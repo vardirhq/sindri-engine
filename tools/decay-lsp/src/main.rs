@@ -3,9 +3,13 @@ mod constants;
 mod diagnostics;
 mod project;
 mod protocol;
+mod rpc;
 mod support;
 mod symbols;
 mod values;
+
+#[cfg(test)]
+mod lifecycle_tests;
 
 use std::{
     collections::HashMap,
@@ -16,10 +20,10 @@ use std::{
 use decay_semantic::{Environment, ExternalSymbol};
 use diagnostics::StructuredDiagnostic;
 use project::ProjectIndex;
-use protocol::{read_message, write_message};
+use protocol::write_message;
 use serde_json::{Value, json};
 use support::{
-    KEYWORDS, completion_chain, completion_item, container_members, emit_symbol, enum_hover, enums,
+    completion_chain, completion_item, container_members, emit_symbol, enum_hover, enums,
     event_hover, events, hover_symbol, initialization_root, offset_at, state_fields, states,
     string_argument, struct_hover, structs, symbol_completion, type_members, word_at,
 };
@@ -35,6 +39,7 @@ struct Server {
     environment: Environment,
     root: Option<PathBuf>,
     project: ProjectIndex,
+    initialized: bool,
     shutdown: bool,
 }
 
@@ -45,6 +50,7 @@ impl Server {
             environment: sindri_decay::environment(),
             root: None,
             project: ProjectIndex::default(),
+            initialized: false,
             shutdown: false,
         }
     }
@@ -55,6 +61,14 @@ impl Server {
             .and_then(Value::as_str)
             .unwrap_or_default();
         let id = message.get("id").cloned();
+        match rpc::gate(message, self.initialized, self.shutdown) {
+            rpc::Gate::Handle => {}
+            rpc::Gate::Reject(code, reason) => {
+                rpc::error(output, &id.unwrap_or(Value::Null), code, reason)?;
+                return Ok(true);
+            }
+            rpc::Gate::Drop => return Ok(true),
+        }
         let params = message.get("params").cloned().unwrap_or(Value::Null);
 
         match method {
@@ -81,9 +95,14 @@ impl Server {
             "textDocument/documentSymbol" => {
                 Self::respond(id, self.document_symbols(&params), output)?;
             }
-            _ => Self::respond(id, Value::Null, output)?,
+            _ => {
+                if let Some(id) = id {
+                    let reason = format!("unsupported method {method:?}");
+                    rpc::error(output, &id, rpc::METHOD_NOT_FOUND, &reason)?;
+                }
+            }
         }
-        Ok(!self.shutdown || method != "exit")
+        Ok(true)
     }
 
     fn initialize(
@@ -92,6 +111,7 @@ impl Server {
         params: &Value,
         output: &mut impl Write,
     ) -> io::Result<()> {
+        self.initialized = true;
         self.root = initialization_root(params);
         self.project = ProjectIndex::scan(self.root.as_deref());
         self.environment = check::environment_for(self.root.as_deref());
@@ -266,8 +286,7 @@ impl Server {
             );
         }
 
-        let mut items = KEYWORDS
-            .iter()
+        let mut items = support::keywords()
             .map(|keyword| completion_item(keyword, 14, Some("Decay keyword")))
             .collect::<Vec<_>>();
         items.extend(
@@ -319,6 +338,14 @@ impl Server {
         let Some(word) = word_at(&source, offset) else {
             return Value::Null;
         };
+        if let (Some(chain), _) = completion_chain(&source[..offset])
+            && let Some((_, symbol)) = self
+                .members_for_chain(&source, offset, &chain)
+                .into_iter()
+                .find(|(name, _)| name == word)
+        {
+            return hover_symbol(word, &symbol);
+        }
         if let Some(ty) = values::local_type(
             &decay_semantic::analyze_with_environment(&source, &self.environment),
             word,
@@ -362,7 +389,7 @@ impl Server {
         {
             return hover_symbol(word, &symbol);
         }
-        if KEYWORDS.contains(&word) {
+        if support::keywords().any(|keyword| keyword == word) {
             return json!({
                 "contents":{"kind":"markdown","value":format!("`{word}` · Decay keyword")}
             });
@@ -454,9 +481,9 @@ impl Server {
             return members;
         }
 
-        let start = usize::from(first == "this");
-        for segment in &chain[start..] {
-            let symbol = if start == 1 && current.is_none() {
+        // The root is already resolved; walk only its members.
+        for segment in &chain[1..] {
+            let symbol = if first == "this" && current.is_none() {
                 self.environment
                     .this()
                     .member(segment)
@@ -504,7 +531,7 @@ impl Server {
 
 fn symbol_type(symbol: ExternalSymbol) -> decay_semantic::Type {
     match symbol {
-        ExternalSymbol::Value(ty) => ty,
+        ExternalSymbol::Value(ty) | ExternalSymbol::ReadOnlyValue(ty) => ty,
         ExternalSymbol::Function(function) => function.return_type,
     }
 }
@@ -547,13 +574,12 @@ fn main() -> io::Result<()> {
 fn run_server() -> io::Result<()> {
     let stdin = io::stdin();
     let stdout = io::stdout();
-    let mut input = stdin.lock();
-    let mut output = stdout.lock();
-    let mut server = Server::new();
-    while let Some(message) = read_message(&mut input)? {
-        if !server.handle(&message, &mut output)? {
-            break;
-        }
+    let code = rpc::serve(&mut stdin.lock(), &mut stdout.lock())?;
+    if code != 0 {
+        std::process::exit(code);
     }
     Ok(())
 }
+
+#[cfg(test)]
+mod spatial_tests;

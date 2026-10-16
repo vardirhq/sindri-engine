@@ -89,6 +89,7 @@ fn a_flood_draws_below_its_level_and_reuses_the_dry_map_chunks() {
             above(0.5, -0.5, 1.0, 0.0),
             0,
             Some((level, TextureId::new(2), UvRect::FULL)),
+            &[],
             &mut batches,
         )
         .unwrap();
@@ -132,5 +133,71 @@ fn a_flood_draws_below_its_level_and_reuses_the_dry_map_chunks() {
     assert!(
         !Rc::ptr_eq(&before, &chunk(cache.get_mut(&entity).unwrap(), 0, 0)),
         "block edits still rebuild terrain"
+    );
+}
+
+#[test]
+fn a_square_reads_the_normal_map_named_for_its_texture() {
+    let world_with = |normal_maps: &str| {
+        let component: VoxelWorldComponent = serde_json::from_str(&format!(
+            r#"{{
+            "view":"map", "generator": {{"kind":"layered_terrain", "base_height":4,
+            "height_variation":0}}, "materials":[
+            {{"voxel":1,"top":"dry","side":"dry","bottom":"dry"}},
+            {{"voxel":2,"top":"dry","side":"dry","bottom":"dry"}},
+            {{"voxel":3,"top":"dry","side":"dry","bottom":"dry"}}],
+            "normal_maps": {normal_maps}
+        }}"#
+        ))
+        .unwrap();
+        let mut world = World::default();
+        world.spawn(sindri_core::EntityData {
+            components: [(
+                "sindri.voxel_world".into(),
+                serde_json::to_value(&component).unwrap(),
+            )]
+            .into(),
+            transform_3d: Some(sindri_core::Transform3D::default()),
+            ..sindri_core::EntityData::default()
+        });
+        world
+    };
+    let mut textures = TextureBindings::new();
+    textures.bind("dry", TextureId::new(1));
+    textures.bind("dry_n", TextureId::new(7));
+    let drawn = |world: &World| {
+        let extractor = SceneExtractor::new().unwrap();
+        let mut batches = Vec::new();
+        extractor
+            .push_voxel_maps(
+                world,
+                Some(above(0.5, -0.5, 1.0, 0.0)),
+                &textures,
+                None,
+                &mut batches,
+            )
+            .unwrap();
+        assert!(!batches.is_empty(), "the map draws");
+        batches
+            .iter()
+            .map(|square| square.normal_map)
+            .collect::<Vec<_>>()
+    };
+    assert!(
+        drawn(&world_with(r#"{"dry": "dry_n"}"#))
+            .iter()
+            .all(|normal_map| *normal_map == Some(TextureId::new(7)))
+    );
+    assert!(
+        drawn(&world_with(r#"{"rock": "dry_n"}"#))
+            .iter()
+            .all(Option::is_none),
+        "another texture's normal map is not borrowed"
+    );
+    assert!(
+        drawn(&world_with(r#"{"dry": "unbound_n"}"#))
+            .iter()
+            .all(Option::is_none),
+        "an unbound normal map lights by distance alone"
     );
 }

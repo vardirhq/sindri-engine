@@ -16,7 +16,10 @@
 //! carries `sindri.effect.burst`, and a script fires it.
 
 mod burst;
+mod emitter;
+mod particles;
 mod pool;
 
 pub use burst::EffectBurstComponent;
+pub use particles::{EmissionShape, ParticleSpace, ParticlesComponent, ParticlesError};
 pub use pool::{Effects2d, Fleck};

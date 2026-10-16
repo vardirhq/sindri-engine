@@ -6,23 +6,90 @@ on:
   pull_request:
     branches: [main]
   workflow_dispatch:
+  # The queue builds the optimised site for the exact commit main is about to
+  # become; the push to main then promotes it rather than building it again.
+  merge_group:
 
 permissions:
   contents: read
   pages: write
   id-token: write
+  actions: read
+  checks: read
+  pull-requests: read
 
 # Deploys share one group and are never cancelled, so two pushes to main cannot
 # race to publish. A pull request only builds the site to prove it assembles,
 # so each has its own group and a newer push cancels the older build, rather
 # than every open pull request queueing behind every other one and the deploy.
+# A merge-queue entry has its own group too, so the queue never waits behind a
+# deploy; GitHub cancels an entry's runs itself when the entry leaves the queue.
 concurrency:
-  group: ${{ github.event_name == 'pull_request' && format('pages-{0}', github.ref) || 'pages' }}
+  group: ${{ github.event_name != 'push' && github.event_name != 'workflow_dispatch' && format('pages-{0}', github.ref) || 'pages' }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
+  # Before the merge queue, every merge built the optimised site twice in
+  # effect: once nobody shipped (the pull request's unoptimised proof) and
+  # again on main. Now the queue builds it for the exact commit main becomes,
+  # and main hands that build on as its stable site. A push the queue did not
+  # build (a direct push, a manual run, or a merge made outside the queue)
+  # finds nothing here and builds as before.
+  promote:
+    name: Promote the merge queue's site
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    outputs:
+      promoted: ${{ steps.promote.outputs.promoted }}
+    steps:
+      - uses: actions/checkout@v7
+      - name: Find this commit's merge-queue build
+        id: lookup
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BEFORE: ${{ github.event.before }}
+        run: |
+          # As in CI's reuse job: a push that changes a dependency manifest
+          # builds in full, because main's build saves the cache pull requests
+          # restore.
+          changed="$RUNNER_TEMP/changed"
+          if [[ "$BEFORE" =~ ^0+$ ]] || ! git fetch --quiet --no-tags --depth=1 origin "$BEFORE"; then
+            echo Cargo.toml >"$changed"
+          else
+            git diff --name-only "$BEFORE" HEAD >"$changed"
+          fi
+          python3 scripts/ci_reuse.py pages --repo "$GITHUB_REPOSITORY" --sha "$GITHUB_SHA" \
+            --changed "$changed"
+      - name: Download it
+        id: promote
+        if: steps.lookup.outputs.run_id != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_ID: ${{ steps.lookup.outputs.run_id }}
+        run: |
+          gh run download "$RUN_ID" --repo "$GITHUB_REPOSITORY" --name queued-site --dir target/pages
+          test -f target/pages/index.html
+          test -f target/pages/.nojekyll
+          echo "promoted=true" >>"$GITHUB_OUTPUT"
+      - uses: actions/upload-pages-artifact@v5
+        if: steps.promote.outputs.promoted == 'true'
+        with:
+          path: target/pages
+      - name: Keep the stable site for the publisher
+        if: steps.promote.outputs.promoted == 'true'
+        uses: actions/upload-artifact@v7
+        with:
+          name: stable-site
+          path: target/pages
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 90
+
   build:
     name: Build Sindri site
+    needs: promote
+    if: ${{ !cancelled() && needs.promote.outputs.promoted != 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -30,6 +97,11 @@ jobs:
         with:
           targets: wasm32-unknown-unknown
       - uses: Swatinem/rust-cache@v2
+        with:
+          # A queue entry's cache is scoped to its temporary branch, which
+          # nothing else can restore from; saving it only evicts caches that
+          # are read.
+          save-if: ${{ github.event_name != 'merge_group' }}
       # wasm-pack from its prebuilt release rather than a source build: the
       # binary is identical and the compile was minutes of every deploy.
       - uses: taiki-e/install-action@v2
@@ -55,6 +127,7 @@ jobs:
       - name: Assemble Sindri site
         env:
           PAGES_BASE_PATH: ${{ steps.pages.outputs.base_path }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
           rm -rf target/pages
           mkdir -p target/pages/assets
@@ -71,6 +144,8 @@ jobs:
             "examples/input:input" \
             "examples/audio:audio" \
             "examples/sequence:sequence" \
+            "examples/sprite-shaders:sprite-shaders" \
+            "examples/sprite-masks:sprite-masks" \
             "examples/ui:ui" \
             "game:causeway" \
             "games/flappy:flappy" \
@@ -88,6 +163,40 @@ jobs:
             mkdir -p "target/pages/examples/$route/pkg"
             cp -R crates/sindri-player/pkg/. "target/pages/examples/$route/pkg/"
           done
+          # Build isolated, unmerged browser previews without publishing to Pages.
+          if [[ "$GITHUB_EVENT_NAME" == "pull_request" ]]; then
+            for project in \
+              "examples/transform:transform" \
+              "examples/orbit:orbit" \
+              "examples/character3d:character3d" \
+              "examples/model-collision:model-collision"; do
+              src="${project%%:*}"
+              route="${project##*:}"
+              cargo run --quiet --package sindri-export --bin sindri-export -- \
+                "$src" "target/wip-preview/$route" --base "/wip/$PR_NUMBER/$route/" \
+                --build-id "${GITHUB_SHA:0:7}"
+              mkdir -p "target/wip-preview/$route/pkg"
+              cp -R crates/sindri-player/pkg/. "target/wip-preview/$route/pkg/"
+            done
+            # An index makes the downloaded artifact navigable when served locally.
+            python3 - <<'PREVIEW'
+          from pathlib import Path
+          from html import escape
+          root = Path("target/wip-preview")
+          labs = [("transform", "Transform Lab"), ("orbit", "Orbit Camera Lab"),
+                  ("character3d", "Character Lab"), ("model-collision", "Model Collision Lab")]
+          items = "".join(f'<li><a href="./{route}/">{escape(name)}</a></li>' for route, name in labs)
+          (root / "index.html").write_text(
+              '<!doctype html><html lang="en"><meta charset="utf-8">'
+              '<meta name="viewport" content="width=device-width,initial-scale=1">'
+              '<title>Sindri 3D Labs (PR preview)</title>'
+              '<style>body{font:1.1rem system-ui;max-width:48rem;margin:3rem auto;'
+              'padding:0 1.5rem;background:#111827;color:#f9fafb}'
+              'a{color:#93c5fd}li{margin:1rem 0}</style>'
+              '<h1>Sindri 3D Labs</h1><p>Unmerged PR preview. Not a stable release.</p>'
+              f'<ul>{items}</ul></html>', encoding="utf-8")
+          PREVIEW
+          fi
           mkdir -p target/pages/examples/voxel-lab/pkg
           cp games/voxel-lab/web/index.html target/pages/examples/voxel-lab/index.html
           cp -R games/voxel-lab/pkg/. target/pages/examples/voxel-lab/pkg/
@@ -135,7 +244,7 @@ jobs:
           test -f target/pages/examples/voxel-lab/pkg/voxel_lab_bg.wasm
           grep -q 'voxel-stats' target/pages/examples/voxel-lab/index.html
           grep -q '"kind": "prefab"' target/pages/examples/orbital-baked/assets/sindri.manifest
-          grep -q 'player.sheet' target/pages/examples/orbital-baked/assets/sindri.manifest
+          grep -q 'detonation.sheet' target/pages/examples/orbital-baked/assets/sindri.manifest
           grep -q '"kind": "script"' target/pages/examples/shapes-lab/assets/sindri.manifest
           grep -q '"demo.weave"' target/pages/examples/weave-poc/assets/sindri.manifest
           grep -q 'hero.sheet' target/pages/examples/platformer/assets/sindri.manifest
@@ -155,20 +264,53 @@ jobs:
           path: target/directory-captures
           if-no-files-found: warn
           retention-days: 14
+      - name: Verify 3D preview exports
+        if: github.event_name == 'pull_request'
+        run: |
+          test -f target/wip-preview/index.html
+          for route in transform orbit character3d model-collision; do
+            test -f "target/wip-preview/$route/index.html"
+            test -f "target/wip-preview/$route/assets/sindri.manifest"
+            test -f "target/wip-preview/$route/pkg/sindri_player_bg.wasm"
+            grep -Fq "<base href=\"/wip/${{ github.event.pull_request.number }}/$route/\">" "target/wip-preview/$route/index.html"
+          done
+      - name: Upload 3D lab preview bundle
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v7
+        with:
+          name: 3d-labs-preview
+          path: target/wip-preview
+          retention-days: 14
+          if-no-files-found: error
       - uses: actions/upload-pages-artifact@v5
-        if: github.event_name != 'pull_request'
+        if: github.event_name != 'pull_request' && github.event_name != 'merge_group'
         with:
           path: target/pages
 
-  deploy:
-    name: Deploy Sindri site
-    needs: build
-    if: github.event_name != 'pull_request'
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Publish GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v5
+      # Pages replaces the whole site on every deployment, so this workflow no
+      # longer deploys: the Sindri Site Publisher composes this stable build
+      # with every verified pull request preview under /wip/ and deploys that,
+      # so a push to main never erases an active preview. It starts when this
+      # run completes and reuses this artifact instead of rebuilding.
+      - name: Keep the stable site for the publisher
+        if: github.event_name != 'pull_request' && github.event_name != 'merge_group'
+        uses: actions/upload-artifact@v7
+        with:
+          name: stable-site
+          path: target/pages
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 90
+
+      # What main promotes. A distinct name from `stable-site`, so the
+      # publisher, which serves the newest `stable-site` from main, can never
+      # serve a commit that has not reached main yet.
+      - name: Keep the queued site for main to promote
+        if: github.event_name == 'merge_group'
+        uses: actions/upload-artifact@v7
+        with:
+          name: queued-site
+          path: target/pages
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 7

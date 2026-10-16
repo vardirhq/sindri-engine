@@ -1,5 +1,8 @@
-// The arena's low-frequency visual pulse. The grid stays quiet enough to read
-// bullets over it, but it is no longer a dead sheet.
+// The arena behind the fight: the original's sector backdrop and its drifting
+// grid. Each sector owns a background and a grid colour, as the original's
+// does, and the arena eases from one to the next rather than cutting; a boss
+// warms the grid while it lives. The grid stays faint enough to read bullets
+// over.
 //
 // The camera's shake is the engine's: this entity's `sindri.camera.behavior`
 // sets how it shakes, and a hit calls `Camera.impact`. So nothing here moves
@@ -8,6 +11,27 @@ script CameraFx {
     var ambience: f32 = 0.0;
     var grid: Entity = null;
     var backdrop: Entity = null;
+    // The grid's authored size and line count, from the scene.
+    @export let grid_extent: f32 = 60.0;
+    @export let grid_cells: f32 = 61.0;
+
+    // The colours being shown, eased towards the sector's.
+    var bg_r: f32 = 0.0015;
+    var bg_g: f32 = 0.0033;
+    var bg_b: f32 = 0.0065;
+    var grid_r: f32 = 0.052;
+    var grid_g: f32 = 0.479;
+    var grid_b: f32 = 0.716;
+    var grid_a: f32 = 0.07;
+
+    // The sector's colours, the original's hex values in linear light.
+    var want_bg_r: f32 = 0.0015;
+    var want_bg_g: f32 = 0.0033;
+    var want_bg_b: f32 = 0.0065;
+    var want_grid_r: f32 = 0.052;
+    var want_grid_g: f32 = 0.479;
+    var want_grid_b: f32 = 0.716;
+    var want_grid_a: f32 = 0.07;
 
     fn start() {
         this.grid = World.find("backdrop-grid");
@@ -16,7 +40,46 @@ script CameraFx {
 
     fn update(dt: f32) {
         this.ambience += dt;
+        choose_sector_colours();
+        let ease = min(1.0, dt * 1.5);
+        this.bg_r += (this.want_bg_r - this.bg_r) * ease;
+        this.bg_g += (this.want_bg_g - this.bg_g) * ease;
+        this.bg_b += (this.want_bg_b - this.bg_b) * ease;
+        this.grid_r += (this.want_grid_r - this.grid_r) * ease;
+        this.grid_g += (this.want_grid_g - this.grid_g) * ease;
+        this.grid_b += (this.want_grid_b - this.grid_b) * ease;
+        this.grid_a += (this.want_grid_a - this.grid_a) * ease;
         update_arena();
+    }
+
+    fn choose_sector_colours() {
+        let sector = Game.sector;
+        if sector == 2.0 {
+            // Ember Belt: #120909, grid rgba(255,116,78,.08)
+            want(0.0060, 0.0027, 0.0027, 1.0, 0.175, 0.077, 0.08);
+        } else if sector == 3.0 {
+            // Violet Wake: #0d0716, grid rgba(190,104,255,.08)
+            want(0.0040, 0.0021, 0.0080, 0.515, 0.138, 1.0, 0.08);
+        } else if sector == 4.0 {
+            // Null Lattice: #050d0d, grid rgba(92,255,202,.07)
+            want(0.0015, 0.0040, 0.0040, 0.107, 1.0, 0.591, 0.07);
+        } else if sector >= 5.0 {
+            // Core Approach: #13060d, grid rgba(255,83,132,.09)
+            want(0.0065, 0.0018, 0.0040, 1.0, 0.087, 0.231, 0.09);
+        } else {
+            // Outer Drift: #050b13, grid rgba(65,184,220,.07)
+            want(0.0015, 0.0033, 0.0065, 0.052, 0.479, 0.716, 0.07);
+        }
+    }
+
+    fn want(bg_r: f32, bg_g: f32, bg_b: f32, r: f32, g: f32, b: f32, a: f32) {
+        this.want_bg_r = bg_r;
+        this.want_bg_g = bg_g;
+        this.want_bg_b = bg_b;
+        this.want_grid_r = r;
+        this.want_grid_g = g;
+        this.want_grid_b = b;
+        this.want_grid_a = a;
     }
 
     fn update_arena() {
@@ -32,18 +95,27 @@ script CameraFx {
         }
 
         if grid != null && World.exists(grid) {
-            grid.transform.rotation_z = sin(this.ambience * 0.11) * 0.012 + boss_energy * sin(this.ambience * 0.42) * 0.009;
-            grid.shape.stroke.r = 0.0085 + boss_energy * 0.12;
-            grid.shape.stroke.g = 0.034 + pulse * 0.012 + boss_energy * 0.035;
-            grid.shape.stroke.b = 0.024 + pulse * 0.010;
-            grid.shape.stroke.a = 0.72 + pulse * 0.18 + boss_energy * 0.10;
-            grid.shape.stroke_width = 0.00035 + pulse * 0.00010 + boss_energy * 0.00012;
+            // The original's grid drifts left and up, 8 and 4 pixels a second
+            // at 540 pixels tall, and never turns: a turning grid reads as a
+            // tilted one. It moves by less than one cell and wraps, so the
+            // sheet never runs out at an edge.
+            let cell = this.grid_extent / this.grid_cells;
+            let drift_x = this.ambience * 0.163;
+            let drift_y = this.ambience * 0.0815;
+            grid.transform.position.x = -(drift_x % cell);
+            grid.transform.position.y = drift_y % cell;
+            // A little brighter than the original's, and breathing, because
+            // the lines are thinner here than a canvas pixel at most sizes.
+            grid.shape.stroke.r = this.grid_r + (1.0 - this.grid_r) * boss_energy * 0.15;
+            grid.shape.stroke.g = this.grid_g * (1.0 - boss_energy * 0.35);
+            grid.shape.stroke.b = this.grid_b * (1.0 - boss_energy * 0.35);
+            grid.shape.stroke.a = this.grid_a * (1.25 + pulse * 0.25 + boss_energy * 0.6);
         }
 
         if backdrop != null && World.exists(backdrop) {
-            backdrop.shape.fill.r = 0.0015 + boss_energy * 0.006;
-            backdrop.shape.fill.g = 0.0021 + pulse * 0.0012;
-            backdrop.shape.fill.b = 0.0044 + pulse * 0.0020 + boss_energy * 0.0015;
+            backdrop.shape.fill.r = this.bg_r + boss_energy * 0.004;
+            backdrop.shape.fill.g = this.bg_g + pulse * 0.0006;
+            backdrop.shape.fill.b = this.bg_b + pulse * 0.0010;
         }
     }
 }

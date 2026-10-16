@@ -243,7 +243,7 @@ script Shell {
     fn update(dt: f32) {
         this.age += dt;
         for other in Physics.collision_started() {
-            if World.has_tag(other, "glass") { this.hit_glass = true; }
+            if World.exists(other) && World.has_tag(other, "glass") { this.hit_glass = true; }
         }
         if this.age > 4.0 { World.despawn(this.entity); }
     }
@@ -258,7 +258,7 @@ script GlassPane {
     fn start() { this.home = this.transform.position; }
     fn update(dt: f32) {
         for other in Physics.collision_started() {
-            if World.has_tag(other, "shell") && !this.broken {
+            if !this.broken && World.exists(other) && World.has_tag(other, "shell") {
                 this.broken = true;
                 Gallery.hits += 1.0;
                 Physics.set_joint_enabled(World.find("pane-hinge-" + this.index), false);
@@ -289,7 +289,7 @@ script BackStop {
     @export let bottom: f32 = -11.5;
     fn update(dt: f32) {
         for other in Physics.sensor_entered() {
-            if World.has_tag(other, "shell") {
+            if World.exists(other) && World.has_tag(other, "shell") {
                 let y = other.transform.world_position.y;
                 let crossed = y < this.top && y > this.bottom && Gallery.hits < 4.0;
                 if crossed && !Shell.on(other).hit_glass {
@@ -427,7 +427,7 @@ script Bumper {
     fn update(dt: f32) {
         this.glow = max(0.0, this.glow - dt * 4.0);
         for other in Physics.collision_started() {
-            if World.has_tag(other, "loose") || World.has_tag(other, "body") {
+            if World.exists(other) && (World.has_tag(other, "loose") || World.has_tag(other, "body")) {
                 let here = this.transform.world_position;
                 let there = other.transform.world_position;
                 let away = Vec2(there.x - here.x, there.y - here.y).normalized;

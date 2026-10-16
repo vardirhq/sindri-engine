@@ -10,6 +10,7 @@ mod decode;
 mod loader;
 mod manifest;
 mod memory;
+pub mod normal_map;
 mod queue;
 mod source;
 mod url;
@@ -27,7 +28,9 @@ pub use builtin::{
 };
 pub use decode::{
     AssetCompletionApplyError, AssetDecodeError, AssetDecoder, DecodedAssetCompletion, FontAsset,
-    FontAssetDecoder, PrefabAssetDecoder, ProfileAssetDecoder, SceneAssetDecoder,
+    FontAssetDecoder, ModelAsset, ModelAssetDecoder, ModelCollisionError, ModelCollisionLimits,
+    ModelCollisionMesh, ModelCollisionPart, ModelIndices, ModelMaterial, ModelMesh, ModelNode,
+    ModelPrimitive, ModelTexture, PrefabAssetDecoder, ProfileAssetDecoder, SceneAssetDecoder,
     SpriteSheetAssetDecoder, TextAssetDecoder, TextureAsset, TextureAssetDecoder,
     TileSetAssetDecoder, decode_completion,
 };

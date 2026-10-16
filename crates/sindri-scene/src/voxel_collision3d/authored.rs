@@ -2,9 +2,9 @@
 //! them.
 //!
 //! A voxel world is unbounded and its render window follows the camera, so
-//! neither is a collision residency. What can collide with voxels is a dynamic
-//! body, so the sections resident here are the ones each dynamic body could
-//! reach this step, plus an authored margin. A body far from the camera still
+//! neither is a collision residency. Dynamic bodies and scene characters supply
+//! their reach for this step; resident sections cover that travel plus an
+//! authored margin. A body far from the camera still
 //! lands; terrain nobody is near costs nothing.
 
 use std::collections::BTreeSet;
@@ -51,11 +51,25 @@ impl SceneVoxelCollision3d {
         tile_sets: Option<&TileSetBindings>,
         physics: &PhysicsWorld3d,
         reaches: &[VoxelReach],
+        materials: &crate::PhysicsMaterialSources,
     ) -> Result<VoxelCollisionPlan3d, PhysicsSyncError> {
         let mut resolved = Vec::new();
-        for (owner, collider) in components.query::<VoxelCollider3dComponent>(world)? {
+        for (owner, mut collider) in components.query::<VoxelCollider3dComponent>(world)? {
             if !world.is_active(owner) {
                 continue;
+            }
+            if let Some(component) =
+                components.get::<crate::PhysicsMaterial3dComponent>(world, owner)?
+            {
+                let material = materials.resolve(
+                    &component.0,
+                    sindri_physics::PhysicsMaterial {
+                        friction: collider.friction,
+                        restitution: collider.restitution,
+                    },
+                )?;
+                collider.friction = material.friction;
+                collider.restitution = material.restitution;
             }
             resolved.push(self.resolve(world, components, tile_sets, owner, collider, reaches)?);
         }

@@ -39,7 +39,8 @@
       1,
       1,
       1
-     ]
+     ],
+     "normal_map": "textures/ship_n.png"
     },
     "sindri.animation.sprite": {
      "clips": {

@@ -18,16 +18,15 @@
 //! Conflating the two is what made `sindri.ui.text` inspect as two rows when it
 //! has seven.
 
-use sindri_core::{BUILTIN_BLOCKS, ComponentSchemaRegistry, FieldMeaning, TagsComponent};
+use sindri_core::{BUILTIN_BLOCKS, ComponentSchemaRegistry, TagsComponent};
 
 use crate::animation::SpriteAnimationComponent;
 use crate::audio::AudioSourceComponent;
 use crate::components::{
-    CameraBehaviorComponent, CameraComponent, EnvironmentComponent, GridNavigationComponent,
-    GridOccupantComponent, GridPlacementComponent, LightComponent, MeshComponent,
-    NaturalTerrainDocument, ShapeComponent, SpriteComponent, TileGridComponent,
-    TileVolumeComponent, TilemapComponent, UiImageComponent, UiShapeBlend, UiShapeComponent,
-    UiShapeKind, UiTextComponent, VoxelGeneratorDocument, VoxelWorldComponent,
+    EnvironmentComponent, GridNavigationComponent, GridOccupantComponent, GridPlacementComponent,
+    LightComponent, MeshComponent, NaturalTerrainDocument, TileGridComponent, TileVolumeComponent,
+    TilemapComponent, UiImageComponent, UiTextComponent, VoxelGeneratorDocument,
+    VoxelWorldComponent,
 };
 use crate::effects::EffectBurstComponent;
 use crate::screen_ui::{
@@ -45,120 +44,6 @@ pub(super) fn builtin_components() -> Result<ComponentSchemaRegistry, SceneExtra
     // What the fields are for, once every field exists to be described.
     super::meanings::describe_builtins(&mut components)?;
     Ok(components)
-}
-
-/// The two shape components, whose blanks are long enough to be their own
-/// function.
-///
-/// Long because a shape is described entirely by numbers — there is no texture
-/// standing in for the look — and because a blank that drew nothing would read
-/// as a broken add rather than an empty one. Both default to a mint outline.
-fn register_shapes(components: &mut ComponentSchemaRegistry) -> Result<(), SceneExtractError> {
-    // The same blank as the overlay shape, minus the anchor: a mint outline,
-    // because a shape whose default drew nothing would read as a broken add.
-    components.register_with_default::<ShapeComponent>(
-        "Shape",
-        serde_json::json!({
-            "kind": UiShapeKind::default().as_str(),
-            "count": 6.0,
-            "fill": [0.0, 0.0, 0.0, 0.0],
-            "stroke": [0.49, 1.0, 0.77, 1.0],
-            "stroke_width": 0.06,
-            "corner_radius": 0.0,
-            "dashes": 0.0,
-            "dash_duty": 0.5,
-            "sweep_start": 0.0,
-            "sweep_turns": 1.0,
-            "blend": UiShapeBlend::default().as_str(),
-            "layer": 0
-        }),
-    )?;
-    components.register_with_default::<UiShapeComponent>(
-        "UI Shape",
-        serde_json::json!({
-            "kind": UiShapeKind::default().as_str(),
-            "count": 6.0,
-            "fill": [0.0, 0.0, 0.0, 0.0],
-            "stroke": [0.49, 1.0, 0.77, 1.0],
-            "stroke_width": 0.04,
-            "corner_radius": 0.0,
-            "dashes": 0.0,
-            "dash_duty": 0.5,
-            "sweep_start": 0.0,
-            "sweep_turns": 1.0,
-            "blend": UiShapeBlend::default().as_str(),
-            "anchor": "center",
-            "layer": 0,
-            "shadow": {
-                "color": [0.0, 0.0, 0.0, 0.0],
-                "offset": [0.0, 0.0],
-                "blur": 0.0,
-                "spread": 0.0
-            }
-        }),
-    )?;
-    Ok(())
-}
-
-fn register_cameras(components: &mut ComponentSchemaRegistry) -> Result<(), SceneExtractError> {
-    components.register_with_default::<CameraComponent>(
-        "Camera",
-        serde_json::json!({
-            "projection": CameraComponent::PROJECTIONS[0],
-            "vertical_fov_degrees": CameraComponent::DEFAULT_VERTICAL_FOV_DEGREES,
-            "near": CameraComponent::DEFAULT_NEAR,
-            "far": CameraComponent::DEFAULT_FAR
-        }),
-    )?;
-    components.register_with_default::<CameraBehaviorComponent>(
-        "Camera Behavior",
-        serde_json::json!({
-            "follow": null,
-            "confine": null,
-            "shake": {
-                "trauma": 0.0,
-                "strength": 0.12,
-                "decay": 2.8,
-                "frequency": 57.0,
-                "phase": 0.0
-            }
-        }),
-    )?;
-    describe_camera_behavior(components)
-}
-
-/// A camera's behaviour follows and confines only once those are added, so
-/// what each holds is said here, and then what its fields mean: the target is
-/// an entity in the scene, and the rates are rates. The shake's phase and
-/// offset are the shake's own running state rather than anything to tune.
-fn describe_camera_behavior(
-    components: &mut ComponentSchemaRegistry,
-) -> Result<(), SceneExtractError> {
-    let at_least_zero = || FieldMeaning::Range {
-        min: 0.0,
-        max: f64::INFINITY,
-    };
-    components.describe_optional::<CameraBehaviorComponent>(
-        "follow",
-        serde_json::json!({
-            "target": "", "offset": [0.0, 0.0, 0.0], "dead_zone": [0.0, 0.0],
-            "smoothing": 8.0, "max_speed": 0.0
-        }),
-    )?;
-    components.describe_optional::<CameraBehaviorComponent>(
-        "confine",
-        serde_json::json!({ "min": [-10.0, -10.0], "max": [10.0, 10.0] }),
-    )?;
-    components.describe::<CameraBehaviorComponent>([
-        ("follow.target", FieldMeaning::Entity),
-        ("follow.smoothing", at_least_zero()),
-        ("follow.max_speed", at_least_zero()),
-        ("shake.trauma", FieldMeaning::Range { min: 0.0, max: 1.0 }),
-        ("shake.strength", at_least_zero()),
-        ("shake.decay", at_least_zero()),
-        ("shake.frequency", at_least_zero()),
-    ])?;
-    Ok(())
 }
 
 /// A light is aimed by its entity's rotation, so a fresh one is only its
@@ -211,6 +96,10 @@ fn register_environment(components: &mut ComponentSchemaRegistry) -> Result<(), 
                 "knee": 0.20,
                 "intensity": 0.45,
                 "passes": 3
+            },
+            "lighting_2d": {
+                "enabled": false,
+                "ambient": [0.25, 0.25, 0.3]
             }
         }),
     )?;
@@ -274,9 +163,19 @@ fn register_drawables(components: &mut ComponentSchemaRegistry) -> Result<(), Sc
     // like, and is what makes the type addable at all. They are chosen to
     // be visible rather than neutral: a sprite added to an entity should
     // appear, or the author is left wondering whether the click worked.
-    register_cameras(components)?;
+    super::registry_cameras::register_cameras(components)?;
     register_environment(components)?;
     register_light(components)?;
+    // An asset reference has no honest blank model the engine can invent.
+    components.register_with_fields::<crate::ModelComponent>(
+        "Model",
+        serde_json::json!({ "asset": "models/model.glb", "layer": 0 }),
+    )?;
+    components.describe::<crate::ModelComponent>([(
+        "asset",
+        sindri_core::FieldMeaning::Asset(sindri_core::AssetKind::Model),
+    )])?;
+    register_material(components)?;
     components.register_with_default::<MeshComponent>(
         "Mesh",
         serde_json::json!({
@@ -286,21 +185,7 @@ fn register_drawables(components: &mut ComponentSchemaRegistry) -> Result<(), Sc
             "surface": null
         }),
     )?;
-    components.register_with_default::<SpriteComponent>(
-        "Sprite",
-        serde_json::json!({
-            "texture": PROCEDURAL_TEXTURES[0].reference,
-            "tint": [1.0, 1.0, 1.0, 1.0],
-            "color_transform": {
-                "multiply": [1.0, 1.0, 1.0, 1.0],
-                "offset": [0.0, 0.0, 0.0, 0.0]
-            },
-            "layer": 0,
-            // Off by default: a new sprite is as likely to be something
-            // lying on the ground as somebody standing on it.
-            "billboard": false
-        }),
-    )?;
+    two_d::register_sprite(components)?;
     // The UI half of the same picture: anchored to the middle of the
     // viewport, because an element that appears off the edge of the screen
     // looks like a click that did nothing.
@@ -314,7 +199,8 @@ fn register_drawables(components: &mut ComponentSchemaRegistry) -> Result<(), Sc
             // Full, and emptying rightwards: an element added to a scene
             // should appear whole, and a bar that a script never drives is
             // a picture, which is what this component was before.
-            "fill": { "amount": 1.0, "from": "left" }
+            "fill": { "amount": 1.0, "from": "left" },
+            "draw": "simple", "border_scale": 2.0 / 720.0
         }),
     )?;
     // A button is a hit area: its rect is the entity's transform, so one
@@ -382,7 +268,10 @@ fn register_drawables(components: &mut ComponentSchemaRegistry) -> Result<(), Sc
     // which is the panel border that most of a UI is made of. A default of
     // nothing — no fill, no stroke — would add a component that draws
     // absolutely nothing and read as a broken button.
-    register_shapes(components)?;
+    two_d::register_shapes(components)?;
+    two_d::register_lights(components)?;
+    two_d::register_particles(components)?;
+    two_d::register_sprite_mask(components)?;
     register_tiles(components)?;
     Ok(())
 }
@@ -404,7 +293,8 @@ fn register_tiles(components: &mut ComponentSchemaRegistry) -> Result<(), SceneE
             "projection": "orthogonal",
             "tiles": [null],
             "tint": [1.0, 1.0, 1.0, 1.0],
-            "layer": 0
+            "layer": 0,
+            "normal_map": ""
         }),
     )?;
     components.register_with_default::<TileGridComponent>(
@@ -474,7 +364,8 @@ fn register_tiles(components: &mut ComponentSchemaRegistry) -> Result<(), SceneE
             "map_flood": null,
             "follow_camera": false,
             "variant_seed": 0,
-            "edits": []
+            "edits": [],
+            "normal_maps": {}
         }),
     )?;
     Ok(())
@@ -530,9 +421,12 @@ fn register_ui_text(components: &mut ComponentSchemaRegistry) -> Result<(), Scen
                 "color": [0.0, 0.0, 0.0, 1.0],
                 "softness": 0.0
             },
-            "auto_size": { "enabled": false, "min": 0.02 }
+            "auto_size": { "enabled": false, "min": 0.02 },
+            "rich": false
         }),
     )?;
+    // The world label: the same fields, in world units.
+    two_d::register_world_text(components)?;
     Ok(())
 }
 
@@ -589,5 +483,18 @@ fn register_gameplay(components: &mut ComponentSchemaRegistry) -> Result<(), Sce
     Ok(())
 }
 
+mod two_d;
+
 #[cfg(test)]
 mod tests;
+
+fn register_material(components: &mut ComponentSchemaRegistry) -> Result<(), SceneExtractError> {
+    components.register_with_default::<crate::MaterialComponent>(
+        "Material",
+        serde_json::json!({"base_color": [1.0, 1.0, 1.0, 1.0], "metallic": 0.0,
+                           "roughness": 1.0, "emissive": [0.0, 0.0, 0.0]}),
+    )?;
+    components
+        .describe::<crate::MaterialComponent>([("base_color", sindri_core::FieldMeaning::Color)])?;
+    Ok(())
+}

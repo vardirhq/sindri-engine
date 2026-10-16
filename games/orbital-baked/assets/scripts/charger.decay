@@ -1,12 +1,12 @@
 // Closes to a distance, broadcasts its intent, then turns into a neon missile.
 script Charger {
     @export let health: f32 = 3.0;
-    @export let worth: f32 = 2.0;
+    @export let worth: f32 = 14.0;
     @export let approach: f32 = 1.2;
     @export let wind_up: f32 = 0.75;
     @export let dash_speed: f32 = 9.5;
     @export let rest: f32 = 1.1;
-    @export let touch_damage: f32 = 1.0;
+    @export let touch_damage: f32 = 0.54;
     @export let elite: f32 = 0.0;
     @export let elite_trait: f32 = 0.0;
     @export let hazard_damage: f32 = 0.0;
@@ -24,14 +24,18 @@ script Charger {
     var dash_y: f32 = 0.0;
     var visual_time: f32 = 0.0;
     var visual_phase: f32 = 0.0;
+    // The dart's body: the original's amber triangle, heated towards white as
+    // it winds up and cooling through the dash. `heat` is how far towards
+    // white, `body_alpha` how solid; `paint` turns them into the shape.
+    var heat: f32 = 0.0;
+    var body_alpha: f32 = 1.0;
 
     fn start() {
         let late = max(0.0, Game.elapsed - 180.0);
         this.hp = this.health * (1.0 + late * 0.0014);
         this.visual_phase = Random.range(0.0, 6.2831853);
         this.transform.rotation_z = this.visual_phase;
-        this.sprite.tint = Color(1.0, 0.88, 0.53, 0.92);
-        tint_elite();
+        paint();
         spawn_elite_visuals();
     }
 
@@ -39,7 +43,6 @@ script Charger {
         if Game.run_state != 1.0 { Physics.set_velocity(this.entity, 0.0, 0.0); return; }
         this.visual_time += dt;
         animate_body();
-        tint_elite();
         if this.hazard_damage > 0.0 {
             this.hp -= this.hazard_damage; this.hazard_damage = 0.0;
             if this.hp <= 0.0 { die(); return; }
@@ -49,19 +52,23 @@ script Charger {
         let dx = player.transform.position.x - this.transform.position.x;
         let dy = player.transform.position.y - this.transform.position.y;
         let far = sqrt(dx * dx + dy * dy);
+        if far < CONTACT_REACH {
+            Game.player_damage_taken = max(Game.player_damage_taken, this.touch_damage);
+        }
         let visible = is_visible();
         if this.phase != 0.0 && !visible { this.phase = 0.0; }
 
         if this.phase == 0.0 {
-            if far > 0.001 { Physics.set_velocity(this.entity, dx / far * this.approach, dy / far * this.approach); }
+            this.heat = 0.0;
+            if far > 0.001 { Physics.set_velocity(this.entity, dx / far * this.approach * Game.event_enemy_speed, dy / far * this.approach * Game.event_enemy_speed); }
             if far < 5.0 && visible { this.phase = 1.0; this.timer = this.wind_up; }
         } else if this.phase == 1.0 {
             Physics.set_velocity(this.entity, 0.0, 0.0);
             this.timer -= dt;
             let charge = 1.0 - max(0.0, this.timer) / max(0.01, this.wind_up);
-            this.sprite.tint.r = 1.0;
-            this.sprite.tint.g = 0.22 + charge * 0.78;
-            this.sprite.tint.a = 0.35 + charge * 0.58;
+            // The body runs from amber to white-hot as the charge peaks.
+            this.body_alpha = 1.0;
+            this.heat = charge * charge;
             this.transform.scale.x = 0.38 * (1.0 + charge * 0.22);
             this.transform.scale.y = 0.38 * (1.0 + charge * 0.22);
             if this.timer <= 0.0 {
@@ -70,9 +77,10 @@ script Charger {
                 if far > 0.001 { this.dash_x = dx / far; this.dash_y = dy / far; }
             }
         } else {
-            this.sprite.tint.g = 1.0;
-            this.sprite.tint.a = 1.0;
-            Physics.set_velocity(this.entity, this.dash_x * this.dash_speed, this.dash_y * this.dash_speed);
+            this.body_alpha = 1.0;
+            // The dash sheds the heat it built over its first moments.
+            this.heat = max(0.0, this.timer / 0.55) * 0.8;
+            Physics.set_velocity(this.entity, this.dash_x * this.dash_speed * Game.event_enemy_speed, this.dash_y * this.dash_speed * Game.event_enemy_speed);
             this.timer -= dt;
             if this.timer <= 0.0 { this.phase = 0.0; this.timer = this.rest; }
         }
@@ -88,7 +96,23 @@ script Charger {
                 if this.hp <= 0.0 && World.property_number(hit, "nova", 0.0) > 0.0 { this.death_burst_damage = damage * 0.3; }
             }
         }
+        paint();
         if this.hp <= 0.0 { die(); }
+    }
+
+    fn paint() {
+        let r: f32 = 1.0;
+        let g: f32 = 0.4508;
+        let b: f32 = 0.1022;
+        let h = min(1.0, this.heat);
+        this.shape.fill.r = r;
+        this.shape.fill.g = g + (1.0 - g) * h;
+        this.shape.fill.b = b + (1.0 - b) * h;
+        this.shape.fill.a = this.body_alpha;
+        this.shape.stroke.r = 1.0;
+        this.shape.stroke.g = 0.70 + 0.30 * h;
+        this.shape.stroke.b = 0.50 + 0.50 * h;
+        this.shape.stroke.a = this.body_alpha * 0.9;
     }
 
     fn animate_body() {
@@ -97,7 +121,7 @@ script Charger {
         if this.phase == 0.0 {
             this.transform.scale.x = 0.38 * (0.94 + pulse * 0.10);
             this.transform.scale.y = 0.38 * (0.94 + pulse * 0.10);
-            this.sprite.tint.a = 0.62 + pulse * 0.25;
+            this.body_alpha = 0.78 + pulse * 0.22;
         }
     }
 
@@ -117,24 +141,9 @@ script Charger {
         let ring = World.spawn(this.elite_ring); World.set_property(ring, "sides", 3.0); World.set_property(ring, "trait", this.elite_trait); World.set_parent(ring, this.entity);
     }
 
-    fn tint_elite() {
-        if this.elite <= 0.0 { return; }
-        if this.elite_trait == 0.0 { elite_color(Color(1.0, 0.91, 0.58)); }
-        else if this.elite_trait == 1.0 { elite_color(Color(1.0, 0.42, 0.45)); }
-        else if this.elite_trait == 2.0 { elite_color(Color(1.0, 0.69, 0.31)); }
-        else if this.elite_trait == 3.0 { elite_color(Color(0.84, 0.49, 1.0)); }
-        else { elite_color(Color(0.45, 1.0, 0.82)); }
-    }
-
-    // The trait's color, keeping the body's fade but never fading below 0.24.
-    fn elite_color(color: Color) {
-        this.sprite.tint = color.with_alpha(max(this.sprite.tint.a, 0.24));
-    }
-
     fn die() {
         burst_on_death(); Effects.burst(this.entity); Audio.play("audio/kill.wav", 0.3);
-        Camera.impact(0.12);
-        Game.kills = Game.kills + 1.0; Game.score = Game.score + this.worth * 10.0;
+        Game.kills = Game.kills + 1.0; Game.score = Game.score + (20.0 + this.worth) * Game.event_score;
         let drop = World.spawn(this.core); drop.transform.position.x = this.transform.position.x; drop.transform.position.y = this.transform.position.y; World.set_property(drop, "worth", this.worth);
         let roll = World.spawn(this.drop_roll); roll.transform.position.x = this.transform.position.x; roll.transform.position.y = this.transform.position.y; World.set_property(roll, "elite", this.elite);
         World.despawn(this.entity);

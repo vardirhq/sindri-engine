@@ -95,8 +95,27 @@ entry, not a routine update.
 
 ## Adding a dependency
 
+Static binary model decoding uses `gltf` 1.4 (`MIT OR Apache-2.0`, MSRV 1.61).
+Only `utils` and `names` are enabled; default `import` and its filesystem/image
+pipeline are disabled. Sindri supplies bytes through its own asynchronous
+sources and decodes embedded base-color images through its existing `image`
+dependency. The decoder must compile on `wasm32-unknown-unknown`.
+
 Ask whether the boundary is real before adding one. Then check that it does not
 raise the MSRV beyond 1.95, that it compiles for `wasm32-unknown-unknown` if the
 crate it lands in must, and that its licence is already on the allowlist. Shared
 versions belong in `[workspace.dependencies]`, referenced as
 `dep.workspace = true`.
+
+## Imported-model conversion
+
+The public `sindri` facade converts CPU `ModelAsset` values into renderer
+`ModelData` when its `render` feature is enabled. Its optional `glam` dependency
+uses the existing workspace version for column-major node matrices. Assets,
+scene and render retain their dependency boundaries; no renderer dependency on
+assets or core is introduced. Project hosts can use this bridge once per asset.
+
+The historical project hosts in `game/` depend on this public facade to prepare
+imported models once. This adds no external dependency or reverse dependency on
+editor code. Generic host relocation belongs to editor PR #503 and is not merged
+or duplicated here.

@@ -49,6 +49,7 @@ fn floor_brightness(direction: [f32; 3]) -> Option<u8> {
         directional_direction: direction,
         directional_color: [1.0; 3],
         directional_intensity: 1.0,
+        ..WorldLighting::default()
     });
     // Looking straight down at the floor, with north up the screen.
     let view_projection = PerspectiveCamera {

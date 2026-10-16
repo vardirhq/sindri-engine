@@ -1,86 +1,46 @@
-# Orbital Last Stand — Baked
+# Orbital Last Stand
 
-Orbital Last Stand with baked 3D sprite sheets, produced by
-`tools/isometric-baker` from recipes that live beside the textures they make.
+Orbital Last Stand, drawn as neon vector shapes the way the original
+(`MadsenDev/tester-repo`) draws it. The crate is still called `orbital-baked`
+because for a while every hull here was a baked 3D sprite sheet; that look was
+softer and lower in contrast than the original's, so it was redrawn with the
+engine's shape renderer. Only the mine blast is still baked.
 
 It is the forcing function described in `AGENTS.md` — a game built only through
-the editor and Decay, whose job is to find what the engine cannot do yet. It
-began as a copy of an original drawn with engine vector shapes; that original
-has since been removed, and this is the one Orbital. The plans, audits and
-evidence written against the original are kept in `docs/` as history.
+the editor and Decay, whose job is to find what the engine cannot do yet. The
+plans, audits and evidence written against earlier versions are kept in `docs/`
+as history.
 
-## What is baked
+## How it is drawn
 
-Each from a `.isobake` recipe in `assets/textures`:
+Every body is a `sindri.shape`:
 
-| sheet            | what it draws                      | frames |
-| ---------------- | ---------------------------------- | ------ |
-| `player`         | the hero interceptor               | 4      |
-| `core`           | the drifting core                  | 4      |
-| `drifter`        | the hex sentry                     | 4      |
-| `charger`        | the ram                            | 4      |
-| `harrower`       | five blades off a pentagon         | 4      |
-| `prism`          | a seven-sided crystal spire        | 4      |
-| `singularity`    | a twelve-sided well                | 4      |
-| `crown`          | ten sides and five attendants      | 4      |
-| `brood`          | an eight-sided shell of pods       | 4      |
-| `mirror`         | a diamond with one polished face   | 4      |
-| `architect`      | a hexagon carrying three walls     | 4      |
-| `spine`          | ten plate sockets, five armour tiers | 20     |
-| `leviathan`      | the largest hull, with a dorsal ridge | 4      |
-| `last-light`     | sixteen rays off a bright disc     | 4      |
-| `warden`         | the boss fortress                  | 4      |
-| `aegis`          | the shielded fortress hub          | 4      |
-| `shield-segment` | one plate of the Aegis’s ring, three states | 9      |
-| `detonation`     | the mine                           | 5      |
-| `asteroid`       | three sizes of rock                | 3      |
+- **Enemies** are filled polygons in the original's warm colours, with as many
+  sides as the original gives each kind. A hit flashes the fill white; the
+  charger heats from amber to white as it winds up.
+- **Asteroids** author eight jittered points with `World.set_shape_point`, so
+  no two rocks share an outline, and brighten their rim as they crack.
+- **The ship** is the original's dart with an inner chevron.
+- **Bosses** are one polygon each, from five sides for the Harrower to sixteen
+  for the Last Light, with a counter-turning rim and core (`boss-ring.decay`)
+  that thickens and pulses below half health. The Spine sheds sides as its
+  plates go: ten, eight, five.
+- **The backdrop and grid** take each sector's colours from the original and
+  drift rather than turn.
 
-The four-frame sheets are animation clips, played by `sindri.animation.sprite`
-and looping: drives pulse, lenses breathe, the warden's cannons charge in
-sequence around its ring.
+Colours are the original's hex values converted to linear light, because the
+renderer blends in linear and an sRGB value written straight in comes out pale.
+Bloom supplies the glow the original's canvas draws with shadow blur.
 
-Re-bake any of them with:
+The mine blast (`textures/detonation.isobake`) stays a baked sheet played by
+`sindri.animation.sprite`, and flashes white-hot through the sprite colour
+offset. Re-bake it with:
 
 ```
 cd tools/isometric-baker
-node src/cli.ts ../../games/orbital-baked/assets/textures/<id>.isobake \
+node src/cli.ts ../../games/orbital-baked/assets/textures/detonation.isobake \
   --out ../../games/orbital-baked/assets
 ```
-
-## What is deliberately not baked
-
-Everything the game draws with `blend: "add"` — beams, arcs, novas, the shield,
-the engine flames, hazard fields, the elite identity rings. Those are light
-rather than objects: baking a glow into a sprite sheet flattens exactly the
-additive blending that makes it read as light. They stay engine-drawn, which is
-also why this variant still exercises the shape renderer.
-
-The elite identity markers (shell, ring, prong, arc, phaser) stay vectors for
-the same reason — they are drawn over an enemy to mark it, closer to interface
-than to object.
-
-## One sheet per boss
-
-There is no shared boss sheet. Ten of the twelve used to be a single orange
-gunship recoloured by a script tint, which is most of why they read as the same
-fight in different colours — the polygon count the vector original gave each of
-them had been flattened into one hull. Each boss now has its own recipe, its own
-sheet, its own prefab and its own script, and the side count is back: five for
-the Harrower through sixteen for the Last Light.
-
-## What the sprites cost
-
-Two things the vector art did that a sprite cannot, and what replaced them:
-
-- **A boss shed a polygon side per damage tier.** A sheet has fixed
-  geometry, but it can hold more than one, so the Spine's five armour tiers are
-  baked as five sets of frames and selected by clip: ten plates ringing the hull
-  at full health, five and a row of torn sockets at the end.
-- **Every asteroid generated its own outline** from `World.set_shape_point`, so
-  no two were the same rock. There are now three baked rocks, one per size.
-
-Both are recorded here rather than in a commit message because they are what a
-person notices when playing the two side by side.
 
 ## Seeing a boss on purpose
 

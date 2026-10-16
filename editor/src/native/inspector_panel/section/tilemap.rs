@@ -78,11 +78,66 @@ pub(super) fn tilemap_section(
         tool.sprite = sprites.first().map(|sprite| sprite.name.clone());
     }
 
+    terrain_palette(ui, texture, &sprites, tool);
     section::group(ui, icons::SPRITE, "Palette");
     tile_palette(ui, texture, &sprites, tool);
     if let Some(problem) = tool.palette.problem() {
         panel::problem(ui, problem);
     }
+}
+
+/// The sheet's terrains, each shown by the sprite a cell surrounded by it
+/// draws. Picking one paints the terrain rather than one sprite.
+fn terrain_palette(
+    ui: &mut egui::Ui,
+    texture: Option<egui::TextureId>,
+    sprites: &[PaletteSprite],
+    tool: &mut TilemapTool,
+) {
+    let terrains: Vec<(String, Option<PaletteSprite>)> = tool
+        .palette
+        .terrains()
+        .iter()
+        .map(|(name, terrain)| {
+            let middle = terrain.sprite_for([true; 8]);
+            let shown = sprites
+                .iter()
+                .find(|sprite| Some(sprite.name.as_str()) == middle)
+                .map(|sprite| PaletteSprite {
+                    name: name.clone(),
+                    rect: sprite.rect,
+                });
+            (name.clone(), shown)
+        })
+        .collect();
+    if terrains.is_empty() {
+        return;
+    }
+    section::group(ui, icons::TILEMAP, "Terrains");
+    ui.horizontal_wrapped(|ui| {
+        ui.spacing_mut().item_spacing = egui::vec2(5.0, 5.0);
+        ui.add_space(metric::GUTTER);
+        for (name, shown) in &terrains {
+            let fallback = PaletteSprite {
+                name: name.clone(),
+                rect: None,
+            };
+            let selected = !tool.erase && tool.terrain.as_deref() == Some(name.as_str());
+            if palette_cell(
+                ui,
+                Some(shown.as_ref().unwrap_or(&fallback)),
+                texture,
+                selected,
+            ) {
+                tool.erase = false;
+                tool.terrain = Some(name.clone());
+            }
+        }
+    });
+    section::caption(
+        ui,
+        "A terrain picks each cell's sprite, and its neighbors', from which of them it touches.",
+    );
 }
 
 pub(super) fn tile_palette(
@@ -98,9 +153,12 @@ pub(super) fn tile_palette(
             tool.erase = true;
         }
         for sprite in sprites {
-            let selected = !tool.erase && tool.sprite.as_deref() == Some(sprite.name.as_str());
+            let selected = !tool.erase
+                && tool.terrain.is_none()
+                && tool.sprite.as_deref() == Some(sprite.name.as_str());
             if palette_cell(ui, Some(sprite), texture, selected) {
                 tool.erase = false;
+                tool.terrain = None;
                 tool.sprite = Some(sprite.name.clone());
             }
         }

@@ -10,9 +10,9 @@ use std::collections::BTreeMap;
 
 use sindri_assets::{
     AssetDecoder, AssetKind, AssetLoadOutcome, AssetLoadQueueConfig, AssetLoader, AssetManifest,
-    AudioAssetDecoder, FetchAssetSource, FontAssetDecoder, MANIFEST_FILE_NAME, PrefabAssetDecoder,
-    ProfileAssetDecoder, SceneAssetDecoder, SpriteSheetAssetDecoder, TextAssetDecoder,
-    TextureAssetDecoder, TileSetAssetDecoder,
+    AudioAssetDecoder, FetchAssetSource, FontAssetDecoder, MANIFEST_FILE_NAME, ModelAssetDecoder,
+    PrefabAssetDecoder, ProfileAssetDecoder, SceneAssetDecoder, SpriteSheetAssetDecoder,
+    TextAssetDecoder, TextureAssetDecoder, TileSetAssetDecoder,
 };
 use sindri_core::AssetId;
 use sindri_decay::{PrefabSources, ProfileSources, ScriptSources};
@@ -31,7 +31,9 @@ pub(crate) enum LoadPhase {
 
 impl BrowserProjectLoader {
     pub(crate) fn new() -> Result<Self, PlayerError> {
-        let source = FetchAssetSource::new("assets")?;
+        // Revalidated, because the manifest keeps its URL across deploys while
+        // the content directory it names does not survive them.
+        let source = FetchAssetSource::new("assets")?.revalidating();
         let mut manifest =
             AssetLoader::new(source, AssetLoadQueueConfig::default(), TextAssetDecoder)?;
         manifest.request(AssetId::new(MANIFEST_FILE_NAME)?)?;
@@ -71,6 +73,7 @@ impl BrowserProjectLoader {
 pub(crate) struct ProjectLoaders {
     scene: AssetLoader<SceneAssetDecoder>,
     scripts: AssetLoader<TextAssetDecoder>,
+    models: AssetLoader<ModelAssetDecoder>,
     textures: AssetLoader<TextureAssetDecoder>,
     fonts: AssetLoader<FontAssetDecoder>,
     audio: AssetLoader<AudioAssetDecoder>,
@@ -80,6 +83,8 @@ pub(crate) struct ProjectLoaders {
     profiles: AssetLoader<ProfileAssetDecoder>,
     styles: AssetLoader<TextAssetDecoder>,
     style_ids: Vec<String>,
+    /// Sprite shaders arrive through the same text loader as stylesheets.
+    shader_ids: Vec<String>,
     /// Kept, because what was asked for is also what has to be collected.
     manifest: AssetManifest,
 }
@@ -115,6 +120,9 @@ impl ProjectLoaders {
             TextureAssetDecoder,
         )?
         .with_manifest(manifest.clone());
+        let mut models =
+            AssetLoader::new(source.clone(), config(AssetKind::Model), ModelAssetDecoder)?
+                .with_manifest(manifest.clone());
         let mut fonts =
             AssetLoader::new(source.clone(), config(AssetKind::Font), FontAssetDecoder)?
                 .with_manifest(manifest.clone());
@@ -157,6 +165,7 @@ impl ProjectLoaders {
         request_kind(&mut scene, &manifest, AssetKind::Scene)?;
         request_kind(&mut scripts, &manifest, AssetKind::Script)?;
         request_kind(&mut textures, &manifest, AssetKind::Texture)?;
+        request_kind(&mut models, &manifest, AssetKind::Model)?;
         request_kind(&mut fonts, &manifest, AssetKind::Font)?;
         request_kind(&mut audio, &manifest, AssetKind::Audio)?;
         request_kind(&mut sheets, &manifest, AssetKind::Sheet)?;
@@ -168,7 +177,12 @@ impl ProjectLoaders {
             .filter(|id| id.as_str().ends_with(".weave"))
             .map(|id| id.as_str().to_owned())
             .collect::<Vec<_>>();
-        for id in &style_ids {
+        let shader_ids = manifest
+            .ids_of(AssetKind::Other)
+            .filter(|id| id.as_str().ends_with(".wgsl"))
+            .map(|id| id.as_str().to_owned())
+            .collect::<Vec<_>>();
+        for id in style_ids.iter().chain(&shader_ids) {
             styles.request(AssetId::new(id.as_str())?)?;
         }
 
@@ -179,6 +193,8 @@ impl ProjectLoaders {
             profiles,
             styles,
             style_ids,
+            shader_ids,
+            models,
             textures,
             fonts,
             audio,
@@ -191,6 +207,7 @@ impl ProjectLoaders {
     pub(crate) fn poll(&mut self) -> Result<Option<ProjectAssets>, PlayerError> {
         poll_loader(&mut self.scene)?;
         poll_loader(&mut self.scripts)?;
+        poll_loader(&mut self.models)?;
         poll_loader(&mut self.textures)?;
         poll_loader(&mut self.fonts)?;
         poll_loader(&mut self.audio)?;
@@ -202,6 +219,7 @@ impl ProjectLoaders {
 
         if self.scene.outstanding()
             + self.scripts.outstanding()
+            + self.models.outstanding()
             + self.textures.outstanding()
             + self.fonts.outstanding()
             + self.audio.outstanding()
@@ -246,6 +264,7 @@ impl ProjectLoaders {
             let profile = loaded(&self.profiles, &id)?;
             profiles.insert(id, profile);
         }
+        let models = loaded_many(&self.models, &ids(AssetKind::Model))?;
         let textures = loaded_many(&self.textures, &ids(AssetKind::Texture))?;
         let fonts = loaded_many(&self.fonts, &ids(AssetKind::Font))?;
         let audio = loaded_many(&self.audio, &ids(AssetKind::Audio))?;
@@ -264,18 +283,25 @@ impl ProjectLoaders {
             .into_iter()
             .map(|(_, sheet)| sheet)
             .collect();
+        let shaders = self
+            .shader_ids
+            .iter()
+            .map(|id| loaded(&self.styles, id).map(|source| (id.clone(), source)))
+            .collect::<Result<Vec<_>, _>>()?;
         let asset_count = self.manifest.len();
         Ok(Some(ProjectAssets {
             scenes,
             scripts,
             prefabs,
             profiles,
+            models,
             textures,
             fonts,
             audio,
             sheets,
             tile_sets,
             stylesheets,
+            shaders,
             asset_count,
         }))
     }

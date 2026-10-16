@@ -77,6 +77,8 @@ pub(super) fn apply(presses: &mut Presses, event: InputEvent, pointer: Option<[f
         InputEvent::TextInput(_)
         | InputEvent::KeyPressed(_)
         | InputEvent::KeyReleased(_)
+        | InputEvent::PointerMotion { .. }
+        | InputEvent::PointerLockChanged(_)
         | InputEvent::Scrolled { .. }
         | InputEvent::GamepadConnected(_)
         | InputEvent::GamepadDisconnected(_)

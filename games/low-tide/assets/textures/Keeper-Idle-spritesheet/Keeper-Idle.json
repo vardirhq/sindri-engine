@@ -1,0 +1,109 @@
+{
+  "character": {
+    "id": "47d8e4ac-1345-4936-8f85-7b3262fd1178",
+    "name": "Idle",
+    "prompt": "Full-body pixel art character for \"Low Tide\", a top-down 2D survival and exploration game set on a desolate seabed after the ocean mysteriously receded.\n\nCharacter: \"The Keeper\", a resourceful mechanic, sailor and salvager who lives aboard a massive tracked crawler. A practical survivor, not a soldier or conventional post-apocalyptic hero.\n\nAppearance:\n\n- Adult, sturdy build, slightly tired but approachable.\n- Short, messy dark hair.\n- Weathered dark teal work jacket with rolled sleeves and repair patches.\n- Distinctive faded rust-orange scarf.\n- Charcoal work trousers with reinforced knees.\n- Heavy worn leather boots and fingerless gloves.\n- Cross-body utility belt with tools.\n- Small canvas backpack with a brass lantern attached.\n\nArt style:\n\n- Beautiful handcrafted 16-bit-inspired pixel art.\n- Strong, recognizable silhouette.\n- Muted maritime-industrial palette: teal, charcoal, rust orange, brown and brass.\n- Clean, deliberate pixel clusters with minimal noise.\n- Slightly exaggerated proportions for readability at 64\u00d764 pixels.\n- Charming, grounded and atmospheric, not overly cartoonish.\n- Minimal baked-in lighting, suitable for dynamic lighting and normal maps.\n\nPerspective:\n\n- Three-quarter top-down view, approximately 45 degrees above.\n- Facing downward toward the viewer.\n- Full body visible, neutral standing idle pose.\n- Consistent proportions suitable for directional animations.\n\nSingle character, centered, transparent background. No environment, text, UI, weapons or ground shadow.",
+    "size": {
+      "width": 64,
+      "height": 64
+    },
+    "directions": 8,
+    "view": "low top-down"
+  },
+  "spritesheet": {
+    "path": "Keeper-Idle.png",
+    "cell_size": {
+      "width": 80,
+      "height": 80
+    },
+    "sheet_size": {
+      "width": 640,
+      "height": 720
+    },
+    "columns": 8,
+    "pivot": "cell-center",
+    "rows": [
+      {
+        "row": 0,
+        "type": "rotations",
+        "frame_count": 8,
+        "directions": [
+          "south",
+          "south-east",
+          "east",
+          "north-east",
+          "north",
+          "north-west",
+          "west",
+          "south-west"
+        ]
+      },
+      {
+        "row": 1,
+        "type": "animation",
+        "frame_count": 6,
+        "animation": "Running",
+        "animation_group_id": "6c87900b-d051-4c7c-9249-b8b1bbf204e2",
+        "direction": "south"
+      },
+      {
+        "row": 2,
+        "type": "animation",
+        "frame_count": 6,
+        "animation": "Running",
+        "animation_group_id": "6c87900b-d051-4c7c-9249-b8b1bbf204e2",
+        "direction": "south-east"
+      },
+      {
+        "row": 3,
+        "type": "animation",
+        "frame_count": 6,
+        "animation": "Running",
+        "animation_group_id": "6c87900b-d051-4c7c-9249-b8b1bbf204e2",
+        "direction": "east"
+      },
+      {
+        "row": 4,
+        "type": "animation",
+        "frame_count": 6,
+        "animation": "Running",
+        "animation_group_id": "6c87900b-d051-4c7c-9249-b8b1bbf204e2",
+        "direction": "north-east"
+      },
+      {
+        "row": 5,
+        "type": "animation",
+        "frame_count": 6,
+        "animation": "Running",
+        "animation_group_id": "6c87900b-d051-4c7c-9249-b8b1bbf204e2",
+        "direction": "north"
+      },
+      {
+        "row": 6,
+        "type": "animation",
+        "frame_count": 6,
+        "animation": "Running",
+        "animation_group_id": "6c87900b-d051-4c7c-9249-b8b1bbf204e2",
+        "direction": "north-west"
+      },
+      {
+        "row": 7,
+        "type": "animation",
+        "frame_count": 6,
+        "animation": "Running",
+        "animation_group_id": "6c87900b-d051-4c7c-9249-b8b1bbf204e2",
+        "direction": "west"
+      },
+      {
+        "row": 8,
+        "type": "animation",
+        "frame_count": 6,
+        "animation": "Running",
+        "animation_group_id": "6c87900b-d051-4c7c-9249-b8b1bbf204e2",
+        "direction": "south-west"
+      }
+    ]
+  },
+  "export_version": "1.0",
+  "export_date": "2026-10-15T18:33:35.999845+00:00"
+}

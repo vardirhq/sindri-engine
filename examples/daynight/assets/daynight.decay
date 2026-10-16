@@ -1,0 +1,68 @@
+// The clock and transitions belong to the project, not an engine time service.
+script DayNight {
+    @export let day_seconds: f32 = 12.0;
+    @export let start_hour: f32 = 6.0;
+    @export let preview_hour: f32 = -1.0;
+    @export let move_carrier: bool = true;
+    @export let night_lights: bool = true;
+    var elapsed: f32 = 0.0;
+    var phase: f32 = -1.0;
+    var ready: bool = false;
+
+    fn start() {
+        this.transform.look_at(Vec3(0.0, 0.0, 0.0));
+        print("Day/night loaded");
+    }
+    fn update(dt: f32) {
+        elapsed += dt;
+        var hour = (max(0.0, start_hour) + elapsed * 24.0 / max(1.0, day_seconds)) % 24.0;
+        if preview_hour >= 0.0 { hour = preview_hour % 24.0; }
+        shade(hour);
+        let carrier = World.find("Carrier");
+        if move_carrier {
+            carrier.transform.position.x = -2.0 + sin(elapsed * 0.8) * 1.5;
+            carrier.transform.position.z = cos(elapsed * 0.8);
+            carrier.transform.yaw = elapsed * 0.4;
+        }
+        announce(hour);
+        if !ready && (elapsed >= max(1.0, day_seconds) || preview_hour >= 0.0) {
+            ready = true;
+            print("Day/night ready");
+        }
+    }
+    fn shade(hour: f32) {
+        let daylight = max(0.0, sin((hour - 6.0) * 0.2617994));
+        let sun = World.find("Sun");
+        sun.transform.pitch = -0.15 - daylight * 0.9;
+        sun.transform.yaw = -2.1 + (hour - 10.0) * 0.12;
+        sun.light.color = Color(1.0, 0.25, 0.1).lerp(Color(1.0, 0.95, 0.86), daylight);
+        sun.light.intensity = daylight * 1.6;
+        sun.light.enabled = daylight > 0.001;
+        let world = World.find("World");
+        world.environment.ambient_intensity = 0.03 + daylight * 0.22;
+        world.environment.ambient_color = Color(0.2, 0.3, 0.8).lerp(Color(1.0, 1.0, 1.0), daylight);
+        let horizon = Color(0.3, 0.06, 0.02).lerp(Color(0.12, 0.32, 0.55), daylight);
+        world.environment.background = Color(0.008, 0.012, 0.035).lerp(horizon, min(1.0, daylight * 4.0));
+        let night = 1.0 - min(1.0, daylight * 4.0);
+        let enabled = night_lights && night > 0.001;
+        let spot = World.find("Work spot");
+        spot.light.intensity = night * 24.0;
+        spot.light.enabled = enabled;
+        let point = World.find("Blue point");
+        point.light.intensity = night * 14.0;
+        point.light.enabled = enabled;
+    }
+    fn announce(hour: f32) {
+        var current: f32 = -1.0;
+        if hour >= 7.0 && hour < 10.0 { current = 0.0; }
+        if hour >= 12.0 && hour < 16.0 { current = 1.0; }
+        if hour >= 17.0 && hour < 18.0 { current = 2.0; }
+        if hour >= 20.0 || hour < 6.0 { current = 3.0; }
+        if current == phase || current < 0.0 { return; }
+        phase = current;
+        if phase == 0.0 { print("Day/night sunrise"); }
+        if phase == 1.0 { print("Day/night midday"); }
+        if phase == 2.0 { print("Day/night sunset"); }
+        if phase == 3.0 { print("Day/night night"); }
+    }
+}

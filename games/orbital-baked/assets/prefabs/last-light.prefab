@@ -20,8 +20,8 @@
           1.0
         ],
         "scale": [
-          1.0,
-          1.0,
+          2.08,
+          2.08,
           1.0
         ]
       },
@@ -54,7 +54,7 @@
         "sindri.physics2d.collider": {
           "shape": {
             "shape": "circle",
-            "radius": 0.5
+            "radius": 1.04
           },
           "offset": [
             0.0,
@@ -96,31 +96,241 @@
             "death_burst": "prefabs/nova.prefab"
           }
         },
-        "sindri.sprite": {
-          "texture": "textures/last-light.png#body-0",
-          "tint": [
+        "sindri.shape": {
+          "kind": "polygon",
+          "count": 16.0,
+          "fill": [
             1.0,
-            1.0,
-            1.0,
+            0.8796,
+            0.3231,
             1.0
           ],
+          "stroke": [
+            1.0,
+            0.9458,
+            0.6954,
+            0.95
+          ],
+          "stroke_width": 0.04,
+          "corner_radius": 0.0,
+          "dashes": 0.0,
+          "dash_duty": 0.5,
+          "sweep_start": 0.0,
+          "sweep_turns": 1.0,
+          "blend": "over",
           "layer": 3
+        }
+      }
+    },
+    {
+      "id": "last-light-ring",
+      "name": "LastLight Ring",
+      "parent": "last-light",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "scale": [
+          1.196,
+          1.196,
+          1.0
+        ]
+      },
+      "components": {
+        "sindri.script": {
+          "source": "scripts/boss-ring.decay",
+          "script": "BossRing",
+          "properties": {
+            "spin": 1.0,
+            "width": 0.03
+          }
         },
-        "sindri.animation.sprite": {
-          "clips": {
-            "idle": {
-              "frames": [
-                "body-0",
-                "body-1",
-                "body-2",
-                "body-3"
-              ],
-              "seconds_per_frame": 0.12,
-              "looping": true
-            }
-          },
-          "playing": "idle",
-          "speed": 1.0
+        "sindri.shape": {
+          "kind": "polygon",
+          "count": 16.0,
+          "fill": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke": [
+            1.0,
+            0.9047,
+            0.7379,
+            0.7
+          ],
+          "stroke_width": 0.03,
+          "corner_radius": 0.0,
+          "dashes": 0.0,
+          "dash_duty": 0.5,
+          "sweep_start": 0.0,
+          "sweep_turns": 1.0,
+          "blend": "over",
+          "layer": 4
+        }
+      }
+    },
+    {
+      "id": "last-light-core",
+      "name": "LastLight Core",
+      "parent": "last-light",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "scale": [
+          0.46,
+          0.46,
+          1.0
+        ]
+      },
+      "components": {
+        "sindri.script": {
+          "source": "scripts/boss-ring.decay",
+          "script": "BossRing",
+          "properties": {
+            "spin": -1.6,
+            "width": 0.07
+          }
+        },
+        "sindri.shape": {
+          "kind": "polygon",
+          "count": 16.0,
+          "fill": [
+            0.18,
+            0.1583,
+            0.0582,
+            0.92
+          ],
+          "stroke": [
+            1.0,
+            0.9458,
+            0.6954,
+            0.8
+          ],
+          "stroke_width": 0.07,
+          "corner_radius": 0.0,
+          "dashes": 0.0,
+          "dash_duty": 0.5,
+          "sweep_start": 0.0,
+          "sweep_turns": 1.0,
+          "blend": "over",
+          "layer": 4
+        }
+      }
+    },
+    {
+      "id": "last-light-halo-0",
+      "name": "Last Light Halo 0",
+      "parent": "last-light",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "scale": [
+          1.353,
+          1.353,
+          1.0
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "ellipse",
+          "count": 6.0,
+          "fill": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke": [
+            1.0,
+            0.9047,
+            0.7379,
+            0.5
+          ],
+          "stroke_width": 0.02,
+          "corner_radius": 0.0,
+          "dashes": 0.0,
+          "dash_duty": 0.5,
+          "sweep_start": 0.0,
+          "sweep_turns": 1.0,
+          "blend": "over",
+          "layer": 4
+        }
+      }
+    },
+    {
+      "id": "last-light-halo-1",
+      "name": "Last Light Halo 1",
+      "parent": "last-light",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "scale": [
+          1.549,
+          1.549,
+          1.0
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "ellipse",
+          "count": 6.0,
+          "fill": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke": [
+            1.0,
+            0.9047,
+            0.7379,
+            0.5
+          ],
+          "stroke_width": 0.02,
+          "corner_radius": 0.0,
+          "dashes": 0.0,
+          "dash_duty": 0.5,
+          "sweep_start": 0.0,
+          "sweep_turns": 1.0,
+          "blend": "over",
+          "layer": 4
         }
       }
     }

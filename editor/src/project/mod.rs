@@ -354,6 +354,19 @@ impl ProjectTree {
             .collect()
     }
 
+    /// References to supported self-contained GLB models. Other mesh formats
+    /// remain visible in the browser but are not offered as loadable models.
+    pub fn models(&self) -> Vec<String> {
+        self.referenced(AssetKind::Mesh)
+            .filter(|reference| {
+                Path::new(reference)
+                    .extension()
+                    .is_some_and(|extension| extension.eq_ignore_ascii_case("glb"))
+            })
+            .map(str::to_owned)
+            .collect()
+    }
+
     /// References to every audio clip the browser can see.
     pub fn audio(&self) -> Vec<String> {
         self.referenced(AssetKind::Audio)
@@ -378,6 +391,21 @@ impl ProjectTree {
     /// References to every reusable tile set the browser can see.
     pub fn tile_sets(&self) -> Vec<String> {
         self.referenced(AssetKind::TileSet)
+            .map(str::to_owned)
+            .collect()
+    }
+
+    /// References to every sprite shader the browser can see.
+    ///
+    /// The browser lists a `.wgsl` file as a script, because it is source; a
+    /// sprite's `shader` field is the one thing that can name one.
+    pub fn shaders(&self) -> Vec<String> {
+        self.referenced(AssetKind::Script)
+            .filter(|reference| {
+                Path::new(reference)
+                    .extension()
+                    .is_some_and(|extension| extension.eq_ignore_ascii_case("wgsl"))
+            })
             .map(str::to_owned)
             .collect()
     }

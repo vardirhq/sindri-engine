@@ -130,3 +130,15 @@ block or crate it hits and how far.
 - [x] Voxel Quarry 3D annex
 - [x] Session regressions, browser smoke on desktop and phone, editor load
 - [x] Documentation: README, parity, capabilities, changelog, pre-alpha exit
+
+## Cleanup and collision snapshots
+
+The director can remove spawned bodies during RESET or CLEAN UP before later
+toy scripts run. The 2D collision/sensor lists describe the solve before scripts
+in that step, so shell, glass-pane, backstop and bumper consumers check
+`World.exists` before reading the other entity's tags, transform or script fields, or applying
+an impulse. A deterministic project regression spawns a ball against a glass
+pane and resets the room in the step that reports their first contact, before
+the pane's script consumes it. This fix uses the existing entity-lifetime contract; it adds no alternate physics
+loop or host API. Desktop/phone browser smoke exercises the same cleanup path
+in the full room after its gravity, blast and dropped-joint controls.

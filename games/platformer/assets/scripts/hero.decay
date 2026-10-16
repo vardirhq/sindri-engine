@@ -155,6 +155,7 @@ script Hero {
         let p = this.transform.world_position;
         let hit = Physics.raycast(Vec2(p.x, p.y), Vec2(0.0, -1.0), 12.0, Physics.layer("ground"), false, this.entity);
         Game.ground_found = hit != null;
+        let was_grounded = this.ground > 0.0;
         this.ground = 0.0;
         this.on_one_way = false;
         if hit != null {
@@ -163,6 +164,10 @@ script Hero {
         let motion = Physics.character_motion(this.entity);
         if motion == null { return; }
         if motion.grounded && this.drop_left <= 0.0 {
+            // A landing kicks up a puff of the dust a run trails.
+            if !was_grounded && this.rise < -4.0 {
+                Effects.emit(this.entity, 8.0);
+            }
             this.ground = 1.0;
             this.rise = 0.0;
             let support = motion.ground;
@@ -213,6 +218,12 @@ script Hero {
             return;
         }
         this.shown = state;
+        // Dust trails a run and nothing else.
+        if state == 1.0 {
+            Effects.play(this.entity);
+        } else {
+            Effects.stop(this.entity);
+        }
         if state == 0.0 {
             Animation.play(this.entity, "idle");
         } else if state == 1.0 {

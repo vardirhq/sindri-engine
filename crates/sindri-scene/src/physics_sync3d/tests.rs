@@ -55,7 +55,7 @@ fn transform_starts_the_body_and_xyz_writeback_preserves_authored_data_and_scale
         &mut world,
         [1.0, 2.0, 3.0],
         Some(RigidBodyKind::Dynamic),
-        Collider3d::sphere(0.2),
+        Collider3d::cuboid([0.2; 3]),
     );
     world
         .get_mut(entity)

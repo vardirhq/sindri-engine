@@ -251,6 +251,7 @@ impl ProjectExport {
             }
         }
         while let Some(world) = pending.pop() {
+            super::models::references(&world, &mut wanted);
             for reference in referenced_textures(&world) {
                 wanted.insert(reference, AssetKind::Texture);
             }
@@ -259,6 +260,10 @@ impl ProjectExport {
             }
             for font in referenced_fonts(&world) {
                 wanted.insert(font, AssetKind::Font);
+            }
+            for shader in sindri_scene::referenced_sprite_shaders(&world) {
+                let kind = AssetKind::for_id(&shader);
+                wanted.insert(shader, kind);
             }
             // Audio is named by a component like anything else, and was the one
             // kind with no walker in the engine — a scene's music would have
@@ -394,6 +399,9 @@ impl ProjectExport {
             if kind == AssetKind::Profile {
                 validate_profile(&id, &bytes, physics_profiles.contains(&id))?;
             }
+            if id.ends_with(".wgsl") {
+                super::shaders::validate(&id, &bytes)?;
+            }
             assets.push(GatheredAsset {
                 id: id.clone(),
                 kind,
@@ -401,6 +409,7 @@ impl ProjectExport {
             });
         }
 
+        super::models::validate(&assets)?;
         let splash = file
             .web
             .splash

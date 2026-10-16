@@ -23,11 +23,11 @@ use crate::{
     audio_host::AUDIO,
     surface::{
         ANIMATION, ANIMATION_CALLS, AnimationCall, CONSTANTS, EFFECTS, EFFECTS_CALLS, ENTITY,
-        EffectsCall, FUNCTIONS, GAME, GAME_CALLS, GAMEPAD, GameCall, HostFunction, INPUT,
-        INPUT_QUERIES, Node, PRINT, PROFILE, PROFILE_CALLS, PROFILES, ProfileCall, RANDOM,
-        RANDOM_CALLS, RandomCall, SAVE, SAVE_CALLS, SCENE, SCENE_CALLS, SEQUENCE, SEQUENCE_CALLS,
-        SaveCall, SceneCall, SequenceCall, THIS, THROUGH_REFERENCE, TIME, TIME_VALUES, UI,
-        UI_CALLS, UiCall, gamepad_type,
+        EffectsCall, FUNCTIONS, GAME, GAME_CALLS, GAMEPAD, GameCall, HostFunction, Node, PRINT,
+        PROFILE, PROFILE_CALLS, PROFILES, ProfileCall, RANDOM, RANDOM_CALLS, RandomCall, SAVE,
+        SAVE_CALLS, SCENE, SCENE_CALLS, SEQUENCE, SEQUENCE_CALLS, SaveCall, SceneCall,
+        SequenceCall, THIS, THROUGH_REFERENCE, TIME, TIME_VALUES, UI, UI_CALLS, UiCall,
+        gamepad_type,
     },
 };
 
@@ -51,6 +51,14 @@ pub fn environment() -> Environment {
     for (name, ty) in collect_types() {
         environment.add_type(name, ty);
     }
+
+    environment.add_struct(
+        crate::surface::QUAT,
+        crate::surface::QUAT_FIELDS
+            .into_iter()
+            .map(|name| (name.to_owned(), Type::F32))
+            .collect(),
+    );
 
     for (name, _) in CONSTANTS {
         environment.add_value(*name, Type::F32);
@@ -80,22 +88,7 @@ pub fn environment() -> Environment {
         },
     );
 
-    let mut input = HostType::new();
-    for (name, query) in INPUT_QUERIES {
-        input = input.with_function(
-            *name,
-            FunctionType {
-                params: vec![Type::String; query.keys()],
-                return_type: if query.is_number() {
-                    Type::F32
-                } else {
-                    Type::Bool
-                },
-            },
-        );
-    }
-    environment.add_type(INPUT, input);
-    environment.add_value(INPUT, Type::Named(INPUT.to_owned()));
+    super::person_surface::add_input_surface(&mut environment);
     environment.add_type(GAMEPAD, gamepad_type());
     environment.add_value(GAMEPAD, Type::Named(GAMEPAD.to_owned()));
 
@@ -405,7 +398,10 @@ pub(super) fn add_effects_surface(environment: &mut Environment) {
             *name,
             FunctionType {
                 params: match call {
-                    EffectsCall::Burst => vec![Type::Named(ENTITY.to_owned())],
+                    EffectsCall::Burst | EffectsCall::Play | EffectsCall::Stop => {
+                        vec![Type::Named(ENTITY.to_owned())]
+                    }
+                    EffectsCall::Emit => vec![Type::Named(ENTITY.to_owned()), Type::F32],
                     EffectsCall::BurstAt => {
                         vec![Type::Named(ENTITY.to_owned()), Type::F32, Type::F32]
                     }
@@ -500,6 +496,9 @@ pub(super) fn describe_node(node: &Node) -> Type {
         // whole, and still read channel by channel.
         Node::Group(name, _) if *name == crate::surface::names::RGBA => Type::Color,
         Node::Group(name, _) => Type::Named((*name).to_owned()),
+        Node::Leaf(crate::surface::Leaf::Light(crate::surface::light::LightField::Enabled)) => {
+            Type::Bool
+        }
         Node::Leaf(_) => Type::F32,
         Node::Handle(_) => Type::Named(ENTITY.to_owned()),
     }
@@ -520,7 +519,14 @@ pub(super) fn collect_types() -> Vec<(String, HostType)> {
             }
             let mut ty = HostType::new();
             for (field, child) in *nested {
-                ty = ty.with_value(*field, describe_node(child));
+                ty = if child.is_read_only() {
+                    ty.with_read_only_value(*field, describe_node(child))
+                } else {
+                    ty.with_value(*field, describe_node(child))
+                };
+            }
+            if *name == crate::surface::TRANSFORM {
+                ty = crate::surface::transform::add_calls(ty);
             }
             into.push(((*name).to_owned(), ty));
             walk(nested, into);

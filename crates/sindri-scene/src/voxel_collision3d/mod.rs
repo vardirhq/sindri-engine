@@ -25,6 +25,15 @@ struct Section {
     pieces: Arc<[Collider3d]>,
 }
 
+impl Section {
+    fn same_geometry(&self, other: &Self) -> bool {
+        Arc::ptr_eq(&self.boxes, &other.boxes)
+            && self.scale.map(f32::to_bits) == other.scale.map(f32::to_bits)
+            && self.settings.layers == other.settings.layers
+            && self.settings.sensor == other.settings.sensor
+    }
+}
+
 /// A prevalidated snapshot, ready to commit.
 pub(crate) struct VoxelCollisionPlan3d {
     owners: BTreeMap<EntityId, Owner>,
@@ -130,10 +139,15 @@ impl SceneVoxelCollision3d {
                     }
                 }
             }
+            let mut material_edits = false;
             for (coord, section) in &owner.sections {
+                let old = previous.and_then(|old| old.sections.get(coord));
+                material_edits |= old.is_some_and(|old| {
+                    old.same_geometry(section) && old.settings != section.settings
+                });
                 let unchanged = previous
                     .and_then(|old| old.sections.get(coord))
-                    .is_some_and(|old| Arc::ptr_eq(&old.pieces, &section.pieces));
+                    .is_some_and(|old| old.same_geometry(section));
                 if !unchanged && (!section.pieces.is_empty() || physics.contains(entity)) {
                     physics.replace_static_group(
                         entity,
@@ -144,6 +158,19 @@ impl SceneVoxelCollision3d {
                 }
             }
             owner.materialized = physics.contains(entity);
+            if owner.materialized && material_edits {
+                let mut ordered: Vec<_> = owner.sections.values().collect();
+                ordered.sort_unstable_by_key(|section| section.key);
+                let materials: Vec<_> = ordered
+                    .iter()
+                    .flat_map(|section| section.pieces.iter())
+                    .map(|piece| sindri_physics::PhysicsMaterial {
+                        friction: piece.friction,
+                        restitution: piece.restitution,
+                    })
+                    .collect();
+                physics.set_materials(entity, &materials)?;
+            }
             if owner.materialized && previous.is_none_or(|old| old.pose != owner.pose) {
                 physics.move_to(entity, owner.pose)?;
             }
@@ -241,6 +268,28 @@ impl SceneVoxelCollision3d {
                 && old.settings == input.settings
         }) {
             return Ok(old.clone());
+        }
+        if let Some(old) = old.filter(|old| {
+            !changed
+                && old.scale.map(f32::to_bits) == input.scale.map(f32::to_bits)
+                && old.settings.layers == input.settings.layers
+                && old.settings.sensor == input.settings.sensor
+        }) {
+            // Coefficient edits retain the compiled boxes and solver groups,
+            // and consume no geometry rebuild budget.
+            let mut section = old.clone();
+            section.settings = input.settings;
+            section.pieces = old
+                .pieces
+                .iter()
+                .map(|piece| Collider3d {
+                    friction: input.settings.friction,
+                    restitution: input.settings.restitution,
+                    ..*piece
+                })
+                .collect::<Vec<_>>()
+                .into();
+            return Ok(section);
         }
         report.rebuilt += 1;
         limit(report.rebuilt, self.budget.rebuilds, "rebuilds")?;

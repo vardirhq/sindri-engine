@@ -57,6 +57,9 @@ pub(super) struct LaidOut {
     pub(super) scale: f32,
     /// What the words cover, in the units the text is placed in.
     pub(super) block: [f32; 2],
+    /// Each rich span's own color, by the metadata its glyphs carry less one.
+    /// Empty for plain text, whose glyphs all take the string's color.
+    pub(super) faces: Vec<Option<[f32; 4]>>,
 }
 
 /// The top-left corner of the room a string is given, and how big that room is.
@@ -137,6 +140,7 @@ impl LaidOut {
             wrapped,
             scale: 1.0,
             block,
+            faces: Vec::new(),
         }
     }
 }

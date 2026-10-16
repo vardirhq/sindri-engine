@@ -1,0 +1,216 @@
+{
+  "format_version": 10,
+  "metadata": {
+    "name": "Sprite Shaders"
+  },
+  "entities": [
+    {
+      "id": "camera",
+      "name": "camera",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          10
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.camera": {
+          "projection": "orthographic",
+          "vertical_size": 4,
+          "near": 0.1,
+          "far": 100,
+          "fit": "height"
+        }
+      }
+    },
+    {
+      "id": "plain",
+      "name": "plain",
+      "transform_3d": {
+        "position": [
+          -4,
+          0,
+          0
+        ],
+        "scale": [
+          1.6,
+          1.6,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/badge.png",
+          "tint": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "layer": 0,
+          "shader": "",
+          "shader_params": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        }
+      }
+    },
+    {
+      "id": "outline",
+      "name": "outline",
+      "transform_3d": {
+        "position": [
+          -2,
+          0,
+          0
+        ],
+        "scale": [
+          1.6,
+          1.6,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/badge.png",
+          "tint": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "layer": 0,
+          "shader": "shaders/outline.wgsl",
+          "shader_params": [
+            3.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        }
+      }
+    },
+    {
+      "id": "dissolve",
+      "name": "dissolve",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1.6,
+          1.6,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/badge.png",
+          "tint": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "layer": 0,
+          "shader": "shaders/dissolve.wgsl",
+          "shader_params": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "sindri.script": {
+          "source": "scripts/shader-demo.decay",
+          "script": "Burn"
+        }
+      }
+    },
+    {
+      "id": "flash",
+      "name": "flash",
+      "transform_3d": {
+        "position": [
+          2,
+          0,
+          0
+        ],
+        "scale": [
+          1.6,
+          1.6,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/badge.png",
+          "tint": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "layer": 0,
+          "shader": "shaders/flash.wgsl",
+          "shader_params": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "sindri.script": {
+          "source": "scripts/shader-demo.decay",
+          "script": "HitFlash"
+        }
+      }
+    },
+    {
+      "id": "wave",
+      "name": "wave",
+      "transform_3d": {
+        "position": [
+          4,
+          0,
+          0
+        ],
+        "scale": [
+          1.6,
+          1.6,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/badge.png",
+          "tint": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "layer": 0,
+          "shader": "shaders/wave.wgsl",
+          "shader_params": [
+            0.06,
+            2.0,
+            0.0,
+            0.0
+          ]
+        }
+      }
+    }
+  ]
+}

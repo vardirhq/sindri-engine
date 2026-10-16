@@ -430,6 +430,6 @@ mod tests {
     #[test]
     fn look_zero_is_plain() {
         let resolved = Resolved::default();
-        assert!(resolved.surface(0, 5.0) == MeshSurface::default());
+        assert_eq!(resolved.surface(0, 5.0), MeshSurface::default());
     }
 }

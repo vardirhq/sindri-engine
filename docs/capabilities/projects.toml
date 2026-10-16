@@ -1,0 +1,297 @@
+# Games, labs and tooling, as data. See physics.toml for the rules the
+# generator applies; `projects.md` is generated from this file.
+#
+# These entries are the projects that prove capabilities, not capabilities
+# themselves: what each one exercises, what it found, and what it does not do
+# yet. `AGENTS.md` says which kind of project proves which kind of capability.
+
+title = "Games, labs and tooling"
+order = 11
+intro = """
+The projects in this repository that exercise the engine, and the offline tools
+beside it. A capability elsewhere names these as its proof; this page says what
+each project is and what it has found. The tooling at the end changes nothing
+about what the engine can do and is listed so that finding it does not read as
+evidence of a capability.
+"""
+
+[[capability]]
+id = "causeway"
+group = "Games"
+title = "Causeway"
+summary = "The flagship showcase: build a path through a voxel world and guide the wanderer to the beacon."
+status = { engine = "n/a", editor = "n/a", decay = "yes", proof = "yes" }
+tests = [
+  "game/tests/the_game_is_played/main.rs",
+  "game/tests/the_game_is_played/crossing.rs",
+  "game/tests/the_game_is_played/tumbling.rs",
+  "game/tests/the_game_holds_together.rs",
+  "game/tests/the_beacon_lights.rs",
+]
+proof = ["game"]
+detail = """
+Causeway's floor is a grid of boxes whose ground is a `sindri.voxel_world`: the
+engine's natural terrain from seed 1, drawn with Causeway's own blocks — grass
+with its variants and buried look, earth, sand, mud, moss, rock, snow, water,
+trees — and following the camera. Nothing in `game/` generates, streams or
+meshes terrain. The walker starts on a bank with the beacon across a river;
+clicks on the water lay planks as edits on the world, and the walker crosses
+them to the beacon. A block taken back tumbles out of its cell under 3D physics,
+lands on the terrain and only then returns to the stock. The beacon lights by
+its own sequences when the walker arrives.
+"""
+
+[[capability]]
+id = "orbital-last-stand"
+group = "Games"
+title = "Orbital Last Stand"
+summary = "The recreated game that forces new capabilities into existence: waves, bosses and a growing arsenal."
+status = { engine = "n/a", editor = "n/a", decay = "yes", proof = "yes" }
+tests = [
+  "games/orbital-baked/tests/it_compiles_and_runs.rs",
+  "games/orbital-baked/tests/boss_rush.rs",
+  "games/orbital-baked/tests/combat_lab.rs",
+  "games/orbital-baked/tests/the_ui_fits_every_screen.rs",
+]
+proof = ["games/orbital-baked"]
+docs = ["docs/orbital-last-stand-evidence.md", "docs/orbital-combat-lab.md"]
+detail = """
+Orbital Last Stand is the proof named by many entries on the other pages:
+masks and sensor events, overlap queries, typed script references, profiles,
+tags and spatial queries, tweening, the mixer and save, the full form-widget
+set and composed Weave styling. Its own evidence and plan documents record what
+it exercises in detail.
+"""
+
+[[capability]]
+id = "platformer"
+group = "Games"
+title = "The platformer"
+summary = "The first genre showcase: a painted, solid tilemap level, a controller-driven hero, ten coins and a flag, with no Rust of its own."
+status = { engine = "n/a", editor = "n/a", decay = "yes", proof = "yes" }
+tests = [
+  "games/platformer/tests/a_run_reaches_the_flag.rs",
+  "games/platformer/tests/painted_ground.rs",
+  "games/platformer/tests/character_gameplay.rs",
+  "scripts/browser/platformer-goal.mjs",
+]
+proof = ["games/platformer"]
+limits = [
+  "No enemies or hazards.",
+  "No level after the first, no pause and no restart without Stop.",
+]
+detail = """
+A side-view level painted as a tilemap and made solid by a Tilemap Collider 2D,
+a hero who runs and jumps, ten coins and a flag, a HUD, and a camera that
+follows. The scene and its Decay scripts are the game, and it exports to the
+site.
+
+Its hero uses the scene-owned Character 2D controller. Decay integrates
+velocity and gravity, queues displacement and reads cached walkable support.
+One capsule probe checks ground obstacles; body and foot sensors preserve
+pickups independently. Walls, ceilings and one-way undersides never grant
+standing. It gives the jump a buffer for a press just before landing and coyote
+time for one just after running off a ledge. Letting go early cuts the rise
+short.
+
+It found three gaps, all closed as general capabilities: a script moving a
+body's transform was undone by the next physics step, so a respawn did nothing;
+a frictionless hero clung to walls because friction averaged; and camera
+behaviors ran only in the camera example. Its tests stand the hero on the
+painted ground, have a scripted player reach the flag without falling, and hold
+the camera to following it inside the level. Its joints, materials, one-way
+planks, ferry, forces and lighting are listed with those capabilities.
+"""
+
+[[capability]]
+id = "scorchball"
+group = "Games"
+title = "Scorchball"
+summary = "The local-multiplayer genre showcase: couch football for two to four pads, ported from Unity with no Rust of its own."
+status = { engine = "n/a", editor = "n/a", decay = "yes", proof = "yes" }
+tests = [
+  "games/scorchball/tests/a_match_is_played.rs",
+  "games/scorchball/tests/a_bot_plays.rs",
+]
+proof = ["games/scorchball"]
+limits = [
+  "No music: the original tracks' terms are unchecked, and MP3 is an exception the dependency policy would rather not grow.",
+  "No match end, pause or restart without Stop.",
+  "Bots do not pass, go for power-ups on purpose, or come in difficulties.",
+  "Played with real pads by nobody yet: CI has none.",
+]
+detail = """
+A scene, four prefabs and four Decay scripts are the game, and it exports to
+the site. Gamepads were the capability it needed and were added for it as a
+general one.
+
+**Players are made when a pad joins.** The match reads `Gamepad.joined()`,
+spawns a player prefab, and authors its slot with `World.set_property`; odd
+slots play for Blue and even for Red. Unplugging a pad takes its player off
+through `Gamepad.left()`. Each player readies with North, picks one of two
+characters with the d-pad, walks with the left stick and kicks with the right
+bumper, aimed with the right stick, all read through its own slot.
+
+**Scripts talk by type and by event.** A player kicks the ball with a typed
+message (`this.ball.kick(velocity, slot)`) and bends the shot with `nudge`; the
+match counts players whose live `ready` field is set; a power-up sends
+`power_up` to the player who took it, or emits `WindPicked` or `FirePicked`;
+the ball sends `catch_fire` to an opponent it touches while alight, and emits
+`GoalScored` when it crosses a goal line. Possession, pickups and reach are
+distance checks, because a collider does not scale with its entity and the
+Enlarger makes a player bigger.
+
+**It found two gaps, both closed.** A child sprite was drawn from its own
+transform alone; a child's transform is now local to its parent everywhere. And
+the test harness did not lay out screen text, so a misspelled text anchor
+passed every test; the harness now lays it out each step.
+
+**It is checked, not just run.** The tests press pads: two join on their own
+sides, ready up and kick off; Blue takes the ball, dribbles past Red and
+scores; a sign cannot be taken until it lands; unplugging a pad takes its
+player off; Blue collects all four powers; and a Fireball sets an opponent
+running wild until it burns out. Select in the lobby adds a bot, which attacks,
+supports, defends goal-side of the ball and goes for loose balls it can reach
+first; the tests have one score on a player standing still, and two play each
+other until one scores.
+"""
+
+[[capability]]
+id = "low-tide"
+group = "Games"
+title = "Low Tide"
+summary = "The moving-home genre showcase: drive a crawler across a drained voxel sea, gather cargo, and escape the returning tide."
+status = { engine = "n/a", editor = "n/a", decay = "yes", proof = "yes" }
+tests = [
+  "games/low-tide/tests/a_voyage_is_played.rs",
+  "games/low-tide/tests/gathering_fills_the_hold.rs",
+  "games/low-tide/tests/a_home_grows.rs",
+  "games/low-tide/tests/a_flood_season.rs",
+  "games/low-tide/tests/a_high_tide_dive.rs",
+  "games/low-tide/tests/played_on_a_phone.rs",
+]
+proof = ["games/low-tide"]
+limits = [
+  "There is no session persistence on desktop or web; history is session-only.",
+  "The dive interior is an authored activity, not a generated terrain cross-section.",
+]
+detail = """
+Low Tide's Basin is a voxel world viewed as a map. It exercises sparse
+`Grid.set_block` edits for biome harvesting, typed shared state and deck tiles
+for its six-resource hold (four slots on the small starter crawler, growing to
+sixteen through three resource-funded stern extensions), and prefab spawning
+for deterministic wrecks across the Basin. Keyboard and phone-touch runtime
+tests harvest, carry, stow and jettison actual blocks; the workbench consumes
+physical cargo for deck expansion, a bunk and an engine upgrade, preserving the
+crew and deck origin while driving. Its viewport-sized workbench exposes three
+directly selectable blueprints, current cargo versus cost, installed and
+chassis-limit states and explicit actions.
+
+Its wrecks spawn six resource-specific cargo prefabs as hull children; Decay
+selects the nearby physical crate and retains a per-slot mask across wreck
+streaming. Carried cargo can be set down as a world prefab and picked up again
+before stowing. Its instrument HUD uses authored atlas icons, real hold
+segments and speed/phase-time meters, and discard confirmation is tied to a
+cell and cancels on movement, Escape or timeout.
+
+A side-view high-tide dive frames a wreck tilemap with a second authored
+camera; Decay swims against hull cells, manages air and a heavy cache, then
+deposits ore and scrap in the original hold only after returning. The map tide
+continues; recall, empty air and ebb recover crew without loot. It found the
+reversible map flood capability; its season, cargo loss, waiting and escape
+rules are Decay gameplay. These are Decay gameplay rules on existing engine
+APIs.
+"""
+
+[[capability]]
+id = "spatial-query-lab"
+group = "Labs and feature examples"
+title = "Spatial Query Lab"
+summary = "`examples/spatial` makes `World.nearest` and `World.within_radius` observable, on desktop and phone."
+status = { engine = "n/a", editor = "n/a", decay = "yes", proof = "yes" }
+tests = ["crates/sindri-decay/tests/spatial_demo.rs"]
+proof = ["examples/spatial"]
+detail = """
+A movable origin and radius guide accompany the actual nearest result and
+ordered radius snapshot. Tag selection, equal-distance samples, an exact
+boundary target, active/parent toggles, rotating and scaled parent transforms,
+a transformless tagged entity and persistent gray markers make the query
+contract observable. Native regressions exercise these cases and phone touch;
+browser smoke exercises visible controls and captures desktop/phone
+project-subpath and custom-domain exports. Orbital remains the gameplay proof
+of the APIs.
+"""
+
+[[capability]]
+id = "camera-lab"
+group = "Labs and feature examples"
+title = "Camera Lab"
+summary = "`examples/camera` makes camera follow, confinement and shake observable with Decay movement and runtime controls."
+status = { engine = "n/a", editor = "n/a", decay = "yes", proof = "yes" }
+tests = ["examples/camera/src/tests.rs"]
+proof = ["examples/camera"]
+docs = ["docs/cameras.md"]
+limits = ["Dedicated editor behavior controls and gizmos are absent."]
+detail = """
+Camera-relative dead-zone and world-space camera-center bounds guides, mode
+toggles, sampled coordinates, an automatic tour, impact button and touch
+movement pad make follow, confinement and shake observable. The native harness
+uses the same scene/scripts, binds the packaged font and supplies UI
+hit-testing; Pages uses the existing shared browser host. Runtime regressions
+exercise modes and phone touch; browser smoke covers desktop and phone controls
+and project/custom-domain routes.
+"""
+
+[[capability]]
+id = "isometric-baker"
+group = "Tooling"
+title = "The isometric baker"
+summary = "`tools/isometric-baker` bakes a 3D model into an ordinary sprite sheet and its `.sheet`, offline, in isometric, top-down or side views."
+status = { engine = "n/a", editor = "n/a", decay = "n/a", proof = "yes" }
+tests = [
+  "tools/isometric-baker/test/bake.test.ts",
+  "tools/isometric-baker/test/anchor.test.ts",
+  "tools/isometric-baker/test/grain.test.ts",
+  "tools/isometric-baker/test/tile-overhang.test.ts",
+]
+proof = ["games/orbital-baked/assets/textures/detonation.isobake"]
+docs = ["docs/isometric-baker.md"]
+detail = """
+Nothing the engine, editor, native game or browser export builds depends on the
+tool: the assets it produces are ordinary PNGs and sheet documents, and by the
+time a game loads one there is nothing left to say it was baked.
+
+It bakes three views. Isometric is the default; **top-down** and **side** were
+added because the isometric camera cannot reach them by any choice of tile.
+The flat views state `pixels_per_unit` rather than deriving a scale from a
+diamond they do not draw, and each view refuses the other's fields. A `grain`
+option shifts texels along a material's ramp, hashed from the texel's position
+on the model, so the same texel is the same shade in every bake. Height is
+baked rather than scaled, so a slab is its own tile. The baker refuses art that
+overhangs its own footprint, and a sheet declares where its sprites meet the
+ground.
+
+Orbital Last Stand uses it for one thing: `textures/detonation.isobake` bakes a
+five-frame blast, top-down, as `variants` of one sheet, and
+`scripts/detonation.decay` plays the clip and despawns when
+`Animation.is_finished` says it ended.
+"""
+
+[[capability]]
+id = "ground-anchor"
+group = "Tooling"
+title = "Sheet-declared ground anchor"
+summary = "A sheet says where its sprites meet the ground, so sorting and placement are authored rather than guessed."
+status = { engine = "yes", editor = "yes", decay = "n/a", proof = "yes" }
+parity = "Sheet-declared ground anchor"
+tests = [
+  "crates/sindri-scene/tests/extraction/standing_on_ground.rs",
+  "tools/isometric-baker/test/anchor.test.ts",
+]
+detail = """
+A quad is drawn centred on its entity, so without an anchor the middle of the
+picture is what lands on the tile. A sheet declares where its sprites meet the
+ground, and `sindri.tilemap` has `tile_overhang`, how far below its cell a
+tile's art may reach: the cell is unchanged and still what the grid, picking,
+occupancy and gameplay measure in; only the drawn quad grows, downward.
+"""

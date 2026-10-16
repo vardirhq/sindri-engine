@@ -10,13 +10,18 @@ mod animation;
 mod audio;
 mod camera_control;
 mod camera_math;
+mod camera_orbit;
 mod characters;
+mod characters3d;
+mod collider_scale3d;
 mod collision_outline;
 mod components;
 pub(crate) mod effects;
 mod extract;
 mod generation;
 mod input_actions;
+mod model_collision3d;
+mod model_convex_collision3d;
 mod navigation;
 mod occlusion;
 mod physics;
@@ -30,6 +35,8 @@ mod placement;
 pub(crate) mod screen_ui;
 mod sequence;
 mod shape_gizmos;
+mod sprite_shaders;
+mod terrain_paint;
 mod textures;
 mod tile_chunk;
 mod tile_surface;
@@ -43,34 +50,54 @@ pub use audio::AudioSourceComponent;
 pub use camera_control::{
     clear_camera_bounds, clear_camera_follow, raise_camera_trauma, set_camera_bounds,
     set_camera_dead_zone, set_camera_follow_offset, set_camera_follow_target, set_camera_max_speed,
-    set_camera_orthographic_size, set_camera_shake, set_camera_smoothing,
+    set_camera_orthographic_size, set_camera_perspective_fov, set_camera_shake,
+    set_camera_smoothing,
 };
 pub use camera_math::camera_rotation_from_look_at;
+pub use camera_orbit::{
+    CameraOrbitError, clear_camera_orbit, set_camera_orbit, set_camera_orbit_collision,
+    set_camera_orbit_offset, set_camera_orbit_smoothing, update_orbit_cameras,
+};
 pub use characters::{Character2dComponent, CharacterMotions2d, CharacterRequests2d};
+pub use characters3d::{Character3dComponent, CharacterMotions3d, CharacterRequests3d};
+pub use collider_scale3d::ColliderScaleError3d;
 pub use collision_outline::{CollisionShapes, collision_shapes};
 pub use components::{
     BiomeDocument, CameraBehaviorComponent, CameraBounds, CameraComponent, CameraFit, CameraFollow,
-    CameraShake, EnvironmentAmbientOcclusion, EnvironmentBloom, EnvironmentComponent,
-    EnvironmentError, EnvironmentFog, EnvironmentPostProcess, EnvironmentShadows,
-    EnvironmentToneMapping, GridNavigationComponent, GridOccupantComponent, GridPlacementComponent,
-    GridWallDocument, LightComponent, LightError, LightKind, MeshComponent, MeshPrimitive,
+    CameraOrbitComponent, CameraShake, EnvironmentAmbientOcclusion, EnvironmentBloom,
+    EnvironmentComponent, EnvironmentError, EnvironmentFog, EnvironmentPostProcess,
+    EnvironmentShadows, EnvironmentToneMapping, GridNavigationComponent, GridOccupantComponent,
+    GridPlacementComponent, GridWallDocument, ImageDraw, LightComponent, LightError, LightKind,
+    MaskInteraction, MaterialComponent, MeshComponent, MeshPrimitive, ModelComponent,
     NaturalTerrainDocument, ShapeComponent, ShapeGeometry, SpriteColorTransform, SpriteComponent,
-    Sun, TileCellDocument, TileDraw, TileGridComponent, TileGridError, TileProjection, TileSpace,
-    TileVolumeComponent, TileVolumeError, TileVolumeIndex, TilemapComponent, TilemapError,
-    UiAnchor, UiFill, UiFillEdge, UiImageComponent, UiShapeBlend, UiShapeComponent, UiShapeKind,
-    UiShapeShadow, UiTextAutoSize, UiTextCase, UiTextComponent, UiTextLineAlign, UiTextOutline,
-    UiTextShadow, UiTextWrap, VoxelBlock, VoxelEdit, VoxelGeneratorDocument, VoxelMapFlood,
-    VoxelMaterialDocument, VoxelView, VoxelWorldComponent, add_camera_trauma, cell_to_local_in,
-    default_sun_transform, environment_of, environments_in, light_direction, lights_in, sun_in,
-    ui_text_template, update_camera_behaviors,
+    SpriteMaskComponent, Sun, TextComponent, TileCellDocument, TileDraw, TileGridComponent,
+    TileGridError, TileProjection, TileSpace, TileVolumeComponent, TileVolumeError,
+    TileVolumeIndex, TilemapComponent, TilemapError, UiAnchor, UiFill, UiFillEdge,
+    UiImageComponent, UiShapeBlend, UiShapeComponent, UiShapeKind, UiShapeShadow, UiTextAutoSize,
+    UiTextCase, UiTextComponent, UiTextLineAlign, UiTextOutline, UiTextShadow, UiTextWrap,
+    VoxelBlock, VoxelEdit, VoxelGeneratorDocument, VoxelMapFlood, VoxelMaterialDocument, VoxelView,
+    VoxelWorldComponent, add_camera_trauma, cell_to_local_in, default_sun_transform,
+    environment_of, environments_in, light_direction, lights_in, sun_in, ui_text_template,
+    update_camera_behaviors,
 };
-pub use effects::{EffectBurstComponent, Effects2d, Fleck};
+pub use components::{
+    EnvironmentLighting2d, Light2dComponent, Light2dError, Light2dOccluderComponent, OccluderShape,
+};
+pub use effects::{
+    EffectBurstComponent, Effects2d, EmissionShape, Fleck, ParticleSpace, ParticlesComponent,
+    ParticlesError,
+};
 pub use extract::{
     CameraView, ExtractProblem, OverlayPlacement, OverlayView, SceneExtractError, SceneExtractor,
     SceneRuntime, UiCanvas, ViewCamera, VoxelGround, VoxelWorldHit, WorldProjection,
-    overlay_for_viewport, overlay_in_scene, pan_for_drag, voxel_space, world_camera_of,
+    overlay_for_viewport, overlay_in_scene, pan_for_drag, referenced_models, voxel_space,
+    world_camera_of,
 };
 pub use input_actions::InputActionsComponent;
+pub use model_collision3d::{
+    ModelCollider3dComponent, ModelCollisionBindings3d, ModelCollisionGeometry3d,
+};
+pub use model_convex_collision3d::{ModelConvexCollider3dComponent, ModelConvexGeometry3d};
 pub use navigation::{GridNavigationError, GridPlacement, WorldGridNavigation};
 pub use occlusion::{
     OcclusionError, OcclusionFinding, OcclusionProbe, OcclusionReport, sweep_occlusion,
@@ -83,8 +110,8 @@ pub use physics_joints::{
     DistanceJoint2dComponent, HingeJoint2dComponent, SliderJoint2dComponent, SpringJoint2dComponent,
 };
 pub use physics_material::{
-    PhysicsMaterial2dComponent, PhysicsMaterialError, PhysicsMaterialSources,
-    physics_material_profile, referenced_physics_materials,
+    PhysicsMaterial2dComponent, PhysicsMaterial3dComponent, PhysicsMaterialError,
+    PhysicsMaterialSources, physics_material_profile, referenced_physics_materials,
 };
 pub use physics_sync::{PhysicsSyncError, ScenePhysics2d};
 pub use physics_sync3d::ScenePhysics3d;
@@ -108,10 +135,17 @@ pub use sequence::{
     referenced_sounds, resolve, top_level,
 };
 pub use shape_gizmos::{GizmoKind, GizmoStroke, ShapeGizmo, shape_gizmos};
+pub use sindri_physics::ConvexHullError3d as ModelConvexGeometryError3d;
+pub use sindri_physics::TriangleMeshError3d as ModelCollisionGeometryError3d;
 /// The shapes a collider is made of, which the editor draws and resizes.
 pub use sindri_physics::{Collider2d, ColliderShape2d};
+pub use sprite_shaders::{
+    SHADER_NAMING_COMPONENTS, SpriteShaderBindings, referenced_sprite_shaders,
+    unresolved_sprite_shaders,
+};
+pub use terrain_paint::{TerrainBindings, TerrainPaintError, paint_terrain, terrain_bindings};
 pub use textures::{
-    FONT_NAMING_COMPONENTS, PROCEDURAL_TEXTURES, ProceduralTexture, SheetBindError,
+    FONT_NAMING_COMPONENTS, PROCEDURAL_TEXTURES, ProceduralTexture, SheetBindError, SliceBorder,
     TEXTURE_NAMING_COMPONENTS, TextureBindings, referenced_fonts, referenced_sheets,
     referenced_textures, unresolved_sprites, unresolved_textures,
 };

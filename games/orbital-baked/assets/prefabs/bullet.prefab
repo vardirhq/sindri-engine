@@ -96,9 +96,10 @@
             "beam": 0.0,
             "beam_effect": "prefabs/beam.prefab",
             "impact_fx": "prefabs/spectacle.prefab",
-            "speed": 9.0,
+            "damage_number": "prefabs/damage-number.prefab",
+            "speed": 10.6,
             "damage": 1.0,
-            "life": 1.6,
+            "life": 1.8,
             "missile": 0.0,
             "nova": 0.0,
             "pierce": 0.0

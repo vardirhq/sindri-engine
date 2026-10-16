@@ -15,8 +15,10 @@
 //! one, so the two kinds cannot be confused and no rule has to be remembered.
 
 mod builtin;
+mod models;
 mod poll;
 mod request;
+mod shaders;
 
 #[cfg(test)]
 mod tests;
@@ -29,8 +31,8 @@ use std::{
 
 use sindri_assets::{
     AssetLoadQueueConfig, AssetLoader, AssetManifest, AssetWatch, FontAssetDecoder,
-    MANIFEST_FILE_NAME, SpriteSheetAssetDecoder, TextureAsset, TextureAssetDecoder,
-    TileSetAssetDecoder,
+    MANIFEST_FILE_NAME, ModelAssetDecoder, SpriteSheetAssetDecoder, TextureAsset,
+    TextureAssetDecoder, TileSetAssetDecoder,
 };
 use sindri_core::{AssetId, World};
 use sindri_render::{Texture2D, TextureError, TextureRegistry};
@@ -92,6 +94,17 @@ pub struct SceneTextures {
     sheets: Option<AssetLoader<SpriteSheetAssetDecoder>>,
     /// Semantic block assets used by stackable tile volumes.
     tile_sets: Option<AssetLoader<TileSetAssetDecoder>>,
+    /// Project sprite shaders, checked as they bind (`shaders.rs`).
+    shaders: Option<AssetLoader<sindri_assets::TextAssetDecoder>>,
+    /// Imported models, decoded here and bound to the scene's extractor
+    /// (`models.rs`).
+    models: Option<AssetLoader<ModelAssetDecoder>>,
+    /// The models bound to the extractor, so a new scene can unbind them.
+    bound_models: BTreeSet<AssetId>,
+    /// Collision models needed by the current Play run, including later scenes.
+    play_models: sindri_runtime::model_assets::ModelCollisionReferences,
+    /// Models no longer named, to unbind at the next poll.
+    released_models: Vec<AssetId>,
     /// Which texture each sheet cuts, keyed by the sheet's own ID.
     sliced: BTreeMap<AssetId, String>,
     registry: TextureRegistry,
@@ -203,5 +216,36 @@ impl SceneTextures {
                 .tile_sets
                 .as_ref()
                 .is_some_and(|loader| loader.outstanding() > 0)
+            || self
+                .models
+                .as_ref()
+                .is_some_and(|loader| loader.outstanding() > 0)
+            || self
+                .shaders
+                .as_ref()
+                .is_some_and(|loader| loader.outstanding() > 0)
+    }
+}
+
+impl SceneTextures {
+    /// Puts pixels the editor made itself on the GPU under `reference`,
+    /// releasing whatever that reference named before.
+    ///
+    /// Uploaded exactly as a loaded texture is, so a picture made in the
+    /// editor is sampled by a sprite the way the same file would be.
+    pub fn provide(
+        &mut self,
+        device: &wgpu::Device,
+        queue: &wgpu::Queue,
+        reference: &str,
+        size: (u32, u32),
+        rgba: &[u8],
+    ) -> Result<(), TextureError> {
+        let texture = Texture2D::from_rgba8(device, queue, reference, size.0, size.1, rgba)?;
+        let id = self.registry.insert(texture);
+        if let Some(previous) = self.bindings.bind(reference, id) {
+            self.registry.remove(previous);
+        }
+        Ok(())
     }
 }

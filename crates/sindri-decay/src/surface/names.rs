@@ -11,7 +11,19 @@ pub(crate) const SHAPE: &str = "Shape";
 
 pub(crate) const RGBA: &str = "Rgba";
 
+/// A sprite's four shader parameters, read and written as `x`, `y`, `z`, `w`.
+pub(crate) const SHADER_PARAMS_TYPE: &str = "ShaderParams";
+
+/// Every way the person reaches the game, gathered under one name.
+///
+/// A script looking for touch controls starts at `Input`, so that is where
+/// they have to be found: `Input.Stick.x` is `Stick.x`, `Input.Keyboard` is the
+/// keyboard. The calls directly on `Input` are the keyboard too, as they were
+/// before it gathered anything, so no script stops compiling.
 pub(crate) const INPUT: &str = "Input";
+
+/// The keys, by position, as `Input.Keyboard`.
+pub(crate) const KEYBOARD: &str = "Keyboard";
 
 /// What the person means, from the scene's declared input actions.
 pub(crate) const ACTION: &str = "Action";
@@ -137,6 +149,14 @@ pub(crate) const SPRITE_COMPONENT: &str = "sindri.sprite";
 /// tint should say which of the two it means.
 pub(crate) const UI_IMAGE_COMPONENT: &str = "sindri.ui.image";
 pub(crate) const SHAPE_COMPONENT: &str = "sindri.shape";
+
+/// A point light in the plane, and the component its fields live in.
+pub(crate) const LIGHT_2D: &str = "Light2d";
+pub(crate) const LIGHT_2D_COMPONENT: &str = "sindri.light2d";
+
+/// Words placed in the world, and the component their fields live in.
+pub(crate) const TEXT: &str = "WorldText";
+pub(crate) const TEXT_COMPONENT: &str = "sindri.text";
 
 /// The component whose layout and entity transform define a gameplay grid.
 pub(crate) const TILEMAP_COMPONENT: &str = "sindri.tilemap";

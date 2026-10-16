@@ -238,6 +238,13 @@ pub fn update_camera_behaviors(world: &mut World, dt: f32) {
     let cameras: Vec<_> = world
         .entities()
         .filter_map(|(entity, data)| {
+            // A 3D orbit owns the pose; 2D follow, confinement and shake resume when removed.
+            if data
+                .components
+                .contains_key(crate::CameraOrbitComponent::TYPE_NAME)
+            {
+                return None;
+            }
             let behavior = data.components.get(CameraBehaviorComponent::TYPE_NAME)?;
             serde_json::from_value::<CameraBehaviorComponent>(behavior.clone())
                 .ok()

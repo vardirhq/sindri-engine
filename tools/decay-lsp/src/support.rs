@@ -4,25 +4,13 @@ use decay_semantic::{Environment, ExternalSymbol, FunctionType, Type};
 use decay_syntax::{Item, Member, Span, parse};
 use serde_json::{Value, json};
 
-pub(crate) const KEYWORDS: &[&str] = &[
-    "script",
-    "component",
-    "fn",
-    "let",
-    "var",
-    "if",
-    "else",
-    "while",
-    "for",
-    "in",
-    "break",
-    "continue",
-    "return",
-    "match",
-    "true",
-    "false",
-    "null",
-];
+/// Decay's reserved words, read from the parser's own table so completion and
+/// hover cannot offer a word the compiler does not reserve, or miss one it does.
+pub(crate) fn keywords() -> impl Iterator<Item = &'static str> {
+    decay_syntax::vocabulary::KEYWORDS
+        .iter()
+        .map(|(word, _)| *word)
+}
 
 pub(crate) fn type_members<'a>(
     environment: &'a Environment,
@@ -285,8 +273,8 @@ pub(crate) fn completion_item(label: &str, kind: u8, detail: Option<&str>) -> Va
 
 pub(crate) fn symbol_completion(name: &str, symbol: &ExternalSymbol) -> Value {
     match symbol {
-        ExternalSymbol::Value(ty) => {
-            json!({"label":name,"kind":6,"detail":ty.display_name()})
+        ExternalSymbol::Value(ty) | ExternalSymbol::ReadOnlyValue(ty) => {
+            json!({"label":name,"kind":6,"detail":format!("{}{}", ty.display_name(), if matches!(symbol, ExternalSymbol::ReadOnlyValue(_)) { " (read-only)" } else { "" })})
         }
         ExternalSymbol::Function(function) => json!({
             "label":name,
@@ -300,8 +288,16 @@ pub(crate) fn symbol_completion(name: &str, symbol: &ExternalSymbol) -> Value {
 
 pub(crate) fn hover_symbol(name: &str, symbol: &ExternalSymbol) -> Value {
     let value = match symbol {
-        ExternalSymbol::Value(ty) => {
-            format!("```decay\n{name}: {}\n```", ty.display_name())
+        ExternalSymbol::Value(ty) | ExternalSymbol::ReadOnlyValue(ty) => {
+            format!(
+                "```decay\n{name}: {}\n```{}",
+                ty.display_name(),
+                if matches!(symbol, ExternalSymbol::ReadOnlyValue(_)) {
+                    "\nRead-only."
+                } else {
+                    ""
+                }
+            )
         }
         ExternalSymbol::Function(function) => {
             format!("```decay\n{}\n```", signature(name, function))
@@ -442,9 +438,26 @@ mod tests {
     }
 
     #[test]
-    fn current_loop_keywords_are_exposed() {
-        assert!(KEYWORDS.contains(&"for"));
-        assert!(KEYWORDS.contains(&"in"));
+    fn keywords_are_the_ones_the_parser_reserves() {
+        // A keyword the parser reserves cannot name a local; an ordinary
+        // word can. Tooling that lists a word the parser accepts as a name,
+        // or omits one it rejects, has drifted from the language.
+        let listed = keywords().collect::<Vec<_>>();
+        for word in ["for", "in", "match", "null"] {
+            assert!(listed.contains(&word), "{word} is a keyword");
+        }
+        for word in &listed {
+            let source = format!("fn probe() {{ let {word} = 1; }}");
+            assert!(
+                !parse(&source).diagnostics.is_empty(),
+                "{word} is offered as a keyword but the parser accepts it as a name"
+            );
+        }
+        assert!(
+            parse("fn probe() { let speed = 1; }")
+                .diagnostics
+                .is_empty()
+        );
     }
 
     #[test]

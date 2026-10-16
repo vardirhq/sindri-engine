@@ -145,6 +145,19 @@ pub struct UiImageComponent {
     /// this field exists.
     #[serde(default)]
     pub fill: UiFill,
+    /// `sliced` keeps the border its sheet gives the art and stretches the
+    /// middle. A sliced bar keeps its end caps as it empties.
+    #[serde(default)]
+    pub draw: super::ImageDraw,
+    /// Screen units each border pixel covers when sliced. At the default one
+    /// art pixel is one screen pixel on a 720-pixel-tall window, and grows
+    /// with the window as the rest of the UI does.
+    #[serde(default = "ui_border_scale")]
+    pub border_scale: f32,
+}
+
+const fn ui_border_scale() -> f32 {
+    2.0 / 720.0
 }
 
 /// How much of an element is drawn, and which way it empties.
@@ -326,6 +339,11 @@ pub struct UiTextComponent {
     pub shadow: UiTextShadow,
     #[serde(default)]
     pub auto_size: UiTextAutoSize,
+    /// Whether `[b]`, `[i]` and `[color=#rrggbb]` tags in the words are spans
+    /// rather than characters. Off, so a bracket typed before rich text existed
+    /// still draws as one.
+    #[serde(default)]
+    pub rich: bool,
 }
 
 impl UiTextComponent {
@@ -408,7 +426,8 @@ impl UiTextComponent {
         .with_style(self.style())
         .with_case(self.case.case())
         .with_outline(self.outline.stroke())
-        .with_shadow(self.shadow.shadow());
+        .with_shadow(self.shadow.shadow())
+        .with_rich(self.rich);
         if let Some(glyphs) = self.visible_glyphs() {
             instance = instance.with_visible_glyphs(glyphs);
         }

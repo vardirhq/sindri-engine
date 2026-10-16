@@ -1,0 +1,313 @@
+<!-- Generated from docs/capabilities/ui.toml by `cargo run -p sindri-capabilities -- --write`. Edit the source, not this file. -->
+
+# Screen UI and Weave
+
+The screen overlay — images, text, buttons and widgets laid out against the
+viewport — and Weave, the CSS-shaped stylesheet language that presents it.
+`docs/weave.md` and `docs/weave-reference.md` record the supported Weave
+surface; `docs/ui-direction.md` is the plan beyond it.
+
+Each entry links its tests and the projects that exercise it. Surface marks match the row in [parity](../parity.md) where one is named: ✅ works and is exercised · 🟡 a useful slice, with the gap named · ❌ absent · — not applicable.
+
+| Capability | Engine | Editor | Decay | Proof |
+| --- | :-: | :-: | :-: | :-: |
+| **Screen UI** | | | | |
+| [Anchored image and text, fill bars, buttons, row/column, safe area](#screen-ui-basics) | ✅ | ✅ | ✅ | ✅ |
+| [Pointer hit-testing, hover/press/held](#ui-hit-testing) | ✅ | ✅ | ✅ | ✅ |
+| [Slider](#ui-slider) | ✅ | ✅ | ✅ | ✅ |
+| [Toggles, text fields, scroll regions, radio groups and dropdowns](#ui-widgets) | ✅ | 🟡 | ✅ | ✅ |
+| **Weave** | | | | |
+| [Weave responsive stylesheets](#weave-stylesheets) | 🟡 | 🟡 | — | ✅ |
+| [Flexbox, grid, box model and content-sized text](#weave-layout) | ✅ | ✅ | — | ✅ |
+| [UI devtools (computed style, which rule won)](#weave-devtools) | — | ✅ | — | — |
+| **Not yet** | | | | |
+| [Accessibility labels](#accessibility-labels) | ❌ | ❌ | ❌ | ❌ |
+
+## Screen UI
+
+<a id="screen-ui-basics"></a>
+
+### Anchored image and text, fill bars, buttons, row/column, safe area
+
+Viewport-space images, templated text, fill bars and pressable buttons, in normalized units with a safe area.
+
+Engine ✅ · Editor ✅ · Decay ✅ · Proof ✅ — parity row *Anchored image and text, fill bars, buttons, row/column, safe area*
+
+**Tested by:** [`crates/sindri-scene/tests/screen_ui.rs`](../../crates/sindri-scene/tests/screen_ui.rs), [`crates/sindri-scene/src/screen_ui/hierarchy/tests.rs`](../../crates/sindri-scene/src/screen_ui/hierarchy/tests.rs), [`games/orbital-baked/tests/the_ui_fits_every_screen.rs`](../../games/orbital-baked/tests/the_ui_fits_every_screen.rs)
+
+**Exercised in:** [`games/orbital-baked`](../../games/orbital-baked)
+
+<details markdown="1">
+<summary>Evidence</summary>
+
+`sindri.ui.image` and `sindri.ui.text` draw against the viewport. Text is a
+**template**: the words carry `{}` slots and a script supplies the numbers, so
+a HUD's words stay in the scene, and a script that does need to build text
+joins it with `+`. An image carries a **fill** fraction and the edge it empties
+from, which is what makes a bar a bar rather than a picture of one.
+
+`sindri.ui.layout` places a parent's active children in a row or column. Three
+buttons could be authored as three offsets; what cannot be authored is a menu
+closing up around an entry that was switched off. `sindri.ui.box` gives any
+element CSS's padding and margin per side: a layout's children flow inside its
+padding and keep their own margins free, without collapsing, as in flexbox. A
+`sindri.ui.shape` can cast a soft `shadow` (colour, offset, blur, spread).
+
+The overlay is authored in normalized units — two tall, centred, running out to
+the aspect ratio — so one authored scene is responsive across a portrait phone
+and a wide desktop window without a breakpoint. A **safe area** takes a notch
+or a home indicator off the edges, moving anchored elements in while leaving
+centred ones where they are; the editor reports none, because a desktop window
+has no notch. Decay reads that same screen shape through `Viewport.aspect`,
+which lets a game combine the viewport with its authored camera framing for
+responsive world-space rules without exposing pixel dimensions or asking the
+host to pick a gameplay camera.
+
+</details>
+
+<a id="ui-hit-testing"></a>
+
+### Pointer hit-testing, hover/press/held
+
+`ScreenUi` hit-tests the pointer by layer and answers hover, click and hold; a disabled subtree is a hidden screen.
+
+Engine ✅ · Editor ✅ · Decay ✅ · Proof ✅ — parity row *Pointer hit-testing, hover/press/held*
+
+**Tested by:** [`crates/sindri-scene/tests/screen_ui.rs`](../../crates/sindri-scene/tests/screen_ui.rs), [`crates/sindri-decay/tests/a_script_reads_a_button.rs`](../../crates/sindri-decay/tests/a_script_reads_a_button.rs)
+
+**Exercised in:** [`games/orbital-baked`](../../games/orbital-baked)
+
+<details markdown="1">
+<summary>Evidence</summary>
+
+`sindri.ui.button` makes an element pressable, its rect being the entity's own
+transform. `ScreenUi` is the runtime beside the world: it lays every element
+out, hit-tests the pointer, and answers hover, click and hold. A click is a
+press and a release on the same element, so sliding off before letting go
+changes a person's mind. Overlapping elements are resolved by layer, so a modal
+is a modal because it is on top. A disabled entity — or one under a disabled
+parent — is not hit-tested, which is also what a *screen* is: a menu is an
+entity with children, and showing it is switching it on. No screen stack was
+added, because the engine already had the mechanism.
+
+Nothing is silently withheld from gameplay while a menu is up: which scripts
+are gameplay is not something a host can know. `Pointer.over_ui` is the one
+line a gameplay script writes instead.
+
+</details>
+
+<a id="ui-slider"></a>
+
+### Slider
+
+A dragged value whose pointer and script writes pass through one clamp-and-quantize check.
+
+Engine ✅ · Editor ✅ · Decay ✅ · Proof ✅ — parity row *Slider*
+
+**Tested by:** [`crates/sindri-scene/tests/slider_interaction.rs`](../../crates/sindri-scene/tests/slider_interaction.rs), [`crates/sindri-scene/tests/sliders_by_keyboard.rs`](../../crates/sindri-scene/tests/sliders_by_keyboard.rs), [`crates/sindri-weave/tests/slider_presentation.rs`](../../crates/sindri-weave/tests/slider_presentation.rs), [`games/orbital-baked/tests/the_mixer.rs`](../../games/orbital-baked/tests/the_mixer.rs)
+
+**Exercised in:** [`games/orbital-baked`](../../games/orbital-baked), [`games/weave-poc`](../../games/weave-poc)
+
+**Limits:**
+
+- `value` is a plain number box in the inspector; no field carries a bounded-range meaning tying it to `min` and `max`.
+
+<details markdown="1">
+<summary>Evidence</summary>
+
+`sindri.ui.slider` is the first element a person drags rather than presses. It
+carries `min`, `max`, `step`, a `value`, an orientation and a `disabled` flag,
+and its point is that the two ways of *setting* it agree: a pointer drag and
+`Ui.set_slider_value` from a script both pass through one `coerce_value`, which
+clamps to the range and quantizes to the step. A value therefore cannot enter
+the component off-step from either direction. An authored value is not coerced
+on load — a scene may hold anything — so the read side stays defensive
+instead: a degenerate range, or a value that is not finite, answers `min`
+rather than letting a NaN spread into the layout. The drag tracks the pointer
+along the element's own rect, so an element moved or resized by Weave keeps its
+slider correct without the slider being told. Decay reads `Ui.slider_value`,
+writes `Ui.set_slider_value`, and asks `Ui.slider_changed` whether the person
+moved it during the step. The editor offers it as **UI Slider** in Add
+Component with `orientation` drawn as a declared choice. Orbital's pause screen
+uses three for its mixer.
+
+</details>
+
+<a id="ui-widgets"></a>
+
+### Toggles, text fields, scroll regions, radio groups and dropdowns
+
+The remaining form widgets, each with one check shared by a person's change and a script's write, and keyboard/pad focus.
+
+Engine ✅ · Editor 🟡 · Decay ✅ · Proof ✅
+
+**Tested by:** [`crates/sindri-scene/tests/widgets.rs`](../../crates/sindri-scene/tests/widgets.rs), [`crates/sindri-scene/tests/choices_and_editing.rs`](../../crates/sindri-scene/tests/choices_and_editing.rs), [`crates/sindri-decay/tests/a_script_reads_widgets.rs`](../../crates/sindri-decay/tests/a_script_reads_widgets.rs), [`game/tests/the_ui_demo_works.rs`](../../game/tests/the_ui_demo_works.rs), [`scripts/browser/ui-demo.mjs`](../../scripts/browser/ui-demo.mjs), [`games/orbital-baked/tests/boss_rush.rs`](../../games/orbital-baked/tests/boss_rush.rs)
+
+**Exercised in:** [`examples/ui`](../../examples/ui), [`games/orbital-baked`](../../games/orbital-baked)
+
+<details markdown="1">
+<summary>Evidence</summary>
+
+`sindri.ui.toggle` is a boolean that a click, tap, Space or Enter flips;
+whether it looks like a switch or a checkbox is styling, through Weave's
+`:checked`. `sindri.ui.text_input` is a single-line field with a placeholder
+and a limit counted in characters: it takes committed Unicode text, Backspace,
+Enter to submit and Escape to let go, and while it has the keyboard its keys
+are held back from `Input`, so typing does not steer. `sindri.ui.scroll`
+scrolls its children vertically by wheel, drag or finger, clamped to how tall
+they are as laid out, and clips their drawing and hit-testing to itself; a drag
+that starts on a row never becomes a click on it. Tab and Shift+Tab walk every
+focusable element in the order the scene is written. Decay reads and writes
+them with `Ui.is_checked`, `Ui.input_text`, `Ui.scroll_offset` and their
+setters, and `Ui.changed`, `Ui.submitted` and `Ui.is_focused` answer for the
+step. Toggles that share a `group` are a radio group, and `sindri.ui.dropdown`
+opens a popup of authored `sindri.ui.option` rows that the engine shows only
+while it is open (Weave's `:open`), read with `Ui.selected`. A field edits at a
+caret with a selection and the system clipboard, and a script draws the caret
+from `Ui.caret` and the `Ui.selection_*` pair. In a browser a field being
+edited gives the page's focus to a hidden textarea, which is how IME
+composition, a paste and a phone's keyboard reach it. The arrows and any pad's
+d-pad move focus toward the nearest control, preferring those in line, and a
+row reached inside a scroll region is scrolled into view. `examples/ui` is the
+feature example; Orbital Last Stand proves them in a game with a saved
+compact-HUD switch, a pilot callsign carried onto the HUD and results, a
+scrolling dropdown of its twelve bosses, and a scrolling field manual on its
+pause screen.
+
+</details>
+
+## Weave
+
+<a id="weave-stylesheets"></a>
+
+### Weave responsive stylesheets
+
+CSS selectors, cascade, custom properties, media queries and transitions, applied by every host through one presenter.
+
+Engine 🟡 · Editor 🟡 · Decay — · Proof ✅ — parity row *Weave responsive stylesheets*
+
+**Tested by:** [`crates/sindri-weave/src/tests.rs`](../../crates/sindri-weave/src/tests.rs), [`crates/sindri-weave/tests/web_style.rs`](../../crates/sindri-weave/tests/web_style.rs), [`crates/sindri-weave/tests/structural.rs`](../../crates/sindri-weave/tests/structural.rs), [`crates/sindri-export/tests/weave_assets.rs`](../../crates/sindri-export/tests/weave_assets.rs), [`weave/crates/weave/tests/smoke.rs`](../../weave/crates/weave/tests/smoke.rs)
+
+**Exercised in:** [`games/weave-poc`](../../games/weave-poc), [`games/orbital-baked`](../../games/orbital-baked)
+
+**See:** [`docs/weave.md`](../../docs/weave.md), [`docs/weave-reference.md`](../../docs/weave-reference.md)
+
+**Limits:**
+
+- Not a general CSS implementation: `@keyframes`, borders per side, grid's `minmax()` and named areas, and accessibility mapping are absent.
+
+<details markdown="1">
+<summary>Evidence</summary>
+
+Weave resolves responsive presentation into a disposable clone of an authored
+world. Its selectors are CSS's: element names (`text`, `button`, with the long
+`sindri.ui.text` still accepted), IDs, classes, `*`, compounds such as
+`button.primary:hover`, descendant and child combinators, and lists, with CSS
+specificity and source order deciding conflicts. Selectors include the
+structural pseudo-classes (`:first-child`, `:nth-child(2n+1)`, `:root` and the
+rest), `:not()`, `:is()`, `:where()`, and the `+` and `~` sibling combinators,
+matched in scene order; lengths take `calc()`. The cascade is CSS's too: text
+properties inherit from the containing entity, `inherit`, `initial` and `unset`
+do what they do in CSS, and custom properties (`--accent`) inherit and
+substitute through `var()` with fallbacks, so a theme's tokens live in one
+place. Media queries test orientation and minimum or maximum width and height,
+combined with `and`, commas and nesting. `:disabled` and `:checked` follow the
+entity's own component data everywhere.
+
+Every running host (the editor's Play, native games, browser exports) styles
+through a `sindri_weave::Presenter`: a game's world is settled with the
+stylesheet's rules at start and on resize, and each frame only what the
+pointer's states and running transitions change is laid over it, in place, for
+the draw, and taken off again. So `:hover` (which, as in CSS, also matches the
+hovered element's containers) and `:active` follow the pointer, a script's own
+writes are not styled back, and hit-testing uses what was drawn. CSS
+`transition` eases colours, lengths and numbers between states with named or
+`cubic-bezier` easings, delays and `all`.
+
+Weave is kept in its own workspace, with its own CI workflow, while
+`sindri-weave` is the one-way bridge that knows the engine. Stylesheets compose
+through `@use`; the exporter follows that graph, and the browser host applies
+independent roots in deterministic asset order. `games/weave-poc` is the
+focused responsive showcase, while Orbital Last Stand uses five composed Weave
+files — a shared theme, then its HUD, overlays and screens — for its
+production-oriented screen UI.
+
+</details>
+
+<a id="weave-layout"></a>
+
+### Flexbox, grid, box model and content-sized text
+
+CSS flexbox and grid layout in the engine, margin/padding/box-shadow, and text that sizes what holds it.
+
+Engine ✅ · Editor ✅ · Decay — · Proof ✅
+
+**Tested by:** [`crates/sindri-weave/tests/flex.rs`](../../crates/sindri-weave/tests/flex.rs), [`crates/sindri-weave/tests/grid.rs`](../../crates/sindri-weave/tests/grid.rs), [`crates/sindri-weave/tests/padding.rs`](../../crates/sindri-weave/tests/padding.rs), [`crates/sindri-scene/src/screen_ui/flex/tests.rs`](../../crates/sindri-scene/src/screen_ui/flex/tests.rs), [`crates/sindri-scene/src/screen_ui/grid/tests.rs`](../../crates/sindri-scene/src/screen_ui/grid/tests.rs), [`crates/sindri-scene/tests/text_sizing.rs`](../../crates/sindri-scene/tests/text_sizing.rs)
+
+**Exercised in:** [`games/orbital-baked`](../../games/orbital-baked), [`games/weave-poc`](../../games/weave-poc)
+
+<details markdown="1">
+<summary>Evidence</summary>
+
+Weave's `margin` and `padding` (one to four values, per-side longhands, CSS
+percentages) write that box, and `box-shadow` writes the shape's shadow.
+Percentage sizing, min/max constraints, gaps, wrapping, alignment, and text
+wrapping cover the responsive composition used by the shipped examples.
+
+Layouts are CSS flexbox, in the engine: `sindri.ui.layout` wraps and fits its
+content, and each child's `sindri.ui.box` grows, shrinks, takes a basis, orders
+and aligns itself within min/max limits. Layout decides sizes as well as
+places, and drawing, hit-testing and the editor's picking use them. Weave's
+`flex`, its longhands, `flex-wrap`, `order`, `align-self`, `width: auto` and
+the rest write the same data.
+
+Text sizes what holds it: a text element whose `sindri.ui.box` fits its content
+(Weave's `width: auto`) is measured by its font each draw, so a label sizes a
+button, and a label is the least a shrinking flex item keeps. Hosts measure
+through `sindri_scene::measure_ui_text` and pass the sizes to extraction and
+hit-testing.
+
+`sindri.ui.grid` lays children out in CSS grid's columns and rows: fixed,
+`auto` and `fr` tracks, explicit or automatic placement with spans, implicit
+tracks, gaps and cell alignment. Weave's `display: grid` and the
+`grid-template-*`, `grid-column`/`grid-row`, gap and alignment properties
+write it.
+
+</details>
+
+<a id="weave-devtools"></a>
+
+### UI devtools (computed style, which rule won)
+
+The inspector's Styles section shows the box model, every matched rule by `file:line`, and edits values back into the stylesheet.
+
+Engine — · Editor ✅ · Decay — · Proof — — parity row *UI devtools (computed style, which rule won)*
+
+**Tested by:** [`crates/sindri-weave/tests/inspect.rs`](../../crates/sindri-weave/tests/inspect.rs), [`crates/sindri-weave/tests/undo.rs`](../../crates/sindri-weave/tests/undo.rs)
+
+<details markdown="1">
+<summary>Evidence</summary>
+
+The editor treats manifest-listed `.weave` roots as project assets, previews
+their source, authors reusable classes in a dedicated inspector section, and
+applies the composed presentation to both Scene and Game views. It watches the
+manifest and complete `@use` graph for saved changes, keeps the last good
+presentation after a broken save, and reports composition failures with their
+source path, line, and column. The inspector's Styles section is Weave's
+devtools: the box model as drawn, every matched rule with its `file:line` and
+the overridden declarations struck through, and the computed values, at the
+Game view's size. Clicking a value there edits it in place and writes it into
+the stylesheet at the rule's line, which then reloads; the Game view's Pick
+toggle selects an element by clicking it in the running game.
+
+</details>
+
+## Not yet
+
+<a id="accessibility-labels"></a>
+
+### Accessibility labels
+
+A button carries a `label`, but the web export renders through canvas/WebGPU with no semantic DOM bridge to expose it.
+
+Engine ❌ · Editor ❌ · Decay ❌ · Proof ❌ — parity row *Accessibility labels*

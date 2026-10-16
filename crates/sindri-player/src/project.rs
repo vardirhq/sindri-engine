@@ -3,7 +3,7 @@
 
 use std::collections::BTreeMap;
 
-use sindri_assets::{AudioAsset, FontAsset, TextureAsset};
+use sindri_assets::{AudioAsset, FontAsset, ModelAsset, TextureAsset};
 use sindri_core::{AssetId, SceneDocument, SpriteSheetDocument, TileSetDocument};
 use sindri_decay::{PrefabSources, ProfileSources, ScriptSources};
 use weave::Stylesheet;
@@ -18,11 +18,16 @@ pub struct ProjectAssets {
     pub scripts: ScriptSources,
     pub prefabs: PrefabSources,
     pub profiles: ProfileSources,
+    /// Every imported model the project ships, decoded once.
+    pub models: Vec<(AssetId, ModelAsset)>,
     pub textures: Vec<(AssetId, TextureAsset)>,
     pub fonts: Vec<(AssetId, FontAsset)>,
     pub audio: Vec<(AssetId, AudioAsset)>,
     pub sheets: BTreeMap<String, SpriteSheetDocument>,
     pub tile_sets: Vec<(AssetId, TileSetDocument)>,
     pub stylesheets: Vec<Stylesheet>,
+    /// Every sprite shader the project ships, as its path and its source.
+    /// Checked when the host binds it, not here.
+    pub shaders: Vec<(String, String)>,
     pub asset_count: usize,
 }

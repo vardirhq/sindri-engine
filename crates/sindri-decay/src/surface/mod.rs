@@ -19,14 +19,20 @@
 
 mod call;
 pub(crate) mod character;
+pub(crate) mod character3d;
 pub(crate) mod contact;
+pub(crate) mod environment;
 mod gamepad;
+pub(crate) mod light;
+mod light2d;
 mod maths;
 mod member;
 pub(super) mod names;
 mod person;
 pub(crate) mod physics3d;
 pub(crate) mod raycast;
+mod text;
+pub(crate) mod transform;
 pub(crate) mod tween;
 
 #[cfg(test)]
@@ -39,19 +45,24 @@ pub(crate) use call::{
     TIME_VALUES, TimeValue, UI_CALLS, UiCall, WORLD_CALLS, WorldCall,
 };
 pub(crate) use gamepad::{GAMEPAD_QUERIES, GamepadQuery, gamepad_type};
+pub(crate) use light2d::LIGHT_2D_MEMBERS;
 pub(crate) use maths::{CONSTANTS, FUNCTIONS, HostFunction};
-pub(crate) use member::{SHAPE_MEMBERS, SPRITE_MEMBERS, TRANSFORM_MEMBERS, UI_IMAGE_MEMBERS};
+pub(crate) use member::{
+    QUAT, QUAT_FIELDS, SHAPE_MEMBERS, SPRITE_MEMBERS, TRANSFORM_MEMBERS, UI_IMAGE_MEMBERS,
+};
 pub(crate) use names::{
-    ACTION, AIM, ANIMATION, CAMERA, EFFECTS, ENTITY, GAME, GAMEPAD, GESTURE, GRID, INPUT, PHYSICS,
-    POINTER, PREFAB, PROFILE, PROFILES, RANDOM, SAVE, SCENE, SEQUENCE, SHAPE, SPRITE, STICK,
-    TILE_GRID_COMPONENT, TILEMAP_COMPONENT, TIME, TOUCH, TRANSFORM, UI, UI_IMAGE, VIEWPORT, WORLD,
+    ACTION, AIM, ANIMATION, CAMERA, EFFECTS, ENTITY, GAME, GAMEPAD, GESTURE, GRID, INPUT, KEYBOARD,
+    LIGHT_2D, PHYSICS, POINTER, PREFAB, PROFILE, PROFILES, RANDOM, SAVE, SCENE, SEQUENCE, SHAPE,
+    SPRITE, STICK, TEXT, TILE_GRID_COMPONENT, TILEMAP_COMPONENT, TIME, TOUCH, TRANSFORM, UI,
+    UI_IMAGE, VIEWPORT, WORLD,
 };
 pub(crate) use person::{
     AIM_VALUES, AimValue, CAMERA_CALLS, CAMERA_VALUES, CameraCall, CameraValue, GESTURE_VALUES,
-    GestureValue, INPUT_QUERIES, InputQuery, POINTER_QUERIES, POINTER_VALUES, PointerQuery,
-    PointerValue, STICK_VALUES, StickValue, TOUCH_CALLS, TOUCH_COUNT, TouchCall, VIEWPORT_VALUES,
-    ViewportValue,
+    GestureValue, INPUT_GROUPS, INPUT_QUERIES, InputQuery, POINTER_QUERIES, POINTER_VALUES,
+    PointerQuery, PointerValue, STICK_VALUES, StickValue, TOUCH_CALLS, TOUCH_COUNT, TouchCall,
+    VIEWPORT_VALUES, ViewportValue, ungrouped,
 };
+pub(crate) use text::TEXT_MEMBERS;
 
 use serde_json::Value as Json;
 use sindri_core::Transform3D;
@@ -71,6 +82,16 @@ pub(crate) enum Node {
     Handle(Handle),
 }
 
+impl Node {
+    pub(crate) fn is_read_only(&self) -> bool {
+        match self {
+            Self::Leaf(leaf) => leaf.is_read_only(),
+            Self::Group(_, members) => members.iter().all(|(_, node)| node.is_read_only()),
+            Self::Handle(_) => false,
+        }
+    }
+}
+
 /// The references the surface offers.
 #[derive(Clone, Copy, Debug)]
 pub(crate) enum Handle {
@@ -79,13 +100,17 @@ pub(crate) enum Handle {
     Own,
 }
 
-/// How the host reaches one number.
+/// How the host reaches one value.
 #[derive(Clone, Copy, Debug)]
 pub(crate) enum Leaf {
     /// One axis of a transform's vector member.
     TransformAxis(Vector, usize),
     /// A scalar member of the transform.
     TransformScalar(Scalar),
+    /// One component of the stored parent-relative quaternion.
+    TransformRotation(usize),
+    Light(light::LightField),
+    Environment(environment::EnvironmentField),
     /// A number inside a component's stored JSON payload.
     ///
     /// Reached by pointer rather than through the typed view, because a
@@ -114,19 +139,32 @@ pub(crate) enum Vector {
     /// Where the entity is in the world, parents folded in. Written, it moves
     /// the entity there by working out the local position that puts it there.
     WorldPosition,
+    Forward,
+    Right,
+    Up,
 }
 
 impl Vector {
+    pub(crate) const fn is_read_only(self) -> bool {
+        matches!(self, Self::Forward | Self::Right | Self::Up)
+    }
+
     /// Whether this reads and writes the world transform rather than the
     /// stored, parent-relative one.
     pub(crate) const fn is_world(self) -> bool {
-        matches!(self, Self::WorldPosition)
+        matches!(
+            self,
+            Self::WorldPosition | Self::Forward | Self::Right | Self::Up
+        )
     }
 
-    pub(crate) const fn get(self, transform: &Transform3D) -> [f32; 3] {
+    pub(crate) fn get(self, transform: &Transform3D) -> [f32; 3] {
         match self {
             Self::Position | Self::WorldPosition => transform.position,
             Self::Scale => transform.scale,
+            Self::Forward => transform.forward(),
+            Self::Right => transform.right(),
+            Self::Up => transform.up(),
         }
     }
 
@@ -134,31 +172,45 @@ impl Vector {
         match self {
             Self::Position | Self::WorldPosition => transform.position = value,
             Self::Scale => transform.scale = value,
+            Self::Forward | Self::Right | Self::Up => {}
         }
     }
 }
 
 /// A transform member that is one float.
 ///
-/// Only the Z rotation, deliberately. A gameplay script should not be asked to
-/// assemble a quaternion by hand, and a third of a 3D rotation API is worse
-/// than none of one.
+/// `rotation_z` is the whole turn of a flat thing. `yaw`, `pitch` and `roll`
+/// are the whole turn of a solid one, as three angles, so a gameplay script is
+/// never asked to assemble a quaternion by hand. Setting one of the three keeps
+/// the other two.
 #[derive(Clone, Copy, Debug)]
 pub(crate) enum Scalar {
     RotationZ,
+    Yaw,
+    Pitch,
+    Roll,
 }
 
 impl Scalar {
     pub(crate) fn get(self, transform: &Transform3D) -> f32 {
         match self {
             Self::RotationZ => transform.rotation_z_radians(),
+            Self::Yaw => transform.yaw_pitch_roll_radians()[0],
+            Self::Pitch => transform.yaw_pitch_roll_radians()[1],
+            Self::Roll => transform.yaw_pitch_roll_radians()[2],
         }
     }
 
     pub(crate) fn set(self, transform: &mut Transform3D, value: f32) {
-        match self {
-            Self::RotationZ => transform.set_rotation_z_radians(value),
-        }
+        let index = match self {
+            Self::RotationZ => return transform.set_rotation_z_radians(value),
+            Self::Yaw => 0,
+            Self::Pitch => 1,
+            Self::Roll => 2,
+        };
+        let mut angles = transform.yaw_pitch_roll_radians();
+        angles[index] = value;
+        transform.set_yaw_pitch_roll_radians(angles);
     }
 }
 
@@ -168,6 +220,13 @@ pub(crate) const THIS: &[(&str, Node)] = &[
     ("sprite", Node::Group(SPRITE, SPRITE_MEMBERS)),
     ("ui_image", Node::Group(UI_IMAGE, UI_IMAGE_MEMBERS)),
     ("shape", Node::Group(SHAPE, SHAPE_MEMBERS)),
+    (
+        "environment",
+        Node::Group(environment::ENVIRONMENT, environment::MEMBERS),
+    ),
+    ("light", Node::Group(light::LIGHT, light::MEMBERS)),
+    ("light2d", Node::Group(LIGHT_2D, LIGHT_2D_MEMBERS)),
+    ("world_text", Node::Group(TEXT, TEXT_MEMBERS)),
     ("entity", Node::Handle(Handle::Own)),
 ];
 
@@ -182,6 +241,13 @@ pub(crate) const THROUGH_REFERENCE: &[(&str, Node)] = &[
     ("sprite", Node::Group(SPRITE, SPRITE_MEMBERS)),
     ("ui_image", Node::Group(UI_IMAGE, UI_IMAGE_MEMBERS)),
     ("shape", Node::Group(SHAPE, SHAPE_MEMBERS)),
+    (
+        "environment",
+        Node::Group(environment::ENVIRONMENT, environment::MEMBERS),
+    ),
+    ("light", Node::Group(light::LIGHT, light::MEMBERS)),
+    ("light2d", Node::Group(LIGHT_2D, LIGHT_2D_MEMBERS)),
+    ("world_text", Node::Group(TEXT, TEXT_MEMBERS)),
 ];
 
 /// Finds the leaf a path names, given the path's parts after `this`.
@@ -266,6 +332,10 @@ fn leaf_in(root: &'static [(&'static str, Node)], parts: &[&str]) -> Option<Leaf
 }
 
 impl Leaf {
+    pub(crate) const fn is_read_only(self) -> bool {
+        matches!(self, Self::TransformAxis(vector, _) if vector.is_read_only())
+    }
+
     /// Reads the number this leaf names, or `None` when the entity has no such
     /// component or the payload does not hold one there.
     /// Reads one number, asking for the world transform only if it is the
@@ -282,6 +352,8 @@ impl Leaf {
             }
             Self::TransformAxis(vector, index) => f64::from(vector.get(transform?)[index]),
             Self::TransformScalar(scalar) => f64::from(scalar.get(transform?)),
+            Self::TransformRotation(index) => f64::from(transform?.rotation[index]),
+            Self::Light(_) | Self::Environment(_) => return None,
             Self::Component { component, pointer } => {
                 follow(components?.get(component)?, pointer)?.as_f64()?
             }

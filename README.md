@@ -112,6 +112,12 @@ Sindri is pre-alpha, but the working surface is already broad. Highlights includ
 - native-windowed, headless, and WebGPU browser hosts;
 - textured/layered sprites, sprite sheets and animation;
 - 3D meshes, perspective/orthographic cameras, lighting and bounded directional shadows;
+- external static GLB model assets with retained hierarchy, material factors/textures,
+  reusable GPU geometry, material-aware directional shadow casting/reception and
+  native/browser project delivery (full imported-model editor UX remains deferred);
+- shared numeric standard material factors and opt-in GGX shading, authored with
+  checked color, metallic/roughness and emission controls; see
+  [`docs/rendering-materials.md`](docs/rendering-materials.md);
 - tilemaps, grids, occupancy, walls, placement validation, and pathfinding;
 - voxel world storage, generation/streaming, meshing, and editor/runtime rendering work;
 - Rapier2D physics with authored bodies/colliders, sensors, masks, events, velocity, and impulses;
@@ -174,7 +180,7 @@ Sindri is still pre-alpha. Among the meaningful gaps and incomplete areas are:
 - polished external Decay authoring, formatting, debugging, and the remaining language-server/IDE features;
 - richer Weave editor tooling and accessibility work;
 - native packaging/release tooling beyond the current web exporter;
-- a mature 3D content pipeline, including broader materials, model import, skeletal animation, and more complete lighting/physics features;
+- a mature 3D content pipeline, including broader materials/import formats, skeletal animation, and more complete lighting/physics features;
 - the accumulated stability, documentation, platform coverage, and real-world usage expected of a mature engine.
 
 For the current outside-in audit rather than an aspirational feature list, see [`docs/parity.md`](docs/parity.md).

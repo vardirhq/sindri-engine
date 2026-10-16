@@ -158,7 +158,24 @@ impl SceneExtractor {
                     Ok::<_, SceneExtractError>((flood.level, face.texture, face.uv))
                 })
                 .transpose()?;
-            push_map(map, root, camera, component.layer, flood, batches)?;
+            // Resolved each frame rather than remembered with the squares: a
+            // normal map that binds late lights the map from then on.
+            let normal_maps: Vec<(TextureId, TextureId)> = component
+                .normal_maps
+                .iter()
+                .filter_map(|(texture, normal_map)| {
+                    Some((textures.get(texture)?, textures.get(normal_map)?))
+                })
+                .collect();
+            push_map(
+                map,
+                root,
+                camera,
+                component.layer,
+                flood,
+                &normal_maps,
+                batches,
+            )?;
         }
         Ok(())
     }
@@ -223,6 +240,7 @@ fn push_map(
     camera: ResolvedCamera,
     layer: i32,
     flood: Option<(f32, TextureId, UvRect)>,
+    normal_maps: &[(TextureId, TextureId)],
     batches: &mut SpriteBatches,
 ) -> Result<(), SceneExtractError> {
     let Some((min, max)) = visible_columns(root, camera) else {
@@ -255,12 +273,22 @@ fn push_map(
                             (texture, rect, [light, light, light, 1.0])
                         },
                     );
+                let normal_map = normal_maps
+                    .iter()
+                    .find(|(drawn, _)| *drawn == texture)
+                    .map(|(_, normal_map)| *normal_map);
                 batches.push(SpriteDraw {
+                    mask: None,
+                    shader: None,
+                    normal_map,
                     clip: None,
                     space: DrawSpace::World,
                     texture,
                     order: TransparentOrder::new(layer, distance, index)?,
-                    sprite: SpriteInstance::new(root * local, tint).with_uv_rect(rect),
+                    // A map is ground, lit like a tilemap's.
+                    sprite: SpriteInstance::new(root * local, tint)
+                        .with_uv_rect(rect)
+                        .lit(true),
                 });
                 index = index.saturating_add(1);
             }

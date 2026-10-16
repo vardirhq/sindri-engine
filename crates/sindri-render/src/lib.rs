@@ -1,5 +1,6 @@
 //! Target-independent Sindri rendering building blocks.
 
+mod batch_stats;
 mod bloom;
 mod camera;
 mod color;
@@ -9,13 +10,18 @@ mod encode;
 mod fog;
 mod frame;
 mod glyph;
+mod light2d;
 mod lighting;
+mod material;
 mod mesh;
+mod mesh_stats;
+mod model;
 mod offscreen;
 mod shadow;
 mod shape;
 mod sprite;
 mod sprite_batch;
+mod sprite_shader;
 mod target;
 mod text;
 mod texture;
@@ -25,6 +31,7 @@ mod transparency;
 mod triangle;
 mod uv_rect;
 
+pub use batch_stats::BatchDrawStats;
 pub use bloom::{Bloom, BloomSettings, PostProcessSettings, ToneMapping};
 pub use camera::{
     OrthographicCamera, PerspectiveCamera, look_at, orthographic_projection, perspective_projection,
@@ -39,14 +46,25 @@ pub use encode::{
 pub use fog::FogSettings;
 pub use frame::{
     ClearOperations, ExtractedFrame, FrameCamera, FrameCommand, FramePass, FramePlanError,
-    PreparedFrame, RenderLayer, RenderStage, Viewport,
+    PreparedFrame, RenderLayer, RenderStage, SpriteEnvironment, Viewport,
 };
 pub use glyph::{
     EDGE, FIELD_PER_RASTER_PIXEL, GlyphAtlas, GlyphDrawError, GlyphInstance, GlyphRenderer,
     GlyphSlot, RASTER_EM,
 };
-pub use lighting::WorldLighting;
+pub use light2d::{
+    Light2d, Light2dShadow, Lighting2d, MAX_LIGHTS_2D, SHADOW_BINS_2D, shadow_map_2d,
+};
+pub use lighting::{
+    LocalLight, MAX_LOCAL_LIGHTS, PointLight, PointLightError, SpotCone, WorldLighting,
+};
+pub use material::{MaterialError, MaterialFactors};
 pub use mesh::{ColoredVertex, MeshBuffers, TexturedVertex};
+pub use mesh_stats::MeshDrawStats;
+pub use model::{
+    ModelCacheStats, ModelData, ModelGeometry, ModelHierarchyNode, ModelImage, ModelIndexData,
+    ModelNodeInstance, ModelRenderError, ModelSurface, ModelVertex, RenderModel,
+};
 pub use offscreen::{OffscreenError, OffscreenReadback, OffscreenTarget};
 pub use shadow::ShadowSettings;
 pub use shape::{
@@ -54,8 +72,10 @@ pub use shape::{
 };
 pub use sprite::{SpriteBlendMode, SpriteRenderer};
 pub use sprite_batch::{
-    SpriteBatchError, SpriteBatchRenderer, SpriteBatchStats, SpriteDepth, SpriteInstance,
+    SpriteBatchDraw, SpriteBatchError, SpriteBatchRenderer, SpriteBatchStats, SpriteBatchTarget,
+    SpriteDepth, SpriteInstance, SpriteMask,
 };
+pub use sprite_shader::{SpriteShader, SpriteShaderError};
 pub use target::{ViewportTarget, encode_clear, sampled_format};
 pub use text::{
     GlyphQuads, LineAlign, TextAlign, TextCase, TextError, TextFit, TextInstance, TextRenderer,

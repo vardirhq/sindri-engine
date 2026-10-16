@@ -25,6 +25,7 @@ pub struct EnvironmentComponent {
     pub fog: EnvironmentFog,
     pub post_process: EnvironmentPostProcess,
     pub bloom: EnvironmentBloom,
+    pub lighting_2d: super::EnvironmentLighting2d,
 }
 
 impl SceneComponent for EnvironmentComponent {
@@ -42,6 +43,7 @@ impl Default for EnvironmentComponent {
             fog: EnvironmentFog::default(),
             post_process: EnvironmentPostProcess::default(),
             bloom: EnvironmentBloom::default(),
+            lighting_2d: super::EnvironmentLighting2d::default(),
         }
     }
 }

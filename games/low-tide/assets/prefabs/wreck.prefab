@@ -34,7 +34,8 @@
       1,
       1,
       1
-     ]
+     ],
+     "normal_map": "textures/wreck_n.png"
     },
     "sindri.tags": {
      "tags": [
@@ -47,6 +48,15 @@
      "properties": {
       "template": "prefabs/cargo.prefab"
      }
+    },
+    "sindri.light2d.occluder": {
+     "enabled": true,
+     "shape": "box",
+     "size": [
+      0.78,
+      0.5
+     ],
+     "points": []
     }
    }
   }

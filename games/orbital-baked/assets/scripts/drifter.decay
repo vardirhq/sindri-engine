@@ -26,6 +26,16 @@ script Drifter {
     var clock: f32 = 0.0;
     var phase_offset: f32 = 0.0;
     var burrow: f32 = 0.0;
+    // The body is a filled polygon in the archetype's own colour, as the
+    // original draws it. A hit whitens it for a moment; burrowing and phasing
+    // fade it. Everything that changes how it looks writes these, and `paint`
+    // turns them into the shape once a frame.
+    var sides: f32 = 5.0;
+    var body_r: f32 = 1.0;
+    var body_g: f32 = 0.5;
+    var body_b: f32 = 0.4;
+    var body_alpha: f32 = 1.0;
+    var flash: f32 = 0.0;
 
     fn start() {
         let late = max(0.0, Game.elapsed - 180.0);
@@ -36,7 +46,6 @@ script Drifter {
         this.transform.rotation_z = this.phase_offset;
         apply_reference_visual();
         spawn_reference_mark();
-        tint_elite();
         spawn_elite_visuals();
     }
 
@@ -49,10 +58,8 @@ script Drifter {
         // Physics owns translation but the reference owns the visual heading:
         // every enemy spins at 0.6 rad/s with a per-instance phase offset.
         this.transform.rotation_z = this.phase_offset + this.clock * 0.6;
-        // Keep the elite fill present when an archetype animates its outline.
-        // Spawn-time tinting makes the first frame correct; this makes the
-        // treatment an invariant for the rest of the enemy's life.
-        tint_elite();
+        this.flash = max(0.0, this.flash - dt * 9.0);
+        paint();
         if this.hazard_damage > 0.0 {
             this.hp -= this.hazard_damage;
             this.hazard_damage = 0.0;
@@ -68,36 +75,37 @@ script Drifter {
         let dx = player.transform.position.x - this.transform.position.x;
         let dy = player.transform.position.y - this.transform.position.y;
         let far = sqrt(dx * dx + dy * dy);
+        press_on(far);
 
         let visible = is_visible();
         if this.kind == 3.0 {
-            steer_range(dx, dy, far, 4.2, 0.18);
+            steer_range(dx, dy, far, 2.95, 0.18);
         } else if this.kind == 4.0 {
-            steer_range(dx, dy, far, 5.2, 0.72);
+            steer_range(dx, dy, far, 3.56, 0.72);
         } else if this.kind == 5.0 {
-            steer_range(dx, dy, far, 5.6, 0.05);
+            steer_range(dx, dy, far, 3.77, 0.05);
             if visible { radial_fire(dt, 2.65, 8.0, 3.1); }
         } else if this.kind == 6.0 {
-            steer_range(dx, dy, far, 5.8, 0.58);
+            steer_range(dx, dy, far, 4.68, 0.58);
             if visible { aimed_fire(dt, dx, dy, far, 1.95, 3.5); }
         } else if this.kind == 7.0 {
             wobble_chase(dx, dy, far, 1.35);
         } else if this.kind == 8.0 {
-            steer_range(dx, dy, far, 5.4, 0.65);
+            steer_range(dx, dy, far, 4.28, 0.65);
             if visible { aimed_fire(dt, dx, dy, far, 1.6, 3.7); }
         } else if this.kind == 9.0 {
             steer_range(dx, dy, far, 7.0, 0.12);
             if visible { aimed_fire(dt, dx, dy, far, 2.1, 5.2); }
         } else if this.kind == 10.0 {
-            steer_range(dx, dy, far, 5.8, 0.92);
+            steer_range(dx, dy, far, 4.38, 0.92);
             if visible { paired_fire(dt, dx, dy, far, 1.75, 3.8); }
         } else if this.kind == 11.0 {
             burrow_move(dt, dx, dy, far);
         } else if this.kind == 12.0 {
-            steer_range(dx, dy, far, 4.0, 0.82);
+            steer_range(dx, dy, far, 2.75, 0.82);
             if visible { paired_fire(dt, dx, dy, far, 1.7, 4.0); }
         } else if this.kind == 13.0 {
-            steer_range(dx, dy, far, 7.2, 0.08);
+            steer_range(dx, dy, far, 5.8, 0.08);
             if visible { fan_fire(dt, dx, dy, far, 2.15, 4.0); }
         } else if this.kind == 14.0 {
             phaser_move(dt, dx, dy, far, player, visible);
@@ -111,8 +119,8 @@ script Drifter {
 
     fn chase(dx: f32, dy: f32, far: f32, scale: f32) {
         if far > 0.001 {
-            Physics.set_velocity(this.entity, dx / far * this.speed * scale,
-                                 dy / far * this.speed * scale);
+            Physics.set_velocity(this.entity, dx / far * this.speed * scale * Game.event_enemy_speed,
+                                 dy / far * this.speed * scale * Game.event_enemy_speed);
         }
     }
 
@@ -120,8 +128,8 @@ script Drifter {
         if far <= 0.001 { return; }
         let tangent = sin(this.clock * 5.0) * 0.42;
         Physics.set_velocity(this.entity,
-            (dx / far - dy / far * tangent) * this.speed * scale,
-            (dy / far + dx / far * tangent) * this.speed * scale);
+            (dx / far - dy / far * tangent) * this.speed * scale * Game.event_enemy_speed,
+            (dy / far + dx / far * tangent) * this.speed * scale * Game.event_enemy_speed);
     }
 
     fn steer_range(dx: f32, dy: f32, far: f32, target: f32, tangent: f32) {
@@ -132,8 +140,8 @@ script Drifter {
         let nx = dx / far;
         let ny = dy / far;
         Physics.set_velocity(this.entity,
-            (nx * radial - ny * tangent) * this.speed,
-            (ny * radial + nx * tangent) * this.speed);
+            (nx * radial - ny * tangent) * this.speed * Game.event_enemy_speed,
+            (ny * radial + nx * tangent) * this.speed * Game.event_enemy_speed);
     }
 
     fn aimed_fire(dt: f32, dx: f32, dy: f32, far: f32, gap: f32, velocity: f32) {
@@ -183,26 +191,26 @@ script Drifter {
         bolt.transform.position.y = this.transform.position.y;
         bolt.transform.rotation_z = atan2(ny, nx);
         World.set_property(bolt, "speed", velocity);
+        // The original's regular enemies fire 9 to 15 of 100 hull, taken at
+        // Normal's 1.08: about 0.6 of this ship's five.
+        World.set_property(bolt, "damage", 0.6);
     }
 
     fn burrow_move(dt: f32, dx: f32, dy: f32, far: f32) {
         this.burrow += dt;
         if this.burrow >= 3.4 { this.burrow = 0.0; }
         if this.burrow < 1.7 {
-            this.sprite.tint.a = 0.28;
-            this.sprite.tint.a = 0.18;
+            this.body_alpha = 0.2;
             chase(dx, dy, far, 1.55);
         } else {
-            this.sprite.tint.a = 1.0;
-            this.sprite.tint.a = 0.92;
+            this.body_alpha = 1.0;
             chase(dx, dy, far, 0.82);
         }
     }
 
     fn phaser_move(dt: f32, dx: f32, dy: f32, far: f32, player: Entity, visible: bool) {
         wobble_chase(dx, dy, far, 1.05);
-        this.sprite.tint.a = 0.55 + sin(this.clock * 12.0) * 0.25;
-        this.sprite.tint.a = 0.58 + sin(this.clock * 12.0) * 0.2;
+        this.body_alpha = 0.6 + sin(this.clock * 12.0) * 0.25;
         this.attack -= dt;
         if this.attack > 0.0 || !visible { return; }
         let a = Random.range(0.0, 6.2831853);
@@ -211,6 +219,14 @@ script Drifter {
         this.transform.position.y = player.transform.position.y + sin(a) * r;
         Effects.burst(this.entity);
         this.attack = Random.range(2.7, 3.5);
+    }
+
+    // Contact hurts for as long as it lasts, as in the original: the ship's
+    // short mercy window is what spaces the hits, not the moment of touching.
+    fn press_on(far: f32) {
+        if far < CONTACT_REACH {
+            Game.player_damage_taken = max(Game.player_damage_taken, this.touch_damage);
+        }
     }
 
     fn receive_hits(player: Entity) {
@@ -223,6 +239,7 @@ script Drifter {
             if this.hp > 0.0 {
                 let damage = damage_from(hit);
                 this.hp -= damage;
+                if damage > 0.0 { this.flash = 1.0; }
                 if this.hp <= 0.0 && World.property_number(hit, "nova", 0.0) > 0.0 {
                     this.death_burst_damage = damage * 0.3;
                 }
@@ -243,29 +260,48 @@ script Drifter {
     }
 
     fn apply_reference_visual() {
-        // Reference renderer side counts, translated to our numeric roster order.
-        if this.kind == 0.0 { set_visual(5.0, 1.0, 0.51765, 0.37255); }
-        else if this.kind == 1.0 { set_visual(5.0, 1.0, 0.43529, 0.35294); }
-        else if this.kind == 3.0 { set_visual(6.0, 1.0, 0.37255, 0.45490); }
-        else if this.kind == 4.0 { set_visual(4.0, 0.84314, 0.42745, 1.0); }
-        else if this.kind == 5.0 { set_visual(6.0, 0.65490, 0.48627, 1.0); }
-        else if this.kind == 6.0 { set_visual(6.0, 0.45882, 0.84314, 1.0); }
-        else if this.kind == 7.0 { set_visual(3.0, 0.55294, 1.0, 0.81176); }
-        else if this.kind == 8.0 { set_visual(7.0, 0.38431, 0.95686, 0.81569); }
-        else if this.kind == 9.0 { set_visual(6.0, 1.0, 0.93725, 0.51373); }
-        else if this.kind == 10.0 { set_visual(7.0, 0.56863, 0.63529, 1.0); }
-        else if this.kind == 11.0 { set_visual(4.0, 1.0, 0.59608, 0.41961); }
-        else if this.kind == 12.0 { set_visual(5.0, 1.0, 0.44706, 0.71373); }
-        else if this.kind == 13.0 { set_visual(6.0, 0.39608, 0.94510, 1.0); }
-        else { set_visual(3.0, 0.84706, 0.62745, 1.0); }
+        // Reference renderer side counts and colours, translated to our numeric
+        // roster order. The colours are the original's sRGB hex values in the
+        // linear space the renderer blends in, so they arrive on screen as
+        // the same hex.
+        if this.kind == 0.0 { set_visual(5.0, 1.0000, 0.2307, 0.1144); }
+        else if this.kind == 1.0 { set_visual(5.0, 1.0000, 0.1590, 0.1022); }
+        else if this.kind == 3.0 { set_visual(6.0, 1.0000, 0.1144, 0.1746); }
+        else if this.kind == 4.0 { set_visual(4.0, 0.6795, 0.1529, 1.0000); }
+        else if this.kind == 5.0 { set_visual(6.0, 0.3864, 0.2016, 1.0000); }
+        else if this.kind == 6.0 { set_visual(6.0, 0.1779, 0.6795, 1.0000); }
+        else if this.kind == 7.0 { set_visual(3.0, 0.2664, 1.0000, 0.6240); }
+        else if this.kind == 8.0 { set_visual(7.0, 0.1221, 0.9047, 0.6308); }
+        else if this.kind == 9.0 { set_visual(6.0, 1.0000, 0.8631, 0.2270); }
+        else if this.kind == 10.0 { set_visual(7.0, 0.2832, 0.3613, 1.0000); }
+        else if this.kind == 11.0 { set_visual(4.0, 1.0000, 0.3140, 0.1470); }
+        else if this.kind == 12.0 { set_visual(5.0, 1.0000, 0.1683, 0.4678); }
+        else if this.kind == 13.0 { set_visual(6.0, 0.1301, 0.8796, 1.0000); }
+        else { set_visual(3.0, 0.6867, 0.3515, 1.0000); }
     }
 
     fn set_visual(sides: f32, r: f32, g: f32, b: f32) {
-        this.sprite.tint.a = 0.92;
-        this.sprite.tint.r = min(1.0, r + 0.18);
-        this.sprite.tint.g = min(1.0, g + 0.18);
-        this.sprite.tint.b = min(1.0, b + 0.18);
-        this.sprite.tint.a = 1.0;
+        this.sides = sides;
+        this.shape.count = sides;
+        this.body_r = r;
+        this.body_g = g;
+        this.body_b = b;
+        paint();
+    }
+
+    // The fill is the archetype's colour, whitened by a hit; the rim is the
+    // same colour lifted towards white, so the silhouette holds its edge
+    // against a bright explosion behind it.
+    fn paint() {
+        let white = this.flash;
+        this.shape.fill.r = this.body_r + (1.0 - this.body_r) * white;
+        this.shape.fill.g = this.body_g + (1.0 - this.body_g) * white;
+        this.shape.fill.b = this.body_b + (1.0 - this.body_b) * white;
+        this.shape.fill.a = this.body_alpha;
+        this.shape.stroke.r = this.body_r + (1.0 - this.body_r) * 0.45;
+        this.shape.stroke.g = this.body_g + (1.0 - this.body_g) * 0.45;
+        this.shape.stroke.b = this.body_b + (1.0 - this.body_b) * 0.45;
+        this.shape.stroke.a = this.body_alpha * 0.9;
     }
 
     fn spawn_reference_mark() {
@@ -316,29 +352,13 @@ script Drifter {
     fn spawn_elite_visuals() {
         if this.elite <= 0.0 { return; }
         let shell = World.spawn(this.elite_shell);
-        World.set_property(shell, "sides", 6.0);
+        World.set_property(shell, "sides", this.sides);
         World.set_property(shell, "trait", this.elite_trait);
         World.set_parent(shell, this.entity);
         let ring = World.spawn(this.elite_ring);
-        World.set_property(ring, "sides", 6.0);
+        World.set_property(ring, "sides", this.sides);
         World.set_property(ring, "trait", this.elite_trait);
         World.set_parent(ring, this.entity);
-    }
-
-    fn tint_elite() {
-        if this.elite <= 0.0 { return; }
-        if this.elite_trait == 0.0 { elite_color(1.0, 0.91, 0.58); }
-        else if this.elite_trait == 1.0 { elite_color(1.0, 0.42, 0.45); }
-        else if this.elite_trait == 2.0 { elite_color(1.0, 0.69, 0.31); }
-        else if this.elite_trait == 3.0 { elite_color(0.84, 0.49, 1.0); }
-        else { elite_color(0.45, 1.0, 0.82); }
-    }
-
-    fn elite_color(r: f32, g: f32, b: f32) {
-        this.sprite.tint.r = r;
-        this.sprite.tint.g = g;
-        this.sprite.tint.b = b;
-        this.sprite.tint.a = 0.2;
     }
 
     fn damage_from(hit: Entity) -> f32 {
@@ -351,12 +371,9 @@ script Drifter {
     fn die() {
         burst_on_death();
         Effects.burst(this.entity);
-        var trauma: f32 = 0.12;
-        if this.elite > 0.0 { trauma = 0.28; }
-        Camera.impact(trauma);
         Audio.play("audio/kill.wav", 0.3);
         Game.kills = Game.kills + 1.0;
-        Game.score = Game.score + this.worth * 10.0;
+        Game.score = Game.score + (20.0 + this.worth) * Game.event_score;
         let drop = World.spawn(this.core);
         drop.transform.position.x = this.transform.position.x;
         drop.transform.position.y = this.transform.position.y;

@@ -98,8 +98,15 @@ pub(super) const TYPES: &[TypeEntry] = &[
         name: "Entity",
         text: "An object in the game, such as a player, an enemy or a button. Scripts get these from calls like `World.find` and can store them, compare them and change their transform, sprite or shape.",
         members: &[
+            value(
+                "environment",
+                "The authored scene environment on this object, if present.",
+            ),
+            value("light", "The object's 3D light, if it has one."),
+            value("light2d", "The object's 2D light, if it has one."),
             value("shape", "The object's drawn shape, if it has one."),
             value("sprite", "The object's image (sprite), if it has one."),
+            value("world_text", "The object's world text, if it has some."),
             value(
                 "transform",
                 "Where the object is, how it is turned and how big it is.",
@@ -111,16 +118,63 @@ pub(super) const TYPES: &[TypeEntry] = &[
         ],
     },
     TypeEntry {
+        name: "Quat",
+        text: "A copied quaternion value, with x/y/z/w components. Build with Quat(x: 0.0, y: 0.0, z: 0.0, w: 1.0), or copy transform.rotation. Change a local var's components, then assign the whole value; no quaternion arithmetic or interpolation methods are provided.",
+        members: &[
+            value("x", "The quaternion's X component."),
+            value("y", "The quaternion's Y component."),
+            value("z", "The quaternion's Z component."),
+            value(
+                "w",
+                "The quaternion's scalar component; identity has w = 1 and x/y/z = 0.",
+            ),
+        ],
+    },
+    TypeEntry {
         name: "Transform",
         text: "Where an object is, how it is turned and how big it is. For an object attached to another, these are measured from that parent.",
         members: &[
+            value(
+                "rotation",
+                "Parent-relative Quat in x/y/z/w order. Reads copy the stored rotation; whole writes normalize finite nonzero values atomically and preserve position, scale and Z lock. Stored components are readable; change components on a local var and assign it back. Zero/non-finite writes fail without mutation.",
+            ),
+            value(
+                "forward",
+                "Read-only unit world-space facing direction: -Z at identity. Parent rotation is included and scale is ignored. Copy it to move with `world_position += forward * speed * dt`.",
+            ),
+            value(
+                "right",
+                "Read-only unit world-space +X direction, with parent rotation included and scale ignored.",
+            ),
+            value(
+                "up",
+                "Read-only unit world-space +Y direction, with parent rotation included and scale ignored.",
+            ),
+            call(
+                "look_at",
+                &["target"],
+                "Faces a world-space Vec3 target with Y up and zero world roll; preserves position and scale, including under a parent. Vertical targets use yaw zero. Coincident/non-finite targets are errors with no mutation.",
+            ),
+            call(
+                "rotate_around",
+                &["pivot", "axis", "radians"],
+                "Rotates position and orientation around a world-space Vec3 pivot and nonzero Vec3 axis by radians. Normalizes the axis and preserves scale. Invalid input/output, a singular parent scale, or movement off a Z-locked layer is an error with no mutation.",
+            ),
             value(
                 "position",
                 "Where the object is. Change it to move the object: `this.transform.position.x += speed * dt`. Measured from the parent if it has one.",
             ),
             value(
+                "pitch",
+                "How far a 3D object is tipped up (positive) or down from level, in radians, after its yaw. Changing it keeps its yaw and roll.",
+            ),
+            value(
+                "roll",
+                "How far a 3D object is turned about the way it faces, in radians, after its yaw and pitch. Changing it keeps its yaw and pitch.",
+            ),
+            value(
                 "rotation_z",
-                "How far the object is turned, in radians. A full turn is `TAU`.",
+                "How far the object is turned, in radians. A full turn is `TAU`. This is the turn of a flat object in a 2D game; it replaces any 3D turn.",
             ),
             value(
                 "scale",
@@ -129,6 +183,10 @@ pub(super) const TYPES: &[TypeEntry] = &[
             value(
                 "world_position",
                 "Where the object is in the world, even when it is attached to a parent. Use it to compare positions of objects in different places.",
+            ),
+            value(
+                "yaw",
+                "Which way a 3D object faces on the ground, in radians: a turn about the up (Y) axis. At zero it faces -Z, and positive turns it left. It moves along `Vec3(-sin(yaw), 0.0, -cos(yaw))`, and faces a point `d` away with `atan2(-d.x, -d.z)`. Changing it keeps its pitch and roll.",
             ),
         ],
     },
@@ -149,9 +207,95 @@ pub(super) const TYPES: &[TypeEntry] = &[
                 "Drawing order: higher numbers are drawn in front of lower ones.",
             ),
             value(
+                "shader_params",
+                "Four numbers the sprite's shader reads, as `x`, `y`, `z` and `w`. What each one does is up to the shader: how far a dissolve has got, how bright a flash is.",
+            ),
+            value(
                 "tint",
                 "A color the image is multiplied by. White leaves it unchanged; lowering `a` fades it out.",
             ),
+        ],
+    },
+    TypeEntry {
+        name: "Light",
+        text: "A directional, point or spot 3D light. Writes validate the whole candidate before changing the payload. Missing components and invalid values are errors. Rotation/position come from the entity transform.",
+        members: &[
+            value(
+                "color",
+                "Linear RGB as a Color, whole or by channel. Alpha reads one and writes must keep it one; RGB is finite and nonnegative. Whole writes are atomic.",
+            ),
+            value(
+                "intensity",
+                "Finite nonnegative brightness; zero contributes no light.",
+            ),
+            value(
+                "range",
+                "Finite positive range in world units, independent of entity scale; used by points and spots.",
+            ),
+            value(
+                "inner_angle",
+                "Inner spotlight half-angle in radians, at least zero and strictly below outer_angle; use an order that keeps each write valid.",
+            ),
+            value(
+                "outer_angle",
+                "Outer spotlight half-angle in radians, above inner_angle and at most pi/2, with distinct f32 cosines.",
+            ),
+            value(
+                "enabled",
+                "Whether this light illuminates. Switching it off leaves its entity, scripts and children active.",
+            ),
+        ],
+    },
+    TypeEntry {
+        name: "Light2d",
+        text: "A light in a 2D scene: it brightens sprites, tiles and shapes near it when the scene's environment turns 2D lighting on. Switch one off with its object's `set_active`.",
+        members: &[
+            value(
+                "color",
+                "The light's color. Lowering `a` dims it, the way it fades a sprite.",
+            ),
+            value(
+                "falloff",
+                "How the light fades toward its edge: 1 fades evenly, higher numbers keep it bright near the middle and drop off sharply.",
+            ),
+            value(
+                "height",
+                "How high above the scene the light hangs. Only images with a normal map notice: low lights rake across their bumps, high ones light them evenly.",
+            ),
+            value("intensity", "How bright the light is; 0 is off."),
+            value("radius", "How far the light reaches, in world units."),
+        ],
+    },
+    TypeEntry {
+        name: "WorldText",
+        text: "Words placed in the game world, such as a damage number or a name over a character. Change the words with `Ui.set_text` and `Ui.set_number`, as for interface text.",
+        members: &[
+            value(
+                "color",
+                "The words' color. Lowering `a` fades them out; colored spans fade with it.",
+            ),
+            value(
+                "font_size",
+                "How tall a line of the words is, in world units.",
+            ),
+            value(
+                "layer",
+                "Drawing order: drawn over sprites in the same layer, under higher ones.",
+            ),
+            value(
+                "visible",
+                "How many letters show, for a typewriter reveal. Negative shows them all.",
+            ),
+        ],
+    },
+    TypeEntry {
+        name: "ShaderParams",
+        text: "The four numbers a sprite's shader reads. What each one means is up to the shader.",
+        members: &[
+            value("w", "The fourth number."),
+            value("x", "The first number."),
+            value("y", "The second number."),
+            value("z", "The third number."),
         ],
     },
     TypeEntry {
@@ -219,6 +363,21 @@ pub(super) const TYPES: &[TypeEntry] = &[
                 "Plays the particle burst set up on an object at another position, such as where an enemy just died.",
             ),
             call("live", &[], "How many particles are currently on screen."),
+            call(
+                "play",
+                &["entity"],
+                "Starts the particle emitter set up on an object. Gives back 1.",
+            ),
+            call(
+                "stop",
+                &["entity"],
+                "Stops the particle emitter set up on an object; particles already out live out their life. Gives back 1.",
+            ),
+            call(
+                "emit",
+                &["entity", "count"],
+                "Throws that many of an object's emitter particles at once, such as dust when landing. Gives back how many were made.",
+            ),
         ],
     },
     super::physics::PHYSICS,
@@ -313,6 +472,11 @@ pub(super) const TYPES: &[TypeEntry] = &[
                 "set_block",
                 &["grid", "column", "row", "level", "tile"],
                 "Places a block, by name, in a cell of a layered grid or a grid whose ground is a voxel world. `\"\"` removes the block.",
+            ),
+            call(
+                "set_terrain",
+                &["grid", "column", "row", "terrain"],
+                "Paints a terrain the map's sheet declares into a flat tile map's cell, choosing its tile and its neighbors' from which of them are the same terrain. `\"\"` empties the cell and redraws its neighbors.",
             ),
             call(
                 "set_tile",

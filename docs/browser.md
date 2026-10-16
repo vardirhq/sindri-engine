@@ -145,3 +145,15 @@ Embedding is a legitimate way to ship a game, so this is not a fault in the game
 It does mean the asset pipeline's browser half needs a caller of its own, and the
 honest candidate is the editor rather than another example: an editor opens files
 it was not compiled with, which is exactly what fetching is for.
+
+## Static imported GLB assets
+
+The manifest-driven project host fetches kind `model` through a bounded
+`AssetLoader<ModelAssetDecoder>`, verifies bytes, prepares one shared renderer
+resource per logical ID through the public facade, and binds scene references.
+Models keep their hierarchy and use normal depth testing, base-color material
+factors/textures and ambient/directional lighting. The external Low Tide cutaway
+crawler was visually inspected in Chrome headless WebGPU at 1200 × 1000; smoke
+confirmed scene/model/texture HTTP delivery and loading completion. Native
+offscreen rendering was inspected separately. Model shadows and full glTF
+animation/skin support are deferred; see [imported models](imported-models.md).

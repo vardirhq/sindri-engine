@@ -38,9 +38,24 @@ pub fn scene_extractor() -> Result<SceneExtractor, String> {
     Ok(extractor)
 }
 
-/// Every file under `root` whose name ends with `suffix`, by its asset ID.
+/// Where a project's assets live: `assets/` when it has one, else beside
+/// `sindri.toml`, which is how a project that keeps its art at its root (and
+/// names it from there) is laid out. Export reads the same rule.
+#[must_use]
+pub fn assets_root(project: &Path) -> std::path::PathBuf {
+    let assets = project.join("assets");
+    if assets.is_dir() {
+        assets
+    } else {
+        project.to_path_buf()
+    }
+}
+
+/// Every file under `root` whose name ends with `suffix`, ignoring ASCII case,
+/// by its unchanged asset ID.
 #[must_use]
 pub fn files_under(root: &Path, suffix: &str) -> BTreeMap<String, Vec<u8>> {
+    let suffix = suffix.to_ascii_lowercase();
     let mut found = BTreeMap::new();
     let mut pending = vec![root.to_path_buf()];
     while let Some(dir) = pending.pop() {
@@ -51,7 +66,10 @@ pub fn files_under(root: &Path, suffix: &str) -> BTreeMap<String, Vec<u8>> {
             let path = entry.path();
             if path.is_dir() {
                 pending.push(path);
-            } else if path.to_string_lossy().ends_with(suffix)
+            } else if path
+                .to_string_lossy()
+                .to_ascii_lowercase()
+                .ends_with(&suffix)
                 && let (Ok(relative), Ok(bytes)) = (path.strip_prefix(root), fs::read(&path))
             {
                 found.insert(relative.to_string_lossy().replace('\\', "/"), bytes);
@@ -165,7 +183,7 @@ impl ProjectRun {
     }
 
     fn open_on(project: &Path, entry: Option<&str>, size: [f32; 2]) -> Result<Self, String> {
-        let assets = project.join("assets");
+        let assets = assets_root(project);
         let (main_path, sheet_ids, other_scenes) = manifest(project)?;
         let main_id = scene_name(&main_path)?;
         let read_scene = |path: &Path| -> Result<SceneDocument, String> {
@@ -225,6 +243,13 @@ impl ProjectRun {
                 .bind(&id, tile_set)
                 .map_err(|error| error.to_string())?;
         }
+        // A sheet that does not read is the renderer's to report; here it
+        // only has no terrains.
+        for (id, bytes) in files_under(&assets, ".sheet") {
+            if let Ok(sheet) = sindri_core::SpriteSheetDocument::from_json(&text(&id, bytes)?) {
+                tile_sets.bind_terrains(id, sheet.terrains);
+            }
+        }
         let mut weave_sources = BTreeMap::new();
         for (id, bytes) in files_under(&assets, ".weave") {
             let source = text(&id, bytes)?;
@@ -236,12 +261,20 @@ impl ProjectRun {
                 weave::compose(&id, &weave_sources).map_err(|error| format!("{id}: {error}"))?,
             );
         }
+        let collision =
+            crate::model_assets::collision_references(&scenes, &prefabs, scene.components())?;
         let mut session = Session::with_sources(scene.components().clone(), sources)
             .with_prefabs(prefabs)
             .with_profiles(profiles)
             .with_tile_sets(tile_sets)
             .with_scenes(scenes, loaded)
             .with_styles(sheets);
+        #[cfg(not(target_arch = "wasm32"))]
+        crate::model_assets::load_collision(&assets, &collision, &mut session)?;
+        #[cfg(target_arch = "wasm32")]
+        if !collision.is_empty() {
+            return Err("headless model collision loading requires a native filesystem".to_owned());
+        }
         session
             .settle_styles(
                 &mut world,

@@ -20,8 +20,10 @@
 //! without anyone remembering to bump a version.
 
 mod gather;
+mod models;
 mod page;
 mod prefabs;
+mod shaders;
 mod write;
 
 pub use gather::{GatheredAsset, ProjectExport};

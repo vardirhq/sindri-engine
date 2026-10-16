@@ -144,3 +144,82 @@ fn choose(value: &mut serde_json::Value, references: &EntityReferences, label: &
         .drop_without_applying_deltas();
     draw(vec![click(target, false)]).drop_without_applying_deltas();
 }
+
+#[test]
+fn render_and_collision_asset_edits_undo_independently_and_component_drags_merge() {
+    use super::super::draft::component_transaction;
+    let scene = SceneExtractor::new().unwrap();
+    let mut world = World::default();
+    let entity = world.spawn(EntityData {
+        components: [
+            (
+                "sindri.model".to_owned(),
+                json!({"asset":"models/level.glb", "layer":0}),
+            ),
+            (
+                "sindri.physics3d.model_collider".to_owned(),
+                json!({"asset":"models/level.glb"}),
+            ),
+        ]
+        .into(),
+        ..EntityData::default()
+    });
+    let initial = world.get(entity).unwrap().components.clone();
+    let mut history = CommandHistory::default();
+    for (kind, asset) in [
+        ("sindri.model", "models/render.glb"),
+        ("sindri.physics3d.model_collider", "models/collision.glb"),
+    ] {
+        let original = world.get(entity).unwrap().components.clone();
+        let mut draft = original.clone();
+        draft.get_mut(kind).unwrap()["asset"] = json!(asset);
+        let (buffer, refused) = component_commands(entity, &original, &draft, scene.components());
+        assert!(refused.is_empty());
+        history
+            .apply(
+                component_transaction(entity, buffer, &original, &draft),
+                &mut world,
+            )
+            .unwrap();
+    }
+    history.undo(&mut world).unwrap();
+    assert_eq!(
+        world.get(entity).unwrap().components["sindri.model"]["asset"],
+        "models/render.glb"
+    );
+    assert_eq!(
+        world.get(entity).unwrap().components["sindri.physics3d.model_collider"]["asset"],
+        "models/level.glb"
+    );
+    history.undo(&mut world).unwrap();
+    assert_eq!(world.get(entity).unwrap().components, initial);
+    history.redo(&mut world).unwrap();
+    history.redo(&mut world).unwrap();
+    assert_eq!(
+        world.get(entity).unwrap().components["sindri.physics3d.model_collider"]["asset"],
+        "models/collision.glb"
+    );
+    history.break_merge_run();
+    for layer in [1, 2, 3] {
+        let original = world.get(entity).unwrap().components.clone();
+        let mut draft = original.clone();
+        draft.get_mut("sindri.model").unwrap()["layer"] = json!(layer);
+        let (buffer, refused) = component_commands(entity, &original, &draft, scene.components());
+        assert!(refused.is_empty());
+        history
+            .apply(
+                component_transaction(entity, buffer, &original, &draft),
+                &mut world,
+            )
+            .unwrap();
+    }
+    history.undo(&mut world).unwrap();
+    assert_eq!(
+        world.get(entity).unwrap().components["sindri.model"]["layer"],
+        0
+    );
+    assert_eq!(
+        world.get(entity).unwrap().components["sindri.model"]["asset"],
+        "models/render.glb"
+    );
+}

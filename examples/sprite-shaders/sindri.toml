@@ -1,0 +1,4 @@
+format_version = 1
+[project]
+name = "Sprite Shaders"
+main_scene = "assets/sprite-shaders.scene"

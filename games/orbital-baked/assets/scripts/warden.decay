@@ -4,7 +4,7 @@
 //   2  telegraphed charges followed by a close-range fan
 //   3  faster rings and charges, with occasional reinforcements
 script Warden {
-    @export let health: f32 = 120.0;
+    @export let health: f32 = 58.0;
     @export let worth: f32 = 40.0;
     @export let touch_damage: f32 = 2.0;
     @export let ring_shots: f32 = 12.0;
@@ -33,7 +33,7 @@ script Warden {
     var phase_flash: f32 = 0.0;
 
     fn start() {
-        this.hp = this.health * (1.0 + Game.elapsed * 0.012);
+        this.hp = this.health * boss_scale();
         this.until_volley = 1.2;
         this.until_summon = 5.0;
         this.dash_timer = 1.4;
@@ -82,11 +82,13 @@ script Warden {
 
         if this.phase_flash > 0.0 {
             this.phase_flash -= dt;
-            this.sprite.tint.g = 1.0;
-            this.sprite.tint.b = 1.0;
+            this.shape.fill.g = 1.0;
+            this.shape.fill.b = 1.0;
         } else {
-            this.sprite.tint.g = 0.28 + share * 0.72;
-            this.sprite.tint.b = 0.28 + share * 0.72;
+            // The original's #ff547c, deepening towards red as the hull wears.
+            this.shape.fill.r = 1.0;
+            this.shape.fill.g = 0.0887 * (0.4 + share * 0.6);
+            this.shape.fill.b = 0.2016 * (0.4 + share * 0.6);
         }
 
         let dx = player.transform.position.x - this.transform.position.x;
@@ -153,8 +155,8 @@ script Warden {
         if this.dash_windup > 0.0 {
             this.dash_windup -= dt;
             Physics.set_velocity(this.entity, 0.0, 0.0);
-            this.sprite.tint.g = 1.0;
-            this.sprite.tint.b = 1.0;
+            this.shape.fill.g = 1.0;
+            this.shape.fill.b = 1.0;
             if this.dash_windup <= 0.0 {
                 this.dash_time = 0.34;
                 if this.phase == 3.0 {
@@ -278,7 +280,7 @@ script Warden {
         Camera.impact(0.9);
         Audio.play("audio/kill.wav", 0.6);
         Game.kills = Game.kills + 1.0;
-        Game.score = Game.score + this.worth * 10.0;
+        Game.score = Game.score + 20.0 + this.worth;
         Game.boss_hp = 0.0;
         Game.boss_max = 0.0;
         Save.set_flag("beat_warden", true);
@@ -289,7 +291,7 @@ script Warden {
             let drop = World.spawn(this.core);
             drop.transform.position.x = this.transform.position.x + cos(angle) * 1.2;
             drop.transform.position.y = this.transform.position.y + sin(angle) * 1.2;
-            World.set_property(drop, "worth", 5.0);
+            World.set_property(drop, "worth", 48.0);
             made += 1.0;
         }
         let roll = World.spawn(this.drop_roll);

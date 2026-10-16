@@ -216,7 +216,7 @@ impl SceneExtractor {
             .collect();
         for entity in departed {
             if let Some(mut runtime) = runtimes.remove(&entity) {
-                push_commands(runtime.release_all(), 0, camera, frame);
+                push_commands(runtime.release_all(), 0, camera, frame, None);
             }
         }
 
@@ -274,7 +274,7 @@ impl SceneExtractor {
                 });
                 if !fresh {
                     if let Some(mut previous) = runtimes.remove(&entity) {
-                        push_commands(previous.release_all(), component.layer, camera, frame);
+                        push_commands(previous.release_all(), component.layer, camera, frame, None);
                     }
                     runtimes.insert(entity, ResidentVoxelWorld::new(definition, resolved));
                 }
@@ -311,7 +311,11 @@ impl SceneExtractor {
                 *model = root * *model;
             }
         }
-        push_commands(commands, component.layer, camera, frame);
+        let material = self
+            .components
+            .get::<crate::MaterialComponent>(world, entity)?
+            .map(|component| component.factors);
+        push_commands(commands, component.layer, camera, frame, material);
         refused.map_or(Ok(()), Err)
     }
 }
@@ -356,9 +360,10 @@ fn push_commands(
     layer: i32,
     camera: super::camera::ResolvedCamera,
     frame: &mut ExtractedFrame,
+    material: Option<sindri_render::MaterialFactors>,
 ) {
     for command in commands {
-        frame.push(FramePass::new(
+        let mut pass = FramePass::new(
             RenderStage::Opaque3d,
             RenderLayer(layer),
             FrameCamera {
@@ -366,7 +371,9 @@ fn push_commands(
                 position: camera.view.inverse().transform_point3(glam::Vec3::ZERO),
             },
             command,
-        ));
+        );
+        pass.material = material;
+        frame.push(pass);
     }
 }
 

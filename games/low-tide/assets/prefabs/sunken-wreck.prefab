@@ -34,6 +34,13 @@
       0.5,
       0.48,
       0.6
+     ],
+     "shader": "shaders/underwater.wgsl",
+     "shader_params": [
+      0.012,
+      0.35,
+      0.55,
+      0.7
      ]
     },
     "sindri.tags": {
@@ -138,6 +145,30 @@
      "sweep_turns": 1.0,
      "blend": "over",
      "layer": 8
+    },
+    "sindri.light2d": {
+     "enabled": true,
+     "color": [
+      1.0,
+      0.8,
+      0.42,
+      1.0
+     ],
+     "intensity": 0.0,
+     "radius": 3.0,
+     "falloff": 1.5,
+     "height": 0.8,
+     "shadows": false,
+     "shadow_reach": 0.3
+    },
+    "sindri.script": {
+     "source": "scripts/daylight.decay",
+     "script": "Lamp",
+     "properties": {
+      "by_day": 0.15,
+      "by_night": 1.1,
+      "flicker": 0.1
+     }
     }
    }
   }

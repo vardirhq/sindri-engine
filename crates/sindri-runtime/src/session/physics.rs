@@ -3,8 +3,115 @@
 use super::Session;
 use crate::RuntimeError;
 use sindri_core::World;
+use sindri_scene::{ScenePhysics2d, ScenePhysics3d};
 
 impl Session {
+    /// Prepares decoded model triangles and binds them for the next fixed step.
+    /// Call after asynchronous loading succeeds; rendering remains independent.
+    /// Failed preparation retains the previous binding and live solver geometry.
+    ///
+    /// # Errors
+    /// Names invalid CPU preparation or static physics geometry.
+    pub fn bind_model_collision(
+        &mut self,
+        id: sindri_core::AssetId,
+        asset: &sindri_assets::ModelAsset,
+    ) -> Result<(), crate::ModelCollisionBindingError> {
+        let mesh = asset.collision_mesh(sindri_assets::ModelCollisionLimits::default())?;
+        let resource = sindri_scene::ModelCollisionGeometry3d::new(mesh.positions, mesh.triangles)?;
+        self.physics3d
+            .model_collision_bindings_mut()
+            .bind(id, std::sync::Arc::new(resource));
+        Ok(())
+    }
+
+    /// Prepares one volumetric hull from the selected decoded model hierarchy.
+    /// Call after asynchronous loading. Convex approximation fills concavities;
+    /// failure leaves the previous hull binding and live solver unchanged.
+    ///
+    /// # Errors
+    /// Invalid model preparation or bounded, nonvolumetric hull geometry.
+    pub fn bind_model_convex_collision(
+        &mut self,
+        id: sindri_core::AssetId,
+        asset: &sindri_assets::ModelAsset,
+    ) -> Result<(), crate::ModelCollisionBindingError> {
+        let mesh = asset.collision_mesh(sindri_assets::ModelCollisionLimits {
+            vertices: 4_096,
+            ..sindri_assets::ModelCollisionLimits::default()
+        })?;
+        let resource = sindri_scene::ModelConvexGeometry3d::new(mesh.positions)?;
+        self.physics3d
+            .bind_model_convex_collision(id, std::sync::Arc::new(resource));
+        Ok(())
+    }
+
+    /// Prepares every authored representation before replacing any binding.
+    /// Shared triangle/convex references load once and fail atomically on reload.
+    ///
+    /// # Errors
+    /// Invalid bounded model preparation, triangles or volumetric hull.
+    pub fn bind_model_collisions(
+        &mut self,
+        id: sindri_core::AssetId,
+        asset: &sindri_assets::ModelAsset,
+        usage: crate::model_assets::ModelCollisionUse,
+    ) -> Result<(), crate::ModelCollisionBindingError> {
+        if !usage.triangles && !usage.convex {
+            return Ok(());
+        }
+        let mesh = asset.collision_mesh(sindri_assets::ModelCollisionLimits {
+            vertices: if usage.convex { 4_096 } else { 1_000_000 },
+            ..sindri_assets::ModelCollisionLimits::default()
+        })?;
+        let convex = usage
+            .convex
+            .then(|| sindri_scene::ModelConvexGeometry3d::new(mesh.positions.clone()))
+            .transpose()?;
+        let triangles = usage
+            .triangles
+            .then(|| sindri_scene::ModelCollisionGeometry3d::new(mesh.positions, mesh.triangles))
+            .transpose()?;
+        if let Some(resource) = convex {
+            self.physics3d
+                .bind_model_convex_collision(id.clone(), std::sync::Arc::new(resource));
+        }
+        if let Some(resource) = triangles {
+            self.physics3d
+                .model_collision_bindings_mut()
+                .bind(id, std::sync::Arc::new(resource));
+        }
+        Ok(())
+    }
+
+    /// Removes a convex binding; active references fail before the next solve.
+    pub fn unbind_model_convex_collision(&mut self, id: &sindri_core::AssetId) {
+        self.physics3d.unbind_model_convex_collision(id);
+    }
+
+    /// Removes a host binding; active scene references fail before the next solve.
+    pub fn unbind_model_collision(&mut self, id: &sindri_core::AssetId) {
+        self.physics3d.model_collision_bindings_mut().unbind(id);
+    }
+
+    /// The 2D solver, for whatever draws what it holds.
+    #[must_use]
+    pub const fn physics(&self) -> &ScenePhysics2d {
+        &self.physics
+    }
+
+    /// The 3D solver, for whatever draws what it holds.
+    #[must_use]
+    pub const fn physics3d(&self) -> &ScenePhysics3d {
+        &self.physics3d
+    }
+
+    /// Queue world-space 3D character movement for the next shared fixed step.
+    /// Gameplay supplies displacement; the scene controller owns collision resolution.
+    pub fn character_requests3d(&mut self) -> &mut sindri_scene::CharacterRequests3d {
+        self.physics3d.character_requests()
+    }
+
     pub(super) fn step_physics(
         &mut self,
         world: &mut World,

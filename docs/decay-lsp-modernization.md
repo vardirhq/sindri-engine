@@ -28,15 +28,39 @@ language model.
   project refresh as correctness issues, not editor polish.
 - Every completed section needs regression tests. CI is not the test harness.
 
+- [x] Carry host read-only member metadata through checking, completion, hover,
+  and generated API documents. Regression tests exercise transform directions
+  and their component assignments; copied vectors retain ordinary mutability.
+  Mouse delta and `Pointer.locked` / `Input.Pointer.locked` exercise read-only
+  vector/boolean metadata and capture-call completion.
+  `Pointer.delta` and `Input.Pointer.delta` also exercise read-only Vec2
+  completion/hover and immutable diagnostics through both namespaces. Nested
+  host globals are walked from their resolved root, fixing `Input.Pointer`
+  completion/hover (the root was previously looked up twice).
+
+- [x] Exercise typed 3D character movement calls and optional nested copied
+  results through the shared host environment: completion/hover exposes
+  the movement signature, typed batch preflight accepts the checked fixtures, and
+  compiler regressions reject Vec2 displacement and wrong result-field types.
+
+- [x] Exercise 3D light completion/hover and typed checking through the shared
+  host surface, including boolean enabled state, numeric intensity and Color.
+
+- [x] Exercise scene-environment Color and numeric completion/hover and typed
+  diagnostics from the same host surface as runtime and generated references.
+
 ## P0 — correctness and drift
 
 These are defects or sources of actively misleading tooling.
 
-- [ ] Make language keyword knowledge authoritative instead of manually copied.
+- [x] Make language keyword knowledge authoritative instead of manually copied.
   - [x] Add current `for` and `in` support to completion/hover immediately.
-  - [ ] Remove or generate the hard-coded keyword list once the language crate
-        exposes authoritative keyword metadata.
-  - [ ] Add a test that fails when parser keywords and tooling keywords drift.
+  - [x] Remove or generate the hard-coded keyword list once the language crate
+        exposes authoritative keyword metadata. Completion and hover read
+        `decay_syntax::vocabulary::KEYWORDS`, the table the lexer uses.
+  - [x] Add a test that fails when parser keywords and tooling keywords drift:
+        every listed keyword must be rejected as a local's name, and the
+        server's keyword completions must equal the parser's table.
 - [ ] Bring the VS Code TextMate grammar up to the current Decay language.
   - [x] Highlight `for` and `in`.
   - [x] Audit every implemented keyword, literal, declaration, primitive type,
@@ -100,20 +124,29 @@ These are defects or sources of actively misleading tooling.
   - [ ] Either negotiate UTF-8 positions or correctly translate the client's
         UTF-16 positions.
   - [ ] Add Unicode regression tests.
-- [ ] Return proper JSON-RPC/LSP errors for malformed or unsupported requests
-      where the protocol requires an error instead of silently returning null.
-- [ ] Verify shutdown/exit lifecycle and process exit semantics against LSP
-      3.17, including exit without shutdown.
+- [x] Return proper JSON-RPC/LSP errors for malformed or unsupported requests
+      where the protocol requires an error instead of silently returning null:
+      parse error for a body that is not JSON, invalid request for a message
+      naming no method and for any request after `shutdown`, method not found
+      for an unsupported request, and `ServerNotInitialized` before
+      `initialize`. Unknown notifications and client replies are dropped.
+- [x] Verify shutdown/exit lifecycle and process exit semantics against LSP
+      3.17, including exit without shutdown: `exit` (or the input closing)
+      after `shutdown` exits 0, and without it exits 1.
 
 ## P0 — test harness
 
 The LSP must stop relying on manual VS Code use as proof.
 
-- [ ] Add protocol framing tests for valid messages, multiple headers, EOF,
+- [x] Add protocol framing tests for valid messages, multiple headers, EOF,
       malformed JSON, missing/invalid `Content-Length`, and sequential messages.
-- [ ] Add an in-process server harness that sends JSON-RPC requests and captures
-      responses/notifications.
-- [ ] Cover initialize capabilities.
+      A malformed body is answered and skipped; a header with no usable
+      length cannot be resynchronised and ends the server with an error
+      rather than looking like a clean end of input.
+- [x] Add an in-process server harness that sends JSON-RPC requests and captures
+      responses/notifications (`tools/decay-lsp/src/lifecycle_tests.rs`, which
+      drives the same framed loop as stdin/stdout).
+- [x] Cover initialize capabilities.
 - [ ] Cover open/change/save/close document lifecycle.
 - [ ] Cover syntax and semantic diagnostic publication and clearing.
 - [ ] Cover completion at root, after `this.`, through typed host chains, and
@@ -123,7 +156,7 @@ The LSP must stop relying on manual VS Code use as proof.
 - [ ] Cover project-aware string completion.
 - [ ] Cover watched project file creation/change/deletion.
 - [ ] Cover Unicode positions.
-- [ ] Cover malformed/unknown requests without crashing the server.
+- [x] Cover malformed/unknown requests without crashing the server.
 - [ ] Add a VS Code extension smoke test or equivalent client integration test
       that launches the real server and proves synchronization + one language
       feature end to end.

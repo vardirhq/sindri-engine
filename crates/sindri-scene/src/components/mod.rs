@@ -10,12 +10,17 @@
 //! entity is, because carrying one of these components already says it.
 
 mod camera;
+mod camera_orbit;
 mod environment;
 mod environment_check;
 mod grid;
 mod light;
+mod light2d;
+mod material;
 mod mesh;
+mod model;
 mod sprite;
+mod sprite_mask;
 mod tile_volume;
 mod tilemap;
 mod ui;
@@ -24,11 +29,13 @@ mod ui_text_options;
 pub mod ui_text_template;
 mod voxel_terrain;
 mod voxel_world;
+mod world_text;
 
 pub use camera::{
     CameraBehaviorComponent, CameraBounds, CameraComponent, CameraFit, CameraFollow, CameraShake,
     add_camera_trauma, update_camera_behaviors,
 };
+pub use camera_orbit::CameraOrbitComponent;
 pub use environment::{
     EnvironmentAmbientOcclusion, EnvironmentBloom, EnvironmentComponent, EnvironmentFog,
     EnvironmentPostProcess, EnvironmentShadows, EnvironmentToneMapping, environment_of,
@@ -42,8 +49,15 @@ pub use light::{
     LightComponent, LightError, LightKind, Sun, default_sun_transform, light_direction, lights_in,
     sun_in,
 };
+pub use light2d::{
+    EnvironmentLighting2d, Light2dComponent, Light2dError, Light2dOccluderComponent, OccluderShape,
+    outline,
+};
+pub use material::MaterialComponent;
 pub use mesh::{MeshComponent, MeshPrimitive};
-pub use sprite::{SpriteColorTransform, SpriteComponent};
+pub use model::ModelComponent;
+pub use sprite::{ImageDraw, SpriteColorTransform, SpriteComponent};
+pub use sprite_mask::{MaskInteraction, SpriteMaskComponent};
 pub use tile_volume::{
     TileCellDocument, TileGridComponent, TileGridError, TileSpace, TileVolumeComponent,
     TileVolumeError, TileVolumeIndex, cell_to_local_in,
@@ -61,6 +75,7 @@ pub use voxel_world::{
     VoxelBlock, VoxelEdit, VoxelGeneratorDocument, VoxelMapFlood, VoxelMaterialDocument, VoxelView,
     VoxelWorldComponent,
 };
+pub use world_text::TextComponent;
 
 /// The tint a component that does not name one draws with.
 ///

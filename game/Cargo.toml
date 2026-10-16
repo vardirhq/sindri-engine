@@ -8,6 +8,7 @@ license.workspace = true
 publish = false
 
 [dependencies]
+sindri = { path = "../crates/sindri" }
 sindri-assets = { path = "../crates/sindri-assets" }
 sindri-core = { path = "../crates/sindri-core" }
 sindri-decay = { path = "../crates/sindri-decay" }

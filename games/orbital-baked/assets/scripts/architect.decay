@@ -1,8 +1,8 @@
 // Anchors, and builds slow walls across the arena until there is
 // nowhere left to stand.
 //
-// Its hull is baked from `textures/architect.isobake`; everything this
-// script does to it beyond that is motion.
+// Its hull is a vector polygon drawn by its prefab; beyond its colour,
+// everything this script does to it is motion.
 script Architect {
     @export let shot: Prefab;
     @export let core: Prefab;
@@ -23,10 +23,9 @@ script Architect {
     fn start() {
         // Bosses that arrive later in a run are the same boss with more to
         // chew through, which is the reference game's curve rather than a
-        // second set of numbers per boss.
-        let elapsed = Game.elapsed;
-        let scale = 1.0 + min(1.35, max(0.0, elapsed - 60.0) * 0.0025);
-        this.hp = 228.0 * scale;
+        // second set of numbers per boss (see boss-scale.decay).
+        let scale = boss_scale();
+        this.hp = 231.4 * scale;
         this.offset = Random.range(0.0, 6.2831853);
         Game.boss_max = this.hp;
         Game.boss_hp = this.hp;
@@ -38,9 +37,10 @@ script Architect {
     }
 
     fn tint() {
-        this.sprite.tint.r = 0.45;
-        this.sprite.tint.g = 0.96;
-        this.sprite.tint.b = 1.0;
+        // The original's #72f4ff, in the linear light the renderer blends in.
+        this.shape.fill.r = 0.1683;
+        this.shape.fill.g = 0.9047;
+        this.shape.fill.b = 1.0;
     }
 
     fn update(dt: f32) {
@@ -89,9 +89,9 @@ script Architect {
         }
         if this.phase_flash > 0.0 {
             this.phase_flash -= dt;
-            this.sprite.tint.r = 1.0;
-            this.sprite.tint.g = 1.0;
-            this.sprite.tint.b = 1.0;
+            this.shape.fill.r = 1.0;
+            this.shape.fill.g = 1.0;
+            this.shape.fill.b = 1.0;
         } else {
             tint();
         }
@@ -198,7 +198,7 @@ script Architect {
             let drop = World.spawn(this.core);
             drop.transform.position.x = this.transform.position.x + cos(angle) * 1.2;
             drop.transform.position.y = this.transform.position.y + sin(angle) * 1.2;
-            World.set_property(drop, "worth", 5.0);
+            World.set_property(drop, "worth", 48.0);
             made += 1.0;
         }
         let roll = World.spawn(this.drop_roll);

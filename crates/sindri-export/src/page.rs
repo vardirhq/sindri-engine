@@ -216,6 +216,15 @@ mod tests {
         assert!(page.contains("WebGPU"), "no WebGPU message");
         assert!(page.contains("sindri:failed"), "no failure channel");
     }
+
+    /// What a failure says is a browser's or the engine's text, and it is
+    /// shown as text: an error message is not the page's to run as markup.
+    #[test]
+    fn a_failure_is_shown_as_text_not_markup() {
+        let page = page_for("Game", "/");
+        assert!(page.contains(r#"id="sindri-error""#), "{page}");
+        assert!(!page.contains("innerHTML"), "{page}");
+    }
 }
 
 #[cfg(test)]

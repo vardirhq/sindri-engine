@@ -3,10 +3,11 @@
 use decay_ir::Path;
 use decay_runtime::{RuntimeError, Value};
 use sindri_core::{EntityId, SceneComponent};
-use sindri_physics::{BodyControl3d, PhysicsWorld3d, RigidBody3d, RigidBodyKind};
+use sindri_physics::{BodyControl3d, PhysicsMaterial, PhysicsWorld3d, RigidBody3d, RigidBodyKind};
 use sindri_scene::{
-    Character2dComponent, Collider2dComponent, Collider3dComponent, RigidBody2dComponent,
-    RigidBody3dComponent, TilemapCollider2dComponent,
+    Character2dComponent, Character3dComponent, Collider2dComponent, Collider3dComponent,
+    ModelCollider3dComponent, ModelConvexCollider3dComponent, RigidBody2dComponent,
+    RigidBody3dComponent, TilemapCollider2dComponent, VoxelCollider3dComponent,
 };
 
 use super::{WorldHost, physics3d::vector};
@@ -117,12 +118,6 @@ impl WorldHost<'_> {
             .ok_or_else(|| error("entity has no authored 3D rigid body"))?;
         let mut body: RigidBody3d = serde_json::from_value(payload.clone())
             .map_err(|failure| error(&format!("invalid 3D rigid body: {failure}")))?;
-        let payload = data
-            .components
-            .get(Collider3dComponent::TYPE_NAME)
-            .ok_or_else(|| error("entity has no authored 3D collider"))?;
-        let collider: Collider3dComponent = serde_json::from_value(payload.clone())
-            .map_err(|failure| error(&format!("invalid 3D collider: {failure}")))?;
         if let Some(transform) = self.world.world_transform(entity) {
             body.position = transform.position;
             body.rotation = transform.rotation;
@@ -130,8 +125,70 @@ impl WorldHost<'_> {
         if body.kind != RigidBodyKind::Static && data.transform_3d.is_some_and(|t| t.z_locked) {
             return Err(error("moving 3D bodies cannot lock depth"));
         }
-        PhysicsWorld3d::validate_body(entity, body, &collider.0)
+        PhysicsWorld3d::validate_body_settings(body)
             .map_err(|failure| error(&failure.to_string()))?;
+        self.pending_colliders3d(entity, path, body)?;
         Ok(body)
+    }
+
+    fn pending_colliders3d(
+        &self,
+        entity: EntityId,
+        path: &Path,
+        body: RigidBody3d,
+    ) -> Result<(), RuntimeError> {
+        let error = |message: &str| RuntimeError::Host(format!("{}: {message}", path.dotted()));
+        let data = self
+            .world
+            .get(entity)
+            .ok_or_else(|| error("missing 3D body"))?;
+        if [
+            Character3dComponent::TYPE_NAME,
+            ModelCollider3dComponent::TYPE_NAME,
+            VoxelCollider3dComponent::TYPE_NAME,
+        ]
+        .iter()
+        .any(|name| data.components.contains_key(*name))
+        {
+            return Err(error(
+                "3D motion cannot share a character, static model or voxel owner",
+            ));
+        }
+        let primitive = data
+            .components
+            .get(Collider3dComponent::TYPE_NAME)
+            .map(|payload| serde_json::from_value::<Collider3dComponent>(payload.clone()))
+            .transpose()
+            .map_err(|failure| error(&format!("invalid 3D collider: {failure}")))?;
+        let convex = data
+            .components
+            .get(ModelConvexCollider3dComponent::TYPE_NAME)
+            .map(|payload| {
+                serde_json::from_value::<ModelConvexCollider3dComponent>(payload.clone())
+            })
+            .transpose()
+            .map_err(|failure| error(&format!("invalid convex model collider: {failure}")))?;
+        if primitive.is_none() && convex.is_none() {
+            return Err(error("entity has no authored 3D collider"));
+        }
+        if let Some(primitive) = primitive {
+            // Retain the existing nonempty primitive validation contract, even
+            // when a hull is also authored on this owner.
+            PhysicsWorld3d::validate_body(entity, body, &primitive.0)
+                .map_err(|failure| error(&failure.to_string()))?;
+        }
+        if let Some(convex) = convex {
+            PhysicsMaterial {
+                friction: convex.0.friction,
+                restitution: convex.0.restitution,
+            }
+            .validate()
+            .map_err(|failure| error(&failure.to_string()))?;
+            let scale = self.world.world_transform(entity).unwrap_or_default().scale;
+            if !scale.iter().all(|value| value.is_finite() && *value > 0.0) {
+                return Err(error("convex collider scale must be finite and positive"));
+            }
+        }
+        Ok(())
     }
 }

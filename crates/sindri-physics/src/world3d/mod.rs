@@ -1,12 +1,18 @@
 //! Fixed-step 3D rigid bodies behind the Sindri entity boundary.
 
 mod build;
+mod character;
 mod controls;
+mod convex_hull;
+mod ground;
+mod grounded;
+mod materials;
 mod pending;
 mod query;
 mod spatial;
 mod static_groups;
 mod sweep;
+mod triangle_mesh;
 mod validation;
 
 use std::{
@@ -42,6 +48,7 @@ pub struct PhysicsWorld3d {
     collider_entities: HashMap<r3::ColliderHandle, EntityId>,
     spatial: spatial::SpatialIndex,
     pending_controls: HashMap<EntityId, Vec<BodyControl3d>>,
+    materials_changed: bool,
 }
 
 /// A copy that goes on exactly as this world would: what recording a run
@@ -54,6 +61,7 @@ impl Clone for PhysicsWorld3d {
             collider_entities: self.collider_entities.clone(),
             spatial: self.spatial.clone(),
             pending_controls: self.pending_controls.clone(),
+            materials_changed: self.materials_changed,
         }
     }
 }
@@ -69,6 +77,7 @@ impl PhysicsWorld3d {
             collider_entities: HashMap::new(),
             spatial: spatial::SpatialIndex::default(),
             pending_controls: HashMap::new(),
+            materials_changed: false,
         })
     }
 
@@ -103,26 +112,38 @@ impl PhysicsWorld3d {
             return Err(PhysicsError::EntityAlreadyRegistered(entity));
         }
         self.validate_insertion(entity, body, colliders)?;
+        let prepared = colliders
+            .iter()
+            .map(|collider| build::collider(entity, *collider))
+            .collect();
+        self.insert_prepared_body(entity, body, prepared)
+    }
+
+    // Callers validate geometry, body ownership and pending controls first.
+    fn insert_prepared_body(
+        &mut self,
+        entity: EntityId,
+        body: RigidBody3d,
+        colliders: Vec<r3::ColliderBuilder>,
+    ) -> Result<(), PhysicsError> {
         let handle = self.backend.insert_body(build::body(body));
         let handles: Vec<_> = colliders
-            .iter()
-            .map(|collider| {
-                self.backend
-                    .insert_collider(build::collider(entity, *collider), Some(handle))
-            })
+            .into_iter()
+            .map(|collider| self.backend.insert_collider(collider, Some(handle)))
             .collect();
         self.backend.bodies[handle]
             .recompute_mass_properties_from_colliders(&self.backend.colliders);
         for &collider in &handles {
             self.collider_entities.insert(collider, entity);
         }
+        let base_colliders = handles.len();
         self.bodies.insert(
             entity,
             BodyRecord {
                 body: handle,
                 colliders: handles,
                 kind: body.kind,
-                base_colliders: colliders.len(),
+                base_colliders,
                 groups: BTreeMap::new(),
             },
         );
@@ -147,6 +168,16 @@ impl PhysicsWorld3d {
         }
         validate_body(body)?;
         validate_colliders(colliders)
+    }
+
+    /// Validates finite body settings and a usable orientation without requiring
+    /// collider geometry. Useful for queued controls before model materialization.
+    ///
+    /// # Errors
+    /// Invalid body pose, velocity, gravity scale or damping. Collider geometry,
+    /// mass, ownership and pending controls require complete insertion validation.
+    pub fn validate_body_settings(body: RigidBody3d) -> Result<(), PhysicsError> {
+        validate_body(body)
     }
 
     pub fn insert_static_collider(
@@ -217,7 +248,23 @@ impl PhysicsWorld3d {
         let (force_send, _force_recv) = mpsc::channel();
         let (tear_send, _tear_recv) = mpsc::channel();
         let events = r3::ChannelEventCollector::new(collision_send, force_send, tear_send);
+        // Rapier can recycle resting contacts using their cached coefficients.
+        // One full contact update after an edit refreshes them without replacing
+        // colliders or losing warm-start impulses. Restore normal recycling after.
+        let recycle_distance = self
+            .backend
+            .integration_parameters
+            .normalized_contact_recycle_distance;
+        if self.materials_changed {
+            self.backend
+                .integration_parameters
+                .normalized_contact_recycle_distance = 0.0;
+        }
         self.backend.step_with_events(&(), &events);
+        self.backend
+            .integration_parameters
+            .normalized_contact_recycle_distance = recycle_distance;
+        self.materials_changed = false;
         self.index_simulated_bodies();
         Ok(collision_recv
             .try_iter()

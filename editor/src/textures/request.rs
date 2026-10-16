@@ -7,8 +7,8 @@ use std::{
 };
 
 use sindri_assets::{
-    AssetLoader, AssetWatch, FileSystemAssetSource, FontAssetDecoder, SpriteSheetAssetDecoder,
-    TextureAssetDecoder, TileSetAssetDecoder,
+    AssetLoader, AssetWatch, FileSystemAssetSource, FontAssetDecoder, ModelAssetDecoder,
+    SpriteSheetAssetDecoder, TextureAssetDecoder, TileSetAssetDecoder,
 };
 use sindri_core::{AssetId, SpriteRef, World, sheet_id_for};
 use sindri_render::{TextRenderer, Texture2D, TextureRegistry};
@@ -86,6 +86,19 @@ impl SceneTextures {
             tile_sets: root.as_deref().and_then(|root| {
                 AssetLoader::new(FileSystemAssetSource::new(root), QUEUE, TileSetAssetDecoder).ok()
             }),
+            models: root.as_deref().and_then(|root| {
+                let loader =
+                    AssetLoader::new(FileSystemAssetSource::new(root), QUEUE, ModelAssetDecoder)
+                        .ok()?;
+                Some(match manifest_beside(root) {
+                    Some(manifest) => loader.with_manifest(manifest),
+                    None => loader,
+                })
+            }),
+            shaders: root.as_deref().and_then(super::shaders::loader),
+            bound_models: BTreeSet::new(),
+            play_models: sindri_runtime::model_assets::ModelCollisionReferences::new(),
+            released_models: Vec::new(),
             sliced: BTreeMap::new(),
             watch: root.map(AssetWatch::new),
             last_examined: Instant::now(),
@@ -140,13 +153,30 @@ impl SceneTextures {
 
     /// Asks for every texture the world draws with, and lets go of the rest.
     ///
+    /// Asks for the fonts, models and shaders the world names: the assets
+    /// that are neither textures nor tile sets, and which only need watching.
+    fn request_others(
+        &mut self,
+        world: &World,
+        text: &mut TextRenderer,
+    ) -> (BTreeSet<AssetId>, Vec<TextureNote>) {
+        let (mut wanted, mut notes) = self.request_fonts(world, text);
+        let (models, model_notes) = self.request_models(world);
+        let (shaders, shader_notes) = self.request_shaders(world);
+        wanted.extend(models);
+        wanted.extend(shaders);
+        notes.extend(model_notes);
+        notes.extend(shader_notes);
+        (wanted, notes)
+    }
+
     /// Called when the scene opens and again whenever an edit could have changed
     /// what it references, so pointing a mesh at another texture loads that
     /// texture rather than waiting for a reload. Asking twice for the same one
     /// costs nothing: the loader coalesces, which is what makes calling this on
     /// a whole world cheap.
     pub fn request(&mut self, world: &World, text: &mut TextRenderer) -> Vec<TextureNote> {
-        let (wanted_fonts, mut notes) = self.request_fonts(world, text);
+        let (wanted_others, mut notes) = self.request_others(world, text);
         let (wanted_tile_sets, tile_notes) = self.request_tile_sets(world);
         notes.extend(tile_notes);
         let mut referenced = referenced_textures(world);
@@ -196,7 +226,7 @@ impl SceneTextures {
         }
         if let Some(watch) = watch.as_mut() {
             let watched: BTreeSet<AssetId> = wanted
-                .union(&wanted_fonts)
+                .union(&wanted_others)
                 .cloned()
                 .chain(wanted_tile_sets.iter().cloned())
                 .collect();
@@ -305,6 +335,8 @@ impl SceneTextures {
             loader: Some(loader),
             fonts,
             tile_sets,
+            models,
+            shaders,
             watch: Some(watch),
             ..
         } = self
@@ -313,17 +345,26 @@ impl SceneTextures {
         };
         let mut notes = Vec::new();
         for id in watch.changed() {
-            let result =
-                if let Some(fonts) = fonts.as_mut().filter(|fonts| fonts.get(&id).is_some()) {
-                    fonts.reload(&id)
-                } else if let Some(tile_sets) = tile_sets
-                    .as_mut()
-                    .filter(|tile_sets| tile_sets.get(&id).is_some())
-                {
-                    tile_sets.reload(&id)
-                } else {
-                    loader.reload(&id)
-                };
+            let result = if let Some(fonts) =
+                fonts.as_mut().filter(|fonts| fonts.get(&id).is_some())
+            {
+                fonts.reload(&id)
+            } else if let Some(tile_sets) = tile_sets
+                .as_mut()
+                .filter(|tile_sets| tile_sets.get(&id).is_some())
+            {
+                tile_sets.reload(&id)
+            } else if let Some(models) = models.as_mut().filter(|models| models.get(&id).is_some())
+            {
+                models.reload(&id)
+            } else if let Some(shaders) = shaders
+                .as_mut()
+                .filter(|shaders| shaders.get(&id).is_some())
+            {
+                shaders.reload(&id)
+            } else {
+                loader.reload(&id)
+            };
             if let Err(error) = result {
                 notes.push(TextureNote::Failed(format!("{id}: {error}")));
             }

@@ -71,6 +71,7 @@ impl EditorApp {
     /// Puts away whatever the inspector was showing about a file.
     pub(crate) fn show_nothing(&mut self) {
         self.slicer = None;
+        self.normal_studio = None;
         self.prefab_brush = None;
         self.preview = None;
         self.profile = None;
@@ -89,6 +90,10 @@ impl EditorApp {
     /// halfway through.
     fn already_showing(&self, path: &Path) -> bool {
         self.slicer.as_ref().is_some_and(|open| open.path() == path)
+            || self
+                .normal_studio
+                .as_ref()
+                .is_some_and(|open| open.source() == path || open.settings_path() == path)
             || self
                 .preview
                 .as_ref()
@@ -123,6 +128,13 @@ impl EditorApp {
         // panel over, so choosing one puts the others away rather than leaving
         // it showing the file before last.
         if self.already_showing(path) {
+            return;
+        }
+        // A picture chosen while the studio is open is one to look at in the
+        // studio, and a studio settings file always is.
+        let studying = self.normal_studio.is_some() && is_sliceable(path);
+        if studying || crate::normal_studio::is_settings_file(path) {
+            self.open_normal_studio(path);
             return;
         }
         self.show_nothing();

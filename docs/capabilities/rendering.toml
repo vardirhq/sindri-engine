@@ -1,0 +1,970 @@
+# Hosts, GPU and rendering capabilities, as data. See physics.toml for the
+# rules the generator applies; `rendering.md` is generated from this file.
+
+title = "Hosts and rendering"
+order = 7
+intro = """
+How a game reaches a window or a browser, how the GPU is negotiated, and what
+the renderer can actually draw: sprites, shapes, text, 2D lighting, tilemaps
+and tile volumes, 3D meshes and models, and the world presentation stack.
+`docs/rendering-frame-pipeline.md`, `docs/rendering-surface.md` and
+`docs/rendering-color.md` are the contracts.
+"""
+
+[[capability]]
+id = "hosts"
+group = "Hosts and GPU"
+title = "Native desktop"
+summary = "One `Game` loop runs windowed on desktop, in a browser and headless, with failures reaching the host whole."
+status = { engine = "yes", editor = "yes", decay = "n/a", proof = "yes" }
+parity = "Native desktop"
+tests = [
+  "crates/sindri-desktop/src/host/app.rs",
+  "crates/sindri-platform/tests/game_loop.rs",
+]
+proof = ["games/platformer", "games/orbital-baked"]
+docs = ["docs/platform-host.md"]
+detail = """
+`Game` receives `start`, `fixed_update`, `update`, and `stop`, each with a
+`FrameContext` carrying the world, the input state, and frame time, and each
+able to fail in a way that reaches the host rather than being swallowed. The
+same loop runs windowed on a desktop, in a browser through the same `winit`
+event loop and canvas attachment, and headless in a test.
+
+`DesktopApp` supplies the window, event loop, and input translation once, so
+an application does not rewrite them. Target-specific code is confined to the
+crates that must have it. Application failures retain their complete
+`std::error::Error` source chain when logged natively or announced through the
+browser's `sindri:failed` event, rather than exposing only the outer host
+error.
+"""
+
+[[capability]]
+id = "browser"
+group = "Hosts and GPU"
+title = "Browser / WASM"
+summary = "The engine runs in Chromium over WebGPU with the same pictures and the same Decay behaviour as native."
+status = { engine = "yes", editor = "n/a", decay = "n/a", proof = "yes" }
+parity = "Browser / WASM"
+tests = ["scripts/browser/smoke.mjs", "crates/sindri-export/tests/exports_a_project.rs"]
+proof = ["examples/cube", "games/platformer"]
+docs = ["docs/browser.md"]
+detail = """
+The cube example draws the same picture in Chromium as it does natively, in
+the same colours, over WebGPU, and games are playable there with Decay
+executing on the browser target. `scripts/browser/smoke.mjs` checks that a page
+starts the engine and fails when it does not.
+"""
+
+[[capability]]
+id = "gpu-negotiation"
+group = "Hosts and GPU"
+title = "GPU negotiation and swapchain policy"
+summary = "Shared adapter/device negotiation with conservative limits, one policy for every swapchain outcome, and enforced sRGB."
+status = { engine = "yes", editor = "n/a", decay = "n/a", proof = "yes" }
+tests = ["crates/sindri-gpu/src/surface/tests.rs"]
+proof = ["examples/triangle", "examples/cube"]
+docs = ["docs/rendering-surface.md"]
+detail = """
+Adapter, device, and queue negotiation is shared, with conservative
+cross-target limits, resource labels, and errors that name what failed.
+Swapchain acquisition has seven outcomes and one policy applied to all of
+them, so hosts do not re-derive when to skip, reconfigure, or recreate.
+Surfaces must negotiate an sRGB format or fail loudly. Headless adapter
+initialisation is proven in CI on software Vulkan.
+"""
+
+[[capability]]
+id = "frame-pipeline"
+group = "Frame and scene extraction"
+title = "Extraction, preparation and ordered passes"
+summary = "Frames are extracted from the world, validated and ordered deterministically by stage, layer and insertion."
+status = { engine = "yes", editor = "yes", decay = "n/a", proof = "yes" }
+tests = [
+  "crates/sindri-render/src/frame.rs",
+  "crates/sindri-scene/tests/extraction/passes.rs",
+  "crates/sindri-scene/tests/extraction/textures.rs",
+  "crates/sindri-scene/tests/extraction/assets.rs",
+]
+proof = ["games/platformer"]
+docs = ["docs/rendering-frame-pipeline.md", "docs/scene-extraction.md"]
+detail = """
+A frame goes through extraction, preparation, and rendering. Preparation
+validates and orders passes deterministically by stage, then layer, then
+insertion order; stage order is `Opaque3d`, `Transparent2d`, `Overlay`.
+
+Gameplay writes to the world and nothing tells the renderer. `SceneExtractor`
+derives an ordered frame from whatever the world currently holds, using the
+built-in camera, mesh, sprite, tilemap, animation, and text schemas. No scene
+needs hand-written extraction code.
+
+Textures bind by reference: a scene names `textures/badge.png`, the renderer
+knows only a `TextureId`, and one place knows both. An unbound reference draws
+a magenta checker and is reported by name rather than failing the frame or
+silently reusing the last texture.
+"""
+
+[[capability]]
+id = "cameras-and-capture"
+group = "Frame and scene extraction"
+title = "Cameras, depth, cube primitive, inline textured surface mesh"
+summary = "Perspective and orthographic cameras with tested projection maths, depth, and deterministic offscreen PNG capture."
+status = { engine = "partial", editor = "partial", decay = "no", proof = "partial" }
+parity = "Cameras, depth, cube primitive, inline textured surface mesh"
+tests = [
+  "crates/sindri-render/src/camera.rs",
+  "crates/sindri-render/src/offscreen.rs",
+  "crates/sindri-scene/tests/extraction/cameras.rs",
+]
+proof = ["examples/cube"]
+docs = ["docs/cameras.md", "docs/rendering-color.md"]
+detail = """
+What can be drawn includes a triangle, a coloured cube, and a textured cube
+with depth testing. The frame clears once before anything draws, so a scene of
+only sprites has a depth buffer to test against. Perspective and orthographic
+cameras exist with tested projection maths, and the zero-to-one depth range and
+Y-up convention are chosen in one place rather than at each call site. Colour
+space is enforced by a shared constant, and the offscreen capture verifies
+authored colours actually survive to the pixels. Offscreen rendering produces a
+deterministic PNG, which CI uploads.
+"""
+
+[[capability]]
+id = "sprites"
+group = "Sprites and shapes"
+title = "Sprites, sheets, UVs, layers, blending"
+summary = "Textured sprites in screen or world space, batched per space, layer and texture, cut by named sheet parts."
+status = { engine = "yes", editor = "yes", decay = "partial", proof = "yes" }
+parity = "Sprites, sheets, UVs, layers, blending"
+tests = [
+  "crates/sindri-gpu/tests/sprite_batches_are_independent.rs",
+  "crates/sindri-gpu/tests/sprite_uv_rect.rs",
+  "crates/sindri-gpu/tests/world_sprites.rs",
+  "crates/sindri-gpu/tests/sprite_textures_follow_their_registry.rs",
+  "crates/sindri-render/src/sprite_batch/tests.rs",
+  "crates/sindri-scene/tests/extraction/sprites.rs",
+  "crates/sindri-core/src/sheet/tests.rs",
+]
+proof = ["games/platformer", "games/orbital-baked"]
+detail = """
+Textured sprites carry tint, anchor, and layer. A sprite is either
+screen-anchored, which is the default and cannot be occluded by the world, or
+in the world, drawn through the world camera by its full transform and hidden
+by opaque geometry in front of it. Sprites batch per space, layer, and texture,
+with a measured five-to-one draw-call reduction. Each batch draws with its own
+camera and its own instances, from buffers of its own; a GPU test draws two
+batches at two scales into one frame and reads back the pixels that only come
+out right when they stayed separate.
+
+**A sliced image says how it is cut, once.** A sheet document beside a
+texture — `textures/tiles.png` is sliced by `textures/tiles.sheet`, at a
+derived ID nothing has to declare — names the parts of it, either as a grid or
+as explicit rects. A scene then writes `textures/tiles.png#floor`, and the `#`
+that had always been rejected inside an asset ID is what carries the name,
+because it was reserved so a fragment could not leak into a path. Names rather
+than indices, so a re-slice that moves a cell does not silently change what a
+scene draws. Rects are checked once, where a sheet binds, and ride on the
+instance so every part of one sheet stays in one draw call — a GPU test reads
+the pixels back to prove the shader honours it. A name no loaded sheet places
+draws the whole image and is reported by `unresolved_sprites`, the same rule an
+unbound texture follows.
+"""
+
+[[capability]]
+id = "sprite-colour-transform"
+group = "Sprites and shapes"
+title = "Advanced sprite colour transform"
+summary = "Per-instance RGBA multipliers and offsets, `sample * tint * multiply + offset`, without breaking batches."
+status = { engine = "yes", editor = "yes", decay = "yes", proof = "yes" }
+parity = "Advanced sprite colour transform"
+tests = ["crates/sindri-scene/tests/extraction/sprites.rs"]
+proof = ["games/orbital-baked"]
+docs = ["docs/color-transform-design.md"]
+detail = """
+A sprite may carry independent RGBA multipliers and offsets evaluated as
+`sample * tint * multiply + offset`, travelling per instance so two sprites
+recoloured differently still share a draw call. The identity is
+`multiply = [1, 1, 1, 1]` and `offset = [0, 0, 0, 0]`, so a sprite authored
+before the transform existed draws exactly as it did. A transform that is not
+finite is refused at extraction rather than drawn — the reachable case is
+narrowing, since `1e39` is an ordinary `f64` and an infinity once it is an
+`f32` — while a finite value outside zero to one is left alone for the render
+target to clip. The editor draws the two quadruples as labelled RGBA rows inside
+an advanced section, collapsed until the scene has authored one and resettable
+to the identity. Orbital's mine blast flashes white-hot through the colour
+offset, which a tint cannot do, and cools within a few frames.
+"""
+
+[[capability]]
+id = "procedural-shapes"
+group = "Sprites and shapes"
+title = "Procedural shapes"
+summary = "Rectangles, ellipses, grids, regular polygons and up-to-eight-point hulls evaluated crisply in the shape shader."
+status = { engine = "yes", editor = "partial", decay = "yes", proof = "yes" }
+parity = "Procedural shapes"
+tests = [
+  "crates/sindri-render/src/shape/mod.rs",
+  "crates/sindri-decay/tests/a_script_authors_shape.rs",
+  "games/orbital-baked/tests/every_boss_is_its_own.rs",
+]
+proof = ["games/orbital-baked"]
+detail = """
+Rectangles, ellipses, grids, and regular polygons are evaluated in the shape
+shader. A polygon may also carry up to eight explicit 2D vertices; those points
+travel in the same instanced payload and the shader measures against the
+actual authored edges, so an irregular hull remains crisp without becoming a
+texture. When no points are authored, regular polygons keep their existing
+path. The eight-point cap keeps the per-instance vertex attributes inside
+Sindri's conservative WebGPU limits. Orbital Last Stand exercises the
+capability with the Strider's exact six-point hull.
+"""
+
+[[capability]]
+id = "sprite-shaders"
+group = "Sprites and shapes"
+title = "Custom shaders / materials"
+summary = "A sprite can be drawn through a project `.wgsl` function, validated with naga by every host and hot-reloaded in the editor."
+status = { engine = "partial", editor = "yes", decay = "yes", proof = "partial" }
+parity = "Custom shaders / materials"
+tests = [
+  "crates/sindri-render/src/sprite_shader/tests.rs",
+  "crates/sindri-gpu/tests/sprite_shaders.rs",
+  "crates/sindri-scene/tests/extraction/sprite_shaders.rs",
+  "game/tests/the_sprite_shader_demo_works.rs",
+]
+proof = ["examples/sprite-shaders"]
+docs = ["docs/sprite-shaders.md"]
+limits = ["Shaders reach `sindri.sprite` only, with one texture and no material asset."]
+detail = """
+`sindri.sprite` names a `.wgsl` asset in `shader` and carries four
+`shader_params`. The file defines
+`fn sprite_shader(input: SpriteShaderInput) -> vec4<f32>`, handed the pixel as
+it would draw unshaded, its UVs and the sprite's UV rect, its world position,
+the four parameters and the scene's clock, with `sample_sprite` and
+`sprite_texel_size` to read the texture again; the engine supplies the vertex
+stage and pipeline around it. Parameters ride on the instance, so sprites
+sharing a texture and a shader share a draw. Every host validates a shader with
+naga as it binds it: the editor loads, watches and hot-reloads the ones a scene
+names, `sindri-player` reads them natively and from the export manifest, and
+`sindri-export` refuses one that does not compile. A failure names the file and
+the line in the project's own numbering and the sprite falls back to the
+built-in look. Decay writes `this.sprite.shader_params.{x,y,z,w}`.
+`examples/sprite-shaders` draws an outline, a dissolve, a hit flash and a wave.
+"""
+
+[[capability]]
+id = "sprite-masks"
+group = "Sprites and shapes"
+title = "Sprite masking / stencil"
+summary = "`sindri.sprite_mask` lets sprites draw only inside or outside a soft alpha shape, without a stencil or broken batches."
+status = { engine = "yes", editor = "yes", decay = "yes", proof = "yes" }
+parity = "Sprite masking / stencil"
+tests = [
+  "crates/sindri-gpu/tests/sprite_masks.rs",
+  "crates/sindri-scene/tests/extraction/sprite_masks.rs",
+  "game/tests/the_sprite_mask_demo_works.rs",
+]
+proof = ["examples/sprite-masks"]
+docs = ["docs/sprite-masks.md"]
+limits = ["World sprites only."]
+detail = """
+`sindri.sprite_mask` places a picture whose alpha is a shape, and a sprite with
+`mask: inside` or `outside` and the mask's name draws only within or beyond it,
+softly where the mask is soft. The mask is batch state read in the fragment
+stage, so masked sprites still share draws and nothing needs a stencil.
+`examples/sprite-masks` reveals a meadow and a hidden gem through a wandering
+keyhole.
+"""
+
+[[capability]]
+id = "nine-slice"
+group = "Sprites and shapes"
+title = "Nine-slice sprites"
+summary = "A `sliced` sprite or UI image keeps its sheet-recorded border and stretches only the middle, in one draw."
+status = { engine = "yes", editor = "yes", decay = "yes", proof = "yes" }
+parity = "Nine-slice sprites"
+tests = [
+  "crates/sindri-scene/tests/extraction/nine_slice.rs",
+  "games/platformer/tests/sliced_panels.rs",
+]
+proof = ["games/platformer"]
+docs = ["docs/nine-slice.md"]
+detail = """
+A sprite or UI image drawn `sliced` keeps the border its sheet records, in
+pixels by sprite name, and stretches only the middle: nine quads in the image's
+own space, sharing one draw. `border_scale` sets how big a border pixel is
+drawn. The sheet slicer drags the border's guides on the image. The
+platformer's HUD frame and signboard are one 24-pixel panel.
+"""
+
+[[capability]]
+id = "sprite-animation"
+group = "Sprite animation"
+title = "Sprite frame clips, timing, loop state"
+summary = "Clips of named sheet parts, played as runtime state and chosen by scripts without dirtying the scene."
+status = { engine = "yes", editor = "yes", decay = "yes", proof = "yes" }
+parity = "Sprite frame clips, timing, loop state"
+tests = [
+  "crates/sindri-scene/src/animation/tests.rs",
+  "crates/sindri-scene/tests/extraction/animation.rs",
+  "crates/sindri-decay/tests/a_script_plays_a_clip.rs",
+  "games/low-tide/tests/a_crawler_looks_alive.rs",
+]
+proof = ["games/low-tide", "games/platformer"]
+detail = """
+`sindri.animation.sprite` holds clips of sprite names and which one plays,
+`SpriteAnimations` holds where each sprite has got to, and the cursor holds a
+name rather than a rect so playback does not depend on where anything sits in
+an image. Playback is runtime state, so watching an animation run does not
+rewrite the scene it came from.
+
+`Animation.play`, `stop` and `restart` name one of the clips the scene
+authored; `is_finished`, `frame` and `clip` read where playback has got to;
+`set_speed` scales it. Choosing is authored state and writes the component, so
+it lives in the world and undoes and saves like anything else, while the cursor
+is derived and is only read — which is what keeps a script driving an
+animation from dirtying the scene. `play` is idempotent so that the natural way
+to write it (`if moving { play("walk") }`, named on every frame) runs the clip
+instead of pinning it to frame one; `restart` is the separate thing to want.
+
+An animated sprite whose reference names no part of its sheet draws the first
+frame of the clip it is playing rather than the whole sheet, so a scene shows a
+pose before anything has run it — in a game's opening frame, in an offscreen
+capture, and in the editor outside play mode. Once a clip is running it decides
+alone: a frame that resolves to nothing draws the whole image rather than the
+resting pose, because a plausible picture of the wrong moment is the failure
+that hides.
+
+Low Tide exercises speed-controlled clips on children of a moving deck: its two
+tread belts roll with actual movement, pivot in opposite directions, hold their
+frame while flooded and resume after the ebb.
+"""
+
+[[capability]]
+id = "sheet-slicer"
+group = "Sprite animation"
+title = "Clip authoring and preview"
+summary = "The Sprite sheet tab slices an image on the canvas, names cells, and the animation inspector builds and previews clips."
+status = { engine = "n/a", editor = "yes", decay = "n/a", proof = "yes" }
+parity = "Clip authoring and preview"
+tests = ["editor/src/slicer/tests.rs"]
+proof = ["games/platformer"]
+detail = """
+Selecting a texture opens it in the Sprite sheet tab, a top-row tab beside the
+Scene and Game views, where the image fills the canvas pixel-sharp on a
+checkerboard, zooms about the pointer with the wheel (5% to 6400%), pans with
+the middle or right button, and fits back with Fit. Each cell is outlined on
+the picture, named cells are labelled once there is room, and with nothing open
+the tab lists every image in the project. The slice itself is the inspector's
+while an image is open: columns, rows, margin and spacing are drags, so a
+packed sheet with gutters can be cut and not only one that divides edge to
+edge. A cell is named by clicking it, and the panel lists the cells that have
+names rather than a field per cell, so a 16x16 atlas is as workable as a
+four-frame strip. Saving writes the sidecar, and the browser then lists the
+sprites underneath the image, collapsed until asked for. A sprite's animation
+inspector creates, renames, and removes clips from those named cells, orders
+frames, edits timing and looping, chooses the runtime clip, and previews it
+without changing scene state.
+"""
+
+[[capability]]
+id = "world-text"
+group = "Text"
+title = "World-space text"
+summary = "`sindri.text` places a label in world units over the sprites of its layer."
+status = { engine = "yes", editor = "yes", decay = "yes", proof = "yes" }
+parity = "World-space text"
+tests = [
+  "crates/sindri-scene/tests/extraction/world_text.rs",
+  "crates/sindri-render/tests/text_measurement.rs",
+  "games/orbital-baked/tests/damage_numbers.rs",
+]
+proof = ["games/orbital-baked"]
+docs = ["docs/world-text.md"]
+detail = """
+`sindri.text` is the UI label's fields in world units, placed at its entity and
+drawn over the sprites of its layer. Decay writes the words with `Ui.set_text`
+and `Ui.set_number` and reaches `this.world_text.color`. Orbital's landed shots
+float their damage.
+"""
+
+[[capability]]
+id = "rich-text"
+group = "Text"
+title = "Rich text"
+summary = "With `rich: true`, `[b]`, `[i]` and `[color=#rrggbb]` tags in UI or world text are spans."
+status = { engine = "yes", editor = "yes", decay = "yes", proof = "yes" }
+parity = "Rich text"
+tests = ["crates/sindri-render/src/text/rich.rs", "crates/sindri-scene/tests/extraction/text.rs"]
+proof = ["games/orbital-baked"]
+detail = """
+With `rich: true`, `[b]`, `[i]` and `[color=#rrggbb]` tags in either kind of
+text are spans. Orbital's critical hits float their damage in bold gold.
+"""
+
+[[capability]]
+id = "lights-2d"
+group = "2D lighting"
+title = "2D lights and shadows"
+summary = "Ambient plus point lights, normal maps and polar-depth shadows from occluders and tilemaps, for sprites, tiles and maps."
+status = { engine = "yes", editor = "partial", decay = "yes", proof = "yes" }
+parity = "2D lights and shadows"
+tests = [
+  "crates/sindri-render/src/light2d/tests.rs",
+  "crates/sindri-gpu/tests/sprite_lights.rs",
+  "crates/sindri-scene/tests/extraction/lights_2d.rs",
+  "games/platformer/tests/cave_lights.rs",
+  "games/low-tide/tests/the_basin_is_lit.rs",
+]
+proof = ["games/platformer", "games/low-tide"]
+docs = ["docs/2d-lights.md"]
+limits = ["A frame carries the 16 lights nearest the camera."]
+detail = """
+With `lighting_2d` on in `sindri.environment`, world sprites, tilemaps, flecks
+and world shapes are multiplied by the light reaching them: an ambient color
+plus every `sindri.light2d` point light within its radius, faded by its
+falloff. A sprite opts out with `unlit`, additive shapes are light themselves,
+and the UI is never lit. A sprite or tilemap may name a `normal_map` laid out
+like its texture; a light's `height` then decides how squarely it meets each
+texel, so a low light rakes across the relief. A light with `shadows` on is
+blocked by `sindri.light2d.occluder` boxes, polygons and the solid cells of a
+tilemap, through one-dimensional polar depth maps built on the CPU each frame.
+Decay writes a light's color, intensity, radius, falloff and height. The Scene
+view draws light radii and occluder outlines with handles. The platformer's
+cave is the proof. A voxel world viewed as a map is lit too, and its
+`normal_maps` name a normal map for each texture its squares draw from: Low
+Tide's Basin is lit by a sun that follows the tide from noon through a golden
+hour to a moonlit flood, and its crawler carries lamps and shadow-casting
+headlights.
+"""
+
+[[capability]]
+id = "normal-map-studio"
+group = "2D lighting"
+title = "Normal map studio"
+summary = "The Normal map tab derives a sprite's normal map and previews it under the game's own 2D lighting."
+status = { engine = "yes", editor = "yes", decay = "n/a", proof = "yes" }
+tests = [
+  "crates/sindri-assets/src/normal_map/tests.rs",
+  "editor/src/normal_studio/tests.rs",
+  "editor/src/native/normal_studio/scene/tests.rs",
+  "games/platformer/tests/studio_normal_map.rs",
+]
+proof = ["games/platformer"]
+docs = ["docs/normal-map-studio.md"]
+detail = """
+The Normal map tab derives a sprite's `normal_map` from its brightness or a
+painted height map, keeping its size, alpha and pixel edges, with each sheet
+cell kept apart, and material presets as starting values. The preview is the
+game's own 2D lighting rather than an imitation: the studio's surface, light
+and ambient are a `sindri.sprite`, a `sindri.light2d` and a
+`sindri.environment` in a world of its own, extracted and drawn as the Scene
+view draws, and a test requires the frame to equal the one a scene using the
+saved map extracts. It shows the map per channel, splits it against the sprite
+lit without a map, and orbits a plane in 3D. Saving writes the map and a
+`.normalmap` of the settings, so the map is made again from changed art; the
+platformer's hero is lit through one made this way.
+"""
+
+[[capability]]
+id = "tilemaps"
+group = "Tilemaps and tile volumes"
+title = "Tilemaps (ortho + iso, overhang)"
+summary = "One entity draws a grid of sheet tiles into the same batches as loose sprites, painted in the Scene view."
+status = { engine = "yes", editor = "yes", decay = "yes", proof = "yes" }
+parity = "Tilemaps (ortho + iso, overhang)"
+tests = [
+  "crates/sindri-scene/tests/extraction/tilemap.rs",
+  "editor/src/tilemap/tests.rs",
+]
+proof = ["games/platformer", "games/low-tide"]
+limits = ["Screen-space tilemaps render and edit as data, but direct painting is limited to world space."]
+detail = """
+A tilemap is a grid of tiles drawn from one entity: `sindri.tilemap` carries
+the map's grid, a palette of sprite names, and a flat array of cells indexing
+that palette, with `null` where the map is empty. Its cells become instances in
+the same batches loose sprites use, so a prop sorts among the floor rather than
+behind it. Columns and rows lay out orthogonally or isometrically, and placing a
+tile and finding the tile under a point are inverses on every cell of both.
+
+Selecting a world-space tilemap shows the slices from its texture's sheet as a
+visual palette, lets its grid be resized while preserving the overlap, and
+turns primary drag in the Scene view into an undoable paint or erase stroke.
+The hovered cell is found by inverting the exact camera matrix used to render
+that viewport, so an orthographic or isometric map does not need separate
+picking approximations. The ordinary component fields still edit projection,
+tile size, tint, render layer, and space.
+"""
+
+[[capability]]
+id = "autotiling"
+group = "Tilemaps and tile volumes"
+title = "Autotiling / rule tiles"
+summary = "A sheet declares 16-edge or 47-blob terrains; painting one redraws every neighbour that depends on the cell."
+status = { engine = "yes", editor = "yes", decay = "yes", proof = "yes" }
+parity = "Autotiling / rule tiles"
+tests = [
+  "crates/sindri-core/src/terrain.rs",
+  "crates/sindri-scene/src/terrain_paint_tests.rs",
+  "crates/sindri-decay/tests/a_script_paints_terrain.rs",
+]
+proof = ["games/platformer"]
+docs = ["docs/terrains.md"]
+detail = """
+A sheet can declare terrains: the sixteen `edges` or forty-seven `blob`
+sprites a cell draws for each pattern of same-terrain neighbors. The tilemap
+brush and `Grid.set_terrain` paint a terrain and redraw every neighbor whose
+picture depends on the cell, erasing included. The platformer's level is
+painted with its ground terrain.
+"""
+
+[[capability]]
+id = "tile-volumes"
+group = "Tilemaps and tile volumes"
+title = "Stackable tile volumes"
+summary = "Sparse `(column, row, level)` cells from a `.tileset`, resolved into only the faces nothing covers, in either projection."
+status = { engine = "yes", editor = "partial", decay = "partial", proof = "no" }
+parity = "Stackable tile volumes"
+tests = [
+  "crates/sindri-core/src/tileset/tests.rs",
+  "crates/sindri-scene/tests/extraction/tile_volume.rs",
+  "crates/sindri-scene/tests/extraction/baked_volume.rs",
+  "crates/sindri-scene/src/tile_chunk.rs",
+  "editor/src/tile_volume/tests.rs",
+]
+limits = ["No game in the repository uses a tile volume since Causeway moved onto the voxel world."]
+detail = """
+`sindri.tile_grid` carries the geometry — columns, rows, cell size,
+projection, and the screen step one level costs — and `sindri.tile_volume`
+carries sparse cells at integer `(column, row, level)` coordinates naming tiles
+in a reusable `.tileset` asset. Empty is absence rather than a reserved ID, so
+an empty sky costs nothing to store. A tile says what its faces look like,
+whether it hides a neighbour's shared face, whether it is solid, and how much of
+its cell it fills; the renderer resolves each occupied cell into only the faces
+nothing covers, so a column two blocks taller than its neighbour exposes two
+side faces without a cliff case and removing a lower block opens a real hole.
+
+**A tile can be shorter than its cell.** `height` is a fraction of a cell
+measured from its floor, defaulting to one. A half is a slab. The value is
+logical: it decides what the tile hides and how high something standing on it
+stands, and says nothing about the art. Anything taller than one cell is
+refused when the asset decodes, because occlusion and occupancy both assume a
+cell's contents stay inside it. A neighbour hides a side face only when it is at
+least as tall as the face it abuts, and a top face survives a block placed
+above it unless the tile fills its cell.
+
+**Both projections are real.** `orthogonal` or `isometric` decides where a cell
+sits, which of its faces a view can see, and what "behind" means. One tile set
+serves both: faces a projection cannot see are left undrawn. Depth belongs to a
+cell's column rather than to each drawn face, so a tower keeps the depth of the
+column it stands in.
+
+**Runtime tile volumes have one engine-owned chunk unit.** A chunk is 16×16
+columns, addressed with Euclidean coordinates and held sparsely by
+`TileChunkStore`; materializing it produces the existing scene component.
+
+**A volume is resolved once, not every frame.** It is resolved into faces once
+and replayed, with only the depth each cell sorts at measured again. `World`
+gives each entity a revision, bumped whenever anything takes a mutable borrow
+of it, and `TextureBindings` and `TileSetBindings` each carry a generation,
+handed out process-wide; a volume keeps the ones it was built from, so editing
+its cells, moving it, changing its grid, rebinding its tile set and re-cutting
+its atlas each show up on the next frame. `baked_volume.rs` is one test per
+input: each edits exactly one of them and fails if the volume goes on drawing
+what it drew before.
+
+**A script reaches one cell at a time.** `Grid.block(volume, column, row,
+level)` answers with the tile a cell holds and `Grid.set_block` writes one,
+with the empty string meaning absence in both directions. A write naming a tile
+the volume's own tile set does not define is refused at the call.
+"""
+
+[[capability]]
+id = "tile-volume-navigation"
+group = "Tilemaps and tile volumes"
+title = "Navigation over tile volume surfaces"
+summary = "A volume's walkable surface becomes grid walls by `max_step`, and `Grid.walkable` asks the same question from a script."
+status = { engine = "yes", editor = "n/a", decay = "yes", proof = "no" }
+tests = [
+  "crates/sindri-scene/tests/navigation/volume.rs",
+  "crates/sindri-decay/tests/a_script_asks_what_is_walkable.rs",
+  "crates/sindri-scene/tests/extraction/standing_on_ground.rs",
+]
+limits = [
+  "`Grid.walkable` is about a cell, not an edge, so a script-driven walker does not honour `max_step`.",
+  "Separate climb and drop limits wait on directional edges.",
+]
+detail = """
+A volume is three-dimensional and grid navigation is not, so the bridge is a
+*surface*: for each column, the height of the ground something walking across
+it stands on — the top of its highest solid cell, which is a fraction rather
+than a level because a slab's top genuinely sits half a cell lower than a
+block's. A column holding nothing solid has no surface at all: it is a hole.
+Every edge between two columns is then either a step something can take or one
+it cannot, and `sindri-grid` already refuses to cross a blocked edge — so the
+volume becomes walls rather than the pathfinder learning about levels.
+`sindri.grid.navigation` carries `max_step`, one cell by default.
+
+A grid still carrying `sindri.tilemap` navigates by that flat map alone, so
+dropping a volume beside an existing floor never closes ground the game already
+walks on. Only `WorldGridNavigation::from_world_with_tile_sets` can answer at
+all, because which cells are solid and how tall they are is a question only the
+tile set answers.
+
+`Grid.walkable(floor, x, y)` answers whether a walker can stand where a point
+falls, from the walkable surface the pathfinder walks, choosing the cell by
+`sindri_scene::nearest_cell`, the same rule a walker's own placement reads
+from. Off the grid, water, decoration and empty columns all answer the same
+way. An authored occupant rests on whatever *supports* it; a walker stands only
+on what is *walkable*.
+"""
+
+[[capability]]
+id = "environment-lighting"
+group = "World presentation"
+title = "3D directional + ambient lighting"
+summary = "`sindri.environment` and a directional `sindri.light` shade textured 3D geometry, with one bounded shadow map."
+status = { engine = "partial", editor = "partial", decay = "partial", proof = "partial" }
+parity = "3D directional + ambient lighting"
+tests = ["crates/sindri-gpu/tests/sunlight_faces.rs", "crates/sindri-decay/tests/lights3d.rs"]
+proof = ["games/voxel-lab", "examples/lighting3d", "examples/daynight"]
+docs = ["docs/world-presentation-plan.md"]
+limits = ["Shipped-host fog/post delivery, sky, environment profiles/volumes, weather, water, full material assets and cascaded shadows remain future slices."]
+detail = '''
+`sindri.environment` is authored scene state for background, ambient fill,
+directional shadows, voxel contact-depth ambient occlusion, and an ordered
+world post stack. The sun is a `sindri.light` entity (kind `directional`) aimed
+by its rotation along local -Z and drawn and aimed in the Scene view;
+`SceneExtractor::lighting` combines it with the environment's ambient into
+renderer-owned `WorldLighting`, tolerating an invalid light in the editor;
+textured cubes, authored meshes, and cached voxel meshes share that model in
+editor and browser rendering. The default renderer lighting preserves the
+previous unlit appearance for scenes without an environment. Voxel Lab is the
+acceptance surface. Directional shadows use one bounded depth map with authored
+coverage, 256–2048 resolution, and bias controls; both transient world meshes
+and persistent voxel meshes cast and receive them.
+
+
+`this.light` and `Entity.light` expose color, intensity, range, spotlight
+half-angles and independent boolean enabled state from the shared typed surface.
+Setters validate full candidates before mutation, including f32 narrowing and
+cross-field cone bounds; failed writes retain payloads and whole colors are
+atomic. Reads honor omitted defaults; Color alpha stays one. The enabled flag
+changes illumination without deactivating the entity or stopping its scripts.
+`examples/lighting3d` is feature proof for Explorer's planned lighting track:
+its checked script animates parented points/spots and the sun, reaches lit/dark
+Session goals and exercises cube, inline and imported geometry. Completion,
+hover, generated docs and typed batch checks share the same metadata. Native,
+real WebGPU and editor Play controls are recorded in `3d-lights.md`. In-tree
+game adoption and local shadows remain
+open; no new uniform or pass cost is introduced.
+'''
+
+[[capability]]
+id = "voxel-ao"
+group = "World presentation"
+title = "Voxel ambient occlusion / contact depth"
+summary = "Voxel meshes carry deterministic corner AO controlled by the environment's contact-depth strength."
+status = { engine = "partial", editor = "partial", decay = "no", proof = "partial" }
+parity = "Voxel ambient occlusion / contact depth"
+tests = ["crates/sindri-voxel/src/mesh_tests.rs"]
+proof = ["games/voxel-lab"]
+limits = ["Screen-space AO for arbitrary geometry is absent."]
+
+[[capability]]
+id = "post-processing"
+group = "World presentation"
+title = "Post-processing stack"
+summary = "Exposure, tone mapping, contrast, saturation, bloom and vignette in one ordered world post path; overlay/UI stays crisp."
+status = { engine = "partial", editor = "partial", decay = "no", proof = "partial" }
+parity = "Post-processing stack"
+tests = ["crates/sindri-render/src/bloom/mod.rs"]
+proof = ["games/voxel-lab"]
+limits = ["Advanced cinematic effects remain future slices."]
+
+[[capability]]
+id = "glb-models"
+group = "3D models"
+title = "glTF / model import"
+summary = "Self-contained binary GLB decodes to reusable geometry, hierarchy, materials and textures, and draws natively and in the browser."
+status = { engine = "partial", editor = "no", decay = "no", proof = "no" }
+parity = "glTF / model import"
+tests = ["crates/sindri-assets/src/decode/model/tests.rs", "crates/sindri-render/src/model/tests.rs", "crates/sindri-gpu/tests/imported_models.rs", "crates/sindri-scene/tests/extraction/models.rs", "crates/sindri-export/tests/imported_models.rs", "crates/sindri/tests/imported_model.rs"]
+docs = ["docs/imported-models.md"]
+limits = ["Full model authoring, animation and skinning remain deferred.", "Feature labs and external Low Tide are evidence; in-tree model gameplay adoption remains open."]
+detail = '''
+`ModelAssetDecoder` parses self-contained binary GLB into reusable CPU geometry,
+node local matrices/children, materials and embedded base-color textures. The
+tiny deterministic fixture exercises both index widths, multiple primitives,
+mesh reuse, non-indexed triangles and malformed/unsupported diagnostics.
+`AssetLoader` reuse is covered. A separate renderer resource and GPU path retain
+normal/UV geometry, hierarchy, textures and materials, composing node and entity
+matrices with inverse-transpose normals. GPU readback coverage checks colors,
+depth and upload reuse; renderer resource tests check malformed data. Scene
+`ModelComponent` references validate asset paths and extract shared resources
+with entity world transforms. Disabled models are discovered without drawing;
+missing bindings name the asset. The public facade converts decoded models
+without cross-coupling foundational crates. The editor catalogue assigns the
+registered component an existing icon/family. Render and static-collision asset
+fields now declare model metadata, use a GLB-only project picker and complete
+Add Component with an actual model. Independent widget/component history scopes
+keep the two selections separate; native review verifies Undo/Redo, save/reopen
+and Play with an alternate wall. Broader model authoring remains deferred. Model manifests and export retain original GLB bytes and discover
+scene/prefab
+references, including inactive entities. Native project capture and the WebGPU
+project host prepare/bind models once through the existing asset queue and
+apply scene lighting. The exact Low Tide cutaway crawler was visually inspected
+in both runtimes at 1200 × 1000, correctly oriented and visibly recognizable.
+Exported bytes match the source hash. Full editor authoring,
+animation and skinning remain deferred. This external proof does not claim
+the repository's in-tree game completion surface. Model Collision Lab now also
+has native player-window visual proof on X11/software Vulkan, after editor asset
+selection and save/reopen; the imported wall blocks keyboard movement and the
+walker renders on the goal pad.
+See [imported models](../imported-models.md).
+'''
+proof = ["examples/model-collision"]
+
+[[capability]]
+id = "font-fallback"
+group = "Not yet"
+title = "Font fallback and richer spans"
+summary = "There is no font fallback, and rich text has colour, bold and italic spans only."
+status = { engine = "no", editor = "no", decay = "n/a", proof = "n/a" }
+
+[[capability]]
+id = "skeletal-animation"
+group = "Not yet"
+title = "Skeletal animation"
+summary = "Imported models are static: glTF animation and skinning, and further generated primitives, are open."
+status = { engine = "no", editor = "no", decay = "no", proof = "no" }
+parity = "Skeletal animation"
+
+[[capability]]
+id = "tile-volume-terrain"
+group = "Not yet"
+title = "Tile volume terrain tools"
+summary = "Terrain-name painting, automatic supporting strata, side-face picking and slice views for tile volumes remain; see `docs/tile-system-2.md`."
+status = { engine = "no", editor = "no", decay = "n/a", proof = "n/a" }
+
+[[capability]]
+id = "orbit-camera-3d"
+group = "3D foundation"
+title = "3D orbit / third-person camera"
+summary = "`sindri.camera.orbit` and explicit `Camera.orbit` controls provide world-space follow, aiming, smoothing and 3D ray pull-in; `Camera.perspective_fov` changes FOV"
+status = { engine = "partial", editor = "partial", decay = "partial", proof = "partial" }
+parity = "3D orbit / third-person camera"
+tests = ["crates/sindri-scene/tests/orbit_cameras.rs", "crates/sindri-runtime/tests/an_orbit_camera_project_plays.rs"]
+proof = ["examples/orbit"]
+docs = ["docs/cameras.md"]
+detail = '''
+`examples/orbit` is an authored feature project with a walker, raised goal and
+blocking wall. Decay changes the perspective FOV and orbit angles; the shared
+runtime follows, aims, pulls in against the wall and recovers after the wall
+is disabled. Its project test opens, compiles and runs to the goal. Native and
+exported Chromium captures were visually inspected before and after recovery;
+the browser fetched the exported assets and reported the scripted goal without
+runtime or GPU errors. The flat-color example produces fourteen screenshot
+colors, so its local smoke used an eight-color minimum plus blue-walker and
+gold-goal pixel checks instead of the generic sixteen-color blank-frame gate. Scene
+regressions cover immediate pull-in, smoothed recovery, sensor/layer/self
+filtering, rotated and scaled parents, Z locks, invalid settings and payload
+preservation. Editor Add Component now creates Camera Orbit from a real active
+spatial target with a stable ID; a Camera is required. Invalid numeric or target
+edits are refused before commands, retaining the previous component. Unit tests
+exercise defaults, self/child/inactive/UI/unidentified exclusions, validation,
+Undo/Redo and save/reopen. Native [review](../camera-orbit-editor-review.md) removes
+the camera script from a scratch Orbit Camera Lab, authors orbit in the inspector
+and reaches the walker goal with engine-owned pull-in/recovery. Selected Scene
+view guides show the world-space focus, requested position/yaw circle and
+actual camera pose during pull-in/recovery, with near-plane clipping and no
+picking or world mutations. Parented target/owner, live poses, invalid targets,
+overflow and a camera behind the Scene eye have regressions. Collision uses one
+sight-line ray and synchronized obstacle poses; camera-volume sweeps and
+Explorer's game/browser proof remain pending. Pointer lock has separate native,
+browser and editor feature-lab evidence. This is new general camera
+capability for Explorer in slice 6 of `docs/3d-update.md`.
+
+Orbit Lab also exercises existing transform scale through normal keyboard
+controls: 1 narrows the wall, 2 restores it and R resumes automatic removal.
+Manual edits reactivate and retain the barrier. A synchronized center ray must
+hit it before an outside ray can verify the narrow/wide state, preventing an
+inactive/missing collider from counting as scale proof. Session regression
+observes reactivation, repeated edits, orbit recovery/pull-in and the goal;
+Chromium drives the same controls and captures both widths. Native
+[scale review](../collider-scale-editor-review.md) verifies matching mesh/collider
+guides, Undo/Redo, save/reopen, Play queries/goal and Stop restoring the saved
+scale. This is feature adoption of the existing general 3D scale capability;
+Explorer game proof remains open.
+'''
+
+[[capability]]
+id = "standard-material-factors"
+group = "3D foundation"
+title = "Shared standard material factors"
+summary = "One numeric `MaterialFactors` type and GGX shader serve opt-in cubes, inline/cached geometry, voxel owners and imported primitives"
+status = { engine = "partial", editor = "partial", decay = "no", proof = "partial" }
+parity = "Shared standard material factors"
+tests = ["crates/sindri-gpu/tests/standard_materials.rs"]
+proof = ["examples/lighting3d"]
+docs = ["docs/rendering-materials.md"]
+detail = '''
+Shared `MaterialFactors` and direct GGX now shade opt-in cubes, inline/cached
+meshes, voxel roots and imported primitives. `sindri.material` authors linear
+base color, metallic/roughness and emission, with checked ranges and per-entity
+factor replacement. GPU comparisons, zero-light emission, mask-alpha and cache
+reuse, scene undo and voxel residency regressions, native/browser swatches and
+native editor edit/Undo/Redo/save/reopen review exercise the numeric foundation.
+Core GLB emissive factors survive decoding/preparation and render without scene
+overrides. Decoder/facade/resource tests, zero-light GPU readback, override
+restoration, masked-shadow invariance and native/browser imported GLB controls
+exercise this addition. Absent overrides preserve legacy/imported looks. Material
+assets, unified texture/alpha/sidedness, emissive maps and Explorer game adoption remain
+open; see [the material contract](../rendering-materials.md).
+'''
+
+[[capability]]
+id = "textured-geometry-normals"
+group = "3D foundation"
+title = "Authored textured geometry normals"
+summary = "Cubes have outward face normals; inline surfaces accept validated optional XYZ normals and cached render vertices carry them"
+status = { engine = "partial", editor = "no", decay = "no", proof = "partial" }
+parity = "Authored textured geometry normals"
+tests = ["crates/sindri-gpu/tests/standard_materials/normals.rs"]
+docs = ["docs/rendering-materials.md"]
+detail = '''
+Cubes carry outward face normals, while inline mesh documents and cached
+render vertices can supply object-space normals for smooth lighting. Checked
+components reject malformed vectors/counts; absent normals retain flat shading.
+GPU comparisons with imported geometry exercise nonuniform scale, rotation and
+reflection; world color/shadow pipelines correct reflected front-face selection.
+Scene edit/history tests and native/browser smooth/flat ellipsoid controls prove
+the feature. Textured vertices grow from 24 to 36 bytes; per-draw uniforms and
+cache residency are unchanged. Editor authoring review, Decay access and Explorer
+adoption remain open. See [normal semantics](../rendering-materials.md#textured-geometry-normals).
+'''
+
+[[capability]]
+id = "shared-lighting-integration"
+group = "3D foundation"
+title = "Lighting"
+summary = "One authored ambient contribution plus one directional world light shade textured 3D geometry and voxel terrain in editor viewports and Voxel Lab, with one bounded directional shadow map"
+status = { engine = "partial", editor = "partial", decay = "partial", proof = "partial" }
+parity = "Lighting"
+tests = ["game/tests/a_3d_lighting_project_plays.rs"]
+proof = ["examples/lighting3d"]
+docs = ["docs/3d-lights.md"]
+detail = '''
+`this.light` and `Entity.light` expose color, intensity, range, spotlight
+half-angles and independent boolean enabled state from the shared typed surface.
+Setters validate full candidates before mutation, including f32 narrowing and
+cross-field cone bounds; failed writes retain payloads and whole colors are
+atomic. Reads honor omitted defaults; Color alpha stays one. The enabled flag
+changes illumination without deactivating the entity or stopping its scripts.
+`examples/lighting3d` is feature proof for Explorer's planned lighting track:
+its checked script animates parented points/spots and the sun, reaches lit/dark
+Session goals and exercises cube, inline and imported geometry. Completion,
+hover, generated docs and typed batch checks share the same metadata. Native,
+real WebGPU and editor Play controls are recorded in `3d-lights.md`. In-tree
+game adoption and local shadows remain
+open; no new uniform or pass cost is introduced.
+'''
+
+[[capability]]
+id = "local-lights-3d"
+group = "3D foundation"
+title = "3D point and spot lights"
+summary = "Strongest-eight active points/spots, world-unit range/falloff, feathered half-angle cones and composed parent positions/directions share Lambert/GGX across meshes, voxels and imported models"
+status = { engine = "partial", editor = "partial", decay = "partial", proof = "partial" }
+parity = "3D point and spot lights"
+tests = ["crates/sindri-gpu/tests/standard_materials/points.rs", "crates/sindri-gpu/tests/standard_materials/spots.rs"]
+proof = ["examples/lighting3d"]
+docs = ["docs/3d-lights.md"]
+detail = '''
+`sindri.light` now supports point lights with world-unit range. The strongest
+eight active points shade primitive, inline/cached/voxel and imported geometry
+through shared Lambert/GGX point lighting. Positions follow composed live
+transforms and inactive ancestors suppress the light. Editor creation uses one
+checked transaction and selected world-range circles; studio lighting omits
+authored points. Native/browser feature controls and GPU/scene regressions are
+described in [the 3D light contract](../3d-lights.md). This is Explorer feature
+proof, with no in-tree game adoption yet; local shadows are absent.
+Typed runtime light properties are described below. Points now share the
+spotlight records
+described below. The fixed uniform cost is 512 additional
+bytes per color draw; shared buffers and spatial light assignment remain open.
+
+Explorer's planned lighting track now has unshadowed spotlights as feature proof;
+no in-tree game uses them yet. `sindri.light.kind = "spot"` uses composed world
+position/forward with validated inner/outer half-angles in radians. Points and
+spots share eight strongest-intensity slots, range falloff and Lambert/GGX
+shading across world/voxel meshes and imported models. Cone strength feathers
+with smoothstep between angle cosines. Color uniforms are now 880/928 bytes for
+textured/model draws (eight 64-byte records); shadow uniforms, passes, writes
+and persistent geometry uploads are unchanged. The editor creates down-facing
+spots in one undo step and paints clipped selected inner/outer range cones.
+Native/browser aimed/away controls and Scene/GPU/guide regressions provide
+feature evidence. Local shadows and Explorer adoption remain open; runtime light
+controls and mounted-light feature evidence are described below and in `3d-lights.md`.
+'''
+
+[[capability]]
+id = "runtime-environment"
+group = "3D foundation"
+title = "Runtime ambient and background controls"
+summary = "Typed entity environment access shares authored defaults and validates full candidates atomically"
+status = { engine = "partial", editor = "partial", decay = "partial", proof = "partial" }
+parity = "Runtime ambient and background controls"
+tests = ["crates/sindri-decay/tests/environment.rs"]
+proof = ["examples/lighting3d"]
+docs = ["docs/runtime-environment.md"]
+detail = '''
+Typed `this.environment` / `entity.environment` address an existing authored
+environment. Ambient intensity, RGB Color and RGBA background reads honor
+defaults; writes validate the full payload before mutation and preserve unrelated
+settings. Whole Color writes are atomic, fractional numbers stay fractional,
+ambient alpha stays one, and stale/missing targets are runtime errors.
+Lighting Lab extends its first two phases with cool/warm ambient and clear-color
+changes, restoring original settings at the ready goal. Shared Session tests
+observe the resulting lighting and frame clear; native/browser captures and
+editor Play exercise rendering. This is feature proof for Explorer/Low Tide 3D's
+planned lighting track, with in-tree game adoption and fog/post controls open.
+Day/Night Lab below exercises the project clock and mounted-light integration. No renderer layout, resource lifetime or dependency changes.
+See `runtime-environment.md` for the contract and validation evidence.
+'''
+
+[[capability]]
+id = "daynight-cycle"
+group = "3D foundation"
+title = "Scripted day/night cycle"
+summary = "Day/Night Lab opens, compiles and plays two Decay clock configurations through sunrise/midday/sunset/night and a continuing goal"
+status = { engine = "partial", editor = "partial", decay = "partial", proof = "partial" }
+parity = "Scripted day/night cycle"
+tests = ["game/tests/a_daynight_project_plays.rs"]
+proof = ["examples/daynight"]
+docs = ["docs/daynight.md"]
+detail = '''
+`examples/daynight` is feature proof for Explorer and external Low Tide 3D's
+planned lighting track. Its Decay-owned clock smoothly changes sun brightness,
+color and rotation, ambient light and background through four phases. A moving
+GLB carries a point and spotlight; night illumination works while the sun is
+disabled. Real-project Session tests exercise two clock configurations, all
+phases, composed night positions, continued motion after the goal, frozen hours
+and independent night controls. Native/browser images isolate moving sun
+shadows on imported ground with fixed model poses, and local illumination at
+midnight. Native editor Play runs the same scene. See `daynight.md` for measured
+evidence. No new host API, renderer path, dependency or engine time service;
+in-tree game adoption and fog/post controls remain open.
+'''
+
+[[capability]]
+id = "project-host-fog-post"
+group = "Not yet"
+title = "Authored fog/AO/post stack in shipped project hosts"
+summary = "Editor viewports apply these environment settings; the shared native/browser player and offscreen project renderer still only apply background, ambient/directional lighting and shadows"
+status = { engine = "no", editor = "n/a", decay = "no", proof = "no" }
+parity = "Authored fog/AO/post stack in shipped project hosts"
+docs = ["docs/3d-foundation-review.md"]
+detail = '''
+Editor viewports apply these environment settings; the shared native/browser player and offscreen project renderer still only apply background, ambient/directional lighting and shadows. Fog/AO/post delivery remains separate work
+'''

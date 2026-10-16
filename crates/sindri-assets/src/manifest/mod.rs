@@ -128,6 +128,8 @@ pub enum AssetKind {
     /// Reusable authored data that is not placed in the world.
     Profile,
     Texture,
+    /// A self-contained static binary glTF model.
+    Model,
     /// A sprite sheet describing how a texture is cut up.
     Sheet,
     /// Semantic tiles and their baked face sprite references.
@@ -145,7 +147,7 @@ impl AssetKind {
     /// Every kind, in the order a host should load them.
     ///
     /// The scene first, because everything else is referenced from it.
-    pub const ALL: [Self; 10] = [
+    pub const ALL: [Self; 11] = [
         Self::Scene,
         Self::Prefab,
         Self::Profile,
@@ -153,6 +155,7 @@ impl AssetKind {
         Self::TileSet,
         Self::Script,
         Self::Texture,
+        Self::Model,
         Self::Font,
         Self::Audio,
         Self::Other,
@@ -174,6 +177,7 @@ impl AssetKind {
         match id.rsplit_once('.').map(|(_, extension)| extension) {
             Some("wav" | "ogg" | "mp3" | "flac") => Self::Audio,
             Some("png" | "jpg" | "jpeg") => Self::Texture,
+            Some("glb") => Self::Model,
             Some("ttf" | "otf") => Self::Font,
             Some("decay") => Self::Script,
             Some("scene") => Self::Scene,
@@ -194,6 +198,7 @@ impl AssetKind {
             Self::Prefab => "prefab",
             Self::Profile => "profile",
             Self::Texture => "texture",
+            Self::Model => "model",
             Self::Sheet => "sheet",
             Self::TileSet => "tile_set",
             Self::Font => "font",

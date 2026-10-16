@@ -198,6 +198,7 @@ fn a_scanned_manifest_says_what_its_assets_are() {
         ("textures/player.sheet", AssetKind::Sheet),
         ("tiles/world.tileset", AssetKind::TileSet),
         ("textures/player.png", AssetKind::Texture),
+        ("models/crawler.glb", AssetKind::Model),
         ("fonts/Inter.ttf", AssetKind::Font),
         ("audio/theme.wav", AssetKind::Audio),
         ("fonts/Inter-OFL.txt", AssetKind::Other),
@@ -218,6 +219,7 @@ fn a_scanned_manifest_says_what_its_assets_are() {
         AssetKind::Sheet,
         AssetKind::TileSet,
         AssetKind::Texture,
+        AssetKind::Model,
         AssetKind::Font,
         AssetKind::Audio,
     ] {

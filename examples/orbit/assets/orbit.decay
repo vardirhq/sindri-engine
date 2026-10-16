@@ -1,0 +1,116 @@
+// The camera stays on the walker's side of the barrier, then returns to its orbit.
+script CameraRig {
+    var yaw: f32 = 0.0;
+    var pitch: f32 = 0.35;
+    var was_locked: bool = false;
+    var scale_pending: bool = false;
+    var inspect_scale: bool = false;
+    var barrier_width: f32 = 10.0;
+    @export
+    var sensitivity: f32 = 0.005;
+    fn start() {
+        let target = World.find("Walker");
+        Camera.perspective_fov(this.entity, 65.0);
+        Camera.orbit(this.entity, target, 0.0, 0.35, 6.0);
+        Camera.orbit_offset(this.entity, Vec3(0.0, 0.5, 0.0));
+        Camera.orbit_smoothing(this.entity, 8.0);
+        Camera.orbit_collision(this.entity, 1.0, 0.2);
+    }
+    fn update(dt: f32) {
+        verify_scale();
+        if Input.Keyboard.just_pressed("Digit1") { resize_barrier(0.02); }
+        if Input.Keyboard.just_pressed("Digit2") { resize_barrier(10.0); }
+        if Input.Keyboard.just_pressed("Digit3") {
+            inspect_scale = true;
+            yaw = 3.1415927;
+            pitch = 0.35;
+        }
+        if Input.Keyboard.just_pressed("R") {
+            inspect_scale = false;
+            yaw = 0.0;
+            pitch = 0.35;
+            let barrier = World.find("Barrier");
+            World.set_active(barrier, true);
+            barrier.transform.scale.x = 10.0;
+            Barrier.on(barrier).manual = false;
+            Barrier.on(barrier).elapsed = 0.0;
+            scale_pending = false;
+            print("Barrier automatic");
+        }
+        if !inspect_scale { yaw += dt * 0.2; }
+        if Input.Pointer.just_pressed("Left") && !Input.Pointer.over_ui && Input.Touch.count == 0.0 {
+            if Input.Pointer.locked { Input.Pointer.unlock(); }
+            else { Input.Pointer.lock(); }
+        }
+        if Input.Keyboard.just_pressed("U") { Input.Pointer.unlock(); }
+        if Input.Pointer.locked != was_locked {
+            was_locked = Input.Pointer.locked;
+            if was_locked { print("Pointer captured"); }
+            else { print("Pointer released"); }
+        }
+        if Input.Pointer.locked || (Input.Pointer.is_down("Right") && !Input.Pointer.over_ui) {
+            let motion = Input.Pointer.delta;
+            if Input.Pointer.locked && (motion.x != 0.0 || motion.y != 0.0) {
+                print("Pointer motion " + motion.x + " " + motion.y);
+            }
+            yaw -= motion.x * sensitivity;
+            pitch = clamp(pitch + motion.y * sensitivity, -1.2, 1.2);
+        }
+        Camera.orbit(this.entity, World.find("Walker"), yaw, pitch, 6.0);
+    }
+    fn resize_barrier(width: f32) {
+        let barrier = World.find("Barrier");
+        World.set_active(barrier, true);
+        Barrier.on(barrier).manual = true;
+        barrier.transform.scale.x = width;
+        barrier_width = width;
+        scale_pending = true;
+        if width < 1.0 { print("Barrier narrow"); }
+        else { print("Barrier wide"); }
+    }
+    // Queries see the previous synchronized solve, so verify on later updates.
+    fn verify_scale() {
+        if !scale_pending { return; }
+        let center = Physics3d.raycast(Vec3(0.0, 2.0, 6.0), Vec3(0.0, 0.0, -1.0), 10.0, 1.0, false, null);
+        if center == null { return; }
+        if center.entity != World.find("Barrier") { return; }
+        let hit = Physics3d.raycast(Vec3(3.0, 2.0, 6.0), Vec3(0.0, 0.0, -1.0), 10.0, 1.0, false, null);
+        if barrier_width < 1.0 {
+            if hit == null {
+                scale_pending = false;
+                print("Barrier scale query narrow");
+            }
+        } else if hit != null {
+            if hit.entity == World.find("Barrier") {
+                scale_pending = false;
+                print("Barrier scale query wide");
+            }
+        }
+    }
+}
+
+script Walker {
+    var arrived: bool = false;
+    fn update(dt: f32) {
+        if arrived { return; }
+        let goal = World.find("Goal");
+        let distance = this.transform.world_position.distance(goal.transform.world_position);
+        if distance <= 0.01 {
+            arrived = true;
+            print("Arrived");
+            return;
+        }
+        this.transform.look_at(goal.transform.world_position);
+        this.transform.world_position += this.transform.forward * min(distance, 0.8 * dt);
+    }
+}
+
+script Barrier {
+    var elapsed: f32 = 0.0;
+    var manual: bool = false;
+    fn update(dt: f32) {
+        if manual { return; }
+        elapsed += dt;
+        if elapsed >= 2.0 { World.set_active(this.entity, false); }
+    }
+}

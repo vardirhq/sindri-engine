@@ -317,3 +317,47 @@ fn a_world_following_the_camera_moves_its_window_with_the_view() {
     assert_eq!(sections_uploaded(&away), 1, "the ground there is loaded");
     assert!(releases(&away) > 0, "and the ground left behind let go");
 }
+
+#[test]
+fn voxel_material_override_does_not_rebuild_resident_geometry() {
+    use sindri_core::{CommandBuffer, CommandHistory, SceneEntityId, WorldCommand};
+    let extractor = SceneExtractor::new().unwrap();
+    let mut world = voxel_world();
+    let textures = textures();
+    extractor
+        .extract(&world, VIEWPORT, CameraView::default(), &textures)
+        .unwrap();
+    let entity = world
+        .entity_for_source_id(&SceneEntityId::new("terrain").unwrap())
+        .unwrap();
+    let mut commands = CommandBuffer::new();
+    commands.push(WorldCommand::SetComponent {
+        entity,
+        type_name: "sindri.material".into(),
+        payload: serde_json::json!({"metallic":0.5}),
+    });
+    CommandHistory::default()
+        .apply(commands.into_transaction("Terrain Material"), &mut world)
+        .unwrap();
+    let frame = extractor
+        .extract(&world, VIEWPORT, CameraView::default(), &textures)
+        .unwrap();
+    let mut counted = 0;
+    for pass in frame.passes() {
+        if let FrameCommand::CachedTexturedMesh { replacement, .. } = &pass.command {
+            assert!(
+                replacement.is_none(),
+                "numeric factors never re-mesh terrain"
+            );
+            assert_eq!(
+                pass.material,
+                Some(sindri_render::MaterialFactors {
+                    metallic: 0.5,
+                    ..Default::default()
+                })
+            );
+            counted += 1;
+        }
+    }
+    assert!(counted > 0);
+}

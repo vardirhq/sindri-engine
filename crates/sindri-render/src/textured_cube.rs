@@ -1,5 +1,3 @@
-use std::borrow::Cow;
-
 use glam::{Mat4, Vec3};
 use wgpu::util::DeviceExt;
 
@@ -11,125 +9,42 @@ use crate::{
     textured_mesh_cache::TexturedMeshCache,
 };
 
-const SHADER: &str = include_str!("textured_cube.wgsl");
+const SHADER: &str = concat!(
+    include_str!("world_effects.wgsl"),
+    include_str!("material.wgsl"),
+    include_str!("textured_cube.wgsl")
+);
 
+mod draw;
 mod geometry;
+mod material;
+mod model;
+mod pipeline;
 mod shadow_pass;
 mod uniform;
 
+use draw::encode_mesh_buffers;
 use uniform::cube_uniform;
 
 use geometry::{INDICES, VERTICES};
-
-fn create_bind_group_layout(device: &wgpu::Device) -> wgpu::BindGroupLayout {
-    device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
-        label: Some("Sindri textured cube bind group layout"),
-        entries: &[
-            wgpu::BindGroupLayoutEntry {
-                binding: 0,
-                visibility: wgpu::ShaderStages::VERTEX_FRAGMENT,
-                ty: wgpu::BindingType::Buffer {
-                    ty: wgpu::BufferBindingType::Uniform,
-                    has_dynamic_offset: false,
-                    min_binding_size: None,
-                },
-                count: None,
-            },
-            wgpu::BindGroupLayoutEntry {
-                binding: 1,
-                visibility: wgpu::ShaderStages::FRAGMENT,
-                ty: wgpu::BindingType::Texture {
-                    sample_type: wgpu::TextureSampleType::Float { filterable: true },
-                    view_dimension: wgpu::TextureViewDimension::D2,
-                    multisampled: false,
-                },
-                count: None,
-            },
-            wgpu::BindGroupLayoutEntry {
-                binding: 2,
-                visibility: wgpu::ShaderStages::FRAGMENT,
-                ty: wgpu::BindingType::Sampler(wgpu::SamplerBindingType::Filtering),
-                count: None,
-            },
-            wgpu::BindGroupLayoutEntry {
-                binding: 3,
-                visibility: wgpu::ShaderStages::FRAGMENT,
-                ty: wgpu::BindingType::Texture {
-                    sample_type: wgpu::TextureSampleType::Depth,
-                    view_dimension: wgpu::TextureViewDimension::D2,
-                    multisampled: false,
-                },
-                count: None,
-            },
-            wgpu::BindGroupLayoutEntry {
-                binding: 4,
-                visibility: wgpu::ShaderStages::FRAGMENT,
-                ty: wgpu::BindingType::Sampler(wgpu::SamplerBindingType::Comparison),
-                count: None,
-            },
-        ],
-    })
-}
-
-fn create_pipeline(
-    device: &wgpu::Device,
-    target_format: wgpu::TextureFormat,
-    bind_group_layout: &wgpu::BindGroupLayout,
-) -> wgpu::RenderPipeline {
-    let shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
-        label: Some("Sindri textured cube shader"),
-        source: wgpu::ShaderSource::Wgsl(Cow::Borrowed(SHADER)),
-    });
-    let layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
-        label: Some("Sindri textured cube pipeline layout"),
-        bind_group_layouts: &[Some(bind_group_layout)],
-        immediate_size: 0,
-    });
-    device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
-        label: Some("Sindri textured cube pipeline"),
-        layout: Some(&layout),
-        vertex: wgpu::VertexState {
-            module: &shader,
-            entry_point: Some("vs_main"),
-            buffers: &[Some(TexturedVertex::ambient_occlusion_layout())],
-            compilation_options: wgpu::PipelineCompilationOptions::default(),
-        },
-        fragment: Some(wgpu::FragmentState {
-            module: &shader,
-            entry_point: Some("fs_main"),
-            compilation_options: wgpu::PipelineCompilationOptions::default(),
-            targets: &[Some(target_format.into())],
-        }),
-        primitive: wgpu::PrimitiveState {
-            cull_mode: Some(wgpu::Face::Back),
-            ..Default::default()
-        },
-        depth_stencil: Some(wgpu::DepthStencilState {
-            format: DepthTarget::FORMAT,
-            depth_write_enabled: Some(true),
-            depth_compare: Some(wgpu::CompareFunction::Less),
-            stencil: wgpu::StencilState::default(),
-            bias: wgpu::DepthBiasState::default(),
-        }),
-        multisample: wgpu::MultisampleState::default(),
-        multiview_mask: None,
-        cache: None,
-    })
-}
+use pipeline::{create_bind_group_layout, create_pipeline, orientation};
 
 #[derive(Debug)]
 pub struct TexturedCubeRenderer {
-    pipeline: wgpu::RenderPipeline,
+    models: crate::model::ModelRenderer,
+    draw_stats: crate::MeshDrawStats,
+    pipeline: [wgpu::RenderPipeline; 2],
     bind_group_layout: wgpu::BindGroupLayout,
     batches: Vec<MeshBatch>,
     next: usize,
     mesh: MeshBuffers,
     cached_meshes: TexturedMeshCache,
+    material: Option<crate::MaterialFactors>,
     lighting: WorldLighting,
     shadow_settings: ShadowSettings,
     shadow_map: ShadowMap,
     shadow_bind_group_layout: wgpu::BindGroupLayout,
-    shadow_pipeline: wgpu::RenderPipeline,
+    shadow_pipeline: [wgpu::RenderPipeline; 2],
     shadow_view_projection: Mat4,
     ambient_occlusion_strength: f32,
     fog: FogSettings,
@@ -159,16 +74,20 @@ impl TexturedCubeRenderer {
     /// baked in, so one renderer draws every mesh in a scene.
     pub fn new(device: &wgpu::Device, target_format: wgpu::TextureFormat) -> Self {
         let bind_group_layout = create_bind_group_layout(device);
-        let pipeline = create_pipeline(device, target_format, &bind_group_layout);
+        let pipeline = [wgpu::FrontFace::Ccw, wgpu::FrontFace::Cw]
+            .map(|front| create_pipeline(device, target_format, &bind_group_layout, front));
         let shadow_map = ShadowMap::new(device, ShadowSettings::default().map_size);
         let (shadow_bind_group_layout, shadow_pipeline) = create_shadow_pipeline(device);
         Self {
+            models: crate::model::ModelRenderer::new(device, target_format),
+            draw_stats: crate::MeshDrawStats::default(),
             pipeline,
             bind_group_layout,
             batches: Vec::new(),
             next: 0,
             mesh: MeshBuffers::new(device, "Sindri textured cube", &VERTICES, &INDICES),
             cached_meshes: TexturedMeshCache::default(),
+            material: None,
             lighting: WorldLighting::default(),
             shadow_settings: ShadowSettings::default(),
             shadow_map,
@@ -189,6 +108,7 @@ impl TexturedCubeRenderer {
     pub fn set_shadows(&mut self, device: &wgpu::Device, settings: ShadowSettings) {
         self.shadow_settings = settings;
         if self.shadow_map.resize(device, settings.map_size) {
+            self.models.invalidate_bindings();
             for batch in &mut self.batches {
                 batch.bind_groups.clear();
             }
@@ -216,6 +136,7 @@ impl TexturedCubeRenderer {
     /// Makes the reusable draw slots available for a new GPU submission.
     pub fn begin_submission(&mut self) {
         self.next = 0;
+        self.models.begin_submission();
     }
 
     fn reserve(&mut self, device: &wgpu::Device) -> usize {
@@ -227,13 +148,14 @@ impl TexturedCubeRenderer {
                 contents: bytemuck::bytes_of(&cube_uniform(
                     Mat4::IDENTITY,
                     Mat4::IDENTITY,
-                    WorldLighting::default(),
+                    &WorldLighting::default(),
                     Mat4::IDENTITY,
                     ShadowSettings::default(),
                     0.0,
                     FogSettings::default(),
                     Vec3::ZERO,
                     MeshSurface::default(),
+                    self.material,
                 )),
                 usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
             });
@@ -333,16 +255,18 @@ impl TexturedCubeRenderer {
             (target, depth),
             Mat4::IDENTITY,
             model_view_projection,
-            self.lighting,
+            &self.lighting,
             self.shadow_view_projection,
             self.shadow_settings,
             self.ambient_occlusion_strength,
             self.fog,
             self.camera_position,
             MeshSurface::default(),
-            (&batch.uniform, &self.pipeline, bind_group),
+            self.material,
+            (&batch.uniform, &self.pipeline[0], bind_group),
             &self.mesh,
             "Sindri textured cube pass",
+            &mut self.draw_stats,
         );
     }
 
@@ -369,16 +293,22 @@ impl TexturedCubeRenderer {
             (target, depth),
             model,
             view_projection * model,
-            self.lighting,
+            &self.lighting,
             self.shadow_view_projection,
             self.shadow_settings,
             self.ambient_occlusion_strength,
             self.fog,
             self.camera_position,
             MeshSurface::default(),
-            (&batch.uniform, &self.pipeline, bind_group),
+            self.material,
+            (
+                &batch.uniform,
+                &self.pipeline[orientation(model)],
+                bind_group,
+            ),
             &self.mesh,
             "Sindri textured cube pass",
+            &mut self.draw_stats,
         );
     }
 
@@ -401,6 +331,7 @@ impl TexturedCubeRenderer {
             return;
         }
         let mesh = MeshBuffers::new(context.device, "Sindri textured surface", vertices, indices);
+        self.draw_stats.transient_geometry_uploads += 1;
         let slot = self.reserve(context.device);
         self.bind_texture(context.device, context.textures, slot, context.texture);
         let batch = &self.batches[slot];
@@ -414,16 +345,18 @@ impl TexturedCubeRenderer {
             target,
             Mat4::IDENTITY,
             model_view_projection,
-            self.lighting,
+            &self.lighting,
             self.shadow_view_projection,
             self.shadow_settings,
             self.ambient_occlusion_strength,
             self.fog,
             self.camera_position,
             MeshSurface::default(),
-            (&batch.uniform, &self.pipeline, bind_group),
+            self.material,
+            (&batch.uniform, &self.pipeline[0], bind_group),
             &mesh,
             "Sindri textured surface pass",
+            &mut self.draw_stats,
         );
     }
 
@@ -443,6 +376,7 @@ impl TexturedCubeRenderer {
             return;
         }
         let mesh = MeshBuffers::new(context.device, "Sindri textured surface", vertices, indices);
+        self.draw_stats.transient_geometry_uploads += 1;
         let slot = self.reserve(context.device);
         self.bind_texture(context.device, context.textures, slot, context.texture);
         let batch = &self.batches[slot];
@@ -456,16 +390,22 @@ impl TexturedCubeRenderer {
             target,
             model,
             view_projection * model,
-            self.lighting,
+            &self.lighting,
             self.shadow_view_projection,
             self.shadow_settings,
             self.ambient_occlusion_strength,
             self.fog,
             self.camera_position,
             MeshSurface::default(),
-            (&batch.uniform, &self.pipeline, bind_group),
+            self.material,
+            (
+                &batch.uniform,
+                &self.pipeline[orientation(model)],
+                bind_group,
+            ),
             &mesh,
             "Sindri textured surface pass",
+            &mut self.draw_stats,
         );
     }
 
@@ -502,16 +442,22 @@ impl TexturedCubeRenderer {
             target,
             model,
             view_projection * model,
-            self.lighting,
+            &self.lighting,
             self.shadow_view_projection,
             self.shadow_settings,
             self.ambient_occlusion_strength,
             self.fog,
             self.camera_position,
             request.surface,
-            (&batch.uniform, &self.pipeline, bind_group),
+            self.material,
+            (
+                &batch.uniform,
+                &self.pipeline[orientation(model)],
+                bind_group,
+            ),
             mesh,
             "Sindri cached textured mesh pass",
+            &mut self.draw_stats,
         );
     }
 
@@ -525,71 +471,15 @@ impl TexturedCubeRenderer {
         self.cached_meshes.stats()
     }
 
+    /// Cumulative physical 3D draw counters, including imported models and shadows.
+    /// Slot reuse at submission boundaries does not reset these counters.
+    pub fn draw_stats(&self) -> crate::MeshDrawStats {
+        self.draw_stats.and(self.models.draw_stats())
+    }
+
     /// High-water mark of textured mesh draws in one submission.
     #[must_use]
     pub fn batch_slots(&self) -> usize {
         self.batches.len()
     }
-}
-
-#[allow(clippy::too_many_arguments, clippy::too_many_lines)]
-fn encode_mesh_buffers(
-    queue: &wgpu::Queue,
-    encoder: &mut wgpu::CommandEncoder,
-    target: (&wgpu::TextureView, &DepthTarget),
-    model: Mat4,
-    model_view_projection: Mat4,
-    lighting: WorldLighting,
-    light_view_projection: Mat4,
-    shadows: ShadowSettings,
-    ambient_occlusion_strength: f32,
-    fog: FogSettings,
-    camera_position: Vec3,
-    surface: MeshSurface,
-    state: (&wgpu::Buffer, &wgpu::RenderPipeline, &wgpu::BindGroup),
-    mesh: &MeshBuffers,
-    label: &str,
-) {
-    let (uniform, pipeline, bind_group) = state;
-    queue.write_buffer(
-        uniform,
-        0,
-        bytemuck::bytes_of(&cube_uniform(
-            model,
-            model_view_projection,
-            lighting,
-            light_view_projection,
-            shadows,
-            ambient_occlusion_strength,
-            fog,
-            camera_position,
-            surface,
-        )),
-    );
-    let mut pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
-        label: Some(label),
-        color_attachments: &[Some(wgpu::RenderPassColorAttachment {
-            view: target.0,
-            depth_slice: None,
-            resolve_target: None,
-            ops: wgpu::Operations {
-                load: wgpu::LoadOp::Load,
-                store: wgpu::StoreOp::Store,
-            },
-        })],
-        depth_stencil_attachment: Some(wgpu::RenderPassDepthStencilAttachment {
-            view: target.1.view(),
-            depth_ops: Some(wgpu::Operations {
-                load: wgpu::LoadOp::Load,
-                store: wgpu::StoreOp::Store,
-            }),
-            stencil_ops: None,
-        }),
-        timestamp_writes: None,
-        occlusion_query_set: None,
-        multiview_mask: None,
-    });
-    pass.set_pipeline(pipeline);
-    pass.set_bind_group(0, bind_group, &[]);
-    mesh.draw(&mut pass);
 }

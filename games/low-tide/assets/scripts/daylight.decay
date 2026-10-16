@@ -1,0 +1,119 @@
+// The Basin's light: the sun keeps time with the tide.
+//
+// Low water is the long bright day. The sea comes back at sunset, high water
+// is the night, and the ebb is the dawn, so the flood reads at a glance from
+// the colour of the salt before the HUD says a word. Nothing about the tide's
+// rules changes here; this only paints by it.
+//
+// The sun is one wide 2D light kept up and to the north-west of the camera,
+// the way the map's own slope shading has always been lit, so normal-mapped
+// boards, plates and salt cracks rake the same way the cliffs do. Below the
+// surface on a dive it is the light coming down through the water instead.
+script Sun {
+    // How bright the day is, as a 2D light's intensity. The sun is low, so a
+    // flat surface faces it at under a third; what faces north-west catches
+    // much more, which is what makes the relief read.
+    @export let day: f32 = 2.9;
+    @export let night: f32 = 0.5;
+    @export let noon: Color = Color(1.0, 0.94, 0.82);
+    @export let sunset: Color = Color(1.0, 0.64, 0.3);
+    @export let moon: Color = Color(0.5, 0.62, 0.95);
+    @export let surface_light: Color = Color(0.5, 0.86, 0.8);
+
+    var camera: Entity = null;
+    var dive_camera: Entity = null;
+
+    fn start() {
+        this.camera = World.find("Camera");
+        this.dive_camera = World.find("Dive camera");
+    }
+
+    fn update(dt: f32) {
+        Game.daylight = daylight_now();
+        if Game.diving && this.dive_camera != null {
+            // Sunlight through the water: brightest at the surface, fading
+            // toward the wreck on the bed.
+            let at = this.dive_camera.transform.position;
+            this.transform.position = Vec3(at.x, at.y + 14.0, 0.0);
+            this.light2d.radius = 26.0;
+            this.light2d.falloff = 1.4;
+            this.light2d.height = 6.0;
+            this.light2d.color = this.surface_light;
+            this.light2d.intensity = lerp(0.5, 1.6, Game.daylight);
+            return;
+        }
+        if this.camera == null { return; }
+        let at = this.camera.transform.position;
+        this.transform.position = Vec3(at.x - 30.0, at.y + 30.0, 0.0);
+        this.light2d.radius = 400.0;
+        this.light2d.falloff = 0.05;
+        this.light2d.height = 14.0;
+        // Moonlight warms to a low orange sun in the golden hour, which
+        // whitens toward noon.
+        let low = this.moon.lerp(this.sunset, clamp(Game.daylight * 4.0, 0.0, 1.0));
+        this.light2d.color = low.lerp(this.noon, clamp(Game.daylight * 2.2 - 1.2, 0.0, 1.0));
+        this.light2d.intensity = lerp(this.night, this.day, Game.daylight);
+    }
+}
+
+// How much of the day there is: one through most of low water, a golden
+// hour as the ebb runs out, falling through the flood to nothing at high
+// water, and rising again with the ebb.
+fn daylight_now() -> f32 {
+    let golden = 0.55;
+    let through = 1.0 - Game.tide_left / max(1.0, Game.tide_duration);
+    let eased = through * through * (3.0 - 2.0 * through);
+    if Game.tide_phase == TidePhase.Rising { return golden * (1.0 - eased); }
+    if Game.tide_phase == TidePhase.High { return 0.0; }
+    if Game.tide_phase == TidePhase.Falling { return eased; }
+    // The last minute of low water is the evening.
+    let evening = clamp(1.0 - Game.tide_left / 60.0, 0.0, 1.0);
+    return lerp(1.0, golden, evening * evening * (3.0 - 2.0 * evening));
+}
+
+// A lamp, a headlight or a lantern: dim by day, bright by night, with a
+// little life in the flame.
+script Lamp {
+    @export let by_day: f32 = 0.2;
+    @export let by_night: f32 = 1.3;
+    @export let flicker: f32 = 0.05;
+
+    var time: f32 = 0.0;
+
+    fn update(dt: f32) {
+        this.time += dt;
+        let wave = sin(this.time * 7.3) * 0.6 + sin(this.time * 12.9 + 1.7) * 0.4;
+        // Lit as the golden hour turns to dusk, full by nightfall.
+        let dark = clamp(1.0 - Game.daylight / 0.5, 0.0, 1.0);
+        let bright = lerp(this.by_day, this.by_night, dark);
+        this.light2d.intensity = max(0.0, bright * (1.0 + wave * this.flicker));
+    }
+}
+
+// Dust thrown up by a tread, while the crawler moves over dry ground.
+script TreadDust {
+    var kicking: bool = false;
+
+    fn update(dt: f32) {
+        let dry = Game.ground != Ground.Brine && Game.ground != Ground.Nothing;
+        let moving = abs(Game.speed) > 0.25 || abs(Game.rudder) > 0.1;
+        let kick = moving && dry && !Game.flooded;
+        if kick != this.kicking {
+            this.kicking = kick;
+            if kick { Effects.play(this.entity); } else { Effects.stop(this.entity); }
+        }
+    }
+}
+
+// The engine's exhaust: it smokes while the throttle is open.
+script Exhaust {
+    var smoking: bool = false;
+
+    fn update(dt: f32) {
+        let smoke = (abs(Game.throttle) > 0.01 || abs(Game.speed) > 0.1) && !Game.flooded;
+        if smoke != this.smoking {
+            this.smoking = smoke;
+            if smoke { Effects.play(this.entity); } else { Effects.stop(this.entity); }
+        }
+    }
+}

@@ -78,7 +78,7 @@
       "components": {
         "sindri.shape": {
           "kind": "grid",
-          "count": 52.0,
+          "count": 61.0,
           "fill": [
             0,
             0,
@@ -1651,6 +1651,197 @@
             0.09,
             0.16,
             1.0
+          ]
+        }
+      }
+    },
+    {
+      "id": "hud-event",
+      "name": "EventPanel",
+      "parent": "hud",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "disabled": true
+    },
+    {
+      "id": "hud-event-frame",
+      "name": "EventFrame",
+      "parent": "hud-event",
+      "transform_3d": {
+        "position": [
+          0.0,
+          -0.34167,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "scale": [
+          1.55556,
+          0.20556,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "hud-event-frame"
+          ]
+        },
+        "sindri.ui.shape": {
+          "anchor": "top",
+          "corner_radius": 0.13514,
+          "fill": [
+            0.0012,
+            0.0037,
+            0.007,
+            0.82
+          ],
+          "kind": "rect",
+          "layer": 122,
+          "stroke": [
+            0.212,
+            0.799,
+            1.0,
+            1.0
+          ],
+          "stroke_width": 0.01351
+        }
+      }
+    },
+    {
+      "id": "hud-event-title",
+      "name": "EventTitle",
+      "parent": "hud-event",
+      "transform_3d": {
+        "position": [
+          0.0,
+          -0.26111,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "scale": [
+          1.44444,
+          0.03889,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "hud-event-title"
+          ]
+        },
+        "sindri.ui.text": {
+          "anchor": "top",
+          "bold": false,
+          "bounds": [
+            1.44444,
+            0.03889
+          ],
+          "case": "as_written",
+          "color": [
+            0.212,
+            0.799,
+            1.0,
+            1.0
+          ],
+          "font": "fonts/ChakraPetch-Bold.ttf",
+          "font_size": 0.03056,
+          "layer": 140,
+          "letter_spacing": 0.00556,
+          "line_align": "center",
+          "line_height": 0.03611,
+          "text": "SYSTEM OVERLOAD",
+          "wrap": "word"
+        },
+        "sindri.ui.box": {
+          "fit_content": [
+            false,
+            false
+          ]
+        }
+      }
+    },
+    {
+      "id": "hud-event-text",
+      "name": "EventText",
+      "parent": "hud-event",
+      "transform_3d": {
+        "position": [
+          0.0,
+          -0.26111,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "scale": [
+          1.44444,
+          0.03889,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "hud-event-text"
+          ]
+        },
+        "sindri.ui.text": {
+          "anchor": "top",
+          "bold": false,
+          "bounds": [
+            1.44444,
+            0.03889
+          ],
+          "case": "as_written",
+          "color": [
+            0.694,
+            0.791,
+            0.855,
+            1.0
+          ],
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.03056,
+          "layer": 140,
+          "letter_spacing": 0.00556,
+          "line_align": "center",
+          "line_height": 0.03611,
+          "text": "Fire rate doubled. Hostiles accelerate.",
+          "wrap": "word"
+        },
+        "sindri.ui.box": {
+          "fit_content": [
+            false,
+            false
           ]
         }
       }
@@ -4507,8 +4698,8 @@
           1.0
         ],
         "scale": [
-          0.42,
-          0.42,
+          0.622,
+          0.622,
           1.0
         ]
       },
@@ -4527,7 +4718,7 @@
           "rotation": 0.0,
           "sensor": true,
           "shape": {
-            "radius": 0.16,
+            "radius": 0.22,
             "shape": "circle"
           }
         },
@@ -4554,7 +4745,8 @@
           "properties": {
             "bullet": "prefabs/bullet.prefab",
             "edge_padding": 0.28,
-            "invulnerable_for": 0.9,
+            "fork_prism": "prefabs/fork-prism.prefab",
+            "invulnerable_for": 0.22,
             "mine": "prefabs/mine.prefab",
             "muzzle_fx": "prefabs/spectacle.prefab"
           },
@@ -4566,31 +4758,55 @@
             "player"
           ]
         },
-        "sindri.sprite": {
-          "texture": "textures/player.png#hull-0",
-          "tint": [
-            1.0,
-            1.0,
+        "sindri.shape": {
+          "kind": "polygon",
+          "count": 6.0,
+          "fill": [
+            0.1878,
+            0.8308,
             1.0,
             1.0
           ],
-          "layer": 5
-        },
-        "sindri.animation.sprite": {
-          "clips": {
-            "idle": {
-              "frames": [
-                "hull-0",
-                "hull-1",
-                "hull-2",
-                "hull-3"
-              ],
-              "seconds_per_frame": 0.09,
-              "looping": true
-            }
-          },
-          "playing": "idle",
-          "speed": 1.0
+          "stroke": [
+            0.8148,
+            0.9823,
+            1.0,
+            0.9
+          ],
+          "stroke_width": 0.03,
+          "corner_radius": 0.0,
+          "dashes": 0.0,
+          "dash_duty": 0.5,
+          "sweep_start": 0.0,
+          "sweep_turns": 1.0,
+          "blend": "over",
+          "layer": 5,
+          "points": [
+            [
+              0.0,
+              0.5004
+            ],
+            [
+              0.2736,
+              -0.2448
+            ],
+            [
+              0.09,
+              -0.1728
+            ],
+            [
+              0.0,
+              -0.3024
+            ],
+            [
+              -0.09,
+              -0.1728
+            ],
+            [
+              -0.2736,
+              -0.2448
+            ]
+          ]
         },
         "sindri.effect.burst": {
           "texture": "textures/fleck.png",
@@ -4645,14 +4861,14 @@
           "kind": "polygon",
           "count": 6.0,
           "fill": [
-            0.47059,
-            0.92157,
+            0.1878,
+            0.8308,
             1.0,
             0.0
           ],
           "stroke": [
-            0.47059,
-            0.92157,
+            0.1878,
+            0.8308,
             1.0,
             0.5
           ],
@@ -4692,7 +4908,7 @@
         "sindri.script": {
           "properties": {
             "kind": 2.0,
-            "side": -0.075
+            "side": -0.067
           },
           "script": "PlayerVisual",
           "source": "scripts/player-visual.decay"
@@ -4701,14 +4917,14 @@
           "kind": "polygon",
           "count": 3.0,
           "fill": [
-            0.47059,
-            0.92157,
+            0.1878,
+            0.8308,
             1.0,
             0.42
           ],
           "stroke": [
-            0.91373,
-            0.99216,
+            0.8149,
+            0.9823,
             1.0,
             0.2
           ],
@@ -4748,7 +4964,7 @@
         "sindri.script": {
           "properties": {
             "kind": 2.0,
-            "side": 0.075
+            "side": 0.067
           },
           "script": "PlayerVisual",
           "source": "scripts/player-visual.decay"
@@ -4757,14 +4973,14 @@
           "kind": "polygon",
           "count": 3.0,
           "fill": [
-            0.47059,
-            0.92157,
+            0.1878,
+            0.8308,
             1.0,
             0.42
           ],
           "stroke": [
-            0.91373,
-            0.99216,
+            0.8149,
+            0.9823,
             1.0,
             0.2
           ],
@@ -4813,14 +5029,14 @@
           "kind": "ellipse",
           "count": 6.0,
           "fill": [
-            0.91373,
-            0.99216,
+            0.8149,
+            0.9823,
             1.0,
             0.88
           ],
           "stroke": [
-            0.47059,
-            0.92157,
+            0.1878,
+            0.8308,
             1.0,
             1.0
           ],
@@ -4832,6 +5048,88 @@
           "sweep_turns": 1.0,
           "blend": "add",
           "layer": 6
+        }
+      }
+    },
+    {
+      "id": "player-chevron",
+      "name": "Player Chevron",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "scale": [
+          0.622,
+          0.622,
+          1.0
+        ]
+      },
+      "components": {
+        "sindri.script": {
+          "properties": {
+            "kind": 4.0,
+            "side": 0.0
+          },
+          "script": "PlayerVisual",
+          "source": "scripts/player-visual.decay"
+        },
+        "sindri.shape": {
+          "kind": "polygon",
+          "count": 6.0,
+          "fill": [
+            0.8148,
+            0.9823,
+            1.0,
+            0.78
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0.0,
+          "corner_radius": 0.0,
+          "dashes": 0.0,
+          "dash_duty": 0.5,
+          "sweep_start": 0.0,
+          "sweep_turns": 1.0,
+          "blend": "over",
+          "layer": 6,
+          "points": [
+            [
+              -0.18,
+              -0.1728
+            ],
+            [
+              0.0,
+              0.3096
+            ],
+            [
+              0.18,
+              -0.1728
+            ],
+            [
+              0.1368,
+              -0.1728
+            ],
+            [
+              0.0,
+              0.2304
+            ],
+            [
+              -0.1368,
+              -0.1728
+            ]
+          ]
         }
       }
     },

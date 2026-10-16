@@ -94,6 +94,56 @@ pub struct SpriteComponent {
     /// viewer would stand it upright.
     #[serde(default)]
     pub billboard: bool,
+    /// The project sprite shader this sprite is drawn through, as an asset
+    /// path, or empty for the built-in look.
+    #[serde(default)]
+    pub shader: String,
+    /// Four numbers the shader reads as `input.params`: how far a dissolve
+    /// has got, how bright a flash is. Meaningless without a shader.
+    #[serde(default)]
+    pub shader_params: [f32; 4],
+    /// A normal map laid out like `texture`, as an asset path, or empty for
+    /// none. 2D lights read it to light the art as a surface with relief.
+    #[serde(default)]
+    pub normal_map: String,
+    /// Keeps the scene's 2D lights off this sprite, for things that glow on
+    /// their own or sit in front of the lit world.
+    #[serde(default)]
+    pub unlit: bool,
+    /// `sliced` keeps the border its sheet gives the art at its own size and
+    /// stretches only the middle, so a panel or a platform can be any size
+    /// without smearing its edges.
+    #[serde(default)]
+    pub draw: ImageDraw,
+    /// World units each border pixel covers when sliced: sixteen pixels to a
+    /// unit unless the art says otherwise.
+    #[serde(default = "sprite_border_scale")]
+    pub border_scale: f32,
+    /// Whether it shows only inside or only outside a `sindri.sprite_mask`.
+    #[serde(default)]
+    pub mask: super::MaskInteraction,
+    /// The `name` of the mask it meets.
+    #[serde(default)]
+    pub mask_name: String,
+}
+
+/// Whether an image stretches whole or keeps its border.
+#[derive(Clone, Copy, Debug, Default, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "snake_case")]
+pub enum ImageDraw {
+    /// The whole picture stretched to the quad.
+    #[default]
+    Simple,
+    /// Nine pieces: corners kept, edges stretched one way, the middle both.
+    Sliced,
+}
+
+impl ImageDraw {
+    pub const NAMES: [&'static str; 2] = ["simple", "sliced"];
+}
+
+const fn sprite_border_scale() -> f32 {
+    1.0 / 16.0
 }
 
 impl SpriteComponent {

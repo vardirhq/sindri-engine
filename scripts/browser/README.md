@@ -38,6 +38,23 @@ scene and plays with keyboard input. It brakes near the flag so a jump over the
 sensor can land there; only the read-only observer's win counts as success.
 Run its input-sequence regression with `node --test scripts/browser/*.test.mjs`.
 
+The Physics Playground smoke uses the normal RESET control for the whole
+room before testing the domino chain. Earlier steps deliberately scatter
+bodies with gravity, blasts, a hundred balls and dropped joints; resetting only
+the dominoes can leave another toy's debris in their path. The smoke still
+requires a new red-button press from the pushed chain, on desktop and phone.
+
+The Orbit Camera Lab capture regression uses full Chromium's headless mode
+(`channel: 'chromium'`), which `playwright install chromium` installs alongside
+the headless shell. The shell does not deliver the expected relative motion
+from Playwright's mouse moves while captured. The regression keeps the exact
+1420-by-60 displacement assertion, release checks, sandbox denial and game goal:
+
+```sh
+SINDRI_BASE_PATH=/examples/orbit/ node scripts/browser/pointer-lock.mjs \
+  target/dist/orbit target/browser-orbit-pointer-lock.png
+```
+
 ## What the first run proved
 
 The module instantiated, `run` executed, winit adopted the page's canvas, a
@@ -49,3 +66,38 @@ were real gaps then. They are closed by the shared project host and static
 export path: browser smoke tests now load the generated manifest and hashed
 assets, run Decay gameplay, verify audio promises, and exercise readable
 capability failures under the GitHub Pages subpath.
+
+The 3D Character Lab uses the shared player's normal keyboard path. Its check
+waits for solved carry, jumps with Space, walks with D, then verifies floor
+landing and the goal without editing scripts or world state:
+
+```sh
+SINDRI_BASE_PATH=/examples/character3d/ node scripts/browser/character3d.mjs \
+  target/dist/character3d target/browser-character3d.png
+```
+
+It checks runtime/GPU errors, fetched assets and rendered colors, and writes a
+goal capture. Native project tests separately verify ferry reversal and once-only
+carry. Editor interaction and Explorer game proof remain open.
+
+The Model Collision Lab verifies imported GLB collision through the normal
+asynchronous browser player: D into the wall, S around its end, D across and
+W to the goal. It checks the GLB fetch, gameplay milestones and runtime/GPU errors.
+
+```sh
+SINDRI_BASE_PATH=/examples/model-collision/ node scripts/browser/model-collision.mjs \
+  target/dist/model-collision target/browser-model-collision.png
+```
+
+`transform.mjs` plays the exported Transform Lab through the real WebGPU player.
+It requires the saved/copied/restored quaternion milestones and walker arrival,
+all five scene/script/texture fetches, changed rendered pixels and no runtime or
+GPU errors. CI retains its final capture.
+
+`benchmark3d.mjs` opens the fixed 300-prop workload, requires its ready goal
+and six asset fetches, and retains a rendered capture without runtime/GPU errors.
+It verifies delivery; performance counters and targets are separate work.
+
+`prepare-benchmark3d.py` makes the shadow-disabled control project without
+changing the source fixture. `compare-shadows.mjs` compares same-host RGB
+captures and requires more than 100 changed and darkened pixels.

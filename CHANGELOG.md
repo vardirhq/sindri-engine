@@ -1,6 +1,264 @@
 # Changelog
 
-- Standalone Sindri Sound Lab gains an editor-style workstation, undoable piano-roll editing and bounded MIDI import/export. Generated music uses in-key chord voicings, recurring question/answer hooks, cadences and shaped percussion. Live note edits and tempo changes retain musical position; the desktop tool no longer breaks browser workspace compilation. Engine/editor integration remains absent.
+- Add Day/Night Lab: a configurable Decay clock blends sunrise, midday, sunset
+  and night, rotates the shadow-casting sun, and moves an imported prop carrying
+  night lights. Frozen-hour controls isolate imported shadows and illumination.
+
+- Change scene ambient intensity/color and background from typed Decay
+  environment properties. Writes validate atomically and appear in the next
+  frame; Lighting Lab now switches cool/warm ambient fill and sky during play.
+
+- Drive 3D lights from Decay through typed color, intensity, range, cone angles
+  and enabled state. Invalid writes retain the previous settings; switching a
+  light off leaves its entity and script active. The new 3D Lighting Lab animates
+  parented lights and the sun through the shared runtime, with lit/dark goals.
+
+- Aim 3D spotlights with feathered inner/outer cone angles. They share eight
+  local-light slots with point lights across meshes, voxels and imported models.
+  The editor creates downward-facing spots, shows selected cone guides and
+  retains valid light settings when an inspector edit is refused.
+  Local-light shadows, Decay light properties and game adoption remain open.
+
+- Add bounded 3D point lighting with range falloff across meshes, voxels and
+  imported models. Lights follow active parent transforms; the editor creates
+  points and shows selected range guides. Point shadows, spotlights and typed
+  Decay light properties remain open.
+
+- Add outward cube normals and optional authored inline/cached mesh normals for
+  smooth 3D shading. Normals transform correctly under nonuniform scale and
+  reflection; world color and shadow draws preserve mirrored front faces.
+  Omitted normals retain flat shading; malformed authored normals are rejected.
+
+- Preserve authored GLB emissive factors through import and rendering. Models
+  retain self-emission without scene overrides, and removing an override restores
+  it. Alpha masks and shadows remain unchanged; emissive maps remain unsupported.
+
+- Add shared standard material factors and GGX shading for opt-in 3D geometry.
+  Author checked base color, metallic/roughness and self-emission through
+  `sindri.material` in the Rendering inspector. Imported overrides preserve
+  textures/masks and geometry residency; removing overrides restores existing
+  looks. Shared material assets and game adoption remain pending.
+
+- Imported GLB models now cast directional shadows using cached geometry and
+  retained hierarchy. Alpha masks, material alpha, mirrored transforms and
+  single/double-sided surfaces govern their silhouettes. Shadow and color
+  uniforms stay independent; invalid shadow transforms return typed frame errors.
+
+- Imported models now receive directional shadows from world geometry and share
+  its distance/density/height fog shader. Shadow-map resizing preserves model
+  geometry residency and refreshes bindings. Authored model fog is currently
+  delivered by editor viewports; imported-model shadow casting remains pending.
+
+- Record physical sprite, shape and glyph batch draws/passes, instance counts
+  and queue buffer payloads in standalone and editor benchmark reports. Empty
+  batches record no work; counters survive slot reuse, and extra Scene work
+  stays separate. Clears, post and atlas/resource uploads remain open.
+
+- Measure optional GPU timestamps in native editor benchmarks, with separate
+  Game and extra Scene intervals, adapter/period/scope metadata and null for
+  unavailable timing. Execution stays outside CPU phases; normal editor
+  launches retain their device policy.
+- Measure native standalone GPU frame intervals with optional timestamp queries.
+  Reports record adapter/period/scope and keep execution separate from CPU wait;
+  unsupported devices report unavailable timing. Default and browser devices
+  retain baseline feature requirements.
+- Record physical 3D draw/pass/upload counters in editor benchmarks, separating
+  the Game view during Play from the extra Scene view. Missing views stay absent,
+  measured zeroes stay visible, and the summary prints both scopes separately.
+- Record physical textured 3D/model draw and render-pass counts, uniform queue
+  writes/bytes, and transient/persistent upload events in standalone benchmark
+  reports. The comparison tool prints these counters without treating older or
+  editor reports as measured zeroes. GPU timestamps and editor counters remain open.
+- Add a fixed 300-prop perspective 3D benchmark project with cubes, inline
+  surfaces and repeated GLBs. Native/browser players and offscreen captures now
+  honor authored directional shadow settings, matching editor viewports.
+
+- Read, copy and restore 3D `transform.rotation` as a typed `Quat` value in
+  Decay. Whole writes normalize finite nonzero values atomically; invalid writes
+  retain the previous transform. Transform Lab transfers its facing to the goal
+  and restores its starting rotation on arrival.
+
+- Keep Physics Playground scripts running when RESET or CLEAN UP removes a
+  body named by a collision event. Shells, panes, backstops and
+  bumpers check existence before using event references.
+
+- Resize Orbit Camera Lab's barrier with 1/2, inspect it from the far side
+  with 3 and resume automatic orbit/removal with R. Synchronized center/edge
+  rays verify live collision width. Browser
+  controls and native editor scale editing, Undo/Redo, persistence and Play
+  provide feature proof; Explorer adoption remains open.
+
+- Show selected orbit camera focus, requested position/yaw circle and current
+  pose in the Scene view, including pull-in/recovery during Play. Guides use
+  world axes, clip at the near plane and remain outside camera picking.
+
+- Add Camera Orbit through the editor using a real active spatial target.
+  Creation requires a Camera; numeric and target edits reject invalid settings
+  before writing commands. Native review verifies Undo/Redo, save/reopen and
+  authored orbit Play without a camera script. Explorer game adoption remains
+  pending.
+
+- Share physics material `.profile` assets between 2D and 3D. The new Physics
+  Material 3D component applies profiles and explicit overrides to primitive,
+  model, convex and voxel colliders; coefficient edits/reloads preserve motion,
+  contacts and streamed groups. Model Collision Lab shares a profile between
+  its imported floor and spawned prop. Explorer adoption remains pending.
+
+- Add standalone live 3D collider coefficient reads and atomic updates for
+  primitive, convex, triangle and streamed static geometry. Updates retain
+  motion, geometry and contacts, wake affected bodies and replay in checkpoints.
+  Shared scene profiles and editor/game adoption remain pending.
+
+- Convex-model prefabs now accept typed Decay motion reads, setters and impulses
+  immediately after spawning. Queued controls use actual scaled/combined mass,
+  preserve previous valid requests on rejected authoring and replay once. Model
+  Collision Lab spawns its GLB prop from a typed prefab and verifies this path.
+
+- Automatically discover, export and bind convex GLB collision in the player,
+  headless runs and editor Play. Shared triangle/convex uses load once and reload
+  atomically; editor defaults and guards support rigid-body/primitive compounds.
+  Model Collision Lab adds a falling prop with a Decay impulse and travel goal.
+
+- Add explicit convex-model scene/Session collision binding for movable props,
+  with positive nonuniform scale, mixed primitive compounds, shared geometry,
+  voxel reach and checkpoint-aware replacement. Automatic project loading,
+  editor authoring and game proof remain pending.
+
+- Render-model and static-model-collider fields now offer project GLB pickers in
+  the editor. Add Component uses real project models and respects world-space
+  and physics ownership constraints. The two asset fields have independent
+  widget and undo scopes, while continuous component drags still merge. Native
+  directory loading accepts extension case without changing asset IDs.
+
+- Editor Play and native headless project runs now install authored GLB collision
+  before gameplay. Play validates its asynchronous model queue, keeps later-scene
+  collision assets alive and safely replaces collision on model reload. Model
+  Collision Lab has editor/headless goal parity and restore/replay regressions.
+
+- The shared native/browser player now installs static GLB collision before
+  gameplay starts, including later scenes and prefab references. Render-only
+  models need no collision geometry; missing/invalid collision assets name their
+  logical IDs. Model Collision Lab demonstrates wall obstruction and a goal route.
+
+- Discover and export collision-only GLB references from scenes and prefabs,
+  including inactive entities and shared render/collision assets. Automatic
+  runtime collision binding remains pending.
+
+- Add static model collider scene references and explicit Session GLB collision
+  bindings, with positive inherited scale, lifecycle and checkpoint-aware asset
+  replacement. Automatic player/editor loading and project proof remain pending.
+- Add clone-shared convex collision hulls and mixed primitive/hull rigid bodies
+  with bounded construction, validated mass and native dynamic/kinematic/sensor
+  regressions. Model scene bindings and browser/editor/game proof remain pending.
+
+- Add shared immutable static triangle collision geometry and keyed physics
+  groups, with immediate queries and tested dynamic landing/replay. Invalid
+  geometry or group edits fail before mutation. Model scene bindings, dynamic
+  hulls and browser/editor/game project proof remain pending.
+
+- Add bounded CPU model collision preparation with accumulated GLB node
+  transforms, instance provenance, reflected winding and typed diagnostics.
+  The model inspection example accepts `--collision` to report prepared counts.
+  Physics triangle/hull shapes and runtime model colliders remain pending.
+
+- Selected 3D characters now show orange slope, step and snap footing guides
+  from their validated scaled collider geometry. Native editor review verifies
+  settings/undo/save/reopen and keyboard Play to the Character Lab goal; Stop
+  restores the authored scene. Explorer game adoption remains pending.
+
+- Add the 3D Character Lab: Decay gravity, keyboard movement/jumping and a
+  reversing ferry with solved carry. Native Session tests and real WebGPU
+  Chromium keyboard play verify landing and goal completion; CI captures the
+  browser goal. Editor controller interaction and Explorer adoption remain pending.
+
+- Decay can queue scene-owned 3D character displacement with
+  `Physics3d.move_character` and read copied optional support, raw movement,
+  platform carry and collisions through `Physics3d.character_motion`. Invalid
+  input preserves the last valid request; scripts observe completed movement
+  on the next fixed step. Native host/script and Session replay tests cover the
+  API; controller browser, editor and Explorer proof remain pending.
+
+- Scene Character 3D now carries riders through solved platform translation and
+  rotation, with classified support, separate carry hits and a `carry_platforms`
+  opt-out. Parenting applies motion once, lifecycle changes clear rider caches,
+  and actual carry expands terrain residency before movement queries. Session
+  checkpoints replay carry. Decay, browser/controller and game proof remain pending.
+
+- Add read-only 3D platform carry composition: verified previous support,
+  collision-limited translation and rotation-point travel, separate carry hits
+  and classified final grounding. Scene lifecycle, terrain reach and Decay
+  integration remain pending.
+
+- Add read-only classified 3D ground probes: nearest support geometry, slope
+  limits, skin contacts and explicit initial penetration, using current collider
+  poses and deterministic ties. Scene platform carry and Decay access remain pending.
+
+- Add scene-owned 3D character movement: queued XYZ displacement, scaled solid
+  probes, terrain residency, cached movement results and shared Session replay.
+  Gameplay owns gravity and jumps; Decay access and platform carry remain pending.
+
+- Add a 3D character movement foundation: read-only Rapier queries with
+  engine-owned slope, step and snap settings, current collider poses and copied
+  movement/hit results. Scene ownership, Decay, editor and moving-platform
+  integration remain pending.
+
+- 3D collider dimensions and offsets follow entity and parent scale. Uniform
+  positive scale works for every shape; boxes also support nonuniform scale
+  when their rotated axes stay orthogonal. Unsupported shear, stretched round
+  shapes and invalid scale fail explicitly. Scale edits rebuild collision at the
+  next fixed step; collider wireframes use the same geometry. Existing scenes
+  using world-unit collider dimensions must convert them to local units.
+
+- Native editor Play supports Decay cursor capture and raw mouse look, with
+  checked capture feedback and release on Escape, focus loss, pause/stop or
+  hiding the Game view.
+
+- Capture the cursor from Decay with `Pointer.lock()` / `Input.Pointer.lock()`,
+  release with `unlock()`, and read actual state through read-only `locked`.
+  Native/browser players feed unbounded relative motion through `Pointer.delta`;
+  Escape, focus loss and suspension release capture. Browser denial leaves the
+  game running. Orbit Camera Lab demonstrates captured look.
+
+- Add shared input groundwork for pointer lock: actual capture feedback and
+  relative mouse motion, with mode-change rebasing, focus-loss cleanup and
+  once-per-step accumulation. Native/browser capture and Decay controls remain
+  pending.
+
+- Read mouse displacement from Decay with read-only `Pointer.delta` or
+  `Input.Pointer.delta`, as a `Vec2` in viewport pixels per fixed step. Orbit
+  Camera Lab now supports right-button drag-to-look with adjustable sensitivity
+  and pitch limits. Pointer lock remains pending.
+
+- Follow a 3D target with an engine-owned orbit camera: smooth movement, aiming,
+  immediate obstruction pull-in and recovery when the view clears. Decay selects
+  explicit camera entities, changes orbit settings and perspective FOV, and can
+  stop orbit without resetting the pose. The Orbit Camera Lab runs to its goal.
+
+- Aim and orbit entities from Decay with `transform.look_at` and
+  `transform.rotate_around`, including under rotated/scaled parents. Read
+  world-space `forward`, `right`, and `up` to move the way an entity faces.
+  Direction writes are rejected by the compiler and runtime; completion,
+  hover, and the generated API identify them as read-only.
+
+- Turn solid objects from Decay. `this.transform.yaw`, `pitch` and `roll` read and write a 3D rotation in radians: yaw turns on the ground, pitch tips up or down, roll turns about the facing, and writing one keeps the others.
+- Orbital has the original's sector events. The first arrives at 0:42 and another 38 to 60 seconds after each ends: System Overload, Signal Harvest, Elite Hunt, Swarm Tide, Glass Space or Temporal Echo, each bending fire rate, enemy speed, salvage pull, elites, spawns, experience, hull damage or score for 13 to 18 seconds under a banner beneath the boss strip. A boss rush has none.
+- Orbital plays at the original's pace. Salvage is worth what the original pays (a scout's gem is 8, a boss leaves 384), so the module chooser comes about twice as often early on. Bosses arrive on the original's one-a-minute clock and take as many shots as they did there (a base-build Warden is about 58 rather than 206). Contact hurts for as long as an enemy touches the ship, through a 0.22 s mercy window instead of one hit per touch and 0.9 s of immunity, at the original's per-kind damage; regular enemies' shots do the original's 9 to 15 of 100 hull. Enemies are drawn and hit at the original's size (0.24 rather than 0.5), move at the original's speed across the screen and keep its distances. Salvage is pulled from the original's 110 px, faster as it closes, and lasts two minutes. The ship has the original's 5% base critical chance and its faster, longer-lived rounds, and the camera no longer shakes on every hit and kill.
+- Orbital's modules do what their names say. The original hands its 77 plain modules one of fifteen stat bundles by list position, so Fork Drone raised hull, Ballast sped the ship up and Combat Medic sped up rounds. Each now carries the bundle its name suggests (Fork Drone is a prism that circles the ship and splits any round fired through it into three, the Binding of Isaac's Angelic Prism rather than a spread upgrade; Combat Medic and Field Rations repair hull, Ballast adds hull and armour, Gravity Mote and Mag Clamp widen the salvage pull), at the original's strengths, and hull, repair and salvage modules say which of those they do.
+- Orbital is closer to the game it recreates. Its bosses are the size the original draws them (the Harrower was about two thirds of it, the Last Light under half) and are hit where they are drawn. The background grid drifts left and up as the original's does instead of turning, which read as tilt. On desktop the hull and XP panel is a quarter of the screen's width rather than two fifths. Hull reads in whole points ("HULL 1/5", not "0.65/5"), and an unnamed pilot's score is labelled SCORE.
+- Low Tide is lit. The sun keeps time with the tide: a bright day at low water, a golden hour as it runs out, a moonlit night when the sea is in and a dawn with the ebb. The salt, the crawler, the crew and the wrecks have normal maps, so the low sun rakes across cracks, plates and boards. At dusk the cabin lamps, the crew's lantern and two headlights come on, and a wreck caught in the headlights casts a shadow. The treads kick up dust and the engine smokes while it drives, swimmers throw spray, divers trail bubbles and a lamp lights the wreck below, and submerged wrecks ripple under the brine through a sprite shader. A voxel world viewed as a map is now lit by 2D lights, where before it was always drawn at full brightness, and its new `normal_maps` names a normal map for each texture its squares draw from.
+- Make normal maps in the editor. The **Normal map** tab, opened from an image or from the sprite sheet slicer, derives a tangent-space map from a sprite's brightness or from a painted height map, keeping its size, alpha and pixel edges and each sheet cell apart, with strength, smoothing, detail, invert, edge and green-axis settings and Metal, Wood, Stone, Fabric and Terrain presets. It previews the map as a picture or one channel, lit by a `sindri.light2d` you drag around (drawn by the same renderer and extraction as the Scene view), split against the sprite without a map, and on a plane under an orbiting camera. Save writes `<name>_n.png` and the settings that made it as `<name>_n.normalmap`, so the map is made again when the art changes, and "Use on sprites" points the scene's sprites and tilemaps at it in one undo step. The platformer's hero is now lit through a map made there. `docs/normal-map-studio.md` is the contract.
+- Orbital is drawn as neon vector shapes again, as the original is. Enemies are filled polygons in their own warm colours with as many sides as the original gives them, asteroids are crisp outlined shards, the ship is the original's dart with its chevron, and every boss is its own coloured polygon with a turning rim that thickens once it is below half health. Each sector tints the backdrop and grid as the original does. The charger now glows white-hot through its shape's fill as it winds up, so the mine blast's flash is the sprite colour offset's user in the repository. The boss banner is a slim strip rather than a panel over where bosses enter, and `orbital-baked-capture boss-N` reaches all twelve bosses again; from the seventh on it had been photographing the Warden.
+- Place text in the world and give it spans. `sindri.text` carries the UI label's fields in world units, sits at its entity and draws over the sprites of its layer, staying level unless `follow_rotation` turns it with the entity; `Ui.set_text` and `Ui.set_number` write it, and Decay reaches `this.world_text.{color,font_size,visible,layer}`. `rich: true` on either text component reads `[b]`, `[i]` and `[color=#rrggbb]` spans, which fade with the text's alpha. Orbital's landed shots now float their damage, critical hits in bold gold. `docs/world-text.md` is the contract.
+- Mask sprites. `sindri.sprite_mask` places a picture whose alpha is a shape, and a `sindri.sprite` with `mask: "inside"` or `"outside"` and that mask's `mask_name` draws only within or beyond it. The mask rides in the batch and is read in the fragment stage, so masked sprites still batch and no stencil buffer is needed. `examples/sprite-masks` shows a wandering keyhole revealing a meadow and a hidden gem; `docs/sprite-masks.md` is the contract.
+- Paint terrains. A sheet declares terrains by name: the sixteen `edges` or forty-seven `blob` sprites a cell draws for each pattern of same-terrain neighbors. The tilemap inspector offers them above the palette, and the brush paints one and redraws every neighbor that depends on the cell; erasing beside a terrain redraws too. `Grid.set_terrain(map, column, row, terrain)` does the same from Decay. The platformer's level is painted with a ground terrain, so its gaps show rims and its tops grow grass; `docs/terrains.md` is the contract.
+- Slice sprites into nine. A sheet records a border per sprite in pixels (`borders`, with the image `size`), and `sindri.sprite` and `sindri.ui.image` with `draw: "sliced"` keep it at its size while the middle stretches, scaled by `border_scale`. A sliced UI bar keeps its end caps as it empties. The sheet slicer edits the border with numbers and by dragging dashed guides on the image. The platformer's HUD frame and its signboard are one sliced panel; `docs/nine-slice.md` is the contract.
+- Emit particles. `sindri.particles` keeps throwing particles while it plays: a rate and a cap, lifetime, speed, direction and spread, a point, circle, box or ring shape at an offset, gravity, drag, size over life, a color ramp, rotation and spin, in world or local space. They live in the fleck pool and its random stream, so they are cheap and a seeded run stays the same run. `Effects.play`, `Effects.stop` and `Effects.emit(entity, count)` drive one from Decay, and the Scene view plays the selected emitter without entering Play. The platformer's coins sparkle and the hero trails dust; `docs/particles.md` is the contract. `project-capture` gains `hold:<Key>` and `release:<Key>`.
+- Light a 2D scene. Turn on `lighting_2d` in `sindri.environment` and its ambient color multiplies world sprites, tilemaps, flecks and shapes; `sindri.light2d` point lights add their color by distance, with a radius, falloff and intensity, and a sprite opts out with `unlit`. Name a `normal_map` on a sprite or tilemap and give a light a `height`, and a low light rakes across the art. Put `sindri.light2d.occluder` on a box, a polygon or a tilemap and a light with `shadows` on is blocked by it. Decay writes `this.light2d.color`, `intensity`, `radius`, `falloff` and `height`. Create offers Light 2D and the Scene view draws radii and occluders, with handles. The platformer has a cave lit by lanterns and a torch, and `docs/2d-lights.md` is the contract.
+- Draw a sprite through your own shader. A project `.wgsl` file defining `fn sprite_shader(input: SpriteShaderInput) -> vec4<f32>` is named in `sindri.sprite`'s new `shader` field, and four `shader_params` per sprite reach it as `input.params`, beside the unshaded color, UVs, world position and the scene's clock. Sprites sharing a shader still share a draw. The editor hot-reloads a shader on save; a shader that does not compile names its file and line and the sprite draws with the built-in look; export refuses one. Decay writes `this.sprite.shader_params`. `examples/sprite-shaders` shows an outline, a dissolve, a hit flash and a wave, and `docs/sprite-shaders.md` is the contract.
+
+- Find every way in under `Input`. `Input.Action`, `Input.Pointer`, `Input.Stick`, `Input.Gesture`, `Input.Touch`, `Input.Keyboard` and `Input.Gamepad` are the namespaces that grew beside `Input` one at a time, now reached from where someone looking for touch controls starts, checked as the same types and answered by the same state. `Input`'s own calls are still the keyboard, so no script changes; the flat names stay until the scripts here move to the gathered ones.
+
+- Load imported models everywhere a project plays. `sindri-player` loads `.glb` models in the browser and natively. The capture and benchmark tools bind them and light them as authored. The editor loads, binds and hot-reloads them for the Scene and Game views, and draws the rest of a scene while one loads or fails to decode. A project that keeps its assets beside `sindri.toml`, as Low Tide does, plays as it exports.
 
 - Every game steps faster. The engine no longer re-decodes components, lays out an unchanged screen, re-checks script text or steps an empty 3D world every fixed step: components are decoded once per change (`sindri_core::Decoded`), a script setting a value to what it already is no longer counts as an edit, and Decay finds a local without hashing its name. The platformer's step takes about half the work it did, and Orbital's standalone step went from 1.13 to 0.84 ms.
 
@@ -19,6 +277,30 @@
 - Every host binds the engine's own block set and textures. `builtin:blocks` was only ever bound by the editor, so a project whose voxel world named it failed in the exported browser build and in `project-capture`.
 
 - The Profiler times the editor's whole frame, not only Play's steps: upkeep, presentation, extraction, encoding, the panels, egui's painting and the wait for the next frame each have a phase, and a toolbar toggle records frames while editing. `sindri-editor <project> --benchmark <report.json>` measures a project at rest and in Play and exits; `project-benchmark` measures the same project as the browser host plays it, and `scripts/frame-benchmark.py` compares the two.
+- Load external model references through native/browser project asset queues,
+  export original validated GLB bytes as model assets, and apply authored scene
+  lighting in both hosts. The real Low Tide cutaway crawler is visually verified
+  in native offscreen and WebGPU runtimes. Imported-model shadows and full editor
+  model UX remain deferred.
+
+- Assign the registered imported-model component its existing rendering family
+  and mesh icon so the editor component catalogue remains complete. Model
+  authoring and loading UI remain deferred.
+
+- Add `sindri.model` external asset references, shared scene bindings, inactive
+  reference discovery and world-transform extraction. The public facade prepares
+  decoded assets without coupling scene/render to assets. Project hosts and
+  export packaging remain pending.
+
+- Add an independent imported-model GPU path with retained hierarchy, normals,
+  UVs, 16/32-bit indices, base-color textures, metallic/roughness lighting,
+  depth testing, mirrored transforms and shared GPU residency. Scene and project
+  host integration remains in progress.
+
+- Add CPU-side static GLB decoding with retained hierarchy, reusable meshes,
+  normals/UVs, 16/32-bit indices, material factors, embedded base-color images,
+  and asset-aware malformed/unsupported diagnostics. Runtime model rendering
+  and scene/export integration remain pending.
 
 - The `cube` mesh primitive is now a unit cube, one unit across like a default Collider 3D box, so a cube mesh and its collider match at any scale. It used to be two units across, which drew 3D bodies twice the size of their colliders. Editor picking follows the new size; the cube example and the editor fixture are drawn at scale 2 to look as they did.
 

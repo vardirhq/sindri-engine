@@ -1,30 +1,71 @@
 //! The person playing: keys, pads, pointer, fingers, and the camera and
 //! screen they look through.
 
-use super::{TypeEntry, call, value};
+use super::{Entry, TypeEntry, call, value};
+
+// The keyboard's calls, which `Input` offers directly for older scripts and
+// `Input.Keyboard` offers for new ones: one description of each, not two that
+// can drift apart.
+const AXIS: Entry = call(
+    "axis",
+    &["negative", "positive"],
+    "-1, 0 or 1 from a pair of keys, for movement: `Input.Keyboard.axis(\"A\", \"D\")` is -1 holding A, 1 holding D and 0 for neither or both.",
+);
+const IS_DOWN: Entry = call("is_down", &["key"], "Whether a key is being held down.");
+const JUST_PRESSED: Entry = call(
+    "just_pressed",
+    &["key"],
+    "Whether a key was pressed this frame. True only once per press, however long it is held.",
+);
+const JUST_RELEASED: Entry = call(
+    "just_released",
+    &["key"],
+    "Whether a key was let go this frame.",
+);
 
 pub(super) const TYPES: &[TypeEntry] = &[
     TypeEntry {
         name: "Input",
-        text: "The keyboard. Keys are named by position, such as `\"W\"`, `\"ArrowLeft\"` or `\"Space\"`, so controls work on any keyboard layout.",
+        text: "Every way the player reaches the game, in one place. Start with `Input.Action`, which works the same whatever the player holds; `Input.Pointer`, `Input.Stick` and `Input.Gesture` for mouse and touch; `Input.Keyboard`, `Input.Touch` and `Input.Gamepad` for one device read directly. The calls directly on `Input` are the keyboard, kept for older scripts: prefer `Input.Keyboard`.",
         members: &[
-            call(
-                "axis",
-                &["negative", "positive"],
-                "-1, 0 or 1 from a pair of keys, for movement: `Input.axis(\"A\", \"D\")` is -1 holding A, 1 holding D and 0 for neither or both.",
+            AXIS,
+            IS_DOWN,
+            JUST_PRESSED,
+            JUST_RELEASED,
+            value(
+                "Action",
+                "What the player means, such as `\"jump\"` or `\"move\"`, from the actions the scene declares. The best place to start: one script works with keys, a controller or a touch screen. The same as `Action`.",
             ),
-            call("is_down", &["key"], "Whether a key is being held down."),
-            call(
-                "just_pressed",
-                &["key"],
-                "Whether a key was pressed this frame. True only once per press, however long it is held.",
+            value(
+                "Gamepad",
+                "Game controllers, read by player number. The same as `Gamepad`.",
             ),
-            call(
-                "just_released",
-                &["key"],
-                "Whether a key was let go this frame.",
+            value(
+                "Gesture",
+                "Taps, holds, drags and pinches, for touch-first controls. The same as `Gesture`.",
+            ),
+            value(
+                "Keyboard",
+                "The keys, named by position so controls work on any keyboard layout.",
+            ),
+            value(
+                "Pointer",
+                "The mouse, or a finger on a touch screen, handled the same way so one game works on both. The same as `Pointer`.",
+            ),
+            value(
+                "Stick",
+                "A virtual joystick for touch screens: wherever a thumb lands becomes the center, and dragging from there steers. The same as `Stick`.",
+            ),
+            value(
+                "Touch",
+                "Every finger on a touch screen, for games that need more than one. For steering, `Input.Stick` is simpler. The same as `Touch`.",
             ),
         ],
+    },
+    TypeEntry {
+        name: "Keyboard",
+        text: "The keyboard, as `Input.Keyboard`. Keys are named by position, such as `\"W\"`, `\"ArrowLeft\"` or `\"Space\"`, so controls work on any keyboard layout. For controls that also work on a controller or a touch screen, use `Input.Action`.",
+        members: &[AXIS, IS_DOWN, JUST_PRESSED, JUST_RELEASED],
     },
     TypeEntry {
         name: "Action",
@@ -114,6 +155,20 @@ pub(super) const TYPES: &[TypeEntry] = &[
         name: "Pointer",
         text: "The mouse, or a finger on a touch screen, handled the same way so one game works on both.",
         members: &[
+            call(
+                "lock",
+                &[],
+                "Requests cursor capture from the windowed host. Call after a player click in a browser; capture is asynchronous and may be denied. Read `locked` for actual state.",
+            ),
+            call(
+                "unlock",
+                &[],
+                "Requests cursor release. Escape, focus loss and suspension also release capture; no automatic recapture.",
+            ),
+            value(
+                "locked",
+                "Read-only actual host cursor capture state, not the last request. False in headless runs and hosts without capture support.",
+            ),
             value(
                 "inside",
                 "Whether the mouse is over the game or a finger is on the screen. Check this before trusting a position.",
@@ -152,6 +207,10 @@ pub(super) const TYPES: &[TypeEntry] = &[
             value(
                 "position",
                 "The pointer's position in pixels, from the top-left corner of the game's view.",
+            ),
+            value(
+                "delta",
+                "Read-only Vec2 mouse displacement accumulated for this fixed step: positive right and down. Unlocked input uses viewport pixels; captured input uses native raw device counts or browser physical pixels. First arrival/re-entry adds no displacement; the next step reads zero without movement. This is displacement, not velocity: do not multiply by dt. Touch uses Gesture.drag_x/drag_y. Use lock/unlock to request cursor capture and locked to read actual host state.",
             ),
             value(
                 "x",
@@ -257,7 +316,7 @@ pub(super) const TYPES: &[TypeEntry] = &[
     },
     TypeEntry {
         name: "Camera",
-        text: "The game's camera: sizing an orthographic view and changing engine-owned follow, confinement, and shake behavior.",
+        text: "The game's camera: projection sizing, 3D orbit with obstruction pull-in, and engine-owned 2D follow, confinement and shake.",
         members: &[
             call(
                 "add_trauma",
@@ -298,6 +357,36 @@ pub(super) const TYPES: &[TypeEntry] = &[
                 "orthographic_size",
                 &["camera", "size"],
                 "Sets an explicitly selected orthographic camera's view size to a positive finite number. Works without camera behavior and preserves clipping, fit and unknown camera fields.",
+            ),
+            call(
+                "perspective_fov",
+                &["camera", "degrees"],
+                "Sets an explicit perspective camera's vertical field of view in degrees, strictly between 0 and 180. Preserves clipping and unknown fields; requires no behavior component.",
+            ),
+            call(
+                "orbit",
+                &["camera", "target", "yaw", "pitch", "distance"],
+                "Creates or retargets an explicit camera's engine-owned world-space orbit. Angles are radians; zero yaw is +Z behind the target, positive pitch is above it. Preserves offset, smoothing and collision settings. Target must be an active authored spatial entity, independent of the camera hierarchy.",
+            ),
+            call(
+                "orbit_offset",
+                &["camera", "offset"],
+                "Sets the orbit focus offset in world units from the target's world position.",
+            ),
+            call(
+                "orbit_smoothing",
+                &["camera", "rate"],
+                "Sets exponential orbit position smoothing per second. Zero snaps. Obstruction pull-in remains immediate.",
+            ),
+            call(
+                "orbit_collision",
+                &["camera", "mask", "padding"],
+                "Sets collider membership bits and world-unit pull-in padding below orbit distance. Mask must be a whole u32; zero disables queries. Sensors, the camera and target are excluded; a ray protects the sight line, not the near-plane volume.",
+            ),
+            call(
+                "clear_orbit",
+                &["camera"],
+                "Removes an explicit camera's orbit while keeping its last pose. Any existing 2D camera behavior resumes.",
             ),
             call(
                 "max_speed",

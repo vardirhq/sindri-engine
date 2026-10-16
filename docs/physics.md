@@ -386,7 +386,10 @@ at the scene boundary uses the engine-owned `PhysicsMaterial::validate` rules;
 asset decoders and core profile documents stay independent of physics.
 
 An entity's `sindri.physics2d.material` names `profile` and applies it to every
-ordinary and generated tilemap collider piece, sensors included. Without a
+ordinary and generated tilemap collider piece, sensors included. Its 3D counterpart,
+`sindri.physics3d.material`, uses exactly the same fields and asset format for
+primitive compounds, characters, static model triangles, convex model hulls and
+resident voxel sections. Without a
 material component, existing per-piece literals are unchanged. An empty profile
 keeps those literals. A non-empty reference must resolve to a loaded physics
 profile; a missing or differently typed profile fails the fixed step. The profile
@@ -912,8 +915,10 @@ keeps angular velocity zero. Invalid arguments/body kinds fail before mutation.
 Controls change live simulation, leaving authored starting motion unchanged;
 structural body/collider rebuilds therefore restore authored settings. Missing
 3D host context and stale/inactive handles fail explicitly. Before synchronization,
-controls require valid authored 3D body and nonempty collider components, no
-conflicting 2D physics and no moving depth lock. The composed transform supplies
+controls require a valid authored 3D body with nonempty primitive colliders or
+a convex-model reference, compatible ownership and no moving depth lock. Convex
+schema/material fields and positive composed scale validate before queuing; hull
+geometry and mass validate at synchronization. The composed transform supplies
 pose, as it does for scene insertion. Requests replay in call order before the
 first solve, after actual compound mass is known. Reads return copied last queued
 setters or authored starting velocities (locked angular velocity is zero);
@@ -1060,9 +1065,26 @@ and `sindri.physics3d.world`. Body payloads use the engine's XYZ fields (includi
 `position` and `rotation`), but an entity's composed `Transform3D` is authoritative
 when present. Without a transform, the body pose is the fallback. Colliders accept
 one piece or `{ "pieces": [...] }`; a collider without a body creates a static
-body, while a body without a collider takes no part. Shape dimensions and local
-offsets are world units, independent of visual transform scale. Automatic 3D
-collider scaling is absent. World settings accept `gravity: [x, y, z]` and optional
+body, while a body without a collider takes no part. Shape dimensions and
+offsets are local units. The scene applies the entity's
+composed world scale (including parents) once before solver insertion and voxel
+reach planning. Without a transform, scale is one. Positive finite uniform scale
+works for all pieces; boxes also support nonuniform scale if their local rotated
+axes remain orthogonal. Axis-permuting rotations work; sheared boxes, nonuniform
+spheres/capsules, zero/negative scale and overflowing dimensions/offsets fail
+explicitly, naming the entity and piece when applicable. The scene does not
+approximate ellipsoids or stretched capsule caps. Collider wireframes use the
+same resolved geometry and omit unsupported geometry. Standalone solver values
+remain world units, and 2D collider semantics are unchanged. Existing scenes
+authored with world-unit dimensions must convert them to local units; an
+axis-aligned box's old half extents and offsets divide by its composed scale.
+Orbit Camera Lab is converted, while the quarry's unit-scale pieces need no edit.
+Orbit Lab's keyboard shrink/restore controls exercise live scaling through
+Session and real Chromium: center and edge rays verify synchronized geometry,
+including reactivating a removed barrier. Native [scale review](collider-scale-editor-review.md)
+exercises inspector edits, matching wireframes, Undo/Redo, persistence, Play and
+Stop restoration. Explorer game adoption remains open.
+World settings accept `gravity: [x, y, z]` and optional
 layer labels; removing/disabling the settings restores the host's gravity.
 Multiple active 3D world settings fail explicitly.
 
@@ -1073,8 +1095,12 @@ reject a Z-locked local transform rather than allowing simulation and rendering
 to disagree. The driver removes inactive/despawned entities and removed colliders,
 including inherited inactivity, and re-registers them on reactivation. Unchanged
 components preserve live velocity; transform/ancestor moves teleport or set a
-position-kinematic target. Any body/collider payload change rebuilds that body and
-resets its motion to authored values. Live coefficient/control patching is not a
+position-kinematic target. Any body/collider payload change or resolved geometry
+change caused by entity
+or ancestor scale rebuilds that body and resets its motion to authored values.
+Unchanged scale does not rebuild; scale writes become effective at the next
+fixed step. Authored collider payloads are never rewritten by scaling. Live
+coefficient/control patching is not a
 3D scene capability yet.
 
 After solving, all non-static body kinds write XYZ/quaternion poses back through
@@ -1097,6 +1123,64 @@ collision (below) supplies the occupied/resident/edited world proof. Typed
 rotated probes are exercised as described above. CCD controls,
 contacts, force/torque, materials, joints and character controllers also have no
 3D authoring/Decay surface yet. The 2D API remains unchanged.
+
+## Live 3D collision coefficients
+
+`PhysicsWorld3d::materials(entity)` returns copied `PhysicsMaterial` values.
+`set_materials(entity, values)` updates existing colliders without rebuilding
+their body or geometry. The order is the original primitive pieces followed by
+convex hull pieces, then static groups in ascending key and piece order. Static
+triangle meshes use their original piece order. An existing static owner whose
+groups have all been removed accepts an empty list; an absent owner fails.
+
+The complete piece count and all coefficients validate before any mutation.
+Friction is finite and nonnegative; restitution is finite in `[0, 1]`, using
+the same asset-free `PhysicsMaterial` rules as 2D. Updates preserve collider
+and body handles, pose, mass, linear/angular velocity, forces, position-kinematic
+targets and checkpoint replay. Changed values refresh contact processing and
+wake affected bodies, including sleeping neighbors of a changed static floor.
+Identical values leave sleeping bodies asleep. Friction retains the minimum
+combine rule and restitution the average rule.
+
+Rapier can reuse a resting contact's cached coefficients even after a pose
+refresh. A changed batch therefore requests one full contact update on the next
+successful step, temporarily bypassing contact recycling for that step only.
+Normal recycling resumes afterward. Checkpoints retain the pending refresh;
+an invalid timestep does not consume it. Geometry and contact identities remain
+intact. A profile reload may consequently cost one full world contact pass.
+
+Native backend regressions exercise mixed primitive/hull validation and state,
+static triangle/group order and identity, empty owners, sleeping bodies,
+kinematic targets, friction changes on existing contacts without new start
+events, sleeping-neighbor wakeup and restitution/replay.
+
+Scene synchronization resolves profiles before committing any 3D body or voxel
+batch. Missing/wrongly typed profiles and invalid enabled overrides leave live
+3D geometry, motion and events intact. Cached model plans start from authored
+literal coefficients every step, so removing a profile restores those values.
+Coefficient-only edits (including literal model coefficients) preserve body
+motion, character support state and existing contacts. Structural geometry,
+layers, sensor, scale or body edits retain the normal rebuild behavior.
+
+Voxel coefficient edits retain compiled boxes, section keys and solver groups,
+consume no geometry rebuild budget and apply coefficients in solver group order.
+Session builds one source set for both dimensions before stepping; restoring a
+checkpoint keeps the latest profile assets delivered by the host. Export discovers
+3D profile references in inactive entities and spawned prefab contents as well as
+ordinary scenes. The editor registers Physics Material 3D in its Physics family,
+with a profile asset field and command-backed generic override controls.
+
+Model Collision Lab's floor and spawned convex prop share `materials/slide.profile`
+and explicitly override restitution to zero. Native scene/runtime/export
+regressions exercise sharing, precedence, invalid-batch retention, reload,
+profile removal, structural rebuilds and checkpoint replay. This capability is
+added for Explorer, with feature-lab proof; Explorer adoption remains pending.
+The rebuilt Chromium smoke fetches the profile and both GLBs, reaches both goals,
+checks rendered colors and reports no runtime/GPU errors. The native editor
+[review](model-collision-editor-review.md#shared-3d-physics-profiles) covers
+profile selection, overrides, Undo/Redo, save/reopen, valid/invalid asset reload,
+prop Play goal and Stop restoration. Native visual evidence is X11/software
+Vulkan; broader platform/GPU coverage remains open.
 
 ## Replaceable static collider groups
 
@@ -1155,7 +1239,9 @@ hash of every block's answer; each section's occupancy revision is a hash of its
 voxels after edits, so an edit, a different generator or a rebound block set
 all change the revision and equal content reuses cached geometry.
 
-Residency follows what can hit voxels. Each step, every planned dynamic body
+Residency follows what can hit voxels. Scene characters add their scaled probe
+extent, requested travel and skin/snap/step margins to the same residency plan,
+so characters alone retain collision terrain. Each step, every planned dynamic body
 contributes its farthest piece extent plus twice the travel its velocity and
 gravity allow in that step, transformed into the world's voxel space (the
 entity's composed pose and scale, then the grid's cell size and centring from
@@ -1163,8 +1249,8 @@ entity's composed pose and scale, then the grid's cell size and centring from
 touch is the complete snapshot handed to `SceneVoxelCollision3d`; terrain no
 body is near is not resident, wherever the camera is. A single reach wider than
 the section budget fails the step whole rather than publishing a partial window.
-Kinematic and static bodies do not drive residency, and queries see only
-resident sections -- a script asking about distant terrain uses `Grid`/`Aim`.
+Ordinary authored kinematic and static bodies do not drive residency; scene
+characters do. Queries see only resident sections -- a script asking about distant terrain uses `Grid`/`Aim`.
 
 `ScenePhysics3d::step_with_tile_sets` resolves these worlds through
 `VoxelGround` (generator, palette and edits), plans the voxel snapshot against
@@ -1390,3 +1476,293 @@ No game rules are supplied. See the character contract for frame ordering,
 query masks, transform semantics, sensor timing and remaining editor/Decay/game
 integration. Compound character probes, same-step solver response and swept
 controller triggers remain absent.
+
+## 3D character query foundation
+
+`PhysicsWorld3d::move_character` and `move_character_where` wrap Rapier's
+kinematic character controller in engine-owned `CharacterOptions3d`,
+`CharacterMotion3d` and `CharacterCollision3d` values. They are read-only
+world-displacement queries with current-pose geometry, slope/step/snap options
+and copied hit results; applying motion and gameplay policy are separate.
+Scene ownership is described below; there is no Decay surface yet. This is added
+generally for Explorer's planned movement, with native engine regression evidence and
+honestly pending game/editor/browser proof. See
+[Character movement](character-movement.md#3d-character-movement-foundation)
+for validation, backend flag semantics, numerical limits and remaining slices.
+
+### Scene-owned 3D character movement
+
+`sindri.physics3d.character` derives a stationary kinematic body from one scaled
+solid Collider 3D piece, with optional sensor pieces and no authored rigid body.
+`ScenePhysics3d` consumes queued world displacement after the solve, applies it
+once and writes the result through the existing parent-space transform path.
+Input/solver reach participates in voxel residency before any bodies change.
+Actual solved carry expands residency before rider queries; a carry budget failure
+retains queued input and leaves riders unmoved but does not roll back the solve.
+Session uses this same driver, including checkpoints; no host assembles another
+movement loop. Backend limits, request/result lifetime, next-solve sensor timing
+and remaining Decay/game proof are specified in
+[the character contract](character-movement.md#3d-scene-ownership).
+
+### Classified 3D ground queries
+
+`PhysicsWorld3d::probe_ground` and `probe_ground_where` expose read-only nearest
+support geometry through `GroundOptions3d` and copied `GroundProbe3d` values.
+They classify skin/touching contacts and downward casts against a slope limit,
+retain steep nearest surfaces and reject initial penetration as support. Filters,
+stable whole-entity predicate reuse, deterministic ties and current poses use the
+existing query index. No snap, carry or gameplay standing policy is applied.
+Native geometry/filter/lifecycle/invalid-input regressions exercise this general
+Explorer prerequisite; browser/editor/Decay/game proof
+remain pending. See [the contract](character-movement.md#classified-3d-ground-queries).
+
+### Read-only 3D platform carry
+
+`move_character_grounded` / `move_character_grounded_where` combine optional
+`PlatformSupport3d`, collision-limited carry, ordinary Rapier movement and
+classified final support. Current compound geometry verifies the previous pose;
+translation and rotation-point travel sweep before input movement, with separate
+copied carry/movement hits and one total translation. Pending targets contribute
+nothing until solved. Native regressions cover geometry, filtering, wall clipping,
+vertical platforms, jumps and validation. Hosts still own snapshot invalidation,
+once-only application and terrain reach; scene ownership is described above. See
+[the contract](character-movement.md#read-only-3d-platform-carry) for chord,
+fixed-orientation and backend correction/iteration limits.
+
+Scene Character 3D enables platform carry by default, with a flat
+`carry_platforms` opt-out. Support is classified before solving; solved translation
+and rotation-point carry precede input movement and are included once in the
+cached `GroundedCharacterMotion3d`. Dependent rider caches invalidate with support
+lifecycle changes; fresh snapshots prevent replay after clipped travel. Native
+scene and Session regressions exercise parenting, jumps, lifecycle, replay and
+terrain budgets. Browser/controller, editor interaction and Explorer proof remain
+pending; no controller-on-controller carry is claimed.
+
+### Imported-model collision preparation
+
+Assets now prepare bounded model-space triangles with accumulated selected-node
+transforms, reflected winding and primitive-instance ranges. This is the CPU
+geometry prerequisite for model-derived static meshes and convex hulls, added
+for the planned Explorer showcase. Static triangle geometry and standalone-world
+queries are now implemented; scene asset bindings remain absent. Standalone
+convex hulls are available below.
+No runtime body is created by asset preparation. See [the asset contract](imported-models.md#cpu-collision-preparation).
+
+### Static triangle geometry
+
+`TriangleMesh3d::new(vertices, triangles)` builds an immutable, clone-shared
+physics resource without an asset, renderer or scene dependency. Its private
+backend acceleration structure is shared across instances and world snapshots.
+It accepts open, disconnected and nonmanifold surfaces without welding or repair;
+rays see both sides and gaps remain empty. A mesh is a surface, not a solid
+volume or a convex approximation. Authored winding remains meaningful for normals.
+
+Construction rejects empty geometry, more than 1,000,000 vertices or triangles,
+nonfinite coordinates or coordinates outside +/-100,000,000 units, out-of-range
+indices and degenerate triangles. Triangle cross-product squared length must be
+positive and finite in backend f32 arithmetic; extremely small triangles can
+therefore fail even after CPU model preparation succeeds. These bounds keep
+construction arithmetic representable. `TriangleMeshError3d` identifies a failing
+vertex or triangle; failed construction returns no partial resource.
+
+`TriangleMeshCollider3d` adds local pose, sensor flag, collision layers and
+`PhysicsMaterial` coefficients. `PhysicsWorld3d::validate_static_mesh_group` and
+`replace_static_mesh_group` validate the owner pose, every piece (with its index),
+composed mesh bounds, static ownership and incompatible pending controls before
+mutation. Static meshes share keys, body identity, ordering, replacement and
+removal with existing primitive groups. A group can replace either kind. The
+owner pose moves all groups; piece poses remain local. An empty replacement
+removes a group and never creates an absent owner. Queries see changes before
+a solver step; simulation contacts update at the next solve.
+
+Eight native regressions exercise geometry errors/budgets, shared resources,
+open gaps and two-sided rays, immediate ray/overlap/cast/ground/character queries,
+local rotation and filtering, replacement/removal, failed late-piece edits and
+pending controls, original body insertion/duplicate ownership, dynamic sphere
+landing and identical cloned-world replay.
+This is standalone physics proof for the planned Explorer showcase. Primitive
+`ColliderShape3d` remains unchanged. Explicit static scene asset bindings are
+described below; automatic host loading and native/browser/editor/Explorer
+project proof remain pending;
+WebAssembly compilation alone does not prove browser behavior.
+
+### Convex hull geometry
+
+`ConvexHull3d::new(points)` builds an immutable, clone-shared volumetric hull
+without asset, renderer or scene dependencies. It fills concavities rather than
+performing convex decomposition. Duplicate and interior points are allowed;
+scale is baked into input positions. Construction accepts 4..=4,096 points in
++/-10,000 local units. Too few/too many points, nonfinite/out-of-range points,
+flat/collinear/identical input and unusable backend mass properties return
+`ConvexHullError3d`. Unit-density mass, principal inertia and their inverses must
+be positive and finite, with finite center of mass and inertia-frame rotation.
+Tiny, thin or numerically ill-conditioned hulls may therefore be rejected.
+
+`ConvexHullCollider3d` carries the shared geometry, local pose, sensor flag,
+layers and existing `PhysicsMaterial`. `PhysicsWorld3d::validate_hull_body` and
+`insert_hull_body` take a rigid body, primitive pieces and hull pieces. Diagnostics
+number primitives first, then hulls. Compounds require 1..=1,024 total pieces.
+The body, all pieces, composed bounds, individual/combined mass properties,
+entity ownership and queued controls are checked before insertion. Failure keeps
+pending controls and leaves the world untouched. Geometry has default unit
+density; sensor pieces contribute mass, matching existing primitive behavior.
+
+Hull bodies use the ordinary insertion, coefficients, immediate queries,
+teleports/kinematic targets, velocity/impulse controls, events, removal and world
+snapshot lifecycle. All four body kinds work; a hull may join primitives in a
+compound. Primitive-only compounds also pass through this API, subject to its
+stricter count and mass checks. Static hulls remain original body pieces when
+keyed static groups are added later.
+
+Eight native regressions exercise invalid/degenerate construction, shared
+geometry and exact tetrahedron rays/interior overlap, mixed-compound mass and
+local rotation/offset, pending impulses, dynamic landing and cloned replay,
+atomic invalid edits/budgets/duplicate ownership, both kinematic kinds and sensor
+filtering/enter/exit events. This foundation is added for the planned Explorer
+showcase. Model-derived scene bindings now have explicit native proof below; automatic
+asset loading and native/browser/editor/game project proof remain pending. Serialized primitive shapes and Decay APIs do not
+change in this slice; WASM compilation is not browser behavior proof.
+
+### Static model scene ownership
+
+`sindri.physics3d.model_collider` requires a logical `asset` ID and optionally
+accepts `friction` (default 0.5), `restitution` (0), `layers` (all) and `sensor`
+(false). It owns one static body and cannot coexist with a 3D rigid body,
+primitive collider, character or voxel collider. Mixed 2D/3D ownership is rejected.
+A render model is optional and can name a different asset. There is no invented
+blank asset or engine add-component default. The editor completes the component
+from a real project GLB and offers a model asset picker through declared field
+metadata. It withholds competing body/collider/character components in either
+order. Render and collision asset choices remain independent and undo separately;
+see the [native authoring review](model-collision-editor-review.md#model-asset-authoring).
+
+Hosts explicitly prepare and deliver resources with
+`Session::bind_model_collision(id, &ModelAsset)` after asynchronous decoding.
+The runtime calls bounded CPU model preparation, then scene-owned
+`ModelCollisionGeometry3d` validation; neither scene nor physics depends on
+assets. Failed preparation keeps the previous binding. Removing a binding makes
+active references fail before the next 3D solve, retaining live geometry until
+corrected. Shared model asset discovery and export include collision-only
+references from scenes and prefabs, including inactive entities. Automatic
+native/browser player collision binding now runs after asset loading completes
+and before Session starts. It expands all scene/prefab references, including
+inactive entities and overrides, and prepares only authored collision assets.
+Missing or invalid geometry names the logical asset ID. Native headless
+`ProjectRun` waits for its worker queue and installs authored collision before
+stepping. Editor Play uses its asynchronous model queue, including unsaved world
+references and retained later-scene/prefab assets; unavailable or invalid assets
+keep Play stopped with a named diagnostic. Successful model reloads replace
+collision before the next step; failures retain the last valid binding. Stop
+releases Play-only retention. References introduced during Play require restarting
+the run. Model Collision Lab's editor/headless parity regression reaches the goal
+with identical state, then restores and replays wall obstruction.
+
+The scene driver prevalidates the entire authored plan before changing its
+solver. Composed positive finite scale is baked into model-space triangles;
+nonuniform scale is supported, invalid/overflowing/degenerate results fail.
+Identity geometry shares its immutable resource. A cache retains at most 64
+scaled variants; active colliders retain their resources independently. Preparation
+may populate this derived cache even when another entity invalidates the plan.
+Unchanged source/properties/scale keeps the registration; changed resources or
+scale rebuild once. Translation/rotation uses existing static teleports. Disable,
+removal and primitive/model transitions use the same ownership lifecycle.
+
+Checkpoints copy the solver and share immutable geometry. Restoring keeps the
+latest host-delivered bindings, like script sources; the next step reconciles
+against those resources. Native scene tests exercise dynamic landing, inherited
+scale/rotation, invalid updates, lifecycle and ownership transitions. Native
+Session tests decode the actual GLB fixture, block character motion, replay the
+same checkpoint and retain replacements across restore and failed preparation.
+This slice is foundation for Explorer; native/browser/editor project and game
+proof remain pending, and no surface earns a completion checkmark from compiling.
+
+
+### Convex model scene ownership
+
+`sindri.physics3d.model_convex_collider` uses the static model collider's required
+`asset` and optional friction/restitution/layers/sensor fields. It supplies one
+volumetric hull to an optional `sindri.physics3d.rigid_body`; without that body it
+is static. All four body kinds are supported. Primitive collider pieces may
+share this body, while characters, static model collision, voxel collision and
+mixed 2D/3D owners are rejected before solver mutation. Moving Z-locked owners
+are rejected. Rendering remains independent.
+
+Hosts explicitly call `Session::bind_model_convex_collision(id, &ModelAsset)`
+after decoding. CPU preparation expands the selected hierarchy with a 4,096
+expanded-vertex budget, including duplicate vertices and repeated mesh instances.
+`ModelConvexGeometry3d` computes one hull of the entire hierarchy; it fills gaps
+and concavities and performs no decomposition, welding or simplification. A flat
+model fails with a typed error. Hull point, volume and mass limits are those of
+`ConvexHull3d`; asset preparation retains its other default node/triangle limits.
+Failed preparation leaves the previous binding intact.
+
+Positive finite composed nonuniform scale is baked into points. Unit-scale
+instances share immutable geometry; at most 64 scaled variants are cached,
+with active instances retaining their geometry independently. Source, scale or
+collider/body edits rebuild; unchanged frames and transform teleports preserve
+velocity. Dynamic hull extent contributes to voxel residency. Disable, removal
+and primitive transitions use the shared scene lifecycle. Checkpoints share
+immutable hulls and restoring preserves the latest host bindings.
+
+Native scene regressions exercise landing, scaling, inherited placement, mixed
+pieces, live velocity, replay, residency extent, invalid scale/material/ownership,
+Z-lock and unbinding retention. A Session regression uses the decoded GLB fixture,
+reorients a node to make it volumetric, moves and replays its body, and verifies
+replacement across restore and rejected planar replacement. Hull rebuild
+prevalidation ignores existing registration; insertion still rejects duplicate
+ownership.
+
+Shared discovery now retains separate triangle/convex uses for each logical
+asset across scenes, expanded prefabs/overrides and inactive entities. Export
+includes convex-only references and original verified GLB bytes. The native/browser
+player, headless `ProjectRun` and editor Play prepare only authored representations
+before gameplay. Editor startup merges unsaved and later-scene uses without losing
+either representation, and keeps their assets retained through Play.
+
+`Session::bind_model_collisions` expands CPU geometry once, validates every
+requested representation, then replaces bindings. A failed hull preparation leaves
+both previous bindings intact, including an asset used for triangles elsewhere.
+Shared triangle/convex use inherits the 4,096 expanded-vertex convex budget;
+triangle-only assets keep their larger budget. Editor model reload uses this same
+atomic operation and retains the previous rendered model on collision failure.
+References introduced during Play still require stopping and restarting.
+
+Add Convex Model Collider uses a real project GLB and the model asset picker.
+Rigid bodies and primitive pieces may share it; static model/voxel collision,
+characters and 2D collision (including tilemaps) are withheld in either order.
+Model Collision Lab now has a volumetric GLB prop that falls onto the imported
+floor, receives a Decay impulse after landing, and reaches a travel goal. This is
+native player/Session, rebuilt browser and native editor feature proof for Explorer;
+see the [editor review](model-collision-editor-review.md#convex-props-and-authoring).
+Explorer game adoption remains open. Static triangle
+and convex bindings remain independent, even when they name the same asset.
+
+
+### Convex-model spawn-window controls
+
+Existing `Physics3d` motion reads, setters and impulses now accept an authored
+convex-only body before its first synchronization, and hull/primitive compounds.
+`PhysicsWorld3d::validate_body_settings` checks the real authored/composed body
+without requiring or inventing primitive geometry. The host also validates
+collider schemas, nonempty primitive pieces when present, convex material,
+positive finite composed hull scale, dimension/owner conflicts and moving Z locks.
+Invalid authoring or input never replaces an earlier valid queued request.
+
+No asset loading or hull construction runs in the scripting host. Geometry,
+bounds, volume, scaled mass and pending kind compatibility validate together
+before scene solver mutation. Missing/invalid hull bindings fail synchronization
+and retain queued controls for a corrected retry. Reads return copied authored
+starts/last queued setters; impulses wait for the actual combined mass. Rotation
+locks still return zero angular velocity. Successful materialization replays once
+in call order, retains authored motion fields and participates in checkpoints.
+
+Five native host regressions cover scaled hull mass/ordered controls/replay,
+invalid authoring preserving the last request, kinematic impulse rejection and
+rotation locks, mixed-compound mass, and missing binding/corrected retry.
+Model Collision Lab now spawns its prop from a typed prefab, queues velocity,
+impulse and angular motion immediately, and reports pending-read verification.
+A project Session regression checks the first materialization step and checkpoint
+replay, then reaches the prop's contact-start impulse/travel goal. Rebuilt Chromium verifies the pending-read message, both fetched GLBs and both
+lab goals. Native editor Play/restart reaches the prop goal and Stop removes
+the spawned body; see [the review](model-collision-editor-review.md#convex-prefab-spawn-window-motion).
+Explorer adoption remains open.

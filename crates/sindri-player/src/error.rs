@@ -36,12 +36,24 @@ pub enum PlayerError {
     TileSet(#[from] sindri_core::TileSetError),
     #[error(transparent)]
     Prefab(#[from] sindri_core::PrefabJsonError),
+    #[error("model collision references: {0}")]
+    ModelCollisionReferences(String),
     #[error(transparent)]
     Decode(#[from] sindri_assets::AssetDecodeError),
     #[error(transparent)]
     Audio(#[from] AudioError),
     #[error(transparent)]
     Texture(#[from] TextureError),
+    #[error(transparent)]
+    Model(#[from] sindri_render::ModelRenderError),
+    #[error("model collision asset '{0}' was not loaded")]
+    MissingModelCollision(sindri_core::AssetId),
+    #[error("model collision asset '{asset}': {source}")]
+    ModelCollision {
+        asset: sindri_core::AssetId,
+        #[source]
+        source: sindri_runtime::ModelCollisionBindingError,
+    },
     #[error(transparent)]
     Animation(#[from] sindri_scene::AnimationError),
     #[error(transparent)]

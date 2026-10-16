@@ -51,6 +51,14 @@
       0.69,
       1.0
      ],
+     "lighting_2d": {
+      "enabled": true,
+      "ambient": [
+       0.05,
+       0.07,
+       0.13
+      ]
+     },
      "shadows": {
       "enabled": false,
       "map_size": 1024,
@@ -256,7 +264,10 @@
      "view": "map",
      "variant_seed": 5,
      "layer": -10,
-     "edits": []
+     "edits": [],
+     "normal_maps": {
+      "textures/terrain.png": "textures/terrain_n.png"
+     }
     },
     "sindri.script": {
      "source": "scripts/tide.decay",
@@ -295,7 +306,8 @@
       1,
       1,
       1
-     ]
+     ],
+     "normal_map": "textures/wreck_n.png"
     },
     "sindri.tags": {
      "tags": [
@@ -308,6 +320,15 @@
      "properties": {
       "template": "prefabs/cargo.prefab"
      }
+    },
+    "sindri.light2d.occluder": {
+     "enabled": true,
+     "shape": "box",
+     "size": [
+      0.78,
+      0.5
+     ],
+     "points": []
     }
    }
   },
@@ -454,7 +475,8 @@
      "columns": 11,
      "rows": 18,
      "tiles": [null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,1,1,2,1,1,null,null,null,null,null,9,1,0,5,0,1,9,null,null,null,null,9,1,0,0,0,1,9,null,null,null,null,9,1,21,0,0,1,9,null,null,null,null,9,1,0,0,0,4,10,null,null,null,null,9,1,0,0,0,1,9,null,null,null,null,9,1,0,0,8,1,9,null,null,null,null,9,1,0,0,0,1,9,null,null,null,null,null,1,1,1,1,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
-     "layer": 4
+     "layer": 4,
+     "normal_map": "textures/ship_n.png"
     }
    }
   },
@@ -511,6 +533,7 @@
      "columns": 11,
      "rows": 18,
      "layer": 3,
+     "normal_map": "textures/ship_n.png",
      "tiles": [null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,14,14,14,14,14,null,null,null,null,null,14,14,14,14,14,14,14,null,null,null,null,14,14,14,14,14,14,14,null,null,null,null,13,13,13,13,13,13,13,null,null,null,null,13,13,13,13,13,13,13,null,null,null,null,15,15,15,15,15,15,15,null,null,null,null,15,15,15,15,15,15,15,null,null,null,null,15,15,15,15,15,15,15,null,null,null,null,null,15,15,15,15,15,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null]
     }
    }
@@ -528,70 +551,177 @@
     "rotation": [
      0,
      0,
-     0.0,
-     1.0
+     0,
+     1
     ],
     "scale": [
-     1.1,
-     1.1,
+     1.5,
+     1.5,
      1
     ]
    },
    "components": {
     "sindri.sprite": {
-     "texture": "textures/crew.png#down-0",
+     "texture": "textures/Keeper-Idle-spritesheet/Keeper-Idle.png#south-idle",
      "layer": 6
     },
     "sindri.animation.sprite": {
      "clips": {
-      "down": {
+      "south-run": {
        "frames": [
-        "down-0",
-        "down-1"
+        "south-run-0",
+        "south-run-1",
+        "south-run-2",
+        "south-run-3",
+        "south-run-4",
+        "south-run-5"
        ],
-       "seconds_per_frame": 0.18,
+       "seconds_per_frame": 0.11,
        "looping": true
       },
-      "up": {
+      "south-still": {
        "frames": [
-        "up-0",
-        "up-1"
-       ],
-       "seconds_per_frame": 0.18,
-       "looping": true
-      },
-      "side": {
-       "frames": [
-        "side-0",
-        "side-1"
-       ],
-       "seconds_per_frame": 0.18,
-       "looping": true
-      },
-      "down-still": {
-       "frames": [
-        "down-0"
+        "south-idle"
        ],
        "seconds_per_frame": 0.5,
        "looping": false
       },
-      "up-still": {
+      "south-east-run": {
        "frames": [
-        "up-0"
+        "south-east-run-0",
+        "south-east-run-1",
+        "south-east-run-2",
+        "south-east-run-3",
+        "south-east-run-4",
+        "south-east-run-5"
+       ],
+       "seconds_per_frame": 0.11,
+       "looping": true
+      },
+      "south-east-still": {
+       "frames": [
+        "south-east-idle"
        ],
        "seconds_per_frame": 0.5,
        "looping": false
       },
-      "side-still": {
+      "east-run": {
        "frames": [
-        "side-0"
+        "east-run-0",
+        "east-run-1",
+        "east-run-2",
+        "east-run-3",
+        "east-run-4",
+        "east-run-5"
+       ],
+       "seconds_per_frame": 0.11,
+       "looping": true
+      },
+      "east-still": {
+       "frames": [
+        "east-idle"
+       ],
+       "seconds_per_frame": 0.5,
+       "looping": false
+      },
+      "north-east-run": {
+       "frames": [
+        "north-east-run-0",
+        "north-east-run-1",
+        "north-east-run-2",
+        "north-east-run-3",
+        "north-east-run-4",
+        "north-east-run-5"
+       ],
+       "seconds_per_frame": 0.11,
+       "looping": true
+      },
+      "north-east-still": {
+       "frames": [
+        "north-east-idle"
+       ],
+       "seconds_per_frame": 0.5,
+       "looping": false
+      },
+      "north-run": {
+       "frames": [
+        "north-run-0",
+        "north-run-1",
+        "north-run-2",
+        "north-run-3",
+        "north-run-4",
+        "north-run-5"
+       ],
+       "seconds_per_frame": 0.11,
+       "looping": true
+      },
+      "north-still": {
+       "frames": [
+        "north-idle"
+       ],
+       "seconds_per_frame": 0.5,
+       "looping": false
+      },
+      "north-west-run": {
+       "frames": [
+        "north-west-run-0",
+        "north-west-run-1",
+        "north-west-run-2",
+        "north-west-run-3",
+        "north-west-run-4",
+        "north-west-run-5"
+       ],
+       "seconds_per_frame": 0.11,
+       "looping": true
+      },
+      "north-west-still": {
+       "frames": [
+        "north-west-idle"
+       ],
+       "seconds_per_frame": 0.5,
+       "looping": false
+      },
+      "west-run": {
+       "frames": [
+        "west-run-0",
+        "west-run-1",
+        "west-run-2",
+        "west-run-3",
+        "west-run-4",
+        "west-run-5"
+       ],
+       "seconds_per_frame": 0.11,
+       "looping": true
+      },
+      "west-still": {
+       "frames": [
+        "west-idle"
+       ],
+       "seconds_per_frame": 0.5,
+       "looping": false
+      },
+      "south-west-run": {
+       "frames": [
+        "south-west-run-0",
+        "south-west-run-1",
+        "south-west-run-2",
+        "south-west-run-3",
+        "south-west-run-4",
+        "south-west-run-5"
+       ],
+       "seconds_per_frame": 0.11,
+       "looping": true
+      },
+      "south-west-still": {
+       "frames": [
+        "south-west-idle"
        ],
        "seconds_per_frame": 0.5,
        "looping": false
       }
      },
-     "playing": "down-still",
-     "speed": 1.0
+     "playing": "south-still",
+     "speed": 1
     },
     "sindri.script": {
      "source": "scripts/crew.decay",
@@ -602,7 +732,7 @@
     }
    }
   },
-  {
+   {
    "id": "swim-wake",
    "name": "Swim wake",
    "parent": "crew",
@@ -610,7 +740,7 @@
    "transform_3d": {
     "position": [
      0,
-     -0.15,
+     -0.11,
      0.05
     ],
     "rotation": [
@@ -620,8 +750,8 @@
      1.0
     ],
     "scale": [
-     1.55,
-     0.6,
+     1.14,
+     0.44,
      1
     ]
    },
@@ -682,8 +812,8 @@
      1.0
     ],
     "scale": [
-     0.5,
-     0.5,
+     0.37,
+     0.37,
      1
     ]
    },
@@ -696,7 +826,8 @@
       1,
       1,
       1
-     ]
+     ],
+     "normal_map": "textures/ship_n.png"
     },
     "sindri.animation.sprite": {
      "clips": {
@@ -901,7 +1032,8 @@
    "components": {
     "sindri.sprite": {
      "texture": "textures/treads.png#port-0",
-     "layer": 5
+     "layer": 5,
+     "normal_map": "textures/treads_n.png"
     },
     "sindri.animation.sprite": {
      "clips": {
@@ -972,7 +1104,8 @@
    "components": {
     "sindri.sprite": {
      "texture": "textures/treads.png#port-0",
-     "layer": 5
+     "layer": 5,
+     "normal_map": "textures/treads_n.png"
     },
     "sindri.animation.sprite": {
      "clips": {
@@ -1043,7 +1176,8 @@
    "components": {
     "sindri.sprite": {
      "texture": "textures/treads.png#port-0",
-     "layer": 5
+     "layer": 5,
+     "normal_map": "textures/treads_n.png"
     },
     "sindri.animation.sprite": {
      "clips": {
@@ -1114,7 +1248,8 @@
    "components": {
     "sindri.sprite": {
      "texture": "textures/treads.png#port-0",
-     "layer": 5
+     "layer": 5,
+     "normal_map": "textures/treads_n.png"
     },
     "sindri.animation.sprite": {
      "clips": {
@@ -1185,7 +1320,8 @@
    "components": {
     "sindri.sprite": {
      "texture": "textures/treads.png#port-0",
-     "layer": 5
+     "layer": 5,
+     "normal_map": "textures/treads_n.png"
     },
     "sindri.animation.sprite": {
      "clips": {
@@ -1256,7 +1392,8 @@
    "components": {
     "sindri.sprite": {
      "texture": "textures/treads.png#port-0",
-     "layer": 5
+     "layer": 5,
+     "normal_map": "textures/treads_n.png"
     },
     "sindri.animation.sprite": {
      "clips": {
@@ -1327,7 +1464,8 @@
    "components": {
     "sindri.sprite": {
      "texture": "textures/treads.png#port-0",
-     "layer": 5
+     "layer": 5,
+     "normal_map": "textures/treads_n.png"
     },
     "sindri.animation.sprite": {
      "clips": {
@@ -1398,7 +1536,8 @@
    "components": {
     "sindri.sprite": {
      "texture": "textures/treads.png#port-0",
-     "layer": 5
+     "layer": 5,
+     "normal_map": "textures/treads_n.png"
     },
     "sindri.animation.sprite": {
      "clips": {
@@ -1469,7 +1608,8 @@
    "components": {
     "sindri.sprite": {
      "texture": "textures/treads.png#port-0",
-     "layer": 5
+     "layer": 5,
+     "normal_map": "textures/treads_n.png"
     },
     "sindri.animation.sprite": {
      "clips": {
@@ -1540,7 +1680,8 @@
    "components": {
     "sindri.sprite": {
      "texture": "textures/treads.png#port-0",
-     "layer": 5
+     "layer": 5,
+     "normal_map": "textures/treads_n.png"
     },
     "sindri.animation.sprite": {
      "clips": {
@@ -1611,7 +1752,8 @@
    "components": {
     "sindri.sprite": {
      "texture": "textures/treads.png#port-0",
-     "layer": 5
+     "layer": 5,
+     "normal_map": "textures/treads_n.png"
     },
     "sindri.animation.sprite": {
      "clips": {
@@ -1682,7 +1824,8 @@
    "components": {
     "sindri.sprite": {
      "texture": "textures/treads.png#port-0",
-     "layer": 5
+     "layer": 5,
+     "normal_map": "textures/treads_n.png"
     },
     "sindri.animation.sprite": {
      "clips": {
@@ -1753,7 +1896,8 @@
    "components": {
     "sindri.sprite": {
      "texture": "textures/treads.png#port-0",
-     "layer": 5
+     "layer": 5,
+     "normal_map": "textures/treads_n.png"
     },
     "sindri.animation.sprite": {
      "clips": {
@@ -1824,7 +1968,8 @@
    "components": {
     "sindri.sprite": {
      "texture": "textures/treads.png#starboard-0",
-     "layer": 5
+     "layer": 5,
+     "normal_map": "textures/treads_n.png"
     },
     "sindri.animation.sprite": {
      "clips": {
@@ -1895,7 +2040,8 @@
    "components": {
     "sindri.sprite": {
      "texture": "textures/treads.png#starboard-0",
-     "layer": 5
+     "layer": 5,
+     "normal_map": "textures/treads_n.png"
     },
     "sindri.animation.sprite": {
      "clips": {
@@ -1966,7 +2112,8 @@
    "components": {
     "sindri.sprite": {
      "texture": "textures/treads.png#starboard-0",
-     "layer": 5
+     "layer": 5,
+     "normal_map": "textures/treads_n.png"
     },
     "sindri.animation.sprite": {
      "clips": {
@@ -2037,7 +2184,8 @@
    "components": {
     "sindri.sprite": {
      "texture": "textures/treads.png#starboard-0",
-     "layer": 5
+     "layer": 5,
+     "normal_map": "textures/treads_n.png"
     },
     "sindri.animation.sprite": {
      "clips": {
@@ -2108,7 +2256,8 @@
    "components": {
     "sindri.sprite": {
      "texture": "textures/treads.png#starboard-0",
-     "layer": 5
+     "layer": 5,
+     "normal_map": "textures/treads_n.png"
     },
     "sindri.animation.sprite": {
      "clips": {
@@ -2179,7 +2328,8 @@
    "components": {
     "sindri.sprite": {
      "texture": "textures/treads.png#starboard-0",
-     "layer": 5
+     "layer": 5,
+     "normal_map": "textures/treads_n.png"
     },
     "sindri.animation.sprite": {
      "clips": {
@@ -2250,7 +2400,8 @@
    "components": {
     "sindri.sprite": {
      "texture": "textures/treads.png#starboard-0",
-     "layer": 5
+     "layer": 5,
+     "normal_map": "textures/treads_n.png"
     },
     "sindri.animation.sprite": {
      "clips": {
@@ -2321,7 +2472,8 @@
    "components": {
     "sindri.sprite": {
      "texture": "textures/treads.png#starboard-0",
-     "layer": 5
+     "layer": 5,
+     "normal_map": "textures/treads_n.png"
     },
     "sindri.animation.sprite": {
      "clips": {
@@ -2392,7 +2544,8 @@
    "components": {
     "sindri.sprite": {
      "texture": "textures/treads.png#starboard-0",
-     "layer": 5
+     "layer": 5,
+     "normal_map": "textures/treads_n.png"
     },
     "sindri.animation.sprite": {
      "clips": {
@@ -2463,7 +2616,8 @@
    "components": {
     "sindri.sprite": {
      "texture": "textures/treads.png#starboard-0",
-     "layer": 5
+     "layer": 5,
+     "normal_map": "textures/treads_n.png"
     },
     "sindri.animation.sprite": {
      "clips": {
@@ -2534,7 +2688,8 @@
    "components": {
     "sindri.sprite": {
      "texture": "textures/treads.png#starboard-0",
-     "layer": 5
+     "layer": 5,
+     "normal_map": "textures/treads_n.png"
     },
     "sindri.animation.sprite": {
      "clips": {
@@ -2605,7 +2760,8 @@
    "components": {
     "sindri.sprite": {
      "texture": "textures/treads.png#starboard-0",
-     "layer": 5
+     "layer": 5,
+     "normal_map": "textures/treads_n.png"
     },
     "sindri.animation.sprite": {
      "clips": {
@@ -2676,7 +2832,8 @@
    "components": {
     "sindri.sprite": {
      "texture": "textures/treads.png#starboard-0",
-     "layer": 5
+     "layer": 5,
+     "normal_map": "textures/treads_n.png"
     },
     "sindri.animation.sprite": {
      "clips": {
@@ -2723,6 +2880,712 @@
    "disabled": true
   },
   {
+   "id": "sun",
+   "name": "Sun",
+   "transform_3d": {
+    "position": [
+     -158.5,
+     82.5,
+     0.0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1
+    ]
+   },
+   "components": {
+    "sindri.light2d": {
+     "enabled": true,
+     "color": [
+      1.0,
+      0.94,
+      0.82,
+      1.0
+     ],
+     "intensity": 2.9,
+     "radius": 400.0,
+     "falloff": 0.05,
+     "height": 14.0,
+     "shadows": false,
+     "shadow_reach": 0.3
+    },
+    "sindri.script": {
+     "source": "scripts/daylight.decay",
+     "script": "Sun",
+     "properties": {}
+    }
+   }
+  },
+  {
+   "id": "cabin-light-0",
+   "name": "Cabin light 0",
+   "parent": "deck",
+   "transform_3d": {
+    "position": [
+     4.5,
+     -5.0,
+     0.2
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1
+    ]
+   },
+   "components": {
+    "sindri.light2d": {
+     "enabled": true,
+     "color": [
+      1.0,
+      0.72,
+      0.4,
+      1.0
+     ],
+     "intensity": 1.0,
+     "radius": 3.2,
+     "falloff": 1.8,
+     "height": 1.0,
+     "shadows": false,
+     "shadow_reach": 0.3
+    },
+    "sindri.script": {
+     "source": "scripts/daylight.decay",
+     "script": "Lamp",
+     "properties": {
+      "by_day": 0.0,
+      "by_night": 0.8
+     }
+    }
+   }
+  },
+  {
+   "id": "cabin-light-1",
+   "name": "Cabin light 1",
+   "parent": "deck",
+   "transform_3d": {
+    "position": [
+     6.5,
+     -5.0,
+     0.2
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1
+    ]
+   },
+   "components": {
+    "sindri.light2d": {
+     "enabled": true,
+     "color": [
+      1.0,
+      0.72,
+      0.4,
+      1.0
+     ],
+     "intensity": 1.0,
+     "radius": 3.2,
+     "falloff": 1.8,
+     "height": 1.0,
+     "shadows": false,
+     "shadow_reach": 0.3
+    },
+    "sindri.script": {
+     "source": "scripts/daylight.decay",
+     "script": "Lamp",
+     "properties": {
+      "by_day": 0.0,
+      "by_night": 0.8
+     }
+    }
+   }
+  },
+  {
+   "id": "cabin-light-2",
+   "name": "Cabin light 2",
+   "parent": "deck",
+   "transform_3d": {
+    "position": [
+     4.5,
+     -10.0,
+     0.2
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1
+    ]
+   },
+   "components": {
+    "sindri.light2d": {
+     "enabled": true,
+     "color": [
+      1.0,
+      0.72,
+      0.4,
+      1.0
+     ],
+     "intensity": 1.0,
+     "radius": 3.2,
+     "falloff": 1.8,
+     "height": 1.0,
+     "shadows": false,
+     "shadow_reach": 0.3
+    },
+    "sindri.script": {
+     "source": "scripts/daylight.decay",
+     "script": "Lamp",
+     "properties": {
+      "by_day": 0.0,
+      "by_night": 0.8
+     }
+    }
+   }
+  },
+  {
+   "id": "cabin-light-3",
+   "name": "Cabin light 3",
+   "parent": "deck",
+   "transform_3d": {
+    "position": [
+     6.5,
+     -10.0,
+     0.2
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1
+    ]
+   },
+   "components": {
+    "sindri.light2d": {
+     "enabled": true,
+     "color": [
+      1.0,
+      0.72,
+      0.4,
+      1.0
+     ],
+     "intensity": 1.0,
+     "radius": 3.2,
+     "falloff": 1.8,
+     "height": 1.0,
+     "shadows": false,
+     "shadow_reach": 0.3
+    },
+    "sindri.script": {
+     "source": "scripts/daylight.decay",
+     "script": "Lamp",
+     "properties": {
+      "by_day": 0.0,
+      "by_night": 0.8
+     }
+    }
+   }
+  },
+  {
+   "id": "headlight-port",
+   "name": "Headlight port",
+   "parent": "deck",
+   "transform_3d": {
+    "position": [
+     3.6,
+     -1.2,
+     0.2
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1
+    ]
+   },
+   "components": {
+    "sindri.light2d": {
+     "enabled": true,
+     "color": [
+      1.0,
+      0.95,
+      0.85,
+      1.0
+     ],
+     "intensity": 0.0,
+     "radius": 12.0,
+     "falloff": 1.1,
+     "height": 1.6,
+     "shadows": true,
+     "shadow_reach": 0.3
+    },
+    "sindri.script": {
+     "source": "scripts/daylight.decay",
+     "script": "Lamp",
+     "properties": {
+      "by_day": 0.0,
+      "by_night": 2.2,
+      "flicker": 0.0
+     }
+    }
+   }
+  },
+  {
+   "id": "headlight-starboard",
+   "name": "Headlight starboard",
+   "parent": "deck",
+   "transform_3d": {
+    "position": [
+     7.4,
+     -1.2,
+     0.2
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1
+    ]
+   },
+   "components": {
+    "sindri.light2d": {
+     "enabled": true,
+     "color": [
+      1.0,
+      0.95,
+      0.85,
+      1.0
+     ],
+     "intensity": 0.0,
+     "radius": 12.0,
+     "falloff": 1.1,
+     "height": 1.6,
+     "shadows": true,
+     "shadow_reach": 0.3
+    },
+    "sindri.script": {
+     "source": "scripts/daylight.decay",
+     "script": "Lamp",
+     "properties": {
+      "by_day": 0.0,
+      "by_night": 2.2,
+      "flicker": 0.0
+     }
+    }
+   }
+  },
+  {
+   "id": "lantern",
+   "name": "Crew lantern",
+   "parent": "crew",
+   "transform_3d": {
+    "position": [
+     0.25,
+     0.1,
+     0.1
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.73,
+     0.73,
+     1
+    ]
+   },
+   "components": {
+    "sindri.light2d": {
+     "enabled": true,
+     "color": [
+      1.0,
+      0.72,
+      0.4,
+      1.0
+     ],
+     "intensity": 0.0,
+     "radius": 3.2,
+     "falloff": 1.4,
+     "height": 1.0,
+     "shadows": false,
+     "shadow_reach": 0.3
+    },
+    "sindri.script": {
+     "source": "scripts/daylight.decay",
+     "script": "Lamp",
+     "properties": {
+      "by_day": 0.0,
+      "by_night": 1.0,
+      "flicker": 0.08
+     }
+    }
+   }
+  },
+  {
+   "id": "port-dust",
+   "name": "Port tread dust",
+   "parent": "deck",
+   "transform_3d": {
+    "position": [
+     2.5,
+     -8.0,
+     0.0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1
+    ]
+   },
+   "components": {
+    "sindri.particles": {
+     "playing": false,
+     "texture": "textures/puff.png",
+     "rate": 16.0,
+     "max": 200,
+     "lifetime": 1.4,
+     "lifetime_spread": 0.3,
+     "speed": 0.5,
+     "speed_spread": 0.4,
+     "direction": 90.0,
+     "spread": 360.0,
+     "shape": "box",
+     "offset": [
+      0.0,
+      0.0
+     ],
+     "shape_size": [
+      0.9,
+      6.5
+     ],
+     "gravity": [
+      0.0,
+      0.0
+     ],
+     "drag": 1.2,
+     "size": 0.35,
+     "size_end": 1.3,
+     "colors": [
+      [
+       0.66,
+       0.6,
+       0.5,
+       0.0
+      ],
+      [
+       0.66,
+       0.6,
+       0.5,
+       0.5
+      ],
+      [
+       0.72,
+       0.67,
+       0.58,
+       0.0
+      ]
+     ],
+     "random_rotation": true,
+     "spin": 0.0,
+     "space": "world",
+     "layer": 2
+    },
+    "sindri.script": {
+     "source": "scripts/daylight.decay",
+     "script": "TreadDust",
+     "properties": {}
+    }
+   }
+  },
+  {
+   "id": "starboard-dust",
+   "name": "Starboard tread dust",
+   "parent": "deck",
+   "transform_3d": {
+    "position": [
+     8.5,
+     -8.0,
+     0.0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1
+    ]
+   },
+   "components": {
+    "sindri.particles": {
+     "playing": false,
+     "texture": "textures/puff.png",
+     "rate": 16.0,
+     "max": 200,
+     "lifetime": 1.4,
+     "lifetime_spread": 0.3,
+     "speed": 0.5,
+     "speed_spread": 0.4,
+     "direction": 90.0,
+     "spread": 360.0,
+     "shape": "box",
+     "offset": [
+      0.0,
+      0.0
+     ],
+     "shape_size": [
+      0.9,
+      6.5
+     ],
+     "gravity": [
+      0.0,
+      0.0
+     ],
+     "drag": 1.2,
+     "size": 0.35,
+     "size_end": 1.3,
+     "colors": [
+      [
+       0.66,
+       0.6,
+       0.5,
+       0.0
+      ],
+      [
+       0.66,
+       0.6,
+       0.5,
+       0.5
+      ],
+      [
+       0.72,
+       0.67,
+       0.58,
+       0.0
+      ]
+     ],
+     "random_rotation": true,
+     "spin": 0.0,
+     "space": "world",
+     "layer": 2
+    },
+    "sindri.script": {
+     "source": "scripts/daylight.decay",
+     "script": "TreadDust",
+     "properties": {}
+    }
+   }
+  },
+  {
+   "id": "exhaust",
+   "name": "Engine exhaust",
+   "parent": "deck",
+   "transform_3d": {
+    "position": [
+     7.6,
+     -9.4,
+     0.3
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1
+    ]
+   },
+   "components": {
+    "sindri.particles": {
+     "playing": false,
+     "texture": "textures/puff.png",
+     "rate": 7.0,
+     "max": 200,
+     "lifetime": 2.6,
+     "lifetime_spread": 0.3,
+     "speed": 0.35,
+     "speed_spread": 0.4,
+     "direction": 90.0,
+     "spread": 360.0,
+     "shape": "point",
+     "offset": [
+      0.0,
+      0.0
+     ],
+     "shape_size": [
+      1.0,
+      1.0
+     ],
+     "gravity": [
+      0.35,
+      0.2
+     ],
+     "drag": 0.4,
+     "size": 0.3,
+     "size_end": 1.6,
+     "colors": [
+      [
+       0.25,
+       0.23,
+       0.22,
+       0.0
+      ],
+      [
+       0.3,
+       0.28,
+       0.26,
+       0.5
+      ],
+      [
+       0.55,
+       0.53,
+       0.5,
+       0.0
+      ]
+     ],
+     "random_rotation": true,
+     "spin": 25.0,
+     "space": "world",
+     "layer": 10
+    },
+    "sindri.script": {
+     "source": "scripts/daylight.decay",
+     "script": "Exhaust",
+     "properties": {}
+    }
+   }
+  },
+  {
+   "id": "swim-spray",
+   "name": "Swim spray",
+   "parent": "swim-wake",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1
+    ]
+   },
+   "components": {
+    "sindri.particles": {
+     "playing": true,
+     "texture": "textures/puff.png",
+     "rate": 9.0,
+     "max": 200,
+     "lifetime": 1.0,
+     "lifetime_spread": 0.3,
+     "speed": 0.6,
+     "speed_spread": 0.4,
+     "direction": 90.0,
+     "spread": 360.0,
+     "shape": "ring",
+     "offset": [
+      0.0,
+      0.0
+     ],
+     "shape_size": [
+      0.5,
+      0.5
+     ],
+     "gravity": [
+      0.0,
+      0.0
+     ],
+     "drag": 1.5,
+     "size": 0.08,
+     "size_end": 0.3,
+     "colors": [
+      [
+       0.8,
+       0.96,
+       0.92,
+       0.0
+      ],
+      [
+       0.8,
+       0.96,
+       0.92,
+       0.6
+      ],
+      [
+       0.8,
+       0.96,
+       0.92,
+       0.0
+      ]
+     ],
+     "random_rotation": true,
+     "spin": 0.0,
+     "space": "world",
+     "layer": 5
+    }
+   }
+  },
+  {
    "id": "cabin-lamp-0",
    "name": "Frame lamp 0",
    "parent": "deck",
@@ -2747,7 +3610,8 @@
    "components": {
     "sindri.sprite": {
      "texture": "textures/lamp.png",
-     "layer": 9
+     "layer": 9,
+     "unlit": true
     }
    }
   },
@@ -2776,7 +3640,8 @@
    "components": {
     "sindri.sprite": {
      "texture": "textures/lamp.png",
-     "layer": 9
+     "layer": 9,
+     "unlit": true
     }
    }
   },
@@ -2805,7 +3670,8 @@
    "components": {
     "sindri.sprite": {
      "texture": "textures/lamp.png",
-     "layer": 9
+     "layer": 9,
+     "unlit": true
     }
    }
   },
@@ -2834,7 +3700,8 @@
    "components": {
     "sindri.sprite": {
      "texture": "textures/lamp.png",
-     "layer": 9
+     "layer": 9,
+     "unlit": true
     }
    }
   },
@@ -2863,7 +3730,8 @@
    "components": {
     "sindri.sprite": {
      "texture": "textures/pipe.png",
-     "layer": 5
+     "layer": 5,
+     "normal_map": "textures/pipe_n.png"
     }
    }
   },
@@ -2892,7 +3760,8 @@
    "components": {
     "sindri.sprite": {
      "texture": "textures/pipe.png",
-     "layer": 5
+     "layer": 5,
+     "normal_map": "textures/pipe_n.png"
     }
    }
   },
@@ -9648,7 +10517,8 @@
      "columns": 14,
      "rows": 12,
      "tiles": [null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,1,1,null,null,1,1,1,1,null,null,null,null,null,null,1,null,null,null,null,null,null,1,null,null,null,null,null,null,1,null,null,1,null,null,null,1,null,null,null,null,null,null,1,null,null,null,null,null,null,1,null,null,null,null,null,null,1,null,null,1,null,null,null,1,null,null,null,null,null,null,1,1,1,1,1,1,1,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
-     "layer": 26
+     "layer": 26,
+     "normal_map": "textures/dive_n.png"
     }
    }
   },
@@ -9677,7 +10547,48 @@
    "components": {
     "sindri.sprite": {
      "texture": "textures/dive.png#salvage",
-     "layer": 28
+     "layer": 28,
+     "normal_map": "textures/dive_n.png"
+    }
+   }
+  },
+  {
+   "id": "cache-glow",
+   "name": "Salvage glow",
+   "parent": "dive-cache",
+   "transform_3d": {
+    "position": [
+     0,
+     0,
+     0.1
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1
+    ]
+   },
+   "components": {
+    "sindri.light2d": {
+     "enabled": true,
+     "color": [
+      1.0,
+      0.78,
+      0.4,
+      1.0
+     ],
+     "intensity": 0.9,
+     "radius": 2.6,
+     "falloff": 1.6,
+     "height": 0.8,
+     "shadows": false,
+     "shadow_reach": 0.3
     }
    }
   },
@@ -9706,7 +10617,125 @@
    "components": {
     "sindri.sprite": {
      "texture": "textures/dive.png#diver",
-     "layer": 30
+     "layer": 30,
+     "normal_map": "textures/dive_n.png"
+    }
+   }
+  },
+  {
+   "id": "diver-lamp",
+   "name": "Diver lamp",
+   "parent": "diver",
+   "transform_3d": {
+    "position": [
+     0.6,
+     0.1,
+     0.1
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1
+    ]
+   },
+   "components": {
+    "sindri.light2d": {
+     "enabled": true,
+     "color": [
+      0.9,
+      0.97,
+      1.0,
+      1.0
+     ],
+     "intensity": 1.5,
+     "radius": 5.0,
+     "falloff": 1.3,
+     "height": 1.2,
+     "shadows": true,
+     "shadow_reach": 0.3
+    }
+   }
+  },
+  {
+   "id": "diver-bubbles",
+   "name": "Diver bubbles",
+   "parent": "diver",
+   "transform_3d": {
+    "position": [
+     0.4,
+     0.3,
+     0.1
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1
+    ]
+   },
+   "components": {
+    "sindri.particles": {
+     "playing": true,
+     "texture": "textures/puff.png",
+     "rate": 3.0,
+     "max": 200,
+     "lifetime": 2.2,
+     "lifetime_spread": 0.3,
+     "speed": 0.4,
+     "speed_spread": 0.4,
+     "direction": 90.0,
+     "spread": 25.0,
+     "shape": "point",
+     "offset": [
+      0.0,
+      0.0
+     ],
+     "shape_size": [
+      1.0,
+      1.0
+     ],
+     "gravity": [
+      0.0,
+      0.8
+     ],
+     "drag": 0.6,
+     "size": 0.08,
+     "size_end": 0.2,
+     "colors": [
+      [
+       0.75,
+       0.95,
+       0.92,
+       0.0
+      ],
+      [
+       0.75,
+       0.95,
+       0.92,
+       0.75
+      ],
+      [
+       0.75,
+       0.95,
+       0.92,
+       0.0
+      ]
+     ],
+     "random_rotation": true,
+     "spin": 0.0,
+     "space": "world",
+     "layer": 31
     }
    }
   }

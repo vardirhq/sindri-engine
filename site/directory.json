@@ -183,6 +183,33 @@
   },
   {
     "category": "demos",
+    "title": "Sprite Shaders",
+    "path": "examples/sprite-shaders/",
+    "source": "examples/sprite-shaders",
+    "description": "Four project WGSL sprite shaders side by side: a pulsing outline, a dissolve, a hit flash and a wave. Scripts drive the burn and the flash through each sprite's shader parameters; Space flashes.",
+    "tags": [
+      "shaders",
+      "wgsl",
+      "sprites",
+      "rendering",
+      "decay"
+    ]
+  },
+  {
+    "category": "demos",
+    "title": "Sprite Masks",
+    "path": "examples/sprite-masks/",
+    "source": "examples/sprite-masks",
+    "description": "A keyhole wanders over a night sky: the night is masked outside it so a sunny meadow shows through, and a gem masked inside it is only ever seen through the hole.",
+    "tags": [
+      "masks",
+      "sprites",
+      "rendering",
+      "decay"
+    ]
+  },
+  {
+    "category": "demos",
     "title": "Weave Control Room",
     "path": "examples/ui/",
     "source": "examples/ui",

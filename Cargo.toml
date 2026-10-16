@@ -48,6 +48,7 @@ license = "MIT OR Apache-2.0"
 repository = "https://github.com/vardirhq/sindri-engine"
 
 [workspace.dependencies]
+gltf = { version = "1.4", default-features = false, features = ["utils", "names"] }
 gilrs = "0.11.2"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
@@ -106,6 +107,18 @@ missing_panics_doc = "allow"
 # Decay VM rather than in the test harnesses themselves.
 [profile.test.package."*"]
 opt-level = 2
+
+# The workspace's own crates, at the lightest optimisation. The game suites
+# have since moved the arithmetic into Sindri itself -- voxel terrain, map
+# extraction, the scene's physics bridge -- and Low Tide's suite came to be
+# 71% of CI's test time, its slowest test alone 564 seconds unoptimised. At
+# `opt-level = 1` that test takes 113 and the suite is about five times
+# faster, for roughly a minute more compiling the workspace; level 2 doubled
+# that minute for another ten percent. Debug assertions and overflow checks are
+# separate settings and stay on, and floating point does not change with the
+# level, so a test sees the same arithmetic it did.
+[profile.test]
+opt-level = 1
 
 # The same, for every build. The editor run unoptimised was the larger part of
 # why a game played in it lagged while the browser build, which is release,

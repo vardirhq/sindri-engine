@@ -69,13 +69,15 @@ pub enum Panel {
     Timeline,
     /// An image cut into named sprites, on the image.
     SpriteSheet,
+    /// A picture's normal map: made, lit by the game's renderer, saved.
+    NormalMap,
     /// The local assistant: its setup while it has one, and itself after.
     Assistant,
 }
 
 impl Panel {
     /// Every panel, in the order a menu should offer them.
-    pub const ALL: [Self; 13] = [
+    pub const ALL: [Self; 14] = [
         Self::Scene,
         Self::Game,
         Self::Hierarchy,
@@ -88,6 +90,7 @@ impl Panel {
         Self::Audio,
         Self::Timeline,
         Self::SpriteSheet,
+        Self::NormalMap,
         Self::Assistant,
     ];
 
@@ -105,6 +108,7 @@ impl Panel {
             Self::Audio => "Audio",
             Self::Timeline => "Timeline",
             Self::SpriteSheet => "Sprite sheet",
+            Self::NormalMap => "Normal map",
             Self::Assistant => "Assistant",
         }
     }

@@ -43,6 +43,9 @@ pub(super) fn describe_world(
         ("kind", FieldMeaning::choice(LightKind::NAMES)),
         ("color", COLOR),
         ("intensity", at_least(0.0)),
+        ("range", at_least(0.001)),
+        ("inner_angle", FieldMeaning::Angle),
+        ("outer_angle", FieldMeaning::Angle),
     ])?;
     describe_voxel_world(components)
 }
@@ -80,6 +83,7 @@ fn describe_environment(components: &mut ComponentSchemaRegistry) -> Result<(), 
         ("bloom.knee", range(1.0e-4, 1.0)),
         ("bloom.intensity", at_least(0.0)),
         ("bloom.passes", range(1.0, 8.0)),
+        ("lighting_2d.ambient", COLOR),
     ])?;
     Ok(())
 }

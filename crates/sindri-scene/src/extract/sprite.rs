@@ -11,12 +11,15 @@ use glam::{Mat4, Quat, Vec3};
 use sindri_core::{EntityId, SpriteRef, World};
 use sindri_render::{
     ExtractedFrame, FrameCamera, FrameCommand, FramePass, RenderLayer, RenderStage, SpriteDepth,
-    SpriteInstance, TextureId, TransparentOrder, UvRect,
+    SpriteInstance, SpriteMask, SpriteShader, TextureId, TransparentOrder, UvRect,
 };
 
 use crate::TileSetBindings;
 use crate::screen_ui::UiHierarchy;
-use crate::{SpriteAnimationComponent, SpriteAnimations, SpriteComponent, TextureBindings};
+use crate::{
+    ImageDraw, MaskInteraction, SpriteAnimationComponent, SpriteAnimations, SpriteComponent,
+    SpriteMaskComponent, TextureBindings,
+};
 
 use super::camera::ResolvedCameras;
 use super::camera::view::camera_distance;
@@ -67,6 +70,13 @@ pub(super) enum DrawSpace {
 pub(super) struct SpriteDraw {
     pub(super) space: DrawSpace,
     pub(super) texture: TextureId,
+    /// The project shader the image is drawn through. Part of what makes two
+    /// adjacent images one batch, because it is pipeline state.
+    pub(super) shader: Option<SpriteShader>,
+    /// The normal map bound beside the texture, also part of the batch key.
+    pub(super) normal_map: Option<TextureId>,
+    /// Where it may draw, when a sprite mask decides; batch state too.
+    pub(super) mask: Option<SpriteMask>,
     pub(super) clip: Option<[u32; 4]>,
     pub(super) order: TransparentOrder,
     pub(super) sprite: SpriteInstance,
@@ -178,10 +188,27 @@ impl SceneExtractor {
             resting,
             ..
         } = drawing;
+        let masks = self.sprite_masks(world, drawing)?;
         for (entity, sprite) in self.components.query::<SpriteComponent>(world)? {
             let reference = sprite.reference()?;
+            // Inside a mask that is not there is nowhere; outside one is
+            // everywhere.
+            let mask = match sprite.mask {
+                MaskInteraction::None => None,
+                interaction => match masks.get(&sprite.mask_name) {
+                    Some(found) => Some(SpriteMask {
+                        outside: interaction == MaskInteraction::Outside,
+                        ..*found
+                    }),
+                    None if interaction == MaskInteraction::Inside => continue,
+                    None => None,
+                },
+            };
             if !sprite.color_transform.is_finite() {
                 return Err(SceneExtractError::InvalidColorTransform);
+            }
+            if !sprite.shader_params.iter().all(|value| value.is_finite()) {
+                return Err(SceneExtractError::InvalidShaderParams);
             }
             let transform = world.world_transform(entity).unwrap_or_default();
             let camera = cameras.world.ok_or(SceneExtractError::MissingWorldCamera)?;
@@ -200,22 +227,72 @@ impl SceneExtractor {
                 camera_distance(camera.view, model.w_axis.truncate()),
                 entity.index(),
             )?;
-            batches.push(SpriteDraw {
-                clip: None,
-                space: DrawSpace::World,
-                texture: textures.resolve(reference.texture()),
-                order,
-                sprite: SpriteInstance::new(model, sprite.tint)
-                    .with_color_transform(
-                        sprite.color_transform.multiply,
-                        sprite.color_transform.offset,
-                    )
-                    .with_uv_rect(drawn_rect(
-                        entity, &reference, textures, animations, resting,
-                    )),
-            });
+            let texture = textures.resolve(reference.texture());
+            // An unbound shader draws the built-in look; the host reports the
+            // missing file by name, as it does a missing texture.
+            let shader = (!sprite.shader.is_empty())
+                .then(|| textures.shaders().get(&sprite.shader).cloned())
+                .flatten();
+            // Unbound, it is simply absent: lit by distance alone rather than
+            // as the missing texture's pattern of bumps.
+            let normal_map = (!sprite.normal_map.is_empty())
+                .then(|| textures.get(&sprite.normal_map))
+                .flatten();
+            let rect = drawn_rect(entity, &reference, textures, animations, resting);
+            let slicing = (sprite.draw == ImageDraw::Sliced)
+                .then(|| textures.slice_border(&reference))
+                .flatten();
+            for (model, uv) in pieces(model, rect, slicing, sprite.border_scale) {
+                batches.push(SpriteDraw {
+                    mask,
+                    clip: None,
+                    space: DrawSpace::World,
+                    texture,
+                    shader: shader.clone(),
+                    normal_map,
+                    order,
+                    sprite: SpriteInstance::new(model, sprite.tint)
+                        .lit(!sprite.unlit)
+                        .with_color_transform(
+                            sprite.color_transform.multiply,
+                            sprite.color_transform.offset,
+                        )
+                        .with_shader_params(sprite.shader_params)
+                        .with_uv_rect(uv),
+                });
+            }
         }
         Ok(())
+    }
+
+    /// Every sprite mask by name, placed as a sprite drawing its picture
+    /// would be. The first of a name wins.
+    fn sprite_masks(
+        &self,
+        world: &World,
+        drawing: Drawing<'_>,
+    ) -> Result<BTreeMap<String, SpriteMask>, SceneExtractError> {
+        let mut masks = BTreeMap::new();
+        for (entity, mask) in self.components.query::<SpriteMaskComponent>(world)? {
+            let reference = mask.reference()?;
+            let transform = world.world_transform(entity).unwrap_or_default();
+            let [offset_x, offset_y] = drawing.textures.sprite_anchor(&reference).offset();
+            let model = transform_matrix(transform)
+                * Mat4::from_translation(Vec3::new(offset_x, offset_y, 0.0));
+            if model.determinant().abs() <= f32::EPSILON {
+                continue;
+            }
+            masks.entry(mask.name.clone()).or_insert(SpriteMask {
+                texture: drawing.textures.resolve(reference.texture()),
+                uv: drawing
+                    .textures
+                    .sprite_rect(&reference)
+                    .unwrap_or(UvRect::FULL),
+                from_world: model.inverse(),
+                outside: false,
+            });
+        }
+        Ok(masks)
     }
 
     fn flush_batches(
@@ -230,12 +307,18 @@ impl SceneExtractor {
             let layer = first.order.layer();
             let texture = first.texture;
             let clip = first.clip;
+            let shader = first.shader;
+            let normal_map = first.normal_map;
+            let mask = first.mask;
             let mut instances = vec![first.sprite];
             while draws.peek().is_some_and(|draw| {
                 draw.space == space
                     && draw.order.layer() == layer
                     && draw.texture == texture
                     && draw.clip == clip
+                    && draw.shader == shader
+                    && draw.normal_map == normal_map
+                    && draw.mask == mask
             }) {
                 instances.push(
                     draws
@@ -273,6 +356,9 @@ impl SceneExtractor {
                     },
                     FrameCommand::SpriteBatch {
                         texture,
+                        normal_map,
+                        mask,
+                        shader,
                         depth,
                         instances,
                     },
@@ -281,6 +367,20 @@ impl SceneExtractor {
             );
         }
         Ok(())
+    }
+}
+
+/// The quads one image draws: itself, or its nine pieces when it is sliced
+/// and its sheet gives it a border to keep.
+pub(super) fn pieces(
+    model: Mat4,
+    rect: UvRect,
+    border: Option<crate::SliceBorder>,
+    scale: f32,
+) -> Vec<(Mat4, UvRect)> {
+    match border {
+        Some(border) => super::nine_slice::nine_slice(model, rect, border, scale),
+        None => vec![(model, rect)],
     }
 }
 

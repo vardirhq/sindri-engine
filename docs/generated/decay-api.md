@@ -18,10 +18,14 @@ The machine-readable form of this page is
 What the entity a script runs on offers, beyond the script's own fields.
 
 - `entity`: `Entity` — The object in the game this script is attached to. Pass it to calls that act on an object, such as `World.despawn(this.entity)`.
+- `environment`: `SceneEnvironment` — The scene environment on this object, if authored: ambient intensity/color and background with checked runtime writes.
+- `light`: `Light` — The 3D light on this object: checked color, intensity, range, cone angles and independent enabled state.
+- `light2d`: `Light2d` — The 2D light on this script's object, if it has one: its color, brightness and reach.
 - `shape`: `Shape` — The drawn shape on this script's object, if it has one: its colors, outline and how much of it is drawn.
 - `sprite`: `Sprite` — The image (sprite) on this script's object, if it has one: its color and drawing order.
 - `transform`: `Transform` — Where this script's object is, how it is turned and how big it is. Change it to move the object.
 - `ui_image`: `UiImage` — The on-screen interface image on this script's object, if it has one: its color and drawing order.
+- `world_text`: `WorldText` — The world text on this script's object, if it has some: its color, size and drawing order.
 
 ## Globals
 
@@ -31,16 +35,16 @@ Names in scope without qualification. Decay has no imports, so each of these is 
 - `Aim`: `Aim` — Which block in a 3D block world the mouse or finger is pointing at, for building and digging games.
 - `Animation`: `Animation` — Playing an object's animations, such as walk or jump, set up for it in the scene.
 - `Audio`: `Audio` — Playing sound effects and music. Every sound goes through a bus — `"effects"`, `"music"`, or any other name — and every bus through `"master"`, so a settings screen can turn each down.
-- `Camera`: `Camera` — The game's camera: sizing an orthographic view and changing engine-owned follow, confinement, and shake behavior.
+- `Camera`: `Camera` — The game's camera: projection sizing, 3D orbit with obstruction pull-in, and engine-owned 2D follow, confinement and shake.
 - `Effects`: `Effects` — Particle effects, such as sparks and explosions. The particles are only drawn; they are not objects and nothing can touch them.
 - `Game`: `Game` — Numbers stored under names that every script can read and write, such as a score. Declaring them with `state` is safer, because a misspelt name then becomes an error.
 - `Gamepad`: `Gamepad` — Game controllers. Each player gets a number from 1 to 8 when they press a button on their controller; 0 means any controller.
 - `Gesture`: `Gesture` — What the player did with the mouse or a finger: a tap, a hold, a drag or a pinch. Works the same for both.
 - `Grid`: `Grid` — Grids of tiles, flat or stacked in layers like building blocks: what each cell holds, where objects stand on them, and paths across them.
-- `Input`: `Input` — The keyboard. Keys are named by position, such as `"W"`, `"ArrowLeft"` or `"Space"`, so controls work on any keyboard layout.
+- `Input`: `Input` — Every way the player reaches the game, in one place. Start with `Input.Action`, which works the same whatever the player holds; `Input.Pointer`, `Input.Stick` and `Input.Gesture` for mouse and touch; `Input.Keyboard`, `Input.Touch` and `Input.Gamepad` for one device read directly. The calls directly on `Input` are the keyboard, kept for older scripts: prefer `Input.Keyboard`.
 - `PI`: `f32` — The number π (3.14159…): half a full turn when measuring angles in radians.
 - `Physics`: `Physics` — 2D physics: moving objects with speed and pushes, and finding out what this script's object bumped into.
-- `Physics3d`: `Physics3d` — Independent 3D physics controls, indexed queries and copied last-step events. Requires a 3D physics host. Controls require an active body. Before synchronization, valid authored 3D bodies and nonempty colliders accept ordered setters/impulses; replay uses actual compound mass. Unconsumed requests expire after successful synchronization. Authored motion fields are unchanged, so structural rebuilds restore authored settings.
+- `Physics3d`: `Physics3d` — Independent 3D physics controls, indexed queries and copied last-step events. Requires a 3D physics host. Controls require an active body. Before synchronization, valid authored 3D bodies with nonempty primitive colliders or convex-model references accept ordered setters/impulses. Convex asset geometry, scaled hull mass and pending controls validate at scene synchronization; replay uses actual compound mass. Unconsumed requests expire after successful synchronization. Authored motion fields are unchanged, so structural rebuilds restore authored settings.
 - `Pointer`: `Pointer` — The mouse, or a finger on a touch screen, handled the same way so one game works on both.
 - `Profiles`: `Profiles` — Reading settings from a profile, a data file shared across a project, such as a weapon's damage and fire rate.
 - `Random`: `Random` — Random numbers. The same seed always gives the same numbers, so a run can be replayed.
@@ -162,23 +166,45 @@ Playing sound effects and music. Every sound goes through a bus — `"effects"`,
 
 ### `Camera`
 
-The game's camera: sizing an orthographic view and changing engine-owned follow, confinement, and shake behavior.
+The game's camera: projection sizing, 3D orbit with obstruction pull-in, and engine-owned 2D follow, confinement and shake.
 
 - `add_trauma(amount: f32)` → `unit` — Adds impact trauma to the authored behavior camera. Bigger amounts shake harder, up to 1, and the authored shake fades by itself.
 - `bounds(min_x: f32, min_y: f32, max_x: f32, max_y: f32)` → `unit` — Confines the authored behavior camera to the given world-space rectangle.
 - `clear_bounds()` → `unit` — Removes runtime confinement from the authored behavior camera.
 - `clear_follow()` → `unit` — Stops the authored behavior camera following a target.
+- `clear_orbit(camera: Entity)` → `unit` — Removes an explicit camera's orbit while keeping its last pose. Any existing 2D camera behavior resumes.
 - `dead_zone(x: f32, y: f32)` → `unit` — Sets the follow dead-zone size for the authored behavior camera.
 - `follow(target: Entity)` → `unit` — Makes the authored behavior camera follow an entity at runtime.
 - `follow_offset(x: f32, y: f32, z: f32)` → `unit` — Sets the world-space offset from the follow target used by the authored behavior camera.
 - `impact(amount: f32)` → `unit` — Shakes the authored behavior camera at least this hard, up to 1: a smaller impact while a bigger one is still shaking changes nothing, so many small hits in a frame do not add up to the biggest shake.
 - `max_speed(value: f32)` → `unit` — Sets the maximum follow speed of the authored behavior camera.
+- `orbit(camera: Entity, target: Entity, yaw: f32, pitch: f32, distance: f32)` → `unit` — Creates or retargets an explicit camera's engine-owned world-space orbit. Angles are radians; zero yaw is +Z behind the target, positive pitch is above it. Preserves offset, smoothing and collision settings. Target must be an active authored spatial entity, independent of the camera hierarchy.
+- `orbit_collision(camera: Entity, mask: f32, padding: f32)` → `unit` — Sets collider membership bits and world-unit pull-in padding below orbit distance. Mask must be a whole u32; zero disables queries. Sensors, the camera and target are excluded; a ray protects the sight line, not the near-plane volume.
+- `orbit_offset(camera: Entity, offset: Vec3)` → `unit` — Sets the orbit focus offset in world units from the target's world position.
+- `orbit_smoothing(camera: Entity, rate: f32)` → `unit` — Sets exponential orbit position smoothing per second. Zero snaps. Obstruction pull-in remains immediate.
 - `orthographic_size(camera: Entity, size: f32)` → `unit` — Sets an explicitly selected orthographic camera's view size to a positive finite number. Works without camera behavior and preserves clipping, fit and unknown camera fields.
 - `pan_x`: `f32` — How far the camera view is moved sideways from where it was placed in the scene.
 - `pan_y`: `f32` — How far the camera view is moved up or down from where it was placed in the scene.
 - `pan_z`: `f32` — How far the camera view is moved forwards or backwards from where it was placed in the scene.
+- `perspective_fov(camera: Entity, degrees: f32)` → `unit` — Sets an explicit perspective camera's vertical field of view in degrees, strictly between 0 and 180. Preserves clipping and unknown fields; requires no behavior component.
 - `shake(strength: f32, frequency: f32, decay: f32)` → `unit` — Changes the authored behavior camera's shake strength, frequency, and trauma decay.
 - `smoothing(value: f32)` → `unit` — Sets how strongly the authored behavior camera smooths its follow movement.
+
+### `CharacterCarry3d`
+
+Verified solved platform carry, already included in total character translation. A platform rotation moves the probe origin along a straight swept chord; it does not rotate the actor.
+
+- `entity`: `Entity` — Active existing platform entity whose solved movement carried the actor.
+- `motion`: `CharacterMovement3d` — Collision-limited CharacterMovement3d carry phase, separate from ordinary movement.
+- `requested`: `Vec3` — World-space Vec3 displacement requested by the platform's previous/current poses.
+
+### `CharacterCollision3d`
+
+One historical movement-phase collision; internal stair and snap probes are not events.
+
+- `hit`: `RayHit3d` — Copied world-space RayHit3d for the collided piece; distance belongs to this sweep phase.
+- `translation_applied`: `Vec3` — World-space Vec3 movement already applied at this collision.
+- `translation_remaining`: `Vec3` — World-space Vec3 movement remaining at this collision.
 
 ### `CharacterMotion2d`
 
@@ -203,6 +229,27 @@ A copied result of scene-owned 2D character movement. Gameplay reads support and
 - `step_translation`: `Vec2` — Accepted step lift, or zero for ordinary movement.
 - `translation`: `Vec2` — Total world displacement applied once at the last fixed step, including slide, step, snap and platform carry.
 
+### `CharacterMotion3d`
+
+Copied historical scene-owned 3D character result. Gameplay chooses gravity, jumping and recovery. This is not a live contact or pending request.
+
+- `ground`: `RayHit3d?` — Zero-travel endpoint support RayHit3d or null when absent/inactive. It is independent of raw backend grounded.
+- `ground_started_penetrating`: `bool` — Whether the endpoint support probe started in strict penetration.
+- `ground_walkable`: `bool` — Whether the active ground hit satisfies authored up and slope limit.
+- `grounded`: `bool` — Classified walkable final support without penetration or ascending input; false when ground is now inactive or removed.
+- `movement`: `CharacterMovement3d` — CharacterMovement3d from the carried pose, excluding carry translation and hits.
+- `platform`: `CharacterCarry3d?` — CharacterCarry3d or null without verified carry or when its entity is now inactive/removed.
+- `translation`: `Vec3` — Total world-space Vec3 displacement applied once, including actual platform carry.
+
+### `CharacterMovement3d`
+
+Copied raw Rapier movement phase. Backend flags are not classified walkable support and must not alone authorize snapping. No independent step/snap displacement or iteration-limit status is available.
+
+- `collisions`: `List<CharacterCollision3d>` — Ordered copied CharacterCollision3d list, filtered to active existing hit entities.
+- `grounded`: `bool` — Raw backend nearby upward-facing contact flag; may include steep or predicted contacts.
+- `sliding_down_slope`: `bool` — Raw backend slope-handling flag, which can also be set while climbing.
+- `translation`: `Vec3` — Collision-limited world-space Vec3 displacement of this phase.
+
 ### `ColorTween`
 
 A managed Color tween; read with Tween.color_value.
@@ -226,16 +273,23 @@ Particle effects, such as sparks and explosions. The particles are only drawn; t
 
 - `burst(entity: Entity)` → `f32` — Plays the particle burst set up on an object, at that object's position. Gives back how many particles were made.
 - `burst_at(entity: Entity, x: f32, y: f32)` → `f32` — Plays the particle burst set up on an object at another position, such as where an enemy just died.
+- `emit(entity: Entity, count: f32)` → `f32` — Throws that many of an object's emitter particles at once, such as dust when landing. Gives back how many were made.
 - `live()` → `f32` — How many particles are currently on screen.
+- `play(entity: Entity)` → `f32` — Starts the particle emitter set up on an object. Gives back 1.
+- `stop(entity: Entity)` → `f32` — Stops the particle emitter set up on an object; particles already out live out their life. Gives back 1.
 
 ### `Entity`
 
 An object in the game, such as a player, an enemy or a button. Scripts get these from calls like `World.find` and can store them, compare them and change their transform, sprite or shape.
 
+- `environment`: `SceneEnvironment` — The authored scene environment on this object, if present.
+- `light`: `Light` — The object's 3D light, if it has one.
+- `light2d`: `Light2d` — The object's 2D light, if it has one.
 - `shape`: `Shape` — The object's drawn shape, if it has one.
 - `sprite`: `Sprite` — The object's image (sprite), if it has one.
 - `transform`: `Transform` — Where the object is, how it is turned and how big it is.
 - `ui_image`: `UiImage` — The object's on-screen interface image, if it has one.
+- `world_text`: `WorldText` — The object's world text, if it has some.
 
 ### `Game`
 
@@ -288,6 +342,7 @@ Grids of tiles, flat or stacked in layers like building blocks: what each cell h
 - `rows(grid: Entity)` → `f32` — How many rows a grid has.
 - `set_block(grid: Entity, column: f32, row: f32, level: f32, tile: String)` → `unit` — Places a block, by name, in a cell of a layered grid or a grid whose ground is a voxel world. `""` removes the block.
 - `set_flood(map: Entity, level: f32, block: String)` → `unit` — Sets a reversible water overlay on a voxel world viewed as a map, using a finite height and a block's top face. An empty block name clears it. Refused on block views.
+- `set_terrain(grid: Entity, column: f32, row: f32, terrain: String)` → `unit` — Paints a terrain the map's sheet declares into a flat tile map's cell, choosing its tile and its neighbors' from which of them are the same terrain. `""` empties the cell and redraws its neighbors.
 - `set_tile(grid: Entity, column: f32, row: f32, index: f32)` → `unit` — Changes a flat tile map's cell to one of its tiles, by number. A negative number empties the cell.
 - `step_toward(mover: Entity, grid: Entity, target: Entity)` → `bool` — Moves a character one cell along the shortest walkable path towards a target. Gives back whether it moved.
 - `surface(grid: Entity, column: f32, row: f32)` → `String` — Which block is on top of a voxel world's column, by name, seen from straight above, or `""` where nothing stands. What a map view of the world draws there.
@@ -297,12 +352,49 @@ Grids of tiles, flat or stacked in layers like building blocks: what each cell h
 
 ### `Input`
 
-The keyboard. Keys are named by position, such as `"W"`, `"ArrowLeft"` or `"Space"`, so controls work on any keyboard layout.
+Every way the player reaches the game, in one place. Start with `Input.Action`, which works the same whatever the player holds; `Input.Pointer`, `Input.Stick` and `Input.Gesture` for mouse and touch; `Input.Keyboard`, `Input.Touch` and `Input.Gamepad` for one device read directly. The calls directly on `Input` are the keyboard, kept for older scripts: prefer `Input.Keyboard`.
 
-- `axis(negative: String, positive: String)` → `f32` — -1, 0 or 1 from a pair of keys, for movement: `Input.axis("A", "D")` is -1 holding A, 1 holding D and 0 for neither or both.
+- `Action`: `Action` — What the player means, such as `"jump"` or `"move"`, from the actions the scene declares. The best place to start: one script works with keys, a controller or a touch screen. The same as `Action`.
+- `Gamepad`: `Gamepad` — Game controllers, read by player number. The same as `Gamepad`.
+- `Gesture`: `Gesture` — Taps, holds, drags and pinches, for touch-first controls. The same as `Gesture`.
+- `Keyboard`: `Keyboard` — The keys, named by position so controls work on any keyboard layout.
+- `Pointer`: `Pointer` — The mouse, or a finger on a touch screen, handled the same way so one game works on both. The same as `Pointer`.
+- `Stick`: `Stick` — A virtual joystick for touch screens: wherever a thumb lands becomes the center, and dragging from there steers. The same as `Stick`.
+- `Touch`: `Touch` — Every finger on a touch screen, for games that need more than one. For steering, `Input.Stick` is simpler. The same as `Touch`.
+- `axis(negative: String, positive: String)` → `f32` — -1, 0 or 1 from a pair of keys, for movement: `Input.Keyboard.axis("A", "D")` is -1 holding A, 1 holding D and 0 for neither or both.
 - `is_down(key: String)` → `bool` — Whether a key is being held down.
 - `just_pressed(key: String)` → `bool` — Whether a key was pressed this frame. True only once per press, however long it is held.
 - `just_released(key: String)` → `bool` — Whether a key was let go this frame.
+
+### `Keyboard`
+
+The keyboard, as `Input.Keyboard`. Keys are named by position, such as `"W"`, `"ArrowLeft"` or `"Space"`, so controls work on any keyboard layout. For controls that also work on a controller or a touch screen, use `Input.Action`.
+
+- `axis(negative: String, positive: String)` → `f32` — -1, 0 or 1 from a pair of keys, for movement: `Input.Keyboard.axis("A", "D")` is -1 holding A, 1 holding D and 0 for neither or both.
+- `is_down(key: String)` → `bool` — Whether a key is being held down.
+- `just_pressed(key: String)` → `bool` — Whether a key was pressed this frame. True only once per press, however long it is held.
+- `just_released(key: String)` → `bool` — Whether a key was let go this frame.
+
+### `Light`
+
+A directional, point or spot 3D light. Writes validate the whole candidate before changing the payload. Missing components and invalid values are errors. Rotation/position come from the entity transform.
+
+- `color`: `Color` — Linear RGB as a Color, whole or by channel. Alpha reads one and writes must keep it one; RGB is finite and nonnegative. Whole writes are atomic.
+- `enabled`: `bool` — Whether this light illuminates. Switching it off leaves its entity, scripts and children active.
+- `inner_angle`: `f32` — Inner spotlight half-angle in radians, at least zero and strictly below outer_angle; use an order that keeps each write valid.
+- `intensity`: `f32` — Finite nonnegative brightness; zero contributes no light.
+- `outer_angle`: `f32` — Outer spotlight half-angle in radians, above inner_angle and at most pi/2, with distinct f32 cosines.
+- `range`: `f32` — Finite positive range in world units, independent of entity scale; used by points and spots.
+
+### `Light2d`
+
+A light in a 2D scene: it brightens sprites, tiles and shapes near it when the scene's environment turns 2D lighting on. Switch one off with its object's `set_active`.
+
+- `color`: `Color` — The light's color. Lowering `a` dims it, the way it fades a sprite.
+- `falloff`: `f32` — How the light fades toward its edge: 1 fades evenly, higher numbers keep it bright near the middle and drop off sharply.
+- `height`: `f32` — How high above the scene the light hangs. Only images with a normal map notice: low lights rake across their bumps, high ones light them evenly.
+- `intensity`: `f32` — How bright the light is; 0 is off.
+- `radius`: `f32` — How far the light reaches, in world units.
 
 ### `NumberTween`
 
@@ -361,17 +453,19 @@ The host names this type but has not described its members.
 
 ### `Physics3d`
 
-Independent 3D physics controls, indexed queries and copied last-step events. Requires a 3D physics host. Controls require an active body. Before synchronization, valid authored 3D bodies and nonempty colliders accept ordered setters/impulses; replay uses actual compound mass. Unconsumed requests expire after successful synchronization. Authored motion fields are unchanged, so structural rebuilds restore authored settings.
+Independent 3D physics controls, indexed queries and copied last-step events. Requires a 3D physics host. Controls require an active body. Before synchronization, valid authored 3D bodies with nonempty primitive colliders or convex-model references accept ordered setters/impulses. Convex asset geometry, scaled hull mass and pending controls validate at scene synchronization; replay uses actual compound mass. Unconsumed requests expire after successful synchronization. Authored motion fields are unchanged, so structural rebuilds restore authored settings.
 
 - `angular_velocity(entity: Entity)` → `Vec3` — Copied world-space Vec3 angular velocity in radians per second around XYZ. Before synchronization returns the last queued setter or authored starting velocity; rotation locking returns zero.
 - `apply_impulse(entity: Entity, impulse: Vec3)` → `unit` — Applies a finite world-space Vec3 impulse to an active dynamic body using its compound mass; queues before synchronization and resolves in call order at materialization. Invalid input or body kind fails before mutation; does not change authored starting motion.
 - `cast_box(origin: Vec3, half_extents: Vec3, rotation_axis: Vec3, rotation_angle: f32, direction: Vec3, max_distance: f32, mask: f32, include_sensors: bool, exclude: Entity?)` → `RayHit3d?` — Indexed active 3D shape query. Positive Vec3 half-extents define the box. Sweeps return copied RayHit3d or null with fixed orientation and nonzero normalized direction; travel is non-negative and the endpoint finite. Finite f32-range values are required. A nonzero Vec3 rotation_axis is normalized and rotation_angle is radians about it using the right-hand rule. Uses the ray membership mask, sensor opt-in and whole-entity exclusion. Overlaps are sorted unique copied Entity lists; casts retain initial-overlap and deterministic tie semantics. Does not step physics.
 - `cast_capsule(origin: Vec3, half_height: f32, radius: f32, rotation_axis: Vec3, rotation_angle: f32, direction: Vec3, max_distance: f32, mask: f32, include_sensors: bool, exclude: Entity?)` → `RayHit3d?` — Indexed active 3D shape query. The local-Y capsule has non-negative straight-segment half_height and positive radius; zero half-height is a sphere. Sweeps return copied RayHit3d or null with fixed orientation and nonzero normalized direction; travel is non-negative and the endpoint finite. Finite f32-range values are required. A nonzero Vec3 rotation_axis is normalized and rotation_angle is radians about it using the right-hand rule. Uses the ray membership mask, sensor opt-in and whole-entity exclusion. Overlaps are sorted unique copied Entity lists; casts retain initial-overlap and deterministic tie semantics. Does not step physics.
 - `cast_sphere(origin: Vec3, radius: f32, direction: Vec3, max_distance: f32, mask: f32, include_sensors: bool, exclude: Entity?)` → `RayHit3d?` — Closest fixed-orientation sphere sweep as a copied RayHit3d or null. Positive finite radius, finite Vec3 origin/direction, normalized nonzero direction and non-negative distance in engine f32 range; endpoint must remain finite. Point is world contact, distance is probe travel. Initial overlap returns origin, zero distance and zero normal. Uses indexed synchronized geometry and the ray filter, skipping inactive/despawned entities. No rotation or physics step; extreme finite geometry still has the engine's documented numerical limitations.
+- `character_motion(entity: Entity)` → `CharacterMotion3d?` — Copied CharacterMotion3d from the last completed controller step, or null before a result exists or for an inactive/non-controller entity. Requires scene character context. Classified support, raw movement and carry remain separate; repeated reads do not drain results. Inactive ground, platform and collision references are filtered; historical translation and raw backend flags remain unchanged. Editing copies never changes simulation or queued movement.
 - `collision_started()` → `List<Entity>` — Sorted unique other active entities that started solid contact with this script's entity in the last successful 3D step. All scripts observe the same snapshot without draining it.
 - `collision_stopped()` → `List<Entity>` — Sorted unique other active entities that stopped solid contact with this script's entity in the last successful 3D step. Removed or inactive handles are filtered.
 - `layer(name: String)` → `f32` — Query mask bit for a text name in the active authored 3D world's first 32 layer labels. Empty labels cannot be selected; duplicate names select the first bit. Reads current authoring without stepping; ignores inactive settings and never reads 2D names. Unknown names, malformed or multiple active world settings and missing 3D host fail.
 - `mask(names: List<String>)` → `f32` — Combines Physics3d.layer bits from a List<str> using bitwise OR. Repeated names do not add bits; an empty list returns zero. Every name is checked; non-text elements, unknown names, invalid active world settings or missing 3D host fail.
+- `move_character(entity: Entity, displacement: Vec3, snap: bool)` → `unit` — Queues finite world-space Vec3 displacement for an active authored Character 3D at the next fixed step, including before first synchronization. Last valid request wins; invalid requests preserve it. Snap only enables the authored snap distance. Requires scene character context, valid settings/transform and no competing body/controller. Scene synchronization validates scaled solid geometry before movement. Gameplay owns gravity, speed and jump policy; events observe the moved pose on the following solver step.
 - `overlap_box(centre: Vec3, half_extents: Vec3, rotation_axis: Vec3, rotation_angle: f32, mask: f32, include_sensors: bool, exclude: Entity?)` → `List<Entity>` — Indexed active 3D shape query. Positive Vec3 half-extents define the box. Finite f32-range values are required. A nonzero Vec3 rotation_axis is normalized and rotation_angle is radians about it using the right-hand rule. Uses the ray membership mask, sensor opt-in and whole-entity exclusion. Overlaps are sorted unique copied Entity lists; casts retain initial-overlap and deterministic tie semantics. Does not step physics.
 - `overlap_capsule(centre: Vec3, half_height: f32, radius: f32, rotation_axis: Vec3, rotation_angle: f32, mask: f32, include_sensors: bool, exclude: Entity?)` → `List<Entity>` — Indexed active 3D shape query. The capsule lies along local Y before rotation; half_height is the non-negative half-length of its straight segment and radius is positive. Zero half-height is a sphere. Finite f32-range values are required. A nonzero Vec3 rotation_axis is normalized and rotation_angle is radians about it using the right-hand rule. Uses the ray membership mask, sensor opt-in and whole-entity exclusion. Overlaps are sorted unique copied Entity lists; casts retain initial-overlap and deterministic tie semantics. Does not step physics.
 - `overlap_sphere(centre: Vec3, radius: f32, mask: f32, include_sensors: bool, exclude: Entity?)` → `List<Entity>` — Sorted unique copied Entity list overlapping a finite Vec3 centre and positive finite f32-range radius. Uses indexed synchronized geometry, membership mask, sensor opt-in and whole-entity exclusion; inactive/despawned entities are filtered. Does not step physics.
@@ -386,15 +480,19 @@ Independent 3D physics controls, indexed queries and copied last-step events. Re
 
 The mouse, or a finger on a touch screen, handled the same way so one game works on both.
 
+- `delta`: `Vec2` (read-only) — Read-only Vec2 mouse displacement accumulated for this fixed step: positive right and down. Unlocked input uses viewport pixels; captured input uses native raw device counts or browser physical pixels. First arrival/re-entry adds no displacement; the next step reads zero without movement. This is displacement, not velocity: do not multiply by dt. Touch uses Gesture.drag_x/drag_y. Use lock/unlock to request cursor capture and locked to read actual host state.
 - `inside`: `bool` — Whether the mouse is over the game or a finger is on the screen. Check this before trusting a position.
 - `is_down(button: String)` → `bool` — Whether a mouse button, `"Left"`, `"Middle"` or `"Right"`, is held. A finger on the screen counts as `"Left"`.
 - `just_pressed(button: String)` → `bool` — Whether a mouse button was pressed this frame.
 - `just_released(button: String)` → `bool` — Whether a mouse button was let go this frame, or the last finger lifted.
+- `lock()` → `unit` — Requests cursor capture from the windowed host. Call after a player click in a browser; capture is asynchronous and may be denied. Read `locked` for actual state.
+- `locked`: `bool` (read-only) — Read-only actual host cursor capture state, not the last request. False in headless runs and hosts without capture support.
 - `over_ui`: `bool` — Whether the pointer is over part of the interface, such as a button. Check it so clicking a button does not also shoot or move in the game.
 - `overlay`: `Vec2` — The pointer's position in screen units, where 0 is the centre of the screen and the screen is 2 units tall. The same on any screen size.
 - `overlay_x`: `f32` — The pointer's sideways position in screen units, where 0 is the centre.
 - `overlay_y`: `f32` — The pointer's up-down position in screen units, where 0 is the centre.
 - `position`: `Vec2` — The pointer's position in pixels, from the top-left corner of the game's view.
+- `unlock()` → `unit` — Requests cursor release. Escape, focus loss and suspension also release capture; no automatic recapture.
 - `x`: `f32` — The pointer's distance from the left edge of the game's view, in pixels.
 - `y`: `f32` — The pointer's distance from the top edge of the game's view, in pixels.
 
@@ -417,6 +515,15 @@ Reading settings from a profile, a data file shared across a project, such as a 
 - `number_at(profile: Profile, collection: String, index: f32, key: String, fallback: f32)` → `f32` — A number setting from one item in a list in the profile, or `fallback`.
 - `text(profile: Profile, key: String, fallback: String)` → `String` — A text setting from the profile, or `fallback` if it is missing.
 - `text_at(profile: Profile, collection: String, index: f32, key: String, fallback: String)` → `String` — A text setting from one item in a list in the profile, or `fallback`.
+
+### `Quat`
+
+A copied quaternion value, with x/y/z/w components. Build with Quat(x: 0.0, y: 0.0, z: 0.0, w: 1.0), or copy transform.rotation. Change a local var's components, then assign the whole value; no quaternion arithmetic or interpolation methods are provided.
+
+- `w`: `f32` — The quaternion's scalar component; identity has w = 1 and x/y/z = 0.
+- `x`: `f32` — The quaternion's X component.
+- `y`: `f32` — The quaternion's Y component.
+- `z`: `f32` — The quaternion's Z component.
 
 ### `Random`
 
@@ -467,6 +574,14 @@ Scenes are a game's separate places or screens, such as a menu, a level or a sho
 - `current()` → `String` — The name of the scene being played.
 - `go(name: String)` → `unit` — Moves to another scene by name, at the end of this frame.
 
+### `SceneEnvironment`
+
+The existing authored scene environment on an entity. Changes affect the next extracted frame without restarting. Missing components and stale entities are runtime errors; writes validate the full payload atomically. Fog and post-processing controls are not exposed here.
+
+- `ambient_color`: `Color` — Ambient RGB as a Color with alpha one. Whole and channel writes are checked; alpha must remain one. RGB follows the authored environment contract: finite f32 values.
+- `ambient_intensity`: `f32` — Finite nonnegative ambient strength. Fractional writes preserve their value even when the authored JSON number was an integer.
+- `background`: `Color` — The scene clear color as RGBA Color. Whole and channel writes retain finite f32 values, including authored alpha. Failed writes preserve the old payload.
+
 ### `Sequence`
 
 Playing an object's sequences: choreography set up for it in the scene's Timeline, such as a title sliding in or a door opening, with named cues along the way.
@@ -479,6 +594,15 @@ Playing an object's sequences: choreography set up for it in the scene's Timelin
 - `set_speed(entity: Entity, speed: f32)` → `unit` — How fast an object's sequences play: 1 is normal speed, 0 holds it where it is.
 - `stop(entity: Entity)` → `unit` — Stops an object's sequence where it is.
 - `time(entity: Entity)` → `f32` — How far into its sequence an object has got, in seconds.
+
+### `ShaderParams`
+
+The four numbers a sprite's shader reads. What each one means is up to the shader.
+
+- `w`: `f32` — The fourth number.
+- `x`: `f32` — The first number.
+- `y`: `f32` — The second number.
+- `z`: `f32` — The third number.
 
 ### `Shape`
 
@@ -501,6 +625,7 @@ A 2D image drawn in the game world, and how it is colored.
 - `color_multiply`: `Color` — Another color the image is multiplied by, on top of `tint`.
 - `color_offset`: `Color` — A color added on top of the image, which can make it brighter or flash white. Keep its `a` at 0, or the image's transparent edges become visible.
 - `layer`: `f32` — Drawing order: higher numbers are drawn in front of lower ones.
+- `shader_params`: `ShaderParams` — Four numbers the sprite's shader reads, as `x`, `y`, `z` and `w`. What each one does is up to the shader: how far a dissolve has got, how bright a flash is.
 - `tint`: `Color` — A color the image is multiplied by. White leaves it unchanged; lowering `a` fades it out.
 
 ### `Stick`
@@ -533,10 +658,19 @@ Every finger on a touch screen, numbered from 0, for games that need more than o
 
 Where an object is, how it is turned and how big it is. For an object attached to another, these are measured from that parent.
 
+- `forward`: `Vec3` (read-only) — Read-only unit world-space facing direction: -Z at identity. Parent rotation is included and scale is ignored. Copy it to move with `world_position += forward * speed * dt`.
+- `look_at(target: Vec3)` → `unit` — Faces a world-space Vec3 target with Y up and zero world roll; preserves position and scale, including under a parent. Vertical targets use yaw zero. Coincident/non-finite targets are errors with no mutation.
+- `pitch`: `f32` — How far a 3D object is tipped up (positive) or down from level, in radians, after its yaw. Changing it keeps its yaw and roll.
 - `position`: `Vec3` — Where the object is. Change it to move the object: `this.transform.position.x += speed * dt`. Measured from the parent if it has one.
-- `rotation_z`: `f32` — How far the object is turned, in radians. A full turn is `TAU`.
+- `right`: `Vec3` (read-only) — Read-only unit world-space +X direction, with parent rotation included and scale ignored.
+- `roll`: `f32` — How far a 3D object is turned about the way it faces, in radians, after its yaw and pitch. Changing it keeps its yaw and pitch.
+- `rotate_around(pivot: Vec3, axis: Vec3, radians: f32)` → `unit` — Rotates position and orientation around a world-space Vec3 pivot and nonzero Vec3 axis by radians. Normalizes the axis and preserves scale. Invalid input/output, a singular parent scale, or movement off a Z-locked layer is an error with no mutation.
+- `rotation`: `Quat` — Parent-relative Quat in x/y/z/w order. Reads copy the stored rotation; whole writes normalize finite nonzero values atomically and preserve position, scale and Z lock. Stored components are readable; change components on a local var and assign it back. Zero/non-finite writes fail without mutation.
+- `rotation_z`: `f32` — How far the object is turned, in radians. A full turn is `TAU`. This is the turn of a flat object in a 2D game; it replaces any 3D turn.
 - `scale`: `Vec3` — How big the object is on each axis; 1 is its normal size.
+- `up`: `Vec3` (read-only) — Read-only unit world-space +Y direction, with parent rotation included and scale ignored.
 - `world_position`: `Vec3` — Where the object is in the world, even when it is attached to a parent. Use it to compare positions of objects in different places.
+- `yaw`: `f32` — Which way a 3D object faces on the ground, in radians: a turn about the up (Y) axis. At zero it faces -Z, and positive turns it left. It moves along `Vec3(-sin(yaw), 0.0, -cos(yaw))`, and faces a point `d` away with `atan2(-d.x, -d.z)`. Changing it keeps its pitch and roll.
 
 ### `Tween`
 
@@ -648,3 +782,12 @@ Finding, creating and removing the objects in a game. Every object in a scene (a
 - `take_signal(name: String)` → `f32` — Collects the numbers other scripts sent to this object under a name with `send_signal`, added together. Gives 0 when nothing arrived.
 - `with_tag(tag: String)` → `List<Entity>` — Every switched-on object with a tag, as a list: `for enemy in World.with_tag("enemy") { ... }`. Looks through the whole game, so call it once per frame, not in a loop.
 - `within_radius(tag: String, position: Vec3, radius: f32)` → `List<Entity>` — A snapshot list of active tagged objects within an inclusive world-space radius of a Vec3 position, nearest first; ties keep world order. Skips unusable transforms. Empty when none match; over 8192 results is an error. Negative or NaN radii are errors; positive infinity searches the whole world.
+
+### `WorldText`
+
+Words placed in the game world, such as a damage number or a name over a character. Change the words with `Ui.set_text` and `Ui.set_number`, as for interface text.
+
+- `color`: `Color` — The words' color. Lowering `a` fades them out; colored spans fade with it.
+- `font_size`: `f32` — How tall a line of the words is, in world units.
+- `layer`: `f32` — Drawing order: drawn over sprites in the same layer, under higher ones.
+- `visible`: `f32` — How many letters show, for a typewriter reveal. Negative shows them all.

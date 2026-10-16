@@ -1,0 +1,286 @@
+{
+  "format_version": 10,
+  "metadata": {
+    "name": "3D Character Lab"
+  },
+  "entities": [
+    {
+      "id": "camera",
+      "name": "Camera",
+      "transform_3d": {
+        "position": [
+          0,
+          3,
+          6
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.camera": {
+          "projection": "perspective",
+          "vertical_fov_degrees": 50,
+          "near": 0.1,
+          "far": 100
+        },
+        "sindri.script": {
+          "source": "character.decay",
+          "script": "CameraRig"
+        }
+      }
+    },
+    {
+      "id": "walker",
+      "name": "Walker",
+      "transform_3d": {
+        "position": [
+          0,
+          1.31,
+          0
+        ],
+        "scale": [
+          0.6,
+          0.6,
+          0.6
+        ]
+      },
+      "components": {
+        "sindri.mesh": {
+          "primitive": "cube",
+          "texture": "textures/walker.png"
+        },
+        "sindri.physics3d.collider": {
+          "pieces": [
+            {
+              "shape": {
+                "shape": "box",
+                "half_extents": [
+                  0.5,
+                  0.5,
+                  0.5
+                ]
+              },
+              "offset": [
+                0,
+                0,
+                0
+              ],
+              "rotation": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "sensor": false,
+              "layers": {
+                "memberships": 1,
+                "filter": 4294967295
+              },
+              "friction": 0.5,
+              "restitution": 0
+            }
+          ]
+        },
+        "sindri.physics3d.character": {
+          "snap_distance": 0.15
+        },
+        "sindri.script": {
+          "source": "character.decay",
+          "script": "Walker"
+        }
+      }
+    },
+    {
+      "id": "ferry",
+      "name": "Ferry",
+      "transform_3d": {
+        "position": [
+          0,
+          0.5,
+          0
+        ],
+        "scale": [
+          2,
+          1,
+          2
+        ]
+      },
+      "components": {
+        "sindri.mesh": {
+          "primitive": "cube",
+          "texture": "textures/goal.png"
+        },
+        "sindri.physics3d.collider": {
+          "pieces": [
+            {
+              "shape": {
+                "shape": "box",
+                "half_extents": [
+                  0.5,
+                  0.5,
+                  0.5
+                ]
+              },
+              "offset": [
+                0,
+                0,
+                0
+              ],
+              "rotation": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "sensor": false,
+              "layers": {
+                "memberships": 1,
+                "filter": 4294967295
+              },
+              "friction": 0.5,
+              "restitution": 0
+            }
+          ]
+        },
+        "sindri.script": {
+          "source": "character.decay",
+          "script": "Ferry"
+        },
+        "sindri.physics3d.rigid_body": {
+          "kind": "kinematic_velocity",
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotation": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "linear_velocity": [
+            1,
+            0,
+            0
+          ],
+          "angular_velocity": [
+            0,
+            0,
+            0
+          ],
+          "gravity_scale": 1,
+          "linear_damping": 0,
+          "angular_damping": 0,
+          "lock_rotation": false
+        }
+      }
+    },
+    {
+      "id": "goal",
+      "name": "Goal",
+      "transform_3d": {
+        "position": [
+          5,
+          0.1,
+          0
+        ],
+        "scale": [
+          1,
+          0.2,
+          2
+        ]
+      },
+      "components": {
+        "sindri.mesh": {
+          "primitive": "cube",
+          "texture": "textures/goal.png"
+        }
+      }
+    },
+    {
+      "id": "floor",
+      "name": "Floor",
+      "transform_3d": {
+        "position": [
+          2,
+          -0.25,
+          0
+        ],
+        "scale": [
+          18,
+          0.5,
+          8
+        ]
+      },
+      "components": {
+        "sindri.mesh": {
+          "primitive": "cube",
+          "texture": "textures/floor.png"
+        },
+        "sindri.physics3d.collider": {
+          "pieces": [
+            {
+              "shape": {
+                "shape": "box",
+                "half_extents": [
+                  0.5,
+                  0.5,
+                  0.5
+                ]
+              },
+              "offset": [
+                0,
+                0,
+                0
+              ],
+              "rotation": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "sensor": false,
+              "layers": {
+                "memberships": 1,
+                "filter": 4294967295
+              },
+              "friction": 0.5,
+              "restitution": 0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "sun",
+      "name": "Sun",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.light": {
+          "kind": "directional",
+          "color": [
+            1,
+            0.95,
+            0.8
+          ],
+          "intensity": 1.1
+        }
+      }
+    }
+  ]
+}

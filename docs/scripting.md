@@ -135,7 +135,16 @@ interprets, and `WorldHost` is the only place that gives them a meaning.
 | `this.transform.position.{x,y,z}` | `f32` | yes | yes |
 | `this.transform.world_position.{x,y,z}` | `f32` | yes | yes |
 | `this.transform.scale.{x,y,z}` | `f32` | yes | yes |
+| `this.transform.rotation` | `Quat` | yes | whole value |
+| `this.transform.rotation.{x,y,z,w}` | `f32` | yes | no |
 | `this.transform.rotation_z` | `f32` | yes | yes |
+| `this.transform.{yaw,pitch,roll}` | `f32` | yes | yes |
+| `this.transform.{forward,right,up}` | `Vec3` | yes | no |
+| `this.transform.forward.{x,y,z}` | `f32` | yes | no |
+| `this.transform.right.{x,y,z}` | `f32` | yes | no |
+| `this.transform.up.{x,y,z}` | `f32` | yes | no |
+| `this.transform.look_at(target)` | unit | call | — |
+| `this.transform.rotate_around(pivot, axis, radians)` | unit | call | — |
 
 **A vector member is reached whole or one component at a time.**
 `this.transform.position` is a `Vec3` a script can hold, add to and store back
@@ -144,6 +153,32 @@ interprets, and `WorldHost` is the only place that gives them a meaning.
 through the same accessors, so they cannot disagree: writing a whole vector
 writes its three components, in order. Vectors themselves are the language's,
 not the engine's; `decay/LANGUAGE.md` has what they can do.
+
+**A rotation is a copied `Quat` value.** Its components are `x`, `y`, `z`,
+`w`; identity is `Quat(x: 0.0, y: 0.0, z: 0.0, w: 1.0)`. This host-provided
+struct uses Decay's existing named-field constructor and copy semantics:
+
+```decay
+let saved: Quat = this.transform.rotation;
+var changed = saved;
+changed.y = 1.0;
+changed.w = 1.0;
+this.transform.rotation = changed;
+other.transform.rotation = saved;
+```
+
+Reads return the stored parent-relative quaternion, including an authored
+non-unit value. Whole writes normalize finite, nonzero values before one atomic
+mutation. Scaling before normalization handles huge and tiny finite script
+numbers; only normalized components cross the engine's f32 boundary. Zero or
+non-finite input is a host error and leaves the transform unchanged. Position,
+scale and Z lock remain exact, even under a singular or nonuniform parent.
+Stored components may be read through `this`, `this.entity` or another entity,
+but must be changed on a local `var` and assigned back whole. `Quat` has no
+multiplication, axis-angle constructor or interpolation methods yet; use the
+existing yaw/pitch/roll and aiming methods for those controls. Transform Lab
+copies the walker's facing onto its goal and restores its saved rotation on
+arrival; its Session and browser tests verify both operations.
 
 **A child's transform is relative to its parent.** Moving, turning or growing a
 parent carries its children, so a marker spawned under a player with
@@ -156,6 +191,48 @@ to compare two entities in different places in the hierarchy; write it to put a
 child at a point in the world, which stores whatever local position puts it
 there. `World.set_parent` keeps the local transform, so something spawned at
 local zero and then parented sits on its new parent.
+
+**Directions and aiming use world space.** `forward`, `right`, and `up`
+are read-only unit `Vec3` values, based on the composed rotation and ignoring
+scale (including negative scale). Identity faces -Z, with +X right and +Y up.
+Assignments to a whole direction or one of its components are compile errors;
+a copied vector is an ordinary value a script may change. Invalid/zero authored
+quaternions use the identity rotation for direction reads.
+
+`transform.look_at(target: Vec3)` faces a world target with Y up and zero world
+roll, preserving position and scale. At a vertical target yaw is zero. A target
+at the entity's position is an error. `transform.rotate_around(pivot: Vec3,
+axis: Vec3, radians: f32)` rotates both position and orientation around a world
+pivot and axis; the nonzero axis is normalized. Both work through `this`,
+`this.entity`, and another entity or script reference. Results are converted
+back to the parent's local transform. Orbiting under a parent with a zero scale
+axis is refused. Inputs must be finite and fit engine `f32`; invalid input,
+non-finite output, or an orbit that changes a Z-locked layer leaves the transform
+unchanged. These calls change the world immediately, with physics following
+its normal synchronization boundary.
+
+```decay
+this.transform.look_at(goal.transform.world_position);
+this.transform.world_position += this.transform.forward * speed * dt;
+```
+
+**A solid object turns by yaw, pitch and roll.** All three are radians, in a
+Y-up world. `yaw` turns it on the ground, about the up axis; at zero it faces
+-Z, as cameras do, and a positive yaw turns it left. `pitch` then tips it up
+(positive) or down, and `roll` last turns it about the way it faces. Writing
+one keeps the other two, so steering is one line and does not undo a tilt:
+
+```decay
+let to_goal = goal.transform.world_position - this.transform.world_position;
+this.transform.yaw = atan2(-to_goal.x, -to_goal.z);
+let yaw = this.transform.yaw;
+this.transform.position += Vec3(-sin(yaw), 0.0, -cos(yaw)) * speed * dt;
+```
+
+`rotation_z` is the turn of a flat thing facing the camera, for 2D games.
+Writing it replaces the whole rotation with a turn about Z, which is the same
+as setting `roll` with yaw and pitch at zero. Looking straight up or down, yaw
+and roll turn about the same axis; the whole of that turn reads back as yaw.
 
 Screen UI is placed by the overlay's layout rather than this, and its
 `position` is already relative to its parent's box.
@@ -188,7 +265,32 @@ leave it at zero unless that is the intent. Nothing is clamped: a channel that
 lands outside zero to one is clipped by the render target, while one that is
 not a number at all is refused when the scene is extracted.
 
+**`shader_params` are the sprite shader's four numbers.** A sprite drawn
+through a project shader (`sindri.sprite.shader`, see
+[the sprite shader contract](sprite-shaders.md)) hands it
+`this.sprite.shader_params` as `input.params`; what each one means is the
+shader's to say, so a script sets how far a dissolve has got or how bright a
+hit flash is and leaves the drawing to the shader. They ride on the instance,
+so changing them every frame never splits a draw. Author them as decimals in a
+hand-written scene (`0.0`, not `0`): a write keeps the number kind the scene
+stored, and an integer rounds.
+
 | `this.sprite.layer` | `f32` | yes | yes |
+| `this.sprite.shader_params.{x,y,z,w}` | `f32` | yes | yes |
+| `this.environment.ambient_intensity` | `f32` | yes | yes |
+| `this.environment.{ambient_color,background}` | `Color` | yes | yes |
+| `this.environment.ambient_color.{r,g,b,a}` | `f32` | yes | yes |
+| `this.environment.background.{r,g,b,a}` | `f32` | yes | yes |
+| `this.light.color` | `Color` | yes | yes |
+| `this.light.color.{r,g,b,a}` | `f32` | yes | yes |
+| `this.light.{intensity,range,inner_angle,outer_angle}` | `f32` | yes | yes |
+| `this.light.enabled` | `bool` | yes | yes |
+| `this.light2d.color` | `Color` | yes | yes |
+| `this.light2d.color.{r,g,b,a}` | `f32` | yes | yes |
+| `this.light2d.{intensity,radius,falloff,height}` | `f32` | yes | yes |
+| `this.world_text.color` | `Color` | yes | yes |
+| `this.world_text.color.{r,g,b,a}` | `f32` | yes | yes |
+| `this.world_text.{font_size,visible,layer}` | `f32` | yes | yes |
 | `this.ui_image.tint` | `Color` | yes | yes |
 | `this.ui_image.tint.{r,g,b,a}` | `f32` | yes | yes |
 | `this.ui_image.layer` | `f32` | yes | yes |
@@ -265,15 +367,39 @@ table above lists, reaching the same numbers.
 | `this.entity.transform.position.{x,y,z}` | `f32` | yes | yes |
 | `this.entity.transform.world_position.{x,y,z}` | `f32` | yes | yes |
 | `this.entity.transform.scale.{x,y,z}` | `f32` | yes | yes |
+| `this.entity.transform.rotation` | `Quat` | yes | whole value |
+| `this.entity.transform.rotation.{x,y,z,w}` | `f32` | yes | no |
 | `this.entity.transform.rotation_z` | `f32` | yes | yes |
+| `this.entity.transform.{yaw,pitch,roll}` | `f32` | yes | yes |
+| `this.entity.transform.{forward,right,up}` | `Vec3` | yes | no |
+| `this.entity.transform.forward.{x,y,z}` | `f32` | yes | no |
+| `this.entity.transform.right.{x,y,z}` | `f32` | yes | no |
+| `this.entity.transform.up.{x,y,z}` | `f32` | yes | no |
+| `this.entity.transform.look_at(target)` | unit | call | — |
+| `this.entity.transform.rotate_around(pivot, axis, radians)` | unit | call | — |
 | `this.entity.sprite.{tint,color_multiply,color_offset}` | `Color` | yes | yes |
 | `this.entity.sprite.tint.{r,g,b,a}` | `f32` | yes | yes |
 | `this.entity.sprite.color_multiply.{r,g,b,a}` | `f32` | yes | yes |
 | `this.entity.sprite.color_offset.{r,g,b,a}` | `f32` | yes | yes |
 | `this.entity.sprite.layer` | `f32` | yes | yes |
+| `this.entity.sprite.shader_params.{x,y,z,w}` | `f32` | yes | yes |
+| `this.entity.environment.ambient_intensity` | `f32` | yes | yes |
+| `this.entity.environment.{ambient_color,background}` | `Color` | yes | yes |
+| `this.entity.environment.ambient_color.{r,g,b,a}` | `f32` | yes | yes |
+| `this.entity.environment.background.{r,g,b,a}` | `f32` | yes | yes |
+| `this.entity.light.color` | `Color` | yes | yes |
+| `this.entity.light.color.{r,g,b,a}` | `f32` | yes | yes |
+| `this.entity.light.{intensity,range,inner_angle,outer_angle}` | `f32` | yes | yes |
+| `this.entity.light.enabled` | `bool` | yes | yes |
+| `this.entity.light2d.color` | `Color` | yes | yes |
+| `this.entity.light2d.color.{r,g,b,a}` | `f32` | yes | yes |
+| `this.entity.light2d.{intensity,radius,falloff,height}` | `f32` | yes | yes |
 | `this.entity.ui_image.tint` | `Color` | yes | yes |
 | `this.entity.ui_image.tint.{r,g,b,a}` | `f32` | yes | yes |
 | `this.entity.ui_image.layer` | `f32` | yes | yes |
+| `this.entity.world_text.color` | `Color` | yes | yes |
+| `this.entity.world_text.color.{r,g,b,a}` | `f32` | yes | yes |
+| `this.entity.world_text.{font_size,visible,layer}` | `f32` | yes | yes |
 | `this.entity.shape.{fill,stroke}` | `Color` | yes | yes |
 | `this.entity.shape.fill.{r,g,b,a}` | `f32` | yes | yes |
 | `this.entity.shape.stroke.{r,g,b,a}` | `f32` | yes | yes |
@@ -567,6 +693,9 @@ follow-up work.
 | `Effects.burst(entity)` | `f32` — how many flecks were made |
 | `Effects.burst_at(entity, x, y)` | `f32` |
 | `Effects.live()` | `f32` |
+| `Effects.play(entity)` | `f32` — starts the entity's `sindri.particles` emitter |
+| `Effects.stop(entity)` | `f32` — stops it; particles already out live on |
+| `Effects.emit(entity, count)` | `f32` — throws that many of its particles at once |
 
 ```rust
 script Bullet {
@@ -603,6 +732,12 @@ Effects.burst_at(this.explosion, enemy.transform.position.x,
 call — so the usual shape, firing a burst and then despawning what fired it,
 works. `burst_at` throws somewhere else, which is what an explosion where
 something *used to be* needs.
+
+**An emitter is a stream the scene authors.** `sindri.particles` keeps throwing
+particles into the same pool while it plays: sparkle round a pickup, smoke from
+a chimney. `Effects.play` and `Effects.stop` switch its `playing` field, and
+`Effects.emit(this.entity, 8.0)` throws a handful at once whether it plays or
+not, which is dust on landing. `docs/particles.md` describes every field.
 
 **Flecks draw their own random directions from their own stream**, never the
 run's. A fleck drawn from the gameplay stream would shift every number after it,
@@ -1002,6 +1137,8 @@ a person who has not clicked yet.
 
 | Call | Returns |
 | --- | --- |
+| `Physics3d.move_character(entity, displacement: Vec3, snap: bool)` | nothing |
+| `Physics3d.character_motion(entity)` | `CharacterMotion3d?` |
 | `Physics3d.layer(name: String)` | numeric mask bit |
 | `Physics3d.mask(names: List<String>)` | numeric mask |
 | `Physics3d.raycast(origin: Vec3, direction: Vec3, max_distance, mask, include_sensors, exclude: Entity?)` | `RayHit3d?` |
@@ -1030,6 +1167,16 @@ ignores inactive settings and never uses 2D world names. Missing 3D host, unknow
 names, wrong argument types, malformed settings or multiple active 3D worlds
 fail explicitly. With no active settings there are no names to select.
 
+Scene-owned 3D characters accept next-fixed-step movement through
+`move_character` and return copied optional results through `character_motion`.
+`CharacterMotion3d` separates classified endpoint support from raw
+`CharacterMovement3d` flags and nullable `CharacterCarry3d`; ordered collisions
+retain hit and applied/remaining displacement. Last valid input wins. Both calls
+require scene character context, supplied by Session in every host. Gameplay owns
+gravity, jumping and snap policy. See [the 3D character contract](character-movement.md#typed-3d-decay-requests-and-results)
+for validation, timing, filtering and copy semantics. Native script/Session tests
+exercise this surface; controller browser/editor/Explorer proof remains pending.
+
 `Physics3d` takes Vec3 values without changing the existing 2D `Physics` API.
 `velocity(entity)` and `angular_velocity(entity)` return copied Vec3 values;
 `set_velocity(entity, velocity)`, `set_angular_velocity(entity, velocity)` and
@@ -1038,8 +1185,12 @@ controls accept dynamic/velocity-kinematic bodies; impulses require dynamic
 bodies. Rotation-locked bodies retain zero angular velocity. Finite f32-range
 vectors validate before mutation; controls leave authored motion unchanged.
 Missing context and inactive/stale handles fail explicitly. Before synchronization,
-valid authored 3D body and nonempty collider components are required, without
-conflicting 2D physics or a moving depth lock. Setters/impulses queue in call order
+a valid authored 3D rigid body and either nonempty primitive colliders or a
+convex-model reference are required. Convex references may share primitive pieces.
+Body settings, schema/material fields, positive composed hull scale, incompatible
+2D/character/static-model/voxel ownership and moving depth locks validate before
+queuing. Model bindings, hull bounds/volume, scaled geometry and actual mass
+validate at the next scene synchronization, not during the script call. Setters/impulses queue in call order
 and replay before solving against actual compound mass. Reads copy the last
 queued setter or authored start; locked angular velocity is zero and impulses
 resolve only at materialization. Successful synchronization expires unconsumed
@@ -1332,7 +1483,12 @@ piercing bullets need, and it falls out of the event rather than being a feature
 hit, or the thing that hit it — is an ordinary `World.despawn`, and the body
 leaves the simulation before the next step. Walking the answer while despawning
 from it is the case `World.exists` covers, exactly as for any other collection of
-references.
+references. A reset or cleanup in an earlier script can remove a referenced
+entity before another script consumes that solve's collision list. Check
+`World.exists(other)` before reading tags, transforms, script fields or applying
+an impulse. Physics Playground's shell, pane, backstop and bumper consumers
+exercise this rule; its regression spawns a ball against a pane and resets the
+room before the pane consumes that solve's contact.
 
 **A host with no physics refuses these**, rather than reporting a velocity of
 zero for a body that does not exist. A game whose bullets never move because
@@ -1482,6 +1638,7 @@ what the map *holds* there.
 | --- | --- |
 | `Grid.tile(map, column, row)` | `f32` |
 | `Grid.set_tile(map, column, row, index)` | nothing |
+| `Grid.set_terrain(map, column, row, terrain)` | nothing |
 | `Grid.columns(map)` | `f32` |
 | `Grid.rows(map)` | `f32` |
 
@@ -1495,6 +1652,10 @@ palette index into a flat array is the flat map's own model, and a volume stacks
 named cells instead. Asked of a grid that carries only `sindri.tile_grid`, both
 fail and name the component they would need rather than reporting that a tilemap
 the entity never had holds no tiles.
+
+`set_terrain` paints a terrain the map's sheet declares and redraws the cell's
+neighbors from the patterns they now make; `""` empties the cell. See
+`docs/terrains.md`.
 
 ### Stacked cells
 
@@ -1759,6 +1920,34 @@ names its bus with `bus`, or leaves it empty to follow `loop`/`play`. Orbital
 Last Stand's pause screen moves the master, music and effects buses with three
 sliders and remembers them.
 
+### Every way in, under `Input`
+
+| Member | The same as |
+| --- | --- |
+| `Input.Action` | `Action`, what the player means, from the scene's actions |
+| `Input.Pointer` | `Pointer`, the mouse or a finger, one way for both |
+| `Input.Stick` | `Stick`, a virtual joystick from whichever finger steers |
+| `Input.Gesture` | `Gesture`, taps, holds, drags and pinches |
+| `Input.Touch` | `Touch`, every finger, by index |
+| `Input.Keyboard` | the keyboard: `Input.Keyboard.is_down("W")` |
+| `Input.Gamepad` | `Gamepad`, the pads, by player slot |
+
+Each way in grew as a namespace of its own, and someone looking for touch
+controls starts at `Input`. So `Input` gathers them: `Input.Stick.x` is
+`Stick.x`, checked as the same type and answered by the same state, so the two
+spellings cannot disagree. Write the gathered form in new scripts. The flat
+names stay until the scripts in this repository have moved, and are then
+retired.
+
+`Input.Mouse` does not exist, deliberately: `Input.Pointer` is the mouse and a
+finger alike, which is what lets one game work on a desktop and a phone. `Aim`
+and `Camera` are not gathered either; they answer questions about the world the
+person is looking at, not about what their hands are doing.
+
+The calls directly on `Input` — `Input.is_down` and the rest below — are the
+keyboard, as they were before `Input` gathered anything, so older scripts keep
+compiling. `Input.Keyboard` is the same four calls under a name that says so.
+
 ### Input actions
 
 | Call | Returns |
@@ -1804,8 +1993,9 @@ example rebinds them.
 | `Input.just_pressed(key)` | `bool` |
 | `Input.just_released(key)` | `bool` |
 
-Keys are named physically, by where they are rather than what they type, so a
-binding survives a change of layout: `"W"`, `"ArrowLeft"`, `"Space"`,
+Each is also `Input.Keyboard.axis` and so on, which is the spelling new
+scripts should use. Keys are named physically, by where they are rather than
+what they type, so a binding survives a change of layout: `"W"`, `"ArrowLeft"`, `"Space"`,
 `"Digit1"`, `"ShiftLeft"`. Matching ignores case, because the name is typed by a
 person. `sindri_platform::Key::ALL` is the list.
 
@@ -1884,6 +2074,14 @@ without changing the scene's authored transform.
 | --- | --- |
 | `Camera.add_trauma(amount)` | unit |
 
+The explicit-entity 3D camera calls are `Camera.perspective_fov(camera, degrees)`,
+`Camera.orbit(camera, target, yaw, pitch, distance)`, `Camera.orbit_offset(camera, Vec3)`,
+`Camera.orbit_smoothing(camera, rate)`, `Camera.orbit_collision(camera, mask, padding)`
+and `Camera.clear_orbit(camera)`. Orbit is engine-owned world-space follow,
+aiming and sight-line obstruction pull-in; see the full checked contract in
+[`camera-runtime-scripting.md`](camera-runtime-scripting.md). These calls do
+not require the singular 2D behavior camera.
+
 `Camera.add_trauma` adds a finite, non-negative amount to the authored gameplay camera's shake trauma, clamped by the engine to one. Decay decides when an impact happens; `sindri.camera.behavior` owns the waveform, strength, frequency, and decay. The call requires exactly one authored `sindri.camera` carrying `sindri.camera.behavior`; ambiguity or absence is a runtime error rather than a silently ignored camera effect.
 
 | Path | Type |
@@ -1893,15 +2091,32 @@ without changing the scene's authored transform.
 | `Pointer.overlay_x` | `f32` |
 | `Pointer.overlay_y` | `f32` |
 | `Pointer.position` | `Vec2` |
+| `Pointer.locked` (read-only) | `bool` |
+| `Pointer.delta` (read-only) | `Vec2` |
 | `Pointer.overlay` | `Vec2` |
 | `Pointer.inside` | `bool` |
 | `Pointer.over_ui` | `bool` |
 
 | Call | Returns |
 | --- | --- |
+| `Pointer.lock()` | `unit` |
+| `Pointer.unlock()` | `unit` |
 | `Pointer.is_down(button)` | `bool` |
 | `Pointer.just_pressed(button)` | `bool` |
 | `Pointer.just_released(button)` | `bool` |
+
+`Pointer.delta` (also `Input.Pointer.delta`) is mouse displacement accumulated
+until the next fixed step: positive X is right, positive Y
+is down. Read the whole vector or `.x`/`.y`; assigning either the value or a
+component is rejected. A mutable copy is independent. First arrival and
+re-entry establish a position without adding displacement; steps without
+movement read zero. Unlocked motion uses viewport pixels; captured motion uses
+native raw device counts or browser physical pixels. Multiply by sensitivity
+in radians per motion unit, without multiplying by `dt`. Touch uses
+`Gesture.drag_x`/`drag_y`; this value is mouse-only. `lock()` and `unlock()`
+request capture/release, while read-only `locked` reports actual host state;
+see the cursor capture contract below. Orbit Camera Lab demonstrates captured
+look and right-button drag-to-look with pitch clamping.
 
 | Path | Type |
 | --- | --- |
@@ -2700,11 +2915,12 @@ than none at all.
 
 ### What is deliberately absent
 
-Two absences, each for a reason worth stating.
+Two remaining limits.
 
-**No full 3D rotation**: a gameplay script should not be asked to assemble a
-quaternion by hand, and offering a third of a 3D rotation API is worse than
-offering none.
+**No quaternion composition or interpolation.** Scripts can copy and restore
+`Quat` rotations and use yaw/pitch/roll, world directions, `look_at` and
+`rotate_around`. Quaternion multiplication, axis-angle value construction and
+slerp are not available yet.
 
 **No query by component type.** A script asks for a group by authored tag, and
 that is the only way to ask. Spelling `sindri.sprite` in a script would put
@@ -2890,3 +3106,82 @@ original endpoints. Completion is polled, so a game can use its existing typed
 messages/events for follow-up actions. This slice does not add property-path
 binding, timelines, sequences, callbacks, loop/yoyo modes or CSS keyframes.
 Orbital's `powerup.decay` uses a managed vector tween for its pickup appearance.
+
+## Cursor capture for 3D mouse look
+
+`Pointer.lock()` / `Input.Pointer.lock()` request capture from the windowed
+native/browser player or native editor Play. `unlock()` requests release;
+read-only `locked` reports actual host state. Both calls take no arguments and return unit. A request
+does not change `locked` within the script invocation. Requests from successful
+script invocations are collected in execution order, last request winning,
+and Session drains the latest request once after the host advances gameplay.
+A failed invocation does not forward its pending capture request.
+
+In a browser, request capture after a player click. Security policy, lack of
+user activation, or platform support can deny it. Browser success is polled
+from the document's actual locked element; synchronous exceptions and rejected
+promises are handled without stopping gameplay. Native capture uses Locked
+where supported and confinement with raw device motion on X11. Escape, focus
+loss and host suspension release capture. There is no automatic recapture.
+
+`Pointer.delta` remains the motion input, positive right/down. Unlocked input
+uses viewport pixels; captured native input uses raw device counts, while
+browser input uses physical-pixel movement. Tune sensitivity per game; do not
+multiply displacement by dt. Absolute cursor warps do not contribute while
+captured. Capture transitions clear pending motion and rebase the first
+unlocked position. Touch remains separate.
+
+Headless runs do not perform capture, so requests remain intentions until a
+host supplies actual-state input. Checkpoint
+restore does not replay consumed window commands. Orbit Camera Lab demonstrates
+click-to-capture, U/second-click release and captured look in Decay. Explorer
+game proof remains pending. Editor Play accepts capture only while running,
+with a visible Game view and the pointer inside it. Escape, window focus loss,
+pause/stop, text editing, picking or hiding the Game view releases capture;
+resuming or regaining focus does not recapture. Raw native motion uses device
+counts without applying the editor display scale.
+
+
+## Checked 3D light properties
+
+`this.light` and an `Entity`'s `.light` expose a `sindri.light` without changing
+its authored kind. Reads honor omitted defaults. Color uses linear RGB through
+`Color`; alpha reads one and must remain one. RGB and intensity are finite and
+nonnegative, range is finite and positive, and cone half-angles in radians obey
+`0 <= inner < outer <= pi/2` with distinct f32 cosine values. Each setter checks
+the entire candidate and retains the previous payload on error; whole color
+writes are atomic. Set outer before inner when widening both cones, and inner
+before outer when narrowing them. Missing lights and stale references are
+runtime errors; access never creates a light. Writes preserve unrelated payload
+fields. Invalid preexisting payloads must be fixed through authoring first.
+
+`light.enabled` switches illumination independently of the entity's active
+state: its script keeps ticking and can turn its light back on. Inactive parents
+still suppress lighting. Scene extraction observes light and transform writes
+after the shared Session script step; directional shadows use that same updated
+sun. `examples/lighting3d` is feature proof; in-tree game adoption remains open.
+
+
+## Live scene environment properties
+
+`this.environment` and `entity.environment` address an existing
+`sindri.environment`, using the same ownership rules as `entity.light`.
+`ambient_intensity` is finite and nonnegative. `ambient_color` is a Color over
+the authored RGB with alpha one; assignments must keep that alpha. `background`
+is an RGBA Color, including its alpha. Whole colors and channels are writable.
+Color channels retain the existing authored contract: finite f32 values; they
+are not clamped to the unit interval. Fractional numbers stay fractional even
+when the original JSON number was an integer.
+
+Every write checks the full candidate before committing, preserving omitted
+defaults, untouched channels and unrelated environment settings. Failed writes,
+including non-finite values, overflow, invalid ambient alpha and invalid
+preexisting settings, leave the payload unchanged. Missing components and stale
+references are runtime errors; access never creates or selects an environment.
+Scene extraction still selects the active environment and rejects multiple
+active environments. Writes to inactive environments affect them when activated.
+The next extraction reads ambient lighting and clear color from the same world,
+without a restart or render-resource rebuild. Lighting Lab is the native/browser/
+editor feature proof. Day/Night Lab adds a configurable project clock and
+mounted-light/shadow integration; fog/post controls and game adoption remain
+separate work.

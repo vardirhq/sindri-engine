@@ -1,0 +1,40 @@
+{
+  "format_version": 1,
+  "metadata": {
+    "name": "Damage Number"
+  },
+  "entities": [
+    {
+      "id": "damage-number",
+      "name": "Damage Number",
+      "transform_3d": {
+        "position": [0.0, 0.0, 0.0],
+        "rotation": [0.0, 0.0, 0.0, 1.0],
+        "scale": [1.0, 1.0, 1.0]
+      },
+      "components": {
+        "sindri.tags": { "tags": ["damage_number"] },
+        "sindri.script": {
+          "source": "scripts/damage-number.decay",
+          "script": "DamageNumber",
+          "properties": {
+            "amount": 10.0,
+            "crit": 0.0
+          }
+        },
+        "sindri.text": {
+          "text": "{.0}",
+          "font": "fonts/ChakraPetch-Bold.ttf",
+          "font_size": 0.34,
+          "line_height": 0.4,
+          "color": [0.86, 0.97, 1.0, 1.0],
+          "anchor": "center",
+          "layer": 20,
+          "values": [10.0],
+          "outline": { "width": 0.03, "color": [0.02, 0.05, 0.1, 0.9] },
+          "rich": true
+        }
+      }
+    }
+  ]
+}

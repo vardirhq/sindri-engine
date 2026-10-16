@@ -60,10 +60,14 @@ mod hierarchy;
 mod history_view;
 mod inspector_panel;
 mod instances;
+mod light2d_gizmo;
 mod light_gizmo;
+mod normal_studio;
 mod occlusion_view;
 mod overlay;
 mod palette_view;
+mod particle_preview;
+mod play_cursor;
 mod pointer;
 mod prefab_authoring;
 pub(crate) mod prefab_drop;
@@ -88,6 +92,7 @@ mod scene_menu;
 mod scene_new;
 mod shape_gizmo;
 mod shortcuts;
+mod slice_guides;
 mod slicer_view;
 mod sprite_sheet_view;
 mod startup;
@@ -295,6 +300,11 @@ struct EditorApp {
     thumbnails: thumbnails::Thumbnails,
     /// Where the Sprite sheet tab's picture is zoomed and panned to.
     sheet_camera: sprite_sheet_view::SheetCamera,
+    /// The picture open in the Normal Map Studio. Beside the slicer, and
+    /// exclusive with it in the inspector for the same reason.
+    normal_studio: Option<crate::normal_studio::NormalStudio>,
+    /// What the Normal map tab keeps between frames: its GPU stage above all.
+    studio_canvas: normal_studio::StudioCanvas,
     /// The Timeline panel's playhead, choice and preview.
     timeline: crate::timeline::TimelineState,
     /// What Play sounds like, and the Audio panel's monitor.
@@ -347,6 +357,8 @@ struct EditorApp {
     scripts: SceneScripts,
     /// The keyboard a running script reads, translated from egui's.
     input: EditorInput,
+    play_cursor: play_cursor::PlayCursor,
+    game_pointer_available: bool,
     /// The world as it was when Play was pressed.
     ///
     /// Scripts write to the world, which animation never did, so stopping has
@@ -427,6 +439,8 @@ impl EditorApp {
 struct Stillness {
     animations: SpriteAnimations,
     effects: sindri_scene::Effects2d,
+    /// The selected emitter, playing in `effects` while nothing else does.
+    preview: particle_preview::ParticlePreview,
     screen_ui: ScreenUi,
 }
 

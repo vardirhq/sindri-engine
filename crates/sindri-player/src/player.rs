@@ -66,6 +66,8 @@ pub(crate) struct Player {
     page_visible: bool,
     platform_suspended: bool,
     paused_for_page: bool,
+    /// How long the scene has played, which is the clock sprite shaders read.
+    seconds: f32,
 }
 
 impl Player {
@@ -82,6 +84,8 @@ impl Player {
         context: &AppContext<'_>,
         project: ProjectAssets,
     ) -> Result<(), PlayerError> {
+        let collision_models =
+            crate::models::references(&project.scenes, &project.prefabs, self.scene.components())?;
         let mut loaded_textures: Vec<AssetId> = Vec::new();
         for (id, asset) in project.textures {
             let texture = Texture2D::from_rgba8(
@@ -106,8 +110,21 @@ impl Player {
             }
         }
 
+        for (id, sheet) in &project.sheets {
+            self.tile_sets
+                .bind_terrains(id.as_str(), sheet.terrains.clone());
+        }
         for (id, tile_set) in project.tile_sets {
             self.tile_sets.bind(id.as_str(), tile_set)?;
+        }
+
+        // Checked as they bind. A broken one is reported and its sprites draw
+        // the built-in look; the export refuses one, so a shipped build only
+        // meets this on a project run straight from its folder.
+        for (id, source) in project.shaders {
+            if let Err(error) = self.bindings.shaders_mut().bind(&id, &source) {
+                log::warn!("{error}");
+            }
         }
 
         for (id, asset) in project.fonts {
@@ -152,6 +169,12 @@ impl Player {
             // cannot reach would be the worst of both.
             .with_tile_sets(self.tile_sets.clone())
             .with_styles(project.stylesheets);
+        crate::models::install(
+            project.models,
+            &collision_models,
+            &mut self.scene,
+            &mut session,
+        )?;
         session.keep_saves_in(saves);
 
         session.settle_styles(&mut world, self.weave_viewport())?;
@@ -251,6 +274,7 @@ impl DesktopApp for Player {
             page_visible: true,
             platform_suspended: false,
             paused_for_page: false,
+            seconds: 0.0,
         })
     }
 
@@ -258,6 +282,10 @@ impl DesktopApp for Player {
         self.engine
             .as_ref()
             .is_some_and(|engine| engine.game().editing_text())
+    }
+
+    fn take_pointer_lock_request(&mut self) -> Option<bool> {
+        self.engine.as_mut()?.game_mut().take_pointer_lock_request()
     }
 
     fn take_copied(&mut self) -> Option<String> {
@@ -292,6 +320,9 @@ impl DesktopApp for Player {
         // a pause on Orbital, or Back in a menu, froze the game on a phone.
         let engine = self.engine.as_mut().expect("checked above");
         engine.advance(delta)?;
+        if !self.paused_for_page {
+            self.seconds += delta.as_secs_f32();
+        }
         Ok(Flow::Continue)
     }
 
@@ -359,6 +390,13 @@ impl DesktopApp for Player {
             .style(&mut world, viewport)
             .map_err(PlayerError::from);
         let prepared = styled.and_then(|undo| {
+            self.cubes.set_lighting(self.scene.lighting(&world)?);
+            let shadows = self
+                .scene
+                .environment(&world)?
+                .map(sindri_scene::EnvironmentComponent::shadow_settings)
+                .unwrap_or_default();
+            self.cubes.set_shadows(context.device(), shadows);
             // Measured as styled, since a stylesheet sets the font size.
             let prepared = measure_ui_text(&world, self.scene.components(), &mut self.text)
                 .map_err(PlayerError::from)
@@ -372,7 +410,8 @@ impl DesktopApp for Player {
                             .with_animations(engine.game().animations())
                             .with_effects(engine.game().effects())
                             .with_tile_sets(&self.tile_sets)
-                            .with_text_sizes(&sizes),
+                            .with_text_sizes(&sizes)
+                            .with_seconds(self.seconds),
                     )?;
                     engine.game_mut().record_drawn(&world, viewport, sizes)?;
                     Ok(prepared)

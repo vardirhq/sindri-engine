@@ -270,6 +270,8 @@ mod tests {
                         profiles: &[],
                         prefabs: &[],
                         tile_sets: &[],
+                        models: &[],
+                        shaders: &[],
                         pictures: &crate::native::thumbnails::NO_PICTURES,
                         block_sets: None,
                         layers: &[],

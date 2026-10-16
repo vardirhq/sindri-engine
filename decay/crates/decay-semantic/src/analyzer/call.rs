@@ -62,7 +62,9 @@ impl Analyzer<'_, '_> {
                     self.check_call(&function, args, span);
                     return function.return_type;
                 }
-                Some(MemberLookup::Found(ExternalSymbol::Value(_))) => {
+                Some(MemberLookup::Found(
+                    ExternalSymbol::Value(_) | ExternalSymbol::ReadOnlyValue(_),
+                )) => {
                     self.error(
                         Code::NotCallable,
                         callee.span,
@@ -173,7 +175,7 @@ impl Analyzer<'_, '_> {
                         self.check_call(&function, args, span);
                         return function.return_type;
                     }
-                    ExternalSymbol::Value(_) => {
+                    ExternalSymbol::Value(_) | ExternalSymbol::ReadOnlyValue(_) => {
                         self.error(
                             Code::NotCallable,
                             callee.span,
