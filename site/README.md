@@ -24,7 +24,7 @@ Pages replaces the whole site on every deployment, so exactly one workflow
 deploys it: **Sindri Site Publisher** (`.github/workflows/site-publisher.yml`).
 `Sindri Pages` only builds. On `main` it uploads its build as the `stable-site`
 artifact (kept 90 days). On a pull request it proves the site assembles, and a
-pull request may also upload a `3d-labs-preview` artifact (PR #507 does). In the
+pull request also uploads a `3d-labs-preview` artifact of the 3D labs. In the
 merge queue it builds the optimised site for the exact commit `main` becomes and
 uploads it as `queued-site`; the push to `main` then promotes that artifact to
 `stable-site` instead of building it again (`scripts/ci_reuse.py pages`). A
