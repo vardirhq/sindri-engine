@@ -20,7 +20,7 @@ pub(crate) fn add_calls(mut ty: HostType) -> HostType {
             FunctionType {
                 params: match call {
                     TransformCall::LookAt => vec![Type::Vec3],
-                    TransformCall::RotateAround => vec![Type::Vec3, Type::Vec3, Type::F32],
+                    TransformCall::RotateAround => vec![Type::Vec3, Type::Vec3, Type::Number],
                 },
                 return_type: Type::Unit,
             },

@@ -12,7 +12,7 @@ pub(super) fn add_action_surface(environment: &mut Environment) {
         action = action.with_function(name, call(vec![Type::String], Type::Bool));
     }
     action = action
-        .with_function("axis", call(vec![Type::String], Type::F32))
+        .with_function("axis", call(vec![Type::String], Type::Number))
         .with_function("vector", call(vec![Type::String], Type::Vec2))
         .with_function(
             "bindings",
@@ -20,7 +20,7 @@ pub(super) fn add_action_surface(environment: &mut Environment) {
         )
         .with_function(
             "rebind",
-            call(vec![Type::String, Type::F32, Type::String], Type::Unit),
+            call(vec![Type::String, Type::Number, Type::String], Type::Unit),
         )
         .with_function("last_pressed", call(Vec::new(), Type::String));
     environment.add_type(ACTION, action);

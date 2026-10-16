@@ -22,7 +22,7 @@ pub(super) fn add_input_surface(environment: &mut Environment) {
             FunctionType {
                 params: vec![Type::String; query.keys()],
                 return_type: if query.is_number() {
-                    Type::F32
+                    Type::Number
                 } else {
                     Type::Bool
                 },
@@ -41,7 +41,7 @@ pub(super) fn add_input_surface(environment: &mut Environment) {
 pub(super) fn add_viewport_surface(environment: &mut Environment) {
     let mut viewport = HostType::new();
     for (name, _) in VIEWPORT_VALUES {
-        viewport = viewport.with_value(*name, Type::F32);
+        viewport = viewport.with_value(*name, Type::Number);
     }
     environment.add_type(VIEWPORT, viewport);
     environment.add_value(VIEWPORT, Type::Named(VIEWPORT.to_owned()));
@@ -55,7 +55,7 @@ pub(super) fn add_aim_surface(environment: &mut Environment) {
             if matches!(value, AimValue::Hit) {
                 Type::Bool
             } else {
-                Type::F32
+                Type::Number
             },
         );
     }
@@ -66,33 +66,35 @@ pub(super) fn add_aim_surface(environment: &mut Environment) {
 pub(super) fn add_camera_surface(environment: &mut Environment) {
     let mut camera = HostType::new();
     for (name, _) in CAMERA_VALUES {
-        camera = camera.with_value(*name, Type::F32);
+        camera = camera.with_value(*name, Type::Number);
     }
     for (name, call) in CAMERA_CALLS {
         let params = match call {
             CameraCall::AddTrauma
             | CameraCall::Impact
             | CameraCall::Smoothing
-            | CameraCall::MaxSpeed => vec![Type::F32],
+            | CameraCall::MaxSpeed => vec![Type::Number],
             CameraCall::OrthographicSize
             | CameraCall::PerspectiveFov
-            | CameraCall::OrbitSmoothing => vec![Type::Named(ENTITY.to_owned()), Type::F32],
+            | CameraCall::OrbitSmoothing => vec![Type::Named(ENTITY.to_owned()), Type::Number],
             CameraCall::Orbit => vec![
                 Type::Named(ENTITY.to_owned()),
                 Type::Named(ENTITY.to_owned()),
-                Type::F32,
-                Type::F32,
-                Type::F32,
+                Type::Number,
+                Type::Number,
+                Type::Number,
             ],
             CameraCall::OrbitOffset => vec![Type::Named(ENTITY.to_owned()), Type::Vec3],
             CameraCall::OrbitCollision => {
-                vec![Type::Named(ENTITY.to_owned()), Type::F32, Type::F32]
+                vec![Type::Named(ENTITY.to_owned()), Type::Number, Type::Number]
             }
             CameraCall::ClearOrbit | CameraCall::Follow => vec![Type::Named(ENTITY.to_owned())],
             CameraCall::ClearFollow | CameraCall::ClearBounds => Vec::new(),
-            CameraCall::FollowOffset | CameraCall::Shake => vec![Type::F32, Type::F32, Type::F32],
-            CameraCall::DeadZone => vec![Type::F32, Type::F32],
-            CameraCall::Bounds => vec![Type::F32, Type::F32, Type::F32, Type::F32],
+            CameraCall::FollowOffset | CameraCall::Shake => {
+                vec![Type::Number, Type::Number, Type::Number]
+            }
+            CameraCall::DeadZone => vec![Type::Number, Type::Number],
+            CameraCall::Bounds => vec![Type::Number, Type::Number, Type::Number, Type::Number],
         };
         camera = camera.with_function(
             *name,
@@ -116,7 +118,7 @@ pub(super) fn add_gesture_surface(environment: &mut Environment) {
                 | GestureValue::Held
                 | GestureValue::Dragging
                 | GestureValue::Pinching => Type::Bool,
-                _ => Type::F32,
+                _ => Type::Number,
             },
         );
     }
@@ -129,7 +131,7 @@ pub(super) fn add_pointer_surface(environment: &mut Environment) {
     for (name, value) in POINTER_VALUES {
         let value_type = match value {
             PointerValue::X | PointerValue::Y | PointerValue::OverlayX | PointerValue::OverlayY => {
-                Type::F32
+                Type::Number
             }
             PointerValue::Inside | PointerValue::OverUi | PointerValue::Locked => Type::Bool,
             PointerValue::Position | PointerValue::Delta | PointerValue::Overlay => Type::Vec2,
@@ -153,13 +155,13 @@ pub(super) fn add_pointer_surface(environment: &mut Environment) {
     environment.add_type(POINTER, pointer);
     environment.add_value(POINTER, Type::Named(POINTER.to_owned()));
 
-    let mut touch = HostType::new().with_value(TOUCH_COUNT, Type::F32);
+    let mut touch = HostType::new().with_value(TOUCH_COUNT, Type::Number);
     for (name, _) in TOUCH_CALLS {
         touch = touch.with_function(
             *name,
             FunctionType {
-                params: vec![Type::F32],
-                return_type: Type::F32,
+                params: vec![Type::Number],
+                return_type: Type::Number,
             },
         );
     }
@@ -173,7 +175,7 @@ pub(super) fn add_pointer_surface(environment: &mut Environment) {
             match value {
                 StickValue::Held => Type::Bool,
                 StickValue::Direction => Type::Vec2,
-                _ => Type::F32,
+                _ => Type::Number,
             },
         );
     }

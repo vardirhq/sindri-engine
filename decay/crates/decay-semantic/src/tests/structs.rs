@@ -37,7 +37,7 @@ fn a_struct_is_accepted_wherever_a_value_goes() {
 #[test]
 fn a_struct_from_the_host_is_known_without_a_declaration() {
     let mut environment = Environment::new();
-    environment.add_struct("Offer", vec![("index".to_owned(), Type::F32)]);
+    environment.add_struct("Offer", vec![("index".to_owned(), Type::Number)]);
     let found = messages(
         "script Chooser { fn f() -> f32 { let o = Offer(index: 1.0); return o.index; } }",
         &environment,
@@ -70,14 +70,14 @@ fn every_mistake_about_a_struct_is_refused() {
     );
     for expected in [
         "`Card` needs every field without a default: missing `weight`",
-        "cannot assign `String` to `f32`",
+        "cannot assign `String` to `number`",
         "`Card` has no field `color`; it has `name`, `weight`",
         "`name` is given twice",
         "`Card` is a struct: name its fields, as in `Card(name: ..., weight: ...)`",
         "`Card` has no field `size`; it has `name`, `weight`",
         "cannot assign to a component of immutable `fixed`",
         "`Nothing` is not a struct, so it is not built with named fields",
-        "cannot assign `Card` to `f32`",
+        "cannot assign `Card` to `number`",
         "struct `Empty` has no fields, so it could never hold anything",
         "`Twice.a` is declared twice",
         "`Chooser` is already a name; a struct needs one of its own",
@@ -139,7 +139,7 @@ fn every_mistake_about_a_struct_method_is_refused() {
         "unknown name `weight`",
         "`Card.twice` is declared twice",
         "`heavier` is a method of `Card` -- call it",
-        "cannot assign `f32` to `Card`",
+        "cannot assign `number` to `Card`",
         "`Card` has no method `lighter`; it has `bare`, `grow`, `heavier`, `twice`",
     ] {
         assert!(all.contains(expected), "missing {expected:?} in:\n{all}");
@@ -149,13 +149,13 @@ fn every_mistake_about_a_struct_method_is_refused() {
 #[test]
 fn a_method_from_another_file_is_known() {
     let mut environment = Environment::new();
-    environment.add_struct("Offer", vec![("index".to_owned(), Type::F32)]);
+    environment.add_struct("Offer", vec![("index".to_owned(), Type::Number)]);
     environment.add_struct_method(
         "Offer",
         "next",
         crate::FunctionType {
-            params: vec![Type::F32],
-            return_type: Type::F32,
+            params: vec![Type::Number],
+            return_type: Type::Number,
         },
     );
     let found = messages(
@@ -206,7 +206,7 @@ fn every_mistake_about_a_default_is_refused() {
     );
     let all = found.join("\n");
     for expected in [
-        "`Card.weight`: field `weight` is declared `f32` but its value is `bool`",
+        "`Card.weight`: field `weight` is declared `number` but its value is `bool`",
         "`Card.spot`: a field's default must be worked out when the file compiles",
         "`Card.size`: `weight` is not a constant",
         "`Card` needs every field without a default: missing `name`",

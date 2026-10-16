@@ -29,8 +29,8 @@ fn a_function_from_another_file_runs_once_linked() {
     environment.add_shared_function(
         "half",
         decay_semantic::FunctionType {
-            params: vec![decay_semantic::Type::F32],
-            return_type: decay_semantic::Type::F32,
+            params: vec![decay_semantic::Type::Number],
+            return_type: decay_semantic::Type::Number,
         },
     );
     let mut program = decay_ir::lower_with_environment(

@@ -140,7 +140,7 @@ fn character3d_calls_complete_hover_and_check_typed_results() {
 fn light_completion_hover_and_checking_share_bool_and_numeric_metadata() {
     for (member, ty) in [
         ("enabled", "bool"),
-        ("intensity", "f32"),
+        ("intensity", "number"),
         ("color", "Color"),
     ] {
         let source =
@@ -179,7 +179,7 @@ fn light_completion_hover_and_checking_share_bool_and_numeric_metadata() {
 #[test]
 fn environment_completion_hover_and_checking_share_color_and_numeric_metadata() {
     for (member, ty) in [
-        ("ambient_intensity", "f32"),
+        ("ambient_intensity", "number"),
         ("ambient_color", "Color"),
         ("background", "Color"),
     ] {

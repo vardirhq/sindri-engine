@@ -50,12 +50,12 @@ fn every_mistake_about_a_color_is_refused() {
     for expected in [
         "`Color` takes `r, g, b`, `r, g, b, a` or a hex text like `\"#ff8800\"`, found 2 arguments",
         "`orange` is not a color: write `#rrggbb` or `#rrggbbaa`",
-        "expected `String`, found `f32`",
+        "expected `String`, found `number`",
         "cannot assign to a component of immutable `fixed`",
         "`Color` has no member `x`; it has `r`, `g`, `b`, `a`, `lerp`, `with_alpha`",
         "`lerp` on a color needs arguments -- call it: `.lerp(...)`",
         "`r` is a number, not a function -- write `.r`",
-        "cannot assign `Color` to `f32`",
+        "cannot assign `Color` to `number`",
     ] {
         assert!(all.contains(expected), "missing {expected:?} in:\n{all}");
     }

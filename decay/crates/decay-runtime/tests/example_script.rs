@@ -63,7 +63,7 @@ fn environment() -> Environment {
     environment.add_function(
         "vec3",
         FunctionType {
-            params: vec![Type::F32, Type::F32, Type::F32],
+            params: vec![Type::Number, Type::Number, Type::Number],
             return_type: Type::Named("Vec3".to_owned()),
         },
     );

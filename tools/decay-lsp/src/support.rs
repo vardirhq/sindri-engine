@@ -433,7 +433,7 @@ mod tests {
         let hover = struct_hover("Card", fields);
         assert_eq!(
             hover.pointer("/contents/value").and_then(Value::as_str),
-            Some("```decay\nstruct Card { name: String, weight: f32 = HEAVY * 2.0 }\n```")
+            Some("```decay\nstruct Card { name: String, weight: number = HEAVY * 2.0 }\n```")
         );
     }
 
@@ -467,7 +467,7 @@ mod tests {
             return_type: Type::Unit,
         };
         let three = FunctionType {
-            params: vec![Type::F32, Type::Bool, Type::String],
+            params: vec![Type::Number, Type::Bool, Type::String],
             return_type: Type::Unit,
         };
         assert_eq!(function_snippet("tick", &zero), "tick()");

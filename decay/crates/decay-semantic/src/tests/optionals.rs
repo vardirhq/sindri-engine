@@ -55,12 +55,12 @@ fn every_misuse_of_an_optional_is_refused() {
     );
     let all = found.join("\n");
     for expected in [
-        "cannot assign `f32?` to `f32` -- it may be `null`: give a fallback with `?? value`",
-        "expected `f32`, found `f32?` -- it may be `null`",
+        "cannot assign `number?` to `number` -- it may be `null`: give a fallback with `?? value`",
+        "expected `number`, found `number?` -- it may be `null`",
         "this is `String?`, which may be `null`",
         "this is `List<String>?`, which may be `null`",
-        "this is `f32`, which is never `null`, so `??` never uses its fallback",
-        "the fallback is `String`, but the value is `f32`",
+        "this is `number`, which is never `null`, so `??` never uses its fallback",
+        "the fallback is `String`, but the value is `number`",
     ] {
         assert!(all.contains(expected), "missing {expected:?} in:\n{all}");
     }
@@ -68,7 +68,7 @@ fn every_misuse_of_an_optional_is_refused() {
     assert!(
         found
             .iter()
-            .filter(|message| message.contains("cannot assign `f32?` to `f32`"))
+            .filter(|message| message.contains("cannot assign `number?` to `number`"))
             .count()
             >= 2,
         "{all}"

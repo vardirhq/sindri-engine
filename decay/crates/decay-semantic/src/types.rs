@@ -49,11 +49,20 @@ pub const CHANNELS: [&str; 4] = ["r", "g", "b", "a"];
 pub const VEC2: &str = "Vec2";
 pub const VEC3: &str = "Vec3";
 
+/// How the one numeric type is spelled. Every Decay number is a 64-bit float;
+/// see `decay/LANGUAGE.md` and the numbers decision in `docs/decay-direction.md`.
+pub const NUMBER: &str = "number";
+
+/// The numeric type's first spelling, which still works. It named the engine's
+/// storage rather than the language's, so it is no longer what a tool shows.
+pub const OLD_NUMBER: &str = "f32";
+
 /// Every built-in type that takes no argument, by each spelling it is written
 /// with. `List<T>` (or `Array<T>`) is the one that takes an argument; every
 /// other name is a declared struct or enum, or a type the host names.
-pub const BUILT_IN_TYPES: [(&str, Type); 10] = [
-    ("f32", Type::F32),
+pub const BUILT_IN_TYPES: [(&str, Type); 11] = [
+    (NUMBER, Type::Number),
+    (OLD_NUMBER, Type::Number),
     ("bool", Type::Bool),
     ("String", Type::String),
     ("string", Type::String),
@@ -100,7 +109,9 @@ use crate::environment::ExternalSymbol;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Type {
-    F32,
+    /// The one numeric type, written `number` (or `f32`, its first spelling).
+    /// Stored as a 64-bit float; narrowed to `f32` only at the host boundary.
+    Number,
     Bool,
     String,
     Unit,
@@ -200,7 +211,7 @@ impl Type {
     #[must_use]
     pub fn is_key(&self) -> bool {
         match self {
-            Self::F32 | Self::Bool | Self::String | Self::Unknown => true,
+            Self::Number | Self::Bool | Self::String | Self::Unknown => true,
             Self::Named(name) => !name.starts_with("enum ") && !name.starts_with("event "),
             _ => false,
         }
@@ -248,7 +259,7 @@ impl Type {
     #[must_use]
     pub fn display_name(&self) -> Cow<'_, str> {
         match self {
-            Self::F32 => Cow::Borrowed("f32"),
+            Self::Number => Cow::Borrowed(NUMBER),
             Self::Bool => Cow::Borrowed("bool"),
             Self::String => Cow::Borrowed("String"),
             Self::Unit => Cow::Borrowed("unit"),

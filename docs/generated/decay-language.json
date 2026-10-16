@@ -9,11 +9,11 @@
       "params": [
         {
           "name": "x",
-          "type": "f32"
+          "type": "number"
         },
         {
           "name": "y",
-          "type": "f32"
+          "type": "number"
         }
       ],
       "returns": "Vec2"
@@ -23,15 +23,15 @@
       "params": [
         {
           "name": "x",
-          "type": "f32"
+          "type": "number"
         },
         {
           "name": "y",
-          "type": "f32"
+          "type": "number"
         },
         {
           "name": "z",
-          "type": "f32"
+          "type": "number"
         }
       ],
       "returns": "Vec3"
@@ -41,7 +41,7 @@
       "params": [
         {
           "name": "seconds",
-          "type": "f32"
+          "type": "number"
         }
       ],
       "returns": "Timer"
@@ -398,7 +398,7 @@
       "code": "decay-semantic/constant-type",
       "id": "constant-type",
       "phase": "decay-semantic",
-      "summary": "A constant of a type a constant cannot hold: anything but `f32`, `bool`, `String` or an enum."
+      "summary": "A constant of a type a constant cannot hold: anything but `number`, `bool`, `String` or an enum."
     }
   ],
   "generated_by": "cargo run -p sindri-capabilities -- --write",
@@ -445,7 +445,7 @@
       "params": [
         {
           "name": "dt",
-          "type": "f32"
+          "type": "number"
         }
       ],
       "returns": "unit"
@@ -463,17 +463,17 @@
         {
           "kind": "property",
           "name": "x",
-          "type": "f32"
+          "type": "number"
         },
         {
           "kind": "property",
           "name": "y",
-          "type": "f32"
+          "type": "number"
         },
         {
           "kind": "property",
           "name": "length",
-          "type": "f32"
+          "type": "number"
         },
         {
           "kind": "property",
@@ -486,7 +486,7 @@
           "params": [
             "Vec2"
           ],
-          "returns": "f32"
+          "returns": "number"
         },
         {
           "kind": "method",
@@ -494,14 +494,14 @@
           "params": [
             "Vec2"
           ],
-          "returns": "f32"
+          "returns": "number"
         },
         {
           "kind": "method",
           "name": "lerp",
           "params": [
             "Vec2",
-            "f32"
+            "number"
           ],
           "returns": "Vec2"
         }
@@ -513,22 +513,22 @@
         {
           "kind": "property",
           "name": "x",
-          "type": "f32"
+          "type": "number"
         },
         {
           "kind": "property",
           "name": "y",
-          "type": "f32"
+          "type": "number"
         },
         {
           "kind": "property",
           "name": "z",
-          "type": "f32"
+          "type": "number"
         },
         {
           "kind": "property",
           "name": "length",
-          "type": "f32"
+          "type": "number"
         },
         {
           "kind": "property",
@@ -541,7 +541,7 @@
           "params": [
             "Vec3"
           ],
-          "returns": "f32"
+          "returns": "number"
         },
         {
           "kind": "method",
@@ -549,14 +549,14 @@
           "params": [
             "Vec3"
           ],
-          "returns": "f32"
+          "returns": "number"
         },
         {
           "kind": "method",
           "name": "lerp",
           "params": [
             "Vec3",
-            "f32"
+            "number"
           ],
           "returns": "Vec3"
         }
@@ -568,29 +568,29 @@
         {
           "kind": "property",
           "name": "r",
-          "type": "f32"
+          "type": "number"
         },
         {
           "kind": "property",
           "name": "g",
-          "type": "f32"
+          "type": "number"
         },
         {
           "kind": "property",
           "name": "b",
-          "type": "f32"
+          "type": "number"
         },
         {
           "kind": "property",
           "name": "a",
-          "type": "f32"
+          "type": "number"
         },
         {
           "kind": "method",
           "name": "lerp",
           "params": [
             "Color",
-            "f32"
+            "number"
           ],
           "returns": "Color"
         },
@@ -598,7 +598,7 @@
           "kind": "method",
           "name": "with_alpha",
           "params": [
-            "f32"
+            "number"
           ],
           "returns": "Color"
         }
@@ -615,17 +615,17 @@
         {
           "kind": "property",
           "name": "left",
-          "type": "f32"
+          "type": "number"
         },
         {
           "kind": "property",
           "name": "duration",
-          "type": "f32"
+          "type": "number"
         },
         {
           "kind": "property",
           "name": "progress",
-          "type": "f32"
+          "type": "number"
         }
       ],
       "type": "Timer"
@@ -635,7 +635,7 @@
         {
           "kind": "property",
           "name": "length",
-          "type": "f32"
+          "type": "number"
         },
         {
           "kind": "property",
@@ -682,14 +682,14 @@
           "params": [
             "String"
           ],
-          "returns": "f32"
+          "returns": "number"
         },
         {
           "kind": "method",
           "name": "slice",
           "params": [
-            "f32",
-            "f32"
+            "number",
+            "number"
           ],
           "returns": "String"
         },
@@ -711,7 +711,7 @@
           "kind": "method",
           "name": "fixed",
           "params": [
-            "f32"
+            "number"
           ],
           "returns": "String"
         },
@@ -719,25 +719,25 @@
           "kind": "method",
           "name": "padded",
           "params": [
-            "f32"
+            "number"
           ],
           "returns": "String"
         }
       ],
-      "type": "f32"
+      "type": "number"
     },
     {
       "members": [
         {
           "kind": "property",
           "name": "length",
-          "type": "f32"
+          "type": "number"
         },
         {
           "alias_of": "length",
           "kind": "property",
           "name": "len",
-          "type": "f32"
+          "type": "number"
         },
         {
           "kind": "method",
@@ -757,7 +757,7 @@
           "kind": "method",
           "name": "insert",
           "params": [
-            "f32",
+            "number",
             "T"
           ],
           "returns": "unit"
@@ -766,7 +766,7 @@
           "kind": "method",
           "name": "remove_at",
           "params": [
-            "f32"
+            "number"
           ],
           "returns": "T"
         },
@@ -790,7 +790,7 @@
           "params": [
             "T"
           ],
-          "returns": "f32"
+          "returns": "number"
         }
       ],
       "type": "List<T>"
@@ -800,7 +800,7 @@
         {
           "kind": "property",
           "name": "length",
-          "type": "f32"
+          "type": "number"
         },
         {
           "kind": "method",
@@ -992,8 +992,9 @@
   "schema": "decay-language/1",
   "types": [
     {
-      "name": "f32",
+      "name": "number",
       "spellings": [
+        "number",
         "f32"
       ],
       "takes": []

@@ -28,9 +28,9 @@ The frontend already understands gameplay-shaped source such as:
 ```rust
 script PlayerController {
     @export
-    let speed: f32 = 6.0;
+    let speed: number = 6.0;
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         this.transform.position.x += speed * dt;
     }
 }
@@ -120,9 +120,9 @@ Persistent instances are important for gameplay. A script like:
 
 ```rust
 script Counter {
-    var count: f32 = 0.0;
+    var count: number = 0.0;
 
-    fn tick() -> f32 {
+    fn tick() -> number {
         count += 1.0;
         return count;
     }
@@ -183,5 +183,5 @@ rather than documenting forever.
 
 The syntax, type model, IR, and runtime are not stable. The point of this phase
 is to discover what deserves to become stable before user scripts make every
-early guess expensive. One decision worth making early rather than discovering:
-the only numeric type is spelled `f32`, but every value it holds is an `f64`.
+early guess expensive. The numeric type is one such decision, now made: `number`
+is a 64-bit float (first spelled `f32`), recorded in `docs/decay-direction.md`.

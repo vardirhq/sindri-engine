@@ -60,14 +60,14 @@ script PlayerController {
     // An authored property. `let` means the script never reassigns it;
     // `@export` means the host may set it before the script starts.
     @export
-    let speed: f32 = 6.0;
+    let speed: number = 6.0;
 
     @export
     let label: String = "player";
 
     // Instance state. `var` may be reassigned. It survives between calls and
     // is not written back to the scene.
-    var elapsed: f32 = 0.0;
+    var elapsed: number = 0.0;
     var airborne: bool = false;
 
     // Runs once, before the first `update`, after authored properties land.
@@ -76,11 +76,11 @@ script PlayerController {
     }
 
     // Runs once a frame. `dt` is the frame's delta in seconds.
-    fn update(dt: f32) {
+    fn update(dt: number) {
         elapsed += dt;
 
         // A local binding. `let` is fixed, `var` may be reassigned.
-        let offset: f32 = wave(elapsed) * speed;
+        let offset: number = wave(elapsed) * speed;
 
         // Host paths. Decay does not know what a transform is; the host does.
         this.transform.position.x = offset;
@@ -93,7 +93,7 @@ script PlayerController {
     }
 
     // Functions may call each other by bare name, and may recurse.
-    fn wave(seconds: f32) -> f32 {
+    fn wave(seconds: number) -> number {
         return sin(seconds);
     }
 }
@@ -234,7 +234,7 @@ handler is a diagnostic.
 
 | Written | Meaning |
 | --- | --- |
-| `f32` | The only numeric type |
+| `number` (or `f32`) | The only numeric type |
 | `bool` | `true` or `false` |
 | `String` or `string` | Text; see [Text](#text) |
 | `unit` or `void` | No value; the default return type |
@@ -246,10 +246,13 @@ handler is a diagnostic.
 There is no `i32`, no `u32`, no `f64`, and no integer type of any kind. `7` and
 `7.0` are the same value, and `7 / 2` is `3.5`.
 
-> **`f32` holds an `f64`.** The type is spelled `f32` because engine transforms
-> are `f32`, but every Decay value is stored as a 64-bit float and narrows only
-> when it crosses into the engine. This is a known inconsistency and an open
-> decision, recorded in `docs/decay-direction.md`.
+> **A `number` is a 64-bit float.** It narrows to 32 bits only when it crosses
+> into the engine, whose transforms and components are `f32`: a field written
+> into a transform and read back may differ in its last digits. `f32` was the
+> type's first spelling, from the engine's storage rather than the language's,
+> and still works; tools show `number`. Whole numbers are exact up to 2^53.
+> Why there is one numeric type, and what would change that, is the *Numbers*
+> decision in `docs/decay-direction.md`.
 
 A named type such as `Transform` is opaque to the language: Decay has no way to
 declare one. The **host** may describe it, and whether it has decides what
@@ -322,7 +325,7 @@ the world. `docs/scripting.md` records what Sindri makes of it.
 takes a type argument; `Array<T>` is its older spelling and means the same.
 
 ```rust
-var ids = [3.0, 1.0, 4.0];               // a List<f32>
+var ids = [3.0, 1.0, 4.0];               // a List<number>
 var held: List<Entity> = [];             // an empty one needs its type
 let enemies = World.with_tag(this.enemy); // the host hands one back
 
@@ -333,7 +336,7 @@ let first = ids.remove_at(0);            // out of a position
 ids[1] += 10.0;                          // an element, set in place
 ids.clear();
 
-let count: f32 = enemies.length;
+let count: number = enemies.length;
 if held.contains(enemies[0]) { }
 let where = ids.index_of(4.0);           // or -1
 for enemy in enemies { enemy.transform.position.y -= 1.0; }
@@ -382,8 +385,8 @@ numbers; walking it is bounded by the operation budget like any loop.
 that takes two type arguments.
 
 ```rust
-var prices = ["arc": 3.0, "nova": 5.0];  // a Map<String, f32>
-var kills: Map<Kind, f32> = [:];         // an empty one needs its type
+var prices = ["arc": 3.0, "nova": 5.0];  // a Map<String, number>
+var kills: Map<Kind, number> = [:];         // an empty one needs its type
 
 kills[Kind.Drone] = 1.0;                 // set, adding the key if it is new
 kills[Kind.Drone] += 2.0;                // read and set in place
@@ -422,20 +425,20 @@ name that may not be set. Any type but an entity, a struct or an enum may be
 written so; those three may be `null` already, and `Entity?` means `Entity`.
 
 ```rust
-fn first_over(values: List<f32>, limit: f32) -> f32? {
+fn first_over(values: List<number>, limit: number) -> number? {
     for value in values { if value > limit { return value; } }
     return null;
 }
 
-var best: f32? = null;
+var best: number? = null;
 let shown = best ?? 0.0;                 // the value, or the fallback
 let pick = first_over(scores, 10.0);
-if pick != null { total += pick; }       // `pick` is an `f32` in here
+if pick != null { total += pick; }       // `pick` is an `number` in here
 if pick == null { return; }              // and after this, to the block's end
 ```
 
-- **Never used as its type unchecked.** An `f32?` is not an `f32`: assigning
-  one to an `f32`, doing arithmetic on it, reading a member, indexing it or
+- **Never used as its type unchecked.** An `number?` is not an `number`: assigning
+  one to an `number`, doing arithmetic on it, reading a member, indexing it or
   calling one of its operations is a diagnostic that says it may be `null`.
 - **`value ?? fallback`** gives the value, or the fallback when it is `null`;
   the fallback is only worked out when it is needed. Its type is the value's
@@ -491,7 +494,7 @@ var velocity: Vec2 = Vec2(3.0, 4.0);
 let up = Vec3(0.0, 1.0, 0.0);
 
 velocity.x += 1.0;                 // components are x, y, and z for Vec3
-let speed: f32 = velocity.length;  // 5.0 before the line above
+let speed: number = velocity.length;  // 5.0 before the line above
 let heading = velocity.normalized; // same direction, one unit long
 ```
 
@@ -558,11 +561,11 @@ are all there is:
 
 | Written | Gives |
 | --- | --- |
-| `s.length` | `f32`, how many characters |
+| `s.length` | `number`, how many characters |
 | `s.uppercase`, `s.lowercase` | `String` |
 | `s.trimmed` | `String`, without spaces at either end |
 | `s.contains(part)`, `s.starts_with(part)`, `s.ends_with(part)` | `bool` |
-| `s.find(part)` | `f32`, where `part` first starts, or `-1` |
+| `s.find(part)` | `number`, where `part` first starts, or `-1` |
 | `s.slice(start, end)` | `String`, characters `start` up to, not including, `end` |
 | `s.replace(old, new)` | `String`, every `old` replaced |
 
@@ -602,7 +605,7 @@ A `Timer` is a countdown, and a value like a number:
 ```rust
 script Mine {
     var cooldown = Timer(0.0);          // already run out
-    fn update(dt: f32) {
+    fn update(dt: number) {
         if !cooldown.done { return; }
         cooldown = Timer(2.4);          // start again
     }
@@ -636,12 +639,12 @@ that file may call it by name. Marked `shared`, it belongs to the project
 instead, and every script in every file may call it.
 
 ```rust
-fn third(size: f32) -> f32 { return size / 3.0; }        // this file's
-shared fn half(size: f32) -> f32 { return size * 0.5; }  // everyone's
+fn third(size: number) -> number { return size / 3.0; }        // this file's
+shared fn half(size: number) -> number { return size * 0.5; }  // everyone's
 
 script Enemy {
-    let view_size: f32 = 11.0;
-    fn update(dt: f32) { let edge = half(this.view_size) + third(1.0); }
+    let view_size: number = 11.0;
+    fn update(dt: number) { let edge = half(this.view_size) + third(1.0); }
 }
 ```
 
@@ -674,19 +677,19 @@ the project.
 ```rust
 enum Phase { Lobby, Play }
 
-shared const VIEW_SIZE: f32 = 11.0;               // everyone's
-const HALF: f32 = VIEW_SIZE / 2.0;                // this file's
+shared const VIEW_SIZE: number = 11.0;               // everyone's
+const HALF: number = VIEW_SIZE / 2.0;                // this file's
 const FIRST: Phase = Phase.Lobby;
 const TITLE: String = "Orbital" + " Baked";
 const WIDE: bool = HALF > 4.0 && !false;
 
 script Enemy {
     var phase: Phase = FIRST;
-    fn update(dt: f32) { if this.transform.position.x > HALF { phase = Phase.Play; } }
+    fn update(dt: number) { if this.transform.position.x > HALF { phase = Phase.Play; } }
 }
 ```
 
-- **Always typed, always given a value.** A constant holds `f32`, `bool`,
+- **Always typed, always given a value.** A constant holds `number`, `bool`,
   `String` or an enum; a vector, a list, a struct or an entity is a
   diagnostic.
 - **Worked out when the file compiles.** Its value may use literals, the
@@ -732,9 +735,9 @@ only.
 ## Fields
 
 ```rust
-let speed: f32 = 6.0;      // fixed after initialization
-var elapsed: f32 = 0.0;    // reassignable
-@export let jump: f32 = 8.0;
+let speed: number = 6.0;      // fixed after initialization
+var elapsed: number = 0.0;    // reassignable
+@export let jump: number = 8.0;
 ```
 
 A field needs a type, an initializer, or both. With neither, it is a diagnostic.
@@ -746,8 +749,8 @@ Field initializers run in **declaration order**, and may read fields declared
 **above** them:
 
 ```rust
-let base: f32 = 2.0;
-let doubled: f32 = base * 2.0;   // fine
+let base: number = 2.0;
+let doubled: number = base * 2.0;   // fine
 ```
 
 Reading a field declared *below*, or reading the field itself, is a compile
@@ -772,8 +775,8 @@ A host that sets a field which is not `@export`, or does not exist, is refused.
 ## Functions
 
 ```rust
-fn name(a: f32, b: bool) -> f32 { return 0.0; }
-fn no_return(dt: f32) { }
+fn name(a: number, b: bool) -> number { return 0.0; }
+fn no_return(dt: number) { }
 ```
 
 An omitted return type is `unit`. An omitted parameter type is unknown, which is
@@ -785,8 +788,8 @@ unit.
 Functions in the same container call each other **by bare name**:
 
 ```rust
-fn helper() -> f32 { return 1.0; }
-fn go() -> f32 { return helper(); }     // correct
+fn helper() -> number { return 1.0; }
+fn go() -> number { return helper(); }     // correct
 ```
 
 > **`this.helper()` is not a method call.** There are no methods on a container.
@@ -825,14 +828,14 @@ An event is something that happens, declared once at the top level of a file,
 emitted by any script, and handled by any script:
 
 ```rust
-event GoalScored(team: f32);
+event GoalScored(team: number);
 
 script Ball {
-    fn update(dt: f32) { GoalScored.emit(1.0); }
+    fn update(dt: number) { GoalScored.emit(1.0); }
 }
 
 script Match {
-    var blue: f32 = 0.0;
+    var blue: number = 0.0;
     on GoalScored(team) { if team == 1.0 { blue += 1.0; } }
 }
 ```
@@ -865,18 +868,18 @@ A `state` declares values every script shares, reached by name:
 
 ```rust
 state Tuning {
-    let gravity: f32 = 30.0;
+    let gravity: number = 30.0;
     var paused = false;
 }
 
 script Body {
-    fn update(dt: f32) {
+    fn update(dt: number) {
         if !Tuning.paused { this.transform.position.y -= Tuning.gravity * dt; }
     }
 }
 ```
 
-- **Fields only.** Each holds an `f32`, a `bool` or an enum, and its
+- **Fields only.** Each holds an `number`, a `bool` or an enum, and its
   initializer is a literal — a number, a negated number, `true`, `false` or a
   variant such as `Phase.Lobby` — since it is set up before any script runs. A
   written type must match the literal.
@@ -907,7 +910,7 @@ enum Phase { Lobby, Countdown, Play }
 
 script Match {
     var phase = Phase.Lobby;
-    fn update(dt: f32) {
+    fn update(dt: number) {
         match this.phase {
             Phase.Lobby => { if ready() { this.phase = Phase.Countdown; } }
             Phase.Countdown | Phase.Play => { run(); }
@@ -967,16 +970,16 @@ A `struct` names a value made of typed fields, so values that belong together
 travel together:
 
 ```rust
-struct Offer { index: f32, weight: f32, name: String }
+struct Offer { index: number, weight: number, name: String }
 
 script Chooser {
     var offers: List<Offer> = [];
     var best = Offer(index: -1.0, weight: 0.0, name: "none");
 
-    fn add(index: f32) {
+    fn add(index: number) {
         offers.push(Offer(index: index, weight: 1.0, name: "module " + index));
     }
-    fn update(dt: f32) {
+    fn update(dt: number) {
         for offer in offers {
             if offer.weight > best.weight { best = offer; }
         }
@@ -991,12 +994,12 @@ script Chooser {
   except a field with a **default**, which may be left out and then holds it:
 
   ```rust
-  struct Offer { name: String, weight: f32 = BASE * 1.5, rarity: Rarity = Rarity.Common }
+  struct Offer { name: String, weight: number = BASE * 1.5, rarity: Rarity = Rarity.Common }
   let o = Offer(name: "a");                // weight 3, rarity Common, with BASE 2
   ```
 
   A default is worked out when the file compiles, as a constant is: it holds
-  `f32`, `bool`, `String` or an enum, and may use literals, operators,
+  `number`, `bool`, `String` or an enum, and may use literals, operators,
   variants and constants, but not another field. Naming the field still
   gives it whatever it is given.
 - **A struct is a value**, like a vector or a list: assigning one copies it,
@@ -1023,8 +1026,8 @@ Functions written in a struct, after its fields, are asked of one value:
 
 ```rust
 struct Offer {
-    index: f32,
-    weight: f32,
+    index: number,
+    weight: number,
     name: String,
 
     fn heavier(other: Offer) -> bool { return this.weight > other.weight; }
@@ -1057,8 +1060,8 @@ if offer.heavier(best) { best = offer.doubled(); }
 ## Statements
 
 ```rust
-let x: f32 = 1.0;      // binding, fixed
-var y: f32 = 2.0;      // binding, reassignable
+let x: number = 1.0;      // binding, fixed
+var y: number = 2.0;      // binding, reassignable
 y = 3.0;               // expression statement
 return y;              // return
 return;                // return unit
@@ -1079,7 +1082,7 @@ A binding needs a type, an initializer, or both.
 [Lists](#lists).
 
 ```rust
-var i: f32 = 0.0;
+var i: number = 0.0;
 while i < 10.0 {
     i += 1.0;
 
@@ -1126,22 +1129,22 @@ value or its fallback, and `best ?? 0.0 + 1.0` falls back to `1.0`.
 
 ### Operand rules
 
-- `+ - * / %` require `f32` on both sides and produce `f32`, or vectors as
+- `+ - * / %` require `number` on both sides and produce `number`, or vectors as
   [Vectors](#vectors) says. **`+` with text on either side joins**; see
   [Text](#text).
 - `%` is a **remainder**, not a floored modulo: its sign follows the left
   operand, so `-7.0 % 3.0` is `-1.0` rather than `2.0`.
-- `< <= > >=` require `f32` and produce `bool`.
+- `< <= > >=` require `number` and produce `bool`.
 - `== !=` require the two sides to be compatible types, and produce `bool`.
 - `&& ||` require `bool` on both sides and produce `bool`, and **short-circuit**:
   the right side is evaluated only when the left does not already decide the
   answer. So `held != null && World.exists(held)` guards the call to its right,
   and `ready || expensive()` does not ask when it is already ready.
-- unary `-` requires `f32`; unary `!` requires `bool`.
+- unary `-` requires `number`; unary `!` requires `bool`.
 
 ### Assignment
 
-`=` assigns. `+= -= *= /= %=` read, apply, and assign, and require `f32` on both
+`=` assigns. `+= -= *= /= %=` read, apply, and assign, and require `number` on both
 sides.
 
 Assignment targets are a name or a member path. Assigning to a `let` binding, to
@@ -1167,9 +1170,9 @@ leaves with it, and shadows rather than replaces an outer binding of the same
 name:
 
 ```rust
-var x: f32 = 1.0;
+var x: number = 1.0;
 if flag {
-    var x: f32 = 2.0;   // a different x
+    var x: number = 2.0;   // a different x
 }
 // x is still 1.0
 ```

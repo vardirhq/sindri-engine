@@ -31,7 +31,8 @@ pub use diagnostic::{
 pub use environment::{Environment, ExternalSymbol, StateField};
 pub use types::{
     BUILT_IN_TYPES, CHANNELS, COLOR, COMPONENTS, EMIT, FunctionType, HostType, LENGTH, LIST, MAP,
-    OLD_LENGTH, TIMER, Type, VEC2, VEC3, enum_type, event_type, method_function,
+    NUMBER, OLD_LENGTH, OLD_NUMBER, TIMER, Type, VEC2, VEC3, enum_type, event_type,
+    method_function,
 };
 
 #[must_use]

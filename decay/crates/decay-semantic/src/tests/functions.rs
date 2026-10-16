@@ -29,8 +29,8 @@ fn one_from_another_file_is_known_through_the_host() {
     environment.add_shared_function(
         "half",
         FunctionType {
-            params: vec![Type::F32],
-            return_type: Type::F32,
+            params: vec![Type::Number],
+            return_type: Type::Number,
         },
     );
     let found = messages(
@@ -41,13 +41,13 @@ fn one_from_another_file_is_known_through_the_host() {
     assert!(
         found
             .iter()
-            .any(|m| m.contains("cannot assign `f32` to `bool`")),
+            .any(|m| m.contains("cannot assign `number` to `bool`")),
         "{found:?}"
     );
     assert!(
         found
             .iter()
-            .any(|m| m.contains("cannot assign `String` to `f32`")),
+            .any(|m| m.contains("cannot assign `String` to `number`")),
         "{found:?}"
     );
 }
@@ -68,8 +68,8 @@ fn every_mistake_about_a_shared_function_is_refused() {
     environment.add_function(
         "sin",
         FunctionType {
-            params: vec![Type::F32],
-            return_type: Type::F32,
+            params: vec![Type::Number],
+            return_type: Type::Number,
         },
     );
     environment.add_ambiguous_function("twice");

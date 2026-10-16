@@ -48,13 +48,13 @@ fn every_mistake_about_text_is_refused() {
     );
     for expected in [
         "text is only joined, with `+`; found `String` - `String`",
-        "text is only joined, with `+`; found `String` * `f32`",
+        "text is only joined, with `+`; found `String` * `number`",
         "`Entity` has no spelling to join to text",
         "`String` has no member `size`; it has `length`",
         "`length` is a property, not a function -- write `.length`",
         "`contains` on `String` needs arguments -- call it: `.contains(...)`",
-        "cannot assign `String` to `f32`",
-        "cannot assign `f32` to `String`",
+        "cannot assign `String` to `number`",
+        "cannot assign `number` to `String`",
     ] {
         assert!(
             found.iter().any(|message| message.contains(expected)),
@@ -92,10 +92,10 @@ fn every_mistake_writing_a_number_is_refused() {
     .collect();
     let all = found.join("\n");
     for expected in [
-        "`fixed` on `f32` needs arguments",
-        "cannot assign `String` to `f32`",
+        "`fixed` on `number` needs arguments",
+        "cannot assign `String` to `number`",
         "expected 1 argument(s), found 2",
-        "`f32` has no member `round`; it has `fixed(...)`, `padded(...)`",
+        "`number` has no member `round`; it has `fixed(...)`, `padded(...)`",
         "`String` has no member `padded`",
     ] {
         assert!(all.contains(expected), "missing {expected:?} in:\n{all}");

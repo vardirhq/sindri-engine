@@ -9,7 +9,7 @@ pub(super) fn add_tween_surface(environment: &mut Environment) {
             .with_function(
                 *name,
                 FunctionType {
-                    params: vec![call.ty(), call.ty(), Type::F32, Type::String],
+                    params: vec![call.ty(), call.ty(), Type::Number, Type::String],
                     return_type: handle.clone(),
                 },
             )
@@ -35,8 +35,8 @@ pub(super) fn add_tween_surface(environment: &mut Environment) {
     }
     let handle = || Type::Named("TweenHandle".to_owned());
     for (name, second) in [
-        ("set_delay", Type::F32),
-        ("set_loops", Type::F32),
+        ("set_delay", Type::Number),
+        ("set_loops", Type::Number),
         ("set_yoyo", Type::Bool),
         ("after", handle()),
     ] {
@@ -49,7 +49,7 @@ pub(super) fn add_tween_surface(environment: &mut Environment) {
         );
     }
     for (name, ty) in [
-        ("progress", Type::F32),
+        ("progress", Type::Number),
         ("is_done", Type::Bool),
         ("is_paused", Type::Bool),
         ("is_cancelled", Type::Bool),

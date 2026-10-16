@@ -34,7 +34,7 @@ pub const LIFECYCLE: [LifecycleFunction; 2] = [
     },
     LifecycleFunction {
         name: UPDATE,
-        params: &[("dt", "f32")],
+        params: &[("dt", "number")],
         when: "every frame, with the seconds since the last one",
     },
 ];

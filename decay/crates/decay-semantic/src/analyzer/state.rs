@@ -115,11 +115,11 @@ impl Analyzer<'_, '_> {
             .initializer
             .as_ref()
             .and_then(|expr| match &expr.kind {
-                ExprKind::Number(_) => Some(Type::F32),
+                ExprKind::Number(_) => Some(Type::Number),
                 ExprKind::Unary {
                     op: UnaryOp::Negate,
                     expr: inner,
-                } if matches!(inner.kind, ExprKind::Number(_)) => Some(Type::F32),
+                } if matches!(inner.kind, ExprKind::Number(_)) => Some(Type::Number),
                 ExprKind::Bool(_) => Some(Type::Bool),
                 // A variant, `Phase.Lobby`: its enum is the field's type.
                 ExprKind::Member { .. } => self.variant_initializer_type(Some(expr)),
@@ -129,14 +129,14 @@ impl Analyzer<'_, '_> {
         let place = format!("{}.{}", state.name, field.name);
         let is_enum = |ty: &Type| matches!(ty, Type::Named(name) if self.enums.contains_key(name));
         if let Some(written) = &written
-            && !matches!(written, Type::F32 | Type::Bool)
+            && !matches!(written, Type::Number | Type::Bool)
             && !is_enum(written)
         {
             self.error(
                 Code::StateFieldType,
                 field.span,
                 format!(
-                    "`{place}` is a `{}`; a state holds `f32`, `bool` and enums for now",
+                    "`{place}` is a `{}`; a state holds `number`, `bool` and enums for now",
                     written.display_name()
                 ),
             );

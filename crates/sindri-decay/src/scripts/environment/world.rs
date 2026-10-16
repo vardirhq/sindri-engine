@@ -21,7 +21,7 @@ pub(super) fn add_world_surface(environment: &mut Environment) {
                         vec![Type::String]
                     }
                     WorldCall::Nearest => vec![Type::String, Type::Vec3],
-                    WorldCall::WithinRadius => vec![Type::String, Type::Vec3, Type::F32],
+                    WorldCall::WithinRadius => vec![Type::String, Type::Vec3, Type::Number],
                     WorldCall::Spawn => vec![Type::Named(PREFAB.to_owned())],
                     WorldCall::SpawnChild => vec![
                         Type::Named(PREFAB.to_owned()),
@@ -40,7 +40,7 @@ pub(super) fn add_world_surface(environment: &mut Environment) {
                         Type::Named(ENTITY.to_owned()),
                         Type::Named(ENTITY.to_owned()),
                     ],
-                    WorldCall::SetShapePoint => vec![Type::F32, Type::F32, Type::F32],
+                    WorldCall::SetShapePoint => vec![Type::Number, Type::Number, Type::Number],
                     // The value is `Unknown` because an exported field may be a
                     // number, a truth, or text, and Decay has no union. The
                     // host checks what it was given, and the instance refuses a
@@ -49,7 +49,7 @@ pub(super) fn add_world_surface(environment: &mut Environment) {
                         vec![Type::Named(ENTITY.to_owned()), Type::String, Type::Unknown]
                     }
                     WorldCall::PropertyNumber | WorldCall::SendSignal => {
-                        vec![Type::Named(ENTITY.to_owned()), Type::String, Type::F32]
+                        vec![Type::Named(ENTITY.to_owned()), Type::String, Type::Number]
                     }
                 },
                 return_type: match call {
@@ -67,7 +67,7 @@ pub(super) fn add_world_surface(environment: &mut Environment) {
                     | WorldCall::SendSignal
                     | WorldCall::SetActive => Type::Unit,
                     WorldCall::Exists | WorldCall::IsActive | WorldCall::HasTag => Type::Bool,
-                    WorldCall::PropertyNumber | WorldCall::TakeSignal => Type::F32,
+                    WorldCall::PropertyNumber | WorldCall::TakeSignal => Type::Number,
                 },
             },
         );

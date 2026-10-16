@@ -282,7 +282,7 @@ impl<'a, 'd> Analyzer<'a, 'd> {
                 2 => (
                     Code::MissingType,
                     format!(
-                        "`{}` takes a key type and a value type, as in `{}<String, f32>`",
+                        "`{}` takes a key type and a value type, as in `{}<String, number>`",
                         reference.name,
                         crate::types::MAP
                     ),

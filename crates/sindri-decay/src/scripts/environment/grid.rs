@@ -23,8 +23,8 @@ pub(crate) fn add_grid_surface(environment: &mut Environment) {
                     GridCall::Place => vec![
                         Type::Named(ENTITY.to_owned()),
                         Type::Named(ENTITY.to_owned()),
-                        Type::F32,
-                        Type::F32,
+                        Type::Number,
+                        Type::Number,
                     ],
                     GridCall::CanReach | GridCall::StepToward => vec![
                         Type::Named(ENTITY.to_owned()),
@@ -39,18 +39,18 @@ pub(crate) fn add_grid_surface(environment: &mut Environment) {
                     | GridCall::Surface
                     | GridCall::Height
                     | GridCall::Flooded => {
-                        vec![Type::Named(ENTITY.to_owned()), Type::F32, Type::F32]
+                        vec![Type::Named(ENTITY.to_owned()), Type::Number, Type::Number]
                     }
                     // A flat cell and a palette index, and a stacked cell and
                     // its level, happen to be the same four arguments.
                     GridCall::SetTile | GridCall::Block => vec![
                         Type::Named(ENTITY.to_owned()),
-                        Type::F32,
-                        Type::F32,
-                        Type::F32,
+                        Type::Number,
+                        Type::Number,
+                        Type::Number,
                     ],
                     GridCall::SetFlood => {
-                        vec![Type::Named(ENTITY.to_owned()), Type::F32, Type::String]
+                        vec![Type::Named(ENTITY.to_owned()), Type::Number, Type::String]
                     }
                     GridCall::Columns | GridCall::Rows => {
                         vec![Type::Named(ENTITY.to_owned())]
@@ -59,15 +59,15 @@ pub(crate) fn add_grid_surface(environment: &mut Environment) {
                     // to ask about.
                     GridCall::SetTerrain => vec![
                         Type::Named(ENTITY.to_owned()),
-                        Type::F32,
-                        Type::F32,
+                        Type::Number,
+                        Type::Number,
                         Type::String,
                     ],
                     GridCall::SetBlock | GridCall::Tagged => vec![
                         Type::Named(ENTITY.to_owned()),
-                        Type::F32,
-                        Type::F32,
-                        Type::F32,
+                        Type::Number,
+                        Type::Number,
+                        Type::Number,
                         Type::String,
                     ],
                 },
@@ -76,9 +76,9 @@ pub(crate) fn add_grid_surface(environment: &mut Environment) {
                     | GridCall::PositionY
                     | GridCall::Tile
                     | GridCall::Columns
-                    | GridCall::Rows => Type::F32,
+                    | GridCall::Rows => Type::Number,
                     GridCall::Block | GridCall::Surface => Type::String,
-                    GridCall::Height => Type::Optional(Box::new(Type::F32)),
+                    GridCall::Height => Type::Optional(Box::new(Type::Number)),
                     GridCall::Place
                     | GridCall::SetTile
                     | GridCall::SetTerrain

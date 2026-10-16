@@ -31,30 +31,30 @@ fn physics_params(call: PhysicsCall) -> Vec<Type> {
         PhysicsCall::Raycast | PhysicsCall::OverlapBox => vec![
             Type::Vec2,
             Type::Vec2,
-            Type::F32,
-            Type::F32,
+            Type::Number,
+            Type::Number,
             Type::Bool,
             entity(),
         ],
         PhysicsCall::OverlapCircle => {
-            vec![Type::Vec2, Type::F32, Type::F32, Type::Bool, entity()]
+            vec![Type::Vec2, Type::Number, Type::Number, Type::Bool, entity()]
         }
         PhysicsCall::CastCircle => vec![
             Type::Vec2,
-            Type::F32,
+            Type::Number,
             Type::Vec2,
-            Type::F32,
-            Type::F32,
+            Type::Number,
+            Type::Number,
             Type::Bool,
             entity(),
         ],
         PhysicsCall::CastBox => vec![
             Type::Vec2,
             Type::Vec2,
-            Type::F32,
+            Type::Number,
             Type::Vec2,
-            Type::F32,
-            Type::F32,
+            Type::Number,
+            Type::Number,
             Type::Bool,
             entity(),
         ],
@@ -65,7 +65,7 @@ fn physics_params(call: PhysicsCall) -> Vec<Type> {
         | PhysicsCall::DropThrough
         | PhysicsCall::ApplyTorque
         | PhysicsCall::SetAngularVelocity
-        | PhysicsCall::ApplyAngularImpulse => vec![entity(), Type::F32],
+        | PhysicsCall::ApplyAngularImpulse => vec![entity(), Type::Number],
         PhysicsCall::MoveCharacter => vec![entity(), Type::Vec2, Type::Bool],
         PhysicsCall::ApplyForce => vec![entity(), Type::Vec2],
         PhysicsCall::ApplyImpulseAtPoint => vec![entity(), Type::Vec2, Type::Vec2],
@@ -84,19 +84,25 @@ fn physics_params(call: PhysicsCall) -> Vec<Type> {
         | PhysicsCall::ApplyImpulse
         | PhysicsCall::SetHingeMotor
         | PhysicsCall::SetSliderMotor => {
-            vec![entity(), Type::F32, Type::F32]
+            vec![entity(), Type::Number, Type::Number]
         }
         PhysicsCall::SetHingePositionMotor | PhysicsCall::SetSliderPositionMotor => {
-            vec![entity(), Type::F32, Type::F32, Type::F32, Type::F32]
+            vec![
+                entity(),
+                Type::Number,
+                Type::Number,
+                Type::Number,
+                Type::Number,
+            ]
         }
-        PhysicsCall::SetSpring => vec![entity(), Type::F32, Type::F32, Type::F32],
+        PhysicsCall::SetSpring => vec![entity(), Type::Number, Type::Number, Type::Number],
         PhysicsCall::CreateSliderJoint
         | PhysicsCall::CreateSpringJoint
         | PhysicsCall::CreateHingeJoint => joint_creation_params(call),
-        PhysicsCall::CreateDistanceJoint => vec![entity(), entity(), entity(), Type::F32],
+        PhysicsCall::CreateDistanceJoint => vec![entity(), entity(), entity(), Type::Number],
         PhysicsCall::SetJointEndpoints => vec![entity(), entity(), entity()],
         PhysicsCall::ConnectDistance => {
-            vec![entity(), entity(), Type::F32]
+            vec![entity(), entity(), Type::Number]
         }
         // An event query is about the entity the script is on, so
         // it takes nothing: an event is about a pair, and the pair
@@ -117,8 +123,8 @@ fn joint_creation_params(call: PhysicsCall) -> Vec<Type> {
             Type::Vec2,
             Type::Vec2,
             Type::Bool,
-            Type::F32,
-            Type::F32,
+            Type::Number,
+            Type::Number,
         ],
         PhysicsCall::CreateSpringJoint => vec![
             entity(),
@@ -126,9 +132,9 @@ fn joint_creation_params(call: PhysicsCall) -> Vec<Type> {
             entity(),
             Type::Vec2,
             Type::Vec2,
-            Type::F32,
-            Type::F32,
-            Type::F32,
+            Type::Number,
+            Type::Number,
+            Type::Number,
         ],
         PhysicsCall::CreateHingeJoint => {
             vec![entity(), entity(), entity(), Type::Vec2, Type::Vec2]
@@ -152,7 +158,7 @@ fn physics_return_type(call: PhysicsCall) -> Type {
         | PhysicsCall::VelocityY
         | PhysicsCall::Layer
         | PhysicsCall::Mask
-        | PhysicsCall::AngularVelocity => Type::F32,
+        | PhysicsCall::AngularVelocity => Type::Number,
         PhysicsCall::ContinuousCollision | PhysicsCall::JointEnabled => Type::Bool,
         PhysicsCall::MoveCharacter
         | PhysicsCall::SetVelocity
@@ -189,7 +195,7 @@ fn add_snapshots(environment: &mut Environment) {
         (HIT_FIELDS[0].to_owned(), entity()),
         (HIT_FIELDS[1].to_owned(), Type::Vec2),
         (HIT_FIELDS[2].to_owned(), Type::Vec2),
-        (HIT_FIELDS[3].to_owned(), Type::F32),
+        (HIT_FIELDS[3].to_owned(), Type::Number),
     ];
     environment.add_struct(RAY_HIT, fields.clone());
     let mut hit = HostType::new();
@@ -201,8 +207,8 @@ fn add_snapshots(environment: &mut Environment) {
         (CONTACT_FIELDS[0].to_owned(), entity()),
         (CONTACT_FIELDS[1].to_owned(), Type::Vec2),
         (CONTACT_FIELDS[2].to_owned(), Type::Vec2),
-        (CONTACT_FIELDS[3].to_owned(), Type::F32),
-        (CONTACT_FIELDS[4].to_owned(), Type::F32),
+        (CONTACT_FIELDS[3].to_owned(), Type::Number),
+        (CONTACT_FIELDS[4].to_owned(), Type::Number),
         (CONTACT_FIELDS[5].to_owned(), Type::Vec2),
     ];
     environment.add_struct(CONTACT, fields.clone());

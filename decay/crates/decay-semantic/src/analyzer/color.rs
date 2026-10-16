@@ -54,7 +54,7 @@ impl Analyzer<'_, '_> {
         }
         for argument in args {
             let actual = self.expr_type(argument);
-            self.require_type(&actual, &Type::F32, argument.span);
+            self.require_type(&actual, &Type::Number, argument.span);
         }
         // Built as four channels; the lowering adds an opaque alpha to three.
         self.value_members.insert(span, ValueMember::Construct(4));
@@ -68,7 +68,7 @@ impl Analyzer<'_, '_> {
                 self.value_members
                     .insert(span, ValueMember::Component(index));
             }
-            return Type::F32;
+            return Type::Number;
         }
         if ColorOp::named(field).is_some() {
             self.error(

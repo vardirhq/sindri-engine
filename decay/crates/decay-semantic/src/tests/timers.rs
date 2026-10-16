@@ -46,11 +46,11 @@ fn every_mistake_about_a_timer_is_refused() {
     );
     for expected in [
         "`Timer` takes the seconds it runs for, found 0 argument(s)",
-        "expected `f32`, found `String`",
+        "expected `number`, found `String`",
         "a timer's `left` cannot be set",
         "`done` is a property, not a function",
         "`Timer` has no member `remaining`; it has `done`, `left`, `duration`, `progress`",
-        "cannot assign `bool` to `f32`",
+        "cannot assign `bool` to `number`",
     ] {
         assert!(
             found.iter().any(|message| message.contains(expected)),
@@ -63,7 +63,7 @@ fn every_mistake_about_a_timer_is_refused() {
 #[test]
 fn a_binding_named_timer_shadows_the_constructor() {
     let mut environment = Environment::new();
-    environment.add_value("Other", Type::F32);
+    environment.add_value("Other", Type::Number);
     let found = crate::analyze_with_environment(
         "script T { fn f(Timer: f32) -> f32 { return Timer; } }",
         &environment,

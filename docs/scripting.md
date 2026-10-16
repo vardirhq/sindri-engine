@@ -108,11 +108,11 @@ to Decay; typed reads are made through `Profiles`:
 | --- | --- |
 | `Profiles.name(profile)` | `String` |
 | `Profiles.kind(profile)` | `String` |
-| `Profiles.number(profile, key, fallback)` | `f32` |
+| `Profiles.number(profile, key, fallback)` | `number` |
 | `Profiles.text(profile, key, fallback)` | `String` |
 | `Profiles.flag(profile, key, fallback)` | `bool` |
-| `Profiles.count(profile, collection)` | `f32` |
-| `Profiles.number_at(profile, collection, index, key, fallback)` | `f32` |
+| `Profiles.count(profile, collection)` | `number` |
+| `Profiles.number_at(profile, collection, index, key, fallback)` | `number` |
 | `Profiles.text_at(profile, collection, index, key, fallback)` | `String` |
 | `Profiles.flag_at(profile, collection, index, key, fallback)` | `bool` |
 
@@ -132,17 +132,17 @@ interprets, and `WorldHost` is the only place that gives them a meaning.
 | Path | Type | Read | Write |
 | --- | --- | --- | --- |
 | `this.transform.{position,world_position,scale}` | `Vec3` | yes | yes |
-| `this.transform.position.{x,y,z}` | `f32` | yes | yes |
-| `this.transform.world_position.{x,y,z}` | `f32` | yes | yes |
-| `this.transform.scale.{x,y,z}` | `f32` | yes | yes |
+| `this.transform.position.{x,y,z}` | `number` | yes | yes |
+| `this.transform.world_position.{x,y,z}` | `number` | yes | yes |
+| `this.transform.scale.{x,y,z}` | `number` | yes | yes |
 | `this.transform.rotation` | `Quat` | yes | whole value |
-| `this.transform.rotation.{x,y,z,w}` | `f32` | yes | no |
-| `this.transform.rotation_z` | `f32` | yes | yes |
-| `this.transform.{yaw,pitch,roll}` | `f32` | yes | yes |
+| `this.transform.rotation.{x,y,z,w}` | `number` | yes | no |
+| `this.transform.rotation_z` | `number` | yes | yes |
+| `this.transform.{yaw,pitch,roll}` | `number` | yes | yes |
 | `this.transform.{forward,right,up}` | `Vec3` | yes | no |
-| `this.transform.forward.{x,y,z}` | `f32` | yes | no |
-| `this.transform.right.{x,y,z}` | `f32` | yes | no |
-| `this.transform.up.{x,y,z}` | `f32` | yes | no |
+| `this.transform.forward.{x,y,z}` | `number` | yes | no |
+| `this.transform.right.{x,y,z}` | `number` | yes | no |
+| `this.transform.up.{x,y,z}` | `number` | yes | no |
 | `this.transform.look_at(target)` | unit | call | — |
 | `this.transform.rotate_around(pivot, axis, radians)` | unit | call | — |
 
@@ -202,11 +202,11 @@ quaternions use the identity rotation for direction reads.
 `transform.look_at(target: Vec3)` faces a world target with Y up and zero world
 roll, preserving position and scale. At a vertical target yaw is zero. A target
 at the entity's position is an error. `transform.rotate_around(pivot: Vec3,
-axis: Vec3, radians: f32)` rotates both position and orientation around a world
+axis: Vec3, radians: number)` rotates both position and orientation around a world
 pivot and axis; the nonzero axis is normalized. Both work through `this`,
 `this.entity`, and another entity or script reference. Results are converted
 back to the parent's local transform. Orbiting under a parent with a zero scale
-axis is refused. Inputs must be finite and fit engine `f32`; invalid input,
+axis is refused. Inputs must be finite and fit the engine's `f32` range; invalid input,
 non-finite output, or an orbit that changes a Z-locked layer leaves the transform
 unchanged. These calls change the world immediately, with physics following
 its normal synchronization boundary.
@@ -240,9 +240,9 @@ Screen UI is placed by the overlay's layout rather than this, and its
 | Path | Type | Read | Write |
 | --- | --- | --- | --- |
 | `this.sprite.{tint,color_multiply,color_offset}` | `Color` | yes | yes |
-| `this.sprite.tint.{r,g,b,a}` | `f32` | yes | yes |
-| `this.sprite.color_multiply.{r,g,b,a}` | `f32` | yes | yes |
-| `this.sprite.color_offset.{r,g,b,a}` | `f32` | yes | yes |
+| `this.sprite.tint.{r,g,b,a}` | `number` | yes | yes |
+| `this.sprite.color_multiply.{r,g,b,a}` | `number` | yes | yes |
+| `this.sprite.color_offset.{r,g,b,a}` | `number` | yes | yes |
 
 **A colour is reached whole or one channel at a time**, as a vector is:
 `this.sprite.tint = Color("#ff8800")` writes all four channels, `let was =
@@ -275,35 +275,35 @@ so changing them every frame never splits a draw. Author them as decimals in a
 hand-written scene (`0.0`, not `0`): a write keeps the number kind the scene
 stored, and an integer rounds.
 
-| `this.sprite.layer` | `f32` | yes | yes |
-| `this.sprite.shader_params.{x,y,z,w}` | `f32` | yes | yes |
-| `this.environment.ambient_intensity` | `f32` | yes | yes |
+| `this.sprite.layer` | `number` | yes | yes |
+| `this.sprite.shader_params.{x,y,z,w}` | `number` | yes | yes |
+| `this.environment.ambient_intensity` | `number` | yes | yes |
 | `this.environment.{ambient_color,background}` | `Color` | yes | yes |
-| `this.environment.ambient_color.{r,g,b,a}` | `f32` | yes | yes |
-| `this.environment.background.{r,g,b,a}` | `f32` | yes | yes |
+| `this.environment.ambient_color.{r,g,b,a}` | `number` | yes | yes |
+| `this.environment.background.{r,g,b,a}` | `number` | yes | yes |
 | `this.light.color` | `Color` | yes | yes |
-| `this.light.color.{r,g,b,a}` | `f32` | yes | yes |
-| `this.light.{intensity,range,inner_angle,outer_angle}` | `f32` | yes | yes |
+| `this.light.color.{r,g,b,a}` | `number` | yes | yes |
+| `this.light.{intensity,range,inner_angle,outer_angle}` | `number` | yes | yes |
 | `this.light.enabled` | `bool` | yes | yes |
 | `this.light2d.color` | `Color` | yes | yes |
-| `this.light2d.color.{r,g,b,a}` | `f32` | yes | yes |
-| `this.light2d.{intensity,radius,falloff,height}` | `f32` | yes | yes |
+| `this.light2d.color.{r,g,b,a}` | `number` | yes | yes |
+| `this.light2d.{intensity,radius,falloff,height}` | `number` | yes | yes |
 | `this.world_text.color` | `Color` | yes | yes |
-| `this.world_text.color.{r,g,b,a}` | `f32` | yes | yes |
-| `this.world_text.{font_size,visible,layer}` | `f32` | yes | yes |
+| `this.world_text.color.{r,g,b,a}` | `number` | yes | yes |
+| `this.world_text.{font_size,visible,layer}` | `number` | yes | yes |
 | `this.ui_image.tint` | `Color` | yes | yes |
-| `this.ui_image.tint.{r,g,b,a}` | `f32` | yes | yes |
-| `this.ui_image.layer` | `f32` | yes | yes |
+| `this.ui_image.tint.{r,g,b,a}` | `number` | yes | yes |
+| `this.ui_image.layer` | `number` | yes | yes |
 | `this.shape.{fill,stroke}` | `Color` | yes | yes |
-| `this.shape.fill.{r,g,b,a}` | `f32` | yes | yes |
-| `this.shape.stroke.{r,g,b,a}` | `f32` | yes | yes |
-| `this.shape.count` | `f32` | yes | yes |
-| `this.shape.stroke_width` | `f32` | yes | yes |
-| `this.shape.sweep_start` | `f32` | yes | yes |
-| `this.shape.sweep_turns` | `f32` | yes | yes |
-| `this.shape.dashes` | `f32` | yes | yes |
-| `this.shape.dash_duty` | `f32` | yes | yes |
-| `this.shape.layer` | `f32` | yes | yes |
+| `this.shape.fill.{r,g,b,a}` | `number` | yes | yes |
+| `this.shape.stroke.{r,g,b,a}` | `number` | yes | yes |
+| `this.shape.count` | `number` | yes | yes |
+| `this.shape.stroke_width` | `number` | yes | yes |
+| `this.shape.sweep_start` | `number` | yes | yes |
+| `this.shape.sweep_turns` | `number` | yes | yes |
+| `this.shape.dashes` | `number` | yes | yes |
+| `this.shape.dash_duty` | `number` | yes | yes |
+| `this.shape.layer` | `number` | yes | yes |
 
 `sprite` is the thing in the world and `ui_image` is the thing on the viewport:
 two components, so two paths. A script says which it means rather than writing
@@ -364,52 +364,52 @@ table above lists, reaching the same numbers.
 | Path | Type | Read | Write |
 | --- | --- | --- | --- |
 | `this.entity.transform.{position,world_position,scale}` | `Vec3` | yes | yes |
-| `this.entity.transform.position.{x,y,z}` | `f32` | yes | yes |
-| `this.entity.transform.world_position.{x,y,z}` | `f32` | yes | yes |
-| `this.entity.transform.scale.{x,y,z}` | `f32` | yes | yes |
+| `this.entity.transform.position.{x,y,z}` | `number` | yes | yes |
+| `this.entity.transform.world_position.{x,y,z}` | `number` | yes | yes |
+| `this.entity.transform.scale.{x,y,z}` | `number` | yes | yes |
 | `this.entity.transform.rotation` | `Quat` | yes | whole value |
-| `this.entity.transform.rotation.{x,y,z,w}` | `f32` | yes | no |
-| `this.entity.transform.rotation_z` | `f32` | yes | yes |
-| `this.entity.transform.{yaw,pitch,roll}` | `f32` | yes | yes |
+| `this.entity.transform.rotation.{x,y,z,w}` | `number` | yes | no |
+| `this.entity.transform.rotation_z` | `number` | yes | yes |
+| `this.entity.transform.{yaw,pitch,roll}` | `number` | yes | yes |
 | `this.entity.transform.{forward,right,up}` | `Vec3` | yes | no |
-| `this.entity.transform.forward.{x,y,z}` | `f32` | yes | no |
-| `this.entity.transform.right.{x,y,z}` | `f32` | yes | no |
-| `this.entity.transform.up.{x,y,z}` | `f32` | yes | no |
+| `this.entity.transform.forward.{x,y,z}` | `number` | yes | no |
+| `this.entity.transform.right.{x,y,z}` | `number` | yes | no |
+| `this.entity.transform.up.{x,y,z}` | `number` | yes | no |
 | `this.entity.transform.look_at(target)` | unit | call | — |
 | `this.entity.transform.rotate_around(pivot, axis, radians)` | unit | call | — |
 | `this.entity.sprite.{tint,color_multiply,color_offset}` | `Color` | yes | yes |
-| `this.entity.sprite.tint.{r,g,b,a}` | `f32` | yes | yes |
-| `this.entity.sprite.color_multiply.{r,g,b,a}` | `f32` | yes | yes |
-| `this.entity.sprite.color_offset.{r,g,b,a}` | `f32` | yes | yes |
-| `this.entity.sprite.layer` | `f32` | yes | yes |
-| `this.entity.sprite.shader_params.{x,y,z,w}` | `f32` | yes | yes |
-| `this.entity.environment.ambient_intensity` | `f32` | yes | yes |
+| `this.entity.sprite.tint.{r,g,b,a}` | `number` | yes | yes |
+| `this.entity.sprite.color_multiply.{r,g,b,a}` | `number` | yes | yes |
+| `this.entity.sprite.color_offset.{r,g,b,a}` | `number` | yes | yes |
+| `this.entity.sprite.layer` | `number` | yes | yes |
+| `this.entity.sprite.shader_params.{x,y,z,w}` | `number` | yes | yes |
+| `this.entity.environment.ambient_intensity` | `number` | yes | yes |
 | `this.entity.environment.{ambient_color,background}` | `Color` | yes | yes |
-| `this.entity.environment.ambient_color.{r,g,b,a}` | `f32` | yes | yes |
-| `this.entity.environment.background.{r,g,b,a}` | `f32` | yes | yes |
+| `this.entity.environment.ambient_color.{r,g,b,a}` | `number` | yes | yes |
+| `this.entity.environment.background.{r,g,b,a}` | `number` | yes | yes |
 | `this.entity.light.color` | `Color` | yes | yes |
-| `this.entity.light.color.{r,g,b,a}` | `f32` | yes | yes |
-| `this.entity.light.{intensity,range,inner_angle,outer_angle}` | `f32` | yes | yes |
+| `this.entity.light.color.{r,g,b,a}` | `number` | yes | yes |
+| `this.entity.light.{intensity,range,inner_angle,outer_angle}` | `number` | yes | yes |
 | `this.entity.light.enabled` | `bool` | yes | yes |
 | `this.entity.light2d.color` | `Color` | yes | yes |
-| `this.entity.light2d.color.{r,g,b,a}` | `f32` | yes | yes |
-| `this.entity.light2d.{intensity,radius,falloff,height}` | `f32` | yes | yes |
+| `this.entity.light2d.color.{r,g,b,a}` | `number` | yes | yes |
+| `this.entity.light2d.{intensity,radius,falloff,height}` | `number` | yes | yes |
 | `this.entity.ui_image.tint` | `Color` | yes | yes |
-| `this.entity.ui_image.tint.{r,g,b,a}` | `f32` | yes | yes |
-| `this.entity.ui_image.layer` | `f32` | yes | yes |
+| `this.entity.ui_image.tint.{r,g,b,a}` | `number` | yes | yes |
+| `this.entity.ui_image.layer` | `number` | yes | yes |
 | `this.entity.world_text.color` | `Color` | yes | yes |
-| `this.entity.world_text.color.{r,g,b,a}` | `f32` | yes | yes |
-| `this.entity.world_text.{font_size,visible,layer}` | `f32` | yes | yes |
+| `this.entity.world_text.color.{r,g,b,a}` | `number` | yes | yes |
+| `this.entity.world_text.{font_size,visible,layer}` | `number` | yes | yes |
 | `this.entity.shape.{fill,stroke}` | `Color` | yes | yes |
-| `this.entity.shape.fill.{r,g,b,a}` | `f32` | yes | yes |
-| `this.entity.shape.stroke.{r,g,b,a}` | `f32` | yes | yes |
-| `this.entity.shape.count` | `f32` | yes | yes |
-| `this.entity.shape.stroke_width` | `f32` | yes | yes |
-| `this.entity.shape.sweep_start` | `f32` | yes | yes |
-| `this.entity.shape.sweep_turns` | `f32` | yes | yes |
-| `this.entity.shape.dashes` | `f32` | yes | yes |
-| `this.entity.shape.dash_duty` | `f32` | yes | yes |
-| `this.entity.shape.layer` | `f32` | yes | yes |
+| `this.entity.shape.fill.{r,g,b,a}` | `number` | yes | yes |
+| `this.entity.shape.stroke.{r,g,b,a}` | `number` | yes | yes |
+| `this.entity.shape.count` | `number` | yes | yes |
+| `this.entity.shape.stroke_width` | `number` | yes | yes |
+| `this.entity.shape.sweep_start` | `number` | yes | yes |
+| `this.entity.shape.sweep_turns` | `number` | yes | yes |
+| `this.entity.shape.dashes` | `number` | yes | yes |
+| `this.entity.shape.dash_duty` | `number` | yes | yes |
+| `this.entity.shape.layer` | `number` | yes | yes |
 
 | Call | Returns |
 | --- | --- |
@@ -433,9 +433,9 @@ question from a lookup of one thing somebody already knows the name of.
 | `World.set_parent(entity, parent)` | nothing |
 | `World.set_shape_point(index, x, y)` | nothing |
 | `World.set_property(entity, name, value)` | nothing |
-| `World.property_number(entity, name, fallback)` | `f32` |
+| `World.property_number(entity, name, fallback)` | `number` |
 | `World.send_signal(entity, name, value)` | nothing |
-| `World.take_signal(name)` | `f32` |
+| `World.take_signal(name)` | `number` |
 | `World.with_tag(tag)` | `List<Entity>` |
 | `World.nearest(tag, position)` | `Entity`, or `null` |
 | `World.within_radius(tag, position, radius)` | `List<Entity>` |
@@ -494,9 +494,9 @@ authored it into an `@export` field.
 ```rust
 script Spawner {
     @export let bullet: Prefab;
-    @export let speed: f32 = 400.0;
+    @export let speed: number = 400.0;
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         let shot = World.spawn(this.bullet);
         shot.transform.position.x = this.transform.position.x;
         World.set_property(shot, "speed", this.speed);
@@ -593,7 +593,7 @@ once per collision would turn a dense combat frame into a quadratic walk.
 script Sweep {
     @export let enemy: String = "enemy";
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         for enemy in World.with_tag(this.enemy) {
             enemy.transform.position.y -= 40.0 * dt;
         }
@@ -638,7 +638,7 @@ the script rather than the pattern. Ask once and hold the answer for the frame.
 
 `World.nearest(tag: String, position: Vec3) -> Entity` returns the closest
 active entity with the authored tag, or `null` if none has a usable spatial
-transform. `World.within_radius(tag: String, position: Vec3, radius: f32) -> List<Entity>`
+transform. `World.within_radius(tag: String, position: Vec3, radius: number) -> List<Entity>`
 returns a snapshot of every such entity at distance **less than or equal to**
 `radius`, or an empty list when none matches.
 
@@ -690,16 +690,16 @@ follow-up work.
 
 | Call | Returns |
 | --- | --- |
-| `Effects.burst(entity)` | `f32` — how many flecks were made |
-| `Effects.burst_at(entity, x, y)` | `f32` |
-| `Effects.live()` | `f32` |
-| `Effects.play(entity)` | `f32` — starts the entity's `sindri.particles` emitter |
-| `Effects.stop(entity)` | `f32` — stops it; particles already out live on |
-| `Effects.emit(entity, count)` | `f32` — throws that many of its particles at once |
+| `Effects.burst(entity)` | `number` — how many flecks were made |
+| `Effects.burst_at(entity, x, y)` | `number` |
+| `Effects.live()` | `number` |
+| `Effects.play(entity)` | `number` — starts the entity's `sindri.particles` emitter |
+| `Effects.stop(entity)` | `number` — stops it; particles already out live on |
+| `Effects.emit(entity, count)` | `number` — throws that many of its particles at once |
 
 ```rust
 script Bullet {
-    fn update(dt: f32) {
+    fn update(dt: number) {
         for hit in Physics.sensor_entered() {
             Effects.burst(this.entity);
             World.despawn(hit);
@@ -756,7 +756,7 @@ will ever see.
 
 | Call | Returns |
 | --- | --- |
-| `Save.number(key, fallback)` | `f32` |
+| `Save.number(key, fallback)` | `number` |
 | `Save.set_number(key, value)` | nothing |
 | `Save.flag(key, fallback)` | `bool` |
 | `Save.set_flag(key, value)` | nothing |
@@ -772,7 +772,7 @@ script Progress {
         this.best = Save.number("best_wave", 0.0);
     }
 
-    fn on_run_ended(wave: f32) {
+    fn on_run_ended(wave: number) {
         if wave > this.best {
             Save.set_number("best_wave", wave);
         }
@@ -834,15 +834,15 @@ text and the surface does not expose it until something needs it.
 
 | Call | Returns |
 | --- | --- |
-| `Random.value()` | `f32` in `[0, 1)` |
-| `Random.range(min, max)` | `f32` in `[min, max)` |
-| `Random.int(min, max)` | a whole `f32`, both ends included |
+| `Random.value()` | `number` in `[0, 1)` |
+| `Random.range(min, max)` | `number` in `[min, max)` |
+| `Random.int(min, max)` | a whole `number`, both ends included |
 | `Random.pick(group)` | `Entity` |
 | `Random.seed(value)` | nothing |
 
 ```rust
 script Spawner {
-    fn update(dt: f32) {
+    fn update(dt: number) {
         if this.due(dt) {
             let enemy = World.spawn(this.enemy);
             enemy.transform.position.x = Random.range(-8.0, 8.0);
@@ -910,20 +910,20 @@ disqualifying for anything else.
 | `Ui.is_hovered(entity)` | `bool` |
 | `Ui.is_pressed(entity)` | `bool` |
 | `Ui.is_held(entity)` | `bool` |
-| `Ui.slider_value(entity)` | `f32` |
+| `Ui.slider_value(entity)` | `number` |
 | `Ui.slider_changed(entity)` | `bool` |
 | `Ui.is_checked(entity)` | `bool` |
 | `Ui.set_checked(entity, checked)` | nothing |
 | `Ui.input_text(entity)` | `String` |
 | `Ui.set_input_text(entity, "words")` | nothing |
-| `Ui.scroll_offset(entity)` | `f32` |
+| `Ui.scroll_offset(entity)` | `number` |
 | `Ui.set_scroll_offset(entity, offset)` | nothing |
-| `Ui.selected(entity)` | `f32` |
+| `Ui.selected(entity)` | `number` |
 | `Ui.set_selected(entity, index)` | nothing |
 | `Ui.is_open(entity)` | `bool` |
-| `Ui.caret(entity)` | `f32` |
-| `Ui.selection_start(entity)` | `f32` |
-| `Ui.selection_end(entity)` | `f32` |
+| `Ui.caret(entity)` | `number` |
+| `Ui.selection_start(entity)` | `number` |
+| `Ui.selection_end(entity)` | `number` |
 | `Ui.changed(entity)` | `bool` |
 | `Ui.submitted(entity)` | `bool` |
 | `Ui.is_focused(entity)` | `bool` |
@@ -1023,7 +1023,7 @@ entity is a hit area with no art.
 
 ```rust
 script StartButton {
-    fn update(dt: f32) {
+    fn update(dt: number) {
         if Ui.is_pressed(this.entity) {
             World.set_property(this.menu, "showing", false);
             World.set_property(this.game, "running", true);
@@ -1061,7 +1061,7 @@ from "gameplay scripts" while a menu was up would have to know which scripts
 those are, and a rule that guesses will guess wrong. So a gameplay script asks:
 
 ```rust
-fn update(dt: f32) {
+fn update(dt: number) {
     if Pointer.just_pressed("Left") && !Pointer.over_ui {
         this.fire();
     }
@@ -1235,15 +1235,15 @@ independently of visual transform scale.
 | `Physics.character_motion(entity)` | `CharacterMotion2d?` |
 | `Physics.apply_force(entity, force: Vec2)` | nothing |
 | `Physics.apply_torque(entity, torque)` | nothing |
-| `Physics.angular_velocity(entity)` | `f32` |
+| `Physics.angular_velocity(entity)` | `number` |
 | `Physics.set_angular_velocity(entity, velocity)` | nothing |
 | `Physics.apply_angular_impulse(entity, impulse)` | nothing |
 | `Physics.apply_impulse_at_point(entity, impulse: Vec2, point: Vec2)` | nothing |
 | `Physics.drop_through(entity, seconds)` | nothing |
 | `Physics.continuous_collision(entity)` | `bool` |
 | `Physics.set_continuous_collision(entity, enabled)` | nothing |
-| `Physics.velocity_x(entity)` | `f32` |
-| `Physics.velocity_y(entity)` | `f32` |
+| `Physics.velocity_x(entity)` | `number` |
+| `Physics.velocity_y(entity)` | `number` |
 | `Physics.set_velocity(entity, x, y)` | nothing |
 | `Physics.apply_impulse(entity, x, y)` | nothing |
 | `Physics.connect_distance(first, second, max_distance)` | nothing |
@@ -1266,8 +1266,8 @@ independently of visual transform scale.
 | `Physics.cast_box(origin, half_size, rotation, direction, max_distance, mask, include_sensors, exclude)` | `RayHit2d` or `null` |
 | `Physics.overlap_circle(center, radius, mask, include_sensors, exclude)` | `[Entity]` |
 | `Physics.overlap_box(center, half_size, rotation, mask, include_sensors, exclude)` | `[Entity]` |
-| `Physics.layer(name)` | `f32` |
-| `Physics.mask(names)` | `f32` |
+| `Physics.layer(name)` | `number` |
+| `Physics.mask(names)` | `number` |
 | `Physics.gravity()` | `Vec2` |
 | `Physics.set_gravity(gravity)` | nothing |
 | `Physics.collision_started()` | `List<Entity>` |
@@ -1448,13 +1448,13 @@ are waiting for synchronization are resolved before the next physics step.
 
 ```rust
 script Bullet {
-    @export let speed: f32 = 400.0;
+    @export let speed: number = 400.0;
 
     fn start() {
         Physics.set_velocity(this.entity, this.speed, 0.0);
     }
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         for hit in Physics.sensor_entered() {
             World.despawn(hit);
             World.despawn(this.entity);
@@ -1504,7 +1504,7 @@ of a collider's physical interaction filter. `include_sensors` explicitly opts
 into trigger pieces. `exclude` skips all pieces of an entity, or is `null`.
 
 A hit is a copied `RayHit2d` struct with `entity: Entity`, `point: Vec2`,
-`normal: Vec2` and `distance: f32`. A miss is `null`; check before reading it.
+`normal: Vec2` and `distance: number`. A miss is `null`; check before reading it.
 The maximum distance is inclusive. Starting inside/on a collider gives distance
 0, point equal to origin and normal (0, 0), because there is no entry surface.
 Other normals describe the world-space surface. Exact distance ties prefer the
@@ -1587,8 +1587,8 @@ this way.
 
 | Call | Returns |
 | --- | --- |
-| `Grid.position_x(entity, grid)` | `f32` |
-| `Grid.position_y(entity, grid)` | `f32` |
+| `Grid.position_x(entity, grid)` | `number` |
+| `Grid.position_y(entity, grid)` | `number` |
 | `Grid.place(entity, grid, x, y)` | nothing |
 | `Grid.can_reach(mover, grid, target)` | `bool` |
 | `Grid.step_toward(mover, grid, target)` | `bool` |
@@ -1636,11 +1636,11 @@ what the map *holds* there.
 
 | Call | Returns |
 | --- | --- |
-| `Grid.tile(map, column, row)` | `f32` |
+| `Grid.tile(map, column, row)` | `number` |
 | `Grid.set_tile(map, column, row, index)` | nothing |
 | `Grid.set_terrain(map, column, row, terrain)` | nothing |
-| `Grid.columns(map)` | `f32` |
-| `Grid.rows(map)` | `f32` |
+| `Grid.columns(map)` | `number` |
+| `Grid.rows(map)` | `number` |
 
 A cell is named by whole column and row rather than by a world position: the map
 is the authority on which cell a position falls in, and a script doing that
@@ -1691,7 +1691,7 @@ the mistake is rather than land somewhere plausible.
 | Call | Returns |
 | --- | --- |
 | `Grid.surface(world, column, row)` | `String` |
-| `Grid.height(world, column, row)` | `f32?` |
+| `Grid.height(world, column, row)` | `number?` |
 
 What a voxel world's column has on top, and how high the top of it is: the
 block a map view draws there (`"view": "map"`), and what a top-down game is
@@ -1814,7 +1814,7 @@ can replace the pair later without exposing tilemap storage to gameplay code.
 | `Animation.stop(entity)` | nothing |
 | `Animation.restart(entity)` | nothing |
 | `Animation.is_finished(entity)` | `bool` |
-| `Animation.frame(entity)` | `f32` |
+| `Animation.frame(entity)` | `number` |
 | `Animation.clip(entity)` | `String` |
 | `Animation.set_speed(entity, speed)` | nothing |
 
@@ -1853,7 +1853,7 @@ hold is reported by the advance, the same way a broken clip authored by hand is.
 | `Sequence.stop(entity)` | nothing |
 | `Sequence.restart(entity)` | nothing |
 | `Sequence.is_finished(entity)` | `bool` |
-| `Sequence.time(entity)` | `f32` |
+| `Sequence.time(entity)` | `number` |
 | `Sequence.cued(entity, cue)` | `bool` |
 | `Sequence.playing(entity)` | `String` |
 | `Sequence.set_speed(entity, speed)` | nothing |
@@ -1875,7 +1875,7 @@ can take over. A cue may also play a sound, which needs no script at all.
 
 ```decay
 script Director {
-    fn update(dt: f32) {
+    fn update(dt: number) {
         if Sequence.cued(this.entity, "landed") { print("touchdown"); }
         if Sequence.playing(this.entity) == "intro" && Sequence.is_finished(this.entity) {
             Sequence.play(this.entity, "idle");
@@ -1896,7 +1896,7 @@ on to an idle loop this way.
 | `Audio.play_on(bus, clip, volume)` | nothing |
 | `Audio.loop_on(bus, clip, volume)` | nothing |
 | `Audio.set_volume(bus, volume)` | nothing |
-| `Audio.volume(bus)` | `f32` |
+| `Audio.volume(bus)` | `number` |
 | `Audio.stop_all()` | nothing |
 | `Audio.pause_all()` | nothing |
 | `Audio.resume_all()` | nothing |
@@ -1955,7 +1955,7 @@ compiling. `Input.Keyboard` is the same four calls under a name that says so.
 | `Action.held(name)` | `bool` |
 | `Action.pressed(name)` | `bool` |
 | `Action.released(name)` | `bool` |
-| `Action.axis(name)` | `f32` |
+| `Action.axis(name)` | `number` |
 | `Action.vector(name)` | `Vec2` |
 | `Action.bindings(name)` | `[String]` |
 | `Action.rebind(name, index, binding)` | nothing |
@@ -1988,7 +1988,7 @@ example rebinds them.
 
 | Call | Returns |
 | --- | --- |
-| `Input.axis(negative, positive)` | `f32`, one of -1, 0, 1 |
+| `Input.axis(negative, positive)` | `number`, one of -1, 0, 1 |
 | `Input.is_down(key)` | `bool` |
 | `Input.just_pressed(key)` | `bool` |
 | `Input.just_released(key)` | `bool` |
@@ -2011,14 +2011,14 @@ operating system's key repeat is not a second press.
 
 | Call | Returns |
 | --- | --- |
-| `Gamepad.joined()` | `f32`, the player slot claimed this frame, or 0 |
-| `Gamepad.left()` | `f32`, the player slot given back this frame, or 0 |
-| `Gamepad.count()` | `f32`, how many slots are held |
+| `Gamepad.joined()` | `number`, the player slot claimed this frame, or 0 |
+| `Gamepad.left()` | `number`, the player slot given back this frame, or 0 |
+| `Gamepad.count()` | `number`, how many slots are held |
 | `Gamepad.is_connected(slot)` | `bool` |
 | `Gamepad.is_down(slot, button)` | `bool` |
 | `Gamepad.just_pressed(slot, button)` | `bool` |
 | `Gamepad.just_released(slot, button)` | `bool` |
-| `Gamepad.axis(slot, axis)` | `f32` |
+| `Gamepad.axis(slot, axis)` | `number` |
 
 A pad is read by **player slot**, not by device. The first pad a face button or
 Start is pressed on claims slot 1, the next slot 2, up to eight. A slot stays
@@ -2053,7 +2053,7 @@ An action binding reads any pad as `gamepad.south` or `gamepad.axis.left_x`.
 
 | Path | Type |
 | --- | --- |
-| `Viewport.aspect` | `f32` |
+| `Viewport.aspect` | `number` |
 
 `Viewport.aspect` is the viewport width divided by its height. It is a screen
 fact, not a camera: a scene that authored its camera can combine the aspect with
@@ -2062,9 +2062,9 @@ host guessing which camera controls gameplay.
 
 | Path | Type |
 | --- | --- |
-| `Camera.pan_x` | `f32` |
-| `Camera.pan_y` | `f32` |
-| `Camera.pan_z` | `f32` |
+| `Camera.pan_x` | `number` |
+| `Camera.pan_y` | `number` |
+| `Camera.pan_z` | `number` |
 
 `Camera.pan_{x,y,z}` is the gameplay camera's accumulated world-space pan offset.
 A script writes the offset it wants; the host applies it to the authored camera
@@ -2086,10 +2086,10 @@ not require the singular 2D behavior camera.
 
 | Path | Type |
 | --- | --- |
-| `Pointer.x` | `f32` |
-| `Pointer.y` | `f32` |
-| `Pointer.overlay_x` | `f32` |
-| `Pointer.overlay_y` | `f32` |
+| `Pointer.x` | `number` |
+| `Pointer.y` | `number` |
+| `Pointer.overlay_x` | `number` |
+| `Pointer.overlay_y` | `number` |
 | `Pointer.position` | `Vec2` |
 | `Pointer.locked` (read-only) | `bool` |
 | `Pointer.delta` (read-only) | `Vec2` |
@@ -2120,26 +2120,26 @@ look and right-button drag-to-look with pitch clamping.
 
 | Path | Type |
 | --- | --- |
-| `Touch.count` | `f32` |
+| `Touch.count` | `number` |
 
 | Call | Returns |
 | --- | --- |
-| `Touch.x(index)` | `f32` |
-| `Touch.y(index)` | `f32` |
+| `Touch.x(index)` | `number` |
+| `Touch.y(index)` | `number` |
 
 | Path | Type |
 | --- | --- |
 | `Gesture.tapped` | `bool` |
-| `Gesture.tap_x` | `f32` |
-| `Gesture.tap_y` | `f32` |
+| `Gesture.tap_x` | `number` |
+| `Gesture.tap_y` | `number` |
 | `Gesture.held` | `bool` |
-| `Gesture.hold_x` | `f32` |
-| `Gesture.hold_y` | `f32` |
+| `Gesture.hold_x` | `number` |
+| `Gesture.hold_y` | `number` |
 | `Gesture.dragging` | `bool` |
-| `Gesture.drag_x` | `f32` |
-| `Gesture.drag_y` | `f32` |
+| `Gesture.drag_x` | `number` |
+| `Gesture.drag_y` | `number` |
 | `Gesture.pinching` | `bool` |
-| `Gesture.pinch` | `f32` |
+| `Gesture.pinch` | `number` |
 
 `Gesture` says what the person *meant*, where `Pointer` says which button is
 down. The difference matters as soon as a game is played with a finger: a mouse
@@ -2158,7 +2158,7 @@ collapse its camera to a point.
 
 ```rust
 script Build {
-    fn update(dt: f32) {
+    fn update(dt: number) {
         // Drag pans, tap builds, hold takes back. The same three lines are the
         // mouse controls and the touch controls.
         if Gesture.dragging {
@@ -2186,7 +2186,7 @@ without a second code path.
 
 ```rust
 script Aim {
-    fn update(dt: f32) {
+    fn update(dt: number) {
         if Pointer.inside && Pointer.is_down("Left") {
             this.transform.position.x = Pointer.x;
             this.transform.position.y = Pointer.y;
@@ -2268,12 +2268,12 @@ answered with zero, which would read as a finger in the corner of the screen.
 | Path | Type |
 | --- | --- |
 | `Aim.hit` | `bool` |
-| `Aim.x` | `f32` |
-| `Aim.y` | `f32` |
-| `Aim.z` | `f32` |
-| `Aim.place_x` | `f32` |
-| `Aim.place_y` | `f32` |
-| `Aim.place_z` | `f32` |
+| `Aim.x` | `number` |
+| `Aim.y` | `number` |
+| `Aim.z` | `number` |
+| `Aim.place_x` | `number` |
+| `Aim.place_y` | `number` |
+| `Aim.place_z` | `number` |
 
 `Pointer` stops at the overlay, and the section above says why: going on to the
 world means a camera. `Aim` is the host going on anyway, for the one case where
@@ -2322,11 +2322,11 @@ one however convincing it looks.
 
 | Path | Type |
 | --- | --- |
-| `Stick.x` | `f32` |
-| `Stick.y` | `f32` |
+| `Stick.x` | `number` |
+| `Stick.y` | `number` |
 | `Stick.held` | `bool` |
-| `Stick.anchor_x` | `f32` |
-| `Stick.anchor_y` | `f32` |
+| `Stick.anchor_x` | `number` |
+| `Stick.anchor_y` | `number` |
 | `Stick.direction` | `Vec2` |
 
 `Stick` is a joystick made out of whichever finger is steering. It anchors
@@ -2364,8 +2364,8 @@ is what the original objection was actually asking for.
 
 | Path | Type |
 | --- | --- |
-| `Time.delta` | `f32` |
-| `Time.elapsed` | `f32` |
+| `Time.delta` | `number` |
+| `Time.elapsed` | `number` |
 
 `delta` is what `update` receives as its argument, offered again so a function
 that is not `update` can reach it. `elapsed` is per script instance rather than
@@ -2376,7 +2376,7 @@ per world: a script attached later has not been running as long.
 ```decay
 script Mine {
     var cooldown = Timer(0.0);
-    fn update(dt: f32) {
+    fn update(dt: number) {
         if !this.cooldown.done { return; }
         this.cooldown = Timer(2.4);
         drop();
@@ -2405,7 +2405,7 @@ reaction times are timers.
 
 ```decay
 // view.decay — any file in the project.
-shared fn visible_half_x(view_size: f32) -> f32 {
+shared fn visible_half_x(view_size: number) -> number {
     let aspect = max(Viewport.aspect, 0.001);
     if aspect >= 1.0 { return view_size * 0.5 * aspect; }
     return view_size * 0.5;
@@ -2439,10 +2439,10 @@ twenty-five scripts used to carry identical copies.
 
 ```decay
 // view.decay — any file in the project.
-shared const VIEW_SIZE: f32 = 11.0;
+shared const VIEW_SIZE: number = 11.0;
 
 // Any file. This one's own, worked out from the project's.
-const EDGE: f32 = VIEW_SIZE / 2.0 + 1.2;
+const EDGE: number = VIEW_SIZE / 2.0 + 1.2;
 const OPENING: Phase = Phase.Lobby;
 ```
 
@@ -2461,7 +2461,7 @@ constants.
 
 Orbital Last Stand and Orbital Baked each declare `VIEW_SIZE`, the camera's
 `vertical_size`, once in `view.decay`, where every enemy, hazard and the
-director used to carry the same `@export let view_size: f32 = 11.0;`.
+director used to carry the same `@export let view_size: number = 11.0;`.
 
 ### Other scripts, by type
 
@@ -2524,7 +2524,7 @@ the sender says what happened and does not need to know who is listening.
 
 ```decay
 // events.decay — any file in the project; each event is declared once.
-event GoalScored(team: f32);
+event GoalScored(team: number);
 
 // ball.decay
 GoalScored.emit(1.0);
@@ -2564,7 +2564,7 @@ power-ups are messages to the one script they concern.
 
 | Call | Returns |
 | --- | --- |
-| `Game.get(name, fallback)` | `f32` |
+| `Game.get(name, fallback)` | `number` |
 | `Game.set(name, value)` | nothing |
 
 The smallest thing that lets two scripts cooperate, and it predates references:
@@ -2598,9 +2598,9 @@ enum Phase { Lobby, Countdown, Play }
 
 state Game {
     var phase = Phase.Lobby;
-    var score_blue: f32 = 0.0;
+    var score_blue: number = 0.0;
     var won: bool = false;
-    let target: f32 = 5.0;
+    let target: number = 5.0;
 }
 
 // Anywhere else.
@@ -2616,7 +2616,7 @@ fallback is — Orbital Last Stand reads `hp` with five different ones.
 - **Several files may add to one state**, as long as no field is declared
   twice; a field declared twice is refused where it is declared and wherever
   it is used, since the file declaring it may be one nothing runs.
-- **A field holds an `f32`, a `bool` or an enum** and starts from a literal
+- **A field holds an `number`, a `bool` or an enum** and starts from a literal
   or a variant, because it exists before any script has run to compute it
   from. On the board an enum is kept as the variant's position, `0` for the
   first, so `Game.get("phase", 0.0)` still reads a number. `let` makes one no
@@ -2625,7 +2625,7 @@ fallback is — Orbital Last Stand reads `hp` with five different ones.
   and `Game.get("score", 0.0)` read the same number, and a `true` is `1.0`, so
   a project moves over one call at a time and a test reading the board sees
   either. A field nothing has written yet reads as its declared start.
-- **A state of another name** — `state Tuning { let gravity: f32 = 30.0; }` —
+- **A state of another name** — `state Tuning { let gravity: number = 30.0; }` —
   is reached as `Tuning.gravity` and kept on the board as `Tuning.gravity`.
   It may not take a script's or an event's name, and may add to a namespace
   the engine offers only as `Game` does: without redefining its members.
@@ -2710,7 +2710,7 @@ decimals (`"12.50"`), and `n.padded(2)` the nearest whole number led with
 zeros to two digits (`"05"`). Neither writes `-0`.
 
 ```decay
-shared fn clock_text(seconds: f32) -> String {
+shared fn clock_text(seconds: number) -> String {
     let whole = floor(max(seconds, 0.0));
     let minutes = floor(whole / 60.0);
     return minutes.fixed(0) + ":" + (whole - minutes * 60.0).padded(2);   // "1:05"
@@ -2731,7 +2731,7 @@ the results screen's "Survived" time with `clock_text`, where the scene's
 ### Lists and ranges
 
 ```decay
-var taken: List<f32> = [];
+var taken: List<number> = [];
 for slot in 0..4 {                 // 0, 1, 2, 3
     let pick = choose(taken);
     taken.push(pick);
@@ -2760,7 +2760,7 @@ parameters.
 ### Maps
 
 ```decay
-var kills: Map<Kind, f32> = [:];
+var kills: Map<Kind, number> = [:];
 kills[kind] = kills.get(kind, 0.0) + 1.0;
 let prices = ["arc": 3.0, "nova": 5.0];
 for name in prices.keys() { print(name + " " + prices[name]); }
@@ -2793,18 +2793,18 @@ Orbital's chargers colour their elite traits this way.
 ### Values that may be missing
 
 ```decay
-fn first_free(slots: List<bool>) -> f32? {
+fn first_free(slots: List<bool>) -> number? {
     for i in 0..slots.length { if !slots[i] { return i; } }
     return null;
 }
 
 let slot = first_free(this.taken);
 if slot == null { return; }          // full
-this.taken[slot] = true;             // `slot` is an `f32` from here on
+this.taken[slot] = true;             // `slot` is an `number` from here on
 let shown = best_time ?? 0.0;        // or give a fallback
 ```
 
-`f32?` — and `String?`, `Vec2?`, `List<T>?` — is a value or `null`, where a
+`number?` — and `String?`, `Vec2?`, `List<T>?` — is a value or `null`, where a
 script used to return `-1` and hope every caller checked. It is never used as
 a number until `??` gives a fallback or a check says it is there: inside
 `if x != null { }`, or after `if x == null { return; }`, a `let` or parameter
@@ -2854,7 +2854,7 @@ this.slots[slot].show(title, blurb);
 `this` in a method is the value, read as `this.card`; it is a copy, so a
 method that works something out returns it rather than changing `this`.
 
-A field may have a default, `weight: f32 = 1.0`, and building one may then
+A field may have a default, `weight: number = 1.0`, and building one may then
 leave that field out. A default is worked out when the project compiles, as a
 constant is, so it is a number, flag, text or variant, and may name a
 `shared const` from any file.
@@ -2959,7 +2959,7 @@ acceptance criteria, and it is now met: authored properties, lifecycle,
 transform, sprite, input, and `print`.
 
 Both of its values are now the language's own: `vec2(x, y)` is `Vec2`, and
-`sprite:set_tint([f32; 4])` is `this.sprite.tint = Color(r, g, b, a)`, while
+`sprite:set_tint([number; 4])` is `this.sprite.tint = Color(r, g, b, a)`, while
 `this.sprite.tint.r` still reaches one channel as `position.x` reaches one
 component.
 
@@ -3003,8 +3003,8 @@ back does not change what undo means.
 - Despawning and other script writes are not routed through `WorldCommand` and
   therefore do not produce undo entries. Editor play mode restores its snapshot
   on Stop instead.
-- Decay's only numeric type is spelled `f32` and holds an `f64`; `WorldHost` is
-  the one place the two meet and the one place that narrows.
+- Decay's only numeric type, `number`, holds an `f64`, and the engine stores
+  `f32`; `WorldHost` is the one place the two meet and the one place that narrows.
 - The script instance is created on first sight and lost when the world is
   reloaded. There is no state migration across a hot reload of the source: a
   changed file recompiles, and the running instance keeps its fields.
@@ -3023,11 +3023,11 @@ math in `sindri-core`, not authoring syntax.
 | `Tween.vec2(from, to, duration, easing)` | `Vec2Tween` | Start a 2D vector tween |
 | `Tween.vec3(from, to, duration, easing)` | `Vec3Tween` | Start a 3D vector tween |
 | `Tween.color(from, to, duration, easing)` | `ColorTween` | Start an RGBA colour tween |
-| `Tween.number_value(tween)` | `f32` | Read a number tween's current value |
+| `Tween.number_value(tween)` | `number` | Read a number tween's current value |
 | `Tween.vec2_value(tween)` | `Vec2` | Read a 2D vector tween's current value |
 | `Tween.vec3_value(tween)` | `Vec3` | Read a 3D vector tween's current value |
 | `Tween.color_value(tween)` | `Color` | Read a colour tween's current value |
-| `Tween.progress(tween)` | `f32` | Linear fraction of the current play in [0, 1] |
+| `Tween.progress(tween)` | `number` | Linear fraction of the current play in [0, 1] |
 | `Tween.is_done(tween)` | `bool` | Naturally completed; cancellation is not completion |
 | `Tween.is_paused(tween)` | `bool` | Paused playback |
 | `Tween.is_cancelled(tween)` | `bool` | Cancelled playback |
@@ -3066,7 +3066,7 @@ script Fade {
         this.tint = Tween.color(Color(1.0, 1.0, 1.0, 1.0),
                                 Color(1.0, 1.0, 1.0, 0.0), 0.3, "ease-out");
     }
-    fn update(dt: f32) {
+    fn update(dt: number) {
         this.sprite.tint = Tween.color_value(this.tint);
         if Tween.is_done(this.tint) { World.despawn(this.entity); }
     }

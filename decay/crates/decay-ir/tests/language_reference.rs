@@ -134,8 +134,8 @@ fn a_described_type_is_checked_and_an_undescribed_one_is_not() {
     described.add_type(
         "Vec3",
         HostType::new()
-            .with_value("x", Type::F32)
-            .with_value("y", Type::F32),
+            .with_value("x", Type::Number)
+            .with_value("y", Type::Number),
     );
     described.add_this_value("position", Type::Named("Vec3".to_owned()));
     // Named but never described, which is the permissive case.
@@ -225,7 +225,7 @@ fn the_documented_example_compiles() {
 #[test]
 fn a_host_reference_can_be_held_and_compared() {
     let mut environment = Environment::new();
-    let vector = HostType::new().with_value("x", Type::F32);
+    let vector = HostType::new().with_value("x", Type::Number);
     let transform = HostType::new().with_value("position", Type::Named("Vec3".to_owned()));
     let thing = HostType::new().with_value("transform", Type::Named("Transform".to_owned()));
     let world = HostType::new().with_function(

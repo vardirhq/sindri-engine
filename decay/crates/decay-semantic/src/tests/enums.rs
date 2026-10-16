@@ -78,13 +78,13 @@ fn every_mistake_about_an_enum_is_refused() {
         "enum `Empty` has no variants",
         "`Phase` is already a name; an enum needs one of its own",
         "`Phase` has no variant `Lobbby`; it has `Lobby`, `Countdown`, `Play`",
-        "cannot assign `Phase` to `f32`",
+        "cannot assign `Phase` to `number`",
         "`Phase` is an enum: name a variant, as in `Phase.Lobby`",
         "does not say what happens for `Phase.Countdown`, `Phase.Play`",
         "`Phase.Lobby` is already matched above",
         "`Kind.Grow` is not a `Phase`",
         "this can never be reached",
-        "`match` takes a value of an enum, found `f32`",
+        "`match` takes a value of an enum, found `number`",
     ] {
         assert!(
             found.iter().any(|message| message.contains(expected)),
@@ -130,10 +130,10 @@ fn every_mistake_in_a_match_value_is_refused() {
     let all = found.join("\n");
     for expected in [
         "does not say what happens for `Phase.Over`",
-        "every arm of a `match` gives the same type: the first gives `f32`, this one `String`",
+        "every arm of a `match` gives the same type: the first gives `number`, this one `String`",
         "this can never be reached",
-        "`match` takes a value of an enum, found `f32`",
-        "cannot assign `f32` to `String`",
+        "`match` takes a value of an enum, found `number`",
+        "cannot assign `number` to `String`",
     ] {
         assert!(all.contains(expected), "missing {expected:?} in:\n{all}");
     }

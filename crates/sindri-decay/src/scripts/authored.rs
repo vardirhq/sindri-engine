@@ -32,7 +32,7 @@ fn type_of(value: &Value) -> Option<Type> {
         Value::Array(values) => {
             Type::array_of(values.first().and_then(type_of).unwrap_or(Type::Unknown))
         }
-        Value::Number(_) => Type::F32,
+        Value::Number(_) => Type::Number,
         Value::Bool(_) => Type::Bool,
         Value::String(_) => Type::String,
         Value::Vec2(_) => Type::Vec2,
@@ -149,7 +149,7 @@ pub(crate) fn blank(program: &IrProgram, ty: &Type) -> Value {
 
 fn blank_at(program: &IrProgram, ty: &Type, depth: usize) -> Value {
     match ty {
-        Type::F32 => Value::Number(0.0),
+        Type::Number => Value::Number(0.0),
         Type::Bool => Value::Bool(false),
         Type::String => Value::String(String::new()),
         Type::Vec2 => Value::Vec2([0.0; 2]),
