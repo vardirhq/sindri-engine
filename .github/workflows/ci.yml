@@ -7,6 +7,10 @@ on:
   # The autofix workflow starts CI this way on the commit it pushes, because a
   # push made with the workflow's own token starts no workflows by itself.
   workflow_dispatch:
+  # A merge queue tests the exact commit main is about to become. The push to
+  # main that follows then finds that commit's tree already verified (see the
+  # reuse job) and skips everything.
+  merge_group:
 
 permissions:
   contents: read
@@ -34,6 +38,48 @@ env:
   CARGO_PROFILE_TEST_DEBUG: line-tables-only
 
 jobs:
+  # A pull request's run tests the merge of its head into main, and a merge
+  # queue's run tests the commit main becomes. When either was green and main
+  # did not move before the merge, the commit pushed to main has the same tree
+  # -- the same bytes in every file, this workflow included -- and running the
+  # same checks over it again can only repeat their answer. That repeat was a
+  # full second run of every job for every merge. `scripts/ci_reuse.py` looks
+  # for the verified record the record job below leaves, and only in runs from
+  # this repository. A push that changes a dependency manifest always runs in
+  # full, because main's run is what saves the build cache pull requests
+  # restore from.
+  reuse:
+    name: Reuse a verified result
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+    outputs:
+      verified: ${{ steps.lookup.outputs.verified }}
+    steps:
+      - uses: actions/checkout@v7
+      - name: Look for a green run of this tree
+        id: lookup
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BEFORE: ${{ github.event.before }}
+        run: |
+          changed="$RUNNER_TEMP/changed"
+          # The pushed range, not only its last commit: a rebase merge pushes
+          # several. A diff needs only the two trees, so one more shallow
+          # commit is enough. Without the previous head there is no range, and
+          # the run goes in full.
+          if [[ "$BEFORE" =~ ^0+$ ]] || ! git fetch --quiet --no-tags --depth=1 origin "$BEFORE"; then
+            echo Cargo.toml >"$changed"
+          else
+            git diff --name-only "$BEFORE" HEAD >"$changed"
+          fi
+          python3 scripts/ci_reuse.py ci --repo "$GITHUB_REPOSITORY" \
+            --repo-id "$GITHUB_REPOSITORY_ID" --tree "$(git rev-parse 'HEAD^{tree}')" \
+            --changed "$changed"
+
   # Nothing here compiles anything, so it reports in well under a minute. It
   # used to gate every compiling job, which saved their runners when a missing
   # newline was going to fail the run anyway, but it also hid every Clippy and
@@ -43,6 +89,8 @@ jobs:
   # autofix workflow repairs formatting on its own.
   quick:
     name: Format and file sizes
+    needs: reuse
+    if: ${{ !cancelled() && needs.reuse.outputs.verified != 'true' }}
     runs-on: ubuntu-latest
     outputs:
       failure: ${{ steps.rustfmt.outputs.failure }}${{ steps.file_size.outputs.failure }}
@@ -82,6 +130,8 @@ jobs:
           rm -f "$output"
       - name: Test agent preflight discovery
         run: python3 -m unittest scripts/test_preflight.py
+      - name: Test CI result reuse
+        run: python3 -m unittest scripts/test_ci_reuse.py
       - name: Test site publisher verification
         run: python3 -m unittest discover -s site/tests
       - name: Check file sizes with structured diagnostics
@@ -117,6 +167,8 @@ jobs:
   # so a script typo and a Rust failure are reported by the same run.
   decay_preflight:
     name: Decay project preflight
+    needs: reuse
+    if: ${{ !cancelled() && needs.reuse.outputs.verified != 'true' }}
     runs-on: ubuntu-latest
     outputs:
       failure: ${{ steps.decay.outputs.failure }}
@@ -198,6 +250,8 @@ jobs:
   # when the pipeline stops producing it.
   baker:
     name: Isometric baker
+    needs: reuse
+    if: ${{ !cancelled() && needs.reuse.outputs.verified != 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -239,6 +293,8 @@ jobs:
 
   clippy:
     name: Clippy
+    needs: reuse
+    if: ${{ !cancelled() && needs.reuse.outputs.verified != 'true' }}
     runs-on: ubuntu-latest
     outputs:
       failure: ${{ steps.clippy.outputs.failure }}
@@ -294,6 +350,8 @@ jobs:
 
   test:
     name: Test and render captures
+    needs: reuse
+    if: ${{ !cancelled() && needs.reuse.outputs.verified != 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 25
     outputs:
@@ -318,6 +376,12 @@ jobs:
       # was. nextest runs every test in one pool across all binaries, which
       # turns the total into roughly the slowest single test rather than the
       # sum of the slowest per binary.
+      # Building and running are separate steps so the run's timing says which
+      # of the two the wait is, and the build's `--timings` report (uploaded
+      # below) says which crates and test binaries the build time goes to.
+      - name: Build the tests
+        id: test_build
+        run: cargo nextest run --workspace --all-features --no-run --timings
       - name: Test
         id: native_tests
         env:
@@ -326,6 +390,14 @@ jobs:
         # nextest stops at the first failing test by default, which reports
         # one failure per push. Every failure is wanted from the same run.
         run: cargo nextest run --workspace --all-features --no-fail-fast
+      - name: Upload the test build's timings
+        if: ${{ !cancelled() && steps.test_build.outcome != 'skipped' }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: test-build-timings
+          path: target/cargo-timings/cargo-timing.html
+          if-no-files-found: warn
+          retention-days: 14
       # nextest does not run doctests -- it has no way to, they are compiled
       # and run by rustdoc rather than built into a test binary. Left out, the
       # switch above would have quietly dropped every example in the public
@@ -410,6 +482,7 @@ jobs:
         shell: bash
         run: |
           failed_step="Test and render captures"
+          [[ "${{ steps.test_build.outcome }}" == "failure" ]] && failed_step="Build the tests"
           [[ "${{ steps.native_tests.outcome }}" == "failure" ]] && failed_step="Test"
           [[ "${{ steps.doctests.outcome }}" == "failure" ]] && failed_step="Test the documented examples"
           [[ "${{ steps.editor_build.outcome }}" == "failure" ]] && failed_step="Build the editor the capture runs"
@@ -430,6 +503,8 @@ jobs:
 
   wasm:
     name: Browser target
+    needs: reuse
+    if: ${{ !cancelled() && needs.reuse.outputs.verified != 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
     outputs:
@@ -500,6 +575,8 @@ jobs:
   # started announcing it.
   browser:
     name: Run the engine in a browser
+    needs: reuse
+    if: ${{ !cancelled() && needs.reuse.outputs.verified != 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 25
     outputs:
@@ -771,6 +848,35 @@ jobs:
             echo "::error::Browser captures were produced, but GitHub rejected artifact finalization with HTTP 403."
             exit 1
           fi
+
+  # The record the reuse job looks for: an artifact named after the tree this
+  # run tested, left only when every job passed. Runs from forks never leave
+  # one, and the reuse job would not trust one from a fork anyway.
+  record:
+    name: Record the verified tree
+    needs: [reuse, quick, decay_preflight, baker, clippy, test, wasm, browser]
+    if: >-
+      ${{ !cancelled() && needs.reuse.outputs.verified != 'true'
+      && needs.quick.result == 'success' && needs.decay_preflight.result == 'success'
+      && needs.baker.result == 'success' && needs.clippy.result == 'success'
+      && needs.test.result == 'success' && needs.wasm.result == 'success'
+      && needs.browser.result == 'success'
+      && (github.event_name != 'pull_request'
+          || github.event.pull_request.head.repo.full_name == github.repository) }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Name the tested tree
+        id: tree
+        run: |
+          tree="$(git rev-parse 'HEAD^{tree}')"
+          echo "tree=$tree" >>"$GITHUB_OUTPUT"
+          printf '%s\n' "$tree" "$GITHUB_SHA" "$GITHUB_EVENT_NAME" >verified.txt
+      - uses: actions/upload-artifact@v7
+        with:
+          name: ci-verified-${{ steps.tree.outputs.tree }}
+          path: verified.txt
+          retention-days: 30
 
   diagnostics_summary:
     name: CI failure summary
