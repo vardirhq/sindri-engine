@@ -315,7 +315,8 @@ Sindri's strongest domain relative to the baseline.
 | **Spatial audio / panning** | ❌ | ❌ | ❌ | ❌ | **Absent** | — |
 | **Per-voice handles** | ❌ | — | ❌ | — | **Behind** | A script cannot stop the specific sound it started |
 | **Music transitions / crossfade** | ❌ | ❌ | ❌ | ❌ | **Absent** | — |
-| **Procedural music authoring / MIDI note editing** | ❌ | ❌ | ❌ | ❌ | **Absent in engine** | `tools/sindri-chiptune` is a standalone native prototype with generated motifs, editable monophonic scores and bounded MIDI interchange. Native tests and Xvfb layout capture are tool evidence, not Engine / Editor / Decay or game proof; audio-device audition remains unverified |
+| **Sound effect authoring (Sound Lab)** | — | ❌ | — | ✅ | **Partial** | `tools/sindri-chiptune` designs seeded game effects (coin, jump, laser, explosion, power-up, hurt, blip, thud) from editable parameters and sends each into a project: the WAV and its `.sindrisfx` source under `assets/audio/`, listed in `[assets] include` so an export ships it, with the `Audio.play` line to paste. The platformer's jump, landing, coin and flag sounds were made and delivered this way, its run hears all four, and a test re-renders each committed source to its WAV. A standalone native tool, not an editor panel, and not yet in a browser |
+| **Procedural music authoring / MIDI note editing** | ❌ | ❌ | ❌ | ❌ | **Absent in engine** | `tools/sindri-chiptune` composes 32-bar chiptune songs with generated motifs, editable monophonic scores, bounded MIDI interchange and `.sindrisong` files that reopen for editing, and sends a song into a project as a looping clip. No game plays one yet: a full song is several megabytes of WAV, and there is no compressed export or shorter loop. Audio-device audition remains unverified |
 
 ## Input
 

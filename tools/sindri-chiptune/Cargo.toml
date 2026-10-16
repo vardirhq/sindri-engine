@@ -8,7 +8,16 @@ license.workspace = true
 [lints]
 workspace = true
 
-# Standalone audio preview; no dependency on Sindri platform or runtime.
+# Standalone audio tool; no dependency on Sindri platform or runtime. Every
+# dependency below is already in the workspace graph through the editor.
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 eframe.workspace = true
+egui_material_icons = { version = "0.8", default-features = false, features = ["outline"] }
+rfd = { version = "0.17.2", default-features = false, features = ["xdg-portal"] }
 rodio = { version = "0.22.2", default-features = false, features = ["playback"] }
+serde.workspace = true
+serde_json.workspace = true
+toml_edit = "0.25"
+
+[target.'cfg(not(target_arch = "wasm32"))'.dev-dependencies]
+tempfile = "3"

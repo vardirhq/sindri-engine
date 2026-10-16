@@ -1,9 +1,16 @@
 //! Standalone workstation: presentation is separate from composition and audio.
 mod editing;
+mod files;
+mod overview;
 mod panels;
+mod scope;
 mod score;
+mod sfx_params;
+mod sfx_view;
+mod shell;
+mod theme;
 use crate::desktop::live::{Command, LiveSource, Transport};
-use crate::desktop::{Note, Settings, compose_with, render_with};
+use crate::desktop::{Note, Settings, compose_with, project, render_with};
 use eframe::egui::{self, Color32};
 use rodio::{
     Player,
@@ -11,17 +18,19 @@ use rodio::{
 };
 use std::{
     error::Error,
+    path::PathBuf,
     sync::mpsc::{self, Receiver},
     thread,
 };
 
-const ACCENT: Color32 = Color32::from_rgb(238, 177, 96);
-const TRACK_COLORS: [Color32; 4] = [
-    Color32::from_rgb(116, 173, 225),
-    Color32::from_rgb(165, 143, 220),
-    Color32::from_rgb(106, 214, 176),
-    Color32::from_rgb(224, 153, 113),
-];
+const ACCENT: Color32 = theme::FORGE;
+const TRACK_COLORS: [Color32; 4] = theme::VOICES;
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum Mode {
+    Music,
+    Sfx,
+}
 type Job = Receiver<Result<String, String>>;
 
 struct ScoreSnapshot {
@@ -31,6 +40,12 @@ struct ScoreSnapshot {
 }
 
 struct ComposerApp {
+    mode: Mode,
+    sfx: sfx_view::SfxState,
+    project: Option<PathBuf>,
+    song_path: Option<PathBuf>,
+    song_name: String,
+    song_snippet: Option<String>,
     settings: Settings,
     generated: Settings,
     scores: [[Vec<Note>; 3]; 2],
@@ -43,7 +58,6 @@ struct ComposerApp {
     drag_origin: Option<(usize, Note, usize, i32)>,
     undo: Vec<ScoreSnapshot>,
     redo: Vec<ScoreSnapshot>,
-    midi_path: String,
     output: String,
     job: Option<Job>,
     stream: Option<MixerDeviceSink>,
@@ -59,6 +73,15 @@ impl Default for ComposerApp {
     fn default() -> Self {
         let settings = Settings::default();
         Self {
+            mode: Mode::Music,
+            sfx: sfx_view::SfxState::default(),
+            // Started inside a project, the tool delivers there without asking.
+            project: std::env::current_dir()
+                .ok()
+                .and_then(|dir| project::find(&dir)),
+            song_path: None,
+            song_name: "theme".into(),
+            song_snippet: None,
             scores: Self::candidates(&settings),
             generated: settings.clone(),
             settings,
@@ -71,7 +94,6 @@ impl Default for ComposerApp {
             drag_origin: None,
             undo: Vec::new(),
             redo: Vec::new(),
-            midi_path: "chiptune.mid".into(),
             output: "chiptune.wav".into(),
             job: None,
             stream: None,
@@ -81,7 +103,7 @@ impl Default for ComposerApp {
             last_sent: None,
             looping: true,
             paused: false,
-            status: "Ready. Play a candidate, then shape its sound in the mixer.".into(),
+            status: "Ready. Play a candidate, or switch to Sound FX for game effects.".into(),
         }
     }
 }
@@ -224,43 +246,81 @@ impl ComposerApp {
 }
 
 impl ComposerApp {
+    fn toggle_play(&mut self) {
+        if let Some(player) = &self.sink {
+            if self.paused {
+                player.play();
+            } else {
+                player.pause();
+            }
+            self.paused = !self.paused;
+        } else {
+            self.start_live();
+        }
+    }
+
     fn workspace(&mut self, ui: &mut egui::Ui) {
         self.poll(ui);
-        egui::Panel::top("transport").show(ui, |ui| {
-            self.transport_controls(ui);
-        });
-        egui::Panel::bottom("export").show(ui, |ui| {
-            self.export_controls(ui);
-        });
-        let wide = ui.available_width() >= 1000.0;
+        self.shortcuts(ui);
+        egui::Panel::top("brand")
+            .exact_size(46.0)
+            .frame(
+                egui::Frame::new()
+                    .fill(theme::HEADER)
+                    .inner_margin(egui::Margin::symmetric(10, 6))
+                    .stroke(egui::Stroke::new(1.0, theme::LINE)),
+            )
+            .show(ui, |ui| self.top_bar(ui));
+        egui::Panel::bottom("status")
+            .exact_size(26.0)
+            .frame(
+                egui::Frame::new()
+                    .fill(theme::HEADER)
+                    .inner_margin(egui::Margin::symmetric(10, 3))
+                    .stroke(egui::Stroke::new(1.0, theme::LINE)),
+            )
+            .show(ui, |ui| self.status_bar(ui));
+        match self.mode {
+            Mode::Music => self.music_workspace(ui),
+            Mode::Sfx => self.sfx_workspace(ui),
+        }
+        self.sync_audio(ui);
+    }
+
+    fn music_workspace(&mut self, ui: &mut egui::Ui) {
+        egui::Panel::top("transport")
+            .frame(
+                egui::Frame::new()
+                    .fill(theme::PANEL)
+                    .inner_margin(egui::Margin::symmetric(12, 8))
+                    .stroke(egui::Stroke::new(1.0, theme::LINE_SOFT)),
+            )
+            .show(ui, |ui| self.transport_controls(ui));
+        let wide = ui.available_width() >= 1100.0;
         egui::Panel::left("composer")
-            .default_size(280.0)
+            .default_size(262.0)
             .min_size(230.0)
             .resizable(true)
             .show(ui, |ui| {
                 egui::ScrollArea::vertical().show(ui, |ui| {
+                    ui.add_space(8.0);
                     self.controls(ui);
-                    ui.add_space(16.0);
-                    if ui
-                        .add(egui::Button::new("Generate A + B").fill(ACCENT.gamma_multiply(0.35)))
-                        .clicked()
-                    {
-                        self.generate();
-                    }
-                    ui.small("Mood, key, seed and density apply on Generate.");
                     if !wide {
-                        ui.separator();
+                        ui.add_space(8.0);
                         self.instrument_rack(ui);
                     }
+                    ui.add_space(8.0);
+                    self.song_delivery(ui);
                 });
             });
         if wide {
             egui::Panel::right("mixer")
-                .default_size(310.0)
-                .min_size(280.0)
+                .default_size(300.0)
+                .min_size(270.0)
                 .resizable(true)
                 .show(ui, |ui| {
                     egui::ScrollArea::vertical().show(ui, |ui| {
+                        ui.add_space(8.0);
                         self.instrument_rack(ui);
                     });
                 });
@@ -270,7 +330,6 @@ impl ComposerApp {
                 self.score(ui);
             });
         });
-        self.sync_audio(ui);
     }
 }
 
@@ -283,36 +342,16 @@ impl eframe::App for ComposerApp {
 pub(super) fn run() -> Result<(), Box<dyn Error>> {
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
-            .with_inner_size([1360.0, 820.0])
-            .with_min_inner_size([760.0, 560.0]),
+            .with_title("Sindri Sound Lab")
+            .with_inner_size([1440.0, 880.0])
+            .with_min_inner_size([820.0, 580.0]),
         ..Default::default()
     };
     eframe::run_native(
         "Sindri Sound Lab",
         options,
         Box::new(|cc| {
-            let mut style = (*cc.egui_ctx.style_of(egui::Theme::Dark)).clone();
-            style.visuals = egui::Visuals::dark();
-            style.visuals.panel_fill = Color32::from_rgb(22, 25, 31);
-            style.visuals.window_fill = Color32::from_rgb(28, 32, 40);
-            style.visuals.selection.bg_fill = ACCENT.gamma_multiply(0.35);
-            style.visuals.widgets.inactive.bg_fill = Color32::from_rgb(38, 43, 53);
-            style.spacing.item_spacing = egui::vec2(8.0, 10.0);
-            style.visuals.override_text_color = Some(Color32::from_gray(220));
-            style
-                .text_styles
-                .insert(egui::TextStyle::Heading, egui::FontId::proportional(24.0));
-            style
-                .text_styles
-                .insert(egui::TextStyle::Body, egui::FontId::proportional(14.0));
-            style
-                .text_styles
-                .insert(egui::TextStyle::Button, egui::FontId::proportional(14.0));
-            style
-                .text_styles
-                .insert(egui::TextStyle::Small, egui::FontId::proportional(12.0));
-            cc.egui_ctx.set_theme(egui::Theme::Dark);
-            cc.egui_ctx.set_style_of(egui::Theme::Dark, style);
+            theme::install(&cc.egui_ctx);
             Ok(Box::<ComposerApp>::default())
         }),
     )?;

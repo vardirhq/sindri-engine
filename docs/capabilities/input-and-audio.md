@@ -17,6 +17,7 @@ Each entry links its tests and the projects that exercise it. Surface marks matc
 | **Audio** | | | | |
 | [WAV / Ogg / MP3, native + browser + silent backends](#audio-backends) | ✅ | ✅ | ✅ | ✅ |
 | [Buses / mixer / master volume](#audio-buses) | ✅ | 🟡 | ✅ | ✅ |
+| [Sound effects made in the Sound Lab](#sound-lab) | — | ❌ | — | ✅ |
 | **Not yet** | | | | |
 | [`referenced_audio` gather](#referenced-audio) | ❌ | — | — | — |
 | **3D foundation** | | | | |
@@ -212,6 +213,48 @@ names its `bus` or follows its looping. The game session routes scripts'
 requests and autoplay through the mixer. Orbital's pause screen has Master,
 Music and Effects sliders, saved between sessions, and `examples/audio` is the
 Sound Mixer feature example.
+
+</details>
+
+<a id="sound-lab"></a>
+
+### Sound effects made in the Sound Lab
+
+A standalone tool designs seeded game sound effects and delivers each into a project, listed for export, with the line that plays it.
+
+Engine — · Editor ❌ · Decay — · Proof ✅ — parity row *Sound effect authoring (Sound Lab)*
+
+**Tested by:** [`tools/sindri-chiptune/src/desktop/sfx/tests.rs`](../../tools/sindri-chiptune/src/desktop/sfx/tests.rs), [`tools/sindri-chiptune/src/desktop/project.rs`](../../tools/sindri-chiptune/src/desktop/project.rs), [`games/platformer/tests/a_run_reaches_the_flag.rs`](../../games/platformer/tests/a_run_reaches_the_flag.rs)
+
+**Exercised in:** [`games/platformer`](../../games/platformer)
+
+**See:** [`tools/sindri-chiptune/README.md`](../../tools/sindri-chiptune/README.md)
+
+<details markdown="1">
+<summary>Evidence</summary>
+
+`tools/sindri-chiptune` (the Sindri Sound Lab) has a Sound FX designer beside
+its music workstation. Eight kinds — coin, jump, laser, explosion, power-up,
+hurt, blip and thud — are seeded regions of one synth voice: a wave, an
+attack/sustain/punch/decay envelope, a pitch path with slide, curve, vibrato,
+arpeggio and repeat, a square duty sweep, low- and high-pass filters and a
+sample-and-hold crush. The same kind and seed always render the same samples.
+Every parameter is a slider with a unit, a change replays the sound, and
+**Mutate** nudges each by a few percent.
+
+**Send to project** writes `assets/audio/<name>.wav` and the editable
+`<name>.sindrisfx` beside it, adds the clip to `sindri.toml`'s
+`[assets] include` (editing the manifest in place, comments kept), and offers
+`Audio.play("audio/<name>.wav", 0.5);` to paste. Without that include line a
+clip a script plays is found by the editor and silently left out of an
+export. The same delivery runs headless:
+`sindri-chiptune sfx coin --seed 5 --project games/platformer --name coin`.
+
+The platformer's hero plays four sounds made this way — jump, landing, coin
+and the flag — and its scripted run to the flag asserts it heard each one and
+that each is listed for export. The tool's own tests re-render every committed
+`.sindrisfx` and compare it with the WAV beside it, so reopening one edits
+what ships. The tool is native only and is not part of the editor.
 
 </details>
 

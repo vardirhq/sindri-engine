@@ -1,7 +1,9 @@
 //! Independent instrument definitions for the standalone chiptune renderer.
+use serde::{Deserialize, Serialize};
 use std::f64::consts::TAU;
 
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
 pub(super) enum Preset {
     WarmTriangle,
     DeepBass,
@@ -126,7 +128,8 @@ impl Preset {
     }
 }
 
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub(super) struct TrackSound {
     pub(super) preset: Preset,
     pub(super) volume: f32,
@@ -146,7 +149,8 @@ impl TrackSound {
     }
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub(super) struct Rack {
     pub(super) tracks: [TrackSound; 4],
 }

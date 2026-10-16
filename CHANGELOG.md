@@ -1,5 +1,19 @@
 # Changelog
 
+- Make game sound effects in the Sindri Sound Lab (`cargo run -p
+  sindri-chiptune`): eight seeded kinds — coin, jump, laser, explosion,
+  power-up, hurt, blip, thud — shaped with envelope, pitch, vibrato, arpeggio,
+  duty, filter and crush controls, auditioned on every change. **Send to
+  project** writes the WAV and its editable `.sindrisfx` into `assets/audio/`,
+  lists the clip in `sindri.toml` so exports ship it, and gives the
+  `Audio.play` line to paste; `sindri-chiptune sfx coin --project <dir>` does
+  the same headless. Its music workstation composes A/B chiptune candidates
+  with an undoable piano roll and MIDI import/export; songs save and reopen as
+  `.sindrisong` and send into a project as a looping clip. The Lab wears the
+  editor's forge palette, with a song overview, piano-key gutter, live
+  oscilloscope and keyboard shortcuts.
+  The platformer's jump, landing, coin and flag sounds were made with it.
+
 - Add Day/Night Lab: a configurable Decay clock blends sunrise, midday, sunset
   and night, rotates the shadow-casting sun, and moves an imported prop carrying
   night lights. Frozen-hour controls isolate imported shadows and illumination.

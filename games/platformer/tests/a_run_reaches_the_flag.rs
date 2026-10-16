@@ -2,7 +2,10 @@
 //! on, and a player running right and jumping at each gap and wall reaches
 //! the flag.
 
+use std::collections::BTreeSet;
+
 use platformer::Run;
+use sindri_decay::AudioCommand;
 use sindri_platform::Key;
 use sindri_scene::TilemapComponent;
 
@@ -11,6 +14,15 @@ const STEP: f32 = 1.0 / 60.0;
 fn step(run: &mut Run) {
     let notes = run.step(STEP);
     assert!(notes.is_empty(), "the game reported: {notes:?}");
+}
+
+/// Every clip the scripts asked to play since this was last asked.
+fn listen(run: &mut Run, heard: &mut BTreeSet<String>) {
+    for command in run.session.take_audio_commands() {
+        if let AudioCommand::Play { clip, .. } = command {
+            heard.insert(clip);
+        }
+    }
 }
 
 /// The level's tiles, read from the scene as a player would see them.
@@ -65,11 +77,27 @@ fn a_player_running_and_jumping_reaches_the_flag() {
     let (tilemap, corner) = level(&run);
     run.key(Key::ArrowRight, true);
     let mut holding_jump = 0;
+    let mut heard = BTreeSet::new();
     for frame in 0..60 * 40 {
         step(&mut run);
+        listen(&mut run, &mut heard);
         if run.board("won") > 0.0 {
             assert!(run.board("falls") < 1.0, "it never fell");
             assert!(run.board("coins") >= 3.0, "and picked up coins on the way");
+            // The sounds made in the Sound Lab: each one heard, and each one
+            // a file the project ships rather than one only the editor finds.
+            let manifest = std::fs::read_to_string(platformer::project().join("sindri.toml"))
+                .expect("the manifest");
+            for clip in [
+                "audio/jump.wav",
+                "audio/land.wav",
+                "audio/coin.wav",
+                "audio/goal.wav",
+            ] {
+                assert!(heard.contains(clip), "{clip} was played: {heard:?}");
+                assert!(platformer::project().join("assets").join(clip).is_file());
+                assert!(manifest.contains(&format!("\"{clip}\"")), "{clip} ships");
+            }
             eprintln!("reached the flag after {:.1} s", f64::from(frame) / 60.0);
             return;
         }

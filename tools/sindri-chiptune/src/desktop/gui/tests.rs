@@ -51,17 +51,23 @@ fn workstation_draws_at_wide_and_compact_window_sizes() {
         egui::vec2(900.0, 650.0),
         egui::vec2(760.0, 560.0),
     ] {
-        let context = egui::Context::default();
-        let mut app = ComposerApp::default();
-        let input = egui::RawInput {
-            screen_rect: Some(egui::Rect::from_min_size(egui::Pos2::ZERO, size)),
-            ..Default::default()
-        };
-        let mut output = context.run_ui(input, |ui| {
-            app.workspace(ui);
-        });
-        assert!(!output.shapes.is_empty());
-        output.textures_delta.clear();
+        for mode in [Mode::Music, Mode::Sfx] {
+            let context = egui::Context::default();
+            theme::install(&context);
+            let mut app = ComposerApp {
+                mode,
+                ..ComposerApp::default()
+            };
+            let input = egui::RawInput {
+                screen_rect: Some(egui::Rect::from_min_size(egui::Pos2::ZERO, size)),
+                ..Default::default()
+            };
+            let mut output = context.run_ui(input, |ui| {
+                app.workspace(ui);
+            });
+            assert!(!output.shapes.is_empty(), "{mode:?} at {size:?}");
+            output.textures_delta.clear();
+        }
     }
 }
 
@@ -75,4 +81,56 @@ fn undo_and_redo_restore_imported_tempo_with_notes() {
     assert!((app.settings.bpm - before).abs() < f64::EPSILON);
     app.redo_edit();
     assert!((app.settings.bpm - 160.0).abs() < f64::EPSILON);
+}
+
+#[test]
+fn send_delivers_the_current_effect_and_song_into_the_project() {
+    let dir = tempfile::tempdir().expect("temp");
+    std::fs::write(
+        dir.path().join("sindri.toml"),
+        "[project]\nname = \"Demo\"\n",
+    )
+    .expect("manifest");
+    std::fs::create_dir(dir.path().join("assets")).expect("assets");
+    let mut app = ComposerApp {
+        mode: Mode::Sfx,
+        project: Some(dir.path().to_path_buf()),
+        ..ComposerApp::default()
+    };
+    app.sfx.generate(crate::desktop::sfx::Kind::Laser);
+    app.send_to_project();
+    assert_eq!(
+        app.sfx.snippet.as_deref(),
+        Some("Audio.play(\"audio/laser.wav\", 0.5);")
+    );
+    let source =
+        std::fs::read_to_string(dir.path().join("assets/audio/laser.sindrisfx")).expect("source");
+    assert_eq!(
+        crate::desktop::sfx::SfxFile::from_json(&source).expect("valid"),
+        app.sfx.file
+    );
+
+    app.mode = Mode::Music;
+    app.song_name = "Title Theme".into();
+    app.send_to_project();
+    assert_eq!(
+        app.song_snippet.as_deref(),
+        Some("Audio.loop(\"audio/title-theme.wav\", 0.6);")
+    );
+    let manifest = std::fs::read_to_string(dir.path().join("sindri.toml")).expect("manifest");
+    assert!(manifest.contains("audio/laser.wav") && manifest.contains("audio/title-theme.wav"));
+}
+
+#[test]
+fn effect_history_keeps_recent_sounds_newest_first() {
+    let mut app = ComposerApp::default();
+    app.sfx.generate(crate::desktop::sfx::Kind::Jump);
+    app.sfx.mutate();
+    assert_eq!(app.sfx.history[0], app.sfx.file);
+    assert_eq!(app.sfx.history[1].kind, crate::desktop::sfx::Kind::Jump);
+    assert!(app.sfx.history.len() >= 3);
+    for _ in 0..30 {
+        app.sfx.generate(crate::desktop::sfx::Kind::Blip);
+    }
+    assert!(app.sfx.history.len() <= 14);
 }

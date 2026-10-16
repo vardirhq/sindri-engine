@@ -1,20 +1,20 @@
 //! Native CLI, note model and offline rendering for the standalone workstation.
-use std::{
-    env,
-    error::Error,
-    fs::File,
-    io::{BufWriter, Write},
-    path::PathBuf,
-};
+use serde::{Deserialize, Serialize};
+use std::{env, error::Error, path::PathBuf};
 
 const RATE: u32 = 44_100;
 const BPM: f64 = 118.0;
+mod cli;
 mod composer;
 mod gui;
 mod instruments;
 mod live;
 mod midi;
 mod percussion;
+mod project;
+mod sfx;
+mod song;
+mod wav;
 
 #[derive(Clone, Debug, PartialEq)]
 struct Settings {
@@ -26,7 +26,8 @@ struct Settings {
     output: PathBuf,
     rack: instruments::Rack,
 }
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
 enum Mood {
     Mysterious,
     Hopeful,
@@ -49,7 +50,8 @@ impl Settings {
 
 const BARS: usize = 32;
 const STEPS: usize = BARS * 16;
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 struct Note {
     pitch: i32,
     start: usize,
@@ -165,86 +167,15 @@ fn render_samples(settings: &Settings, tracks: &[Vec<Note>; 3]) -> Vec<f32> {
     audio
 }
 
-// The normalized sample is clamped to the signed 16-bit WAV range before casting.
-#[allow(clippy::cast_possible_truncation)]
 fn render_with(settings: &Settings, tracks: &[Vec<Note>; 3]) -> Result<(), Box<dyn Error>> {
-    let audio = render_samples(settings, tracks);
-    let mut file = BufWriter::new(File::create(&settings.output)?);
-    let bytes = u32::try_from(audio.len())?
-        .checked_mul(2)
-        .ok_or("WAV too long")?;
-    file.write_all(b"RIFF")?;
-    file.write_all(&(36 + bytes).to_le_bytes())?;
-    file.write_all(b"WAVEfmt ")?;
-    file.write_all(&16_u32.to_le_bytes())?;
-    file.write_all(&1_u16.to_le_bytes())?;
-    file.write_all(&1_u16.to_le_bytes())?;
-    file.write_all(&RATE.to_le_bytes())?;
-    file.write_all(&(RATE * 2).to_le_bytes())?;
-    file.write_all(&2_u16.to_le_bytes())?;
-    file.write_all(&16_u16.to_le_bytes())?;
-    file.write_all(b"data")?;
-    file.write_all(&bytes.to_le_bytes())?;
-    for sample in audio {
-        let pcm = (sample.clamp(-1.0, 1.0) * 32767.0).round() as i16;
-        file.write_all(&pcm.to_le_bytes())?;
-    }
-    file.flush()?;
-    Ok(())
+    wav::write(&settings.output, &render_samples(settings, tracks))
 }
 
 pub(super) fn run() -> Result<(), Box<dyn Error>> {
-    let mut settings = Settings::default();
-    let mut args = env::args().skip(1);
     if env::args().len() == 1 {
         return gui::run();
     }
-    while let Some(arg) = args.next() {
-        match arg.as_str() {
-            "--seed" => settings.seed = args.next().ok_or("missing --seed value")?.parse()?,
-            "--output" => {
-                settings.output = PathBuf::from(args.next().ok_or("missing --output path")?);
-            }
-            "--bpm" => settings.bpm = args.next().ok_or("missing --bpm value")?.parse()?,
-            "--energy" => settings.energy = args.next().ok_or("missing --energy value")?.parse()?,
-            "--key" => settings.key = args.next().ok_or("missing --key value")?.parse()?,
-            "--mood" => {
-                settings.mood = match args.next().ok_or("missing --mood value")?.as_str() {
-                    "mysterious" => Mood::Mysterious,
-                    "hopeful" => Mood::Hopeful,
-                    "tense" => Mood::Tense,
-                    "melancholic" => Mood::Melancholic,
-                    _ => {
-                        return Err(
-                            "mood must be mysterious, hopeful, tense, or melancholic".into()
-                        );
-                    }
-                }
-            }
-            "--help" | "-h" => {
-                println!(
-                    "sindri-chiptune [--seed NUMBER] [--output PATH]\nGenerates 32 bars of D-minor exploratory chiptune at 118 BPM."
-                );
-                return Ok(());
-            }
-            _ => return Err(format!("unknown argument: {arg}").into()),
-        }
-    }
-    if !(60.0..=220.0).contains(&settings.bpm)
-        || !(0.0..=1.0).contains(&settings.energy)
-        || !(0..=11).contains(&settings.key)
-    {
-        return Err("bpm must be 60..220, energy 0..1, key 0..11".into());
-    }
-    let tracks = compose_with(&settings);
-    render_with(&settings, &tracks)?;
-    println!(
-        "Wrote {} (seed {}, {} BPM, 32 bars)",
-        settings.output.display(),
-        settings.seed,
-        settings.bpm
-    );
-    Ok(())
+    cli::run(env::args().skip(1).collect())
 }
 
 #[cfg(test)]

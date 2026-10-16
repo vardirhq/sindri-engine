@@ -4,7 +4,7 @@ use rodio::Source;
 use std::{
     num::NonZero,
     sync::{
-        Arc,
+        Arc, Mutex,
         atomic::{AtomicU64, Ordering},
         mpsc::{self, Receiver, Sender},
     },
@@ -19,9 +19,14 @@ pub(super) enum Command {
     Loop(bool),
 }
 
+/// How many of the most recent output samples the oscilloscope sees.
+pub(super) const SCOPE: usize = 1024;
+
 pub(super) struct Transport {
     pub(super) tx: Sender<Command>,
     pub(super) position: Arc<AtomicU64>,
+    /// The latest output, oldest first, for drawing. Never blocks the audio thread.
+    pub(super) scope: Arc<Mutex<Vec<f32>>>,
 }
 
 pub(super) struct LiveSource {
@@ -29,6 +34,7 @@ pub(super) struct LiveSource {
     tracks: [Vec<Note>; 3],
     rx: Receiver<Command>,
     position: Arc<AtomicU64>,
+    scope: Arc<Mutex<Vec<f32>>>,
     sample: u64,
     looped: bool,
     buffer: [f32; 256],
@@ -39,15 +45,18 @@ impl LiveSource {
     pub(super) fn new(settings: Settings, tracks: [Vec<Note>; 3]) -> (Self, Transport) {
         let (tx, rx) = mpsc::channel();
         let position = Arc::new(AtomicU64::new(0));
+        let scope = Arc::new(Mutex::new(vec![0.0; SCOPE]));
         let transport = Transport {
             tx,
             position: Arc::clone(&position),
+            scope: Arc::clone(&scope),
         };
         let source = Self {
             settings,
             tracks,
             rx,
             position,
+            scope,
             sample: 0,
             looped: true,
             buffer: [0.0; 256],
@@ -153,6 +162,11 @@ impl LiveSource {
             self.sample += 1;
         }
         self.position.store(self.sample, Ordering::Relaxed);
+        // A frame the UI is reading is skipped rather than waited for.
+        if let Ok(mut scope) = self.scope.try_lock() {
+            scope.drain(..self.buffer.len());
+            scope.extend_from_slice(&self.buffer);
+        }
         self.offset = 0;
     }
 }
