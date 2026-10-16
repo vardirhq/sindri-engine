@@ -2,7 +2,8 @@
 
 This is the numeric foundation of the planned Explorer material track, with
 native/browser feature-control and GPU evidence. Game adoption and the complete
-shared material asset/texture/alpha/sidedness contract remain open.
+shared material asset/texture/alpha contract remain open. Face visibility has
+an independent shared override, described below.
 
 `sindri-render::MaterialFactors` owns linear `base_color` RGBA, `metallic`,
 `roughness`, and linear RGB `emissive`. Base color, metallic and roughness must
@@ -37,11 +38,12 @@ Attach `sindri.material` to the entity owning a mesh, model or voxel world:
 Missing fields use white base color, nonmetallic, roughness one and zero
 emission. These are absolute factors, not multipliers on imported primitive
 factors. A model override replaces factors across all its primitives while
-keeping their embedded textures, alpha masks, sidedness, hierarchy and shared
+keeping their embedded textures, alpha masks, hierarchy and shared
 geometry. Remove the component to restore imported factors. Alpha factors
 participate in imported masks in both color and shadow draws. Opaque imported
-materials continue ignoring alpha for coverage. This component does not add
-blended transparency or unify geometry-owned alpha/sidedness policy.
+materials continue ignoring alpha for coverage. Missing `sidedness` preserves
+imported face visibility. This component does not add blended transparency or
+unify geometry-owned alpha policy.
 
 Without the component, existing textured world geometry retains its Lambert
 appearance; imported models retain their authored factors and existing GGX
@@ -149,10 +151,11 @@ from cofactors of the model's linear transform; it handles rotation, nonuniform
 scale and reflection without changing uniforms. Singular/near-singular transforms
 (determinant magnitude below 1e-20) fall back to geometric normals.
 
-World color and directional-shadow pipelines now select clockwise front faces
+World color and directional-shadow pipelines select clockwise front faces
 for a negative world determinant, preserving exterior culling for reflected
-cubes, inline meshes and cached geometry. Back-face culling remains enabled;
-this does not add shared sidedness or cutout-shadow policy. Legacy low-level
+cubes, inline meshes and cached geometry. Back-face culling is the default;
+the shared sidedness override below also applies to these pipelines. Cutout-shadow
+policy remains separate work. Legacy low-level
 MVP-only draw methods still assume an identity world transform; project frames
 use the separate-world-transform methods.
 
@@ -182,3 +185,66 @@ WASM, authored-color capture, formatting and file-size gates pass. Catalog
 regeneration produces no changes. The fixed 300-prop on/off benchmark reconfirms
 602/301 draws, 603/301 passes and 138,032/115,568 uniform bytes with valid GPU
 timing. These are correctness/counter checks, not a performance improvement.
+
+## Face visibility
+
+`sindri.material.sidedness` is a checked choice: `inherit` (the default),
+`single`, or `double`. It applies to the owning cube, inline surface, cached
+voxel sections, or every primitive of an imported model. Other entities and
+children retain their own settings. Unknown spellings and nonstring values
+reject the component. The editor exposes the choice through checked commands
+and undo/redo, using the same registration as generated component documentation.
+
+```json
+"sindri.material": {
+  "base_color": [0.85, 0.4, 0.06, 1.0],
+  "roughness": 0.7,
+  "sidedness": "double"
+}
+```
+
+`inherit` preserves each imported primitive's authored `doubleSided`; other
+world geometry is single-sided. Explicit `single` can override an imported
+double-sided primitive. Removing the component restores inherited visibility
+alongside its existing factor restoration. Existing numeric-only overrides keep
+their prior behavior because omitted sidedness inherits. Alpha masks, texture
+ownership and legacy-look opt-in are unchanged.
+
+`FramePass.sidedness` carries renderer-owned `MaterialSidedness` independently
+of numeric factors. Both color and shadow encoding reset it for every pass.
+Textured pipelines select front-face orientation and culling independently:
+reflections preserve the outward side, and double-sided draws disable culling.
+Visible backs flip interpolated authored normals toward the viewed side; flat
+geometric normals already face the viewer. Imported color/shadow shaders use
+the resolved policy with their existing orientation and normal logic.
+
+Changing sidedness does not replace geometry, remesh voxels or upload model
+assets. Two additional color and two additional shadow pipelines per textured
+renderer cover double-sided reflected/unreflected draws. Uniform layouts,
+draw/pass counts and per-draw queue writes are unchanged. This is face visibility,
+not blended transparency, cutout-shadow unification or shared material assets.
+
+GPU readbacks exercise inherited/forced/restored model settings, lit backs of
+transient/retained/cached surfaces, a cube viewed from inside, reflected geometry,
+matching directional-shadow coverage and geometry residency. Scene tests cover
+checked removal/undo/redo and voxel overrides without remeshing. Lighting Lab
+adds two back-facing orange panels: `Single-sided panel` is hidden from its
+camera; `Double-sided panel` is visible and receives lighting on its back.
+The `prepare-lighting3d.py --single-sided` control changes only the latter's
+material policy. Native and real WebGPU capture comparisons require the visible
+orange panel to disappear in that control. This is feature proof for the planned
+Explorer material track; in-tree game adoption remains open.
+
+Native review of the paired panels measures 3,550 changed/orange pixels at
+960×540 when the double-sided control becomes single-sided. The 300-prop
+baseline remains byte-identical, with 602/301 shadow-on/off draws and no
+settled geometry uploads; offscreen and native-editor authored-color checks pass.
+In a scratch Lighting Lab project, the editor choice hides/restores the panel,
+Undo/Redo restores each policy, and saving and reopening preserves `single`.
+Native Play reaches the existing lighting goal with that saved policy.
+
+Real Chromium/WebGPU delivery measures the same 3,550 changed/orange pixels.
+The lights-off control removes 91,020 brightened pixels, including 5,059 red
+and 69,820 blue pixels; all three Lighting Lab exports fetch their six assets,
+exercise the live point/spot phases and reach the scripted goal without GPU or
+runtime errors. The existing browser benchmark remains byte-identical.

@@ -233,6 +233,7 @@ fn encode_directional_shadows(
         .filter(|pass| pass.stage == RenderStage::Opaque3d)
     {
         cube.set_material(pass.material)?;
+        cube.set_sidedness(pass.sidedness);
         match &pass.command {
             FrameCommand::Model { model, asset } => {
                 cube.encode_shadow_model(device, queue, encoder, asset, *model)?;
@@ -332,6 +333,7 @@ fn encode_passes<'p>(
         shape_renderer.set_clip(pass.clip);
         cube_renderer.set_camera_position(pass.camera.position);
         cube_renderer.set_material(pass.material)?;
+        cube_renderer.set_sidedness(pass.sidedness);
         match &pass.command {
             FrameCommand::Model { model, asset } => {
                 cube_renderer.encode_model(

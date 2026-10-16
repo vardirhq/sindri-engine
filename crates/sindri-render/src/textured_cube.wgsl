@@ -65,7 +65,7 @@ fn vs_main(input: VertexInput) -> VertexOutput {
 }
 
 @fragment
-fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
+fn fs_main(input: VertexOutput, @builtin(front_facing) front: bool) -> @location(0) vec4<f32> {
     let sampled = uniforms.base_color * textureSample(cube_texture, cube_sampler, input.uv);
     // A cutout surface has holes where its art does, rather than a square.
     if sampled.a < uniforms.surface.w {
@@ -79,7 +79,7 @@ fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
     let geometric_normal = normalize(cross(dy, dx));
     var normal = geometric_normal;
     if dot(input.normal, input.normal) > 0.0 {
-        normal = normalize(input.normal);
+        normal = normalize(input.normal) * select(-1.0, 1.0, front);
     }
     let light_direction = normalize(uniforms.directional_direction.xyz);
     let diffuse = max(dot(normal, -light_direction), 0.0);

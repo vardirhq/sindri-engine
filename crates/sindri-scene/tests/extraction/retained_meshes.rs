@@ -59,7 +59,7 @@ fn draw_state_reuses_geometry_but_atlas_layout_rebuilds_it() {
         .unwrap()["layer"] = 7.into();
     world.get_mut(entity).unwrap().components.insert(
         "sindri.material".into(),
-        serde_json::json!({"metallic":0.5}),
+        serde_json::json!({"metallic":0.5,"sidedness":"double"}),
     );
     assert!(Arc::ptr_eq(
         &original,
@@ -214,4 +214,52 @@ fn surfaces_accept_indices_above_the_u16_range_and_reject_bad_triangles() {
             sindri_render::MeshGeometryError::InvalidIndices
         ))
     ));
+}
+
+#[test]
+fn sidedness_history_keeps_geometry_and_old_frame_policy_independent() {
+    use sindri_render::MaterialSidedness;
+    let mut world = fixture();
+    let extractor = SceneExtractor::new().unwrap();
+    let textures = animated_bindings();
+    let original = geometry(&extractor, &world, &textures);
+    let before = extractor
+        .extract(&world, VIEWPORT, CameraView::default(), &textures)
+        .unwrap();
+    let entity = world
+        .entity_for_source_id(&SceneEntityId::new("mesh").unwrap())
+        .unwrap();
+    let mut commands = CommandBuffer::new();
+    commands.push(WorldCommand::SetComponent {
+        entity,
+        type_name: "sindri.material".into(),
+        payload: serde_json::json!({"sidedness":"double"}),
+    });
+    let mut history = CommandHistory::default();
+    history
+        .apply(
+            commands.into_transaction("Double-sided Surface"),
+            &mut world,
+        )
+        .unwrap();
+    for expected in [
+        MaterialSidedness::Double,
+        MaterialSidedness::Inherit,
+        MaterialSidedness::Double,
+    ] {
+        let frame = extractor
+            .extract(&world, VIEWPORT, CameraView::default(), &textures)
+            .unwrap();
+        assert_eq!(frame.passes()[0].sidedness, expected);
+        assert_eq!(before.passes()[0].sidedness, MaterialSidedness::Inherit);
+        let FrameCommand::RetainedTexturedMesh { geometry, .. } = &frame.passes()[0].command else {
+            panic!()
+        };
+        assert!(Arc::ptr_eq(&original, geometry));
+        if expected == MaterialSidedness::Double {
+            history.undo(&mut world).unwrap();
+        } else {
+            history.redo(&mut world).unwrap();
+        }
+    }
 }

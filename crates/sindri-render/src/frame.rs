@@ -157,6 +157,8 @@ pub struct FramePass {
     pub clip: Option<[u32; 4]>,
     /// Optional standard factors; imported primitives retain their factors when absent.
     pub material: Option<crate::MaterialFactors>,
+    /// Face visibility, independent of standard factors and geometry ownership.
+    pub sidedness: crate::MaterialSidedness,
 }
 
 impl FramePass {
@@ -180,6 +182,7 @@ impl FramePass {
             insertion_order: 0,
             clip: None,
             material: None,
+            sidedness: crate::MaterialSidedness::Inherit,
         }
     }
 }

@@ -5,7 +5,7 @@ use glam::{Mat4, Quat, Vec3};
 use sindri_render::{FogSettings, FrameEncodeError, ModelRenderError, RenderModel};
 use std::sync::Arc;
 
-fn caster(
+pub(super) fn caster(
     alphas: [u8; 3],
     cutoff: Option<f32>,
     factor: f32,
@@ -40,7 +40,7 @@ fn caster(
     Arc::new(RenderModel::new(data).unwrap())
 }
 
-fn darkened(before: &[u8], after: &[u8]) -> usize {
+pub(super) fn darkened(before: &[u8], after: &[u8]) -> usize {
     before
         .chunks_exact(4)
         .zip(after.chunks_exact(4))

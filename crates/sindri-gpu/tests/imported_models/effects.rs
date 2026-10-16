@@ -23,6 +23,18 @@ pub(super) struct Scene {
 }
 
 impl Scene {
+    pub(super) fn edit_caster(&mut self, mut edit: impl FnMut(&mut FramePass)) {
+        let mut frame = ExtractedFrame::new(self.frame.viewport(), self.frame.clear());
+        let last = self.frame.passes().len() - 1;
+        for (index, mut pass) in self.frame.passes().iter().cloned().enumerate() {
+            if index == last {
+                edit(&mut pass);
+            }
+            frame.push(pass);
+        }
+        self.frame = frame.prepare().unwrap();
+    }
+
     pub(super) fn new(gpu: &GpuContext) -> Self {
         let format = OffscreenTarget::FORMAT;
         let mut textures = TextureRegistry::new(&gpu.device, &gpu.queue);

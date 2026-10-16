@@ -28,6 +28,7 @@ pub(crate) struct ModelDraw<'a> {
     pub shadows: ShadowSettings,
     pub fog: FogSettings,
     pub material: Option<crate::MaterialFactors>,
+    pub sidedness: crate::MaterialSidedness,
 }
 
 #[derive(Debug)]
@@ -259,7 +260,7 @@ fn uniform(draw: &ModelDraw<'_>, world: Mat4, surface: &ModelSurface) -> Uniform
             factors.metallic,
             factors.roughness,
             surface.alpha_cutoff.unwrap_or(-1.0),
-            f32::from(surface.double_sided),
+            f32::from(draw.sidedness.resolve(surface.double_sided)),
         ],
         ambient: ambient.extend(0.0).to_array(),
         direction: direction.extend(world.determinant().signum()).to_array(),

@@ -137,7 +137,7 @@ struct VertexInput { @location(0) position: vec3<f32>, @location(1) uv: vec2<f32
 
 pub(crate) fn create_shadow_pipeline(
     device: &wgpu::Device,
-) -> (wgpu::BindGroupLayout, [wgpu::RenderPipeline; 2]) {
+) -> (wgpu::BindGroupLayout, [wgpu::RenderPipeline; 4]) {
     let bind_group_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
         label: Some("Sindri shadow bind group layout"),
         entries: &[wgpu::BindGroupLayoutEntry {
@@ -160,7 +160,13 @@ pub(crate) fn create_shadow_pipeline(
         bind_group_layouts: &[Some(&bind_group_layout)],
         immediate_size: 0,
     });
-    let pipeline = [wgpu::FrontFace::Ccw, wgpu::FrontFace::Cw].map(|front_face| {
+    let pipeline = [
+        (wgpu::FrontFace::Ccw, false),
+        (wgpu::FrontFace::Cw, false),
+        (wgpu::FrontFace::Ccw, true),
+        (wgpu::FrontFace::Cw, true),
+    ]
+    .map(|(front_face, double_sided)| {
         device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
             label: Some("Sindri shadow pipeline"),
             layout: Some(&layout),
@@ -172,7 +178,11 @@ pub(crate) fn create_shadow_pipeline(
             },
             fragment: None,
             primitive: wgpu::PrimitiveState {
-                cull_mode: Some(wgpu::Face::Back),
+                cull_mode: if double_sided {
+                    None
+                } else {
+                    Some(wgpu::Face::Back)
+                },
                 front_face,
                 ..Default::default()
             },

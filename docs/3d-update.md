@@ -68,7 +68,8 @@ The foundation stops after Day/Night Lab. No unchecked feature below is a
 merge gate for PR #507. Continue with separate, reviewable PRs in this order:
 
 1. Retained inline geometry/u32 feature proof meets the zero-settled-upload
-   target (slices 2 and 3; [contract](retained-meshes.md)). Next, finish measurement
+   target (slices 2 and 3; [contract](retained-meshes.md)). Explicit material face
+   visibility now has native/editor/WebGPU feature proof. Next, finish measurement
    coverage alongside subsequent rendering work and define the shared material
    assets/alpha contract (slice 3).
 2. Batch and instance repeated geometry, and cull meshes and models against
@@ -150,8 +151,12 @@ The yaw/pitch/roll convention remains radians, Y-up, -Z forward and YXZ order.
   - [x] Preserve and render core GLB emissive factors, including override/removal
     and masked-shadow invariance, with native/browser imported controls. Emissive
     maps and game adoption remain open.
-  - [ ] Shared material assets/texture bindings, unified alpha/sidedness
-    and legacy-look migration.
+  - [ ] Shared material assets/texture bindings, unified alpha and legacy-look migration.
+  - [x] Shared inherit/single/double sidedness across cubes, inline/cached surfaces,
+    voxel owners and imported primitives. GPU color/shadow, reflection, history
+    and residency regressions pass; native/WebGPU panel controls and editor
+    edit/Undo/Redo/save/reopen/Play prove the slice.
+    See [face visibility](rendering-materials.md#face-visibility). Game adoption remains open.
   - base color (factor and texture);
   - metallic/roughness;
   - emissive (replaces `glow`);

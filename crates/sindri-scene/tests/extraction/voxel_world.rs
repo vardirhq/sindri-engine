@@ -334,7 +334,7 @@ fn voxel_material_override_does_not_rebuild_resident_geometry() {
     commands.push(WorldCommand::SetComponent {
         entity,
         type_name: "sindri.material".into(),
-        payload: serde_json::json!({"metallic":0.5}),
+        payload: serde_json::json!({"metallic":0.5,"sidedness":"double"}),
     });
     CommandHistory::default()
         .apply(commands.into_transaction("Terrain Material"), &mut world)
@@ -347,7 +347,7 @@ fn voxel_material_override_does_not_rebuild_resident_geometry() {
         if let FrameCommand::CachedTexturedMesh { replacement, .. } = &pass.command {
             assert!(
                 replacement.is_none(),
-                "numeric factors never re-mesh terrain"
+                "material changes never re-mesh terrain"
             );
             assert_eq!(
                 pass.material,
@@ -356,6 +356,7 @@ fn voxel_material_override_does_not_rebuild_resident_geometry() {
                     ..Default::default()
                 })
             );
+            assert_eq!(pass.sidedness, sindri_render::MaterialSidedness::Double);
             counted += 1;
         }
     }

@@ -33,6 +33,7 @@ pub(crate) struct ModelShadowDraw<'a> {
     pub projection: Mat4,
     pub target: &'a wgpu::TextureView,
     pub material: Option<crate::MaterialFactors>,
+    pub sidedness: crate::MaterialSidedness,
 }
 
 impl ShadowRenderer {
@@ -150,7 +151,7 @@ impl ModelRenderer {
                             .map_or(surface.base_color, |factors| factors.base_color),
                         surface: [
                             surface.alpha_cutoff.unwrap_or(-1.0),
-                            f32::from(surface.double_sided),
+                            f32::from(draw.sidedness.resolve(surface.double_sided)),
                             world.determinant().signum(),
                             0.0,
                         ],

@@ -492,9 +492,14 @@ fn register_material(components: &mut ComponentSchemaRegistry) -> Result<(), Sce
     components.register_with_default::<crate::MaterialComponent>(
         "Material",
         serde_json::json!({"base_color": [1.0, 1.0, 1.0, 1.0], "metallic": 0.0,
-                           "roughness": 1.0, "emissive": [0.0, 0.0, 0.0]}),
+                           "roughness": 1.0, "emissive": [0.0, 0.0, 0.0], "sidedness": "inherit"}),
     )?;
-    components
-        .describe::<crate::MaterialComponent>([("base_color", sindri_core::FieldMeaning::Color)])?;
+    components.describe::<crate::MaterialComponent>([
+        ("base_color", sindri_core::FieldMeaning::Color),
+        (
+            "sidedness",
+            sindri_core::FieldMeaning::choice(["inherit", "single", "double"]),
+        ),
+    ])?;
     Ok(())
 }

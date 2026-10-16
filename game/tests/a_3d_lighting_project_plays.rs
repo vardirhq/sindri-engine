@@ -55,7 +55,23 @@ fn check_geometry(player: &ProjectPlayer) {
             _ => panic!("unexpected 3D lab geometry"),
         }
     }
-    assert_eq!(counts, [4, 1, 2]);
+    assert_eq!(counts, [4, 3, 2]);
+    assert_eq!(
+        frame
+            .passes()
+            .iter()
+            .filter(|p| p.sidedness == sindri_render::MaterialSidedness::Double)
+            .count(),
+        1
+    );
+    assert_eq!(
+        frame
+            .passes()
+            .iter()
+            .filter(|p| p.sidedness == sindri_render::MaterialSidedness::Single)
+            .count(),
+        1
+    );
     let environment = player.scene.environment(&player.world).unwrap().unwrap();
     assert!((environment.ambient_intensity - 0.025).abs() < 1e-6);
     assert_close(environment.ambient_color.map(f64::from), [1.0; 3]);

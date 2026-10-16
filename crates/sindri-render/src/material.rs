@@ -2,8 +2,30 @@
 
 use thiserror::Error;
 
+/// Face visibility shared by world geometry and imported model primitives.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub enum MaterialSidedness {
+    /// Preserve imported primitive settings; other geometry is single-sided.
+    #[default]
+    Inherit,
+    Single,
+    Double,
+}
+
+impl MaterialSidedness {
+    #[must_use]
+    pub const fn resolve(self, inherited: bool) -> bool {
+        match self {
+            Self::Inherit => inherited,
+            Self::Single => false,
+            Self::Double => true,
+        }
+    }
+}
+
 /// Linear factors shared by textured geometry and imported model primitives.
-/// Textures, alpha mode and sidedness remain owned by their geometry resources.
+/// Textures and alpha mode remain owned by geometry resources; face visibility
+/// uses the independent `FramePass::sidedness` override.
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct MaterialFactors {
     pub base_color: [f32; 4],

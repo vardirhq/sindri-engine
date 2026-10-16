@@ -1,7 +1,7 @@
 //! Textured mesh normals match the imported-model inverse-transpose path.
 use super::*;
 
-fn authored(scene: &mut Scene, normals: [[f32; 3]; 4], transform: Mat4) {
+pub(super) fn authored(scene: &mut Scene, normals: [[f32; 3]; 4], transform: Mat4) {
     let FrameCommand::Model { asset, .. } = &scene.frames[1].passes()[1].command else {
         panic!("model expected");
     };

@@ -59,7 +59,7 @@ pub use light2d::{
 pub use lighting::{
     LocalLight, MAX_LOCAL_LIGHTS, PointLight, PointLightError, SpotCone, WorldLighting,
 };
-pub use material::{MaterialError, MaterialFactors};
+pub use material::{MaterialError, MaterialFactors, MaterialSidedness};
 pub use mesh::{ColoredVertex, MeshBuffers, TexturedVertex};
 pub use mesh_stats::MeshDrawStats;
 pub use model::{

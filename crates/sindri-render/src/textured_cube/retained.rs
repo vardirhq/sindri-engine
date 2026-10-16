@@ -40,7 +40,7 @@ impl TexturedCubeRenderer {
             self.material,
             (
                 &batch.uniform,
-                &self.pipeline[orientation(model)],
+                &self.pipeline[orientation(model, self.sidedness)],
                 bind_group,
             ),
             mesh,
@@ -68,7 +68,7 @@ impl TexturedCubeRenderer {
             self.shadow_view_projection * model,
             &self.batches[slot].shadow_uniform,
             &self.batches[slot].shadow_bind_group,
-            &self.shadow_pipeline[orientation(model)],
+            &self.shadow_pipeline[orientation(model, self.sidedness)],
             mesh,
             &mut self.draw_stats,
         );

@@ -32,6 +32,7 @@ impl TexturedCubeRenderer {
                 projection: self.shadow_view_projection,
                 target: self.shadow_map.view(),
                 material: self.material,
+                sidedness: self.sidedness,
             },
         )
     }
@@ -61,6 +62,7 @@ impl TexturedCubeRenderer {
                 shadows: self.shadow_settings,
                 fog: self.fog,
                 material: self.material,
+                sidedness: self.sidedness,
             },
         )
     }
