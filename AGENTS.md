@@ -120,7 +120,8 @@ These documents govern the work:
   before changing Decay scripts or their host APIs.
 - `docs/decay-lsp-modernization.md` — mandatory checklist for Decay language-server,
   editor tooling, batch preflight, structured diagnostics, and agent-tooling work.
-- `docs/capabilities.md` — detailed evidence for what actually works.
+- `docs/capabilities.md` — detailed evidence for what actually works, generated
+  from one TOML file per area in `docs/capabilities/`.
 - `docs/parity.md` — what an engine is expected to do, what Sindri does, and the
   distance between them; carries the Engine / Editor / Decay / proof status that
   the function and feature-integration matrices used to hold separately.
@@ -193,7 +194,13 @@ When a capability changes, update the relevant documentation in the same commit:
 
 - `docs/parity.md` for Engine / Editor / Decay / proof status, and for the
   judgement against what an engine is expected to do.
-- `docs/capabilities.md` for detailed evidence and limitations.
+- `docs/capabilities/<area>.toml` for detailed evidence and limitations, then
+  regenerate `docs/capabilities.md` and the area pages with
+  `cargo run -p sindri-capabilities -- --write`. The pages are never
+  hand-edited. The generator refuses a named test, proof project or document
+  that does not exist, a ✅ or 🟡 with no evidence behind it, and a `status`
+  that disagrees with the `parity` row the entry names — so when a parity row
+  changes, the entry naming it changes in the same commit.
 - The relevant subsystem contract in `docs/` when behaviour changes.
 - `docs/generated/` when the Decay host surface or a component registration
   changes — regenerate with `cargo run -p sindri-capabilities -- --write`.

@@ -2,13 +2,14 @@ use js_sys::Uint8Array;
 use sindri_core::{AssetId, AssetLoadErrorKind};
 use wasm_bindgen::JsCast;
 use wasm_bindgen_futures::JsFuture;
-use web_sys::Response;
+use web_sys::{RequestCache, RequestInit, Response};
 
 use crate::{AssetBytes, AssetSource, AssetSourceError, AssetSourceFuture, UrlRoot, UrlRootError};
 
 #[derive(Clone, Debug, Default)]
 pub struct FetchAssetSource {
     root: UrlRoot,
+    revalidate: bool,
 }
 
 impl FetchAssetSource {
@@ -19,13 +20,27 @@ impl FetchAssetSource {
     pub fn new(root: impl Into<String>) -> Result<Self, UrlRootError> {
         Ok(Self {
             root: UrlRoot::new(root)?,
+            revalidate: false,
         })
+    }
+
+    /// Asks the server whether each file changed before using a cached copy.
+    ///
+    /// For a file that keeps its URL while its contents change, such as an
+    /// export's manifest. A static host may still tell browsers to keep it for
+    /// minutes, and a stale manifest names a content directory the next deploy
+    /// already removed, so every asset after it fails with a 404.
+    #[must_use]
+    pub const fn revalidating(mut self) -> Self {
+        self.revalidate = true;
+        self
     }
 
     /// Creates a source resolving against the page's own directory.
     pub fn relative() -> Self {
         Self {
             root: UrlRoot::relative(),
+            revalidate: false,
         }
     }
 
@@ -50,7 +65,14 @@ impl AssetSource for FetchAssetSource {
                     "browser Window is unavailable",
                 )
             })?;
-            let response = JsFuture::from(window.fetch_with_str(&url))
+            let request = if self.revalidate {
+                let init = RequestInit::new();
+                init.set_cache(RequestCache::NoCache);
+                window.fetch_with_str_and_init(&url, &init)
+            } else {
+                window.fetch_with_str(&url)
+            };
+            let response = JsFuture::from(request)
                 .await
                 .map_err(|error| js_error(id, "fetch request failed", &error))?
                 .dyn_into::<Response>()

@@ -551,71 +551,177 @@
     "rotation": [
      0,
      0,
-     0.0,
-     1.0
+     0,
+     1
     ],
     "scale": [
-     1.1,
-     1.1,
+     1.5,
+     1.5,
      1
     ]
    },
    "components": {
     "sindri.sprite": {
-     "texture": "textures/crew.png#down-0",
-     "layer": 6,
-     "normal_map": "textures/crew_n.png"
+     "texture": "textures/Keeper-Idle-spritesheet/Keeper-Idle.png#south-idle",
+     "layer": 6
     },
     "sindri.animation.sprite": {
      "clips": {
-      "down": {
+      "south-run": {
        "frames": [
-        "down-0",
-        "down-1"
+        "south-run-0",
+        "south-run-1",
+        "south-run-2",
+        "south-run-3",
+        "south-run-4",
+        "south-run-5"
        ],
-       "seconds_per_frame": 0.18,
+       "seconds_per_frame": 0.11,
        "looping": true
       },
-      "up": {
+      "south-still": {
        "frames": [
-        "up-0",
-        "up-1"
-       ],
-       "seconds_per_frame": 0.18,
-       "looping": true
-      },
-      "side": {
-       "frames": [
-        "side-0",
-        "side-1"
-       ],
-       "seconds_per_frame": 0.18,
-       "looping": true
-      },
-      "down-still": {
-       "frames": [
-        "down-0"
+        "south-idle"
        ],
        "seconds_per_frame": 0.5,
        "looping": false
       },
-      "up-still": {
+      "south-east-run": {
        "frames": [
-        "up-0"
+        "south-east-run-0",
+        "south-east-run-1",
+        "south-east-run-2",
+        "south-east-run-3",
+        "south-east-run-4",
+        "south-east-run-5"
+       ],
+       "seconds_per_frame": 0.11,
+       "looping": true
+      },
+      "south-east-still": {
+       "frames": [
+        "south-east-idle"
        ],
        "seconds_per_frame": 0.5,
        "looping": false
       },
-      "side-still": {
+      "east-run": {
        "frames": [
-        "side-0"
+        "east-run-0",
+        "east-run-1",
+        "east-run-2",
+        "east-run-3",
+        "east-run-4",
+        "east-run-5"
+       ],
+       "seconds_per_frame": 0.11,
+       "looping": true
+      },
+      "east-still": {
+       "frames": [
+        "east-idle"
+       ],
+       "seconds_per_frame": 0.5,
+       "looping": false
+      },
+      "north-east-run": {
+       "frames": [
+        "north-east-run-0",
+        "north-east-run-1",
+        "north-east-run-2",
+        "north-east-run-3",
+        "north-east-run-4",
+        "north-east-run-5"
+       ],
+       "seconds_per_frame": 0.11,
+       "looping": true
+      },
+      "north-east-still": {
+       "frames": [
+        "north-east-idle"
+       ],
+       "seconds_per_frame": 0.5,
+       "looping": false
+      },
+      "north-run": {
+       "frames": [
+        "north-run-0",
+        "north-run-1",
+        "north-run-2",
+        "north-run-3",
+        "north-run-4",
+        "north-run-5"
+       ],
+       "seconds_per_frame": 0.11,
+       "looping": true
+      },
+      "north-still": {
+       "frames": [
+        "north-idle"
+       ],
+       "seconds_per_frame": 0.5,
+       "looping": false
+      },
+      "north-west-run": {
+       "frames": [
+        "north-west-run-0",
+        "north-west-run-1",
+        "north-west-run-2",
+        "north-west-run-3",
+        "north-west-run-4",
+        "north-west-run-5"
+       ],
+       "seconds_per_frame": 0.11,
+       "looping": true
+      },
+      "north-west-still": {
+       "frames": [
+        "north-west-idle"
+       ],
+       "seconds_per_frame": 0.5,
+       "looping": false
+      },
+      "west-run": {
+       "frames": [
+        "west-run-0",
+        "west-run-1",
+        "west-run-2",
+        "west-run-3",
+        "west-run-4",
+        "west-run-5"
+       ],
+       "seconds_per_frame": 0.11,
+       "looping": true
+      },
+      "west-still": {
+       "frames": [
+        "west-idle"
+       ],
+       "seconds_per_frame": 0.5,
+       "looping": false
+      },
+      "south-west-run": {
+       "frames": [
+        "south-west-run-0",
+        "south-west-run-1",
+        "south-west-run-2",
+        "south-west-run-3",
+        "south-west-run-4",
+        "south-west-run-5"
+       ],
+       "seconds_per_frame": 0.11,
+       "looping": true
+      },
+      "south-west-still": {
+       "frames": [
+        "south-west-idle"
        ],
        "seconds_per_frame": 0.5,
        "looping": false
       }
      },
-     "playing": "down-still",
-     "speed": 1.0
+     "playing": "south-still",
+     "speed": 1
     },
     "sindri.script": {
      "source": "scripts/crew.decay",
@@ -626,7 +732,7 @@
     }
    }
   },
-  {
+   {
    "id": "swim-wake",
    "name": "Swim wake",
    "parent": "crew",
@@ -634,7 +740,7 @@
    "transform_3d": {
     "position": [
      0,
-     -0.15,
+     -0.11,
      0.05
     ],
     "rotation": [
@@ -644,8 +750,8 @@
      1.0
     ],
     "scale": [
-     1.55,
-     0.6,
+     1.14,
+     0.44,
      1
     ]
    },
@@ -706,8 +812,8 @@
      1.0
     ],
     "scale": [
-     0.5,
-     0.5,
+     0.37,
+     0.37,
      1
     ]
    },
@@ -3124,8 +3230,8 @@
      1.0
     ],
     "scale": [
-     1.0,
-     1.0,
+     0.73,
+     0.73,
      1
     ]
    },

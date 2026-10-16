@@ -22,9 +22,10 @@
 mod components;
 mod decay;
 mod decay_language;
+mod entries;
 mod markdown;
 
-use std::fmt;
+use std::{fmt, path::Path};
 
 use sindri_scene::SceneExtractError;
 
@@ -41,7 +42,7 @@ pub const REGENERATE_COMMAND: &str = "cargo run -p sindri-capabilities -- --writ
 /// One file this tool owns, and what it should contain right now.
 pub struct GeneratedDocument {
     /// Where it lives, relative to the repository root.
-    pub path: &'static str,
+    pub path: String,
     pub contents: String,
 }
 
@@ -54,6 +55,9 @@ pub enum CapabilitiesError {
     /// opens a scene, so this is the engine refusing to start.
     Components(SceneExtractError),
     Json(serde_json::Error),
+    /// A capability source in `docs/capabilities/` failed its checks; one line
+    /// per problem.
+    Entries(Vec<String>),
 }
 
 impl fmt::Display for CapabilitiesError {
@@ -66,6 +70,13 @@ impl fmt::Display for CapabilitiesError {
                 )
             }
             Self::Json(error) => write!(formatter, "the description would not serialize: {error}"),
+            Self::Entries(problems) => {
+                write!(formatter, "the capability entries do not check:")?;
+                for problem in problems {
+                    write!(formatter, "\n  {problem}")?;
+                }
+                Ok(())
+            }
         }
     }
 }
@@ -75,6 +86,7 @@ impl std::error::Error for CapabilitiesError {
         match self {
             Self::Components(error) => Some(error),
             Self::Json(error) => Some(error),
+            Self::Entries(_) => None,
         }
     }
 }
@@ -100,25 +112,40 @@ impl From<serde_json::Error> for CapabilitiesError {
 pub fn documents() -> Result<Vec<GeneratedDocument>, CapabilitiesError> {
     let decay_api = decay::describe();
     let capabilities = components::describe()?;
+    let pages = entries::pages(repository_root()).map_err(CapabilitiesError::Entries)?;
 
-    Ok(vec![
+    let mut documents = vec![
         GeneratedDocument {
-            path: "docs/generated/decay-api.json",
+            path: "docs/generated/decay-api.json".to_owned(),
             contents: to_json(&decay_api.to_json())?,
         },
         GeneratedDocument {
-            path: "docs/generated/decay-api.md",
+            path: "docs/generated/decay-api.md".to_owned(),
             contents: markdown::render(&decay_api),
         },
         GeneratedDocument {
-            path: "docs/generated/decay-language.json",
+            path: "docs/generated/decay-language.json".to_owned(),
             contents: to_json(&decay_language::describe())?,
         },
         GeneratedDocument {
-            path: "docs/generated/sindri-capabilities.json",
+            path: "docs/generated/sindri-capabilities.json".to_owned(),
             contents: to_json(&capabilities)?,
         },
-    ])
+    ];
+    documents.extend(pages.into_iter().map(|page| GeneratedDocument {
+        path: page.path,
+        contents: page.contents,
+    }));
+    Ok(documents)
+}
+
+/// The workspace root, from where Cargo put this crate rather than from the
+/// current directory, so the tool reads and writes the right files from anywhere.
+pub fn repository_root() -> &'static Path {
+    Path::new(env!("CARGO_MANIFEST_DIR"))
+        .parent()
+        .and_then(Path::parent)
+        .expect("the crate lives two directories below the repository root")
 }
 
 /// Pretty-printed and newline-terminated, because these files are read in diffs

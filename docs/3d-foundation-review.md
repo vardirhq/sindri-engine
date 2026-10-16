@@ -51,18 +51,24 @@ emitting checked commands; Undo/Redo and save/reopen are exercised. Pointer
 capture follows actual host state, releases on focus/Escape, and rejects stale
 asynchronous browser grants after release.
 
-The final integration includes current main's browser startup-failure page and
-its smoke assertions. Validation checks the combined template rather than
-relying on the pre-merge exports.
+The final integration includes main's browser startup-failure page and manifest
+cache revalidation. It preserves Low Tide's updated Keeper assets/scripts and
+moves this branch's capability evidence into the per-area TOML inventory,
+regenerating its pages rather than retaining the old hand-written index.
+Validation checks the combined template and rebuilt browser player.
 
 ## Validation
 
 The combined foundation/main tree passes warning-denied workspace Clippy,
-all-target/all-feature tests (3,247 passing), the full WASM graph, and a separate
+workspace tests with all features (3,247 passing), the full WASM graph, and a separate
 required-GPU/timestamp run (163 passing). The separate Decay workspace passes
 formatting, Clippy and tests. Typed preflight checks all ten changed scripts
 with zero errors and zero runtime-contract reminders. Formatting, file-size,
-generated catalogue freshness and final diff checks pass.
+generated catalogue freshness and final diff checks pass. The subsequent
+main integration passes 165 affected-crate tests, including Low Tide's scripted
+runs and the migrated inventory checks. Full workspace Clippy and WASM checks
+pass again; all 25 documentation pages build and inventory evidence links
+resolve.
 
 Fresh exports pass missing-canvas, missing-adapter and refused-device startup
 checks against the integrated browser template. The same template runs the
