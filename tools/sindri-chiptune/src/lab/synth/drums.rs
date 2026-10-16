@@ -1,6 +1,6 @@
 //! A synthesized kit and the patterns it plays, per mood, section and energy.
 use super::dsp::{Noise, OnePole, Osc, RATE, Shape, Svf, pan};
-use crate::lab::{Mood, instruments::Preset};
+use crate::lab::{composer::Groove, instruments::Preset};
 use std::f64::consts::TAU;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -276,20 +276,142 @@ fn chance(seed: u64, bar: usize, slot: usize, salt: u64) -> f64 {
     f64::from(u32::try_from(h >> 40).expect("24 bits")) / f64::from(1_u32 << 24)
 }
 
-/// How late an off-beat sixteenth lands, as a fraction of a step.
-pub(super) fn swing(mood: Mood) -> f64 {
-    match mood {
-        Mood::Hopeful => 0.14,
-        Mood::Melancholic => 0.1,
-        Mood::Mysterious => 0.06,
-        Mood::Tense => 0.0,
+fn mask(slots: &[usize]) -> u16 {
+    slots.iter().fold(0, |m, s| m | 1 << s)
+}
+
+fn on(mask: u16, slot: usize) -> bool {
+    mask & (1 << slot) != 0
+}
+
+/// One song's drum part: where each piece falls in a bar, how it swings, and
+/// how it fills. Chosen once, it repeats every bar, which is what makes a
+/// groove a groove.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(in crate::lab) struct Beat {
+    kick: u16,
+    snare: u16,
+    hats: u16,
+    /// Hats added when the music lifts.
+    busy_hats: u16,
+    open: u16,
+    ghost: u16,
+    /// Late off-beats, in hundredths of a step.
+    swing: u8,
+    /// Whether the swing falls on eighths (a shuffle) or sixteenths.
+    shuffle: bool,
+    fill: u8,
+}
+
+impl Beat {
+    /// How late `slot` lands, as a fraction of a step; every part shares it.
+    pub(in crate::lab) fn swing(&self, slot: usize) -> f64 {
+        let swung = if self.shuffle {
+            slot % 4 == 2
+        } else {
+            slot % 2 == 1
+        };
+        if swung {
+            f64::from(self.swing) / 100.0 * if self.shuffle { 2.0 } else { 1.0 }
+        } else {
+            0.0
+        }
+    }
+}
+
+/// A beat for `groove`, varied by `seed` among the ones that suit it.
+// Choices index short lists from a fraction in 0..1; nothing approaches the
+// edges of the casts.
+#[allow(
+    clippy::cast_possible_truncation,
+    clippy::cast_sign_loss,
+    clippy::cast_precision_loss
+)]
+pub(in crate::lab) fn beat(groove: Groove, seed: u64) -> Beat {
+    let pick = |options: &[&[usize]], salt: u64| {
+        let i = (chance(seed, 0, 0, salt) * options.len() as f64) as usize;
+        mask(options[i.min(options.len() - 1)])
+    };
+    let eighths: &[usize] = &[0, 2, 4, 6, 8, 10, 12, 14];
+    let sixteenths: &[usize] = &[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
+    let offbeats: &[usize] = &[2, 6, 10, 14];
+    let fill = u8::try_from((chance(seed, 0, 0, 77) * 3.0) as usize % 3).expect("small");
+    match groove {
+        Groove::Bounce => Beat {
+            kick: pick(&[&[0, 8], &[0, 8, 10], &[0, 6, 8], &[0, 3, 8, 11]], 1),
+            snare: mask(&[4, 12]),
+            hats: pick(&[eighths, eighths, &[0, 2, 4, 6, 8, 10, 12, 14, 15]], 2),
+            busy_hats: mask(sixteenths),
+            open: pick(&[&[14], &[6, 14], &[]], 3),
+            ghost: pick(&[&[7, 15], &[11], &[]], 4),
+            swing: 8,
+            shuffle: false,
+            fill,
+        },
+        Groove::Shuffle => Beat {
+            kick: pick(&[&[0, 8], &[0, 10], &[0, 6, 10], &[0, 8, 14]], 1),
+            snare: mask(&[4, 12]),
+            hats: mask(eighths),
+            busy_hats: mask(&[0, 2, 3, 4, 6, 7, 8, 10, 11, 12, 14, 15]),
+            open: pick(&[&[6], &[14], &[]], 3),
+            ghost: pick(&[&[10], &[2, 10], &[]], 4),
+            swing: 30,
+            shuffle: true,
+            fill,
+        },
+        Groove::Drive => Beat {
+            kick: pick(&[&[0, 4, 8, 12], &[0, 4, 8, 12, 14], &[0, 6, 8, 10]], 1),
+            snare: mask(&[4, 12]),
+            hats: pick(&[offbeats, sixteenths, eighths], 2),
+            busy_hats: mask(sixteenths),
+            open: pick(&[offbeats, &[14], &[]], 3),
+            ghost: pick(&[&[15], &[7, 15], &[]], 4),
+            swing: 0,
+            shuffle: false,
+            fill,
+        },
+        Groove::HalfTime => Beat {
+            kick: pick(&[&[0, 10], &[0, 3, 10], &[0, 6, 11], &[0, 14]], 1),
+            snare: mask(&[8]),
+            hats: pick(&[eighths, sixteenths], 2),
+            busy_hats: mask(sixteenths),
+            open: pick(&[&[14], &[6], &[]], 3),
+            ghost: pick(&[&[13], &[5, 13], &[]], 4),
+            swing: 5,
+            shuffle: false,
+            fill,
+        },
+        Groove::Ballad => Beat {
+            kick: pick(&[&[0, 9], &[0, 8], &[0, 6, 10]], 1),
+            snare: mask(&[8]),
+            hats: mask(eighths),
+            busy_hats: mask(&[0, 2, 4, 6, 7, 8, 10, 12, 14, 15]),
+            open: pick(&[&[14], &[]], 3),
+            ghost: pick(&[&[15], &[]], 4),
+            swing: 10,
+            shuffle: false,
+            fill,
+        },
+        Groove::Drift => Beat {
+            kick: pick(&[&[0, 10], &[0, 7], &[0, 11]], 1),
+            snare: pick(&[&[12], &[8]], 5),
+            hats: pick(&[offbeats, &[2, 6, 10, 14, 15], eighths], 2),
+            busy_hats: mask(eighths),
+            open: pick(&[&[14], &[]], 3),
+            ghost: pick(&[&[5], &[]], 4),
+            swing: 6,
+            shuffle: false,
+            fill,
+        },
     }
 }
 
 /// What the kit plays on one sixteenth of the 32-bar form.
-pub(super) fn pattern(seed: u64, mood: Mood, energy: f64, bar: usize, slot: usize) -> Vec<Hit> {
+pub(super) fn pattern(beat: &Beat, energy: f64, bar: usize, slot: usize) -> Vec<Hit> {
     let mut hits = Vec::new();
-    let human = |piece: Piece| 0.92 + 0.16 * chance(seed, bar, slot, piece as u64 + 7);
+    // Velocities vary by place in the bar, the same every bar: a feel, not noise.
+    let human =
+        |piece: Piece| 0.92 + 0.16 * chance(u64::from(beat.kick), 0, slot, piece as u64 + 7);
     let mut hit = |piece, velocity: f64| {
         hits.push(Hit {
             piece,
@@ -309,7 +431,7 @@ pub(super) fn pattern(seed: u64, mood: Mood, energy: f64, bar: usize, slot: usiz
         _ => 0.7,
     };
     let e = (energy * lift).clamp(0.05, 1.0);
-    let dense = e > 0.55;
+    let dense = e > 0.6;
     if bar == 31 {
         hit(Piece::Kick, 0.95);
         hit(Piece::Crash, 0.9);
@@ -319,19 +441,14 @@ pub(super) fn pattern(seed: u64, mood: Mood, energy: f64, bar: usize, slot: usiz
         hit(Piece::Crash, 0.85);
     }
     // Hats first: they set the pulse.
-    let hat = match mood {
-        Mood::Tense => dense || slot.is_multiple_of(2),
-        Mood::Hopeful => slot.is_multiple_of(2) || dense && section == 2,
-        Mood::Mysterious => slot % 4 == 2 || dense && slot.is_multiple_of(2),
-        Mood::Melancholic => slot.is_multiple_of(2),
+    let pulse = if dense && section == 2 {
+        beat.busy_hats
+    } else {
+        beat.hats
     };
-    let open = match mood {
-        Mood::Hopeful | Mood::Tense => slot == 14 || dense && slot == 6,
-        _ => slot == 14 && bar % 2 == 1,
-    };
-    if open && !intro {
+    if on(beat.open, slot) && !intro {
         hit(Piece::Open, 0.45 + 0.2 * e);
-    } else if hat {
+    } else if on(pulse, slot) {
         let accent = if slot.is_multiple_of(4) { 0.55 } else { 0.38 };
         hit(Piece::Closed, accent * (0.6 + 0.5 * e));
     }
@@ -339,38 +456,26 @@ pub(super) fn pattern(seed: u64, mood: Mood, energy: f64, bar: usize, slot: usiz
         return hits;
     }
     // A fill at the end of every four-bar phrase from the theme on.
-    let fill = bar % 4 == 3 && bar >= 8 && slot >= 12;
-    if fill {
-        let roll = chance(seed, bar, 0, 99) > 0.5;
-        match (slot, roll) {
-            (12, true) | (14, false) => hit(Piece::TomHigh, 0.8),
-            (13, true) | (15, false) => hit(Piece::TomLow, 0.85),
-            _ => hit(
-                Piece::Snare,
-                0.6 + 0.1 * f64::from(u32::try_from(slot - 12).expect("slot")),
-            ),
+    if bar % 4 == 3 && bar >= 8 && slot >= 12 {
+        let step = f64::from(u32::try_from(slot - 12).expect("slot"));
+        match (beat.fill, slot) {
+            (0, 12 | 13) => hit(Piece::TomHigh, 0.75 + 0.05 * step),
+            (0, _) => hit(Piece::TomLow, 0.85),
+            (1, _) => hit(Piece::Snare, 0.55 + 0.12 * step),
+            (_, 12 | 14) => hit(Piece::Kick, 0.85),
+            _ => hit(Piece::Snare, 0.8),
         }
         if slot == 12 {
             hit(Piece::Kick, 0.8);
         }
         return hits;
     }
-    let kick = match mood {
-        Mood::Tense => slot.is_multiple_of(4) || dense && slot == 14,
-        Mood::Hopeful => slot == 0 || slot == 8 || slot == 10 && chance(seed, bar, slot, 3) > 0.5,
-        Mood::Mysterious => slot == 0 || slot == 10 && dense,
-        Mood::Melancholic => slot == 0 || slot == 9 && dense,
-    };
-    if kick {
+    if on(beat.kick, slot) {
         hit(Piece::Kick, if slot == 0 { 1.0 } else { 0.85 });
     }
-    let snare = match mood {
-        Mood::Tense | Mood::Hopeful => slot == 4 || slot == 12,
-        Mood::Mysterious | Mood::Melancholic => slot == 8,
-    };
-    if snare {
+    if on(beat.snare, slot) {
         hit(Piece::Snare, 0.85 + 0.1 * e);
-    } else if dense && (slot == 7 || slot == 15) && chance(seed, bar, slot, 11) > 0.45 {
+    } else if dense && on(beat.ghost, slot) {
         hit(Piece::Ghost, 0.5);
     }
     hits
@@ -380,39 +485,70 @@ pub(super) fn pattern(seed: u64, mood: Mood, energy: f64, bar: usize, slot: usiz
 mod tests {
     use super::*;
 
+    const GROOVES: [Groove; 6] = [
+        Groove::Bounce,
+        Groove::Shuffle,
+        Groove::Drive,
+        Groove::HalfTime,
+        Groove::Ballad,
+        Groove::Drift,
+    ];
+
+    fn bar(beat: &Beat, bar: usize) -> Vec<Vec<(Piece, u64)>> {
+        (0..16)
+            .map(|slot| {
+                pattern(beat, 0.7, bar, slot)
+                    .iter()
+                    .map(|h| (h.piece, h.velocity.to_bits()))
+                    .collect()
+            })
+            .collect()
+    }
+
     #[test]
-    fn every_mood_keeps_a_kick_and_backbeat_in_the_theme() {
-        for mood in [
-            Mood::Hopeful,
-            Mood::Tense,
-            Mood::Mysterious,
-            Mood::Melancholic,
-        ] {
-            let bar: Vec<Vec<Hit>> = (0..16).map(|slot| pattern(1, mood, 0.7, 9, slot)).collect();
-            assert!(bar[0].iter().any(|h| h.piece == Piece::Kick), "{mood:?}");
-            assert!(
-                bar.iter().flatten().any(|h| h.piece == Piece::Snare),
-                "{mood:?}"
-            );
-            assert!(
-                bar.iter()
-                    .flatten()
-                    .any(|h| matches!(h.piece, Piece::Closed | Piece::Open))
-            );
+    fn every_groove_keeps_a_kick_and_backbeat_and_repeats_each_bar() {
+        for groove in GROOVES {
+            for seed in 0..16 {
+                let beat = beat(groove, seed);
+                let theme = bar(&beat, 9);
+                assert!(theme[0].iter().any(|h| h.0 == Piece::Kick), "{groove:?}");
+                assert!(
+                    theme.iter().flatten().any(|h| h.0 == Piece::Snare),
+                    "{groove:?}"
+                );
+                assert_eq!(theme, bar(&beat, 10), "{groove:?} changed between bars");
+            }
+        }
+    }
+
+    #[test]
+    fn seeds_give_a_groove_different_beats() {
+        for groove in [Groove::Bounce, Groove::Drive, Groove::HalfTime] {
+            let distinct: std::collections::BTreeSet<_> = (0..32)
+                .map(|seed| format!("{:?}", beat(groove, seed)))
+                .collect();
+            assert!(distinct.len() >= 4, "{groove:?}: {}", distinct.len());
         }
     }
 
     #[test]
     fn the_song_starts_bare_and_ends_on_one_hit() {
+        let beat = beat(Groove::Drive, 1);
         for slot in 0..16 {
-            assert!(pattern(1, Mood::Tense, 1.0, 0, slot).is_empty());
-            assert!(slot == 0 || pattern(1, Mood::Tense, 1.0, 31, slot).is_empty());
+            assert!(pattern(&beat, 1.0, 0, slot).is_empty());
+            assert!(slot == 0 || pattern(&beat, 1.0, 31, slot).is_empty());
         }
         assert!(
-            pattern(1, Mood::Tense, 1.0, 8, 0)
+            pattern(&beat, 1.0, 8, 0)
                 .iter()
                 .any(|h| h.piece == Piece::Crash)
         );
+    }
+
+    #[test]
+    fn a_shuffle_swings_its_eighths() {
+        let beat = beat(Groove::Shuffle, 1);
+        assert!(beat.swing(2) > 0.5 && beat.swing(4) == 0.0);
     }
 
     #[test]
