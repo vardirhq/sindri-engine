@@ -4,6 +4,7 @@ A feature example for scene-owned 3D character movement, added for the planned
 Explorer showcase. Gravity, jumping, movement speed, ferry reversal and the goal
 are Decay gameplay. The shared engine clips displacement and supplies classified
 support and solved platform carry; it contains no lab-specific gameplay.
+Pages publishes it at `https://sindri.vardir.no/examples/character3d/`.
 
 Run `cargo run -p sindri-player -- examples/character3d`, or open `sindri.toml`
 in the editor and enter Play. The blue cube starts aboard a gold ferry. Ride it,

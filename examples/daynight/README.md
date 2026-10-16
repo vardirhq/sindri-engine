@@ -4,6 +4,7 @@ A feature example for Explorer and external Low Tide 3D's planned lighting
 track. This is feature proof, with in-tree game adoption still open. Geometry
 reuses Model Collision Lab's two self-contained GLBs: a green ground/wall and a
 purple prop. No engine time-of-day service or game-specific Rust is involved.
+Pages publishes it at `https://sindri.vardir.no/examples/daynight/`.
 
 Open `examples/daynight` in the editor, or run `sindri-player examples/daynight`.
 The Camera's Decay script runs a twelve-second day, starting at 06:00. It blends

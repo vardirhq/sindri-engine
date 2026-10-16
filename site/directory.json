@@ -263,6 +263,93 @@
     ]
   },
   {
+    "category": "demos",
+    "title": "3D Transform Lab",
+    "path": "examples/transform/",
+    "source": "examples/transform",
+    "description": "A cube faces a raised goal and walks to it in world space while the camera orbits the scene.",
+    "tags": [
+      "3d",
+      "transforms",
+      "look-at",
+      "orbit",
+      "decay"
+    ]
+  },
+  {
+    "category": "demos",
+    "title": "3D Orbit Camera Lab",
+    "path": "examples/orbit/",
+    "source": "examples/orbit",
+    "description": "A third-person orbit camera follows a walker, pulls in past a barrier and eases back out. Right-drag, or click to capture the pointer, to look around.",
+    "tags": [
+      "3d",
+      "camera",
+      "orbit",
+      "pointer-lock",
+      "decay"
+    ]
+  },
+  {
+    "category": "demos",
+    "title": "3D Character Lab",
+    "path": "examples/character3d/",
+    "source": "examples/character3d",
+    "description": "Ride a ferry, jump off and walk to the goal pad with grounded 3D character movement. WASD moves, Space jumps.",
+    "tags": [
+      "3d",
+      "character",
+      "platforms",
+      "physics",
+      "decay"
+    ]
+  },
+  {
+    "category": "demos",
+    "title": "Model Collision Lab",
+    "path": "examples/model-collision/",
+    "source": "examples/model-collision",
+    "description": "Walk around a wall that collides from an imported GLB's own triangles. WASD moves.",
+    "tags": [
+      "3d",
+      "glb",
+      "models",
+      "collision",
+      "physics",
+      "decay"
+    ]
+  },
+  {
+    "category": "demos",
+    "title": "3D Lighting Lab",
+    "path": "examples/lighting3d/",
+    "source": "examples/lighting3d",
+    "description": "Point and spot lights, the sun, ambient fill and the sky change color and direction from Decay.",
+    "tags": [
+      "3d",
+      "lighting",
+      "spotlights",
+      "point lights",
+      "shadows",
+      "decay"
+    ]
+  },
+  {
+    "category": "demos",
+    "title": "Day/Night Lab",
+    "path": "examples/daynight/",
+    "source": "examples/daynight",
+    "description": "A twelve-second day moves through sunrise, midday, sunset and night, then mounted lights take over.",
+    "tags": [
+      "3d",
+      "lighting",
+      "shadows",
+      "time of day",
+      "glb",
+      "decay"
+    ]
+  },
+  {
     "category": "docs",
     "title": "Documentation map",
     "path": "docs/documentation/",

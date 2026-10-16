@@ -4,6 +4,7 @@ A feature example of static and dynamic convex collision from imported GLBs. One
 both the green ground and the orange wall; the same asset is referenced by
 `sindri.model` and `sindri.physics3d.model_collider`. The shared player prepares
 collision before starting gameplay after asset loading completes (asynchronously in the browser).
+Pages publishes it at `https://sindri.vardir.no/examples/model-collision/`.
 
 Run `cargo run -p sindri-player -- examples/model-collision`. Hold D until the
 blue walker hits the wall, S to go around its end, D to cross, then W to reach

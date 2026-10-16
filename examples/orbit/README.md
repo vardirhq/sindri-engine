@@ -5,6 +5,7 @@ from slice 6 of the 3D update. A blue walker heads to a raised gold goal.
 The gray barrier blocks the camera's requested six-unit orbit; the camera
 pulls in immediately, keeps facing the walker, then eases back out when
 Decay removes the barrier after two seconds.
+Pages publishes it at `https://sindri.vardir.no/examples/orbit/`.
 
 Open the project in the editor or run:
 
