@@ -1,0 +1,121 @@
+# Asset pipeline capabilities, as data. See physics.toml for the rules the
+# generator applies; `assets.md` is generated from this file.
+
+title = "Assets"
+order = 8
+intro = """
+Logical asset IDs, the asynchronous load queue, typed decoders, manifests and
+hot reload. `docs/asset-foundation.md` is the contract.
+"""
+
+[[capability]]
+id = "asset-ids-and-loading"
+group = "Loading"
+title = "Asset IDs, manifests, async load"
+summary = "Validated logical IDs, a bounded generation-checked load queue, typed decoders and hash-checked manifests."
+status = { engine = "yes", editor = "yes", decay = "partial", proof = "yes" }
+parity = "Asset IDs, manifests, async load"
+tests = [
+  "crates/sindri-core/src/asset/tests/id.rs",
+  "crates/sindri-core/src/asset/tests/store.rs",
+  "crates/sindri-assets/src/queue/tests.rs",
+  "crates/sindri-assets/src/loader/tests.rs",
+  "crates/sindri-assets/src/manifest/tests.rs",
+  "crates/sindri-gpu/tests/texture_registry.rs",
+]
+proof = ["games/orbital-baked"]
+docs = ["docs/asset-foundation.md"]
+detail = """
+`AssetId` is a validated relative logical ID, never a path or URL. Sources
+resolve it against a root: the filesystem source canonicalises to catch symlink
+escapes, and `UrlRoot` percent-encodes and normalises bases with rules
+exercised on every target rather than only in a browser. The load queue is
+bounded, rejects duplicates, and carries a generation token so a late
+completion cannot overwrite a replacement. Textures, fonts, sheets, scripts,
+and scene JSON decode through typed decoders. Nothing pretends browser I/O is
+synchronous.
+
+A `TextureId` is a generation-checked slot handle, so the renderer's texture
+registry can release one texture and reuse its slot without a handle nobody
+updated drawing whatever lands there next.
+
+`AssetLoader` drives all of that in one place — request, enqueue, drain,
+decode, apply — so a caller does not have to know the order. Requesting is
+idempotent, a failure is reported once rather than retried forever, and
+`retain` releases what is no longer wanted and says which IDs went, so a host
+can drop whatever it built from them. GPU upload stays with the host, which is
+the only thing that owns a device.
+
+`AssetManifest` records what a project ships — each asset's length and the
+SHA-256 of its stored bytes — as a versioned, ID-ordered file. A loader given
+one holds arriving bytes to it, so a truncated response or a stale cache entry
+is an error naming the asset rather than a picture from last week; an asset the
+manifest does not list still loads. The editor picks one up from the directory
+a scene lives in. The generic browser host sizes each kind's bounded request
+queue from that manifest, so projects with more than the asset pipeline's
+default 64 textures or other same-kind assets still load without increasing
+fetch concurrency.
+"""
+
+[[capability]]
+id = "image-decoding"
+group = "Loading"
+title = "Identical image decoding on every target"
+summary = "Every PNG colour type, 16-bit, interlaced and JPEG images decode pixel-identically natively and on wasm32."
+status = { engine = "yes", editor = "n/a", decay = "n/a", proof = "n/a" }
+tests = ["crates/sindri-assets/tests/decode_compatibility.rs", "crates/sindri-assets/src/decode/tests.rs"]
+detail = """
+A corpus of deliberately awkward images — every PNG colour type, sixteen bits
+per channel, an interlaced encoding, and a JPEG — is decoded and checked pixel
+by pixel on both native and `wasm32-unknown-unknown`, so a texture cannot
+decode one way in the editor and another in the browser.
+"""
+
+[[capability]]
+id = "project-fonts"
+group = "Loading"
+title = "Project fonts"
+summary = "OpenType faces are validated and bound under the scene's logical reference, so no build substitutes an installed font."
+status = { engine = "yes", editor = "yes", decay = "n/a", proof = "yes" }
+parity = "Project fonts"
+tests = ["crates/sindri-assets/src/decode/tests.rs"]
+proof = ["games/orbital-baked"]
+detail = """
+`FontAssetDecoder` validates OpenType bytes and records their declared family;
+text binds that project-owned face under the scene's logical asset reference,
+so native and browser builds never substitute different installed fonts.
+"""
+
+[[capability]]
+id = "profiles"
+group = "Loading"
+title = "Reusable data profiles"
+summary = "Versioned `.profile` assets hold nested data that many script components read without creating entities."
+status = { engine = "yes", editor = "yes", decay = "yes", proof = "yes" }
+parity = "Reusable data profiles"
+tests = ["crates/sindri-decay/tests/a_script_reads_a_profile.rs"]
+proof = ["games/platformer"]
+docs = ["docs/profiles.md"]
+detail = """
+`ProfileDocument` is the reusable-data counterpart to a prefab: a versioned
+`.profile` asset with an author label, an optional game-defined type, and a
+nested JSON-shaped value payload. `ProfileAssetDecoder` validates it through
+the same native/browser loading path, and the manifest records it as
+`profile`. Unlike a prefab it creates no entity; many script components can
+hold the same logical profile reference and read one loaded document.
+"""
+
+[[capability]]
+id = "hot-reload"
+group = "Loading"
+title = "Hot reload"
+summary = "On native, `AssetWatch` notices a changed file behind a loaded asset and `AssetLoader::reload` loads it again."
+status = { engine = "yes", editor = "partial", decay = "partial", proof = "yes" }
+parity = "Hot reload"
+tests = ["crates/sindri-assets/src/loader/tests.rs"]
+proof = ["games/platformer"]
+detail = """
+On native, `AssetWatch` notices when the file behind a loaded asset changes and
+`AssetLoader::reload` loads it again, by polling modification time and length
+rather than subscribing to filesystem events.
+"""
