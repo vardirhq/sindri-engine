@@ -159,6 +159,11 @@ uncompressed size, so for that part the bytes that have arrived are eased
 towards their share rather than divided by a total. Any `DesktopApp` can report
 its own wait the same way, through `DesktopApp::progress`.
 
+The game does not play under it. The host counts a page whose
+`#sindri-loading` is still there as hidden, exactly as it counts a hidden tab,
+so the player holds the game paused on its first frame; the page dispatches
+`sindri:revealed` once the screen has faded and gone, and the game starts then.
+
 It stays until the host announces the game is on screen. The host dispatches
 `sindri:ready` on `window` once, on the first frame it presents while the
 application says it is ready (`DesktopApp::ready`; the browser game is ready

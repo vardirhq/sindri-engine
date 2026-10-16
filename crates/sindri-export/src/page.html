@@ -426,7 +426,13 @@
     const reveal = () => {
       if (!loading || loading.dataset.done === "true") return;
       loading.dataset.done = "true";
-      setTimeout(() => loading.remove(), 500);
+      // Gone, and only then said so: the host keeps the game paused while
+      // the screen is over it, so a game's first seconds are ones a player
+      // sees rather than ones that played under the fade.
+      setTimeout(() => {
+        loading.remove();
+        dispatchEvent(new Event("sindri:revealed"));
+      }, 500);
     };
     const settle = () => {
       if (!ready || !loading) return;
