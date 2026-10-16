@@ -331,8 +331,16 @@
     #sindri-loading .motion { position: absolute; inset: 0; overflow: hidden; transition: opacity .45s ease; }
     #sindri-loading[data-motion] > .grid,
     #sindri-loading[data-motion] > .glow,
-    #sindri-loading[data-motion] > .stage.sindri { display: none; }
-    #sindri-loading[data-stage="brand"] .motion { opacity: 0; }
+    #sindri-loading[data-motion] > .stage.sindri,
+    #sindri-loading[data-motion] > .stage.brand { display: none; }
+    /* The still bar, once the wait has been measured, shows how much of it
+       is over rather than sweeping. */
+    #sindri-loading[data-progress] .sweep {
+      animation: none;
+      width: calc(var(--progress) * 100%);
+      background: var(--accent);
+      transition: width .2s ease;
+    }
     #sindri-loading .brand img { max-width: 100%; max-height: 40vh; object-fit: contain; }
     #sindri-loading .brand-title { font: 700 clamp(1.4rem, 5vmin, 3rem)/1.1 system-ui, sans-serif; }
     #sindri-loading .brand-caption { font: 400 clamp(.85rem, 2vmin, 1.1rem)/1.4 system-ui, sans-serif; opacity: .75; }
@@ -406,7 +414,12 @@
     const loading = document.querySelector("#sindri-loading");
     const opened = performance.now();
     const SINDRI_AT_LEAST = Number(loading?.dataset.motionMs ?? 900);
-    const brandFor = Number(loading?.dataset.brandSeconds ?? 0) * 1000;
+    // A brand's time starts after the handoff to it, and is never shorter
+    // than its entrance, so the game cannot cut one off halfway.
+    const brandFor = Number(loading?.dataset.brandLeadMs ?? 0) + Math.max(
+      Number(loading?.dataset.brandSeconds ?? 0) * 1000,
+      Number(loading?.dataset.brandEntranceMs ?? 0),
+    );
     const hasBrand = Boolean(loading?.querySelector(".stage.brand"));
     let brandSince = null;
     let ready = false;
@@ -436,8 +449,31 @@
     }
     addEventListener("sindri:ready", () => {
       ready = true;
+      measured(1);
       settle();
     }, { once: true });
+
+    // How much of the wait is over, for the bar: the host's code arriving is
+    // the first part, the project's assets the second, and the last sliver is
+    // the GPU starting and the first frame. Each is measured, not guessed --
+    // except a host served compressed, whose full size the browser does not
+    // say, where the bytes that have arrived are eased towards their share.
+    const HOST_SHARE = 0.6;
+    const ASSETS_END = 0.95;
+    let shown = 0;
+    const measured = (fraction) => {
+      if (!loading) return;
+      shown = Math.max(shown, Math.min(1, fraction));
+      loading.dataset.progress = shown.toFixed(4);
+      loading.style.setProperty("--progress", shown.toFixed(4));
+    };
+    addEventListener("sindri:download", ({ detail: { loaded, total } }) => {
+      measured(HOST_SHARE * (total ? loaded / total : 1 - Math.exp(-loaded / 6e6)));
+    });
+    addEventListener("sindri:downloaded", () => measured(HOST_SHARE));
+    addEventListener("sindri:progress", ({ detail: { loaded, total } }) => {
+      measured(HOST_SHARE + (ASSETS_END - HOST_SHARE) * (total ? loaded / total : 1));
+    });
   </script>
   <section id="sindri-error" role="alert" aria-live="assertive">
     <div class="grid"></div>
@@ -599,6 +635,33 @@
       ],
     };
 
+    // The host's wasm, fetched here rather than by `init`, so the loading
+    // screen can count it arriving: on a first visit it is most of the wait.
+    // Handed on as a response, so the browser still compiles it as it
+    // streams. A failed or unreadable response is handed on as it is, and
+    // fails in `init` exactly as it would have.
+    const counted = async (url) => {
+      const response = await fetch(url);
+      if (!response.ok || !response.body || typeof TransformStream !== "function") return response;
+      // Compressed on the wire, the length is of the compressed bytes and the
+      // body arrives decompressed, so there is no total to divide by.
+      const encoding = response.headers.get("content-encoding") ?? "identity";
+      const total = encoding === "identity" ? Number(response.headers.get("content-length") ?? 0) : 0;
+      let loaded = 0;
+      const counting = new TransformStream({
+        transform(chunk, controller) {
+          loaded += chunk.byteLength;
+          dispatchEvent(new CustomEvent("sindri:download", { detail: { loaded, total } }));
+          controller.enqueue(chunk);
+        },
+      });
+      return new Response(response.body.pipeThrough(counting), {
+        status: response.status,
+        statusText: response.statusText,
+        headers: response.headers,
+      });
+    };
+
     if (!(canvas instanceof HTMLCanvasElement)) {
       fail({
         reason: "canvas",
@@ -627,7 +690,8 @@
         // a stale host runs new content and every symptom looks like a live bug
         // in code that was already fixed.
         const { default: init } = await import("./pkg/{{host}}.js{{cachebust}}");
-        await init({ module_or_path: "./pkg/{{host}}_bg.wasm{{cachebust}}" });
+        await init({ module_or_path: await counted("./pkg/{{host}}_bg.wasm{{cachebust}}") });
+        dispatchEvent(new Event("sindri:downloaded"));
       } catch (error) {
         console.error(error);
         fail({

@@ -78,6 +78,8 @@ struct Host<A: DesktopApp> {
     page_visible: bool,
     /// Whether the page has been told the game is on screen.
     announced_ready: bool,
+    /// The progress the page was last told, so it hears each change once.
+    announced_progress: Option<(u64, u64)>,
     cursor: cursor::CursorCapture,
     /// The modifiers held now, which decide whether a key press types.
     modifiers: winit::keyboard::ModifiersState,
@@ -120,6 +122,7 @@ impl<A: DesktopApp> Host<A> {
             failure: None,
             page_visible,
             announced_ready: false,
+            announced_progress: None,
             cursor: cursor::CursorCapture::default(),
             modifiers: winit::keyboard::ModifiersState::empty(),
             typist: typing::Typist::default(),
@@ -327,7 +330,15 @@ impl<A: DesktopApp> Host<A> {
             window.pre_present_notify();
         }
         let ready = running.app.ready();
+        let progress = running.app.progress();
         running.gpu.queue.present(frame);
+        if !self.announced_ready && progress.is_some() && progress != self.announced_progress {
+            self.announced_progress = progress;
+            #[cfg(target_arch = "wasm32")]
+            if let Some((loaded, total)) = progress {
+                startup::announce_progress(loaded, total);
+            }
+        }
         if ready && !self.announced_ready {
             self.announced_ready = true;
             #[cfg(target_arch = "wasm32")]

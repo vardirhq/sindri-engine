@@ -62,6 +62,10 @@ fn a_described_brand_is_written_beside_the_page() {
         page.contains(r#"data-brand-seconds="1.5""#),
         "the default time: {page}"
     );
+    assert!(
+        page.contains(r#"data-brand-entrance="random""#),
+        "the default entrance: {page}"
+    );
 }
 
 #[test]
@@ -76,6 +80,13 @@ fn every_mistake_in_a_brand_is_refused_with_its_reason() {
     assert!(
         refused("[web.splash]\ntitle = \"x\"\nseconds = 60.0", "long")
             .contains("a splash shows for 0 to 10 seconds")
+    );
+    assert!(
+        refused(
+            "[web.splash]\ntitle = \"x\"\nentrance = \"explode\"",
+            "entrance"
+        )
+        .contains("entrance \"explode\" is not one of")
     );
     assert!(
         refused("[web.splash]\nimage = \"sindri.toml\"", "kind")

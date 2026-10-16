@@ -141,7 +141,7 @@ concepts of the Sindri mark and wordmark — forge, blueprint, pixel, cube,
 arcade, diorama, boss, loot, puzzle, achievement, level-up, fog, speedrun and
 torch — chosen at random each time the page opens, and never the one that
 browser showed last. Each is a four-second loop. They are drawn by a script
-inlined in the page (`crates/sindri-export/src/loading.js`) as it is parsed,
+inlined in the page (`crates/sindri-export/src/loading/`) as it is parsed,
 so the screen is there the moment the page is, before any wasm or asset has
 arrived. That covers the whole wait a browser build has: the host downloading,
 WebGPU starting, and the project's assets arriving.
@@ -149,6 +149,15 @@ WebGPU starting, and the project's assets arriving.
 The concepts are written in Pixelify Sans and JetBrains Mono, both OFL-1.1,
 which the export writes beside the page in `fonts/` rather than fetching from
 a font service, so a game's page asks no third party for anything.
+
+The bar under it measures the real wait. The page fetches the host's wasm
+itself and counts the bytes as they arrive, which is the first 60% of the bar;
+the host then announces `sindri:progress` on `window` with `{ loaded, total }`,
+the project's asset bytes by the manifest's count, which fills it to 95%; and
+`sindri:ready` finishes it. A host served compressed does not say its
+uncompressed size, so for that part the bytes that have arrived are eased
+towards their share rather than divided by a total. Any `DesktopApp` can report
+its own wait the same way, through `DesktopApp::progress`.
 
 It stays until the host announces the game is on screen. The host dispatches
 `sindri:ready` on `window` once, on the first frame it presents while the
@@ -168,15 +177,34 @@ title = "Vardir Games"     # under the image, or in its place
 caption = "presents"       # optional, smaller
 background = "#101820"     # optional, #rrggbb; the Sindri ink otherwise
 seconds = 1.5              # the least it shows, 0 to 10 (default 1.5)
+entrance = "random"        # how it comes on screen (default random)
 ```
+
+The Sindri animation hands over to it rather than fading: the ENGINE tag flips
+to PRESENTS, the mark and the wordmark fall apart, and the brand's background
+rises behind them. Then the brand makes its entrance, one of:
+
+| `entrance` | What it does |
+| --- | --- |
+| `forge` | Drops in glowing, strikes, throws sparks off its base and cools; the title heats and cools beside it |
+| `blueprint` | A grid and a frame drawn edge by edge with the image's dimensions; the image as faint line-work, inked left to right; the title typed |
+| `pixel` | Stacked out of its own pixels from the bottom row up, then sharpened through coarse resolutions to the image; the title steps in letter by letter |
+| `arcade` | Switched on like a CRT: a dot, a line, the picture opening out overbright and split into colour, a glitch, then a clean screen |
+| `achievement` | An "Achievement unlocked" toast with the brand as its icon drops in, flashes gold and settles |
+| `fade` | A plain rise |
+| `random` | One of the five above, picked each time the page opens, never the one that browser showed last |
+
+The brand's time, `seconds`, starts after the handoff and is never shorter
+than its entrance, so the game cannot cut one off halfway.
 
 It needs an image, a title or both. The image is written beside the page,
 named by its contents so a changed image is never served from a cache. The
 game is revealed once it is ready *and* the brand has had its time. A setting
 that is not one — an unknown key, a colour that is not `#rrggbb`, a time
 outside 0 to 10 seconds — fails the export with the reason. With
-`prefers-reduced-motion`, no concept plays: the screen is the still forge
-mark, wordmark and bar in the page's own markup, and nothing on it moves.
+`prefers-reduced-motion`, no concept, handoff or entrance plays: the screen is
+the still forge mark, wordmark and bar in the page's own markup, then the
+brand's still stage, and nothing on it moves but the bar filling.
 
 ## What a browser is told when it cannot run this
 

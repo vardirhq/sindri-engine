@@ -361,6 +361,11 @@ impl DesktopApp for Player {
         self.engine.is_some()
     }
 
+    /// The project's bytes, while it is still arriving.
+    fn progress(&self) -> Option<(u64, u64)> {
+        self.source.progress()
+    }
+
     fn visibility_changed(&mut self, visible: bool) -> Result<(), Self::Error> {
         self.page_visible = visible;
         self.sync_page_lifecycle()
@@ -484,6 +489,16 @@ impl Source {
             *self = Self::Ready(Box::new(project));
         }
         Ok(())
+    }
+
+    /// How far the fetch has got. Nothing natively, where there is no wait.
+    #[cfg_attr(not(target_arch = "wasm32"), allow(clippy::unused_self))]
+    fn progress(&self) -> Option<(u64, u64)> {
+        #[cfg(target_arch = "wasm32")]
+        if let Self::Fetching(loader) = self {
+            return loader.progress();
+        }
+        None
     }
 
     /// The project, once, if it has arrived.

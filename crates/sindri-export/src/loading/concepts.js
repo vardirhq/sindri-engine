@@ -1,96 +1,3 @@
-// The loading screen's animations, one chosen at random each time the page
-// opens. A classic script inlined in the page rather than a file it fetches, so
-// it runs during the parse that shows the screen: there is nothing to wait for
-// before the first frame, which is the whole of the wait the screen covers.
-//
-// Each concept is a pure, cyclic function of `p`, the place in a four-second
-// loop, so the last frame meets the first. They were designed as JSX and are
-// kept here as the calls JSX compiles to, against `node` below: a tree of
-// plain objects, rendered by patching the elements of the frame before, so the
-// page needs no framework for twelve kilobytes of motion.
-//
-// With `prefers-reduced-motion` none of this runs, and the still forge mark in
-// the page's own markup stays as the loading screen.
-(() => {
-  const screen = document.querySelector("#sindri-loading");
-  if (!screen || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-
-  const LOOP_MS = 4000;
-  const SVG = "http://www.w3.org/2000/svg";
-  // React's rule for a bare number in a style: pixels, except for these.
-  const UNITLESS = new Set(["opacity", "flex", "flexGrow", "flexShrink", "zIndex", "fontWeight", "lineHeight", "order"]);
-  // SVG attributes whose names are camelCase in the markup too.
-  const CAMEL = new Set(["viewBox", "patternUnits", "patternContentUnits", "preserveAspectRatio", "gradientUnits", "gradientTransform", "patternTransform"]);
-  const attributeName = (key, svg) =>
-    key === "className" ? "class" :
-    svg && !CAMEL.has(key) ? key.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`) : key;
-  const styleValue = (key, value) =>
-    typeof value === "number" && !UNITLESS.has(key) ? `${value}px` : value == null || value === false ? "" : String(value);
-
-  // A component is called where it appears, so a tree holds only elements
-  // and text by the time it is rendered.
-  const node = (type, props, ...children) => {
-    props = props || {};
-    if (typeof type === "function") return type({ ...props, children });
-    return { type, props, children: children.flat(Infinity).filter((c) => c != null && c !== false && c !== true) };
-  };
-
-  const create = (vnode, svg) => {
-    if (typeof vnode !== "object") return document.createTextNode(String(vnode));
-    svg = svg || vnode.type === "svg";
-    const element = svg ? document.createElementNS(SVG, vnode.type) : document.createElement(vnode.type);
-    element.sindriType = vnode.type;
-    element.sindriProps = {};
-    element.sindriStyle = {};
-    return element;
-  };
-
-  // Brings `dom` to what `vnode` describes, or replaces it, and returns the
-  // element that now stands in its place.
-  const patch = (parent, dom, vnode, svg) => {
-    if (typeof vnode !== "object") {
-      const text = String(vnode);
-      if (dom && dom.nodeType === Node.TEXT_NODE) {
-        if (dom.data !== text) dom.data = text;
-        return dom;
-      }
-      const fresh = document.createTextNode(text);
-      dom ? parent.replaceChild(fresh, dom) : parent.appendChild(fresh);
-      return fresh;
-    }
-    svg = svg || vnode.type === "svg";
-    if (!dom || dom.sindriType !== vnode.type) {
-      const fresh = create(vnode, svg);
-      dom ? parent.replaceChild(fresh, dom) : parent.appendChild(fresh);
-      dom = fresh;
-    }
-    const before = dom.sindriProps;
-    for (const [key, value] of Object.entries(vnode.props)) {
-      if (key === "key" || key === "children" || key === "style") continue;
-      if (before[key] === value) continue;
-      const name = attributeName(key, svg);
-      if (value == null || value === false) dom.removeAttribute(name);
-      else dom.setAttribute(name, String(value));
-    }
-    for (const key of Object.keys(before)) {
-      if (key === "key" || key === "children" || key === "style") continue;
-      if (!(key in vnode.props)) dom.removeAttribute(attributeName(key, svg));
-    }
-    dom.sindriProps = vnode.props;
-    const style = vnode.props.style || {};
-    const was = dom.sindriStyle;
-    for (const [key, value] of Object.entries(style)) {
-      const text = styleValue(key, value);
-      if (was[key] !== text) dom.style[key] = text;
-    }
-    for (const key of Object.keys(was)) if (!(key in style)) dom.style[key] = "";
-    dom.sindriStyle = Object.fromEntries(Object.entries(style).map(([k, v]) => [k, styleValue(k, v)]));
-    const children = dom.childNodes;
-    vnode.children.forEach((child, i) => patch(dom, children[i], child, svg && vnode.type !== "foreignObject"));
-    while (children.length > vnode.children.length) dom.removeChild(dom.lastChild);
-    return dom;
-  };
-
   // ---- The concepts, as designed. ----
   const Easing = {
     easeInOutCubic: t => t < 0.5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1
@@ -237,6 +144,9 @@
       }
     }, tg.text ?? 'ENGINE'))) : null);
   }
+  // The bar under every concept. It sweeps while nothing has been measured,
+  // and fills with the real wait once the page says how far it has got, the
+  // sweep still running across what has filled.
   function Progress({
     p,
     S,
@@ -247,6 +157,18 @@
     const width = Math.min(w * 0.6, 560 * S);
     const seg = width * 0.3;
     const x = -seg + frac(p * 2) * (width + seg);
+    const done = loadFraction();
+    const sweep = node("div", {
+      style: {
+        position: 'absolute',
+        top: 0,
+        bottom: 0,
+        left: x,
+        width: seg,
+        background: `linear-gradient(90deg, transparent, ${done === null ? color : CREAM}, transparent)`,
+        opacity: done === null ? 1 : 0.55
+      }
+    });
     return node("div", {
       style: {
         width,
@@ -261,25 +183,28 @@
         position: 'relative',
         overflow: 'hidden'
       }
-    }, node("div", {
+    }, done === null ? sweep : node("div", {
       style: {
         position: 'absolute',
         top: 0,
         bottom: 0,
-        left: x,
-        width: seg,
-        background: `linear-gradient(90deg, ${color}00, ${color}, ${color}00)`
+        left: 0,
+        width: width * done,
+        background: color,
+        overflow: 'hidden'
       }
-    })), label ? node("div", {
+    }, sweep)), label ? node("div", {
       style: {
         fontFamily: "'JetBrains Mono', monospace",
         fontSize: 20 * S,
         letterSpacing: '0.24em',
         textTransform: 'uppercase',
         color: MUTED,
-        textAlign: 'center'
+        textAlign: 'center',
+        fontVariantNumeric: 'tabular-nums',
+        whiteSpace: 'pre'
       }
-    }, label) : null);
+    }, done === null ? label : `${label} ${String(Math.floor(done * 100)).padStart(3)}%`) : null);
   }
 
   // ---------- Forge: two hammer strikes per loop; the core heats, sparks fly, it cools
@@ -2612,36 +2537,3 @@
     speedrun: Speedrun,
     torch: Torch
   };
-  // ---- Which one, and the loop that plays it. ----
-
-  // At random each time, and never the one this browser showed last, so a
-  // reload is always something new.
-  const names = Object.keys(CONCEPTS);
-  let last = null;
-  try { last = localStorage.getItem("sindri-loading-concept"); } catch {}
-  const choices = names.filter((name) => name !== last);
-  const chosen = choices[Math.floor(Math.random() * choices.length)];
-  try { localStorage.setItem("sindri-loading-concept", chosen); } catch {}
-  const Concept = CONCEPTS[chosen];
-
-  const stage = document.createElement("div");
-  stage.className = "motion";
-  screen.prepend(stage);
-  screen.dataset.motion = chosen;
-  // How long one loop takes, for the page's own script: an animation is
-  // played through once before the game is revealed, never cut off halfway.
-  screen.dataset.motionMs = String(LOOP_MS);
-
-  const opened = performance.now();
-  const frame = (now) => {
-    if (!screen.isConnected) return;
-    const w = stage.clientWidth || innerWidth;
-    const h = stage.clientHeight || innerHeight;
-    const S = Math.min(w, h) / 1080;
-    const p = (((now - opened) % LOOP_MS) + LOOP_MS) % LOOP_MS / LOOP_MS;
-    const tree = node(Concept, { p, S, w, h, horizontal: w / h >= 1.25, showNext: true, showProgress: true, label: "Loading.." });
-    patch(stage, stage.firstChild, tree, false);
-    requestAnimationFrame(frame);
-  };
-  frame(opened);
-})();

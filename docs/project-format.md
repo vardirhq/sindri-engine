@@ -83,7 +83,8 @@ metadata, written by a person or by the editor.
 ### `[web.splash]`
 
 A browser build's own brand, shown after the Sindri loading screen while the
-game loads: `image`, `title`, `caption`, `background` and `seconds`.
+game loads: `image`, `title`, `caption`, `background`, `seconds` and
+`entrance`.
 `docs/export.md` has what each means and how long it shows.
 
 ## What creating one makes

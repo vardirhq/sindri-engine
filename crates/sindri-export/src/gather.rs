@@ -44,6 +44,8 @@ struct SplashSection {
     /// How long it shows at least, even when the game is ready sooner.
     #[serde(default = "default_splash_seconds")]
     seconds: f64,
+    /// How it comes on screen: one of `page::ENTRANCES`.
+    entrance: Option<String>,
 }
 
 const fn default_splash_seconds() -> f64 {
@@ -150,12 +152,14 @@ fn read_splash(project: &Path, splash: SplashSection) -> Result<crate::page::Spl
     if image.is_none() && splash.title.is_none() {
         return Err(bad("needs an image, a title, or both".to_owned()));
     }
+    let entrance = crate::page::entrance(splash.entrance.as_deref()).map_err(bad)?;
     Ok(crate::page::Splash {
         image,
         title: splash.title,
         caption: splash.caption,
         background: splash.background,
         seconds: splash.seconds,
+        entrance,
     })
 }
 
