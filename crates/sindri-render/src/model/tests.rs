@@ -114,3 +114,29 @@ fn singular_and_nonfinite_transforms_are_diagnosed() {
         Err(ModelRenderError::InvalidTransform)
     );
 }
+
+#[test]
+fn resource_rejects_invalid_emission_but_accepts_hdr() {
+    for emissive in [[-0.1, 0.0, 0.0], [f32::NAN; 3], [f32::INFINITY; 3]] {
+        assert!(
+            RenderModel::new(ModelData {
+                surfaces: vec![ModelSurface {
+                    emissive,
+                    ..Default::default()
+                }],
+                ..Default::default()
+            })
+            .is_err()
+        );
+    }
+    assert!(
+        RenderModel::new(ModelData {
+            surfaces: vec![ModelSurface {
+                emissive: [2.0, 0.0, 0.0],
+                ..Default::default()
+            }],
+            ..Default::default()
+        })
+        .is_ok()
+    );
+}

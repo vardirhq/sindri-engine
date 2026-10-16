@@ -6,9 +6,13 @@
 //! with scene ownership; game/editor hosts, Decay and voxel proof remain separate.
 
 mod backend;
+mod character3d;
 mod contact2d;
+mod convex_hull3d;
 mod ground2d;
+mod ground3d;
 mod grounded2d;
+mod grounded3d;
 mod hinge2d;
 mod material;
 mod motor2d;
@@ -20,6 +24,7 @@ mod shared;
 mod slide2d;
 mod slider2d;
 mod spring2d;
+mod triangle_mesh3d;
 mod types2d;
 mod types3d;
 mod validate;
@@ -29,9 +34,15 @@ mod world3d;
 #[cfg(test)]
 mod tests;
 
+pub use character3d::{CharacterCollision3d, CharacterMotion3d, CharacterOptions3d};
 pub use contact2d::Contact2d;
+pub use convex_hull3d::{ConvexHull3d, ConvexHullCollider3d, ConvexHullError3d};
 pub use ground2d::{GroundOptions2d, GroundProbe2d};
+pub use ground3d::{GroundOptions3d, GroundProbe3d};
 pub use grounded2d::{GroundedSlideMotion2d, GroundedSlideOptions2d};
+pub use grounded3d::{
+    GroundedCharacterMotion3d, GroundedCharacterOptions3d, PlatformCarry3d, PlatformSupport3d,
+};
 pub use hinge2d::{HingeJoint2d, HingeSettings2d};
 pub use material::PhysicsMaterial;
 pub use motor2d::MotorMode2d;
@@ -43,6 +54,7 @@ pub use shared::{CollisionLayers, PhysicsEventKind, RigidBodyKind};
 pub use slide2d::{SlideMotion2d, SlideOptions2d};
 pub use slider2d::{SliderJoint2d, SliderSettings2d};
 pub use spring2d::{SpringJoint2d, SpringSettings2d};
+pub use triangle_mesh3d::{TriangleMesh3d, TriangleMeshCollider3d, TriangleMeshError3d};
 pub use types2d::{
     Collider2d, ColliderShape2d, DistanceJoint2d, PhysicsEvent2d, PhysicsPose2d, RigidBody2d,
 };

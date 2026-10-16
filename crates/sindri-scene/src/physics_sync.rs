@@ -35,12 +35,22 @@ const MOVED: f32 = 1.0e-4;
 
 #[derive(Debug, Error)]
 pub enum PhysicsSyncError {
+    #[error("model collider entity {0:?} has no collision binding for '{1}'")]
+    MissingModelCollision(EntityId, sindri_core::AssetId),
+    #[error("model collider entity {0:?}: {1}")]
+    InvalidModelCollider(EntityId, &'static str),
+    #[error("model collider entity {0:?}: {1}")]
+    ModelCollisionGeometry(EntityId, sindri_physics::TriangleMeshError3d),
+    #[error("convex model collider entity {0:?}: {1}")]
+    ModelConvexGeometry(EntityId, sindri_physics::ConvexHullError3d),
     #[error("entity {0:?} has both 2D and 3D physics components")]
     ConflictingDimensions(EntityId),
     #[error("a scene has more than one active 3D physics world component")]
     MultipleWorlds3d,
     #[error("moving 3D physics entity {0:?} has a Z-locked transform")]
     LockedDepth3d(EntityId),
+    #[error("3D collider entity {0:?}: {1}")]
+    ColliderScale3d(EntityId, crate::ColliderScaleError3d),
     #[error("character entity {0:?}: {1}")]
     InvalidCharacter(EntityId, &'static str),
     #[error("joint entity {0:?} has more than one joint component")]

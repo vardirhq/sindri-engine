@@ -29,7 +29,7 @@ use sindri_core::{ComponentSchemaRegistry, EntityId, World};
 use self::run::{TickWorld, ensure_compiled, tick};
 use self::timing::timed;
 use crate::{
-    Blackboard, ScriptComponent, ScriptExport, ScriptFailure, ScriptMessage, ScriptReport,
+    Blackboard, ScriptComponent, ScriptExport, ScriptFailure, ScriptReport,
     audio_host::{AudioCommand, AudioQueue},
     exports::exports_of,
     surface::{PREFAB, PROFILE},
@@ -72,22 +72,6 @@ struct Compiled {
     project: String,
     /// Shared so a call can hold its program while the cache is lent elsewhere.
     program: std::rc::Rc<IrProgram>,
-}
-
-/// Files one tick's outcome into the report.
-fn collect(
-    report: &mut ScriptReport,
-    entity: EntityId,
-    outcome: Result<Vec<String>, ScriptFailure>,
-) {
-    match outcome {
-        Ok(printed) => report.printed.extend(
-            printed
-                .into_iter()
-                .map(|message| ScriptMessage { entity, message }),
-        ),
-        Err(failure) => report.failures.push(failure),
-    }
 }
 
 #[derive(Clone)]
@@ -216,6 +200,7 @@ impl Scripts {
             physics,
             physics3d,
             characters,
+            characters3d,
             screen_ui,
             aim,
             gestures,
@@ -268,6 +253,7 @@ impl Scripts {
             physics,
             physics3d,
             characters,
+            characters3d,
             screen_ui,
             aim,
             gestures,
@@ -302,20 +288,13 @@ impl Scripts {
             let outcome = timed(measuring.then_some(&mut report), &component, || {
                 tick(&mut at, entity, &component, delta_seconds)
             });
-            collect(&mut report, entity, outcome);
+            run::collect(&mut report, entity, outcome);
         }
 
         Self::start_spawned(&mut report, &mut live, &mut at, components, delta_seconds);
         Self::deliver_messages(&mut report, &mut live, &mut at, components, delta_seconds);
 
-        at.tweens.retain(|entity| live.contains(&entity));
-        at.running.retain(|entity, _| live.contains(entity));
-        // What was waiting for something that never started goes with it.
-        let world = &*at.world;
-        at.starting.retain(|entity, _| world.get(*entity).is_some());
-        let world = &*at.world;
-        at.blackboard
-            .retain_signals(|bits| world.get(EntityId::from_bits(bits)).is_some());
+        run::retain_live(&mut at, &live);
         report
     }
 
@@ -359,7 +338,7 @@ impl Scripts {
             }
             for message in pending {
                 match message.to {
-                    Some(entity) => collect(report, entity, run::deliver(at, entity, message)),
+                    Some(entity) => run::collect(report, entity, run::deliver(at, entity, message)),
                     None => {
                         for entity in run::handlers(at, &message.name) {
                             let copy = Message {
@@ -367,7 +346,7 @@ impl Scripts {
                                 name: message.name.clone(),
                                 args: message.args.clone(),
                             };
-                            collect(report, entity, run::deliver(at, entity, copy));
+                            run::collect(report, entity, run::deliver(at, entity, copy));
                         }
                     }
                 }
@@ -422,7 +401,7 @@ impl Scripts {
                     continue;
                 }
                 live.insert(entity);
-                collect(report, entity, tick(at, entity, &component, delta_seconds));
+                run::collect(report, entity, tick(at, entity, &component, delta_seconds));
             }
             pending = std::mem::take(&mut at.spawned);
             if !pending.is_empty() && round + 1 == SPAWN_ROUNDS {

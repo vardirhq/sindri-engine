@@ -227,7 +227,7 @@ impl<'a, 'd> Analyzer<'a, 'd> {
 
         if let Some(symbol) = self.environment.globals.get(name) {
             return match symbol {
-                ExternalSymbol::Value(ty) => ty.clone(),
+                ExternalSymbol::Value(ty) | ExternalSymbol::ReadOnlyValue(ty) => ty.clone(),
                 ExternalSymbol::Function(_) => Type::Unknown,
             };
         }

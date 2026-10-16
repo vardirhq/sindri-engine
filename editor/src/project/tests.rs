@@ -333,3 +333,35 @@ fn a_deep_tree_stops_and_says_it_stopped() {
     assert!(tree.truncated(), "the walk has to admit it stopped");
     assert_eq!(tree.entries().len(), MAX_DEPTH);
 }
+
+#[test]
+fn model_choices_include_only_glbs_in_both_project_asset_layouts() {
+    for assets in [false, true] {
+        let directory = tempfile::tempdir().unwrap();
+        let root = if assets {
+            directory.path().join("assets")
+        } else {
+            directory.path().to_path_buf()
+        };
+        fs::create_dir_all(root.join("models")).unwrap();
+        for name in [
+            "level.glb",
+            "UPPER.GLB",
+            "external.gltf",
+            "shape.obj",
+            "other.fbx",
+        ] {
+            fs::write(root.join("models").join(name), "").unwrap();
+        }
+        let tree = ProjectTree::beside(Some(&root.join("level.scene")));
+        let mut models = tree.models();
+        models.sort();
+        assert_eq!(models, ["models/UPPER.GLB", "models/level.glb"]);
+        assert!(
+            tree.matching("external.gltf")
+                .iter()
+                .any(|entry| entry.name == "external.gltf"),
+            "unsupported models remain visible as files"
+        );
+    }
+}

@@ -14,6 +14,12 @@ impl WorldHost<'_> {
         path: &Path,
         args: &[Value],
     ) -> Result<Value, RuntimeError> {
+        if matches!(
+            call,
+            Physics3dCall::MoveCharacter | Physics3dCall::CharacterMotion
+        ) {
+            return self.physics3d_character(call, path, args);
+        }
         if matches!(call, Physics3dCall::Layer | Physics3dCall::Mask) {
             return self.physics3d_layers(call, path, args);
         }

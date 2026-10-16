@@ -8,7 +8,7 @@ use decay_ir::Path;
 use decay_runtime::{Host, RuntimeError, Value};
 use sindri_core::{EntityId, Transform3D};
 
-use super::convert::{as_f32, describe, number};
+use super::convert::{describe, number};
 use super::{WorldHost, print};
 use crate::surface::{
     AIM, AIM_VALUES, CAMERA, CAMERA_VALUES, FUNCTIONS, GESTURE, GESTURE_VALUES, Handle,
@@ -33,6 +33,15 @@ impl Host for WorldHost<'_> {
             && let Some(value) = self.time_or_constant(&parts)
         {
             return Ok(Some(value));
+        }
+
+        if subject.is_none()
+            && let [POINTER, "delta", axis @ ("x" | "y")] = ungrouped(&parts)
+        {
+            let index = usize::from(*axis == "y");
+            return Ok(Some(Value::Number(f64::from(
+                self.context.input.pointer_delta()[index],
+            ))));
         }
 
         // Where the person is pointing, and how many fingers are down. Facts
@@ -97,6 +106,10 @@ impl Host for WorldHost<'_> {
             }));
         }
 
+        if let Some(value) = self.load_copied_value(subject, path, &under)? {
+            return Ok(Some(value));
+        }
+
         let found = if subject.is_some() {
             leaf_through_reference(&under)
         } else {
@@ -109,6 +122,9 @@ impl Host for WorldHost<'_> {
             return self.peer_load(subject, path);
         };
         let entity = self.subject(subject, path)?;
+        if let Some(value) = self.load_checked_leaf(entity, leaf, path)? {
+            return Ok(Some(value));
+        }
         let transform = self.transform_of(entity);
         // Read in place. Every load used to serialize all of the entity's
         // components into a fresh JSON object to look one number up, which was
@@ -136,9 +152,24 @@ impl Host for WorldHost<'_> {
         if subject.is_none() && self.shared_store(path, &value)? {
             return Ok(true);
         }
+        if subject.is_none() && Self::is_read_only_pointer(path) {
+            return Err(RuntimeError::Host(format!(
+                "{} is read-only",
+                path.dotted()
+            )));
+        }
         let Some(under) = Self::addressed(subject, path) else {
             return Ok(false);
         };
+        if self.store_environment_color(subject, path, &under, &value)? {
+            return Ok(true);
+        }
+        if self.store_light_color(subject, path, &under, &value)? {
+            return Ok(true);
+        }
+        if self.store_rotation(subject, path, &under, &value)? {
+            return Ok(true);
+        }
         let found = if subject.is_some() {
             leaf_through_reference(&under)
         } else {
@@ -150,56 +181,28 @@ impl Host for WorldHost<'_> {
             }
             return self.peer_store(subject, path, value);
         };
+        if leaf.is_read_only() {
+            return Err(RuntimeError::Host(format!(
+                "{} is read-only",
+                path.dotted()
+            )));
+        }
         let entity = self.subject(subject, path)?;
+        if let Leaf::Light(field) = leaf {
+            return self.store_light(entity, field, path, &value);
+        }
+        if let Leaf::Environment(field) = leaf {
+            return self.store_environment(entity, field, path, &value);
+        }
         let number = number(path, &value)?;
 
         match leaf {
             Leaf::TransformAxis(..) | Leaf::TransformScalar(_) => {
-                let Some(mut transform) = self.transform_of(entity) else {
-                    return Ok(false);
-                };
-                match leaf {
-                    Leaf::TransformAxis(vector, index) if vector.is_world() => {
-                        // Moved in the world, and stored as the place under its
-                        // parent that puts it there.
-                        let Some(mut placed) = self.world.world_transform(entity) else {
-                            return Ok(false);
-                        };
-                        let mut values = vector.get(&placed);
-                        values[index] = as_f32(number);
-                        vector.set(&mut placed, values);
-                        transform = self.world.local_for_world(entity, placed);
-                    }
-                    Leaf::TransformAxis(vector, index) => {
-                        let mut values = vector.get(&transform);
-                        values[index] = as_f32(number);
-                        vector.set(&mut transform, values);
-                    }
-                    Leaf::TransformScalar(scalar) => {
-                        scalar.set(&mut transform, as_f32(number));
-                    }
-                    Leaf::Component { .. } => unreachable!("matched above"),
-                }
-
-                // The Z lock is an invariant of the transform, not a rule the
-                // editor enforces on the way in. A script is a write path like
-                // any other, and one that could ignore the lock would be the
-                // hole that makes the lock worthless.
-                if self
-                    .transform_of(entity)
-                    .is_some_and(|current| current.z_lock_rejects(Some(transform)))
-                {
-                    return Err(RuntimeError::Host(format!(
-                        "{} would move a Z-locked transform off its layer",
-                        path.dotted()
-                    )));
-                }
-                let Some(data) = self.world.get_mut(entity) else {
-                    return Ok(false);
-                };
-                data.transform_3d = Some(transform);
-                Ok(true)
+                self.store_transform_leaf(entity, leaf, number, path)
             }
+            Leaf::Environment(_) => unreachable!("handled by store_environment"),
+            Leaf::Light(_) => unreachable!("handled by store_light"),
+            Leaf::TransformRotation(_) => unreachable!("handled by store_rotation"),
             Leaf::Component { component, pointer } => {
                 let Some(data) = self.world.get_mut(entity) else {
                     return Ok(false);
@@ -242,10 +245,12 @@ impl Host for WorldHost<'_> {
         path: &Path,
         args: &[Value],
     ) -> Result<Option<Value>, RuntimeError> {
-        // Nothing on the surface is called *through* a reference: an entity is
-        // a thing to read and write, not a thing with methods. Refusing here
-        // keeps `target.axis("a", "b")` from reaching `Input`. What is called
-        // through one is another script, and that is a message.
+        if let Some(value) = self.transform_call(subject, path, args)? {
+            return Ok(Some(value));
+        }
+        // Transform methods above are the entity methods. Other reference calls
+        // address script messages; refusing namespace calls here keeps
+        // `target.axis("a", "b")` from reaching `Input`.
         if subject.is_some() {
             return Ok(self.peer_call(subject, path, args));
         }
@@ -280,6 +285,36 @@ impl Host for WorldHost<'_> {
 }
 
 impl WorldHost<'_> {
+    /// Component leaves whose typed defaults and validation own their reads.
+    fn load_checked_leaf(
+        &self,
+        entity: EntityId,
+        leaf: Leaf,
+        path: &Path,
+    ) -> Result<Option<Value>, RuntimeError> {
+        match leaf {
+            Leaf::Light(field) => self.load_light(entity, field, path).map(Some),
+            Leaf::Environment(field) => self.load_environment(entity, field, path).map(Some),
+            _ => Ok(None),
+        }
+    }
+
+    /// Whole copied values with checked specialized storage at the host seam.
+    fn load_copied_value(
+        &self,
+        subject: Option<u64>,
+        path: &Path,
+        under: &[&str],
+    ) -> Result<Option<Value>, RuntimeError> {
+        if let Some(color) = self.load_environment_color(subject, path, under)? {
+            return Ok(Some(color));
+        }
+        if let Some(color) = self.load_light_color(subject, path, under)? {
+            return Ok(Some(color));
+        }
+        self.load_rotation(subject, path, under)
+    }
+
     /// Everything the script printed during the call.
     pub fn take_printed(&mut self) -> Vec<String> {
         std::mem::take(&mut self.printed)

@@ -6,16 +6,24 @@ use sindri_render::{
 };
 
 use super::{SceneExtractError, SceneExtractor, camera::ResolvedCameras, transform_matrix};
-use crate::ModelComponent;
+use crate::{ModelCollider3dComponent, ModelComponent, ModelConvexCollider3dComponent};
 
-/// Every model named by the world, including currently inactive entities.
+/// Every render or collision model named by the world, including inactive entities.
 ///
 /// Hosts and the exporter load once per logical ID. Component validation
 /// reports malformed references before this discovery is used.
 pub fn referenced_models(world: &World) -> BTreeSet<String> {
     world
         .entities()
-        .filter_map(|(_, data)| data.components.get(ModelComponent::TYPE_NAME))
+        .flat_map(|(_, data)| {
+            [
+                ModelComponent::TYPE_NAME,
+                ModelCollider3dComponent::TYPE_NAME,
+                ModelConvexCollider3dComponent::TYPE_NAME,
+            ]
+            .into_iter()
+            .filter_map(|name| data.components.get(name))
+        })
         .filter_map(|payload| payload.get("asset"))
         .filter_map(serde_json::Value::as_str)
         .map(str::to_owned)
@@ -66,7 +74,7 @@ impl SceneExtractor {
                 }
                 return Err(error.into());
             }
-            frame.push(FramePass::new(
+            let mut pass = FramePass::new(
                 RenderStage::Opaque3d,
                 RenderLayer(component.layer),
                 FrameCamera {
@@ -77,7 +85,12 @@ impl SceneExtractor {
                     model,
                     asset: Arc::clone(asset),
                 },
-            ));
+            );
+            pass.material = self
+                .components
+                .get::<crate::MaterialComponent>(world, entity)?
+                .map(|component| component.factors);
+            frame.push(pass);
         }
         Ok(())
     }

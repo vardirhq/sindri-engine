@@ -10,11 +10,13 @@
 //! entity is, because carrying one of these components already says it.
 
 mod camera;
+mod camera_orbit;
 mod environment;
 mod environment_check;
 mod grid;
 mod light;
 mod light2d;
+mod material;
 mod mesh;
 mod model;
 mod sprite;
@@ -33,6 +35,7 @@ pub use camera::{
     CameraBehaviorComponent, CameraBounds, CameraComponent, CameraFit, CameraFollow, CameraShake,
     add_camera_trauma, update_camera_behaviors,
 };
+pub use camera_orbit::CameraOrbitComponent;
 pub use environment::{
     EnvironmentAmbientOcclusion, EnvironmentBloom, EnvironmentComponent, EnvironmentFog,
     EnvironmentPostProcess, EnvironmentShadows, EnvironmentToneMapping, environment_of,
@@ -50,6 +53,7 @@ pub use light2d::{
     EnvironmentLighting2d, Light2dComponent, Light2dError, Light2dOccluderComponent, OccluderShape,
     outline,
 };
+pub use material::MaterialComponent;
 pub use mesh::{MeshComponent, MeshPrimitive};
 pub use model::ModelComponent;
 pub use sprite::{ImageDraw, SpriteColorTransform, SpriteComponent};

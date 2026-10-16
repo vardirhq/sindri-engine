@@ -19,6 +19,8 @@ use crate::ui::theme::color;
 use super::projection::{distance_to_segment, polygon_contains, project_point, project_segment};
 use super::{EditorApp, WorkspaceTab};
 
+mod orbit;
+
 #[cfg(test)]
 mod tests;
 
@@ -405,6 +407,7 @@ impl EditorApp {
             ))
             .with_clip_rect(response.rect);
         paint_authored_cameras(&painter, &visuals, &self.selection);
+        orbit::paint_selected(self, &painter, response.rect);
     }
 
     pub(super) fn move_camera(

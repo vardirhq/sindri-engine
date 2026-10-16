@@ -35,6 +35,7 @@ pub fn run() -> eframe::Result {
         // A frame's cost rather than the display's rate: with vsync a fast
         // frame and a slow one both report the refresh interval.
         options.wgpu_options.surface.present_mode = eframe::wgpu::PresentMode::AutoNoVsync;
+        optional_timestamps(&mut options.wgpu_options.wgpu_setup);
         // Measured as a fresh install would see it, and leaving the person's
         // own settings as they were.
         options.persist_window = false;
@@ -57,5 +58,17 @@ fn benchmark_plan() -> Result<Option<BenchmarkPlan>, String> {
         )),
         Some((_, rest)) => BenchmarkPlan::from_args(rest),
         None => Ok(None),
+    }
+}
+
+/// Preserve eframe's device policy and enable only supported benchmark features.
+fn optional_timestamps(setup: &mut eframe::egui_wgpu::WgpuSetup) {
+    if let eframe::egui_wgpu::WgpuSetup::CreateNew(create) = setup {
+        let descriptor = std::sync::Arc::clone(&create.device_descriptor);
+        create.device_descriptor = std::sync::Arc::new(move |adapter| {
+            let mut device = descriptor(adapter);
+            device.required_features |= adapter.features() & sindri::gpu::TIMING_FEATURES;
+            device
+        });
     }
 }

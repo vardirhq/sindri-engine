@@ -38,6 +38,8 @@ pub struct ScriptFrame<'a> {
     pub physics3d: Option<crate::Physics3d<'a>>,
     /// Scene controller input and cached results, when offered by the host.
     pub characters: Option<Characters2d<'a>>,
+    /// Independent scene-owned 3D controller requests and cached results.
+    pub characters3d: Option<crate::Characters3d<'a>>,
     /// Where the screen elements are and what the pointer is doing to them.
     ///
     /// `None` for a host that draws no UI, and then `Ui.is_pressed` says so
@@ -115,6 +117,7 @@ impl<'a> ScriptFrame<'a> {
             physics: None,
             physics3d: None,
             characters: None,
+            characters3d: None,
             screen_ui: None,
             aim: None,
             gestures: None,
@@ -231,6 +234,13 @@ impl<'a> ScriptFrame<'a> {
     #[must_use]
     pub fn with_characters(mut self, characters: Characters2d<'a>) -> Self {
         self.characters = Some(characters);
+        self
+    }
+
+    /// The same frame, with scene-owned 3D controller requests and results.
+    #[must_use]
+    pub fn with_characters3d(mut self, characters: crate::Characters3d<'a>) -> Self {
+        self.characters3d = Some(characters);
         self
     }
 

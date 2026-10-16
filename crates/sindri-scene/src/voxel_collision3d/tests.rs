@@ -330,3 +330,41 @@ fn duplicates_bad_empty_settings_and_unrelated_solver_owners_reject_without_muta
 
 #[path = "lifecycle_tests.rs"]
 mod lifecycle;
+
+#[test]
+fn coefficient_only_snapshot_keeps_groups_and_uses_no_rebuild_budget() {
+    let mut world = World::default();
+    let owner = world.spawn(EntityData::default());
+    let mut physics = PhysicsWorld3d::new([0.0; 3]).unwrap();
+    let mut cache = SceneVoxelCollision3d::default();
+    let voxels = section();
+    let sections = [VoxelCollisionSection3d {
+        coord: SectionCoord::default(),
+        revision: 1,
+        voxels: &voxels,
+    }];
+    cache
+        .synchronize(&world, &mut physics, &[input(owner, &sections, &solid, 1)])
+        .unwrap();
+    let old = cache.owners[&owner].sections[&SectionCoord::default()].clone();
+    let before = hit(&physics, 0.5, 0.5).unwrap();
+    cache.budget.rebuilds = 0;
+    let mut snapshot = input(owner, &sections, &solid, 1);
+    snapshot.settings.friction = 0.0;
+    snapshot.settings.restitution = 0.8;
+    let report = cache
+        .synchronize(&world, &mut physics, &[snapshot])
+        .unwrap();
+    assert_eq!((report.compiled, report.rebuilt), (0, 0));
+    let new = &cache.owners[&owner].sections[&SectionCoord::default()];
+    assert!(Arc::ptr_eq(&old.boxes, &new.boxes));
+    assert_eq!(old.key, new.key);
+    assert_eq!(hit(&physics, 0.5, 0.5).unwrap(), before);
+    assert_eq!(
+        physics.materials(owner).unwrap(),
+        [sindri_physics::PhysicsMaterial {
+            friction: 0.0,
+            restitution: 0.8
+        }]
+    );
+}

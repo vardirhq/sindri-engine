@@ -51,9 +51,11 @@ pub fn assets_root(project: &Path) -> std::path::PathBuf {
     }
 }
 
-/// Every file under `root` whose name ends with `suffix`, by its asset ID.
+/// Every file under `root` whose name ends with `suffix`, ignoring ASCII case,
+/// by its unchanged asset ID.
 #[must_use]
 pub fn files_under(root: &Path, suffix: &str) -> BTreeMap<String, Vec<u8>> {
+    let suffix = suffix.to_ascii_lowercase();
     let mut found = BTreeMap::new();
     let mut pending = vec![root.to_path_buf()];
     while let Some(dir) = pending.pop() {
@@ -64,7 +66,10 @@ pub fn files_under(root: &Path, suffix: &str) -> BTreeMap<String, Vec<u8>> {
             let path = entry.path();
             if path.is_dir() {
                 pending.push(path);
-            } else if path.to_string_lossy().ends_with(suffix)
+            } else if path
+                .to_string_lossy()
+                .to_ascii_lowercase()
+                .ends_with(&suffix)
                 && let (Ok(relative), Ok(bytes)) = (path.strip_prefix(root), fs::read(&path))
             {
                 found.insert(relative.to_string_lossy().replace('\\', "/"), bytes);
@@ -256,12 +261,20 @@ impl ProjectRun {
                 weave::compose(&id, &weave_sources).map_err(|error| format!("{id}: {error}"))?,
             );
         }
+        let collision =
+            crate::model_assets::collision_references(&scenes, &prefabs, scene.components())?;
         let mut session = Session::with_sources(scene.components().clone(), sources)
             .with_prefabs(prefabs)
             .with_profiles(profiles)
             .with_tile_sets(tile_sets)
             .with_scenes(scenes, loaded)
             .with_styles(sheets);
+        #[cfg(not(target_arch = "wasm32"))]
+        crate::model_assets::load_collision(&assets, &collision, &mut session)?;
+        #[cfg(target_arch = "wasm32")]
+        if !collision.is_empty() {
+            return Err("headless model collision loading requires a native filesystem".to_owned());
+        }
         session
             .settle_styles(
                 &mut world,

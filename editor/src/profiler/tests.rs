@@ -151,3 +151,83 @@ fn clearing_forgets_the_open_frame_too() {
     profiler.begin(at, Some(ms(12)), true);
     assert!(profiler.frames().is_empty());
 }
+
+#[test]
+fn view_counters_follow_frame_capture_without_mixing_scene_and_game() {
+    let mut profiler = Profiler::default();
+    let mut at = Instant::now();
+    profiler.capture();
+    frame(&mut profiler, &mut at, true, |profiler| {
+        for (beside, draws, uploads) in [(false, 2, 1), (true, 9, 3), (false, 4, 0)] {
+            profiler.set_scene_beside_run(beside);
+            profiler.add_gpu_execution(ms(draws));
+            profiler.add_batch_counters(sindri_render::BatchDrawStats {
+                draw_calls: draws,
+                instances: draws * 2,
+                ..Default::default()
+            });
+            profiler.add_mesh_counters(super::MeshCounters {
+                meshes: sindri_render::MeshDrawStats {
+                    draw_calls: draws,
+                    render_passes: draws + 1,
+                    uniform_writes: draws,
+                    uniform_bytes: draws * 64,
+                    transient_geometry_uploads: draws,
+                },
+                model_uploads: uploads,
+                cached_geometry_uploads: 1,
+            });
+        }
+        profiler.set_scene_beside_run(false);
+    });
+    profiler.begin(at, None, true);
+    let captured = profiler.take_captured();
+    assert_eq!(captured[0].gpu_execution, Some(ms(6)));
+    assert_eq!(captured[0].scene_gpu_execution, Some(ms(9)));
+    assert_eq!(
+        captured[0].work(),
+        ms(10),
+        "GPU intervals stay outside CPU phases"
+    );
+    assert_eq!(captured[0].batch_counters.unwrap().draw_calls, 6);
+    assert_eq!(captured[0].batch_counters.unwrap().instances, 12);
+    assert_eq!(captured[0].scene_batch_counters.unwrap().draw_calls, 9);
+    let primary = captured[0].mesh_counters.unwrap();
+    assert_eq!(primary.meshes.draw_calls, 6);
+    assert_eq!(primary.meshes.render_passes, 8);
+    assert_eq!(primary.meshes.uniform_writes, 6);
+    assert_eq!(primary.meshes.uniform_bytes, 384);
+    assert_eq!(primary.meshes.transient_geometry_uploads, 6);
+    assert_eq!(primary.model_uploads, 1);
+    assert_eq!(primary.cached_geometry_uploads, 2);
+    assert_eq!(
+        captured[0].scene_mesh_counters.unwrap().meshes.draw_calls,
+        9
+    );
+    assert_eq!(captured[0].scene_mesh_counters.unwrap().model_uploads, 3);
+    assert_eq!(profiler.frames()[0], captured[0]);
+    profiler.end(ms(1));
+    profiler.begin(at + ms(20), None, true);
+    assert!(
+        profiler.frames()[1].mesh_counters.is_none(),
+        "undrawn is not measured zero"
+    );
+    assert!(profiler.frames()[1].scene_mesh_counters.is_none());
+    assert!(profiler.frames()[1].gpu_execution.is_none());
+    assert!(profiler.frames()[1].scene_gpu_execution.is_none());
+    assert!(profiler.frames()[1].batch_counters.is_none());
+    assert!(profiler.frames()[1].scene_batch_counters.is_none());
+    profiler.add_mesh_counters(super::MeshCounters::default());
+    profiler.add_gpu_execution(ms(4));
+    profiler.add_batch_counters(sindri_render::BatchDrawStats::default());
+    profiler.clear();
+    profiler.begin(at + ms(40), None, true);
+    profiler.end(ms(1));
+    profiler.begin(at + ms(60), None, true);
+    assert!(
+        profiler.frames()[0].mesh_counters.is_none(),
+        "Play reset clears counters"
+    );
+    assert!(profiler.frames()[0].gpu_execution.is_none());
+    assert!(profiler.frames()[0].batch_counters.is_none());
+}

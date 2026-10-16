@@ -47,6 +47,7 @@ pub(super) struct TickWorld<'a> {
     pub(super) messages: Vec<super::Message>,
     /// Scene-owned controller requests and cached results.
     pub(super) characters: Option<Characters2d<'a>>,
+    pub(super) characters3d: Option<crate::Characters3d<'a>>,
     /// The physics a script may read and drive, when the host runs any.
     pub(super) physics: Option<Physics2d<'a>>,
     pub(super) physics3d: Option<crate::Physics3d<'a>>,
@@ -70,12 +71,24 @@ pub(super) struct TickWorld<'a> {
     pub(super) tile_sets: Option<&'a sindri_scene::TileSetBindings>,
 }
 
+/// Drops instance state and signals whose owners no longer survive the pass.
+pub(super) fn retain_live(at: &mut TickWorld<'_>, live: &BTreeSet<EntityId>) {
+    at.tweens.retain(|entity| live.contains(&entity));
+    at.running.retain(|entity, _| live.contains(entity));
+    // What was waiting for something that never started goes with it.
+    let world = &*at.world;
+    at.starting.retain(|entity, _| world.get(*entity).is_some());
+    let world = &*at.world;
+    at.blackboard
+        .retain_signals(|bits| world.get(EntityId::from_bits(bits)).is_some());
+}
+
 pub(super) fn tick(
     at: &mut TickWorld<'_>,
     entity: EntityId,
     component: &ScriptComponent,
     delta_seconds: f32,
-) -> Result<Vec<String>, ScriptFailure> {
+) -> Result<RunOutput, ScriptFailure> {
     ensure_compiled(at.programs, at.sources, entity, component)?;
     let program = std::rc::Rc::clone(&at.programs[&component.source].program);
     let container = program
@@ -175,11 +188,11 @@ pub(super) fn tick(
         }
         Ok(())
     })();
-    let printed = runtime.into_host().take_printed();
+    let output = RunOutput::from_host(runtime.into_host());
     if let Some(current) = current {
         at.running.insert(entity, current);
     }
-    outcome.map(|()| printed)
+    outcome.map(|()| output)
 }
 
 /// Runs a message another script sent: `function` on `entity`'s script, with
@@ -192,16 +205,16 @@ pub(super) fn deliver(
     at: &mut TickWorld<'_>,
     entity: EntityId,
     message: super::Message,
-) -> Result<Vec<String>, ScriptFailure> {
+) -> Result<RunOutput, ScriptFailure> {
     if at.world.get(entity).is_none() {
-        return Ok(Vec::new());
+        return Ok(RunOutput::default());
     }
     let Some(mut current) = at.running.remove(&entity) else {
-        return Ok(Vec::new());
+        return Ok(RunOutput::default());
     };
     let Some(compiled) = at.programs.get(&current.source) else {
         at.running.insert(entity, current);
-        return Ok(Vec::new());
+        return Ok(RunOutput::default());
     };
     let program = std::rc::Rc::clone(&compiled.program);
     let script = current.script.clone();
@@ -215,9 +228,9 @@ pub(super) fn deliver(
         .call_instance(&mut current.instance, &message.name, message.args)
         .map(|_| ())
         .map_err(|error| ScriptFailure::runtime(entity, &script, &message.name, &error));
-    let printed = runtime.into_host().take_printed();
+    let output = RunOutput::from_host(runtime.into_host());
     at.running.insert(entity, current);
-    outcome.map(|()| printed)
+    outcome.map(|()| output)
 }
 
 /// Every running script with a function of this name, in the order a pass
@@ -293,6 +306,14 @@ fn host_for<'b>(
         requests: &mut *characters.requests,
         motions: characters.motions,
     }))
+    .with_characters3d(
+        at.characters3d
+            .as_mut()
+            .map(|characters| crate::Characters3d {
+                requests: &mut *characters.requests,
+                motions: characters.motions,
+            }),
+    )
     .with_tweens(&mut *at.tweens)
     .with_actions(at.actions)
     .with_sequences(at.sequences.as_deref_mut())
@@ -506,4 +527,41 @@ pub(crate) fn to_value(value: &serde_json::Value) -> Option<Value> {
         )?,
         serde_json::Value::Object(_) => return None,
     })
+}
+
+/// Side effects from a successful script invocation.
+#[derive(Default)]
+pub(super) struct RunOutput {
+    printed: Vec<String>,
+    pointer_lock_request: Option<bool>,
+}
+
+impl RunOutput {
+    fn from_host(mut host: WorldHost<'_>) -> Self {
+        Self {
+            printed: host.take_printed(),
+            pointer_lock_request: host.take_pointer_lock_request(),
+        }
+    }
+}
+
+pub(super) fn collect(
+    report: &mut crate::ScriptReport,
+    entity: EntityId,
+    outcome: Result<RunOutput, ScriptFailure>,
+) {
+    match outcome {
+        Ok(output) => {
+            report.printed.extend(
+                output
+                    .printed
+                    .into_iter()
+                    .map(|message| crate::ScriptMessage { entity, message }),
+            );
+            if output.pointer_lock_request.is_some() {
+                report.pointer_lock_request = output.pointer_lock_request;
+            }
+        }
+        Err(failure) => report.failures.push(failure),
+    }
 }

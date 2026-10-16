@@ -52,6 +52,14 @@ pub fn environment() -> Environment {
         environment.add_type(name, ty);
     }
 
+    environment.add_struct(
+        crate::surface::QUAT,
+        crate::surface::QUAT_FIELDS
+            .into_iter()
+            .map(|name| (name.to_owned(), Type::F32))
+            .collect(),
+    );
+
     for (name, _) in CONSTANTS {
         environment.add_value(*name, Type::F32);
     }
@@ -488,6 +496,9 @@ pub(super) fn describe_node(node: &Node) -> Type {
         // whole, and still read channel by channel.
         Node::Group(name, _) if *name == crate::surface::names::RGBA => Type::Color,
         Node::Group(name, _) => Type::Named((*name).to_owned()),
+        Node::Leaf(crate::surface::Leaf::Light(crate::surface::light::LightField::Enabled)) => {
+            Type::Bool
+        }
         Node::Leaf(_) => Type::F32,
         Node::Handle(_) => Type::Named(ENTITY.to_owned()),
     }
@@ -508,7 +519,14 @@ pub(super) fn collect_types() -> Vec<(String, HostType)> {
             }
             let mut ty = HostType::new();
             for (field, child) in *nested {
-                ty = ty.with_value(*field, describe_node(child));
+                ty = if child.is_read_only() {
+                    ty.with_read_only_value(*field, describe_node(child))
+                } else {
+                    ty.with_value(*field, describe_node(child))
+                };
+            }
+            if *name == crate::surface::TRANSFORM {
+                ty = crate::surface::transform::add_calls(ty);
             }
             into.push(((*name).to_owned(), ty));
             walk(nested, into);

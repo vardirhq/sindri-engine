@@ -153,6 +153,12 @@ pub trait DesktopApp: Sized + 'static {
         None
     }
 
+    /// Cursor capture intent produced since the last update, drained once.
+    /// The host reports actual success/release through `PointerLockChanged`.
+    fn take_pointer_lock_request(&mut self) -> Option<bool> {
+        None
+    }
+
     /// Advances by the real time since the previous frame.
     fn update(&mut self, delta: Duration) -> Result<Flow, Self::Error> {
         let _ = delta;

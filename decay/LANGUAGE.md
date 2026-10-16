@@ -1183,6 +1183,15 @@ Container fields are visible in every function of that container.
 
 ## The host boundary
 
+A host may describe a computed member as read-only with
+`HostType::with_read_only_value`. It has the same read type as a writable
+member, but assigning it or a component/field inside its value is an
+`immutable` diagnostic. Copying it to a mutable variable creates an ordinary
+value. A read-only reference may still be used to change the entity it names;
+that does not reassign the reference. The runtime host must enforce the same
+write restriction when executing bytecode that bypassed checking.
+
+
 Decay has **no built-in functions and no standard library**. Not even `print` —
 where one exists, the host registered it. The one exception is vectors: `Vec2`,
 `Vec3`, and what a vector can do belong to the language, because a value type

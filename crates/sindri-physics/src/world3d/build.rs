@@ -1,7 +1,10 @@
 //! The only conversions from validated Sindri 3D values into backend builders.
 
 use super::r3;
-use crate::{Collider3d, ColliderShape3d, PhysicsPose3d, RigidBody3d, RigidBodyKind};
+use crate::{
+    Collider3d, ColliderShape3d, CollisionLayers, PhysicsMaterial, PhysicsPose3d, RigidBody3d,
+    RigidBodyKind,
+};
 use sindri_core::EntityId;
 
 pub(super) fn pose(value: PhysicsPose3d) -> r3::Pose {
@@ -45,21 +48,42 @@ pub(super) fn collider(entity: EntityId, value: Collider3d) -> r3::ColliderBuild
             radius,
         } => r3::ColliderBuilder::capsule_y(half_height, radius),
     };
-    builder
-        .position(pose(PhysicsPose3d {
+    properties(
+        entity,
+        builder,
+        PhysicsPose3d {
             position: value.offset,
             rotation: value.rotation,
-        }))
-        .sensor(value.sensor)
+        },
+        value.sensor,
+        value.layers,
+        PhysicsMaterial {
+            friction: value.friction,
+            restitution: value.restitution,
+        },
+    )
+}
+
+pub(super) fn properties(
+    entity: EntityId,
+    builder: r3::ColliderBuilder,
+    local: PhysicsPose3d,
+    sensor: bool,
+    layers: CollisionLayers,
+    material: PhysicsMaterial,
+) -> r3::ColliderBuilder {
+    builder
+        .position(pose(local))
+        .sensor(sensor)
         .collision_groups(r3::InteractionGroups::new(
-            r3::Group::from_bits_retain(value.layers.memberships),
-            r3::Group::from_bits_retain(value.layers.filter),
+            r3::Group::from_bits_retain(layers.memberships),
+            r3::Group::from_bits_retain(layers.filter),
             r3::InteractionTestMode::And,
         ))
         .active_collision_types(r3::ActiveCollisionTypes::all())
         .active_events(r3::ActiveEvents::COLLISION_EVENTS)
-        .friction(value.friction)
+        .friction(material.friction)
         .friction_combine_rule(r3::CoefficientCombineRule::Min)
-        .restitution(value.restitution)
+        .restitution(material.restitution)
         .user_data(u128::from(entity.to_bits()))
 }

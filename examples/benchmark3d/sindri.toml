@@ -1,0 +1,4 @@
+format_version = 1
+[project]
+name = "3D Benchmark"
+main_scene = "assets/benchmark.scene"

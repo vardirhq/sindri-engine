@@ -67,6 +67,8 @@ Each entry links its tests and the projects that exercise it. Surface marks matc
 | [In-editor script editing](#in-editor-scripts) | — | ❌ | — | — |
 | [Reloading an edited scene file](#scene-file-reload) | ❌ | ❌ | — | — |
 | [Viewport authoring of polygon vertices](#polygon-handles) | — | ❌ | — | — |
+| **3D foundation** | | | | |
+| [Model asset field metadata and picker](#model-asset-picker) | ✅ | ✅ | — | 🟡 |
 
 ## Projects and scenes
 
@@ -907,6 +909,46 @@ frame's phases and exits; `project-benchmark` plays the same project offscreen
 the way the browser host does. `scripts/frame-benchmark.py` runs both and
 compares the work per frame.
 
+
+The fixed [3D Benchmark](../../examples/benchmark3d/README.md) supplies 100 cubes,
+100 inline pyramid surfaces and 100 references to one shared GLB, plus a floor.
+Its native asset-queue/Session regression verifies ready, static poses, actual
+extracted commands and shared model resources; real Chromium fetches all six
+assets and draws the workload. Native/browser player and offscreen capture paths
+now apply authored shadow settings; on/off captures verify delivery alongside
+editor benchmarks. Imported models now receive the same directional map. Shared shadow/fog WGSL,
+map-resize/disable/cache GPU regressions and native/browser green-receiver controls
+exercise reception on imported geometry. Renderer fog supports distance, density
+and height terms; authored fog is still forwarded only by editor viewports.
+Models now cast material-aware shadows from their cached primitive geometry,
+with retained hierarchy, both index widths and glTF mask/facing GPU regressions.
+Native/browser imported-only controls prove casting/reception; Explorer adoption
+remains open.
+CPU phases and GPU completion wait are available. Standalone reports also record
+physical textured 3D/model draws and passes, uniform queue writes/bytes, transient
+geometry pairs and separate persistent cache upload events. Shadowed/unshadowed
+consecutive-frame CI checks verify deltas; these counters exclude 2D, post and
+initial resource uploads. Editor benchmark frames now carry matching primary-view
+counters and separate extra Scene-view work. Frame capture/reset and missing
+versus measured-zero views have regressions; native editor shadow controls prove
+Game/standalone agreement. Native standalone reports optionally record actual
+GPU timestamp intervals separately from CPU completion wait, including adapter,
+period and scope; unsupported devices retain null timing. Real GPU query/reuse
+and baseline-device regressions plus shadow-control CI exercise this.
+Native editor benchmarks now request supported timestamp features without
+altering eframe's device limits; each view owns its own reusable query pair.
+Primary and extra Scene intervals accumulate independently, serialize in
+microseconds and stay outside CPU phases. Capture/reset/null regressions and
+real native shadow-control/two-view runs exercise delivery. Whole-frame
+counters, browser timestamps and performance targets remain pending.
+`BatchDrawStats` now records physical sprite/shape/glyph batches and queue
+buffer payloads, excluding initialization/atlas uploads. Standalone and editor
+reports carry primary and extra Scene scopes. Real GPU empty/reuse tests,
+Platformer reports and rebuilt browser smoke exercise the shared path; the
+fixed 3D CI workload records measured zeroes for 2D batches. The
+[baseline record](../3d-benchmark-baseline.md) records the hardware/profile context,
+short editor/standalone sample and native/browser shadow comparisons.
+
 </details>
 
 ## Workspace
@@ -1153,3 +1195,54 @@ Engine ❌ · Editor ❌ · Decay — · Proof —
 Irregular polygon vertices work in the runtime and Decay, but have no point handles or purpose-built inspector.
 
 Engine — · Editor ❌ · Decay — · Proof —
+
+## 3D foundation
+
+<a id="model-asset-picker"></a>
+
+### Model asset field metadata and picker
+
+Core model asset meaning describes render/static-collision references and is generated into the catalogue
+
+Engine ✅ · Editor ✅ · Decay — · Proof 🟡 — parity row *Model asset field metadata and picker*
+
+**Tested by:** [`editor/tests/inspector_field_meanings.rs`](../../editor/tests/inspector_field_meanings.rs)
+
+**Exercised in:** [`examples/model-collision`](../../examples/model-collision)
+
+**See:** [`docs/model-collision-editor-review.md`](../../docs/model-collision-editor-review.md)
+
+<details markdown="1">
+<summary>Evidence</summary>
+
+`ModelAssetDecoder` parses self-contained binary GLB into reusable CPU geometry,
+node local matrices/children, materials and embedded base-color textures. The
+tiny deterministic fixture exercises both index widths, multiple primitives,
+mesh reuse, non-indexed triangles and malformed/unsupported diagnostics.
+`AssetLoader` reuse is covered. A separate renderer resource and GPU path retain
+normal/UV geometry, hierarchy, textures and materials, composing node and entity
+matrices with inverse-transpose normals. GPU readback coverage checks colors,
+depth and upload reuse; renderer resource tests check malformed data. Scene
+`ModelComponent` references validate asset paths and extract shared resources
+with entity world transforms. Disabled models are discovered without drawing;
+missing bindings name the asset. The public facade converts decoded models
+without cross-coupling foundational crates. The editor catalogue assigns the
+registered component an existing icon/family. Render and static-collision asset
+fields now declare model metadata, use a GLB-only project picker and complete
+Add Component with an actual model. Independent widget/component history scopes
+keep the two selections separate; native review verifies Undo/Redo, save/reopen
+and Play with an alternate wall. Broader model authoring remains deferred. Model manifests and export retain original GLB bytes and discover
+scene/prefab
+references, including inactive entities. Native project capture and the WebGPU
+project host prepare/bind models once through the existing asset queue and
+apply scene lighting. The exact Low Tide cutaway crawler was visually inspected
+in both runtimes at 1200 × 1000, correctly oriented and visibly recognizable.
+Exported bytes match the source hash. Full editor authoring,
+animation and skinning remain deferred. This external proof does not claim
+the repository's in-tree game completion surface. Model Collision Lab now also
+has native player-window visual proof on X11/software Vulkan, after editor asset
+selection and save/reopen; the imported wall blocks keyboard movement and the
+walker renders on the goal pad.
+See [imported models](../imported-models.md).
+
+</details>

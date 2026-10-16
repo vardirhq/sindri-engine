@@ -56,12 +56,18 @@ pub struct ShapeRenderer {
     batches: Vec<Batch>,
     next: usize,
     clip: Option<[u32; 4]>,
+    draw_stats: crate::BatchDrawStats,
     /// The frame's 2D lights, uploaded on the frame's first batch.
     lighting: Option<Lighting2d>,
     lights: Lights2dGpu,
 }
 
 impl ShapeRenderer {
+    /// Cumulative physical draw/write payloads, including every nonempty batch.
+    pub const fn draw_stats(&self) -> crate::BatchDrawStats {
+        self.draw_stats
+    }
+
     pub fn set_clip(&mut self, clip: Option<[u32; 4]>) {
         self.clip = clip;
     }
@@ -132,6 +138,7 @@ impl ShapeRenderer {
             batches: Vec::new(),
             next: 0,
             clip: None,
+            draw_stats: crate::BatchDrawStats::default(),
             lighting: None,
             lights: Lights2dGpu::new(device),
         }
@@ -210,6 +217,11 @@ impl ShapeRenderer {
         pass.set_bind_group(0, &batch.bind_group, &[]);
         pass.set_vertex_buffer(1, batch.instances.slice(..));
         self.mesh.draw_instances(&mut pass, 0..instance_count);
+        self.draw_stats.record_draw(
+            instance_count,
+            std::mem::size_of::<ShapeUniform>(),
+            std::mem::size_of_val(instances),
+        );
         Ok(())
     }
 

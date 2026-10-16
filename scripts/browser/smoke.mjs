@@ -25,6 +25,11 @@ const EXPECT_ASSET_KINDS = new Set(
     .filter(Boolean),
 );
 const EXPECT_FAILURE = process.env.SINDRI_EXPECT_FAILURE || '';
+// Pixel-art examples may deliberately use fewer colors than the game smokes.
+const MIN_COLORS = Number(process.env.SINDRI_MIN_COLORS ?? 16);
+if (!Number.isInteger(MIN_COLORS) || MIN_COLORS <= 0) {
+  throw new Error('SINDRI_MIN_COLORS must be a positive integer');
+}
 const VIEWPORT = {
   width: Number(process.env.SINDRI_VIEWPORT_WIDTH ?? 960),
   height: Number(process.env.SINDRI_VIEWPORT_HEIGHT ?? 540),
@@ -514,10 +519,9 @@ const missingAssets = EXPECT_ASSETS
 // likeness test -- it separates a drawn frame from an empty one. The build
 // that shipped every pipeline rejected measured 5 colors at a mean of 0.09;
 // the same build working measures hundreds at a mean above 10.
-const BLANK_COLORS = 16;
 const BLANK_MEAN = 1;
 const blank =
-  drawn !== null && (drawn.colors < BLANK_COLORS || drawn.mean < BLANK_MEAN);
+  drawn !== null && (drawn.colors < MIN_COLORS || drawn.mean < BLANK_MEAN);
 
 console.log(`webgpu: ${webgpu ? 'yes' : 'no'}`);
 if (hasLoadingScreen) {

@@ -44,8 +44,17 @@ mod benchmark {
         let size = [SIZE.0 as f32, SIZE.1 as f32];
         let mut opened = open(Path::new(project), size)?;
         let instance = wgpu::Instance::default();
-        let gpu = GpuContext::request(&instance, None, &GpuRequestOptions::default()).await?;
+        let gpu = GpuContext::request(
+            &instance,
+            None,
+            &GpuRequestOptions {
+                optional_features: sindri_gpu::TIMING_FEATURES,
+                ..GpuRequestOptions::default()
+            },
+        )
+        .await?;
         let mut renderer = ProjectRenderer::new(&gpu, &opened.images, &opened.sheets, SIZE)?;
+        let gpu_timing = renderer.enable_gpu_timing(&gpu);
         renderer.bind_shaders(&opened.shaders)?;
         let mut playing: Vec<Value> = Vec::with_capacity(frames);
         for at in 0..settle + frames {
@@ -56,9 +65,28 @@ mod benchmark {
             let waiting = Instant::now();
             gpu.device.poll(wgpu::PollType::wait_indefinitely())?;
             let gpu_time = waiting.elapsed();
+            let execution = renderer.gpu_execution(&gpu)?;
             if at >= settle {
                 playing.push(json!({
                     "steps": 1,
+                    "gpu_execution_us": execution.map(micros),
+                    "batch_counters": {
+                        "draw_calls": drawn.batches.draw_calls,
+                        "render_passes": drawn.batches.render_passes,
+                        "instances": drawn.batches.instances,
+                        "buffer_writes": drawn.batches.buffer_writes,
+                        "uniform_bytes": drawn.batches.uniform_bytes,
+                        "instance_bytes": drawn.batches.instance_bytes,
+                    },
+                    "mesh_counters": {
+                        "draw_calls": drawn.meshes.draw_calls,
+                        "render_passes": drawn.meshes.render_passes,
+                        "uniform_writes": drawn.meshes.uniform_writes,
+                        "uniform_bytes": drawn.meshes.uniform_bytes,
+                        "transient_geometry_uploads": drawn.meshes.transient_geometry_uploads,
+                        "model_uploads": drawn.model_uploads,
+                        "cached_geometry_uploads": drawn.cached_geometry_uploads,
+                    },
                     "phases": {
                         "step": micros(stepped),
                         "presentation": micros(drawn.presentation),
@@ -71,6 +99,13 @@ mod benchmark {
         }
         let written = json!({
             "host": "standalone",
+            "gpu_timing": {
+                "supported": gpu_timing,
+                "adapter": gpu.capabilities.adapter_name,
+                "backend": format!("{:?}", gpu.capabilities.backend),
+                "timestamp_period_ns": gpu_timing.then(|| gpu.queue.get_timestamp_period()),
+                "scope": "project frame commands; excludes readback and presentation",
+            },
             "opened": project,
             "optimized": !cfg!(debug_assertions),
             "window": [SIZE.0, SIZE.1],

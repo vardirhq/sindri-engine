@@ -1,3 +1,6 @@
+mod shadow;
+pub(crate) use shadow::ModelShadowDraw;
+
 use std::{
     collections::HashMap,
     sync::{Arc, Weak},
@@ -10,23 +13,33 @@ use super::{
     ModelCacheStats, ModelIndexData, ModelRenderError, ModelSurface, RenderModel, pipeline,
     validate,
 };
-use crate::{FrameCamera, FrameTarget, Texture2D, WorldLighting};
+use crate::{
+    FogSettings, FrameCamera, FrameTarget, ShadowSettings, Texture2D, WorldLighting,
+    shadow::ShadowMap,
+};
 
 #[derive(Clone, Copy)]
-pub(crate) struct ModelDraw {
+pub(crate) struct ModelDraw<'a> {
     pub world: Mat4,
     pub camera: FrameCamera,
     pub lighting: WorldLighting,
+    pub shadow_map: &'a ShadowMap,
+    pub light_view_projection: Mat4,
+    pub shadows: ShadowSettings,
+    pub fog: FogSettings,
+    pub material: Option<crate::MaterialFactors>,
 }
 
 #[derive(Debug)]
 pub(crate) struct ModelRenderer {
+    shadow: shadow::ShadowRenderer,
     pipeline: wgpu::RenderPipeline,
     layout: wgpu::BindGroupLayout,
     cache: HashMap<usize, CachedModel>,
     slots: Vec<Slot>,
     next: usize,
     stats: ModelCacheStats,
+    draw_stats: crate::MeshDrawStats,
 }
 
 #[derive(Debug)]
@@ -63,6 +76,12 @@ struct Uniform {
     direction: [f32; 4],
     light: [f32; 4],
     eye: [f32; 4],
+    light_view_projection: [[f32; 4]; 4],
+    shadow: [f32; 4],
+    fog_color: [f32; 4],
+    fog_params: [f32; 4],
+    emissive: [f32; 4],
+    local_lights: [crate::lighting::LocalLightUniform; crate::MAX_LOCAL_LIGHTS],
 }
 
 impl ModelRenderer {
@@ -70,12 +89,20 @@ impl ModelRenderer {
         let layout = pipeline::layout(device);
         let pipeline = pipeline::create(device, format, &layout);
         Self {
+            shadow: shadow::ShadowRenderer::new(device),
             pipeline,
             layout,
             cache: HashMap::new(),
             slots: Vec::new(),
             next: 0,
             stats: ModelCacheStats::default(),
+            draw_stats: crate::MeshDrawStats::default(),
+        }
+    }
+
+    pub(crate) fn invalidate_bindings(&mut self) {
+        for slot in &mut self.slots {
+            slot.binding = None;
         }
     }
 
@@ -92,10 +119,30 @@ impl ModelRenderer {
             }
         }
         self.stats.resident_models = self.cache.len();
+        self.shadow.begin_submission(&self.cache);
     }
 
     pub(crate) const fn stats(&self) -> ModelCacheStats {
         self.stats
+    }
+
+    pub(crate) const fn draw_stats(&self) -> crate::MeshDrawStats {
+        self.draw_stats
+    }
+
+    fn ensure_cached(
+        &mut self,
+        device: &wgpu::Device,
+        queue: &wgpu::Queue,
+        asset: &Arc<RenderModel>,
+    ) -> Result<usize, ModelRenderError> {
+        let key = Arc::as_ptr(asset) as usize;
+        if let std::collections::hash_map::Entry::Vacant(entry) = self.cache.entry(key) {
+            entry.insert(upload(device, queue, asset)?);
+            self.stats.uploads += 1;
+            self.stats.resident_models = self.cache.len();
+        }
+        Ok(key)
     }
 
     pub(crate) fn encode(
@@ -105,15 +152,10 @@ impl ModelRenderer {
         encoder: &mut wgpu::CommandEncoder,
         target: FrameTarget<'_>,
         asset: &Arc<RenderModel>,
-        draw: ModelDraw,
+        draw: &ModelDraw<'_>,
     ) -> Result<(), ModelRenderError> {
         validate::transform(draw.world)?;
-        let key = Arc::as_ptr(asset) as usize;
-        if let std::collections::hash_map::Entry::Vacant(entry) = self.cache.entry(key) {
-            entry.insert(upload(device, queue, asset)?);
-            self.stats.uploads += 1;
-            self.stats.resident_models = self.cache.len();
-        }
+        let key = self.ensure_cached(device, queue, asset)?;
         let cached = &self.cache[&key];
         let fallback = ModelSurface::default();
         for instance in asset.instances() {
@@ -155,6 +197,7 @@ impl ModelRenderer {
                             &slot.uniform,
                             &cached.textures[texture],
                             &cached.samplers[texture],
+                            draw.shadow_map,
                         ),
                     ));
                 }
@@ -188,32 +231,69 @@ impl ModelRenderer {
                 pass.set_index_buffer(geometry.index.slice(..), geometry.format);
                 pass.draw_indexed(0..geometry.count, 0, 0..1);
                 self.stats.draws += 1;
+                self.draw_stats.record_draw(std::mem::size_of::<Uniform>());
             }
         }
         Ok(())
     }
 }
 
-fn uniform(draw: ModelDraw, world: Mat4, surface: &ModelSurface) -> Uniform {
-    let lighting = draw.lighting;
+fn uniform(draw: &ModelDraw<'_>, world: Mat4, surface: &ModelSurface) -> Uniform {
+    let factors = draw.material.unwrap_or(crate::MaterialFactors {
+        base_color: surface.base_color,
+        metallic: surface.metallic,
+        roughness: surface.roughness,
+        emissive: surface.emissive,
+    });
+    let lighting = &draw.lighting;
     let ambient = Vec3::from_array(lighting.ambient_color) * lighting.ambient_intensity;
     let light = Vec3::from_array(lighting.directional_color) * lighting.directional_intensity;
     let direction = -Vec3::from_array(lighting.directional_direction);
     Uniform {
+        local_lights: lighting.local_uniforms(),
         view_projection: draw.camera.view_projection.to_cols_array_2d(),
         world: world.to_cols_array_2d(),
         normal: world.inverse().transpose().to_cols_array_2d(),
-        base_color: surface.base_color,
+        base_color: factors.base_color,
         surface: [
-            surface.metallic,
-            surface.roughness,
+            factors.metallic,
+            factors.roughness,
             surface.alpha_cutoff.unwrap_or(-1.0),
             f32::from(surface.double_sided),
         ],
         ambient: ambient.extend(0.0).to_array(),
         direction: direction.extend(world.determinant().signum()).to_array(),
         light: light.extend(0.0).to_array(),
-        eye: draw.camera.position.extend(0.0).to_array(),
+        eye: draw
+            .camera
+            .position
+            .extend(draw.fog.height_falloff)
+            .to_array(),
+        light_view_projection: draw.light_view_projection.to_cols_array_2d(),
+        shadow: [
+            draw.shadows.bias,
+            f32::from(draw.shadows.enabled && lighting.directional_intensity > 0.0),
+            0.0,
+            0.0,
+        ],
+        fog_color: [
+            draw.fog.color[0],
+            draw.fog.color[1],
+            draw.fog.color[2],
+            f32::from(draw.fog.enabled),
+        ],
+        emissive: [
+            factors.emissive[0],
+            factors.emissive[1],
+            factors.emissive[2],
+            0.0,
+        ],
+        fog_params: [
+            draw.fog.start,
+            draw.fog.distance,
+            draw.fog.density,
+            draw.fog.height,
+        ],
     }
 }
 
@@ -223,6 +303,7 @@ fn bind(
     uniform: &wgpu::Buffer,
     texture: &Texture2D,
     sampler: &wgpu::Sampler,
+    shadow_map: &ShadowMap,
 ) -> wgpu::BindGroup {
     device.create_bind_group(&wgpu::BindGroupDescriptor {
         label: Some("Imported model draw"),
@@ -239,6 +320,14 @@ fn bind(
             wgpu::BindGroupEntry {
                 binding: 2,
                 resource: wgpu::BindingResource::Sampler(sampler),
+            },
+            wgpu::BindGroupEntry {
+                binding: 3,
+                resource: wgpu::BindingResource::TextureView(shadow_map.view()),
+            },
+            wgpu::BindGroupEntry {
+                binding: 4,
+                resource: wgpu::BindingResource::Sampler(shadow_map.sampler()),
             },
         ],
     })

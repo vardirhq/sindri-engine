@@ -47,11 +47,15 @@ pub(crate) const INPUT_QUERIES: &[(&str, InputQuery)] = &[
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(crate) enum PointerQuery {
+    Lock,
+    Unlock,
     Down,
     Pressed,
     Released,
 }
 pub(crate) const POINTER_QUERIES: &[(&str, PointerQuery)] = &[
+    ("lock", PointerQuery::Lock),
+    ("unlock", PointerQuery::Unlock),
     ("is_down", PointerQuery::Down),
     ("just_pressed", PointerQuery::Pressed),
     ("just_released", PointerQuery::Released),
@@ -66,6 +70,8 @@ pub(crate) enum PointerValue {
     OverlayX,
     OverlayY,
     Position,
+    Delta,
+    Locked,
     Overlay,
 }
 pub(crate) const POINTER_VALUES: &[(&str, PointerValue)] = &[
@@ -74,6 +80,8 @@ pub(crate) const POINTER_VALUES: &[(&str, PointerValue)] = &[
     ("overlay_x", PointerValue::OverlayX),
     ("overlay_y", PointerValue::OverlayY),
     ("position", PointerValue::Position),
+    ("delta", PointerValue::Delta),
+    ("locked", PointerValue::Locked),
     ("overlay", PointerValue::Overlay),
     ("inside", PointerValue::Inside),
     ("over_ui", PointerValue::OverUi),
@@ -123,6 +131,12 @@ pub(crate) enum CameraCall {
     Smoothing,
     MaxSpeed,
     OrthographicSize,
+    PerspectiveFov,
+    Orbit,
+    OrbitOffset,
+    OrbitSmoothing,
+    OrbitCollision,
+    ClearOrbit,
     Bounds,
     ClearBounds,
     Shake,
@@ -137,6 +151,12 @@ pub(crate) const CAMERA_CALLS: &[(&str, CameraCall)] = &[
     ("smoothing", CameraCall::Smoothing),
     ("max_speed", CameraCall::MaxSpeed),
     ("orthographic_size", CameraCall::OrthographicSize),
+    ("perspective_fov", CameraCall::PerspectiveFov),
+    ("orbit", CameraCall::Orbit),
+    ("orbit_offset", CameraCall::OrbitOffset),
+    ("orbit_smoothing", CameraCall::OrbitSmoothing),
+    ("orbit_collision", CameraCall::OrbitCollision),
+    ("clear_orbit", CameraCall::ClearOrbit),
     ("bounds", CameraCall::Bounds),
     ("clear_bounds", CameraCall::ClearBounds),
     ("shake", CameraCall::Shake),

@@ -80,7 +80,11 @@ fn described_entity_paths(environment: &Environment) -> BTreeSet<String> {
         symbol: &ExternalSymbol,
         into: &mut BTreeSet<String>,
     ) {
-        let ExternalSymbol::Value(ty) = symbol else {
+        if matches!(symbol, ExternalSymbol::Function(_)) {
+            into.insert(prefix);
+            return;
+        }
+        let (ExternalSymbol::Value(ty) | ExternalSymbol::ReadOnlyValue(ty)) = symbol else {
             return;
         };
         if let Some(dimensions) = ty.dimensions() {
@@ -101,6 +105,10 @@ fn described_entity_paths(environment: &Environment) -> BTreeSet<String> {
             into.insert(prefix);
             return;
         };
+        // Host-provided structs are copied values as well as member paths.
+        if environment.structs().any(|(known, _)| known == name) {
+            into.insert(prefix.clone());
+        }
         let described = environment
             .get_type(name)
             .unwrap_or_else(|| panic!("`{name}` is named by the surface but never described"));

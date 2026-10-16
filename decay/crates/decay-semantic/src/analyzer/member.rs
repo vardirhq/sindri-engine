@@ -72,7 +72,9 @@ impl Analyzer<'_, '_> {
             return Type::Unknown;
         }
         match self.member_symbol(&object_type, field, super::call::is_this(object)) {
-            Some(MemberLookup::Found(ExternalSymbol::Value(ty))) => ty,
+            Some(MemberLookup::Found(
+                ExternalSymbol::Value(ty) | ExternalSymbol::ReadOnlyValue(ty),
+            )) => ty,
             // A function reached without calling it. Decay has no function
             // values, so there is nothing this could evaluate to.
             Some(MemberLookup::Found(ExternalSymbol::Function(_))) => {
@@ -100,6 +102,31 @@ impl Analyzer<'_, '_> {
                 Type::Unknown
             }
             None => Type::Unknown,
+        }
+    }
+
+    /// Reject writes through a computed value, including its vector components.
+    pub(super) fn check_host_member_write(
+        &mut self,
+        object: &Expr,
+        ty: &Type,
+        field: &str,
+        span: Span,
+    ) {
+        if matches!(
+            self.member_symbol(ty, field, super::call::is_this(object)),
+            Some(MemberLookup::Found(ExternalSymbol::ReadOnlyValue(_)))
+        ) {
+            self.error(
+                Code::Immutable,
+                span,
+                format!("cannot assign to read-only member `{field}`"),
+            );
+        } else if (ty.dimensions().is_some() || *ty == Type::Color || self.is_struct(ty))
+            && let decay_syntax::ExprKind::Member { object, field } = &object.kind
+        {
+            let parent_type = self.expr_type(object);
+            self.check_host_member_write(object, &parent_type, field, span);
         }
     }
 

@@ -1,0 +1,498 @@
+{
+  "format_version": 10,
+  "metadata": {
+    "name": "3D Lighting Lab"
+  },
+  "entities": [
+    {
+      "id": "Camera",
+      "name": "Camera",
+      "transform_3d": {
+        "position": [
+          8,
+          9,
+          12
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ],
+        "rotation": [
+          -0.2635350713876335,
+          0.2785822852913061,
+          0.07979199930413745,
+          0.9200947849638301
+        ]
+      },
+      "components": {
+        "sindri.camera": {
+          "projection": "perspective",
+          "vertical_fov_degrees": 35,
+          "near": 0.1,
+          "far": 200
+        },
+        "sindri.script": {
+          "source": "lighting.decay",
+          "script": "Lighting",
+          "properties": {
+            "lit": true
+          }
+        }
+      }
+    },
+    {
+      "id": "Sun",
+      "name": "Sun",
+      "transform_3d": {
+        "position": [
+          0,
+          20,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ],
+        "rotation": [
+          -0.2635350713876335,
+          0.2785822852913061,
+          0.07979199930413745,
+          0.9200947849638301
+        ]
+      },
+      "components": {
+        "sindri.light": {
+          "kind": "directional",
+          "intensity": 0,
+          "color": [
+            0,
+            0,
+            0
+          ],
+          "enabled": false
+        }
+      }
+    },
+    {
+      "id": "World",
+      "name": "World",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.environment": {
+          "ambient_intensity": 0.025,
+          "shadows": {
+            "enabled": true,
+            "distance": 20,
+            "map_size": 1024,
+            "bias": 0.001
+          }
+        }
+      }
+    },
+    {
+      "id": "Floor",
+      "name": "Floor",
+      "transform_3d": {
+        "position": [
+          0,
+          -0.1,
+          0
+        ],
+        "scale": [
+          12,
+          0.2,
+          8
+        ]
+      },
+      "components": {
+        "sindri.mesh": {
+          "primitive": "cube",
+          "texture": "textures/floor.png"
+        }
+      }
+    },
+    {
+      "id": "Swatch-0",
+      "name": "Swatch-0",
+      "transform_3d": {
+        "position": [
+          -2.5,
+          0.75,
+          -1.5
+        ],
+        "scale": [
+          1.3,
+          1.5,
+          1.3
+        ]
+      },
+      "components": {
+        "sindri.mesh": {
+          "primitive": "cube",
+          "texture": "textures/cube.png"
+        },
+        "sindri.material": {
+          "base_color": [
+            0.7,
+            0.7,
+            0.7,
+            1
+          ],
+          "metallic": 0.0,
+          "roughness": 1.0,
+          "emissive": [
+            0,
+            0,
+            0
+          ]
+        }
+      }
+    },
+    {
+      "id": "Swatch-1",
+      "name": "Swatch-1",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.75,
+          -1.5
+        ],
+        "scale": [
+          1.3,
+          1.5,
+          1.3
+        ]
+      },
+      "components": {
+        "sindri.mesh": {
+          "primitive": "cube",
+          "texture": "textures/cube.png"
+        },
+        "sindri.material": {
+          "base_color": [
+            0.7,
+            0.7,
+            0.7,
+            1
+          ],
+          "metallic": 1.0,
+          "roughness": 1.0,
+          "emissive": [
+            0,
+            0,
+            0
+          ]
+        }
+      }
+    },
+    {
+      "id": "Swatch-2",
+      "name": "Swatch-2",
+      "transform_3d": {
+        "position": [
+          2.5,
+          0.75,
+          -1.5
+        ],
+        "scale": [
+          1.3,
+          1.5,
+          1.3
+        ]
+      },
+      "components": {
+        "sindri.mesh": {
+          "primitive": "cube",
+          "texture": "textures/cube.png"
+        },
+        "sindri.material": {
+          "base_color": [
+            0.7,
+            0.7,
+            0.7,
+            1
+          ],
+          "metallic": 1.0,
+          "roughness": 0.15,
+          "emissive": [
+            0,
+            0,
+            0
+          ]
+        }
+      }
+    },
+    {
+      "id": "Swatch-4",
+      "name": "Swatch-4",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.75,
+          1.5
+        ],
+        "scale": [
+          1.3,
+          1.5,
+          1.3
+        ]
+      },
+      "components": {
+        "sindri.model": {
+          "asset": "models/prop.glb"
+        },
+        "sindri.material": {
+          "base_color": [
+            0.7,
+            0.7,
+            0.7,
+            1
+          ],
+          "metallic": 1.0,
+          "roughness": 0.15,
+          "emissive": [
+            0,
+            0,
+            0
+          ]
+        }
+      }
+    },
+    {
+      "id": "Swatch-5",
+      "name": "Swatch-5",
+      "transform_3d": {
+        "position": [
+          2.5,
+          0.75,
+          1.5
+        ],
+        "scale": [
+          1.3,
+          1.5,
+          1.3
+        ]
+      },
+      "components": {
+        "sindri.model": {
+          "asset": "models/prop.glb"
+        },
+        "sindri.material": {
+          "base_color": [
+            0.7,
+            0.7,
+            0.7,
+            1
+          ],
+          "metallic": 0.0,
+          "roughness": 1.0,
+          "emissive": [
+            0,
+            0,
+            0
+          ]
+        }
+      }
+    },
+    {
+      "id": "light-carrier",
+      "name": "Light carrier",
+      "disabled": false,
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0.70710677,
+          0,
+          0.70710677
+        ],
+        "scale": [
+          2,
+          2,
+          2
+        ]
+      }
+    },
+    {
+      "id": "Warm-point",
+      "name": "Warm spotlight",
+      "parent": "light-carrier",
+      "transform_3d": {
+        "position": [
+          0.5,
+          1.5,
+          -1.25
+        ],
+        "rotation": [
+          -0.70710677,
+          0,
+          0,
+          0.70710677
+        ]
+      },
+      "components": {
+        "sindri.light": {
+          "kind": "spot",
+          "color": [
+            0,
+            0,
+            0
+          ],
+          "intensity": 0,
+          "range": 6,
+          "enabled": false
+        }
+      }
+    },
+    {
+      "id": "Blue-point",
+      "name": "Blue point",
+      "parent": "light-carrier",
+      "transform_3d": {
+        "position": [
+          -0.5,
+          1.5,
+          1.25
+        ]
+      },
+      "components": {
+        "sindri.light": {
+          "kind": "point",
+          "color": [
+            0,
+            0,
+            0
+          ],
+          "intensity": 0,
+          "range": 6,
+          "enabled": false
+        }
+      }
+    },
+    {
+      "id": "Swatch-3",
+      "name": "Swatch-3",
+      "transform_3d": {
+        "position": [
+          -2.5,
+          0.75,
+          1.5
+        ],
+        "scale": [
+          1.3,
+          1.5,
+          1.3
+        ]
+      },
+      "components": {
+        "sindri.mesh": {
+          "primitive": "surface",
+          "texture": "textures/surface.png",
+          "surface": {
+            "vertices": [
+              [
+                -0.5,
+                -0.5,
+                -0.5
+              ],
+              [
+                0.5,
+                -0.5,
+                -0.5
+              ],
+              [
+                0.5,
+                -0.5,
+                0.5
+              ],
+              [
+                -0.5,
+                -0.5,
+                0.5
+              ],
+              [
+                0,
+                0.5,
+                0
+              ]
+            ],
+            "uvs": [
+              [
+                0,
+                0
+              ],
+              [
+                1,
+                0
+              ],
+              [
+                1,
+                1
+              ],
+              [
+                0,
+                1
+              ],
+              [
+                0.5,
+                0.5
+              ]
+            ],
+            "indices": [
+              0,
+              1,
+              2,
+              0,
+              2,
+              3,
+              0,
+              4,
+              1,
+              1,
+              4,
+              2,
+              2,
+              4,
+              3,
+              3,
+              4,
+              0
+            ]
+          }
+        },
+        "sindri.material": {
+          "base_color": [
+            0.7,
+            0.7,
+            0.7,
+            1
+          ],
+          "metallic": 0.0,
+          "roughness": 0.55,
+          "emissive": [
+            0,
+            0,
+            0
+          ]
+        }
+      }
+    }
+  ]
+}

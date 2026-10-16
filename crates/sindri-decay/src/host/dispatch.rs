@@ -129,12 +129,23 @@ impl WorldHost<'_> {
         path: &Path,
         args: &[Value],
     ) -> Result<Value, RuntimeError> {
+        if matches!(query, PointerQuery::Lock | PointerQuery::Unlock) {
+            if !args.is_empty() {
+                return Err(RuntimeError::Host(format!(
+                    "{} takes no arguments",
+                    path.dotted()
+                )));
+            }
+            self.pointer_lock_request = Some(query == PointerQuery::Lock);
+            return Ok(Value::Unit);
+        }
         let input = self.context.input;
         let button = button(path, args.first())?;
         Ok(Value::Bool(match query {
             PointerQuery::Down => input.pointer_down(button),
             PointerQuery::Pressed => input.pointer_pressed(button),
             PointerQuery::Released => input.pointer_released(button),
+            PointerQuery::Lock | PointerQuery::Unlock => return Ok(Value::Unit),
         }))
     }
 

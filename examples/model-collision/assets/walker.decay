@@ -1,0 +1,84 @@
+// The model supplies collision; Decay owns movement, gravity and the goal.
+script Walker {
+    var blocked: bool = false;
+    var arrived: bool = false;
+    var around: bool = false;
+    var across: bool = false;
+    fn start() {
+        print("Model collision ready: D into the wall, S around it, D then W to the gold pad");
+    }
+    fn update(dt: f32) {
+        let motion = Physics3d.character_motion(this.entity);
+        var grounded = false;
+        if motion != null {
+            grounded = motion.grounded;
+            for collision in motion.movement.collisions {
+                if collision.hit.entity == World.find("Level") && collision.hit.normal.x < -0.5 && !blocked {
+                    blocked = true;
+                    print("Model wall blocked");
+                }
+            }
+        }
+        var x = 0.0;
+        var z = 0.0;
+        if Input.Keyboard.is_down("D") { x += 3.0; }
+        if Input.Keyboard.is_down("A") { x -= 3.0; }
+        if Input.Keyboard.is_down("S") { z += 3.0; }
+        if Input.Keyboard.is_down("W") { z -= 3.0; }
+        let position = this.transform.world_position;
+        if blocked && position.z > 1.8 && !around {
+            around = true;
+            print("Model wall bypass ready");
+        }
+        if around && position.x > 1.8 && !across {
+            across = true;
+            print("Model across wall");
+        }
+        let delta = this.transform.world_position - World.find("Goal").transform.world_position;
+        if blocked && grounded && abs(delta.x) < 0.5 && abs(delta.z) < 0.5 && !arrived {
+            arrived = true;
+            print("Model goal reached");
+        }
+        Physics3d.move_character(this.entity, Vec3(x * dt, -4.0 * dt, z * dt), grounded);
+    }
+}
+
+script CameraRig {
+    @export let prop_prefab: Prefab;
+    fn start() {
+        this.transform.look_at(Vec3(0.0, 0.0, 0.0));
+        let prop = World.spawn(this.prop_prefab);
+        Physics3d.set_velocity(prop, Vec3(0.5, 0.0, 0.0));
+        Physics3d.apply_impulse(prop, Vec3(0.5, 0.0, 0.0));
+        Physics3d.set_angular_velocity(prop, Vec3(0.0, 1.0, 0.0));
+        let linear = Physics3d.velocity(prop);
+        let angular = Physics3d.angular_velocity(prop);
+        if abs(linear.x - 0.5) < 0.001 && abs(angular.y) < 0.001 {
+            print("Model spawn controls queued");
+        }
+    }
+}
+
+
+// A falling imported prop: the solved pose triggers one Decay impulse, then
+// its travel proves that the hull is a real dynamic body on the shared clock.
+script Prop {
+    var pushed: bool = false;
+    var arrived: bool = false;
+    fn update(dt: f32) {
+        let position = this.transform.world_position;
+        if !pushed {
+            for other in Physics3d.collision_started() {
+                if other == World.find("Level") {
+                    pushed = true;
+                    Physics3d.apply_impulse(this.entity, Vec3(3.0, 0.0, 0.0));
+                    print("Model prop landed and pushed");
+                }
+            }
+        }
+        if pushed && !arrived && position.x > -2.3 {
+            arrived = true;
+            print("Model prop goal reached");
+        }
+    }
+}

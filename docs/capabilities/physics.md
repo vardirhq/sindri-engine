@@ -49,16 +49,25 @@ Each entry links its tests and the projects that exercise it. Surface marks matc
 | [3D spawn-window controls](#spawn-window-3d) | 🟡 | ❌ | 🟡 | ❌ |
 | [3D physics queries](#queries-3d) | ✅ | ✅ | ✅ | 🟡 |
 | [3D replaceable static geometry groups](#static-groups-3d) | 🟡 | ❌ | ❌ | ❌ |
+| **3D physics foundation** | | | | |
+| [Automatic 3D collider scaling](#collider-scaling-3d) | 🟡 | 🟡 | 🟡 | 🟡 |
+| [Character controller (3D)](#character-controller-3d) | 🟡 | ✅ | 🟡 | 🟡 |
 | **Not yet** | | | | |
-| [Automatic 3D collider scaling](#collider-scaling-3d) | ❌ | ❌ | ❌ | ❌ |
 | [Extreme 3D query numerical failure reporting](#query-numerics-3d) | ❌ | — | — | ❌ |
 | [Script-triggered world snapshot save/load](#world-snapshots) | ❌ | — | ❌ | ❌ |
-| [Character controller (3D)](#character-controller-3d) | ❌ | ❌ | ❌ | ❌ |
 | [Compound solid character probes](#compound-character-probes) | ❌ | — | ❌ | ❌ |
 | [Same-step solver response to controller motion](#same-step-controller-response) | ❌ | — | ❌ | ❌ |
 | [Swept controller trigger events](#swept-controller-triggers) | ❌ | — | ❌ | ❌ |
 | [Sweeping rotating platform carry along its arc](#rotating-carry-arc) | ❌ | — | ❌ | ❌ |
 | [Sweeping a rotating character probe](#rotating-character-probe) | ❌ | — | ❌ | ❌ |
+| [Carry on a scene-owned 3D character](#controller-on-controller-carry) | ❌ | — | ❌ | ❌ |
+| **3D foundation** | | | | |
+| [3D physics](#physics-3d-integration) | ✅ | ✅ | ✅ | ✅ |
+| [Physics materials as assets (3D)](#physics-materials-3d) | 🟡 | 🟡 | — | 🟡 |
+| [Static triangle mesh colliders (3D)](#static-model-collision-3d) | 🟡 | 🟡 | ❌ | 🟡 |
+| [Convex hull colliders (3D)](#convex-hull-collision-3d) | 🟡 | ❌ | ❌ | 🟡 |
+| [Convex model collision project loading](#convex-model-project-loading) | 🟡 | 🟡 | 🟡 | 🟡 |
+| [Pre-synchronization controls for convex-only bodies](#convex-spawn-controls) | 🟡 | 🟡 | 🟡 | 🟡 |
 
 ## 2D bodies and colliders
 
@@ -111,6 +120,9 @@ Engine ✅ · Editor 🟡 · Decay ✅ · Proof ✅ — parity row *Masks, senso
 `games/orbital-baked` is the end-to-end proof: player, enemies, projectiles,
 pickups, and effects use distinct masks and collision or sensor events
 continuously.
+
+
+Physics Playground checks existence before consuming 2D last-solve references in shell/pane/backstop/bumper scripts. A reset-after-contact project regression and desktop/phone browser smoke exercise cleanup; copied event references can outlive their entities
 
 </details>
 
@@ -906,9 +918,9 @@ Engine ✅ · Editor 🟡 · Decay 🟡 · Proof ❌
 
 **Limits:**
 
-- Visual scale is preserved but does not resize 3D colliders.
+- Composed scale edits rebuild geometry and reset body motion.
 - Structural payload edits reset the rebuilt body's motion.
-- Native inspector/Play interaction is unverified because local graphics adapter startup hangs or fails.
+- Model/character capabilities have feature-lab proof; Explorer game adoption remains open.
 
 <details markdown="1">
 <summary>Evidence</summary>
@@ -1035,15 +1047,123 @@ unload/reload.
 
 </details>
 
-## Not yet
+## 3D physics foundation
 
 <a id="collider-scaling-3d"></a>
 
 ### Automatic 3D collider scaling
 
-Scene 3D collider dimensions and offsets are world units; visual scale does not resize collision geometry.
+Composed positive entity/parent scale resizes dimensions and offsets with atomic validation.
 
-Engine ❌ · Editor ❌ · Decay ❌ · Proof ❌ — parity row *Automatic 3D collider scaling*
+Engine 🟡 · Editor 🟡 · Decay 🟡 · Proof 🟡 — parity row *Automatic 3D collider scaling*
+
+**Tested by:** [`crates/sindri-scene/src/physics_sync3d/scale_tests.rs`](../../crates/sindri-scene/src/physics_sync3d/scale_tests.rs)
+
+**Exercised in:** [`examples/orbit`](../../examples/orbit)
+
+**See:** [`docs/collider-scale-editor-review.md`](../../docs/collider-scale-editor-review.md)
+
+<details markdown="1">
+<summary>Evidence</summary>
+
+`ScenePhysics3d` reconciles registered body/collider/world components with
+active scene entities, composed XYZ/quaternion transforms, gravity settings and
+parent-space write-back. Twelve regressions cover lifecycle/edits, batch rejection,
+solid/sensor events, targets, newer rotated/scaled parents and checked command
+undo/redo/save/reopen. Composed positive transform scale now resizes 3D collider
+dimensions and offsets, including inherited scale. Boxes support nonuniform
+scale with orthogonal local axes; spheres/capsules require uniform scale. Shear,
+nonpositive/nonfinite scale and overflow fail before batch mutation. The shared
+editor wireframe path resolves the same geometry. Native scene regressions
+exercise scaled solid landing, queries, parent offsets, wireframes, rebuild timing
+and atomic rejection. A shared Session regression narrows/restores Orbit Camera
+Lab's barrier and verifies recovery/immediate pull-in. The converted lab reaches
+its goal in real WebGPU Chromium with fetched assets, rendered pixels and no
+runtime errors; captured input and denial regressions also pass. Native editor
+scale authoring is exercised below; Explorer adoption remains pending. Structural payload or resolved scale edits
+reset the rebuilt body's motion. This is the prerequisite
+
+Orbit Lab keyboard shrink/restore and native editor scale authoring, Undo/Redo, save/reopen, Play query/goal and Stop restoration are exercised. Explorer adoption remains open.
+
+</details>
+
+<a id="character-controller-3d"></a>
+
+### Character controller (3D)
+
+Checked scene-owned 3D movement, grounding and solved platform carry have typed Decay and native/browser/editor feature proof.
+
+Engine 🟡 · Editor ✅ · Decay 🟡 · Proof 🟡 — parity row *Character controller (3D)*
+
+**Tested by:** [`crates/sindri-physics/tests/character3d.rs`](../../crates/sindri-physics/tests/character3d.rs), [`crates/sindri-decay/tests/character_controllers3d.rs`](../../crates/sindri-decay/tests/character_controllers3d.rs)
+
+**Exercised in:** [`examples/character3d`](../../examples/character3d)
+
+**See:** [`docs/character-movement.md`](../../docs/character-movement.md), [`docs/physics-character3d-editor-review.md`](../../docs/physics-character3d-editor-review.md)
+
+<details markdown="1">
+<summary>Evidence</summary>
+
+`PhysicsWorld3d::move_character` wraps Rapier's kinematic character controller
+in engine-owned read-only movement queries. Absolute separation, slope limits,
+optional steps/snap, stationary correction and copied collision values use the
+existing current-pose query index. Native engine tests exercise XYZ motion,
+solid landing, wall slide, steps/headroom, snap, slopes, arbitrary up, filtering,
+teleports, copies, clone replay and invalid input. Platform carry is intentionally
+separate from this displacement query. Rapier contact/flag semantics and bounded
+iteration/correction limits are documented in [Character movement](../character-movement.md).
+This is a foundation added for Explorer, with scene ownership described below;
+Scene/Decay integration, moving-platform carry and browser feature proof are
+implemented below; native editor proof is recorded in
+[the review](../physics-character3d-editor-review.md). Explorer game goal proof remains pending.
+
+Scene ownership through
+`sindri.physics3d.character` provides stationary kinematic bodies, next-fixed-step XYZ
+requests, scaled single-solid probes, cached results and voxel residency covering
+requested movement. Native scene and shared Session tests exercise filtering,
+parent writeback, invalid input, rebuilds, terrain budgets and checkpoint replay.
+Read-only `probe_ground` queries now classify nearest skin/touching or downward
+support against a slope limit, retain steep hits and flag initial penetration.
+Native tests cover shapes, compound offsets, filters, ties, current poses and
+invalid inputs; [the query contract](../character-movement.md#classified-3d-ground-queries)
+records numerical limits. `move_character_grounded` now composes verified
+previous support, solved translation/rotation-point carry, ordinary movement and
+classified final support. Eight native regressions cover clipping, vertical
+platforms, jumps, compound offsets, filtering, copies and invalid input; the
+[carry contract](../character-movement.md#read-only-3d-platform-carry) records chord
+and backend limits. Scene carry now uses the composition with classified pre-solve support, a flat
+`carry_platforms` opt-out, dependent cache invalidation and once-only parent-space
+writeback. Terrain keeps its input/solver window before the solve and expands for
+actual carry before rider queries. A post-solve carry budget failure retains input
+and leaves riders unmoved; it does not roll back solver state. Native scene and
+Session tests cover boarding, jumps, parented rotation, wall clipping, lifecycle,
+checkpoint replay and terrain budgets.
+Typed `Physics3d.move_character` now queues Vec3 displacement and
+`Physics3d.character_motion` copies optional classified support, raw movement,
+carry and detailed collisions. Native host/script tests exercise next-step and
+last-valid-input semantics, invalid context/values/ownership, stale-reference
+filtering and nested copy mutation; shared Session verifies real-script timing
+and checkpoint replay. Compiler/LSP and generated API metadata use the same
+record types. Gameplay supplies gravity/jumps. The new
+[Character Lab](../../examples/character3d/README.md) opens and compiles through
+native Session, verifies idle carry/reversal, and reaches its goal through keyboard
+jump, airborne carry release and floor landing. Exported WebGPU Chromium plays
+the same project with ordinary keys, verifies each milestone, fetched assets and
+no runtime/GPU errors, and captures the blue rider on the gold goal pad. CI runs
+both project tests and the browser regression. Selected 3D characters now show
+orange slope, step and snap guides from the runtime's validated scaled probe,
+with exact box/sphere/capsule projection extents and world-space up/reach. Four
+scene regressions cover parenting, scaling, sensors, invalid geometry and disabled
+controllers. Native editor [review](../physics-character3d-editor-review.md) exercises
+snap undo/redo, step editing, invalid skin rejection, save/reopen, keyboard Play
+to the goal, read-only controls, Save refusal and Stop restoration. Explorer
+adoption remains pending; see
+[the contract](../character-movement.md#3d-scene-ownership). This is a general
+capability added for the planned Explorer showcase, not completed game proof.
+
+</details>
+
+## Not yet
 
 <a id="query-numerics-3d"></a>
 
@@ -1061,14 +1181,6 @@ Decay's `Save` stores numbers and flags; there is no operation to persist and re
 
 Engine ❌ · Editor — · Decay ❌ · Proof ❌ — parity row *Script-triggered world snapshot save/load*
 
-<a id="character-controller-3d"></a>
-
-### Character controller (3D)
-
-The exercised controller and its scene/Decay integration are 2D only.
-
-Engine ❌ · Editor ❌ · Decay ❌ · Proof ❌ — parity row *Character controller (3D)*
-
 <a id="compound-character-probes"></a>
 
 ### Compound solid character probes
@@ -1076,6 +1188,13 @@ Engine ❌ · Editor ❌ · Decay ❌ · Proof ❌ — parity row *Character con
 Scene controllers require one solid box, circle or capsule piece, because the movement primitive sweeps one convex shape.
 
 Engine ❌ · Editor — · Decay ❌ · Proof ❌ — parity row *Compound solid character probes*
+
+<details markdown="1">
+<summary>Evidence</summary>
+
+Scene controllers require one solid primitive piece; extra sensors are allowed. Multiple solid probes are rejected because the movement primitive sweeps one convex shape
+
+</details>
 
 <a id="same-step-controller-response"></a>
 
@@ -1108,3 +1227,262 @@ Engine ❌ · Editor — · Decay ❌ · Proof ❌ — parity row *Sweeping rota
 Movement and carry keep the probe's rotation; there is no swept orientation change.
 
 Engine ❌ · Editor — · Decay ❌ · Proof ❌ — parity row *Sweeping a rotating character probe*
+
+<a id="controller-on-controller-carry"></a>
+
+### Carry on a scene-owned 3D character
+
+Controllers collide geometrically, but carry support excludes other controllers: they remain stationary during the solve and apply input afterward, so controller-on-controller carry would otherwise depend on entity processing order
+
+Engine ❌ · Editor — · Decay ❌ · Proof ❌ — parity row *Carry on a scene-owned 3D character*
+
+**See:** [`docs/character-movement.md`](../../docs/character-movement.md)
+
+<details markdown="1">
+<summary>Evidence</summary>
+
+Controllers collide geometrically, but carry support excludes other controllers: they remain stationary during the solve and apply input afterward, so controller-on-controller carry would otherwise depend on entity processing order
+
+</details>
+
+## 3D foundation
+
+<a id="physics-3d-integration"></a>
+
+### 3D physics
+
+`PhysicsWorld3d` exercises fixed steps, all body kinds, box/sphere/capsule compounds, quaternion/local offsets, compound mass, collision/sensor events, masks, controls, keyed static groups and atomic validation
+
+Engine ✅ · Editor ✅ · Decay ✅ · Proof ✅ — parity row *3D physics*
+
+**Tested by:** [`game/tests/the_3d_physics_works.rs`](../../game/tests/the_3d_physics_works.rs)
+
+**Exercised in:** [`game`](../../game)
+
+**See:** [`docs/physics.md`](../../docs/physics.md)
+
+<details markdown="1">
+<summary>Evidence</summary>
+
+`PhysicsWorld3d` exercises fixed steps, all body kinds, box/sphere/capsule compounds, quaternion/local offsets, compound mass, collision/sensor events, masks, controls, keyed static groups and atomic validation. `ScenePhysics3d` owns authored bodies, colliders and voxel colliders, validates each batch before committing it and writes back parent-space poses. Shared native/browser sessions and editor Play step it before scripts. Typed `Physics3d` controls, ordered spawn queues and copied collision/sensor events are exercised in bridge/session tests and Chromium. Causeway uses it: a block taken back is a dynamic body that lands on the voxel world before it counts. [The native review](../physics-voxel-editor-review.md) authors Rigid Body 3D/Collider 3D in the inspector and lands the body on voxels in Play, with Stop and replay. Behind because joints, CCD and one-way support remain 2D-only; 3D profiles and characters still await their game proof, and the 3D scene/controller foundation is tracked below
+
+</details>
+
+<a id="physics-materials-3d"></a>
+
+### Physics materials as assets (3D)
+
+Shared `.profile` format and explicit overrides resolve on primitives, characters, static model triangles, convex hulls and resident voxels
+
+Engine 🟡 · Editor 🟡 · Decay — · Proof 🟡 — parity row *Physics materials as assets (3D)*
+
+**Tested by:** [`crates/sindri-physics/src/world3d/materials_tests.rs`](../../crates/sindri-physics/src/world3d/materials_tests.rs), [`crates/sindri-scene/src/physics_sync3d/material_tests.rs`](../../crates/sindri-scene/src/physics_sync3d/material_tests.rs), [`crates/sindri-runtime/tests/physics_material3d.rs`](../../crates/sindri-runtime/tests/physics_material3d.rs)
+
+**Exercised in:** [`examples/model-collision`](../../examples/model-collision)
+
+**See:** [`docs/physics.md`](../../docs/physics.md), [`docs/model-collision-editor-review.md`](../../docs/model-collision-editor-review.md)
+
+<details markdown="1">
+<summary>Evidence</summary>
+
+The standalone `PhysicsWorld3d` now reads copied `PhysicsMaterial` values and
+updates complete coefficient batches on primitive, convex, triangle and keyed
+static colliders. Invalid values or a piece count mismatch leave the batch
+unchanged. Existing geometry/body handles, mass, motion, forces and kinematic
+targets survive; changed values wake contact processing while identical values
+leave sleeping bodies asleep. Native regressions verify friction changes on
+existing contacts, static-floor wakeup, restitution response and checkpoint
+replay. See [the physics contract](../physics.md#live-3d-collision-coefficients).
+The shared scene and project integration is described below; Explorer game
+proof remains pending.
+
+`sindri.physics3d.material` reuses the 2D physics profile schema and explicit
+override fields. Scene preparation resolves coefficients on primitive/model/hull
+bodies and voxel sections before solver mutation. Reloads and literal coefficient
+edits retain body motion, geometry, character support and contacts; voxel edits
+keep section groups and consume no geometry rebuild budget. Cached model plans
+restore authored coefficients before resolving each step, including profile removal.
+Session validates one source set for both dimensions and keeps the latest host
+profiles on checkpoint restore. Export includes inactive and prefab references.
+The editor's registered default, profile metadata and Physics family support
+checked generic authoring. Model Collision Lab shares a slide profile between
+its floor and spawned convex prop, with a zero-restitution override. Native
+scene, runtime and export regressions exercise resolution, atomic invalid edits,
+retained motion, latest-asset replay and original-byte deduplication. This is
+feature proof for Explorer; gameplay adoption remains open. See the
+[physics contract](../physics.md#live-3d-collision-coefficients).
+
+Rebuilt Chromium fetches the shared physics profile and both GLBs, reaches the
+walker/prop goals and passes rendered-color/error checks. Native editor review
+exercises the profile picker, override Undo/Redo and save/reopen, valid reload
+during Play, invalid-reload last-valid retention, prop goal and Stop restoration.
+See the [review](../model-collision-editor-review.md#shared-3d-physics-profiles).
+Native visual evidence uses isolated X11/software Vulkan; broader coverage and
+Explorer game proof remain open.
+
+</details>
+
+<a id="static-model-collision-3d"></a>
+
+### Static triangle mesh colliders (3D)
+
+Assets prepare bounded GLB triangles; immutable physics meshes share acceleration structures across keyed static groups
+
+Engine 🟡 · Editor 🟡 · Decay ❌ · Proof 🟡 — parity row *Static triangle mesh colliders (3D)*
+
+**Tested by:** [`crates/sindri-assets/src/decode/model/collision/tests.rs`](../../crates/sindri-assets/src/decode/model/collision/tests.rs), [`crates/sindri-physics/src/world3d/triangle_mesh_tests.rs`](../../crates/sindri-physics/src/world3d/triangle_mesh_tests.rs), [`crates/sindri-runtime/tests/model_collision_steps.rs`](../../crates/sindri-runtime/tests/model_collision_steps.rs)
+
+**Exercised in:** [`examples/model-collision`](../../examples/model-collision)
+
+**See:** [`docs/model-collision-editor-review.md`](../../docs/model-collision-editor-review.md), [`docs/physics.md`](../../docs/physics.md)
+
+<details markdown="1">
+<summary>Evidence</summary>
+
+Model assets expose bounded CPU `collision_mesh` preparation: selected-root
+node matrices are accumulated, reused mesh primitives expand per instance,
+reflections correct index winding, and node/mesh/primitive ranges are retained.
+Six native GLB regressions cover order, copied data, both index widths,
+non-indexed geometry, mirror transforms, exact budgets, deep iterative traversal
+and malformed data. The optional `sindri-assets` model inspector's `--collision`
+flag reports prepared counts without creating physics bodies. This is a
+foundation added for the planned Explorer showcase. Standalone static triangle
+physics is available below; scene bindings and imported-model project collision now have the feature proof below. See
+[the contract](../imported-models.md#cpu-collision-preparation).
+
+Static physics now provides clone-shared `TriangleMesh3d` resources and
+`TriangleMeshCollider3d` properties through keyed static groups. Eight native
+regressions exercise immediate ray/overlap/cast/ground/character queries, open
+surface gaps, filtering and local rotation, resource sharing, atomic invalid
+edits, replacement/removal, dynamic landing and cloned-world replay. This is
+foundation for Explorer. Static scene model components and explicit Session GLB
+bindings now exercise character collision, scale/lifecycle, asset replacement and
+checkpoint replay in native regressions. Shared discovery and export now cover
+collision-only scene/prefab references, inactive entities, deduplicated assets and
+original verified GLB bytes. The shared native/browser player now installs
+collision before gameplay, expanding scenes/prefabs/overrides and preparing only
+authored collider assets. Model Collision Lab opens/compiles and walks into an
+imported wall, around it and to its goal through the player's Session regression
+and exported browser smoke. Native headless loading and editor Play now install
+collision before gameplay; the lab's editor/headless parity regression compares
+every step through wall obstruction and the goal and restores/replays collision.
+Editor startup checks its asynchronous queue, honors unsaved references and keeps
+later-scene assets alive; model reload failures retain previous collision.
+Native editor [review](../model-collision-editor-review.md) verifies the goal,
+moved-wall reload, failed-replacement retention, Save refusal and Stop restoration
+on X11/software Vulkan. The same review now exercises model asset picking,
+independent Undo/Redo, project-backed Add Model and save/reopen followed by Play.
+Picker metadata is reflected in the generated catalogue; uppercase GLB native
+loading is covered without changing IDs. Explorer game proof remains pending. See
+[the contract and numeric limits](../physics.md#static-triangle-geometry).
+
+</details>
+
+<a id="convex-hull-collision-3d"></a>
+
+### Convex hull colliders (3D)
+
+Clone-shared volumetric hull resources and mixed primitive/hull bodies support all four body kinds
+
+Engine 🟡 · Editor ❌ · Decay ❌ · Proof 🟡 — parity row *Convex hull colliders (3D)*
+
+**Tested by:** [`crates/sindri-physics/src/world3d/convex_hull_tests.rs`](../../crates/sindri-physics/src/world3d/convex_hull_tests.rs), [`crates/sindri-scene/src/physics_sync3d/convex_model_tests.rs`](../../crates/sindri-scene/src/physics_sync3d/convex_model_tests.rs)
+
+**Exercised in:** [`examples/model-collision`](../../examples/model-collision)
+
+**See:** [`docs/physics.md`](../../docs/physics.md)
+
+<details markdown="1">
+<summary>Evidence</summary>
+
+`ConvexHull3d` constructs bounded, immutable volumetric resources, shared by
+`ConvexHullCollider3d` pieces in mixed primitive/hull rigid bodies. Native tests
+exercise exact tetrahedron geometry, duplicates/invalid/degenerate points,
+shared resources, compound mass and local transforms, pending impulses, dynamic
+landing/replay, atomic failures, both kinematic kinds and sensor masks/events.
+The same insertion and control/query lifecycle supports all four body kinds.
+This is foundation added for Explorer; explicit convex-model scene and Session
+bindings now exercise scaled dynamic landing, mixed pieces, retained velocity,
+lifecycle, atomic failures and checkpoint-aware GLB replacement. Shared convex discovery/export and player/headless/editor Play loading now
+retain both representations per logical asset, with atomic shared reload.
+Collision-only headless layouts, inactive/prefab export, merged unsaved/later
+references and authoring compatibility have regressions. Model Collision Lab
+adds a falling GLB prop with a Decay contact-start/impulse/travel goal through
+native player and editor/headless parity tests, rebuilt Chromium and native
+editor Play. The [editor review](../model-collision-editor-review.md#convex-props-and-authoring)
+checks valid/invalid reload, Add Component, independent picking/Undo/Redo, save
+and reopen. Explorer game
+proof remains pending. See
+[the hull contract and numeric limits](../physics.md#convex-hull-geometry).
+
+</details>
+
+<a id="convex-model-project-loading"></a>
+
+### Convex model collision project loading
+
+Shared discovery/export and player/headless/editor Play installation retain both collision representations per logical GLB
+
+Engine 🟡 · Editor 🟡 · Decay 🟡 · Proof 🟡 — parity row *Convex model collision project loading*
+
+**Tested by:** [`crates/sindri-runtime/tests/model_project_loading.rs`](../../crates/sindri-runtime/tests/model_project_loading.rs), [`crates/sindri-runtime/tests/model_convex_steps.rs`](../../crates/sindri-runtime/tests/model_convex_steps.rs)
+
+**Exercised in:** [`examples/model-collision`](../../examples/model-collision)
+
+**See:** [`docs/model-collision-editor-review.md`](../../docs/model-collision-editor-review.md)
+
+<details markdown="1">
+<summary>Evidence</summary>
+
+`ConvexHull3d` constructs bounded, immutable volumetric resources, shared by
+`ConvexHullCollider3d` pieces in mixed primitive/hull rigid bodies. Native tests
+exercise exact tetrahedron geometry, duplicates/invalid/degenerate points,
+shared resources, compound mass and local transforms, pending impulses, dynamic
+landing/replay, atomic failures, both kinematic kinds and sensor masks/events.
+The same insertion and control/query lifecycle supports all four body kinds.
+This is foundation added for Explorer; explicit convex-model scene and Session
+bindings now exercise scaled dynamic landing, mixed pieces, retained velocity,
+lifecycle, atomic failures and checkpoint-aware GLB replacement. Shared convex discovery/export and player/headless/editor Play loading now
+retain both representations per logical asset, with atomic shared reload.
+Collision-only headless layouts, inactive/prefab export, merged unsaved/later
+references and authoring compatibility have regressions. Model Collision Lab
+adds a falling GLB prop with a Decay contact-start/impulse/travel goal through
+native player and editor/headless parity tests, rebuilt Chromium and native
+editor Play. The [editor review](../model-collision-editor-review.md#convex-props-and-authoring)
+checks valid/invalid reload, Add Component, independent picking/Undo/Redo, save
+and reopen. Explorer game
+proof remains pending. See
+[the hull contract and numeric limits](../physics.md#convex-hull-geometry).
+
+</details>
+
+<a id="convex-spawn-controls"></a>
+
+### Pre-synchronization controls for convex-only bodies
+
+Convex-only and mixed bodies accept existing typed motion reads/setters/impulses before materialization
+
+Engine 🟡 · Editor 🟡 · Decay 🟡 · Proof 🟡 — parity row *Pre-synchronization controls for convex-only bodies*
+
+**Tested by:** [`crates/sindri-decay/tests/physics3d_convex_spawn.rs`](../../crates/sindri-decay/tests/physics3d_convex_spawn.rs)
+
+**Exercised in:** [`examples/model-collision`](../../examples/model-collision)
+
+**See:** [`docs/model-collision-editor-review.md`](../../docs/model-collision-editor-review.md)
+
+<details markdown="1">
+<summary>Evidence</summary>
+
+Convex-model spawn-window motionnow shares the existing `Physics3d` control
+queue. The host validates real body settings and primitive/convex authoring
+without creating stand-in geometry; full model bindings, hull volume/bounds and
+combined mass validate at scene synchronization. Five native host regressions
+cover scaled/mixed mass, pending reads, rotation locks, invalid authoring,
+geometry retry and once-only replay. Model Collision Lab now spawns a typed
+convex GLB prefab, queues controls immediately, and reaches its landing/impulse
+travel goal. The project Session regression checks first materialization and
+checkpoint replay. Rebuilt Chromium reaches both goals, and native editor
+Play/restart/Stop is recorded in the [review](../model-collision-editor-review.md#convex-prefab-spawn-window-motion).
+This is feature proof for Explorer; game adoption remains open.
+
+</details>

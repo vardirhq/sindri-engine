@@ -90,6 +90,11 @@ const KNOWN: &[Known] = &[
         icon: icons::CAMERA,
     },
     Known {
+        type_name: "sindri.camera.orbit",
+        family: Family::Behaviour,
+        icon: icons::CAMERA,
+    },
+    Known {
         type_name: "sindri.light",
         family: Family::Rendering,
         icon: icons::LIGHT,
@@ -111,6 +116,11 @@ const KNOWN: &[Known] = &[
     },
     Known {
         type_name: "sindri.model",
+        family: Family::Rendering,
+        icon: icons::MESH,
+    },
+    Known {
+        type_name: "sindri.material",
         family: Family::Rendering,
         icon: icons::MESH,
     },
@@ -220,6 +230,11 @@ const KNOWN: &[Known] = &[
         icon: icons::EFFECT,
     },
     Known {
+        type_name: "sindri.physics3d.character",
+        family: Family::Physics,
+        icon: icons::PHYSICS,
+    },
+    Known {
         type_name: "sindri.particles",
         family: Family::Rendering,
         icon: icons::EFFECT,
@@ -241,6 +256,16 @@ const KNOWN: &[Known] = &[
     },
     Known {
         type_name: "sindri.physics3d.collider",
+        family: Family::Physics,
+        icon: icons::COLLIDER,
+    },
+    Known {
+        type_name: "sindri.physics3d.model_collider",
+        family: Family::Physics,
+        icon: icons::COLLIDER,
+    },
+    Known {
+        type_name: "sindri.physics3d.model_convex_collider",
         family: Family::Physics,
         icon: icons::COLLIDER,
     },
@@ -271,6 +296,11 @@ const KNOWN: &[Known] = &[
     },
     Known {
         type_name: "sindri.physics2d.one_way",
+        family: Family::Physics,
+        icon: icons::COLLIDER,
+    },
+    Known {
+        type_name: "sindri.physics3d.material",
         family: Family::Physics,
         icon: icons::COLLIDER,
     },

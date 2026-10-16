@@ -1,0 +1,63 @@
+// Feature example: scripts own the light clock; engine properties own shading.
+script Lighting {
+    @export let lit: bool = true;
+    var elapsed: f32 = 0.0;
+    var ready: bool = false;
+    var spot_phase: bool = false;
+
+    fn start() {
+        this.transform.look_at(Vec3(0.0, 0.0, 0.0));
+        let spot = World.find("Warm spotlight");
+        spot.light.color = Color(1.0, 0.12, 0.025);
+        spot.light.intensity = 24.0;
+        spot.light.range = 6.0;
+        spot.light.outer_angle = 0.75;
+        spot.light.inner_angle = 0.35;
+        let point = World.find("Blue point");
+        point.light.color = Color(0.025, 0.15, 1.0);
+        point.light.intensity = 24.0;
+        point.light.range = 6.0;
+        let sun = World.find("Sun");
+        sun.light.color = Color(1.0, 0.95, 0.86);
+        sun.light.intensity = 0.04;
+        sun.light.enabled = true;
+        let environment = World.find("World");
+        environment.environment.ambient_intensity = 0.15;
+        environment.environment.ambient_color = Color(0.1, 0.2, 1.0);
+        environment.environment.background = Color(0.015, 0.025, 0.12);
+        print("3D lighting loaded");
+    }
+    fn update(dt: f32) {
+        if ready { return; }
+        elapsed += dt;
+        let rig = World.find("Light carrier");
+        rig.transform.position.x = sin(elapsed * 6.2831853) * 0.3;
+        rig.transform.yaw = 1.5707963 + sin(elapsed * 6.2831853) * 0.25;
+        rig.transform.pitch = sin(elapsed * 6.2831853) * 0.15;
+        World.find("Sun").transform.yaw += dt * 0.25;
+        World.find("Warm spotlight").light.enabled = elapsed >= 1.0;
+        World.find("Blue point").light.enabled = elapsed < 1.0 || elapsed >= 2.0;
+        if elapsed >= 1.0 && !spot_phase {
+            spot_phase = true;
+            let environment = World.find("World");
+            environment.environment.ambient_intensity = 0.3;
+            environment.environment.ambient_color = Color(1.0, 0.25, 0.1);
+            environment.environment.background = Color(0.12, 0.025, 0.015);
+            print("3D lighting spot phase");
+        }
+        if elapsed >= 3.0 {
+            rig.transform.position.x = 0.0;
+            rig.transform.yaw = 1.5707963;
+            rig.transform.pitch = 0.0;
+            World.find("Warm spotlight").light.enabled = lit;
+            World.find("Blue point").light.enabled = lit;
+            World.find("Sun").light.enabled = lit;
+            let environment = World.find("World");
+            environment.environment.ambient_intensity = 0.025;
+            environment.environment.ambient_color = Color(1.0, 1.0, 1.0);
+            environment.environment.background = Color(0.035, 0.045, 0.065);
+            ready = true;
+            print("3D lighting ready");
+        }
+    }
+}

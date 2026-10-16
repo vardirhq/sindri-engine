@@ -123,6 +123,8 @@ fn every_offered_default_is_one_the_engine_accepts() {
         grid: Some("floor"),
         audio: Some("audio/pickup.wav"),
         script: Some(("scripts/spin.decay", "Spin")),
+        model: Some("models/level.glb"),
+        orbit_target: None,
     };
     for type_name in usable(components, &BTreeMap::new(), project) {
         let payload = component_default(components, &type_name, project)
@@ -368,4 +370,141 @@ fn navigation_asks_for_the_tilemap_it_navigates() {
         usable(components, &with_map, ProjectDefaults::default())
             .contains(&GRID_NAVIGATION_COMPONENT.to_owned())
     );
+}
+
+#[test]
+fn imported_components_need_a_project_model_and_do_not_mix_static_and_body_colliders() {
+    let extractor = extractor();
+    let components = extractor.components();
+    for type_name in [
+        "sindri.model",
+        "sindri.physics3d.model_collider",
+        "sindri.physics3d.model_convex_collider",
+    ] {
+        assert_eq!(
+            reason(
+                components,
+                &BTreeMap::new(),
+                ProjectDefaults::default(),
+                SceneHolds::default(),
+                type_name
+            ),
+            Some("No supported .glb model in the project beside this scene")
+        );
+        let payload = component_default(
+            components,
+            type_name,
+            ProjectDefaults {
+                model: Some("models/level.glb"),
+                ..ProjectDefaults::default()
+            },
+        )
+        .unwrap();
+        assert_eq!(payload["asset"], "models/level.glb");
+        components.validate_payload(type_name, &payload).unwrap();
+    }
+    let project = ProjectDefaults {
+        model: Some("models/level.glb"),
+        ..ProjectDefaults::default()
+    };
+    for type_name in [
+        "sindri.physics3d.rigid_body",
+        "sindri.physics3d.collider",
+        "sindri.physics3d.voxel_collider",
+        "sindri.physics3d.character",
+        "sindri.physics2d.rigid_body",
+        "sindri.physics2d.collider",
+        "sindri.physics2d.character",
+    ] {
+        let present = [(type_name.to_owned(), serde_json::json!({}))]
+            .into_iter()
+            .collect();
+        assert!(
+            reason(
+                components,
+                &present,
+                project,
+                SceneHolds::default(),
+                "sindri.physics3d.model_collider"
+            )
+            .is_some()
+        );
+        let present = [(
+            "sindri.physics3d.model_collider".to_owned(),
+            serde_json::json!({}),
+        )]
+        .into_iter()
+        .collect();
+        assert!(
+            reason(
+                components,
+                &present,
+                project,
+                SceneHolds::default(),
+                type_name
+            )
+            .is_some()
+        );
+    }
+    let hud = [(UI_IMAGE_COMPONENT.to_owned(), serde_json::json!({}))]
+        .into_iter()
+        .collect();
+    assert!(!usable(components, &hud, project).contains(&"sindri.model".to_owned()));
+}
+
+#[test]
+fn convex_model_authoring_allows_body_compounds_and_rejects_competing_owners() {
+    let extractor = extractor();
+    let components = extractor.components();
+    let project = ProjectDefaults {
+        model: Some("models/prop.glb"),
+        ..ProjectDefaults::default()
+    };
+    let convex = "sindri.physics3d.model_convex_collider";
+    for allowed in ["sindri.physics3d.rigid_body", "sindri.physics3d.collider"] {
+        let present = [(allowed.into(), serde_json::json!({}))]
+            .into_iter()
+            .collect();
+        assert!(reason(components, &present, project, SceneHolds::default(), convex).is_none());
+        let present = [(convex.into(), serde_json::json!({}))]
+            .into_iter()
+            .collect();
+        assert!(
+            reason(
+                components,
+                &present,
+                project,
+                SceneHolds::default(),
+                allowed
+            )
+            .is_none()
+        );
+    }
+    for conflicting in [
+        "sindri.physics3d.model_collider",
+        "sindri.physics3d.character",
+        "sindri.physics3d.voxel_collider",
+        "sindri.physics2d.rigid_body",
+        "sindri.physics2d.collider",
+        "sindri.physics2d.character",
+        "sindri.physics2d.tilemap_collider",
+    ] {
+        let present = [(conflicting.into(), serde_json::json!({}))]
+            .into_iter()
+            .collect();
+        assert!(reason(components, &present, project, SceneHolds::default(), convex).is_some());
+        let present = [(convex.into(), serde_json::json!({}))]
+            .into_iter()
+            .collect();
+        assert!(
+            reason(
+                components,
+                &present,
+                project,
+                SceneHolds::default(),
+                conflicting
+            )
+            .is_some()
+        );
+    }
 }

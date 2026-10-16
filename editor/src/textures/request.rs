@@ -97,6 +97,7 @@ impl SceneTextures {
             }),
             shaders: root.as_deref().and_then(super::shaders::loader),
             bound_models: BTreeSet::new(),
+            play_models: sindri_runtime::model_assets::ModelCollisionReferences::new(),
             released_models: Vec::new(),
             sliced: BTreeMap::new(),
             watch: root.map(AssetWatch::new),

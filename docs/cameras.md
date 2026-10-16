@@ -78,6 +78,37 @@ Runtime mode changes are already available through `Camera.follow`,
 combat shake. Dedicated editor behavior controls and gizmos remain follow-up
 work.
 
+## Third-person 3D orbit
+
+`sindri.camera.orbit` follows an authored target in world space, smooths its
+position, faces the focus and pulls in immediately when a 3D sight-line ray
+hits an obstruction. Yaw/pitch are radians, with zero yaw on +Z and positive
+pitch above the target. Settings and limits are in
+[`camera-runtime-scripting.md`](camera-runtime-scripting.md). The shared
+runtime steps it after scripts and animation using synchronized physics poses.
+It takes precedence over 2D behavior on the same camera.
+
+The registered component describes its target as an entity field and exposes
+numeric settings to the generic inspector. Add Component now completes Camera
+Orbit from a distinct active spatial entity with a stable ID, excluding camera
+children and viewport entities. It requires a Camera on the owner. Inspector
+edits validate settings and target ownership before becoming commands; rejected
+orbit edits retain the previous payload while unrelated valid component edits
+remain independent. Creation, numeric editing, Undo/Redo, save/reopen and authored
+Play are exercised in the [native review](camera-orbit-editor-review.md).
+
+Selecting an active orbit camera shows an amber focus marker, requested
+position, sight line and yaw circle at the authored pitch/distance. A blue
+"Camera now" marker and line show the actual world pose when it differs by more
+than 0.05 units, including smoothing and collision pull-in during Play. Offset
+and angles follow world axes even with rotated/scaled parents. Lines use the
+same near-plane clipping as frusta; guides remain visible when the camera
+marker is behind the Scene eye and never become picking targets or commands.
+These are settings/pose guides, without an editor-side obstruction prediction
+or camera-volume clearance visualization. Explorer gameplay proof remains
+pending. The [Orbit Camera Lab](../examples/orbit/README.md) exercises it in a real project;
+Explorer remains the game proof.
+
 ## Screen-space UI and overlays
 
 The `sindri.ui.*` family does not require a camera entity. Their projection is owned by the viewport and their anchors resolve against the viewport's screen-space extent.

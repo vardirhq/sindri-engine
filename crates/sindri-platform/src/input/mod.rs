@@ -9,6 +9,7 @@ pub mod action;
 mod button;
 mod gamepad;
 mod key;
+mod mouse;
 mod presses;
 mod reader;
 mod state;

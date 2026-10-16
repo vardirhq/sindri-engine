@@ -33,3 +33,14 @@ impl From<sindri_assets::BuiltinError> for RuntimeError {
         Self::Builtin(Box::new(error))
     }
 }
+
+/// Preparing a decoded model for the scene-owned collision seam.
+#[derive(Debug, Error)]
+pub enum ModelCollisionBindingError {
+    #[error(transparent)]
+    Preparation(#[from] sindri_assets::ModelCollisionError),
+    #[error(transparent)]
+    Geometry(#[from] sindri_scene::ModelCollisionGeometryError3d),
+    #[error(transparent)]
+    ConvexGeometry(#[from] sindri_scene::ModelConvexGeometryError3d),
+}

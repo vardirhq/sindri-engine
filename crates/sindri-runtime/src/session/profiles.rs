@@ -30,7 +30,8 @@ impl Session {
             .filter_map(|id| self.profiles.get(id).map(|profile| (id, profile)));
         let materials = sindri_scene::PhysicsMaterialSources::from_profiles(profiles)
             .map_err(sindri_scene::PhysicsSyncError::from)?;
-        self.physics.set_materials(materials);
+        self.physics.set_materials(materials.clone());
+        self.physics3d.set_materials(materials);
         Ok(())
     }
 }

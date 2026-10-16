@@ -39,14 +39,14 @@ correct it or delete it.
 | Area | Capabilities | Not yet | No automated test |
 | --- | :-: | :-: | :-: |
 | [Engine core](capabilities/core.md) | 7 | 1 | 0 |
-| [Input and audio](capabilities/input-and-audio.md) | 6 | 1 | 0 |
-| [Physics](capabilities/physics.md) | 28 | 9 | 0 |
+| [Input and audio](capabilities/input-and-audio.md) | 8 | 1 | 0 |
+| [Physics](capabilities/physics.md) | 36 | 8 | 0 |
 | [Effects, saves and randomness](capabilities/runtime.md) | 4 | 1 | 0 |
 | [Screen UI and Weave](capabilities/ui.md) | 7 | 1 | 0 |
 | [Grids and voxels](capabilities/grids-and-voxels.md) | 10 | 3 | 0 |
-| [Hosts and rendering](capabilities/rendering.md) | 25 | 3 | 0 |
+| [Hosts and rendering](capabilities/rendering.md) | 32 | 4 | 0 |
 | [Assets](capabilities/assets.md) | 5 | 0 | 0 |
-| [The editor](capabilities/editor.md) | 36 | 6 | 1 |
-| [Decay](capabilities/decay.md) | 22 | 7 | 0 |
+| [The editor](capabilities/editor.md) | 37 | 6 | 1 |
+| [Decay](capabilities/decay.md) | 23 | 8 | 0 |
 | [Games, labs and tooling](capabilities/projects.md) | 9 | 0 | 0 |
-| **All** | **159** | **32** | **1** |
+| **All** | **178** | **33** | **1** |

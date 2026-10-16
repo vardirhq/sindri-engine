@@ -624,13 +624,13 @@ id = "environment-lighting"
 group = "World presentation"
 title = "3D directional + ambient lighting"
 summary = "`sindri.environment` and a directional `sindri.light` shade textured 3D geometry, with one bounded shadow map."
-status = { engine = "partial", editor = "partial", decay = "no", proof = "partial" }
+status = { engine = "partial", editor = "partial", decay = "partial", proof = "partial" }
 parity = "3D directional + ambient lighting"
-tests = ["crates/sindri-gpu/tests/sunlight_faces.rs"]
-proof = ["games/voxel-lab"]
+tests = ["crates/sindri-gpu/tests/sunlight_faces.rs", "crates/sindri-decay/tests/lights3d.rs"]
+proof = ["games/voxel-lab", "examples/lighting3d", "examples/daynight"]
 docs = ["docs/world-presentation-plan.md"]
-limits = ["Fog, sky, environment profiles/volumes, local lights, weather, water, materials and cascaded shadows are future slices."]
-detail = """
+limits = ["Shipped-host fog/post delivery, sky, environment profiles/volumes, weather, water, full material assets and cascaded shadows remain future slices."]
+detail = '''
 `sindri.environment` is authored scene state for background, ambient fill,
 directional shadows, voxel contact-depth ambient occlusion, and an ordered
 world post stack. The sun is a `sindri.light` entity (kind `directional`) aimed
@@ -643,7 +643,22 @@ previous unlit appearance for scenes without an environment. Voxel Lab is the
 acceptance surface. Directional shadows use one bounded depth map with authored
 coverage, 256–2048 resolution, and bias controls; both transient world meshes
 and persistent voxel meshes cast and receive them.
-"""
+
+
+`this.light` and `Entity.light` expose color, intensity, range, spotlight
+half-angles and independent boolean enabled state from the shared typed surface.
+Setters validate full candidates before mutation, including f32 narrowing and
+cross-field cone bounds; failed writes retain payloads and whole colors are
+atomic. Reads honor omitted defaults; Color alpha stays one. The enabled flag
+changes illumination without deactivating the entity or stopping its scripts.
+`examples/lighting3d` is feature proof for Explorer's planned lighting track:
+its checked script animates parented points/spots and the sun, reaches lit/dark
+Session goals and exercises cube, inline and imported geometry. Completion,
+hover, generated docs and typed batch checks share the same metadata. Native,
+real WebGPU and editor Play controls are recorded in `3d-lights.md`. In-tree
+game adoption and local shadows remain
+open; no new uniform or pass cost is introduced.
+'''
 
 [[capability]]
 id = "voxel-ao"
@@ -674,40 +689,41 @@ title = "glTF / model import"
 summary = "Self-contained binary GLB decodes to reusable geometry, hierarchy, materials and textures, and draws natively and in the browser."
 status = { engine = "partial", editor = "no", decay = "no", proof = "no" }
 parity = "glTF / model import"
-tests = [
-  "crates/sindri-assets/src/decode/model/tests.rs",
-  "crates/sindri-render/src/model/tests.rs",
-  "crates/sindri-gpu/tests/imported_models.rs",
-  "crates/sindri-scene/tests/extraction/models.rs",
-  "crates/sindri-export/tests/imported_models.rs",
-  "crates/sindri/tests/imported_model.rs",
-]
+tests = ["crates/sindri-assets/src/decode/model/tests.rs", "crates/sindri-render/src/model/tests.rs", "crates/sindri-gpu/tests/imported_models.rs", "crates/sindri-scene/tests/extraction/models.rs", "crates/sindri-export/tests/imported_models.rs", "crates/sindri/tests/imported_model.rs"]
 docs = ["docs/imported-models.md"]
-limits = [
-  "Model shadows, full editor authoring, animation and skinning are deferred.",
-  "The proof is an external project, not an in-tree game.",
-]
-detail = """
-`ModelAssetDecoder` parses self-contained binary GLB into reusable CPU
-geometry, node local matrices/children, materials and embedded base-color
-textures. The tiny deterministic fixture exercises both index widths, multiple
-primitives, mesh reuse, non-indexed triangles and malformed/unsupported
-diagnostics. `AssetLoader` reuse is covered. A separate renderer resource and
-GPU path retain normal/UV geometry, hierarchy, textures and materials,
-composing node and entity matrices with inverse-transpose normals. GPU readback
-coverage checks colors, depth and upload reuse; renderer resource tests check
-malformed data. Scene `ModelComponent` references validate asset paths and
-extract shared resources with entity world transforms. Disabled models are
-discovered without drawing; missing bindings name the asset. The public facade
-converts decoded models without cross-coupling foundational crates. The editor
-catalogue assigns the registered component an existing icon/family. Model
-manifests and export retain original GLB bytes and discover scene/prefab
+limits = ["Full model authoring, animation and skinning remain deferred.", "Feature labs and external Low Tide are evidence; in-tree model gameplay adoption remains open."]
+detail = '''
+`ModelAssetDecoder` parses self-contained binary GLB into reusable CPU geometry,
+node local matrices/children, materials and embedded base-color textures. The
+tiny deterministic fixture exercises both index widths, multiple primitives,
+mesh reuse, non-indexed triangles and malformed/unsupported diagnostics.
+`AssetLoader` reuse is covered. A separate renderer resource and GPU path retain
+normal/UV geometry, hierarchy, textures and materials, composing node and entity
+matrices with inverse-transpose normals. GPU readback coverage checks colors,
+depth and upload reuse; renderer resource tests check malformed data. Scene
+`ModelComponent` references validate asset paths and extract shared resources
+with entity world transforms. Disabled models are discovered without drawing;
+missing bindings name the asset. The public facade converts decoded models
+without cross-coupling foundational crates. The editor catalogue assigns the
+registered component an existing icon/family. Render and static-collision asset
+fields now declare model metadata, use a GLB-only project picker and complete
+Add Component with an actual model. Independent widget/component history scopes
+keep the two selections separate; native review verifies Undo/Redo, save/reopen
+and Play with an alternate wall. Broader model authoring remains deferred. Model manifests and export retain original GLB bytes and discover
+scene/prefab
 references, including inactive entities. Native project capture and the WebGPU
 project host prepare/bind models once through the existing asset queue and
 apply scene lighting. The exact Low Tide cutaway crawler was visually inspected
 in both runtimes at 1200 × 1000, correctly oriented and visibly recognizable.
-Exported bytes match the source hash.
-"""
+Exported bytes match the source hash. Full editor authoring,
+animation and skinning remain deferred. This external proof does not claim
+the repository's in-tree game completion surface. Model Collision Lab now also
+has native player-window visual proof on X11/software Vulkan, after editor asset
+selection and save/reopen; the imported wall blocks keyboard movement and the
+walker renders on the goal pad.
+See [imported models](../imported-models.md).
+'''
+proof = ["examples/model-collision"]
 
 [[capability]]
 id = "font-fallback"
@@ -730,3 +746,225 @@ group = "Not yet"
 title = "Tile volume terrain tools"
 summary = "Terrain-name painting, automatic supporting strata, side-face picking and slice views for tile volumes remain; see `docs/tile-system-2.md`."
 status = { engine = "no", editor = "no", decay = "n/a", proof = "n/a" }
+
+[[capability]]
+id = "orbit-camera-3d"
+group = "3D foundation"
+title = "3D orbit / third-person camera"
+summary = "`sindri.camera.orbit` and explicit `Camera.orbit` controls provide world-space follow, aiming, smoothing and 3D ray pull-in; `Camera.perspective_fov` changes FOV"
+status = { engine = "partial", editor = "partial", decay = "partial", proof = "partial" }
+parity = "3D orbit / third-person camera"
+tests = ["crates/sindri-scene/tests/orbit_cameras.rs", "crates/sindri-runtime/tests/an_orbit_camera_project_plays.rs"]
+proof = ["examples/orbit"]
+docs = ["docs/cameras.md"]
+detail = '''
+`examples/orbit` is an authored feature project with a walker, raised goal and
+blocking wall. Decay changes the perspective FOV and orbit angles; the shared
+runtime follows, aims, pulls in against the wall and recovers after the wall
+is disabled. Its project test opens, compiles and runs to the goal. Native and
+exported Chromium captures were visually inspected before and after recovery;
+the browser fetched the exported assets and reported the scripted goal without
+runtime or GPU errors. The flat-color example produces fourteen screenshot
+colors, so its local smoke used an eight-color minimum plus blue-walker and
+gold-goal pixel checks instead of the generic sixteen-color blank-frame gate. Scene
+regressions cover immediate pull-in, smoothed recovery, sensor/layer/self
+filtering, rotated and scaled parents, Z locks, invalid settings and payload
+preservation. Editor Add Component now creates Camera Orbit from a real active
+spatial target with a stable ID; a Camera is required. Invalid numeric or target
+edits are refused before commands, retaining the previous component. Unit tests
+exercise defaults, self/child/inactive/UI/unidentified exclusions, validation,
+Undo/Redo and save/reopen. Native [review](../camera-orbit-editor-review.md) removes
+the camera script from a scratch Orbit Camera Lab, authors orbit in the inspector
+and reaches the walker goal with engine-owned pull-in/recovery. Selected Scene
+view guides show the world-space focus, requested position/yaw circle and
+actual camera pose during pull-in/recovery, with near-plane clipping and no
+picking or world mutations. Parented target/owner, live poses, invalid targets,
+overflow and a camera behind the Scene eye have regressions. Collision uses one
+sight-line ray and synchronized obstacle poses; camera-volume sweeps and
+Explorer's game/browser proof remain pending. Pointer lock has separate native,
+browser and editor feature-lab evidence. This is new general camera
+capability for Explorer in slice 6 of `docs/3d-update.md`.
+
+Orbit Lab also exercises existing transform scale through normal keyboard
+controls: 1 narrows the wall, 2 restores it and R resumes automatic removal.
+Manual edits reactivate and retain the barrier. A synchronized center ray must
+hit it before an outside ray can verify the narrow/wide state, preventing an
+inactive/missing collider from counting as scale proof. Session regression
+observes reactivation, repeated edits, orbit recovery/pull-in and the goal;
+Chromium drives the same controls and captures both widths. Native
+[scale review](../collider-scale-editor-review.md) verifies matching mesh/collider
+guides, Undo/Redo, save/reopen, Play queries/goal and Stop restoring the saved
+scale. This is feature adoption of the existing general 3D scale capability;
+Explorer game proof remains open.
+'''
+
+[[capability]]
+id = "standard-material-factors"
+group = "3D foundation"
+title = "Shared standard material factors"
+summary = "One numeric `MaterialFactors` type and GGX shader serve opt-in cubes, inline/cached geometry, voxel owners and imported primitives"
+status = { engine = "partial", editor = "partial", decay = "no", proof = "partial" }
+parity = "Shared standard material factors"
+tests = ["crates/sindri-gpu/tests/standard_materials.rs"]
+proof = ["examples/lighting3d"]
+docs = ["docs/rendering-materials.md"]
+detail = '''
+Shared `MaterialFactors` and direct GGX now shade opt-in cubes, inline/cached
+meshes, voxel roots and imported primitives. `sindri.material` authors linear
+base color, metallic/roughness and emission, with checked ranges and per-entity
+factor replacement. GPU comparisons, zero-light emission, mask-alpha and cache
+reuse, scene undo and voxel residency regressions, native/browser swatches and
+native editor edit/Undo/Redo/save/reopen review exercise the numeric foundation.
+Core GLB emissive factors survive decoding/preparation and render without scene
+overrides. Decoder/facade/resource tests, zero-light GPU readback, override
+restoration, masked-shadow invariance and native/browser imported GLB controls
+exercise this addition. Absent overrides preserve legacy/imported looks. Material
+assets, unified texture/alpha/sidedness, emissive maps and Explorer game adoption remain
+open; see [the material contract](../rendering-materials.md).
+'''
+
+[[capability]]
+id = "textured-geometry-normals"
+group = "3D foundation"
+title = "Authored textured geometry normals"
+summary = "Cubes have outward face normals; inline surfaces accept validated optional XYZ normals and cached render vertices carry them"
+status = { engine = "partial", editor = "no", decay = "no", proof = "partial" }
+parity = "Authored textured geometry normals"
+tests = ["crates/sindri-gpu/tests/standard_materials/normals.rs"]
+docs = ["docs/rendering-materials.md"]
+detail = '''
+Cubes carry outward face normals, while inline mesh documents and cached
+render vertices can supply object-space normals for smooth lighting. Checked
+components reject malformed vectors/counts; absent normals retain flat shading.
+GPU comparisons with imported geometry exercise nonuniform scale, rotation and
+reflection; world color/shadow pipelines correct reflected front-face selection.
+Scene edit/history tests and native/browser smooth/flat ellipsoid controls prove
+the feature. Textured vertices grow from 24 to 36 bytes; per-draw uniforms and
+cache residency are unchanged. Editor authoring review, Decay access and Explorer
+adoption remain open. See [normal semantics](../rendering-materials.md#textured-geometry-normals).
+'''
+
+[[capability]]
+id = "shared-lighting-integration"
+group = "3D foundation"
+title = "Lighting"
+summary = "One authored ambient contribution plus one directional world light shade textured 3D geometry and voxel terrain in editor viewports and Voxel Lab, with one bounded directional shadow map"
+status = { engine = "partial", editor = "partial", decay = "partial", proof = "partial" }
+parity = "Lighting"
+tests = ["game/tests/a_3d_lighting_project_plays.rs"]
+proof = ["examples/lighting3d"]
+docs = ["docs/3d-lights.md"]
+detail = '''
+`this.light` and `Entity.light` expose color, intensity, range, spotlight
+half-angles and independent boolean enabled state from the shared typed surface.
+Setters validate full candidates before mutation, including f32 narrowing and
+cross-field cone bounds; failed writes retain payloads and whole colors are
+atomic. Reads honor omitted defaults; Color alpha stays one. The enabled flag
+changes illumination without deactivating the entity or stopping its scripts.
+`examples/lighting3d` is feature proof for Explorer's planned lighting track:
+its checked script animates parented points/spots and the sun, reaches lit/dark
+Session goals and exercises cube, inline and imported geometry. Completion,
+hover, generated docs and typed batch checks share the same metadata. Native,
+real WebGPU and editor Play controls are recorded in `3d-lights.md`. In-tree
+game adoption and local shadows remain
+open; no new uniform or pass cost is introduced.
+'''
+
+[[capability]]
+id = "local-lights-3d"
+group = "3D foundation"
+title = "3D point and spot lights"
+summary = "Strongest-eight active points/spots, world-unit range/falloff, feathered half-angle cones and composed parent positions/directions share Lambert/GGX across meshes, voxels and imported models"
+status = { engine = "partial", editor = "partial", decay = "partial", proof = "partial" }
+parity = "3D point and spot lights"
+tests = ["crates/sindri-gpu/tests/standard_materials/points.rs", "crates/sindri-gpu/tests/standard_materials/spots.rs"]
+proof = ["examples/lighting3d"]
+docs = ["docs/3d-lights.md"]
+detail = '''
+`sindri.light` now supports point lights with world-unit range. The strongest
+eight active points shade primitive, inline/cached/voxel and imported geometry
+through shared Lambert/GGX point lighting. Positions follow composed live
+transforms and inactive ancestors suppress the light. Editor creation uses one
+checked transaction and selected world-range circles; studio lighting omits
+authored points. Native/browser feature controls and GPU/scene regressions are
+described in [the 3D light contract](../3d-lights.md). This is Explorer feature
+proof, with no in-tree game adoption yet; local shadows are absent.
+Typed runtime light properties are described below. Points now share the
+spotlight records
+described below. The fixed uniform cost is 512 additional
+bytes per color draw; shared buffers and spatial light assignment remain open.
+
+Explorer's planned lighting track now has unshadowed spotlights as feature proof;
+no in-tree game uses them yet. `sindri.light.kind = "spot"` uses composed world
+position/forward with validated inner/outer half-angles in radians. Points and
+spots share eight strongest-intensity slots, range falloff and Lambert/GGX
+shading across world/voxel meshes and imported models. Cone strength feathers
+with smoothstep between angle cosines. Color uniforms are now 880/928 bytes for
+textured/model draws (eight 64-byte records); shadow uniforms, passes, writes
+and persistent geometry uploads are unchanged. The editor creates down-facing
+spots in one undo step and paints clipped selected inner/outer range cones.
+Native/browser aimed/away controls and Scene/GPU/guide regressions provide
+feature evidence. Local shadows and Explorer adoption remain open; runtime light
+controls and mounted-light feature evidence are described below and in `3d-lights.md`.
+'''
+
+[[capability]]
+id = "runtime-environment"
+group = "3D foundation"
+title = "Runtime ambient and background controls"
+summary = "Typed entity environment access shares authored defaults and validates full candidates atomically"
+status = { engine = "partial", editor = "partial", decay = "partial", proof = "partial" }
+parity = "Runtime ambient and background controls"
+tests = ["crates/sindri-decay/tests/environment.rs"]
+proof = ["examples/lighting3d"]
+docs = ["docs/runtime-environment.md"]
+detail = '''
+Typed `this.environment` / `entity.environment` address an existing authored
+environment. Ambient intensity, RGB Color and RGBA background reads honor
+defaults; writes validate the full payload before mutation and preserve unrelated
+settings. Whole Color writes are atomic, fractional numbers stay fractional,
+ambient alpha stays one, and stale/missing targets are runtime errors.
+Lighting Lab extends its first two phases with cool/warm ambient and clear-color
+changes, restoring original settings at the ready goal. Shared Session tests
+observe the resulting lighting and frame clear; native/browser captures and
+editor Play exercise rendering. This is feature proof for Explorer/Low Tide 3D's
+planned lighting track, with in-tree game adoption and fog/post controls open.
+Day/Night Lab below exercises the project clock and mounted-light integration. No renderer layout, resource lifetime or dependency changes.
+See `runtime-environment.md` for the contract and validation evidence.
+'''
+
+[[capability]]
+id = "daynight-cycle"
+group = "3D foundation"
+title = "Scripted day/night cycle"
+summary = "Day/Night Lab opens, compiles and plays two Decay clock configurations through sunrise/midday/sunset/night and a continuing goal"
+status = { engine = "partial", editor = "partial", decay = "partial", proof = "partial" }
+parity = "Scripted day/night cycle"
+tests = ["game/tests/a_daynight_project_plays.rs"]
+proof = ["examples/daynight"]
+docs = ["docs/daynight.md"]
+detail = '''
+`examples/daynight` is feature proof for Explorer and external Low Tide 3D's
+planned lighting track. Its Decay-owned clock smoothly changes sun brightness,
+color and rotation, ambient light and background through four phases. A moving
+GLB carries a point and spotlight; night illumination works while the sun is
+disabled. Real-project Session tests exercise two clock configurations, all
+phases, composed night positions, continued motion after the goal, frozen hours
+and independent night controls. Native/browser images isolate moving sun
+shadows on imported ground with fixed model poses, and local illumination at
+midnight. Native editor Play runs the same scene. See `daynight.md` for measured
+evidence. No new host API, renderer path, dependency or engine time service;
+in-tree game adoption and fog/post controls remain open.
+'''
+
+[[capability]]
+id = "project-host-fog-post"
+group = "Not yet"
+title = "Authored fog/AO/post stack in shipped project hosts"
+summary = "Editor viewports apply these environment settings; the shared native/browser player and offscreen project renderer still only apply background, ambient/directional lighting and shadows"
+status = { engine = "no", editor = "n/a", decay = "no", proof = "no" }
+parity = "Authored fog/AO/post stack in shipped project hosts"
+docs = ["docs/3d-foundation-review.md"]
+detail = '''
+Editor viewports apply these environment settings; the shared native/browser player and offscreen project renderer still only apply background, ambient/directional lighting and shadows. Fog/AO/post delivery remains separate work
+'''

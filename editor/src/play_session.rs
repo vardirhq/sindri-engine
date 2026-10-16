@@ -7,8 +7,10 @@
 
 use std::path::Path;
 
+use sindri_assets::{AssetLoader, ModelAssetDecoder};
+
 use sindri_core::{ComponentSchemaRegistry, LoadedScenes, SceneDocument, World};
-use sindri_runtime::Session;
+use sindri_runtime::{Session, model_assets::ModelCollisionReferences};
 use sindri_scene::TileSetBindings;
 use weave::{Stylesheet, Viewport};
 
@@ -25,6 +27,8 @@ pub struct PlaySources<'a> {
     pub tile_sets: &'a TileSetBindings,
     /// The project's composed stylesheets.
     pub sheets: &'a [Stylesheet],
+    /// The asynchronous model queue; Play requires every collision asset ready.
+    pub models: Option<&'a AssetLoader<ModelAssetDecoder>>,
 }
 
 /// Where the open scene is: the project it belongs to and its own file.
@@ -47,6 +51,7 @@ pub fn start(
     open: OpenScene<'_>,
     viewport: Viewport,
 ) -> Result<Session, String> {
+    let collision = collision_references(sources, world, open)?;
     let mut session = Session::with_sources(
         sources.components.clone(),
         sources.scripts.sources().clone(),
@@ -58,10 +63,55 @@ pub fn start(
     if let Some((scenes, loaded)) = playable_scenes(world, open)? {
         session = session.with_scenes(scenes, loaded);
     }
+    for (id, usage) in collision {
+        let loader = sources
+            .models
+            .ok_or_else(|| format!("{id}: no model asset queue"))?;
+        if let Some(error) = loader.error(&id) {
+            return Err(format!("{id}: {}", error.message()));
+        }
+        let asset = loader.get(&id).ok_or_else(|| {
+            format!("{id}: model collision is still loading; try Play when loading finishes")
+        })?;
+        session
+            .bind_model_collisions(id.clone(), asset, usage)
+            .map_err(|error| format!("{id}: {error}"))?;
+    }
     session
         .settle_styles(world, viewport)
         .map_err(|error| error.to_string())?;
     Ok(session)
+}
+
+/// All collision assets Play can reach, using unsaved world edits instead
+/// of the open scene's saved document, plus later scenes and spawnable prefabs.
+///
+/// # Errors
+/// Invalid scene/prefab/component data.
+pub fn collision_references(
+    sources: &PlaySources<'_>,
+    world: &World,
+    open: OpenScene<'_>,
+) -> Result<ModelCollisionReferences, String> {
+    let mut copy = world.clone();
+    let mut scenes = playable_scenes(&mut copy, open)?.map_or_else(Vec::new, |(scenes, _)| scenes);
+    if let Some(file) = open
+        .file
+        .and_then(Path::file_name)
+        .and_then(|name| name.to_str())
+    {
+        scenes.retain(|(name, _)| name != file);
+    }
+    let mut wanted = sindri_runtime::model_assets::collision_references(
+        &scenes,
+        sources.scripts.prefabs(),
+        sources.components,
+    )?;
+    sindri_runtime::model_assets::merge_references(
+        &mut wanted,
+        sindri_runtime::model_assets::collision_world_references(world, sources.components)?,
+    );
+    Ok(wanted)
 }
 
 /// The scenes a script's `Scene.go` can reach, named as a build names
@@ -116,3 +166,6 @@ fn playable_scenes(
     }
     Ok(Some((scenes, loaded)))
 }
+
+#[cfg(test)]
+mod tests;

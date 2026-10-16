@@ -15,6 +15,7 @@
 //! `sindri_scene::screen_ui`, which already reads its transform as local to
 //! that box.
 
+use crate::transform::quaternion::{conjugate, multiply, normalized, rotate};
 use crate::{EntityId, Transform3D};
 
 use super::World;
@@ -154,43 +155,6 @@ impl World {
         }
         Ok(())
     }
-}
-
-fn multiply(a: [f32; 4], b: [f32; 4]) -> [f32; 4] {
-    let [ax, ay, az, aw] = a;
-    let [bx, by, bz, bw] = b;
-    [
-        aw * bx + ax * bw + ay * bz - az * by,
-        aw * by - ax * bz + ay * bw + az * bx,
-        aw * bz + ax * by - ay * bx + az * bw,
-        aw * bw - ax * bx - ay * by - az * bz,
-    ]
-}
-
-const fn conjugate([x, y, z, w]: [f32; 4]) -> [f32; 4] {
-    [-x, -y, -z, w]
-}
-
-fn normalized(quaternion: [f32; 4]) -> [f32; 4] {
-    let length = quaternion
-        .iter()
-        .map(|part| part * part)
-        .sum::<f32>()
-        .sqrt();
-    if length > f32::EPSILON && length.is_finite() {
-        quaternion.map(|part| part / length)
-    } else {
-        [0.0, 0.0, 0.0, 1.0]
-    }
-}
-
-fn rotate(rotation: [f32; 4], vector: [f32; 3]) -> [f32; 3] {
-    let rotation = normalized(rotation);
-    let [x, y, z, _] = multiply(
-        multiply(rotation, [vector[0], vector[1], vector[2], 0.0]),
-        conjugate(rotation),
-    );
-    [x, y, z]
 }
 
 #[cfg(test)]

@@ -20,8 +20,10 @@ pub(super) mod header;
 mod held;
 mod instance;
 mod keys;
+mod light;
 pub(super) mod list;
 mod mask;
+mod orbit;
 pub(super) mod rows;
 mod scene;
 pub(super) mod section;
@@ -82,6 +84,8 @@ struct PanelContext {
     profiles: Vec<String>,
     prefabs: Vec<String>,
     tile_sets: Vec<String>,
+    models: Vec<String>,
+    orbit_target: Option<String>,
     shaders: Vec<String>,
     pictures: super::thumbnails::Pictures,
     block_sets: TileSetBindings,
@@ -115,6 +119,8 @@ impl PanelContext {
     fn defaults(&self) -> ProjectDefaults<'_> {
         ProjectDefaults {
             font: self.fonts.first().map(String::as_str),
+            model: self.models.first().map(String::as_str),
+            orbit_target: self.orbit_target.as_deref(),
             sprite: self.animation_sprites.first().map(String::as_str),
             grid: self.grids.first().map(|(_, id)| id.as_str()),
             audio: self.audio.first().map(String::as_str),
@@ -135,6 +141,7 @@ impl PanelContext {
             profiles: &self.profiles,
             prefabs: &self.prefabs,
             tile_sets: &self.tile_sets,
+            models: &self.models,
             shaders: &self.shaders,
             pictures: &self.pictures,
             block_sets: Some(&self.block_sets),
@@ -294,19 +301,27 @@ impl EditorApp {
         original: &BTreeMap<String, Value>,
         draft: &BTreeMap<String, Value>,
     ) {
+        let mut checked = draft.clone();
+        if let Some(payload) = draft.get("sindri.camera.orbit")
+            && original.get("sindri.camera.orbit") != Some(payload)
+            && let Err(error) = orbit::validate(&self.world, entity, payload)
+        {
+            self.console.warning(error);
+            if let Some(previous) = original.get("sindri.camera.orbit") {
+                checked.insert("sindri.camera.orbit".into(), previous.clone());
+            } else {
+                checked.remove("sindri.camera.orbit");
+            }
+        }
         let (buffer, refused) =
-            component_commands(entity, original, draft, self.scene.components());
+            component_commands(entity, original, &checked, self.scene.components());
         for message in refused {
             self.console.warning(message);
         }
         if buffer.is_empty() {
             return;
         }
-        // The same merge key the rest of the inspector uses, so dragging a tint
-        // is one undo step rather than one per frame of the drag.
-        let transaction = buffer
-            .into_transaction("Edit components")
-            .merging(format!("inspector:{}", entity.index()));
+        let transaction = draft::component_transaction(entity, buffer, original, &checked);
         if let Err(error) = self.apply_edit(transaction) {
             self.report(error.to_string());
         }
@@ -322,6 +337,12 @@ impl EditorApp {
         let Some(payload) = component_default(self.scene.components(), type_name, project) else {
             return;
         };
+        if type_name == "sindri.camera.orbit"
+            && let Err(error) = orbit::validate(&self.world, entity, &payload)
+        {
+            self.console.warning(error);
+            return;
+        }
         let mut buffer = CommandBuffer::new();
         buffer.push(WorldCommand::SetComponent {
             entity,
@@ -382,6 +403,8 @@ impl EditorApp {
             audio: self.project.audio(),
             profiles: self.project.profiles(),
             prefabs: self.project.prefabs(),
+            models: self.project.models(),
+            orbit_target: orbit::default_target(&self.world, entity),
             // The engine's own block set is always there to choose, first,
             // beside whatever sets the project holds.
             tile_sets: std::iter::once(sindri_core::BUILTIN_BLOCKS.to_owned())

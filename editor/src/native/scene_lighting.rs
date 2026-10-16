@@ -60,6 +60,7 @@ fn studio_lighting(forward: Vec3) -> WorldLighting {
         directional_direction: direction.to_array(),
         directional_color: [1.0; 3],
         directional_intensity: HEADLIGHT,
+        ..WorldLighting::default()
     }
 }
 

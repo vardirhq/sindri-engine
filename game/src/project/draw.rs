@@ -21,7 +21,7 @@ use sindri_scene::{CameraView, SceneRuntime, TextureBindings, measure_ui_text};
 
 use super::ProjectPlayer;
 
-/// Where one draw's time went, on the CPU.
+/// One draw's CPU timings and scoped renderer counters.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub struct DrawTimes {
     /// Laying the stylesheets' per-draw states over the world, and taking
@@ -32,6 +32,14 @@ pub struct DrawTimes {
     pub extraction: Duration,
     /// Recording the frame's commands and submitting them.
     pub encoding: Duration,
+    /// Physical textured 3D/model work; excludes the frame clear, 2D and post.
+    pub meshes: sindri_render::MeshDrawStats,
+    /// Physical sprite/shape/glyph batches; excludes atlas/texture initialization.
+    pub batches: sindri_render::BatchDrawStats,
+    /// New imported assets uploaded this draw, not primitive/buffer counts.
+    pub model_uploads: u64,
+    /// Persistent mesh vertex/index buffer pairs uploaded this draw.
+    pub cached_geometry_uploads: u64,
 }
 
 /// The GPU side of playing a project offscreen.
@@ -45,6 +53,7 @@ pub struct ProjectRenderer {
     glyphs: GlyphRenderer,
     shapes: ShapeRenderer,
     size: (u32, u32),
+    timing: Option<sindri_gpu::GpuTimer>,
 }
 
 impl ProjectRenderer {
@@ -97,6 +106,7 @@ impl ProjectRenderer {
             glyphs: GlyphRenderer::new(&gpu.device, OffscreenTarget::FORMAT),
             shapes: ShapeRenderer::new(&gpu.device, OffscreenTarget::FORMAT),
             size,
+            timing: None,
         })
     }
 
@@ -119,6 +129,30 @@ impl ProjectRenderer {
         &self.target
     }
 
+    /// Enables optional native GPU timestamps for synchronous benchmark draws.
+    pub fn enable_gpu_timing(&mut self, gpu: &GpuContext) -> bool {
+        self.timing = sindri_gpu::GpuTimer::new(&gpu.device, &gpu.queue);
+        self.timing.is_some()
+    }
+
+    /// Read after submission, before drawing again with timing enabled.
+    pub fn gpu_execution(
+        &self,
+        gpu: &GpuContext,
+    ) -> Result<Option<Duration>, sindri_gpu::GpuTimingError> {
+        self.timing
+            .as_ref()
+            .map(|timer| timer.read(&gpu.device))
+            .transpose()
+    }
+
+    fn batch_stats(&self) -> sindri_render::BatchDrawStats {
+        self.sprites
+            .draw_stats()
+            .combined(self.shapes.draw_stats())
+            .combined(self.glyphs.draw_stats())
+    }
+
     /// Draws the player's world once and submits it.
     pub fn draw(
         &mut self,
@@ -134,6 +168,12 @@ impl ProjectRenderer {
             .and_then(|sizes| {
                 self.cubes
                     .set_lighting(player.scene.lighting(&player.world)?);
+                let shadows = player
+                    .scene
+                    .environment(&player.world)?
+                    .map(sindri_scene::EnvironmentComponent::shadow_settings)
+                    .unwrap_or_default();
+                self.cubes.set_shadows(&gpu.device, shadows);
                 let prepared = player.scene.extract_animated(
                     &player.world,
                     Viewport::new(self.size.0, self.size.1),
@@ -162,6 +202,13 @@ impl ProjectRenderer {
             .create_command_encoder(&wgpu::CommandEncoderDescriptor {
                 label: Some("project draw"),
             });
+        if let Some(timer) = &self.timing {
+            timer.begin(&mut encoder);
+        }
+        let before = self.cubes.draw_stats();
+        let batches = self.batch_stats();
+        let model_uploads = self.cubes.model_cache_stats().uploads;
+        let cached_uploads = self.cubes.cached_mesh_stats().buffer_uploads;
         encode_prepared_frame(
             FrameRenderers {
                 cube: &mut self.cubes,
@@ -180,11 +227,26 @@ impl ProjectRenderer {
             },
             &prepared,
         )?;
+        if let Some(timer) = &self.timing {
+            timer.finish(&mut encoder);
+        }
         gpu.queue.submit([encoder.finish()]);
         Ok(DrawTimes {
             presentation: styled.duration_since(began) + unstyled.duration_since(extracted),
             extraction: extracted.duration_since(styled),
             encoding: unstyled.elapsed(),
+            meshes: self.cubes.draw_stats().since(before),
+            batches: self.batch_stats().since(batches),
+            model_uploads: self
+                .cubes
+                .model_cache_stats()
+                .uploads
+                .saturating_sub(model_uploads),
+            cached_geometry_uploads: self
+                .cubes
+                .cached_mesh_stats()
+                .buffer_uploads
+                .saturating_sub(cached_uploads),
         })
     }
 }

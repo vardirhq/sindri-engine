@@ -18,14 +18,13 @@
 //! Conflating the two is what made `sindri.ui.text` inspect as two rows when it
 //! has seven.
 
-use sindri_core::{BUILTIN_BLOCKS, ComponentSchemaRegistry, FieldMeaning, TagsComponent};
+use sindri_core::{BUILTIN_BLOCKS, ComponentSchemaRegistry, TagsComponent};
 
 use crate::animation::SpriteAnimationComponent;
 use crate::audio::AudioSourceComponent;
 use crate::components::{
-    CameraBehaviorComponent, CameraComponent, EnvironmentComponent, GridNavigationComponent,
-    GridOccupantComponent, GridPlacementComponent, LightComponent, MeshComponent,
-    NaturalTerrainDocument, SpriteComponent, TileGridComponent, TileVolumeComponent,
+    EnvironmentComponent, GridNavigationComponent, GridOccupantComponent, GridPlacementComponent,
+    LightComponent, MeshComponent, NaturalTerrainDocument, TileGridComponent, TileVolumeComponent,
     TilemapComponent, UiImageComponent, UiTextComponent, VoxelGeneratorDocument,
     VoxelWorldComponent,
 };
@@ -45,67 +44,6 @@ pub(super) fn builtin_components() -> Result<ComponentSchemaRegistry, SceneExtra
     // What the fields are for, once every field exists to be described.
     super::meanings::describe_builtins(&mut components)?;
     Ok(components)
-}
-
-fn register_cameras(components: &mut ComponentSchemaRegistry) -> Result<(), SceneExtractError> {
-    components.register_with_default::<CameraComponent>(
-        "Camera",
-        serde_json::json!({
-            "projection": CameraComponent::PROJECTIONS[0],
-            "vertical_fov_degrees": CameraComponent::DEFAULT_VERTICAL_FOV_DEGREES,
-            "near": CameraComponent::DEFAULT_NEAR,
-            "far": CameraComponent::DEFAULT_FAR
-        }),
-    )?;
-    components.register_with_default::<CameraBehaviorComponent>(
-        "Camera Behavior",
-        serde_json::json!({
-            "follow": null,
-            "confine": null,
-            "shake": {
-                "trauma": 0.0,
-                "strength": 0.12,
-                "decay": 2.8,
-                "frequency": 57.0,
-                "phase": 0.0
-            }
-        }),
-    )?;
-    describe_camera_behavior(components)
-}
-
-/// A camera's behaviour follows and confines only once those are added, so
-/// what each holds is said here, and then what its fields mean: the target is
-/// an entity in the scene, and the rates are rates. The shake's phase and
-/// offset are the shake's own running state rather than anything to tune.
-fn describe_camera_behavior(
-    components: &mut ComponentSchemaRegistry,
-) -> Result<(), SceneExtractError> {
-    let at_least_zero = || FieldMeaning::Range {
-        min: 0.0,
-        max: f64::INFINITY,
-    };
-    components.describe_optional::<CameraBehaviorComponent>(
-        "follow",
-        serde_json::json!({
-            "target": "", "offset": [0.0, 0.0, 0.0], "dead_zone": [0.0, 0.0],
-            "smoothing": 8.0, "max_speed": 0.0
-        }),
-    )?;
-    components.describe_optional::<CameraBehaviorComponent>(
-        "confine",
-        serde_json::json!({ "min": [-10.0, -10.0], "max": [10.0, 10.0] }),
-    )?;
-    components.describe::<CameraBehaviorComponent>([
-        ("follow.target", FieldMeaning::Entity),
-        ("follow.smoothing", at_least_zero()),
-        ("follow.max_speed", at_least_zero()),
-        ("shake.trauma", FieldMeaning::Range { min: 0.0, max: 1.0 }),
-        ("shake.strength", at_least_zero()),
-        ("shake.decay", at_least_zero()),
-        ("shake.frequency", at_least_zero()),
-    ])?;
-    Ok(())
 }
 
 /// A light is aimed by its entity's rotation, so a fresh one is only its
@@ -225,7 +163,7 @@ fn register_drawables(components: &mut ComponentSchemaRegistry) -> Result<(), Sc
     // like, and is what makes the type addable at all. They are chosen to
     // be visible rather than neutral: a sprite added to an entity should
     // appear, or the author is left wondering whether the click worked.
-    register_cameras(components)?;
+    super::registry_cameras::register_cameras(components)?;
     register_environment(components)?;
     register_light(components)?;
     // An asset reference has no honest blank model the engine can invent.
@@ -233,6 +171,11 @@ fn register_drawables(components: &mut ComponentSchemaRegistry) -> Result<(), Sc
         "Model",
         serde_json::json!({ "asset": "models/model.glb", "layer": 0 }),
     )?;
+    components.describe::<crate::ModelComponent>([(
+        "asset",
+        sindri_core::FieldMeaning::Asset(sindri_core::AssetKind::Model),
+    )])?;
+    register_material(components)?;
     components.register_with_default::<MeshComponent>(
         "Mesh",
         serde_json::json!({
@@ -242,26 +185,7 @@ fn register_drawables(components: &mut ComponentSchemaRegistry) -> Result<(), Sc
             "surface": null
         }),
     )?;
-    components.register_with_default::<SpriteComponent>(
-        "Sprite",
-        serde_json::json!({
-            "texture": PROCEDURAL_TEXTURES[0].reference,
-            "tint": [1.0, 1.0, 1.0, 1.0],
-            "color_transform": {
-                "multiply": [1.0, 1.0, 1.0, 1.0],
-                "offset": [0.0, 0.0, 0.0, 0.0]
-            },
-            "layer": 0,
-            // Off by default: a new sprite is as likely to be something
-            // lying on the ground as somebody standing on it.
-            "billboard": false,
-            "shader": "",
-            "shader_params": [0.0, 0.0, 0.0, 0.0],
-            "normal_map": "",
-            "unlit": false,
-            "draw": "simple", "border_scale": 1.0 / 16.0, "mask": "none", "mask_name": ""
-        }),
-    )?;
+    two_d::register_sprite(components)?;
     // The UI half of the same picture: anchored to the middle of the
     // viewport, because an element that appears off the edge of the screen
     // looks like a click that did nothing.
@@ -563,3 +487,14 @@ mod two_d;
 
 #[cfg(test)]
 mod tests;
+
+fn register_material(components: &mut ComponentSchemaRegistry) -> Result<(), SceneExtractError> {
+    components.register_with_default::<crate::MaterialComponent>(
+        "Material",
+        serde_json::json!({"base_color": [1.0, 1.0, 1.0, 1.0], "metallic": 0.0,
+                           "roughness": 1.0, "emissive": [0.0, 0.0, 0.0]}),
+    )?;
+    components
+        .describe::<crate::MaterialComponent>([("base_color", sindri_core::FieldMeaning::Color)])?;
+    Ok(())
+}

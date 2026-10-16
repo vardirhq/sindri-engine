@@ -5,7 +5,8 @@ use sindri_physics::{Collider3d, RigidBody3d, RigidBodyKind};
 
 use super::SceneExtractError;
 use crate::{
-    Collider3dComponent, PhysicsWorld3dComponent, RigidBody3dComponent, VoxelCollider3dComponent,
+    Character3dComponent, Collider3dComponent, PhysicsWorld3dComponent, RigidBody3dComponent,
+    VoxelCollider3dComponent,
 };
 
 pub(super) fn register(components: &mut ComponentSchemaRegistry) -> Result<(), SceneExtractError> {
@@ -17,6 +18,14 @@ pub(super) fn register(components: &mut ComponentSchemaRegistry) -> Result<(), S
         "kind",
         FieldMeaning::choice(RigidBodyKind::ALL.into_iter().map(RigidBodyKind::as_str)),
     )])?;
+    components.register_with_default::<Character3dComponent>(
+        "Character 3D",
+        serde_json::json!(Character3dComponent::default()),
+    )?;
+    components.describe::<Character3dComponent>([
+        ("max_slope_angle", FieldMeaning::Angle),
+        ("min_slide_angle", FieldMeaning::Angle),
+    ])?;
     components.register_with_default::<Collider3dComponent>(
         "Collider 3D",
         serde_json::json!({"pieces": [Collider3d::cuboid([0.5; 3])]}),
@@ -30,6 +39,30 @@ pub(super) fn register(components: &mut ComponentSchemaRegistry) -> Result<(), S
             "margin": 2.0,
         }),
     )?;
+    components.register_with_fields::<crate::ModelCollider3dComponent>(
+        "Static Model Collider 3D",
+        serde_json::json!({"asset": "models/collision.glb", "friction": 0.5, "restitution": 0.0, "layers": sindri_physics::CollisionLayers::ALL, "sensor": false}),
+    )?;
+    components.describe::<crate::ModelCollider3dComponent>([(
+        "asset",
+        FieldMeaning::Asset(sindri_core::AssetKind::Model),
+    )])?;
+    components.register_with_fields::<crate::ModelConvexCollider3dComponent>(
+        "Convex Model Collider 3D",
+        serde_json::json!({"asset": "models/collision.glb", "friction": 0.5, "restitution": 0.0, "layers": sindri_physics::CollisionLayers::ALL, "sensor": false}),
+    )?;
+    components.describe::<crate::ModelConvexCollider3dComponent>([(
+        "asset",
+        FieldMeaning::Asset(sindri_core::AssetKind::Model),
+    )])?;
+    components.register_with_default::<crate::PhysicsMaterial3dComponent>(
+        "Physics Material 3D",
+        serde_json::json!({"profile": "", "override_friction": false, "friction": 0.5, "override_restitution": false, "restitution": 0.0}),
+    )?;
+    components.describe::<crate::PhysicsMaterial3dComponent>([(
+        "profile",
+        FieldMeaning::Asset(sindri_core::AssetKind::Profile),
+    )])?;
     components.register_with_default::<PhysicsWorld3dComponent>(
         "Physics 3D World",
         serde_json::json!({"gravity": [0.0, -9.81, 0.0], "layers": []}),

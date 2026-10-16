@@ -3,8 +3,8 @@
 use sindri_core::{AssetKind, ComponentSchemaRegistry, FieldMeaning};
 
 use crate::components::{
-    Light2dComponent, Light2dOccluderComponent, OccluderShape, ShapeComponent, UiShapeBlend,
-    UiShapeComponent, UiShapeKind,
+    Light2dComponent, Light2dOccluderComponent, OccluderShape, ShapeComponent, SpriteComponent,
+    UiShapeBlend, UiShapeComponent, UiShapeKind,
 };
 
 use crate::effects::{EmissionShape, ParticleSpace, ParticlesComponent};
@@ -179,6 +179,32 @@ pub(super) fn register_world_text(
             "auto_size": { "enabled": false, "min": 0.1 },
             "rich": false,
             "follow_rotation": false
+        }),
+    )?;
+    Ok(())
+}
+
+pub(super) fn register_sprite(
+    components: &mut ComponentSchemaRegistry,
+) -> Result<(), SceneExtractError> {
+    components.register_with_default::<SpriteComponent>(
+        "Sprite",
+        serde_json::json!({
+            "texture": PROCEDURAL_TEXTURES[0].reference,
+            "tint": [1.0, 1.0, 1.0, 1.0],
+            "color_transform": {
+                "multiply": [1.0, 1.0, 1.0, 1.0],
+                "offset": [0.0, 0.0, 0.0, 0.0]
+            },
+            "layer": 0,
+            // Off by default: a new sprite is as likely to be something
+            // lying on the ground as somebody standing on it.
+            "billboard": false,
+            "shader": "",
+            "shader_params": [0.0, 0.0, 0.0, 0.0],
+            "normal_map": "",
+            "unlit": false,
+            "draw": "simple", "border_scale": 1.0 / 16.0, "mask": "none", "mask_name": ""
         }),
     )?;
     Ok(())

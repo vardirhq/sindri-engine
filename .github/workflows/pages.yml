@@ -127,6 +127,7 @@ jobs:
       - name: Assemble Sindri site
         env:
           PAGES_BASE_PATH: ${{ steps.pages.outputs.base_path }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
           rm -rf target/pages
           mkdir -p target/pages/assets
@@ -162,6 +163,40 @@ jobs:
             mkdir -p "target/pages/examples/$route/pkg"
             cp -R crates/sindri-player/pkg/. "target/pages/examples/$route/pkg/"
           done
+          # Build isolated, unmerged browser previews without publishing to Pages.
+          if [[ "$GITHUB_EVENT_NAME" == "pull_request" ]]; then
+            for project in \
+              "examples/transform:transform" \
+              "examples/orbit:orbit" \
+              "examples/character3d:character3d" \
+              "examples/model-collision:model-collision"; do
+              src="${project%%:*}"
+              route="${project##*:}"
+              cargo run --quiet --package sindri-export --bin sindri-export -- \
+                "$src" "target/wip-preview/$route" --base "/wip/$PR_NUMBER/$route/" \
+                --build-id "${GITHUB_SHA:0:7}"
+              mkdir -p "target/wip-preview/$route/pkg"
+              cp -R crates/sindri-player/pkg/. "target/wip-preview/$route/pkg/"
+            done
+            # An index makes the downloaded artifact navigable when served locally.
+            python3 - <<'PREVIEW'
+          from pathlib import Path
+          from html import escape
+          root = Path("target/wip-preview")
+          labs = [("transform", "Transform Lab"), ("orbit", "Orbit Camera Lab"),
+                  ("character3d", "Character Lab"), ("model-collision", "Model Collision Lab")]
+          items = "".join(f'<li><a href="./{route}/">{escape(name)}</a></li>' for route, name in labs)
+          (root / "index.html").write_text(
+              '<!doctype html><html lang="en"><meta charset="utf-8">'
+              '<meta name="viewport" content="width=device-width,initial-scale=1">'
+              '<title>Sindri 3D Labs (PR preview)</title>'
+              '<style>body{font:1.1rem system-ui;max-width:48rem;margin:3rem auto;'
+              'padding:0 1.5rem;background:#111827;color:#f9fafb}'
+              'a{color:#93c5fd}li{margin:1rem 0}</style>'
+              '<h1>Sindri 3D Labs</h1><p>Unmerged PR preview. Not a stable release.</p>'
+              f'<ul>{items}</ul></html>', encoding="utf-8")
+          PREVIEW
+          fi
           mkdir -p target/pages/examples/voxel-lab/pkg
           cp games/voxel-lab/web/index.html target/pages/examples/voxel-lab/index.html
           cp -R games/voxel-lab/pkg/. target/pages/examples/voxel-lab/pkg/
@@ -229,6 +264,24 @@ jobs:
           path: target/directory-captures
           if-no-files-found: warn
           retention-days: 14
+      - name: Verify 3D preview exports
+        if: github.event_name == 'pull_request'
+        run: |
+          test -f target/wip-preview/index.html
+          for route in transform orbit character3d model-collision; do
+            test -f "target/wip-preview/$route/index.html"
+            test -f "target/wip-preview/$route/assets/sindri.manifest"
+            test -f "target/wip-preview/$route/pkg/sindri_player_bg.wasm"
+            grep -Fq "<base href=\"/wip/${{ github.event.pull_request.number }}/$route/\">" "target/wip-preview/$route/index.html"
+          done
+      - name: Upload 3D lab preview bundle
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v7
+        with:
+          name: 3d-labs-preview
+          path: target/wip-preview
+          retention-days: 14
+          if-no-files-found: error
       - uses: actions/upload-pages-artifact@v5
         if: github.event_name != 'pull_request' && github.event_name != 'merge_group'
         with:

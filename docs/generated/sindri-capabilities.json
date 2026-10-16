@@ -160,6 +160,59 @@
       "type_name": "sindri.camera.behavior"
     },
     {
+      "addable": false,
+      "apply": {},
+      "default_payload": null,
+      "display_name": "Camera Orbit",
+      "fields": {
+        "collision_mask": 4294967295,
+        "collision_padding": 0.2,
+        "distance": 6.0,
+        "offset": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "pitch": 0.35,
+        "smoothing": 8.0,
+        "target": "target",
+        "yaw": 0.0
+      },
+      "meanings": {
+        "collision_mask": {
+          "kind": "range",
+          "max": 4294967295.0,
+          "min": 0.0
+        },
+        "collision_padding": {
+          "kind": "range",
+          "max": null,
+          "min": 0.0
+        },
+        "distance": {
+          "kind": "range",
+          "max": null,
+          "min": 0.0
+        },
+        "pitch": {
+          "kind": "angle"
+        },
+        "smoothing": {
+          "kind": "range",
+          "max": null,
+          "min": 0.0
+        },
+        "target": {
+          "kind": "entity"
+        },
+        "yaw": {
+          "kind": "angle"
+        }
+      },
+      "schema_version": 1,
+      "type_name": "sindri.camera.orbit"
+    },
+    {
       "addable": true,
       "apply": {},
       "default_payload": {
@@ -532,8 +585,12 @@
           0.949999988079071,
           0.8600000143051147
         ],
+        "enabled": true,
+        "inner_angle": 0.3490658402442932,
         "intensity": 1.0,
-        "kind": "directional"
+        "kind": "directional",
+        "outer_angle": 0.5235987901687622,
+        "range": 8.0
       },
       "display_name": "Light",
       "fields": {
@@ -542,12 +599,19 @@
           0.949999988079071,
           0.8600000143051147
         ],
+        "enabled": true,
+        "inner_angle": 0.3490658402442932,
         "intensity": 1.0,
-        "kind": "directional"
+        "kind": "directional",
+        "outer_angle": 0.5235987901687622,
+        "range": 8.0
       },
       "meanings": {
         "color": {
           "kind": "color"
+        },
+        "inner_angle": {
+          "kind": "angle"
         },
         "intensity": {
           "kind": "range",
@@ -557,8 +621,18 @@
         "kind": {
           "kind": "choice",
           "options": [
-            "directional"
+            "directional",
+            "point",
+            "spot"
           ]
+        },
+        "outer_angle": {
+          "kind": "angle"
+        },
+        "range": {
+          "kind": "range",
+          "max": null,
+          "min": 0.001
         }
       },
       "schema_version": 1,
@@ -675,6 +749,48 @@
       "addable": true,
       "apply": {},
       "default_payload": {
+        "base_color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "emissive": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "metallic": 0.0,
+        "roughness": 1.0
+      },
+      "display_name": "Material",
+      "fields": {
+        "base_color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "emissive": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "metallic": 0.0,
+        "roughness": 1.0
+      },
+      "meanings": {
+        "base_color": {
+          "kind": "color"
+        }
+      },
+      "schema_version": 1,
+      "type_name": "sindri.material"
+    },
+    {
+      "addable": true,
+      "apply": {},
+      "default_payload": {
         "layer": 0,
         "primitive": "cube",
         "surface": null,
@@ -705,7 +821,12 @@
         "asset": "models/model.glb",
         "layer": 0
       },
-      "meanings": {},
+      "meanings": {
+        "asset": {
+          "asset": "model",
+          "kind": "asset"
+        }
+      },
       "schema_version": 1,
       "type_name": "sindri.model"
     },
@@ -1405,6 +1526,53 @@
       "addable": true,
       "apply": {},
       "default_payload": {
+        "carry_platforms": true,
+        "max_slope_angle": 0.7853981852531433,
+        "min_slide_angle": 0.7853981852531433,
+        "skin": 0.009999999776482582,
+        "slide": true,
+        "snap_distance": 0.0,
+        "step_dynamic_bodies": false,
+        "step_height": 0.0,
+        "step_min_width": 0.10000000149011612,
+        "up": [
+          0.0,
+          1.0,
+          0.0
+        ]
+      },
+      "display_name": "Character 3D",
+      "fields": {
+        "carry_platforms": true,
+        "max_slope_angle": 0.7853981852531433,
+        "min_slide_angle": 0.7853981852531433,
+        "skin": 0.009999999776482582,
+        "slide": true,
+        "snap_distance": 0.0,
+        "step_dynamic_bodies": false,
+        "step_height": 0.0,
+        "step_min_width": 0.10000000149011612,
+        "up": [
+          0.0,
+          1.0,
+          0.0
+        ]
+      },
+      "meanings": {
+        "max_slope_angle": {
+          "kind": "angle"
+        },
+        "min_slide_angle": {
+          "kind": "angle"
+        }
+      },
+      "schema_version": 1,
+      "type_name": "sindri.physics3d.character"
+    },
+    {
+      "addable": true,
+      "apply": {},
+      "default_payload": {
         "pieces": [
           {
             "friction": 0.5,
@@ -1472,6 +1640,81 @@
       "meanings": {},
       "schema_version": 1,
       "type_name": "sindri.physics3d.collider"
+    },
+    {
+      "addable": true,
+      "apply": {},
+      "default_payload": {
+        "friction": 0.5,
+        "override_friction": false,
+        "override_restitution": false,
+        "profile": "",
+        "restitution": 0.0
+      },
+      "display_name": "Physics Material 3D",
+      "fields": {
+        "friction": 0.5,
+        "override_friction": false,
+        "override_restitution": false,
+        "profile": "",
+        "restitution": 0.0
+      },
+      "meanings": {
+        "profile": {
+          "asset": "profile",
+          "kind": "asset"
+        }
+      },
+      "schema_version": 1,
+      "type_name": "sindri.physics3d.material"
+    },
+    {
+      "addable": false,
+      "apply": {},
+      "default_payload": null,
+      "display_name": "Static Model Collider 3D",
+      "fields": {
+        "asset": "models/collision.glb",
+        "friction": 0.5,
+        "layers": {
+          "filter": 4294967295,
+          "memberships": 4294967295
+        },
+        "restitution": 0.0,
+        "sensor": false
+      },
+      "meanings": {
+        "asset": {
+          "asset": "model",
+          "kind": "asset"
+        }
+      },
+      "schema_version": 1,
+      "type_name": "sindri.physics3d.model_collider"
+    },
+    {
+      "addable": false,
+      "apply": {},
+      "default_payload": null,
+      "display_name": "Convex Model Collider 3D",
+      "fields": {
+        "asset": "models/collision.glb",
+        "friction": 0.5,
+        "layers": {
+          "filter": 4294967295,
+          "memberships": 4294967295
+        },
+        "restitution": 0.0,
+        "sensor": false
+      },
+      "meanings": {
+        "asset": {
+          "asset": "model",
+          "kind": "asset"
+        }
+      },
+      "schema_version": 1,
+      "type_name": "sindri.physics3d.model_convex_collider"
     },
     {
       "addable": true,

@@ -11,6 +11,8 @@ use crate::types::{FunctionType, HostType, Type};
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ExternalSymbol {
     Value(Type),
+    /// A host-derived value; assigning it or a component of it is refused.
+    ReadOnlyValue(Type),
     Function(FunctionType),
 }
 

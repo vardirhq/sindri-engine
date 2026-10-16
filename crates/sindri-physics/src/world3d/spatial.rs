@@ -27,6 +27,13 @@ pub(super) struct SpatialIndex {
 }
 
 impl SpatialIndex {
+    pub(super) fn character_tree(&self) -> Result<&Bvh, crate::PhysicsError> {
+        if !self.unbounded.is_empty() {
+            return Err(crate::PhysicsError::NonFinite("character_obstacle_bounds"));
+        }
+        Ok(&self.tree)
+    }
+
     fn update(&mut self, piece: QueryPiece, bounds: Aabb) {
         let key = piece.handle.into_raw_parts().0;
         let bounds = padded(bounds);
@@ -118,10 +125,16 @@ impl PhysicsWorld3d {
         }
         let body = &self.backend.bodies[record.body];
         for (order, &handle) in record.colliders.iter().enumerate() {
-            let collider = &self.backend.colliders[handle];
+            let collider = &mut self.backend.colliders[handle];
             let pose = collider
                 .position_wrt_parent()
                 .map_or(*collider.position(), |local| *body.position() * *local);
+            // Rapier's character query reads collider world poses directly.
+            // Keep this derived pose current on inserts/teleports, just as the
+            // query-only BVH is, without waiting for the next solver step.
+            if collider.position() != &pose {
+                collider.set_position(pose);
+            }
             self.spatial.update(
                 QueryPiece {
                     entity,

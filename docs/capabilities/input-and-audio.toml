@@ -186,3 +186,110 @@ summary = "Nothing gathers the clips a scene names, so dynamically named clips m
 status = { engine = "no", editor = "n/a", decay = "n/a", proof = "n/a" }
 parity = "`referenced_audio` gather"
 limits = ["The editor does not preview a scene's audio source in place."]
+
+[[capability]]
+id = "mouse-look-delta"
+group = "3D foundation"
+title = "Mouse displacement for 3D look"
+summary = "Read-only `Pointer.delta` / `Input.Pointer.delta` returns accumulated viewport-pixel mouse movement once per fixed step, positive right/down"
+status = { engine = "partial", editor = "partial", decay = "partial", proof = "partial" }
+parity = "Mouse displacement for 3D look"
+tests = ["crates/sindri-decay/tests/a_script_reads_the_pointer.rs"]
+proof = ["examples/orbit"]
+docs = ["docs/scripting.md"]
+detail = '''
+`Pointer.delta` and `Input.Pointer.delta` expose the existing platform mouse
+movement accumulator as a read-only `Vec2`, including component reads. Movement
+is in viewport pixels, positive right/down, spent once per fixed step; a first
+arrival/re-entry adds no jump. It is displacement rather than velocity, and
+independent of touch (`Gesture` remains the touch drag surface). Compiler and
+runtime reject writes, while a copied vector stays mutable. Bridge regressions
+exercise accumulated movement, reset, re-entry and both namespaces; LSP tests
+check completion/hover from the same host metadata.
+
+Orbit Camera Lab uses it for right-button drag-to-look, with sensitivity and
+pitch limits in Decay. Its Session regression checks yaw/pitch changes, no
+repeated displacement on the next step and pitch clamping. Real WebGPU
+Chromium drove a right-button drag through the exported generic player; a
+console observer in a disposable copy recorded exactly 60 pixels right and 40
+down, once. Assets loaded, the walker reached its goal and inspected captures
+showed the camera response without runtime/GPU errors. The flat-color lab used
+the same local eight-color smoke threshold as its earlier capture (fourteen
+colors drawn); the repository browser gate is unchanged. This is feature
+example evidence; native editor Play also exercises captured delta. Explorer
+game proof remains pending.
+Native/browser capture is described below.
+'''
+
+[[capability]]
+id = "pointer-lock"
+group = "3D foundation"
+title = "Pointer lock"
+summary = "`Pointer.lock()` / `unlock()` and read-only `locked`, also under `Input.Pointer`, connect Session to native/browser and native editor Play capture"
+status = { engine = "partial", editor = "partial", decay = "partial", proof = "partial" }
+parity = "Pointer lock"
+tests = ["crates/sindri-platform/tests/pointer_motion.rs", "scripts/browser/pointer-lock.mjs"]
+proof = ["examples/orbit"]
+docs = ["docs/platform-host.md"]
+detail = '''
+The shared platform input state accepts `PointerLockChanged` as actual host
+capture feedback and `PointerMotion` as relative mouse displacement. These are
+platform events, not Decay APIs or capture requests. Relative motion is accepted
+only while captured and focused; cursor warps and leave events do not add motion
+or move/cancel UI presses during capture. Changing capture mode discards pending
+motion and rebases the next absolute position. Focus loss clears capture, pending
+motion and the absolute mouse position; focus regain does not recapture.
+Nonfinite motion and overflowing sums are rejected atomically.
+
+`crates/sindri-platform/tests/pointer_motion.rs` exercises these transitions,
+invalid input and once-only consumption through the real `EngineHost` fixed-step
+loop, including frames with no step and catchup steps. Native/browser player
+hosts now emit this feedback and motion, as described below.
+
+`Pointer.lock()` / `Input.Pointer.lock()` request capture; `unlock()` requests
+release and read-only `locked` reports actual state. No request changes state
+within an invocation. Successful invocation outputs collect requests in execution
+order (last request wins), Session queues the latest across fixed steps, and
+`DesktopApp` drains it once after update. Failed invocations do not forward their
+capture intent; checkpoint restore does not replay window commands.
+
+The windowed host uses native Locked, with X11 confinement plus raw device
+motion as a fallback. Browser capture calls are caught at the JavaScript boundary
+and Promise rejection is consumed; actual document lock is polled before gameplay
+and relative motion. Delayed grants after explicit release are released again.
+Escape, focus loss, suspension, hidden pages, failure and normal exit release
+capture. Returning focus does not recapture. Motion uses native raw device counts
+or browser physical pixels, positive right/down, through the existing delta API.
+
+Bridge regressions cover actual-state reads, both namespaces, read-only writes,
+invalid call signatures and failed-invocation intent. Orbit Camera Lab's Session
+regression covers request draining, relative camera motion and checkpoint restore.
+LSP tests cover read-only boolean metadata and capture-call completion; generated
+reference/metadata share the same typed host surface.
+
+`scripts/browser/pointer-lock.mjs` runs the exported lab in real WebGPU Chromium:
+a trusted click captures, movement beyond the viewport reaches Decay as exactly
+1,420 horizontal/60 vertical units once, U and Escape release, and a sandboxed
+frame denies capture without false success or interrupting the goal run. The
+captured-look screenshot was inspected. CI exports the same project and runs
+this regression, retaining its screenshot. Its flat-color fixture uses an
+eight-color minimum; the general browser smoke threshold remains unchanged.
+Native X11 verification runs the same generic player in an isolated Xvfb
+window on Vulkan, reaches the goal, and drives capture/raw motion/U/Escape/focus
+changes with XTest. Decay observes 4,000 horizontal/120 vertical raw units in
+one step, releases on each requested/focus transition and does not recapture
+on focus regain. The native window screenshot was inspected alongside Chromium.
+Native platforms other than this X11 run were not visually exercised here.
+Native editor Play also drains Session requests after stepping and editor
+transport/layout changes. Native window calls report success before input sees
+capture; missing windows cannot report false success. egui raw mouse events
+feed native counts without display scaling; the shared state ignores absolute
+warps. Unit regressions cover accumulation across frames, once-only consumption,
+release rebasing, stopping and absent windows. The actual X11 editor window runs
+Orbit Camera Lab to its goal, reports 6,000 horizontal/120 vertical raw units
+from an unbounded XTest move, and releases on U/Escape, pause/stop, focus loss
+and hiding the Game view. An external pointer-grab probe verifies actual capture
+and release; resume/focus regain/new Play do not automatically recapture. The
+editor screenshot with Decay motion and goal output was inspected. Other native
+editor platforms and Explorer game proof remain pending.
+'''

@@ -21,19 +21,11 @@ title = "Typed host, compile / run / reload"
 summary = "`sindri.script` binds a source to an entity; paths are typed against one description shared by analyzer and host, and sources hot-reload."
 status = { engine = "yes", editor = "partial", decay = "yes", proof = "yes" }
 parity = "Typed host, compile / run / reload"
-tests = [
-  "crates/sindri-decay/src/surface/tests.rs",
-  "crates/sindri-decay/tests/documented_surface.rs",
-  "crates/sindri-runtime/tests/a_session_steps_a_scene.rs",
-]
-proof = ["games/orbital-baked", "games/scorchball", "games/platformer"]
+tests = ["crates/sindri-decay/src/surface/tests.rs", "crates/sindri-decay/tests/documented_surface.rs", "crates/sindri-runtime/tests/a_session_steps_a_scene.rs", "crates/sindri-decay/tests/spatial_transforms.rs"]
+proof = ["games/orbital-baked", "games/scorchball", "games/platformer", "examples/transform"]
 docs = ["docs/scripting.md", "docs/generated/decay-api.md"]
-limits = [
-  "No script state migration across a reload: a changed file recompiles, and the running instance keeps whatever fields it had.",
-  "There is no general dynamic component API; purpose-built typed paths cover each subsystem.",
-  "Despawning is not undoable — no script write is; play mode restores from a snapshot.",
-]
-detail = """
+limits = ["No script state migration across a reload: a changed file recompiles, and the running instance keeps whatever fields it had.", "There is no general dynamic component API; purpose-built typed paths cover each subsystem.", "Despawning is not undoable — no script write is; play mode restores from a snapshot."]
+detail = '''
 `sindri-decay` binds the language to a world: a `sindri.script` component names
 a source and a container, `WorldHost` gives Decay's symbolic paths a meaning in
 terms of one entity's transform, and the editor runs every script once a frame
@@ -53,7 +45,31 @@ accessors are derived from one description, and a test walks every path the
 analyzer accepts to assert the host answers it.
 
 A failing script reports itself and does not stop the others.
-"""
+
+
+The 3D transform surface additionally offers read-only world-space unit
+`forward`, `right`, and `up`, and checked `look_at(target)` and
+`rotate_around(pivot, axis, radians)` methods on own and referenced entities.
+The script regressions cover rotated/scaled parents, normalized directions,
+copy-versus-write semantics, and atomic errors including the Z lock. The
+[Transform Lab](../../examples/transform/README.md) opens a perspective scene
+and runs to its goal.
+This is slice 6 of `docs/3d-update.md`, a foundation for Explorer rather than
+completed game proof: no in-tree game uses these new methods yet. Quaternion
+composition/interpolation remains pending; character and orbit-camera feature
+proof is documented below.
+
+`transform.rotation` is a copied parent-relative `Quat` x/y/z/w value, using
+Decay's existing struct constructor and copy semantics. Whole writes normalize
+finite nonzero values atomically; zero/non-finite writes retain the transform.
+Stored components are readable; edit a copied local value and assign it back.
+Script regressions cover huge/tiny magnitudes, invalid input, parented rotation,
+copy independence and runtime rejection of direct component writes. Transform
+Lab saves its rotation, transfers its facing to the goal and restores its original
+on arrival through Session and exported Chromium. Generated host metadata exposes
+the type to the checker and LSP. This is a general transform capability added to
+finish the planned 3D scripting surface; Explorer game proof remains pending.
+'''
 
 [[capability]]
 id = "references"
@@ -505,11 +521,26 @@ parity = "Coroutines / sequencing"
 
 [[capability]]
 id = "rotations"
-group = "Not yet"
+group = "3D transform values"
 title = "Rotations as values"
-summary = "Rotations are not language values; scripts reach a Z rotation in degrees."
-status = { engine = "no", editor = "n/a", decay = "no", proof = "n/a" }
+summary = "Copied parent-relative Quat values support normalized atomic whole writes; composition and interpolation remain absent."
+status = { engine = "partial", editor = "n/a", decay = "partial", proof = "partial" }
 parity = "Rotations as values"
+detail = '''
+parent-relative `Quat` x/y/z/w value, using
+Decay's existing struct constructor and copy semantics. Whole writes normalize
+finite nonzero values atomically; zero/non-finite writes retain the transform.
+Stored components are readable; edit a copied local value and assign it back.
+Script regressions cover huge/tiny magnitudes, invalid input, parented rotation,
+copy independence and runtime rejection of direct component writes. Transform
+Lab saves its rotation, transfers its facing to the goal and restores its original
+on arrival through Session and exported Chromium. Generated host metadata exposes
+the type to the checker and LSP. This is a general transform capability added to
+finish the planned 3D scripting surface; Explorer game proof remains pending.
+'''
+tests = ["crates/sindri-decay/tests/spatial_transforms/quaternion.rs"]
+proof = ["examples/transform"]
+docs = ["docs/scripting.md"]
 
 [[capability]]
 id = "script-unit-tests"
@@ -532,3 +563,26 @@ group = "Not yet"
 title = "TypeScript embedding SDK"
 summary = "Browser games expose narrow application entry points and run their gameplay in Decay; there is no optional TypeScript SDK."
 status = { engine = "no", editor = "n/a", decay = "n/a", proof = "n/a" }
+
+[[capability]]
+id = "generic-fractional-component-writes"
+group = "Not yet"
+title = "Fractional component writes from integer-authored numbers"
+summary = "Existing generic numeric component leaves round writes when the stored JSON slot is an integer, so fractional 2D light intensity or tint can be lost"
+status = { engine = "no", editor = "n/a", decay = "no", proof = "no" }
+parity = "Fractional component writes from integer-authored numbers"
+detail = '''
+Existing generic numeric component leaves round writes when the stored JSON slot is an integer, so fractional 2D light intensity or tint can be lost. Checked 3D light/environment setters use dedicated floating-point storage; other leaves still need declared storage semantics (`sindri-decay/host/access.rs`)
+'''
+
+[[capability]]
+id = "quaternion-operations"
+group = "Not yet"
+title = "Quaternion composition and interpolation"
+summary = "No quaternion multiplication, axis-angle value constructor or slerp API; existing Euler and world-space aim/orbit controls remain available"
+status = { engine = "no", editor = "n/a", decay = "no", proof = "no" }
+parity = "Quaternion composition and interpolation"
+docs = ["docs/scripting.md"]
+detail = '''
+No quaternion multiplication, axis-angle value constructor or slerp API; existing Euler and world-space aim/orbit controls remain available
+'''

@@ -76,7 +76,7 @@ pub fn encode_prepared_frame(
         encoder,
         textures,
         frame.passes(),
-    );
+    )?;
     // Each batch draws from its own slot, and this is what hands the first one
     // back at the start of every submission. Without it a host would allocate a
     // slot per batch per frame for as long as it ran.
@@ -169,7 +169,7 @@ pub fn encode_lit_frame(
         encoder,
         textures,
         frame.passes(),
-    );
+    )?;
     cube_renderer.begin_submission();
     sprite_renderer.begin_submission();
     sprite_renderer.set_environment(frame.sprite_environment());
@@ -215,16 +215,16 @@ fn encode_directional_shadows(
     encoder: &mut wgpu::CommandEncoder,
     textures: &TextureRegistry,
     passes: &[FramePass],
-) {
+) -> Result<(), FrameEncodeError> {
     if !cube.shadows_enabled() {
-        return;
+        return Ok(());
     }
     let Some(camera) = passes
         .iter()
         .find(|pass| pass.stage == RenderStage::Opaque3d)
         .map(|pass| pass.camera.view_projection)
     else {
-        return;
+        return Ok(());
     };
     cube.begin_submission();
     cube.begin_shadow_pass(encoder, camera);
@@ -232,7 +232,11 @@ fn encode_directional_shadows(
         .iter()
         .filter(|pass| pass.stage == RenderStage::Opaque3d)
     {
+        cube.set_material(pass.material)?;
         match &pass.command {
+            FrameCommand::Model { model, asset } => {
+                cube.encode_shadow_model(device, queue, encoder, asset, *model)?;
+            }
             FrameCommand::TexturedCube { model, .. } => {
                 cube.encode_shadow_cube(device, queue, encoder, *model);
             }
@@ -270,6 +274,7 @@ fn encode_directional_shadows(
             _ => {}
         }
     }
+    Ok(())
 }
 
 /// What lights a frame.
@@ -321,6 +326,7 @@ fn encode_passes<'p>(
         glyph_renderer.set_clip(pass.clip);
         shape_renderer.set_clip(pass.clip);
         cube_renderer.set_camera_position(pass.camera.position);
+        cube_renderer.set_material(pass.material)?;
         match &pass.command {
             FrameCommand::Model { model, asset } => {
                 cube_renderer.encode_model(
@@ -486,6 +492,8 @@ fn encode_cached_textured_mesh(
 
 #[derive(Debug, Error)]
 pub enum FrameEncodeError {
+    #[error(transparent)]
+    Material(#[from] crate::MaterialError),
     #[error(transparent)]
     Model(#[from] crate::ModelRenderError),
     #[error(transparent)]

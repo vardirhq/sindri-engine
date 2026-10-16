@@ -43,6 +43,9 @@ pub(super) fn describe_world(
         ("kind", FieldMeaning::choice(LightKind::NAMES)),
         ("color", COLOR),
         ("intensity", at_least(0.0)),
+        ("range", at_least(0.001)),
+        ("inner_angle", FieldMeaning::Angle),
+        ("outer_angle", FieldMeaning::Angle),
     ])?;
     describe_voxel_world(components)
 }

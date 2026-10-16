@@ -9,8 +9,8 @@ mod validate;
 use glam::Mat4;
 use thiserror::Error;
 
-pub(crate) use gpu::ModelDraw;
 pub(crate) use gpu::ModelRenderer;
+pub(crate) use gpu::{ModelDraw, ModelShadowDraw};
 
 #[derive(Clone, Copy, Debug, bytemuck::Pod, bytemuck::Zeroable)]
 #[repr(C)]
@@ -47,6 +47,8 @@ pub struct ModelSurface {
     pub texture: Option<usize>,
     pub metallic: f32,
     pub roughness: f32,
+    /// Linear RGB self-emission; finite, nonnegative HDR values are allowed.
+    pub emissive: [f32; 3],
     pub double_sided: bool,
     pub alpha_cutoff: Option<f32>,
 }
@@ -58,6 +60,7 @@ impl Default for ModelSurface {
             texture: None,
             metallic: 1.0,
             roughness: 1.0,
+            emissive: [0.0; 3],
             double_sided: false,
             alpha_cutoff: None,
         }

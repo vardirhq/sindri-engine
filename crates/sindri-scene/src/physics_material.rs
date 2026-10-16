@@ -33,6 +33,15 @@ impl SceneComponent for PhysicsMaterial2dComponent {
     const TYPE_NAME: &'static str = "sindri.physics2d.material";
 }
 
+/// The 3D counterpart, using the same profile and override fields as 2D.
+#[derive(Clone, Debug, Deserialize, PartialEq)]
+#[serde(transparent)]
+pub struct PhysicsMaterial3dComponent(pub PhysicsMaterial2dComponent);
+
+impl SceneComponent for PhysicsMaterial3dComponent {
+    const TYPE_NAME: &'static str = "sindri.physics3d.material";
+}
+
 #[derive(Debug, Error)]
 pub enum PhysicsMaterialError {
     #[error("physics material profile '{id}': {reason}")]
@@ -99,41 +108,51 @@ impl PhysicsMaterialSources {
         Ok(Self { materials })
     }
 
-    pub(crate) fn apply(
+    pub(crate) fn resolve(
         &self,
         component: &PhysicsMaterial2dComponent,
-        pieces: &mut [Collider2d],
-    ) -> Result<(), PhysicsMaterialError> {
-        let material = if component.profile.is_empty() {
-            None
-        } else {
-            Some(
-                *self
-                    .materials
-                    .get(&component.profile)
-                    .ok_or_else(|| PhysicsMaterialError::Missing(component.profile.clone()))?,
-            )
-        };
-        for piece in pieces {
-            if let Some(material) = material {
-                piece.friction = material.friction;
-                piece.restitution = material.restitution;
-            }
-            if component.override_friction {
-                piece.friction = component.friction;
-            }
-            if component.override_restitution {
-                piece.restitution = component.restitution;
-            }
-            PhysicsMaterial {
-                friction: piece.friction,
-                restitution: piece.restitution,
-            }
+        mut material: PhysicsMaterial,
+    ) -> Result<PhysicsMaterial, PhysicsMaterialError> {
+        if !component.profile.is_empty() {
+            material = *self
+                .materials
+                .get(&component.profile)
+                .ok_or_else(|| PhysicsMaterialError::Missing(component.profile.clone()))?;
+        }
+        if component.override_friction {
+            material.friction = component.friction;
+        }
+        if component.override_restitution {
+            material.restitution = component.restitution;
+        }
+        material
             .validate()
             .map_err(|error| PhysicsMaterialError::Invalid {
                 id: component.profile.clone(),
                 reason: error.to_string(),
             })?;
+        Ok(material)
+    }
+
+    pub(crate) fn apply(
+        &self,
+        component: &PhysicsMaterial2dComponent,
+        pieces: &mut [Collider2d],
+    ) -> Result<(), PhysicsMaterialError> {
+        // A missing reference is an error even for an empty piece list.
+        if !component.profile.is_empty() && !self.materials.contains_key(&component.profile) {
+            return Err(PhysicsMaterialError::Missing(component.profile.clone()));
+        }
+        for piece in pieces {
+            let material = self.resolve(
+                component,
+                PhysicsMaterial {
+                    friction: piece.friction,
+                    restitution: piece.restitution,
+                },
+            )?;
+            piece.friction = material.friction;
+            piece.restitution = material.restitution;
         }
         Ok(())
     }
@@ -150,10 +169,19 @@ pub fn referenced_physics_materials(
 ) -> Result<Vec<String>, PhysicsSyncError> {
     let mut profiles = Vec::new();
     for (_, data) in world.entities() {
-        if let Some(payload) = data.components.get(PhysicsMaterial2dComponent::TYPE_NAME) {
-            let material = components.decode::<PhysicsMaterial2dComponent>(payload)?;
-            if !material.profile.is_empty() {
-                profiles.push(material.profile);
+        for name in [
+            PhysicsMaterial2dComponent::TYPE_NAME,
+            PhysicsMaterial3dComponent::TYPE_NAME,
+        ] {
+            if let Some(payload) = data.components.get(name) {
+                let material = if name == PhysicsMaterial2dComponent::TYPE_NAME {
+                    components.decode::<PhysicsMaterial2dComponent>(payload)?
+                } else {
+                    components.decode::<PhysicsMaterial3dComponent>(payload)?.0
+                };
+                if !material.profile.is_empty() {
+                    profiles.push(material.profile);
+                }
             }
         }
     }

@@ -44,13 +44,22 @@ impl SceneExtractor {
                         .vertices
                         .iter()
                         .zip(&surface.uvs)
-                        .map(|(position, uv)| {
+                        .enumerate()
+                        .map(|(index, (position, uv))| {
                             TexturedVertex::new(
                                 *position,
                                 [
                                     rect.width().mul_add(uv[0], rect.x()),
                                     rect.height().mul_add(uv[1], rect.y()),
                                 ],
+                            )
+                            .with_normal(
+                                surface
+                                    .normals
+                                    .as_ref()
+                                    .and_then(|normals| normals.get(index))
+                                    .copied()
+                                    .unwrap_or([0.0; 3]),
                             )
                         })
                         .collect();
@@ -62,7 +71,7 @@ impl SceneExtractor {
                     }
                 }
             };
-            frame.push(FramePass::new(
+            let mut pass = FramePass::new(
                 RenderStage::Opaque3d,
                 RenderLayer(mesh.layer),
                 FrameCamera {
@@ -78,7 +87,12 @@ impl SceneExtractor {
                         .transform_point3(glam::Vec3::ZERO),
                 },
                 command,
-            ));
+            );
+            pass.material = self
+                .components
+                .get::<crate::MaterialComponent>(world, entity)?
+                .map(|component| component.factors);
+            frame.push(pass);
         }
         Ok(())
     }

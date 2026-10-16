@@ -144,6 +144,16 @@ export ships, assembles it for a project. The editor's fixed-step clock steps
 it; `editor/tests/play_matches_the_build.rs` plays four games both ways with
 the same input and requires the same world.
 
+Cursor capture uses the same Decay requests as the shipped player.
+`native/play_cursor.rs` drains Session after fixed steps and editor actions,
+checks actual native window capture results (Locked, then X11 confinement),
+and reports feedback to `EditorInput`. egui raw `MouseMoved` events carry native
+device counts; absolute warps cannot add motion while captured. Input edges
+and motion are spent only after a fixed step. Capture requires a running,
+visible Game view and releases on Escape, focus loss, pause/stop, text input,
+picking or hiding that view. Resuming does not recapture; dropping the editor
+releases any remaining grab.
+
 A run is the world the session steps, so an edit made while it plays has two
 places it could go. `EditorApp::apply_edit` decides: stopped, an edit lands in
 the scene's history; playing, it is applied to the running world and recorded
@@ -682,3 +692,27 @@ resize re-rasterises nothing.
 It is a specimen rather than a test because what an outline or an auto-fit *does*
 is a thing you look at, and an assertion that a number came back is not the same
 as knowing the words are where they should be.
+
+## Orbit camera authoring
+
+The inspector completes Camera Orbit's existing field template with an active
+authored spatial target from the current world. The owner requires a Camera
+and transform; target candidates exclude self, descendants, inactive entities,
+viewport entities and nodes without stable IDs or transforms. This completion
+is editor policy and creates no engine asset or alternate camera loop.
+
+Before adding or editing orbit, the inspector checks the engine's
+`CameraOrbitComponent::is_valid` settings contract and resolves target ownership.
+Rejected orbit changes retain their previous payload; valid edits to other
+components still become commands with their own transaction scope. Runtime
+pose validation remains with the shared camera driver. Tests and the
+[native review](camera-orbit-editor-review.md) exercise creation, validation,
+undo/redo, persistence and authored Play.
+
+Selected orbit guides live in the camera overlay's private `orbit` module.
+They derive focus/desired/current world positions from scene components and
+transforms each frame, draw the yaw circle at requested pitch/distance, and use
+the shared near-plane projection helpers. Their painter does not enter the
+camera hit-test path and writes no commands. The actual pose line makes runtime
+smoothing/pull-in visible; the editor does not run a second orbit solver or
+predict obstruction clearance.

@@ -7,7 +7,7 @@ model GPU cache/pipeline, so the existing `FrameRenderers` host contract and
 inline mesh/voxel vertex layouts stay compatible. Geometry and embedded textures
 upload once per shared resource; draw uniforms are independent per primitive
 instance. See [imported models](imported-models.md) for the supported material
-subset, diagnostics, residency behavior and deferred model shadows.
+subset, diagnostics, residency behavior and model shadow casting/reception.
 
 Sindri separates a frame into three explicit stages:
 
@@ -99,8 +99,170 @@ draws two batches into one frame, at two scales and with two instance counts,
 and reads back the pixels that only come out right when each batch kept its
 own.
 
+## Authored shadow settings in every project host
+
+The shared native/browser player and offscreen `ProjectRenderer` apply the
+validated environment's `shadow_settings` before encoding each frame, as editor
+viewports do. An absent environment restores defaults, so a previous scene's
+shadow state cannot leak into the next. The same encoder handles primitive,
+inline and cached voxel shadow geometry; imported models cast into and receive that map using cached geometry.
+The fixed `examples/benchmark3d` workload and shadow-on/off native/browser captures
+exercise delivery, rather than inferring it from authored component presence.
+
 ## Current boundary
 
 The frame command enum intentionally contains only the render capabilities that exist today. It is
 not a general render graph. New commands should be added when a working renderer needs them, while
 asset resolution and GPU resource ownership remain outside serialized scene data.
+
+## Physical 3D counters
+
+`TexturedCubeRenderer::draw_stats()` returns cumulative `MeshDrawStats` for
+textured cubes, inline/cached meshes, their shadow draws and imported model
+color/shadow primitives. Snapshot before encoding and call `since` afterwards. Submission
+slot resets do not reset counters, including the reset between shadows and
+color. The counters record executed encoder paths, rather than counting
+`FramePass` records: a model command can draw several primitives, and empty
+inline geometry or a missing cached mesh draws nothing.
+
+`draw_calls` counts indexed draws; `render_passes` includes the shadow-map clear
+as well as each draw's physical render pass. Uniform writes and their payload
+bytes exclude initialization and driver padding. `transient_geometry_uploads`
+counts uploaded vertex/index buffer pairs; a shadowed inline mesh currently
+uploads once for each of its shadow and color draws. Persistent model asset
+uploads and cached voxel geometry pairs remain separate cache counters.
+
+These counters exclude the frame clear, sprites, shapes, glyphs, post-processing,
+texture initialization and UI. They are not whole-frame GPU totals.
+`project-benchmark` records per-frame deltas under `mesh_counters`, and
+`scripts/frame-benchmark.py` prints their means when present. Reports without these counters retain their CPU summary. Editor reports now
+record the same counters per primary view, with `scene_mesh_counters` for the
+extra Scene view beside Play. Missing views are omitted, while an encoded view
+with no 3D work records zero. Repeated draws in one editor frame accumulate;
+frame close/capture and Play reset follow the existing profiler lifecycle.
+Standalone native benchmarks now optionally bracket the prepared frame with
+GPU timestamps. Native editor benchmarks reuse the same timer per viewport. GPU completion wait
+is still a CPU stall, not GPU execution time. This is feature-example instrumentation, proven
+with the fixed 3D Benchmark and the imported-model GPU readback regression.
+
+
+## Native benchmark timestamps
+
+`project-benchmark` requests optional encoder timestamps and enables timing on
+its offscreen renderer. Each frame writes `gpu_execution_us` separately from
+`phases`; unsupported devices write `null` and metadata says timing is
+unavailable. Metadata records adapter/backend, timestamp period and scope.
+`scripts/frame-benchmark.py` prints GPU execution mean/p95 without adding it to
+CPU work or frame-interval sums. Old reports retain their existing summaries.
+
+The interval covers the frame clear, shadow work and all prepared-frame draws.
+Query resolution/copy, mapping, readback and presentation lie outside it. This
+is the GPU's bracketed command interval, not a sum of shader times; backend
+reordering and timestamp precision can affect it. CPU encoding includes the
+extra query commands, and benchmark readback is deliberately synchronous.
+Software-Vulkan CI requires real nonzero timing for both shadow controls and
+exercises query-buffer reuse. A baseline-device GPU test proves graceful
+unavailability. Browser timing and whole-frame draw/upload totals remain open. This measurement foundation is proven by the fixed feature example,
+without claiming gameplay capability completion.
+
+
+Editor benchmark launches wrap eframe's existing device descriptor to request
+only supported timestamp features while preserving its limits and required
+features. Interactive launches keep the default descriptor. Each viewport owns
+its own query pair through the existing engine facade, without a new dependency.
+Reports add primary `gpu_execution_us` and extra `scene_gpu_execution_us`, with
+null for unavailable or undrawn intervals. Repeated draws accumulate per scope;
+capture, frame and Play resets follow the existing profiler lifecycle. Execution
+never enters CPU phases; `gpu` continues to book CPU completion/readback wait.
+
+Editor metadata records adapter/backend, period and interval scope. Intervals
+cover viewport clear/shadows/draws and optional world post-processing, excluding
+egui painting, scene-board copies, query readback and presentation. Queue
+uploads scheduled before encoder execution are outside the timestamp bracket. Native CI
+requires nonzero primary timestamps for both shadow controls. A real two-view
+layout exercises independent Scene/Game intervals; profiler/report regressions
+protect accumulation, reset, microsecond serialization, null and measured zero.
+These reports do not make the interactive Profiler panel a GPU profiler.
+
+
+## Physical 2D batch counters
+
+`SpriteBatchRenderer`, `ShapeRenderer` and `GlyphRenderer` expose cumulative
+`BatchDrawStats`. Their actual indexed draw sites record physical draws/passes,
+instance counts, the two per-batch queue buffer writes and uniform/instance
+payload bytes. Sprite camera/time/mask uniforms now occupy 160 bytes; shape and
+glyph camera uniforms remain 64. Shared 2D lighting uniforms/shadow textures are
+resource updates outside this per-batch scope. Empty batches return before any
+write or pass. Submission slot resets preserve these counters, including the
+resets between editor views.
+`combined` merges independent snapshots; `since` gives one view's delta.
+
+Standalone reports add `batch_counters`. Editor reports add the same primary
+scope and `scene_batch_counters` for the extra Scene view beside Play. Missing
+views remain absent, encoded empty views record zero, and repeated draws
+accumulate with the profiler frame lifecycle. Summaries print these scopes
+separately from 3D counters and CPU/GPU timings. Old reports stay readable.
+
+A real GPU regression encodes empty and nonempty sprite, shape and glyph batches
+through two submissions, reads the target and verifies exact draw/write/byte
+counts and slot reuse. Platformer's native editor/standalone reports exercise
+batch counters in a game; their check allows transient sprite variation between
+different simulation times while verifying the exact per-batch payload
+accounting against the stable non-sprite workload. Rebuilt browser smoke checks
+the shared render path.
+The fixed 3D workload records measured zeroes for these batches in native CI.
+Resource initialization, atlas/texture uploads, frame clears, post-processing,
+scene-board copies and egui's editor UI remain outside these counters. The
+whole-frame counter item remains open.
+
+## Shared world effects on imported geometry
+
+`world_effects.wgsl` supplies directional-map visibility and atmosphere for both
+textured world and imported-model shaders. The map uses one light projection,
+bias, bounds check and comparison sampler. Only direct model lighting is shadowed;
+ambient remains available. Fog is applied after surface lighting, with the same
+camera-distance, density and height terms as world meshes. Cube shader extraction
+preserves its existing calculations. Model uniforms grow from 288 to 400 bytes;
+physical draw/pass counts and cached geometry residency are unchanged.
+
+Resizing the map invalidates model draw bindings as well as textured-mesh
+bindings, so slot reuse never samples a previous map. The renderer accepts fog
+from every caller; authored fog delivery remains editor-only until shipped hosts
+forward the environment settings. Imported geometry casts shadows through its own material-aware depth pipeline.
+
+## Imported casters in the shadow stage
+
+Both frame encoders now include imported-model primitives in the directional
+shadow stage, with typed errors propagated through the existing frame error.
+The shadow renderer reuses the color cache, retained hierarchy and index widths;
+its independent uniform slots prevent queued color writes from corrupting depth
+transforms. Each primitive writes 96 bytes (light/world matrix, base color and
+mask/facing settings). Shadow bindings exclude the receiving depth texture to
+avoid sampling an attachment being written. Alpha masks and single/double-sided
+facing, including mirrored nodes/entities, follow imported material semantics.
+World-mesh cutout casting remains pending. The fixed workload now issues 602
+shadowed draws and 603 passes, with 126,784 uniform bytes; its unshadowed counts
+remain 301/301 and 104,320 bytes. Geometry residency is unchanged.
+
+## Standard factors on frame passes
+
+`FramePass.material` carries optional renderer-owned numeric factors, validated
+at preparation. Both shadow and color dispatch select factors for each pass,
+including resetting absent overrides; renderer state cannot leak a previous
+entity's material into the next. Scene extraction attaches the owning entity's
+`sindri.material` to primitive, imported and voxel passes. Shared GGX and emission
+are an opt-in mesh path; absent model overrides use original primitive factors.
+Texture/alpha/sidedness ownership stays separate. Textured/model color uniforms
+are 368/416 bytes; the fixed workload now writes 138,032/115,568 bytes with shadows
+on/off, without changing draw/pass counts or geometry residency. See
+[standard materials](rendering-materials.md).
+
+
+## Textured vertex normals and orientation
+
+Inline vertices and cached replacements carry optional object-space normals;
+zero requests geometric flat shading. Frame preparation rejects nonfinite values
+with `FramePlanError::NonFiniteNormal` before GPU encoding. Textured vertices
+are now 36 bytes, while color/shadow uniforms are unchanged. World color and
+shadow dispatch select the clockwise pipeline for a negative model determinant,
+including cached draws without replacements. See [normal semantics and proof](rendering-materials.md#textured-geometry-normals).

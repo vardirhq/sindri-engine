@@ -44,10 +44,13 @@ Each entry links its tests and the projects that exercise it. Surface marks matc
 | [Formatter](#formatter) | ❌ | ❌ | ❌ | — |
 | [Debugger (breakpoints, stepping)](#debugger) | ❌ | ❌ | ❌ | — |
 | [Coroutines / sequencing](#coroutines) | ❌ | — | ❌ | — |
-| [Rotations as values](#rotations) | ❌ | — | ❌ | — |
 | [Script unit tests](#script-unit-tests) | ❌ | ❌ | ❌ | ❌ |
 | [Sets, closures and first-class functions](#closures) | — | — | ❌ | — |
 | [TypeScript embedding SDK](#typescript-sdk) | ❌ | — | — | — |
+| [Fractional component writes from integer-authored numbers](#generic-fractional-component-writes) | ❌ | — | ❌ | ❌ |
+| [Quaternion composition and interpolation](#quaternion-operations) | ❌ | — | ❌ | ❌ |
+| **3D transform values** | | | | |
+| [Rotations as values](#rotations) | 🟡 | — | 🟡 | 🟡 |
 
 ## Scripts and the host
 
@@ -59,9 +62,9 @@ Each entry links its tests and the projects that exercise it. Surface marks matc
 
 Engine ✅ · Editor 🟡 · Decay ✅ · Proof ✅ — parity row *Typed host, compile / run / reload*
 
-**Tested by:** [`crates/sindri-decay/src/surface/tests.rs`](../../crates/sindri-decay/src/surface/tests.rs), [`crates/sindri-decay/tests/documented_surface.rs`](../../crates/sindri-decay/tests/documented_surface.rs), [`crates/sindri-runtime/tests/a_session_steps_a_scene.rs`](../../crates/sindri-runtime/tests/a_session_steps_a_scene.rs)
+**Tested by:** [`crates/sindri-decay/src/surface/tests.rs`](../../crates/sindri-decay/src/surface/tests.rs), [`crates/sindri-decay/tests/documented_surface.rs`](../../crates/sindri-decay/tests/documented_surface.rs), [`crates/sindri-runtime/tests/a_session_steps_a_scene.rs`](../../crates/sindri-runtime/tests/a_session_steps_a_scene.rs), [`crates/sindri-decay/tests/spatial_transforms.rs`](../../crates/sindri-decay/tests/spatial_transforms.rs)
 
-**Exercised in:** [`games/orbital-baked`](../../games/orbital-baked), [`games/scorchball`](../../games/scorchball), [`games/platformer`](../../games/platformer)
+**Exercised in:** [`games/orbital-baked`](../../games/orbital-baked), [`games/scorchball`](../../games/scorchball), [`games/platformer`](../../games/platformer), [`examples/transform`](../../examples/transform)
 
 **See:** [`docs/scripting.md`](../../docs/scripting.md), [`docs/generated/decay-api.md`](../../docs/generated/decay-api.md)
 
@@ -93,6 +96,30 @@ accessors are derived from one description, and a test walks every path the
 analyzer accepts to assert the host answers it.
 
 A failing script reports itself and does not stop the others.
+
+
+The 3D transform surface additionally offers read-only world-space unit
+`forward`, `right`, and `up`, and checked `look_at(target)` and
+`rotate_around(pivot, axis, radians)` methods on own and referenced entities.
+The script regressions cover rotated/scaled parents, normalized directions,
+copy-versus-write semantics, and atomic errors including the Z lock. The
+[Transform Lab](../../examples/transform/README.md) opens a perspective scene
+and runs to its goal.
+This is slice 6 of `docs/3d-update.md`, a foundation for Explorer rather than
+completed game proof: no in-tree game uses these new methods yet. Quaternion
+composition/interpolation remains pending; character and orbit-camera feature
+proof is documented below.
+
+`transform.rotation` is a copied parent-relative `Quat` x/y/z/w value, using
+Decay's existing struct constructor and copy semantics. Whole writes normalize
+finite nonzero values atomically; zero/non-finite writes retain the transform.
+Stored components are readable; edit a copied local value and assign it back.
+Script regressions cover huge/tiny magnitudes, invalid input, parented rotation,
+copy independence and runtime rejection of direct component writes. Transform
+Lab saves its rotation, transfers its facing to the goal and restores its original
+on arrival through Session and exported Chromium. Generated host metadata exposes
+the type to the checker and LSP. This is a general transform capability added to
+finish the planned 3D scripting surface; Explorer game proof remains pending.
 
 </details>
 
@@ -629,14 +656,6 @@ Scripts cannot suspend; sequencing is written with timers and state.
 
 Engine ❌ · Editor — · Decay ❌ · Proof — — parity row *Coroutines / sequencing*
 
-<a id="rotations"></a>
-
-### Rotations as values
-
-Rotations are not language values; scripts reach a Z rotation in degrees.
-
-Engine ❌ · Editor — · Decay ❌ · Proof — — parity row *Rotations as values*
-
 <a id="script-unit-tests"></a>
 
 ### Script unit tests
@@ -660,3 +679,67 @@ Engine — · Editor — · Decay ❌ · Proof —
 Browser games expose narrow application entry points and run their gameplay in Decay; there is no optional TypeScript SDK.
 
 Engine ❌ · Editor — · Decay — · Proof —
+
+<a id="generic-fractional-component-writes"></a>
+
+### Fractional component writes from integer-authored numbers
+
+Existing generic numeric component leaves round writes when the stored JSON slot is an integer, so fractional 2D light intensity or tint can be lost
+
+Engine ❌ · Editor — · Decay ❌ · Proof ❌ — parity row *Fractional component writes from integer-authored numbers*
+
+<details markdown="1">
+<summary>Evidence</summary>
+
+Existing generic numeric component leaves round writes when the stored JSON slot is an integer, so fractional 2D light intensity or tint can be lost. Checked 3D light/environment setters use dedicated floating-point storage; other leaves still need declared storage semantics (`sindri-decay/host/access.rs`)
+
+</details>
+
+<a id="quaternion-operations"></a>
+
+### Quaternion composition and interpolation
+
+No quaternion multiplication, axis-angle value constructor or slerp API; existing Euler and world-space aim/orbit controls remain available
+
+Engine ❌ · Editor — · Decay ❌ · Proof ❌ — parity row *Quaternion composition and interpolation*
+
+**See:** [`docs/scripting.md`](../../docs/scripting.md)
+
+<details markdown="1">
+<summary>Evidence</summary>
+
+No quaternion multiplication, axis-angle value constructor or slerp API; existing Euler and world-space aim/orbit controls remain available
+
+</details>
+
+## 3D transform values
+
+<a id="rotations"></a>
+
+### Rotations as values
+
+Copied parent-relative Quat values support normalized atomic whole writes; composition and interpolation remain absent.
+
+Engine 🟡 · Editor — · Decay 🟡 · Proof 🟡 — parity row *Rotations as values*
+
+**Tested by:** [`crates/sindri-decay/tests/spatial_transforms/quaternion.rs`](../../crates/sindri-decay/tests/spatial_transforms/quaternion.rs)
+
+**Exercised in:** [`examples/transform`](../../examples/transform)
+
+**See:** [`docs/scripting.md`](../../docs/scripting.md)
+
+<details markdown="1">
+<summary>Evidence</summary>
+
+parent-relative `Quat` x/y/z/w value, using
+Decay's existing struct constructor and copy semantics. Whole writes normalize
+finite nonzero values atomically; zero/non-finite writes retain the transform.
+Stored components are readable; edit a copied local value and assign it back.
+Script regressions cover huge/tiny magnitudes, invalid input, parented rotation,
+copy independence and runtime rejection of direct component writes. Transform
+Lab saves its rotation, transfers its facing to the goal and restores its original
+on arrival through Session and exported Chromium. Generated host metadata exposes
+the type to the checker and LSP. This is a general transform capability added to
+finish the planned 3D scripting surface; Explorer game proof remains pending.
+
+</details>

@@ -149,6 +149,8 @@ pub struct FramePass {
     insertion_order: usize,
     /// Optional physical pixel scissor rectangle (x, y, width, height).
     pub clip: Option<[u32; 4]>,
+    /// Optional standard factors; imported primitives retain their factors when absent.
+    pub material: Option<crate::MaterialFactors>,
 }
 
 impl FramePass {
@@ -171,6 +173,7 @@ impl FramePass {
             command,
             insertion_order: 0,
             clip: None,
+            material: None,
         }
     }
 }
@@ -230,6 +233,25 @@ impl ExtractedFrame {
         if !self.clear.color.into_iter().all(f64::is_finite) || !self.clear.depth.is_finite() {
             return Err(FramePlanError::NonFiniteClearValue);
         }
+        for pass in &self.passes {
+            if let Some(material) = pass.material {
+                material.validate()?;
+            }
+            let vertices = match &pass.command {
+                FrameCommand::TexturedMesh { vertices, .. } => vertices.as_slice(),
+                FrameCommand::CachedTexturedMesh {
+                    replacement: Some(upload),
+                    ..
+                } => upload.vertices.as_slice(),
+                _ => &[],
+            };
+            if vertices
+                .iter()
+                .any(|v| !v.normal.into_iter().all(f32::is_finite))
+            {
+                return Err(FramePlanError::NonFiniteNormal);
+            }
+        }
         self.passes
             .sort_by_key(|pass| (pass.stage, pass.layer, pass.insertion_order));
         Ok(PreparedFrame {
@@ -270,12 +292,16 @@ impl PreparedFrame {
 
 #[derive(Clone, Copy, Debug, Error, PartialEq, Eq)]
 pub enum FramePlanError {
+    #[error(transparent)]
+    Material(#[from] crate::MaterialError),
     #[error("render viewport width and height must be non-zero")]
     EmptyViewport,
     #[error("render viewport dimensions exceed the supported 65535-pixel limit")]
     ViewportTooLarge,
     #[error("render clear values must be finite")]
     NonFiniteClearValue,
+    #[error("textured vertex normals must be finite; zero requests flat shading")]
+    NonFiniteNormal,
 }
 
 #[cfg(test)]
@@ -323,6 +349,21 @@ mod tests {
     }
 
     #[test]
+    fn preparation_rejects_nonfinite_material_before_encoding() {
+        let mut frame = ExtractedFrame::new(Viewport::new(64, 64), ClearOperations::default());
+        let mut pass = pass(RenderStage::Opaque3d, RenderLayer(0));
+        pass.material = Some(crate::MaterialFactors {
+            roughness: f32::NAN,
+            ..Default::default()
+        });
+        frame.push(pass);
+        assert_eq!(
+            frame.prepare().unwrap_err(),
+            FramePlanError::Material(crate::MaterialError::InvalidFactor("roughness"))
+        );
+    }
+
+    #[test]
     fn preparation_rejects_empty_viewports() {
         let frame = ExtractedFrame::new(Viewport::new(0, 360), ClearOperations::default());
         assert_eq!(frame.prepare().unwrap_err(), FramePlanError::EmptyViewport);
@@ -332,5 +373,39 @@ mod tests {
     fn viewport_reports_aspect_ratio() {
         let aspect = Viewport::new(1920, 1080).aspect_ratio().unwrap();
         assert!((aspect - 16.0 / 9.0).abs() <= f32::EPSILON);
+    }
+    #[test]
+    fn preparation_rejects_nonfinite_mesh_normals_before_encoding() {
+        for cached in [false, true] {
+            let mut frame = ExtractedFrame::new(Viewport::new(64, 64), ClearOperations::default());
+            let mut pass = pass(RenderStage::Opaque3d, RenderLayer(0));
+            let vertices =
+                vec![crate::TexturedVertex::new([0.0; 3], [0.0; 2]).with_normal([f32::NAN; 3])];
+            pass.command = if cached {
+                FrameCommand::CachedTexturedMesh {
+                    model: Mat4::IDENTITY,
+                    texture: crate::TextureRegistry::MISSING,
+                    cache: crate::CachedMeshId::new(1),
+                    revision: 1,
+                    replacement: Some(crate::CachedTexturedMeshUpload::new(
+                        vertices,
+                        vec![0, 0, 0],
+                    )),
+                    surface: MeshSurface::default(),
+                }
+            } else {
+                FrameCommand::TexturedMesh {
+                    model: Mat4::IDENTITY,
+                    texture: crate::TextureRegistry::MISSING,
+                    vertices,
+                    indices: vec![0, 0, 0],
+                }
+            };
+            frame.push(pass);
+            assert_eq!(
+                frame.prepare().unwrap_err(),
+                FramePlanError::NonFiniteNormal
+            );
+        }
     }
 }

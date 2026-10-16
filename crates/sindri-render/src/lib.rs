@@ -1,5 +1,6 @@
 //! Target-independent Sindri rendering building blocks.
 
+mod batch_stats;
 mod bloom;
 mod camera;
 mod color;
@@ -11,7 +12,9 @@ mod frame;
 mod glyph;
 mod light2d;
 mod lighting;
+mod material;
 mod mesh;
+mod mesh_stats;
 mod model;
 mod offscreen;
 mod shadow;
@@ -28,6 +31,7 @@ mod transparency;
 mod triangle;
 mod uv_rect;
 
+pub use batch_stats::BatchDrawStats;
 pub use bloom::{Bloom, BloomSettings, PostProcessSettings, ToneMapping};
 pub use camera::{
     OrthographicCamera, PerspectiveCamera, look_at, orthographic_projection, perspective_projection,
@@ -51,8 +55,12 @@ pub use glyph::{
 pub use light2d::{
     Light2d, Light2dShadow, Lighting2d, MAX_LIGHTS_2D, SHADOW_BINS_2D, shadow_map_2d,
 };
-pub use lighting::WorldLighting;
+pub use lighting::{
+    LocalLight, MAX_LOCAL_LIGHTS, PointLight, PointLightError, SpotCone, WorldLighting,
+};
+pub use material::{MaterialError, MaterialFactors};
 pub use mesh::{ColoredVertex, MeshBuffers, TexturedVertex};
+pub use mesh_stats::MeshDrawStats;
 pub use model::{
     ModelCacheStats, ModelData, ModelGeometry, ModelHierarchyNode, ModelImage, ModelIndexData,
     ModelNodeInstance, ModelRenderError, ModelSurface, ModelVertex, RenderModel,

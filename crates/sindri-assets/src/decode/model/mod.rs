@@ -1,11 +1,15 @@
 //! Static, self-contained binary glTF models. No filesystem or GPU ownership.
 
+mod collision;
 mod geometry;
 mod parse;
 #[cfg(test)]
 mod tests;
 
 use super::TextureAsset;
+pub use collision::{
+    ModelCollisionError, ModelCollisionLimits, ModelCollisionMesh, ModelCollisionPart,
+};
 
 /// A reusable model, retaining authored node identities and local matrices.
 #[derive(Clone, Debug)]
@@ -67,6 +71,8 @@ pub struct ModelMaterial {
     pub base_color_texture: Option<usize>,
     pub metallic: f32,
     pub roughness: f32,
+    /// Linear RGB self-emission, independent of world lighting.
+    pub emissive: [f32; 3],
     pub double_sided: bool,
     pub alpha_cutoff: Option<f32>,
 }
@@ -79,6 +85,7 @@ impl Default for ModelMaterial {
             base_color_texture: None,
             metallic: 1.0,
             roughness: 1.0,
+            emissive: [0.0; 3],
             double_sided: false,
             alpha_cutoff: None,
         }

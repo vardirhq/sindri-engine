@@ -19,8 +19,9 @@ mod tests;
 
 pub use font::{FontAsset, FontAssetDecoder};
 pub use model::{
-    ModelAsset, ModelAssetDecoder, ModelIndices, ModelMaterial, ModelMesh, ModelNode,
-    ModelPrimitive, ModelTexture,
+    ModelAsset, ModelAssetDecoder, ModelCollisionError, ModelCollisionLimits, ModelCollisionMesh,
+    ModelCollisionPart, ModelIndices, ModelMaterial, ModelMesh, ModelNode, ModelPrimitive,
+    ModelTexture,
 };
 pub use prefab::PrefabAssetDecoder;
 pub use profile::ProfileAssetDecoder;

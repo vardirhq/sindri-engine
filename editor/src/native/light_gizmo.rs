@@ -10,13 +10,15 @@
 use eframe::egui::{self, Color32, LayerId, Order, Painter, Pos2, Rect, Response, Stroke};
 use glam::{Mat4, Vec3};
 use sindri_core::{EntityId, SceneComponent};
-use sindri_scene::{CameraView, LightComponent, light_direction};
+use sindri_scene::{CameraView, LightComponent, LightKind, light_direction};
 
 use crate::selection::Selection;
 use crate::ui::theme::color;
 
 use super::EditorApp;
 use super::projection::{distance_to_segment, project_point, project_segment};
+
+mod spot;
 
 const LIGHT_OVERLAY_LAYER: &str = "sindri-light-overlay";
 const LIGHT_PICK_STATE: &str = "sindri-light-pick";
@@ -40,6 +42,7 @@ struct LightVisual {
     centre: Pos2,
     arrow: Option<[Pos2; 2]>,
     trail: Option<[Pos2; 2]>,
+    range_segments: Vec<[Pos2; 2]>,
 }
 
 impl LightVisual {
@@ -81,7 +84,42 @@ fn light_visual(
         centre,
         arrow,
         trail,
+        range_segments: Vec::new(),
     })
+}
+
+fn point_visual(
+    entity: EntityId,
+    position: Vec3,
+    range: f32,
+    rect: Rect,
+    view_projection: Mat4,
+    selected: bool,
+) -> Option<LightVisual> {
+    let mut visual = LightVisual {
+        entity,
+        centre: project_point(rect, view_projection, position)?,
+        arrow: None,
+        trail: None,
+        range_segments: Vec::new(),
+    };
+    if selected {
+        for (a, b) in [(Vec3::X, Vec3::Y), (Vec3::X, Vec3::Z), (Vec3::Y, Vec3::Z)] {
+            for step in 0..32_u8 {
+                let from = std::f32::consts::TAU * f32::from(step) / 32.0;
+                let to = std::f32::consts::TAU * f32::from(step + 1) / 32.0;
+                if let Some(segment) = project_segment(
+                    rect,
+                    view_projection,
+                    position + range * (a * from.cos() + b * from.sin()),
+                    position + range * (a * to.cos() + b * to.sin()),
+                ) {
+                    visual.range_segments.push(segment);
+                }
+            }
+        }
+    }
+    Some(visual)
 }
 
 fn paint_lights(painter: &Painter, visuals: &[LightVisual], selection: &Selection) {
@@ -93,6 +131,9 @@ fn paint_lights(painter: &Painter, visuals: &[LightVisual], selection: &Selectio
             SUN_YELLOW
         };
         let stroke = Stroke::new(if selected { 2.0 } else { 1.5 }, tone);
+        for segment in &visual.range_segments {
+            painter.line_segment(*segment, Stroke::new(1.0, tone.gamma_multiply(0.5)));
+        }
         painter.circle(visual.centre, SUN_RADIUS, tone.gamma_multiply(0.35), stroke);
         for step in 0..8 {
             let angle = std::f32::consts::FRAC_PI_4 * f32::from(u8::try_from(step).unwrap_or(0));
@@ -148,8 +189,34 @@ impl EditorApp {
         self.world
             .entities()
             .filter(|(_, data)| data.components.contains_key(LightComponent::TYPE_NAME))
-            .filter_map(|(entity, _)| {
+            .filter_map(|(entity, data)| {
+                let light = serde_json::from_value::<LightComponent>(
+                    data.components.get(LightComponent::TYPE_NAME)?.clone(),
+                )
+                .ok()?
+                .validate()
+                .ok()?;
                 let transform = self.world.world_transform(entity).unwrap_or_default();
+                if light.kind == LightKind::Point {
+                    return point_visual(
+                        entity,
+                        Vec3::from_array(transform.position),
+                        light.range,
+                        rect,
+                        scene_camera.view_projection,
+                        self.selection.contains(entity),
+                    );
+                }
+                if light.kind == LightKind::Spot {
+                    return spot::visual(
+                        entity,
+                        transform,
+                        light,
+                        rect,
+                        scene_camera.view_projection,
+                        self.selection.contains(entity),
+                    );
+                }
                 light_visual(
                     entity,
                     Vec3::from_array(transform.position),
@@ -256,5 +323,27 @@ mod tests {
         assert!(visual.hit_test(tip));
         assert!(!visual.hit_test(visual.centre + egui::vec2(0.0, 60.0)));
         assert!(visual.trail.is_some());
+    }
+    #[test]
+    fn selected_points_show_world_range_without_directional_arrows() {
+        let selected =
+            point_visual(entity(), Vec3::ZERO, 1.0, rect(), looking_down_z(), true).unwrap();
+        assert_eq!(selected.range_segments.len(), 96);
+        assert!(selected.arrow.is_none() && selected.trail.is_none());
+        let unselected =
+            point_visual(entity(), Vec3::ZERO, 1.0, rect(), looking_down_z(), false).unwrap();
+        assert!(unselected.range_segments.is_empty());
+        assert!(unselected.hit_test(unselected.centre));
+        assert!(
+            point_visual(
+                entity(),
+                Vec3::Z * 11.0,
+                1.0,
+                rect(),
+                looking_down_z(),
+                true
+            )
+            .is_none()
+        );
     }
 }

@@ -112,6 +112,14 @@ impl EditorApp {
                         create = Some(CreateGameObject::DirectionalLight);
                         ui.close();
                     }
+                    if ui.button("Create Point Light").clicked() {
+                        create = Some(CreateGameObject::PointLight);
+                        ui.close();
+                    }
+                    if ui.button("Create Spot Light").clicked() {
+                        create = Some(CreateGameObject::SpotLight);
+                        ui.close();
+                    }
                     if ui.button("Create Light 2D").clicked() {
                         create = Some(CreateGameObject::Light2d);
                         ui.close();
@@ -452,6 +460,8 @@ fn space_menu(space: &egui::Response, authoring: bool, can_paste: bool) -> Optio
                     "Create Directional Light",
                     CreateGameObject::DirectionalLight,
                 ),
+                ("Create Point Light", CreateGameObject::PointLight),
+                ("Create Spot Light", CreateGameObject::SpotLight),
                 ("Create Light 2D", CreateGameObject::Light2d),
             ];
             for (label, create) in offered {

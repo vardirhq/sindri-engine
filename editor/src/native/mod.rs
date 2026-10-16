@@ -67,6 +67,7 @@ mod occlusion_view;
 mod overlay;
 mod palette_view;
 mod particle_preview;
+mod play_cursor;
 mod pointer;
 mod prefab_authoring;
 pub(crate) mod prefab_drop;
@@ -356,6 +357,8 @@ struct EditorApp {
     scripts: SceneScripts,
     /// The keyboard a running script reads, translated from egui's.
     input: EditorInput,
+    play_cursor: play_cursor::PlayCursor,
+    game_pointer_available: bool,
     /// The world as it was when Play was pressed.
     ///
     /// Scripts write to the world, which animation never did, so stopping has
