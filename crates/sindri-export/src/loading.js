@@ -2628,6 +2628,9 @@
   stage.className = "motion";
   screen.prepend(stage);
   screen.dataset.motion = chosen;
+  // How long one loop takes, for the page's own script: an animation is
+  // played through once before the game is revealed, never cut off halfway.
+  screen.dataset.motionMs = String(LOOP_MS);
 
   const opened = performance.now();
   const frame = (now) => {

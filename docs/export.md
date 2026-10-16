@@ -154,8 +154,10 @@ It stays until the host announces the game is on screen. The host dispatches
 `sindri:ready` on `window` once, on the first frame it presents while the
 application says it is ready (`DesktopApp::ready`; the browser game is ready
 once its project is installed, not while it is still clearing the screen
-waiting for assets). The Sindri mark shows for at least 0.9 seconds so a fast
-load is not a flash. A failure removes it at once and shows the reason.
+waiting for assets). The animation plays through at least one whole loop, so
+even a fast load sees it finish rather than a flash of its first second; the
+still mark shown under reduced motion stays at least 0.9 seconds. A failure
+removes it at once and shows the reason.
 
 A project may follow the Sindri mark with its own brand, in `sindri.toml`:
 

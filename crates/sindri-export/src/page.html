@@ -398,12 +398,14 @@
     // Its own ordinary script, ahead of the module: if the host fails to load
     // at all, this still runs, and the page still says what went wrong.
     // The loading screen stays until the host says the game is on screen. The
-    // Sindri mark shows for at least a moment, so a fast load is not a flash;
-    // a project's brand, when it has one, follows it and shows for as long as
-    // the project asked, and the game is revealed after whichever is later.
+    // Sindri mark shows for at least one whole loop of its animation, so even
+    // a fast load sees it through, or a moment when it is still because the
+    // player asked for less motion; a project's brand, when it has one,
+    // follows it and shows for as long as the project asked, and the game is
+    // revealed after whichever is later.
     const loading = document.querySelector("#sindri-loading");
     const opened = performance.now();
-    const SINDRI_AT_LEAST = 900;
+    const SINDRI_AT_LEAST = Number(loading?.dataset.motionMs ?? 900);
     const brandFor = Number(loading?.dataset.brandSeconds ?? 0) * 1000;
     const hasBrand = Boolean(loading?.querySelector(".stage.brand"));
     let brandSince = null;
