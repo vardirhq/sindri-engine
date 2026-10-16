@@ -465,6 +465,7 @@ jobs:
           python3 scripts/browser/prepare-spot-lights.py target/spot-lights
           python3 scripts/browser/prepare-spot-lights.py target/spot-lights-away --away
           python3 scripts/browser/prepare-lighting3d.py target/lighting3d-off
+          python3 scripts/browser/prepare-lighting3d.py target/lighting3d-single --single-sided
           cargo run --package sindri-causeway --bin project-capture -- target/standard-materials target/render-artifacts/native-standard-materials.png 960 540 wait:0.5
           cargo run --package sindri-causeway --bin project-capture -- target/standard-materials-legacy target/render-artifacts/native-standard-materials-legacy.png 960 540 wait:0.5
           node scripts/browser/compare-materials.mjs target/render-artifacts/native-standard-materials.png target/render-artifacts/native-standard-materials-legacy.png
@@ -481,6 +482,8 @@ jobs:
           cargo run --package sindri-causeway --bin project-capture -- target/spot-lights-away target/render-artifacts/native-spot-lights-away.png 960 540 wait:0.5
           node scripts/browser/compare-point-lights.mjs target/render-artifacts/native-spot-lights.png target/render-artifacts/native-spot-lights-away.png
           cargo run --package sindri-causeway --bin project-capture -- examples/lighting3d target/render-artifacts/native-lighting3d.png 960 540 wait:4
+          cargo run --package sindri-causeway --bin project-capture -- target/lighting3d-single target/render-artifacts/native-lighting3d-single.png 960 540 wait:4
+          node scripts/browser/compare-sidedness.mjs target/render-artifacts/native-lighting3d.png target/render-artifacts/native-lighting3d-single.png
           cargo run --package sindri-causeway --bin project-capture -- target/lighting3d-off target/render-artifacts/native-lighting3d-off.png 960 540 wait:4
           node scripts/browser/compare-point-lights.mjs target/render-artifacts/native-lighting3d.png target/render-artifacts/native-lighting3d-off.png
           cargo run --package sindri-causeway --bin project-capture -- examples/lighting3d target/render-artifacts/native-lighting3d-point-phase.png 960 540 wait:0
@@ -557,6 +560,7 @@ jobs:
             target/render-artifacts/native-spot-lights-away.png
             target/render-artifacts/native-daynight-*.png
             target/render-artifacts/native-lighting3d.png
+            target/render-artifacts/native-lighting3d-single.png
             target/render-artifacts/native-lighting3d-off.png
             target/render-artifacts/native-lighting3d-point-phase.png
             target/render-artifacts/native-lighting3d-spot-phase.png
@@ -827,14 +831,15 @@ jobs:
           python3 scripts/browser/prepare-spot-lights.py target/spot-lights
           python3 scripts/browser/prepare-spot-lights.py target/spot-lights-away --away
           python3 scripts/browser/prepare-lighting3d.py target/lighting3d-off
+          python3 scripts/browser/prepare-lighting3d.py target/lighting3d-single --single-sided
           for project in model-receiver model-receiver-no-shadows model-caster model-caster-no-shadows standard-materials standard-materials-legacy imported-emission imported-emission-off surface-normals surface-normals-flat point-lights point-lights-off spot-lights spot-lights-away; do
             cargo run --quiet --package sindri-export --bin sindri-export -- \
               target/$project target/dist/$project --base /examples/benchmark3d/
             cp -R crates/sindri-player/pkg/. target/dist/$project/pkg/
           done
-          for lighting_project in lighting3d lighting3d-off; do
+          for lighting_project in lighting3d lighting3d-off lighting3d-single; do
             lighting_source=examples/lighting3d
-            if [ "$lighting_project" = lighting3d-off ]; then lighting_source=target/lighting3d-off; fi
+            if [ "$lighting_project" != lighting3d ]; then lighting_source=target/$lighting_project; fi
             cargo run --quiet --package sindri-export --bin sindri-export -- \
               "$lighting_source" target/dist/$lighting_project --base /examples/lighting3d/
             cp -R crates/sindri-player/pkg/. target/dist/$lighting_project/pkg/
@@ -923,6 +928,9 @@ jobs:
           node scripts/browser/compare-point-lights.mjs target/render-artifacts/browser-spot-lights.png target/render-artifacts/browser-spot-lights-away.png
           SINDRI_LIGHTING3D=1 SINDRI_BASE_PATH=/examples/lighting3d/ \
             node scripts/browser/benchmark3d.mjs target/dist/lighting3d target/render-artifacts/browser-lighting3d.png
+          SINDRI_LIGHTING3D=1 SINDRI_BASE_PATH=/examples/lighting3d/ \
+            node scripts/browser/benchmark3d.mjs target/dist/lighting3d-single target/render-artifacts/browser-lighting3d-single.png
+          node scripts/browser/compare-sidedness.mjs target/render-artifacts/browser-lighting3d.png target/render-artifacts/browser-lighting3d-single.png
           SINDRI_LIGHTING3D=1 SINDRI_MIN_COLORS=4 SINDRI_BASE_PATH=/examples/lighting3d/ \
             node scripts/browser/benchmark3d.mjs target/dist/lighting3d-off target/render-artifacts/browser-lighting3d-off.png
           node scripts/browser/compare-point-lights.mjs target/render-artifacts/browser-lighting3d.png target/render-artifacts/browser-lighting3d-off.png
@@ -1052,6 +1060,7 @@ jobs:
             target/render-artifacts/browser-spot-lights-away.png
             target/render-artifacts/browser-daynight*.png
             target/render-artifacts/browser-lighting3d.png
+            target/render-artifacts/browser-lighting3d-single.png
             target/render-artifacts/browser-lighting3d-off.png
             target/render-artifacts/browser-lighting3d-point-phase.png
             target/render-artifacts/browser-lighting3d-spot-phase.png

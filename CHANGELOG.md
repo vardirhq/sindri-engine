@@ -13,6 +13,12 @@
   and atlas edits replace it. Surface indices now support u32 meshes; invalid
   triangle geometry returns a scene-extraction error.
 
+- Author single- and double-sided 3D materials across cubes, inline meshes,
+  voxel worlds and imported models. The new `sidedness` choice inherits existing
+  settings by default; explicit overrides apply to color and directional shadows,
+  with back-face lighting under reflected transforms and no geometry re-upload.
+  Lighting Lab includes a visible back-facing panel and its single-sided control.
+
 - Make the Sound Lab's songs sound full: a new stereo engine with band-limited
   oscillators, filtered and enveloped patches, a chords layer that follows the
   bass, a synthesized drum kit with fills and swing, reverb, echo, ducking and

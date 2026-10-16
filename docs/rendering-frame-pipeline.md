@@ -248,6 +248,11 @@ remain 301/301 and 104,320 bytes. Geometry residency is unchanged.
 
 ## Standard factors on frame passes
 
+`FramePass.sidedness` independently selects inherited, single- or double-sided
+visibility in both color and shadow draws. Imported settings are inherited per
+primitive; other geometry defaults to single-sided. Each pass resets the policy
+without replacing its geometry. See [face visibility](rendering-materials.md#face-visibility).
+
 `FramePass.material` carries optional renderer-owned numeric factors, validated
 at preparation. Both shadow and color dispatch select factors for each pass,
 including resetting absent overrides; renderer state cannot leak a previous

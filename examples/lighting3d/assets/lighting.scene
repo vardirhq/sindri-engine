@@ -493,6 +493,226 @@
           ]
         }
       }
+    },
+    {
+      "id": "Backface-single",
+      "name": "Single-sided panel",
+      "transform_3d": {
+        "position": [
+          -1.7,
+          0.9,
+          3.0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.mesh": {
+          "primitive": "surface",
+          "texture": "textures/cube.png",
+          "surface": {
+            "vertices": [
+              [
+                -0.7,
+                -0.8,
+                0
+              ],
+              [
+                0.7,
+                -0.8,
+                0
+              ],
+              [
+                0.7,
+                0.8,
+                0
+              ],
+              [
+                -0.7,
+                0.8,
+                0
+              ]
+            ],
+            "uvs": [
+              [
+                0,
+                0
+              ],
+              [
+                1,
+                0
+              ],
+              [
+                1,
+                1
+              ],
+              [
+                0,
+                1
+              ]
+            ],
+            "indices": [
+              0,
+              2,
+              1,
+              0,
+              3,
+              2
+            ],
+            "normals": [
+              [
+                0,
+                0,
+                -1
+              ],
+              [
+                0,
+                0,
+                -1
+              ],
+              [
+                0,
+                0,
+                -1
+              ],
+              [
+                0,
+                0,
+                -1
+              ]
+            ]
+          }
+        },
+        "sindri.material": {
+          "base_color": [
+            0.85,
+            0.4,
+            0.06,
+            1
+          ],
+          "metallic": 0,
+          "roughness": 0.7,
+          "emissive": [
+            0.08,
+            0.025,
+            0.002
+          ],
+          "sidedness": "single"
+        }
+      }
+    },
+    {
+      "id": "Backface-double",
+      "name": "Double-sided panel",
+      "transform_3d": {
+        "position": [
+          -3.6,
+          0.9,
+          3.0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.mesh": {
+          "primitive": "surface",
+          "texture": "textures/cube.png",
+          "surface": {
+            "vertices": [
+              [
+                -0.7,
+                -0.8,
+                0
+              ],
+              [
+                0.7,
+                -0.8,
+                0
+              ],
+              [
+                0.7,
+                0.8,
+                0
+              ],
+              [
+                -0.7,
+                0.8,
+                0
+              ]
+            ],
+            "uvs": [
+              [
+                0,
+                0
+              ],
+              [
+                1,
+                0
+              ],
+              [
+                1,
+                1
+              ],
+              [
+                0,
+                1
+              ]
+            ],
+            "indices": [
+              0,
+              2,
+              1,
+              0,
+              3,
+              2
+            ],
+            "normals": [
+              [
+                0,
+                0,
+                -1
+              ],
+              [
+                0,
+                0,
+                -1
+              ],
+              [
+                0,
+                0,
+                -1
+              ],
+              [
+                0,
+                0,
+                -1
+              ]
+            ]
+          }
+        },
+        "sindri.material": {
+          "base_color": [
+            0.85,
+            0.4,
+            0.06,
+            1
+          ],
+          "metallic": 0,
+          "roughness": 0.7,
+          "emissive": [
+            0.08,
+            0.025,
+            0.002
+          ],
+          "sidedness": "double"
+        }
+      }
     }
   ]
 }

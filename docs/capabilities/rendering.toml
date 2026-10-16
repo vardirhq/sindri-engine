@@ -819,7 +819,7 @@ Core GLB emissive factors survive decoding/preparation and render without scene
 overrides. Decoder/facade/resource tests, zero-light GPU readback, override
 restoration, masked-shadow invariance and native/browser imported GLB controls
 exercise this addition. Absent overrides preserve legacy/imported looks. Material
-assets, unified texture/alpha/sidedness, emissive maps and Explorer game adoption remain
+assets, unified texture/alpha, emissive maps and Explorer game adoption remain
 open; see [the material contract](../rendering-materials.md).
 '''
 
@@ -990,4 +990,24 @@ unchanged draws/passes. Release browser exports exercise real u32 geometry,
 shadows, smooth normals and live lighting. This is feature proof for the planned
 Explorer/Low Tide 3D track; in-tree game adoption,
 instancing, deduplication and culling remain open.
+"""
+
+
+[[capability]]
+id = "material-sidedness"
+group = "3D foundation"
+title = "Authored material sidedness"
+summary = "Inherit, single and double face visibility share color/shadow policy across world geometry"
+status = { engine = "partial", editor = "partial", decay = "n/a", proof = "partial" }
+parity = "Authored material sidedness"
+tests = ["crates/sindri-gpu/tests/standard_materials/sidedness.rs", "crates/sindri-gpu/tests/imported_models/sidedness.rs", "crates/sindri-scene/tests/extraction/material.rs", "crates/sindri-scene/tests/extraction/voxel_world.rs", "game/tests/a_3d_lighting_project_plays.rs"]
+proof = ["examples/lighting3d"]
+docs = ["docs/rendering-materials.md"]
+detail = """
+The material component carries a checked sidedness choice independently of numeric
+factors. Inherit preserves imported primitive settings; other geometry is single-sided.
+Explicit single/double choices govern both color and shadows, including reflected
+transforms and lighting on visible backs. Policy edits retain geometry and voxel meshes.
+Lighting Lab carries a back-facing orange panel and a single-sided native/WebGPU
+control. Shared material assets, alpha unification and Explorer game adoption remain open.
 """

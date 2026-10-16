@@ -761,7 +761,8 @@
           0.0
         ],
         "metallic": 0.0,
-        "roughness": 1.0
+        "roughness": 1.0,
+        "sidedness": "inherit"
       },
       "display_name": "Material",
       "fields": {
@@ -777,11 +778,20 @@
           0.0
         ],
         "metallic": 0.0,
-        "roughness": 1.0
+        "roughness": 1.0,
+        "sidedness": "inherit"
       },
       "meanings": {
         "base_color": {
           "kind": "color"
+        },
+        "sidedness": {
+          "kind": "choice",
+          "options": [
+            "inherit",
+            "single",
+            "double"
+          ]
         }
       },
       "schema_version": 1,

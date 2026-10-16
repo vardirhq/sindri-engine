@@ -4,6 +4,8 @@
 mod casting;
 #[path = "imported_models/effects.rs"]
 mod effects;
+#[path = "imported_models/sidedness.rs"]
+mod sidedness;
 
 use std::sync::Arc;
 

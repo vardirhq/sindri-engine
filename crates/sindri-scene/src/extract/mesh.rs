@@ -62,10 +62,13 @@ impl SceneExtractor {
                 },
                 command,
             );
-            pass.material = self
+            if let Some(material) = self
                 .components
                 .get::<crate::MaterialComponent>(world, entity)?
-                .map(|component| component.factors);
+            {
+                pass.material = Some(material.factors);
+                pass.sidedness = material.sidedness;
+            }
             frame.push(pass);
         }
         cache.retain(&live);

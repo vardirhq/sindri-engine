@@ -18,6 +18,8 @@ mod normals;
 mod points;
 #[path = "standard_materials/retained.rs"]
 mod retained;
+#[path = "standard_materials/sidedness.rs"]
+mod sidedness;
 #[path = "standard_materials/spots.rs"]
 mod spots;
 

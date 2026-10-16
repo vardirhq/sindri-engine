@@ -60,6 +60,7 @@ Each entry links its tests and the projects that exercise it. Surface marks matc
 | [Runtime ambient and background controls](#runtime-environment) | 🟡 | 🟡 | 🟡 | 🟡 |
 | [Scripted day/night cycle](#daynight-cycle) | 🟡 | 🟡 | 🟡 | 🟡 |
 | [Retained inline mesh geometry](#retained-inline-meshes) | 🟡 | 🟡 | — | 🟡 |
+| [Authored material sidedness](#material-sidedness) | 🟡 | 🟡 | — | 🟡 |
 
 ## Hosts and GPU
 
@@ -1038,7 +1039,7 @@ Core GLB emissive factors survive decoding/preparation and render without scene
 overrides. Decoder/facade/resource tests, zero-light GPU readback, override
 restoration, masked-shadow invariance and native/browser imported GLB controls
 exercise this addition. Absent overrides preserve legacy/imported looks. Material
-assets, unified texture/alpha/sidedness, emissive maps and Explorer game adoption remain
+assets, unified texture/alpha, emissive maps and Explorer game adoption remain
 open; see [the material contract](../rendering-materials.md).
 
 </details>
@@ -1237,5 +1238,31 @@ unchanged draws/passes. Release browser exports exercise real u32 geometry,
 shadows, smooth normals and live lighting. This is feature proof for the planned
 Explorer/Low Tide 3D track; in-tree game adoption,
 instancing, deduplication and culling remain open.
+
+</details>
+
+<a id="material-sidedness"></a>
+
+### Authored material sidedness
+
+Inherit, single and double face visibility share color/shadow policy across world geometry
+
+Engine 🟡 · Editor 🟡 · Decay — · Proof 🟡 — parity row *Authored material sidedness*
+
+**Tested by:** [`crates/sindri-gpu/tests/standard_materials/sidedness.rs`](../../crates/sindri-gpu/tests/standard_materials/sidedness.rs), [`crates/sindri-gpu/tests/imported_models/sidedness.rs`](../../crates/sindri-gpu/tests/imported_models/sidedness.rs), [`crates/sindri-scene/tests/extraction/material.rs`](../../crates/sindri-scene/tests/extraction/material.rs), [`crates/sindri-scene/tests/extraction/voxel_world.rs`](../../crates/sindri-scene/tests/extraction/voxel_world.rs), [`game/tests/a_3d_lighting_project_plays.rs`](../../game/tests/a_3d_lighting_project_plays.rs)
+
+**Exercised in:** [`examples/lighting3d`](../../examples/lighting3d)
+
+**See:** [`docs/rendering-materials.md`](../../docs/rendering-materials.md)
+
+<details markdown="1">
+<summary>Evidence</summary>
+
+The material component carries a checked sidedness choice independently of numeric
+factors. Inherit preserves imported primitive settings; other geometry is single-sided.
+Explicit single/double choices govern both color and shadows, including reflected
+transforms and lighting on visible backs. Policy edits retain geometry and voxel meshes.
+Lighting Lab carries a back-facing orange panel and a single-sided native/WebGPU
+control. Shared material assets, alpha unification and Explorer game adoption remain open.
 
 </details>

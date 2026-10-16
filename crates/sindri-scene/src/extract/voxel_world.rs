@@ -313,8 +313,7 @@ impl SceneExtractor {
         }
         let material = self
             .components
-            .get::<crate::MaterialComponent>(world, entity)?
-            .map(|component| component.factors);
+            .get::<crate::MaterialComponent>(world, entity)?;
         push_commands(commands, component.layer, camera, frame, material);
         refused.map_or(Ok(()), Err)
     }
@@ -360,7 +359,7 @@ fn push_commands(
     layer: i32,
     camera: super::camera::ResolvedCamera,
     frame: &mut ExtractedFrame,
-    material: Option<sindri_render::MaterialFactors>,
+    material: Option<crate::MaterialComponent>,
 ) {
     for command in commands {
         let mut pass = FramePass::new(
@@ -372,7 +371,10 @@ fn push_commands(
             },
             command,
         );
-        pass.material = material;
+        if let Some(material) = material {
+            pass.material = Some(material.factors);
+            pass.sidedness = material.sidedness;
+        }
         frame.push(pass);
     }
 }

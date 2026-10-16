@@ -34,7 +34,7 @@ use pipeline::{create_bind_group_layout, create_pipeline, orientation};
 pub struct TexturedCubeRenderer {
     models: crate::model::ModelRenderer,
     draw_stats: crate::MeshDrawStats,
-    pipeline: [wgpu::RenderPipeline; 2],
+    pipeline: [wgpu::RenderPipeline; 4],
     bind_group_layout: wgpu::BindGroupLayout,
     batches: Vec<MeshBatch>,
     next: usize,
@@ -42,11 +42,12 @@ pub struct TexturedCubeRenderer {
     cached_meshes: TexturedMeshCache,
     retained_meshes: crate::retained_mesh::RetainedMeshes,
     material: Option<crate::MaterialFactors>,
+    sidedness: crate::MaterialSidedness,
     lighting: WorldLighting,
     shadow_settings: ShadowSettings,
     shadow_map: ShadowMap,
     shadow_bind_group_layout: wgpu::BindGroupLayout,
-    shadow_pipeline: [wgpu::RenderPipeline; 2],
+    shadow_pipeline: [wgpu::RenderPipeline; 4],
     shadow_view_projection: Mat4,
     ambient_occlusion_strength: f32,
     fog: FogSettings,
@@ -76,8 +77,15 @@ impl TexturedCubeRenderer {
     /// baked in, so one renderer draws every mesh in a scene.
     pub fn new(device: &wgpu::Device, target_format: wgpu::TextureFormat) -> Self {
         let bind_group_layout = create_bind_group_layout(device);
-        let pipeline = [wgpu::FrontFace::Ccw, wgpu::FrontFace::Cw]
-            .map(|front| create_pipeline(device, target_format, &bind_group_layout, front));
+        let pipeline = [
+            (wgpu::FrontFace::Ccw, false),
+            (wgpu::FrontFace::Cw, false),
+            (wgpu::FrontFace::Ccw, true),
+            (wgpu::FrontFace::Cw, true),
+        ]
+        .map(|(front, double)| {
+            create_pipeline(device, target_format, &bind_group_layout, front, double)
+        });
         let shadow_map = ShadowMap::new(device, ShadowSettings::default().map_size);
         let (shadow_bind_group_layout, shadow_pipeline) = create_shadow_pipeline(device);
         Self {
@@ -91,6 +99,7 @@ impl TexturedCubeRenderer {
             cached_meshes: TexturedMeshCache::default(),
             retained_meshes: crate::retained_mesh::RetainedMeshes::default(),
             material: None,
+            sidedness: crate::MaterialSidedness::Inherit,
             lighting: WorldLighting::default(),
             shadow_settings: ShadowSettings::default(),
             shadow_map,
@@ -267,7 +276,11 @@ impl TexturedCubeRenderer {
             self.camera_position,
             MeshSurface::default(),
             self.material,
-            (&batch.uniform, &self.pipeline[0], bind_group),
+            (
+                &batch.uniform,
+                &self.pipeline[orientation(Mat4::IDENTITY, self.sidedness)],
+                bind_group,
+            ),
             &self.mesh,
             "Sindri textured cube pass",
             &mut self.draw_stats,
@@ -307,7 +320,7 @@ impl TexturedCubeRenderer {
             self.material,
             (
                 &batch.uniform,
-                &self.pipeline[orientation(model)],
+                &self.pipeline[orientation(model, self.sidedness)],
                 bind_group,
             ),
             &self.mesh,
@@ -357,7 +370,11 @@ impl TexturedCubeRenderer {
             self.camera_position,
             MeshSurface::default(),
             self.material,
-            (&batch.uniform, &self.pipeline[0], bind_group),
+            (
+                &batch.uniform,
+                &self.pipeline[orientation(Mat4::IDENTITY, self.sidedness)],
+                bind_group,
+            ),
             &mesh,
             "Sindri textured surface pass",
             &mut self.draw_stats,
@@ -404,7 +421,7 @@ impl TexturedCubeRenderer {
             self.material,
             (
                 &batch.uniform,
-                &self.pipeline[orientation(model)],
+                &self.pipeline[orientation(model, self.sidedness)],
                 bind_group,
             ),
             &mesh,
@@ -456,7 +473,7 @@ impl TexturedCubeRenderer {
             self.material,
             (
                 &batch.uniform,
-                &self.pipeline[orientation(model)],
+                &self.pipeline[orientation(model, self.sidedness)],
                 bind_group,
             ),
             mesh,

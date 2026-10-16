@@ -2,7 +2,7 @@
 
 use crate::support::{VIEWPORT, scene, world_from};
 use sindri_core::{AssetId, CommandBuffer, CommandHistory, SceneEntityId, WorldCommand};
-use sindri_render::{FrameCommand, MaterialFactors, ModelData, RenderModel};
+use sindri_render::{FrameCommand, MaterialFactors, MaterialSidedness, ModelData, RenderModel};
 use sindri_scene::{CameraView, SceneExtractor, TextureBindings};
 use std::sync::Arc;
 
@@ -11,8 +11,8 @@ fn material_edits_undo_and_restore_mesh_and_shared_model_factors() {
     let mut world = world_from(&scene(
         r#",
         {"id":"mesh", "components":{"sindri.mesh":{"primitive":"cube","texture":"t"},
-            "sindri.material":{"metallic":0.8,"roughness":0.2,"emissive":[0,0.5,1]}}},
-        {"id":"model", "components":{"sindri.model":{"asset":"test.glb"}, "sindri.material":{"metallic":0.4}}},
+            "sindri.material":{"sidedness":"double","metallic":0.8,"roughness":0.2,"emissive":[0,0.5,1]}}},
+        {"id":"model", "components":{"sindri.model":{"asset":"test.glb"}, "sindri.material":{"metallic":0.4,"sidedness":"single"}}},
         {"id":"plain", "components":{"sindri.model":{"asset":"test.glb"}}}"#,
     ));
     let asset = Arc::new(RenderModel::new(ModelData::default()).unwrap());
@@ -39,6 +39,9 @@ fn material_edits_undo_and_restore_mesh_and_shared_model_factors() {
         })
     );
     assert_eq!(before.passes()[2].material, None);
+    assert_eq!(before.passes()[0].sidedness, MaterialSidedness::Double);
+    assert_eq!(before.passes()[1].sidedness, MaterialSidedness::Single);
+    assert_eq!(before.passes()[2].sidedness, MaterialSidedness::Inherit);
     for pass in &before.passes()[1..] {
         let FrameCommand::Model { asset: bound, .. } = &pass.command else {
             panic!("model expected");
@@ -61,9 +64,16 @@ fn material_edits_undo_and_restore_mesh_and_shared_model_factors() {
         .extract(&world, VIEWPORT, CameraView::default(), &bindings)
         .unwrap();
     assert_eq!(removed.passes()[0].material, None);
+    assert_eq!(removed.passes()[0].sidedness, MaterialSidedness::Inherit);
     history.undo(&mut world).unwrap();
     let restored = extractor
         .extract(&world, VIEWPORT, CameraView::default(), &bindings)
         .unwrap();
     assert_eq!(restored.passes()[0].material, before.passes()[0].material);
+    assert_eq!(restored.passes()[0].sidedness, MaterialSidedness::Double);
+    history.redo(&mut world).unwrap();
+    let redone = extractor
+        .extract(&world, VIEWPORT, CameraView::default(), &bindings)
+        .unwrap();
+    assert_eq!(redone.passes()[0].sidedness, MaterialSidedness::Inherit);
 }

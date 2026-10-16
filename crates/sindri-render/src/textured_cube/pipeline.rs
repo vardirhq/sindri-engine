@@ -59,6 +59,7 @@ pub(super) fn create_pipeline(
     target_format: wgpu::TextureFormat,
     bind_group_layout: &wgpu::BindGroupLayout,
     front_face: wgpu::FrontFace,
+    double_sided: bool,
 ) -> wgpu::RenderPipeline {
     let shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
         label: Some("Sindri textured cube shader"),
@@ -85,7 +86,11 @@ pub(super) fn create_pipeline(
             targets: &[Some(target_format.into())],
         }),
         primitive: wgpu::PrimitiveState {
-            cull_mode: Some(wgpu::Face::Back),
+            cull_mode: if double_sided {
+                None
+            } else {
+                Some(wgpu::Face::Back)
+            },
             front_face,
             ..Default::default()
         },
@@ -103,6 +108,6 @@ pub(super) fn create_pipeline(
 }
 
 /// Preserve outward faces when an affine world transform reverses orientation.
-pub(super) fn orientation(model: glam::Mat4) -> usize {
-    usize::from(model.determinant() < 0.0)
+pub(super) fn orientation(model: glam::Mat4, sidedness: crate::MaterialSidedness) -> usize {
+    usize::from(model.determinant() < 0.0) + 2 * usize::from(sidedness.resolve(false))
 }
