@@ -42,6 +42,8 @@ pub(in crate::lab) struct Engine {
     voices: [ToneVoice; 3],
     pad: PadVoice,
     drums: drums::Drums,
+    /// The song's groove, chosen with its tune and repeated every bar.
+    beat: drums::Beat,
     pending: Vec<(u64, drums::Hit)>,
     last_step: Option<usize>,
     chord_centre: f64,
@@ -86,6 +88,7 @@ impl Engine {
         let mut engine = Self {
             pad: PadVoice::new(&patch::patch(rack.pad.preset, Role::Pad)),
             drums: drums::Drums::new(rack.tracks[3].preset),
+            beat: drums::beat(crate::lab::composer::groove(&settings), settings.seed),
             voices,
             settings,
             tracks,
@@ -127,18 +130,19 @@ impl Engine {
 
     /// Points each part at its first note not yet started.
     fn recursor(&mut self) {
-        for (track, cursor) in self.tracks.iter().zip(&mut self.cursors) {
-            *cursor = track
+        for part in 0..3 {
+            self.cursors[part] = self.tracks[part]
                 .iter()
-                .position(|n| {
-                    samples(
-                        f64::from(u32::try_from(n.start).expect("step")) * 60.0
-                            / self.settings.bpm
-                            / 4.0,
-                    ) >= self.position
-                })
-                .unwrap_or(track.len());
+                .position(|n| self.note_start(n.start) >= self.position)
+                .unwrap_or(self.tracks[part].len());
         }
+    }
+
+    /// Where a step starts, the song's swing included: the whole band leans
+    /// back on the off-beats together, not only the drums.
+    fn note_start(&self, step: usize) -> u64 {
+        let late = self.beat.swing(step % 16);
+        samples((f64::from(u32::try_from(step).expect("step")) + late) * self.step_seconds())
     }
 
     /// New mixer, tempo or sounds, keeping the song's musical position.
@@ -158,6 +162,7 @@ impl Engine {
                 .set_patch(&patch::patch(settings.rack.pad.preset, Role::Pad));
         }
         self.drums.set_kit(settings.rack.tracks[3].preset);
+        self.beat = drums::beat(crate::lab::composer::groove(&settings), settings.seed);
         self.rack = settings.rack.clone();
         self.settings = settings;
         self.recursor();
@@ -293,9 +298,7 @@ impl Engine {
         for part in 0..3 {
             let track = &self.tracks[part];
             while let Some(note) = track.get(self.cursors[part]) {
-                let start =
-                    samples(f64::from(u32::try_from(note.start).expect("step")) * step_seconds);
-                if start > self.position {
+                if self.note_start(note.start) > self.position {
                     break;
                 }
                 let gate =
@@ -309,14 +312,8 @@ impl Engine {
         if self.last_step != Some(step) && step < STEPS {
             self.last_step = Some(step);
             let (bar, slot) = (step / 16, step % 16);
-            let s = &self.settings;
-            for hit in drums::pattern(s.seed, s.mood, s.energy, bar, slot) {
-                let late = if slot % 2 == 1 {
-                    drums::swing(s.mood)
-                } else {
-                    0.0
-                };
-                let at = self.position + samples(late * step_seconds);
+            for hit in drums::pattern(&self.beat, self.settings.energy, bar, slot) {
+                let at = self.position + samples(self.beat.swing(slot) * step_seconds);
                 self.pending.push((at, hit));
             }
             if slot % 8 == 0 {
