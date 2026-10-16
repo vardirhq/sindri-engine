@@ -226,8 +226,9 @@ jobs:
           import os, pathlib, re, sys
 
           root = pathlib.Path("target/pages")
+          # The path only: a link may carry a query, such as ?mode=sfx.
           refs = sorted(set(re.findall(
-              r'(?:href|src)="./([^"#]+)"', (root / "index.html").read_text())))
+              r'(?:href|src)="./([^"#?]+)[^"]*"', (root / "index.html").read_text())))
           missing = [
               ref for ref in refs
               if not (root / ref).is_file() and not (root / ref / "index.html").is_file()
