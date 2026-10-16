@@ -968,3 +968,26 @@ docs = ["docs/3d-foundation-review.md"]
 detail = '''
 Editor viewports apply these environment settings; the shared native/browser player and offscreen project renderer still only apply background, ambient/directional lighting and shadows. Fog/AO/post delivery remains separate work
 '''
+
+
+[[capability]]
+id = "retained-inline-meshes"
+group = "3D foundation"
+title = "Retained inline mesh geometry"
+summary = "Immutable u32 resources share shadow/color buffers and survive independent draw-state changes"
+status = { engine = "partial", editor = "partial", decay = "n/a", proof = "partial" }
+parity = "Retained inline mesh geometry"
+tests = ["crates/sindri-core/src/component/decoded.rs", "crates/sindri-scene/tests/extraction/retained_meshes.rs", "crates/sindri-gpu/tests/standard_materials/retained.rs", "crates/sindri-gpu/tests/standard_materials/normals.rs", "game/tests/a_3d_benchmark_project_plays.rs"]
+proof = ["examples/benchmark3d", "examples/lighting3d"]
+docs = ["docs/retained-meshes.md"]
+detail = """
+Scene extraction reuses immutable geometry until its positions, UVs, normals,
+indices or atlas rectangle change. Per-renderer weak caches upload once across
+shadow/color draws and retire unused resources; older frames own their revision.
+Checked edits/undo, lifecycle, real u32 drawing and shared shading have regressions.
+Native/editor benchmark reports record zero settled geometry uploads with
+unchanged draws/passes. Release browser exports exercise real u32 geometry,
+shadows, smooth normals and live lighting. This is feature proof for the planned
+Explorer/Low Tide 3D track; in-tree game adoption,
+instancing, deduplication and culling remain open.
+"""

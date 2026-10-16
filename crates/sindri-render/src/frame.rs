@@ -82,7 +82,13 @@ pub enum FrameCommand {
         model: Mat4,
         texture: TextureId,
     },
-    /// Explicit textured triangles in model space.
+    /// Immutable textured geometry retained across submissions and shared by shadows.
+    RetainedTexturedMesh {
+        model: Mat4,
+        texture: TextureId,
+        geometry: std::sync::Arc<crate::RenderMesh>,
+    },
+    /// Explicit transient textured triangles in model space.
     TexturedMesh {
         model: Mat4,
         texture: TextureId,

@@ -37,6 +37,7 @@ fn sprites_batch_per_texture_within_a_layer() {
             FrameCommand::TexturedCube { .. }
             | FrameCommand::Model { .. }
             | FrameCommand::TexturedMesh { .. }
+            | FrameCommand::RetainedTexturedMesh { .. }
             | FrameCommand::CachedTexturedMesh { .. }
             | FrameCommand::ReleaseCachedTexturedMesh { .. }
             | FrameCommand::Text { .. }

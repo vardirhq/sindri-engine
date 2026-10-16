@@ -17,6 +17,7 @@ mod mesh;
 mod mesh_stats;
 mod model;
 mod offscreen;
+mod retained_mesh;
 mod shadow;
 mod shape;
 mod sprite;
@@ -66,6 +67,7 @@ pub use model::{
     ModelNodeInstance, ModelRenderError, ModelSurface, ModelVertex, RenderModel,
 };
 pub use offscreen::{OffscreenError, OffscreenReadback, OffscreenTarget};
+pub use retained_mesh::{MeshGeometryError, RenderMesh};
 pub use shadow::ShadowSettings;
 pub use shape::{
     MAX_POLYGON_POINTS, Shape, ShapeBlend, ShapeDrawError, ShapeInstance, ShapeRenderer,

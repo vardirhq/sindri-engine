@@ -94,6 +94,19 @@ impl<T: SceneComponent> Decoded<T> {
             .collect())
     }
 
+    /// Immediately forgets inactive entities and entities without this component.
+    ///
+    /// `query` amortizes its cleanup. Call this when large decoded payloads need
+    /// prompt release, including when the last carrying entity disappears.
+    pub fn retain_active(&mut self, world: &World) {
+        self.held.retain(|entity, _| {
+            world.is_active(*entity)
+                && world
+                    .get(*entity)
+                    .is_some_and(|data| data.components.contains_key(T::TYPE_NAME))
+        });
+    }
+
     /// Brings the held decode of `entity` up to its revision, answering
     /// whether it is active, so there is anything to answer for.
     fn refresh(
@@ -201,5 +214,40 @@ mod tests {
         let mut decoded = Decoded::<Speed>::default();
         assert!(decoded.query(&registry, &world).unwrap().is_empty());
         assert_eq!(decoded.get(&registry, &world, entity).unwrap(), None);
+    }
+
+    #[test]
+    fn explicit_pruning_releases_small_caches_and_preserves_active_decodes() {
+        let registry = registry();
+        let mut world = World::default();
+        let entities: Vec<_> = (0..4)
+            .map(|_| {
+                world.spawn(EntityData {
+                    components: [(Speed::TYPE_NAME.to_owned(), json!({ "value": 1.0 }))].into(),
+                    ..EntityData::default()
+                })
+            })
+            .collect();
+        let mut decoded = Decoded::<Speed>::default();
+        assert_eq!(decoded.query(&registry, &world).unwrap().len(), 4);
+        world.get_mut(entities[1]).unwrap().disabled = true;
+        world
+            .get_mut(entities[2])
+            .unwrap()
+            .components
+            .remove(Speed::TYPE_NAME);
+        world.despawn_recursive(entities[3]).unwrap();
+        decoded.retain_active(&world);
+        assert_eq!(decoded.held.len(), 1);
+        assert_eq!(
+            decoded.get(&registry, &world, entities[0]).unwrap(),
+            Some(&Speed { value: 1.0 })
+        );
+        world.despawn_recursive(entities[0]).unwrap();
+        decoded.retain_active(&world);
+        assert!(
+            decoded.held.is_empty(),
+            "the last removed payload is released immediately"
+        );
     }
 }

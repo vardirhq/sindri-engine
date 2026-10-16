@@ -16,6 +16,8 @@ use std::sync::Arc;
 mod normals;
 #[path = "standard_materials/points.rs"]
 mod points;
+#[path = "standard_materials/retained.rs"]
+mod retained;
 #[path = "standard_materials/spots.rs"]
 mod spots;
 
@@ -68,6 +70,14 @@ impl Scene {
                 texture,
                 vertices: vertices.clone(),
                 indices: vec![0, 1, 2, 0, 2, 3],
+            },
+            FrameCommand::RetainedTexturedMesh {
+                model: Mat4::from_translation(Vec3::new(-0.6, 0.0, 0.25)),
+                texture,
+                geometry: Arc::new(
+                    sindri_render::RenderMesh::new(vertices.clone(), vec![0, 1, 2, 0, 2, 3])
+                        .unwrap(),
+                ),
             },
             FrameCommand::CachedTexturedMesh {
                 model: Mat4::from_translation(Vec3::new(-0.6, 0.0, 0.25)),
@@ -191,7 +201,7 @@ fn cubes_inline_cached_and_imported_geometry_share_standard_factors() {
             roughness,
             ..Default::default()
         };
-        for kind in 0..3 {
+        for kind in 0..4 {
             let image = scene.draw(&gpu, kind, Some(factors), &lighting);
             assert!(
                 pixel(&image, 32)
@@ -214,7 +224,7 @@ fn cubes_inline_cached_and_imported_geometry_share_standard_factors() {
     assert_ne!(swatches[1], swatches[2], "roughness changes the response");
     check_emission_and_restore(&mut scene, &gpu);
     assert_eq!(scene.cube.model_cache_stats().uploads, 1);
-    assert_eq!(scene.cube.cached_mesh_stats().buffer_uploads, 1);
+    assert_eq!(scene.cube.cached_mesh_stats().buffer_uploads, 2);
 }
 
 fn resource(positions: [[f32; 3]; 4], emissive: [f32; 3]) -> Arc<RenderModel> {
@@ -251,7 +261,7 @@ fn resource(positions: [[f32; 3]; 4], emissive: [f32; 3]) -> Arc<RenderModel> {
 }
 
 fn check_emission_and_restore(scene: &mut Scene, gpu: &GpuContext) {
-    for kind in 0..3 {
+    for kind in 0..4 {
         let image = scene.draw(
             gpu,
             kind,

@@ -50,7 +50,7 @@ fn check_geometry(player: &ProjectPlayer) {
     for pass in frame.passes() {
         match pass.command {
             FrameCommand::TexturedCube { .. } => counts[0] += 1,
-            FrameCommand::TexturedMesh { .. } => counts[1] += 1,
+            FrameCommand::RetainedTexturedMesh { .. } => counts[1] += 1,
             FrameCommand::Model { .. } => counts[2] += 1,
             _ => panic!("unexpected 3D lab geometry"),
         }

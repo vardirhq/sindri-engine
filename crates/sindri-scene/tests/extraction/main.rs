@@ -16,6 +16,7 @@ mod nine_slice;
 mod normals;
 mod passes;
 mod points;
+mod retained_meshes;
 mod sprite_masks;
 mod sprite_shaders;
 mod sprites;

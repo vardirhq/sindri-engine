@@ -109,7 +109,7 @@ impl TexturedCubeRenderer {
 }
 
 #[allow(clippy::too_many_arguments)]
-fn encode_shadow_mesh(
+pub(super) fn encode_shadow_mesh(
     queue: &wgpu::Queue,
     encoder: &mut wgpu::CommandEncoder,
     shadow_view: &wgpu::TextureView,

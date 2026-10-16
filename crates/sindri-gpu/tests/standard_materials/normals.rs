@@ -23,6 +23,19 @@ fn authored(scene: &mut Scene, normals: [[f32; 3]; 4], transform: Mat4) {
                     }
                     *model = Mat4::from_translation(Vec3::new(-0.6, 0.0, 0.25)) * transform;
                 }
+                FrameCommand::RetainedTexturedMesh {
+                    geometry, model, ..
+                } => {
+                    let mut vertices = geometry.vertices().to_vec();
+                    for (vertex, normal) in vertices.iter_mut().zip(normals) {
+                        vertex.normal = normal;
+                    }
+                    *geometry = Arc::new(
+                        sindri_render::RenderMesh::new(vertices, geometry.indices().to_vec())
+                            .unwrap(),
+                    );
+                    *model = Mat4::from_translation(Vec3::new(-0.6, 0.0, 0.25)) * transform;
+                }
                 FrameCommand::CachedTexturedMesh {
                     replacement, model, ..
                 } => {
@@ -100,7 +113,7 @@ fn authored_normals_match_models_under_nonuniform_rotation_and_reflection() {
             ],
             transform,
         );
-        for kind in [1, 2] {
+        for kind in [1, 2, 3] {
             let image = scene.draw(&gpu, kind, Some(material), &lighting);
             assert!(
                 pixel(&image, 32)
@@ -113,6 +126,6 @@ fn authored_normals_match_models_under_nonuniform_rotation_and_reflection() {
             );
         }
         assert_eq!(scene.cube.model_cache_stats().uploads, 1);
-        assert_eq!(scene.cube.cached_mesh_stats().buffer_uploads, 1);
+        assert_eq!(scene.cube.cached_mesh_stats().buffer_uploads, 2);
     }
 }

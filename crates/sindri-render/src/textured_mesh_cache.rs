@@ -78,6 +78,20 @@ pub struct TexturedMeshCacheStats {
     pub releases: u64,
 }
 
+impl TexturedMeshCacheStats {
+    pub(crate) fn and(self, other: Self) -> Self {
+        Self {
+            entries: self.entries.saturating_add(other.entries),
+            installs: self.installs.saturating_add(other.installs),
+            buffer_uploads: self.buffer_uploads.saturating_add(other.buffer_uploads),
+            reused_draws: self.reused_draws.saturating_add(other.reused_draws),
+            stale_draws: self.stale_draws.saturating_add(other.stale_draws),
+            misses: self.misses.saturating_add(other.misses),
+            releases: self.releases.saturating_add(other.releases),
+        }
+    }
+}
+
 #[derive(Debug)]
 struct CachedMesh {
     revision: u64,

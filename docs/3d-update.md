@@ -1,11 +1,10 @@
 # 3D foundation and Milestone 8 follow-ups
 
-PR #507 now ends at the shared 3D foundation, including the Day/Night Lab proof.
-It delivers the checked feature slices below. The remaining unchecked work is
-split into follow-up PRs, in dependency order; it is not a gate for merging this
-foundation. Milestone 8 itself remains incomplete until the game acceptance is
-met. Runtime, editor, scripting, proof and documentation continue together in
-each follow-up.
+PR #507 merged the shared 3D foundation, including the Day/Night Lab proof.
+The checked items below record that foundation and completed follow-ups.
+Unchecked work is split into separate PRs in dependency order. Milestone 8 itself
+remains incomplete until the game acceptance is met. Runtime, editor, scripting,
+proof and documentation continue together in each follow-up.
 
 The foundation boundary is shared model loading/export/rendering and model
 collision, 3D transforms/cameras/input/characters, scoped native measurements,
@@ -68,10 +67,12 @@ GLB decoding, a model GPU path and project export; slice 1 merges it. Read again
 The foundation stops after Day/Night Lab. No unchecked feature below is a
 merge gate for PR #507. Continue with separate, reviewable PRs in this order:
 
-1. Close measurement coverage and define performance targets (slice 2), then
-   shared material assets/alpha contracts (slice 3).
-2. Batch and instance repeated geometry, retain inline meshes, and cull meshes
-   and models against cached bounds (slice 3).
+1. Retained inline geometry/u32 feature proof meets the zero-settled-upload
+   target (slices 2 and 3; [contract](retained-meshes.md)). Next, finish measurement
+   coverage alongside subsequent rendering work and define the shared material
+   assets/alpha contract (slice 3).
+2. Batch and instance repeated geometry, and cull meshes and models against
+   cached bounds (slice 3).
 3. Finish shadow quality, mipmaps, transparency and authored fog/post delivery,
    then expose their runtime controls (slices 3 and 4b).
 4. Finish model placement/picking, Scene-view navigation and collider authoring
@@ -134,8 +135,10 @@ The yaw/pitch/roll convention remains radians, Y-up, -Z forward and YXZ order.
   the fixed 3D fixture records measured zeroes.
 - [ ] Finish whole-frame coverage (clears, post, atlas/resource uploads and editor
   UI) and GPU timestamps in browser reports.
-- [ ] Set the targets the next slice must meet (for example, draws and passes
-  per frame independent of repeated props, and zero steady-state uploads).
+- [x] Set and meet the retained-inline target: zero settled geometry uploads,
+  with unchanged draws/passes and native/browser appearance. Native and editor
+  reports, real u32 browser controls and GPU lifetime tests exercise the boundary.
+- [ ] Set batching targets for draws/passes independent of repeated props.
 
 ### 3. One lit 3D path
 - [ ] A `Material` shared by meshes, cubes, voxels and models:
@@ -161,8 +164,11 @@ The yaw/pitch/roll convention remains radians, Y-up, -Z forward and YXZ order.
     smooth versus flat shading. Editor authoring review and game adoption remain open.
 - [ ] One render pass per stage. Draws are sorted by pipeline, material and
   mesh, and repeated mesh+material pairs are instanced.
-- [ ] Inline meshes are cached by revision, like voxel sections, so there is
-  no per-frame upload. Indices are u32.
+- [x] Inline meshes are cached by geometry revision, with u32 indices and no
+  settled uploads. Shadow/color draws share buffers; independent uniforms,
+  edit/undo/redo, atlas changes, old-frame lifetime and retirement have regressions.
+  Native/editor counters and browser controls pass. See [retained meshes](retained-meshes.md);
+  deduplication, instancing and in-tree game adoption remain open.
 - [ ] Frustum culling of meshes and models at extraction, from cached
   bounds.
 - [ ] Models cast and receive shadows, and are fogged.

@@ -18,10 +18,11 @@ fn surface_normals_extract_and_restore_through_undo() {
         let frame = extractor
             .extract(world, VIEWPORT, CameraView::default(), &textures)
             .unwrap();
-        let FrameCommand::TexturedMesh { vertices, .. } = &frame.passes()[0].command else {
+        let FrameCommand::RetainedTexturedMesh { geometry, .. } = &frame.passes()[0].command else {
             panic!("surface expected");
         };
-        vertices
+        geometry
+            .vertices()
             .iter()
             .map(|v| v.normal.map(f32::to_bits))
             .collect::<Vec<_>>()
