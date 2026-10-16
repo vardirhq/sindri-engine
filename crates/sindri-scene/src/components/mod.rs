@@ -54,6 +54,7 @@ pub use light2d::{
     outline,
 };
 pub use material::MaterialComponent;
+pub(crate) use mesh::SurfaceMesh;
 pub use mesh::{MeshComponent, MeshPrimitive};
 pub use model::ModelComponent;
 pub use sprite::{ImageDraw, SpriteColorTransform, SpriteComponent};

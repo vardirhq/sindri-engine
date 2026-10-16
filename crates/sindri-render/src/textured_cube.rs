@@ -20,6 +20,7 @@ mod geometry;
 mod material;
 mod model;
 mod pipeline;
+mod retained;
 mod shadow_pass;
 mod uniform;
 
@@ -39,6 +40,7 @@ pub struct TexturedCubeRenderer {
     next: usize,
     mesh: MeshBuffers,
     cached_meshes: TexturedMeshCache,
+    retained_meshes: crate::retained_mesh::RetainedMeshes,
     material: Option<crate::MaterialFactors>,
     lighting: WorldLighting,
     shadow_settings: ShadowSettings,
@@ -87,6 +89,7 @@ impl TexturedCubeRenderer {
             next: 0,
             mesh: MeshBuffers::new(device, "Sindri textured cube", &VERTICES, &INDICES),
             cached_meshes: TexturedMeshCache::default(),
+            retained_meshes: crate::retained_mesh::RetainedMeshes::default(),
             material: None,
             lighting: WorldLighting::default(),
             shadow_settings: ShadowSettings::default(),
@@ -137,6 +140,7 @@ impl TexturedCubeRenderer {
     pub fn begin_submission(&mut self) {
         self.next = 0;
         self.models.begin_submission();
+        self.retained_meshes.begin_submission();
     }
 
     fn reserve(&mut self, device: &wgpu::Device) -> usize {
@@ -315,8 +319,8 @@ impl TexturedCubeRenderer {
     /// Draws caller-provided textured triangles through the same opaque 3D
     /// pipeline as cubes.
     ///
-    /// This remains the transient path for authored surface meshes. Generated
-    /// terrain should use [`Self::encode_cached_mesh`].
+    /// This low-level transient path uploads on every draw. Scene surfaces use
+    /// retained resources; generated terrain uses [`Self::encode_cached_mesh`].
     #[allow(clippy::too_many_lines)]
     pub fn encode_mesh(
         &mut self,
@@ -466,9 +470,9 @@ impl TexturedCubeRenderer {
         self.cached_meshes.release(cache)
     }
 
-    /// Cumulative cache counters and the current number of resident entries.
+    /// Combined retained inline/voxel cache counters and resident entry count.
     pub fn cached_mesh_stats(&self) -> TexturedMeshCacheStats {
-        self.cached_meshes.stats()
+        self.cached_meshes.stats().and(self.retained_meshes.stats())
     }
 
     /// Cumulative physical 3D draw counters, including imported models and shadows.

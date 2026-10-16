@@ -39,7 +39,7 @@ fn point_lights_share_shading_range_and_updates_without_geometry_uploads() {
         intensity: 8.0,
         range: 6.0,
     };
-    for kind in 0..3 {
+    for kind in 0..4 {
         let image = scene.draw(&gpu, kind, Some(material), &lighting(point));
         let left = pixel(&image, 32);
         let right = pixel(&image, 95);
@@ -101,5 +101,5 @@ fn point_lights_share_shading_range_and_updates_without_geometry_uploads() {
         assert!(pixel(&image, 32)[0] > left[0] + 10, "second light adds red");
     }
     assert_eq!(scene.cube.model_cache_stats().uploads, 1);
-    assert_eq!(scene.cube.cached_mesh_stats().buffer_uploads, 1);
+    assert_eq!(scene.cube.cached_mesh_stats().buffer_uploads, 2);
 }

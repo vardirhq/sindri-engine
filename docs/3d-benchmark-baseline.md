@@ -324,3 +324,50 @@ controls verify those exact totals with nonzero GPU timestamps, while retaining
 and zero settled geometry uploads. Adding a spotlight does not add a render pass
 or shadow work; local-light occlusion remains unimplemented. These controls
 establish accounting rather than a performance target.
+
+## Retained inline geometry
+
+Recorded October 16, 2026, using the fixed workload and software Vulkan.
+Three consecutive native frames after 30 settling frames meet the retained-mesh
+slice's target: zero steady-state inline uploads, with draw/pass counts unchanged.
+The current color uniform layout includes point/spot lighting from the foundation.
+
+| Work per frame | Shadows on | Shadows off |
+| --- | ---: | ---: |
+| Indexed draws | 602 | 301 |
+| Physical render passes | 603 | 301 |
+| Uniform writes | 602 | 301 |
+| Uniform payload bytes | 292,144 | 269,680 |
+| Transient geometry pairs | **0** | **0** |
+| Retained inline/voxel geometry pairs | **0** | **0** |
+| Model uploads | 0 | 0 |
+
+Previously the same workload uploaded 200/100 transient inline buffer pairs per
+shadowed/unshadowed frame. The 100 inline resources now upload once per renderer,
+shared by shadow and color draws. GPU readback regressions verify first-use and
+retirement separately; this report measures settled deltas. Supported timestamp
+queries are exercised, without making a frame-time claim from this short run.
+
+Native captures at 960×540 are byte-identical to the pre-change host capture and
+to a control whose first pyramid uses indices 65,535–65,539. The latter pads that
+surface with 65,535 unused vertices/UVs and offsets its indices, leaving its visible
+geometry unchanged. Authored shadows change 2,147 pixels (2,119 darker), and the
+smooth/flat reflected ellipsoid controls change 1,449 pixels (maximum channel
+difference 45). Raw reports and captures are under `target/retained-proof/`.
+See [the resource contract](retained-meshes.md) for scope and remaining work.
+
+Native editor X11/software-Vulkan controls also record three settled editing and
+three settled playing frames per shadow setting, with no errors and the same
+counters above. Both Scene and Play report zero transient/cached geometry uploads;
+GPU timestamp support and nonzero playing intervals pass the existing checker.
+A separate cold native run records 100 retained pairs and one model upload on
+frame one, followed by zero of either on frame two.
+
+
+Fresh release WebGPU exports pass all six asset fetches and the ready goal for
+benchmark, no-shadows, u32, smooth/flat normals and Lighting Lab. Browser u32 and
+original captures are byte-identical. Shadows change 2,110 pixels (2,088 darker);
+normals change 1,451 pixels (maximum channel difference 45). Lighting Lab's live
+phase controls show 109,227 added red and 154,881 removed blue pixels, alongside
+its expected background changes. No runtime or GPU errors are reported.
+The native editor authored-color capture also passes the scene color verifier.

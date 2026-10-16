@@ -1,5 +1,10 @@
 # Changelog
 
+- Retain inline 3D surface geometry across frames and share its GPU buffers
+  between shadow and color draws. Transforms and materials reuse geometry; mesh
+  and atlas edits replace it. Surface indices now support u32 meshes; invalid
+  triangle geometry returns a scene-extraction error.
+
 - Make the Sound Lab's songs sound full: a new stereo engine with band-limited
   oscillators, filtered and enveloped patches, a chords layer that follows the
   bass, a synthesized drum kit with fills and swing, reverb, echo, ducking and

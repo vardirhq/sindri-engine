@@ -128,9 +128,11 @@ inline geometry or a missing cached mesh draws nothing.
 `draw_calls` counts indexed draws; `render_passes` includes the shadow-map clear
 as well as each draw's physical render pass. Uniform writes and their payload
 bytes exclude initialization and driver padding. `transient_geometry_uploads`
-counts uploaded vertex/index buffer pairs; a shadowed inline mesh currently
-uploads once for each of its shadow and color draws. Persistent model asset
-uploads and cached voxel geometry pairs remain separate cache counters.
+counts uploaded vertex/index buffer pairs for explicit transient commands. Scene
+inline surfaces now use immutable retained resources: one upload shared by shadow
+and color draws, included with voxel uploads in `cached_geometry_uploads`.
+Persistent model uploads remain separate. See [retained meshes](retained-meshes.md)
+for ownership, revision and retirement rules.
 
 These counters exclude the frame clear, sprites, shapes, glyphs, post-processing,
 texture initialization and UI. They are not whole-frame GPU totals.

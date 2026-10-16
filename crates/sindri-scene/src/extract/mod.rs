@@ -11,6 +11,7 @@ mod effects;
 mod frustum;
 mod meanings;
 mod mesh;
+mod mesh_cache;
 mod model;
 mod nine_slice;
 pub use model::referenced_models;
@@ -103,6 +104,8 @@ pub struct SceneExtractor {
     /// to a volume -- or to its grid, its transform, or the tile set and
     /// textures it draws from -- is picked up on the next frame.
     baked_volumes: RefCell<BTreeMap<EntityId, BakedVolume>>,
+    retained_surfaces: RefCell<mesh_cache::SurfaceCache>,
+    decoded_meshes: RefCell<sindri_core::Decoded<crate::MeshComponent>>,
     /// Persistent section worlds and their compiled renderer bridges.
     voxel_worlds: voxel_world::VoxelWorldCache,
     /// The squares of voxel worlds viewed as maps, chunk by chunk.
@@ -129,6 +132,8 @@ fn transform_matrix(transform: Transform3D) -> Mat4 {
 pub enum SceneExtractError {
     #[error("model asset '{0}' is not loaded and bound")]
     MissingModel(sindri_core::AssetId),
+    #[error(transparent)]
+    Mesh(#[from] sindri_render::MeshGeometryError),
     #[error(transparent)]
     Model(#[from] sindri_render::ModelRenderError),
     #[error(transparent)]
@@ -221,6 +226,8 @@ impl SceneExtractor {
             components: builtin_components()?,
             models: BTreeMap::new(),
             baked_volumes: RefCell::default(),
+            retained_surfaces: RefCell::default(),
+            decoded_meshes: RefCell::default(),
             voxel_worlds: voxel_world::VoxelWorldCache::default(),
             voxel_maps: voxel_map::VoxelMapCache::default(),
             tolerant: false,

@@ -59,6 +59,7 @@ Each entry links its tests and the projects that exercise it. Surface marks matc
 | [3D point and spot lights](#local-lights-3d) | 🟡 | 🟡 | 🟡 | 🟡 |
 | [Runtime ambient and background controls](#runtime-environment) | 🟡 | 🟡 | 🟡 | 🟡 |
 | [Scripted day/night cycle](#daynight-cycle) | 🟡 | 🟡 | 🟡 | 🟡 |
+| [Retained inline mesh geometry](#retained-inline-meshes) | 🟡 | 🟡 | — | 🟡 |
 
 ## Hosts and GPU
 
@@ -1207,5 +1208,34 @@ shadows on imported ground with fixed model poses, and local illumination at
 midnight. Native editor Play runs the same scene. See `daynight.md` for measured
 evidence. No new host API, renderer path, dependency or engine time service;
 in-tree game adoption and fog/post controls remain open.
+
+</details>
+
+<a id="retained-inline-meshes"></a>
+
+### Retained inline mesh geometry
+
+Immutable u32 resources share shadow/color buffers and survive independent draw-state changes
+
+Engine 🟡 · Editor 🟡 · Decay — · Proof 🟡 — parity row *Retained inline mesh geometry*
+
+**Tested by:** [`crates/sindri-core/src/component/decoded.rs`](../../crates/sindri-core/src/component/decoded.rs), [`crates/sindri-scene/tests/extraction/retained_meshes.rs`](../../crates/sindri-scene/tests/extraction/retained_meshes.rs), [`crates/sindri-gpu/tests/standard_materials/retained.rs`](../../crates/sindri-gpu/tests/standard_materials/retained.rs), [`crates/sindri-gpu/tests/standard_materials/normals.rs`](../../crates/sindri-gpu/tests/standard_materials/normals.rs), [`game/tests/a_3d_benchmark_project_plays.rs`](../../game/tests/a_3d_benchmark_project_plays.rs)
+
+**Exercised in:** [`examples/benchmark3d`](../../examples/benchmark3d), [`examples/lighting3d`](../../examples/lighting3d)
+
+**See:** [`docs/retained-meshes.md`](../../docs/retained-meshes.md)
+
+<details markdown="1">
+<summary>Evidence</summary>
+
+Scene extraction reuses immutable geometry until its positions, UVs, normals,
+indices or atlas rectangle change. Per-renderer weak caches upload once across
+shadow/color draws and retire unused resources; older frames own their revision.
+Checked edits/undo, lifecycle, real u32 drawing and shared shading have regressions.
+Native/editor benchmark reports record zero settled geometry uploads with
+unchanged draws/passes. Release browser exports exercise real u32 geometry,
+shadows, smooth normals and live lighting. This is feature proof for the planned
+Explorer/Low Tide 3D track; in-tree game adoption,
+instancing, deduplication and culling remain open.
 
 </details>

@@ -1,11 +1,12 @@
 //! Mesh components, and the pass that draws them.
 
-use sindri_core::{SpriteRef, World};
+use sindri_core::World;
 use sindri_render::{
-    ExtractedFrame, FrameCamera, FrameCommand, FramePass, RenderLayer, RenderStage, TexturedVertex,
+    ExtractedFrame, FrameCamera, FrameCommand, FramePass, RenderLayer, RenderStage,
 };
+use std::collections::BTreeSet;
 
-use crate::{MeshComponent, MeshPrimitive, TextureBindings};
+use crate::{MeshPrimitive, TextureBindings};
 
 use super::camera::ResolvedCameras;
 use super::{SceneExtractError, SceneExtractor, transform_matrix};
@@ -18,7 +19,12 @@ impl SceneExtractor {
         textures: &TextureBindings,
         frame: &mut ExtractedFrame,
     ) -> Result<(), SceneExtractError> {
-        for (entity, mesh) in self.components.query::<MeshComponent>(world)? {
+        let mut cache = self.retained_surfaces.borrow_mut();
+        let mut live = BTreeSet::new();
+        let mut decoded = self.decoded_meshes.borrow_mut();
+        // Large mesh payloads must not wait for amortized decode-cache cleanup.
+        decoded.retain_active(world);
+        for (entity, mesh) in decoded.query(&self.components, world)? {
             let transform = world.world_transform(entity).unwrap_or_default();
             let model = transform_matrix(transform);
             let command = match mesh.primitive {
@@ -27,47 +33,15 @@ impl SceneExtractor {
                     texture: textures.resolve(&mesh.texture),
                 },
                 MeshPrimitive::Surface => {
-                    let Some(surface) = mesh.surface.as_ref() else {
+                    let Some((texture, geometry)) = cache.resolve(world, entity, mesh, textures)?
+                    else {
                         continue;
                     };
-                    if surface.vertices.len() != surface.uvs.len()
-                        || surface
-                            .indices
-                            .iter()
-                            .any(|index| usize::from(*index) >= surface.vertices.len())
-                    {
-                        continue;
-                    }
-                    let reference = SpriteRef::parse(&mesh.texture)?;
-                    let (texture, rect) = textures.resolve_sprite(&reference);
-                    let vertices = surface
-                        .vertices
-                        .iter()
-                        .zip(&surface.uvs)
-                        .enumerate()
-                        .map(|(index, (position, uv))| {
-                            TexturedVertex::new(
-                                *position,
-                                [
-                                    rect.width().mul_add(uv[0], rect.x()),
-                                    rect.height().mul_add(uv[1], rect.y()),
-                                ],
-                            )
-                            .with_normal(
-                                surface
-                                    .normals
-                                    .as_ref()
-                                    .and_then(|normals| normals.get(index))
-                                    .copied()
-                                    .unwrap_or([0.0; 3]),
-                            )
-                        })
-                        .collect();
-                    FrameCommand::TexturedMesh {
+                    live.insert(entity);
+                    FrameCommand::RetainedTexturedMesh {
                         model,
                         texture,
-                        vertices,
-                        indices: surface.indices.clone(),
+                        geometry,
                     }
                 }
             };
@@ -94,6 +68,7 @@ impl SceneExtractor {
                 .map(|component| component.factors);
             frame.push(pass);
         }
+        cache.retain(&live);
         Ok(())
     }
 }

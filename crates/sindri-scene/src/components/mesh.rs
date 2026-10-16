@@ -27,7 +27,7 @@ pub struct SurfaceMesh {
     #[serde(default)]
     pub uvs: Vec<[f32; 2]>,
     #[serde(default)]
-    pub indices: Vec<u16>,
+    pub indices: Vec<u32>,
     /// One finite, nonzero object-space normal per vertex, or flat shading.
     pub normals: Option<Vec<[f32; 3]>>,
 }
@@ -53,7 +53,7 @@ struct SurfaceDocument {
     #[serde(default)]
     uvs: Vec<[f32; 2]>,
     #[serde(default)]
-    indices: Vec<u16>,
+    indices: Vec<u32>,
     #[serde(default)]
     normals: Option<Vec<[f32; 3]>>,
 }

@@ -240,6 +240,11 @@ fn encode_directional_shadows(
             FrameCommand::TexturedCube { model, .. } => {
                 cube.encode_shadow_cube(device, queue, encoder, *model);
             }
+            FrameCommand::RetainedTexturedMesh {
+                model, geometry, ..
+            } => {
+                cube.encode_shadow_retained_mesh(device, queue, encoder, *model, geometry);
+            }
             FrameCommand::TexturedMesh {
                 model,
                 vertices,
@@ -351,6 +356,25 @@ fn encode_passes<'p>(
                 *model,
                 pass.camera.view_projection,
             ),
+            FrameCommand::RetainedTexturedMesh {
+                model,
+                texture,
+                geometry,
+            } => {
+                cube_renderer.encode_retained_mesh(
+                    DrawContext {
+                        device,
+                        queue,
+                        textures,
+                        texture: *texture,
+                    },
+                    encoder,
+                    (target.color, target.depth),
+                    *model,
+                    pass.camera.view_projection,
+                    geometry,
+                );
+            }
             FrameCommand::TexturedMesh {
                 model,
                 texture,

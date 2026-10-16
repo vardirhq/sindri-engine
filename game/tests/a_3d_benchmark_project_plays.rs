@@ -83,12 +83,10 @@ fn the_fixed_workload_reaches_ready_and_extracts_all_three_geometry_kinds() {
     for pass in frame.passes() {
         match &pass.command {
             FrameCommand::TexturedCube { .. } => counts[0] += 1,
-            FrameCommand::TexturedMesh {
-                vertices, indices, ..
-            } => {
+            FrameCommand::RetainedTexturedMesh { geometry, .. } => {
                 counts[1] += 1;
-                assert_eq!(vertices.len(), 5);
-                assert_eq!(indices.len(), 18);
+                assert_eq!(geometry.vertices().len(), 5);
+                assert_eq!(geometry.indices().len(), 18);
             }
             FrameCommand::Model { asset, .. } => {
                 counts[2] += 1;

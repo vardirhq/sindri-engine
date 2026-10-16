@@ -44,9 +44,9 @@ correct it or delete it.
 | [Effects, saves and randomness](capabilities/runtime.md) | 4 | 1 | 0 |
 | [Screen UI and Weave](capabilities/ui.md) | 7 | 1 | 0 |
 | [Grids and voxels](capabilities/grids-and-voxels.md) | 10 | 3 | 0 |
-| [Hosts and rendering](capabilities/rendering.md) | 32 | 4 | 0 |
+| [Hosts and rendering](capabilities/rendering.md) | 33 | 4 | 0 |
 | [Assets](capabilities/assets.md) | 5 | 0 | 0 |
 | [The editor](capabilities/editor.md) | 37 | 6 | 1 |
 | [Decay](capabilities/decay.md) | 23 | 8 | 0 |
 | [Games, labs and tooling](capabilities/projects.md) | 9 | 0 | 0 |
-| **All** | **179** | **33** | **1** |
+| **All** | **180** | **33** | **1** |

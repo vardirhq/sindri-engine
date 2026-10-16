@@ -50,7 +50,9 @@ flat shading; invalid counts/vectors reject the component. Extraction preserves
 normals in `TexturedVertex`; checked edit/Undo/Redo restores both authored and
 absent values. Cube face normals and world normal/culling transforms are renderer
 owned. See [the material contract](rendering-materials.md#textured-geometry-normals).
-Surface indices remain u16 and transient; caching/u32 migration remains open.
+Surface indices are u32. Immutable geometry is retained across extraction and
+shared by shadow/color draws; edits replace the resource while older frames keep
+their revision. See [retained meshes](retained-meshes.md).
 
 ## What extraction guarantees
 

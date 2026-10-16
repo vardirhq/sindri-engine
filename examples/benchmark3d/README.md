@@ -47,7 +47,7 @@ A short debug/software-Vulkan sample and the exact capture comparisons are in
 
 The standalone report now includes `mesh_counters`: physical textured 3D/model
 draws and passes, uniform writes/bytes, transient geometry pairs and separate
-model/voxel cache upload events. `scripts/frame-benchmark.py summarize` prints
+model and retained inline/voxel cache upload events. `scripts/frame-benchmark.py summarize` prints
 their means. Counts exclude 2D, post, the frame clear and initialization uploads;
 editor reports record matching primary counters and separate `scene_mesh_counters`
 for the extra Scene view beside Play. Native standalone and editor reports optionally record `gpu_execution_us` from GPU
@@ -60,3 +60,8 @@ Reports also carry `batch_counters` (and extra `scene_batch_counters` in the
 editor) for sprite/shape/glyph draws and buffer payloads. This fixture measures
 zero for those scopes; Platformer exercises nonempty batches. Atlas/resource
 uploads, clears, post and editor UI are still outside the reported totals.
+
+
+Inline surfaces now target zero geometry uploads after settling, with unchanged
+draw/pass counts. Each surface uploads once per renderer, shared by shadow and
+color draws; transforms and materials reuse it. See the [retained mesh contract](../../docs/retained-meshes.md).

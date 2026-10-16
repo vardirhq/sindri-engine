@@ -45,7 +45,7 @@ fn cones_aim_feather_and_update_every_geometry_without_uploads() {
         roughness: 0.6,
         ..Default::default()
     };
-    for kind in 0..3 {
+    for kind in 0..4 {
         let left = scene.draw(
             &gpu,
             kind,
@@ -89,5 +89,5 @@ fn cones_aim_feather_and_update_every_geometry_without_uploads() {
         assert!(pixel(&legacy, 32)[2] > 20);
     }
     assert_eq!(scene.cube.model_cache_stats().uploads, 1);
-    assert_eq!(scene.cube.cached_mesh_stats().buffer_uploads, 1);
+    assert_eq!(scene.cube.cached_mesh_stats().buffer_uploads, 2);
 }

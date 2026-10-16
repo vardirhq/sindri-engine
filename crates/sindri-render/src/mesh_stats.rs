@@ -5,7 +5,7 @@
 /// These exclude frame clears, sprites, glyphs, shapes, post-processing and
 /// resource initialization. Uniform bytes count queue-write payloads, without
 /// driver padding. Geometry uploads count transient vertex/index buffer pairs;
-/// persistent model and voxel uploads have their own cache counters.
+/// persistent model, retained inline and voxel uploads have their own cache counters.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub struct MeshDrawStats {
     pub draw_calls: u64,

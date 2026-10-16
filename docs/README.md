@@ -41,6 +41,7 @@ contracts below; dated evidence should not override them.
 - [Physics architecture](physics.md)
 - [Platform host](platform-host.md)
 - [Rendering frame pipeline](rendering-frame-pipeline.md)
+- [Retained inline meshes](retained-meshes.md)
 - [Presentation surfaces](rendering-surface.md)
 - [Colour handling](rendering-color.md)
 - [Transparent rendering](rendering-transparency.md)
