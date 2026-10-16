@@ -136,11 +136,19 @@ maximum number of textures, scripts, or other assets in an exported game.
 
 ## What a player sees while it loads
 
-The page opens on the Sindri loading screen — the forge mark, the wordmark
-and a moving bar — drawn in plain CSS and SVG, so it is there the moment the
-page is, before any script, wasm or asset has arrived. That covers the whole
-wait a browser build has: the host downloading, WebGPU starting, and the
-project's assets arriving.
+The page opens on the Sindri loading screen: one of fourteen animated
+concepts of the Sindri mark and wordmark — forge, blueprint, pixel, cube,
+arcade, diorama, boss, loot, puzzle, achievement, level-up, fog, speedrun and
+torch — chosen at random each time the page opens, and never the one that
+browser showed last. Each is a four-second loop. They are drawn by a script
+inlined in the page (`crates/sindri-export/src/loading.js`) as it is parsed,
+so the screen is there the moment the page is, before any wasm or asset has
+arrived. That covers the whole wait a browser build has: the host downloading,
+WebGPU starting, and the project's assets arriving.
+
+The concepts are written in Pixelify Sans and JetBrains Mono, both OFL-1.1,
+which the export writes beside the page in `fonts/` rather than fetching from
+a font service, so a game's page asks no third party for anything.
 
 It stays until the host announces the game is on screen. The host dispatches
 `sindri:ready` on `window` once, on the first frame it presents while the
@@ -165,7 +173,8 @@ named by its contents so a changed image is never served from a cache. The
 game is revealed once it is ready *and* the brand has had its time. A setting
 that is not one — an unknown key, a colour that is not `#rrggbb`, a time
 outside 0 to 10 seconds — fails the export with the reason. With
-`prefers-reduced-motion`, nothing on the loading screen moves.
+`prefers-reduced-motion`, no concept plays: the screen is the still forge
+mark, wordmark and bar in the page's own markup, and nothing on it moves.
 
 ## What a browser is told when it cannot run this
 

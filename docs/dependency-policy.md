@@ -34,7 +34,8 @@ product decision rather than a build one.
 The allowlist is kept to licences actually present in the tree, so adding a
 dependency under a new licence fails the check and a human decides. Font licences
 are on it: `egui` bundles typefaces under OFL-1.1 and Ubuntu-font-1.0, and Sindri
-ships Inter under OFL-1.1 itself.
+ships Inter, and Pixelify Sans and JetBrains Mono for the browser loading
+screen, under OFL-1.1 itself.
 
 One exception exists, and it is named crate by crate rather than added to the
 allowlist: Symphonia's MP3 decoder is MPL-2.0. It is there because Rodio's

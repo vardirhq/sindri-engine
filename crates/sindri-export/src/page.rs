@@ -7,6 +7,24 @@
 /// The page, with `{{name}}`, `{{base}}` and `{{build}}` still in it.
 pub const PAGE_TEMPLATE: &str = include_str!("page.html");
 
+/// The loading screen's animations, inlined into the page where `{{loading}}`
+/// stands.
+pub const LOADING_SCRIPT: &str = include_str!("loading.js");
+
+/// The typefaces the loading screen draws in, as the paths the page asks for
+/// them by and their bytes. Both are OFL-1.1; their licences sit beside them in
+/// `fonts/`.
+pub const LOADING_FONTS: [(&str, &[u8]); 2] = [
+    (
+        "fonts/pixelify-sans.woff2",
+        include_bytes!("../fonts/pixelify-sans.woff2"),
+    ),
+    (
+        "fonts/jetbrains-mono.woff2",
+        include_bytes!("../fonts/jetbrains-mono.woff2"),
+    ),
+];
+
 /// A project's own brand, shown on the loading screen after the Sindri mark.
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct Splash {
@@ -103,7 +121,10 @@ pub fn page_with_splash(
         || (String::new(), String::new()),
         |splash| brand_stage(name, splash),
     );
+    // The script first, so nothing a project wrote -- a name, a title -- can
+    // spell `{{loading}}` and be replaced by it.
     PAGE_TEMPLATE
+        .replace("{{loading}}", LOADING_SCRIPT)
         .replace("{{brand}}", &brand)
         .replace("{{brand_attributes}}", &brand_attributes)
         .replace("{{name}}", &escape(name))
@@ -309,6 +330,41 @@ mod build_stamp_tests {
         assert!(page.contains(r#"data-brand-seconds="2.5""#), "{page}");
         assert!(page.contains("--brand-background: #101820"), "{page}");
         assert!(!page.contains("{{"), "{page}");
+    }
+
+    #[test]
+    fn the_loading_screen_plays_one_of_every_concept_at_random() {
+        let page = page_for("Orbital", "/");
+        for concept in [
+            "forge",
+            "blueprint",
+            "pixel",
+            "cube",
+            "arcade",
+            "diorama",
+            "boss",
+            "loot",
+            "puzzle",
+            "achievement",
+            "levelup",
+            "fog",
+            "speedrun",
+            "torch",
+        ] {
+            assert!(
+                page.contains(&format!("  {concept}: ")),
+                "{concept} is missing"
+            );
+        }
+        assert!(page.contains("Math.random()"), "{page}");
+        // The still mark stays for reduced motion, and for the error page,
+        // which borrows its wordmark.
+        assert!(page.contains("prefers-reduced-motion"), "{page}");
+        assert!(page.contains(r#"class="wordmark""#), "{page}");
+        for (path, bytes) in super::LOADING_FONTS {
+            assert!(page.contains(&format!(r#"url("{path}")"#)), "{path}");
+            assert!(bytes.starts_with(b"wOF2"), "{path} is not woff2");
+        }
     }
 
     #[test]

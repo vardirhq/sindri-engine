@@ -8,7 +8,24 @@
        a single path in the page changing. -->
   <base href="{{base}}">
   <title>{{name}}</title>
+  <!-- The loading screen's two typefaces, written beside the page rather than
+       fetched from a font service, so a game's page asks nobody else for
+       anything and its loading screen looks the same offline. -->
+  <link rel="preload" href="fonts/pixelify-sans.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/jetbrains-mono.woff2" as="font" type="font/woff2" crossorigin>
   <style>
+    @font-face {
+      font-family: "Pixelify Sans";
+      font-weight: 400 700;
+      font-display: block;
+      src: url("fonts/pixelify-sans.woff2") format("woff2");
+    }
+    @font-face {
+      font-family: "JetBrains Mono";
+      font-weight: 400 700;
+      font-display: block;
+      src: url("fonts/jetbrains-mono.woff2") format("woff2");
+    }
     html, body { margin: 0; height: 100%; background: #12161f; color: #f2f5fb; }
     /* The canvas keeps the game's own aspect and sits in the middle, rather
        than stretching, because a game stretched to a window is a game whose
@@ -213,8 +230,10 @@
     #sindri-input[data-visible="true"] { display: block; }
     /* The loading screen: the Sindri mark from the moment the page opens,
        then the project's own brand if it has one, until the host announces
-       the game is on screen. Plain CSS and SVG, so it shows before any script
-       or wasm has arrived -- which is the whole of the wait it covers. */
+       the game is on screen. The still mark is plain CSS and SVG; an inline
+       script replaces it with an animation as the page is parsed, so either
+       way it shows before any wasm has arrived -- which is the whole of the
+       wait it covers. */
     #sindri-loading {
       --ink: #0d1117; --cream: #e6e1d4; --line: #2a3038; --muted: #8a8580;
       --accent: #f0c050; --loop: 3s;
@@ -306,6 +325,14 @@
     /* One, two, then three dots across a loop. */
     #sindri-loading .dots span:nth-child(2) { animation: sindri-dot-two var(--loop) steps(1) infinite; }
     #sindri-loading .dots span:nth-child(3) { animation: sindri-dot-three var(--loop) steps(1) infinite; }
+    /* One of the animated concepts, drawn by the script below over the whole
+       screen. While it plays, the still mark it replaces is not shown; with
+       reduced motion it never starts, and the still mark is the screen. */
+    #sindri-loading .motion { position: absolute; inset: 0; overflow: hidden; transition: opacity .45s ease; }
+    #sindri-loading[data-motion] > .grid,
+    #sindri-loading[data-motion] > .glow,
+    #sindri-loading[data-motion] > .stage.sindri { display: none; }
+    #sindri-loading[data-stage="brand"] .motion { opacity: 0; }
     #sindri-loading .brand img { max-width: 100%; max-height: 40vh; object-fit: contain; }
     #sindri-loading .brand-title { font: 700 clamp(1.4rem, 5vmin, 3rem)/1.1 system-ui, sans-serif; }
     #sindri-loading .brand-caption { font: 400 clamp(.85rem, 2vmin, 1.1rem)/1.4 system-ui, sans-serif; opacity: .75; }
@@ -364,6 +391,9 @@
     </div>
 {{brand}}
   </div>
+  <script>
+{{loading}}
+  </script>
   <script>
     // Its own ordinary script, ahead of the module: if the host fails to load
     // at all, this still runs, and the page still says what went wrong.
