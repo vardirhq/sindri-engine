@@ -1,4 +1,6 @@
 // The hero: runs, jumps, picks up coins and reaches the flag.
+// Its four sounds were made in the Sindri Sound Lab; each `audio/*.sindrisfx`
+// beside its WAV reopens there to be reshaped and sent back.
 //
 // Controller support grants standing only above a walkable surface.
 // Body and foot sensors handle pickups; overlapping a plank from below never grants
@@ -88,6 +90,7 @@ script Hero {
         }
         if this.drop_left <= 0.0 && this.since_press <= this.buffer && this.since_ground <= this.coyote {
             rise = this.jump_speed;
+            Audio.play("audio/jump.wav", 0.35);
             this.since_press = 1.0;
             this.since_ground = 1.0;
         }
@@ -167,6 +170,7 @@ script Hero {
             // A landing kicks up a puff of the dust a run trails.
             if !was_grounded && this.rise < -4.0 {
                 Effects.emit(this.entity, 8.0);
+                Audio.play("audio/land.wav", 0.4);
             }
             this.ground = 1.0;
             this.rise = 0.0;
@@ -192,7 +196,12 @@ script Hero {
             } else if World.has_tag(other, "coin") {
                 World.despawn(other);
                 Game.coins += 1.0;
+                Audio.play("audio/coin.wav", 0.45);
             } else if World.has_tag(other, "goal") {
+                // The flag can be touched again; it only cheers the first time.
+                if !Game.won {
+                    Audio.play("audio/goal.wav", 0.55);
+                }
                 Game.won = true;
             }
         }

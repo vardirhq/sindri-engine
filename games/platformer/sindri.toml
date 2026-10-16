@@ -3,3 +3,9 @@ format_version = 1
 [project]
 name = "Platformer"
 main_scene = "assets/platformer.scene"
+
+# The hero's sounds, made in the Sindri Sound Lab (`tools/sindri-chiptune`).
+# A script plays them by name, which no walk of the scene can see, so they are
+# listed here; each `.sindrisfx` beside its WAV reopens in the Lab.
+[assets]
+include = ["audio/jump.wav", "audio/coin.wav", "audio/land.wav", "audio/goal.wav"]

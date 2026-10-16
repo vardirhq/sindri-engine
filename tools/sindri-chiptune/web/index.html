@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#12161b" />
+    <meta name="description" content="Make game sound effects and chiptune music in your browser, then download them. The Sindri Sound Lab." />
+    <title>Sound Lab · Sindri Engine</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%2312161b'/%3E%3Cpath d='M3 10V6M6 12V4M9 11V5M12 9V7' stroke='%23e9a33a' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E" />
+    <style>
+      :root { color-scheme: dark; }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; height: 100%; overflow: hidden; background: #0f1317; }
+      /* The canvas fills the safe area; egui lays out to whatever size it is given. */
+      #sound-lab {
+        position: fixed;
+        inset: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+        width: calc(100vw - env(safe-area-inset-left) - env(safe-area-inset-right));
+        height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+        display: block;
+        touch-action: none;
+      }
+      #loading {
+        position: fixed; inset: 0; display: grid; place-content: center; gap: 10px;
+        padding: 24px; text-align: center; pointer-events: none;
+        font: 15px/1.5 Inter, ui-sans-serif, system-ui, sans-serif; color: #98a0a8;
+      }
+      #loading strong { color: #e9a33a; letter-spacing: .08em; font-size: 13px; }
+    </style>
+  </head>
+  <body>
+    <canvas id="sound-lab" aria-label="Sindri Sound Lab: game sound effects and chiptune music"></canvas>
+    <div id="loading" role="status"><strong>SINDRI SOUND LAB</strong><span>Loading…</span></div>
+    <noscript>The Sound Lab needs JavaScript and WebAssembly.</noscript>
+    <script type="module">
+      import init from './pkg/sindri_chiptune.js';
+      const loading = document.querySelector('#loading span');
+      try { await init(); } catch (error) { if (loading) loading.textContent = String(error); throw error; }
+    </script>
+  </body>
+</html>

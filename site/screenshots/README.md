@@ -90,3 +90,16 @@ A screenshot of the browser build. The games render identically in a browser and
 natively — that is the point of one renderer — so a browser capture would show
 the same pixels with more machinery behind it. What a browser capture is good
 for is proving that claim, and that belongs in a test rather than on a page.
+
+## The Sound Lab
+
+`sound-lab.png` is the browser Sound Lab on its effects designer, taken by the
+same smoke test Pages runs, from a wasm-pack build of `tools/sindri-chiptune`:
+
+```
+wasm-pack build tools/sindri-chiptune --target web --release --out-dir pkg
+mkdir -p target/sound-lab && cp tools/sindri-chiptune/web/index.html target/sound-lab/
+cp -R tools/sindri-chiptune/pkg target/sound-lab/
+node scripts/browser/sound-lab.mjs target/sound-lab target/sound-lab-captures
+cp target/sound-lab-captures/sound-lab-desktop-sfx.png site/screenshots/sound-lab.png
+```

@@ -20,6 +20,7 @@ members = [
     "crates/sindri-voxel",
     "tools/decay-lsp",
     "tools/sindri-capabilities",
+    "tools/sindri-chiptune",
     "examples/triangle",
     "examples/cube",
     "examples/camera",
