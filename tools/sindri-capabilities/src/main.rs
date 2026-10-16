@@ -10,7 +10,7 @@
 
 use std::{fs, path::Path, process::ExitCode};
 
-use sindri_capabilities::{GeneratedDocument, REGENERATE_COMMAND, documents};
+use sindri_capabilities::{GeneratedDocument, REGENERATE_COMMAND, documents, repository_root};
 
 fn main() -> ExitCode {
     let write = match mode() {
@@ -48,7 +48,7 @@ fn main() -> ExitCode {
     let stale: Vec<&str> = documents
         .iter()
         .filter(|document| !is_current(root, document))
-        .map(|document| document.path)
+        .map(|document| document.path.as_str())
         .collect();
 
     if stale.is_empty() {
@@ -76,17 +76,8 @@ fn mode() -> Result<bool, String> {
     Ok(write)
 }
 
-/// The workspace root, from where Cargo put this crate rather than from the
-/// current directory, so the tool writes the right files from anywhere.
-fn repository_root() -> &'static Path {
-    Path::new(env!("CARGO_MANIFEST_DIR"))
-        .parent()
-        .and_then(Path::parent)
-        .expect("the crate lives two directories below the repository root")
-}
-
 fn write_document(root: &Path, document: &GeneratedDocument) -> std::io::Result<()> {
-    let path = root.join(document.path);
+    let path = root.join(&document.path);
     if let Some(parent) = path.parent() {
         fs::create_dir_all(parent)?;
     }
@@ -94,5 +85,5 @@ fn write_document(root: &Path, document: &GeneratedDocument) -> std::io::Result<
 }
 
 fn is_current(root: &Path, document: &GeneratedDocument) -> bool {
-    fs::read_to_string(root.join(document.path)).is_ok_and(|found| found == document.contents)
+    fs::read_to_string(root.join(&document.path)).is_ok_and(|found| found == document.contents)
 }
