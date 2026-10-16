@@ -395,6 +395,7 @@ Sindri's strongest domain relative to the baseline.
 | **Coroutines / sequencing** | ❌ | — | ❌ | — | **Absent** | "Wait a second, then do this" is a `Timer` field and a check, not a sequence |
 | **Debugger (breakpoints, stepping)** | ❌ | ❌ | ❌ | — | **Absent** | `print` debugging only |
 | **Formatter** | ❌ | ❌ | ❌ | — | **Absent** | — |
+| **Script and entity throughput at scale** | ❌ | ❌ | ❌ | ❌ | **Absent** | Rendering is benchmarked and the Profiler times each script, but nothing measures how many scripted entities a frame can run, natively or in the browser. Survivor-likes and colony or factory sims depend on this number |
 | **In-editor script editing** | — | ❌ | — | — | **Behind** | Scripts are created and previewed read-only; editing is external |
 | **Signals / event bus** | ❌ | ❌ | ❌ | ❌ | **Absent** | Godot's signals are a headline feature. Scripts poll |
 | **Script unit tests** | ❌ | ❌ | ❌ | ❌ | **Absent** | No way to test a `.decay` file without running a game |
