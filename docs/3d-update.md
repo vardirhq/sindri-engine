@@ -1,11 +1,25 @@
-# 3D update: Milestone 8, imported content to a playable 3D game
+# 3D foundation and Milestone 8 follow-ups
 
-One pull request, delivered in checked feature slices, the way
-[the editor update](editor-update.md) was. Each slice is committed and pushed
-before the next starts. Runtime, editor, scripting, proof and documentation
-move together.
+PR #507 now ends at the shared 3D foundation, including the Day/Night Lab proof.
+It delivers the checked feature slices below. The remaining unchecked work is
+split into follow-up PRs, in dependency order; it is not a gate for merging this
+foundation. Milestone 8 itself remains incomplete until the game acceptance is
+met. Runtime, editor, scripting, proof and documentation continue together in
+each follow-up.
 
-## Why
+The foundation boundary is shared model loading/export/rendering and model
+collision, 3D transforms/cameras/input/characters, scoped native measurements,
+shared material factors/normals/imported shadows, point/spot lights, typed runtime
+light/environment controls and the day/night/mounted-GLB feature example. See
+[`3d-foundation-review.md`](3d-foundation-review.md) for review and validation.
+Follow-ups cover the remaining material/alpha contract, batching/culling/cache
+work, advanced editor authoring, fog/post delivery, terrain/animation and the
+in-tree playable game. The checkboxes below retain the full Milestone 8 plan.
+
+## Original Milestone 8 gap assessment
+
+The following assessment records the starting point of the full milestone;
+the checked slices below describe what the foundation now delivers.
 
 The exit gate of Milestone 8 is: *imported glTF content, camera, lighting and
 collision work in native, browser and editor preview.* PR #504 brought static
@@ -49,103 +63,30 @@ GLB decoding, a model GPU path and project export; slice 1 merges it. Read again
    level with a perspective camera. The low-tide crawler proof is external,
    and AGENTS.md does not count it.
 
-## Handing over
+## Follow-up order
 
-This plan is the state of the work. Whoever picks it up next reads
-`AGENTS.md` first, ticks a box only when its code, tests and docs land
-together, and pushes each slice before starting the next.
+The foundation stops after Day/Night Lab. No unchecked feature below is a
+merge gate for PR #507. Continue with separate, reviewable PRs in this order:
 
-Order:
-- Slice 6 now has world-space read-only `forward`/`right`/`up` and checked
-  `look_at`/`rotate_around`, with parent-space conversion, atomic validation,
-  compiler/LSP metadata and the transform feature example. Parent-relative
-  quaternion rotation now uses a copied host-provided `Quat` struct with atomic
-  normalized whole writes and save/copy/restore proof in Transform Lab. Quaternion
-  composition/interpolation and Explorer game proof remain pending.
-- Slice 6 also has explicit perspective FOV control and `sindri.camera.orbit`
-  with world-space follow, aiming, smoothing and sight-line collision pull-in.
-  The Orbit Camera Lab runs to its goal through Session and exported Chromium;
-  native and WebGPU captures show pull-in and recovery. Editor/game proof
-  remains pending.
-- Pointer lock now connects Decay lock/unlock requests and read-only actual
-  state through Session to the native/browser host. Shared relative motion
-  excludes cursor warps, rebases mode changes and is consumed once per step.
-  Real Chromium checks unbounded motion, U/Escape release and sandbox denial;
-  native X11/Vulkan verifies unbounded raw motion, U/Escape/focus-loss release
-  and no recapture on focus regain. Native editor Play now verifies the same
-  raw input and actual capture, including pause/stop and hidden-view release.
-  Explorer game proof remains pending.
-- Collider scale now resolves local dimensions and offsets through composed
-  positive entity/parent scale. Uniform scale works for every shape; nonuniform
-  boxes work when their local axes remain orthogonal. Unsupported shear and
-  nonuniform round shapes fail before runtime mutation. Native scene tests cover
-  solid landing, queries, parent offsets, editor wireframes and scale rebuilds.
-  Orbit Camera Lab uses local collider units, verifies wall resizing through
-  Session, and reaches its goal in real WebGPU Chromium. Browser scale editing,
-  native editor interaction and Explorer adoption remain pending.
-- The 3D character foundation now wraps Rapier's controller in read-only
-  engine-owned displacement queries over the existing current-pose BVH. Native
-  tests cover walls, slopes, steps, snapping, filtering and validation; backend
-  flag/correction limits are explicit. Scene-owned requests now derive stationary
-  kinematic bodies, extend voxel residency and apply collision-limited travel once
-  after solving through Session, with cached results and replay tests. Editor
-  interaction, controller browser and Explorer proof remain pending. Classified
-  read-only ground probes now provide support entities, slope checks and initial
-  penetration rejection with native tests. A read-only grounded movement
-  composition now verifies previous support, sweeps solved translation/rotation
-  and returns separate carry hits plus classified final support. Scene-owned carry
-  now seeds classified pre-solve support, applies solved motion once, invalidates
-  dependent rider caches and expands terrain for actual carry before querying.
-  Native scene and Session regressions verify parenting, replay and terrain
-  budgets. Typed Decay movement requests and copied support/movement/carry
-  records now have native host/script and Session timing/replay regressions,
-  compiler/LSP checks and generated API metadata. Selected 3D footing gizmos now
-  reuse the orange character overlay; native editor review verifies settings,
-  undo/redo, save/reopen, Play goal and Stop restoration. Continue with Explorer
-  proof and content collision; do not add gameplay rules in Rust. CPU model
-  collision preparation now expands selected GLB node/primitive instances into
-  bounded model-space triangles, preserving provenance and mirrored winding.
-  Standalone static triangle geometry now shares immutable acceleration resources
-  across keyed groups, with immediate queries, native landing/replay and validation
-  regressions. Clone-shared convex hulls now support mixed primitive/hull bodies,
-  validated mass and native dynamic/kinematic/sensor/replay regressions. Continue
-  with editor/headless loading and Explorer proof before claiming imported-content
-  collision complete. Static scene colliders now accept explicit Session bindings,
-  with native GLB movement/replay and asset replacement regressions. Shared
-  discovery/export now include collision-only references from scenes and prefabs,
-  inactive entities and shared render/collision assets. Automatic host collision
-  binding is now installed by the shared native/browser player before gameplay.
-  Model Collision Lab supplies imported-wall obstruction and a goal route through
-  player Session tests and exported browser smoke. Native headless loading and
-  editor Play now bind collision before gameplay; editor/headless parity tests
-  compare every step through the goal and restore/replay wall obstruction. Model
-  picker metadata is now declared for render/collision fields, with GLB choices,
-  project-backed Add Component defaults and independent Undo/Redo. Explorer proof
-  remains. Native editor review verifies the
-  goal, moved-wall reload, invalid-reload retention and Stop restoration. The
-  authored alternate-wall project was also visually played in the real native
-  player window on X11/software Vulkan.
-  The Character Lab
-  now exercises Decay gravity/jumps, solved carry/reversal and a keyboard goal
-  through native Session and exported Chromium. It is feature proof, not Explorer
-  completion.
-- Slice 6's feature foundations are implemented; Explorer game adoption and
-  proof remain open. Slice 2 now provides physical 3D/2D counters and native
-  standalone/editor GPU timestamps. Whole-frame totals and browser timing remain
-  open; they do not block starting visible rendering work.
-- Current priority is slices 3 to 4 (one lit path, instancing and lights), which
-  terrain (5b) and the showcase need. The first shared shader slice gives models
-  directional shadow reception and renderer fog. Models now also cast material-aware
-  shadows. Shared numeric factors/GGX and an authored Material component now
-  work; the complete shared material/texture/alpha contract remains.
-- Slice 4b records future runtime environment controls and day/night proof.
-  Start it only after unified materials, imported-model shadows, runtime light
-  access and point/spot lights are ready. This does not change the current
-  rendering/lighting priority. Keep the work in PR #507.
+1. Close measurement coverage and define performance targets (slice 2), then
+   shared material assets/alpha contracts (slice 3).
+2. Batch and instance repeated geometry, retain inline meshes, and cull meshes
+   and models against cached bounds (slice 3).
+3. Finish shadow quality, mipmaps, transparency and authored fog/post delivery,
+   then expose their runtime controls (slices 3 and 4b).
+4. Finish model placement/picking, Scene-view navigation and collider authoring
+   (slice 5); extend native-window feature proof where still unchecked.
+5. Add smooth terrain and foliage after rendering and placement dependencies
+   (slice 5b), and skeletal animation (slice 6b).
+6. Build Explorer, adopt shared capabilities in real gameplay, add the Causeway
+   prop, and meet measured browser/editor performance targets (slices 6 and 7).
+   Only then reassess the Milestone 8 exit gate and final integration (slice 8).
 
-The yaw/pitch/roll convention is fixed: radians, Y-up, -Z forward (as
-cameras face), YXZ order. Build on `Transform3D::yaw_pitch_roll_radians` and
-`set_yaw_pitch_roll_radians` rather than adding another.
+For each PR, read `AGENTS.md`, keep runtime/editor/Decay/proof documentation
+together, and check acceptance only after its tests and relevant surface proof
+pass. Existing checked subitems remain evidence even when their parent is
+unchecked because it still requires game adoption or broader implementation.
+The yaw/pitch/roll convention remains radians, Y-up, -Z forward and YXZ order.
 
 ## Slices
 
@@ -163,8 +104,9 @@ cameras face), YXZ order. Build on `Transform3D::yaw_pitch_roll_radians` and
 - [x] Report model decode warnings: host logs, and editor console lines.
 - [x] The editor loads, binds and hot-reloads models for both views, and
   draws around one that is loading or broken.
-- [ ] Prove that `sindri-player <project>` plays a model scene natively in a
-  window. It is not yet looked at on screen.
+- [x] Prove that `sindri-player <project>` plays a model scene natively in a
+  window. Model Collision Lab was reviewed on X11/software Vulkan: imported
+  wall, keyboard obstruction and walker reaching its goal pad.
 
 ### 2. Measure 3D
 - [x] Fixed benchmark project: 100 cubes, 100 inline pyramid surfaces and 100
@@ -310,15 +252,15 @@ Acceptance: a Decay script continuously advances its own clock and changes
 the sun, ambient illumination and background; the same scene renders correctly
 in native, browser and editor Play; a moving imported GLB carries functional
 lights; and imported models cast and receive shadows. Do not tick this item
-based only on schemas or compilable APIs. Deliver it in small, tested commits
-pushed regularly to this existing PR once the dependencies pass.
+based only on schemas or compilable APIs. This feature-level acceptance is delivered in the foundation; future extensions
+land in separate PRs.
 
 Skyboxes, procedural atmosphere, stars, moon rendering and weather are optional
 future enhancements, not prerequisites; do not build a complete skybox solely
 for this example.
 
 ### 5. Author 3D scenes in the editor
-- [ ] The editor loads models through the same asset queue as the player,
+- [x] The editor loads models through the same asset queue as the player,
   with hot reload and decode warnings in the console.
 - [ ] Offscreen-rendered thumbnails for `.glb` files.
 - [ ] Drag a model into the Scene view. It lands on the surface under the

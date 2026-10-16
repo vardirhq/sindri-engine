@@ -104,6 +104,8 @@ try {
   assert(imageStatistics(pixels).colors >= 8, 'the lab draws several scene colors');
   assert([...fetched].some((path) => path.includes('/assets/')), 'project assets were fetched');
 
+  // Release the completed game's GPU work before testing a second runtime.
+  await page.close();
   const denied = await browser.newPage({ viewport: { width: 1000, height: 600 } });
   const deniedLogs = [], deniedErrors = [];
   denied.on('pageerror', (error) => deniedErrors.push(error.message));
@@ -120,7 +122,8 @@ try {
   assert.equal(await frame.evaluate(() => document.pointerLockElement), null, 'sandbox denies capture');
   assert(!deniedLogs.some((text) => text.includes('Pointer captured')), 'Decay never reports false success');
   for (let i = 0; i < 120 && !deniedLogs.some((text) => text.includes('Arrived')); i++) await denied.waitForTimeout(100);
-  assert(deniedLogs.some((text) => text.includes('Arrived')), 'denial leaves gameplay running');
+  assert(deniedLogs.some((text) => text.includes('Arrived')),
+    `denial leaves gameplay running: ${deniedLogs.slice(-10).join(' | ')}`);
   assert.deepEqual(deniedErrors, [], 'denial produces no unrelated runtime errors');
   console.log(`Pointer lock: unbounded ${sum} motion, explicit release, Escape, sandbox denial, synchronized scale edits and game goal passed`);
 } finally {
