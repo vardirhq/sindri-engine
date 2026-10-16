@@ -21,6 +21,9 @@
   oscilloscope and keyboard shortcuts.
   The platformer's jump, landing, coin and flag sounds were made with it.
 
+- Publish the 3D Transform, Orbit Camera, Character, Model Collision, Lighting
+  and Day/Night labs on Pages under `/examples/`, listed in the Directory.
+
 - Add Day/Night Lab: a configurable Decay clock blends sunrise, midday, sunset
   and night, rotates the shadow-casting sun, and moves an imported prop carrying
   night lights. Frozen-hour controls isolate imported shadows and illumination.

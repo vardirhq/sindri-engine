@@ -3,6 +3,7 @@
 A feature example for Explorer's planned lighting track. It uses the existing
 Benchmark's cube, pyramid and GLB assets. No in-tree game uses these controls yet.
 Open this project in the editor or `sindri-player examples/lighting3d`.
+Pages publishes it at `https://sindri.vardir.no/examples/lighting3d/`.
 
 The Camera's Decay script assigns warm/blue colors, intensity, range and spot
 half-angles to lights authored black, dark and disabled. During the first three

@@ -4,6 +4,7 @@ A feature example of world-space aiming, direction reads and orbiting, from
 slice 6 of the 3D update. A cube faces a raised goal and walks to it while a
 perspective camera orbits the scene. The cube starts under a scaled parent:
 its script uses world coordinates so the parent does not change its speed.
+Pages publishes it at `https://sindri.vardir.no/examples/transform/`.
 
 Open this project in the editor, or run:
 
