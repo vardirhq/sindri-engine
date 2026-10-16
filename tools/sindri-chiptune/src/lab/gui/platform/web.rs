@@ -24,33 +24,40 @@ struct Live {
     source: LiveSource,
     paused: bool,
     finished: bool,
-    /// Lab samples per device sample, and how far between `a` and `b` we are.
+    /// Lab frames per device frame, and how far between `a` and `b` we are.
     step: f64,
     phase: f64,
-    a: f32,
-    b: f32,
+    a: [f32; 2],
+    b: [f32; 2],
 }
 
 impl Live {
-    // Display-quality linear interpolation between two adjacent samples.
+    fn frame(&mut self) -> Option<[f32; 2]> {
+        Some([self.source.next()?, self.source.next()?])
+    }
+
+    // Display-quality linear interpolation between two adjacent frames.
     #[allow(clippy::cast_possible_truncation)]
-    fn fill(&mut self, out: &mut [f32]) {
-        for sample in out {
+    fn fill(&mut self, left: &mut [f32], right: &mut [f32]) {
+        for (l, r) in left.iter_mut().zip(right.iter_mut()) {
             if self.paused || self.finished {
-                *sample = 0.0;
+                *l = 0.0;
+                *r = 0.0;
                 continue;
             }
             while self.phase >= 1.0 {
                 self.phase -= 1.0;
                 self.a = self.b;
-                if let Some(next) = self.source.next() {
+                if let Some(next) = self.frame() {
                     self.b = next;
                 } else {
                     self.finished = true;
                     break;
                 }
             }
-            *sample = self.a + (self.b - self.a) * self.phase as f32;
+            let t = self.phase as f32;
+            *l = self.a[0] + (self.b[0] - self.a[0]) * t;
+            *r = self.a[1] + (self.b[1] - self.a[1]) * t;
             self.phase += self.step;
         }
     }
@@ -87,7 +94,7 @@ impl Speaker {
         let Ok(node) = self
             .context
             .create_script_processor_with_buffer_size_and_number_of_input_channels_and_number_of_output_channels(
-                BLOCK, 0, 1,
+                BLOCK, 0, 2,
             )
         else {
             return;
@@ -98,17 +105,19 @@ impl Speaker {
             finished: false,
             step: f64::from(RATE) / f64::from(self.context.sample_rate()),
             phase: 1.0,
-            a: 0.0,
-            b: 0.0,
+            a: [0.0; 2],
+            b: [0.0; 2],
         }));
         let shared = Rc::clone(&state);
         let process: Process = Closure::new(move |event: AudioProcessingEvent| {
             let Ok(buffer) = event.output_buffer() else {
                 return;
             };
-            let mut out = vec![0.0; buffer.length() as usize];
-            shared.borrow_mut().fill(&mut out);
-            let _ = buffer.copy_to_channel(&out, 0);
+            let mut left = vec![0.0; buffer.length() as usize];
+            let mut right = left.clone();
+            shared.borrow_mut().fill(&mut left, &mut right);
+            let _ = buffer.copy_to_channel(&left, 0);
+            let _ = buffer.copy_to_channel(&right, 1);
         });
         node.set_onaudioprocess(Some(process.as_ref().unchecked_ref()));
         let _ = node.connect_with_audio_node(&self.context.destination());

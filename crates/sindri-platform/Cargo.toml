@@ -38,7 +38,22 @@ rodio = { version = "0.22.2", optional = true, default-features = false, feature
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 js-sys.workspace = true
 wasm-bindgen.workspace = true
-web-sys = { workspace = true, features = ["Blob", "BlobPropertyBag", "HtmlAudioElement", "HtmlMediaElement", "MediaError", "Storage", "Url", "Window"] }
+web-sys = { workspace = true, features = [
+  "AudioBuffer",
+  "AudioBufferSourceNode",
+  "AudioContext",
+  "AudioContextState",
+  "AudioDestinationNode",
+  "AudioNode",
+  "AudioParam",
+  "AudioScheduledSourceNode",
+  "BaseAudioContext",
+  "Document",
+  "EventTarget",
+  "GainNode",
+  "Storage",
+  "Window",
+] }
 
 [lints]
 workspace = true

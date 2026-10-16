@@ -60,7 +60,8 @@ every parameter by name. **Open** brings one back to reshape and send again.
 
 ## Music
 
-The workstation composes 32-bar chiptune songs in four voices.
+The workstation composes 32-bar chiptune songs: bass, arpeggio and lead you can
+edit, chords and drums that follow them, mixed in stereo.
 
 1. Pick a mood, key, density and seed, then **Generate A + B**. The two
    candidates are cached; drafts never change the song that is playing.
@@ -72,17 +73,55 @@ The workstation composes 32-bar chiptune songs in four voices.
    octave). The other two voices are drawn faintly behind, and brightness is
    velocity. One voice per part: an overlapping edit is refused and rolled
    back. Undo/redo (Ctrl+Z / Ctrl+Y) keeps 64 edits.
-4. Change sounds, levels, mute/solo and octave in the mixer while it plays.
+4. Change sounds, levels, mute/solo and octave in the mixer while it plays,
+   and how much **Room & echo** the whole mix has.
 5. **Save** (Ctrl+S) writes a `.sindrisong` holding the edited notes, tempo,
    key, mood and mixer; **Open** reopens it. **Send to project** writes the
    rendered song and its `.sindrisong`, and offers
    `Audio.loop("audio/<name>.wav", 0.6);`.
 
+### Writing
+
 Four styles use major, minor, Dorian or Phrygian harmony, with chords stacked
 in the style's scale, a seeded hook that resolves accents to chord tones, a
-question/answer phrase, cadence breaths and a tonic ending. Percussion is
-generated from mood and density. These are software interpretations of chip
-sounds, not cycle-accurate emulations.
+question/answer phrase, cadence breaths and a tonic ending. The bass plays the
+groove's rhythm on roots, octaves and fifths, and steps into each chord change
+from a scale tone away. The arpeggio changes with the section: sparse in the
+intro, flowing eighths in the theme, a sixteenth-note run over two octaves in
+the rise, falling broken chords in the return.
+
+The **chords** are read from the bass line, half a bar at a time, stacked in the
+song's scale (with sevenths in the darker moods) and voiced to move as little as
+possible, so they follow every bass edit. The **drums** are generated from mood,
+section and density: kick, snare and ghost notes, closed and open hats, a crash
+at each section, tom and snare fills every fourth bar, swing on the lighter
+moods and slightly varied velocities.
+
+### Sound
+
+Every part plays through a stateful synthesizer voice:
+
+- **Clean oscillators.** Band-limited (PolyBLEP) saw and pulse waves keep the
+  chip character without aliasing. Measured above 16 kHz, the melodic parts sit
+  60–90 dB down; the first renderer had more energy there than at 12–16 kHz.
+- **Patches.** Each of the 12 sounds is two oscillator layers, unison
+  detuning, a resonant filter with its own envelope, an amp envelope, delayed
+  vibrato, glide and drive, adjusted for the part it plays: a lead sings, a
+  bass stays tight and centred, a pad breathes.
+- **A real kit.** The kick has a click and a falling pitch, the snare mixes
+  tone and band-passed noise, and the hats are six metallic oscillators,
+  high-passed, with closed hats choking open ones. The three kits differ in
+  tuning, length, drive and grit.
+- **A mix.** Parts are placed across the stereo field. The bass and chords duck
+  under the kick, and arpeggio, lead and chords send to a stereo reverb and a
+  ping-pong echo timed to a dotted eighth. The bus is glued by a compressor,
+  given a gentle high shelf, and limited at -0.8 dBFS. Songs land around
+  -14 LUFS with no clipping.
+- **Seamless loops.** An exported song starts already carrying the tails its
+  own ending leaves, so a game looping it hears no seam.
+
+These are software interpretations of chip sounds, not cycle-accurate
+emulations.
 
 MIDI export writes format 1 at 480 ticks per quarter: tempo, 4/4 and the three
 tonal parts. MIDI import accepts format 0/1 with constant 60–220 BPM, 4/4 and up
@@ -132,5 +171,5 @@ Pages builds the browser Lab and its smoke test opens it at desktop and phone
 sizes in both modes, failing on any page error or an unpainted canvas.
 
 Not yet: hearing it through a real audio device in CI, music short enough to
-ship (a full song is several megabytes of WAV), an editable drum score, and an
-editor panel.
+ship (a full stereo song is about 11 MB of WAV), an editable drum score or
+chord track, and an editor panel.

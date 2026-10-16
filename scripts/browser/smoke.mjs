@@ -1,7 +1,7 @@
 // Loads a wasm-pack build in a real browser and reports what happened.
 //
 // Compiling wasm proves almost nothing about delivery. This check insists on a
-// configured canvas, settled audio promises, and — when SINDRI_EXPECT_ASSETS is
+// configured canvas, sounds that played, and — when SINDRI_EXPECT_ASSETS is
 // set — real HTTP requests for project assets. Projects can narrow that check
 // with SINDRI_EXPECT_ASSET_KINDS; otherwise every manifest kind is required.
 // It can also deliberately remove a browser capability to prove the page fails
@@ -121,22 +121,30 @@ if (EXPECT_FAILURE === 'device') {
   });
 }
 
+// Every sound the engine starts is a Web Audio buffer source. One counts as
+// playing when its context was running as it started and the context's clock
+// then moved on; a clip the browser cannot decode is recorded as refused.
 await page.addInitScript(() => {
   window.__plays = [];
-  const play = HTMLMediaElement.prototype.play;
-  HTMLMediaElement.prototype.play = function () {
-    const record = { settled: 'pending' };
-    window.__plays.push(record);
-    const element = this;
-    return play.call(this).then(
-      () => {
-        record.settled = 'played';
-        record.element = element;
-      },
-      (error) => {
-        record.settled = `refused: ${error.message}`;
-      },
-    );
+  const start = AudioBufferSourceNode.prototype.start;
+  AudioBufferSourceNode.prototype.start = function (...args) {
+    // The one-sample buffer is the unlock gesture's own silence, not a sound.
+    if (this.buffer && this.buffer.length > 1) {
+      const context = this.context;
+      window.__plays.push({
+        context,
+        at: context.currentTime,
+        settled: context.state === 'running' ? 'played' : `refused: context ${context.state}`,
+      });
+    }
+    return start.apply(this, args);
+  };
+  const decode = BaseAudioContext.prototype.decodeAudioData;
+  BaseAudioContext.prototype.decodeAudioData = function (...args) {
+    return decode.apply(this, args).catch((error) => {
+      window.__plays.push({ settled: `refused: ${error.message}` });
+      throw error;
+    });
   };
 });
 
@@ -423,18 +431,15 @@ if (process.env.SINDRI_SPATIAL_DEMO === '1') {
 await page.mouse.click(480, 270);
 await page.keyboard.press('KeyD');
 await page.waitForTimeout(2000);
-// A sound requested in that time may still be starting: `play()` settles once
-// the element has loaded and begun, and on a software renderer at two or three
-// frames a second that can land either side of any fixed moment. So wait for
-// every requested sound to settle and, if it played, to have moved -- bounded,
-// so one that never starts still fails, as it should.
+// A sound started in that time has only just begun, and on a software renderer
+// at two or three frames a second its context's clock may not have moved yet.
+// So wait for every one that played to have moved on -- bounded, so one whose
+// context never runs still fails, as it should.
 await page
   .waitForFunction(
     () =>
       window.__plays.every(
-        (record) =>
-          record.settled !== 'pending' &&
-          (record.settled !== 'played' || (record.element && record.element.currentTime > 0)),
+        (record) => record.settled !== 'played' || record.context.currentTime > record.at,
       ),
     { timeout: 15000 },
   )
@@ -442,7 +447,7 @@ await page
 const audio = await page.evaluate(() =>
   window.__plays.map((record) => ({
     settled: record.settled,
-    playedTo: record.element ? Number(record.element.currentTime.toFixed(2)) : 0,
+    playedTo: record.context ? Number((record.context.currentTime - record.at).toFixed(2)) : 0,
   })),
 );
 

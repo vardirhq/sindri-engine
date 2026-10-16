@@ -26,12 +26,13 @@ pub(super) const EMBER: Color32 = Color32::from_rgb(46, 34, 17);
 pub(super) const DANGER: Color32 = Color32::from_rgb(255, 138, 148);
 pub(super) const SUCCESS: Color32 = Color32::from_rgb(121, 182, 138);
 
-/// Bass, arpeggio, lead and percussion, wherever a voice is named.
-pub(super) const VOICES: [Color32; 4] = [
+/// Bass, arpeggio, lead, drums and chords, wherever a voice is named.
+pub(super) const VOICES: [Color32; 5] = [
     Color32::from_rgb(110, 168, 230),
     Color32::from_rgb(170, 140, 230),
     Color32::from_rgb(96, 214, 170),
     Color32::from_rgb(230, 150, 105),
+    Color32::from_rgb(226, 132, 170),
 ];
 
 // Shared with the editor rather than copied, so the two cannot drift apart.

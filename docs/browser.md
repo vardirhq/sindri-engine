@@ -102,6 +102,20 @@ satisfy the gesture requirement, then watches how each `play()` promise settles.
 The looping background music has been observed playing to 1.75 s in headless
 Chromium over software Vulkan.
 
+### Phones, the third time
+
+The element-per-sound backend had one more fault, which only a phone showed: it
+unlocked on a key or a mouse press, never a touch, and iOS Safari lets a new
+`<audio>` element play only from inside a gesture's own handler, never from the
+frame loop that starts a game's sounds. The platformer, played with a finger on
+its stick, made no sound at all. The backend is now Web Audio: each clip is
+decoded once, every sound is a buffer source on one `AudioContext`, and the
+backend resumes that context from document-level tap, click and key listeners,
+inside the gesture. The host unlocks on a touch starting or ending, since a
+player may hold a finger down for the whole level and browsers grant audio when
+it lifts. `smoke.mjs` now watches buffer sources start on a running context and
+its clock move on, and records a clip the browser cannot decode as refused.
+
 CI runs both pages now — the cube and the game — rather than only compiling
 them, so the next thing that works on wasm32 and not in a browser fails a check
 instead of waiting for someone to look.

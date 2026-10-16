@@ -20,7 +20,7 @@ use std::{path::PathBuf, sync::mpsc::Receiver};
 const ACCENT: Color32 = theme::FORGE;
 /// Below this width the side panels fold into one scrolling column.
 const COMPACT: f32 = 720.0;
-const TRACK_COLORS: [Color32; 4] = theme::VOICES;
+const TRACK_COLORS: [Color32; 5] = theme::VOICES;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum Mode {

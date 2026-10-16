@@ -22,7 +22,7 @@ impl Style {
         let alternate = rng.range(2) == 0;
         match mood {
             Mood::Mysterious => Self {
-                scale: [0, 2, 3, 5, 7, 9, 10],
+                scale: super::synth::scale(mood),
                 progression: if alternate {
                     [0, 5, 3, 6, 0, 4, 5, 0]
                 } else {
@@ -32,7 +32,7 @@ impl Style {
                 max_step: 2,
             },
             Mood::Hopeful => Self {
-                scale: [0, 2, 4, 5, 7, 9, 11],
+                scale: super::synth::scale(mood),
                 progression: if alternate {
                     [0, 4, 3, 5, 0, 3, 4, 0]
                 } else {
@@ -42,7 +42,7 @@ impl Style {
                 max_step: 4,
             },
             Mood::Tense => Self {
-                scale: [0, 1, 3, 5, 7, 8, 10],
+                scale: super::synth::scale(mood),
                 progression: if alternate {
                     [0, 1, 6, 1, 0, 5, 1, 0]
                 } else {
@@ -52,7 +52,7 @@ impl Style {
                 max_step: 5,
             },
             Mood::Melancholic => Self {
-                scale: [0, 2, 3, 5, 7, 8, 10],
+                scale: super::synth::scale(mood),
                 progression: if alternate {
                     [0, 5, 2, 6, 3, 5, 4, 0]
                 } else {
@@ -171,44 +171,70 @@ fn intensity(bar: usize, energy: f64) -> f64 {
     (curve * energy).clamp(0.02, 1.0)
 }
 
+/// The bar's bass line: the groove's rhythm on the chord's root, its octave
+/// and fifth, and a step that leads into the next chord when it changes.
 fn bass(
     tracks: &mut [Vec<Note>; 3],
     rng: &mut Rng,
     style: Style,
-    root: i32,
+    harmony: (i32, i32, i32),
     bar: usize,
     power: f64,
 ) {
+    let (tonic, degree, next) = harmony;
+    let root = style.pitch(tonic, degree);
+    let fifth = style.pitch(tonic, degree + 4) - 12;
     let slots: &[usize] = match style.groove {
-        Groove::Drift => &[0, 8],
-        Groove::Bounce => &[0, 3, 8, 12],
-        Groove::Drive => &[0, 4, 8, 12],
-        Groove::Ballad => &[0, 10],
+        Groove::Drift => &[0, 8, 14],
+        Groove::Bounce => &[0, 3, 6, 8, 11, 14],
+        Groove::Drive => &[0, 2, 4, 6, 8, 10, 12, 14],
+        Groove::Ballad => &[0, 6, 10],
     };
+    let length = |slot: usize, i: usize| {
+        let gap = slots.get(i + 1).copied().unwrap_or(16) - slot;
+        match style.groove {
+            Groove::Ballad | Groove::Drift => gap,
+            Groove::Bounce | Groove::Drive => gap.clamp(1, 2),
+        }
+    };
+    let changing = next != degree && bar % 2 == 1;
     for (i, slot) in slots.iter().enumerate() {
+        let last = i + 1 == slots.len();
         if i > 0
-            && f64::from(u32::try_from(rng.range(100)).expect("percentage")) > 55.0 + power * 40.0
+            && !last
+            && f64::from(u32::try_from(rng.range(100)).expect("percentage")) > 50.0 + power * 45.0
         {
             continue;
         }
-        let pitch = if i > 0 && rng.range(4) == 0 {
-            root + 12
-        } else {
+        let pitch = if last && changing {
+            // Approach the next root from a scale step below or above.
+            let below = style.pitch(tonic, next - 1);
+            let above = style.pitch(tonic, next + 1);
+            if (below - root).abs() <= (above - root).abs() {
+                below
+            } else {
+                above
+            }
+        } else if i == 0 {
             root
+        } else {
+            match rng.range(5) {
+                0 => root + 12,
+                1 if power > 0.4 => fifth.max(root - 12),
+                _ => root,
+            }
         };
         tracks[0].push(Note {
             pitch,
             start: bar * 16 + *slot,
-            len: match style.groove {
-                Groove::Ballad | Groove::Drift => 6,
-                Groove::Bounce => 2,
-                Groove::Drive => 3,
-            },
-            velocity: velocity(42.0 + power * 42.0),
+            len: length(*slot, i),
+            velocity: velocity(46.0 + power * 40.0 + if i == 0 { 10.0 } else { 0.0 }),
         });
     }
 }
 
+/// The arpeggio: chord tones in a pattern that changes with the section, from
+/// sparse in the intro to a climbing run in the rise.
 fn accompaniment(
     tracks: &mut [Vec<Note>; 3],
     style: Style,
@@ -218,23 +244,26 @@ fn accompaniment(
     power: f64,
 ) {
     // Stack thirds in the global scale: a major mood still has minor chords.
-    // Keep a repeating picking pattern rather than shuffling every bar.
-    let contour = [0, 2, 4, 2, 0, 4, 2, 4];
-    let gap = if matches!(style.groove, Groove::Bounce | Groove::Drive) {
-        2
-    } else {
-        4
+    let section = bar / 8;
+    let (gap, contour): (usize, &[i32]) = match section {
+        0 => (4, &[0, 4, 2, 4]),
+        2 if power > 0.45 => (1, &[0, 2, 4, 7, 9, 7, 4, 2]),
+        3 => (2, &[7, 4, 2, 0, 4, 2, 0, 2]),
+        _ if matches!(style.groove, Groove::Bounce | Groove::Drive) => {
+            (2, &[0, 2, 4, 2, 0, 4, 2, 4])
+        }
+        _ => (2, &[0, 4, 2, 4, 7, 4, 2, 4]),
     };
     for slot in (0..16).step_by(gap) {
-        if bar < 4 && slot % 8 != 0 || bar >= 28 && slot >= 8 {
+        if bar < 4 && slot % 8 != 0 || bar >= 30 && slot >= 8 {
             continue;
         }
         let offset = contour[(slot / gap) % contour.len()];
         tracks[1].push(Note {
             pitch: style.pitch(tonic + 12, degree + offset),
             start: bar * 16 + slot,
-            len: gap - 1,
-            velocity: velocity(24.0 + power * 32.0 + if slot % 8 == 0 { 8.0 } else { 0.0 }),
+            len: if gap == 1 { 1 } else { gap - 1 },
+            velocity: velocity(24.0 + power * 34.0 + if slot % 4 == 0 { 10.0 } else { 0.0 }),
         });
     }
 }
@@ -313,13 +342,23 @@ pub(super) fn compose(settings: &Settings) -> [Vec<Note>; 3] {
     let mut tracks: [Vec<Note>; 3] = std::array::from_fn(|_| Vec::new());
     for bar in 0..BARS {
         let power = intensity(bar, settings.energy);
-        let degree = if bar >= 30 {
-            0
-        } else {
-            style.progression[(bar / 2) % 8]
+        let harmony_at = |bar: usize| {
+            if bar >= 30 {
+                0
+            } else {
+                style.progression[(bar / 2) % 8]
+            }
         };
-        let root = style.pitch(tonic, degree);
-        bass(&mut tracks, &mut bass_rng, style, root, bar, power);
+        let degree = harmony_at(bar);
+        let next = harmony_at((bar + 1) % BARS);
+        bass(
+            &mut tracks,
+            &mut bass_rng,
+            style,
+            (tonic, degree, next),
+            bar,
+            power,
+        );
         accompaniment(&mut tracks, style, tonic, degree, bar, power);
         let motif = if bar / 8 == 2 { motif_b } else { motif_a };
         melody(&mut tracks, style, motif, (tonic, degree), bar, power);

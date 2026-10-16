@@ -1,5 +1,18 @@
 # Changelog
 
+- Make the Sound Lab's songs sound full: a new stereo engine with band-limited
+  oscillators, filtered and enveloped patches, a chords layer that follows the
+  bass, a synthesized drum kit with fills and swing, reverb, echo, ducking and
+  a limited master at about -14 LUFS. Bass lines step into chord changes and the
+  arpeggio changes pattern by section. Exported songs loop without a seam, and
+  existing `.sindrisong` files load and play through the new engine; the mixer
+  gains a chords channel and a Room & echo control.
+
+- Fix silent games on phones: browser audio now plays through Web Audio,
+  unlocked by the first tap, click or key — including a finger lifting off a
+  touch stick — and resumed inside the gesture, as iOS Safari requires. The
+  platformer's sounds play on a phone.
+
 - Open the Sound Lab in a browser at `/examples/sound-lab/`, on a phone as
   well as a desktop: the same effects designer and music workstation, drawn
   with WebGL2, with Web Audio playback and downloads in place of a project

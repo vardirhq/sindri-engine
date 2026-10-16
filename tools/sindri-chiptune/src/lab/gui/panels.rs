@@ -100,9 +100,23 @@ impl ComposerApp {
     pub(super) fn instrument_rack(&mut self, ui: &mut egui::Ui) {
         theme::card(ui, "MIXER", ACCENT, |ui| {
             ui.small("Sounds and levels change live; notes stay intact.");
-            for (index, title) in ["BASS", "ARPEGGIO", "LEAD", "DRUMS"].iter().enumerate() {
+            ui.horizontal(|ui| {
+                ui.label(RichText::new("Room & echo").color(theme::MUTED));
+                ui.add(egui::Slider::new(&mut self.settings.rack.space, 0.0..=1.0).max_decimals(2))
+                    .on_hover_text("How much reverb and echo the whole mix has");
+            });
+            ui.small("Chords are read from the bass line, so they follow your edits.");
+            for (index, title) in ["BASS", "ARPEGGIO", "LEAD", "DRUMS", "CHORDS"]
+                .iter()
+                .enumerate()
+            {
                 let color = TRACK_COLORS[index];
-                let track = &mut self.settings.rack.tracks[index];
+                let rack = &mut self.settings.rack;
+                let track = if index == 4 {
+                    &mut rack.pad
+                } else {
+                    &mut rack.tracks[index]
+                };
                 ui.add_space(4.0);
                 egui::Frame::new()
                     .fill(theme::WELL)

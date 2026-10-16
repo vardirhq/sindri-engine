@@ -152,7 +152,7 @@ component. The platformer's hero runs and jumps by actions, and
 
 ### WAV / Ogg / MP3, native + browser + silent backends
 
-Validated audio assets play through Rodio/CPAL natively, media elements in the browser, and a recording silent backend in tests.
+Validated audio assets play through Rodio/CPAL natively, Web Audio in the browser, and a recording silent backend in tests.
 
 Engine ✅ · Editor ✅ · Decay ✅ · Proof ✅ — parity row *WAV / Ogg / MP3, native + browser + silent backends*
 
@@ -165,9 +165,12 @@ Engine ✅ · Editor ✅ · Decay ✅ · Proof ✅ — parity row *WAV / Ogg / M
 
 Audio is a platform service rather than simulation state. Encoded WAV, Ogg, and
 MP3 assets are identified and validated by the asset layer, then registered
-with an `AudioBackend`. Native hosts use Rodio/CPAL, browser hosts use media
-elements with an explicit user-interaction unlock, and headless tests use a
-silent backend that records every request without needing a sound device. The
+with an `AudioBackend`. Native hosts use Rodio/CPAL; browser hosts decode each
+clip once into a Web Audio buffer and play it through one `AudioContext`,
+unlocked by the first key, click or touch — resumed inside the gesture's own
+handler, which iOS Safari requires, and on a finger lifting as well as landing,
+so a phone player holding the platformer's stick still hears it. Headless tests
+use a silent backend that records every request without needing a sound device. The
 shared boundary supports one-shot and looping playback plus per-voice stop and
 global pause, resume, and stop.
 
