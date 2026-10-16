@@ -42,6 +42,15 @@ impl BrowserProjectLoader {
         })
     }
 
+    /// How many of the project's bytes have arrived, of how many, once the
+    /// manifest has said how many there are.
+    pub(crate) fn progress(&self) -> Option<(u64, u64)> {
+        match self.phase.as_ref()? {
+            LoadPhase::Manifest(_) => None,
+            LoadPhase::Assets(loaders) => Some((loaders.loaded_bytes, loaders.total_bytes)),
+        }
+    }
+
     pub(crate) fn poll(&mut self) -> Result<Option<ProjectAssets>, PlayerError> {
         let Some(phase) = self.phase.take() else {
             return Ok(None);
@@ -87,6 +96,10 @@ pub(crate) struct ProjectLoaders {
     shader_ids: Vec<String>,
     /// Kept, because what was asked for is also what has to be collected.
     manifest: AssetManifest,
+    /// The bytes of every asset that has arrived, by the manifest's count.
+    loaded_bytes: u64,
+    /// The bytes of every asset the manifest records.
+    total_bytes: u64,
 }
 
 fn queue_config(manifest: &AssetManifest, kind: AssetKind) -> AssetLoadQueueConfig {
@@ -186,6 +199,7 @@ impl ProjectLoaders {
             styles.request(AssetId::new(id.as_str())?)?;
         }
 
+        let total_bytes = manifest.assets().map(|(_, entry)| entry.bytes).sum();
         Ok(Self {
             scene,
             scripts,
@@ -201,21 +215,24 @@ impl ProjectLoaders {
             sheets,
             tile_sets,
             manifest,
+            loaded_bytes: 0,
+            total_bytes,
         })
     }
 
     pub(crate) fn poll(&mut self) -> Result<Option<ProjectAssets>, PlayerError> {
-        poll_loader(&mut self.scene)?;
-        poll_loader(&mut self.scripts)?;
-        poll_loader(&mut self.models)?;
-        poll_loader(&mut self.textures)?;
-        poll_loader(&mut self.fonts)?;
-        poll_loader(&mut self.audio)?;
-        poll_loader(&mut self.sheets)?;
-        poll_loader(&mut self.tile_sets)?;
-        poll_loader(&mut self.prefabs)?;
-        poll_loader(&mut self.profiles)?;
-        poll_loader(&mut self.styles)?;
+        let manifest = &self.manifest;
+        self.loaded_bytes += poll_counting(&mut self.scene, manifest)?
+            + poll_counting(&mut self.scripts, manifest)?
+            + poll_counting(&mut self.models, manifest)?
+            + poll_counting(&mut self.textures, manifest)?
+            + poll_counting(&mut self.fonts, manifest)?
+            + poll_counting(&mut self.audio, manifest)?
+            + poll_counting(&mut self.sheets, manifest)?
+            + poll_counting(&mut self.tile_sets, manifest)?
+            + poll_counting(&mut self.prefabs, manifest)?
+            + poll_counting(&mut self.profiles, manifest)?
+            + poll_counting(&mut self.styles, manifest)?;
 
         if self.scene.outstanding()
             + self.scripts.outstanding()
@@ -326,6 +343,24 @@ pub(crate) fn poll_loader<D: AssetDecoder>(loader: &mut AssetLoader<D>) -> Resul
         }
     }
     Ok(())
+}
+
+/// Moves a loader on, as [`poll_loader`] does, and says how many bytes the
+/// assets that arrived amount to, by the manifest's count of each.
+fn poll_counting<D: AssetDecoder>(
+    loader: &mut AssetLoader<D>,
+    manifest: &AssetManifest,
+) -> Result<u64, PlayerError> {
+    let mut bytes = 0;
+    for outcome in loader.poll() {
+        match outcome {
+            AssetLoadOutcome::Ready(id) => {
+                bytes += manifest.get(&id).map_or(0, |entry| entry.bytes);
+            }
+            AssetLoadOutcome::Failed(error) => return Err(error.into()),
+        }
+    }
+    Ok(bytes)
 }
 
 pub(crate) fn loaded<D>(loader: &AssetLoader<D>, id: &str) -> Result<D::Asset, PlayerError>

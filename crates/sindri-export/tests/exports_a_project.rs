@@ -117,6 +117,13 @@ fn the_manifest_sits_outside_the_hashed_directory() {
             .exists()
     );
     assert!(scratch.0.join("index.html").is_file());
+    // The loading screen's typefaces, beside the page that asks for them.
+    for (path, bytes) in sindri_export::LOADING_FONTS {
+        assert_eq!(
+            std::fs::read(scratch.0.join(path)).expect("the font is written"),
+            bytes
+        );
+    }
 }
 
 /// A changed asset must not land in a directory anyone has already cached.

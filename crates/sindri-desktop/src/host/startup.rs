@@ -23,6 +23,31 @@ pub const FAILURE_EVENT: &str = "sindri:failed";
 #[cfg(target_arch = "wasm32")]
 pub const READY_EVENT: &str = "sindri:ready";
 
+/// The event name a browser host dispatches on `window` each time what the
+/// application is waiting for moves on, with `{ loaded, total }` as its detail.
+#[cfg(target_arch = "wasm32")]
+pub const PROGRESS_EVENT: &str = "sindri:progress";
+
+/// Tells the page how far loading has got. Best effort, as a failure is.
+#[cfg(target_arch = "wasm32")]
+pub(super) fn announce_progress(loaded: u64, total: u64) {
+    let Some(window) = web_sys::window() else {
+        return;
+    };
+    let detail = js_sys::Object::new();
+    // As numbers rather than BigInts: a page divides them, and a project is
+    // nowhere near the 2^53 bytes where a double stops counting exactly.
+    #[allow(clippy::cast_precision_loss)]
+    let (loaded, total) = (loaded as f64, total as f64);
+    let _ = js_sys::Reflect::set(&detail, &"loaded".into(), &loaded.into());
+    let _ = js_sys::Reflect::set(&detail, &"total".into(), &total.into());
+    let init = web_sys::CustomEventInit::new();
+    init.set_detail(&detail);
+    if let Ok(event) = web_sys::CustomEvent::new_with_event_init_dict(PROGRESS_EVENT, &init) {
+        let _ = window.dispatch_event(&event);
+    }
+}
+
 /// Tells the page the game is on screen. Best effort, as a failure is.
 #[cfg(target_arch = "wasm32")]
 pub(super) fn announce_ready() {

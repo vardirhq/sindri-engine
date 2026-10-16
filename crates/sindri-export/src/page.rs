@@ -7,6 +7,57 @@
 /// The page, with `{{name}}`, `{{base}}` and `{{build}}` still in it.
 pub const PAGE_TEMPLATE: &str = include_str!("page.html");
 
+/// The loading screen's animations, inlined into the page where `{{loading}}`
+/// stands: one function across four files, opened by the first and closed by
+/// the last.
+pub const LOADING_SCRIPT: &str = concat!(
+    include_str!("loading/runtime.js"),
+    include_str!("loading/concepts.js"),
+    include_str!("loading/brand.js"),
+    include_str!("loading/play.js"),
+);
+
+/// How a brand may come on screen after the Sindri mark hands over to it.
+/// `random` picks one of the others each time the page opens, never the one
+/// that browser showed last; `fade` is a plain rise.
+pub const ENTRANCES: [&str; 7] = [
+    "random",
+    "fade",
+    "forge",
+    "blueprint",
+    "pixel",
+    "arcade",
+    "achievement",
+];
+
+/// A brand's entrance as `sindri.toml` names it, checked: `random` when it
+/// names none, and the reason when it names one that is not.
+pub fn entrance(named: Option<&str>) -> Result<String, String> {
+    let named = named.unwrap_or("random");
+    if ENTRANCES.contains(&named) {
+        Ok(named.to_owned())
+    } else {
+        Err(format!(
+            "entrance {named:?} is not one of {}",
+            ENTRANCES.join(", ")
+        ))
+    }
+}
+
+/// The typefaces the loading screen draws in, as the paths the page asks for
+/// them by and their bytes. Both are OFL-1.1; their licences sit beside them in
+/// `fonts/`.
+pub const LOADING_FONTS: [(&str, &[u8]); 2] = [
+    (
+        "fonts/pixelify-sans.woff2",
+        include_bytes!("../fonts/pixelify-sans.woff2"),
+    ),
+    (
+        "fonts/jetbrains-mono.woff2",
+        include_bytes!("../fonts/jetbrains-mono.woff2"),
+    ),
+];
+
 /// A project's own brand, shown on the loading screen after the Sindri mark.
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct Splash {
@@ -18,6 +69,8 @@ pub struct Splash {
     pub background: Option<String>,
     /// How long it shows at least.
     pub seconds: f64,
+    /// How it comes on screen: one of [`ENTRANCES`].
+    pub entrance: String,
 }
 
 impl Splash {
@@ -103,7 +156,10 @@ pub fn page_with_splash(
         || (String::new(), String::new()),
         |splash| brand_stage(name, splash),
     );
+    // The script first, so nothing a project wrote -- a name, a title -- can
+    // spell `{{loading}}` and be replaced by it.
     PAGE_TEMPLATE
+        .replace("{{loading}}", LOADING_SCRIPT)
         .replace("{{brand}}", &brand)
         .replace("{{brand_attributes}}", &brand_attributes)
         .replace("{{name}}", &escape(name))
@@ -137,7 +193,11 @@ fn brand_stage(name: &str, splash: &Splash) -> (String, String) {
         "    <div class=\"stage brand\">\n{}\n    </div>",
         parts.join("\n")
     );
-    let mut attributes = format!(r#" data-brand-seconds="{}""#, splash.seconds);
+    let mut attributes = format!(
+        r#" data-brand-seconds="{}" data-brand-entrance="{}""#,
+        splash.seconds,
+        escape(&splash.entrance)
+    );
     if let Some(background) = &splash.background {
         attributes.push_str(&format!(
             r#" style="--brand-background: {}""#,
@@ -296,6 +356,7 @@ mod build_stamp_tests {
             caption: Some("presents".to_owned()),
             background: Some("#101820".to_owned()),
             seconds: 2.5,
+            entrance: "forge".to_owned(),
         };
         let file = splash.image_file().expect("an image names a file");
         assert!(
@@ -308,7 +369,77 @@ mod build_stamp_tests {
         assert!(page.contains("Vardir &lt;Games&gt;</div>"), "{page}");
         assert!(page.contains(r#"data-brand-seconds="2.5""#), "{page}");
         assert!(page.contains("--brand-background: #101820"), "{page}");
+        assert!(page.contains(r#"data-brand-entrance="forge""#), "{page}");
         assert!(!page.contains("{{"), "{page}");
+    }
+
+    #[test]
+    fn the_loading_screen_plays_one_of_every_concept_at_random() {
+        let page = page_for("Orbital", "/");
+        for concept in [
+            "forge",
+            "blueprint",
+            "pixel",
+            "cube",
+            "arcade",
+            "diorama",
+            "boss",
+            "loot",
+            "puzzle",
+            "achievement",
+            "levelup",
+            "fog",
+            "speedrun",
+            "torch",
+        ] {
+            assert!(
+                page.contains(&format!("  {concept}: ")),
+                "{concept} is missing"
+            );
+        }
+        assert!(page.contains("Math.random()"), "{page}");
+        // The still mark stays for reduced motion, and for the error page,
+        // which borrows its wordmark.
+        assert!(page.contains("prefers-reduced-motion"), "{page}");
+        assert!(page.contains(r#"class="wordmark""#), "{page}");
+        for (path, bytes) in super::LOADING_FONTS {
+            assert!(page.contains(&format!(r#"url("{path}")"#)), "{path}");
+            assert!(bytes.starts_with(b"wOF2"), "{path} is not woff2");
+        }
+    }
+
+    #[test]
+    fn an_entrance_is_one_the_page_knows() {
+        assert_eq!(super::entrance(None).as_deref(), Ok("random"));
+        assert_eq!(super::entrance(Some("pixel")).as_deref(), Ok("pixel"));
+        let refused = super::entrance(Some("explode")).expect_err("not an entrance");
+        assert!(
+            refused.contains("\"explode\" is not one of random, fade"),
+            "{refused}"
+        );
+        // Every one the script draws, and nothing it does not.
+        for name in super::ENTRANCES.iter().filter(|name| **name != "random") {
+            assert!(
+                super::LOADING_SCRIPT.contains(&format!("{name}: ")),
+                "{name} has no entrance in the script"
+            );
+        }
+    }
+
+    #[test]
+    fn the_bar_measures_the_real_wait() {
+        let page = page_for("Orbital", "/");
+        // The host's code, counted as it downloads, then the project's
+        // assets as the host announces them.
+        assert!(page.contains("module_or_path: await counted("), "{page}");
+        assert!(
+            page.contains(r#"addEventListener("sindri:download""#),
+            "{page}"
+        );
+        assert!(
+            page.contains(r#"addEventListener("sindri:progress""#),
+            "{page}"
+        );
     }
 
     #[test]

@@ -101,6 +101,14 @@ impl ProjectExport {
             build,
             self.splash.as_ref(),
         );
+        for (path, bytes) in crate::page::LOADING_FONTS {
+            let font_path = root.join(path);
+            if let Some(parent) = font_path.parent() {
+                create(parent)?;
+            }
+            std::fs::write(&font_path, bytes)
+                .map_err(|error| ExportError::unwritable(&font_path, &error))?;
+        }
         let page_path = root.join("index.html");
         std::fs::write(&page_path, page)
             .map_err(|error| ExportError::unwritable(&page_path, &error))?;

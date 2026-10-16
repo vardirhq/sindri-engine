@@ -8,7 +8,24 @@
        a single path in the page changing. -->
   <base href="{{base}}">
   <title>{{name}}</title>
+  <!-- The loading screen's two typefaces, written beside the page rather than
+       fetched from a font service, so a game's page asks nobody else for
+       anything and its loading screen looks the same offline. -->
+  <link rel="preload" href="fonts/pixelify-sans.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/jetbrains-mono.woff2" as="font" type="font/woff2" crossorigin>
   <style>
+    @font-face {
+      font-family: "Pixelify Sans";
+      font-weight: 400 700;
+      font-display: block;
+      src: url("fonts/pixelify-sans.woff2") format("woff2");
+    }
+    @font-face {
+      font-family: "JetBrains Mono";
+      font-weight: 400 700;
+      font-display: block;
+      src: url("fonts/jetbrains-mono.woff2") format("woff2");
+    }
     html, body { margin: 0; height: 100%; background: #12161f; color: #f2f5fb; }
     /* The canvas keeps the game's own aspect and sits in the middle, rather
        than stretching, because a game stretched to a window is a game whose
@@ -213,8 +230,10 @@
     #sindri-input[data-visible="true"] { display: block; }
     /* The loading screen: the Sindri mark from the moment the page opens,
        then the project's own brand if it has one, until the host announces
-       the game is on screen. Plain CSS and SVG, so it shows before any script
-       or wasm has arrived -- which is the whole of the wait it covers. */
+       the game is on screen. The still mark is plain CSS and SVG; an inline
+       script replaces it with an animation as the page is parsed, so either
+       way it shows before any wasm has arrived -- which is the whole of the
+       wait it covers. */
     #sindri-loading {
       --ink: #0d1117; --cream: #e6e1d4; --line: #2a3038; --muted: #8a8580;
       --accent: #f0c050; --loop: 3s;
@@ -306,6 +325,22 @@
     /* One, two, then three dots across a loop. */
     #sindri-loading .dots span:nth-child(2) { animation: sindri-dot-two var(--loop) steps(1) infinite; }
     #sindri-loading .dots span:nth-child(3) { animation: sindri-dot-three var(--loop) steps(1) infinite; }
+    /* One of the animated concepts, drawn by the script below over the whole
+       screen. While it plays, the still mark it replaces is not shown; with
+       reduced motion it never starts, and the still mark is the screen. */
+    #sindri-loading .motion { position: absolute; inset: 0; overflow: hidden; transition: opacity .45s ease; }
+    #sindri-loading[data-motion] > .grid,
+    #sindri-loading[data-motion] > .glow,
+    #sindri-loading[data-motion] > .stage.sindri,
+    #sindri-loading[data-motion] > .stage.brand { display: none; }
+    /* The still bar, once the wait has been measured, shows how much of it
+       is over rather than sweeping. */
+    #sindri-loading[data-progress] .sweep {
+      animation: none;
+      width: calc(var(--progress) * 100%);
+      background: var(--accent);
+      transition: width .2s ease;
+    }
     #sindri-loading .brand img { max-width: 100%; max-height: 40vh; object-fit: contain; }
     #sindri-loading .brand-title { font: 700 clamp(1.4rem, 5vmin, 3rem)/1.1 system-ui, sans-serif; }
     #sindri-loading .brand-caption { font: 400 clamp(.85rem, 2vmin, 1.1rem)/1.4 system-ui, sans-serif; opacity: .75; }
@@ -365,23 +400,39 @@
 {{brand}}
   </div>
   <script>
+{{loading}}
+  </script>
+  <script>
     // Its own ordinary script, ahead of the module: if the host fails to load
     // at all, this still runs, and the page still says what went wrong.
     // The loading screen stays until the host says the game is on screen. The
-    // Sindri mark shows for at least a moment, so a fast load is not a flash;
-    // a project's brand, when it has one, follows it and shows for as long as
-    // the project asked, and the game is revealed after whichever is later.
+    // Sindri mark shows for at least one whole loop of its animation, so even
+    // a fast load sees it through, or a moment when it is still because the
+    // player asked for less motion; a project's brand, when it has one,
+    // follows it and shows for as long as the project asked, and the game is
+    // revealed after whichever is later.
     const loading = document.querySelector("#sindri-loading");
     const opened = performance.now();
-    const SINDRI_AT_LEAST = 900;
-    const brandFor = Number(loading?.dataset.brandSeconds ?? 0) * 1000;
+    const SINDRI_AT_LEAST = Number(loading?.dataset.motionMs ?? 900);
+    // A brand's time starts after the handoff to it, and is never shorter
+    // than its entrance, so the game cannot cut one off halfway.
+    const brandFor = Number(loading?.dataset.brandLeadMs ?? 0) + Math.max(
+      Number(loading?.dataset.brandSeconds ?? 0) * 1000,
+      Number(loading?.dataset.brandEntranceMs ?? 0),
+    );
     const hasBrand = Boolean(loading?.querySelector(".stage.brand"));
     let brandSince = null;
     let ready = false;
     const reveal = () => {
       if (!loading || loading.dataset.done === "true") return;
       loading.dataset.done = "true";
-      setTimeout(() => loading.remove(), 500);
+      // Gone, and only then said so: the host keeps the game paused while
+      // the screen is over it, so a game's first seconds are ones a player
+      // sees rather than ones that played under the fade.
+      setTimeout(() => {
+        loading.remove();
+        dispatchEvent(new Event("sindri:revealed"));
+      }, 500);
     };
     const settle = () => {
       if (!ready || !loading) return;
@@ -404,8 +455,31 @@
     }
     addEventListener("sindri:ready", () => {
       ready = true;
+      measured(1);
       settle();
     }, { once: true });
+
+    // How much of the wait is over, for the bar: the host's code arriving is
+    // the first part, the project's assets the second, and the last sliver is
+    // the GPU starting and the first frame. Each is measured, not guessed --
+    // except a host served compressed, whose full size the browser does not
+    // say, where the bytes that have arrived are eased towards their share.
+    const HOST_SHARE = 0.6;
+    const ASSETS_END = 0.95;
+    let shown = 0;
+    const measured = (fraction) => {
+      if (!loading) return;
+      shown = Math.max(shown, Math.min(1, fraction));
+      loading.dataset.progress = shown.toFixed(4);
+      loading.style.setProperty("--progress", shown.toFixed(4));
+    };
+    addEventListener("sindri:download", ({ detail: { loaded, total } }) => {
+      measured(HOST_SHARE * (total ? loaded / total : 1 - Math.exp(-loaded / 6e6)));
+    });
+    addEventListener("sindri:downloaded", () => measured(HOST_SHARE));
+    addEventListener("sindri:progress", ({ detail: { loaded, total } }) => {
+      measured(HOST_SHARE + (ASSETS_END - HOST_SHARE) * (total ? loaded / total : 1));
+    });
   </script>
   <section id="sindri-error" role="alert" aria-live="assertive">
     <div class="grid"></div>
@@ -567,6 +641,33 @@
       ],
     };
 
+    // The host's wasm, fetched here rather than by `init`, so the loading
+    // screen can count it arriving: on a first visit it is most of the wait.
+    // Handed on as a response, so the browser still compiles it as it
+    // streams. A failed or unreadable response is handed on as it is, and
+    // fails in `init` exactly as it would have.
+    const counted = async (url) => {
+      const response = await fetch(url);
+      if (!response.ok || !response.body || typeof TransformStream !== "function") return response;
+      // Compressed on the wire, the length is of the compressed bytes and the
+      // body arrives decompressed, so there is no total to divide by.
+      const encoding = response.headers.get("content-encoding") ?? "identity";
+      const total = encoding === "identity" ? Number(response.headers.get("content-length") ?? 0) : 0;
+      let loaded = 0;
+      const counting = new TransformStream({
+        transform(chunk, controller) {
+          loaded += chunk.byteLength;
+          dispatchEvent(new CustomEvent("sindri:download", { detail: { loaded, total } }));
+          controller.enqueue(chunk);
+        },
+      });
+      return new Response(response.body.pipeThrough(counting), {
+        status: response.status,
+        statusText: response.statusText,
+        headers: response.headers,
+      });
+    };
+
     if (!(canvas instanceof HTMLCanvasElement)) {
       fail({
         reason: "canvas",
@@ -595,7 +696,8 @@
         // a stale host runs new content and every symptom looks like a live bug
         // in code that was already fixed.
         const { default: init } = await import("./pkg/{{host}}.js{{cachebust}}");
-        await init({ module_or_path: "./pkg/{{host}}_bg.wasm{{cachebust}}" });
+        await init({ module_or_path: await counted("./pkg/{{host}}_bg.wasm{{cachebust}}") });
+        dispatchEvent(new Event("sindri:downloaded"));
       } catch (error) {
         console.error(error);
         fail({

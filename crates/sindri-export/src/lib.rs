@@ -9,6 +9,7 @@
 //!
 //! ```text
 //! index.html                 the page, rewritten for the host's base path
+//! fonts/                     the loading screen's two typefaces
 //! pkg/                       the WebAssembly host, as wasm-pack built it
 //! assets/sindri.manifest     small, and never cached
 //! assets/<content hash>/     every asset, and cacheable for ever
@@ -27,7 +28,10 @@ mod shaders;
 mod write;
 
 pub use gather::{GatheredAsset, ProjectExport};
-pub use page::{HOST_MODULE, PAGE_TEMPLATE, Splash, page_for, page_for_host, page_with_splash};
+pub use page::{
+    HOST_MODULE, LOADING_FONTS, LOADING_SCRIPT, PAGE_TEMPLATE, Splash, page_for, page_for_host,
+    page_with_splash,
+};
 pub use write::{ExportError, WrittenExport};
 
 /// Where the page and the host go, relative to the export root.

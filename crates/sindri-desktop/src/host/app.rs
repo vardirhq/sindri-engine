@@ -203,6 +203,17 @@ pub trait DesktopApp: Sized + 'static {
         true
     }
 
+    /// How much of what the application is waiting for has arrived, as
+    /// `(loaded, total)` in whatever unit it counts — bytes, for a project
+    /// fetched over the network — while it is not yet [`ready`](Self::ready).
+    ///
+    /// A browser host announces each change as `sindri:progress`, so a page's
+    /// loading screen can show the real wait rather than a bar that only
+    /// moves. `None`, the default, says nothing is being counted.
+    fn progress(&self) -> Option<(u64, u64)> {
+        None
+    }
+
     /// Encodes and submits one frame. The host presents what this drew into.
     fn render(
         &mut self,
