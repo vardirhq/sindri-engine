@@ -10,7 +10,7 @@
 //! which is checked against the environment here so that every name on the
 //! surface has a description and no description outlives its name.
 
-use decay_semantic::{Environment, ExternalSymbol, FunctionType, Type};
+use decay_semantic::{Environment, ExternalSymbol, FunctionType, NUMBER, Type};
 use serde_json::{Value, json};
 use sindri_decay::reference::{self, Entry};
 
@@ -209,7 +209,7 @@ fn symbol_of(name: &str, symbol: &ExternalSymbol, reference: Option<Entry>) -> S
 /// How a type is written in Decay source, so a reader can copy it into a script.
 pub(crate) fn type_name(ty: &Type) -> String {
     match ty {
-        Type::F32 => "f32".to_owned(),
+        Type::Number => NUMBER.to_owned(),
         Type::Bool => "bool".to_owned(),
         Type::String => "String".to_owned(),
         Type::Unit => "unit".to_owned(),

@@ -331,7 +331,7 @@ impl Parser<'_> {
             } else {
                 self.error_here(
                     crate::codes::SyntaxCode::StateFieldsOnly,
-                    "a state holds only fields: `var name: f32 = 0.0;`",
+                    "a state holds only fields: `var name: number = 0.0;`",
                 );
                 // Past the offending token first: recovery stops at `fn`,
                 // which is exactly what a state cannot hold.

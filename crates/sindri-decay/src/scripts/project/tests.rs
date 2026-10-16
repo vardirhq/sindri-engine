@@ -36,15 +36,15 @@ fn a_script_s_fields_and_messages_are_declared_with_their_types() {
     assert_eq!(
         bolt.fields,
         [
-            ("damage".to_owned(), Type::F32),
-            ("speed".to_owned(), Type::F32),
+            ("damage".to_owned(), Type::Number),
+            ("speed".to_owned(), Type::Number),
             ("heading".to_owned(), Type::Vec2),
             ("label".to_owned(), Type::String),
             ("owner".to_owned(), Type::Named("Entity".to_owned())),
         ]
     );
     // Lifecycle functions are the engine's to call, not messages.
-    assert_eq!(bolt.messages, [("hit".to_owned(), vec![Type::F32])]);
+    assert_eq!(bolt.messages, [("hit".to_owned(), vec![Type::Number])]);
 }
 
 #[test]
@@ -72,7 +72,8 @@ fn a_mistake_about_another_script_is_a_compile_error() {
     assert!(said("let b = Bolt.on(this.entity); b.damage = \"lots\";").contains("cannot assign"));
     assert!(said("let b = Bolt.on(this.entity); b.hit();").contains("expected 1 argument"));
     assert!(
-        said("let b = Bolt.on(this.entity); let x = b.hit(1.0) + 1.0;").contains("expected `f32`")
+        said("let b = Bolt.on(this.entity); let x = b.hit(1.0) + 1.0;")
+            .contains("expected `number`")
     );
     assert!(said("let b = Blot.on(this.entity);").contains("unknown name `Blot`"));
 }

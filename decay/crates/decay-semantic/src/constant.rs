@@ -37,7 +37,7 @@ impl ConstValue {
     #[must_use]
     pub fn ty(&self) -> Type {
         match self {
-            Self::Number(_) => Type::F32,
+            Self::Number(_) => Type::Number,
             Self::Bool(_) => Type::Bool,
             Self::Text(_) => Type::String,
             Self::Variant { enumeration, .. } => Type::Named(enumeration.clone()),
@@ -166,14 +166,14 @@ impl Folder<'_, '_> {
         let declared = Type::from_ref(&declaration.ty);
         let allowed = matches!(
             declared,
-            Type::F32 | Type::Bool | Type::String | Type::Color
+            Type::Number | Type::Bool | Type::String | Type::Color
         ) || matches!(&declared, Type::Named(enumeration) if (self.variants)(enumeration).is_some());
         if !allowed {
             self.error(
                 Code::ConstantType,
                 declaration.ty.span,
                 format!(
-                    "a constant holds `f32`, `bool`, `String`, `Color` or an enum, not `{}`",
+                    "a constant holds `number`, `bool`, `String`, `Color` or an enum, not `{}`",
                     declared.display_name()
                 ),
             );

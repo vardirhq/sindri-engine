@@ -47,7 +47,7 @@ fn a_handler_s_unwritten_parameter_takes_the_event_s_type() {
 #[test]
 fn an_event_from_the_host_is_known_without_a_declaration() {
     let mut environment = Environment::new();
-    environment.add_event("Wave", vec![Type::F32]);
+    environment.add_event("Wave", vec![Type::Number]);
     let found = messages(
         "script Director { fn update(dt: f32) { Wave.emit(3.0); } }
          script Hud { on Wave(number: f32) { } }",
@@ -78,11 +78,11 @@ fn every_mistake_about_an_event_is_refused() {
     for expected in [
         "duplicate declaration `Hit`",
         "event parameter `amount` needs a type",
-        "cannot assign `String` to `f32`",
+        "cannot assign `String` to `number`",
         "expected 1 argument(s), found 0",
         "`event Hit` has no member `emt`",
         "unknown name `Missed`",
-        "`Hit` carries `f32` here, not `bool`",
+        "`Hit` carries `number` here, not `bool`",
         "`Hit` carries 1 value(s), and this handler takes 2",
         "unknown event `Missed`",
     ] {

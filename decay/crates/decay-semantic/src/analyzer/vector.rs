@@ -41,7 +41,7 @@ impl Analyzer<'_, '_> {
         }
         for argument in args {
             let actual = self.expr_type(argument);
-            self.require_type(&actual, &Type::F32, argument.span);
+            self.require_type(&actual, &Type::Number, argument.span);
         }
         self.value_members
             .insert(span, ValueMember::Construct(dimensions));
@@ -62,7 +62,7 @@ impl Analyzer<'_, '_> {
                 self.value_members
                     .insert(span, ValueMember::Component(index));
             }
-            return Type::F32;
+            return Type::Number;
         }
         match VectorOp::named(field) {
             Some((op, 0)) => {
@@ -154,7 +154,7 @@ impl Analyzer<'_, '_> {
         if left_type.dimensions().is_none() && right_type.dimensions().is_none() {
             return None;
         }
-        let number = |ty: &Type| matches!(ty, Type::F32 | Type::Unknown);
+        let number = |ty: &Type| matches!(ty, Type::Number | Type::Unknown);
         let vector = if left_type.dimensions().is_some() {
             left_type.clone()
         } else {

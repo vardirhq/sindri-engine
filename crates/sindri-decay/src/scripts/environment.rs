@@ -56,23 +56,23 @@ pub fn environment() -> Environment {
         crate::surface::QUAT,
         crate::surface::QUAT_FIELDS
             .into_iter()
-            .map(|name| (name.to_owned(), Type::F32))
+            .map(|name| (name.to_owned(), Type::Number))
             .collect(),
     );
 
     for (name, _) in CONSTANTS {
-        environment.add_value(*name, Type::F32);
+        environment.add_value(*name, Type::Number);
     }
     for (name, function) in FUNCTIONS {
         environment.add_function(
             *name,
             FunctionType {
                 params: match function {
-                    HostFunction::Unary(_) => vec![Type::F32],
-                    HostFunction::Binary(_) => vec![Type::F32, Type::F32],
-                    HostFunction::Ternary(_) => vec![Type::F32, Type::F32, Type::F32],
+                    HostFunction::Unary(_) => vec![Type::Number],
+                    HostFunction::Binary(_) => vec![Type::Number, Type::Number],
+                    HostFunction::Ternary(_) => vec![Type::Number, Type::Number, Type::Number],
                 },
-                return_type: Type::F32,
+                return_type: Type::Number,
             },
         );
     }
@@ -97,9 +97,9 @@ pub fn environment() -> Environment {
         game = game.with_function(
             *name,
             FunctionType {
-                params: vec![Type::String, Type::F32],
+                params: vec![Type::String, Type::Number],
                 return_type: match call {
-                    GameCall::Get => Type::F32,
+                    GameCall::Get => Type::Number,
                     GameCall::Set => Type::Unit,
                 },
             },
@@ -110,7 +110,7 @@ pub fn environment() -> Environment {
 
     let mut time = HostType::new();
     for (name, _) in TIME_VALUES {
-        time = time.with_value(*name, Type::F32);
+        time = time.with_value(*name, Type::Number);
     }
     environment.add_type(TIME, time);
     environment.add_value(TIME, Type::Named(TIME.to_owned()));
@@ -146,28 +146,31 @@ fn add_profile_surface(environment: &mut Environment) {
     for (name, call) in PROFILE_CALLS {
         let (params, return_type) = match call {
             ProfileCall::Name | ProfileCall::Kind => (vec![profile.clone()], Type::String),
-            ProfileCall::Number => (vec![profile.clone(), Type::String, Type::F32], Type::F32),
+            ProfileCall::Number => (
+                vec![profile.clone(), Type::String, Type::Number],
+                Type::Number,
+            ),
             ProfileCall::Text => (
                 vec![profile.clone(), Type::String, Type::String],
                 Type::String,
             ),
             ProfileCall::Flag => (vec![profile.clone(), Type::String, Type::Bool], Type::Bool),
-            ProfileCall::Count => (vec![profile.clone(), Type::String], Type::F32),
+            ProfileCall::Count => (vec![profile.clone(), Type::String], Type::Number),
             ProfileCall::NumberAt => (
                 vec![
                     profile.clone(),
                     Type::String,
-                    Type::F32,
+                    Type::Number,
                     Type::String,
-                    Type::F32,
+                    Type::Number,
                 ],
-                Type::F32,
+                Type::Number,
             ),
             ProfileCall::TextAt => (
                 vec![
                     profile.clone(),
                     Type::String,
-                    Type::F32,
+                    Type::Number,
                     Type::String,
                     Type::String,
                 ],
@@ -177,7 +180,7 @@ fn add_profile_surface(environment: &mut Environment) {
                 vec![
                     profile.clone(),
                     Type::String,
-                    Type::F32,
+                    Type::Number,
                     Type::String,
                     Type::Bool,
                 ],
@@ -212,12 +215,12 @@ pub(super) fn add_animation_surface(environment: &mut Environment) {
             FunctionType {
                 params: match call {
                     AnimationCall::Play => vec![entity(), Type::String],
-                    AnimationCall::Speed => vec![entity(), Type::F32],
+                    AnimationCall::Speed => vec![entity(), Type::Number],
                     _ => vec![entity()],
                 },
                 return_type: match call {
                     AnimationCall::Finished => Type::Bool,
-                    AnimationCall::Frame => Type::F32,
+                    AnimationCall::Frame => Type::Number,
                     AnimationCall::Clip => Type::String,
                     AnimationCall::Play
                     | AnimationCall::Restart
@@ -241,12 +244,12 @@ pub(super) fn add_sequence_surface(environment: &mut Environment) {
             FunctionType {
                 params: match call {
                     SequenceCall::Play | SequenceCall::Cued => vec![entity(), Type::String],
-                    SequenceCall::Speed => vec![entity(), Type::F32],
+                    SequenceCall::Speed => vec![entity(), Type::Number],
                     _ => vec![entity()],
                 },
                 return_type: match call {
                     SequenceCall::Finished | SequenceCall::Cued => Type::Bool,
-                    SequenceCall::Time => Type::F32,
+                    SequenceCall::Time => Type::Number,
                     SequenceCall::Name => Type::String,
                     SequenceCall::Play
                     | SequenceCall::Restart
@@ -274,13 +277,13 @@ pub(super) fn add_ui_surface(environment: &mut Environment) {
             FunctionType {
                 params: match call {
                     UiCall::Text | UiCall::SetInputText => vec![entity(), Type::String],
-                    UiCall::Numbers => vec![entity(), Type::F32, Type::F32],
+                    UiCall::Numbers => vec![entity(), Type::Number, Type::Number],
                     UiCall::Number
                     | UiCall::Fill
                     | UiCall::SliderSetValue
                     | UiCall::SetScrollOffset
                     | UiCall::SetSelected => {
-                        vec![entity(), Type::F32]
+                        vec![entity(), Type::Number]
                     }
                     UiCall::SetChecked => vec![entity(), Type::Bool],
                     _ => vec![entity()],
@@ -291,7 +294,7 @@ pub(super) fn add_ui_surface(environment: &mut Environment) {
                     | UiCall::Selected
                     | UiCall::Caret
                     | UiCall::SelectionStart
-                    | UiCall::SelectionEnd => Type::F32,
+                    | UiCall::SelectionEnd => Type::Number,
                     UiCall::InputText => Type::String,
                     UiCall::Position | UiCall::Size => Type::Vec2,
                     UiCall::Hovered
@@ -321,12 +324,12 @@ pub(super) fn add_random_surface(environment: &mut Environment) {
             FunctionType {
                 params: match call {
                     RandomCall::Value => Vec::new(),
-                    RandomCall::Range | RandomCall::Int => vec![Type::F32, Type::F32],
+                    RandomCall::Range | RandomCall::Int => vec![Type::Number, Type::Number],
                     RandomCall::Pick => vec![Type::array_of(Type::Named(ENTITY.to_owned()))],
-                    RandomCall::Seed => vec![Type::F32],
+                    RandomCall::Seed => vec![Type::Number],
                 },
                 return_type: match call {
-                    RandomCall::Value | RandomCall::Range | RandomCall::Int => Type::F32,
+                    RandomCall::Value | RandomCall::Range | RandomCall::Int => Type::Number,
                     RandomCall::Pick => Type::Named(ENTITY.to_owned()),
                     RandomCall::Seed => Type::Unit,
                 },
@@ -345,13 +348,13 @@ pub(super) fn add_save_surface(environment: &mut Environment) {
             *name,
             FunctionType {
                 params: match call {
-                    SaveCall::Number | SaveCall::SetNumber => vec![Type::String, Type::F32],
+                    SaveCall::Number | SaveCall::SetNumber => vec![Type::String, Type::Number],
                     SaveCall::Flag | SaveCall::SetFlag => vec![Type::String, Type::Bool],
                     SaveCall::Has => vec![Type::String],
                     _ => Vec::new(),
                 },
                 return_type: match call {
-                    SaveCall::Number => Type::F32,
+                    SaveCall::Number => Type::Number,
                     SaveCall::Flag
                     | SaveCall::Has
                     | SaveCall::IsNew
@@ -401,15 +404,15 @@ pub(super) fn add_effects_surface(environment: &mut Environment) {
                     EffectsCall::Burst | EffectsCall::Play | EffectsCall::Stop => {
                         vec![Type::Named(ENTITY.to_owned())]
                     }
-                    EffectsCall::Emit => vec![Type::Named(ENTITY.to_owned()), Type::F32],
+                    EffectsCall::Emit => vec![Type::Named(ENTITY.to_owned()), Type::Number],
                     EffectsCall::BurstAt => {
-                        vec![Type::Named(ENTITY.to_owned()), Type::F32, Type::F32]
+                        vec![Type::Named(ENTITY.to_owned()), Type::Number, Type::Number]
                     }
                     EffectsCall::Live => Vec::new(),
                 },
                 // How many flecks were made, which is fewer than asked for when
                 // the pool is full. A game can watch it and turn itself down.
-                return_type: Type::F32,
+                return_type: Type::Number,
             },
         );
     }
@@ -422,35 +425,35 @@ pub(super) fn add_audio_surface(environment: &mut Environment) {
         .with_function(
             "play",
             FunctionType {
-                params: vec![Type::String, Type::F32],
+                params: vec![Type::String, Type::Number],
                 return_type: Type::Unit,
             },
         )
         .with_function(
             "loop",
             FunctionType {
-                params: vec![Type::String, Type::F32],
+                params: vec![Type::String, Type::Number],
                 return_type: Type::Unit,
             },
         )
         .with_function(
             "play_on",
             FunctionType {
-                params: vec![Type::String, Type::String, Type::F32],
+                params: vec![Type::String, Type::String, Type::Number],
                 return_type: Type::Unit,
             },
         )
         .with_function(
             "loop_on",
             FunctionType {
-                params: vec![Type::String, Type::String, Type::F32],
+                params: vec![Type::String, Type::String, Type::Number],
                 return_type: Type::Unit,
             },
         )
         .with_function(
             "set_volume",
             FunctionType {
-                params: vec![Type::String, Type::F32],
+                params: vec![Type::String, Type::Number],
                 return_type: Type::Unit,
             },
         )
@@ -458,7 +461,7 @@ pub(super) fn add_audio_surface(environment: &mut Environment) {
             "volume",
             FunctionType {
                 params: vec![Type::String],
-                return_type: Type::F32,
+                return_type: Type::Number,
             },
         )
         .with_function(
@@ -499,7 +502,7 @@ pub(super) fn describe_node(node: &Node) -> Type {
         Node::Leaf(crate::surface::Leaf::Light(crate::surface::light::LightField::Enabled)) => {
             Type::Bool
         }
-        Node::Leaf(_) => Type::F32,
+        Node::Leaf(_) => Type::Number,
         Node::Handle(_) => Type::Named(ENTITY.to_owned()),
     }
 }

@@ -18,7 +18,7 @@ impl Analyzer<'_, '_> {
             self.error(
                 Code::FunctionNotCalled,
                 span,
-                format!("`{field}` on `f32` needs arguments -- call it: `.{field}(...)`"),
+                format!("`{field}` on `number` needs arguments -- call it: `.{field}(...)`"),
             );
         } else {
             self.error(Code::UnknownMember, span, missing_member(field));
@@ -48,5 +48,5 @@ fn missing_member(field: &str) -> String {
         .map(|(_, name, _)| format!("`{name}(...)`"))
         .collect::<Vec<_>>()
         .join(", ");
-    format!("`f32` has no member `{field}`; it has {operations}")
+    format!("`number` has no member `{field}`; it has {operations}")
 }

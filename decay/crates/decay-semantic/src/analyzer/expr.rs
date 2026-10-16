@@ -11,7 +11,7 @@ impl Analyzer<'_, '_> {
     pub(super) fn expr_type(&mut self, expr: &Expr) -> Type {
         match &expr.kind {
             ExprKind::Identifier(name) => self.resolve_identifier(name, expr.span),
-            ExprKind::Number(_) => Type::F32,
+            ExprKind::Number(_) => Type::Number,
             ExprKind::String(_) => Type::String,
             ExprKind::Bool(_) => Type::Bool,
             ExprKind::Null => Type::Null,
@@ -22,8 +22,8 @@ impl Analyzer<'_, '_> {
                     // A vector negates to the vector pointing the other way.
                     UnaryOp::Negate if inner_type.dimensions().is_some() => inner_type,
                     UnaryOp::Negate => {
-                        self.require_type(&inner_type, &Type::F32, inner.span);
-                        Type::F32
+                        self.require_type(&inner_type, &Type::Number, inner.span);
+                        Type::Number
                     }
                     UnaryOp::Not => {
                         self.require_type(&inner_type, &Type::Bool, inner.span);
@@ -64,7 +64,7 @@ impl Analyzer<'_, '_> {
             return self.map_index_type(key, value, index);
         }
         let index_type = self.expr_type(index);
-        self.require_type(&index_type, &Type::F32, index.span);
+        self.require_type(&index_type, &Type::Number, index.span);
         match &object_type {
             Type::Array(element) => (**element).clone(),
             Type::Unknown => Type::Unknown,
@@ -92,8 +92,8 @@ impl Analyzer<'_, '_> {
                 self.arithmetic_type((&left_type, left.span), op, (&right_type, right.span))
             }
             BinaryOp::Less | BinaryOp::LessEqual | BinaryOp::Greater | BinaryOp::GreaterEqual => {
-                self.require_type(&left_type, &Type::F32, left.span);
-                self.require_type(&right_type, &Type::F32, right.span);
+                self.require_type(&left_type, &Type::Number, left.span);
+                self.require_type(&right_type, &Type::Number, right.span);
                 Type::Bool
             }
             BinaryOp::Fallback => {
@@ -138,9 +138,9 @@ impl Analyzer<'_, '_> {
         if let Some(vector) = self.vector_arithmetic(left, op, right) {
             return vector;
         }
-        self.require_type(left.0, &Type::F32, left.1);
-        self.require_type(right.0, &Type::F32, right.1);
-        Type::F32
+        self.require_type(left.0, &Type::Number, left.1);
+        self.require_type(right.0, &Type::Number, right.1);
+        Type::Number
     }
 
     pub(super) fn assignment_type(&mut self, target: &Expr, op: AssignOp, value: &Expr) -> Type {

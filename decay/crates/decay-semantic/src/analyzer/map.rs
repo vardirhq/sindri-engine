@@ -125,7 +125,7 @@ impl Analyzer<'_, '_> {
     ) -> Type {
         if crate::types::is_length(field) {
             self.value_members.insert(span, ValueMember::Length);
-            return Type::F32;
+            return Type::Number;
         }
         if MapOp::named(field).is_some() {
             self.error(

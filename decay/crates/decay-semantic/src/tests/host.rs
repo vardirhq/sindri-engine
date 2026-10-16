@@ -9,7 +9,7 @@ fn host_globals_are_injected_without_engine_dependencies() {
         "delta",
         FunctionType {
             params: vec![],
-            return_type: Type::F32,
+            return_type: Type::Number,
         },
     );
     environment.add_value("Input", Type::Named("Input".to_owned()));
@@ -42,9 +42,9 @@ fn a_described_type_checks_its_members() {
     environment.add_type(
         "Vec3",
         HostType::new()
-            .with_value("x", Type::F32)
-            .with_value("y", Type::F32)
-            .with_value("z", Type::F32),
+            .with_value("x", Type::Number)
+            .with_value("y", Type::Number)
+            .with_value("z", Type::Number),
     );
     environment.add_type(
         "Transform",
@@ -99,7 +99,7 @@ fn a_members_type_is_enforced_like_any_other() {
         analysis
             .diagnostics
             .iter()
-            .any(|d| d.message.contains("cannot assign `f32` to `bool`")),
+            .any(|d| d.message.contains("cannot assign `number` to `bool`")),
         "{:?}",
         analysis.diagnostics
     );
@@ -152,7 +152,7 @@ fn a_host_method_checks_its_arguments() {
         HostType::new().with_function(
             "add_impulse",
             FunctionType {
-                params: vec![Type::F32, Type::F32],
+                params: vec![Type::Number, Type::Number],
                 return_type: Type::Unit,
             },
         ),
@@ -207,7 +207,7 @@ fn reaching_for_a_method_says_what_to_write_instead() {
 fn a_subtype_goes_where_its_supertype_does_and_not_back() {
     let mut environment = Environment::new();
     environment.add_type("Entity", HostType::new().with_value("alive", Type::Bool));
-    environment.add_type("Bolt", HostType::new().with_value("damage", Type::F32));
+    environment.add_type("Bolt", HostType::new().with_value("damage", Type::Number));
     environment.add_supertype("Bolt", "Entity");
     let said = |body: &str| {
         analyze_with_environment(
@@ -235,13 +235,15 @@ fn a_held_reference_to_this_script_is_not_this() {
     let mut environment = Environment::new();
     environment.add_type(
         "Echo",
-        HostType::new().with_value("loud", Type::F32).with_function(
-            "ping",
-            FunctionType {
-                params: vec![Type::F32],
-                return_type: Type::Unit,
-            },
-        ),
+        HostType::new()
+            .with_value("loud", Type::Number)
+            .with_function(
+                "ping",
+                FunctionType {
+                    params: vec![Type::Number],
+                    return_type: Type::Unit,
+                },
+            ),
     );
     let said = |body: &str| {
         analyze_with_environment(

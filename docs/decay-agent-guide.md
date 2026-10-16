@@ -43,17 +43,17 @@ This is the most important Sindri/Decay distinction.
 | `Event.emit(args)` / `on Event(args) { }` | Emits a declared event to every script handling it, delivered after the pass | During gameplay |
 | `Timer(seconds)` in a field, read with `.done` / `.left` / `.progress` | A countdown that runs down on its own before each `update` | Any time |
 | `shared fn name(...)` at the top of any `.decay` file (a plain top-level `fn` is that file's only) | A helper every script calls by name, with no `this` | Any time |
-| `const LIMIT: f32 = 3.0;` / `shared const VIEW_SIZE: f32 = 11.0;` at the top of a file | A value worked out when the project compiles, the same everywhere; a scene cannot tune it | Any time |
-| `struct Card { name: String, weight: f32 = 1.0 }`, `Card(name: "Arc")`, `card.weight` | Values that belong together, as one; copied where assigned; a field with a default may be left out | Any time |
+| `const LIMIT: number = 3.0;` / `shared const VIEW_SIZE: number = 11.0;` at the top of a file | A value worked out when the project compiles, the same everywhere; a scene cannot tune it | Any time |
+| `struct Card { name: String, weight: number = 1.0 }`, `Card(name: "Arc")`, `card.weight` | Values that belong together, as one; copied where assigned; a field with a default may be left out | Any time |
 | `fn heavier(other: Card) -> bool { return this.weight > other.weight; }` after a struct's fields, `card.heavier(best)` | A function asked of one value; `this` is a copy, so return a changed one rather than writing `this.x` | Any time |
 | `const HOT: Color = Color("#ff8800");`, `this.sprite.tint = HOT.lerp(c, t)`, `this.sprite.tint.a = 0.5` | A colour, held and assigned whole or by channel; the engine's tints, fills and strokes are this type | Any time |
-| `fn find() -> f32? { ... return null; }`, `x ?? 0.0`, `if x == null { return; }` | A value that may be missing, instead of `-1`; used as its type only after a fallback or a check on a `let`/parameter | Any time |
-| `var m: Map<String, f32> = [:];`, `m["arc"] = 1.0`, `m.get(k, 0.0)`, `for k in m.keys()` | Values found by key, in the order keys were first set; `m[k]` for a key it must have | Any time |
-| `var xs: List<f32> = [];`, `xs.push(v)`, `for i in 0..n` | A list the script owns, changed in place; a range walked without building one | Any time |
+| `fn find() -> number? { ... return null; }`, `x ?? 0.0`, `if x == null { return; }` | A value that may be missing, instead of `-1`; used as its type only after a fallback or a check on a `let`/parameter | Any time |
+| `var m: Map<String, number> = [:];`, `m["arc"] = 1.0`, `m.get(k, 0.0)`, `for k in m.keys()` | Values found by key, in the order keys were first set; `m[k]` for a key it must have | Any time |
+| `var xs: List<number> = [];`, `xs.push(v)`, `for i in 0..n` | A list the script owns, changed in place; a range walked without building one | Any time |
 | `"Score " + score`, `s.contains("x")`, `s.slice(0, 3)` | Joins text with numbers, flags, vectors and variants; asks text by character | Any time |
 | `n.fixed(2)`, `n.padded(2)` | A number as text with exactly 2 decimals (`"12.50"`), or whole and led with zeros (`"05"`) | Any time |
 | `enum Phase { Lobby, Play }` in any file, `match p { Phase.Lobby => { } _ => { } }`, `let s = match p { Phase.Lobby => "wait", _ => "go" };` | A named set of values in place of numbers; `match` must cover every variant or end with `_`, and gives a value where one goes | Any time |
-| `Game.field` (declared with `state Game { var field: f32 = 0.0; }`) | Reads or writes a value the whole game shares, checked | Any time |
+| `Game.field` (declared with `state Game { var field: number = 0.0; }`) | Reads or writes a value the whole game shares, checked | Any time |
 
 Prefer the typed forms in the last sixteen rows: a misspelt name or a wrong value
 is a compile error rather than a silent fallback.

@@ -57,18 +57,18 @@ fn every_mistake_about_a_list_is_refused() {
          }"#,
     );
     for expected in [
-        "a list holds one type: this is `String`, and the first element is `f32`",
-        "cannot assign `List<String>` to `List<f32>`",
+        "a list holds one type: this is `String`, and the first element is `number`",
+        "cannot assign `List<String>` to `List<number>`",
         "`fixed` is a `let`, so it cannot change -- declare it `var` if `push` can change it",
         "`fixed` is a `let`, so it cannot change -- declare it `var` if an element can be set",
-        "cannot assign `String` to `f32`",
-        "`List<f32>` has no member `shove`; it has `length`, and `push`",
+        "cannot assign `String` to `number`",
+        "`List<number>` has no member `shove`; it has `length`, and `push`",
         "`push` on a list is a function -- call it: `.push(...)`",
         "`length` is a property, not a function -- write `.length`",
         "only a list in a variable or a field of this script can change",
         "expected `;` after binding",
-        "expected `f32`, found `bool`",
-        "expected `f32`, found `String`",
+        "expected `number`, found `bool`",
+        "expected `number`, found `String`",
     ] {
         assert!(
             found.iter().any(|message| message.contains(expected)),

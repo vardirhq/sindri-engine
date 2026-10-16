@@ -21,10 +21,10 @@ fn signature(params: Vec<Type>, return_type: Type) -> FunctionType {
 #[must_use]
 pub fn vector_op_signature(op: VectorOp, vector: &Type) -> FunctionType {
     match op {
-        VectorOp::Length => signature(vec![], Type::F32),
+        VectorOp::Length => signature(vec![], Type::Number),
         VectorOp::Normalized => signature(vec![], vector.clone()),
-        VectorOp::Dot | VectorOp::Distance => signature(vec![vector.clone()], Type::F32),
-        VectorOp::Lerp => signature(vec![vector.clone(), Type::F32], vector.clone()),
+        VectorOp::Dot | VectorOp::Distance => signature(vec![vector.clone()], Type::Number),
+        VectorOp::Lerp => signature(vec![vector.clone(), Type::Number], vector.clone()),
     }
 }
 
@@ -32,15 +32,15 @@ pub fn vector_op_signature(op: VectorOp, vector: &Type) -> FunctionType {
 #[must_use]
 pub fn string_op_signature(op: StringOp) -> FunctionType {
     match op {
-        StringOp::Length => signature(vec![], Type::F32),
+        StringOp::Length => signature(vec![], Type::Number),
         StringOp::Uppercase | StringOp::Lowercase | StringOp::Trimmed => {
             signature(vec![], Type::String)
         }
         StringOp::Contains | StringOp::StartsWith | StringOp::EndsWith => {
             signature(vec![Type::String], Type::Bool)
         }
-        StringOp::Find => signature(vec![Type::String], Type::F32),
-        StringOp::Slice => signature(vec![Type::F32, Type::F32], Type::String),
+        StringOp::Find => signature(vec![Type::String], Type::Number),
+        StringOp::Slice => signature(vec![Type::Number, Type::Number], Type::String),
         StringOp::Replace => signature(vec![Type::String, Type::String], Type::String),
     }
 }
@@ -49,7 +49,7 @@ pub fn string_op_signature(op: StringOp) -> FunctionType {
 #[must_use]
 pub fn number_op_signature(op: NumberOp) -> FunctionType {
     match op {
-        NumberOp::Fixed | NumberOp::Padded => signature(vec![Type::F32], Type::String),
+        NumberOp::Fixed | NumberOp::Padded => signature(vec![Type::Number], Type::String),
     }
 }
 
@@ -59,12 +59,12 @@ pub fn list_op_signature(op: ListOp, element: &Type) -> FunctionType {
     match op {
         ListOp::Push => signature(vec![element.clone()], Type::Unit),
         ListOp::Pop => signature(vec![], element.clone()),
-        ListOp::Insert => signature(vec![Type::F32, element.clone()], Type::Unit),
-        ListOp::RemoveAt => signature(vec![Type::F32], element.clone()),
+        ListOp::Insert => signature(vec![Type::Number, element.clone()], Type::Unit),
+        ListOp::RemoveAt => signature(vec![Type::Number], element.clone()),
         ListOp::Clear => signature(vec![], Type::Unit),
         ListOp::Contains => signature(vec![element.clone()], Type::Bool),
-        ListOp::IndexOf => signature(vec![element.clone()], Type::F32),
-        ListOp::SetAt => signature(vec![Type::F32, element.clone()], element.clone()),
+        ListOp::IndexOf => signature(vec![element.clone()], Type::Number),
+        ListOp::SetAt => signature(vec![Type::Number, element.clone()], element.clone()),
     }
 }
 
@@ -72,8 +72,8 @@ pub fn list_op_signature(op: ListOp, element: &Type) -> FunctionType {
 #[must_use]
 pub fn color_op_signature(op: ColorOp) -> FunctionType {
     match op {
-        ColorOp::Lerp => signature(vec![Type::Color, Type::F32], Type::Color),
-        ColorOp::WithAlpha => signature(vec![Type::F32], Type::Color),
+        ColorOp::Lerp => signature(vec![Type::Color, Type::Number], Type::Color),
+        ColorOp::WithAlpha => signature(vec![Type::Number], Type::Color),
         ColorOp::FromHex => signature(vec![Type::String], Type::Color),
     }
 }
@@ -96,6 +96,6 @@ pub fn map_op_signature(op: MapOp, key: &Type, value: &Type) -> FunctionType {
 pub const fn timer_property_type(property: TimerProperty) -> Type {
     match property {
         TimerProperty::Done => Type::Bool,
-        TimerProperty::Left | TimerProperty::Duration | TimerProperty::Progress => Type::F32,
+        TimerProperty::Left | TimerProperty::Duration | TimerProperty::Progress => Type::Number,
     }
 }

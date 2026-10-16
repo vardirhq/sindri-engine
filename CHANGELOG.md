@@ -1,5 +1,10 @@
 # Changelog
 
+- Spell Decay's numeric type `number`. It was always a 64-bit float; `f32`,
+  its first spelling, named the engine's storage and still works. Diagnostics,
+  hovers and the generated reference now say `number`. The decision, and when
+  an integer type would be added, is in `docs/decay-direction.md`.
+
 - Make generated songs sound composed rather than random: each section loops
   four chords, the melody is a motif developed in question-and-answer phrases
   with stepwise voice-leading and cadences, the theme returns note for note,

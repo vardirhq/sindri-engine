@@ -93,7 +93,7 @@ pub(crate) fn value_members(
             let dimensions = ty.dimensions().unwrap_or(2);
             let mut members: Vec<(String, ExternalSymbol)> = COMPONENTS[..dimensions]
                 .iter()
-                .map(|component| ((*component).to_owned(), value(Type::F32)))
+                .map(|component| ((*component).to_owned(), value(Type::Number)))
                 .collect();
             members.extend(
                 VectorOp::ALL.iter().map(|(op, name, _)| {
@@ -104,7 +104,7 @@ pub(crate) fn value_members(
         }
         Type::Color => CHANNELS
             .iter()
-            .map(|channel| ((*channel).to_owned(), value(Type::F32)))
+            .map(|channel| ((*channel).to_owned(), value(Type::Number)))
             .chain(ColorOp::ALL.iter().map(|(op, name, _)| {
                 (
                     (*name).to_owned(),
@@ -121,7 +121,7 @@ pub(crate) fn value_members(
             .map(|(op, name, _)| ((*name).to_owned(), member(string_op_signature(*op))))
             .collect(),
         Type::Map(key, value) => {
-            let mut members = vec![(LENGTH.to_owned(), self::value(Type::F32))];
+            let mut members = vec![(LENGTH.to_owned(), self::value(Type::Number))];
             members.extend(MapOp::ALL.iter().map(|(op, name, _)| {
                 // Every map operation is a call, `keys()` included.
                 let signature = map_op_signature(*op, key, value);
@@ -129,12 +129,12 @@ pub(crate) fn value_members(
             }));
             members
         }
-        Type::F32 => NumberOp::ALL
+        Type::Number => NumberOp::ALL
             .iter()
             .map(|(op, name, _)| ((*name).to_owned(), member(number_op_signature(*op))))
             .collect(),
         Type::Array(element) => {
-            let mut members = vec![(LENGTH.to_owned(), value(Type::F32))];
+            let mut members = vec![(LENGTH.to_owned(), value(Type::Number))];
             members.extend(ListOp::ALL.iter().map(|(op, name, _)| {
                 // Every list operation is a call, `pop()` included.
                 let signature = list_op_signature(*op, element);

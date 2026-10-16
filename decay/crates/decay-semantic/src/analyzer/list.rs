@@ -52,9 +52,9 @@ impl Analyzer<'_, '_> {
     pub(super) fn range_type(&mut self, start: &Expr, end: &Expr) -> Type {
         for side in [start, end] {
             let ty = self.expr_type(side);
-            self.require_type(&ty, &Type::F32, side.span);
+            self.require_type(&ty, &Type::Number, side.span);
         }
-        Type::F32
+        Type::Number
     }
 
     /// `list.op(args)`.
@@ -116,7 +116,7 @@ impl Analyzer<'_, '_> {
             return self.map_entry_target_type(object, key, value, index, target);
         }
         let index_type = self.expr_type(index);
-        self.require_type(&index_type, &Type::F32, index.span);
+        self.require_type(&index_type, &Type::Number, index.span);
         match &object_type {
             Type::Array(element) => {
                 self.check_list_place(object, "[]");

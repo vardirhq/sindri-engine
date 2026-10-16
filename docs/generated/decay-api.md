@@ -42,7 +42,7 @@ Names in scope without qualification. Decay has no imports, so each of these is 
 - `Gesture`: `Gesture` — What the player did with the mouse or a finger: a tap, a hold, a drag or a pinch. Works the same for both.
 - `Grid`: `Grid` — Grids of tiles, flat or stacked in layers like building blocks: what each cell holds, where objects stand on them, and paths across them.
 - `Input`: `Input` — Every way the player reaches the game, in one place. Start with `Input.Action`, which works the same whatever the player holds; `Input.Pointer`, `Input.Stick` and `Input.Gesture` for mouse and touch; `Input.Keyboard`, `Input.Touch` and `Input.Gamepad` for one device read directly. The calls directly on `Input` are the keyboard, kept for older scripts: prefer `Input.Keyboard`.
-- `PI`: `f32` — The number π (3.14159…): half a full turn when measuring angles in radians.
+- `PI`: `number` — The number π (3.14159…): half a full turn when measuring angles in radians.
 - `Physics`: `Physics` — 2D physics: moving objects with speed and pushes, and finding out what this script's object bumped into.
 - `Physics3d`: `Physics3d` — Independent 3D physics controls, indexed queries and copied last-step events. Requires a 3D physics host. Controls require an active body. Before synchronization, valid authored 3D bodies with nonempty primitive colliders or convex-model references accept ordered setters/impulses. Convex asset geometry, scaled hull mass and pending controls validate at scene synchronization; replay uses actual compound mass. Unconsumed requests expire after successful synchronization. Authored motion fields are unchanged, so structural rebuilds restore authored settings.
 - `Pointer`: `Pointer` — The mouse, or a finger on a touch screen, handled the same way so one game works on both.
@@ -52,28 +52,28 @@ Names in scope without qualification. Decay has no imports, so each of these is 
 - `Scene`: `Scene` — Scenes are a game's separate places or screens, such as a menu, a level or a shop. This asks which one is playing and moves to another.
 - `Sequence`: `Sequence` — Playing an object's sequences: choreography set up for it in the scene's Timeline, such as a title sliding in or a door opening, with named cues along the way.
 - `Stick`: `Stick` — A virtual joystick for touch screens: wherever a thumb lands becomes the centre, and dragging from there steers.
-- `TAU`: `f32` — The number τ (6.28318…), which is 2π: one full turn when measuring angles in radians.
+- `TAU`: `number` — The number τ (6.28318…), which is 2π: one full turn when measuring angles in radians.
 - `Time`: `Time` — Time in the game. A game runs as a series of frames, many times a second.
 - `Touch`: `Touch` — Every finger on a touch screen, numbered from 0, for games that need more than one finger.
 - `Tween`: `Tween` — Creates automatically playing gameplay tweens owned by the calling script. Copies alias playback state. Advance occurs before the owner's subsequent updates using script delta. No automatic property binding. Curves: linear, ease, ease-in, ease-out, ease-in-out. Finite endpoints and finite non-negative duration are required; zero duration completes immediately. Maximum 8192 retained handles per runner; dispose unused handles.
 - `Ui`: `Ui` — The interface drawn over the game: changing text and bars, and checking buttons and sliders.
 - `Viewport`: `Viewport` — The area of the screen the game is drawn in.
 - `World`: `World` — Finding, creating and removing the objects in a game. Every object in a scene (a player, an enemy, a button) is an entity.
-- `abs(value: f32)` → `f32` — The number without its minus sign: `abs(-3.0)` is `3`. Useful for distances and differences where only the size matters.
-- `atan2(y: f32, x: f32)` → `f32` — The angle pointing from the origin towards the point (x, y), in radians. Use it to turn something to face a direction: `atan2(dy, dx)`.
-- `ceil(value: f32)` → `f32` — Rounds up to a whole number: `ceil(2.1)` is `3`.
-- `clamp(value: f32, low: f32, high: f32)` → `f32` — Keeps a number between a lowest and a highest value: `clamp(hp, 0.0, 100.0)` never goes below 0 or above 100.
-- `cos(angle: f32)` → `f32` — The cosine of an angle in radians. With `sin`, turns an angle into a direction: `Vec2(cos(a), sin(a))`.
-- `exp(value: f32)` → `f32` — The number e raised to a power. Mostly used for smooth movement that looks the same at any frame rate: `1.0 - exp(-speed * dt)`.
-- `floor(value: f32)` → `f32` — Rounds down to a whole number: `floor(2.9)` is `2`.
-- `lerp(a: f32, b: f32, t: f32)` → `f32` — Blends between two numbers: `t` of 0 gives `a`, 1 gives `b`, and 0.5 gives halfway. Used for smooth movement and fades.
-- `max(a: f32, b: f32)` → `f32` — The larger of two numbers.
-- `min(a: f32, b: f32)` → `f32` — The smaller of two numbers.
+- `abs(value: number)` → `number` — The number without its minus sign: `abs(-3.0)` is `3`. Useful for distances and differences where only the size matters.
+- `atan2(y: number, x: number)` → `number` — The angle pointing from the origin towards the point (x, y), in radians. Use it to turn something to face a direction: `atan2(dy, dx)`.
+- `ceil(value: number)` → `number` — Rounds up to a whole number: `ceil(2.1)` is `3`.
+- `clamp(value: number, low: number, high: number)` → `number` — Keeps a number between a lowest and a highest value: `clamp(hp, 0.0, 100.0)` never goes below 0 or above 100.
+- `cos(angle: number)` → `number` — The cosine of an angle in radians. With `sin`, turns an angle into a direction: `Vec2(cos(a), sin(a))`.
+- `exp(value: number)` → `number` — The number e raised to a power. Mostly used for smooth movement that looks the same at any frame rate: `1.0 - exp(-speed * dt)`.
+- `floor(value: number)` → `number` — Rounds down to a whole number: `floor(2.9)` is `2`.
+- `lerp(a: number, b: number, t: number)` → `number` — Blends between two numbers: `t` of 0 gives `a`, 1 gives `b`, and 0.5 gives halfway. Used for smooth movement and fades.
+- `max(a: number, b: number)` → `number` — The larger of two numbers.
+- `min(a: number, b: number)` → `number` — The smaller of two numbers.
 - `print(value: unknown)` → `unit` — Writes a message to the log, for checking what a script is doing. Accepts any value; combine text and values with `+`: `print("hp " + hp)`.
-- `round(value: f32)` → `f32` — Rounds to the nearest whole number: `round(2.5)` is `3` and `round(-2.5)` is `-3`.
-- `sign(value: f32)` → `f32` — Whether a number is negative, zero or positive, as -1, 0 or 1. Handy for "which way is this moving?".
-- `sin(angle: f32)` → `f32` — The sine of an angle in radians. Good for bobbing and waving motion: `sin(Time.elapsed)`.
-- `sqrt(value: f32)` → `f32` — The square root of a number.
+- `round(value: number)` → `number` — Rounds to the nearest whole number: `round(2.5)` is `3` and `round(-2.5)` is `-3`.
+- `sign(value: number)` → `number` — Whether a number is negative, zero or positive, as -1, 0 or 1. Handy for "which way is this moving?".
+- `sin(angle: number)` → `number` — The sine of an angle in radians. Good for bobbing and waving motion: `sin(Time.elapsed)`.
+- `sqrt(value: number)` → `number` — The square root of a number.
 
 ## Vectors
 
@@ -81,24 +81,24 @@ Names in scope without qualification. Decay has no imports, so each of these is 
 
 ### `Vec2`
 
-- `x`: `f32`
-- `y`: `f32`
-- `length`: `f32`
+- `x`: `number`
+- `y`: `number`
+- `length`: `number`
 - `normalized`: `Vec2`
-- `dot(Vec2)` → `f32`
-- `distance(Vec2)` → `f32`
-- `lerp(Vec2, f32)` → `Vec2`
+- `dot(Vec2)` → `number`
+- `distance(Vec2)` → `number`
+- `lerp(Vec2, number)` → `Vec2`
 
 ### `Vec3`
 
-- `x`: `f32`
-- `y`: `f32`
-- `z`: `f32`
-- `length`: `f32`
+- `x`: `number`
+- `y`: `number`
+- `z`: `number`
+- `length`: `number`
 - `normalized`: `Vec3`
-- `dot(Vec3)` → `f32`
-- `distance(Vec3)` → `f32`
-- `lerp(Vec3, f32)` → `Vec3`
+- `dot(Vec3)` → `number`
+- `distance(Vec3)` → `number`
+- `lerp(Vec3, number)` → `Vec3`
 
 ## Timers
 
@@ -107,9 +107,9 @@ Names in scope without qualification. Decay has no imports, so each of these is 
 ### `Timer`
 
 - `done`: `bool`
-- `left`: `f32`
-- `duration`: `f32`
-- `progress`: `f32`
+- `left`: `number`
+- `duration`: `number`
+- `progress`: `number`
 
 ## Types
 
@@ -117,12 +117,12 @@ Names in scope without qualification. Decay has no imports, so each of these is 
 
 What the player means rather than what they pressed: the input actions the scene declares, such as `"jump"` or `"move"`, each bound to keys, buttons and sticks that can be changed while the game runs. A binding is written as text: `"key.Space"`, two sources for an axis (`"key.A/key.D"`), or four for a direction (`"key.W/key.S/key.A/key.D"`). A name the scene does not declare is an error.
 
-- `axis(name: String)` → `f32` — An axis action's value, from -1 to 1.
+- `axis(name: String)` → `number` — An axis action's value, from -1 to 1.
 - `bindings(name: String)` → `List<String>` — What an action is bound to now, as a list of binding texts.
 - `held(name: String)` → `bool` — Whether an action is being made now.
 - `last_pressed()` → `String` — The key, mouse button or controller button pressed this frame, as a source name such as `"key.J"`, or empty text: for a screen that waits for the key to rebind to.
 - `pressed(name: String)` → `bool` — Whether an action started this frame.
-- `rebind(name: String, index: f32, binding: String)` → `unit` — Replaces an action's binding at `index` with a binding text, or adds one at the next index. A binding that cannot make the action's kind is refused.
+- `rebind(name: String, index: number, binding: String)` → `unit` — Replaces an action's binding at `index` with a binding text, or adds one at the next index. A binding that cannot make the action's kind is refused.
 - `released(name: String)` → `bool` — Whether an action stopped this frame.
 - `vector(name: String)` → `Vec2` — A direction action's value, as a Vec2 with right and up positive.
 
@@ -131,64 +131,64 @@ What the player means rather than what they pressed: the input actions the scene
 Which block in a 3D block world the mouse or finger is pointing at, for building and digging games.
 
 - `hit`: `bool` — Whether the pointer is over a block. Always check this first: when it is false, every other `Aim` value is 0, which is a real position.
-- `place_x`: `f32` — Where a new block would go if placed now: the column of the empty space next to the side being pointed at.
-- `place_y`: `f32` — The row where a new block would go.
-- `place_z`: `f32` — The height level where a new block would go.
-- `x`: `f32` — The column of the block being pointed at.
-- `y`: `f32` — The row of the block being pointed at.
-- `z`: `f32` — The height level of the block being pointed at.
+- `place_x`: `number` — Where a new block would go if placed now: the column of the empty space next to the side being pointed at.
+- `place_y`: `number` — The row where a new block would go.
+- `place_z`: `number` — The height level where a new block would go.
+- `x`: `number` — The column of the block being pointed at.
+- `y`: `number` — The row of the block being pointed at.
+- `z`: `number` — The height level of the block being pointed at.
 
 ### `Animation`
 
 Playing an object's animations, such as walk or jump, set up for it in the scene.
 
 - `clip(entity: Entity)` → `String` — The name of the animation an object is playing.
-- `frame(entity: Entity)` → `f32` — Which picture of its animation an object is showing, counting from the start of the animation.
+- `frame(entity: Entity)` → `number` — Which picture of its animation an object is showing, counting from the start of the animation.
 - `is_finished(entity: Entity)` → `bool` — Whether an animation that plays once, such as an attack, has finished.
 - `play(entity: Entity, clip: String)` → `unit` — Plays one of an object's animations by name, such as `"walk"`. Calling it again with the animation already playing does nothing, so it is safe to call every frame.
 - `restart(entity: Entity)` → `unit` — Starts an object's current animation again from the beginning.
-- `set_speed(entity: Entity, speed: f32)` → `unit` — How fast an object's animations play: 1 is normal speed, 2 is twice as fast.
+- `set_speed(entity: Entity, speed: number)` → `unit` — How fast an object's animations play: 1 is normal speed, 2 is twice as fast.
 - `stop(entity: Entity)` → `unit` — Stops an object's animation.
 
 ### `Audio`
 
 Playing sound effects and music. Every sound goes through a bus — `"effects"`, `"music"`, or any other name — and every bus through `"master"`, so a settings screen can turn each down.
 
-- `loop(clip: String, volume: f32)` → `unit` — Plays a sound over and over until stopped, such as music, at a volume from 0 (silent) to 1 (full), through the `"music"` bus.
-- `loop_on(bus: String, clip: String, volume: f32)` → `unit` — Plays a sound over and over through a bus you name.
+- `loop(clip: String, volume: number)` → `unit` — Plays a sound over and over until stopped, such as music, at a volume from 0 (silent) to 1 (full), through the `"music"` bus.
+- `loop_on(bus: String, clip: String, volume: number)` → `unit` — Plays a sound over and over through a bus you name.
 - `pause_all()` → `unit` — Pauses every sound that is playing.
-- `play(clip: String, volume: f32)` → `unit` — Plays a sound once, at a volume from 0 (silent) to 1 (full), through the `"effects"` bus.
-- `play_on(bus: String, clip: String, volume: f32)` → `unit` — Plays a sound once through a bus you name.
+- `play(clip: String, volume: number)` → `unit` — Plays a sound once, at a volume from 0 (silent) to 1 (full), through the `"effects"` bus.
+- `play_on(bus: String, clip: String, volume: number)` → `unit` — Plays a sound once through a bus you name.
 - `resume_all()` → `unit` — Continues every paused sound.
-- `set_volume(bus: String, volume: f32)` → `unit` — Sets a bus's volume from 0 to 1, at once for every sound playing through it. `"master"` turns everything up or down.
+- `set_volume(bus: String, volume: number)` → `unit` — Sets a bus's volume from 0 to 1, at once for every sound playing through it. `"master"` turns everything up or down.
 - `stop_all()` → `unit` — Stops every sound that is playing.
-- `volume(bus: String)` → `f32` — A bus's volume as last set, or 1 for one never set.
+- `volume(bus: String)` → `number` — A bus's volume as last set, or 1 for one never set.
 
 ### `Camera`
 
 The game's camera: projection sizing, 3D orbit with obstruction pull-in, and engine-owned 2D follow, confinement and shake.
 
-- `add_trauma(amount: f32)` → `unit` — Adds impact trauma to the authored behavior camera. Bigger amounts shake harder, up to 1, and the authored shake fades by itself.
-- `bounds(min_x: f32, min_y: f32, max_x: f32, max_y: f32)` → `unit` — Confines the authored behavior camera to the given world-space rectangle.
+- `add_trauma(amount: number)` → `unit` — Adds impact trauma to the authored behavior camera. Bigger amounts shake harder, up to 1, and the authored shake fades by itself.
+- `bounds(min_x: number, min_y: number, max_x: number, max_y: number)` → `unit` — Confines the authored behavior camera to the given world-space rectangle.
 - `clear_bounds()` → `unit` — Removes runtime confinement from the authored behavior camera.
 - `clear_follow()` → `unit` — Stops the authored behavior camera following a target.
 - `clear_orbit(camera: Entity)` → `unit` — Removes an explicit camera's orbit while keeping its last pose. Any existing 2D camera behavior resumes.
-- `dead_zone(x: f32, y: f32)` → `unit` — Sets the follow dead-zone size for the authored behavior camera.
+- `dead_zone(x: number, y: number)` → `unit` — Sets the follow dead-zone size for the authored behavior camera.
 - `follow(target: Entity)` → `unit` — Makes the authored behavior camera follow an entity at runtime.
-- `follow_offset(x: f32, y: f32, z: f32)` → `unit` — Sets the world-space offset from the follow target used by the authored behavior camera.
-- `impact(amount: f32)` → `unit` — Shakes the authored behavior camera at least this hard, up to 1: a smaller impact while a bigger one is still shaking changes nothing, so many small hits in a frame do not add up to the biggest shake.
-- `max_speed(value: f32)` → `unit` — Sets the maximum follow speed of the authored behavior camera.
-- `orbit(camera: Entity, target: Entity, yaw: f32, pitch: f32, distance: f32)` → `unit` — Creates or retargets an explicit camera's engine-owned world-space orbit. Angles are radians; zero yaw is +Z behind the target, positive pitch is above it. Preserves offset, smoothing and collision settings. Target must be an active authored spatial entity, independent of the camera hierarchy.
-- `orbit_collision(camera: Entity, mask: f32, padding: f32)` → `unit` — Sets collider membership bits and world-unit pull-in padding below orbit distance. Mask must be a whole u32; zero disables queries. Sensors, the camera and target are excluded; a ray protects the sight line, not the near-plane volume.
+- `follow_offset(x: number, y: number, z: number)` → `unit` — Sets the world-space offset from the follow target used by the authored behavior camera.
+- `impact(amount: number)` → `unit` — Shakes the authored behavior camera at least this hard, up to 1: a smaller impact while a bigger one is still shaking changes nothing, so many small hits in a frame do not add up to the biggest shake.
+- `max_speed(value: number)` → `unit` — Sets the maximum follow speed of the authored behavior camera.
+- `orbit(camera: Entity, target: Entity, yaw: number, pitch: number, distance: number)` → `unit` — Creates or retargets an explicit camera's engine-owned world-space orbit. Angles are radians; zero yaw is +Z behind the target, positive pitch is above it. Preserves offset, smoothing and collision settings. Target must be an active authored spatial entity, independent of the camera hierarchy.
+- `orbit_collision(camera: Entity, mask: number, padding: number)` → `unit` — Sets collider membership bits and world-unit pull-in padding below orbit distance. Mask must be a whole u32; zero disables queries. Sensors, the camera and target are excluded; a ray protects the sight line, not the near-plane volume.
 - `orbit_offset(camera: Entity, offset: Vec3)` → `unit` — Sets the orbit focus offset in world units from the target's world position.
-- `orbit_smoothing(camera: Entity, rate: f32)` → `unit` — Sets exponential orbit position smoothing per second. Zero snaps. Obstruction pull-in remains immediate.
-- `orthographic_size(camera: Entity, size: f32)` → `unit` — Sets an explicitly selected orthographic camera's view size to a positive finite number. Works without camera behavior and preserves clipping, fit and unknown camera fields.
-- `pan_x`: `f32` — How far the camera view is moved sideways from where it was placed in the scene.
-- `pan_y`: `f32` — How far the camera view is moved up or down from where it was placed in the scene.
-- `pan_z`: `f32` — How far the camera view is moved forwards or backwards from where it was placed in the scene.
-- `perspective_fov(camera: Entity, degrees: f32)` → `unit` — Sets an explicit perspective camera's vertical field of view in degrees, strictly between 0 and 180. Preserves clipping and unknown fields; requires no behavior component.
-- `shake(strength: f32, frequency: f32, decay: f32)` → `unit` — Changes the authored behavior camera's shake strength, frequency, and trauma decay.
-- `smoothing(value: f32)` → `unit` — Sets how strongly the authored behavior camera smooths its follow movement.
+- `orbit_smoothing(camera: Entity, rate: number)` → `unit` — Sets exponential orbit position smoothing per second. Zero snaps. Obstruction pull-in remains immediate.
+- `orthographic_size(camera: Entity, size: number)` → `unit` — Sets an explicitly selected orthographic camera's view size to a positive finite number. Works without camera behavior and preserves clipping, fit and unknown camera fields.
+- `pan_x`: `number` — How far the camera view is moved sideways from where it was placed in the scene.
+- `pan_y`: `number` — How far the camera view is moved up or down from where it was placed in the scene.
+- `pan_z`: `number` — How far the camera view is moved forwards or backwards from where it was placed in the scene.
+- `perspective_fov(camera: Entity, degrees: number)` → `unit` — Sets an explicit perspective camera's vertical field of view in degrees, strictly between 0 and 180. Preserves clipping and unknown fields; requires no behavior component.
+- `shake(strength: number, frequency: number, decay: number)` → `unit` — Changes the authored behavior camera's shake strength, frequency, and trauma decay.
+- `smoothing(value: number)` → `unit` — Sets how strongly the authored behavior camera smooths its follow movement.
 
 ### `CharacterCarry3d`
 
@@ -263,20 +263,20 @@ A copied solid solver contact from the last fixed step, relative to the queried 
 - `entity`: `Entity` — The other entity touching the queried body.
 - `force`: `Vec2` — Total world impulse divided by the fixed step's seconds, as Vec2.
 - `normal`: `Vec2` — World-space unit push direction towards the queried body, as Vec2.
-- `normal_impulse`: `f32` — Nonnegative normal impulse from the last solve.
+- `normal_impulse`: `number` — Nonnegative normal impulse from the last solve.
 - `point`: `Vec2` — World-space midpoint of the two surface anchors, as Vec2.
-- `tangent_impulse`: `f32` — Signed friction impulse along Vec2(-normal.y, normal.x).
+- `tangent_impulse`: `number` — Signed friction impulse along Vec2(-normal.y, normal.x).
 
 ### `Effects`
 
 Particle effects, such as sparks and explosions. The particles are only drawn; they are not objects and nothing can touch them.
 
-- `burst(entity: Entity)` → `f32` — Plays the particle burst set up on an object, at that object's position. Gives back how many particles were made.
-- `burst_at(entity: Entity, x: f32, y: f32)` → `f32` — Plays the particle burst set up on an object at another position, such as where an enemy just died.
-- `emit(entity: Entity, count: f32)` → `f32` — Throws that many of an object's emitter particles at once, such as dust when landing. Gives back how many were made.
-- `live()` → `f32` — How many particles are currently on screen.
-- `play(entity: Entity)` → `f32` — Starts the particle emitter set up on an object. Gives back 1.
-- `stop(entity: Entity)` → `f32` — Stops the particle emitter set up on an object; particles already out live out their life. Gives back 1.
+- `burst(entity: Entity)` → `number` — Plays the particle burst set up on an object, at that object's position. Gives back how many particles were made.
+- `burst_at(entity: Entity, x: number, y: number)` → `number` — Plays the particle burst set up on an object at another position, such as where an enemy just died.
+- `emit(entity: Entity, count: number)` → `number` — Throws that many of an object's emitter particles at once, such as dust when landing. Gives back how many were made.
+- `live()` → `number` — How many particles are currently on screen.
+- `play(entity: Entity)` → `number` — Starts the particle emitter set up on an object. Gives back 1.
+- `stop(entity: Entity)` → `number` — Stops the particle emitter set up on an object; particles already out live out their life. Gives back 1.
 
 ### `Entity`
 
@@ -295,60 +295,60 @@ An object in the game, such as a player, an enemy or a button. Scripts get these
 
 Numbers stored under names that every script can read and write, such as a score. Declaring them with `state` is safer, because a misspelt name then becomes an error.
 
-- `get(name: String, fallback: f32)` → `f32` — The number stored under a name, or `fallback` if nothing has been stored yet.
-- `set(name: String, value: f32)` → `unit` — Stores a number under a name for any script to read.
+- `get(name: String, fallback: number)` → `number` — The number stored under a name, or `fallback` if nothing has been stored yet.
+- `set(name: String, value: number)` → `unit` — Stores a number under a name for any script to read.
 
 ### `Gamepad`
 
 Game controllers. Each player gets a number from 1 to 8 when they press a button on their controller; 0 means any controller.
 
-- `axis(slot: f32, axis: String)` → `f32` — How far a stick or trigger is pushed. Sticks (`"left_x"`, `"left_y"`…) give -1 to 1, with right and down positive; triggers give 0 to 1.
-- `count()` → `f32` — How many players have joined with a controller.
-- `is_connected(slot: f32)` → `bool` — Whether a player number has a connected controller.
-- `is_down(slot: f32, button: String)` → `bool` — Whether a controller button is held. Buttons are named by position, so `"south"` is the bottom face button on every make of controller.
-- `joined()` → `f32` — The player number of a controller that joined this frame, or 0. Use it to add a player.
-- `just_pressed(slot: f32, button: String)` → `bool` — Whether a mouse button was pressed this frame.
-- `just_released(slot: f32, button: String)` → `bool` — Whether a controller button was let go this frame.
-- `left()` → `f32` — The player number of a controller that was unplugged this frame, or 0. Use it to remove a player.
+- `axis(slot: number, axis: String)` → `number` — How far a stick or trigger is pushed. Sticks (`"left_x"`, `"left_y"`…) give -1 to 1, with right and down positive; triggers give 0 to 1.
+- `count()` → `number` — How many players have joined with a controller.
+- `is_connected(slot: number)` → `bool` — Whether a player number has a connected controller.
+- `is_down(slot: number, button: String)` → `bool` — Whether a controller button is held. Buttons are named by position, so `"south"` is the bottom face button on every make of controller.
+- `joined()` → `number` — The player number of a controller that joined this frame, or 0. Use it to add a player.
+- `just_pressed(slot: number, button: String)` → `bool` — Whether a mouse button was pressed this frame.
+- `just_released(slot: number, button: String)` → `bool` — Whether a controller button was let go this frame.
+- `left()` → `number` — The player number of a controller that was unplugged this frame, or 0. Use it to remove a player.
 
 ### `Gesture`
 
 What the player did with the mouse or a finger: a tap, a hold, a drag or a pinch. Works the same for both.
 
-- `drag_x`: `f32` — How far the drag moved sideways this frame. Add it to a camera's position to pan.
-- `drag_y`: `f32` — How far the drag moved up or down this frame.
+- `drag_x`: `number` — How far the drag moved sideways this frame. Add it to a camera's position to pan.
+- `drag_y`: `number` — How far the drag moved up or down this frame.
 - `dragging`: `bool` — Whether the player is dragging.
 - `held`: `bool` — Whether the player has pressed and held still long enough to count as a long press.
-- `hold_x`: `f32` — Where the long press is, sideways.
-- `hold_y`: `f32` — Where the long press is, up or down.
-- `pinch`: `f32` — How much two fingers pinched this frame: above 1 when spreading apart, below 1 when closing, and 1 when not pinching. Multiply a zoom by it.
+- `hold_x`: `number` — Where the long press is, sideways.
+- `hold_y`: `number` — Where the long press is, up or down.
+- `pinch`: `number` — How much two fingers pinched this frame: above 1 when spreading apart, below 1 when closing, and 1 when not pinching. Multiply a zoom by it.
 - `pinching`: `bool` — Whether two fingers are pinching.
-- `tap_x`: `f32` — Where the tap was, sideways.
-- `tap_y`: `f32` — Where the tap was, up or down.
+- `tap_x`: `number` — Where the tap was, sideways.
+- `tap_y`: `number` — Where the tap was, up or down.
 - `tapped`: `bool` — Whether the player tapped (a quick press without moving) this frame. Check this before reading `tap_x` and `tap_y`.
 
 ### `Grid`
 
 Grids of tiles, flat or stacked in layers like building blocks: what each cell holds, where objects stand on them, and paths across them.
 
-- `block(grid: Entity, column: f32, row: f32, level: f32)` → `String` — Which block is in a cell of a layered grid or a grid whose ground is a voxel world, by name, or `""` if the cell is empty.
+- `block(grid: Entity, column: number, row: number, level: number)` → `String` — Which block is in a cell of a layered grid or a grid whose ground is a voxel world, by name, or `""` if the cell is empty.
 - `can_reach(mover: Entity, grid: Entity, target: Entity)` → `bool` — Whether a character on a grid can walk to where another object is.
-- `columns(grid: Entity)` → `f32` — How many columns a grid has.
-- `flooded(map: Entity, column: f32, row: f32)` → `bool` — Whether a map column's existing surface is strictly below its flood level. Reads the same threshold the map draws; terrain and edits stay unchanged.
-- `height(grid: Entity, column: f32, row: f32)` → `f32?` — How high the top of a voxel world's column is, as `Grid.surface` sees it, or `null` where nothing stands.
-- `place(entity: Entity, grid: Entity, x: f32, y: f32)` → `unit` — Moves an object to a position on a grid, measured in cells. Fractions place it between cells.
-- `position_x(entity: Entity, grid: Entity)` → `f32` — Which column an object is at on a grid, with fractions between cells.
-- `position_y(entity: Entity, grid: Entity)` → `f32` — Which row an object is at on a grid, with fractions between cells.
-- `rows(grid: Entity)` → `f32` — How many rows a grid has.
-- `set_block(grid: Entity, column: f32, row: f32, level: f32, tile: String)` → `unit` — Places a block, by name, in a cell of a layered grid or a grid whose ground is a voxel world. `""` removes the block.
-- `set_flood(map: Entity, level: f32, block: String)` → `unit` — Sets a reversible water overlay on a voxel world viewed as a map, using a finite height and a block's top face. An empty block name clears it. Refused on block views.
-- `set_terrain(grid: Entity, column: f32, row: f32, terrain: String)` → `unit` — Paints a terrain the map's sheet declares into a flat tile map's cell, choosing its tile and its neighbors' from which of them are the same terrain. `""` empties the cell and redraws its neighbors.
-- `set_tile(grid: Entity, column: f32, row: f32, index: f32)` → `unit` — Changes a flat tile map's cell to one of its tiles, by number. A negative number empties the cell.
+- `columns(grid: Entity)` → `number` — How many columns a grid has.
+- `flooded(map: Entity, column: number, row: number)` → `bool` — Whether a map column's existing surface is strictly below its flood level. Reads the same threshold the map draws; terrain and edits stay unchanged.
+- `height(grid: Entity, column: number, row: number)` → `number?` — How high the top of a voxel world's column is, as `Grid.surface` sees it, or `null` where nothing stands.
+- `place(entity: Entity, grid: Entity, x: number, y: number)` → `unit` — Moves an object to a position on a grid, measured in cells. Fractions place it between cells.
+- `position_x(entity: Entity, grid: Entity)` → `number` — Which column an object is at on a grid, with fractions between cells.
+- `position_y(entity: Entity, grid: Entity)` → `number` — Which row an object is at on a grid, with fractions between cells.
+- `rows(grid: Entity)` → `number` — How many rows a grid has.
+- `set_block(grid: Entity, column: number, row: number, level: number, tile: String)` → `unit` — Places a block, by name, in a cell of a layered grid or a grid whose ground is a voxel world. `""` removes the block.
+- `set_flood(map: Entity, level: number, block: String)` → `unit` — Sets a reversible water overlay on a voxel world viewed as a map, using a finite height and a block's top face. An empty block name clears it. Refused on block views.
+- `set_terrain(grid: Entity, column: number, row: number, terrain: String)` → `unit` — Paints a terrain the map's sheet declares into a flat tile map's cell, choosing its tile and its neighbors' from which of them are the same terrain. `""` empties the cell and redraws its neighbors.
+- `set_tile(grid: Entity, column: number, row: number, index: number)` → `unit` — Changes a flat tile map's cell to one of its tiles, by number. A negative number empties the cell.
 - `step_toward(mover: Entity, grid: Entity, target: Entity)` → `bool` — Moves a character one cell along the shortest walkable path towards a target. Gives back whether it moved.
-- `surface(grid: Entity, column: f32, row: f32)` → `String` — Which block is on top of a voxel world's column, by name, seen from straight above, or `""` where nothing stands. What a map view of the world draws there.
-- `tagged(grid: Entity, column: f32, row: f32, level: f32, tag: String)` → `bool` — Whether the block in a cell has a label, such as `"hot"` on lava, given to it where the blocks are defined.
-- `tile(grid: Entity, column: f32, row: f32)` → `f32` — Which tile is in a flat tile map's cell, by number, or -1 if it is empty or outside the map.
-- `walkable(grid: Entity, x: f32, y: f32)` → `bool` — Whether a character could stand at a point on a grid. False for water, empty space or outside the grid.
+- `surface(grid: Entity, column: number, row: number)` → `String` — Which block is on top of a voxel world's column, by name, seen from straight above, or `""` where nothing stands. What a map view of the world draws there.
+- `tagged(grid: Entity, column: number, row: number, level: number, tag: String)` → `bool` — Whether the block in a cell has a label, such as `"hot"` on lava, given to it where the blocks are defined.
+- `tile(grid: Entity, column: number, row: number)` → `number` — Which tile is in a flat tile map's cell, by number, or -1 if it is empty or outside the map.
+- `walkable(grid: Entity, x: number, y: number)` → `bool` — Whether a character could stand at a point on a grid. False for water, empty space or outside the grid.
 
 ### `Input`
 
@@ -361,7 +361,7 @@ Every way the player reaches the game, in one place. Start with `Input.Action`, 
 - `Pointer`: `Pointer` — The mouse, or a finger on a touch screen, handled the same way so one game works on both. The same as `Pointer`.
 - `Stick`: `Stick` — A virtual joystick for touch screens: wherever a thumb lands becomes the center, and dragging from there steers. The same as `Stick`.
 - `Touch`: `Touch` — Every finger on a touch screen, for games that need more than one. For steering, `Input.Stick` is simpler. The same as `Touch`.
-- `axis(negative: String, positive: String)` → `f32` — -1, 0 or 1 from a pair of keys, for movement: `Input.Keyboard.axis("A", "D")` is -1 holding A, 1 holding D and 0 for neither or both.
+- `axis(negative: String, positive: String)` → `number` — -1, 0 or 1 from a pair of keys, for movement: `Input.Keyboard.axis("A", "D")` is -1 holding A, 1 holding D and 0 for neither or both.
 - `is_down(key: String)` → `bool` — Whether a key is being held down.
 - `just_pressed(key: String)` → `bool` — Whether a key was pressed this frame. True only once per press, however long it is held.
 - `just_released(key: String)` → `bool` — Whether a key was let go this frame.
@@ -370,7 +370,7 @@ Every way the player reaches the game, in one place. Start with `Input.Action`, 
 
 The keyboard, as `Input.Keyboard`. Keys are named by position, such as `"W"`, `"ArrowLeft"` or `"Space"`, so controls work on any keyboard layout. For controls that also work on a controller or a touch screen, use `Input.Action`.
 
-- `axis(negative: String, positive: String)` → `f32` — -1, 0 or 1 from a pair of keys, for movement: `Input.Keyboard.axis("A", "D")` is -1 holding A, 1 holding D and 0 for neither or both.
+- `axis(negative: String, positive: String)` → `number` — -1, 0 or 1 from a pair of keys, for movement: `Input.Keyboard.axis("A", "D")` is -1 holding A, 1 holding D and 0 for neither or both.
 - `is_down(key: String)` → `bool` — Whether a key is being held down.
 - `just_pressed(key: String)` → `bool` — Whether a key was pressed this frame. True only once per press, however long it is held.
 - `just_released(key: String)` → `bool` — Whether a key was let go this frame.
@@ -381,20 +381,20 @@ A directional, point or spot 3D light. Writes validate the whole candidate befor
 
 - `color`: `Color` — Linear RGB as a Color, whole or by channel. Alpha reads one and writes must keep it one; RGB is finite and nonnegative. Whole writes are atomic.
 - `enabled`: `bool` — Whether this light illuminates. Switching it off leaves its entity, scripts and children active.
-- `inner_angle`: `f32` — Inner spotlight half-angle in radians, at least zero and strictly below outer_angle; use an order that keeps each write valid.
-- `intensity`: `f32` — Finite nonnegative brightness; zero contributes no light.
-- `outer_angle`: `f32` — Outer spotlight half-angle in radians, above inner_angle and at most pi/2, with distinct f32 cosines.
-- `range`: `f32` — Finite positive range in world units, independent of entity scale; used by points and spots.
+- `inner_angle`: `number` — Inner spotlight half-angle in radians, at least zero and strictly below outer_angle; use an order that keeps each write valid.
+- `intensity`: `number` — Finite nonnegative brightness; zero contributes no light.
+- `outer_angle`: `number` — Outer spotlight half-angle in radians, above inner_angle and at most pi/2, with distinct f32 cosines.
+- `range`: `number` — Finite positive range in world units, independent of entity scale; used by points and spots.
 
 ### `Light2d`
 
 A light in a 2D scene: it brightens sprites, tiles and shapes near it when the scene's environment turns 2D lighting on. Switch one off with its object's `set_active`.
 
 - `color`: `Color` — The light's color. Lowering `a` dims it, the way it fades a sprite.
-- `falloff`: `f32` — How the light fades toward its edge: 1 fades evenly, higher numbers keep it bright near the middle and drop off sharply.
-- `height`: `f32` — How high above the scene the light hangs. Only images with a normal map notice: low lights rake across their bumps, high ones light them evenly.
-- `intensity`: `f32` — How bright the light is; 0 is off.
-- `radius`: `f32` — How far the light reaches, in world units.
+- `falloff`: `number` — How the light fades toward its edge: 1 fades evenly, higher numbers keep it bright near the middle and drop off sharply.
+- `height`: `number` — How high above the scene the light hangs. Only images with a normal map notice: low lights rake across their bumps, high ones light them evenly.
+- `intensity`: `number` — How bright the light is; 0 is off.
+- `radius`: `number` — How far the light reaches, in world units.
 
 ### `NumberTween`
 
@@ -406,50 +406,50 @@ The host names this type but has not described its members.
 
 2D physics: moving objects with speed and pushes, and finding out what this script's object bumped into.
 
-- `angular_velocity(entity: Entity)` → `f32` — Radians per second. Before a spawned body is built, reads its authored value or latest queued setter.
-- `apply_angular_impulse(entity: Entity, impulse: f32)` → `unit` — Applies an immediate angular impulse to a dynamic body, independent of timestep.
+- `angular_velocity(entity: Entity)` → `number` — Radians per second. Before a spawned body is built, reads its authored value or latest queued setter.
+- `apply_angular_impulse(entity: Entity, impulse: number)` → `unit` — Applies an immediate angular impulse to a dynamic body, independent of timestep.
 - `apply_force(entity: Entity, force: Vec2)` → `unit` — Adds a world-space Vec2 force for the next fixed step, then clears it. Repeated calls add; requires a dynamic body.
-- `apply_impulse(entity: Entity, x: f32, y: f32)` → `unit` — Gives an object a sudden push in a direction. Heavier objects move less.
+- `apply_impulse(entity: Entity, x: number, y: number)` → `unit` — Gives an object a sudden push in a direction. Heavier objects move less.
 - `apply_impulse_at_point(entity: Entity, impulse: Vec2, point: Vec2)` → `unit` — Applies a world-space Vec2 impulse at a world-space Vec2 point, translating and turning a dynamic body. All motion controls support the spawn window.
-- `apply_torque(entity: Entity, torque: f32)` → `unit` — Adds torque for the next fixed step, then clears it. Positive turns counterclockwise; requires a dynamic body.
-- `cast_box(origin: Vec2, half_size: Vec2, rotation: f32, direction: Vec2, max_distance: f32, mask: f32, include_sensors: bool, exclude: Entity)` → `RayHit2d` — Like `cast_circle`, for a box `half_size` from its centre to each edge, turned by `rotation` radians.
-- `cast_circle(origin: Vec2, radius: f32, direction: Vec2, max_distance: f32, mask: f32, include_sensors: bool, exclude: Entity)` → `RayHit2d` — Sweeps a circle from `origin` along `direction` and returns the first collider it would touch, as RayHit2d or null: a raycast with a size, for whether something fits through a gap. `point` is where they touch and `distance` how far the circle's centre travelled. Starting already overlapping gives distance 0 and normal Vec2(0, 0). The filter arguments are the raycast's.
+- `apply_torque(entity: Entity, torque: number)` → `unit` — Adds torque for the next fixed step, then clears it. Positive turns counterclockwise; requires a dynamic body.
+- `cast_box(origin: Vec2, half_size: Vec2, rotation: number, direction: Vec2, max_distance: number, mask: number, include_sensors: bool, exclude: Entity)` → `RayHit2d` — Like `cast_circle`, for a box `half_size` from its centre to each edge, turned by `rotation` radians.
+- `cast_circle(origin: Vec2, radius: number, direction: Vec2, max_distance: number, mask: number, include_sensors: bool, exclude: Entity)` → `RayHit2d` — Sweeps a circle from `origin` along `direction` and returns the first collider it would touch, as RayHit2d or null: a raycast with a size, for whether something fits through a gap. `point` is where they touch and `distance` how far the circle's centre travelled. Starting already overlapping gives distance 0 and normal Vec2(0, 0). The filter arguments are the raycast's.
 - `character_motion(entity: Entity)` → `CharacterMotion2d?` — A copied CharacterMotion2d from the last fixed controller pass, or null before first movement or for inactive/non-controller entities. Requires scene controller context; stale entity handles are errors. All scripts read the same completed pass while requests queue separately. Inactive/despawned ground, platform and collision references are filtered; grounded and ground_walkable become false when ground is filtered. Mutating returned fields/lists never changes the cached result. Settings, parenting and teleports invalidate the cache at synchronization.
 - `collision_started()` → `List<Entity>` — The objects that started touching this script's object since the last frame, as a list.
 - `collision_stopped()` → `List<Entity>` — The objects that stopped touching this script's object since the last frame, as a list.
-- `connect_distance(first: Entity, second: Entity, max_distance: f32)` → `unit` — Ties two objects together like a rope: they can come closer, but never further apart than a distance.
+- `connect_distance(first: Entity, second: Entity, max_distance: number)` → `unit` — Ties two objects together like a rope: they can come closer, but never further apart than a distance.
 - `contacts(entity: Entity)` → `List<Contact2d>` — Copied Contact2d solid solver contacts from the last fixed step, ordered by other entity, point, normal and impulse. Normal points towards the queried body. Sensors are excluded; sleeping contacts report zero new impulses/force. Empty before simulation/spawn synchronization. Missing bodies/physics fail. Inactive/despawned others are omitted; removal and teleports invalidate affected snapshots.
 - `continuous_collision(entity: Entity)` → `bool` — Whether this authored 2D body uses swept solid collision. Sensors remain discrete.
-- `create_distance_joint(joint: Entity, first: Entity, second: Entity, max_distance: f32)` → `unit` — Authors an enabled maximum-distance joint on an existing owner with no authored 2D joint of any kind. Scoped endpoint handles become stable IDs or local prefab paths; null leaves an endpoint unbound and inactive endpoints suspend until active. Requires physics and a finite positive length. Valid before bodies are built; the next fixed synchronization creates the owned solver constraint. Invalid owners, references, identical endpoints, lengths or existing joints fail before mutation. Keeps other owner components and body motion; legacy connect_distance constraints remain separate.
+- `create_distance_joint(joint: Entity, first: Entity, second: Entity, max_distance: number)` → `unit` — Authors an enabled maximum-distance joint on an existing owner with no authored 2D joint of any kind. Scoped endpoint handles become stable IDs or local prefab paths; null leaves an endpoint unbound and inactive endpoints suspend until active. Requires physics and a finite positive length. Valid before bodies are built; the next fixed synchronization creates the owned solver constraint. Invalid owners, references, identical endpoints, lengths or existing joints fail before mutation. Keeps other owner components and body motion; legacy connect_distance constraints remain separate.
 - `create_hinge_joint(joint: Entity, first: Entity, second: Entity, first_anchor: Vec2, second_anchor: Vec2)` → `unit` — Authors an enabled hinge on an existing owner with no authored 2D joint of any kind. Anchors are finite body-local Vec2 distances without transform scale. Angular limits and motor start disabled; set_hinge_motor can drive the new joint. Scoped handles become stable IDs or local prefab paths; null leaves an endpoint unbound and inactive targets suspend until active. Requires physics, works before bodies are built and creates its constraint at next fixed synchronization. Invalid owners, references, identical endpoints, anchors or existing joints fail before mutation. Keeps other owner components and body motion; legacy connections remain separate.
-- `create_slider_joint(joint: Entity, first: Entity, second: Entity, first_anchor: Vec2, second_anchor: Vec2, first_axis: Vec2, second_axis: Vec2, limits_enabled: bool, lower_distance: f32, upper_distance: f32)` → `unit` — Authors an enabled slider on an existing owner with no authored 2D joint of any kind. Finite Vec2 anchors use body-local world units without transform scale; axes must be finite unit Vec2 vectors. Bounds must be finite even when disabled; enabled lower distance cannot exceed upper distance. Motor starts disabled and set_slider_motor can configure it before synchronization. Scoped handles become stable IDs or local prefab paths; null leaves an endpoint unbound and inactive targets suspend until active. Requires physics, works before bodies are built and creates its constraint at next fixed synchronization. Invalid arguments or existing joints fail before mutation. Keeps other owner components and body motion; legacy connections remain separate.
-- `create_spring_joint(joint: Entity, first: Entity, second: Entity, first_anchor: Vec2, second_anchor: Vec2, rest_length: f32, stiffness: f32, damping: f32)` → `unit` — Authors an enabled spring on an existing owner with no authored 2D joint of any kind. Finite Vec2 anchors use body-local world units without transform scale; rest length must be finite and positive, stiffness/damping finite and non-negative. Scoped handles become stable IDs or local prefab paths; null leaves an endpoint unbound and inactive targets suspend until active. Requires physics, works before bodies are built and creates its constraint at next fixed synchronization. Invalid arguments or existing joints fail before mutation. Keeps other owner components and body motion; legacy connections remain separate. Existing set_spring controls can retune the new joint before synchronization.
-- `drop_through(entity: Entity, seconds: f32)` → `unit` — Ignores only one-way solid platforms for a finite non-negative simulation duration; zero cancels. Dynamic bodies keep the solver timer, including queued spawn-window requests. Authored Character 2D entities instead queue a replacement scene-controller timer for the next fixed pass; positive remainder covers that whole pass and decrements afterward. Controller drop removes one-way support/carry and snap while ordinary floors and sensors retain their policy. Pause retains timers. Requires the corresponding physics/controller host context; invalid values preserve the previous request. No authored state is changed.
+- `create_slider_joint(joint: Entity, first: Entity, second: Entity, first_anchor: Vec2, second_anchor: Vec2, first_axis: Vec2, second_axis: Vec2, limits_enabled: bool, lower_distance: number, upper_distance: number)` → `unit` — Authors an enabled slider on an existing owner with no authored 2D joint of any kind. Finite Vec2 anchors use body-local world units without transform scale; axes must be finite unit Vec2 vectors. Bounds must be finite even when disabled; enabled lower distance cannot exceed upper distance. Motor starts disabled and set_slider_motor can configure it before synchronization. Scoped handles become stable IDs or local prefab paths; null leaves an endpoint unbound and inactive targets suspend until active. Requires physics, works before bodies are built and creates its constraint at next fixed synchronization. Invalid arguments or existing joints fail before mutation. Keeps other owner components and body motion; legacy connections remain separate.
+- `create_spring_joint(joint: Entity, first: Entity, second: Entity, first_anchor: Vec2, second_anchor: Vec2, rest_length: number, stiffness: number, damping: number)` → `unit` — Authors an enabled spring on an existing owner with no authored 2D joint of any kind. Finite Vec2 anchors use body-local world units without transform scale; rest length must be finite and positive, stiffness/damping finite and non-negative. Scoped handles become stable IDs or local prefab paths; null leaves an endpoint unbound and inactive targets suspend until active. Requires physics, works before bodies are built and creates its constraint at next fixed synchronization. Invalid arguments or existing joints fail before mutation. Keeps other owner components and body motion; legacy connections remain separate. Existing set_spring controls can retune the new joint before synchronization.
+- `drop_through(entity: Entity, seconds: number)` → `unit` — Ignores only one-way solid platforms for a finite non-negative simulation duration; zero cancels. Dynamic bodies keep the solver timer, including queued spawn-window requests. Authored Character 2D entities instead queue a replacement scene-controller timer for the next fixed pass; positive remainder covers that whole pass and decrements afterward. Controller drop removes one-way support/carry and snap while ordinary floors and sensors retain their policy. Pause retains timers. Requires the corresponding physics/controller host context; invalid values preserve the previous request. No authored state is changed.
 - `gravity()` → `Vec2` — Which way is down, as a Vec2 in world units per second squared: the first active Physics 2D World's authored gravity, or the host's own when the scene authors none.
 - `joint_enabled(joint: Entity)` → `bool` — Reads the authored enabled flag of one 2D joint owner, including before synchronization. True does not guarantee live endpoints; inactive or missing endpoints still suspend the constraint. Requires physics and exactly one valid authored joint.
-- `layer(name: String)` → `f32` — The mask for one collision layer the scene's physics world names, such as `"ground"`, for a query's `mask` argument. A name the world does not give is an error.
-- `mask(names: List<String>)` → `f32` — The mask for several named collision layers at once, such as `["ground", "enemies"]`.
+- `layer(name: String)` → `number` — The mask for one collision layer the scene's physics world names, such as `"ground"`, for a query's `mask` argument. A name the world does not give is an error.
+- `mask(names: List<String>)` → `number` — The mask for several named collision layers at once, such as `["ground", "enemies"]`.
 - `move_character(entity: Entity, displacement: Vec2, snap: bool)` → `unit` — Queues finite world-space Vec2 displacement for an active authored Character 2D at the next fixed scene step. Later requests replace earlier ones, including before spawn synchronization; invalid input preserves the pending request. snap permits authored downward snapping; ascending requests never snap. Requires scene controller context, valid character settings, a transform and no competing rigid body. Scene synchronization validates exactly one solid collider before applying input. Gameplay owns speed, gravity and jumps. Results are available from character_motion after the fixed step; solver response and discrete sensor events follow at the next solve.
-- `overlap_box(center: Vec2, half_size: Vec2, rotation: f32, mask: f32, include_sensors: bool, exclude: Entity)` → `List<Entity>` — Like `overlap_circle`, for a box `half_size` from its centre to each edge, turned by `rotation` radians.
-- `overlap_circle(center: Vec2, radius: f32, mask: f32, include_sensors: bool, exclude: Entity)` → `List<Entity>` — Every object with a collider inside a circle, as a list, each once: an area check for a blast, an aura or a pickup radius. The filter arguments are the raycast's: which layers, whether trigger areas count, and one object to leave out (or null). Ignores inactive objects.
-- `raycast(origin: Vec2, direction: Vec2, max_distance: f32, mask: f32, include_sensors: bool, exclude: Entity)` → `RayHit2d` — The closest 2D collider hit, as RayHit2d or null. Normalizes a nonzero Vec2 direction; returns world-space point, normal and distance. The mask selects collider memberships; include_sensors opts into triggers; exclude skips all pieces of one entity (or null). Origin, direction and distance must be finite; distance non-negative; mask a whole u32. Inside hits have distance 0 and normal Vec2(0, 0). Queries synchronized geometry; ignores inactive/despawned entities. Ties prefer entity handle then piece order.
+- `overlap_box(center: Vec2, half_size: Vec2, rotation: number, mask: number, include_sensors: bool, exclude: Entity)` → `List<Entity>` — Like `overlap_circle`, for a box `half_size` from its centre to each edge, turned by `rotation` radians.
+- `overlap_circle(center: Vec2, radius: number, mask: number, include_sensors: bool, exclude: Entity)` → `List<Entity>` — Every object with a collider inside a circle, as a list, each once: an area check for a blast, an aura or a pickup radius. The filter arguments are the raycast's: which layers, whether trigger areas count, and one object to leave out (or null). Ignores inactive objects.
+- `raycast(origin: Vec2, direction: Vec2, max_distance: number, mask: number, include_sensors: bool, exclude: Entity)` → `RayHit2d` — The closest 2D collider hit, as RayHit2d or null. Normalizes a nonzero Vec2 direction; returns world-space point, normal and distance. The mask selects collider memberships; include_sensors opts into triggers; exclude skips all pieces of one entity (or null). Origin, direction and distance must be finite; distance non-negative; mask a whole u32. Inside hits have distance 0 and normal Vec2(0, 0). Queries synchronized geometry; ignores inactive/despawned entities. Ties prefer entity handle then piece order.
 - `remove_joint(joint: Entity)` → `unit` — Removes the authored distance, hinge, slider or spring component from one owner; the next fixed synchronization releases its solver constraint. Keeps the owner, its other components and endpoint bodies/motion. Legacy connect_distance constraints are unaffected. Works before bodies are built or while suspended. Requires physics and exactly one valid authored joint; missing, conflicting or malformed owners fail before mutation. Later joint controls fail until a joint is authored again.
 - `sensor_entered()` → `List<Entity>` — The objects that entered this script's trigger area since the last frame. A trigger area detects things without blocking them, like a pickup.
 - `sensor_exited()` → `List<Entity>` — The objects that left this script's trigger area since the last frame.
-- `set_angular_velocity(entity: Entity, velocity: f32)` → `unit` — Sets radians per second on a dynamic or velocity-kinematic body, respecting rotation locks.
+- `set_angular_velocity(entity: Entity, velocity: number)` → `unit` — Sets radians per second on a dynamic or velocity-kinematic body, respecting rotation locks.
 - `set_continuous_collision(entity: Entity, enabled: bool)` → `unit` — Enables swept solid collision on a dynamic 2D body, including before a spawned body is built. Keeps velocity and joints.
-- `set_distance(joint: Entity, max_distance: f32)` → `unit` — Tunes an authored 2D maximum-distance constraint for the next fixed synchronization. Distance must be finite and positive. Works while suspended or before endpoints are built; preserves unknown fields and body motion. Requires physics and an authored distance joint.
+- `set_distance(joint: Entity, max_distance: number)` → `unit` — Tunes an authored 2D maximum-distance constraint for the next fixed synchronization. Distance must be finite and positive. Works while suspended or before endpoints are built; preserves unknown fields and body motion. Requires physics and an authored distance joint.
 - `set_gravity(gravity: Vec2)` → `unit` — Changes the first active Physics 2D World's authored gravity to a finite Vec2, keeping its layer names. The next fixed step uses it and the inspector shows it; every body feels it, scaled by its own gravity scale. Fails when the scene authors no active world settings to change.
-- `set_hinge_motor(joint: Entity, velocity: f32, max_torque: f32)` → `unit` — Selects velocity mode on an authored 2D hinge owner and sets its relative angular velocity target in radians/second and finite non-negative torque cap. Positive turns the second body counterclockwise relative to the first. Zero torque disables the motor (it coasts rather than brakes). Applied at the next fixed synchronization, including before endpoints are built; persists through rebuilds. Invalid values leave the component unchanged. Needs physics and a hinge component on the owner.
-- `set_hinge_position_motor(joint: Entity, target_angle: f32, stiffness: f32, damping: f32, max_torque: f32)` → `unit` — Selects a force-based position motor on an authored hinge owner. Target is relative radians within [-pi, pi]; stiffness, damping and torque cap must be finite and non-negative. Zero torque disables drive. Requires physics; validates before mutation, preserves unknown fields and body motion, and applies at next synchronization even before bodies exist. Settings survive suspension and endpoint rebuilds. set_hinge_motor selects velocity mode again. Enabled angular limits still bound motion.
+- `set_hinge_motor(joint: Entity, velocity: number, max_torque: number)` → `unit` — Selects velocity mode on an authored 2D hinge owner and sets its relative angular velocity target in radians/second and finite non-negative torque cap. Positive turns the second body counterclockwise relative to the first. Zero torque disables the motor (it coasts rather than brakes). Applied at the next fixed synchronization, including before endpoints are built; persists through rebuilds. Invalid values leave the component unchanged. Needs physics and a hinge component on the owner.
+- `set_hinge_position_motor(joint: Entity, target_angle: number, stiffness: number, damping: number, max_torque: number)` → `unit` — Selects a force-based position motor on an authored hinge owner. Target is relative radians within [-pi, pi]; stiffness, damping and torque cap must be finite and non-negative. Zero torque disables drive. Requires physics; validates before mutation, preserves unknown fields and body motion, and applies at next synchronization even before bodies exist. Settings survive suspension and endpoint rebuilds. set_hinge_motor selects velocity mode again. Enabled angular limits still bound motion.
 - `set_joint_enabled(joint: Entity, enabled: bool)` → `unit` — Suspends or reconnects an authored distance, hinge, slider or spring at the next fixed synchronization. Keeps the owner, endpoints, settings and body motion; preserves unknown fields. Validates before mutation, including in the spawn window. Requires physics and exactly one valid authored joint.
 - `set_joint_endpoints(joint: Entity, first: Entity, second: Entity)` → `unit` — Retargets an authored 2D distance, hinge, slider or spring at the next fixed synchronization. Accepts entity handles in the owner's scene or runtime prefab; null clears either endpoint. Stores stable scene IDs or canonical prefab paths, never runtime handles. Inactive endpoints may be authored and suspend until active. Stale, unstable, out-of-scope or identical endpoints fail before mutation. Preserves enabled state, settings, unknown fields and body motion. Requires physics and exactly one valid authored joint; works before bodies are built.
-- `set_slider_motor(joint: Entity, velocity: f32, max_force: f32)` → `unit` — Selects velocity mode on an authored 2D slider owner and sets its relative translation speed in world units/second along the first local axis, with a finite non-negative force cap. Zero force disables the drive; zero speed with positive force brakes. Validates before modifying the runtime component; applies at next fixed synchronization and survives endpoint rebuilds. Needs physics and a slider component; preserves unknown fields.
-- `set_slider_position_motor(joint: Entity, target_distance: f32, stiffness: f32, damping: f32, max_force: f32)` → `unit` — Selects a damped force-based position motor on an authored slider owner. Target is finite signed anchor separation along the first body's local axis in world units without transform scale. Stiffness, damping and force cap must be finite and non-negative. Enabled travel limits still bound motion; zero force disables drive. Requires physics; validates before mutation, preserves unknown fields/body motion and applies at next synchronization even before bodies exist. Settings survive suspension/rebuilds. set_slider_motor selects velocity mode again.
-- `set_spring(joint: Entity, rest_length: f32, stiffness: f32, damping: f32)` → `unit` — Tunes an authored 2D spring owner's positive rest length and non-negative force-based stiffness/damping. All values must be finite. Invalid calls leave the component unchanged; valid changes apply at the next fixed synchronization, including before endpoints are built, and survive rebuilds. Needs physics and a spring component; preserves unknown fields.
-- `set_velocity(entity: Entity, x: f32, y: f32)` → `unit` — Sets how fast, and which way, an object is moving.
-- `velocity_x(entity: Entity)` → `f32` — How fast an object is moving sideways.
-- `velocity_y(entity: Entity)` → `f32` — How fast an object is moving up or down.
+- `set_slider_motor(joint: Entity, velocity: number, max_force: number)` → `unit` — Selects velocity mode on an authored 2D slider owner and sets its relative translation speed in world units/second along the first local axis, with a finite non-negative force cap. Zero force disables the drive; zero speed with positive force brakes. Validates before modifying the runtime component; applies at next fixed synchronization and survives endpoint rebuilds. Needs physics and a slider component; preserves unknown fields.
+- `set_slider_position_motor(joint: Entity, target_distance: number, stiffness: number, damping: number, max_force: number)` → `unit` — Selects a damped force-based position motor on an authored slider owner. Target is finite signed anchor separation along the first body's local axis in world units without transform scale. Stiffness, damping and force cap must be finite and non-negative. Enabled travel limits still bound motion; zero force disables drive. Requires physics; validates before mutation, preserves unknown fields/body motion and applies at next synchronization even before bodies exist. Settings survive suspension/rebuilds. set_slider_motor selects velocity mode again.
+- `set_spring(joint: Entity, rest_length: number, stiffness: number, damping: number)` → `unit` — Tunes an authored 2D spring owner's positive rest length and non-negative force-based stiffness/damping. All values must be finite. Invalid calls leave the component unchanged; valid changes apply at the next fixed synchronization, including before endpoints are built, and survive rebuilds. Needs physics and a spring component; preserves unknown fields.
+- `set_velocity(entity: Entity, x: number, y: number)` → `unit` — Sets how fast, and which way, an object is moving.
+- `velocity_x(entity: Entity)` → `number` — How fast an object is moving sideways.
+- `velocity_y(entity: Entity)` → `number` — How fast an object is moving up or down.
 
 ### `Physics3d`
 
@@ -457,19 +457,19 @@ Independent 3D physics controls, indexed queries and copied last-step events. Re
 
 - `angular_velocity(entity: Entity)` → `Vec3` — Copied world-space Vec3 angular velocity in radians per second around XYZ. Before synchronization returns the last queued setter or authored starting velocity; rotation locking returns zero.
 - `apply_impulse(entity: Entity, impulse: Vec3)` → `unit` — Applies a finite world-space Vec3 impulse to an active dynamic body using its compound mass; queues before synchronization and resolves in call order at materialization. Invalid input or body kind fails before mutation; does not change authored starting motion.
-- `cast_box(origin: Vec3, half_extents: Vec3, rotation_axis: Vec3, rotation_angle: f32, direction: Vec3, max_distance: f32, mask: f32, include_sensors: bool, exclude: Entity?)` → `RayHit3d?` — Indexed active 3D shape query. Positive Vec3 half-extents define the box. Sweeps return copied RayHit3d or null with fixed orientation and nonzero normalized direction; travel is non-negative and the endpoint finite. Finite f32-range values are required. A nonzero Vec3 rotation_axis is normalized and rotation_angle is radians about it using the right-hand rule. Uses the ray membership mask, sensor opt-in and whole-entity exclusion. Overlaps are sorted unique copied Entity lists; casts retain initial-overlap and deterministic tie semantics. Does not step physics.
-- `cast_capsule(origin: Vec3, half_height: f32, radius: f32, rotation_axis: Vec3, rotation_angle: f32, direction: Vec3, max_distance: f32, mask: f32, include_sensors: bool, exclude: Entity?)` → `RayHit3d?` — Indexed active 3D shape query. The local-Y capsule has non-negative straight-segment half_height and positive radius; zero half-height is a sphere. Sweeps return copied RayHit3d or null with fixed orientation and nonzero normalized direction; travel is non-negative and the endpoint finite. Finite f32-range values are required. A nonzero Vec3 rotation_axis is normalized and rotation_angle is radians about it using the right-hand rule. Uses the ray membership mask, sensor opt-in and whole-entity exclusion. Overlaps are sorted unique copied Entity lists; casts retain initial-overlap and deterministic tie semantics. Does not step physics.
-- `cast_sphere(origin: Vec3, radius: f32, direction: Vec3, max_distance: f32, mask: f32, include_sensors: bool, exclude: Entity?)` → `RayHit3d?` — Closest fixed-orientation sphere sweep as a copied RayHit3d or null. Positive finite radius, finite Vec3 origin/direction, normalized nonzero direction and non-negative distance in engine f32 range; endpoint must remain finite. Point is world contact, distance is probe travel. Initial overlap returns origin, zero distance and zero normal. Uses indexed synchronized geometry and the ray filter, skipping inactive/despawned entities. No rotation or physics step; extreme finite geometry still has the engine's documented numerical limitations.
+- `cast_box(origin: Vec3, half_extents: Vec3, rotation_axis: Vec3, rotation_angle: number, direction: Vec3, max_distance: number, mask: number, include_sensors: bool, exclude: Entity?)` → `RayHit3d?` — Indexed active 3D shape query. Positive Vec3 half-extents define the box. Sweeps return copied RayHit3d or null with fixed orientation and nonzero normalized direction; travel is non-negative and the endpoint finite. Finite f32-range values are required. A nonzero Vec3 rotation_axis is normalized and rotation_angle is radians about it using the right-hand rule. Uses the ray membership mask, sensor opt-in and whole-entity exclusion. Overlaps are sorted unique copied Entity lists; casts retain initial-overlap and deterministic tie semantics. Does not step physics.
+- `cast_capsule(origin: Vec3, half_height: number, radius: number, rotation_axis: Vec3, rotation_angle: number, direction: Vec3, max_distance: number, mask: number, include_sensors: bool, exclude: Entity?)` → `RayHit3d?` — Indexed active 3D shape query. The local-Y capsule has non-negative straight-segment half_height and positive radius; zero half-height is a sphere. Sweeps return copied RayHit3d or null with fixed orientation and nonzero normalized direction; travel is non-negative and the endpoint finite. Finite f32-range values are required. A nonzero Vec3 rotation_axis is normalized and rotation_angle is radians about it using the right-hand rule. Uses the ray membership mask, sensor opt-in and whole-entity exclusion. Overlaps are sorted unique copied Entity lists; casts retain initial-overlap and deterministic tie semantics. Does not step physics.
+- `cast_sphere(origin: Vec3, radius: number, direction: Vec3, max_distance: number, mask: number, include_sensors: bool, exclude: Entity?)` → `RayHit3d?` — Closest fixed-orientation sphere sweep as a copied RayHit3d or null. Positive finite radius, finite Vec3 origin/direction, normalized nonzero direction and non-negative distance in engine f32 range; endpoint must remain finite. Point is world contact, distance is probe travel. Initial overlap returns origin, zero distance and zero normal. Uses indexed synchronized geometry and the ray filter, skipping inactive/despawned entities. No rotation or physics step; extreme finite geometry still has the engine's documented numerical limitations.
 - `character_motion(entity: Entity)` → `CharacterMotion3d?` — Copied CharacterMotion3d from the last completed controller step, or null before a result exists or for an inactive/non-controller entity. Requires scene character context. Classified support, raw movement and carry remain separate; repeated reads do not drain results. Inactive ground, platform and collision references are filtered; historical translation and raw backend flags remain unchanged. Editing copies never changes simulation or queued movement.
 - `collision_started()` → `List<Entity>` — Sorted unique other active entities that started solid contact with this script's entity in the last successful 3D step. All scripts observe the same snapshot without draining it.
 - `collision_stopped()` → `List<Entity>` — Sorted unique other active entities that stopped solid contact with this script's entity in the last successful 3D step. Removed or inactive handles are filtered.
-- `layer(name: String)` → `f32` — Query mask bit for a text name in the active authored 3D world's first 32 layer labels. Empty labels cannot be selected; duplicate names select the first bit. Reads current authoring without stepping; ignores inactive settings and never reads 2D names. Unknown names, malformed or multiple active world settings and missing 3D host fail.
-- `mask(names: List<String>)` → `f32` — Combines Physics3d.layer bits from a List<str> using bitwise OR. Repeated names do not add bits; an empty list returns zero. Every name is checked; non-text elements, unknown names, invalid active world settings or missing 3D host fail.
+- `layer(name: String)` → `number` — Query mask bit for a text name in the active authored 3D world's first 32 layer labels. Empty labels cannot be selected; duplicate names select the first bit. Reads current authoring without stepping; ignores inactive settings and never reads 2D names. Unknown names, malformed or multiple active world settings and missing 3D host fail.
+- `mask(names: List<String>)` → `number` — Combines Physics3d.layer bits from a List<str> using bitwise OR. Repeated names do not add bits; an empty list returns zero. Every name is checked; non-text elements, unknown names, invalid active world settings or missing 3D host fail.
 - `move_character(entity: Entity, displacement: Vec3, snap: bool)` → `unit` — Queues finite world-space Vec3 displacement for an active authored Character 3D at the next fixed step, including before first synchronization. Last valid request wins; invalid requests preserve it. Snap only enables the authored snap distance. Requires scene character context, valid settings/transform and no competing body/controller. Scene synchronization validates scaled solid geometry before movement. Gameplay owns gravity, speed and jump policy; events observe the moved pose on the following solver step.
-- `overlap_box(centre: Vec3, half_extents: Vec3, rotation_axis: Vec3, rotation_angle: f32, mask: f32, include_sensors: bool, exclude: Entity?)` → `List<Entity>` — Indexed active 3D shape query. Positive Vec3 half-extents define the box. Finite f32-range values are required. A nonzero Vec3 rotation_axis is normalized and rotation_angle is radians about it using the right-hand rule. Uses the ray membership mask, sensor opt-in and whole-entity exclusion. Overlaps are sorted unique copied Entity lists; casts retain initial-overlap and deterministic tie semantics. Does not step physics.
-- `overlap_capsule(centre: Vec3, half_height: f32, radius: f32, rotation_axis: Vec3, rotation_angle: f32, mask: f32, include_sensors: bool, exclude: Entity?)` → `List<Entity>` — Indexed active 3D shape query. The capsule lies along local Y before rotation; half_height is the non-negative half-length of its straight segment and radius is positive. Zero half-height is a sphere. Finite f32-range values are required. A nonzero Vec3 rotation_axis is normalized and rotation_angle is radians about it using the right-hand rule. Uses the ray membership mask, sensor opt-in and whole-entity exclusion. Overlaps are sorted unique copied Entity lists; casts retain initial-overlap and deterministic tie semantics. Does not step physics.
-- `overlap_sphere(centre: Vec3, radius: f32, mask: f32, include_sensors: bool, exclude: Entity?)` → `List<Entity>` — Sorted unique copied Entity list overlapping a finite Vec3 centre and positive finite f32-range radius. Uses indexed synchronized geometry, membership mask, sensor opt-in and whole-entity exclusion; inactive/despawned entities are filtered. Does not step physics.
-- `raycast(origin: Vec3, direction: Vec3, max_distance: f32, mask: f32, include_sensors: bool, exclude: Entity?)` → `RayHit3d?` — Closest indexed 3D ray hit as a copied RayHit3d or null. Finite Vec3 origin/direction and non-negative finite f32-range distance are required; direction is normalized and the endpoint must remain finite. Whole-u32 mask selects memberships, sensors opt in and an Entity or null excludes all pieces of one entity. Skips inactive/despawned entities. Inside/on hits have distance zero and zero normal; exact ties prefer entity then piece order. Queries synchronized geometry without stepping physics.
+- `overlap_box(centre: Vec3, half_extents: Vec3, rotation_axis: Vec3, rotation_angle: number, mask: number, include_sensors: bool, exclude: Entity?)` → `List<Entity>` — Indexed active 3D shape query. Positive Vec3 half-extents define the box. Finite f32-range values are required. A nonzero Vec3 rotation_axis is normalized and rotation_angle is radians about it using the right-hand rule. Uses the ray membership mask, sensor opt-in and whole-entity exclusion. Overlaps are sorted unique copied Entity lists; casts retain initial-overlap and deterministic tie semantics. Does not step physics.
+- `overlap_capsule(centre: Vec3, half_height: number, radius: number, rotation_axis: Vec3, rotation_angle: number, mask: number, include_sensors: bool, exclude: Entity?)` → `List<Entity>` — Indexed active 3D shape query. The capsule lies along local Y before rotation; half_height is the non-negative half-length of its straight segment and radius is positive. Zero half-height is a sphere. Finite f32-range values are required. A nonzero Vec3 rotation_axis is normalized and rotation_angle is radians about it using the right-hand rule. Uses the ray membership mask, sensor opt-in and whole-entity exclusion. Overlaps are sorted unique copied Entity lists; casts retain initial-overlap and deterministic tie semantics. Does not step physics.
+- `overlap_sphere(centre: Vec3, radius: number, mask: number, include_sensors: bool, exclude: Entity?)` → `List<Entity>` — Sorted unique copied Entity list overlapping a finite Vec3 centre and positive finite f32-range radius. Uses indexed synchronized geometry, membership mask, sensor opt-in and whole-entity exclusion; inactive/despawned entities are filtered. Does not step physics.
+- `raycast(origin: Vec3, direction: Vec3, max_distance: number, mask: number, include_sensors: bool, exclude: Entity?)` → `RayHit3d?` — Closest indexed 3D ray hit as a copied RayHit3d or null. Finite Vec3 origin/direction and non-negative finite f32-range distance are required; direction is normalized and the endpoint must remain finite. Whole-u32 mask selects memberships, sensors opt in and an Entity or null excludes all pieces of one entity. Skips inactive/despawned entities. Inside/on hits have distance zero and zero normal; exact ties prefer entity then piece order. Queries synchronized geometry without stepping physics.
 - `sensor_entered()` → `List<Entity>` — Sorted unique other active entities that entered sensor contact with this script's entity in the last successful 3D step. Discrete events do not guarantee fast trigger sweeps; the snapshot is not drained.
 - `sensor_exited()` → `List<Entity>` — Sorted unique other active entities that left sensor contact with this script's entity in the last successful 3D step. Removed or inactive handles are filtered; the snapshot is not drained.
 - `set_angular_velocity(entity: Entity, velocity: Vec3)` → `unit` — Sets finite Vec3 angular velocity in radians per second around world XYZ on an active dynamic or velocity-kinematic body; queues before synchronization after validating authored body/colliders. Rotation-locked bodies retain zero angular velocity. Invalid input fails before mutation; does not change authored starting motion.
@@ -489,12 +489,12 @@ The mouse, or a finger on a touch screen, handled the same way so one game works
 - `locked`: `bool` (read-only) — Read-only actual host cursor capture state, not the last request. False in headless runs and hosts without capture support.
 - `over_ui`: `bool` — Whether the pointer is over part of the interface, such as a button. Check it so clicking a button does not also shoot or move in the game.
 - `overlay`: `Vec2` — The pointer's position in screen units, where 0 is the centre of the screen and the screen is 2 units tall. The same on any screen size.
-- `overlay_x`: `f32` — The pointer's sideways position in screen units, where 0 is the centre.
-- `overlay_y`: `f32` — The pointer's up-down position in screen units, where 0 is the centre.
+- `overlay_x`: `number` — The pointer's sideways position in screen units, where 0 is the centre.
+- `overlay_y`: `number` — The pointer's up-down position in screen units, where 0 is the centre.
 - `position`: `Vec2` — The pointer's position in pixels, from the top-left corner of the game's view.
 - `unlock()` → `unit` — Requests cursor release. Escape, focus loss and suspension also release capture; no automatic recapture.
-- `x`: `f32` — The pointer's distance from the left edge of the game's view, in pixels.
-- `y`: `f32` — The pointer's distance from the top edge of the game's view, in pixels.
+- `x`: `number` — The pointer's distance from the left edge of the game's view, in pixels.
+- `y`: `number` — The pointer's distance from the top edge of the game's view, in pixels.
 
 ### `Profile`
 
@@ -506,40 +506,40 @@ The host names this type but has not described its members.
 
 Reading settings from a profile, a data file shared across a project, such as a weapon's damage and fire rate.
 
-- `count(profile: Profile, collection: String)` → `f32` — How many items a list in the profile has.
+- `count(profile: Profile, collection: String)` → `number` — How many items a list in the profile has.
 - `flag(profile: Profile, key: String, fallback: bool)` → `bool` — A true/false setting from the profile, or `fallback` if it is missing.
-- `flag_at(profile: Profile, collection: String, index: f32, key: String, fallback: bool)` → `bool` — A true/false setting from one item in a list in the profile, or `fallback`.
+- `flag_at(profile: Profile, collection: String, index: number, key: String, fallback: bool)` → `bool` — A true/false setting from one item in a list in the profile, or `fallback`.
 - `kind(profile: Profile)` → `String` — What kind of profile it is.
 - `name(profile: Profile)` → `String` — The profile's name.
-- `number(profile: Profile, key: String, fallback: f32)` → `f32` — A number setting from the profile, or `fallback` if it is missing: `Profiles.number(this.tuning, "damage", 1.0)`.
-- `number_at(profile: Profile, collection: String, index: f32, key: String, fallback: f32)` → `f32` — A number setting from one item in a list in the profile, or `fallback`.
+- `number(profile: Profile, key: String, fallback: number)` → `number` — A number setting from the profile, or `fallback` if it is missing: `Profiles.number(this.tuning, "damage", 1.0)`.
+- `number_at(profile: Profile, collection: String, index: number, key: String, fallback: number)` → `number` — A number setting from one item in a list in the profile, or `fallback`.
 - `text(profile: Profile, key: String, fallback: String)` → `String` — A text setting from the profile, or `fallback` if it is missing.
-- `text_at(profile: Profile, collection: String, index: f32, key: String, fallback: String)` → `String` — A text setting from one item in a list in the profile, or `fallback`.
+- `text_at(profile: Profile, collection: String, index: number, key: String, fallback: String)` → `String` — A text setting from one item in a list in the profile, or `fallback`.
 
 ### `Quat`
 
 A copied quaternion value, with x/y/z/w components. Build with Quat(x: 0.0, y: 0.0, z: 0.0, w: 1.0), or copy transform.rotation. Change a local var's components, then assign the whole value; no quaternion arithmetic or interpolation methods are provided.
 
-- `w`: `f32` — The quaternion's scalar component; identity has w = 1 and x/y/z = 0.
-- `x`: `f32` — The quaternion's X component.
-- `y`: `f32` — The quaternion's Y component.
-- `z`: `f32` — The quaternion's Z component.
+- `w`: `number` — The quaternion's scalar component; identity has w = 1 and x/y/z = 0.
+- `x`: `number` — The quaternion's X component.
+- `y`: `number` — The quaternion's Y component.
+- `z`: `number` — The quaternion's Z component.
 
 ### `Random`
 
 Random numbers. The same seed always gives the same numbers, so a run can be replayed.
 
-- `int(min: f32, max: f32)` → `f32` — A random whole number from `min` to `max`, both included: `Random.int(1.0, 6.0)` rolls a die.
+- `int(min: number, max: number)` → `number` — A random whole number from `min` to `max`, both included: `Random.int(1.0, 6.0)` rolls a die.
 - `pick(group: List<Entity>)` → `Entity` — A random object from a list, such as a random enemy to target. The list must not be empty.
-- `range(min: f32, max: f32)` → `f32` — A random number from `min` up to, but not including, `max`.
-- `seed(value: f32)` → `unit` — Starts the random numbers from a seed. The same seed always gives the same numbers afterwards.
-- `value()` → `f32` — A random number from 0 up to, but not including, 1.
+- `range(min: number, max: number)` → `number` — A random number from `min` up to, but not including, `max`.
+- `seed(value: number)` → `unit` — Starts the random numbers from a seed. The same seed always gives the same numbers afterwards.
+- `value()` → `number` — A random number from 0 up to, but not including, 1.
 
 ### `RayHit2d`
 
 A copied 2D ray hit snapshot. Null means no hit. Holds entity, world-space point and normal, and distance in world units. Copying or editing a snapshot never changes physics.
 
-- `distance`: `f32` — Distance from the ray origin, in world units.
+- `distance`: `number` — Distance from the ray origin, in world units.
 - `entity`: `Entity` — The entity owning the hit collider piece.
 - `normal`: `Vec2` — The world-space surface normal, as Vec2. Zero for a hit at distance zero.
 - `point`: `Vec2` — The hit point in world coordinates, as Vec2.
@@ -548,7 +548,7 @@ A copied 2D ray hit snapshot. Null means no hit. Holds entity, world-space point
 
 Copied closest 3D ray/shape-cast hit, optional where no hit exists. World-space point/normal and world-unit distance; editing fields never changes simulation geometry.
 
-- `distance`: `f32` — World-unit ray distance or shape centre travel, including zero for initial overlap.
+- `distance`: `number` — World-unit ray distance or shape centre travel, including zero for initial overlap.
 - `entity`: `Entity` — The active entity whose collider piece was hit.
 - `normal`: `Vec3` — World-space outward Vec3 normal; zero for an inside/on or initial-overlap hit.
 - `point`: `Vec3` — World-space Vec3 hit/contact position; probe origin for an initial shape overlap.
@@ -563,9 +563,9 @@ Saving progress between play sessions: numbers and true/false values stored unde
 - `is_damaged()` → `bool` — Whether saved progress existed but could not be read, so the game can tell the player before overwriting it.
 - `is_from_newer()` → `bool` — Whether the save was made by a newer version of the game. Its values are not loaded.
 - `is_new()` → `bool` — Whether nothing has been saved yet, as on the first time the game is played.
-- `number(key: String, fallback: f32)` → `f32` — A saved number, or `fallback` if nothing is saved under that name yet: `Save.number("best", 0.0)`.
+- `number(key: String, fallback: number)` → `number` — A saved number, or `fallback` if nothing is saved under that name yet: `Save.number("best", 0.0)`.
 - `set_flag(key: String, value: bool)` → `unit` — Saves a true/false value under a name.
-- `set_number(key: String, value: f32)` → `unit` — Saves a number under a name.
+- `set_number(key: String, value: number)` → `unit` — Saves a number under a name.
 
 ### `Scene`
 
@@ -579,7 +579,7 @@ Scenes are a game's separate places or screens, such as a menu, a level or a sho
 The existing authored scene environment on an entity. Changes affect the next extracted frame without restarting. Missing components and stale entities are runtime errors; writes validate the full payload atomically. Fog and post-processing controls are not exposed here.
 
 - `ambient_color`: `Color` — Ambient RGB as a Color with alpha one. Whole and channel writes are checked; alpha must remain one. RGB follows the authored environment contract: finite f32 values.
-- `ambient_intensity`: `f32` — Finite nonnegative ambient strength. Fractional writes preserve their value even when the authored JSON number was an integer.
+- `ambient_intensity`: `number` — Finite nonnegative ambient strength. Fractional writes preserve their value even when the authored JSON number was an integer.
 - `background`: `Color` — The scene clear color as RGBA Color. Whole and channel writes retain finite f32 values, including authored alpha. Failed writes preserve the old payload.
 
 ### `Sequence`
@@ -591,32 +591,32 @@ Playing an object's sequences: choreography set up for it in the scene's Timelin
 - `play(entity: Entity, sequence: String)` → `unit` — Plays one of an object's sequences by name. Calling it again with the sequence already playing does nothing, so it is safe to call every frame.
 - `playing(entity: Entity)` → `String` — The name of the sequence an object is playing, or empty text.
 - `restart(entity: Entity)` → `unit` — Starts an object's current sequence again from the beginning.
-- `set_speed(entity: Entity, speed: f32)` → `unit` — How fast an object's sequences play: 1 is normal speed, 0 holds it where it is.
+- `set_speed(entity: Entity, speed: number)` → `unit` — How fast an object's sequences play: 1 is normal speed, 0 holds it where it is.
 - `stop(entity: Entity)` → `unit` — Stops an object's sequence where it is.
-- `time(entity: Entity)` → `f32` — How far into its sequence an object has got, in seconds.
+- `time(entity: Entity)` → `number` — How far into its sequence an object has got, in seconds.
 
 ### `ShaderParams`
 
 The four numbers a sprite's shader reads. What each one means is up to the shader.
 
-- `w`: `f32` — The fourth number.
-- `x`: `f32` — The first number.
-- `y`: `f32` — The second number.
-- `z`: `f32` — The third number.
+- `w`: `number` — The fourth number.
+- `x`: `number` — The first number.
+- `y`: `number` — The second number.
+- `z`: `number` — The third number.
 
 ### `Shape`
 
 A shape drawn in the game world, such as a circle, polygon or ring, with an inside color and an outline.
 
-- `count`: `f32` — How many sides a polygon has (3 is a triangle, 6 a hexagon), or how many cells a grid shape is across.
-- `dash_duty`: `f32` — How much of each dash is drawn, from 0 to 1; the rest is the gap before the next. 0.5 draws dashes and gaps of equal length.
-- `dashes`: `f32` — How many dashes the outline is broken into. 0 draws a solid line.
+- `count`: `number` — How many sides a polygon has (3 is a triangle, 6 a hexagon), or how many cells a grid shape is across.
+- `dash_duty`: `number` — How much of each dash is drawn, from 0 to 1; the rest is the gap before the next. 0.5 draws dashes and gaps of equal length.
+- `dashes`: `number` — How many dashes the outline is broken into. 0 draws a solid line.
 - `fill`: `Color` — The color inside the shape.
-- `layer`: `f32` — Drawing order: higher numbers are drawn in front of lower ones.
+- `layer`: `number` — Drawing order: higher numbers are drawn in front of lower ones.
 - `stroke`: `Color` — The color of the shape's outline.
-- `stroke_width`: `f32` — How thick the outline is, as a fraction of the shape's size.
-- `sweep_start`: `f32` — Where the outline starts, as a fraction of the way round from the top.
-- `sweep_turns`: `f32` — How much of the outline is drawn, from 0 to 1. Setting it to 0.5 draws half a ring, which makes cooldown and charge meters.
+- `stroke_width`: `number` — How thick the outline is, as a fraction of the shape's size.
+- `sweep_start`: `number` — Where the outline starts, as a fraction of the way round from the top.
+- `sweep_turns`: `number` — How much of the outline is drawn, from 0 to 1. Setting it to 0.5 draws half a ring, which makes cooldown and charge meters.
 
 ### `Sprite`
 
@@ -624,7 +624,7 @@ A 2D image drawn in the game world, and how it is colored.
 
 - `color_multiply`: `Color` — Another color the image is multiplied by, on top of `tint`.
 - `color_offset`: `Color` — A color added on top of the image, which can make it brighter or flash white. Keep its `a` at 0, or the image's transparent edges become visible.
-- `layer`: `f32` — Drawing order: higher numbers are drawn in front of lower ones.
+- `layer`: `number` — Drawing order: higher numbers are drawn in front of lower ones.
 - `shader_params`: `ShaderParams` — Four numbers the sprite's shader reads, as `x`, `y`, `z` and `w`. What each one does is up to the shader: how far a dissolve has got, how bright a flash is.
 - `tint`: `Color` — A color the image is multiplied by. White leaves it unchanged; lowering `a` fades it out.
 
@@ -632,27 +632,27 @@ A 2D image drawn in the game world, and how it is colored.
 
 A virtual joystick for touch screens: wherever a thumb lands becomes the centre, and dragging from there steers.
 
-- `anchor_x`: `f32` — Where the thumb first landed, sideways. Use it to draw the joystick.
-- `anchor_y`: `f32` — Where the thumb first landed, up or down.
+- `anchor_x`: `number` — Where the thumb first landed, sideways. Use it to draw the joystick.
+- `anchor_y`: `number` — Where the thumb first landed, up or down.
 - `direction`: `Vec2` — Which way and how far the joystick is pushed, as a direction up to 1 long.
 - `held`: `bool` — Whether a thumb is on the joystick, even if it is not pushing.
-- `x`: `f32` — How far the joystick is pushed right, from -1 (fully left) to 1 (fully right).
-- `y`: `f32` — How far the joystick is pushed down, from -1 (fully up) to 1 (fully down).
+- `x`: `number` — How far the joystick is pushed right, from -1 (fully left) to 1 (fully right).
+- `y`: `number` — How far the joystick is pushed down, from -1 (fully up) to 1 (fully down).
 
 ### `Time`
 
 Time in the game. A game runs as a series of frames, many times a second.
 
-- `delta`: `f32` — How many seconds the last frame took. Multiply speeds by it so movement is the same at any frame rate. The same as `update`'s `dt`.
-- `elapsed`: `f32` — How many seconds this script has been running.
+- `delta`: `number` — How many seconds the last frame took. Multiply speeds by it so movement is the same at any frame rate. The same as `update`'s `dt`.
+- `elapsed`: `number` — How many seconds this script has been running.
 
 ### `Touch`
 
 Every finger on a touch screen, numbered from 0, for games that need more than one finger.
 
-- `count`: `f32` — How many fingers are on the screen.
-- `x(index: f32)` → `f32` — A finger's distance from the left edge of the game's view, in pixels.
-- `y(index: f32)` → `f32` — A finger's distance from the top edge of the game's view, in pixels.
+- `count`: `number` — How many fingers are on the screen.
+- `x(index: number)` → `number` — A finger's distance from the left edge of the game's view, in pixels.
+- `y(index: number)` → `number` — A finger's distance from the top edge of the game's view, in pixels.
 
 ### `Transform`
 
@@ -660,17 +660,17 @@ Where an object is, how it is turned and how big it is. For an object attached t
 
 - `forward`: `Vec3` (read-only) — Read-only unit world-space facing direction: -Z at identity. Parent rotation is included and scale is ignored. Copy it to move with `world_position += forward * speed * dt`.
 - `look_at(target: Vec3)` → `unit` — Faces a world-space Vec3 target with Y up and zero world roll; preserves position and scale, including under a parent. Vertical targets use yaw zero. Coincident/non-finite targets are errors with no mutation.
-- `pitch`: `f32` — How far a 3D object is tipped up (positive) or down from level, in radians, after its yaw. Changing it keeps its yaw and roll.
+- `pitch`: `number` — How far a 3D object is tipped up (positive) or down from level, in radians, after its yaw. Changing it keeps its yaw and roll.
 - `position`: `Vec3` — Where the object is. Change it to move the object: `this.transform.position.x += speed * dt`. Measured from the parent if it has one.
 - `right`: `Vec3` (read-only) — Read-only unit world-space +X direction, with parent rotation included and scale ignored.
-- `roll`: `f32` — How far a 3D object is turned about the way it faces, in radians, after its yaw and pitch. Changing it keeps its yaw and pitch.
-- `rotate_around(pivot: Vec3, axis: Vec3, radians: f32)` → `unit` — Rotates position and orientation around a world-space Vec3 pivot and nonzero Vec3 axis by radians. Normalizes the axis and preserves scale. Invalid input/output, a singular parent scale, or movement off a Z-locked layer is an error with no mutation.
+- `roll`: `number` — How far a 3D object is turned about the way it faces, in radians, after its yaw and pitch. Changing it keeps its yaw and pitch.
+- `rotate_around(pivot: Vec3, axis: Vec3, radians: number)` → `unit` — Rotates position and orientation around a world-space Vec3 pivot and nonzero Vec3 axis by radians. Normalizes the axis and preserves scale. Invalid input/output, a singular parent scale, or movement off a Z-locked layer is an error with no mutation.
 - `rotation`: `Quat` — Parent-relative Quat in x/y/z/w order. Reads copy the stored rotation; whole writes normalize finite nonzero values atomically and preserve position, scale and Z lock. Stored components are readable; change components on a local var and assign it back. Zero/non-finite writes fail without mutation.
-- `rotation_z`: `f32` — How far the object is turned, in radians. A full turn is `TAU`. This is the turn of a flat object in a 2D game; it replaces any 3D turn.
+- `rotation_z`: `number` — How far the object is turned, in radians. A full turn is `TAU`. This is the turn of a flat object in a 2D game; it replaces any 3D turn.
 - `scale`: `Vec3` — How big the object is on each axis; 1 is its normal size.
 - `up`: `Vec3` (read-only) — Read-only unit world-space +Y direction, with parent rotation included and scale ignored.
 - `world_position`: `Vec3` — Where the object is in the world, even when it is attached to a parent. Use it to compare positions of objects in different places.
-- `yaw`: `f32` — Which way a 3D object faces on the ground, in radians: a turn about the up (Y) axis. At zero it faces -Z, and positive turns it left. It moves along `Vec3(-sin(yaw), 0.0, -cos(yaw))`, and faces a point `d` away with `atan2(-d.x, -d.z)`. Changing it keeps its pitch and roll.
+- `yaw`: `number` — Which way a 3D object faces on the ground, in radians: a turn about the up (Y) axis. At zero it faces -Z, and positive turns it left. It moves along `Vec3(-sin(yaw), 0.0, -cos(yaw))`, and faces a point `d` away with `atan2(-d.x, -d.z)`. Changing it keeps its pitch and roll.
 
 ### `Tween`
 
@@ -678,24 +678,24 @@ Creates automatically playing gameplay tweens owned by the calling script. Copie
 
 - `after(tween: TweenHandle, previous: TweenHandle)` → `unit` — Holds a tween still until `previous` has finished, then plays it from the next step: tweens in sequence. One whose `previous` is disposed goes on without it.
 - `cancel(tween: TweenHandle)` → `unit` — Stops at the current value; is_done is false. Restart can play it again.
-- `color(from: Color, to: Color, duration: f32, easing: String)` → `ColorTween` — Starts a ColorTween, blending all four channels without additional gamma conversion or channel clamping.
+- `color(from: Color, to: Color, duration: number, easing: String)` → `ColorTween` — Starts a ColorTween, blending all four channels without additional gamma conversion or channel clamping.
 - `color_value(tween: ColorTween)` → `Color` — Reads the eased Color including alpha.
 - `dispose(tween: TweenHandle)` → `unit` — Releases a tween; aliases become invalid. Owner removal, script replacement and runner reset also release it.
 - `is_cancelled(tween: TweenHandle)` → `bool` — Whether cancelled; its last value remains readable until disposed.
 - `is_done(tween: TweenHandle)` → `bool` — True on natural completion, including zero duration. Cancellation is not completion.
 - `is_paused(tween: TweenHandle)` → `bool` — Whether advancement is paused.
-- `number(from: f32, to: f32, duration: f32, easing: String)` → `NumberTween` — Starts a NumberTween; duration is seconds.
-- `number_value(tween: NumberTween)` → `f32` — Reads the eased number, held at the exact target after completion.
+- `number(from: number, to: number, duration: number, easing: String)` → `NumberTween` — Starts a NumberTween; duration is seconds.
+- `number_value(tween: NumberTween)` → `number` — Reads the eased number, held at the exact target after completion.
 - `pause(tween: TweenHandle)` → `unit` — Pauses at the current value.
-- `progress(tween: TweenHandle)` → `f32` — Linear fraction of the current play from 0 to 1, running back down on a yoyo's return; zero duration is 1.
+- `progress(tween: TweenHandle)` → `number` — Linear fraction of the current play from 0 to 1, running back down on a yoyo's return; zero duration is 1.
 - `restart(tween: TweenHandle)` → `unit` — Resets to the original endpoints and begins again, clearing pause/cancellation.
 - `resume(tween: TweenHandle)` → `unit` — Resumes a paused tween. Does not undo cancellation.
-- `set_delay(tween: TweenHandle, seconds: f32)` → `unit` — Holds the starting value for a number of seconds before playing.
-- `set_loops(tween: TweenHandle, count: f32)` → `unit` — Plays it a whole number of times; 0 plays for ever and is never done.
+- `set_delay(tween: TweenHandle, seconds: number)` → `unit` — Holds the starting value for a number of seconds before playing.
+- `set_loops(tween: TweenHandle, count: number)` → `unit` — Plays it a whole number of times; 0 plays for ever and is never done.
 - `set_yoyo(tween: TweenHandle, on: bool)` → `unit` — Whether every other play runs back from the end to the start, for a pulse or a bob.
-- `vec2(from: Vec2, to: Vec2, duration: f32, easing: String)` → `Vec2Tween` — Starts a Vec2Tween in the endpoints' coordinate space.
+- `vec2(from: Vec2, to: Vec2, duration: number, easing: String)` → `Vec2Tween` — Starts a Vec2Tween in the endpoints' coordinate space.
 - `vec2_value(tween: Vec2Tween)` → `Vec2` — Reads the eased Vec2.
-- `vec3(from: Vec3, to: Vec3, duration: f32, easing: String)` → `Vec3Tween` — Starts a Vec3Tween in the endpoints' coordinate space.
+- `vec3(from: Vec3, to: Vec3, duration: number, easing: String)` → `Vec3Tween` — Starts a Vec3Tween in the endpoints' coordinate space.
 - `vec3_value(tween: Vec3Tween)` → `Vec3` — Reads the eased Vec3. Apply through ordinary checked transform setters.
 
 ### `TweenHandle`
@@ -708,7 +708,7 @@ The host names this type but has not described its members.
 
 The interface drawn over the game: changing text and bars, and checking buttons and sliders.
 
-- `caret(input: Entity)` → `f32` — Where a text field's caret is, in characters.
+- `caret(input: Entity)` → `number` — Where a text field's caret is, in characters.
 - `changed(element: Entity)` → `bool` — Whether user interaction changed a widget this step.
 - `input_text(input: Entity)` → `String` — The committed text in a single-line input.
 - `is_checked(toggle: Entity)` → `bool` — Whether a toggle is checked.
@@ -718,29 +718,29 @@ The interface drawn over the game: changing text and bars, and checking buttons 
 - `is_open(dropdown: Entity)` → `bool` — Whether a dropdown's list is open.
 - `is_pressed(button: Entity)` → `bool` — Whether a button was clicked this frame: pressed and let go while on it.
 - `position(element: Entity)` → `Vec2` — Where an element was laid out on the screen, as a Vec2 in overlay units: 0 is the middle, and one unit is half the screen's height, up positive.
-- `scroll_offset(scroll: Entity)` → `f32` — Vertical scroll distance in overlay units.
-- `selected(dropdown: Entity)` → `f32` — Which option a dropdown has chosen, counted from zero.
-- `selection_end(input: Entity)` → `f32` — Where a text field's selection ends, in characters; the caret when nothing is selected.
-- `selection_start(input: Entity)` → `f32` — Where a text field's selection begins, in characters; the caret when nothing is selected.
+- `scroll_offset(scroll: Entity)` → `number` — Vertical scroll distance in overlay units.
+- `selected(dropdown: Entity)` → `number` — Which option a dropdown has chosen, counted from zero.
+- `selection_end(input: Entity)` → `number` — Where a text field's selection ends, in characters; the caret when nothing is selected.
+- `selection_start(input: Entity)` → `number` — Where a text field's selection begins, in characters; the caret when nothing is selected.
 - `set_checked(toggle: Entity, checked: bool)` → `unit` — Sets a toggle without emitting a user-change event.
-- `set_fill(bar: Entity, amount: f32)` → `unit` — Shows part of an image, from 0 (none) to 1 (all). This is how health and progress bars work: `Ui.set_fill(bar, hp / max_hp)`.
+- `set_fill(bar: Entity, amount: number)` → `unit` — Shows part of an image, from 0 (none) to 1 (all). This is how health and progress bars work: `Ui.set_fill(bar, hp / max_hp)`.
 - `set_input_text(input: Entity, text: String)` → `unit` — Writes text using the input's Unicode length limit.
-- `set_number(label: Entity, value: f32)` → `unit` — Puts a number into a text element. Its text is set up in the scene with a `{}` where the number goes, such as `"Score: {}"`.
-- `set_numbers(label: Entity, first: f32, second: f32)` → `unit` — Puts two numbers into a text element with two `{}` places, such as `"{}/{}"` for `45/100`.
-- `set_scroll_offset(scroll: Entity, offset: f32)` → `unit` — Clamps the offset to the authored content height.
-- `set_selected(dropdown: Entity, index: f32)` → `unit` — Chooses a dropdown's option without emitting a user-change event.
-- `set_slider_value(slider: Entity, value: f32)` → `unit` — Moves a slider to a value, kept within the slider's range.
+- `set_number(label: Entity, value: number)` → `unit` — Puts a number into a text element. Its text is set up in the scene with a `{}` where the number goes, such as `"Score: {}"`.
+- `set_numbers(label: Entity, first: number, second: number)` → `unit` — Puts two numbers into a text element with two `{}` places, such as `"{}/{}"` for `45/100`.
+- `set_scroll_offset(scroll: Entity, offset: number)` → `unit` — Clamps the offset to the authored content height.
+- `set_selected(dropdown: Entity, index: number)` → `unit` — Chooses a dropdown's option without emitting a user-change event.
+- `set_slider_value(slider: Entity, value: number)` → `unit` — Moves a slider to a value, kept within the slider's range.
 - `set_text(label: Entity, text: String)` → `unit` — Changes the words a text element shows.
 - `size(element: Entity)` → `Vec2` — How wide and tall an element was laid out, in the same units as `position`, including room a stylesheet's `flex-grow` gave it.
 - `slider_changed(slider: Entity)` → `bool` — Whether the player moved a slider this frame.
-- `slider_value(slider: Entity)` → `f32` — The value a slider is set to.
+- `slider_value(slider: Entity)` → `number` — The value a slider is set to.
 - `submitted(input: Entity)` → `bool` — Whether Enter submitted the focused input this step.
 
 ### `UiImage`
 
 An image in the interface drawn over the game, such as a health bar or an icon, rather than in the game world.
 
-- `layer`: `f32` — Drawing order: higher numbers are drawn in front of lower ones.
+- `layer`: `number` — Drawing order: higher numbers are drawn in front of lower ones.
 - `tint`: `Color` — A color the image is multiplied by. White leaves it unchanged; lowering `a` fades it out.
 
 ### `Vec2Tween`
@@ -759,7 +759,7 @@ The host names this type but has not described its members.
 
 The area of the screen the game is drawn in.
 
-- `aspect`: `f32` — The game view's width divided by its height: above 1 for a wide screen, below 1 for a phone held upright.
+- `aspect`: `number` — The game view's width divided by its height: above 1 for a wide screen, below 1 for a phone held upright.
 
 ### `World`
 
@@ -771,23 +771,23 @@ Finding, creating and removing the objects in a game. Every object in a scene (a
 - `has_tag(entity: Entity, tag: String)` → `bool` — Whether an object has a tag, a label such as `"enemy"` given to it in the scene.
 - `is_active(entity: Entity)` → `bool` — Whether an object is switched on. An object switched off, or inside one that is, is hidden and does nothing.
 - `nearest(tag: String, position: Vec3)` → `Entity` — The closest active object with an authored tag to a world-space Vec3 position, including parent transforms. Gives null if none has a usable transform. Equal distances keep world order.
-- `property_number(entity: Entity, name: String, fallback: f32)` → `f32` — Reads a number set up for another object's script, such as a bullet's damage, or gives `fallback` if there is none.
-- `send_signal(entity: Entity, name: String, value: f32)` → `unit` — Sends a number to another object under a name, for its script to collect with `take_signal`. Older style: events and calling another script's functions are clearer.
+- `property_number(entity: Entity, name: String, fallback: number)` → `number` — Reads a number set up for another object's script, such as a bullet's damage, or gives `fallback` if there is none.
+- `send_signal(entity: Entity, name: String, value: number)` → `unit` — Sends a number to another object under a name, for its script to collect with `take_signal`. Older style: events and calling another script's functions are clearer.
 - `set_active(entity: Entity, on: bool)` → `unit` — Switches an object, and everything inside it, on or off. This is how menus and screens are shown and hidden.
 - `set_parent(entity: Entity, parent: Entity)` → `unit` — Attaches an object to another, so it moves, turns and scales with it. `null` detaches it.
 - `set_property(entity: Entity, name: String, value: unknown)` → `unit` — Sets a starting value on a newly created object's script, before it starts. For example, a bullet's speed right after spawning it.
-- `set_shape_point(index: f32, x: f32, y: f32)` → `unit` — Moves one corner, numbered 0 to 7, of this object's custom polygon shape.
+- `set_shape_point(index: number, x: number, y: number)` → `unit` — Moves one corner, numbered 0 to 7, of this object's custom polygon shape.
 - `spawn(prefab: Prefab)` → `Entity` — Creates a new object from a prefab, a reusable template such as a bullet or an enemy, and gives it back so you can position it.
 - `spawn_child(prefab: Prefab, parent: Entity)` → `Entity` — Creates a new object from a prefab, already attached to a parent object.
-- `take_signal(name: String)` → `f32` — Collects the numbers other scripts sent to this object under a name with `send_signal`, added together. Gives 0 when nothing arrived.
+- `take_signal(name: String)` → `number` — Collects the numbers other scripts sent to this object under a name with `send_signal`, added together. Gives 0 when nothing arrived.
 - `with_tag(tag: String)` → `List<Entity>` — Every switched-on object with a tag, as a list: `for enemy in World.with_tag("enemy") { ... }`. Looks through the whole game, so call it once per frame, not in a loop.
-- `within_radius(tag: String, position: Vec3, radius: f32)` → `List<Entity>` — A snapshot list of active tagged objects within an inclusive world-space radius of a Vec3 position, nearest first; ties keep world order. Skips unusable transforms. Empty when none match; over 8192 results is an error. Negative or NaN radii are errors; positive infinity searches the whole world.
+- `within_radius(tag: String, position: Vec3, radius: number)` → `List<Entity>` — A snapshot list of active tagged objects within an inclusive world-space radius of a Vec3 position, nearest first; ties keep world order. Skips unusable transforms. Empty when none match; over 8192 results is an error. Negative or NaN radii are errors; positive infinity searches the whole world.
 
 ### `WorldText`
 
 Words placed in the game world, such as a damage number or a name over a character. Change the words with `Ui.set_text` and `Ui.set_number`, as for interface text.
 
 - `color`: `Color` — The words' color. Lowering `a` fades them out; colored spans fade with it.
-- `font_size`: `f32` — How tall a line of the words is, in world units.
-- `layer`: `f32` — Drawing order: drawn over sprites in the same layer, under higher ones.
-- `visible`: `f32` — How many letters show, for a typewriter reveal. Negative shows them all.
+- `font_size`: `number` — How tall a line of the words is, in world units.
+- `layer`: `number` — Drawing order: drawn over sprites in the same layer, under higher ones.
+- `visible`: `number` — How many letters show, for a typewriter reveal. Negative shows them all.

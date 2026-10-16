@@ -21,7 +21,7 @@ pub(crate) const COMPOSE: &[&str] = &["set_delay", "set_loops", "set_yoyo", "aft
 impl TweenCall {
     pub(crate) fn ty(self) -> Type {
         match self {
-            Self::Number => Type::F32,
+            Self::Number => Type::Number,
             Self::Vec2 => Type::Vec2,
             Self::Vec3 => Type::Vec3,
             Self::Color => Type::Color,

@@ -59,7 +59,7 @@ pub(crate) fn add_surface(environment: &mut Environment) {
         (HIT_FIELDS[0].to_owned(), entity()),
         (HIT_FIELDS[1].to_owned(), Type::Vec3),
         (HIT_FIELDS[2].to_owned(), Type::Vec3),
-        (HIT_FIELDS[3].to_owned(), Type::F32),
+        (HIT_FIELDS[3].to_owned(), Type::Number),
     ];
     environment.add_struct(RAY_HIT, fields.clone());
     let mut hit = HostType::new();
@@ -76,8 +76,8 @@ pub(crate) fn add_surface(environment: &mut Environment) {
                 vec![entity()],
                 Type::Optional(Box::new(Type::Named(super::character3d::MOTION.to_owned()))),
             ),
-            Physics3dCall::Layer => (vec![Type::String], Type::F32),
-            Physics3dCall::Mask => (vec![Type::array_of(Type::String)], Type::F32),
+            Physics3dCall::Layer => (vec![Type::String], Type::Number),
+            Physics3dCall::Mask => (vec![Type::array_of(Type::String)], Type::Number),
             Physics3dCall::Raycast
             | Physics3dCall::OverlapSphere
             | Physics3dCall::CastSphere
@@ -107,22 +107,28 @@ pub(crate) fn add_surface(environment: &mut Environment) {
 
 fn query_signature(call: Physics3dCall) -> (Vec<Type>, Type) {
     let mut params = match call {
-        Physics3dCall::Raycast => vec![Type::Vec3, Type::Vec3, Type::F32],
-        Physics3dCall::OverlapSphere => vec![Type::Vec3, Type::F32],
-        Physics3dCall::CastSphere => vec![Type::Vec3, Type::F32, Type::Vec3, Type::F32],
+        Physics3dCall::Raycast => vec![Type::Vec3, Type::Vec3, Type::Number],
+        Physics3dCall::OverlapSphere => vec![Type::Vec3, Type::Number],
+        Physics3dCall::CastSphere => vec![Type::Vec3, Type::Number, Type::Vec3, Type::Number],
         Physics3dCall::OverlapBox | Physics3dCall::CastBox => {
-            vec![Type::Vec3, Type::Vec3, Type::Vec3, Type::F32]
+            vec![Type::Vec3, Type::Vec3, Type::Vec3, Type::Number]
         }
         Physics3dCall::OverlapCapsule | Physics3dCall::CastCapsule => {
-            vec![Type::Vec3, Type::F32, Type::F32, Type::Vec3, Type::F32]
+            vec![
+                Type::Vec3,
+                Type::Number,
+                Type::Number,
+                Type::Vec3,
+                Type::Number,
+            ]
         }
         _ => unreachable!("only query calls reach here"),
     };
     if matches!(call, Physics3dCall::CastBox | Physics3dCall::CastCapsule) {
-        params.extend([Type::Vec3, Type::F32]);
+        params.extend([Type::Vec3, Type::Number]);
     }
     params.extend([
-        Type::F32,
+        Type::Number,
         Type::Bool,
         Type::Optional(Box::new(Type::Named(super::ENTITY.to_owned()))),
     ]);

@@ -16,7 +16,8 @@ use decay_semantic::members::{
     string_op_signature, timer_property_type, vector_op_signature,
 };
 use decay_semantic::{
-    BUILT_IN_TYPES, CHANNELS, COMPONENTS, FunctionType, LENGTH, OLD_LENGTH, TIMER, Type, VEC2, VEC3,
+    BUILT_IN_TYPES, CHANNELS, COMPONENTS, FunctionType, LENGTH, NUMBER, OLD_LENGTH, TIMER, Type,
+    VEC2, VEC3,
 };
 use decay_syntax::vocabulary::{
     ASSIGNMENT_OPERATORS, ATTRIBUTES, BINARY_OPERATORS, CONTEXTUAL_KEYWORDS, ITEM_WORDS, KEYWORDS,
@@ -158,7 +159,7 @@ fn constructors() -> Value {
             "name": name,
             "params": COMPONENTS[..dimensions]
                 .iter()
-                .map(|component| json!({ "name": component, "type": "f32" }))
+                .map(|component| json!({ "name": component, "type": NUMBER }))
                 .collect::<Vec<_>>(),
             "returns": type_name(&ty),
         })
@@ -168,7 +169,7 @@ fn constructors() -> Value {
         vector(VEC3, Type::Vec3),
         {
             "name": TIMER,
-            "params": [{ "name": "seconds", "type": "f32" }],
+            "params": [{ "name": "seconds", "type": NUMBER }],
             "returns": type_name(&Type::Timer),
         },
     ])
@@ -196,7 +197,7 @@ fn members() -> Value {
         let dimensions = ty.dimensions().unwrap_or(0);
         let mut members: Vec<Value> = COMPONENTS[..dimensions]
             .iter()
-            .map(|component| property(component, &Type::F32))
+            .map(|component| property(component, &Type::Number))
             .collect();
         members.extend(
             VectorOp::ALL
@@ -207,8 +208,8 @@ fn members() -> Value {
     };
     let element = Type::Named(ELEMENT.to_owned());
     let mut list = vec![
-        property(LENGTH, &Type::F32),
-        json!({ "name": OLD_LENGTH, "kind": "property", "type": "f32", "alias_of": LENGTH }),
+        property(LENGTH, &Type::Number),
+        json!({ "name": OLD_LENGTH, "kind": "property", "type": NUMBER, "alias_of": LENGTH }),
     ];
     // Every list operation is a call, `pop()` and `clear()` included.
     list.extend(
@@ -218,7 +219,7 @@ fn members() -> Value {
     );
     // A map's key and value, named as the list's element is.
     let (key, value) = (Type::Named("K".to_owned()), Type::Named("V".to_owned()));
-    let mut map = vec![property(LENGTH, &Type::F32)];
+    let mut map = vec![property(LENGTH, &Type::Number)];
     // Every map operation is a call, `keys()` included.
     map.extend(
         MapOp::ALL
@@ -232,7 +233,7 @@ fn members() -> Value {
             "type": type_name(&Type::Color),
             "members": CHANNELS
                 .iter()
-                .map(|channel| property(channel, &Type::F32))
+                .map(|channel| property(channel, &Type::Number))
                 .chain(
                     ColorOp::ALL
                         .iter()
@@ -255,7 +256,7 @@ fn members() -> Value {
                 .collect::<Vec<_>>(),
         },
         {
-            "type": type_name(&Type::F32),
+            "type": type_name(&Type::Number),
             "members": NumberOp::ALL
                 .iter()
                 .map(|(op, name, _)| member(name, &number_op_signature(*op), true))

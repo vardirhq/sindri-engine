@@ -314,7 +314,7 @@ fn built_value_type(initializer: Option<&Expr>) -> Type {
     // something not yet known, which still has a list's members.
     if let Some(ExprKind::List(elements)) = initializer.map(|expr| &expr.kind) {
         let element = match elements.first().map(|expr| &expr.kind) {
-            Some(ExprKind::Number(_)) => Type::F32,
+            Some(ExprKind::Number(_)) => Type::Number,
             Some(ExprKind::String(_)) => Type::String,
             Some(ExprKind::Bool(_)) => Type::Bool,
             _ => Type::Unknown,

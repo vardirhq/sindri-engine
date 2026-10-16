@@ -47,12 +47,12 @@ impl GamepadQuery {
     /// host relies on.
     fn signature(self) -> FunctionType {
         let (params, return_type) = match self {
-            Self::Joined | Self::Left | Self::Count => (vec![], Type::F32),
-            Self::IsConnected => (vec![Type::F32], Type::Bool),
+            Self::Joined | Self::Left | Self::Count => (vec![], Type::Number),
+            Self::IsConnected => (vec![Type::Number], Type::Bool),
             Self::Down | Self::Pressed | Self::Released => {
-                (vec![Type::F32, Type::String], Type::Bool)
+                (vec![Type::Number, Type::String], Type::Bool)
             }
-            Self::Axis => (vec![Type::F32, Type::String], Type::F32),
+            Self::Axis => (vec![Type::Number, Type::String], Type::Number),
         };
         FunctionType {
             params,

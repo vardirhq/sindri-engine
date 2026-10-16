@@ -245,7 +245,7 @@ impl Code {
         (
             Self::ConstantType,
             "constant-type",
-            "A constant of a type a constant cannot hold: anything but `f32`, `bool`, `String` or an enum.",
+            "A constant of a type a constant cannot hold: anything but `number`, `bool`, `String` or an enum.",
         ),
     ];
 

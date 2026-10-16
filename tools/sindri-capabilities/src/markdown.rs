@@ -7,6 +7,7 @@
 use std::fmt::Write as _;
 
 use crate::decay::{DecayApi, Namespace, Symbol};
+use decay_semantic::NUMBER;
 
 /// Renders the Decay surface as Markdown.
 pub(crate) fn render(api: &DecayApi) -> String {
@@ -48,14 +49,14 @@ fn vectors() -> String {
         let dimensions = ty.dimensions().unwrap_or(0);
         let _ = writeln!(section, "### `{name}`\n");
         for component in &COMPONENTS[..dimensions] {
-            let _ = writeln!(section, "- `{component}`: `f32`");
+            let _ = writeln!(section, "- `{component}`: `number`");
         }
         for (op, spelled, _) in VectorOp::ALL {
             let line = match op {
-                VectorOp::Length => format!("- `{spelled}`: `f32`"),
+                VectorOp::Length => format!("- `{spelled}`: `number`"),
                 VectorOp::Normalized => format!("- `{spelled}`: `{name}`"),
-                VectorOp::Dot | VectorOp::Distance => format!("- `{spelled}({name})` → `f32`"),
-                VectorOp::Lerp => format!("- `{spelled}({name}, f32)` → `{name}`"),
+                VectorOp::Dot | VectorOp::Distance => format!("- `{spelled}({name})` → `number`"),
+                VectorOp::Lerp => format!("- `{spelled}({name}, number)` → `{name}`"),
             };
             let _ = writeln!(section, "{line}");
         }
@@ -79,7 +80,7 @@ fn timers() -> String {
     for (property, spelled) in TimerProperty::ALL {
         let ty = match property {
             TimerProperty::Done => "bool",
-            TimerProperty::Left | TimerProperty::Duration | TimerProperty::Progress => "f32",
+            TimerProperty::Left | TimerProperty::Duration | TimerProperty::Progress => NUMBER,
         };
         let _ = writeln!(section, "- `{spelled}`: `{ty}`");
     }
@@ -165,7 +166,7 @@ fn signature(symbol: &Symbol) -> String {
 
 #[cfg(test)]
 mod tests {
-    use super::{render, signature};
+    use super::{NUMBER, render, signature};
     use crate::decay::{Symbol, describe};
 
     #[test]
@@ -173,19 +174,19 @@ mod tests {
         let symbol = Symbol::Function {
             name: "axis".to_owned(),
             params: vec!["String".to_owned(), "String".to_owned()],
-            returns: "f32".to_owned(),
+            returns: NUMBER.to_owned(),
             reference: None,
         };
-        assert_eq!(signature(&symbol), "`axis(String, String)` → `f32`");
+        assert_eq!(signature(&symbol), "`axis(String, String)` → `number`");
         let named = Symbol::Function {
             name: "axis".to_owned(),
             params: vec!["String".to_owned(), "String".to_owned()],
-            returns: "f32".to_owned(),
+            returns: NUMBER.to_owned(),
             reference: sindri_decay::reference::member_entry("Input", "axis").copied(),
         };
         assert_eq!(
             signature(&named),
-            "`axis(negative: String, positive: String)` → `f32`"
+            "`axis(negative: String, positive: String)` → `number`"
         );
     }
 

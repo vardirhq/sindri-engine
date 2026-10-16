@@ -47,7 +47,7 @@ impl Analyzer<'_, '_> {
         if *object_type == Type::String {
             return self.string_member_type(field, span);
         }
-        if *object_type == Type::F32 {
+        if *object_type == Type::Number {
             return self.number_member_type(field, span);
         }
         if let Type::Map(key, value) = object_type {
@@ -66,7 +66,7 @@ impl Analyzer<'_, '_> {
         if let Type::Array(element) = &object_type {
             if crate::types::is_length(field) {
                 self.value_members.insert(span, ValueMember::Length);
-                return Type::F32;
+                return Type::Number;
             }
             self.list_member_error(element, field, span);
             return Type::Unknown;
@@ -151,7 +151,7 @@ impl Analyzer<'_, '_> {
         // use for its own, and a length is a property of the value anyway.
         if let Type::Array(_) = object_type {
             return Some(if crate::types::is_length(field) {
-                MemberLookup::Found(ExternalSymbol::Value(Type::F32))
+                MemberLookup::Found(ExternalSymbol::Value(Type::Number))
             } else {
                 MemberLookup::Missing
             });

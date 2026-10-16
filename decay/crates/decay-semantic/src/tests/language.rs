@@ -29,6 +29,32 @@ fn accepts_typed_gameplay_code() {
 }
 
 #[test]
+fn number_and_its_first_spelling_are_one_type() {
+    let analysis = analyze(
+        r#"
+        script Mixed {
+            var old: f32 = 1.0;
+            var new: number = old;
+            var both: List<number> = [old, new];
+            var kept: Map<String, f32> = [:];
+
+            fn half(value: number) -> f32 { return value / 2.0; }
+            fn update(dt: f32) {
+                old = half(new) + both[0];
+                kept["a"] = new;
+            }
+        }
+        "#,
+    );
+
+    assert!(
+        analysis.diagnostics.is_empty(),
+        "{:?}",
+        analysis.diagnostics
+    );
+}
+
+#[test]
 fn reports_unknown_names_and_type_mismatches() {
     let analysis = analyze(
         r"
@@ -44,7 +70,9 @@ fn reports_unknown_names_and_type_mismatches() {
 
     assert!(analysis.diagnostics.iter().any(|diagnostic| {
         diagnostic.phase == DiagnosticPhase::Semantic
-            && diagnostic.message.contains("cannot assign `f32` to `bool`")
+            && diagnostic
+                .message
+                .contains("cannot assign `number` to `bool`")
     }));
     assert!(analysis.diagnostics.iter().any(|diagnostic| {
         diagnostic.phase == DiagnosticPhase::Semantic

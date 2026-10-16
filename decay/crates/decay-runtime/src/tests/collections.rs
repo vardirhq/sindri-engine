@@ -61,8 +61,8 @@ fn environment() -> Environment {
         .with_function(
             "of",
             FunctionType {
-                params: vec![Type::F32],
-                return_type: Type::array_of(Type::F32),
+                params: vec![Type::Number],
+                return_type: Type::array_of(Type::Number),
             },
         )
         .with_function(
@@ -349,7 +349,7 @@ fn the_element_type_is_checked_rather_than_assumed() {
     assert!(
         messages
             .iter()
-            .any(|message| message.contains("cannot assign `String` to `f32`")),
+            .any(|message| message.contains("cannot assign `String` to `number`")),
         "{messages:?}"
     );
 }

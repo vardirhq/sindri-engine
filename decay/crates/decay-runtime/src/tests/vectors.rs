@@ -272,7 +272,7 @@ fn mismatched_vector_arithmetic_does_not_compile() {
         said("fn go() { var speed = 1.0; speed += Vec2(1.0, 1.0); }").contains("cannot assign")
     );
     assert!(
-        said("fn go() { let a = Vec2(1.0, 1.0) < Vec2(2.0, 2.0); }").contains("expected `f32`")
+        said("fn go() { let a = Vec2(1.0, 1.0) < Vec2(2.0, 2.0); }").contains("expected `number`")
     );
 }
 
@@ -287,7 +287,7 @@ fn vector_members_are_checked() {
             .contains("cannot assign")
     );
     assert!(said("fn go() { let a = Vec2(1.0); }").contains("takes 2 numbers"));
-    assert!(said("fn go() { let a = Vec3(1.0, \"two\", 3.0); }").contains("expected `f32`"));
+    assert!(said("fn go() { let a = Vec3(1.0, \"two\", 3.0); }").contains("expected `number`"));
     assert!(said("fn go() { let a = Vec2(1.0, 1.0); a.x = 2.0; }").contains("immutable `a`"));
     assert!(said("fn go() { let a: Vec2 = null; }").contains("cannot assign"));
     assert!(refuse("fn go() -> Vec3 { return Vec3(1.0, 2.0, 3.0).normalized; }").is_empty());

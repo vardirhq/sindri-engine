@@ -12,8 +12,8 @@ pub fn environment() -> Environment {
     environment.add_function(
         "sin",
         FunctionType {
-            params: vec![Type::F32],
-            return_type: Type::F32,
+            params: vec![Type::Number],
+            return_type: Type::Number,
         },
     );
     environment

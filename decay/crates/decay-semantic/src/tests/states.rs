@@ -20,8 +20,8 @@ fn with_game() -> Environment {
         HostType::new().with_function(
             "get",
             FunctionType {
-                params: vec![Type::String, Type::F32],
-                return_type: Type::F32,
+                params: vec![Type::String, Type::Number],
+                return_type: Type::Number,
             },
         ),
     );
@@ -61,7 +61,7 @@ fn a_state_from_the_host_is_known_without_a_declaration() {
         "Game",
         "phase",
         StateField {
-            ty: Type::F32,
+            ty: Type::Number,
             mutable: true,
         },
     );
@@ -100,12 +100,12 @@ fn every_mistake_about_state_is_refused() {
     );
     for expected in [
         "duplicate state field `Game.score`",
-        "`Game.name` is a `String`; a state holds `f32`, `bool` and enums for now",
+        "`Game.name` is a `String`; a state holds `number`, `bool` and enums for now",
         "`Game.half` needs a starting value written as a number",
-        "`Game.flag` is a `bool` but starts as a `f32`",
+        "`Game.flag` is a `bool` but starts as a `number`",
         "`Game` already has a `get`",
         "`Ball` is already a name; a state needs one of its own",
-        "cannot assign `bool` to `f32`",
+        "cannot assign `bool` to `number`",
         "`Game.lives` is a `let` and cannot be changed",
         "`Game` has no member `scroe`",
     ] {

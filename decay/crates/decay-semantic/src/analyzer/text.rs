@@ -119,7 +119,9 @@ impl Analyzer<'_, '_> {
     /// Whether a value of this type has one obvious way to be written out.
     fn joinable(&self, ty: &Type) -> bool {
         match ty {
-            Type::String | Type::F32 | Type::Bool | Type::Vec2 | Type::Vec3 | Type::Unknown => true,
+            Type::String | Type::Number | Type::Bool | Type::Vec2 | Type::Vec3 | Type::Unknown => {
+                true
+            }
             Type::Named(name) => self.enums.contains_key(name),
             _ => false,
         }

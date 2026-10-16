@@ -533,10 +533,12 @@ fn place_variants(
 /// than refused somewhere it is right.
 fn literal_type(initializer: Option<&decay_syntax::Expr>) -> Type {
     match initializer.map(|expr| &expr.kind) {
-        Some(ExprKind::Number(_)) => Type::F32,
+        Some(ExprKind::Number(_)) => Type::Number,
         Some(ExprKind::Bool(_)) => Type::Bool,
         Some(ExprKind::String(_)) => Type::String,
-        Some(ExprKind::Unary { expr, .. }) if matches!(expr.kind, ExprKind::Number(_)) => Type::F32,
+        Some(ExprKind::Unary { expr, .. }) if matches!(expr.kind, ExprKind::Number(_)) => {
+            Type::Number
+        }
         Some(ExprKind::Call { callee, .. }) => match &callee.kind {
             ExprKind::Identifier(name) if name == "Vec2" => Type::Vec2,
             ExprKind::Identifier(name) if name == "Vec3" => Type::Vec3,

@@ -56,17 +56,17 @@ fn every_mistake_about_a_map_is_refused() {
     );
     let all = found.join("\n");
     for expected in [
-        "`Map` takes a key type and a value type, as in `Map<String, f32>`",
-        "a map is keyed by text, numbers, flags, enum variants or entities, not `List<f32>`",
-        "a map holds one key type: this is `f32`, and the first is `String`",
-        "a map holds one value type: this is `String`, and the first is `f32`",
-        "expected `String`, found `f32`",
+        "`Map` takes a key type and a value type, as in `Map<String, number>`",
+        "a map is keyed by text, numbers, flags, enum variants or entities, not `List<number>`",
+        "a map holds one key type: this is `number`, and the first is `String`",
+        "a map holds one value type: this is `String`, and the first is `number`",
+        "expected `String`, found `number`",
         "`fixed` is a `let`, so it cannot change -- declare it `var` if an entry can be set",
         "`fixed` is a `let`, so it cannot change -- declare it `var` if `clear` can change it",
         "`keys` on a map is a function -- call it: `.keys(...)`",
         "`length` is a property, not a function -- write `.length`",
-        "`Map<String, f32>` has no member `size`",
-        "cannot assign `f32` to `String`",
+        "`Map<String, number>` has no member `size`",
+        "cannot assign `number` to `String`",
     ] {
         assert!(all.contains(expected), "missing {expected:?} in:\n{all}");
     }

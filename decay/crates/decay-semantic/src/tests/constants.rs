@@ -70,7 +70,7 @@ fn every_mistake_about_a_constant_is_refused() {
     for expected in [
         "needs its own value",
         "must be worked out when the file compiles",
-        "declared `bool` but its value is `f32`",
+        "declared `bool` but its value is `number`",
         "joins text only to text",
         "divides by zero",
         "duplicate declaration `TWICE`",

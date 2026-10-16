@@ -37,7 +37,7 @@ impl Analyzer<'_, '_> {
         }
         for argument in args {
             let actual = self.expr_type(argument);
-            self.require_type(&actual, &Type::F32, argument.span);
+            self.require_type(&actual, &Type::Number, argument.span);
         }
         self.value_members.insert(span, ValueMember::StartTimer);
         Some(Type::Timer)

@@ -30,9 +30,9 @@ A current script looks like:
 ```rust
 script Player {
     @export
-    var speed: f32 = 6.0;
+    var speed: number = 6.0;
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         let movement = Input.axis("ArrowLeft", "ArrowRight");
         this.transform.position.x += movement * speed * dt;
     }
@@ -297,3 +297,19 @@ The "When to revisit" list above was written as a gate on *starting*. That gate 
 4. Did the engine generate the language's requirements, or did the language keep guessing at them?
 
 Two yeses and the decision is vindicated. Two nos and the isolation is what keeps the cost of having been wrong small — which is the point of keeping it, and the reason committing to Decay is affordable at all.
+
+# Numbers
+
+**Decided 2026-10-16. Decay has one numeric type, `number`: a 64-bit float.** `f32`, its first spelling, still works and always will, as `len` and `Array` do; diagnostics, hovers and the generated reference show `number`. The engine stores `f32`, and `sindri-decay` is the one place a value narrows.
+
+The old spelling named the engine's storage, not the language's, so it described a type scripts never had. Renaming it costs one word; adding an integer type would rewrite every signature in the language and at the host boundary.
+
+**No integer type for now.** A 64-bit float holds every whole number up to 2^53 exactly, so counts, currency and list indices are safe, and a fractional index is already a runtime error naming the value. Revisit when a real game needs one of:
+
+1. integer division or bit operations (masks, flags) written in Decay rather than as host calls;
+2. whole numbers beyond 2^53, such as hashes or large identifiers;
+3. a save or network format that must round-trip integers the host cannot carry as floats.
+
+Any of those starts a design for `int` (literals, promotion, overflow, the host boundary, indexing), not a silent conversion.
+
+**Native and browser must agree.** The runtime's arithmetic is IEEE-754 `f64` (`+ - * / %` and `sqrt` are exactly rounded), so it gives the same bits on every target. A math function that is not exactly rounded (`sin`, `pow` and the like) must come from one implementation on every target, not from the platform's library, before it is offered to scripts. A test running the same arithmetic natively and on `wasm32-unknown-unknown` is the open item that proves this.

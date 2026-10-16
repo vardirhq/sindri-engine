@@ -85,7 +85,7 @@
       "kind": "value",
       "name": "PI",
       "read_only": false,
-      "type": "f32"
+      "type": "number"
     },
     {
       "description": "2D physics: moving objects with speed and pushes, and finding out what this script's object bumped into.",
@@ -155,7 +155,7 @@
       "kind": "value",
       "name": "TAU",
       "read_only": false,
-      "type": "f32"
+      "type": "number"
     },
     {
       "description": "Time in the game. A game runs as a series of frames, many times a second.",
@@ -207,9 +207,9 @@
         "value"
       ],
       "parameters": [
-        "f32"
+        "number"
       ],
-      "returns": "f32"
+      "returns": "number"
     },
     {
       "description": "The angle pointing from the origin towards the point (x, y), in radians. Use it to turn something to face a direction: `atan2(dy, dx)`.",
@@ -220,10 +220,10 @@
         "x"
       ],
       "parameters": [
-        "f32",
-        "f32"
+        "number",
+        "number"
       ],
-      "returns": "f32"
+      "returns": "number"
     },
     {
       "description": "Rounds up to a whole number: `ceil(2.1)` is `3`.",
@@ -233,9 +233,9 @@
         "value"
       ],
       "parameters": [
-        "f32"
+        "number"
       ],
-      "returns": "f32"
+      "returns": "number"
     },
     {
       "description": "Keeps a number between a lowest and a highest value: `clamp(hp, 0.0, 100.0)` never goes below 0 or above 100.",
@@ -247,11 +247,11 @@
         "high"
       ],
       "parameters": [
-        "f32",
-        "f32",
-        "f32"
+        "number",
+        "number",
+        "number"
       ],
-      "returns": "f32"
+      "returns": "number"
     },
     {
       "description": "The cosine of an angle in radians. With `sin`, turns an angle into a direction: `Vec2(cos(a), sin(a))`.",
@@ -261,9 +261,9 @@
         "angle"
       ],
       "parameters": [
-        "f32"
+        "number"
       ],
-      "returns": "f32"
+      "returns": "number"
     },
     {
       "description": "The number e raised to a power. Mostly used for smooth movement that looks the same at any frame rate: `1.0 - exp(-speed * dt)`.",
@@ -273,9 +273,9 @@
         "value"
       ],
       "parameters": [
-        "f32"
+        "number"
       ],
-      "returns": "f32"
+      "returns": "number"
     },
     {
       "description": "Rounds down to a whole number: `floor(2.9)` is `2`.",
@@ -285,9 +285,9 @@
         "value"
       ],
       "parameters": [
-        "f32"
+        "number"
       ],
-      "returns": "f32"
+      "returns": "number"
     },
     {
       "description": "Blends between two numbers: `t` of 0 gives `a`, 1 gives `b`, and 0.5 gives halfway. Used for smooth movement and fades.",
@@ -299,11 +299,11 @@
         "t"
       ],
       "parameters": [
-        "f32",
-        "f32",
-        "f32"
+        "number",
+        "number",
+        "number"
       ],
-      "returns": "f32"
+      "returns": "number"
     },
     {
       "description": "The larger of two numbers.",
@@ -314,10 +314,10 @@
         "b"
       ],
       "parameters": [
-        "f32",
-        "f32"
+        "number",
+        "number"
       ],
-      "returns": "f32"
+      "returns": "number"
     },
     {
       "description": "The smaller of two numbers.",
@@ -328,10 +328,10 @@
         "b"
       ],
       "parameters": [
-        "f32",
-        "f32"
+        "number",
+        "number"
       ],
-      "returns": "f32"
+      "returns": "number"
     },
     {
       "description": "Writes a message to the log, for checking what a script is doing. Accepts any value; combine text and values with `+`: `print(\"hp \" + hp)`.",
@@ -353,9 +353,9 @@
         "value"
       ],
       "parameters": [
-        "f32"
+        "number"
       ],
-      "returns": "f32"
+      "returns": "number"
     },
     {
       "description": "Whether a number is negative, zero or positive, as -1, 0 or 1. Handy for \"which way is this moving?\".",
@@ -365,9 +365,9 @@
         "value"
       ],
       "parameters": [
-        "f32"
+        "number"
       ],
-      "returns": "f32"
+      "returns": "number"
     },
     {
       "description": "The sine of an angle in radians. Good for bobbing and waving motion: `sin(Time.elapsed)`.",
@@ -377,9 +377,9 @@
         "angle"
       ],
       "parameters": [
-        "f32"
+        "number"
       ],
-      "returns": "f32"
+      "returns": "number"
     },
     {
       "description": "The square root of a number.",
@@ -389,9 +389,9 @@
         "value"
       ],
       "parameters": [
-        "f32"
+        "number"
       ],
-      "returns": "f32"
+      "returns": "number"
     }
   ],
   "schema_version": 1,
@@ -474,7 +474,7 @@
           "parameters": [
             "String"
           ],
-          "returns": "f32"
+          "returns": "number"
         },
         {
           "description": "What an action is bound to now, as a list of binding texts.",
@@ -531,7 +531,7 @@
           ],
           "parameters": [
             "String",
-            "f32",
+            "number",
             "String"
           ],
           "returns": "unit"
@@ -578,42 +578,42 @@
           "kind": "value",
           "name": "place_x",
           "read_only": false,
-          "type": "f32"
+          "type": "number"
         },
         {
           "description": "The row where a new block would go.",
           "kind": "value",
           "name": "place_y",
           "read_only": false,
-          "type": "f32"
+          "type": "number"
         },
         {
           "description": "The height level where a new block would go.",
           "kind": "value",
           "name": "place_z",
           "read_only": false,
-          "type": "f32"
+          "type": "number"
         },
         {
           "description": "The column of the block being pointed at.",
           "kind": "value",
           "name": "x",
           "read_only": false,
-          "type": "f32"
+          "type": "number"
         },
         {
           "description": "The row of the block being pointed at.",
           "kind": "value",
           "name": "y",
           "read_only": false,
-          "type": "f32"
+          "type": "number"
         },
         {
           "description": "The height level of the block being pointed at.",
           "kind": "value",
           "name": "z",
           "read_only": false,
-          "type": "f32"
+          "type": "number"
         }
       ],
       "name": "Aim"
@@ -643,7 +643,7 @@
           "parameters": [
             "Entity"
           ],
-          "returns": "f32"
+          "returns": "number"
         },
         {
           "description": "Whether an animation that plays once, such as an attack, has finished.",
@@ -693,7 +693,7 @@
           ],
           "parameters": [
             "Entity",
-            "f32"
+            "number"
           ],
           "returns": "unit"
         },
@@ -725,7 +725,7 @@
           ],
           "parameters": [
             "String",
-            "f32"
+            "number"
           ],
           "returns": "unit"
         },
@@ -741,7 +741,7 @@
           "parameters": [
             "String",
             "String",
-            "f32"
+            "number"
           ],
           "returns": "unit"
         },
@@ -763,7 +763,7 @@
           ],
           "parameters": [
             "String",
-            "f32"
+            "number"
           ],
           "returns": "unit"
         },
@@ -779,7 +779,7 @@
           "parameters": [
             "String",
             "String",
-            "f32"
+            "number"
           ],
           "returns": "unit"
         },
@@ -801,7 +801,7 @@
           ],
           "parameters": [
             "String",
-            "f32"
+            "number"
           ],
           "returns": "unit"
         },
@@ -823,7 +823,7 @@
           "parameters": [
             "String"
           ],
-          "returns": "f32"
+          "returns": "number"
         }
       ],
       "name": "Audio"
@@ -839,7 +839,7 @@
             "amount"
           ],
           "parameters": [
-            "f32"
+            "number"
           ],
           "returns": "unit"
         },
@@ -854,10 +854,10 @@
             "max_y"
           ],
           "parameters": [
-            "f32",
-            "f32",
-            "f32",
-            "f32"
+            "number",
+            "number",
+            "number",
+            "number"
           ],
           "returns": "unit"
         },
@@ -898,8 +898,8 @@
             "y"
           ],
           "parameters": [
-            "f32",
-            "f32"
+            "number",
+            "number"
           ],
           "returns": "unit"
         },
@@ -925,9 +925,9 @@
             "z"
           ],
           "parameters": [
-            "f32",
-            "f32",
-            "f32"
+            "number",
+            "number",
+            "number"
           ],
           "returns": "unit"
         },
@@ -939,7 +939,7 @@
             "amount"
           ],
           "parameters": [
-            "f32"
+            "number"
           ],
           "returns": "unit"
         },
@@ -951,7 +951,7 @@
             "value"
           ],
           "parameters": [
-            "f32"
+            "number"
           ],
           "returns": "unit"
         },
@@ -969,9 +969,9 @@
           "parameters": [
             "Entity",
             "Entity",
-            "f32",
-            "f32",
-            "f32"
+            "number",
+            "number",
+            "number"
           ],
           "returns": "unit"
         },
@@ -986,8 +986,8 @@
           ],
           "parameters": [
             "Entity",
-            "f32",
-            "f32"
+            "number",
+            "number"
           ],
           "returns": "unit"
         },
@@ -1015,7 +1015,7 @@
           ],
           "parameters": [
             "Entity",
-            "f32"
+            "number"
           ],
           "returns": "unit"
         },
@@ -1029,7 +1029,7 @@
           ],
           "parameters": [
             "Entity",
-            "f32"
+            "number"
           ],
           "returns": "unit"
         },
@@ -1038,21 +1038,21 @@
           "kind": "value",
           "name": "pan_x",
           "read_only": false,
-          "type": "f32"
+          "type": "number"
         },
         {
           "description": "How far the camera view is moved up or down from where it was placed in the scene.",
           "kind": "value",
           "name": "pan_y",
           "read_only": false,
-          "type": "f32"
+          "type": "number"
         },
         {
           "description": "How far the camera view is moved forwards or backwards from where it was placed in the scene.",
           "kind": "value",
           "name": "pan_z",
           "read_only": false,
-          "type": "f32"
+          "type": "number"
         },
         {
           "description": "Sets an explicit perspective camera's vertical field of view in degrees, strictly between 0 and 180. Preserves clipping and unknown fields; requires no behavior component.",
@@ -1064,7 +1064,7 @@
           ],
           "parameters": [
             "Entity",
-            "f32"
+            "number"
           ],
           "returns": "unit"
         },
@@ -1078,9 +1078,9 @@
             "decay"
           ],
           "parameters": [
-            "f32",
-            "f32",
-            "f32"
+            "number",
+            "number",
+            "number"
           ],
           "returns": "unit"
         },
@@ -1092,7 +1092,7 @@
             "value"
           ],
           "parameters": [
-            "f32"
+            "number"
           ],
           "returns": "unit"
         }
@@ -1408,7 +1408,7 @@
           "kind": "value",
           "name": "normal_impulse",
           "read_only": false,
-          "type": "f32"
+          "type": "number"
         },
         {
           "description": "World-space midpoint of the two surface anchors, as Vec2.",
@@ -1422,7 +1422,7 @@
           "kind": "value",
           "name": "tangent_impulse",
           "read_only": false,
-          "type": "f32"
+          "type": "number"
         }
       ],
       "name": "Contact2d"
@@ -1440,7 +1440,7 @@
           "parameters": [
             "Entity"
           ],
-          "returns": "f32"
+          "returns": "number"
         },
         {
           "description": "Plays the particle burst set up on an object at another position, such as where an enemy just died.",
@@ -1453,10 +1453,10 @@
           ],
           "parameters": [
             "Entity",
-            "f32",
-            "f32"
+            "number",
+            "number"
           ],
-          "returns": "f32"
+          "returns": "number"
         },
         {
           "description": "Throws that many of an object's emitter particles at once, such as dust when landing. Gives back how many were made.",
@@ -1468,9 +1468,9 @@
           ],
           "parameters": [
             "Entity",
-            "f32"
+            "number"
           ],
-          "returns": "f32"
+          "returns": "number"
         },
         {
           "description": "How many particles are currently on screen.",
@@ -1478,7 +1478,7 @@
           "name": "live",
           "parameter_names": [],
           "parameters": [],
-          "returns": "f32"
+          "returns": "number"
         },
         {
           "description": "Starts the particle emitter set up on an object. Gives back 1.",
@@ -1490,7 +1490,7 @@
           "parameters": [
             "Entity"
           ],
-          "returns": "f32"
+          "returns": "number"
         },
         {
           "description": "Stops the particle emitter set up on an object; particles already out live out their life. Gives back 1.",
@@ -1502,7 +1502,7 @@
           "parameters": [
             "Entity"
           ],
-          "returns": "f32"
+          "returns": "number"
         }
       ],
       "name": "Effects"
@@ -1582,9 +1582,9 @@
           ],
           "parameters": [
             "String",
-            "f32"
+            "number"
           ],
-          "returns": "f32"
+          "returns": "number"
         },
         {
           "description": "Stores a number under a name for any script to read.",
@@ -1596,7 +1596,7 @@
           ],
           "parameters": [
             "String",
-            "f32"
+            "number"
           ],
           "returns": "unit"
         }
@@ -1615,10 +1615,10 @@
             "axis"
           ],
           "parameters": [
-            "f32",
+            "number",
             "String"
           ],
-          "returns": "f32"
+          "returns": "number"
         },
         {
           "description": "How many players have joined with a controller.",
@@ -1626,7 +1626,7 @@
           "name": "count",
           "parameter_names": [],
           "parameters": [],
-          "returns": "f32"
+          "returns": "number"
         },
         {
           "description": "Whether a player number has a connected controller.",
@@ -1636,7 +1636,7 @@
             "slot"
           ],
           "parameters": [
-            "f32"
+            "number"
           ],
           "returns": "bool"
         },
@@ -1649,7 +1649,7 @@
             "button"
           ],
           "parameters": [
-            "f32",
+            "number",
             "String"
           ],
           "returns": "bool"
@@ -1660,7 +1660,7 @@
           "name": "joined",
           "parameter_names": [],
           "parameters": [],
-          "returns": "f32"
+          "returns": "number"
         },
         {
           "description": "Whether a mouse button was pressed this frame.",
@@ -1671,7 +1671,7 @@
             "button"
           ],
           "parameters": [
-            "f32",
+            "number",
             "String"
           ],
           "returns": "bool"
@@ -1685,7 +1685,7 @@
             "button"
           ],
           "parameters": [
-            "f32",
+            "number",
             "String"
           ],
           "returns": "bool"
@@ -1696,7 +1696,7 @@
           "name": "left",
           "parameter_names": [],
           "parameters": [],
-          "returns": "f32"
+          "returns": "number"
         }
       ],
       "name": "Gamepad"
@@ -1709,14 +1709,14 @@
           "kind": "value",
           "name": "drag_x",
           "read_only": false,
-          "type": "f32"
+          "type": "number"
         },
         {
           "description": "How far the drag moved up or down this frame.",
           "kind": "value",
           "name": "drag_y",
           "read_only": false,
-          "type": "f32"
+          "type": "number"
         },
         {
           "description": "Whether the player is dragging.",
@@ -1737,21 +1737,21 @@
           "kind": "value",
           "name": "hold_x",
           "read_only": false,
-          "type": "f32"
+          "type": "number"
         },
         {
           "description": "Where the long press is, up or down.",
           "kind": "value",
           "name": "hold_y",
           "read_only": false,
-          "type": "f32"
+          "type": "number"
         },
         {
           "description": "How much two fingers pinched this frame: above 1 when spreading apart, below 1 when closing, and 1 when not pinching. Multiply a zoom by it.",
           "kind": "value",
           "name": "pinch",
           "read_only": false,
-          "type": "f32"
+          "type": "number"
         },
         {
           "description": "Whether two fingers are pinching.",
@@ -1765,14 +1765,14 @@
           "kind": "value",
           "name": "tap_x",
           "read_only": false,
-          "type": "f32"
+          "type": "number"
         },
         {
           "description": "Where the tap was, up or down.",
           "kind": "value",
           "name": "tap_y",
           "read_only": false,
-          "type": "f32"
+          "type": "number"
         },
         {
           "description": "Whether the player tapped (a quick press without moving) this frame. Check this before reading `tap_x` and `tap_y`.",
@@ -1799,9 +1799,9 @@
           ],
           "parameters": [
             "Entity",
-            "f32",
-            "f32",
-            "f32"
+            "number",
+            "number",
+            "number"
           ],
           "returns": "String"
         },
@@ -1831,7 +1831,7 @@
           "parameters": [
             "Entity"
           ],
-          "returns": "f32"
+          "returns": "number"
         },
         {
           "description": "Whether a map column's existing surface is strictly below its flood level. Reads the same threshold the map draws; terrain and edits stay unchanged.",
@@ -1844,8 +1844,8 @@
           ],
           "parameters": [
             "Entity",
-            "f32",
-            "f32"
+            "number",
+            "number"
           ],
           "returns": "bool"
         },
@@ -1860,10 +1860,10 @@
           ],
           "parameters": [
             "Entity",
-            "f32",
-            "f32"
+            "number",
+            "number"
           ],
-          "returns": "f32?"
+          "returns": "number?"
         },
         {
           "description": "Moves an object to a position on a grid, measured in cells. Fractions place it between cells.",
@@ -1878,8 +1878,8 @@
           "parameters": [
             "Entity",
             "Entity",
-            "f32",
-            "f32"
+            "number",
+            "number"
           ],
           "returns": "unit"
         },
@@ -1895,7 +1895,7 @@
             "Entity",
             "Entity"
           ],
-          "returns": "f32"
+          "returns": "number"
         },
         {
           "description": "Which row an object is at on a grid, with fractions between cells.",
@@ -1909,7 +1909,7 @@
             "Entity",
             "Entity"
           ],
-          "returns": "f32"
+          "returns": "number"
         },
         {
           "description": "How many rows a grid has.",
@@ -1921,7 +1921,7 @@
           "parameters": [
             "Entity"
           ],
-          "returns": "f32"
+          "returns": "number"
         },
         {
           "description": "Places a block, by name, in a cell of a layered grid or a grid whose ground is a voxel world. `\"\"` removes the block.",
@@ -1936,9 +1936,9 @@
           ],
           "parameters": [
             "Entity",
-            "f32",
-            "f32",
-            "f32",
+            "number",
+            "number",
+            "number",
             "String"
           ],
           "returns": "unit"
@@ -1954,7 +1954,7 @@
           ],
           "parameters": [
             "Entity",
-            "f32",
+            "number",
             "String"
           ],
           "returns": "unit"
@@ -1971,8 +1971,8 @@
           ],
           "parameters": [
             "Entity",
-            "f32",
-            "f32",
+            "number",
+            "number",
             "String"
           ],
           "returns": "unit"
@@ -1989,9 +1989,9 @@
           ],
           "parameters": [
             "Entity",
-            "f32",
-            "f32",
-            "f32"
+            "number",
+            "number",
+            "number"
           ],
           "returns": "unit"
         },
@@ -2022,8 +2022,8 @@
           ],
           "parameters": [
             "Entity",
-            "f32",
-            "f32"
+            "number",
+            "number"
           ],
           "returns": "String"
         },
@@ -2040,9 +2040,9 @@
           ],
           "parameters": [
             "Entity",
-            "f32",
-            "f32",
-            "f32",
+            "number",
+            "number",
+            "number",
             "String"
           ],
           "returns": "bool"
@@ -2058,10 +2058,10 @@
           ],
           "parameters": [
             "Entity",
-            "f32",
-            "f32"
+            "number",
+            "number"
           ],
-          "returns": "f32"
+          "returns": "number"
         },
         {
           "description": "Whether a character could stand at a point on a grid. False for water, empty space or outside the grid.",
@@ -2074,8 +2074,8 @@
           ],
           "parameters": [
             "Entity",
-            "f32",
-            "f32"
+            "number",
+            "number"
           ],
           "returns": "bool"
         }
@@ -2146,7 +2146,7 @@
             "String",
             "String"
           ],
-          "returns": "f32"
+          "returns": "number"
         },
         {
           "description": "Whether a key is being held down.",
@@ -2202,7 +2202,7 @@
             "String",
             "String"
           ],
-          "returns": "f32"
+          "returns": "number"
         },
         {
           "description": "Whether a key is being held down.",
@@ -2265,28 +2265,28 @@
           "kind": "value",
           "name": "inner_angle",
           "read_only": false,
-          "type": "f32"
+          "type": "number"
         },
         {
           "description": "Finite nonnegative brightness; zero contributes no light.",
           "kind": "value",
           "name": "intensity",
           "read_only": false,
-          "type": "f32"
+          "type": "number"
         },
         {
           "description": "Outer spotlight half-angle in radians, above inner_angle and at most pi/2, with distinct f32 cosines.",
           "kind": "value",
           "name": "outer_angle",
           "read_only": false,
-          "type": "f32"
+          "type": "number"
         },
         {
           "description": "Finite positive range in world units, independent of entity scale; used by points and spots.",
           "kind": "value",
           "name": "range",
           "read_only": false,
-          "type": "f32"
+          "type": "number"
         }
       ],
       "name": "Light"
@@ -2306,28 +2306,28 @@
           "kind": "value",
           "name": "falloff",
           "read_only": false,
-          "type": "f32"
+          "type": "number"
         },
         {
           "description": "How high above the scene the light hangs. Only images with a normal map notice: low lights rake across their bumps, high ones light them evenly.",
           "kind": "value",
           "name": "height",
           "read_only": false,
-          "type": "f32"
+          "type": "number"
         },
         {
           "description": "How bright the light is; 0 is off.",
           "kind": "value",
           "name": "intensity",
           "read_only": false,
-          "type": "f32"
+          "type": "number"
         },
         {
           "description": "How far the light reaches, in world units.",
           "kind": "value",
           "name": "radius",
           "read_only": false,
-          "type": "f32"
+          "type": "number"
         }
       ],
       "name": "Light2d"
@@ -2350,7 +2350,7 @@
           "parameters": [
             "Entity"
           ],
-          "returns": "f32"
+          "returns": "number"
         },
         {
           "description": "Applies an immediate angular impulse to a dynamic body, independent of timestep.",
@@ -2362,7 +2362,7 @@
           ],
           "parameters": [
             "Entity",
-            "f32"
+            "number"
           ],
           "returns": "unit"
         },
@@ -2391,8 +2391,8 @@
           ],
           "parameters": [
             "Entity",
-            "f32",
-            "f32"
+            "number",
+            "number"
           ],
           "returns": "unit"
         },
@@ -2422,7 +2422,7 @@
           ],
           "parameters": [
             "Entity",
-            "f32"
+            "number"
           ],
           "returns": "unit"
         },
@@ -2443,10 +2443,10 @@
           "parameters": [
             "Vec2",
             "Vec2",
-            "f32",
+            "number",
             "Vec2",
-            "f32",
-            "f32",
+            "number",
+            "number",
             "bool",
             "Entity"
           ],
@@ -2467,10 +2467,10 @@
           ],
           "parameters": [
             "Vec2",
-            "f32",
+            "number",
             "Vec2",
-            "f32",
-            "f32",
+            "number",
+            "number",
             "bool",
             "Entity"
           ],
@@ -2516,7 +2516,7 @@
           "parameters": [
             "Entity",
             "Entity",
-            "f32"
+            "number"
           ],
           "returns": "unit"
         },
@@ -2558,7 +2558,7 @@
             "Entity",
             "Entity",
             "Entity",
-            "f32"
+            "number"
           ],
           "returns": "unit"
         },
@@ -2607,8 +2607,8 @@
             "Vec2",
             "Vec2",
             "bool",
-            "f32",
-            "f32"
+            "number",
+            "number"
           ],
           "returns": "unit"
         },
@@ -2632,9 +2632,9 @@
             "Entity",
             "Vec2",
             "Vec2",
-            "f32",
-            "f32",
-            "f32"
+            "number",
+            "number",
+            "number"
           ],
           "returns": "unit"
         },
@@ -2648,7 +2648,7 @@
           ],
           "parameters": [
             "Entity",
-            "f32"
+            "number"
           ],
           "returns": "unit"
         },
@@ -2682,7 +2682,7 @@
           "parameters": [
             "String"
           ],
-          "returns": "f32"
+          "returns": "number"
         },
         {
           "description": "The mask for several named collision layers at once, such as `[\"ground\", \"enemies\"]`.",
@@ -2694,7 +2694,7 @@
           "parameters": [
             "List<String>"
           ],
-          "returns": "f32"
+          "returns": "number"
         },
         {
           "description": "Queues finite world-space Vec2 displacement for an active authored Character 2D at the next fixed scene step. Later requests replace earlier ones, including before spawn synchronization; invalid input preserves the pending request. snap permits authored downward snapping; ascending requests never snap. Requires scene controller context, valid character settings, a transform and no competing rigid body. Scene synchronization validates exactly one solid collider before applying input. Gameplay owns speed, gravity and jumps. Results are available from character_motion after the fixed step; solver response and discrete sensor events follow at the next solve.",
@@ -2727,8 +2727,8 @@
           "parameters": [
             "Vec2",
             "Vec2",
-            "f32",
-            "f32",
+            "number",
+            "number",
             "bool",
             "Entity"
           ],
@@ -2747,8 +2747,8 @@
           ],
           "parameters": [
             "Vec2",
-            "f32",
-            "f32",
+            "number",
+            "number",
             "bool",
             "Entity"
           ],
@@ -2769,8 +2769,8 @@
           "parameters": [
             "Vec2",
             "Vec2",
-            "f32",
-            "f32",
+            "number",
+            "number",
             "bool",
             "Entity"
           ],
@@ -2814,7 +2814,7 @@
           ],
           "parameters": [
             "Entity",
-            "f32"
+            "number"
           ],
           "returns": "unit"
         },
@@ -2842,7 +2842,7 @@
           ],
           "parameters": [
             "Entity",
-            "f32"
+            "number"
           ],
           "returns": "unit"
         },
@@ -2869,8 +2869,8 @@
           ],
           "parameters": [
             "Entity",
-            "f32",
-            "f32"
+            "number",
+            "number"
           ],
           "returns": "unit"
         },
@@ -2887,10 +2887,10 @@
           ],
           "parameters": [
             "Entity",
-            "f32",
-            "f32",
-            "f32",
-            "f32"
+            "number",
+            "number",
+            "number",
+            "number"
           ],
           "returns": "unit"
         },
@@ -2935,8 +2935,8 @@
           ],
           "parameters": [
             "Entity",
-            "f32",
-            "f32"
+            "number",
+            "number"
           ],
           "returns": "unit"
         },
@@ -2953,10 +2953,10 @@
           ],
           "parameters": [
             "Entity",
-            "f32",
-            "f32",
-            "f32",
-            "f32"
+            "number",
+            "number",
+            "number",
+            "number"
           ],
           "returns": "unit"
         },
@@ -2972,9 +2972,9 @@
           ],
           "parameters": [
             "Entity",
-            "f32",
-            "f32",
-            "f32"
+            "number",
+            "number",
+            "number"
           ],
           "returns": "unit"
         },
@@ -2989,8 +2989,8 @@
           ],
           "parameters": [
             "Entity",
-            "f32",
-            "f32"
+            "number",
+            "number"
           ],
           "returns": "unit"
         },
@@ -3004,7 +3004,7 @@
           "parameters": [
             "Entity"
           ],
-          "returns": "f32"
+          "returns": "number"
         },
         {
           "description": "How fast an object is moving up or down.",
@@ -3016,7 +3016,7 @@
           "parameters": [
             "Entity"
           ],
-          "returns": "f32"
+          "returns": "number"
         }
       ],
       "name": "Physics"
@@ -3069,10 +3069,10 @@
             "Vec3",
             "Vec3",
             "Vec3",
-            "f32",
+            "number",
             "Vec3",
-            "f32",
-            "f32",
+            "number",
+            "number",
             "bool",
             "Entity?"
           ],
@@ -3096,13 +3096,13 @@
           ],
           "parameters": [
             "Vec3",
-            "f32",
-            "f32",
+            "number",
+            "number",
             "Vec3",
-            "f32",
+            "number",
             "Vec3",
-            "f32",
-            "f32",
+            "number",
+            "number",
             "bool",
             "Entity?"
           ],
@@ -3123,10 +3123,10 @@
           ],
           "parameters": [
             "Vec3",
-            "f32",
+            "number",
             "Vec3",
-            "f32",
-            "f32",
+            "number",
+            "number",
             "bool",
             "Entity?"
           ],
@@ -3170,7 +3170,7 @@
           "parameters": [
             "String"
           ],
-          "returns": "f32"
+          "returns": "number"
         },
         {
           "description": "Combines Physics3d.layer bits from a List<str> using bitwise OR. Repeated names do not add bits; an empty list returns zero. Every name is checked; non-text elements, unknown names, invalid active world settings or missing 3D host fail.",
@@ -3182,7 +3182,7 @@
           "parameters": [
             "List<String>"
           ],
-          "returns": "f32"
+          "returns": "number"
         },
         {
           "description": "Queues finite world-space Vec3 displacement for an active authored Character 3D at the next fixed step, including before first synchronization. Last valid request wins; invalid requests preserve it. Snap only enables the authored snap distance. Requires scene character context, valid settings/transform and no competing body/controller. Scene synchronization validates scaled solid geometry before movement. Gameplay owns gravity, speed and jump policy; events observe the moved pose on the following solver step.",
@@ -3217,8 +3217,8 @@
             "Vec3",
             "Vec3",
             "Vec3",
-            "f32",
-            "f32",
+            "number",
+            "number",
             "bool",
             "Entity?"
           ],
@@ -3240,11 +3240,11 @@
           ],
           "parameters": [
             "Vec3",
-            "f32",
-            "f32",
+            "number",
+            "number",
             "Vec3",
-            "f32",
-            "f32",
+            "number",
+            "number",
             "bool",
             "Entity?"
           ],
@@ -3263,8 +3263,8 @@
           ],
           "parameters": [
             "Vec3",
-            "f32",
-            "f32",
+            "number",
+            "number",
             "bool",
             "Entity?"
           ],
@@ -3285,8 +3285,8 @@
           "parameters": [
             "Vec3",
             "Vec3",
-            "f32",
-            "f32",
+            "number",
+            "number",
             "bool",
             "Entity?"
           ],
@@ -3438,14 +3438,14 @@
           "kind": "value",
           "name": "overlay_x",
           "read_only": false,
-          "type": "f32"
+          "type": "number"
         },
         {
           "description": "The pointer's up-down position in screen units, where 0 is the centre.",
           "kind": "value",
           "name": "overlay_y",
           "read_only": false,
-          "type": "f32"
+          "type": "number"
         },
         {
           "description": "The pointer's position in pixels, from the top-left corner of the game's view.",
@@ -3467,14 +3467,14 @@
           "kind": "value",
           "name": "x",
           "read_only": false,
-          "type": "f32"
+          "type": "number"
         },
         {
           "description": "The pointer's distance from the top edge of the game's view, in pixels.",
           "kind": "value",
           "name": "y",
           "read_only": false,
-          "type": "f32"
+          "type": "number"
         }
       ],
       "name": "Pointer"
@@ -3499,7 +3499,7 @@
             "Profile",
             "String"
           ],
-          "returns": "f32"
+          "returns": "number"
         },
         {
           "description": "A true/false setting from the profile, or `fallback` if it is missing.",
@@ -3531,7 +3531,7 @@
           "parameters": [
             "Profile",
             "String",
-            "f32",
+            "number",
             "String",
             "bool"
           ],
@@ -3573,9 +3573,9 @@
           "parameters": [
             "Profile",
             "String",
-            "f32"
+            "number"
           ],
-          "returns": "f32"
+          "returns": "number"
         },
         {
           "description": "A number setting from one item in a list in the profile, or `fallback`.",
@@ -3591,11 +3591,11 @@
           "parameters": [
             "Profile",
             "String",
-            "f32",
+            "number",
             "String",
-            "f32"
+            "number"
           ],
-          "returns": "f32"
+          "returns": "number"
         },
         {
           "description": "A text setting from the profile, or `fallback` if it is missing.",
@@ -3627,7 +3627,7 @@
           "parameters": [
             "Profile",
             "String",
-            "f32",
+            "number",
             "String",
             "String"
           ],
@@ -3644,28 +3644,28 @@
           "kind": "value",
           "name": "w",
           "read_only": false,
-          "type": "f32"
+          "type": "number"
         },
         {
           "description": "The quaternion's X component.",
           "kind": "value",
           "name": "x",
           "read_only": false,
-          "type": "f32"
+          "type": "number"
         },
         {
           "description": "The quaternion's Y component.",
           "kind": "value",
           "name": "y",
           "read_only": false,
-          "type": "f32"
+          "type": "number"
         },
         {
           "description": "The quaternion's Z component.",
           "kind": "value",
           "name": "z",
           "read_only": false,
-          "type": "f32"
+          "type": "number"
         }
       ],
       "name": "Quat"
@@ -3682,10 +3682,10 @@
             "max"
           ],
           "parameters": [
-            "f32",
-            "f32"
+            "number",
+            "number"
           ],
-          "returns": "f32"
+          "returns": "number"
         },
         {
           "description": "A random object from a list, such as a random enemy to target. The list must not be empty.",
@@ -3708,10 +3708,10 @@
             "max"
           ],
           "parameters": [
-            "f32",
-            "f32"
+            "number",
+            "number"
           ],
-          "returns": "f32"
+          "returns": "number"
         },
         {
           "description": "Starts the random numbers from a seed. The same seed always gives the same numbers afterwards.",
@@ -3721,7 +3721,7 @@
             "value"
           ],
           "parameters": [
-            "f32"
+            "number"
           ],
           "returns": "unit"
         },
@@ -3731,7 +3731,7 @@
           "name": "value",
           "parameter_names": [],
           "parameters": [],
-          "returns": "f32"
+          "returns": "number"
         }
       ],
       "name": "Random"
@@ -3744,7 +3744,7 @@
           "kind": "value",
           "name": "distance",
           "read_only": false,
-          "type": "f32"
+          "type": "number"
         },
         {
           "description": "The entity owning the hit collider piece.",
@@ -3778,7 +3778,7 @@
           "kind": "value",
           "name": "distance",
           "read_only": false,
-          "type": "f32"
+          "type": "number"
         },
         {
           "description": "The active entity whose collider piece was hit.",
@@ -3875,9 +3875,9 @@
           ],
           "parameters": [
             "String",
-            "f32"
+            "number"
           ],
-          "returns": "f32"
+          "returns": "number"
         },
         {
           "description": "Saves a true/false value under a name.",
@@ -3903,7 +3903,7 @@
           ],
           "parameters": [
             "String",
-            "f32"
+            "number"
           ],
           "returns": "unit"
         }
@@ -3951,7 +3951,7 @@
           "kind": "value",
           "name": "ambient_intensity",
           "read_only": false,
-          "type": "f32"
+          "type": "number"
         },
         {
           "description": "The scene clear color as RGBA Color. Whole and channel writes retain finite f32 values, including authored alpha. Failed writes preserve the old payload.",
@@ -4040,7 +4040,7 @@
           ],
           "parameters": [
             "Entity",
-            "f32"
+            "number"
           ],
           "returns": "unit"
         },
@@ -4066,7 +4066,7 @@
           "parameters": [
             "Entity"
           ],
-          "returns": "f32"
+          "returns": "number"
         }
       ],
       "name": "Sequence"
@@ -4079,28 +4079,28 @@
           "kind": "value",
           "name": "w",
           "read_only": false,
-          "type": "f32"
+          "type": "number"
         },
         {
           "description": "The first number.",
           "kind": "value",
           "name": "x",
           "read_only": false,
-          "type": "f32"
+          "type": "number"
         },
         {
           "description": "The second number.",
           "kind": "value",
           "name": "y",
           "read_only": false,
-          "type": "f32"
+          "type": "number"
         },
         {
           "description": "The third number.",
           "kind": "value",
           "name": "z",
           "read_only": false,
-          "type": "f32"
+          "type": "number"
         }
       ],
       "name": "ShaderParams"
@@ -4113,21 +4113,21 @@
           "kind": "value",
           "name": "count",
           "read_only": false,
-          "type": "f32"
+          "type": "number"
         },
         {
           "description": "How much of each dash is drawn, from 0 to 1; the rest is the gap before the next. 0.5 draws dashes and gaps of equal length.",
           "kind": "value",
           "name": "dash_duty",
           "read_only": false,
-          "type": "f32"
+          "type": "number"
         },
         {
           "description": "How many dashes the outline is broken into. 0 draws a solid line.",
           "kind": "value",
           "name": "dashes",
           "read_only": false,
-          "type": "f32"
+          "type": "number"
         },
         {
           "description": "The color inside the shape.",
@@ -4141,7 +4141,7 @@
           "kind": "value",
           "name": "layer",
           "read_only": false,
-          "type": "f32"
+          "type": "number"
         },
         {
           "description": "The color of the shape's outline.",
@@ -4155,21 +4155,21 @@
           "kind": "value",
           "name": "stroke_width",
           "read_only": false,
-          "type": "f32"
+          "type": "number"
         },
         {
           "description": "Where the outline starts, as a fraction of the way round from the top.",
           "kind": "value",
           "name": "sweep_start",
           "read_only": false,
-          "type": "f32"
+          "type": "number"
         },
         {
           "description": "How much of the outline is drawn, from 0 to 1. Setting it to 0.5 draws half a ring, which makes cooldown and charge meters.",
           "kind": "value",
           "name": "sweep_turns",
           "read_only": false,
-          "type": "f32"
+          "type": "number"
         }
       ],
       "name": "Shape"
@@ -4196,7 +4196,7 @@
           "kind": "value",
           "name": "layer",
           "read_only": false,
-          "type": "f32"
+          "type": "number"
         },
         {
           "description": "Four numbers the sprite's shader reads, as `x`, `y`, `z` and `w`. What each one does is up to the shader: how far a dissolve has got, how bright a flash is.",
@@ -4223,14 +4223,14 @@
           "kind": "value",
           "name": "anchor_x",
           "read_only": false,
-          "type": "f32"
+          "type": "number"
         },
         {
           "description": "Where the thumb first landed, up or down.",
           "kind": "value",
           "name": "anchor_y",
           "read_only": false,
-          "type": "f32"
+          "type": "number"
         },
         {
           "description": "Which way and how far the joystick is pushed, as a direction up to 1 long.",
@@ -4251,14 +4251,14 @@
           "kind": "value",
           "name": "x",
           "read_only": false,
-          "type": "f32"
+          "type": "number"
         },
         {
           "description": "How far the joystick is pushed down, from -1 (fully up) to 1 (fully down).",
           "kind": "value",
           "name": "y",
           "read_only": false,
-          "type": "f32"
+          "type": "number"
         }
       ],
       "name": "Stick"
@@ -4271,14 +4271,14 @@
           "kind": "value",
           "name": "delta",
           "read_only": false,
-          "type": "f32"
+          "type": "number"
         },
         {
           "description": "How many seconds this script has been running.",
           "kind": "value",
           "name": "elapsed",
           "read_only": false,
-          "type": "f32"
+          "type": "number"
         }
       ],
       "name": "Time"
@@ -4291,7 +4291,7 @@
           "kind": "value",
           "name": "count",
           "read_only": false,
-          "type": "f32"
+          "type": "number"
         },
         {
           "description": "A finger's distance from the left edge of the game's view, in pixels.",
@@ -4301,9 +4301,9 @@
             "index"
           ],
           "parameters": [
-            "f32"
+            "number"
           ],
-          "returns": "f32"
+          "returns": "number"
         },
         {
           "description": "A finger's distance from the top edge of the game's view, in pixels.",
@@ -4313,9 +4313,9 @@
             "index"
           ],
           "parameters": [
-            "f32"
+            "number"
           ],
-          "returns": "f32"
+          "returns": "number"
         }
       ],
       "name": "Touch"
@@ -4347,7 +4347,7 @@
           "kind": "value",
           "name": "pitch",
           "read_only": false,
-          "type": "f32"
+          "type": "number"
         },
         {
           "description": "Where the object is. Change it to move the object: `this.transform.position.x += speed * dt`. Measured from the parent if it has one.",
@@ -4368,7 +4368,7 @@
           "kind": "value",
           "name": "roll",
           "read_only": false,
-          "type": "f32"
+          "type": "number"
         },
         {
           "description": "Rotates position and orientation around a world-space Vec3 pivot and nonzero Vec3 axis by radians. Normalizes the axis and preserves scale. Invalid input/output, a singular parent scale, or movement off a Z-locked layer is an error with no mutation.",
@@ -4382,7 +4382,7 @@
           "parameters": [
             "Vec3",
             "Vec3",
-            "f32"
+            "number"
           ],
           "returns": "unit"
         },
@@ -4398,7 +4398,7 @@
           "kind": "value",
           "name": "rotation_z",
           "read_only": false,
-          "type": "f32"
+          "type": "number"
         },
         {
           "description": "How big the object is on each axis; 1 is its normal size.",
@@ -4426,7 +4426,7 @@
           "kind": "value",
           "name": "yaw",
           "read_only": false,
-          "type": "f32"
+          "type": "number"
         }
       ],
       "name": "Transform"
@@ -4473,7 +4473,7 @@
           "parameters": [
             "Color",
             "Color",
-            "f32",
+            "number",
             "String"
           ],
           "returns": "ColorTween"
@@ -4549,9 +4549,9 @@
             "easing"
           ],
           "parameters": [
-            "f32",
-            "f32",
-            "f32",
+            "number",
+            "number",
+            "number",
             "String"
           ],
           "returns": "NumberTween"
@@ -4566,7 +4566,7 @@
           "parameters": [
             "NumberTween"
           ],
-          "returns": "f32"
+          "returns": "number"
         },
         {
           "description": "Pauses at the current value.",
@@ -4590,7 +4590,7 @@
           "parameters": [
             "TweenHandle"
           ],
-          "returns": "f32"
+          "returns": "number"
         },
         {
           "description": "Resets to the original endpoints and begins again, clearing pause/cancellation.",
@@ -4626,7 +4626,7 @@
           ],
           "parameters": [
             "TweenHandle",
-            "f32"
+            "number"
           ],
           "returns": "unit"
         },
@@ -4640,7 +4640,7 @@
           ],
           "parameters": [
             "TweenHandle",
-            "f32"
+            "number"
           ],
           "returns": "unit"
         },
@@ -4671,7 +4671,7 @@
           "parameters": [
             "Vec2",
             "Vec2",
-            "f32",
+            "number",
             "String"
           ],
           "returns": "Vec2Tween"
@@ -4701,7 +4701,7 @@
           "parameters": [
             "Vec3",
             "Vec3",
-            "f32",
+            "number",
             "String"
           ],
           "returns": "Vec3Tween"
@@ -4739,7 +4739,7 @@
           "parameters": [
             "Entity"
           ],
-          "returns": "f32"
+          "returns": "number"
         },
         {
           "description": "Whether user interaction changed a widget this step.",
@@ -4859,7 +4859,7 @@
           "parameters": [
             "Entity"
           ],
-          "returns": "f32"
+          "returns": "number"
         },
         {
           "description": "Which option a dropdown has chosen, counted from zero.",
@@ -4871,7 +4871,7 @@
           "parameters": [
             "Entity"
           ],
-          "returns": "f32"
+          "returns": "number"
         },
         {
           "description": "Where a text field's selection ends, in characters; the caret when nothing is selected.",
@@ -4883,7 +4883,7 @@
           "parameters": [
             "Entity"
           ],
-          "returns": "f32"
+          "returns": "number"
         },
         {
           "description": "Where a text field's selection begins, in characters; the caret when nothing is selected.",
@@ -4895,7 +4895,7 @@
           "parameters": [
             "Entity"
           ],
-          "returns": "f32"
+          "returns": "number"
         },
         {
           "description": "Sets a toggle without emitting a user-change event.",
@@ -4921,7 +4921,7 @@
           ],
           "parameters": [
             "Entity",
-            "f32"
+            "number"
           ],
           "returns": "unit"
         },
@@ -4949,7 +4949,7 @@
           ],
           "parameters": [
             "Entity",
-            "f32"
+            "number"
           ],
           "returns": "unit"
         },
@@ -4964,8 +4964,8 @@
           ],
           "parameters": [
             "Entity",
-            "f32",
-            "f32"
+            "number",
+            "number"
           ],
           "returns": "unit"
         },
@@ -4979,7 +4979,7 @@
           ],
           "parameters": [
             "Entity",
-            "f32"
+            "number"
           ],
           "returns": "unit"
         },
@@ -4993,7 +4993,7 @@
           ],
           "parameters": [
             "Entity",
-            "f32"
+            "number"
           ],
           "returns": "unit"
         },
@@ -5007,7 +5007,7 @@
           ],
           "parameters": [
             "Entity",
-            "f32"
+            "number"
           ],
           "returns": "unit"
         },
@@ -5059,7 +5059,7 @@
           "parameters": [
             "Entity"
           ],
-          "returns": "f32"
+          "returns": "number"
         },
         {
           "description": "Whether Enter submitted the focused input this step.",
@@ -5084,7 +5084,7 @@
           "kind": "value",
           "name": "layer",
           "read_only": false,
-          "type": "f32"
+          "type": "number"
         },
         {
           "description": "A color the image is multiplied by. White leaves it unchanged; lowering `a` fades it out.",
@@ -5114,7 +5114,7 @@
           "kind": "value",
           "name": "aspect",
           "read_only": false,
-          "type": "f32"
+          "type": "number"
         }
       ],
       "name": "Viewport"
@@ -5210,9 +5210,9 @@
           "parameters": [
             "Entity",
             "String",
-            "f32"
+            "number"
           ],
-          "returns": "f32"
+          "returns": "number"
         },
         {
           "description": "Sends a number to another object under a name, for its script to collect with `take_signal`. Older style: events and calling another script's functions are clearer.",
@@ -5226,7 +5226,7 @@
           "parameters": [
             "Entity",
             "String",
-            "f32"
+            "number"
           ],
           "returns": "unit"
         },
@@ -5284,9 +5284,9 @@
             "y"
           ],
           "parameters": [
-            "f32",
-            "f32",
-            "f32"
+            "number",
+            "number",
+            "number"
           ],
           "returns": "unit"
         },
@@ -5326,7 +5326,7 @@
           "parameters": [
             "String"
           ],
-          "returns": "f32"
+          "returns": "number"
         },
         {
           "description": "Every switched-on object with a tag, as a list: `for enemy in World.with_tag(\"enemy\") { ... }`. Looks through the whole game, so call it once per frame, not in a loop.",
@@ -5352,7 +5352,7 @@
           "parameters": [
             "String",
             "Vec3",
-            "f32"
+            "number"
           ],
           "returns": "List<Entity>"
         }
@@ -5374,21 +5374,21 @@
           "kind": "value",
           "name": "font_size",
           "read_only": false,
-          "type": "f32"
+          "type": "number"
         },
         {
           "description": "Drawing order: drawn over sprites in the same layer, under higher ones.",
           "kind": "value",
           "name": "layer",
           "read_only": false,
-          "type": "f32"
+          "type": "number"
         },
         {
           "description": "How many letters show, for a typewriter reveal. Negative shows them all.",
           "kind": "value",
           "name": "visible",
           "read_only": false,
-          "type": "f32"
+          "type": "number"
         }
       ],
       "name": "WorldText"

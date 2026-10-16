@@ -55,7 +55,7 @@ mod tests {
         let hover = constant_hover("HALF", &ConstValue::Number(6.0));
         assert_eq!(
             hover.pointer("/contents/value").and_then(Value::as_str),
-            Some("```decay\nconst HALF: f32 = 6\n```")
+            Some("```decay\nconst HALF: number = 6\n```")
         );
         let hover = constant_hover("TITLE", &ConstValue::Text("Orbital".to_owned()));
         assert!(
