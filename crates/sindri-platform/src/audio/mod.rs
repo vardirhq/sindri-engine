@@ -35,9 +35,8 @@ pub use silent::SilentAudioBackend;
 /// One decoded asset handed to the platform audio boundary.
 ///
 /// The asset pipeline identifies the container; the device backend owns codec
-/// decoding because native Rodio and browser media elements already implement
-/// that work, including streaming compressed music without expanding it to PCM
-/// in engine memory first.
+/// decoding because native Rodio and the browser's Web Audio already implement
+/// that work.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct AudioClip {
     pub id: String,

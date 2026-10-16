@@ -302,6 +302,7 @@ impl DesktopApp for Player {
             InputEvent::KeyPressed(_)
                 | InputEvent::ButtonPressed(_)
                 | InputEvent::TouchStarted { .. }
+                | InputEvent::TouchEnded { .. }
         ) && let Some(audio) = &mut self.audio
         {
             let _ = audio.unlock();

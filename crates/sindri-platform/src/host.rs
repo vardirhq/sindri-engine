@@ -196,13 +196,18 @@ impl<G: Game, A: AudioBackend> EngineHost<G, A> {
 
     /// Records a host input event for the next frame.
     ///
-    /// A keyboard or pointer press is also the browser's required user gesture
-    /// for audio. Unlocking here means games do not need a web-only "click to
-    /// enable sound" branch; the first real interaction opens the device.
+    /// A key, a pointer press or a touch is also the browser's required user
+    /// gesture for audio. Unlocking here means games do not need a web-only
+    /// "click to enable sound" branch; the first real interaction opens the
+    /// device. Touch counts both ways: a phone player may hold a finger down
+    /// for a long time, and browsers grant audio on the finger's lifting.
     pub fn queue_input(&mut self, event: InputEvent) {
         if matches!(
             event,
-            InputEvent::KeyPressed(_) | InputEvent::ButtonPressed(_)
+            InputEvent::KeyPressed(_)
+                | InputEvent::ButtonPressed(_)
+                | InputEvent::TouchStarted { .. }
+                | InputEvent::TouchEnded { .. }
         ) {
             let _ = self.audio.unlock();
         }

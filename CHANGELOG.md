@@ -1,5 +1,10 @@
 # Changelog
 
+- Fix silent games on phones: browser audio now plays through Web Audio,
+  unlocked by the first tap, click or key — including a finger lifting off a
+  touch stick — and resumed inside the gesture, as iOS Safari requires. The
+  platformer's sounds play on a phone.
+
 - Open the Sound Lab in a browser at `/examples/sound-lab/`, on a phone as
   well as a desktop: the same effects designer and music workstation, drawn
   with WebGL2, with Web Audio playback and downloads in place of a project
