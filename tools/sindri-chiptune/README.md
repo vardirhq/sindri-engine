@@ -82,20 +82,30 @@ edit, chords and drums that follow them, mixed in stereo.
 
 ### Writing
 
-Four styles use major, minor, Dorian or Phrygian harmony, with chords stacked
-in the style's scale, a seeded hook that resolves accents to chord tones, a
-question/answer phrase, cadence breaths and a tonic ending. The bass plays the
-groove's rhythm on roots, octaves and fifths, and steps into each chord change
-from a scale tone away. The arpeggio changes with the section: sparse in the
-intro, flowing eighths in the theme, a sixteenth-note run over two octaves in
-the rise, falling broken chords in the return.
+A song is written to repeat, so it sounds like one piece rather than a run of
+random bars. Each section loops four chords, one per bar, and the melody is a
+period: a one-bar motif built on chord tones at the strong beats, carried
+through the loop with stepwise voice-leading, ending each phrase on a cadence
+that asks a question (resting on the fifth) or answers it (home on the root).
+The theme comes back note for note in the return, the bass plays one riff for
+the whole song, and the drums keep one beat that repeats every bar, with a fill
+at the end of each phrase.
 
-The **chords** are read from the bass line, half a bar at a time, stacked in the
-song's scale (with sevenths in the darker moods) and voiced to move as little as
-possible, so they follow every bass edit. The **drums** are generated from mood,
-section and density: kick, snare and ghost notes, closed and open hats, a crash
-at each section, tom and snare fills every fourth bar, swing on the lighter
-moods and slightly varied velocities.
+Variety comes from what is chosen, per song, by the seed. Four moods set major,
+minor, Dorian or Phrygian harmony; each draws its verse and rise loops from its
+own library of progressions, and a groove from those that suit it: **Drift,
+Bounce, Drive, Ballad, Shuffle** (triplet swing) or **Half-time**. The groove
+picks the drum beat from its own set, the motif's rhythm (curated, or generated
+from the groove's onsets), the bass riff, cadence shapes, and the swing, which
+moves every part, not only the hats. The register, contour direction and
+arpeggio figure are drawn too, so two seeds of one mood can differ in beat,
+chords and tune.
+
+The arpeggio changes with the section: sparse in the intro, a seeded figure in
+the theme, a sixteenth-note run in the rise. The **chords** are read from the
+bass line at each downbeat, stacked in the song's scale (with sevenths in the
+darker moods) and voiced to move as little as possible, so they follow every
+bass edit.
 
 ### Sound
 
@@ -163,7 +173,8 @@ cargo check -p sindri-chiptune --all-features --target wasm32-unknown-unknown
 The tests cover every effect kind over many seeds (deterministic, audible,
 bounded, click-free endings), pitch direction per kind, mutation, `.sindrisfx`
 and `.sindrisong` round trips and refusals, project delivery and manifest
-editing, in-key monophonic composition, MIDI round trips and malformed input,
+editing, in-key monophonic composition that repeats its theme, riff and beat and
+moves mostly by step, a beat that repeats for every groove, MIDI round trips and malformed input,
 undo/redo, live tempo and edit continuity, and drawing both modes at three
 window sizes. Layouts were captured from the real window under Xvfb.
 

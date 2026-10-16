@@ -11,13 +11,19 @@ pub(in crate::lab) fn scale(mood: Mood) -> [i32; 7] {
     }
 }
 
-/// The bass note that defines the harmony from `from` for `length` steps: the
-/// lowest one sounding at its start or beginning inside it.
+/// The bass note that defines the harmony from `from` for `length` steps:
+/// the one sounding on its downbeat, or failing that the first to begin in it.
+/// Not the lowest: a riff that drops to the fifth below is still on the root's
+/// chord.
 pub(super) fn bass_at(bass: &[Note], from: usize, length: usize) -> Option<i32> {
     bass.iter()
-        .filter(|n| n.start < from + length && n.start + n.len > from)
+        .find(|n| n.start <= from && n.start + n.len > from)
+        .or_else(|| {
+            bass.iter()
+                .filter(|n| n.start > from && n.start < from + length)
+                .min_by_key(|n| n.start)
+        })
         .map(|n| n.pitch)
-        .min()
 }
 
 /// A chord built on `root` by stacking thirds in the song's scale, voiced
@@ -87,7 +93,7 @@ mod tests {
     }
 
     #[test]
-    fn the_harmony_follows_the_lowest_bass_note() {
+    fn the_harmony_follows_the_bass_on_the_downbeat() {
         let bass = [
             Note {
                 pitch: 40,
@@ -102,7 +108,8 @@ mod tests {
                 velocity: 90,
             },
         ];
-        assert_eq!(bass_at(&bass, 0, 8), Some(36));
+        assert_eq!(bass_at(&bass, 0, 8), Some(40));
+        assert_eq!(bass_at(&bass, 2, 8), Some(40));
         assert_eq!(bass_at(&bass, 8, 8), None);
     }
 }

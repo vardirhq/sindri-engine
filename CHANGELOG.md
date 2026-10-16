@@ -1,5 +1,13 @@
 # Changelog
 
+- Make generated songs sound composed rather than random: each section loops
+  four chords, the melody is a motif developed in question-and-answer phrases
+  with stepwise voice-leading and cadences, the theme returns note for note,
+  the bass keeps one riff and the drums one beat per song. Variety moved to
+  choices per seed: chord loops from per-mood libraries and six grooves
+  (Drift, Bounce, Drive, Ballad, Shuffle, Half-time), each with its own beats,
+  rhythms, riffs and swing that moves every part.
+
 - Make the Sound Lab's songs sound full: a new stereo engine with band-limited
   oscillators, filtered and enveloped patches, a chords layer that follows the
   bass, a synthesized drum kit with fills and swing, reverb, echo, ducking and
