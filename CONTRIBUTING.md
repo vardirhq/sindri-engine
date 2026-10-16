@@ -48,6 +48,17 @@ makes with the workflow's own token start CI through `workflow_dispatch`; set a
 `SINDRI_AUTOFIX_TOKEN` secret (a fine-grained token with contents write access
 to this repository) to make them ordinary pushes that start every workflow.
 
+CI does not repeat work it has already verified. Every fully green CI run
+records the tree it tested (`ci-verified-<tree>`), and a push to `main` whose
+tree already passed in this repository skips its jobs — the bytes are the same,
+so the answer would be too. A push that changes a `Cargo.toml` or the toolchain
+always runs in full, because `main`'s run saves the build cache every pull
+request restores. With the merge queue enabled, the queue runs CI and builds
+the optimised site for the exact commit `main` becomes, and the push to `main`
+promotes that site rather than rebuilding it; `scripts/ci_reuse.py` is the
+lookup. The test job reports its build and its run as separate steps and
+uploads cargo's `--timings` report, so a slow run says which half is slow.
+
 Dependency changes additionally run `cargo deny`; see
 [`docs/dependency-policy.md`](docs/dependency-policy.md).
 
