@@ -1,5 +1,12 @@
 # Changelog
 
+- Open the Sound Lab in a browser at `/examples/sound-lab/`, on a phone as
+  well as a desktop: the same effects designer and music workstation, drawn
+  with WebGL2, with Web Audio playback and downloads in place of a project
+  folder. Below 720 points wide it folds into one scrolling column with larger
+  touch targets; `?mode=sfx` opens on the effects designer. Find it under the
+  directory's new **Tools** filter.
+
 - Make game sound effects in the Sindri Sound Lab (`cargo run -p
   sindri-chiptune`): eight seeded kinds — coin, jump, laser, explosion,
   power-up, hurt, blip, thud — shaped with envelope, pitch, vibrato, arpeggio,

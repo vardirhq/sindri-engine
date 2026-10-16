@@ -1,6 +1,6 @@
 //! Undoable score edits.
 use super::{ComposerApp, ScoreSnapshot};
-use crate::desktop::{live::Command, midi};
+use crate::lab::{live::Command, midi};
 
 impl ComposerApp {
     fn snapshot(&self, candidate: usize) -> ScoreSnapshot {

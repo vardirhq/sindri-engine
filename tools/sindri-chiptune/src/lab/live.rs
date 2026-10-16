@@ -1,15 +1,14 @@
 //! Continuous sample source: the audio thread owns its timeline and synth state.
 use super::{Note, RATE, STEPS, Settings, noise, voice};
+#[cfg(not(target_arch = "wasm32"))]
 use rodio::Source;
-use std::{
-    num::NonZero,
-    sync::{
-        Arc, Mutex,
-        atomic::{AtomicU64, Ordering},
-        mpsc::{self, Receiver, Sender},
-    },
-    time::Duration,
+use std::sync::{
+    Arc, Mutex,
+    atomic::{AtomicU64, Ordering},
+    mpsc::{self, Receiver, Sender},
 };
+#[cfg(not(target_arch = "wasm32"))]
+use std::{num::NonZero, time::Duration};
 
 pub(super) enum Command {
     Update(Settings),
@@ -192,6 +191,7 @@ impl Iterator for LiveSource {
         Some(sample)
     }
 }
+#[cfg(not(target_arch = "wasm32"))]
 impl Source for LiveSource {
     fn current_span_len(&self) -> Option<usize> {
         None
@@ -214,7 +214,7 @@ mod tests {
     fn tempo_updates_preserve_musical_position() {
         let settings = Settings::default();
         let (mut source, transport) =
-            LiveSource::new(settings.clone(), crate::desktop::compose_with(&settings));
+            LiveSource::new(settings.clone(), crate::lab::compose_with(&settings));
         source.sample = 44_100;
         let mut changed = settings;
         changed.bpm *= 2.0;
@@ -227,7 +227,7 @@ mod tests {
     fn note_edits_preserve_the_timeline() {
         let settings = Settings::default();
         let (mut source, transport) =
-            LiveSource::new(settings.clone(), crate::desktop::compose_with(&settings));
+            LiveSource::new(settings.clone(), crate::lab::compose_with(&settings));
         source.sample = 44_100;
         transport
             .tx
@@ -241,7 +241,7 @@ mod tests {
     fn non_looping_playback_finishes() {
         let settings = Settings::default();
         let (mut source, transport) =
-            LiveSource::new(settings.clone(), crate::desktop::compose_with(&settings));
+            LiveSource::new(settings.clone(), crate::lab::compose_with(&settings));
         source.sample = 6_000_000;
         transport.tx.send(Command::Loop(false)).expect("send");
         assert!(source.next().is_none());

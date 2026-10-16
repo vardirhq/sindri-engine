@@ -357,7 +357,7 @@ mod tests {
                     ..Settings::default()
                 };
                 let tracks = compose(&settings);
-                crate::desktop::midi::validate(&tracks).expect("bounded monophonic score");
+                crate::lab::midi::validate(&tracks).expect("bounded monophonic score");
                 let style = Style::new(mood, &mut Rng::new(seed ^ 0x8de4));
                 for note in tracks.iter().flatten() {
                     assert!(
@@ -368,7 +368,7 @@ mod tests {
                 }
                 let ending = tracks[2].last().expect("ending");
                 assert_eq!((ending.pitch - settings.key).rem_euclid(12), 0);
-                assert!(ending.start + ending.len < crate::desktop::STEPS);
+                assert!(ending.start + ending.len < crate::lab::STEPS);
             }
         }
     }

@@ -3,27 +3,23 @@ mod editing;
 mod files;
 mod overview;
 mod panels;
+mod platform;
 mod scope;
 mod score;
 mod sfx_params;
 mod sfx_view;
 mod shell;
 mod theme;
-use crate::desktop::live::{Command, LiveSource, Transport};
-use crate::desktop::{Note, Settings, compose_with, project, render_with};
+mod transport;
+use crate::lab::live::Transport;
+use crate::lab::{Note, Settings, compose_with};
 use eframe::egui::{self, Color32};
-use rodio::{
-    Player,
-    stream::{DeviceSinkBuilder, MixerDeviceSink},
-};
-use std::{
-    error::Error,
-    path::PathBuf,
-    sync::mpsc::{self, Receiver},
-    thread,
-};
+use platform::{Files, Speaker};
+use std::{path::PathBuf, sync::mpsc::Receiver};
 
 const ACCENT: Color32 = theme::FORGE;
+/// Below this width the side panels fold into one scrolling column.
+const COMPACT: f32 = 720.0;
 const TRACK_COLORS: [Color32; 4] = theme::VOICES;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -41,6 +37,8 @@ struct ScoreSnapshot {
 
 struct ComposerApp {
     mode: Mode,
+    /// A phone-width window: one scrolling column, bigger touch targets.
+    compact: bool,
     sfx: sfx_view::SfxState,
     project: Option<PathBuf>,
     song_path: Option<PathBuf>,
@@ -58,10 +56,9 @@ struct ComposerApp {
     drag_origin: Option<(usize, Note, usize, i32)>,
     undo: Vec<ScoreSnapshot>,
     redo: Vec<ScoreSnapshot>,
-    output: String,
     job: Option<Job>,
-    stream: Option<MixerDeviceSink>,
-    sink: Option<Player>,
+    speaker: Option<Speaker>,
+    files: Files,
     transport: Option<Transport>,
     playing: Option<Settings>,
     last_sent: Option<Settings>,
@@ -74,11 +71,15 @@ impl Default for ComposerApp {
         let settings = Settings::default();
         Self {
             mode: Mode::Music,
+            compact: false,
             sfx: sfx_view::SfxState::default(),
             // Started inside a project, the tool delivers there without asking.
+            #[cfg(not(target_arch = "wasm32"))]
             project: std::env::current_dir()
                 .ok()
-                .and_then(|dir| project::find(&dir)),
+                .and_then(|dir| crate::lab::project::find(&dir)),
+            #[cfg(target_arch = "wasm32")]
+            project: None,
             song_path: None,
             song_name: "theme".into(),
             song_snippet: None,
@@ -94,10 +95,9 @@ impl Default for ComposerApp {
             drag_origin: None,
             undo: Vec::new(),
             redo: Vec::new(),
-            output: "chiptune.wav".into(),
             job: None,
-            stream: None,
-            sink: None,
+            speaker: None,
+            files: Files::default(),
             transport: None,
             playing: None,
             last_sent: None,
@@ -134,132 +134,19 @@ impl ComposerApp {
         }
         self.status = "Generated two new candidates. Select A or B to compare.".into();
     }
-    fn export(&mut self) {
-        if self.job.is_some() {
-            return;
-        }
-        let mut settings = self.selected_settings();
-        settings.output = self.output.clone().into();
-        let notes = self.scores[self.selected].clone();
-        let (tx, rx) = mpsc::channel();
-        self.job = Some(rx);
-        self.status = "Exporting selected score...".into();
-        thread::spawn(move || {
-            let result = render_with(&settings, &notes)
-                .map(|()| settings.output.display().to_string())
-                .map_err(|e| e.to_string());
-            let _ = tx.send(result);
-        });
-    }
-    fn start_live(&mut self) {
-        let settings = self.selected_settings();
-        let notes = self.scores[self.selected].clone();
-        if let Some(transport) = &self.transport {
-            let _ = transport.tx.send(Command::Replace(settings.clone(), notes));
-            if let Some(player) = &self.sink {
-                player.play();
-            }
-            self.paused = false;
-        } else {
-            match DeviceSinkBuilder::open_default_sink() {
-                Ok(stream) => {
-                    let player = Player::connect_new(stream.mixer());
-                    let (source, transport) = LiveSource::new(settings.clone(), notes);
-                    let _ = transport.tx.send(Command::Loop(self.looping));
-                    player.append(source);
-                    player.play();
-                    self.stream = Some(stream);
-                    self.sink = Some(player);
-                    self.transport = Some(transport);
-                    self.paused = false;
-                }
-                Err(error) => {
-                    self.status = format!("Audio device unavailable: {error}");
-                    return;
-                }
-            }
-        }
-        self.playing = Some(settings.clone());
-        self.last_sent = Some(settings);
-        self.status = "Playing selected score. Mixer and tempo changes are live.".into();
-    }
-    fn stop(&mut self) {
-        if let Some(player) = self.sink.take() {
-            player.stop();
-        }
-        self.stream = None;
-        self.transport = None;
-        self.playing = None;
-        self.last_sent = None;
-        self.paused = false;
-        self.status = "Stopped.".into();
-    }
-    fn sync_audio(&mut self, ui: &egui::Ui) {
-        if let (Some(transport), Some(playing)) = (&self.transport, &mut self.playing) {
-            playing.rack = self.settings.rack.clone();
-            playing.bpm = self.settings.bpm;
-            if self.last_sent.as_ref() != Some(playing) {
-                let _ = transport.tx.send(Command::Update(playing.clone()));
-                self.last_sent = Some(playing.clone());
-            }
-            ui.ctx()
-                .request_repaint_after(std::time::Duration::from_millis(33));
-        }
-    }
-    fn playhead_bar(&self) -> f32 {
-        self.transport.as_ref().map_or(0.0, |transport| {
-            let samples = transport
-                .position
-                .load(std::sync::atomic::Ordering::Relaxed);
-            let samples = u32::try_from(samples).unwrap_or(u32::MAX);
-            // A 32-bar song has fewer than 6 million samples; display precision suffices.
-            #[allow(clippy::cast_precision_loss, clippy::cast_possible_truncation)]
-            let bar = (f64::from(samples)
-                / (f64::from(crate::desktop::RATE) * 240.0 / self.settings.bpm))
-                as f32;
-            bar.min(31.999)
-        })
-    }
-    fn poll(&mut self, ui: &egui::Ui) {
-        if self.sink.as_ref().is_some_and(Player::empty) && !self.paused {
-            self.stop();
-            self.status = "Finished. Press Play to audition again.".into();
-        }
-        match self.job.as_ref().map(Receiver::try_recv) {
-            Some(Ok(result)) => {
-                self.job = None;
-                self.status = match result {
-                    Ok(path) => format!("Saved {path}"),
-                    Err(e) => format!("Export failed: {e}"),
-                };
-            }
-            Some(Err(mpsc::TryRecvError::Disconnected)) => {
-                self.job = None;
-                self.status = "Export worker disconnected.".into();
-            }
-            Some(Err(mpsc::TryRecvError::Empty)) => ui
-                .ctx()
-                .request_repaint_after(std::time::Duration::from_millis(80)),
-            None => {}
-        }
-    }
 }
 
 impl ComposerApp {
-    fn toggle_play(&mut self) {
-        if let Some(player) = &self.sink {
-            if self.paused {
-                player.play();
-            } else {
-                player.pause();
-            }
-            self.paused = !self.paused;
-        } else {
-            self.start_live();
-        }
-    }
-
     fn workspace(&mut self, ui: &mut egui::Ui) {
+        self.compact = ui.available_width() < COMPACT;
+        if self.compact {
+            // Fingers, not a pointer: taller rows and wider buttons.
+            let spacing = &mut ui.style_mut().spacing;
+            spacing.interact_size.y = 34.0;
+            spacing.button_padding = egui::vec2(12.0, 7.0);
+            spacing.item_spacing = egui::vec2(8.0, 8.0);
+            spacing.slider_width = 130.0;
+        }
         self.poll(ui);
         self.shortcuts(ui);
         egui::Panel::top("brand")
@@ -280,9 +167,17 @@ impl ComposerApp {
                     .stroke(egui::Stroke::new(1.0, theme::LINE)),
             )
             .show(ui, |ui| self.status_bar(ui));
-        match self.mode {
-            Mode::Music => self.music_workspace(ui),
-            Mode::Sfx => self.sfx_workspace(ui),
+        match (self.mode, self.compact) {
+            (Mode::Music, false) => self.music_workspace(ui),
+            (Mode::Sfx, false) => self.sfx_workspace(ui),
+            (mode, true) => {
+                egui::CentralPanel::default().show(ui, |ui| {
+                    egui::ScrollArea::vertical().show(ui, |ui| match mode {
+                        Mode::Music => self.music_column(ui),
+                        Mode::Sfx => self.sfx_column(ui),
+                    });
+                });
+            }
         }
         self.sync_audio(ui);
     }
@@ -333,13 +228,30 @@ impl ComposerApp {
     }
 }
 
+impl ComposerApp {
+    /// The music workstation as one column, in the order a phone is used.
+    fn music_column(&mut self, ui: &mut egui::Ui) {
+        ui.add_space(6.0);
+        self.transport_controls(ui);
+        self.score(ui);
+        ui.add_space(8.0);
+        self.controls(ui);
+        ui.add_space(8.0);
+        self.instrument_rack(ui);
+        ui.add_space(8.0);
+        self.song_delivery(ui);
+        ui.add_space(12.0);
+    }
+}
+
 impl eframe::App for ComposerApp {
     fn ui(&mut self, ui: &mut egui::Ui, _frame: &mut eframe::Frame) {
         self.workspace(ui);
     }
 }
 
-pub(super) fn run() -> Result<(), Box<dyn Error>> {
+#[cfg(not(target_arch = "wasm32"))]
+pub(super) fn run() -> Result<(), Box<dyn std::error::Error>> {
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
             .with_title("Sindri Sound Lab")
@@ -356,6 +268,24 @@ pub(super) fn run() -> Result<(), Box<dyn Error>> {
         }),
     )?;
     Ok(())
+}
+
+#[cfg(target_arch = "wasm32")]
+pub(super) fn start_web() {
+    // `?mode=sfx` opens on the effects designer, so a link can say what it is for.
+    let effects = web_sys_search().contains("mode=sfx");
+    platform::start(move |cc| {
+        theme::install(&cc.egui_ctx);
+        Box::new(ComposerApp {
+            mode: if effects { Mode::Sfx } else { Mode::Music },
+            ..ComposerApp::default()
+        })
+    });
+}
+
+#[cfg(target_arch = "wasm32")]
+fn web_sys_search() -> String {
+    platform::search()
 }
 
 #[cfg(test)]

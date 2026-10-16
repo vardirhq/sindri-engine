@@ -1,6 +1,6 @@
 //! The designer's parameter cards. Every control edits the sound in place.
 use super::{ComposerApp, scope, sfx_view::tint, theme};
-use crate::desktop::sfx::{Sfx, Wave};
+use crate::lab::sfx::{Sfx, Wave};
 use eframe::egui::{self, RichText};
 use std::ops::RangeInclusive;
 

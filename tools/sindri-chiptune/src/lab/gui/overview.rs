@@ -1,6 +1,6 @@
 //! The whole song at a glance: four sections, three voices, and the playhead.
 use super::{ComposerApp, TRACK_COLORS, theme};
-use crate::desktop::{BARS, STEPS, live::Command};
+use crate::lab::{BARS, STEPS, live::Command};
 use eframe::egui::{self, Pos2, Rect, RichText, Stroke, StrokeKind, Vec2};
 
 const SECTIONS: [&str; 4] = ["INTRO", "THEME", "RISE", "RETURN"];

@@ -1,7 +1,6 @@
 //! Deliberately narrow Standard MIDI File interchange for three monophonic voices.
 //! Supports format 0/1, metrical time, running status and constant-tempo 4/4.
-use crate::desktop::{Note, STEPS, Settings};
-use std::{error::Error, fs};
+use crate::lab::{Note, STEPS, Settings};
 
 pub(super) fn validate(tracks: &[Vec<Note>; 3]) -> Result<(), &'static str> {
     for track in tracks {
@@ -47,7 +46,10 @@ fn chunk(out: &mut Vec<u8>, tag: &[u8], data: &[u8]) {
 }
 // Tempo is finite and bounded to 60..220 BPM before conversion to microseconds.
 #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
-fn encode(settings: &Settings, tracks: &[Vec<Note>; 3]) -> Result<Vec<u8>, &'static str> {
+pub(super) fn encode(
+    settings: &Settings,
+    tracks: &[Vec<Note>; 3],
+) -> Result<Vec<u8>, &'static str> {
     validate(tracks)?;
     if !settings.bpm.is_finite() || !(60.0..=220.0).contains(&settings.bpm) {
         return Err("Unsupported tempo.");
@@ -89,15 +91,6 @@ fn encode(settings: &Settings, tracks: &[Vec<Note>; 3]) -> Result<Vec<u8>, &'sta
     }
     Ok(out)
 }
-pub(super) fn write(
-    path: &str,
-    settings: &Settings,
-    tracks: &[Vec<Note>; 3],
-) -> Result<(), Box<dyn Error>> {
-    fs::write(path, encode(settings, tracks)?)?;
-    Ok(())
-}
-
 struct Reader<'a>(&'a [u8]);
 impl<'a> Reader<'a> {
     fn take(&mut self, count: usize) -> Result<&'a [u8], String> {

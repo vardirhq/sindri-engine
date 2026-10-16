@@ -186,8 +186,8 @@ summary = "A standalone tool designs seeded game sound effects and delivers each
 status = { engine = "n/a", editor = "no", decay = "n/a", proof = "yes" }
 parity = "Sound effect authoring (Sound Lab)"
 tests = [
-  "tools/sindri-chiptune/src/desktop/sfx/tests.rs",
-  "tools/sindri-chiptune/src/desktop/project.rs",
+  "tools/sindri-chiptune/src/lab/sfx/tests.rs",
+  "tools/sindri-chiptune/src/lab/project.rs",
   "games/platformer/tests/a_run_reaches_the_flag.rs",
 ]
 proof = ["games/platformer"]
@@ -214,7 +214,14 @@ The platformer's hero plays four sounds made this way — jump, landing, coin
 and the flag — and its scripted run to the flag asserts it heard each one and
 that each is listed for export. The tool's own tests re-render every committed
 `.sindrisfx` and compare it with the WAV beside it, so reopening one edits
-what ships. The tool is native only and is not part of the editor.
+what ships.
+
+The same Lab runs in a browser at `/examples/sound-lab/`, built by Pages with
+wasm-pack and drawn with WebGL2. There **Send** becomes **Download** of the
+same two files with the lines to add, and under 720 points wide the window
+folds into one column for a phone. `scripts/browser/sound-lab.mjs` opens it at
+desktop and phone sizes in both modes on every Pages build. The tool is not
+part of the editor.
 """
 
 [[capability]]

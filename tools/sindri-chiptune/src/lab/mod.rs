@@ -1,9 +1,12 @@
-//! Native CLI, note model and offline rendering for the standalone workstation.
+//! The note model, settings and offline rendering shared by both hosts.
 use serde::{Deserialize, Serialize};
-use std::{env, error::Error, path::PathBuf};
+use std::path::PathBuf;
+#[cfg(not(target_arch = "wasm32"))]
+use std::{env, error::Error};
 
 const RATE: u32 = 44_100;
 const BPM: f64 = 118.0;
+#[cfg(not(target_arch = "wasm32"))]
 mod cli;
 mod composer;
 mod gui;
@@ -167,15 +170,22 @@ fn render_samples(settings: &Settings, tracks: &[Vec<Note>; 3]) -> Vec<f32> {
     audio
 }
 
+#[cfg(not(target_arch = "wasm32"))]
 fn render_with(settings: &Settings, tracks: &[Vec<Note>; 3]) -> Result<(), Box<dyn Error>> {
     wav::write(&settings.output, &render_samples(settings, tracks))
 }
 
+#[cfg(not(target_arch = "wasm32"))]
 pub(super) fn run() -> Result<(), Box<dyn Error>> {
     if env::args().len() == 1 {
         return gui::run();
     }
     cli::run(env::args().skip(1).collect())
+}
+
+#[cfg(target_arch = "wasm32")]
+pub(super) fn start_web() {
+    gui::start_web();
 }
 
 #[cfg(test)]

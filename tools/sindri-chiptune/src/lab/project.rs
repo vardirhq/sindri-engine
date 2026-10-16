@@ -4,14 +4,21 @@
 //! see, so a project lists it under `[assets] include` in `sindri.toml`. Writing
 //! the WAV without that line makes a sound that plays in the editor and is
 //! silently missing from the exported game; this module always does both.
+//!
+//! A browser cannot write into a project, so there the Lab downloads the same
+//! two files and says which line to add; only the naming is shared.
+#[cfg(not(target_arch = "wasm32"))]
 use std::{
     fs,
     path::{Path, PathBuf},
 };
+#[cfg(not(target_arch = "wasm32"))]
 use toml_edit::{Array, DocumentMut, Item, Table, value};
 
+#[cfg(not(target_arch = "wasm32"))]
 const MANIFEST: &str = "sindri.toml";
 
+#[cfg(not(target_arch = "wasm32"))]
 /// The nearest enclosing directory holding a `sindri.toml`.
 pub(super) fn find(start: &Path) -> Option<PathBuf> {
     start
@@ -20,6 +27,7 @@ pub(super) fn find(start: &Path) -> Option<PathBuf> {
         .map(Path::to_path_buf)
 }
 
+#[cfg(not(target_arch = "wasm32"))]
 /// The project's display name, or its folder name when the manifest has none.
 pub(super) fn name(root: &Path) -> String {
     fs::read_to_string(root.join(MANIFEST))
@@ -52,6 +60,7 @@ pub(super) fn stem(name: &str) -> Option<String> {
     (!out.is_empty()).then_some(out)
 }
 
+#[cfg(not(target_arch = "wasm32"))]
 /// Where a sound went, and the line that plays it.
 #[derive(Debug, PartialEq, Eq)]
 pub(super) struct Placed {
@@ -62,6 +71,7 @@ pub(super) struct Placed {
     pub(super) listed: bool,
 }
 
+#[cfg(not(target_arch = "wasm32"))]
 /// Writes `audio/<stem>.wav` and its editable source beside it, then lists the clip.
 pub(super) fn place(
     root: &Path,
@@ -102,6 +112,7 @@ pub(super) fn place(
     })
 }
 
+#[cfg(not(target_arch = "wasm32"))]
 /// Adds `clip` to `[assets] include`, keeping every comment and table in place.
 fn include(doc: &mut DocumentMut, clip: &str) -> bool {
     let assets = doc
@@ -130,6 +141,12 @@ pub(super) fn snippet(clip: &str, music: bool) -> String {
     } else {
         format!("Audio.play(\"{clip}\", 0.5);")
     }
+}
+
+/// The `sindri.toml` line that ships a clip a script plays by name.
+#[cfg(any(target_arch = "wasm32", test))]
+pub(super) fn include_line(clip: &str) -> String {
+    format!("[assets] include = [\"{clip}\"]")
 }
 
 #[cfg(test)]
@@ -187,6 +204,14 @@ mod tests {
         let nested = inner.path().join("assets/audio");
         fs::create_dir_all(&nested).expect("nested");
         assert_eq!(find(&nested).as_deref(), Some(inner.path()));
+    }
+
+    #[test]
+    fn a_download_names_the_line_that_ships_it() {
+        assert_eq!(
+            include_line("audio/zap.wav"),
+            "[assets] include = [\"audio/zap.wav\"]"
+        );
     }
 
     #[test]

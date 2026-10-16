@@ -8,7 +8,7 @@ import shutil
 import sys
 
 SITE = Path(__file__).resolve().parent
-LABELS = {"games": "Game", "demos": "Feature demo", "docs": "Documentation"}
+LABELS = {"games": "Game", "demos": "Feature demo", "tools": "Tool", "docs": "Documentation"}
 
 
 def build(root: Path) -> None:
@@ -37,7 +37,7 @@ def build(root: Path) -> None:
         escape = html.escape
         terms = " ".join([entry["title"], entry["description"], *entry["tags"]]).lower()
         tags = "".join(f"<li>{escape(tag)}</li>" for tag in entry["tags"])
-        action = "Read" if category == "docs" else "Launch"
+        action = {"docs": "Read", "tools": "Open"}.get(category, "Launch")
         source_link = "https://github.com/vardirhq/sindri-engine/" + (
             "blob/main/" if category == "docs" else "tree/main/"
         ) + source

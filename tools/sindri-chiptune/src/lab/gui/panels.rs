@@ -1,6 +1,6 @@
 //! Composition inspector, live mixer, persistent transport and song delivery.
 use super::{ACCENT, ComposerApp, TRACK_COLORS, files::snippet_row, theme};
-use crate::desktop::{Mood, instruments::Preset, live::Command};
+use crate::lab::{Mood, instruments::Preset, live::Command};
 use eframe::egui::{self, RichText, Vec2};
 use egui_material_icons::icons;
 
@@ -177,7 +177,7 @@ impl ComposerApp {
             }
             if ui
                 .add_enabled(
-                    self.sink.is_some(),
+                    self.transport.is_some(),
                     egui::Button::new(theme::label(icons::ICON_STOP, ""))
                         .min_size(Vec2::new(30.0, 30.0)),
                 )
@@ -277,7 +277,7 @@ impl ComposerApp {
                     .button(theme::label(icons::ICON_FOLDER_OPEN, "Open"))
                     .clicked()
                 {
-                    self.open_song();
+                    self.ask_song(ui.ctx());
                 }
                 if ui
                     .button(theme::label(icons::ICON_SAVE, "Save"))
@@ -290,7 +290,7 @@ impl ComposerApp {
                     .button(theme::label(icons::ICON_UPLOAD_FILE, "MIDI in"))
                     .clicked()
                 {
-                    self.import_midi();
+                    self.ask_midi(ui.ctx());
                 }
                 if ui
                     .button(theme::label(icons::ICON_DOWNLOAD, "MIDI"))
@@ -318,7 +318,7 @@ impl ComposerApp {
                         .desired_width(ui.available_width()),
                 );
             });
-            let send = theme::primary(theme::label(icons::ICON_SEND, "Send to project"))
+            let send = theme::primary(theme::label(icons::ICON_SEND, Self::send_label()))
                 .min_size(Vec2::new(ui.available_width(), 30.0));
             if ui.add(send).on_hover_text(self.project_hint()).clicked() {
                 self.send_to_project();

@@ -1,13 +1,9 @@
 //! The Sound FX designer: pick a kind, audition, shape, and deliver to a project.
 use super::{ComposerApp, scope, theme};
-use crate::desktop::{
-    RATE,
-    sfx::{FORMAT, Kind, Sfx, SfxFile},
-};
+use crate::lab::sfx::{FORMAT, Kind, Sfx, SfxFile};
 use eframe::egui::{self, Color32, RichText, Vec2};
 use egui_material_icons::{MaterialIcon, icons};
-use rodio::{Player, buffer::SamplesBuffer, stream::DeviceSinkBuilder, stream::MixerDeviceSink};
-use std::{num::NonZero, time::Instant};
+use web_time::Instant;
 
 const HISTORY: usize = 14;
 
@@ -45,9 +41,7 @@ pub(super) struct SfxState {
     pub(super) history: Vec<SfxFile>,
     pub(super) name: String,
     pub(super) auto_play: bool,
-    started: Option<Instant>,
-    stream: Option<MixerDeviceSink>,
-    player: Option<Player>,
+    pub(super) started: Option<Instant>,
     pub(super) snippet: Option<String>,
     next_seed: u64,
 }
@@ -68,8 +62,6 @@ impl Default for SfxState {
             name: "coin".into(),
             auto_play: true,
             started: None,
-            stream: None,
-            player: None,
             snippet: None,
             next_seed: 2,
         };
@@ -129,24 +121,6 @@ impl SfxState {
         self.remember();
     }
 
-    pub(super) fn play(&mut self) -> Result<(), String> {
-        self.refresh();
-        if self.stream.is_none() {
-            self.stream = Some(DeviceSinkBuilder::open_default_sink().map_err(|e| e.to_string())?);
-        }
-        let stream = self.stream.as_ref().expect("opened above");
-        let player = Player::connect_new(stream.mixer());
-        player.append(SamplesBuffer::new(
-            NonZero::new(1).expect("mono"),
-            NonZero::new(RATE).expect("rate"),
-            self.samples.clone(),
-        ));
-        player.play();
-        self.player = Some(player);
-        self.started = Some(Instant::now());
-        Ok(())
-    }
-
     // Display only: the effect is at most a few seconds long.
     #[allow(clippy::cast_possible_truncation)]
     fn playhead(&self) -> Option<f32> {
@@ -157,12 +131,6 @@ impl SfxState {
 }
 
 impl ComposerApp {
-    pub(super) fn audition(&mut self) {
-        if let Err(error) = self.sfx.play() {
-            self.status = format!("Audio device unavailable: {error}");
-        }
-    }
-
     pub(super) fn sfx_workspace(&mut self, ui: &mut egui::Ui) {
         let wide = ui.available_width() >= 1100.0;
         egui::Panel::left("sfx-kinds")
@@ -191,12 +159,31 @@ impl ComposerApp {
         }
     }
 
+    /// The designer as one column: pick, hear, shape, take.
+    pub(super) fn sfx_column(&mut self, ui: &mut egui::Ui) {
+        self.kind_picker(ui);
+        ui.add_space(6.0);
+        self.sfx_stage(ui);
+        ui.add_space(10.0);
+        let changed = self.sfx_parameters(ui);
+        if changed.replay && self.sfx.auto_play {
+            self.audition();
+        }
+        ui.add_space(12.0);
+        if self.sfx.playhead().is_some() {
+            ui.ctx().request_repaint();
+        }
+    }
+
     fn kind_picker(&mut self, ui: &mut egui::Ui) {
         ui.add_space(10.0);
         theme::caption(ui, "GENERATE");
         ui.small("Each click is a new variation, played at once.");
         ui.add_space(4.0);
-        let width = (ui.available_width() - 6.0) / 2.0;
+        let columns = if self.compact { 4 } else { 2 };
+        let gaps = 6.0 * f32::from(u8::try_from(columns - 1).expect("columns"));
+        let width =
+            (ui.available_width() - gaps) / f32::from(u8::try_from(columns).expect("columns"));
         egui::Grid::new("kinds")
             .num_columns(2)
             .spacing(Vec2::new(6.0, 6.0))
@@ -215,7 +202,10 @@ impl ComposerApp {
                     text.append(
                         &format!("\n{}", kind.name()),
                         0.0,
-                        format(12.5, if current { color } else { theme::TEXT }),
+                        format(
+                            if self.compact { 11.0 } else { 12.5 },
+                            if current { color } else { theme::TEXT },
+                        ),
                     );
                     text.halign = egui::Align::Center;
                     let tile = egui::Button::new(text)
@@ -235,11 +225,14 @@ impl ComposerApp {
                         self.audition();
                         self.status = format!("New {} · seed {}", kind.name(), self.sfx.file.seed);
                     }
-                    if i % 2 == 1 {
+                    if i % columns == columns - 1 {
                         ui.end_row();
                     }
                 }
             });
+        if self.compact {
+            return;
+        }
         ui.add_space(14.0);
         theme::caption(ui, "RECENT");
         let mut chosen = None;
@@ -293,7 +286,11 @@ impl ComposerApp {
         ui.small(kind.hint());
         ui.add_space(6.0);
         let playhead = self.sfx.playhead();
-        let height = (ui.available_height() - 210.0).clamp(220.0, 420.0);
+        let height = if self.compact {
+            170.0
+        } else {
+            (ui.available_height() - 210.0).clamp(220.0, 420.0)
+        };
         let wave = scope::waveform(
             ui,
             &self.sfx.samples,

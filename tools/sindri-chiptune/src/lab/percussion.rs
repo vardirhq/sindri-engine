@@ -1,5 +1,5 @@
 //! Deterministic kick, backbeat, hats and phrase fills for the fourth chip voice.
-use crate::desktop::{Mood, RATE, STEPS, instruments::Preset};
+use crate::lab::{Mood, RATE, STEPS, instruments::Preset};
 use std::f64::consts::TAU;
 
 // A 32-bar timeline bounds indices, and hash arithmetic intentionally wraps.

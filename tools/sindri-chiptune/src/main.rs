@@ -1,12 +1,9 @@
-//! Standalone native chiptune workstation. No engine/editor dependencies.
-#[cfg(not(target_arch = "wasm32"))]
-mod desktop;
-
+//! The native Sound Lab: a window, or a headless render when given arguments.
 #[cfg(not(target_arch = "wasm32"))]
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    desktop::run()
+    sindri_chiptune::run()
 }
 
-// Native audio and GUI are deliberately absent from the browser workspace build.
+// The browser build starts from the library's `start`, not from a binary.
 #[cfg(target_arch = "wasm32")]
 fn main() {}

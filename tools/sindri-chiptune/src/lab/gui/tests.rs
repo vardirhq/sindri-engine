@@ -5,7 +5,7 @@ fn cached_candidates_do_not_change_when_draft_settings_change() {
     let mut app = ComposerApp::default();
     let original = app.scores.clone();
     app.settings.key = 9;
-    app.settings.mood = crate::desktop::Mood::Hopeful;
+    app.settings.mood = crate::lab::Mood::Hopeful;
     app.settings.seed = 177;
     assert_eq!(app.scores, original);
     assert_eq!(app.selected_settings().key, 2);
@@ -38,7 +38,7 @@ fn overlapping_edits_roll_back_instead_of_hiding_notes() {
     let mut app = ComposerApp::default();
     let before = app.scores[0].clone();
     app.save_undo();
-    app.scores[0][2][0].len = crate::desktop::STEPS;
+    app.scores[0][2][0].len = crate::lab::STEPS;
     app.finish_edit();
     assert_eq!(app.scores[0], before);
     assert!(app.status.contains("32-bar"));
@@ -50,6 +50,9 @@ fn workstation_draws_at_wide_and_compact_window_sizes() {
         egui::vec2(1360.0, 820.0),
         egui::vec2(900.0, 650.0),
         egui::vec2(760.0, 560.0),
+        // A phone in portrait, and one on its side.
+        egui::vec2(390.0, 844.0),
+        egui::vec2(700.0, 360.0),
     ] {
         for mode in [Mode::Music, Mode::Sfx] {
             let context = egui::Context::default();
@@ -97,7 +100,7 @@ fn send_delivers_the_current_effect_and_song_into_the_project() {
         project: Some(dir.path().to_path_buf()),
         ..ComposerApp::default()
     };
-    app.sfx.generate(crate::desktop::sfx::Kind::Laser);
+    app.sfx.generate(crate::lab::sfx::Kind::Laser);
     app.send_to_project();
     assert_eq!(
         app.sfx.snippet.as_deref(),
@@ -106,7 +109,7 @@ fn send_delivers_the_current_effect_and_song_into_the_project() {
     let source =
         std::fs::read_to_string(dir.path().join("assets/audio/laser.sindrisfx")).expect("source");
     assert_eq!(
-        crate::desktop::sfx::SfxFile::from_json(&source).expect("valid"),
+        crate::lab::sfx::SfxFile::from_json(&source).expect("valid"),
         app.sfx.file
     );
 
@@ -124,13 +127,13 @@ fn send_delivers_the_current_effect_and_song_into_the_project() {
 #[test]
 fn effect_history_keeps_recent_sounds_newest_first() {
     let mut app = ComposerApp::default();
-    app.sfx.generate(crate::desktop::sfx::Kind::Jump);
+    app.sfx.generate(crate::lab::sfx::Kind::Jump);
     app.sfx.mutate();
     assert_eq!(app.sfx.history[0], app.sfx.file);
-    assert_eq!(app.sfx.history[1].kind, crate::desktop::sfx::Kind::Jump);
+    assert_eq!(app.sfx.history[1].kind, crate::lab::sfx::Kind::Jump);
     assert!(app.sfx.history.len() >= 3);
     for _ in 0..30 {
-        app.sfx.generate(crate::desktop::sfx::Kind::Blip);
+        app.sfx.generate(crate::lab::sfx::Kind::Blip);
     }
     assert!(app.sfx.history.len() <= 14);
 }

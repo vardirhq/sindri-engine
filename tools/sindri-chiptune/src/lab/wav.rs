@@ -1,6 +1,6 @@
 //! 16-bit mono PCM WAV, the format every Sindri audio backend decodes.
 use super::RATE;
-use std::{error::Error, fs, path::Path};
+use std::error::Error;
 
 /// Encodes normalized samples as a 44.1 kHz, 16-bit, mono RIFF/WAVE file.
 // Samples are clamped to the signed 16-bit range before the cast.
@@ -29,8 +29,9 @@ pub(super) fn encode(samples: &[f32]) -> Result<Vec<u8>, Box<dyn Error>> {
     Ok(out)
 }
 
-pub(super) fn write(path: &Path, samples: &[f32]) -> Result<(), Box<dyn Error>> {
-    fs::write(path, encode(samples)?)?;
+#[cfg(not(target_arch = "wasm32"))]
+pub(super) fn write(path: &std::path::Path, samples: &[f32]) -> Result<(), Box<dyn Error>> {
+    std::fs::write(path, encode(samples)?)?;
     Ok(())
 }
 

@@ -77,7 +77,7 @@ impl SongFile {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::desktop::compose_with;
+    use crate::lab::compose_with;
 
     #[test]
     fn a_song_round_trips_with_its_edits_and_mixer() {
@@ -102,7 +102,7 @@ mod tests {
         let settings = Settings::default();
         let song = SongFile::new(&settings, &compose_with(&settings));
         let mut overlapping = song.clone();
-        overlapping.tracks[2][0].len = crate::desktop::STEPS;
+        overlapping.tracks[2][0].len = crate::lab::STEPS;
         assert!(SongFile::from_json(&overlapping.to_json()).is_err());
         let mut fast = song;
         fast.bpm = 999.0;

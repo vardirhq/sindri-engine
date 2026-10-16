@@ -1,6 +1,8 @@
 //! The window's frame: brand, mode tabs, project, status and keyboard shortcuts.
 use super::{ComposerApp, Mode, scope, theme};
-use crate::desktop::{STEPS, project};
+use crate::lab::STEPS;
+#[cfg(not(target_arch = "wasm32"))]
+use crate::lab::project;
 use eframe::egui::{self, Key, RichText, Vec2};
 use egui_material_icons::icons;
 
@@ -10,14 +12,16 @@ impl ComposerApp {
             ui.add_space(4.0);
             let glyph: &str = icons::ICON_GRAPHIC_EQ.into();
             ui.label(RichText::new(glyph).size(20.0).color(theme::FORGE));
-            ui.label(
-                RichText::new("SINDRI")
-                    .strong()
-                    .size(14.0)
-                    .color(theme::TEXT),
-            );
-            ui.label(RichText::new("SOUND LAB").size(14.0).color(theme::FORGE));
-            ui.add_space(18.0);
+            if !self.compact {
+                ui.label(
+                    RichText::new("SINDRI")
+                        .strong()
+                        .size(14.0)
+                        .color(theme::TEXT),
+                );
+                ui.label(RichText::new("SOUND LAB").size(14.0).color(theme::FORGE));
+            }
+            ui.add_space(if self.compact { 6.0 } else { 18.0 });
             for (mode, icon, name) in [
                 (Mode::Music, icons::ICON_PIANO, "Music"),
                 (Mode::Sfx, icons::ICON_BOLT, "Sound FX"),
@@ -27,25 +31,12 @@ impl ComposerApp {
                     self.mode = mode;
                 }
             }
+            if self.compact {
+                return;
+            }
             ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
                 ui.add_space(4.0);
-                let (name, color) = self.project.as_ref().map_or_else(
-                    || ("Choose project…".to_owned(), theme::MUTED),
-                    |root| (project::name(root), theme::TEXT),
-                );
-                let chip = egui::Button::new(
-                    RichText::new(theme::label(icons::ICON_FOLDER, &name)).color(color),
-                )
-                .fill(theme::WELL)
-                .stroke(egui::Stroke::new(1.0, theme::LINE));
-                if ui
-                    .add(chip)
-                    .on_hover_text("The Sindri project Send writes sounds into")
-                    .clicked()
-                {
-                    self.pick_project();
-                }
-                ui.label(RichText::new("PROJECT").size(10.5).color(theme::FAINT));
+                self.project_chip(ui);
                 ui.add_space(12.0);
                 if let Some(samples) = self.scope_samples() {
                     scope::meter(ui, &samples, Vec2::new(8.0, 26.0));
@@ -53,6 +44,45 @@ impl ComposerApp {
                 }
             });
         });
+    }
+
+    #[cfg(not(target_arch = "wasm32"))]
+    fn project_chip(&mut self, ui: &mut egui::Ui) {
+        let (name, color) = self.project.as_ref().map_or_else(
+            || ("Choose project…".to_owned(), theme::MUTED),
+            |root| (project::name(root), theme::TEXT),
+        );
+        let chip =
+            egui::Button::new(RichText::new(theme::label(icons::ICON_FOLDER, &name)).color(color))
+                .fill(theme::WELL)
+                .stroke(egui::Stroke::new(1.0, theme::LINE));
+        if ui
+            .add(chip)
+            .on_hover_text("The Sindri project Send writes sounds into")
+            .clicked()
+        {
+            self.pick_project();
+        }
+        ui.label(RichText::new("PROJECT").size(10.5).color(theme::FAINT));
+    }
+
+    /// A browser cannot reach a project folder; say where sounds go instead.
+    #[cfg(target_arch = "wasm32")]
+    #[allow(clippy::unused_self)]
+    fn project_chip(&mut self, ui: &mut egui::Ui) {
+        ui.label(
+            RichText::new(theme::label(icons::ICON_DOWNLOAD, "Sounds download"))
+                .color(theme::MUTED),
+        )
+        .on_hover_text(
+            "In the browser, sounds download with their editable source. The desktop Lab \
+             (cargo run -p sindri-chiptune) sends them straight into a project.",
+        );
+        ui.label(
+            RichText::new("IN YOUR BROWSER")
+                .size(10.5)
+                .color(theme::FAINT),
+        );
     }
 
     pub(super) fn scope_samples(&self) -> Option<Vec<f32>> {
@@ -78,11 +108,18 @@ impl ComposerApp {
             } else {
                 (icons::ICON_CHECK_CIRCLE, theme::FAINT)
             };
-            ui.label(
-                RichText::new(theme::label(icon, &self.status))
-                    .size(11.5)
-                    .color(color),
-            );
+            ui.add(
+                egui::Label::new(
+                    RichText::new(theme::label(icon, &self.status))
+                        .size(11.5)
+                        .color(color),
+                )
+                .truncate(),
+            )
+            .on_hover_text(&self.status);
+            if self.compact {
+                return;
+            }
             ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
                 let keys = match self.mode {
                     Mode::Music => {
@@ -166,7 +203,7 @@ impl ComposerApp {
                     .iter()
                     .position(|k| *k == number);
                     if let Some(index) = index {
-                        self.sfx.generate(crate::desktop::sfx::Kind::ALL[index]);
+                        self.sfx.generate(crate::lab::sfx::Kind::ALL[index]);
                         self.audition();
                     }
                 }

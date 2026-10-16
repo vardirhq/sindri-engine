@@ -251,6 +251,20 @@
     ]
   },
   {
+    "category": "tools",
+    "title": "Sound Lab",
+    "path": "examples/sound-lab/",
+    "source": "tools/sindri-chiptune",
+    "description": "Make game sound effects and chiptune music in the browser, then download them.",
+    "tags": [
+      "audio",
+      "sound effects",
+      "music",
+      "chiptune",
+      "tool"
+    ]
+  },
+  {
     "category": "demos",
     "title": "Shapes Lab",
     "path": "examples/shapes-lab/",

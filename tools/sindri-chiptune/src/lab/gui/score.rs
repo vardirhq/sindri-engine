@@ -1,6 +1,6 @@
 //! Editable note-event piano roll; every edit is reflected in audition and export.
 use super::{ACCENT, ComposerApp, TRACK_COLORS, theme};
-use crate::desktop::{Note, STEPS, live::Command};
+use crate::lab::{Note, STEPS, live::Command};
 use eframe::egui::{self, Color32, RichText};
 
 const KEYS_WIDTH: f32 = 46.0;
@@ -150,9 +150,11 @@ impl ComposerApp {
                 self.piano_roll(ui);
             });
         ui.label(
-            RichText::new(
-                "Click to add · drag to move · right-click to delete · click the ruler to seek · snap 1/16",
-            )
+            RichText::new(if self.compact {
+                "Tap to add · drag to move · long-press to delete · tap the ruler to seek"
+            } else {
+                "Click to add · drag to move · right-click to delete · click the ruler to seek · snap 1/16"
+            })
             .size(11.0)
             .color(theme::FAINT),
         );
@@ -216,8 +218,10 @@ impl ComposerApp {
 
     fn piano_roll(&mut self, ui: &mut egui::Ui) {
         let width = ui.available_width().max(720.0);
-        let (rect, response) =
-            ui.allocate_exact_size(egui::vec2(width, 480.0), egui::Sense::click_and_drag());
+        let (rect, response) = ui.allocate_exact_size(
+            egui::vec2(width, if self.compact { 380.0 } else { 480.0 }),
+            egui::Sense::click_and_drag(),
+        );
         let painter = ui.painter_at(rect);
         let grid = egui::Rect::from_min_max(rect.min + egui::vec2(KEYS_WIDTH, 24.0), rect.max);
         let base = self.roll_base;

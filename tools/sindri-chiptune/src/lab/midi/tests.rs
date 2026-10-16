@@ -3,10 +3,10 @@ use super::*;
 #[test]
 fn exported_notes_round_trip_at_all_moods_and_keys() {
     for mood in [
-        crate::desktop::Mood::Mysterious,
-        crate::desktop::Mood::Hopeful,
-        crate::desktop::Mood::Tense,
-        crate::desktop::Mood::Melancholic,
+        crate::lab::Mood::Mysterious,
+        crate::lab::Mood::Hopeful,
+        crate::lab::Mood::Tense,
+        crate::lab::Mood::Melancholic,
     ] {
         for key in 0..12 {
             let settings = Settings {
@@ -14,7 +14,7 @@ fn exported_notes_round_trip_at_all_moods_and_keys() {
                 mood,
                 ..Settings::default()
             };
-            let score = crate::desktop::compose_with(&settings);
+            let score = crate::lab::compose_with(&settings);
             let (imported, bpm) =
                 read(&encode(&settings, &score).expect("encode")).expect("import");
             assert_eq!(score, imported);
@@ -66,7 +66,7 @@ fn rejects_polyphony_without_discarding_notes() {
 #[test]
 fn rejects_truncated_files_and_invalid_quantities() {
     let settings = Settings::default();
-    let bytes = encode(&settings, &crate::desktop::compose_with(&settings)).expect("encode");
+    let bytes = encode(&settings, &crate::lab::compose_with(&settings)).expect("encode");
     for length in 0..bytes.len() {
         assert!(read(&bytes[..length]).is_err(), "accepted prefix {length}");
     }

@@ -1,11 +1,11 @@
 //! The kinds of sound a game asks for, each a seeded region of the parameter space.
 use super::{Sfx, Wave, between};
-use crate::desktop::Rng;
+use crate::lab::Rng;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
-pub(in crate::desktop) enum Kind {
+pub(in crate::lab) enum Kind {
     Coin,
     Jump,
     Laser,
@@ -17,7 +17,7 @@ pub(in crate::desktop) enum Kind {
 }
 
 impl Kind {
-    pub(in crate::desktop) const ALL: [Self; 8] = [
+    pub(in crate::lab) const ALL: [Self; 8] = [
         Self::Coin,
         Self::Jump,
         Self::Laser,
@@ -28,7 +28,7 @@ impl Kind {
         Self::Thud,
     ];
 
-    pub(in crate::desktop) fn name(self) -> &'static str {
+    pub(in crate::lab) fn name(self) -> &'static str {
         match self {
             Self::Coin => "Coin",
             Self::Jump => "Jump",
@@ -42,7 +42,7 @@ impl Kind {
     }
 
     /// The file-name stem a new effect of this kind starts with.
-    pub(in crate::desktop) fn slug(self) -> &'static str {
+    pub(in crate::lab) fn slug(self) -> &'static str {
         match self {
             Self::Coin => "coin",
             Self::Jump => "jump",
@@ -55,7 +55,7 @@ impl Kind {
         }
     }
 
-    pub(in crate::desktop) fn hint(self) -> &'static str {
+    pub(in crate::lab) fn hint(self) -> &'static str {
         match self {
             Self::Coin => "Pickups, score, collectables",
             Self::Jump => "Jumps, springs, bounces",
@@ -68,14 +68,15 @@ impl Kind {
         }
     }
 
-    pub(in crate::desktop) fn parse(text: &str) -> Option<Self> {
+    #[cfg(any(not(target_arch = "wasm32"), test))]
+    pub(in crate::lab) fn parse(text: &str) -> Option<Self> {
         Self::ALL
             .into_iter()
             .find(|kind| kind.slug() == text || kind.slug().replace('-', "") == text)
     }
 
     /// A new effect of this kind. The same kind and seed always give the same sound.
-    pub(in crate::desktop) fn generate(self, seed: u64) -> Sfx {
+    pub(in crate::lab) fn generate(self, seed: u64) -> Sfx {
         let mut rng = Rng::new(seed ^ 0x5f8c_0000 ^ (self as u64) << 40);
         let r = &mut rng;
         let base = Sfx::default();

@@ -8,8 +8,30 @@ cargo run -p sindri-chiptune          # open the Sound Lab
 ```
 
 Started inside a project folder, the Lab sends there without asking; otherwise
-**Project** in the top bar picks one. It is a standalone native tool: it does
-not depend on the editor or the runtime, and the editor does not embed it.
+**Project** in the top bar picks one. It is a standalone tool: it does not
+depend on the editor or the runtime, and the editor does not embed it.
+
+## In a browser
+
+The same Lab runs on the site at
+[`/examples/sound-lab/`](https://sindri.vardir.no/examples/sound-lab/)
+(`?mode=sfx` opens on the effects designer). A browser cannot reach a project
+folder, so **Send to project** becomes **Download**: the WAV and its editable
+source, named for `assets/audio/`, and the lines to add to `sindri.toml` and to
+a script. Open, Save, WAV and MIDI export are downloads and file pickers.
+
+It draws with WebGL2 rather than WebGPU: the Lab is a flat interface, and Chrome
+on Android exposes WebGPU more widely than its drivers can serve. Under 720
+points wide it folds into one scrolling column with larger touch targets, so it
+works on a phone: tap to add a note, long-press to delete one. Audio goes
+through Web Audio and starts on the first tap, as browsers require.
+
+```sh
+wasm-pack build tools/sindri-chiptune --target web --release --out-dir pkg
+mkdir -p target/sound-lab && cp tools/sindri-chiptune/web/index.html target/sound-lab/
+cp -R tools/sindri-chiptune/pkg target/sound-lab/
+node scripts/browser/sound-lab.mjs target/sound-lab   # desktop and phone, both modes
+```
 
 ## Sound FX
 
@@ -106,6 +128,9 @@ editing, in-key monophonic composition, MIDI round trips and malformed input,
 undo/redo, live tempo and edit continuity, and drawing both modes at three
 window sizes. Layouts were captured from the real window under Xvfb.
 
-Not yet: hearing it through a real audio device in CI, a browser build, music
-short enough to ship (a full song is several megabytes of WAV), an editable
-drum score, and an editor panel.
+Pages builds the browser Lab and its smoke test opens it at desktop and phone
+sizes in both modes, failing on any page error or an unpainted canvas.
+
+Not yet: hearing it through a real audio device in CI, music short enough to
+ship (a full song is several megabytes of WAV), an editable drum score, and an
+editor panel.

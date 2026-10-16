@@ -1,23 +1,66 @@
 [package]
 name = "sindri-chiptune"
+description = "Sindri Sound Lab: game sound effects and chiptune music, natively and in a browser"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
+publish = false
+
+# `cdylib` so wasm-pack can build the browser Sound Lab the site serves, `rlib`
+# so the native binary is a thin wrapper around the same library.
+[lib]
+crate-type = ["cdylib", "rlib"]
 
 [lints]
 workspace = true
 
-# Standalone audio tool; no dependency on Sindri platform or runtime. Every
-# dependency below is already in the workspace graph through the editor.
-[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+# A standalone tool: no dependency on any Sindri crate. Every dependency below
+# is already in the workspace graph through the editor or the browser player.
+[dependencies]
 eframe.workspace = true
 egui_material_icons = { version = "0.8", default-features = false, features = ["outline"] }
-rfd = { version = "0.17.2", default-features = false, features = ["xdg-portal"] }
-rodio = { version = "0.22.2", default-features = false, features = ["playback"] }
 serde.workspace = true
 serde_json.workspace = true
+web-time.workspace = true
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+rfd = { version = "0.17.2", default-features = false, features = ["xdg-portal"] }
+rodio = { version = "0.22.2", default-features = false, features = ["playback"] }
 toml_edit = "0.25"
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+console_error_panic_hook = "0.1"
+js-sys.workspace = true
+wasm-bindgen.workspace = true
+wasm-bindgen-futures.workspace = true
+web-sys = { workspace = true, features = [
+  "AudioBuffer",
+  "AudioBufferSourceNode",
+  "AudioContext",
+  "AudioContextState",
+  "AudioDestinationNode",
+  "AudioNode",
+  "AudioProcessingEvent",
+  "AudioScheduledSourceNode",
+  "BaseAudioContext",
+  "Blob",
+  "BlobPropertyBag",
+  "Document",
+  "Element",
+  "Event",
+  "EventTarget",
+  "File",
+  "FileList",
+  "HtmlAnchorElement",
+  "HtmlCanvasElement",
+  "HtmlElement",
+  "HtmlInputElement",
+  "Location",
+  "ScriptProcessorNode",
+  "Url",
+  "Window",
+] }
 
 [target.'cfg(not(target_arch = "wasm32"))'.dev-dependencies]
 tempfile = "3"
