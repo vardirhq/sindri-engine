@@ -258,6 +258,12 @@ The project has a simple rule: **working code beats plausible architecture**. A 
 
 Read [`CONTRIBUTING.md`](CONTRIBUTING.md) for checks, conventions, and commit style, and [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md) for participation guidelines. The dependency policy is documented in [`docs/dependency-policy.md`](docs/dependency-policy.md).
 
+## Support Sindri
+
+Sindri is an independent, open-source game engine developed in my spare time. If you'd like to support its continued development, you can [buy me a coffee](https://buymeacoffee.com/madsendev).
+
+Contributions, feedback, and GitHub stars are also appreciated.
+
 ## License
 
 Dual-licensed under either the [Apache License 2.0](LICENSE-APACHE) or the [MIT license](LICENSE-MIT), at your option.
