@@ -61,6 +61,7 @@ Each entry links its tests and the projects that exercise it. Surface marks matc
 | [Scripted day/night cycle](#daynight-cycle) | 🟡 | 🟡 | 🟡 | 🟡 |
 | [Retained inline mesh geometry](#retained-inline-meshes) | 🟡 | 🟡 | — | 🟡 |
 | [Authored material sidedness](#material-sidedness) | 🟡 | 🟡 | — | 🟡 |
+| [Shared render material profiles](#render-material-profiles) | 🟡 | 🟡 | — | 🟡 |
 
 ## Hosts and GPU
 
@@ -1039,7 +1040,7 @@ Core GLB emissive factors survive decoding/preparation and render without scene
 overrides. Decoder/facade/resource tests, zero-light GPU readback, override
 restoration, masked-shadow invariance and native/browser imported GLB controls
 exercise this addition. Absent overrides preserve legacy/imported looks. Material
-assets, unified texture/alpha, emissive maps and Explorer game adoption remain
+texture-bearing assets, unified alpha, emissive maps and Explorer game adoption remain
 open; see [the material contract](../rendering-materials.md).
 
 </details>
@@ -1263,6 +1264,36 @@ factors. Inherit preserves imported primitive settings; other geometry is single
 Explicit single/double choices govern both color and shadows, including reflected
 transforms and lighting on visible backs. Policy edits retain geometry and voxel meshes.
 Lighting Lab carries a back-facing orange panel and a single-sided native/WebGPU
-control. Shared material assets, alpha unification and Explorer game adoption remain open.
+control. Shared texture bindings, alpha unification and Explorer game adoption remain open.
+
+</details>
+
+<a id="render-material-profiles"></a>
+
+### Shared render material profiles
+
+Typed profile assets share numeric material factors and face visibility with explicit local overrides
+
+Engine 🟡 · Editor 🟡 · Decay — · Proof 🟡 — parity row *Shared render material profiles*
+
+**Tested by:** [`crates/sindri-scene/src/render_material/tests.rs`](../../crates/sindri-scene/src/render_material/tests.rs), [`crates/sindri-scene/tests/extraction/material_profiles.rs`](../../crates/sindri-scene/tests/extraction/material_profiles.rs), [`crates/sindri-scene/tests/extraction/voxel_world.rs`](../../crates/sindri-scene/tests/extraction/voxel_world.rs), [`crates/sindri-export/tests/render_materials.rs`](../../crates/sindri-export/tests/render_materials.rs), [`editor/src/scripts/tests.rs`](../../editor/src/scripts/tests.rs), [`editor/src/profile.rs`](../../editor/src/profile.rs), [`game/tests/a_3d_lighting_project_plays.rs`](../../game/tests/a_3d_lighting_project_plays.rs)
+
+**Exercised in:** [`examples/lighting3d`](../../examples/lighting3d)
+
+**See:** [`docs/rendering-materials.md`](../../docs/rendering-materials.md), [`docs/profiles.md`](../../docs/profiles.md)
+
+<details markdown="1">
+<summary>Evidence</summary>
+
+Engine-owned render_material profiles carry checked numeric factors and sidedness.
+References use the existing asynchronous profile pipeline and export dependency
+walk, including inactive entities, later scenes and expanded prefabs. Explicit
+local overrides are independent of profile values. Invalid editor reloads retain
+last-valid values; extraction snapshots values without replacing geometry.
+Lighting Lab shares three profiles across six objects and carries inline-equivalence
+and shared-edit controls, exercised in native and real Chromium/WebGPU captures.
+Native editor review covers creation, selection/history, validated Save/correction,
+reload, reopen and Play. Material texture ownership, unified alpha and in-tree
+game adoption remain open.
 
 </details>

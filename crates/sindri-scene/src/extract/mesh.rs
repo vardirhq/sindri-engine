@@ -62,12 +62,8 @@ impl SceneExtractor {
                 },
                 command,
             );
-            if let Some(material) = self
-                .components
-                .get::<crate::MaterialComponent>(world, entity)?
-            {
-                pass.material = Some(material.factors);
-                pass.sidedness = material.sidedness;
+            if !self.apply_material(world, entity, &mut pass)? {
+                continue;
             }
             frame.push(pass);
         }

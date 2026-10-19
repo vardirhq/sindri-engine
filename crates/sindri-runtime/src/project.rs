@@ -13,14 +13,16 @@ use std::path::Path;
 use std::time::Duration;
 
 use sindri_core::{
-    EntityId, LoadedScenes, PREFAB_SUFFIX, PROFILE_SUFFIX, PrefabDocument, ProfileDocument,
-    SceneDocument, SceneEntityId, TagsComponent, TileSetDocument, UnknownComponentPolicy, World,
+    EntityId, LoadedScenes, PREFAB_SUFFIX, PrefabDocument, SceneDocument, SceneEntityId,
+    TagsComponent, TileSetDocument, UnknownComponentPolicy, World,
 };
-use sindri_decay::{PrefabSources, ProfileSources, ScriptComponent, ScriptSources};
+use sindri_decay::{PrefabSources, ScriptComponent, ScriptSources};
 use sindri_platform::{GamepadAxis, GamepadButton, InputEvent, InputState, Key, PadId};
 use sindri_scene::{SceneExtractor, TileSetBindings, UiTextSizes};
 
 use crate::{Session, StepReport};
+
+mod profiles;
 
 /// One fixed step at the rate every host runs gameplay.
 pub const STEP: f32 = 1.0 / 60.0;
@@ -200,7 +202,7 @@ impl ProjectRun {
         // Component data is checked the way the renderer will read it, so a
         // typo such as an unknown shape kind fails when the run opens rather
         // than first in a browser.
-        let scene = scene_extractor()?;
+        let mut scene = scene_extractor()?;
         for (name, document) in &scenes {
             scene
                 .validate(document, UnknownComponentPolicy::Preserve)
@@ -229,12 +231,7 @@ impl ProjectRun {
         loaded
             .enter_keeping_identities_with(&mut world, &scene_id, &document, &prefabs)
             .map_err(|error| error.to_string())?;
-        let mut profiles = ProfileSources::new();
-        for (id, bytes) in files_under(&assets, PROFILE_SUFFIX) {
-            let profile = ProfileDocument::from_json(&text(&id, bytes)?)
-                .map_err(|error| format!("{id}: {error}"))?;
-            profiles.insert(id, profile);
-        }
+        let profiles = profiles::load(&assets, &mut scene)?;
         let mut tile_sets = TileSetBindings::new();
         for (id, bytes) in files_under(&assets, ".tileset") {
             let tile_set = TileSetDocument::from_json(&text(&id, bytes)?)

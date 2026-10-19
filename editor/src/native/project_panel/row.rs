@@ -297,6 +297,10 @@ pub(crate) fn row_menu(
             asked = Some(BrowserAction::NewPhysicsMaterial(entry.path.clone()));
             ui.close();
         }
+        if menu::item(ui, "New render material here").clicked() {
+            asked = Some(BrowserAction::NewRenderMaterial(entry.path.clone()));
+            ui.close();
+        }
         if menu::item(ui, "New block set here").clicked() {
             asked = Some(BrowserAction::NewBlockSet(entry.path.clone()));
             ui.close();
@@ -360,11 +364,12 @@ pub(super) fn space_menu(ui: &mut egui::Ui, here: &Path, room: f32) -> Option<Br
     menu::on_right_click(&response, |ui| {
         menu::subject(ui, &name);
         let here = here.to_path_buf();
-        let offered: [(&str, Offer); 6] = [
+        let offered: [(&str, Offer); 7] = [
             ("New folder", BrowserAction::NewFolder),
             ("New script", BrowserAction::NewScript),
             ("New profile", BrowserAction::NewProfile),
             ("New physics material", BrowserAction::NewPhysicsMaterial),
+            ("New render material", BrowserAction::NewRenderMaterial),
             ("New block set", BrowserAction::NewBlockSet),
             ("Import files…", BrowserAction::Import),
         ];

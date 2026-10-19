@@ -11,6 +11,7 @@ mod cameras;
 mod canvas;
 mod lights_2d;
 mod material;
+mod material_profiles;
 mod models;
 mod nine_slice;
 mod normals;

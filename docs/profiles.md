@@ -33,8 +33,11 @@ Profiles use the `.profile` suffix and carry their own format version:
 ```
 
 `name` is an author-facing label. `type` is an optional game-defined category;
-the engine does not turn it into a schema or attach behavior to it. `values` is
-a JSON object whose values may be numbers, text, flags, groups, or lists. The
+ordinary game-defined types do not acquire a schema or behavior from it.
+Engine-owned `physics_material` and `render_material` types are checked by their
+scene subsystems; see
+[render material profiles](rendering-materials.md#reusable-material-profiles).
+`values` is a JSON object whose values may be numbers, text, flags, groups, or lists. The
 payload stays game-owned so enemy tuning, item definitions, dialogue, and module
 catalogs do not require new engine components.
 
@@ -95,3 +98,9 @@ and pass them into each script frame. Static export records them as the
 That restriction is deliberate: a string that merely looks like a profile path
 would be invisible to the editor picker and export gatherer, and would fail only
 when a frame happened to use it.
+
+Render-material component references are also explicit dependency edges: they
+load and ship without a Decay export or an `[assets] include` list. The project
+browser can create a render material starter, and its structured inspector
+validates factor and sidedness edits before Save. Render profiles remain
+read-only during gameplay and do not add a Decay rendering API.

@@ -84,6 +84,15 @@ impl Player {
         context: &AppContext<'_>,
         project: ProjectAssets,
     ) -> Result<(), PlayerError> {
+        self.scene.set_materials(
+            sindri_scene::RenderMaterialSources::from_profiles(
+                project
+                    .profiles
+                    .ids()
+                    .filter_map(|id| project.profiles.get(id).map(|p| (id, p))),
+            )
+            .map_err(sindri_scene::SceneExtractError::from)?,
+        );
         let collision_models =
             crate::models::references(&project.scenes, &project.prefabs, self.scene.components())?;
         let mut loaded_textures: Vec<AssetId> = Vec::new();

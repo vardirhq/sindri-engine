@@ -213,3 +213,43 @@ fn a_large_project_loads_whole_before_anything_compiles() {
     }
     panic!("the project never finished loading");
 }
+
+#[test]
+fn render_profiles_reload_asynchronously_and_keep_the_last_valid_material() {
+    let directory = TempDir::new().unwrap();
+    let path = directory.path().join("gold.PROFILE");
+    let mut profile = sindri_scene::render_material_template();
+    fs::write(&path, profile.to_canonical_json().unwrap()).unwrap();
+    let scene = directory.path().join("test.scene");
+    let mut scripts = SceneScripts::for_scene(Some(&scene));
+    let mut extractor = sindri_scene::SceneExtractor::new().unwrap();
+    extractor.register::<ScriptComponent>("Script").unwrap();
+    let mut world = World::default();
+    world.spawn(EntityData {
+        components: BTreeMap::from([("sindri.material".into(), json!({"profile":"gold.PROFILE"}))]),
+        ..EntityData::default()
+    });
+    scripts.request(&world, extractor.components());
+    assert!(
+        wait_for_material(&mut scripts)
+            .iter()
+            .all(|n| !matches!(n, super::ScriptNote::Failed(_)))
+    );
+    for (roughness, valid) in [(-0.5, false), (0.25, true)] {
+        profile.values.insert("roughness".into(), json!(roughness));
+        fs::write(&path, profile.to_canonical_json().unwrap()).unwrap();
+        scripts.last_examined -= super::WATCH_INTERVAL;
+        let notes = wait_for_material(&mut scripts);
+        assert_eq!(
+            notes
+                .iter()
+                .any(|n| matches!(n, super::ScriptNote::Failed(_))),
+            !valid
+        );
+        let stored = scripts.profiles().get("gold.PROFILE").unwrap();
+        let material = sindri_scene::render_material_profile("gold.PROFILE", stored)
+            .unwrap()
+            .unwrap();
+        assert!((material.factors.roughness - if valid { 0.25 } else { 1.0 }).abs() < f32::EPSILON);
+    }
+}

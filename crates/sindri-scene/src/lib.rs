@@ -32,6 +32,7 @@ mod physics_reads;
 mod physics_sync;
 mod physics_sync3d;
 mod placement;
+mod render_material;
 pub(crate) mod screen_ui;
 mod sequence;
 mod shape_gizmos;
@@ -164,3 +165,8 @@ pub use voxel_render::{
 };
 
 pub use tilesets::{TileSetBindings, referenced_tile_sets, tile_set_sheets, tile_set_textures};
+
+pub use render_material::{
+    RenderMaterialError, RenderMaterialSources, ResolvedRenderMaterial,
+    referenced_render_materials, render_material_profile, render_material_template,
+};

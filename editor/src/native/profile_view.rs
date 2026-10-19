@@ -44,7 +44,6 @@ impl EditorApp {
         });
         if let Some(error) = &profile.error {
             panel::problem(ui, error);
-            return;
         }
         let Some(document) = profile.document.as_mut() else {
             return;

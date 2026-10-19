@@ -223,7 +223,7 @@ impl ProjectExport {
         // Ordered and de-duplicated, because two entities naming one texture is
         // one download.
         let mut wanted: BTreeMap<String, AssetKind> = BTreeMap::new();
-        let mut physics_profiles = BTreeSet::new();
+        let mut profiles = crate::profiles::ProfileReferences::default();
         // The prefabs a scene places ship as prefabs: a host makes each
         // instance from its prefab when the scene loads.
         for id in placed.ids() {
@@ -329,12 +329,7 @@ impl ProjectExport {
                 everything_on(&mut world);
                 pending.push(world);
             }
-            for id in sindri_scene::referenced_physics_materials(&world, &components)
-                .map_err(|error| ExportError::Project(error.to_string()))?
-            {
-                physics_profiles.insert(id.clone());
-                wanted.insert(id, AssetKind::Profile);
-            }
+            profiles.collect(&world, &components, &mut wanted)?;
             for id in scripts.referenced_profiles(&world, &components) {
                 wanted.insert(id, AssetKind::Profile);
             }
@@ -401,7 +396,7 @@ impl ProjectExport {
             let path = resolve(project, &id);
             let bytes = read(&path)?;
             if kind == AssetKind::Profile {
-                validate_profile(&id, &bytes, physics_profiles.contains(&id))?;
+                profiles.validate(&id, &bytes)?;
             }
             if id.ends_with(".wgsl") {
                 super::shaders::validate(&id, &bytes)?;
@@ -568,19 +563,4 @@ fn scripts_under(root: &Path) -> Vec<String> {
     walk(root, root, 0, &mut found);
     found.sort();
     found
-}
-
-fn validate_profile(id: &str, bytes: &[u8], physics: bool) -> Result<(), ExportError> {
-    let text = std::str::from_utf8(bytes)
-        .map_err(|error| ExportError::Project(format!("{id}: {error}")))?;
-    let profile = sindri_core::ProfileDocument::from_json(text)
-        .map_err(|error| ExportError::Project(format!("{id}: {error}")))?;
-    let material = sindri_scene::physics_material_profile(id, &profile)
-        .map_err(|error| ExportError::Project(error.to_string()))?;
-    if physics && material.is_none() {
-        return Err(ExportError::Project(format!(
-            "{id}: physics material reference needs type physics_material"
-        )));
-    }
-    Ok(())
 }

@@ -115,7 +115,7 @@ impl EditorApp {
     }
 
     /// Makes a reusable profile and opens its structured inspector.
-    pub(super) fn new_profile(&mut self, beside: &Path, physics: bool) {
+    pub(super) fn new_profile(&mut self, beside: &Path, kind: &str) {
         let Some(root) = self.project.root().map(Path::to_path_buf) else {
             return;
         };
@@ -123,7 +123,7 @@ impl EditorApp {
             return;
         };
         let name = unused_name(&parent, "profile", sindri_core::PROFILE_SUFFIX);
-        let document = if physics {
+        let document = if kind == "physics_material" {
             sindri_core::ProfileDocument {
                 name: "New Physics Material".into(),
                 profile_type: "physics_material".into(),
@@ -134,6 +134,8 @@ impl EditorApp {
                 .into(),
                 ..sindri_core::ProfileDocument::default()
             }
+        } else if kind == "render_material" {
+            sindri_scene::render_material_template()
         } else {
             sindri_core::ProfileDocument::default()
         };

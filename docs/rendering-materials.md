@@ -48,7 +48,7 @@ unify geometry-owned alpha policy.
 Without the component, existing textured world geometry retains its Lambert
 appearance; imported models retain their authored factors and existing GGX
 response. Opting in selects the common standard path. Migration of legacy
-looks, shared texture/material assets and per-node model overrides remain pending.
+looks, shared material texture bindings and per-node model overrides remain pending.
 Factors apply to the owning entity, not its children or 2D sprites/UI.
 
 The editor's Rendering family offers Material with checked generic controls:
@@ -56,6 +56,88 @@ base-color picker, metallic/roughness numbers and numeric RGB emission (the
 vector controls use X/Y/Z labels). Fields serialize through the normal checked
 commands and undo history. Emission uses numbers so HDR values remain authorable.
 Voxel material edits change uniforms without re-meshing resident sections.
+
+## Reusable material profiles
+
+A `.profile` asset with `type: "render_material"` supplies the same numeric
+factors and sidedness to cubes, inline/cached surfaces, voxel owners and imported
+model primitives. This is a bounded asset-authoring slice for the planned
+Explorer track, proven in Lighting Lab. Texture-bearing materials, unified alpha
+and game adoption remain open.
+
+```json
+{
+  "format_version": 1,
+  "name": "Polished metal",
+  "type": "render_material",
+  "values": {
+    "base_color": [0.7, 0.7, 0.7, 1.0],
+    "metallic": 1.0,
+    "roughness": 0.15,
+    "emissive": [0.0, 0.0, 0.0],
+    "sidedness": "inherit"
+  }
+}
+```
+
+Select it with `"sindri.material": {"profile": "materials/polished.profile"}`.
+The profile is resolved first. `override_factors: true` replaces **all four**
+factor fields with the component's local values, including their ordinary
+white/nonmetallic/rough defaults when omitted. `override_sidedness: true` independently selects the local `sidedness`, including
+an explicit `inherit` that restores imported primitive settings. With no profile,
+inline component semantics remain unchanged, regardless of the override flags.
+Removing the component restores legacy/imported factors and visibility.
+
+Profile references are validated logical asset IDs with a `.profile` suffix.
+Other profile types remain game-owned. The engine-owned render type rejects
+unknown fields, recursive profile references, texture/alpha fields, invalid
+versions, invalid factors and unknown sidedness. Missing/wrong-type references
+fail strict extraction; tolerant editor views report the entity and skip its
+draw rather than silently drawing with defaults.
+
+The project browser offers **New render material**, with a full-value starter.
+The existing structured profile inspector edits it; Save validates render fields
+before replacing disk content. A rejected Save keeps the form editable; a valid
+correction clears the error. Material component fields use the existing profile asset
+picker and checked scene commands with normal Undo/Redo. The picker lists all
+profile types; extraction reports mismatched types. Profiles use the existing asynchronous editor
+loader/watcher and browser asset loader; a failed editor reload retains the last
+valid values. Successful reloads replace the complete source set for both editor
+viewports. Native players and headless project runs install the same checked
+sources. No filesystem access is added to extraction or rendering.
+
+The exporter discovers references on inactive entities, later scenes and expanded
+prefabs, deduplicates the assets and validates their type/content before writing.
+A render material profile carries values only: it owns no texture handles, GPU
+buffers or shader variants. Each frame snapshots resolved factors/policy; reloads
+and local overrides leave retained geometry, imported assets and voxel meshes
+resident, and old frame packets retain their earlier values.
+
+Lighting Lab shares three profiles across six objects. Its inline control must
+render byte-identically; editing only the polished profile adds green emission
+to both a cube and an imported model. Existing scripted light phases, the goal
+run and the paired sidedness controls still apply. These are feature controls,
+not game adoption or a performance improvement.
+
+Native profile controls at 960×540 render shared and inline values
+byte-identically, and preserve the earlier Lighting Lab capture exactly. Editing
+only the polished profile adds 17,705 green pixels: 9,483 on the model's side
+of the image and 8,222 on the cube's. The sidedness control retains its 3,550
+changed/orange pixels. The 300-prop benchmark preserves its settled draw/pass
+counters and zero geometry uploads with valid GPU timing, and authored-color
+verification passes. These are correctness controls, not a speedup claim.
+
+Real Chromium/WebGPU produces byte-identical shared/inline captures. The shared
+edit adds 17,700 green pixels (9,480 on the model side, 8,220 on the cube side).
+All five Lighting Lab variants reach the scripted goal and exercise light phases
+without runtime/GPU errors; profile exports fetch nine assets and the inline
+control fetches six. Existing lighting, sidedness and benchmark controls pass.
+
+Native X11/software-Vulkan editor review creates a render profile, selects an
+existing profile, saves and independently undoes/redoes the selection. An invalid
+roughness Save is rejected without overwriting disk; correcting it saves normally.
+Editing the shared polished asset updates both objects live. Reopening preserves
+the profile and scene edits, and Play renders both updated objects.
 
 ## Evidence
 
@@ -222,7 +304,7 @@ Changing sidedness does not replace geometry, remesh voxels or upload model
 assets. Two additional color and two additional shadow pipelines per textured
 renderer cover double-sided reflected/unreflected draws. Uniform layouts,
 draw/pass counts and per-draw queue writes are unchanged. This is face visibility,
-not blended transparency, cutout-shadow unification or shared material assets.
+not blended transparency, cutout-shadow unification or shared texture bindings.
 
 GPU readbacks exercise inherited/forced/restored model settings, lit backs of
 transient/retained/cached surfaces, a cube viewed from inside, reflected geometry,

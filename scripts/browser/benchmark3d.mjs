@@ -59,7 +59,7 @@ try {
   const pixels = await page.screenshot(shot ? { path: shot } : {});
   assert(imageStatistics(pixels).colors >= minColors, 'the lab renders several scene colors');
   const assets = process.env.SINDRI_LIGHTING3D
-    ? ['lighting.scene', 'lighting.decay', 'cube.png', 'surface.png', 'floor.png', 'prop.glb']
+    ? ['lighting.scene', 'lighting.decay', 'cube.png', 'surface.png', 'floor.png', 'prop.glb', ...(process.env.SINDRI_INLINE_MATERIALS ? [] : ['dielectric.profile', 'polished.profile', 'orange.profile'])]
     : process.env.SINDRI_MODEL_CASTER
     ? ['benchmark.scene', 'benchmark.decay', 'caster.glb', 'prop.glb']
     : process.env.SINDRI_MODEL_RECEIVER

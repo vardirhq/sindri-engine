@@ -2,11 +2,14 @@
 
 use serde::Deserialize;
 use sindri_core::SceneComponent;
-use sindri_render::{MaterialError, MaterialFactors, MaterialSidedness};
+use sindri_render::{MaterialFactors, MaterialSidedness};
 
-#[derive(Clone, Copy, Debug, Deserialize, PartialEq)]
+#[derive(Clone, Debug, Deserialize, PartialEq)]
 #[serde(try_from = "Document")]
 pub struct MaterialComponent {
+    pub profile: String,
+    pub override_factors: bool,
+    pub override_sidedness: bool,
     pub factors: MaterialFactors,
     pub sidedness: MaterialSidedness,
 }
@@ -14,6 +17,9 @@ pub struct MaterialComponent {
 #[derive(Deserialize)]
 #[serde(default)]
 struct Document {
+    profile: String,
+    override_factors: bool,
+    override_sidedness: bool,
     base_color: [f32; 4],
     metallic: f32,
     roughness: f32,
@@ -44,6 +50,9 @@ impl Default for Document {
     fn default() -> Self {
         let factors = MaterialFactors::default();
         Self {
+            profile: String::new(),
+            override_factors: false,
+            override_sidedness: false,
             base_color: factors.base_color,
             metallic: factors.metallic,
             roughness: factors.roughness,
@@ -54,7 +63,7 @@ impl Default for Document {
 }
 
 impl TryFrom<Document> for MaterialComponent {
-    type Error = MaterialError;
+    type Error = crate::RenderMaterialError;
 
     fn try_from(value: Document) -> Result<Self, Self::Error> {
         let factors = MaterialFactors {
@@ -64,7 +73,11 @@ impl TryFrom<Document> for MaterialComponent {
             emissive: value.emissive,
         };
         factors.validate()?;
+        crate::render_material::check_reference(&value.profile)?;
         Ok(Self {
+            profile: value.profile,
+            override_factors: value.override_factors,
+            override_sidedness: value.override_sidedness,
             factors,
             sidedness: value.sidedness.into(),
         })

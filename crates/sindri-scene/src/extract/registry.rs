@@ -491,10 +491,15 @@ mod tests;
 fn register_material(components: &mut ComponentSchemaRegistry) -> Result<(), SceneExtractError> {
     components.register_with_default::<crate::MaterialComponent>(
         "Material",
-        serde_json::json!({"base_color": [1.0, 1.0, 1.0, 1.0], "metallic": 0.0,
+        serde_json::json!({"profile": "", "override_factors": false, "override_sidedness": false,
+                           "base_color": [1.0, 1.0, 1.0, 1.0], "metallic": 0.0,
                            "roughness": 1.0, "emissive": [0.0, 0.0, 0.0], "sidedness": "inherit"}),
     )?;
     components.describe::<crate::MaterialComponent>([
+        (
+            "profile",
+            sindri_core::FieldMeaning::Asset(sindri_core::AssetKind::Profile),
+        ),
         ("base_color", sindri_core::FieldMeaning::Color),
         (
             "sidedness",
