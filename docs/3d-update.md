@@ -69,9 +69,9 @@ merge gate for PR #507. Continue with separate, reviewable PRs in this order:
 
 1. Retained inline geometry/u32 feature proof meets the zero-settled-upload
    target (slices 2 and 3; [contract](retained-meshes.md)). Explicit material face
-   visibility now has native/editor/WebGPU feature proof. Next, finish measurement
-   coverage alongside subsequent rendering work and define the shared material
-   assets/alpha contract (slice 3).
+   visibility has native/editor/WebGPU feature proof. Reusable numeric material
+   profiles have native/editor/WebGPU feature proof; texture bindings and unified
+   alpha remain separate work (slice 3), alongside remaining measurement coverage.
 2. Batch and instance repeated geometry, and cull meshes and models against
    cached bounds (slice 3).
 3. Finish shadow quality, mipmaps, transparency and authored fog/post delivery,
@@ -151,7 +151,12 @@ The yaw/pitch/roll convention remains radians, Y-up, -Z forward and YXZ order.
   - [x] Preserve and render core GLB emissive factors, including override/removal
     and masked-shadow invariance, with native/browser imported controls. Emissive
     maps and game adoption remain open.
-  - [ ] Shared material assets/texture bindings, unified alpha and legacy-look migration.
+  - [x] Reusable typed render material profiles, shared numeric factors and face
+    policy, explicit local overrides, checked editor authoring, asynchronous
+    loading and export discovery. Native/WebGPU shared/inline and shared-edit
+    controls, plus editor creation, Save/correction, selection/history, reload,
+    reopen and Play prove the slice; game adoption remains open. See [profiles](rendering-materials.md#reusable-material-profiles).
+  - [ ] Shared material texture bindings, unified alpha and legacy-look migration.
   - [x] Shared inherit/single/double sidedness across cubes, inline/cached surfaces,
     voxel owners and imported primitives. GPU color/shadow, reflection, history
     and residency regressions pass; native/WebGPU panel controls and editor

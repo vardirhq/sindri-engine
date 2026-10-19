@@ -256,6 +256,8 @@ impl SceneExtractor {
         world: &World,
         target: VoxelTarget<'_>,
     ) -> Result<(), SceneExtractError> {
+        // A pending profile must not consume a section's one-time mesh upload.
+        let material = self.resolved_material(world, entity)?;
         let VoxelTarget {
             camera,
             textures,
@@ -311,9 +313,6 @@ impl SceneExtractor {
                 *model = root * *model;
             }
         }
-        let material = self
-            .components
-            .get::<crate::MaterialComponent>(world, entity)?;
         push_commands(commands, component.layer, camera, frame, material);
         refused.map_or(Ok(()), Err)
     }
@@ -359,7 +358,7 @@ fn push_commands(
     layer: i32,
     camera: super::camera::ResolvedCamera,
     frame: &mut ExtractedFrame,
-    material: Option<crate::MaterialComponent>,
+    material: Option<crate::ResolvedRenderMaterial>,
 ) {
     for command in commands {
         let mut pass = FramePass::new(

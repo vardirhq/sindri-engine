@@ -122,6 +122,10 @@ impl SceneScripts {
             Ok(materials) => referenced.extend(materials),
             Err(error) => notes.push(ScriptNote::Failed(error.to_string())),
         }
+        match sindri_scene::referenced_render_materials(world, components) {
+            Ok(materials) => referenced.extend(materials),
+            Err(error) => notes.push(ScriptNote::Failed(error.to_string())),
+        }
         let wanted: BTreeSet<AssetId> = referenced
             .iter()
             .filter_map(|reference| AssetId::new(reference.clone()).ok())
@@ -272,6 +276,12 @@ impl SceneScripts {
                             Ok(profile) => {
                                 if let Err(error) =
                                     sindri_scene::physics_material_profile(id.as_str(), &profile)
+                                {
+                                    notes.push(ScriptNote::Failed(error.to_string()));
+                                    continue;
+                                }
+                                if let Err(error) =
+                                    sindri_scene::render_material_profile(id.as_str(), &profile)
                                 {
                                     notes.push(ScriptNote::Failed(error.to_string()));
                                     continue;
@@ -462,7 +472,8 @@ fn is_prefab(id: &str) -> bool {
 }
 
 fn is_profile(id: &str) -> bool {
-    id.ends_with(sindri_core::PROFILE_SUFFIX)
+    id.to_ascii_lowercase()
+        .ends_with(sindri_core::PROFILE_SUFFIX)
 }
 
 pub use sindri_core::PREFAB_SUFFIX;

@@ -53,11 +53,14 @@ impl ProfileEditor {
         })?;
         sindri_scene::physics_material_profile(&self.path.to_string_lossy(), document)
             .map_err(|error| error.to_string())?;
+        sindri_scene::render_material_profile(&self.path.to_string_lossy(), document)
+            .map_err(|error| error.to_string())?;
         let json = document
             .to_canonical_json()
             .map_err(|error| error.to_string())?;
         std::fs::write(&self.path, json).map_err(|error| error.to_string())?;
         self.dirty = false;
+        self.error = None;
         Ok(())
     }
 }
@@ -99,5 +102,47 @@ mod tests {
         assert!(editor.save().is_err());
         assert!(editor.dirty);
         assert_eq!(std::fs::read_to_string(path).unwrap(), valid);
+    }
+}
+
+#[cfg(test)]
+mod render_material_tests {
+    use super::*;
+    #[test]
+    fn invalid_render_factors_cannot_overwrite_the_profile() {
+        let directory = tempfile::tempdir().unwrap();
+        let path = directory.path().join("gold.profile");
+        let valid = sindri_scene::render_material_template()
+            .to_canonical_json()
+            .unwrap();
+        std::fs::write(&path, &valid).unwrap();
+        let mut editor = ProfileEditor::open(&path);
+        editor
+            .document
+            .as_mut()
+            .unwrap()
+            .values
+            .insert("metallic".into(), serde_json::json!(2));
+        editor.dirty = true;
+        assert!(editor.save().is_err());
+        assert!(editor.dirty);
+        assert_eq!(std::fs::read_to_string(&path).unwrap(), valid);
+        editor.error = Some("the previous save was rejected".into());
+        editor
+            .document
+            .as_mut()
+            .unwrap()
+            .values
+            .insert("metallic".into(), serde_json::json!(0.5));
+        editor.save().unwrap();
+        assert!(!editor.dirty);
+        assert!(editor.error.is_none());
+        assert_eq!(
+            ProfileEditor::open(&path)
+                .document
+                .unwrap()
+                .value("metallic"),
+            Some(&serde_json::json!(0.5))
+        );
     }
 }

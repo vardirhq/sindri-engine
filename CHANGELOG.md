@@ -599,6 +599,11 @@ requests, commit history, and subsystem documentation rather than this file.
 
 ## [Unreleased]
 
+- Add reusable `render_material` profiles for shared 3D factors and sidedness,
+  with explicit local overrides, validated editor authoring, asynchronous loading
+  and automatic export discovery. Lighting Lab shares profiles across cubes,
+  inline surfaces and models; texture bindings and unified alpha remain open.
+
 ### Changed
 
 - 2D physics rays, overlaps and shape casts select collider candidates through

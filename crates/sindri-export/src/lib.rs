@@ -24,6 +24,7 @@ mod gather;
 mod models;
 mod page;
 mod prefabs;
+mod profiles;
 mod shaders;
 mod write;
 

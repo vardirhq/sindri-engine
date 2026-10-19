@@ -9,6 +9,7 @@ mod camera;
 mod clip_runs;
 mod effects;
 mod frustum;
+mod material;
 mod meanings;
 mod mesh;
 mod mesh_cache;
@@ -91,6 +92,7 @@ fn environment_clear(environment: Option<crate::EnvironmentComponent>) -> ClearO
 #[derive(Clone, Debug)]
 pub struct SceneExtractor {
     components: ComponentSchemaRegistry,
+    materials: crate::RenderMaterialSources,
     models: BTreeMap<sindri_core::AssetId, std::sync::Arc<sindri_render::RenderModel>>,
     /// Tile volumes already resolved into the faces they draw.
     ///
@@ -130,6 +132,8 @@ fn transform_matrix(transform: Transform3D) -> Mat4 {
 
 #[derive(Debug, Error)]
 pub enum SceneExtractError {
+    #[error(transparent)]
+    Material(#[from] crate::RenderMaterialError),
     #[error("model asset '{0}' is not loaded and bound")]
     MissingModel(sindri_core::AssetId),
     #[error(transparent)]
@@ -224,6 +228,7 @@ impl SceneExtractor {
     pub fn new() -> Result<Self, SceneExtractError> {
         Ok(Self {
             components: builtin_components()?,
+            materials: crate::RenderMaterialSources::default(),
             models: BTreeMap::new(),
             baked_volumes: RefCell::default(),
             retained_surfaces: RefCell::default(),

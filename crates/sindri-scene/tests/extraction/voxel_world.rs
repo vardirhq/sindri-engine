@@ -362,3 +362,85 @@ fn voxel_material_override_does_not_rebuild_resident_geometry() {
     }
     assert!(counted > 0);
 }
+
+#[test]
+fn reloading_a_shared_profile_keeps_voxel_sections_resident() {
+    let mut extractor = SceneExtractor::new().unwrap();
+    let mut world = voxel_world();
+    let entity = world
+        .entity_for_source_id(&sindri_core::SceneEntityId::new("terrain").unwrap())
+        .unwrap();
+    world.get_mut(entity).unwrap().components.insert(
+        "sindri.material".into(),
+        serde_json::json!({"profile":"ground.profile"}),
+    );
+    let textures = textures();
+    let mut profile = sindri_scene::render_material_template();
+    for (index, policy) in ["inherit", "double", "single"].into_iter().enumerate() {
+        profile
+            .values
+            .insert("sidedness".into(), serde_json::json!(policy));
+        extractor.set_materials(
+            sindri_scene::RenderMaterialSources::from_profiles([("ground.profile", &profile)])
+                .unwrap(),
+        );
+        let frame = extractor
+            .extract(&world, VIEWPORT, CameraView::default(), &textures)
+            .unwrap();
+        let mut counted = 0;
+        for pass in frame.passes() {
+            if let FrameCommand::CachedTexturedMesh { replacement, .. } = &pass.command {
+                assert_eq!(replacement.is_some(), index == 0);
+                assert_eq!(
+                    pass.sidedness,
+                    match index {
+                        0 => sindri_render::MaterialSidedness::Inherit,
+                        1 => sindri_render::MaterialSidedness::Double,
+                        _ => sindri_render::MaterialSidedness::Single,
+                    }
+                );
+                counted += 1;
+            }
+        }
+        assert!(counted > 0);
+    }
+}
+
+#[test]
+fn a_late_material_profile_does_not_consume_the_first_voxel_upload() {
+    let mut extractor = SceneExtractor::new().unwrap();
+    extractor.tolerate_invalid_components();
+    let mut world = voxel_world();
+    let entity = world
+        .entity_for_source_id(&sindri_core::SceneEntityId::new("terrain").unwrap())
+        .unwrap();
+    world.get_mut(entity).unwrap().components.insert(
+        "sindri.material".into(),
+        serde_json::json!({"profile":"ground.profile"}),
+    );
+    let textures = textures();
+    let pending = extractor
+        .extract(&world, VIEWPORT, CameraView::default(), &textures)
+        .unwrap();
+    assert!(pending.passes().is_empty());
+    assert!(!extractor.problems().is_empty());
+    let profile = sindri_scene::render_material_template();
+    extractor.set_materials(
+        sindri_scene::RenderMaterialSources::from_profiles([("ground.profile", &profile)]).unwrap(),
+    );
+    let ready = extractor
+        .extract(&world, VIEWPORT, CameraView::default(), &textures)
+        .unwrap();
+    assert!(extractor.problems().is_empty());
+    let mut sections = 0;
+    for pass in ready.passes() {
+        if let FrameCommand::CachedTexturedMesh { replacement, .. } = &pass.command {
+            assert!(
+                replacement.is_some(),
+                "the first drawn section still uploads its mesh"
+            );
+            sections += 1;
+        }
+    }
+    assert!(sections > 0);
+}

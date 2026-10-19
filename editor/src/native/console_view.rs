@@ -40,12 +40,29 @@ impl EditorApp {
     }
 
     pub(super) fn record_script_notes(&mut self, notes: Vec<ScriptNote>) {
+        let refresh = notes
+            .iter()
+            .any(|note| matches!(note, ScriptNote::Loaded(_) | ScriptNote::Reloaded(_)));
         for note in notes {
             match note {
                 ScriptNote::Loaded(message) | ScriptNote::Reloaded(message) => {
                     self.console.info(message);
                 }
                 ScriptNote::Failed(message) => self.console.warning(message),
+            }
+        }
+        if refresh {
+            let profiles = self.scripts.profiles();
+            match sindri_scene::RenderMaterialSources::from_profiles(
+                profiles
+                    .ids()
+                    .filter_map(|id| profiles.get(id).map(|p| (id, p))),
+            ) {
+                Ok(materials) => {
+                    self.scene.set_materials(materials.clone());
+                    self.game_scene.set_materials(materials);
+                }
+                Err(error) => self.console.warning(error.to_string()),
             }
         }
     }

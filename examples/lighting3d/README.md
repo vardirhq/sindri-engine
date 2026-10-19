@@ -29,3 +29,15 @@ directions, updated sun state, retained entity activity and the final enabled/
 disabled controls.
 Typed checking and LSP metadata use the same host surface. Native/editor and
 real WebGPU captures are feature evidence, with game adoption still open.
+
+Three `materials/*.profile` assets now provide shared factors and sidedness for
+six objects. `polished.profile` drives a cube and a GLB; changing its emission
+updates both. The two back-facing panels share `orange.profile`, with an explicit
+local Single override on the hidden panel. Use **New render material** in the
+project browser to create another; select it in an entity's Material profile
+picker. The structured profile inspector validates Save, and the scene picker
+uses normal Undo/Redo. Texture ownership remains with each mesh/model.
+
+The native/WebGPU controls include `prepare-lighting3d.py --inline-materials`
+(equal pixels with inline values) and `--green-materials` (one shared profile
+edit changes two visible surfaces). Neither changes gameplay scripts or the goal.
