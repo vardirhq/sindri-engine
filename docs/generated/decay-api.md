@@ -48,7 +48,7 @@ Names in scope without qualification. Decay has no imports, so each of these is 
 - `Pointer`: `Pointer` — The mouse, or a finger on a touch screen, handled the same way so one game works on both.
 - `Profiles`: `Profiles` — Reading settings from a profile, a data file shared across a project, such as a weapon's damage and fire rate.
 - `Random`: `Random` — Random numbers. The same seed always gives the same numbers, so a run can be replayed.
-- `Save`: `Save` — Saving progress between play sessions: numbers and true/false values stored under names, such as a best score.
+- `Save`: `Save` — Saving progress between play sessions: numbers, text and true/false values stored under names, such as a best score.
 - `Scene`: `Scene` — Scenes are a game's separate places or screens, such as a menu, a level or a shop. This asks which one is playing and moves to another.
 - `Sequence`: `Sequence` — Playing an object's sequences: choreography set up for it in the scene's Timeline, such as a title sliding in or a door opening, with named cues along the way.
 - `Stick`: `Stick` — A virtual joystick for touch screens: wherever a thumb lands becomes the centre, and dragging from there steers.
@@ -555,7 +555,7 @@ Copied closest 3D ray/shape-cast hit, optional where no hit exists. World-space 
 
 ### `Save`
 
-Saving progress between play sessions: numbers and true/false values stored under names, such as a best score.
+Saving progress between play sessions: numbers, text and true/false values stored under names, such as a best score.
 
 - `clear()` → `unit` — Deletes everything saved.
 - `flag(key: String, fallback: bool)` → `bool` — A saved true/false value, or `fallback` if nothing is saved under that name yet.
@@ -566,6 +566,8 @@ Saving progress between play sessions: numbers and true/false values stored unde
 - `number(key: String, fallback: number)` → `number` — A saved number, or `fallback` if nothing is saved under that name yet: `Save.number("best", 0.0)`.
 - `set_flag(key: String, value: bool)` → `unit` — Saves a true/false value under a name.
 - `set_number(key: String, value: number)` → `unit` — Saves a number under a name.
+- `set_text(key: String, value: String)` → `unit` — Saves text under a name through the shared versioned store.
+- `text(key: String, fallback: String)` → `String` — Saved Unicode text, or the fallback when the key is absent or holds another type.
 
 ### `Scene`
 

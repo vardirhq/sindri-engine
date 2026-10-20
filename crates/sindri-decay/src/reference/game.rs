@@ -272,13 +272,23 @@ pub(super) const TYPES: &[TypeEntry] = &[
     },
     TypeEntry {
         name: "Save",
-        text: "Saving progress between play sessions: numbers and true/false values stored under names, such as a best score.",
+        text: "Saving progress between play sessions: numbers, text and true/false values stored under names, such as a best score.",
         members: &[
             call("clear", &[], "Deletes everything saved."),
             call(
                 "flag",
                 &["key", "fallback"],
                 "A saved true/false value, or `fallback` if nothing is saved under that name yet.",
+            ),
+            call(
+                "text",
+                &["key", "fallback"],
+                "Saved Unicode text, or the fallback when the key is absent or holds another type.",
+            ),
+            call(
+                "set_text",
+                &["key", "value"],
+                "Saves text under a name through the shared versioned store.",
             ),
             call("has", &["key"], "Whether anything is saved under a name."),
             call(

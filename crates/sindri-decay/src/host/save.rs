@@ -52,6 +52,9 @@ impl WorldHost<'_> {
                 path.dotted()
             )));
         };
+        if matches!(call, SaveCall::Text | SaveCall::SetText) {
+            return text_call(saves, call, path, key, args.get(1));
+        }
         match call {
             SaveCall::Has => Ok(Value::Bool(saves.has(key))),
             SaveCall::Number => {
@@ -87,9 +90,35 @@ impl WorldHost<'_> {
                 Ok(Value::Unit)
             }
             // Answered above, before a key was even looked for.
-            SaveCall::Clear | SaveCall::IsNew | SaveCall::IsDamaged | SaveCall::IsFromNewer => {
+            SaveCall::Clear
+            | SaveCall::IsNew
+            | SaveCall::IsDamaged
+            | SaveCall::IsFromNewer
+            | SaveCall::Text
+            | SaveCall::SetText => {
                 unreachable!("handled without a key")
             }
         }
+    }
+}
+
+fn text_call(
+    saves: &mut sindri_core::SaveStore,
+    call: SaveCall,
+    path: &Path,
+    key: &str,
+    value: Option<&Value>,
+) -> Result<Value, RuntimeError> {
+    let Some(Value::String(value)) = value else {
+        return Err(RuntimeError::Host(format!(
+            "{}: needs text to remember or use as a fallback",
+            path.dotted()
+        )));
+    };
+    if call == SaveCall::Text {
+        Ok(Value::String(saves.text(key, value).to_owned()))
+    } else {
+        saves.set(key, SaveValue::Text(value.clone()));
+        Ok(Value::Unit)
     }
 }

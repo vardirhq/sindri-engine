@@ -49,6 +49,10 @@ language model.
 - [x] Exercise scene-environment Color and numeric completion/hover and typed
   diagnostics from the same host surface as runtime and generated references.
 
+- [x] Exercise Unicode text-save calls through the shared host environment: text
+  completion/hover, typed fallback/write diagnostics and native round-trip tests;
+  Orbital uses the calls for pilot names and flight records.
+
 ## P0 — correctness and drift
 
 These are defects or sources of actively misleading tooling.

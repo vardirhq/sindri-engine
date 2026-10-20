@@ -442,6 +442,8 @@ pub(crate) enum SaveCall {
     /// where nothing has been stored yet.
     Number,
     SetNumber,
+    Text,
+    SetText,
     Flag,
     SetFlag,
     /// Whether anything is stored under a key.
@@ -463,6 +465,8 @@ pub(crate) enum SaveCall {
 pub(crate) const SAVE_CALLS: &[(&str, SaveCall)] = &[
     ("number", SaveCall::Number),
     ("set_number", SaveCall::SetNumber),
+    ("text", SaveCall::Text),
+    ("set_text", SaveCall::SetText),
     ("flag", SaveCall::Flag),
     ("set_flag", SaveCall::SetFlag),
     ("has", SaveCall::Has),

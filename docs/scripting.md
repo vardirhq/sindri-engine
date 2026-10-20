@@ -758,6 +758,8 @@ will ever see.
 | --- | --- |
 | `Save.number(key, fallback)` | `number` |
 | `Save.set_number(key, value)` | nothing |
+| `Save.text(key, fallback)` | `String` |
+| `Save.set_text(key, value)` | nothing |
 | `Save.flag(key, fallback)` | `bool` |
 | `Save.set_flag(key, value)` | nothing |
 | `Save.has(key)` | `bool` |
@@ -784,6 +786,12 @@ script Progress {
 and text and nothing else, so a structure a script could not build is a structure
 nothing could write. A game that wants `settings.volume` and `progress.best_wave`
 writes those keys, and the file stays something a person can read and repair.
+
+`Save.text` and `Save.set_text` carry Unicode strings through the existing
+versioned store. Missing and wrong-typed values return the supplied text fallback.
+They perform no immediate I/O. Orbital Last Stand uses them for the callsign
+and its bounded sortie history; the native and browser hosts persist the same
+document. Numeric and flag APIs remain unchanged.
 
 **A fallback rather than an optional**, because every caller has one — a starting
 score, a default volume — and a save is mostly read on the run where nothing has
@@ -1980,8 +1988,9 @@ index, refuses one that cannot make the action's kind, and writes the change
 into the scene's component, so it is read on the next step and the editor's
 Play shows it. `last_pressed` names the key, mouse button or pad button pressed
 this step, for a screen that waits for the key to rebind to. A rebinding
-lasts as long as the scene: `Save` holds numbers and flags, not text, so
-keeping one between sessions is not yet possible. The platformer's hero runs and jumps by actions, and the Input
+lasts as long as the scene unless the game keeps its text with `Save.set_text`
+and restores it with `Save.text` and `Action.rebind` at startup. Orbital's burst
+key does this. The platformer's hero runs and jumps by actions, and the Input
 example rebinds them.
 
 ### The keyboard

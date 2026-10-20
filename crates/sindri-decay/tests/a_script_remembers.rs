@@ -272,3 +272,47 @@ fn a_save_survives_a_backend_it_was_written_through() {
     run(&mut second, read_it, &mut reopened);
     assert!((recorded(&second, entity)[0] - 250.0).abs() < 1.0e-5);
 }
+
+#[test]
+fn unicode_text_round_trips_and_wrong_types_use_the_text_fallback() {
+    let mut first = World::default();
+    scripted(&mut first);
+    let mut saves = SaveStore::default();
+    let report = run(
+        &mut first,
+        r#"
+        script Progress {
+            fn start() {
+                Save.set_text("pilot", "Nóva 星🚀");
+                Save.set_number("wrong_type", 9.0);
+            }
+        }
+    "#,
+        &mut saves,
+    );
+    assert!(report.failures.is_empty(), "{:?}", report.failures);
+    let mut reopened = SaveStore::opened(Ok(Some(saves.to_document())));
+    let mut second = World::default();
+    let entity = scripted(&mut second);
+    let report = run(
+        &mut second,
+        r#"
+        script Progress {
+            fn start() {
+                if Save.text("pilot", "missing") == "Nóva 星🚀" {
+                    this.transform.position.x = 1.0;
+                }
+                if Save.text("wrong_type", "fallback") == "fallback" &&
+                   Save.text("absent", "fallback") == "fallback" {
+                    this.transform.position.y = 1.0;
+                }
+            }
+        }
+    "#,
+        &mut reopened,
+    );
+    assert!(report.failures.is_empty(), "{:?}", report.failures);
+    let position = recorded(&second, entity);
+    assert!((position[0] - 1.0).abs() < 1.0e-5);
+    assert!((position[1] - 1.0).abs() < 1.0e-5);
+}

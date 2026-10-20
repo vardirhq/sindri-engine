@@ -123,7 +123,7 @@
       "type": "Random"
     },
     {
-      "description": "Saving progress between play sessions: numbers and true/false values stored under names, such as a best score.",
+      "description": "Saving progress between play sessions: numbers, text and true/false values stored under names, such as a best score.",
       "kind": "value",
       "name": "Save",
       "read_only": false,
@@ -3805,7 +3805,7 @@
       "name": "RayHit3d"
     },
     {
-      "description": "Saving progress between play sessions: numbers and true/false values stored under names, such as a best score.",
+      "description": "Saving progress between play sessions: numbers, text and true/false values stored under names, such as a best score.",
       "members": [
         {
           "description": "Deletes everything saved.",
@@ -3906,6 +3906,34 @@
             "number"
           ],
           "returns": "unit"
+        },
+        {
+          "description": "Saves text under a name through the shared versioned store.",
+          "kind": "function",
+          "name": "set_text",
+          "parameter_names": [
+            "key",
+            "value"
+          ],
+          "parameters": [
+            "String",
+            "String"
+          ],
+          "returns": "unit"
+        },
+        {
+          "description": "Saved Unicode text, or the fallback when the key is absent or holds another type.",
+          "kind": "function",
+          "name": "text",
+          "parameter_names": [
+            "key",
+            "fallback"
+          ],
+          "parameters": [
+            "String",
+            "String"
+          ],
+          "returns": "String"
         }
       ],
       "name": "Save"

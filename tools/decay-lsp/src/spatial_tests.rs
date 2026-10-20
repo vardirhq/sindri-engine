@@ -218,3 +218,42 @@ fn environment_completion_hover_and_checking_share_color_and_numeric_metadata() 
         .is_empty()
     );
 }
+
+#[test]
+fn text_saves_complete_hover_and_check_against_the_real_host() {
+    let source = "script S { fn start() { let pilot = Save.text(\"pilot\", \"\"); Save.set_text(\"pilot\", pilot); } }";
+    let uri = "file:///tmp/saved-pilot.decay";
+    let mut server = Server::new();
+    server.documents.insert(
+        uri.into(),
+        Document {
+            text: source.into(),
+            version: 1,
+        },
+    );
+    let offset = source.find("text(").unwrap();
+    let params = json!({"textDocument":{"uri":uri},"position":{"line":0,"character":offset}});
+    let Value::Array(items) = server.completion(&params) else {
+        panic!("completion array");
+    };
+    for member in ["text", "set_text"] {
+        let item = items
+            .iter()
+            .find(|item| item["label"] == member)
+            .expect("save member");
+        assert!(item["detail"].as_str().unwrap().contains("String"));
+    }
+    assert!(
+        server.hover(&params)["contents"]["value"]
+            .as_str()
+            .unwrap()
+            .contains("fn text(String, String) -> String")
+    );
+    assert!(sindri_decay::check_source(source).diagnostics.is_empty());
+    for invalid in [
+        "script S { fn start() { Save.set_text(\"pilot\", 5.0); } }",
+        "script S { fn start() { let pilot = Save.text(\"pilot\", false); } }",
+    ] {
+        assert!(!sindri_decay::check_source(invalid).diagnostics.is_empty());
+    }
+}

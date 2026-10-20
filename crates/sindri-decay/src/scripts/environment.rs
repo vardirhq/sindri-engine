@@ -350,17 +350,22 @@ pub(super) fn add_save_surface(environment: &mut Environment) {
                 params: match call {
                     SaveCall::Number | SaveCall::SetNumber => vec![Type::String, Type::Number],
                     SaveCall::Flag | SaveCall::SetFlag => vec![Type::String, Type::Bool],
+                    SaveCall::Text | SaveCall::SetText => vec![Type::String, Type::String],
                     SaveCall::Has => vec![Type::String],
                     _ => Vec::new(),
                 },
                 return_type: match call {
                     SaveCall::Number => Type::Number,
+                    SaveCall::Text => Type::String,
                     SaveCall::Flag
                     | SaveCall::Has
                     | SaveCall::IsNew
                     | SaveCall::IsDamaged
                     | SaveCall::IsFromNewer => Type::Bool,
-                    SaveCall::SetNumber | SaveCall::SetFlag | SaveCall::Clear => Type::Unit,
+                    SaveCall::SetNumber
+                    | SaveCall::SetFlag
+                    | SaveCall::SetText
+                    | SaveCall::Clear => Type::Unit,
                 },
             },
         );
