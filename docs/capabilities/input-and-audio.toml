@@ -100,11 +100,12 @@ tests = [
   "crates/sindri-platform/src/input/action/state.rs",
   "games/platformer/tests/a_run_reaches_the_flag.rs",
   "game/tests/the_mixer_and_input_demos_work.rs",
+  "games/orbital-baked/tests/the_complete_game.rs",
 ]
-proof = ["games/platformer", "examples/input"]
+proof = ["games/platformer", "examples/input", "games/orbital-baked"]
 limits = [
   "Actions are per scene, not per project or per player.",
-  "A rebinding is not saved between sessions.",
+  "No automatic binding persistence; a game can store and restore a binding with Save.text.",
 ]
 detail = """
 Input actions are declared by a scene's `sindri.input.actions` component, in
@@ -115,6 +116,8 @@ before any script runs; `Action.held`, `pressed`, `released`, `axis` and
 `Action.last_pressed` rebind one while the game runs, written back into the
 component. The platformer's hero runs and jumps by actions, and
 `examples/input` rebinds its boost (also covered by the browser smoke).
+Orbital Last Stand rebinds burst in its settings and saves the chosen binding
+through `Save.text`, restoring it when the next session opens.
 """
 
 [[capability]]
@@ -165,6 +168,7 @@ tests = [
   "crates/sindri-platform/src/audio/mixer.rs",
   "games/orbital-baked/tests/the_mixer.rs",
   "game/tests/the_mixer_and_input_demos_work.rs",
+  "games/orbital-baked/tests/the_complete_game.rs",
 ]
 proof = ["games/orbital-baked", "examples/audio"]
 limits = ["There are no bus effects, ducking or snapshots."]

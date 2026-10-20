@@ -1,6 +1,6 @@
 [package]
 name = "orbital-baked"
-description = "Orbital Last Stand with baked 3D sprite art in place of engine-drawn vectors"
+description = "Orbital Last Stand, a complete space survival game authored in Decay"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true

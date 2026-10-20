@@ -23,7 +23,7 @@ const VIEWPORTS: [(f32, f32, &str); 5] = [
     (820.0, 1180.0, "a tablet"),
 ];
 
-const SCREENS: [&str; 5] = ["title", "hud", "pause", "result", "upgrades"];
+const SCREENS: [&str; 6] = ["title", "hud", "pause", "result", "upgrades", "port"];
 
 fn stylesheet() -> Stylesheet {
     let root = concat!(env!("CARGO_MANIFEST_DIR"), "/assets/");
@@ -34,6 +34,7 @@ fn stylesheet() -> Stylesheet {
         "ui/hud.weave",
         "ui/overlays.weave",
         "ui/screens.weave",
+        "ui/port.weave",
     ] {
         let text = std::fs::read_to_string(format!("{root}{id}")).expect("stylesheet reads");
         sources.insert(id.to_owned(), text);
@@ -64,7 +65,19 @@ impl Shown {
         let mut world = World::from_scene(&document).expect("the scene loads").world;
         for other in SCREENS {
             let entity = id(&world, other);
-            world.get_mut(entity).expect("a screen").disabled = other != screen;
+            world.get_mut(entity).expect("a screen").disabled =
+                other != screen && !(screen.starts_with("port-page-") && other == "port");
+        }
+        if screen.starts_with("port-page-") {
+            for page in ["port-page-1", "port-page-2", "port-page-3", "port-page-4"] {
+                let entity = id(&world, page);
+                world.get_mut(entity).unwrap().disabled = page != screen;
+            }
+            for name in ["title-main", "port-back"] {
+                let entity = id(&world, name);
+                world.get_mut(entity).unwrap().disabled =
+                    name == "title-main" || screen == "port-page-4";
+            }
         }
         // The chooser shows three offers, or four with Second Opinion: the
         // widest it gets is four, so four are shown and the rest put away.
@@ -131,6 +144,11 @@ fn controls(screen: &str) -> (&'static str, Vec<(&'static str, Option<&'static s
                 ("title-rush", Some("title-rush-text")),
                 ("title-pick", Some("title-pick-text")),
                 ("title-compact", None),
+                ("title-difficulty", Some("title-difficulty-text")),
+                ("title-hangar", Some("title-hangar-text")),
+                ("title-archive", Some("title-archive-text")),
+                ("title-records", Some("title-records-text")),
+                ("title-settings", Some("title-settings-text")),
             ],
         ),
         "pause" => (
@@ -139,6 +157,7 @@ fn controls(screen: &str) -> (&'static str, Vec<(&'static str, Option<&'static s
                 ("pause-resume", Some("pause-resume-text")),
                 ("pause-quit", Some("pause-quit-text")),
                 ("pause-manual", None),
+                ("pause-settings", Some("pause-settings-text")),
             ],
         ),
         "result" => (
@@ -157,6 +176,7 @@ fn controls(screen: &str) -> (&'static str, Vec<(&'static str, Option<&'static s
                 ("card-hull", Some("card-hull-name")),
                 ("card-magnet", Some("card-magnet-name")),
                 ("card-pierce", Some("card-pierce-blurb")),
+                ("upgrade-reroll", Some("upgrade-reroll-text")),
             ],
         ),
     }
@@ -257,6 +277,8 @@ fn the_hud_panels_are_apart_and_hold_their_meters() {
             "hud-clock-back",
             "hud-stats-back",
             "hud-vitals-back",
+            "flight-dash",
+            "flight-pause",
         ];
         for (i, a) in panels.iter().enumerate() {
             for b in &panels[i + 1..] {
@@ -264,6 +286,76 @@ fn the_hud_panels_are_apart_and_hold_their_meters() {
                     !overlap(shown.rect(a), shown.rect(b)),
                     "{device}: {a} and {b} overlap"
                 );
+            }
+        }
+    }
+}
+
+/// A hidden page must not conceal a hit target that collides with its neighbors.
+#[test]
+fn mission_control_pages_keep_every_hit_target_visible_and_separate() {
+    for (width, height, device) in VIEWPORTS {
+        for (page, extra) in [
+            (
+                "port-page-1",
+                vec![
+                    "port-ship-0",
+                    "port-ship-1",
+                    "port-ship-2",
+                    "port-ship-3",
+                    "port-equip",
+                    "port-back",
+                ],
+            ),
+            (
+                "port-page-2",
+                vec![
+                    "port-archive-mode-0",
+                    "port-archive-mode-1",
+                    "port-archive-mode-2",
+                    "port-archive-mode-3",
+                    "port-archive-prev",
+                    "port-archive-next",
+                    "port-back",
+                ],
+            ),
+            ("port-page-3", vec!["port-back"]),
+            (
+                "port-page-4",
+                vec![
+                    "port-master",
+                    "port-music",
+                    "port-effects",
+                    "port-motion",
+                    "port-flashes",
+                    "port-guides",
+                    "port-rebind",
+                    "port-lab",
+                    "port-settings-back",
+                ],
+            ),
+        ] {
+            let shown = Shown::of(page, width, height);
+            let mut controls = vec!["port-tab-1", "port-tab-2", "port-tab-3", "port-tab-4"];
+            controls.extend(extra);
+            let panel = shown.rect("port-panel");
+            for (index, name) in controls.iter().enumerate() {
+                let rect = shown.rect(name);
+                assert!(
+                    inside(rect, panel),
+                    "{device}: {name} leaves {page}: {rect:?}"
+                );
+                let least = if width < height { 44.0 } else { 20.0 };
+                assert!(
+                    shown.pixels(rect.size[1]) >= least,
+                    "{device}: {name} is too small"
+                );
+                for other in &controls[index + 1..] {
+                    assert!(
+                        !overlap(rect, shown.rect(other)),
+                        "{device}: {name} overlaps {other} on {page}"
+                    );
+                }
             }
         }
     }

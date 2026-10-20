@@ -1,5 +1,12 @@
 # Changelog
 
+- Rebuild Orbital Last Stand around a complete flight deck: four ship sidegrades,
+  difficulty choices, salvage unlocks, commendations, a flight log and archive,
+  evasive burst, finite Boss Rush, responsive menus and accessibility settings.
+  Original space artwork and a new score give it its own presentation.
+- Persist Unicode text from Decay with `Save.text` and `Save.set_text`, using the
+  existing versioned game-save store and typed fallback behavior.
+
 - Spell Decay's numeric type `number`. It was always a 64-bit float; `f32`,
   its first spelling, named the engine's storage and still works. Diagnostics,
   hovers and the generated reference now say `number`. The decision, and when

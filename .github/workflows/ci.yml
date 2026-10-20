@@ -976,6 +976,8 @@ jobs:
           SINDRI_EXPECT_ASSETS=1 SINDRI_BASE_PATH=/sindri-engine/ \
             SINDRI_VIEWPORT_WIDTH=390 SINDRI_VIEWPORT_HEIGHT=844 \
             node scripts/browser/smoke.mjs target/dist/orbital-baked target/render-artifacts/browser-orbital-baked-phone.png
+          SINDRI_BASE_PATH=/sindri-engine/ \
+            node scripts/browser/orbital-complete.mjs target/dist/orbital-baked target/render-artifacts/orbital-complete
           SINDRI_EXPECT_ASSETS=1 SINDRI_TWEEN_DEMO=1 \
             SINDRI_EXPECT_ASSET_KINDS=scene,script,font \
             SINDRI_BASE_PATH=/sindri-engine/examples/tween/ \
@@ -1088,6 +1090,7 @@ jobs:
             target/render-artifacts/browser-causeway.png
             target/render-artifacts/browser-weave-phone.png
             target/render-artifacts/browser-orbital-baked-phone.png
+            target/render-artifacts/orbital-complete/
             target/render-artifacts/browser-physics.png
             target/render-artifacts/browser-physics-phone.png
             target/render-artifacts/browser-ui.png

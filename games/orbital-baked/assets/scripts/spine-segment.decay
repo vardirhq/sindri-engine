@@ -348,7 +348,7 @@ script SpineSegment {
         }
 
         Effects.burst(this.entity);
-        Camera.impact(0.22);
+        flight_impact(0.22);
         Audio.play("audio/kill.wav", 0.25);
         World.despawn(this.entity);
     }

@@ -73,7 +73,7 @@ script Charger {
             this.transform.scale.y = 0.38 * (1.0 + charge * 0.22);
             if this.timer <= 0.0 {
                 this.phase = 2.0; this.timer = 0.55;
-                Camera.impact(0.16);
+                flight_impact(0.16);
                 if far > 0.001 { this.dash_x = dx / far; this.dash_y = dy / far; }
             }
         } else {

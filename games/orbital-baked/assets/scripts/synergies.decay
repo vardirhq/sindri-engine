@@ -9,12 +9,30 @@ script Synergies {
     fn update(dt: f32) {
         var index: f32 = 0.0;
         var active_count: f32 = 0.0;
+        var damage: number = 0.0;
+        var fire: number = 0.0;
+        var magnet: number = 0.0;
+        var armor: number = 0.0;
+        var regen: number = 0.0;
         let count = Profiles.count(this.catalog, "synergies");
         while index < count {
-            if evaluate(index) { active_count += 1.0; }
+            if evaluate(index) {
+                active_count += 1.0;
+                damage += Profiles.number_at(this.catalog, "synergies", index, "damage_bonus", 0.0);
+                fire += Profiles.number_at(this.catalog, "synergies", index, "fire_bonus", 0.0);
+                magnet += Profiles.number_at(this.catalog, "synergies", index, "magnet_bonus", 0.0);
+                armor += Profiles.number_at(this.catalog, "synergies", index, "armor_bonus", 0.0);
+                regen += Profiles.number_at(this.catalog, "synergies", index, "regen_bonus", 0.0);
+                if Game.run_state == 1.0 { Save.set_flag("synergy_seen_" + index, true); }
+            }
             index += 1.0;
         }
         Game.synergy_count = active_count;
+        Game.synergy_damage_bonus = damage;
+        Game.synergy_fire_bonus = fire;
+        Game.synergy_magnet_bonus = magnet;
+        Game.synergy_armor_bonus = armor;
+        Game.synergy_regen_bonus = regen;
         if Game.run_state == 1.0 && active_count > this.previous_count {
             celebrate(active_count - this.previous_count);
         }
@@ -36,7 +54,7 @@ script Synergies {
             World.set_property(flare, "spin", 3.0 + ring * 2.0);
             ring += 1.0;
         }
-        Camera.impact(0.58);
+        flight_impact(0.58);
     }
 
     fn evaluate(index: f32) -> bool {

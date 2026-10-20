@@ -1,0 +1,306 @@
+/* Complete-game edition. Midnight glass, warm type and mint instrumentation.
+   All geometry remains authored UI; these rules reflow the same real controls. */
+:root {
+    --ink: #f4eee1;
+    --muted: #a5b7c6;
+    --faint: #718797;
+    --accent: #8be8ce;
+    --panel: #07121eee;
+    --panel-edge: #29414d;
+}
+sindri.ui.text { font-family: "Chakra Petch"; }
+.action { border-radius: 6px; border-width: 1px; }
+.action-primary { background: #8be8ce; border-color: #bbffe9; }
+.action-primary:hover { background: #b8f7df; }
+.action-secondary { background: #0c2934; border-color: #3c6d76; }
+.action-ghost { background: #07152088; border-color: #2b414e; }
+.action-label { letter-spacing: 0.2vh; }
+.screen-panel { border-radius: 10px; }
+.menu-key-art { width: 178vh; height: 100vh; x: 0px; y: 0px; anchor: center; }
+.title-panel { width: 164vh; max-width: 96vw; height: 90vh; y: 0px; background: #03101a22; border-width: 0px; }
+.launch-panel { width: 58vh; height: 82vh; x: 43vh; y: 0px; background: #06111de8; border-color: #29414d; border-width: 1px; border-radius: 10px; }
+.title-divider { width: 0px; height: 0px; }
+.title-edition { width: 72vh; height: 3vh; x: -34vh; y: 34vh; font-size: 1.7vh; color: #dac8a5; letter-spacing: 0.55vh; }
+.title-wordmark { width: 72vh; height: 23vh; x: -34vh; y: 18vh; font-weight: 700; font-size: 9.5vh; line-height: 9.7vh; letter-spacing: 0.55vh; text-align: start; color: #fff2d9; }
+.title-story { width: 70vh; height: 8vh; x: -34vh; y: -0.5vh; font-size: 2.6vh; line-height: 3.6vh; color: #d5d7d1; text-align: start; }
+.title-fleet { width: 70vh; height: 3vh; x: -34vh; y: -15vh; font-size: 1.7vh; }
+.title-best { width: 70vh; height: 3vh; x: -34vh; y: -20vh; font-size: 2vh; text-align: start; }
+.title-pilot-label { width: 50vh; height: 2.5vh; x: -44vh; y: -26vh; font-size: 1.5vh; }
+.title-callsign { width: 50vh; height: 6.5vh; x: -44vh; y: -32vh; }
+.title-launch-label { x: 43vh; y: 34vh; }
+.title-start { x: 43vh; y: 24vh; height: 13vh; }
+.title-start-label { font-size: 3vh; }
+.title-start-sub { font-size: 1.5vh; color: #17483f; }
+.title-rush { x: 43vh; y: 11vh; height: 7vh; }
+.title-pick { x: 43vh; y: 3vh; height: 6vh; }
+.title-difficulty { width: 50vh; height: 6vh; x: 43vh; y: -5vh; }
+.title-difficulty .port-button-label { font-size: 1.8vh; }
+.title-compact { x: 43vh; y: -13vh; height: 6vh; }
+.title-hangar, .title-archive, .title-records, .title-settings { width: 24vh; height: 6vh; }
+.title-hangar { x: 30vh; y: -23vh; }
+.title-archive { x: 56vh; y: -23vh; }
+.title-records { x: 30vh; y: -31vh; }
+.title-settings { x: 56vh; y: -31vh; }
+.title-hint { width: 70vh; height: 6vh; x: -34vh; y: -40vh; font-size: 1.6vh; line-height: 2.2vh; }
+.title-notice { width: 70vh; x: -34vh; y: -7vh; }
+.port-panel { width: 156vh; max-width: 96vw; height: 90vh; y: 0px; }
+.port-heading { width: 68vh; height: 3vh; x: -36vh; y: 39vh; }
+.port-credits { width: 68vh; height: 3vh; x: 36vh; y: 39vh; font-size: 1.8vh; color: var(--muted); text-align: end; }
+.port-tab { width: 33vh; height: 6vh; y: 29vh; }
+.port-tab-1 { x: -54vh; }
+.port-tab-2 { x: -18vh; }
+.port-tab-3 { x: 18vh; }
+.port-tab-4 { x: 54vh; }
+.port-button-label { height: 3vh; font-size: 2vh; line-height: 2.5vh; }
+.port-back { width: 48vh; height: 6vh; x: 0px; y: -38vh; }
+.port-ship-art { width: 52vh; height: 52vh; x: -39vh; y: -2vh; }
+.port-ship-kicker { width: 67vh; height: 3vh; x: 31vh; y: 17vh; font-size: 1.6vh; }
+.port-ship-name { width: 67vh; height: 7vh; x: 31vh; y: 10.5vh; font-size: 5.2vh; }
+.port-ship-copy { width: 67vh; height: 22vh; x: 31vh; y: -5.5vh; font-size: 2.2vh; line-height: 3.1vh; text-align: start; }
+.port-ship-status { width: 67vh; height: 3vh; x: 31vh; y: -20vh; font-size: 1.5vh; color: var(--muted); text-align: start; }
+.port-equip { width: 67vh; height: 7vh; x: 31vh; y: -27vh; }
+.port-ship-button { width: 17vh; height: 5vh; y: -29vh; }
+.port-ship-button .port-button-label { font-size: 1.4vh; letter-spacing: 0.05vh; }
+.port-ship-button-0 { x: -65vh; }
+.port-ship-button-1 { x: -47vh; }
+.port-ship-button-2 { x: -29vh; }
+.port-ship-button-3 { x: -11vh; }
+.archive-mode { width: 42vh; height: 6vh; y: 17vh; }
+.archive-mode-0 { x: -46vh; }
+.archive-mode-1 { x: 0px; }
+.archive-mode-2 { x: 46vh; }
+.archive-name { width: 126vh; height: 9vh; x: 0px; y: 5vh; font-size: 4vh; text-align: center; }
+.archive-copy { width: 112vh; height: 19vh; x: 0px; y: -10vh; font-size: 2.5vh; line-height: 3.5vh; text-align: center; }
+.archive-status { width: 120vh; height: 3vh; x: 0px; y: -25vh; font-size: 1.5vh; text-align: center; }
+.archive-count { width: 24vh; height: 3vh; x: 0px; y: -30vh; font-size: 2vh; text-align: center; }
+.archive-prev, .archive-next { width: 32vh; height: 5.5vh; y: -30vh; }
+.archive-prev { x: -42vh; }
+.archive-next { x: 42vh; }
+.port-career { width: 36vh; height: 47vh; x: -51vh; y: -4vh; font-size: 3.4vh; line-height: 7.2vh; text-align: start; color: var(--accent); }
+.port-record { width: 88vh; height: 7vh; x: 22vh; font-size: 1.7vh; line-height: 2.6vh; color: var(--muted); text-align: start; }
+.port-record-0 { y: 17vh; }
+.port-record-1 { y: 9vh; }
+.port-record-2 { y: 1vh; }
+.port-record-3 { y: -7vh; }
+.port-record-4 { y: -15vh; }
+.port-record-5 { y: -23vh; }
+.port-mix-label { width: 20vh; height: 3vh; x: -57vh; font-size: 2vh; color: var(--muted); text-align: start; }
+.port-mix-track { width: 42vh; height: 4vh; x: -24vh; background: #102335; border-color: #37525c; border-width: 1px; border-radius: 4px; }
+.port-mix-fill { width: 42vh; height: 4vh; x: 0px; y: 0px; }
+.port-mix-0 { y: 16vh; }
+.port-mix-1 { y: 6vh; }
+.port-mix-2 { y: -4vh; }
+.port-option { width: 58vh; height: 6vh; x: 34vh; }
+.port-option-0 { y: 16vh; }
+.port-option-1 { y: 6vh; }
+.port-option-2 { y: -4vh; }
+.port-controls { width: 136vh; height: 16vh; x: 0px; y: -20vh; font-size: 1.8vh; line-height: 2.4vh; text-align: center; color: var(--muted); }
+.port-lab { width: 30vh; height: 5vh; x: 56vh; y: -38vh; }
+.result-reward { width: 44vh; height: 7vh; x: -31vh; y: -3vh; font-size: 1.8vh; line-height: 2.6vh; color: var(--accent); text-align: start; }
+.flight-pause { width: 100px; height: 44px; x: -72px; y: 44px; anchor: bottom_right; }
+.flight-dash { width: 150px; height: 54px; x: -214px; y: 49px; anchor: bottom_right; }
+.flight-pause .port-button-label, .flight-dash .port-button-label { height: 22px; font-size: 14px; line-height: 18px; letter-spacing: 1px; }
+.flight-mission { width: 420px; height: 20px; x: 0px; y: -94px; anchor: top; font-size: 12px; line-height: 16px; color: var(--muted); text-align: center; }
+.flight-guide { width: 500px; height: 22px; x: 0px; y: 30px; anchor: bottom; font-size: 13px; line-height: 18px; color: var(--accent); text-align: center; }
+.upgrade-reroll { width: 30vh; height: 5vh; x: 0px; y: -35vh; }
+.upgrade-hint { y: -40vh; font-size: 1.5vh; }
+
+@media (orientation: portrait) {
+    .menu-key-art { x: 20vh; }
+    .title-panel { width: 94vw; height: 96vh; }
+    .launch-panel { width: 90vw; height: 59vh; x: 0px; y: -16vh; }
+    .title-edition { width: 86vw; height: 2vh; x: 0px; y: 44vh; font-size: 1.3vh; letter-spacing: 0.25vh; }
+    .title-wordmark { width: 86vw; height: 16vh; x: 0px; y: 33vh; font-size: 6.5vh; line-height: 6.7vh; letter-spacing: 0.35vh; }
+    .title-story { width: 86vw; height: 4vh; x: 0px; y: 21vh; font-size: 1.7vh; line-height: 2vh; }
+    .title-fleet { width: 86vw; height: 2.5vh; x: 0px; y: 16vh; font-size: 1.3vh; }
+    .title-best { width: 86vw; height: 2.5vh; x: 0px; y: 12.5vh; font-size: 1.4vh; }
+    .title-pilot-label { width: 76vw; height: 2vh; x: 0px; y: 7.5vh; font-size: 1.2vh; }
+    .title-callsign { width: 80vw; height: 5.8vh; x: 0px; y: 3vh; }
+    .title-launch-label { width: 0px; height: 0px; }
+    .title-start { width: 80vw; height: 8vh; x: 0px; y: -5vh; }
+    .title-start-label { font-size: 2.6vh; }
+    .title-start-sub { font-size: 1.1vh; }
+    .title-rush { width: 80vw; height: 5.8vh; x: 0px; y: -13vh; }
+    .title-pick { width: 80vw; height: 5.4vh; x: 0px; y: -19.6vh; }
+    .title-difficulty { width: 80vw; height: 5.4vh; x: 0px; y: -26vh; }
+    .title-difficulty .port-button-label { font-size: 1.5vh; }
+    .title-compact { width: 80vw; height: 5.4vh; x: 0px; y: -32.4vh; }
+    .title-hangar, .title-archive, .title-records, .title-settings { width: 18.6vw; height: 5.4vh; y: -39vh; }
+    .title-hangar { x: -30.6vw; }
+    .title-archive { x: -10.2vw; }
+    .title-records { x: 10.2vw; }
+    .title-settings { x: 30.6vw; }
+    .title-hangar .port-button-label, .title-archive .port-button-label, .title-records .port-button-label, .title-settings .port-button-label { font-size: 1.1vh; letter-spacing: 0px; }
+    .title-hint { width: 84vw; height: 3vh; x: 0px; y: -46vh; font-size: 1.2vh; line-height: 1.5vh; }
+    .title-notice { width: 84vw; x: 0px; y: 10vh; }
+    .port-panel { width: 96vw; height: 96vh; }
+    .port-heading { width: 86vw; x: 0px; y: 43vh; font-size: 1.5vh; }
+    .port-credits { width: 86vw; x: 0px; y: 39vh; font-size: 1.3vh; text-align: start; }
+    .port-tab { width: 20vw; height: 5.6vh; y: 32vh; }
+    .port-tab-1 { x: -33vw; }
+    .port-tab-2 { x: -11vw; }
+    .port-tab-3 { x: 11vw; }
+    .port-tab-4 { x: 33vw; }
+    .port-tab .port-button-label { font-size: 1.15vh; letter-spacing: 0px; }
+    .port-back { width: 82vw; height: 6vh; y: -41vh; }
+    .port-ship-art { width: 32vh; height: 32vh; x: 0px; y: 13vh; }
+    .port-ship-button { width: 20vw; height: 5.5vh; y: -5vh; }
+    .port-ship-button-0 { x: -33vw; }
+    .port-ship-button-1 { x: -11vw; }
+    .port-ship-button-2 { x: 11vw; }
+    .port-ship-button-3 { x: 33vw; }
+    .port-ship-button .port-button-label { font-size: 1.1vh; }
+    .port-ship-kicker { width: 84vw; x: 0px; y: -10.5vh; font-size: 1.2vh; }
+    .port-ship-name { width: 84vw; x: 0px; y: -15vh; height: 5vh; font-size: 3.7vh; }
+    .port-ship-copy { width: 84vw; x: 0px; y: -24vh; height: 13vh; font-size: 1.6vh; line-height: 2.1vh; }
+    .port-ship-status { width: 84vw; x: 0px; y: -32vh; height: 3vh; font-size: 1.1vh; }
+    .port-equip { width: 84vw; x: 0px; y: -35.5vh; height: 5.5vh; }
+    .port-equip .port-button-label { font-size: 1.4vh; }
+    .archive-mode { width: 27vw; height: 5.6vh; y: 23vh; }
+    .archive-mode-0 { x: -29vw; }
+    .archive-mode-1 { x: 0px; }
+    .archive-mode-2 { x: 29vw; }
+    .archive-mode .port-button-label { font-size: 1.1vh; letter-spacing: 0px; }
+    .archive-name { width: 82vw; height: 12vh; y: 11vh; font-size: 3vh; line-height: 3.8vh; }
+    .archive-copy { width: 80vw; height: 24vh; y: -10vh; font-size: 2vh; line-height: 2.9vh; }
+    .archive-status { width: 84vw; y: -27vh; font-size: 1.1vh; letter-spacing: 0.1vh; }
+    .archive-count { width: 20vw; y: -33vh; font-size: 1.6vh; }
+    .archive-prev, .archive-next { width: 29vw; height: 5.5vh; y: -33vh; }
+    .archive-prev { x: -28vw; }
+    .archive-next { x: 28vw; }
+    .port-career { width: 84vw; height: 12vh; x: 0px; y: 20vh; font-size: 1.7vh; line-height: 2.6vh; text-align: center; }
+    .port-record { width: 82vw; height: 6.4vh; x: 0px; font-size: 1.35vh; line-height: 2vh; }
+    .port-record-0 { y: 8vh; }
+    .port-record-1 { y: 0vh; }
+    .port-record-2 { y: -8vh; }
+    .port-record-3 { y: -16vh; }
+    .port-record-4 { y: -24vh; }
+    .port-record-5 { y: -32vh; }
+    .port-mix-label { width: 25vw; x: -28vw; font-size: 1.5vh; }
+    .port-mix-track { width: 49vw; height: 3.6vh; x: 13vw; }
+    .port-mix-fill { width: 49vw; height: 3.6vh; }
+    .port-mix-0 { y: 23vh; }
+    .port-mix-1 { y: 16vh; }
+    .port-mix-2 { y: 9vh; }
+    .port-option { width: 84vw; height: 5.5vh; x: 0px; }
+    .port-option-0 { y: 0px; }
+    .port-option-1 { y: -7vh; }
+    .port-option-2 { y: -14vh; }
+    .port-controls { width: 82vw; height: 15vh; y: -26vh; font-size: 1.2vh; line-height: 1.7vh; }
+    .port-lab { width: 82vw; height: 5.4vh; x: 0px; y: -34vh; }
+    .port-lab .port-button-label { width: 90%; height: 3vh; font-size: 1.5vh; }
+    .result-reward { width: 84vw; height: 5vh; x: 0px; y: 19vh; font-size: 1.4vh; line-height: 2vh; }
+    .result-breakdown { y: 14vh; }
+    .result-stats { y: -4vh; height: 32vh; }
+    .flight-pause { width: 72px; height: 44px; x: -50px; y: 39px; }
+    .flight-dash { width: 108px; height: 48px; x: -150px; y: 41px; }
+    .flight-mission { width: 88vw; height: 18px; y: -17vh; font-size: 11px; }
+    .flight-guide { width: 88vw; height: 40px; y: 100px; font-size: 11px; line-height: 16px; }
+    .upgrade-reroll { width: 70vw; height: 5.4vh; y: -42vh; }
+    .upgrade-hint { y: -46.5vh; font-size: 1.2vh; }
+}
+
+.pause-settings { width: 44vh; height: 5vh; x: -31vh; y: 9vh; }
+@media (orientation: portrait) {
+    .pause-settings { width: 84vw; height: 5.4vh; x: 0px; y: -40vh; }
+    .pause-manual-title { y: -3vh; }
+    .manual { height: 29vh; y: -20vh; }
+}
+
+.action-primary .port-button-label { color: #092a24; }
+.port-ship-button { width: 16vh; }
+.port-ship-button-0 { x: -66vh; }
+.port-ship-button-1 { x: -49vh; }
+.port-ship-button-2 { x: -32vh; }
+.port-ship-button-3 { x: -15vh; }
+@media (orientation: portrait) {
+    .title-start-sub { font-size: 1.35vh; line-height: 1.8vh; }
+    .port-tab .port-button-label { font-size: 1.35vh; }
+    .title-hangar .port-button-label, .title-archive .port-button-label, .title-records .port-button-label, .title-settings .port-button-label { font-size: 1.35vh; }
+    .port-ship-button { width: 20vw; }
+    .port-ship-button-0 { x: -33vw; }
+    .port-ship-button-1 { x: -11vw; }
+    .port-ship-button-2 { x: 11vw; }
+    .port-ship-button-3 { x: 33vw; }
+    .port-ship-button .port-button-label { font-size: 1.3vh; }
+    .archive-mode .port-button-label { font-size: 1.3vh; }
+    .port-mix-track, .port-mix-fill { height: 5.4vh; }
+    .port-controls { height: 16vh; y: -25vh; font-size: 1.45vh; line-height: 1.9vh; }
+}
+
+@media (orientation: portrait) {
+    .port-ship-status { y: -31vh; height: 2vh; font-size: 1.3vh; }
+}
+
+.port-rebind { width: 58vh; height: 6vh; x: 34vh; y: -14vh; }
+.port-controls { width: 66vh; height: 20vh; x: -34vh; y: -22vh; font-size: 1.65vh; line-height: 2.3vh; text-align: start; }
+.port-settings-back { width: 48vh; height: 6vh; x: 0px; y: -38vh; }
+@media (orientation: portrait) {
+    .port-rebind { width: 84vw; height: 5.5vh; x: 0px; y: -22vh; }
+    .port-rebind .port-button-label { font-size: 1.3vh; }
+    .port-controls { width: 84vw; height: 6vh; x: 0px; y: -31vh; font-size: 1.45vh; line-height: 2vh; text-align: center; }
+    .port-lab { width: 40vw; height: 5.5vh; x: -22vw; y: -41vh; }
+    .port-settings-back { width: 40vw; height: 5.5vh; x: 22vw; y: -41vh; }
+    .port-settings-back .port-button-label, .port-lab .port-button-label { font-size: 1.3vh; letter-spacing: 0px; }
+}
+
+.port-mix-fill { height: 1.2vh; }
+.upgrade-card-copy { height: 15vh; y: -1vh; font-size: 2vh; line-height: 2.6vh; }
+.upgrade-card-kicker { color: var(--amber); }
+@media (orientation: portrait) {
+    .port-mix-fill { height: 1.5vh; }
+    .upgrade-card-copy { height: 5.4vh; y: -2vh; font-size: 1.45vh; line-height: 1.9vh; }
+}
+
+.archive-mode { width: 33vh; }
+.archive-mode-0 { x: -54vh; }
+.archive-mode-1 { x: -18vh; }
+.archive-mode-2 { x: 18vh; }
+.archive-mode-3 { x: 54vh; }
+@media (orientation: portrait) {
+    .archive-mode { width: 20vw; }
+    .archive-mode-0 { x: -33vw; }
+    .archive-mode-1 { x: -11vw; }
+    .archive-mode-2 { x: 11vw; }
+    .archive-mode-3 { x: 33vw; }
+    .archive-mode .port-button-label { font-size: 1.2vh; }
+}
+
+.flight-guide { y: 110px; }
+@media (orientation: portrait) and (max-width: 700px) {
+    .flight-dash, .flight-pause { y: 35vw; }
+    .flight-guide { y: 48vw; }
+    .flight-dash .port-button-label { height: 36px; font-size: 12px; line-height: 16px; }
+}
+@media (orientation: portrait) and (min-width: 701px) {
+    .flight-pause { width: 100px; height: 44px; x: -72px; y: 44px; }
+    .flight-dash { width: 150px; height: 54px; x: -214px; y: 49px; }
+    .flight-guide { width: 500px; height: 22px; y: 110px; font-size: 13px; }
+    .flight-mission { width: 420px; height: 20px; y: -94px; font-size: 12px; }
+}
+
+@media (orientation: portrait) {
+    .port-back { y: -42vh; height: 5.5vh; }
+    .upgrade-grid { height: 67vh; y: -3vh; }
+    .upgrade-card { height: 15.5vh; }
+}
+
+@media (orientation: portrait) {
+    .pause-settings { max-width: 44vh; }
+}
+@media (orientation: landscape) and (max-height: 550px) {
+    .port-ship-button, .port-lab, .archive-prev, .archive-next,
+    .port-mix-track, .pause-settings, .upgrade-reroll { min-height: 20px; }
+    .port-button-label { height: 14px; font-size: 10px; line-height: 12px; letter-spacing: 0px; }
+    .port-ship-button .port-button-label { font-size: 8px; }
+    .title-difficulty .port-button-label { font-size: 9px; }
+    .title-start-sub { font-size: 8px; line-height: 10px; }
+    .title-hint { font-size: 8px; line-height: 10px; }
+    .port-heading, .port-ship-kicker { font-size: 9px; }
+    .port-credits, .port-ship-status { font-size: 8px; }
+    .port-ship-copy { height: 26vh; font-size: 10px; line-height: 11px; }
+    .archive-copy { font-size: 11px; line-height: 14px; }
+    .archive-status { font-size: 8px; }
+    .port-record { font-size: 8px; line-height: 11px; }
+    .port-controls { font-size: 8px; line-height: 10px; }
+}

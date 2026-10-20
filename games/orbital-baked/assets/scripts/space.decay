@@ -1,0 +1,22 @@
+// Three authored star layers. No random draws, tags, colliders or transient
+// entities: a fresh run's combat seed is independent of its presentation.
+script Space {
+    @export let depth: number = 0.0;
+    var clock: number = 0.0;
+    fn update(dt: number) {
+        if !Game.reduced_motion { this.clock += dt; }
+        this.transform.scale.x = visible_half_x(VIEW_SIZE) * 1.1;
+        this.transform.scale.y = visible_half_y(VIEW_SIZE) * 1.1;
+        this.transform.position.x = sin(this.clock * 0.025) * (0.03 + this.depth * 0.04);
+        this.transform.position.y = cos(this.clock * 0.018) * (0.02 + this.depth * 0.03);
+    }
+}
+
+script SpaceBackdrop {
+    fn update(dt: number) {
+        let height = visible_half_y(VIEW_SIZE) * 2.0;
+        let width = max(visible_half_x(VIEW_SIZE) * 2.0, height * 1.7778);
+        this.transform.scale.x = width;
+        this.transform.scale.y = max(height, width / 1.7778);
+    }
+}

@@ -5,9 +5,14 @@ script Player {
     @export let mine: Prefab;
     @export let muzzle_fx: Prefab;
     @export let fork_prism: Prefab;
+    @export let aura: Prefab;
+    @export let apex_aura: Prefab;
     @export let invulnerable_for: f32 = 0.9;
     @export let edge_padding: f32 = 0.28;
 
+    var aura_clock: number = 0.0;
+    var dash_time: number = 0.0;
+    var dash_cooldown: number = 0.0;
     var hurt: Entity = null;
     var target: Entity = null;
     var cooldown: f32 = 0.0;
@@ -38,11 +43,13 @@ script Player {
             reset_runtime();
         }
         if Game.run_state != 1.0 {
+            paint_hull(false);
             Physics.set_velocity(this.entity, 0.0, 0.0);
             this.transform.rotation_z = this.facing - 1.5707963;
             return;
         }
 
+        dash(dt);
         move(dt);
         tick_overdrive(dt);
         take_hits();
@@ -57,7 +64,7 @@ script Player {
             this.mercy -= dt;
             // The original blinks the hull white twenty times a second while
             // it cannot be hurt.
-            paint_hull(floor(this.mercy * 20.0) % 2.0 == 1.0);
+            paint_hull(!Game.reduced_flashes && floor(this.mercy * 20.0) % 2.0 == 1.0);
         } else {
             paint_hull(false);
         }
@@ -73,10 +80,19 @@ script Player {
             this.shape.fill.r = 0.1878;
             this.shape.fill.g = 0.8308;
             this.shape.fill.b = 1.0;
+            if Game.ship == 1.0 { this.shape.fill = Color(1.0, 0.43, 0.10); }
+            else if Game.ship == 2.0 { this.shape.fill = Color(0.1, 1.0, 0.55); }
+            else if Game.ship == 3.0 { this.shape.fill = Color(0.55, 0.24, 1.0); }
         }
+        if Game.run_state == 0.0 || Game.run_state == 4.0 { this.shape.fill.a = 0.0; this.shape.stroke.a = 0.0; }
+        else { this.shape.fill.a = 1.0; this.shape.stroke.a = 0.9; }
     }
 
     fn reset_runtime() {
+        this.aura_clock = 0.0;
+        this.dash_time = 0.0;
+        this.dash_cooldown = 0.0;
+        configure_hull();
         this.transform.position.x = 0.0;
         this.transform.position.y = 0.0;
         this.facing = 1.5707963;
@@ -99,10 +115,65 @@ script Player {
         Physics.set_velocity(this.entity, 0.0, 0.0);
     }
 
+    fn dash(dt: number) {
+        this.dash_time = max(0.0, this.dash_time - dt);
+        this.dash_cooldown = max(0.0, this.dash_cooldown - dt);
+        let requested = Action.pressed("burst") || Ui.is_pressed(World.find("FlightDash"));
+        if requested && this.dash_cooldown <= 0.0 {
+            this.dash_time = 0.18;
+            this.dash_cooldown = 3.5;
+            this.mercy = max(this.mercy, 0.28);
+            if !Game.reduced_flashes { Effects.burst(this.entity); }
+            Audio.play("audio/burst.wav", 0.28);
+        }
+        Game.dash_left = this.dash_cooldown;
+    }
+
+    fn configure_hull() {
+        this.shape.count = 6.0;
+        if Game.ship == 1.0 {
+            World.set_shape_point(0.0, 0.0, 0.43);
+            World.set_shape_point(1.0, 0.32, 0.08);
+            World.set_shape_point(2.0, 0.28, -0.28);
+            World.set_shape_point(3.0, 0.0, -0.17);
+            World.set_shape_point(4.0, -0.28, -0.28);
+            World.set_shape_point(5.0, -0.32, 0.08);
+        } else if Game.ship == 2.0 {
+            World.set_shape_point(0.0, 0.0, 0.55);
+            World.set_shape_point(1.0, 0.13, -0.03);
+            World.set_shape_point(2.0, 0.35, -0.32);
+            World.set_shape_point(3.0, 0.0, -0.16);
+            World.set_shape_point(4.0, -0.35, -0.32);
+            World.set_shape_point(5.0, -0.13, -0.03);
+        } else if Game.ship == 3.0 {
+            World.set_shape_point(0.0, 0.0, 0.46);
+            World.set_shape_point(1.0, 0.33, -0.04);
+            World.set_shape_point(2.0, 0.21, -0.29);
+            World.set_shape_point(3.0, 0.0, -0.08);
+            World.set_shape_point(4.0, -0.21, -0.29);
+            World.set_shape_point(5.0, -0.33, -0.04);
+        } else {
+            World.set_shape_point(0.0, 0.0, 0.5004);
+            World.set_shape_point(1.0, 0.2736, -0.2448);
+            World.set_shape_point(2.0, 0.09, -0.1728);
+            World.set_shape_point(3.0, 0.0, -0.3024);
+            World.set_shape_point(4.0, -0.09, -0.1728);
+            World.set_shape_point(5.0, -0.2736, -0.2448);
+        }
+    }
+
     fn move(dt: f32) {
-        let speed = Game.move_speed;
+        var speed = Game.move_speed;
+        if this.dash_time > 0.0 { speed *= 2.8; }
         var dx: f32 = Input.axis("A", "D") + Input.axis("ArrowLeft", "ArrowRight");
         var dy: f32 = Input.axis("S", "W") + Input.axis("ArrowDown", "ArrowUp");
+        if dx == 0.0 && dy == 0.0 {
+            dx = Gamepad.axis(0.0, "left_x");
+            dy = -Gamepad.axis(0.0, "left_y");
+            if abs(dx) < 0.16 { dx = 0.0; }
+            if abs(dy) < 0.16 { dy = 0.0; }
+        }
+        if dx == 0.0 && dy == 0.0 && this.dash_time > 0.0 { dx = cos(this.facing); dy = sin(this.facing); }
         if dx == 0.0 && dy == 0.0 && Stick.held && !Pointer.over_ui {
             dx = Stick.x;
             dy = -Stick.y;
@@ -148,7 +219,7 @@ script Player {
             this.mercy = 0.18;
             return;
         }
-        var damage: f32 = raw * (1.0 - Game.armor) * Game.event_hurt;
+        var damage: f32 = raw * (1.0 - Game.armor) * Game.event_hurt * Game.incoming_damage;
         if Game.special_mutual_defense > 0.0 {
             damage *= 1.0 - min(0.2, companion_count() * 0.04);
         }
@@ -165,7 +236,7 @@ script Player {
             Game.overdrive = max(4.0, Game.overdrive);
         }
         Game.shield_impact = 1.0;
-        Camera.impact(0.72);
+        flight_impact(0.72);
         Effects.burst(this.hurt);
         Audio.play("audio/hurt.wav", 0.5);
     }
@@ -260,6 +331,16 @@ script Player {
     }
 
     fn special_attacks(dt: f32) {
+        this.aura_clock -= dt;
+        if Game.player_aura_dps > 0.0 && this.aura_clock <= 0.0 {
+            this.aura_clock = 0.65;
+            var source = this.aura;
+            if Game.player_aura_radius > 3.0 { source = this.apex_aura; }
+            let pulse = World.spawn(source);
+            pulse.transform.position.x = this.transform.position.x;
+            pulse.transform.position.y = this.transform.position.y;
+            World.set_property(pulse, "damage", Game.player_aura_dps * 0.65);
+        }
         if Game.special_broadside_protocol > 0.0 {
             this.broadside -= dt;
             if this.broadside <= 0.0 {

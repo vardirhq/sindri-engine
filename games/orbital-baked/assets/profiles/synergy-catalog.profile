@@ -16,7 +16,10 @@
         "required_3": "",
         "minimum_3": 0,
         "required_4": "",
-        "minimum_4": 0
+        "minimum_4": 0,
+        "fire_bonus": 0.08,
+        "requirements_text": "REQUIRES / 2 volley rounds + homing",
+        "description": "+8% fire rate while the complete recipe is active. Stacks with modules; recalculated when your build changes."
       },
       {
         "key": "synergy_critical_conduction",
@@ -30,7 +33,10 @@
         "required_3": "",
         "minimum_3": 0,
         "required_4": "",
-        "minimum_4": 0
+        "minimum_4": 0,
+        "damage_bonus": 0.1,
+        "requirements_text": "REQUIRES / critical chance + arc payloads",
+        "description": "+10% damage while the complete recipe is active. Stacks with modules; recalculated when your build changes."
       },
       {
         "key": "synergy_mass_driver",
@@ -44,7 +50,10 @@
         "required_3": "",
         "minimum_3": 0,
         "required_4": "",
-        "minimum_4": 0
+        "minimum_4": 0,
+        "damage_bonus": 0.1,
+        "requirements_text": "REQUIRES / heavy rounds + accelerated rounds",
+        "description": "+10% damage while the complete recipe is active. Stacks with modules; recalculated when your build changes."
       },
       {
         "key": "synergy_phase_discharge",
@@ -58,7 +67,10 @@
         "required_3": "",
         "minimum_3": 0,
         "required_4": "",
-        "minimum_4": 0
+        "minimum_4": 0,
+        "damage_bonus": 0.12,
+        "requirements_text": "REQUIRES / piercing + nova payloads",
+        "description": "+12% damage while the complete recipe is active. Stacks with modules; recalculated when your build changes."
       },
       {
         "key": "synergy_prismatic_phase",
@@ -72,7 +84,10 @@
         "required_3": "",
         "minimum_3": 0,
         "required_4": "",
-        "minimum_4": 0
+        "minimum_4": 0,
+        "fire_bonus": 0.1,
+        "requirements_text": "REQUIRES / piercing + prism payloads",
+        "description": "+10% fire rate while the complete recipe is active. Stacks with modules; recalculated when your build changes."
       },
       {
         "key": "synergy_hunters_spark",
@@ -86,7 +101,10 @@
         "required_3": "",
         "minimum_3": 0,
         "required_4": "",
-        "minimum_4": 0
+        "minimum_4": 0,
+        "magnet_bonus": 0.1,
+        "requirements_text": "REQUIRES / Ember familiar + homing",
+        "description": "+10% collection range while the complete recipe is active. Stacks with modules; recalculated when your build changes."
       },
       {
         "key": "synergy_phase_escort",
@@ -100,7 +118,10 @@
         "required_3": "",
         "minimum_3": 0,
         "required_4": "",
-        "minimum_4": 0
+        "minimum_4": 0,
+        "armor_bonus": 0.03,
+        "requirements_text": "REQUIRES / Gundrone + piercing",
+        "description": "+3% armor while the complete recipe is active. Stacks with modules; recalculated when your build changes."
       },
       {
         "key": "synergy_heavy_orbit",
@@ -114,7 +135,10 @@
         "required_3": "",
         "minimum_3": 0,
         "required_4": "",
-        "minimum_4": 0
+        "minimum_4": 0,
+        "damage_bonus": 0.08,
+        "requirements_text": "REQUIRES / Razor orbital + heavy rounds",
+        "description": "+8% damage while the complete recipe is active. Stacks with modules; recalculated when your build changes."
       },
       {
         "key": "synergy_void_echo",
@@ -128,7 +152,10 @@
         "required_3": "",
         "minimum_3": 0,
         "required_4": "",
-        "minimum_4": 0
+        "minimum_4": 0,
+        "regen_bonus": 0.015,
+        "requirements_text": "REQUIRES / Void Wisp + nova payloads",
+        "description": "+0.015 hull regeneration per second while the complete recipe is active. Stacks with modules; recalculated when your build changes."
       },
       {
         "key": "synergy_static_aegis",
@@ -142,7 +169,10 @@
         "required_3": "",
         "minimum_3": 0,
         "required_4": "",
-        "minimum_4": 0
+        "minimum_4": 0,
+        "armor_bonus": 0.04,
+        "requirements_text": "REQUIRES / Aegis halo + arc payloads",
+        "description": "+4% armor while the complete recipe is active. Stacks with modules; recalculated when your build changes."
       },
       {
         "key": "synergy_seeking_storm",
@@ -156,7 +186,10 @@
         "required_3": "transform_storm",
         "minimum_3": 1,
         "required_4": "",
-        "minimum_4": 0
+        "minimum_4": 0,
+        "fire_bonus": 0.15,
+        "requirements_text": "REQUIRES / 2 volley rounds + homing + arc payloads + Storm Lens",
+        "description": "+15% fire rate while the complete recipe is active. Stacks with modules; recalculated when your build changes."
       },
       {
         "key": "synergy_critical_mass",
@@ -170,7 +203,10 @@
         "required_3": "transform_critical_mass",
         "minimum_3": 1,
         "required_4": "",
-        "minimum_4": 0
+        "minimum_4": 0,
+        "damage_bonus": 0.2,
+        "requirements_text": "REQUIRES / heavy rounds + critical chance + nova payloads + Critical Mass Cell",
+        "description": "+20% damage while the complete recipe is active. Stacks with modules; recalculated when your build changes."
       },
       {
         "key": "synergy_rail_prism",
@@ -184,7 +220,10 @@
         "required_3": "transform_rail_prism",
         "minimum_3": 1,
         "required_4": "",
-        "minimum_4": 0
+        "minimum_4": 0,
+        "damage_bonus": 0.15,
+        "requirements_text": "REQUIRES / accelerated rounds + piercing + prism payloads + Prism Rail",
+        "description": "+15% damage while the complete recipe is active. Stacks with modules; recalculated when your build changes."
       },
       {
         "key": "synergy_recursive_violence",
@@ -198,7 +237,10 @@
         "required_3": "arc",
         "minimum_3": 1,
         "required_4": "transform_recursive",
-        "minimum_4": 1
+        "minimum_4": 1,
+        "fire_bonus": 0.15,
+        "requirements_text": "REQUIRES / 2 volley rounds + piercing + homing + arc payloads + Recursive Bus",
+        "description": "+15% fire rate while the complete recipe is active. Stacks with modules; recalculated when your build changes."
       },
       {
         "key": "synergy_event_horizon",
@@ -212,7 +254,10 @@
         "required_3": "pierce",
         "minimum_3": 1,
         "required_4": "transform_horizon",
-        "minimum_4": 1
+        "minimum_4": 1,
+        "magnet_bonus": 0.25,
+        "requirements_text": "REQUIRES / heavy rounds + nova payloads + gravity mines + piercing + Event Horizon Chip",
+        "description": "+25% collection range while the complete recipe is active. Stacks with modules; recalculated when your build changes."
       },
       {
         "key": "synergy_thunder_choir",
@@ -226,7 +271,10 @@
         "required_3": "transform_thunder_choir",
         "minimum_3": 1,
         "required_4": "",
-        "minimum_4": 0
+        "minimum_4": 0,
+        "damage_bonus": 0.12,
+        "requirements_text": "REQUIRES / arc payloads + Ember familiar + Void Wisp + Choir Engine",
+        "description": "+12% damage while the complete recipe is active. Stacks with modules; recalculated when your build changes."
       },
       {
         "key": "synergy_prismatic_razor",
@@ -240,7 +288,10 @@
         "required_3": "transform_razor_prism",
         "minimum_3": 1,
         "required_4": "",
-        "minimum_4": 0
+        "minimum_4": 0,
+        "fire_bonus": 0.12,
+        "requirements_text": "REQUIRES / Razor orbital + prism payloads + accelerated rounds + Orbital Prism",
+        "description": "+12% fire rate while the complete recipe is active. Stacks with modules; recalculated when your build changes."
       },
       {
         "key": "synergy_guardian_swarm",
@@ -254,7 +305,10 @@
         "required_3": "transform_guardian_swarm",
         "minimum_3": 1,
         "required_4": "",
-        "minimum_4": 0
+        "minimum_4": 0,
+        "armor_bonus": 0.08,
+        "requirements_text": "REQUIRES / Aegis halo + Gundrone + 2 volley rounds + Guardian Network",
+        "description": "+8% armor while the complete recipe is active. Stacks with modules; recalculated when your build changes."
       },
       {
         "key": "synergy_singularity_court",
@@ -268,7 +322,10 @@
         "required_3": "bullet_size",
         "minimum_3": 1.001,
         "required_4": "transform_singularity_court",
-        "minimum_4": 1
+        "minimum_4": 1,
+        "regen_bonus": 0.035,
+        "requirements_text": "REQUIRES / Void Wisp + gravity mines + nova payloads + heavy rounds + Moon Court",
+        "description": "+0.035 hull regeneration per second while the complete recipe is active. Stacks with modules; recalculated when your build changes."
       }
     ]
   }

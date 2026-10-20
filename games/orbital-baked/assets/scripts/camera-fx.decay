@@ -39,7 +39,7 @@ script CameraFx {
     }
 
     fn update(dt: f32) {
-        this.ambience += dt;
+        if !Game.reduced_motion { this.ambience += dt; }
         choose_sector_colours();
         let ease = min(1.0, dt * 1.5);
         this.bg_r += (this.want_bg_r - this.bg_r) * ease;

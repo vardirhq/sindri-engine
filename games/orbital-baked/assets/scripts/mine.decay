@@ -57,7 +57,7 @@ script Mine {
         }
         World.set_property(wave, "damage", this.damage);
         Effects.burst(this.entity);
-        Camera.impact(0.42);
+        flight_impact(0.42);
         World.despawn(this.entity);
     }
 }

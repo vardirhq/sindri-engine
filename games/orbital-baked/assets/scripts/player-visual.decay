@@ -25,7 +25,7 @@ script PlayerVisual {
         if player == null || !World.exists(player) { return; }
 
         let state = Game.run_state;
-        if state == 1.0 { this.clock += dt; }
+        if state == 1.0 && !Game.reduced_motion { this.clock += dt; }
         this.transform.position.x = player.transform.position.x;
         this.transform.position.y = player.transform.position.y;
 
@@ -93,6 +93,7 @@ script PlayerVisual {
     // The original's accent line down the hull: a V from the wing roots to
     // just behind the nose, turning with the ship.
     fn update_chevron() {
+        this.shape.stroke.a = 0.85;
         this.transform.rotation_z = Game.player_facing - 1.5707963;
     }
 

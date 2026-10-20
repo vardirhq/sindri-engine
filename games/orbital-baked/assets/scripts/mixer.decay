@@ -20,12 +20,18 @@ script Mixer {
         restore(this.master, this.master_fill, "master");
         restore(this.music, this.music_fill, "music");
         restore(this.effects, this.effects_fill, "effects");
+        restore(World.find("PortMaster"), World.find("PortMasterFill"), "master");
+        restore(World.find("PortMusic"), World.find("PortMusicFill"), "music");
+        restore(World.find("PortEffects"), World.find("PortEffectsFill"), "effects");
     }
 
     fn update(dt: f32) {
         follow(this.master, this.master_fill, "master");
         follow(this.music, this.music_fill, "music");
         follow(this.effects, this.effects_fill, "effects");
+        follow(World.find("PortMaster"), World.find("PortMasterFill"), "master");
+        follow(World.find("PortMusic"), World.find("PortMusicFill"), "music");
+        follow(World.find("PortEffects"), World.find("PortEffectsFill"), "effects");
     }
 
     // The saved volume, onto the bus and the slider that moves it.
@@ -46,6 +52,13 @@ script Mixer {
         let volume = Ui.slider_value(slider);
         Audio.set_volume(bus, volume);
         Save.set_number("volume_" + bus, volume);
+        var name: String = "Master";
+        if bus == "music" { name = "Music"; }
+        if bus == "effects" { name = "Effects"; }
+        for prefix in ["Pause", "Port"] {
+            Ui.set_slider_value(World.find(prefix + name), volume);
+            Ui.set_fill(World.find(prefix + name + "Fill"), volume);
+        }
         Ui.set_fill(fill, volume);
         Audio.play("audio/click.wav", 0.3);
     }

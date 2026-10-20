@@ -56,7 +56,8 @@ fn clear_the_boss(run: &mut Run) {
         run.world.despawn_recursive(boss).expect("boss despawns");
     }
     run.set_board("boss_hp", 0.0);
-    step(run);
+    let notes = run.step(STEP);
+    assert!(notes.is_empty(), "{notes:#?}");
 }
 
 /// The whole point: press it and the roster arrives, in order.
@@ -167,4 +168,36 @@ fn start_asks_for_an_ordinary_run_and_rush_asks_for_a_rush() {
     other.click("TitleRush");
     step(&mut other);
     assert_eq!(other.board("mode"), 1.0, "BOSS RUSH asks for a rush");
+}
+
+/// The twelfth defeated boss is the goal, including when the roster wraps.
+#[test]
+fn twelve_bosses_complete_the_gauntlet_and_retry_keeps_the_mode() {
+    let mut run = at_the_title();
+    run.click("TitlePick");
+    step(&mut run);
+    run.click("TitlePick4");
+    step(&mut run);
+    run.click("TitleRush");
+    for index in 0..12_u16 {
+        run.set_board("hp", 100_000.0);
+        assert!((await_boss(&mut run) - f32::from((index + 4) % 12)).abs() < 1.0e-5);
+        clear_the_boss(&mut run);
+    }
+    for _ in 0..4 {
+        step(&mut run);
+    }
+    assert!((run.board("run_state") - 4.0).abs() < 1.0e-5);
+    assert!((run.board("victory") - 1.0).abs() < 1.0e-5);
+    assert!(
+        run.session
+            .saves()
+            .text("record_0", "")
+            .contains("GAUNTLET")
+    );
+    run.click("ResultAgain");
+    step(&mut run);
+    assert!((run.board("mode") - 1.0).abs() < 1.0e-5);
+    assert!(run.board("bosses_defeated").abs() < 1.0e-5);
+    assert!((await_boss(&mut run) - 4.0).abs() < 1.0e-5);
 }

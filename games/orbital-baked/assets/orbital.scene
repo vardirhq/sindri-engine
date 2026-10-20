@@ -1868,11 +1868,10 @@
         ]
       },
       "components": {
-        "sindri.audio.source": {
-          "autoplay": true,
-          "clip": "audio/theme.wav",
-          "looping": true,
-          "volume": 0.3
+        "sindri.script": {
+          "source": "scripts/soundscape.decay",
+          "script": "Soundscape",
+          "properties": {}
         }
       }
     },
@@ -4486,7 +4485,7 @@
           "layer": 340,
           "line_align": "left",
           "line_height": 0.0345,
-          "text": "Tap the title logo",
+          "text": "Settings > Combat Lab",
           "wrap": "word"
         },
         "sindri.ui.box": {
@@ -4748,7 +4747,9 @@
             "fork_prism": "prefabs/fork-prism.prefab",
             "invulnerable_for": 0.22,
             "mine": "prefabs/mine.prefab",
-            "muzzle_fx": "prefabs/spectacle.prefab"
+            "muzzle_fx": "prefabs/spectacle.prefab",
+            "aura": "prefabs/black-sun-pulse.prefab",
+            "apex_aura": "prefabs/annihilation-pulse.prefab"
           },
           "script": "Player",
           "source": "scripts/player.decay"
@@ -5601,7 +5602,7 @@
         },
         "sindri.script": {
           "properties": {
-            "action": 0.0
+            "action": 6
           },
           "script": "Button",
           "source": "scripts/button.decay"
@@ -5729,7 +5730,7 @@
         },
         "sindri.script": {
           "properties": {
-            "action": 4.0
+            "action": 1
           },
           "script": "Button",
           "source": "scripts/button.decay"
@@ -5807,7 +5808,7 @@
           "letter_spacing": 0.007,
           "line_align": "center",
           "line_height": 0.064,
-          "text": "BOSS RUSH",
+          "text": "RETURN TO FLIGHT DECK",
           "wrap": "word"
         },
         "sindri.ui.box": {
@@ -6870,7 +6871,7 @@
     {
       "id": "title-bg",
       "name": "TitleBack",
-      "parent": "title",
+      "parent": "title-main",
       "transform_3d": {
         "position": [
           0.0,
@@ -6892,7 +6893,6 @@
       "components": {
         "weave.style": {
           "classes": [
-            "screen-panel",
             "title-panel"
           ]
         },
@@ -6944,50 +6944,9 @@
       }
     },
     {
-      "id": "title-name",
-      "name": "Logo",
-      "parent": "title",
-      "transform_3d": {
-        "position": [
-          -0.62,
-          0.44,
-          0.0
-        ],
-        "rotation": [
-          0.0,
-          0.0,
-          0.0,
-          1.0
-        ],
-        "scale": [
-          1.0,
-          0.5,
-          1.0
-        ]
-      },
-      "components": {
-        "weave.style": {
-          "classes": [
-            "title-logo"
-          ]
-        },
-        "sindri.ui.image": {
-          "anchor": "center",
-          "layer": 140,
-          "texture": "textures/logo.png",
-          "tint": [
-            1.0,
-            1.0,
-            1.0,
-            1.0
-          ]
-        }
-      }
-    },
-    {
       "id": "title-best",
       "name": "TitleBest",
-      "parent": "title",
+      "parent": "title-main",
       "transform_3d": {
         "position": [
           -0.62,
@@ -7046,7 +7005,7 @@
     {
       "id": "title-pilot-label",
       "name": "TitlePilotLabel",
-      "parent": "title",
+      "parent": "title-main",
       "transform_3d": {
         "position": [
           -0.62,
@@ -7106,7 +7065,7 @@
     {
       "id": "title-callsign",
       "name": "TitleCallsign",
-      "parent": "title",
+      "parent": "title-main",
       "transform_3d": {
         "position": [
           -0.62,
@@ -7220,7 +7179,7 @@
     {
       "id": "title-divider",
       "name": "TitleDivider",
-      "parent": "title",
+      "parent": "title-main",
       "transform_3d": {
         "position": [
           0.0,
@@ -7269,7 +7228,7 @@
     {
       "id": "title-launch-label",
       "name": "TitleLaunchLabel",
-      "parent": "title",
+      "parent": "title-main",
       "transform_3d": {
         "position": [
           0.62,
@@ -7329,7 +7288,7 @@
     {
       "id": "title-start",
       "name": "TitleStart",
-      "parent": "title",
+      "parent": "title-main",
       "transform_3d": {
         "position": [
           0.62,
@@ -7503,7 +7462,7 @@
           "layer": 140,
           "line_align": "center",
           "line_height": 0.044,
-          "text": "Endless survival across five sectors",
+          "text": "10 minutes. Five sectors. One last chance.",
           "wrap": "word"
         },
         "sindri.ui.box": {
@@ -7517,7 +7476,7 @@
     {
       "id": "title-rush",
       "name": "TitleRush",
-      "parent": "title",
+      "parent": "title-main",
       "transform_3d": {
         "position": [
           0.62,
@@ -7631,7 +7590,7 @@
           "letter_spacing": 0.007,
           "line_align": "center",
           "line_height": 0.064,
-          "text": "BOSS RUSH",
+          "text": "BOSS RUSH / FIELD KIT",
           "wrap": "word"
         },
         "sindri.ui.box": {
@@ -7645,7 +7604,7 @@
     {
       "id": "title-pick",
       "name": "TitlePick",
-      "parent": "title",
+      "parent": "title-main",
       "transform_3d": {
         "position": [
           0.62,
@@ -9249,7 +9208,7 @@
     {
       "id": "title-compact",
       "name": "TitleCompact",
-      "parent": "title",
+      "parent": "title-main",
       "transform_3d": {
         "position": [
           0.62,
@@ -9478,7 +9437,7 @@
     {
       "id": "title-hint",
       "name": "TitleHint",
-      "parent": "title",
+      "parent": "title-main",
       "transform_3d": {
         "position": [
           0.62,
@@ -9550,7 +9509,7 @@
     {
       "id": "title-notice",
       "name": "TitleNotice",
-      "parent": "title",
+      "parent": "title-main",
       "transform_3d": {
         "position": [
           -0.62,
@@ -12240,6 +12199,9256 @@
           "layer": 5
         }
       }
+    },
+    {
+      "id": "title-main",
+      "name": "TitleMain",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {},
+      "parent": "title"
+    },
+    {
+      "id": "menu-key-art",
+      "name": "MenuKeyArt",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "menu-key-art"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/orbital-key-art.png",
+          "tint": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "anchor": "center",
+          "layer": 80
+        }
+      },
+      "parent": "title"
+    },
+    {
+      "id": "title-launch-back",
+      "name": "TitleLaunchBack",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "launch-panel"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.002,
+            0.006,
+            0.014,
+            1
+          ],
+          "stroke": [
+            0.03,
+            0.08,
+            0.1,
+            1
+          ],
+          "stroke_width": 0.002,
+          "layer": 100,
+          "anchor": "center"
+        }
+      },
+      "parent": "title-main"
+    },
+    {
+      "id": "title-wordmark",
+      "name": "TitleWordmark",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "title-wordmark"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "ORBITAL\nLAST STAND",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.035,
+          "line_height": 0.048,
+          "anchor": "center",
+          "color": [
+            0.85,
+            0.9,
+            1,
+            1
+          ],
+          "bounds": [
+            1.0,
+            0.12
+          ],
+          "wrap": "word",
+          "layer": 120
+        },
+        "sindri.ui.box": {
+          "fit_content": [
+            false,
+            false
+          ]
+        }
+      },
+      "parent": "title-main"
+    },
+    {
+      "id": "title-edition",
+      "name": "TitleEdition",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "title-edition",
+            "kicker"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "THE EVACUATION CORRIDOR",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.035,
+          "line_height": 0.048,
+          "anchor": "center",
+          "color": [
+            0.85,
+            0.9,
+            1,
+            1
+          ],
+          "bounds": [
+            1.0,
+            0.12
+          ],
+          "wrap": "word",
+          "layer": 120
+        },
+        "sindri.ui.box": {
+          "fit_content": [
+            false,
+            false
+          ]
+        }
+      },
+      "parent": "title-main"
+    },
+    {
+      "id": "title-story",
+      "name": "TitleStory",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "title-story"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "The fleet is gone.\nSomeone has to hold the line.",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.035,
+          "line_height": 0.048,
+          "anchor": "center",
+          "color": [
+            0.85,
+            0.9,
+            1,
+            1
+          ],
+          "bounds": [
+            1.0,
+            0.12
+          ],
+          "wrap": "word",
+          "layer": 120
+        },
+        "sindri.ui.box": {
+          "fit_content": [
+            false,
+            false
+          ]
+        }
+      },
+      "parent": "title-main"
+    },
+    {
+      "id": "title-fleet",
+      "name": "TitleFleetText",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "title-fleet",
+            "kicker"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "FLIGHT DECK / STRIDER",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.035,
+          "line_height": 0.048,
+          "anchor": "center",
+          "color": [
+            0.85,
+            0.9,
+            1,
+            1
+          ],
+          "bounds": [
+            1.0,
+            0.12
+          ],
+          "wrap": "word",
+          "layer": 120
+        },
+        "sindri.ui.box": {
+          "fit_content": [
+            false,
+            false
+          ]
+        }
+      },
+      "parent": "title-main"
+    },
+    {
+      "id": "title-difficulty",
+      "name": "TitleDifficulty",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "action",
+            "action-ghost",
+            "title-difficulty"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.002,
+            0.006,
+            0.014,
+            1
+          ],
+          "stroke": [
+            0.03,
+            0.08,
+            0.1,
+            1
+          ],
+          "stroke_width": 0.002,
+          "layer": 110,
+          "anchor": "center"
+        },
+        "sindri.ui.button": {
+          "label": "DIFFICULTY / STANDARD"
+        },
+        "sindri.script": {
+          "source": "scripts/port.decay",
+          "script": "PortAction",
+          "properties": {
+            "action": 3,
+            "value": 0
+          }
+        }
+      },
+      "parent": "title-main"
+    },
+    {
+      "id": "title-difficulty-text",
+      "name": "TitleDifficultyText",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "action-label",
+            "port-button-label"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "DIFFICULTY / STANDARD",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.035,
+          "line_height": 0.048,
+          "anchor": "center",
+          "color": [
+            0.85,
+            0.9,
+            1,
+            1
+          ],
+          "bounds": [
+            1.0,
+            0.12
+          ],
+          "wrap": "word",
+          "layer": 115
+        },
+        "sindri.ui.box": {
+          "fit_content": [
+            false,
+            false
+          ]
+        }
+      },
+      "parent": "title-difficulty"
+    },
+    {
+      "id": "title-hangar",
+      "name": "TitleHangar",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "action",
+            "action-ghost",
+            "title-hangar"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.002,
+            0.006,
+            0.014,
+            1
+          ],
+          "stroke": [
+            0.03,
+            0.08,
+            0.1,
+            1
+          ],
+          "stroke_width": 0.002,
+          "layer": 110,
+          "anchor": "center"
+        },
+        "sindri.ui.button": {
+          "label": "HANGAR"
+        },
+        "sindri.script": {
+          "source": "scripts/port.decay",
+          "script": "PortAction",
+          "properties": {
+            "action": 0,
+            "value": 1
+          }
+        }
+      },
+      "parent": "title-main"
+    },
+    {
+      "id": "title-hangar-text",
+      "name": "TitleHangarText",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "action-label",
+            "port-button-label"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "HANGAR",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.035,
+          "line_height": 0.048,
+          "anchor": "center",
+          "color": [
+            0.85,
+            0.9,
+            1,
+            1
+          ],
+          "bounds": [
+            1.0,
+            0.12
+          ],
+          "wrap": "word",
+          "layer": 115
+        },
+        "sindri.ui.box": {
+          "fit_content": [
+            false,
+            false
+          ]
+        }
+      },
+      "parent": "title-hangar"
+    },
+    {
+      "id": "title-archive",
+      "name": "TitleArchive",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "action",
+            "action-ghost",
+            "title-archive"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.002,
+            0.006,
+            0.014,
+            1
+          ],
+          "stroke": [
+            0.03,
+            0.08,
+            0.1,
+            1
+          ],
+          "stroke_width": 0.002,
+          "layer": 110,
+          "anchor": "center"
+        },
+        "sindri.ui.button": {
+          "label": "ARCHIVE"
+        },
+        "sindri.script": {
+          "source": "scripts/port.decay",
+          "script": "PortAction",
+          "properties": {
+            "action": 0,
+            "value": 2
+          }
+        }
+      },
+      "parent": "title-main"
+    },
+    {
+      "id": "title-archive-text",
+      "name": "TitleArchiveText",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "action-label",
+            "port-button-label"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "ARCHIVE",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.035,
+          "line_height": 0.048,
+          "anchor": "center",
+          "color": [
+            0.85,
+            0.9,
+            1,
+            1
+          ],
+          "bounds": [
+            1.0,
+            0.12
+          ],
+          "wrap": "word",
+          "layer": 115
+        },
+        "sindri.ui.box": {
+          "fit_content": [
+            false,
+            false
+          ]
+        }
+      },
+      "parent": "title-archive"
+    },
+    {
+      "id": "title-records",
+      "name": "TitleRecords",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "action",
+            "action-ghost",
+            "title-records"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.002,
+            0.006,
+            0.014,
+            1
+          ],
+          "stroke": [
+            0.03,
+            0.08,
+            0.1,
+            1
+          ],
+          "stroke_width": 0.002,
+          "layer": 110,
+          "anchor": "center"
+        },
+        "sindri.ui.button": {
+          "label": "FLIGHT LOG"
+        },
+        "sindri.script": {
+          "source": "scripts/port.decay",
+          "script": "PortAction",
+          "properties": {
+            "action": 0,
+            "value": 3
+          }
+        }
+      },
+      "parent": "title-main"
+    },
+    {
+      "id": "title-records-text",
+      "name": "TitleRecordsText",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "action-label",
+            "port-button-label"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "FLIGHT LOG",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.035,
+          "line_height": 0.048,
+          "anchor": "center",
+          "color": [
+            0.85,
+            0.9,
+            1,
+            1
+          ],
+          "bounds": [
+            1.0,
+            0.12
+          ],
+          "wrap": "word",
+          "layer": 115
+        },
+        "sindri.ui.box": {
+          "fit_content": [
+            false,
+            false
+          ]
+        }
+      },
+      "parent": "title-records"
+    },
+    {
+      "id": "title-settings",
+      "name": "TitleSettings",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "action",
+            "action-ghost",
+            "title-settings"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.002,
+            0.006,
+            0.014,
+            1
+          ],
+          "stroke": [
+            0.03,
+            0.08,
+            0.1,
+            1
+          ],
+          "stroke_width": 0.002,
+          "layer": 110,
+          "anchor": "center"
+        },
+        "sindri.ui.button": {
+          "label": "SETTINGS"
+        },
+        "sindri.script": {
+          "source": "scripts/port.decay",
+          "script": "PortAction",
+          "properties": {
+            "action": 0,
+            "value": 4
+          }
+        }
+      },
+      "parent": "title-main"
+    },
+    {
+      "id": "title-settings-text",
+      "name": "TitleSettingsText",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "action-label",
+            "port-button-label"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "SETTINGS",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.035,
+          "line_height": 0.048,
+          "anchor": "center",
+          "color": [
+            0.85,
+            0.9,
+            1,
+            1
+          ],
+          "bounds": [
+            1.0,
+            0.12
+          ],
+          "wrap": "word",
+          "layer": 115
+        },
+        "sindri.ui.box": {
+          "fit_content": [
+            false,
+            false
+          ]
+        }
+      },
+      "parent": "title-settings"
+    },
+    {
+      "id": "port-controller",
+      "name": "PortController",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.script": {
+          "source": "scripts/port.decay",
+          "script": "Port",
+          "properties": {
+            "modules": "profiles/module-catalog.profile",
+            "threats": "profiles/flight-manual.profile",
+            "synergies": "profiles/synergy-catalog.profile"
+          }
+        }
+      }
+    },
+    {
+      "id": "port",
+      "name": "PortScreen",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {},
+      "disabled": true
+    },
+    {
+      "id": "port-panel",
+      "name": "PortPanel",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "screen-panel",
+            "port-panel"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.002,
+            0.006,
+            0.014,
+            1
+          ],
+          "stroke": [
+            0.03,
+            0.08,
+            0.1,
+            1
+          ],
+          "stroke_width": 0.002,
+          "layer": 500,
+          "anchor": "center"
+        }
+      },
+      "parent": "port"
+    },
+    {
+      "id": "port-heading",
+      "name": "PortHeading",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "port-heading",
+            "kicker"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "FLIGHT OPERATIONS",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.035,
+          "line_height": 0.048,
+          "anchor": "center",
+          "color": [
+            0.85,
+            0.9,
+            1,
+            1
+          ],
+          "bounds": [
+            1.0,
+            0.12
+          ],
+          "wrap": "word",
+          "layer": 540
+        },
+        "sindri.ui.box": {
+          "fit_content": [
+            false,
+            false
+          ]
+        }
+      },
+      "parent": "port"
+    },
+    {
+      "id": "port-credits",
+      "name": "PortCredits",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "port-credits"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "0 SALVAGE",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.035,
+          "line_height": 0.048,
+          "anchor": "center",
+          "color": [
+            0.85,
+            0.9,
+            1,
+            1
+          ],
+          "bounds": [
+            1.0,
+            0.12
+          ],
+          "wrap": "word",
+          "layer": 540
+        },
+        "sindri.ui.box": {
+          "fit_content": [
+            false,
+            false
+          ]
+        }
+      },
+      "parent": "port"
+    },
+    {
+      "id": "port-back",
+      "name": "PortBack",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "action",
+            "action-ghost",
+            "port-back"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.002,
+            0.006,
+            0.014,
+            1
+          ],
+          "stroke": [
+            0.03,
+            0.08,
+            0.1,
+            1
+          ],
+          "stroke_width": 0.002,
+          "layer": 520,
+          "anchor": "center"
+        },
+        "sindri.ui.button": {
+          "label": "BACK TO FLIGHT DECK"
+        },
+        "sindri.script": {
+          "source": "scripts/port.decay",
+          "script": "PortAction",
+          "properties": {
+            "action": 0,
+            "value": 0
+          }
+        }
+      },
+      "parent": "port"
+    },
+    {
+      "id": "port-back-text",
+      "name": "PortBackText",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "action-label",
+            "port-button-label"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "BACK TO FLIGHT DECK",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.035,
+          "line_height": 0.048,
+          "anchor": "center",
+          "color": [
+            0.85,
+            0.9,
+            1,
+            1
+          ],
+          "bounds": [
+            1.0,
+            0.12
+          ],
+          "wrap": "word",
+          "layer": 525
+        },
+        "sindri.ui.box": {
+          "fit_content": [
+            false,
+            false
+          ]
+        }
+      },
+      "parent": "port-back"
+    },
+    {
+      "id": "port-tab-1",
+      "name": "PortTab1",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "action",
+            "action-ghost",
+            "port-tab",
+            "port-tab-1"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.002,
+            0.006,
+            0.014,
+            1
+          ],
+          "stroke": [
+            0.03,
+            0.08,
+            0.1,
+            1
+          ],
+          "stroke_width": 0.002,
+          "layer": 520,
+          "anchor": "center"
+        },
+        "sindri.ui.button": {
+          "label": "HANGAR"
+        },
+        "sindri.script": {
+          "source": "scripts/port.decay",
+          "script": "PortAction",
+          "properties": {
+            "action": 0,
+            "value": 1
+          }
+        }
+      },
+      "parent": "port"
+    },
+    {
+      "id": "port-tab-1-text",
+      "name": "PortTab1Text",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "action-label",
+            "port-button-label"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "HANGAR",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.035,
+          "line_height": 0.048,
+          "anchor": "center",
+          "color": [
+            0.85,
+            0.9,
+            1,
+            1
+          ],
+          "bounds": [
+            1.0,
+            0.12
+          ],
+          "wrap": "word",
+          "layer": 525
+        },
+        "sindri.ui.box": {
+          "fit_content": [
+            false,
+            false
+          ]
+        }
+      },
+      "parent": "port-tab-1"
+    },
+    {
+      "id": "port-page-1",
+      "name": "PortPage1",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {},
+      "parent": "port",
+      "disabled": true
+    },
+    {
+      "id": "port-tab-2",
+      "name": "PortTab2",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "action",
+            "action-ghost",
+            "port-tab",
+            "port-tab-2"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.002,
+            0.006,
+            0.014,
+            1
+          ],
+          "stroke": [
+            0.03,
+            0.08,
+            0.1,
+            1
+          ],
+          "stroke_width": 0.002,
+          "layer": 520,
+          "anchor": "center"
+        },
+        "sindri.ui.button": {
+          "label": "ARCHIVE"
+        },
+        "sindri.script": {
+          "source": "scripts/port.decay",
+          "script": "PortAction",
+          "properties": {
+            "action": 0,
+            "value": 2
+          }
+        }
+      },
+      "parent": "port"
+    },
+    {
+      "id": "port-tab-2-text",
+      "name": "PortTab2Text",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "action-label",
+            "port-button-label"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "ARCHIVE",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.035,
+          "line_height": 0.048,
+          "anchor": "center",
+          "color": [
+            0.85,
+            0.9,
+            1,
+            1
+          ],
+          "bounds": [
+            1.0,
+            0.12
+          ],
+          "wrap": "word",
+          "layer": 525
+        },
+        "sindri.ui.box": {
+          "fit_content": [
+            false,
+            false
+          ]
+        }
+      },
+      "parent": "port-tab-2"
+    },
+    {
+      "id": "port-page-2",
+      "name": "PortPage2",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {},
+      "parent": "port",
+      "disabled": true
+    },
+    {
+      "id": "port-tab-3",
+      "name": "PortTab3",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "action",
+            "action-ghost",
+            "port-tab",
+            "port-tab-3"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.002,
+            0.006,
+            0.014,
+            1
+          ],
+          "stroke": [
+            0.03,
+            0.08,
+            0.1,
+            1
+          ],
+          "stroke_width": 0.002,
+          "layer": 520,
+          "anchor": "center"
+        },
+        "sindri.ui.button": {
+          "label": "FLIGHT LOG"
+        },
+        "sindri.script": {
+          "source": "scripts/port.decay",
+          "script": "PortAction",
+          "properties": {
+            "action": 0,
+            "value": 3
+          }
+        }
+      },
+      "parent": "port"
+    },
+    {
+      "id": "port-tab-3-text",
+      "name": "PortTab3Text",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "action-label",
+            "port-button-label"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "FLIGHT LOG",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.035,
+          "line_height": 0.048,
+          "anchor": "center",
+          "color": [
+            0.85,
+            0.9,
+            1,
+            1
+          ],
+          "bounds": [
+            1.0,
+            0.12
+          ],
+          "wrap": "word",
+          "layer": 525
+        },
+        "sindri.ui.box": {
+          "fit_content": [
+            false,
+            false
+          ]
+        }
+      },
+      "parent": "port-tab-3"
+    },
+    {
+      "id": "port-page-3",
+      "name": "PortPage3",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {},
+      "parent": "port",
+      "disabled": true
+    },
+    {
+      "id": "port-tab-4",
+      "name": "PortTab4",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "action",
+            "action-ghost",
+            "port-tab",
+            "port-tab-4"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.002,
+            0.006,
+            0.014,
+            1
+          ],
+          "stroke": [
+            0.03,
+            0.08,
+            0.1,
+            1
+          ],
+          "stroke_width": 0.002,
+          "layer": 520,
+          "anchor": "center"
+        },
+        "sindri.ui.button": {
+          "label": "SETTINGS"
+        },
+        "sindri.script": {
+          "source": "scripts/port.decay",
+          "script": "PortAction",
+          "properties": {
+            "action": 0,
+            "value": 4
+          }
+        }
+      },
+      "parent": "port"
+    },
+    {
+      "id": "port-tab-4-text",
+      "name": "PortTab4Text",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "action-label",
+            "port-button-label"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "SETTINGS",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.035,
+          "line_height": 0.048,
+          "anchor": "center",
+          "color": [
+            0.85,
+            0.9,
+            1,
+            1
+          ],
+          "bounds": [
+            1.0,
+            0.12
+          ],
+          "wrap": "word",
+          "layer": 525
+        },
+        "sindri.ui.box": {
+          "fit_content": [
+            false,
+            false
+          ]
+        }
+      },
+      "parent": "port-tab-4"
+    },
+    {
+      "id": "port-page-4",
+      "name": "PortPage4",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {},
+      "parent": "port",
+      "disabled": true
+    },
+    {
+      "id": "port-ship-art-0",
+      "name": "PortShipArt0",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "port-ship-art"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/fleet-0.png",
+          "tint": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "anchor": "center",
+          "layer": 530
+        }
+      },
+      "parent": "port-page-1"
+    },
+    {
+      "id": "port-ship-0",
+      "name": "PortShip0",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "action",
+            "action-secondary",
+            "port-ship-button",
+            "port-ship-button-0"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.002,
+            0.006,
+            0.014,
+            1
+          ],
+          "stroke": [
+            0.03,
+            0.08,
+            0.1,
+            1
+          ],
+          "stroke_width": 0.002,
+          "layer": 520,
+          "anchor": "center"
+        },
+        "sindri.ui.button": {
+          "label": "STRIDER"
+        },
+        "sindri.script": {
+          "source": "scripts/port.decay",
+          "script": "PortAction",
+          "properties": {
+            "action": 1,
+            "value": 0
+          }
+        }
+      },
+      "parent": "port-page-1"
+    },
+    {
+      "id": "port-ship-0-text",
+      "name": "PortShip0Text",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "action-label",
+            "port-button-label"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "STRIDER",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.035,
+          "line_height": 0.048,
+          "anchor": "center",
+          "color": [
+            0.85,
+            0.9,
+            1,
+            1
+          ],
+          "bounds": [
+            1.0,
+            0.12
+          ],
+          "wrap": "word",
+          "layer": 525
+        },
+        "sindri.ui.box": {
+          "fit_content": [
+            false,
+            false
+          ]
+        }
+      },
+      "parent": "port-ship-0"
+    },
+    {
+      "id": "port-ship-art-1",
+      "name": "PortShipArt1",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "port-ship-art"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/fleet-1.png",
+          "tint": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "anchor": "center",
+          "layer": 530
+        }
+      },
+      "parent": "port-page-1"
+    },
+    {
+      "id": "port-ship-1",
+      "name": "PortShip1",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "action",
+            "action-secondary",
+            "port-ship-button",
+            "port-ship-button-1"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.002,
+            0.006,
+            0.014,
+            1
+          ],
+          "stroke": [
+            0.03,
+            0.08,
+            0.1,
+            1
+          ],
+          "stroke_width": 0.002,
+          "layer": 520,
+          "anchor": "center"
+        },
+        "sindri.ui.button": {
+          "label": "BASTION"
+        },
+        "sindri.script": {
+          "source": "scripts/port.decay",
+          "script": "PortAction",
+          "properties": {
+            "action": 1,
+            "value": 1
+          }
+        }
+      },
+      "parent": "port-page-1"
+    },
+    {
+      "id": "port-ship-1-text",
+      "name": "PortShip1Text",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "action-label",
+            "port-button-label"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "BASTION",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.035,
+          "line_height": 0.048,
+          "anchor": "center",
+          "color": [
+            0.85,
+            0.9,
+            1,
+            1
+          ],
+          "bounds": [
+            1.0,
+            0.12
+          ],
+          "wrap": "word",
+          "layer": 525
+        },
+        "sindri.ui.box": {
+          "fit_content": [
+            false,
+            false
+          ]
+        }
+      },
+      "parent": "port-ship-1"
+    },
+    {
+      "id": "port-ship-art-2",
+      "name": "PortShipArt2",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "port-ship-art"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/fleet-2.png",
+          "tint": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "anchor": "center",
+          "layer": 530
+        }
+      },
+      "parent": "port-page-1"
+    },
+    {
+      "id": "port-ship-2",
+      "name": "PortShip2",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "action",
+            "action-secondary",
+            "port-ship-button",
+            "port-ship-button-2"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.002,
+            0.006,
+            0.014,
+            1
+          ],
+          "stroke": [
+            0.03,
+            0.08,
+            0.1,
+            1
+          ],
+          "stroke_width": 0.002,
+          "layer": 520,
+          "anchor": "center"
+        },
+        "sindri.ui.button": {
+          "label": "KESTREL"
+        },
+        "sindri.script": {
+          "source": "scripts/port.decay",
+          "script": "PortAction",
+          "properties": {
+            "action": 1,
+            "value": 2
+          }
+        }
+      },
+      "parent": "port-page-1"
+    },
+    {
+      "id": "port-ship-2-text",
+      "name": "PortShip2Text",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "action-label",
+            "port-button-label"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "KESTREL",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.035,
+          "line_height": 0.048,
+          "anchor": "center",
+          "color": [
+            0.85,
+            0.9,
+            1,
+            1
+          ],
+          "bounds": [
+            1.0,
+            0.12
+          ],
+          "wrap": "word",
+          "layer": 525
+        },
+        "sindri.ui.box": {
+          "fit_content": [
+            false,
+            false
+          ]
+        }
+      },
+      "parent": "port-ship-2"
+    },
+    {
+      "id": "port-ship-art-3",
+      "name": "PortShipArt3",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "port-ship-art"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/fleet-3.png",
+          "tint": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "anchor": "center",
+          "layer": 530
+        }
+      },
+      "parent": "port-page-1"
+    },
+    {
+      "id": "port-ship-3",
+      "name": "PortShip3",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "action",
+            "action-secondary",
+            "port-ship-button",
+            "port-ship-button-3"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.002,
+            0.006,
+            0.014,
+            1
+          ],
+          "stroke": [
+            0.03,
+            0.08,
+            0.1,
+            1
+          ],
+          "stroke_width": 0.002,
+          "layer": 520,
+          "anchor": "center"
+        },
+        "sindri.ui.button": {
+          "label": "ORACLE"
+        },
+        "sindri.script": {
+          "source": "scripts/port.decay",
+          "script": "PortAction",
+          "properties": {
+            "action": 1,
+            "value": 3
+          }
+        }
+      },
+      "parent": "port-page-1"
+    },
+    {
+      "id": "port-ship-3-text",
+      "name": "PortShip3Text",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "action-label",
+            "port-button-label"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "ORACLE",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.035,
+          "line_height": 0.048,
+          "anchor": "center",
+          "color": [
+            0.85,
+            0.9,
+            1,
+            1
+          ],
+          "bounds": [
+            1.0,
+            0.12
+          ],
+          "wrap": "word",
+          "layer": 525
+        },
+        "sindri.ui.box": {
+          "fit_content": [
+            false,
+            false
+          ]
+        }
+      },
+      "parent": "port-ship-3"
+    },
+    {
+      "id": "port-ship-kicker",
+      "name": "PortShipKicker",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "port-ship-kicker",
+            "kicker"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "YOUR SHIP. YOUR WAY HOME.",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.035,
+          "line_height": 0.048,
+          "anchor": "center",
+          "color": [
+            0.85,
+            0.9,
+            1,
+            1
+          ],
+          "bounds": [
+            1.0,
+            0.12
+          ],
+          "wrap": "word",
+          "layer": 540
+        },
+        "sindri.ui.box": {
+          "fit_content": [
+            false,
+            false
+          ]
+        }
+      },
+      "parent": "port-page-1"
+    },
+    {
+      "id": "port-ship-name",
+      "name": "PortShipName",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "port-ship-name",
+            "screen-title"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "STRIDER",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.035,
+          "line_height": 0.048,
+          "anchor": "center",
+          "color": [
+            0.85,
+            0.9,
+            1,
+            1
+          ],
+          "bounds": [
+            1.0,
+            0.12
+          ],
+          "wrap": "word",
+          "layer": 540
+        },
+        "sindri.ui.box": {
+          "fit_content": [
+            false,
+            false
+          ]
+        }
+      },
+      "parent": "port-page-1"
+    },
+    {
+      "id": "port-ship-copy",
+      "name": "PortShipCopy",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "port-ship-copy"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.035,
+          "line_height": 0.048,
+          "anchor": "center",
+          "color": [
+            0.85,
+            0.9,
+            1,
+            1
+          ],
+          "bounds": [
+            1.0,
+            0.12
+          ],
+          "wrap": "word",
+          "layer": 540
+        },
+        "sindri.ui.box": {
+          "fit_content": [
+            false,
+            false
+          ]
+        }
+      },
+      "parent": "port-page-1"
+    },
+    {
+      "id": "port-ship-status",
+      "name": "PortShipStatus",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "port-ship-status"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.035,
+          "line_height": 0.048,
+          "anchor": "center",
+          "color": [
+            0.85,
+            0.9,
+            1,
+            1
+          ],
+          "bounds": [
+            1.0,
+            0.12
+          ],
+          "wrap": "word",
+          "layer": 540
+        },
+        "sindri.ui.box": {
+          "fit_content": [
+            false,
+            false
+          ]
+        }
+      },
+      "parent": "port-page-1"
+    },
+    {
+      "id": "port-equip",
+      "name": "PortEquip",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "action",
+            "action-primary",
+            "port-equip"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.002,
+            0.006,
+            0.014,
+            1
+          ],
+          "stroke": [
+            0.03,
+            0.08,
+            0.1,
+            1
+          ],
+          "stroke_width": 0.002,
+          "layer": 520,
+          "anchor": "center"
+        },
+        "sindri.ui.button": {
+          "label": "EQUIP"
+        },
+        "sindri.script": {
+          "source": "scripts/port.decay",
+          "script": "PortAction",
+          "properties": {
+            "action": 2,
+            "value": 0
+          }
+        }
+      },
+      "parent": "port-page-1"
+    },
+    {
+      "id": "port-equip-text",
+      "name": "PortEquipText",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "action-label",
+            "port-button-label"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "EQUIP",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.035,
+          "line_height": 0.048,
+          "anchor": "center",
+          "color": [
+            0.85,
+            0.9,
+            1,
+            1
+          ],
+          "bounds": [
+            1.0,
+            0.12
+          ],
+          "wrap": "word",
+          "layer": 525
+        },
+        "sindri.ui.box": {
+          "fit_content": [
+            false,
+            false
+          ]
+        }
+      },
+      "parent": "port-equip"
+    },
+    {
+      "id": "port-archive-mode-0",
+      "name": "PortArchiveMode0",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "action",
+            "action-secondary",
+            "archive-mode",
+            "archive-mode-0"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.002,
+            0.006,
+            0.014,
+            1
+          ],
+          "stroke": [
+            0.03,
+            0.08,
+            0.1,
+            1
+          ],
+          "stroke_width": 0.002,
+          "layer": 520,
+          "anchor": "center"
+        },
+        "sindri.ui.button": {
+          "label": "MODULES"
+        },
+        "sindri.script": {
+          "source": "scripts/port.decay",
+          "script": "PortAction",
+          "properties": {
+            "action": 8,
+            "value": 0
+          }
+        }
+      },
+      "parent": "port-page-2"
+    },
+    {
+      "id": "port-archive-mode-0-text",
+      "name": "PortArchiveMode0Text",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "action-label",
+            "port-button-label"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "MODULES",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.035,
+          "line_height": 0.048,
+          "anchor": "center",
+          "color": [
+            0.85,
+            0.9,
+            1,
+            1
+          ],
+          "bounds": [
+            1.0,
+            0.12
+          ],
+          "wrap": "word",
+          "layer": 525
+        },
+        "sindri.ui.box": {
+          "fit_content": [
+            false,
+            false
+          ]
+        }
+      },
+      "parent": "port-archive-mode-0"
+    },
+    {
+      "id": "port-archive-mode-1",
+      "name": "PortArchiveMode1",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "action",
+            "action-secondary",
+            "archive-mode",
+            "archive-mode-1"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.002,
+            0.006,
+            0.014,
+            1
+          ],
+          "stroke": [
+            0.03,
+            0.08,
+            0.1,
+            1
+          ],
+          "stroke_width": 0.002,
+          "layer": 520,
+          "anchor": "center"
+        },
+        "sindri.ui.button": {
+          "label": "THREATS"
+        },
+        "sindri.script": {
+          "source": "scripts/port.decay",
+          "script": "PortAction",
+          "properties": {
+            "action": 8,
+            "value": 1
+          }
+        }
+      },
+      "parent": "port-page-2"
+    },
+    {
+      "id": "port-archive-mode-1-text",
+      "name": "PortArchiveMode1Text",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "action-label",
+            "port-button-label"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "THREATS",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.035,
+          "line_height": 0.048,
+          "anchor": "center",
+          "color": [
+            0.85,
+            0.9,
+            1,
+            1
+          ],
+          "bounds": [
+            1.0,
+            0.12
+          ],
+          "wrap": "word",
+          "layer": 525
+        },
+        "sindri.ui.box": {
+          "fit_content": [
+            false,
+            false
+          ]
+        }
+      },
+      "parent": "port-archive-mode-1"
+    },
+    {
+      "id": "port-archive-mode-2",
+      "name": "PortArchiveMode2",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "action",
+            "action-secondary",
+            "archive-mode",
+            "archive-mode-2"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.002,
+            0.006,
+            0.014,
+            1
+          ],
+          "stroke": [
+            0.03,
+            0.08,
+            0.1,
+            1
+          ],
+          "stroke_width": 0.002,
+          "layer": 520,
+          "anchor": "center"
+        },
+        "sindri.ui.button": {
+          "label": "COMMENDATIONS"
+        },
+        "sindri.script": {
+          "source": "scripts/port.decay",
+          "script": "PortAction",
+          "properties": {
+            "action": 8,
+            "value": 2
+          }
+        }
+      },
+      "parent": "port-page-2"
+    },
+    {
+      "id": "port-archive-mode-2-text",
+      "name": "PortArchiveMode2Text",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "action-label",
+            "port-button-label"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "SYNERGIES",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.035,
+          "line_height": 0.048,
+          "anchor": "center",
+          "color": [
+            0.85,
+            0.9,
+            1,
+            1
+          ],
+          "bounds": [
+            1.0,
+            0.12
+          ],
+          "wrap": "word",
+          "layer": 525
+        },
+        "sindri.ui.box": {
+          "fit_content": [
+            false,
+            false
+          ]
+        }
+      },
+      "parent": "port-archive-mode-2"
+    },
+    {
+      "id": "port-archive-name",
+      "name": "PortArchiveName",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "archive-name",
+            "screen-title"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "FIELD MANUAL",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.035,
+          "line_height": 0.048,
+          "anchor": "center",
+          "color": [
+            0.85,
+            0.9,
+            1,
+            1
+          ],
+          "bounds": [
+            1.0,
+            0.12
+          ],
+          "wrap": "word",
+          "layer": 540
+        },
+        "sindri.ui.box": {
+          "fit_content": [
+            false,
+            false
+          ]
+        }
+      },
+      "parent": "port-page-2"
+    },
+    {
+      "id": "port-archive-copy",
+      "name": "PortArchiveCopy",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "archive-copy"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.035,
+          "line_height": 0.048,
+          "anchor": "center",
+          "color": [
+            0.85,
+            0.9,
+            1,
+            1
+          ],
+          "bounds": [
+            1.0,
+            0.12
+          ],
+          "wrap": "word",
+          "layer": 540
+        },
+        "sindri.ui.box": {
+          "fit_content": [
+            false,
+            false
+          ]
+        }
+      },
+      "parent": "port-page-2"
+    },
+    {
+      "id": "port-archive-status",
+      "name": "PortArchiveStatus",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "archive-status",
+            "kicker"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.035,
+          "line_height": 0.048,
+          "anchor": "center",
+          "color": [
+            0.85,
+            0.9,
+            1,
+            1
+          ],
+          "bounds": [
+            1.0,
+            0.12
+          ],
+          "wrap": "word",
+          "layer": 540
+        },
+        "sindri.ui.box": {
+          "fit_content": [
+            false,
+            false
+          ]
+        }
+      },
+      "parent": "port-page-2"
+    },
+    {
+      "id": "port-archive-count",
+      "name": "PortArchiveCount",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "archive-count"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.035,
+          "line_height": 0.048,
+          "anchor": "center",
+          "color": [
+            0.85,
+            0.9,
+            1,
+            1
+          ],
+          "bounds": [
+            1.0,
+            0.12
+          ],
+          "wrap": "word",
+          "layer": 540
+        },
+        "sindri.ui.box": {
+          "fit_content": [
+            false,
+            false
+          ]
+        }
+      },
+      "parent": "port-page-2"
+    },
+    {
+      "id": "port-archive-prev",
+      "name": "PortArchivePrev",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "action",
+            "action-ghost",
+            "archive-prev"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.002,
+            0.006,
+            0.014,
+            1
+          ],
+          "stroke": [
+            0.03,
+            0.08,
+            0.1,
+            1
+          ],
+          "stroke_width": 0.002,
+          "layer": 520,
+          "anchor": "center"
+        },
+        "sindri.ui.button": {
+          "label": "PREVIOUS"
+        },
+        "sindri.script": {
+          "source": "scripts/port.decay",
+          "script": "PortAction",
+          "properties": {
+            "action": 5,
+            "value": -1
+          }
+        }
+      },
+      "parent": "port-page-2"
+    },
+    {
+      "id": "port-archive-prev-text",
+      "name": "PortArchivePrevText",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "action-label",
+            "port-button-label"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "PREVIOUS",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.035,
+          "line_height": 0.048,
+          "anchor": "center",
+          "color": [
+            0.85,
+            0.9,
+            1,
+            1
+          ],
+          "bounds": [
+            1.0,
+            0.12
+          ],
+          "wrap": "word",
+          "layer": 525
+        },
+        "sindri.ui.box": {
+          "fit_content": [
+            false,
+            false
+          ]
+        }
+      },
+      "parent": "port-archive-prev"
+    },
+    {
+      "id": "port-archive-next",
+      "name": "PortArchiveNext",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "action",
+            "action-secondary",
+            "archive-next"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.002,
+            0.006,
+            0.014,
+            1
+          ],
+          "stroke": [
+            0.03,
+            0.08,
+            0.1,
+            1
+          ],
+          "stroke_width": 0.002,
+          "layer": 520,
+          "anchor": "center"
+        },
+        "sindri.ui.button": {
+          "label": "NEXT"
+        },
+        "sindri.script": {
+          "source": "scripts/port.decay",
+          "script": "PortAction",
+          "properties": {
+            "action": 5,
+            "value": 1
+          }
+        }
+      },
+      "parent": "port-page-2"
+    },
+    {
+      "id": "port-archive-next-text",
+      "name": "PortArchiveNextText",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "action-label",
+            "port-button-label"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "NEXT",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.035,
+          "line_height": 0.048,
+          "anchor": "center",
+          "color": [
+            0.85,
+            0.9,
+            1,
+            1
+          ],
+          "bounds": [
+            1.0,
+            0.12
+          ],
+          "wrap": "word",
+          "layer": 525
+        },
+        "sindri.ui.box": {
+          "fit_content": [
+            false,
+            false
+          ]
+        }
+      },
+      "parent": "port-archive-next"
+    },
+    {
+      "id": "port-career",
+      "name": "PortCareer",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "port-career"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.035,
+          "line_height": 0.048,
+          "anchor": "center",
+          "color": [
+            0.85,
+            0.9,
+            1,
+            1
+          ],
+          "bounds": [
+            1.0,
+            0.12
+          ],
+          "wrap": "word",
+          "layer": 540
+        },
+        "sindri.ui.box": {
+          "fit_content": [
+            false,
+            false
+          ]
+        }
+      },
+      "parent": "port-page-3"
+    },
+    {
+      "id": "port-record-0",
+      "name": "PortRecord0",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "port-record",
+            "port-record-0"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.035,
+          "line_height": 0.048,
+          "anchor": "center",
+          "color": [
+            0.85,
+            0.9,
+            1,
+            1
+          ],
+          "bounds": [
+            1.0,
+            0.12
+          ],
+          "wrap": "word",
+          "layer": 540
+        },
+        "sindri.ui.box": {
+          "fit_content": [
+            false,
+            false
+          ]
+        }
+      },
+      "parent": "port-page-3"
+    },
+    {
+      "id": "port-record-1",
+      "name": "PortRecord1",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "port-record",
+            "port-record-1"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.035,
+          "line_height": 0.048,
+          "anchor": "center",
+          "color": [
+            0.85,
+            0.9,
+            1,
+            1
+          ],
+          "bounds": [
+            1.0,
+            0.12
+          ],
+          "wrap": "word",
+          "layer": 540
+        },
+        "sindri.ui.box": {
+          "fit_content": [
+            false,
+            false
+          ]
+        }
+      },
+      "parent": "port-page-3"
+    },
+    {
+      "id": "port-record-2",
+      "name": "PortRecord2",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "port-record",
+            "port-record-2"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.035,
+          "line_height": 0.048,
+          "anchor": "center",
+          "color": [
+            0.85,
+            0.9,
+            1,
+            1
+          ],
+          "bounds": [
+            1.0,
+            0.12
+          ],
+          "wrap": "word",
+          "layer": 540
+        },
+        "sindri.ui.box": {
+          "fit_content": [
+            false,
+            false
+          ]
+        }
+      },
+      "parent": "port-page-3"
+    },
+    {
+      "id": "port-record-3",
+      "name": "PortRecord3",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "port-record",
+            "port-record-3"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.035,
+          "line_height": 0.048,
+          "anchor": "center",
+          "color": [
+            0.85,
+            0.9,
+            1,
+            1
+          ],
+          "bounds": [
+            1.0,
+            0.12
+          ],
+          "wrap": "word",
+          "layer": 540
+        },
+        "sindri.ui.box": {
+          "fit_content": [
+            false,
+            false
+          ]
+        }
+      },
+      "parent": "port-page-3"
+    },
+    {
+      "id": "port-record-4",
+      "name": "PortRecord4",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "port-record",
+            "port-record-4"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.035,
+          "line_height": 0.048,
+          "anchor": "center",
+          "color": [
+            0.85,
+            0.9,
+            1,
+            1
+          ],
+          "bounds": [
+            1.0,
+            0.12
+          ],
+          "wrap": "word",
+          "layer": 540
+        },
+        "sindri.ui.box": {
+          "fit_content": [
+            false,
+            false
+          ]
+        }
+      },
+      "parent": "port-page-3"
+    },
+    {
+      "id": "port-record-5",
+      "name": "PortRecord5",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "port-record",
+            "port-record-5"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.035,
+          "line_height": 0.048,
+          "anchor": "center",
+          "color": [
+            0.85,
+            0.9,
+            1,
+            1
+          ],
+          "bounds": [
+            1.0,
+            0.12
+          ],
+          "wrap": "word",
+          "layer": 540
+        },
+        "sindri.ui.box": {
+          "fit_content": [
+            false,
+            false
+          ]
+        }
+      },
+      "parent": "port-page-3"
+    },
+    {
+      "id": "port-master-label",
+      "name": "PortMasterLabel",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "port-mix-label",
+            "port-mix-0"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "MASTER",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.035,
+          "line_height": 0.048,
+          "anchor": "center",
+          "color": [
+            0.85,
+            0.9,
+            1,
+            1
+          ],
+          "bounds": [
+            1.0,
+            0.12
+          ],
+          "wrap": "word",
+          "layer": 540
+        },
+        "sindri.ui.box": {
+          "fit_content": [
+            false,
+            false
+          ]
+        }
+      },
+      "parent": "port-page-4"
+    },
+    {
+      "id": "port-master",
+      "name": "PortMaster",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "port-mix-track",
+            "port-mix-0"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.002,
+            0.006,
+            0.014,
+            1
+          ],
+          "stroke": [
+            0.03,
+            0.08,
+            0.1,
+            1
+          ],
+          "stroke_width": 0.002,
+          "layer": 520,
+          "anchor": "center"
+        },
+        "sindri.ui.slider": {
+          "label": "Master volume",
+          "min": 0,
+          "max": 1,
+          "step": 0.05,
+          "value": 1
+        }
+      },
+      "parent": "port-page-4"
+    },
+    {
+      "id": "port-master-fill",
+      "name": "PortMasterFill",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "port-mix-fill"
+          ]
+        },
+        "sindri.ui.image": {
+          "anchor": "center",
+          "fill": {
+            "amount": 1.0,
+            "from": "left"
+          },
+          "layer": 525,
+          "texture": "textures/white.png",
+          "tint": [
+            0.11193,
+            0.82279,
+            0.65837,
+            0.55
+          ]
+        }
+      },
+      "parent": "port-master"
+    },
+    {
+      "id": "port-music-label",
+      "name": "PortMusicLabel",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "port-mix-label",
+            "port-mix-1"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "MUSIC",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.035,
+          "line_height": 0.048,
+          "anchor": "center",
+          "color": [
+            0.85,
+            0.9,
+            1,
+            1
+          ],
+          "bounds": [
+            1.0,
+            0.12
+          ],
+          "wrap": "word",
+          "layer": 540
+        },
+        "sindri.ui.box": {
+          "fit_content": [
+            false,
+            false
+          ]
+        }
+      },
+      "parent": "port-page-4"
+    },
+    {
+      "id": "port-music",
+      "name": "PortMusic",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "port-mix-track",
+            "port-mix-1"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.002,
+            0.006,
+            0.014,
+            1
+          ],
+          "stroke": [
+            0.03,
+            0.08,
+            0.1,
+            1
+          ],
+          "stroke_width": 0.002,
+          "layer": 520,
+          "anchor": "center"
+        },
+        "sindri.ui.slider": {
+          "label": "Music volume",
+          "min": 0,
+          "max": 1,
+          "step": 0.05,
+          "value": 1
+        }
+      },
+      "parent": "port-page-4"
+    },
+    {
+      "id": "port-music-fill",
+      "name": "PortMusicFill",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "port-mix-fill"
+          ]
+        },
+        "sindri.ui.image": {
+          "anchor": "center",
+          "fill": {
+            "amount": 1.0,
+            "from": "left"
+          },
+          "layer": 525,
+          "texture": "textures/white.png",
+          "tint": [
+            0.11193,
+            0.82279,
+            0.65837,
+            0.55
+          ]
+        }
+      },
+      "parent": "port-music"
+    },
+    {
+      "id": "port-effects-label",
+      "name": "PortEffectsLabel",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "port-mix-label",
+            "port-mix-2"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "EFFECTS",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.035,
+          "line_height": 0.048,
+          "anchor": "center",
+          "color": [
+            0.85,
+            0.9,
+            1,
+            1
+          ],
+          "bounds": [
+            1.0,
+            0.12
+          ],
+          "wrap": "word",
+          "layer": 540
+        },
+        "sindri.ui.box": {
+          "fit_content": [
+            false,
+            false
+          ]
+        }
+      },
+      "parent": "port-page-4"
+    },
+    {
+      "id": "port-effects",
+      "name": "PortEffects",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "port-mix-track",
+            "port-mix-2"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.002,
+            0.006,
+            0.014,
+            1
+          ],
+          "stroke": [
+            0.03,
+            0.08,
+            0.1,
+            1
+          ],
+          "stroke_width": 0.002,
+          "layer": 520,
+          "anchor": "center"
+        },
+        "sindri.ui.slider": {
+          "label": "Effects volume",
+          "min": 0,
+          "max": 1,
+          "step": 0.05,
+          "value": 1
+        }
+      },
+      "parent": "port-page-4"
+    },
+    {
+      "id": "port-effects-fill",
+      "name": "PortEffectsFill",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "port-mix-fill"
+          ]
+        },
+        "sindri.ui.image": {
+          "anchor": "center",
+          "fill": {
+            "amount": 1.0,
+            "from": "left"
+          },
+          "layer": 525,
+          "texture": "textures/white.png",
+          "tint": [
+            0.11193,
+            0.82279,
+            0.65837,
+            0.55
+          ]
+        }
+      },
+      "parent": "port-effects"
+    },
+    {
+      "id": "port-motion",
+      "name": "PortMotion",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "switch",
+            "port-option",
+            "port-option-0"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.002,
+            0.006,
+            0.014,
+            1
+          ],
+          "stroke": [
+            0.03,
+            0.08,
+            0.1,
+            1
+          ],
+          "stroke_width": 0.002,
+          "layer": 520,
+          "anchor": "center"
+        },
+        "sindri.ui.toggle": {
+          "label": "REDUCED MOTION",
+          "checked": false
+        },
+        "sindri.ui.layout": {
+          "align": "center",
+          "direction": "row",
+          "fit_content": [
+            false,
+            false
+          ],
+          "justify": "space_between",
+          "spacing": 0.02
+        },
+        "sindri.ui.box": {
+          "padding": [
+            0.0,
+            0.032,
+            0.0,
+            0.032
+          ]
+        }
+      },
+      "parent": "port-page-4"
+    },
+    {
+      "id": "port-motion-text",
+      "name": "PortMotionText",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "switch-label"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "REDUCED MOTION",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.035,
+          "line_height": 0.048,
+          "anchor": "center",
+          "color": [
+            0.85,
+            0.9,
+            1,
+            1
+          ],
+          "bounds": [
+            1.0,
+            0.12
+          ],
+          "wrap": "word",
+          "layer": 525
+        },
+        "sindri.ui.box": {
+          "fit_content": [
+            false,
+            false
+          ]
+        }
+      },
+      "parent": "port-motion"
+    },
+    {
+      "id": "port-motion-track",
+      "name": "PortMotionTrack",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "switch-track"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.002,
+            0.006,
+            0.014,
+            1
+          ],
+          "stroke": [
+            0.03,
+            0.08,
+            0.1,
+            1
+          ],
+          "stroke_width": 0.002,
+          "layer": 525,
+          "anchor": "center"
+        }
+      },
+      "parent": "port-motion"
+    },
+    {
+      "id": "port-motion-knob",
+      "name": "PortMotionKnob",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "switch-knob"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.002,
+            0.006,
+            0.014,
+            1
+          ],
+          "stroke": [
+            0.03,
+            0.08,
+            0.1,
+            1
+          ],
+          "stroke_width": 0.002,
+          "layer": 526,
+          "anchor": "center"
+        }
+      },
+      "parent": "port-motion-track"
+    },
+    {
+      "id": "port-flashes",
+      "name": "PortFlashes",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "switch",
+            "port-option",
+            "port-option-1"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.002,
+            0.006,
+            0.014,
+            1
+          ],
+          "stroke": [
+            0.03,
+            0.08,
+            0.1,
+            1
+          ],
+          "stroke_width": 0.002,
+          "layer": 520,
+          "anchor": "center"
+        },
+        "sindri.ui.toggle": {
+          "label": "REDUCED FLASHES",
+          "checked": false
+        },
+        "sindri.ui.layout": {
+          "align": "center",
+          "direction": "row",
+          "fit_content": [
+            false,
+            false
+          ],
+          "justify": "space_between",
+          "spacing": 0.02
+        },
+        "sindri.ui.box": {
+          "padding": [
+            0.0,
+            0.032,
+            0.0,
+            0.032
+          ]
+        }
+      },
+      "parent": "port-page-4"
+    },
+    {
+      "id": "port-flashes-text",
+      "name": "PortFlashesText",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "switch-label"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "REDUCED FLASHES",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.035,
+          "line_height": 0.048,
+          "anchor": "center",
+          "color": [
+            0.85,
+            0.9,
+            1,
+            1
+          ],
+          "bounds": [
+            1.0,
+            0.12
+          ],
+          "wrap": "word",
+          "layer": 525
+        },
+        "sindri.ui.box": {
+          "fit_content": [
+            false,
+            false
+          ]
+        }
+      },
+      "parent": "port-flashes"
+    },
+    {
+      "id": "port-flashes-track",
+      "name": "PortFlashesTrack",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "switch-track"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.002,
+            0.006,
+            0.014,
+            1
+          ],
+          "stroke": [
+            0.03,
+            0.08,
+            0.1,
+            1
+          ],
+          "stroke_width": 0.002,
+          "layer": 525,
+          "anchor": "center"
+        }
+      },
+      "parent": "port-flashes"
+    },
+    {
+      "id": "port-flashes-knob",
+      "name": "PortFlashesKnob",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "switch-knob"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.002,
+            0.006,
+            0.014,
+            1
+          ],
+          "stroke": [
+            0.03,
+            0.08,
+            0.1,
+            1
+          ],
+          "stroke_width": 0.002,
+          "layer": 526,
+          "anchor": "center"
+        }
+      },
+      "parent": "port-flashes-track"
+    },
+    {
+      "id": "port-guides",
+      "name": "PortGuides",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "switch",
+            "port-option",
+            "port-option-2"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.002,
+            0.006,
+            0.014,
+            1
+          ],
+          "stroke": [
+            0.03,
+            0.08,
+            0.1,
+            1
+          ],
+          "stroke_width": 0.002,
+          "layer": 520,
+          "anchor": "center"
+        },
+        "sindri.ui.toggle": {
+          "label": "FLIGHT GUIDANCE",
+          "checked": false
+        },
+        "sindri.ui.layout": {
+          "align": "center",
+          "direction": "row",
+          "fit_content": [
+            false,
+            false
+          ],
+          "justify": "space_between",
+          "spacing": 0.02
+        },
+        "sindri.ui.box": {
+          "padding": [
+            0.0,
+            0.032,
+            0.0,
+            0.032
+          ]
+        }
+      },
+      "parent": "port-page-4"
+    },
+    {
+      "id": "port-guides-text",
+      "name": "PortGuidesText",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "switch-label"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "FLIGHT GUIDANCE",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.035,
+          "line_height": 0.048,
+          "anchor": "center",
+          "color": [
+            0.85,
+            0.9,
+            1,
+            1
+          ],
+          "bounds": [
+            1.0,
+            0.12
+          ],
+          "wrap": "word",
+          "layer": 525
+        },
+        "sindri.ui.box": {
+          "fit_content": [
+            false,
+            false
+          ]
+        }
+      },
+      "parent": "port-guides"
+    },
+    {
+      "id": "port-guides-track",
+      "name": "PortGuidesTrack",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "switch-track"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.002,
+            0.006,
+            0.014,
+            1
+          ],
+          "stroke": [
+            0.03,
+            0.08,
+            0.1,
+            1
+          ],
+          "stroke_width": 0.002,
+          "layer": 525,
+          "anchor": "center"
+        }
+      },
+      "parent": "port-guides"
+    },
+    {
+      "id": "port-guides-knob",
+      "name": "PortGuidesKnob",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "switch-knob"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.002,
+            0.006,
+            0.014,
+            1
+          ],
+          "stroke": [
+            0.03,
+            0.08,
+            0.1,
+            1
+          ],
+          "stroke_width": 0.002,
+          "layer": 526,
+          "anchor": "center"
+        }
+      },
+      "parent": "port-guides-track"
+    },
+    {
+      "id": "port-controls",
+      "name": "PortControls",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "port-controls"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "FLIGHT CONTROLS\nWASD / arrows / left stick / drag to steer\nShift / right bumper / BURST to evade\nEsc / Start / PAUSE to suspend\n\nFire is automatic. Collect cores to upgrade.\nSidegrades unlock with salvage earned by flying.",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.035,
+          "line_height": 0.048,
+          "anchor": "center",
+          "color": [
+            0.85,
+            0.9,
+            1,
+            1
+          ],
+          "bounds": [
+            1.0,
+            0.12
+          ],
+          "wrap": "word",
+          "layer": 540
+        },
+        "sindri.ui.box": {
+          "fit_content": [
+            false,
+            false
+          ]
+        }
+      },
+      "parent": "port-page-4"
+    },
+    {
+      "id": "port-lab",
+      "name": "PortLab",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "action",
+            "action-ghost",
+            "port-lab"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.002,
+            0.006,
+            0.014,
+            1
+          ],
+          "stroke": [
+            0.03,
+            0.08,
+            0.1,
+            1
+          ],
+          "stroke_width": 0.002,
+          "layer": 520,
+          "anchor": "center"
+        },
+        "sindri.ui.button": {
+          "label": "COMBAT LAB"
+        },
+        "sindri.script": {
+          "source": "scripts/port.decay",
+          "script": "PortAction",
+          "properties": {
+            "action": 9,
+            "value": 0
+          }
+        }
+      },
+      "parent": "port-page-4"
+    },
+    {
+      "id": "port-lab-text",
+      "name": "PortLabText",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "action-label",
+            "port-button-label"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "COMBAT LAB",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.035,
+          "line_height": 0.048,
+          "anchor": "center",
+          "color": [
+            0.85,
+            0.9,
+            1,
+            1
+          ],
+          "bounds": [
+            1.0,
+            0.12
+          ],
+          "wrap": "word",
+          "layer": 525
+        },
+        "sindri.ui.box": {
+          "fit_content": [
+            false,
+            false
+          ]
+        }
+      },
+      "parent": "port-lab"
+    },
+    {
+      "id": "result-reward",
+      "name": "ResultReward",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "result-reward"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "+0 SALVAGE",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.035,
+          "line_height": 0.048,
+          "anchor": "center",
+          "color": [
+            0.85,
+            0.9,
+            1,
+            1
+          ],
+          "bounds": [
+            1.0,
+            0.12
+          ],
+          "wrap": "word",
+          "layer": 340
+        },
+        "sindri.ui.box": {
+          "fit_content": [
+            false,
+            false
+          ]
+        }
+      },
+      "parent": "result"
+    },
+    {
+      "id": "flight-pause",
+      "name": "FlightPause",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "action",
+            "action-ghost",
+            "flight-pause"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.002,
+            0.006,
+            0.014,
+            1
+          ],
+          "stroke": [
+            0.03,
+            0.08,
+            0.1,
+            1
+          ],
+          "stroke_width": 0.002,
+          "layer": 65,
+          "anchor": "center"
+        },
+        "sindri.ui.button": {
+          "label": "PAUSE"
+        },
+        "sindri.script": {
+          "source": "scripts/port.decay",
+          "script": "PortAction",
+          "properties": {
+            "action": 6,
+            "value": 0
+          }
+        }
+      },
+      "parent": "hud"
+    },
+    {
+      "id": "flight-pause-text",
+      "name": "FlightPauseText",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "action-label",
+            "port-button-label"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "PAUSE",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.035,
+          "line_height": 0.048,
+          "anchor": "center",
+          "color": [
+            0.85,
+            0.9,
+            1,
+            1
+          ],
+          "bounds": [
+            1.0,
+            0.12
+          ],
+          "wrap": "word",
+          "layer": 70
+        },
+        "sindri.ui.box": {
+          "fit_content": [
+            false,
+            false
+          ]
+        }
+      },
+      "parent": "flight-pause"
+    },
+    {
+      "id": "flight-dash",
+      "name": "FlightDash",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "action",
+            "action-secondary",
+            "flight-dash"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.002,
+            0.006,
+            0.014,
+            1
+          ],
+          "stroke": [
+            0.03,
+            0.08,
+            0.1,
+            1
+          ],
+          "stroke_width": 0.002,
+          "layer": 65,
+          "anchor": "center"
+        },
+        "sindri.ui.button": {
+          "label": "BURST"
+        },
+        "sindri.script": {
+          "source": "scripts/port.decay",
+          "script": "PortAction",
+          "properties": {
+            "action": 99,
+            "value": 0
+          }
+        }
+      },
+      "parent": "hud"
+    },
+    {
+      "id": "flight-dash-text",
+      "name": "FlightDashText",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "action-label",
+            "port-button-label"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "BURST",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.035,
+          "line_height": 0.048,
+          "anchor": "center",
+          "color": [
+            0.85,
+            0.9,
+            1,
+            1
+          ],
+          "bounds": [
+            1.0,
+            0.12
+          ],
+          "wrap": "word",
+          "layer": 70
+        },
+        "sindri.ui.box": {
+          "fit_content": [
+            false,
+            false
+          ]
+        }
+      },
+      "parent": "flight-dash"
+    },
+    {
+      "id": "flight-mission",
+      "name": "FlightMission",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "flight-mission"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "HOLD THE CORRIDOR / 10:00",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.035,
+          "line_height": 0.048,
+          "anchor": "center",
+          "color": [
+            0.85,
+            0.9,
+            1,
+            1
+          ],
+          "bounds": [
+            1.0,
+            0.12
+          ],
+          "wrap": "word",
+          "layer": 70
+        },
+        "sindri.ui.box": {
+          "fit_content": [
+            false,
+            false
+          ]
+        }
+      },
+      "parent": "hud"
+    },
+    {
+      "id": "flight-guide",
+      "name": "FlightGuide",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "flight-guide"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "MOVE TO EVADE / FIRE IS AUTOMATIC",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.035,
+          "line_height": 0.048,
+          "anchor": "center",
+          "color": [
+            0.85,
+            0.9,
+            1,
+            1
+          ],
+          "bounds": [
+            1.0,
+            0.12
+          ],
+          "wrap": "word",
+          "layer": 70
+        },
+        "sindri.ui.box": {
+          "fit_content": [
+            false,
+            false
+          ]
+        }
+      },
+      "parent": "hud"
+    },
+    {
+      "id": "flight-controller",
+      "name": "FlightController",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.script": {
+          "source": "scripts/flight.decay",
+          "script": "Flight",
+          "properties": {}
+        }
+      }
+    },
+    {
+      "id": "upgrade-reroll",
+      "name": "UpgradeReroll",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "action",
+            "action-ghost",
+            "upgrade-reroll"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.002,
+            0.006,
+            0.014,
+            1
+          ],
+          "stroke": [
+            0.03,
+            0.08,
+            0.1,
+            1
+          ],
+          "stroke_width": 0.002,
+          "layer": 430,
+          "anchor": "center"
+        },
+        "sindri.ui.button": {
+          "label": "REDRAW / 2 LEFT"
+        },
+        "sindri.script": {
+          "source": "scripts/port.decay",
+          "script": "PortAction",
+          "properties": {
+            "action": 7,
+            "value": 0
+          }
+        }
+      },
+      "parent": "upgrades"
+    },
+    {
+      "id": "upgrade-reroll-text",
+      "name": "UpgradeRerollText",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "action-label",
+            "port-button-label"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "REDRAW / 2 LEFT",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.035,
+          "line_height": 0.048,
+          "anchor": "center",
+          "color": [
+            0.85,
+            0.9,
+            1,
+            1
+          ],
+          "bounds": [
+            1.0,
+            0.12
+          ],
+          "wrap": "word",
+          "layer": 435
+        },
+        "sindri.ui.box": {
+          "fit_content": [
+            false,
+            false
+          ]
+        }
+      },
+      "parent": "upgrade-reroll"
+    },
+    {
+      "id": "space-dust-0",
+      "name": "SpaceDust0",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.script": {
+          "source": "scripts/space.decay",
+          "script": "Space",
+          "properties": {
+            "depth": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "star-0-0",
+      "name": "Star",
+      "transform_3d": {
+        "position": [
+          0.9414197626641785,
+          -0.5951110646094224,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.002,
+          0.002,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "ellipse",
+          "fill": [
+            0.3,
+            0.48,
+            0.72,
+            0.18
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0,
+          "layer": -180
+        }
+      },
+      "parent": "space-dust-0"
+    },
+    {
+      "id": "star-0-1",
+      "name": "Star",
+      "transform_3d": {
+        "position": [
+          0.25248368088944323,
+          -0.927749002862774,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.002,
+          0.002,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "ellipse",
+          "fill": [
+            0.3,
+            0.48,
+            0.72,
+            0.18
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0,
+          "layer": -180
+        }
+      },
+      "parent": "space-dust-0"
+    },
+    {
+      "id": "star-0-2",
+      "name": "Star",
+      "transform_3d": {
+        "position": [
+          -0.8737050070963881,
+          -0.851204192321264,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.002,
+          0.002,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "ellipse",
+          "fill": [
+            0.3,
+            0.48,
+            0.72,
+            0.18
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0,
+          "layer": -180
+        }
+      },
+      "parent": "space-dust-0"
+    },
+    {
+      "id": "star-0-3",
+      "name": "Star",
+      "transform_3d": {
+        "position": [
+          -0.48680663113106304,
+          -0.3992366433828666,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.002,
+          0.002,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "ellipse",
+          "fill": [
+            0.3,
+            0.48,
+            0.72,
+            0.18
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0,
+          "layer": -180
+        }
+      },
+      "parent": "space-dust-0"
+    },
+    {
+      "id": "star-0-4",
+      "name": "Star",
+      "transform_3d": {
+        "position": [
+          0.7431461055480477,
+          0.22881381877338353,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.002,
+          0.002,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "ellipse",
+          "fill": [
+            0.3,
+            0.48,
+            0.72,
+            0.18
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0,
+          "layer": -180
+        }
+      },
+      "parent": "space-dust-0"
+    },
+    {
+      "id": "star-0-5",
+      "name": "Star",
+      "transform_3d": {
+        "position": [
+          0.6861143911853721,
+          0.7559461801943738,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.002,
+          0.002,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "ellipse",
+          "fill": [
+            0.3,
+            0.48,
+            0.72,
+            0.18
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0,
+          "layer": -180
+        }
+      },
+      "parent": "space-dust-0"
+    },
+    {
+      "id": "star-0-6",
+      "name": "Star",
+      "transform_3d": {
+        "position": [
+          -0.5591339423579658,
+          0.9496692520354949,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.002,
+          0.002,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "ellipse",
+          "fill": [
+            0.3,
+            0.48,
+            0.72,
+            0.18
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0,
+          "layer": -180
+        }
+      },
+      "parent": "space-dust-0"
+    },
+    {
+      "id": "star-0-7",
+      "name": "Star",
+      "transform_3d": {
+        "position": [
+          -0.8360710858241418,
+          0.7245416716045372,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.002,
+          0.002,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "ellipse",
+          "fill": [
+            0.3,
+            0.48,
+            0.72,
+            0.18
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0,
+          "layer": -180
+        }
+      },
+      "parent": "space-dust-0"
+    },
+    {
+      "id": "star-0-8",
+      "name": "Star",
+      "transform_3d": {
+        "position": [
+          0.3349042059471051,
+          0.17985572798618188,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.002,
+          0.002,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "ellipse",
+          "fill": [
+            0.3,
+            0.48,
+            0.72,
+            0.18
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0,
+          "layer": -180
+        }
+      },
+      "parent": "space-dust-0"
+    },
+    {
+      "id": "star-0-9",
+      "name": "Star",
+      "transform_3d": {
+        "position": [
+          0.9258905797591256,
+          -0.44415540050092206,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.002,
+          0.002,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "ellipse",
+          "fill": [
+            0.3,
+            0.48,
+            0.72,
+            0.18
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0,
+          "layer": -180
+        }
+      },
+      "parent": "space-dust-0"
+    },
+    {
+      "id": "star-0-10",
+      "name": "Star",
+      "transform_3d": {
+        "position": [
+          -0.08658536779478515,
+          -0.8722722438869386,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.002,
+          0.002,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "ellipse",
+          "fill": [
+            0.3,
+            0.48,
+            0.72,
+            0.18
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0,
+          "layer": -180
+        }
+      },
+      "parent": "space-dust-0"
+    },
+    {
+      "id": "star-0-11",
+      "name": "Star",
+      "transform_3d": {
+        "position": [
+          -0.9491123063884249,
+          -0.915674306281795,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.002,
+          0.002,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "ellipse",
+          "fill": [
+            0.3,
+            0.48,
+            0.72,
+            0.18
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0,
+          "layer": -180
+        }
+      },
+      "parent": "space-dust-0"
+    },
+    {
+      "id": "star-0-12",
+      "name": "Star",
+      "transform_3d": {
+        "position": [
+          -0.1679614116526861,
+          -0.5552191524586221,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.002,
+          0.002,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "ellipse",
+          "fill": [
+            0.3,
+            0.48,
+            0.72,
+            0.18
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0,
+          "layer": -180
+        }
+      },
+      "parent": "space-dust-0"
+    },
+    {
+      "id": "star-0-13",
+      "name": "Star",
+      "transform_3d": {
+        "position": [
+          0.9040659655919839,
+          0.050114840668650865,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.002,
+          0.002,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "ellipse",
+          "fill": [
+            0.3,
+            0.48,
+            0.72,
+            0.18
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0,
+          "layer": -180
+        }
+      },
+      "parent": "space-dust-0"
+    },
+    {
+      "id": "star-0-14",
+      "name": "Star",
+      "transform_3d": {
+        "position": [
+          0.41042700650436165,
+          0.6333457345773432,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.002,
+          0.002,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "ellipse",
+          "fill": [
+            0.3,
+            0.48,
+            0.72,
+            0.18
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0,
+          "layer": -180
+        }
+      },
+      "parent": "space-dust-0"
+    },
+    {
+      "id": "star-0-15",
+      "name": "Star",
+      "transform_3d": {
+        "position": [
+          -0.7939916656374111,
+          0.9372401400476965,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.002,
+          0.002,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "ellipse",
+          "fill": [
+            0.3,
+            0.48,
+            0.72,
+            0.18
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0,
+          "layer": -180
+        }
+      },
+      "parent": "space-dust-0"
+    },
+    {
+      "id": "star-0-16",
+      "name": "Star",
+      "transform_3d": {
+        "position": [
+          -0.6233712703558856,
+          0.827765740375478,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.002,
+          0.002,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "ellipse",
+          "fill": [
+            0.3,
+            0.48,
+            0.72,
+            0.18
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0,
+          "layer": -180
+        }
+      },
+      "parent": "space-dust-0"
+    },
+    {
+      "id": "star-0-17",
+      "name": "Star",
+      "transform_3d": {
+        "position": [
+          0.6268068675884821,
+          0.3532061075638058,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.002,
+          0.002,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "ellipse",
+          "fill": [
+            0.3,
+            0.48,
+            0.72,
+            0.18
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0,
+          "layer": -180
+        }
+      },
+      "parent": "space-dust-0"
+    },
+    {
+      "id": "star-0-18",
+      "name": "Star",
+      "transform_3d": {
+        "position": [
+          0.7914774769725086,
+          -0.2771347177235523,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.002,
+          0.002,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "ellipse",
+          "fill": [
+            0.3,
+            0.48,
+            0.72,
+            0.18
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0,
+          "layer": -180
+        }
+      },
+      "parent": "space-dust-0"
+    },
+    {
+      "id": "star-0-19",
+      "name": "Star",
+      "transform_3d": {
+        "position": [
+          -0.4145368955184209,
+          -0.7852455592171319,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.002,
+          0.002,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "ellipse",
+          "fill": [
+            0.3,
+            0.48,
+            0.72,
+            0.18
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0,
+          "layer": -180
+        }
+      },
+      "parent": "space-dust-0"
+    },
+    {
+      "id": "star-0-20",
+      "name": "Star",
+      "transform_3d": {
+        "position": [
+          -0.9026540268983836,
+          -0.9470246499807679,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.002,
+          0.002,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "ellipse",
+          "fill": [
+            0.3,
+            0.48,
+            0.72,
+            0.18
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0,
+          "layer": -180
+        }
+      },
+      "parent": "space-dust-0"
+    },
+    {
+      "id": "star-0-21",
+      "name": "Star",
+      "transform_3d": {
+        "position": [
+          0.1724499749760231,
+          -0.6911194875036173,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.002,
+          0.002,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "ellipse",
+          "fill": [
+            0.3,
+            0.48,
+            0.72,
+            0.18
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0,
+          "layer": -180
+        }
+      },
+      "parent": "space-dust-0"
+    },
+    {
+      "id": "space-dust-1",
+      "name": "SpaceDust1",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.script": {
+          "source": "scripts/space.decay",
+          "script": "Space",
+          "properties": {
+            "depth": 1
+          }
+        }
+      }
+    },
+    {
+      "id": "star-1-0",
+      "name": "Star",
+      "transform_3d": {
+        "position": [
+          0.9393933420000793,
+          -0.9288250921032423,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.003,
+          0.003,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "ellipse",
+          "fill": [
+            0.3,
+            0.48,
+            0.72,
+            0.26
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0,
+          "layer": -179
+        }
+      },
+      "parent": "space-dust-1"
+    },
+    {
+      "id": "star-1-1",
+      "name": "Star",
+      "transform_3d": {
+        "position": [
+          -0.014314555436566428,
+          -0.848944140811432,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.003,
+          0.003,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "ellipse",
+          "fill": [
+            0.3,
+            0.48,
+            0.72,
+            0.26
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0,
+          "layer": -179
+        }
+      },
+      "parent": "space-dust-1"
+    },
+    {
+      "id": "star-1-2",
+      "name": "Star",
+      "transform_3d": {
+        "position": [
+          -0.9432324282294667,
+          -0.39463724452951443,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.003,
+          0.003,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "ellipse",
+          "fill": [
+            0.3,
+            0.48,
+            0.72,
+            0.26
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0,
+          "layer": -179
+        }
+      },
+      "parent": "space-dust-1"
+    },
+    {
+      "id": "star-1-3",
+      "name": "Star",
+      "transform_3d": {
+        "position": [
+          -0.2386552725386379,
+          0.2337240048103298,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.003,
+          0.003,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "ellipse",
+          "fill": [
+            0.3,
+            0.48,
+            0.72,
+            0.26
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0,
+          "layer": -179
+        }
+      },
+      "parent": "space-dust-1"
+    },
+    {
+      "id": "star-1-4",
+      "name": "Star",
+      "transform_3d": {
+        "position": [
+          0.8792263768760445,
+          0.7590015208855424,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.003,
+          0.003,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "ellipse",
+          "fill": [
+            0.3,
+            0.48,
+            0.72,
+            0.26
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0,
+          "layer": -179
+        }
+      },
+      "parent": "space-dust-1"
+    },
+    {
+      "id": "star-1-5",
+      "name": "Star",
+      "transform_3d": {
+        "position": [
+          0.4744590242471964,
+          0.9495221924941014,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.003,
+          0.003,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "ellipse",
+          "fill": [
+            0.3,
+            0.48,
+            0.72,
+            0.26
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0,
+          "layer": -179
+        }
+      },
+      "parent": "space-dust-1"
+    },
+    {
+      "id": "star-1-6",
+      "name": "Star",
+      "transform_3d": {
+        "position": [
+          -0.751979036609733,
+          0.7212570722908981,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.003,
+          0.003,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "ellipse",
+          "fill": [
+            0.3,
+            0.48,
+            0.72,
+            0.26
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0,
+          "layer": -179
+        }
+      },
+      "parent": "space-dust-1"
+    },
+    {
+      "id": "star-1-7",
+      "name": "Star",
+      "transform_3d": {
+        "position": [
+          -0.6761357285661924,
+          0.17488225806824492,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.003,
+          0.003,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "ellipse",
+          "fill": [
+            0.3,
+            0.48,
+            0.72,
+            0.26
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0,
+          "layer": -179
+        }
+      },
+      "parent": "space-dust-1"
+    },
+    {
+      "id": "star-1-8",
+      "name": "Star",
+      "transform_3d": {
+        "position": [
+          0.5706430966819458,
+          -0.4486241972029426,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.003,
+          0.003,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "ellipse",
+          "fill": [
+            0.3,
+            0.48,
+            0.72,
+            0.26
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0,
+          "layer": -179
+        }
+      },
+      "parent": "space-dust-1"
+    },
+    {
+      "id": "star-1-9",
+      "name": "Star",
+      "transform_3d": {
+        "position": [
+          0.8291791160522005,
+          -0.8742654091583794,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.003,
+          0.003,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "ellipse",
+          "fill": [
+            0.3,
+            0.48,
+            0.72,
+            0.26
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0,
+          "layer": -179
+        }
+      },
+      "parent": "space-dust-1"
+    },
+    {
+      "id": "star-1-10",
+      "name": "Star",
+      "transform_3d": {
+        "position": [
+          -0.34826174923177106,
+          -0.9143127566183311,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.003,
+          0.003,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "ellipse",
+          "fill": [
+            0.3,
+            0.48,
+            0.72,
+            0.26
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0,
+          "layer": -179
+        }
+      },
+      "parent": "space-dust-1"
+    },
+    {
+      "id": "star-1-11",
+      "name": "Star",
+      "transform_3d": {
+        "position": [
+          -0.9225810307414033,
+          -0.5511033979467075,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.003,
+          0.003,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "ellipse",
+          "fill": [
+            0.3,
+            0.48,
+            0.72,
+            0.26
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0,
+          "layer": -179
+        }
+      },
+      "parent": "space-dust-1"
+    },
+    {
+      "id": "star-1-12",
+      "name": "Star",
+      "transform_3d": {
+        "position": [
+          0.10083051419894187,
+          0.055169550711201144,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.003,
+          0.003,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "ellipse",
+          "fill": [
+            0.3,
+            0.48,
+            0.72,
+            0.26
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0,
+          "layer": -179
+        }
+      },
+      "parent": "space-dust-1"
+    },
+    {
+      "id": "star-1-13",
+      "name": "Star",
+      "transform_3d": {
+        "position": [
+          0.9496232284735249,
+          0.6371100254563076,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.003,
+          0.003,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "ellipse",
+          "fill": [
+            0.3,
+            0.48,
+            0.72,
+            0.26
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0,
+          "layer": -179
+        }
+      },
+      "parent": "space-dust-1"
+    },
+    {
+      "id": "star-1-14",
+      "name": "Star",
+      "transform_3d": {
+        "position": [
+          0.1538532917842038,
+          0.9380537751210895,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.003,
+          0.003,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "ellipse",
+          "fill": [
+            0.3,
+            0.48,
+            0.72,
+            0.26
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0,
+          "layer": -179
+        }
+      },
+      "parent": "space-dust-1"
+    },
+    {
+      "id": "star-1-15",
+      "name": "Star",
+      "transform_3d": {
+        "position": [
+          -0.9083606090052649,
+          0.8252698667263799,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.003,
+          0.003,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "ellipse",
+          "fill": [
+            0.3,
+            0.48,
+            0.72,
+            0.26
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0,
+          "layer": -179
+        }
+      },
+      "parent": "space-dust-1"
+    },
+    {
+      "id": "star-1-16",
+      "name": "Star",
+      "transform_3d": {
+        "position": [
+          -0.3974706867366218,
+          0.3485015277123284,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.003,
+          0.003,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "ellipse",
+          "fill": [
+            0.3,
+            0.48,
+            0.72,
+            0.26
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0,
+          "layer": -179
+        }
+      },
+      "parent": "space-dust-1"
+    },
+    {
+      "id": "star-1-17",
+      "name": "Star",
+      "transform_3d": {
+        "position": [
+          0.8017611238308935,
+          -0.2819730536458408,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.003,
+          0.003,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "ellipse",
+          "fill": [
+            0.3,
+            0.48,
+            0.72,
+            0.26
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0,
+          "layer": -179
+        }
+      },
+      "parent": "space-dust-1"
+    },
+    {
+      "id": "star-1-18",
+      "name": "Star",
+      "transform_3d": {
+        "position": [
+          0.6124986771899179,
+          -0.7880837081004399,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.003,
+          0.003,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "ellipse",
+          "fill": [
+            0.3,
+            0.48,
+            0.72,
+            0.26
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0,
+          "layer": -179
+        }
+      },
+      "parent": "space-dust-1"
+    },
+    {
+      "id": "star-1-19",
+      "name": "Star",
+      "transform_3d": {
+        "position": [
+          -0.6374922963749422,
+          -0.9466108491630203,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.003,
+          0.003,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "ellipse",
+          "fill": [
+            0.3,
+            0.48,
+            0.72,
+            0.26
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0,
+          "layer": -179
+        }
+      },
+      "parent": "space-dust-1"
+    },
+    {
+      "id": "star-1-20",
+      "name": "Star",
+      "transform_3d": {
+        "position": [
+          -0.783470657926769,
+          -0.6876362434122392,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.003,
+          0.003,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "ellipse",
+          "fill": [
+            0.3,
+            0.48,
+            0.72,
+            0.26
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0,
+          "layer": -179
+        }
+      },
+      "parent": "space-dust-1"
+    },
+    {
+      "id": "star-1-21",
+      "name": "Star",
+      "transform_3d": {
+        "position": [
+          0.4273697098015044,
+          -0.1253803758307617,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.003,
+          0.003,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "ellipse",
+          "fill": [
+            0.3,
+            0.48,
+            0.72,
+            0.26
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0,
+          "layer": -179
+        }
+      },
+      "parent": "space-dust-1"
+    },
+    {
+      "id": "space-dust-2",
+      "name": "SpaceDust2",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.script": {
+          "source": "scripts/space.decay",
+          "script": "Space",
+          "properties": {
+            "depth": 2
+          }
+        }
+      }
+    },
+    {
+      "id": "star-2-0",
+      "name": "Star",
+      "transform_3d": {
+        "position": [
+          0.8620684260895435,
+          -0.8466599813673853,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.004,
+          0.004,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "ellipse",
+          "fill": [
+            0.3,
+            0.48,
+            0.72,
+            0.33999999999999997
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0,
+          "layer": -178
+        }
+      },
+      "parent": "space-dust-2"
+    },
+    {
+      "id": "star-2-1",
+      "name": "Star",
+      "transform_3d": {
+        "position": [
+          -0.2799653869042448,
+          -0.3900266389451087,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.004,
+          0.004,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "ellipse",
+          "fill": [
+            0.3,
+            0.48,
+            0.72,
+            0.33999999999999997
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0,
+          "layer": -178
+        }
+      },
+      "parent": "space-dust-2"
+    },
+    {
+      "id": "star-2-2",
+      "name": "Star",
+      "transform_3d": {
+        "position": [
+          -0.9371536263483475,
+          0.2386275536578996,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.004,
+          0.004,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "ellipse",
+          "fill": [
+            0.3,
+            0.48,
+            0.72,
+            0.33999999999999997
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0,
+          "layer": -178
+        }
+      },
+      "parent": "space-dust-2"
+    },
+    {
+      "id": "star-2-3",
+      "name": "Star",
+      "transform_3d": {
+        "position": [
+          0.02862586066601688,
+          0.7620353077925549,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.004,
+          0.004,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "ellipse",
+          "fill": [
+            0.3,
+            0.48,
+            0.72,
+            0.33999999999999997
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0,
+          "layer": -178
+        }
+      },
+      "parent": "space-dust-2"
+    },
+    {
+      "id": "star-2-4",
+      "name": "Star",
+      "transform_3d": {
+        "position": [
+          0.9448309271191844,
+          0.9493481688481241,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.004,
+          0.004,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "ellipse",
+          "fill": [
+            0.3,
+            0.48,
+            0.72,
+            0.33999999999999997
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0,
+          "layer": -178
+        }
+      },
+      "parent": "space-dust-2"
+    },
+    {
+      "id": "star-2-5",
+      "name": "Star",
+      "transform_3d": {
+        "position": [
+          0.22477267605280732,
+          0.7179519910429948,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.004,
+          0.004,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "ellipse",
+          "fill": [
+            0.3,
+            0.48,
+            0.72,
+            0.33999999999999997
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0,
+          "layer": -178
+        }
+      },
+      "parent": "space-dust-2"
+    },
+    {
+      "id": "star-2-6",
+      "name": "Star",
+      "transform_3d": {
+        "position": [
+          -0.8845481129443706,
+          0.16990382192209671,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.004,
+          0.004,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "ellipse",
+          "fill": [
+            0.3,
+            0.48,
+            0.72,
+            0.33999999999999997
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0,
+          "layer": -178
+        }
+      },
+      "parent": "space-dust-2"
+    },
+    {
+      "id": "star-2-7",
+      "name": "Star",
+      "transform_3d": {
+        "position": [
+          -0.4620036885480667,
+          -0.4530802540769673,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.004,
+          0.004,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "ellipse",
+          "fill": [
+            0.3,
+            0.48,
+            0.72,
+            0.33999999999999997
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0,
+          "layer": -178
+        }
+      },
+      "parent": "space-dust-2"
+    },
+    {
+      "id": "star-2-8",
+      "name": "Star",
+      "transform_3d": {
+        "position": [
+          0.7606412262448552,
+          -0.8762337474337241,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.004,
+          0.004,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "ellipse",
+          "fill": [
+            0.3,
+            0.48,
+            0.72,
+            0.33999999999999997
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0,
+          "layer": -178
+        }
+      },
+      "parent": "space-dust-2"
+    },
+    {
+      "id": "star-2-9",
+      "name": "Star",
+      "transform_3d": {
+        "position": [
+          0.6660035452061049,
+          -0.9129252427119058,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.004,
+          0.004,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "ellipse",
+          "fill": [
+            0.3,
+            0.48,
+            0.72,
+            0.33999999999999997
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0,
+          "layer": -178
+        }
+      },
+      "parent": "space-dust-2"
+    },
+    {
+      "id": "star-2-10",
+      "name": "Star",
+      "transform_3d": {
+        "position": [
+          -0.5820226830105719,
+          -0.5469719934477676,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.004,
+          0.004,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "ellipse",
+          "fill": [
+            0.3,
+            0.48,
+            0.72,
+            0.33999999999999997
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0,
+          "layer": -178
+        }
+      },
+      "parent": "space-dust-2"
+    },
+    {
+      "id": "star-2-11",
+      "name": "Star",
+      "transform_3d": {
+        "position": [
+          -0.8220988761049227,
+          0.060222694074070354,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.004,
+          0.004,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "ellipse",
+          "fill": [
+            0.3,
+            0.48,
+            0.72,
+            0.33999999999999997
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0,
+          "layer": -178
+        }
+      },
+      "parent": "space-dust-2"
+    },
+    {
+      "id": "star-2-12",
+      "name": "Star",
+      "transform_3d": {
+        "position": [
+          0.36154021756223326,
+          0.6408562239713551,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.004,
+          0.004,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "ellipse",
+          "fill": [
+            0.3,
+            0.48,
+            0.72,
+            0.33999999999999997
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0,
+          "layer": -178
+        }
+      },
+      "parent": "space-dust-2"
+    },
+    {
+      "id": "star-2-13",
+      "name": "Star",
+      "transform_3d": {
+        "position": [
+          0.9190620040738017,
+          0.9388407717649306,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.004,
+          0.004,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "ellipse",
+          "fill": [
+            0.3,
+            0.48,
+            0.72,
+            0.33999999999999997
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0,
+          "layer": -178
+        }
+      },
+      "parent": "space-dust-2"
+    },
+    {
+      "id": "star-2-14",
+      "name": "Star",
+      "transform_3d": {
+        "position": [
+          -0.11505276641988665,
+          0.822750557434418,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.004,
+          0.004,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "ellipse",
+          "fill": [
+            0.3,
+            0.48,
+            0.72,
+            0.33999999999999997
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0,
+          "layer": -178
+        }
+      },
+      "parent": "space-dust-2"
+    },
+    {
+      "id": "star-2-15",
+      "name": "Star",
+      "transform_3d": {
+        "position": [
+          -0.949918532812869,
+          0.34378705127105635,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.004,
+          0.004,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "ellipse",
+          "fill": [
+            0.3,
+            0.48,
+            0.72,
+            0.33999999999999997
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0,
+          "layer": -178
+        }
+      },
+      "parent": "space-dust-2"
+    },
+    {
+      "id": "star-2-16",
+      "name": "Star",
+      "transform_3d": {
+        "position": [
+          -0.13971023858768775,
+          -0.28680338222404833,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.004,
+          0.004,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "ellipse",
+          "fill": [
+            0.3,
+            0.48,
+            0.72,
+            0.33999999999999997
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0,
+          "layer": -178
+        }
+      },
+      "parent": "space-dust-2"
+    },
+    {
+      "id": "star-2-17",
+      "name": "Star",
+      "transform_3d": {
+        "position": [
+          0.9124490036022664,
+          -0.7908994773367084,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.004,
+          0.004,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "ellipse",
+          "fill": [
+            0.3,
+            0.48,
+            0.72,
+            0.33999999999999997
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0,
+          "layer": -178
+        }
+      },
+      "parent": "space-dust-2"
+    },
+    {
+      "id": "star-2-18",
+      "name": "Star",
+      "transform_3d": {
+        "position": [
+          0.38442411882450883,
+          -0.946170166915711,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.004,
+          0.004,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "ellipse",
+          "fill": [
+            0.3,
+            0.48,
+            0.72,
+            0.33999999999999997
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0,
+          "layer": -178
+        }
+      },
+      "parent": "space-dust-2"
+    },
+    {
+      "id": "star-2-19",
+      "name": "Star",
+      "transform_3d": {
+        "position": [
+          -0.8093485372717504,
+          -0.6841334721357905,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.004,
+          0.004,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "ellipse",
+          "fill": [
+            0.3,
+            0.48,
+            0.72,
+            0.33999999999999997
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0,
+          "layer": -178
+        }
+      },
+      "parent": "space-dust-2"
+    },
+    {
+      "id": "star-2-20",
+      "name": "Star",
+      "transform_3d": {
+        "position": [
+          -0.6014870124636785,
+          -0.12036040921395606,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.004,
+          0.004,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "ellipse",
+          "fill": [
+            0.3,
+            0.48,
+            0.72,
+            0.33999999999999997
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0,
+          "layer": -178
+        }
+      },
+      "parent": "space-dust-2"
+    },
+    {
+      "id": "star-2-21",
+      "name": "Star",
+      "transform_3d": {
+        "position": [
+          0.648032978647459,
+          0.4964974890849802,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.004,
+          0.004,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "ellipse",
+          "fill": [
+            0.3,
+            0.48,
+            0.72,
+            0.33999999999999997
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0,
+          "layer": -178
+        }
+      },
+      "parent": "space-dust-2"
+    },
+    {
+      "id": "pause-settings",
+      "name": "PauseSettings",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "action",
+            "action-ghost",
+            "pause-settings"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.002,
+            0.006,
+            0.014,
+            1
+          ],
+          "stroke": [
+            0.03,
+            0.08,
+            0.1,
+            1
+          ],
+          "stroke_width": 0.002,
+          "layer": 310,
+          "anchor": "center"
+        },
+        "sindri.ui.button": {
+          "label": "HANGAR"
+        },
+        "sindri.script": {
+          "source": "scripts/port.decay",
+          "script": "PortAction",
+          "properties": {
+            "action": 0,
+            "value": 4
+          }
+        }
+      },
+      "parent": "pause"
+    },
+    {
+      "id": "pause-settings-text",
+      "name": "PauseSettingsText",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "action-label",
+            "port-button-label"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "FLIGHT SETTINGS",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.035,
+          "line_height": 0.048,
+          "anchor": "center",
+          "color": [
+            0.85,
+            0.9,
+            1,
+            1
+          ],
+          "bounds": [
+            1.0,
+            0.12
+          ],
+          "wrap": "word",
+          "layer": 340
+        },
+        "sindri.ui.box": {
+          "fit_content": [
+            false,
+            false
+          ]
+        }
+      },
+      "parent": "pause-settings"
+    },
+    {
+      "id": "space-backdrop",
+      "name": "SpaceBackdrop",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          -9
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          20,
+          12,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/orbital-key-art.png",
+          "tint": [
+            0.14,
+            0.18,
+            0.24,
+            0.24
+          ],
+          "layer": -195
+        },
+        "sindri.script": {
+          "source": "scripts/space.decay",
+          "script": "SpaceBackdrop",
+          "properties": {}
+        }
+      }
+    },
+    {
+      "id": "flight-actions",
+      "name": "FlightActions",
+      "components": {
+        "sindri.input.actions": {
+          "actions": [
+            {
+              "name": "burst",
+              "kind": "button",
+              "bindings": [
+                "key.ShiftLeft",
+                "gamepad.right_bumper"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "port-rebind",
+      "name": "PortRebind",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "action",
+            "action-ghost",
+            "port-rebind"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.002,
+            0.006,
+            0.014,
+            1
+          ],
+          "stroke": [
+            0.03,
+            0.08,
+            0.1,
+            1
+          ],
+          "stroke_width": 0.002,
+          "layer": 520,
+          "anchor": "center"
+        },
+        "sindri.ui.button": {
+          "label": "BURST KEY / ShiftLeft"
+        },
+        "sindri.script": {
+          "source": "scripts/port.decay",
+          "script": "PortAction",
+          "properties": {
+            "action": 10,
+            "value": 0
+          }
+        }
+      },
+      "parent": "port-page-4"
+    },
+    {
+      "id": "port-rebind-text",
+      "name": "PortRebindText",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "action-label",
+            "port-button-label"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "BURST KEY / ShiftLeft",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.035,
+          "line_height": 0.048,
+          "anchor": "center",
+          "color": [
+            0.85,
+            0.9,
+            1,
+            1
+          ],
+          "bounds": [
+            1.0,
+            0.12
+          ],
+          "wrap": "word",
+          "layer": 525
+        },
+        "sindri.ui.box": {
+          "fit_content": [
+            false,
+            false
+          ]
+        }
+      },
+      "parent": "port-rebind"
+    },
+    {
+      "id": "port-settings-back",
+      "name": "PortSettingsBack",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "action",
+            "action-ghost",
+            "port-settings-back"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.002,
+            0.006,
+            0.014,
+            1
+          ],
+          "stroke": [
+            0.03,
+            0.08,
+            0.1,
+            1
+          ],
+          "stroke_width": 0.002,
+          "layer": 520,
+          "anchor": "center"
+        },
+        "sindri.ui.button": {
+          "label": "BACK TO FLIGHT DECK"
+        },
+        "sindri.script": {
+          "source": "scripts/port.decay",
+          "script": "PortAction",
+          "properties": {
+            "action": 0,
+            "value": 0
+          }
+        }
+      },
+      "parent": "port-page-4"
+    },
+    {
+      "id": "port-settings-back-text",
+      "name": "PortSettingsBackText",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "action-label",
+            "port-button-label"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "BACK TO FLIGHT DECK",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.035,
+          "line_height": 0.048,
+          "anchor": "center",
+          "color": [
+            0.85,
+            0.9,
+            1,
+            1
+          ],
+          "bounds": [
+            1.0,
+            0.12
+          ],
+          "wrap": "word",
+          "layer": 525
+        },
+        "sindri.ui.box": {
+          "fit_content": [
+            false,
+            false
+          ]
+        }
+      },
+      "parent": "port-settings-back"
+    },
+    {
+      "id": "port-archive-mode-3",
+      "name": "PortArchiveMode3",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "action",
+            "action-secondary",
+            "archive-mode",
+            "archive-mode-3"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.002,
+            0.006,
+            0.014,
+            1
+          ],
+          "stroke": [
+            0.03,
+            0.08,
+            0.1,
+            1
+          ],
+          "stroke_width": 0.002,
+          "layer": 520,
+          "anchor": "center"
+        },
+        "sindri.ui.button": {
+          "label": "Medals"
+        },
+        "sindri.script": {
+          "source": "scripts/port.decay",
+          "script": "PortAction",
+          "properties": {
+            "action": 8,
+            "value": 3
+          }
+        }
+      },
+      "parent": "port-page-2"
+    },
+    {
+      "id": "port-archive-mode-3-text",
+      "name": "PortArchiveMode3Text",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "action-label",
+            "port-button-label"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "MEDALS",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.035,
+          "line_height": 0.048,
+          "anchor": "center",
+          "color": [
+            0.85,
+            0.9,
+            1,
+            1
+          ],
+          "bounds": [
+            1.0,
+            0.12
+          ],
+          "wrap": "word",
+          "layer": 525
+        },
+        "sindri.ui.box": {
+          "fit_content": [
+            false,
+            false
+          ]
+        }
+      },
+      "parent": "port-archive-mode-3"
     }
   ]
 }

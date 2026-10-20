@@ -123,14 +123,14 @@ A scene declares named actions; scripts read them by name and rebind them while 
 
 Engine ✅ · Editor 🟡 · Decay ✅ · Proof ✅ — parity row *Action mapping (named actions, rebindable)*
 
-**Tested by:** [`crates/sindri-platform/src/input/action/map.rs`](../../crates/sindri-platform/src/input/action/map.rs), [`crates/sindri-platform/src/input/action/state.rs`](../../crates/sindri-platform/src/input/action/state.rs), [`games/platformer/tests/a_run_reaches_the_flag.rs`](../../games/platformer/tests/a_run_reaches_the_flag.rs), [`game/tests/the_mixer_and_input_demos_work.rs`](../../game/tests/the_mixer_and_input_demos_work.rs)
+**Tested by:** [`crates/sindri-platform/src/input/action/map.rs`](../../crates/sindri-platform/src/input/action/map.rs), [`crates/sindri-platform/src/input/action/state.rs`](../../crates/sindri-platform/src/input/action/state.rs), [`games/platformer/tests/a_run_reaches_the_flag.rs`](../../games/platformer/tests/a_run_reaches_the_flag.rs), [`game/tests/the_mixer_and_input_demos_work.rs`](../../game/tests/the_mixer_and_input_demos_work.rs), [`games/orbital-baked/tests/the_complete_game.rs`](../../games/orbital-baked/tests/the_complete_game.rs)
 
-**Exercised in:** [`games/platformer`](../../games/platformer), [`examples/input`](../../examples/input)
+**Exercised in:** [`games/platformer`](../../games/platformer), [`examples/input`](../../examples/input), [`games/orbital-baked`](../../games/orbital-baked)
 
 **Limits:**
 
 - Actions are per scene, not per project or per player.
-- A rebinding is not saved between sessions.
+- No automatic binding persistence; a game can store and restore a binding with Save.text.
 
 <details markdown="1">
 <summary>Evidence</summary>
@@ -143,6 +143,8 @@ before any script runs; `Action.held`, `pressed`, `released`, `axis` and
 `Action.last_pressed` rebind one while the game runs, written back into the
 component. The platformer's hero runs and jumps by actions, and
 `examples/input` rebinds its boost (also covered by the browser smoke).
+Orbital Last Stand rebinds burst in its settings and saves the chosen binding
+through `Save.text`, restoring it when the next session opens.
 
 </details>
 
@@ -195,7 +197,7 @@ Every voice plays through a named bus under `master`; scripts move and read bus 
 
 Engine ✅ · Editor 🟡 · Decay ✅ · Proof ✅ — parity row *Buses / mixer / master volume*
 
-**Tested by:** [`crates/sindri-platform/src/audio/mixer.rs`](../../crates/sindri-platform/src/audio/mixer.rs), [`games/orbital-baked/tests/the_mixer.rs`](../../games/orbital-baked/tests/the_mixer.rs), [`game/tests/the_mixer_and_input_demos_work.rs`](../../game/tests/the_mixer_and_input_demos_work.rs)
+**Tested by:** [`crates/sindri-platform/src/audio/mixer.rs`](../../crates/sindri-platform/src/audio/mixer.rs), [`games/orbital-baked/tests/the_mixer.rs`](../../games/orbital-baked/tests/the_mixer.rs), [`game/tests/the_mixer_and_input_demos_work.rs`](../../game/tests/the_mixer_and_input_demos_work.rs), [`games/orbital-baked/tests/the_complete_game.rs`](../../games/orbital-baked/tests/the_complete_game.rs)
 
 **Exercised in:** [`games/orbital-baked`](../../games/orbital-baked), [`examples/audio`](../../examples/audio)
 

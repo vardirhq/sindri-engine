@@ -37,6 +37,10 @@ script Result {
         }
         this.shown = true;
 
+        if Game.victory > 0.0 { Ui.set_text(World.find("ResultTitle"), "EVACUATION COMPLETE"); }
+        else { Ui.set_text(World.find("ResultTitle"), "SIGNAL LOST / SORTIE COMPLETE"); }
+        if Game.mode == 1.0 && Game.victory > 0.0 { Ui.set_text(World.find("ResultTitle"), "GAUNTLET COMPLETE / ALL TWELVE"); }
+        Ui.set_text(World.find("ResultReward"), "+" + floor(Game.credits_earned) + " SALVAGE  /  " + floor(Game.commendations_earned) + " COMMENDATIONS\n" + ship_name(Game.ship) + "  /  " + difficulty_name(Game.run_difficulty));
         Ui.set_number(this.score, Game.score);
         Ui.set_number(this.kills, Game.kills);
         Ui.set_number(this.best, Save.number("best_score", 0.0));

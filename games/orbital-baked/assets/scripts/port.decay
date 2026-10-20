@@ -1,0 +1,207 @@
+// Mission control owns front-end navigation; entering a sortie snapshots choices.
+script Port {
+    @export let modules: Profile;
+    @export let threats: Profile;
+    @export let synergies: Profile;
+    var shown_page: number = -1.0;
+    var shown_ship: number = -1.0;
+    var shown_archive: number = -1.0;
+    var shown_mode: number = -1.0;
+
+    fn start() {
+        Game.selected_ship = floor(clamp(Save.number("selected_ship", 0.0), 0.0, 3.0));
+        if !ship_unlocked(Game.selected_ship) { Game.selected_ship = 0.0; }
+        Game.preview_ship = Game.selected_ship;
+        Game.difficulty = floor(clamp(Save.number("difficulty", 1.0), 0.0, 2.0));
+        Game.reduced_motion = Save.flag("reduced_motion", false);
+        Game.reduced_flashes = Save.flag("reduced_flashes", false);
+        Game.guides = Save.flag("guides", true);
+        let binding = Save.text("burst_binding", "key.ShiftLeft");
+        if valid_burst_key(binding) { Action.rebind("burst", 0.0, binding); }
+        Ui.set_checked(World.find("PortMotion"), Game.reduced_motion);
+        Ui.set_checked(World.find("PortFlashes"), Game.reduced_flashes);
+        Ui.set_checked(World.find("PortGuides"), Game.guides);
+    }
+
+    fn update(dt: number) {
+        let page = Game.menu_page;
+        World.set_active(World.find("Pause"), Game.run_state == 3.0 && page == 0.0);
+        let docked = Game.run_state == 0.0 || (Game.run_state == 3.0 && page > 0.0);
+        World.set_active(World.find("TitleMain"), Game.run_state == 0.0 && page == 0.0);
+        World.set_active(World.find("PortScreen"), docked && page > 0.0);
+        for group in 1..5 {
+            World.set_active(World.find("PortPage" + group), docked && page == group);
+        }
+        if !docked { this.shown_page = -1.0; return; }
+        if page != this.shown_page {
+            this.shown_page = page;
+            Game.awaiting_burst_key = false;
+            refresh_summary();
+            var heading: String = "01 / FLEET HANGAR";
+            if page == 2.0 { heading = "02 / SIGNAL ARCHIVE"; }
+            if page == 3.0 { heading = "03 / PILOT FLIGHT LOG"; }
+            if page == 4.0 { heading = "04 / FLIGHT SETTINGS"; }
+            Ui.set_text(World.find("PortHeading"), heading);
+            this.shown_ship = -1.0;
+            this.shown_archive = -1.0;
+        }
+        Ui.set_text(World.find("TitleDifficultyText"), "DIFFICULTY  /  " + difficulty_name(Game.difficulty));
+        if page == 1.0 && this.shown_ship != Game.preview_ship { show_ship(); }
+        if page == 2.0 && (this.shown_archive != Game.archive_index || this.shown_mode != Game.archive_mode) { show_archive(); }
+        World.set_active(World.find("PortBack"), page != 4.0);
+        if page == 4.0 { settings(); }
+        if page > 0.0 && (Input.just_pressed("Escape") || Gamepad.just_pressed(0.0, "east")) {
+            Game.menu_page = 0.0;
+        }
+    }
+
+    fn refresh_summary() {
+        var back: String = "BACK TO FLIGHT DECK";
+        if Game.run_state == 3.0 { back = "BACK TO PAUSE"; }
+        Ui.set_text(World.find("PortBackText"), back);
+        Ui.set_text(World.find("PortSettingsBackText"), back);
+        for bus in ["Master", "Music", "Effects"] {
+            var key: String = "master";
+            if bus == "Music" { key = "music"; }
+            if bus == "Effects" { key = "effects"; }
+            let volume = Save.number("volume_" + key, 1.0);
+            Ui.set_slider_value(World.find("Port" + bus), volume);
+            Ui.set_fill(World.find("Port" + bus + "Fill"), volume);
+        }
+        Ui.set_text(World.find("PortCredits"), floor(Save.number("credits", 0.0)) + " SALVAGE  /  " + floor(Save.number("commendations", 0.0)) + " COMMENDATIONS");
+        Ui.set_text(World.find("TitleFleetText"), "FLIGHT DECK  /  " + ship_name(Game.selected_ship));
+        Ui.set_text(World.find("PortCareer"), floor(Save.number("runs", 0.0)) + " SORTIES\n" + floor(Save.number("total_kills", 0.0)) + " HOSTILES\n" + floor(Save.number("career_bosses", 0.0)) + " BOSSES\n" + floor(Save.number("victories", 0.0)) + " VICTORIES");
+        for row in 0..6 {
+            Ui.set_text(World.find("PortRecord" + row), Save.text("record_" + row, "AWAITING FLIGHT DATA\nYour next sortie will be recorded here."));
+        }
+    }
+
+    fn show_ship() {
+        let ship = Game.preview_ship;
+        this.shown_ship = ship;
+        Ui.set_text(World.find("PortShipName"), ship_name(ship));
+        var copy: String = "MULTIROLE / BALANCED\n\nThe dependable all-rounder. A clean hull and a precise gun: every build starts with possibility.\n\nHULL  5     SPEED  100%     FIRE  100%";
+        if ship == 1.0 { copy = "DEFENDER / HEAVY\n\nHeavy plating buys room for mistakes. Slower handling rewards a deliberate build.\n\nHULL  7     ARMOR  10%     SPEED  85%"; }
+        if ship == 2.0 { copy = "INTERCEPTOR / AGILE\n\nFast handling and rapid fire trade away hull and shot power. Make every opening count.\n\nHULL  4     SPEED  120%     FIRE  120%"; }
+        if ship == 3.0 { copy = "RESEARCH / ARC SYSTEM\n\nAn Arc Imprint, wider collection and faster research. Fragile, built to grow.\n\nHULL  4     XP  120%     MAGNET  +0.8"; }
+        Ui.set_text(World.find("PortShipCopy"), copy);
+        for index in 0..4 { World.set_active(World.find("PortShipArt" + index), index == ship); }
+        if ship_unlocked(ship) {
+            if Game.selected_ship == ship { Ui.set_text(World.find("PortEquipText"), "EQUIPPED  /  READY TO FLY"); }
+            else { Ui.set_text(World.find("PortEquipText"), "EQUIP " + ship_name(ship)); }
+        } else {
+            Ui.set_text(World.find("PortEquipText"), "UNLOCK  /  " + ship_cost(ship) + " SALVAGE");
+        }
+        Ui.set_text(World.find("PortShipStatus"), "PERSONAL BEST  /  " + floor(Save.number("best_ship_" + ship, 0.0)) + " PTS");
+    }
+
+    fn show_archive() {
+        let mode = Game.archive_mode;
+        var count: number = Profiles.count(this.modules, "modules");
+        if mode == 1.0 { count = Profiles.count(this.threats, "entries"); }
+        if mode == 2.0 { count = Profiles.count(this.synergies, "synergies"); }
+        if mode == 3.0 { count = 8.0; }
+        Game.archive_index = (Game.archive_index + count) % count;
+        let index = Game.archive_index;
+        this.shown_archive = index;
+        this.shown_mode = mode;
+        var name: String = Profiles.text_at(this.modules, "modules", index, "name", "Module");
+        var copy: String = Profiles.text_at(this.modules, "modules", index, "description", "");
+        var known: bool = Save.flag("module_" + index, false);
+        if mode == 1.0 {
+            name = Profiles.text_at(this.threats, "entries", index, "name", "Signal");
+            copy = Profiles.text_at(this.threats, "entries", index, "description", "");
+            known = Save.flag(Profiles.text_at(this.threats, "entries", index, "discovery", "unknown"), false);
+        }
+        if mode == 2.0 {
+            name = Profiles.text_at(this.synergies, "synergies", index, "name", "Link");
+            copy = Profiles.text_at(this.synergies, "synergies", index, "requirements_text", "") + "\n\n" + Profiles.text_at(this.synergies, "synergies", index, "description", "");
+            known = Save.flag("synergy_seen_" + index, false);
+        }
+        if mode == 3.0 {
+            name = Profiles.text_at(this.threats, "medals", index, "name", "Commendation");
+            copy = Profiles.text_at(this.threats, "medals", index, "description", "");
+            known = Save.flag("medal_" + Profiles.text_at(this.threats, "medals", index, "key", ""), false);
+        }
+        var status: String = "FIELD MANUAL / NOT YET RECORDED";
+        if known { status = "RECORDED IN YOUR CAREER"; }
+        Ui.set_text(World.find("PortArchiveName"), name);
+        Ui.set_text(World.find("PortArchiveCopy"), copy);
+        Ui.set_text(World.find("PortArchiveStatus"), status);
+        Ui.set_text(World.find("PortArchiveCount"), (index + 1.0) + " / " + count);
+    }
+
+    fn settings() {
+        let motion = World.find("PortMotion");
+        let flashes = World.find("PortFlashes");
+        let guides = World.find("PortGuides");
+        if Game.awaiting_burst_key {
+            Ui.set_text(World.find("PortRebindText"), "PRESS Q E R F C X Z OR SHIFT");
+            let pressed = Action.last_pressed();
+            if valid_burst_key(pressed) {
+                Action.rebind("burst", 0.0, pressed);
+                Save.set_text("burst_binding", pressed);
+                Game.awaiting_burst_key = false;
+            }
+        } else {
+            let bindings = Action.bindings("burst");
+            Ui.set_text(World.find("PortRebindText"), "BURST KEY  /  " + bindings[0].slice(4, bindings[0].length));
+        }
+        if Viewport.aspect < 1.0 {
+            Ui.set_text(World.find("PortControls"), "WASD / stick / drag to steer
+Burst: custom key / RB / BURST
+Pause: Esc / Start / PAUSE");
+        } else {
+            Ui.set_text(World.find("PortControls"), "FLIGHT CONTROLS
+WASD / arrows / left stick / drag to steer
+Custom burst key / right bumper / BURST to evade
+Esc / Start / PAUSE to suspend
+
+Fire is automatic. Collect cores to level up.
+Progress is saved on this device.");
+        }
+        if Ui.changed(motion) { Game.reduced_motion = Ui.is_checked(motion); Save.set_flag("reduced_motion", Game.reduced_motion); }
+        if Ui.changed(flashes) { Game.reduced_flashes = Ui.is_checked(flashes); Save.set_flag("reduced_flashes", Game.reduced_flashes); }
+        if Ui.changed(guides) { Game.guides = Ui.is_checked(guides); Save.set_flag("guides", Game.guides); }
+    }
+}
+
+script PortAction {
+    @export let action: number = 0.0;
+    @export let value: number = 0.0;
+
+    fn update(dt: number) {
+        if !Ui.is_pressed(this.entity) { return; }
+        Audio.play("audio/click.wav", 0.3);
+        if this.action == 0.0 { Game.menu_page = this.value; }
+        else if this.action == 1.0 { Game.preview_ship = this.value; }
+        else if this.action == 2.0 { equip(); }
+        else if this.action == 3.0 {
+            Game.difficulty = (Game.difficulty + 1.0) % 3.0;
+            Save.set_number("difficulty", Game.difficulty);
+        } else if this.action == 5.0 { Game.archive_index += this.value; }
+        else if this.action == 6.0 { Game.run_state = 3.0; }
+        else if this.action == 7.0 { Game.reroll_request = true; }
+        else if this.action == 8.0 { Game.archive_mode = this.value; Game.archive_index = 0.0; }
+        else if this.action == 9.0 { Scene.go("combat-lab.scene"); }
+        else if this.action == 10.0 { Game.awaiting_burst_key = true; }
+    }
+
+    fn equip() {
+        let ship = Game.preview_ship;
+        if !ship_unlocked(ship) {
+            let credits = Save.number("credits", 0.0);
+            if credits < ship_cost(ship) {
+                Ui.set_text(World.find("PortShipStatus"), "NEED " + (ship_cost(ship) - credits) + " MORE SALVAGE / EARNED BY FLYING");
+                return;
+            }
+            Save.set_number("credits", credits - ship_cost(ship));
+            Save.set_flag("ship_" + ship, true);
+        }
+        Game.selected_ship = ship;
+        Save.set_number("selected_ship", ship);
+        Ui.set_text(World.find("PortEquipText"), "EQUIPPED  /  READY TO FLY");
+        Ui.set_text(World.find("PortCredits"), floor(Save.number("credits", 0.0)) + " SALVAGE");
+        Ui.set_text(World.find("TitleFleetText"), "FLIGHT DECK  /  " + ship_name(ship));
+    }
+}

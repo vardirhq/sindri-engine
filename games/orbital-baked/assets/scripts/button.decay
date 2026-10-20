@@ -19,9 +19,12 @@ script Button {
             Game.mode = 0.0;
             Game.request_start = 1.0;
         } else if this.action == 1.0 {
+            Game.menu_page = 0.0;
             Game.run_state = 0.0;
         } else if this.action == 2.0 {
             Game.run_state = 1.0;
+        } else if this.action == 6.0 {
+            Game.request_start = 1.0;
         } else if this.action == 4.0 {
             Game.mode = 1.0;
             Game.request_start = 1.0;

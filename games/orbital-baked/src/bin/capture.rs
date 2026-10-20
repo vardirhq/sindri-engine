@@ -35,7 +35,28 @@ struct Shot {
     rush_from: Option<f32>,
 }
 
+fn menu_shot(name: &str) -> Option<Shot> {
+    let clicks = match name {
+        "hangar" => vec!["TitleHangar"],
+        "archive" => vec!["TitleArchive"],
+        "records" => vec!["TitleRecords"],
+        "settings" => vec!["TitleSettings"],
+        "pause" => vec!["TitleStart", "FlightPause"],
+        "upgrade" => vec!["TitleStart"],
+        "debrief" => vec!["TitleStart", "FlightPause", "PauseQuit"],
+        _ => return None,
+    };
+    Some(Shot {
+        seconds: 0.2,
+        clicks: clicks.into_iter().map(str::to_owned).collect(),
+        rush_from: None,
+    })
+}
+
 fn shot_for(name: &str) -> Shot {
+    if let Some(shot) = menu_shot(name) {
+        return shot;
+    }
     // `boss-7` opens a boss rush on the eighth boss of the roster, so any one
     // of the twelve can be photographed on demand rather than waited for.
     if let Some(index) = name.strip_prefix("boss-")
@@ -92,6 +113,19 @@ fn shot_for(name: &str) -> Shot {
             clicks: Vec::new(),
             rush_from: None,
         },
+    }
+}
+
+/// Research through the actual director/chooser, including its fourth offer.
+fn stage_upgrade(run: &mut Run, what: &str) {
+    if what != "upgrade" {
+        return;
+    }
+    run.set_board("special_second_opinion", 1.0);
+    run.set_board("cores", run.board("next_level"));
+    for _ in 0..4 {
+        let notes = run.step(1.0 / 60.0);
+        assert!(notes.is_empty(), "{notes:#?}");
     }
 }
 
@@ -197,6 +231,8 @@ async fn capture(
         let notes = run.step(1.0 / 60.0);
         assert!(notes.is_empty(), "step {step}: {notes:#?}");
     }
+
+    stage_upgrade(&mut run, what);
 
     // Bound after the run has played rather than before it, which is the whole
     // difference between this game and the one it was copied from. There the

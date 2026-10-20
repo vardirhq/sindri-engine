@@ -1,0 +1,45 @@
+// Three composed loops, gently crossfaded through the existing named buses.
+// The saved music fader is their common gain. Effects remain independent.
+script Soundscape {
+    var briefing: number = 1.0;
+    var corridor: number = 0.0;
+    var signal: number = 0.0;
+    var target: number = 0.0;
+    var previous_state: number = 0.0;
+
+    fn start() {
+        Audio.set_volume("score_briefing", 1.0);
+        Audio.set_volume("score_corridor", 0.0);
+        Audio.set_volume("score_signal", 0.0);
+        Audio.loop_on("score_briefing", "audio/briefing.ogg", 0.28);
+        Audio.loop_on("score_corridor", "audio/corridor.ogg", 0.32);
+        Audio.loop_on("score_signal", "audio/last-signal.ogg", 0.34);
+    }
+
+    fn update(dt: number) {
+        let state = Game.run_state;
+        if state == 0.0 || state == 4.0 { this.target = 0.0; }
+        else if state == 1.0 || state == 2.0 {
+            if Game.boss_hp > 0.0 { this.target = 2.0; }
+            else { this.target = 1.0; }
+        }
+        let ease = min(1.0, dt * 2.5);
+        var menu: number = 0.0;
+        var field: number = 0.0;
+        var boss: number = 0.0;
+        if this.target == 0.0 { menu = 1.0; }
+        if this.target == 1.0 { field = 1.0; }
+        if this.target == 2.0 { boss = 1.0; }
+        this.briefing += (menu - this.briefing) * ease;
+        this.corridor += (field - this.corridor) * ease;
+        this.signal += (boss - this.signal) * ease;
+        let music = Audio.volume("music");
+        Audio.set_volume("score_briefing", this.briefing * music);
+        Audio.set_volume("score_corridor", this.corridor * music);
+        Audio.set_volume("score_signal", this.signal * music);
+        if state == 4.0 && this.previous_state != 4.0 && Game.victory > 0.0 {
+            Audio.play("audio/victory.wav", 0.5);
+        }
+        this.previous_state = state;
+    }
+}

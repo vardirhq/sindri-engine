@@ -1,7 +1,7 @@
 format_version = 1
 
 [project]
-name = "Orbital Last Stand (Baked)"
+name = "Orbital Last Stand"
 main_scene = "assets/orbital.scene"
 scenes = ["assets/combat-lab.scene"]
 
@@ -11,6 +11,11 @@ scenes = ["assets/combat-lab.scene"]
 [assets]
 include = [
   "ui.weave",
+  "audio/briefing.ogg",
+  "audio/corridor.ogg",
+  "audio/last-signal.ogg",
+  "audio/burst.wav",
+  "audio/victory.wav",
   "audio/shot.wav",
   "audio/kill.wav",
   "audio/core.wav",

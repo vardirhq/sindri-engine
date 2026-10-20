@@ -6,9 +6,11 @@ struct OfferCard {
     card: Entity,
     name: Entity,
     blurb: Entity,
+    kicker: Entity,
 
     // Puts a module on this slot's card.
-    fn show(title: String, text: String) {
+    fn show(title: String, text: String, rarity: String) {
+        Ui.set_text(this.kicker, rarity);
         Ui.set_text(this.name, title);
         Ui.set_text(this.blurb, text);
         World.set_active(this.card, true);
@@ -40,6 +42,7 @@ script UpgradeChooser {
                 card: World.find(card),
                 name: World.find(card + " Name"),
                 blurb: World.find(card + " Blurb"),
+                kicker: World.find(card + " Kicker"),
             ));
         }
         hide();
@@ -52,6 +55,13 @@ script UpgradeChooser {
             Game.black_modules_taken = 0.0;
         }
         let choosing = Game.run_state == 2.0;
+        if choosing {
+            Ui.set_text(World.find("UpgradeRerollText"), "REDRAW  /  " + Game.rerolls_left + " LEFT");
+            if Game.reroll_request {
+                Game.reroll_request = false;
+                if Game.rerolls_left > 0.0 { Game.rerolls_left -= 1.0; show(); }
+            }
+        }
         if choosing == this.showing { return; }
         this.showing = choosing;
         if choosing { show(); }
@@ -75,11 +85,20 @@ script UpgradeChooser {
         for card in this.cards { World.set_active(card, false); }
         World.set_active(this.screen, true);
         let pool = Game.module_pool;
+        var signal: String = "SALVAGE SIGNAL";
+        if pool == 1.0 { signal = "BOSS RELIC"; }
+        if pool == 2.0 { signal = "FOUNDRY SIGNAL"; }
+        if pool == 3.0 { signal = "BLACK SIGNAL"; }
+        Ui.set_text(World.find("UpgradeKicker"), "LEVEL " + Game.level + " / " + signal);
         var taken: List<f32> = [];
         for slot in 0..this.slots.length {
             let index = pick(slot, pool, taken);
             if index != null { taken.push(index); }
             offer(slot, index);
+        }
+        if taken.length == 0.0 {
+            Game.hp = min(Game.max_hp, Game.hp + Game.max_hp * 0.2);
+            Game.run_state = 1.0;
         }
     }
 
@@ -97,7 +116,8 @@ script UpgradeChooser {
         if index == null { shown.hide(); return; }
         shown.show(
             Profiles.text_at(this.catalog, "modules", index, "name", "Unknown Module"),
-            Profiles.text_at(this.catalog, "modules", index, "description", "")
+            Profiles.text_at(this.catalog, "modules", index, "description", ""),
+            Profiles.text_at(this.catalog, "modules", index, "rarity", "COMMON")
         );
     }
 
@@ -114,7 +134,7 @@ script UpgradeChooser {
                 total += Profiles.number_at(this.catalog, "modules", index, "weight", 1.0);
             }
         }
-        if total <= 0.0 { return null; }
+        if total <= 0.0 { return first_available(0.0, taken); }
         var cursor = Random.range(0.0, total);
         for index in 0..count {
             if available(index, pool, taken) {

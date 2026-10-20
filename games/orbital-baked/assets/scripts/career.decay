@@ -1,0 +1,48 @@
+// A completed sortie settles once. Sidegrades, discoveries and six recent
+// records persist through the shared save store on native and browser hosts.
+shared fn award_commendation(key: String, earned: bool) {
+    if earned && !Save.flag("medal_" + key, false) {
+        Save.set_flag("medal_" + key, true);
+        Game.credits_earned += 30.0;
+        Game.commendations_earned += 1.0;
+        Save.set_number("commendations", Save.number("commendations", 0.0) + 1.0);
+    }
+}
+
+shared fn settle_sortie() {
+    let sortie = Save.number("runs", 0.0);
+    if Save.number("settled_sortie", -1.0) == sortie { return; }
+    Save.set_number("settled_sortie", sortie);
+    // Very short abandoned flights cannot be farmed for currency.
+    var credit: number = 0.0;
+    if Game.elapsed >= 15.0 || Game.bosses_defeated > 0.0 {
+        credit = floor(Game.elapsed / 12.0 + Game.kills / 10.0 + Game.bosses_defeated * 20.0);
+        if Game.victory > 0.0 { credit += 120.0; }
+        if Game.run_difficulty == 2.0 { credit = floor(credit * 1.25); }
+    }
+    Game.credits_earned = credit;
+    award_commendation("first_flight", Game.elapsed >= 60.0);
+    award_commendation("hunter", Game.kills >= 100.0);
+    award_commendation("breaker", Game.bosses_defeated >= 1.0);
+    award_commendation("explorer", Game.sector >= 3.0);
+    award_commendation("engineer", Game.modules_installed >= 8.0);
+    award_commendation("evacuation", Game.victory > 0.0 && Game.mode == 0.0);
+    award_commendation("gauntlet", Game.victory > 0.0 && Game.mode == 1.0);
+    award_commendation("veteran", Game.victory > 0.0 && Game.run_difficulty == 2.0);
+    Save.set_number("credits", Save.number("credits", 0.0) + Game.credits_earned);
+    Save.set_number("career_bosses", Save.number("career_bosses", 0.0) + Game.bosses_defeated);
+    Save.set_number("career_seconds", Save.number("career_seconds", 0.0) + Game.elapsed);
+    if Game.victory > 0.0 { Save.set_number("victories", Save.number("victories", 0.0) + 1.0); }
+    if Game.score > Save.number("best_ship_" + Game.ship, 0.0) {
+        Save.set_number("best_ship_" + Game.ship, Game.score);
+    }
+    for offset in 0..5 {
+        let slot = 5.0 - offset;
+        Save.set_text("record_" + slot, Save.text("record_" + (slot - 1.0), ""));
+    }
+    var outcome: String = "LOST";
+    if Game.victory > 0.0 { outcome = "CLEAR"; }
+    var route: String = "CORRIDOR";
+    if Game.mode == 1.0 { route = "GAUNTLET"; }
+    Save.set_text("record_0", route + " / " + ship_name(Game.ship) + "  /  " + difficulty_name(Game.run_difficulty) + "  /  " + outcome + "\n" + clock_text(Game.elapsed) + "     " + floor(Game.score) + " PTS     " + floor(Game.kills) + " KILLS");
+}

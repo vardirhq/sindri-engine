@@ -62,11 +62,11 @@ The recreated game that forces new capabilities into existence: waves, bosses an
 
 Engine — · Editor — · Decay ✅ · Proof ✅
 
-**Tested by:** [`games/orbital-baked/tests/it_compiles_and_runs.rs`](../../games/orbital-baked/tests/it_compiles_and_runs.rs), [`games/orbital-baked/tests/boss_rush.rs`](../../games/orbital-baked/tests/boss_rush.rs), [`games/orbital-baked/tests/combat_lab.rs`](../../games/orbital-baked/tests/combat_lab.rs), [`games/orbital-baked/tests/the_ui_fits_every_screen.rs`](../../games/orbital-baked/tests/the_ui_fits_every_screen.rs)
+**Tested by:** [`games/orbital-baked/tests/it_compiles_and_runs.rs`](../../games/orbital-baked/tests/it_compiles_and_runs.rs), [`games/orbital-baked/tests/boss_rush.rs`](../../games/orbital-baked/tests/boss_rush.rs), [`games/orbital-baked/tests/the_complete_game.rs`](../../games/orbital-baked/tests/the_complete_game.rs), [`games/orbital-baked/tests/the_build_has_teeth.rs`](../../games/orbital-baked/tests/the_build_has_teeth.rs), [`scripts/browser/orbital-complete.mjs`](../../scripts/browser/orbital-complete.mjs), [`games/orbital-baked/tests/combat_lab.rs`](../../games/orbital-baked/tests/combat_lab.rs), [`games/orbital-baked/tests/the_ui_fits_every_screen.rs`](../../games/orbital-baked/tests/the_ui_fits_every_screen.rs)
 
 **Exercised in:** [`games/orbital-baked`](../../games/orbital-baked)
 
-**See:** [`docs/orbital-last-stand-evidence.md`](../../docs/orbital-last-stand-evidence.md), [`docs/orbital-combat-lab.md`](../../docs/orbital-combat-lab.md)
+**See:** [`docs/orbital-last-stand-evidence.md`](../../docs/orbital-last-stand-evidence.md), [`docs/orbital-combat-lab.md`](../../docs/orbital-combat-lab.md), [`docs/orbital-release.md`](../../docs/orbital-release.md)
 
 <details markdown="1">
 <summary>Evidence</summary>
@@ -75,7 +75,14 @@ Orbital Last Stand is the proof named by many entries on the other pages:
 masks and sensor events, overlap queries, typed script references, profiles,
 tags and spatial queries, tweening, the mixer and save, the full form-widget
 set and composed Weave styling. Its own evidence and plan documents record what
-it exercises in detail.
+it exercises in detail. Its complete-game edition adds a fleet hangar with four
+sidegrade hulls, three difficulty settings, a finite twelve-boss rush, evasive
+burst, career salvage/unlocks, commendations, the full module/threat archive,
+recent sortie records and accessibility settings. All nineteen synergy recipes
+grant explicit build bonuses, catalog descriptions match their combat effects,
+and three Sound Lab compositions crossfade through named audio buses. Game logic remains Decay;
+Weave owns responsive screens. Unicode text saves were the general engine gap
+found by the callsign and flight log.
 
 </details>
 

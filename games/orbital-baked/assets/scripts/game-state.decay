@@ -2,6 +2,27 @@
 // it reads as before anything has set it. `Game.kills` is checked when the
 // project compiles, where `Game.get("kils", 0.0)` read the fallback silently.
 state Game {
+    var menu_page: number = 0.0;
+    var selected_ship: number = 0.0;
+    var preview_ship: number = 0.0;
+    var ship: number = 0.0;
+    var difficulty: number = 1.0;
+    var run_difficulty: number = 1.0;
+    var run_pressure: number = 1.0;
+    var incoming_damage: number = 1.0;
+    var bosses_defeated: number = 0.0;
+    var modules_installed: number = 0.0;
+    var commendations_earned: number = 0.0;
+    var credits_earned: number = 0.0;
+    var dash_left: number = 0.0;
+    var archive_mode: number = 0.0;
+    var archive_index: number = 0.0;
+    var reduced_motion: bool = false;
+    var reduced_flashes: bool = false;
+    var guides: bool = true;
+    var awaiting_burst_key: bool = false;
+    var rerolls_left: number = 2.0;
+    var reroll_request: bool = false;
     var aegis_core_exposed: f32 = 0.0;
     var aegis_reservoir: f32 = 0.0;
     var arc: f32 = 0.0;
@@ -127,6 +148,11 @@ state Game {
     var special_terminal_velocity: f32 = 0.0;
     var special_white_noise: f32 = 0.0;
     var stats_reset: f32 = 0.0;
+    var synergy_damage_bonus: number = 0.0;
+    var synergy_fire_bonus: number = 0.0;
+    var synergy_magnet_bonus: number = 0.0;
+    var synergy_armor_bonus: number = 0.0;
+    var synergy_regen_bonus: number = 0.0;
     var synergy_count: f32 = 0.0;
     var synergy_critical_conduction: f32 = 0.0;
     var synergy_heavy_orbit: f32 = 0.0;

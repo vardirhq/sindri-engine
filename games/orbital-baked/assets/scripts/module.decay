@@ -15,6 +15,8 @@ script Module {
             Game.black_modules_taken = Game.black_modules_taken + 1.0;
         }
         Game.picked_module = index;
+        Game.modules_installed += 1.0;
+        Save.set_flag("module_" + index, true);
         Audio.play("audio/upgrade.wav", 0.4);
         Game.run_state = 1.0;
     }

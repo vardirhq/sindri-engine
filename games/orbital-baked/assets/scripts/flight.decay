@@ -1,0 +1,37 @@
+// Small, actionable guidance instead of interrupting a pilot's first fight.
+script Flight {
+    var mission: Entity = null;
+    var guide: Entity = null;
+    var dash_label: Entity = null;
+    var shown_second: number = -1.0;
+
+    fn start() {
+        this.mission = World.find("FlightMission");
+        this.guide = World.find("FlightGuide");
+        this.dash_label = World.find("FlightDashText");
+    }
+
+    fn update(dt: number) {
+        World.set_active(World.find("FlightPause"), Game.run_state == 1.0);
+        World.set_active(World.find("FlightDash"), Game.run_state == 1.0);
+        if Game.run_state != 1.0 { this.shown_second = -1.0; return; }
+        let second = floor(Game.elapsed);
+        if second != this.shown_second {
+            this.shown_second = second;
+            var mission: String = "EVACUATION  /  " + clock_text(max(0.0, 600.0 - second)) + " REMAINING";
+            if Game.mode == 1.0 { mission = "BOSS GAUNTLET  /  " + Game.bosses_defeated + " OF 12 DEFEATED"; }
+            if Game.synergy_count > 0.0 { mission += " / " + Game.synergy_count + " LINKS"; }
+            Ui.set_text(this.mission, mission);
+        }
+        if Game.dash_left <= 0.0 {
+            if Viewport.aspect < 1.0 { Ui.set_text(this.dash_label, "BURST\nREADY"); }
+            else { Ui.set_text(this.dash_label, "BURST / READY"); }
+        }
+        else { Ui.set_text(this.dash_label, "BURST / " + ceil(Game.dash_left)); }
+        World.set_active(this.mission, Game.boss_hp <= 0.0 && Game.event_banner <= 0.0);
+        World.set_active(this.guide, Game.guides && Game.elapsed < 32.0 && Game.mode == 0.0);
+        if Game.elapsed < 8.0 { Ui.set_text(this.guide, "WASD / LEFT STICK / DRAG TO STEER. FIRING IS AUTOMATIC."); }
+        else if Game.elapsed < 18.0 { Ui.set_text(this.guide, "COLLECT THE GLOWING CORES. EACH LEVEL ADDS A MODULE."); }
+        else { Ui.set_text(this.guide, "BURST TO ESCAPE. A BRIEF SHIELD, THEN 3.5 SECONDS TO RECHARGE."); }
+    }
+}

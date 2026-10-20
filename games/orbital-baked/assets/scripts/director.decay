@@ -76,6 +76,11 @@ script Director {
         // A boss rush opens on whichever boss the title screen was showing, and
         // walks the roster from there. Everything else about the run is the
         // same run: the same director, the same upgrades, the same death.
+        prepare_loadout();
+        Game.menu_page = 0.0;
+        Game.rerolls_left = 2.0;
+        Game.reroll_request = false;
+        this.boss_was_alive = 0.0;
         this.rush_index = Game.rush_from;
         let seed = Save.number("runs", 0.0) + 1.0;
         Save.set_number("runs", seed);
@@ -148,6 +153,7 @@ script Director {
         let state = Game.run_state;
         if state != this.was_state {
             this.was_state = state;
+            if state == 0.0 { show_only_title(); }
             World.set_active(this.pause_screen, state == 3.0);
             World.set_active(this.result_screen, state == 4.0);
         }
@@ -165,7 +171,8 @@ script Director {
             }
             return;
         }
-        if Input.just_pressed("Escape") {
+        if Input.just_pressed("Escape") || Gamepad.just_pressed(0.0, "start") {
+            if state == 3.0 && Game.menu_page > 0.0 { Game.menu_page = 0.0; return; }
             if state == 1.0 { Game.run_state = 3.0; }
             else if state == 3.0 { Game.run_state = 1.0; }
         }
@@ -180,7 +187,7 @@ script Director {
         Game.elapsed = this.elapsed;
         publish_sector();
         update_events(dt);
-        if this.elapsed >= this.run_limit {
+        if this.elapsed >= this.run_limit && rushing() <= 0.0 {
             this.elapsed = this.run_limit;
             Game.elapsed = this.run_limit;
             Game.victory = 1.0;
@@ -206,6 +213,12 @@ script Director {
         // slot still leaves six seconds to collect its salvage before the next
         // one, where the original sends it at once.
         if this.boss_was_alive > 0.0 && !boss_alive {
+            Game.bosses_defeated += 1.0;
+            if rushing() > 0.0 && Game.bosses_defeated >= 12.0 {
+                Game.victory = 1.0;
+                end_run();
+                return;
+            }
             if rushing() > 0.0 {
                 // Long enough to breathe and take the upgrade, short enough
                 // that the next one is clearly the point.
@@ -264,6 +277,7 @@ script Director {
         Game.boss_hp = 0.0;
         Game.boss_max = 0.0;
         Game.nullified = 0.0;
+        settle_sortie();
         let score = Game.score;
         if score > Save.number("best_score", 0.0) { Save.set_number("best_score", score); }
         Save.set_number("total_kills", Save.number("total_kills", 0.0) + Game.kills);
@@ -278,7 +292,7 @@ script Director {
 
     fn spawn_rate() -> f32 {
         return max(0.085, 0.7 - this.elapsed * 0.00092) /
-               (this.normal_spawn * sector_pressure() * Game.event_spawn);
+               (this.normal_spawn * sector_pressure() * Game.event_spawn * Game.run_pressure);
     }
 
     // The event clock (see events.decay). A rush is bosses only, so it has
@@ -326,6 +340,7 @@ script Director {
         let count = unlocked_count();
         let slot = Random.int(0.0, count - 1.0);
         if slot == 2.0 {
+            Save.set_flag("enemy_seen_2", true);
             let enemy = World.spawn(this.charger);
             make_elite(enemy, true);
             place(enemy);
@@ -353,6 +368,7 @@ script Director {
     }
 
     fn spawn_roster(kind: f32) {
+        Save.set_flag("enemy_seen_" + kind, true);
         let enemy = World.spawn(this.drifter);
         World.set_property(enemy, "kind", kind);
         if kind == 0.0 { configure(enemy, 1.5, 2.0, 1.0, 1.0); }
@@ -466,6 +482,7 @@ script Director {
     /// Put one boss on the field. The pick is an index into the roster in the
     /// order a run meets them, and each one is simply its own prefab.
     fn send_kind(pick: f32) {
+        Save.set_flag("boss_seen_" + pick, true);
         var boss: Entity = null;
         if pick == 0.0 { boss = World.spawn(this.warden); }
         else if pick == 1.0 { boss = World.spawn(this.harrower); }

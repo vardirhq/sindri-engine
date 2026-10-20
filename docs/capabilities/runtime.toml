@@ -74,6 +74,7 @@ Tide's treads kick up dust and its engine smokes while it drives.
 id = "game-saves"
 group = "Game saves"
 title = "Game saves"
+parity = "Game progress saves (numbers, flags and text)"
 summary = "A flat, versioned key/value save written atomically to disk or `localStorage` by the host, never by a script."
 status = { engine = "yes", editor = "yes", decay = "yes", proof = "yes" }
 tests = [
@@ -82,6 +83,7 @@ tests = [
   "crates/sindri-platform/src/saves/mod.rs",
   "crates/sindri-decay/tests/a_script_remembers.rs",
   "games/orbital-baked/tests/the_mixer.rs",
+  "games/orbital-baked/tests/the_complete_game.rs",
 ]
 proof = ["games/orbital-baked"]
 limits = ["Decay's store holds numbers, truths and text; it has no world snapshot operation."]
@@ -107,6 +109,10 @@ someone's machine lost power mid-run; `BrowserSaves` uses `localStorage`,
 chosen over every larger browser store because the alternatives are
 asynchronous and a game should not have to ask whether its progress has landed
 yet.
+
+Decay reaches Unicode text through typed `Save.text` and `Save.set_text`, with
+explicit wrong-type/missing-key fallbacks. Orbital uses those calls for pilot
+names and a bounded flight log alongside its numeric career and flag unlocks.
 
 Nothing in Decay writes to storage. The store is in memory, marked dirty on
 change, and the host writes it out on a cadence and before it stops — how often

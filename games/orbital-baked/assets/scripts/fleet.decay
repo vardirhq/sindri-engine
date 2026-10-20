@@ -1,0 +1,85 @@
+// Fleet sidegrades and sortie tuning. These are game choices, not engine types.
+shared fn ship_name(ship: number) -> String {
+    if ship == 1.0 { return "BASTION"; }
+    if ship == 2.0 { return "KESTREL"; }
+    if ship == 3.0 { return "ORACLE"; }
+    return "STRIDER";
+}
+
+shared fn difficulty_name(level: number) -> String {
+    if level == 0.0 { return "STORY"; }
+    if level == 2.0 { return "VETERAN"; }
+    return "STANDARD";
+}
+
+shared fn ship_cost(ship: number) -> number {
+    if ship == 1.0 { return 80.0; }
+    if ship == 2.0 { return 140.0; }
+    if ship == 3.0 { return 220.0; }
+    return 0.0;
+}
+
+shared fn ship_unlocked(ship: number) -> bool {
+    return ship == 0.0 || Save.flag("ship_" + ship, false);
+}
+
+shared fn flight_impact(strength: number) {
+    if !Game.reduced_motion { Camera.impact(strength); }
+}
+
+shared fn prepare_loadout() {
+    Game.ship = Game.selected_ship;
+    if !ship_unlocked(Game.ship) { Game.ship = 0.0; }
+    Game.run_difficulty = Game.difficulty;
+    Game.bosses_defeated = 0.0;
+    Game.modules_installed = 0.0;
+    Game.credits_earned = 0.0;
+    Game.commendations_earned = 0.0;
+    Game.dash_left = 0.0;
+    Game.elite_kills = 0.0;
+    Game.run_pressure = 1.0;
+    Game.incoming_damage = 1.0;
+    if Game.run_difficulty == 0.0 {
+        Game.run_pressure = 0.78;
+        Game.incoming_damage = 0.65;
+    } else if Game.run_difficulty == 2.0 {
+        Game.run_pressure = 1.22;
+        Game.incoming_damage = 1.25;
+    }
+}
+
+shared fn apply_ship_stats() {
+    if Game.ship == 1.0 {
+        Game.max_hp_add = Game.max_hp_add + 2.0;
+        Game.set("armor_add", 0.10);
+        Game.set("move_speed_mul", 0.85);
+        Game.set("fire_rate_mul", 0.90);
+    } else if Game.ship == 2.0 {
+        Game.max_hp_add = Game.max_hp_add - 1.0;
+        Game.set("move_speed_mul", 1.20);
+        Game.set("fire_rate_mul", 1.20);
+        Game.damage_mul = 0.85;
+    } else if Game.ship == 3.0 {
+        Game.max_hp_add = Game.max_hp_add - 1.0;
+        Game.set("xp_gain_mul", 1.20);
+        Game.set("magnet_add", 0.80);
+        Game.arc = 1.0;
+    }
+    // Boss Rush begins with a viable field kit; its twelve fights, not a timer,
+    // decide the result. Every hull keeps its own sidegrade on top of this kit.
+    if Game.mode == 1.0 {
+        Game.set("damage_add", Game.get("damage_add", 0.0) + 2.0);
+        Game.set("fire_rate_add", 1.2);
+        Game.max_hp_add += 3.0;
+        Game.arc = 1.0;
+        Game.nova = 1.0;
+    }
+
+}
+
+shared fn valid_burst_key(binding: String) -> bool {
+    for allowed in ["key.ShiftLeft", "key.ShiftRight", "key.Q", "key.E", "key.R", "key.F", "key.C", "key.X", "key.Z"] {
+        if binding == allowed { return true; }
+    }
+    return false;
+}

@@ -293,7 +293,8 @@ script Drifter {
     // same colour lifted towards white, so the silhouette holds its edge
     // against a bright explosion behind it.
     fn paint() {
-        let white = this.flash;
+        var white = this.flash;
+        if Game.reduced_flashes { white *= 0.15; }
         this.shape.fill.r = this.body_r + (1.0 - this.body_r) * white;
         this.shape.fill.g = this.body_g + (1.0 - this.body_g) * white;
         this.shape.fill.b = this.body_b + (1.0 - this.body_b) * white;

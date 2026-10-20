@@ -97,9 +97,9 @@ Tide's treads kick up dust and its engine smokes while it drives.
 
 A flat, versioned key/value save written atomically to disk or `localStorage` by the host, never by a script.
 
-Engine ✅ · Editor ✅ · Decay ✅ · Proof ✅
+Engine ✅ · Editor ✅ · Decay ✅ · Proof ✅ — parity row *Game progress saves (numbers, flags and text)*
 
-**Tested by:** [`crates/sindri-core/src/save.rs`](../../crates/sindri-core/src/save.rs), [`crates/sindri-platform/src/saves/file.rs`](../../crates/sindri-platform/src/saves/file.rs), [`crates/sindri-platform/src/saves/mod.rs`](../../crates/sindri-platform/src/saves/mod.rs), [`crates/sindri-decay/tests/a_script_remembers.rs`](../../crates/sindri-decay/tests/a_script_remembers.rs), [`games/orbital-baked/tests/the_mixer.rs`](../../games/orbital-baked/tests/the_mixer.rs)
+**Tested by:** [`crates/sindri-core/src/save.rs`](../../crates/sindri-core/src/save.rs), [`crates/sindri-platform/src/saves/file.rs`](../../crates/sindri-platform/src/saves/file.rs), [`crates/sindri-platform/src/saves/mod.rs`](../../crates/sindri-platform/src/saves/mod.rs), [`crates/sindri-decay/tests/a_script_remembers.rs`](../../crates/sindri-decay/tests/a_script_remembers.rs), [`games/orbital-baked/tests/the_mixer.rs`](../../games/orbital-baked/tests/the_mixer.rs), [`games/orbital-baked/tests/the_complete_game.rs`](../../games/orbital-baked/tests/the_complete_game.rs)
 
 **Exercised in:** [`games/orbital-baked`](../../games/orbital-baked)
 
@@ -131,6 +131,10 @@ someone's machine lost power mid-run; `BrowserSaves` uses `localStorage`,
 chosen over every larger browser store because the alternatives are
 asynchronous and a game should not have to ask whether its progress has landed
 yet.
+
+Decay reaches Unicode text through typed `Save.text` and `Save.set_text`, with
+explicit wrong-type/missing-key fallbacks. Orbital uses those calls for pilot
+names and a bounded flight log alongside its numeric career and flag unlocks.
 
 Nothing in Decay writes to storage. The store is in memory, marked dirty on
 change, and the host writes it out on a cadence and before it stops — how often

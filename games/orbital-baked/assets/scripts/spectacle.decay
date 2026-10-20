@@ -22,9 +22,11 @@ script Spectacle {
         let size = this.start_size + (this.end_size - this.start_size) * eased;
         this.transform.scale.x = size;
         this.transform.scale.y = size;
-        this.transform.rotation_z += this.spin * dt;
-        this.shape.stroke.a = 1.0 - t;
-        this.shape.fill.a = (1.0 - t) * 0.2;
+        if !Game.reduced_motion { this.transform.rotation_z += this.spin * dt; }
+        var intensity: number = 1.0;
+        if Game.reduced_flashes { intensity = 0.20; }
+        this.shape.stroke.a = (1.0 - t) * intensity;
+        this.shape.fill.a = (1.0 - t) * 0.2 * intensity;
         this.shape.dashes = 3.0 + t * 9.0;
         this.shape.sweep_start = t * 0.35;
         this.shape.sweep_turns = 1.0 - t * 0.18;
