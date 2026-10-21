@@ -9,7 +9,7 @@ python site/build_knowledge_pack.py                 # target/knowledge-pack/
 python site/build_knowledge_pack.py target/pages/knowledge-pack
 ```
 
-Pages builds it on every run and publishes the files and
+Pages builds it on every run and publishes the files, an index page and
 `sindri-knowledge-pack.zip` at `https://sindri.vardir.no/knowledge-pack/`.
 To use it, upload the fifteen `.md` files as the model's knowledge and tell it
 to read `00-start-here.md` first.

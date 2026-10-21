@@ -11,6 +11,7 @@ here that no longer exists fails the build rather than leaving a gap.
 """
 
 from pathlib import Path, PurePosixPath
+import html
 import json
 import math
 import posixpath
@@ -512,13 +513,18 @@ def build_components_file():
     return "\n".join(out) + "\n"
 
 
-def file_index():
+def pack_rows():
+    """Every pack file and what it answers, in reading order."""
     rows = [("00-start-here.md", "Read first: the workflow, project layout, rules and traps.")]
     rows += [(n, a) for n, _, a, _ in DOC_FILES[:3]]
     rows.append((COMPONENTS_FILE[0], COMPONENTS_FILE[2]))
     rows += [(n, a) for n, _, a, _ in DOC_FILES[3:]]
     rows += [(n, a) for n, _, a, _ in EXAMPLE_FILES]
-    return "\n".join(f"| `{n}` | {a} |" for n, a in rows)
+    return rows
+
+
+def file_index():
+    return "\n".join(f"| `{n}` | {a} |" for n, a in pack_rows())
 
 
 def language_section(heading):
@@ -602,6 +608,28 @@ def build_start_here():
     return template
 
 
+def index_page():
+    """The pack's own page, so a link to the folder lands somewhere."""
+    items = "".join(
+        f'<li><a href="./{html.escape(n)}">{html.escape(n)}</a> {html.escape(a)}</li>'
+        for n, a in pack_rows()
+    )
+    return (
+        '<!doctype html><html lang="en"><meta charset="utf-8">'
+        '<meta name="viewport" content="width=device-width,initial-scale=1">'
+        "<title>Sindri knowledge pack</title>"
+        "<style>body{font:1rem/1.6 system-ui;max-width:48rem;margin:3rem auto;"
+        "padding:0 1rem;background:#111827;color:#f9fafb}a{color:#93c5fd}"
+        "li{margin:.6rem 0}</style>"
+        "<h1>Sindri AI knowledge pack</h1>"
+        "<p>Files to give a chat model as its knowledge, so it can make a Sindri "
+        "game without having seen Sindri. Upload them all and tell the model to "
+        "read <code>00-start-here.md</code> first.</p>"
+        '<p><a href="./sindri-knowledge-pack.zip"><b>Download all as a zip</b></a></p>'
+        f"<ul>{items}</ul></html>\n"
+    )
+
+
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
     for stale in OUT.glob("*.md"):
@@ -617,6 +645,7 @@ def main():
     with zipfile.ZipFile(OUT / "sindri-knowledge-pack.zip", "w", zipfile.ZIP_DEFLATED) as archive:
         for name in sorted(files):
             archive.write(OUT / name, name)
+    (OUT / "index.html").write_text(index_page(), encoding="utf-8")
     total = sum(len(t.encode("utf-8")) for t in files.values())
     print(f"knowledge pack: {len(files)} files, {total // 1000} KB, in {OUT}")
 

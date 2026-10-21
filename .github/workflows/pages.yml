@@ -223,6 +223,7 @@ jobs:
         run: |
           test -f target/pages/index.html
           test -f target/pages/directory/index.html
+          test -f target/pages/knowledge-pack/index.html
           test -f target/pages/knowledge-pack/sindri-knowledge-pack.zip
           python - <<'CHECK'
           import os, pathlib, re, sys
