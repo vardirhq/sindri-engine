@@ -836,9 +836,9 @@ ends them. Without an audio device Play carries on silently.
 
 Engine ✅ · Editor ✅ · Decay ✅ · Proof ✅ — parity row *Timeline / cutscenes*
 
-**Tested by:** [`editor/src/timeline/tests.rs`](../../editor/src/timeline/tests.rs), [`editor/src/native/timeline_view/tests.rs`](../../editor/src/native/timeline_view/tests.rs), [`crates/sindri-decay/tests/a_script_plays_a_sequence.rs`](../../crates/sindri-decay/tests/a_script_plays_a_sequence.rs), [`game/tests/the_sequence_demo_works.rs`](../../game/tests/the_sequence_demo_works.rs), [`game/tests/the_beacon_lights.rs`](../../game/tests/the_beacon_lights.rs)
+**Tested by:** [`editor/src/timeline/tests.rs`](../../editor/src/timeline/tests.rs), [`editor/src/native/timeline_view/tests.rs`](../../editor/src/native/timeline_view/tests.rs), [`crates/sindri-decay/tests/a_script_plays_a_sequence.rs`](../../crates/sindri-decay/tests/a_script_plays_a_sequence.rs), [`game/tests/the_sequence_demo_works.rs`](../../game/tests/the_sequence_demo_works.rs)
 
-**Exercised in:** [`examples/sequence`](../../examples/sequence), [`game`](../../game)
+**Exercised in:** [`examples/sequence`](../../examples/sequence)
 
 **Limits:**
 
@@ -867,9 +867,9 @@ cue lane and one lane per track; clicking the ruler moves the playhead, and
 with preview on the Scene view shows the sequence posed there without touching
 the document. Keys and cues are picked, dragged on a 0.05 s grid and edited; a
 track is added for any target and property and keyed at the playhead from the
-value the scene holds. Every edit is one undoable step. Causeway's beacon
-lights by its own sequences: arriving plays `arrive`, a swell whose first cue
-sounds the chime, and the script moves it on to the looping `glow`. A cue's
+value the scene holds. Every edit is one undoable step. Sequence Stage's intro
+is authored this way, and its director hears the end and moves the stage on to
+its idle loop. A cue's
 sound is found by the export's walk of the scene, so a project need not list
 it.
 

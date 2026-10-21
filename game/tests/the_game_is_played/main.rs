@@ -7,6 +7,9 @@
 //! called the rules directly would prove the rules, and the autoplay test
 //! already does that; this proves a person can reach them.
 
+// The board holds whole numbers the scripts wrote, so they compare exactly.
+#![allow(clippy::float_cmp)]
+
 mod support;
 
 use sindri_platform::Key;
@@ -18,9 +21,17 @@ fn the_title_begins_a_crossing_and_the_hollow_climb_out() {
     assert_eq!(game.phase(), TITLE, "the game opens on its title");
     game.tap_key(Key::Enter);
     game.until_players_turn();
-    assert_eq!(game.board("island"), 0.0, "the crossing starts on the first island");
+    assert_eq!(
+        game.board("island"),
+        0.0,
+        "the crossing starts on the first island"
+    );
     assert_eq!(game.board("round"), 1.0);
-    assert_eq!(game.pieces("bulwark").len(), 1, "the wardens stand on the island");
+    assert_eq!(
+        game.pieces("bulwark").len(),
+        1,
+        "the wardens stand on the island"
+    );
     assert_eq!(game.pieces("mason").len(), 1);
     assert_eq!(game.pieces("lamplighter").len(), 1);
     assert!(
@@ -73,5 +84,8 @@ fn the_keyboard_alone_can_move_a_warden() {
     game.tap_key(Key::ArrowLeft);
     game.tap_key(Key::Enter);
     game.until_players_turn();
-    assert_eq!(game.cell_of(game.pieces("bulwark")[0]), (start.0 - 1, start.1));
+    assert_eq!(
+        game.cell_of(game.pieces("bulwark")[0]),
+        (start.0 - 1, start.1)
+    );
 }

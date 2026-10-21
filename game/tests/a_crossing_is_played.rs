@@ -6,6 +6,9 @@
 //! run a whole crossing without a script failing, that an island can be held
 //! by somebody trying, and that the same seed plays the same crossing.
 
+// The board holds whole numbers the scripts wrote, so they compare exactly.
+#![allow(clippy::float_cmp)]
+
 use std::path::{Path, PathBuf};
 
 use sindri_runtime::ProjectRun;
@@ -18,10 +21,8 @@ fn game() -> PathBuf {
 
 /// A project holding the game's rules and the bot, played with `seed`.
 fn project(seed: u32) -> PathBuf {
-    let root = std::env::temp_dir().join(format!(
-        "causeway-autoplay-{}-{seed}",
-        std::process::id()
-    ));
+    let root =
+        std::env::temp_dir().join(format!("causeway-autoplay-{}-{seed}", std::process::id()));
     let scripts = root.join("assets/scripts");
     std::fs::create_dir_all(&scripts).expect("the project folder is made");
     std::fs::write(

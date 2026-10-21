@@ -66,6 +66,10 @@ mod tests {
             first.len(),
             samples.len() * 2
         );
-        assert_eq!(first, encode(&samples, 2).expect("encodes again"), "deterministic");
+        assert_eq!(
+            first,
+            encode(&samples, 2).expect("encodes again"),
+            "deterministic"
+        );
     }
 }

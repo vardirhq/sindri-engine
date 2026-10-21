@@ -4,8 +4,8 @@
 
 Writes `game/assets/models/*.glb` and `game/assets/textures/*.png`. Run it again
 after changing anything here or an island in `islands.decay`; the outputs are
-checked in like any other art, and `the_art_is_up_to_date` fails when they no
-longer match what this script makes.
+checked in like any other art. `the_art_is_built_from_the_islands_the_rules_read`
+checks that every island has a model.
 
 One script rather than a file per asset because the look is a set of decisions
 that have to agree: one palette, one bevel, one scale. The wardens are warm --

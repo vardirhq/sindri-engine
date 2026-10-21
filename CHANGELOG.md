@@ -1,5 +1,20 @@
 # Changelog
 
+- Rebuild Causeway as a turn-based tactics game. Three wardens hold four
+  islands against the Hollow, who show every strike before it lands, until the
+  rising tide drowns them. The diorama is generated low-poly GLB models lit by
+  the sun, lanterns and a beacon, with Weave panels, an Ogg score and a bot
+  that plays the whole crossing in its tests.
+- Give Decay the pointer's world ray, `Pointer.ray_origin` and
+  `Pointer.ray_direction`, so a script can pick what is under the cursor in a
+  3D scene.
+- Apply an environment's fog, occlusion, grade and bloom in the shared player
+  and the offscreen project renderer, as the editor already did.
+- Draw a font bound from a bold-only file in its own face instead of falling
+  back to a system font.
+- Deliver Sound Lab songs to a project as Ogg Vorbis, about a seventh of the
+  size of WAV. The engine already plays WAV, Ogg and MP3.
+
 - Rebuild Orbital Last Stand around a complete flight deck: four ship sidegrades,
   difficulty choices, salvage unlocks, commendations, a flight log and archive,
   evasive burst, finite Boss Rush, responsive menus and accessibility settings.

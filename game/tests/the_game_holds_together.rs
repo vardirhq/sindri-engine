@@ -7,6 +7,9 @@
 //! `the_game_is_played`; whether the rules hold up over a whole crossing is
 //! `a_crossing_is_played`.
 
+// The board holds whole numbers the scripts wrote, so they compare exactly.
+#![allow(clippy::float_cmp)]
+
 use std::collections::BTreeSet;
 use std::path::Path;
 
@@ -34,7 +37,8 @@ fn references(text: &str, suffixes: &[&str]) -> BTreeSet<String> {
 fn every_file_the_game_names_is_shipped() {
     let assets = sindri_causeway::project_dir().join("assets");
     let mut named = BTreeSet::new();
-    let mut texts = vec![std::fs::read_to_string(assets.join("causeway.scene")).expect("the scene")];
+    let mut texts =
+        vec![std::fs::read_to_string(assets.join("causeway.scene")).expect("the scene")];
     for folder in ["prefabs", "scripts"] {
         for entry in std::fs::read_dir(assets.join(folder)).expect("the folder") {
             texts.push(std::fs::read_to_string(entry.expect("an entry").path()).expect("a file"));
@@ -43,7 +47,9 @@ fn every_file_the_game_names_is_shipped() {
     for text in &texts {
         named.extend(references(
             text,
-            &[".glb", ".png", ".ttf", ".wav", ".ogg", ".prefab", ".decay", ".weave"],
+            &[
+                ".glb", ".png", ".ttf", ".wav", ".ogg", ".prefab", ".decay", ".weave",
+            ],
         ));
     }
     assert!(named.len() > 20, "the game names its files: {named:?}");

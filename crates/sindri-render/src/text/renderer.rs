@@ -83,7 +83,9 @@ impl TextRenderer {
         let (weight, style) = ids
             .first()
             .and_then(|id| self.font_system.db().face(*id))
-            .map_or((Weight::NORMAL, Style::Normal), |face| (face.weight, face.style));
+            .map_or((Weight::NORMAL, Style::Normal), |face| {
+                (face.weight, face.style)
+            });
         self.fonts
             .insert(
                 reference.into(),

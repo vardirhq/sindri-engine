@@ -244,7 +244,13 @@ impl ComposerApp {
             );
             #[cfg(target_arch = "wasm32")]
             let (bytes, format) = (wav::encode(&samples, 2).map_err(|e| e.to_string())?, "wav");
-            Ok((self.song_name.clone(), bytes, format, "sindrisong", song.to_json()))
+            Ok((
+                self.song_name.clone(),
+                bytes,
+                format,
+                "sindrisong",
+                song.to_json(),
+            ))
         } else {
             self.sfx.refresh();
             let bytes = wav::encode(&self.sfx.samples, 1).map_err(|e| e.to_string())?;

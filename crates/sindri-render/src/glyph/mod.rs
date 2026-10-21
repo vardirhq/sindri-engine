@@ -450,9 +450,9 @@ mod tests {
         let mut fonts = FontSystem::new();
         let bytes = std::fs::read(concat!(
             env!("CARGO_MANIFEST_DIR"),
-            "/../../game/assets/fonts/Inter.ttf"
+            "/../../editor/assets/Inter.ttf"
         ))
-        .expect("the companion game's font is in the repository");
+        .expect("the editor's font is in the repository");
         fonts.db_mut().load_font_data(bytes);
         fonts
     }

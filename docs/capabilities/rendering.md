@@ -44,13 +44,13 @@ Each entry links its tests and the projects that exercise it. Surface marks matc
 | [3D directional + ambient lighting](#environment-lighting) | 🟡 | 🟡 | 🟡 | 🟡 |
 | [Voxel ambient occlusion / contact depth](#voxel-ao) | 🟡 | 🟡 | ❌ | 🟡 |
 | [Post-processing stack](#post-processing) | 🟡 | 🟡 | ❌ | 🟡 |
+| [Authored fog/AO/post stack in shipped project hosts](#project-host-fog-post) | ✅ | — | ❌ | ✅ |
 | **3D models** | | | | |
-| [glTF / model import](#glb-models) | 🟡 | ❌ | ❌ | ❌ |
+| [glTF / model import](#glb-models) | 🟡 | ❌ | ❌ | ✅ |
 | **Not yet** | | | | |
 | [Font fallback and richer spans](#font-fallback) | ❌ | ❌ | — | — |
 | [Skeletal animation](#skeletal-animation) | ❌ | ❌ | ❌ | ❌ |
 | [Tile volume terrain tools](#tile-volume-terrain) | ❌ | ❌ | — | — |
-| [Authored fog/AO/post stack in shipped project hosts](#project-host-fog-post) | ❌ | — | ❌ | ❌ |
 | **3D foundation** | | | | |
 | [3D orbit / third-person camera](#orbit-camera-3d) | 🟡 | 🟡 | 🟡 | 🟡 |
 | [Shared standard material factors](#standard-material-factors) | 🟡 | 🟡 | ❌ | 🟡 |
@@ -854,6 +854,37 @@ Engine 🟡 · Editor 🟡 · Decay ❌ · Proof 🟡 — parity row *Post-proce
 
 - Advanced cinematic effects remain future slices.
 
+<a id="project-host-fog-post"></a>
+
+### Authored fog/AO/post stack in shipped project hosts
+
+The shared native/browser player and the offscreen project renderer apply an environment's fog, occlusion, grade and bloom as the editor does
+
+Engine ✅ · Editor — · Decay ❌ · Proof ✅ — parity row *Authored fog/AO/post stack in shipped project hosts*
+
+**Tested by:** [`game/tests/the_game_holds_together.rs`](../../game/tests/the_game_holds_together.rs)
+
+**Exercised in:** [`game`](../../game)
+
+**See:** [`docs/3d-foundation-review.md`](../../docs/3d-foundation-review.md)
+
+**Limits:**
+
+- Decay cannot change fog or post-processing at runtime.
+
+<details markdown="1">
+<summary>Evidence</summary>
+
+`SceneExtractor::world_settings` gathers an environment's light, shadows, fog,
+occlusion strength and grade into one `WorldSettings`, and
+`TexturedCubeRenderer::configure` applies them, so the shared native/browser
+player and the offscreen project renderer light a frame as the editor does. A
+frame with post-processing goes through `encode_lit_frame` and its bloom.
+Causeway ships tone mapping, grade, vignette and bloom on its lanterns and
+beacon this way.
+
+</details>
+
 ## 3D models
 
 <a id="glb-models"></a>
@@ -862,18 +893,18 @@ Engine 🟡 · Editor 🟡 · Decay ❌ · Proof 🟡 — parity row *Post-proce
 
 Self-contained binary GLB decodes to reusable geometry, hierarchy, materials and textures, and draws natively and in the browser.
 
-Engine 🟡 · Editor ❌ · Decay ❌ · Proof ❌ — parity row *glTF / model import*
+Engine 🟡 · Editor ❌ · Decay ❌ · Proof ✅ — parity row *glTF / model import*
 
-**Tested by:** [`crates/sindri-assets/src/decode/model/tests.rs`](../../crates/sindri-assets/src/decode/model/tests.rs), [`crates/sindri-render/src/model/tests.rs`](../../crates/sindri-render/src/model/tests.rs), [`crates/sindri-gpu/tests/imported_models.rs`](../../crates/sindri-gpu/tests/imported_models.rs), [`crates/sindri-scene/tests/extraction/models.rs`](../../crates/sindri-scene/tests/extraction/models.rs), [`crates/sindri-export/tests/imported_models.rs`](../../crates/sindri-export/tests/imported_models.rs), [`crates/sindri/tests/imported_model.rs`](../../crates/sindri/tests/imported_model.rs)
+**Tested by:** [`game/tests/the_game_holds_together.rs`](../../game/tests/the_game_holds_together.rs), [`crates/sindri-assets/src/decode/model/tests.rs`](../../crates/sindri-assets/src/decode/model/tests.rs), [`crates/sindri-render/src/model/tests.rs`](../../crates/sindri-render/src/model/tests.rs), [`crates/sindri-gpu/tests/imported_models.rs`](../../crates/sindri-gpu/tests/imported_models.rs), [`crates/sindri-scene/tests/extraction/models.rs`](../../crates/sindri-scene/tests/extraction/models.rs), [`crates/sindri-export/tests/imported_models.rs`](../../crates/sindri-export/tests/imported_models.rs), [`crates/sindri/tests/imported_model.rs`](../../crates/sindri/tests/imported_model.rs)
 
-**Exercised in:** [`examples/model-collision`](../../examples/model-collision)
+**Exercised in:** [`game`](../../game), [`examples/model-collision`](../../examples/model-collision)
 
 **See:** [`docs/imported-models.md`](../../docs/imported-models.md)
 
 **Limits:**
 
 - Full model authoring, animation and skinning remain deferred.
-- Feature labs and external Low Tide are evidence; in-tree model gameplay adoption remains open.
+- Causeway draws only static, generated models; no flagship imports artist-authored animated GLB yet.
 
 <details markdown="1">
 <summary>Evidence</summary>
@@ -906,6 +937,8 @@ the repository's in-tree game completion surface. Model Collision Lab now also
 has native player-window visual proof on X11/software Vulkan, after editor asset
 selection and save/reopen; the imported wall blocks keyboard movement and the
 walker renders on the goal pad.
+Causeway draws every island, figure and building as a generated GLB with
+emissive materials, lit by the sun and point lights.
 See [imported models](../imported-models.md).
 
 </details>
@@ -935,23 +968,6 @@ Engine ❌ · Editor ❌ · Decay ❌ · Proof ❌ — parity row *Skeletal anim
 Terrain-name painting, automatic supporting strata, side-face picking and slice views for tile volumes remain; see `docs/tile-system-2.md`.
 
 Engine ❌ · Editor ❌ · Decay — · Proof —
-
-<a id="project-host-fog-post"></a>
-
-### Authored fog/AO/post stack in shipped project hosts
-
-Editor viewports apply these environment settings; the shared native/browser player and offscreen project renderer still only apply background, ambient/directional lighting and shadows
-
-Engine ❌ · Editor — · Decay ❌ · Proof ❌ — parity row *Authored fog/AO/post stack in shipped project hosts*
-
-**See:** [`docs/3d-foundation-review.md`](../../docs/3d-foundation-review.md)
-
-<details markdown="1">
-<summary>Evidence</summary>
-
-Editor viewports apply these environment settings; the shared native/browser player and offscreen project renderer still only apply background, ambient/directional lighting and shadows. Fog/AO/post delivery remains separate work
-
-</details>
 
 ## 3D foundation
 

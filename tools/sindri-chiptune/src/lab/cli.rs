@@ -218,7 +218,10 @@ fn deliver(
             .then(|| format!("{fallback}.wav").into())
     });
     if let Some(path) = wav_path {
-        if path.extension().is_some_and(|ext| ext.eq_ignore_ascii_case("ogg")) {
+        if path
+            .extension()
+            .is_some_and(|ext| ext.eq_ignore_ascii_case("ogg"))
+        {
             std::fs::write(&path, super::ogg::encode(samples, u8::try_from(channels)?)?)?;
         } else {
             wav::write(&path, samples, channels)?;

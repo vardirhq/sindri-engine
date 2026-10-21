@@ -166,7 +166,8 @@ mod tests {
     #[test]
     fn placing_a_sound_writes_it_and_lists_it_once() {
         let dir = project("format_version = 1\n\n# keep me\n[project]\nname = \"Demo\"\n");
-        let placed = place(dir.path(), "Big Coin!", b"RIFF", "wav", "sindrisfx", "{}").expect("placed");
+        let placed =
+            place(dir.path(), "Big Coin!", b"RIFF", "wav", "sindrisfx", "{}").expect("placed");
         assert_eq!(placed.clip, "audio/big-coin.wav");
         assert!(placed.listed);
         assert!(dir.path().join("assets/audio/big-coin.wav").is_file());
@@ -175,7 +176,8 @@ mod tests {
         assert!(manifest.contains("# keep me"));
         assert!(manifest.contains("\"audio/big-coin.wav\""));
 
-        let again = place(dir.path(), "big-coin", b"RIFF2", "wav", "sindrisfx", "{}").expect("again");
+        let again =
+            place(dir.path(), "big-coin", b"RIFF2", "wav", "sindrisfx", "{}").expect("again");
         assert!(!again.listed);
         let manifest = fs::read_to_string(dir.path().join(MANIFEST)).expect("read");
         assert_eq!(manifest.matches("audio/big-coin.wav").count(), 1);

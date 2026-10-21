@@ -49,7 +49,7 @@ Sindri is not trying to win a feature-count contest with mature engines. The goa
 
 Sindri is developed vertically: runtime capability, editor authoring, Decay/Weave access, and a real project evolve together where a feature applies.
 
-- **Causeway** is the flagship showcase: a voxel builder that pushes the engine's world, rendering, authoring, and asset capabilities by trying to become a game worth playing rather than a disposable demo.
+- **Causeway** is the flagship showcase: a turn-based tactics game on a lit low-poly diorama that pushes the engine's 3D rendering, model import, UI, scripting, and audio capabilities by trying to become a game worth playing rather than a disposable demo.
 - **Orbital Last Stand** is the forcing function: a recreation of a complete game built through the editor and Decay. Gaps it exposes are closed as general Sindri capabilities rather than game-specific hacks.
 - **Genre showcases** are small complete games that prove ordinary workflows. The platformer exercises the plain 2D path; **Scorchball** exercises local multiplayer, player-slot input, prefab-driven players, animation, typed Decay communication, events, state, and increasingly game-like AI and mechanics. **Low Tide** exercises a moving home: a crew walking a tilemap deck that drives and turns under them, a camera that turns with the deck, and tile reads and writes from Decay.
 - **Feature examples and labs** isolate larger systems such as cameras, Weave, graphics, and voxels when isolation is the honest way to test them.

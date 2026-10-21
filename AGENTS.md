@@ -42,27 +42,28 @@ or callable Decay API is necessary evidence but is not a substitute for a
 feature being used in a game — and Causeway is where a finished capability
 proves it can be used. It is not a disposable demo.
 
-Causeway is a builder: the world is made of voxels, you place and remove blocks
-by clicking their faces, and somebody walks the way you build. It is held to
-the standard of a game somebody would choose to play rather than of a demo that
-proves a point, because a showcase nobody wants to play does not showcase
-anything.
+Causeway is a turn-based tactics game: three wardens hold small islands against
+the Hollow, who cross the causeway at low tide, until the rising sea drowns
+them. Every Hollow shows what it will strike before it strikes, so each turn is
+a puzzle with a visible answer. It is held to the standard of a game somebody
+would choose to play rather than of a demo that proves a point, because a
+showcase nobody wants to play does not showcase anything.
 
-It replaced Causeway, an isometric farming game, when the engine stopped drawing
-a picture of blocks and started drawing blocks. Causeway was authored as a
-projection all the way down — its art baked as isometric silhouettes, its
-scene written in screen coordinates, its scripts assuming a flat plane — and
-migrating it would have carried a design shaped around a limitation the engine
-no longer has. The history holds it if it is ever wanted.
+It replaced Causeway the voxel builder, which had replaced Causeway the
+isometric farming game. Each time the design, not the engine, was the limit: a
+builder with no stakes and a farm drawn as a projection. The tactics game is a
+lit low-poly diorama of imported models, so it exercises the 3D renderer, model
+import, picking through a pointer ray, Weave UI and Decay at once. The history
+holds the earlier games if they are ever wanted.
 
 Being the showcase does not mean it may only use what already exists. Where the
 game needs a capability Sindri lacks, that capability is added, as a general
 one, on the same terms as any other. What separates it from the forcing
 function below is *why* the gap is found: Causeway finds gaps by trying to be a
 good game, Orbital by trying to be a faithful recreation. Causeway also carries
-the art: it is the one place the isometric baker is pushed as far as it goes,
-because a showcase that looks approximate sells an engine that looks
-approximate.
+the art: its models, textures, sounds and score are generated in-tree by
+`tools/causeway_art.py`, `tools/level.py` and the Sound Lab, because a showcase
+that looks approximate sells an engine that looks approximate.
 
 **Orbital Last Stand is the forcing function.** It is a recreation of a real,
 complete game built only through the editor and Decay, and its job is to find

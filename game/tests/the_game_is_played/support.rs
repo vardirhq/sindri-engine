@@ -57,7 +57,10 @@ impl Game {
                 return;
             }
         }
-        panic!("the wardens' turn never came; the game is in phase {}", self.phase());
+        panic!(
+            "the wardens' turn never came; the game is in phase {}",
+            self.phase()
+        );
     }
 
     pub fn tap_key(&mut self, key: Key) {
@@ -120,20 +123,7 @@ impl Game {
         );
         let clip = camera.view_projection * point.extend(1.0);
         let ndc = clip.truncate() / clip.w;
-        [
-            (ndc.x + 1.0) * 0.5 * SIZE[0],
-            (1.0 - ndc.y) * 0.5 * SIZE[1],
-        ]
-    }
-
-    /// The height of a cell's top, read from where a piece standing there
-    /// would be -- or, for an empty cell, from the island's own heights.
-    fn top_of(&self, cell: (i32, i32)) -> f32 {
-        const SALTMARSH: &str = "00111100012332101234432112333211123322110122211100122110\
-                                 00011100";
-        let index = usize::try_from(cell.1 * 8 + cell.0).expect("a cell on the board");
-        let digit = SALTMARSH.as_bytes()[index] - b'0';
-        f32::from(digit)
+        [(ndc.x + 1.0) * 0.5 * SIZE[0], (1.0 - ndc.y) * 0.5 * SIZE[1]]
     }
 
     /// A neighbour of `from` that nothing stands on and that is at most a
@@ -157,7 +147,7 @@ impl Game {
                 (0..8).contains(&cell.0)
                     && (0..8).contains(&cell.1)
                     && !taken.contains(&cell)
-                    && (self.top_of(cell) - self.top_of(from)).abs() <= 1.0
+                    && (top_of(cell) - top_of(from)).abs() <= 1.0
             })
             .expect("the Bulwark has somewhere to step")
     }
@@ -165,7 +155,7 @@ impl Game {
     /// A click on the middle of a cell, pressed and released as a host
     /// delivers one.
     pub fn click_cell(&mut self, cell: (i32, i32)) {
-        let [x, y] = self.pixel_of(cell, self.top_of(cell));
+        let [x, y] = self.pixel_of(cell, top_of(cell));
         self.run.input.apply(InputEvent::PointerMoved { x, y });
         self.step();
         let expected = cell.1 * 8 + cell.0;
@@ -186,4 +176,14 @@ impl Game {
         self.step();
         self.step();
     }
+}
+
+/// The height of a cell's top on the first island, Saltmarsh, from the same
+/// heights `islands.decay` gives it.
+fn top_of(cell: (i32, i32)) -> f32 {
+    const SALTMARSH: &str = "00111100012332101234432112333211123322110122211100122110\
+                             00011100";
+    let index = usize::try_from(cell.1 * 8 + cell.0).expect("a cell on the board");
+    let digit = SALTMARSH.as_bytes()[index] - b'0';
+    f32::from(digit)
 }
