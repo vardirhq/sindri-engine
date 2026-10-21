@@ -16,6 +16,8 @@ Sindri offers; it is a way to fail CI.
 | `decay-api.json` | What gameplay code may I write? | `sindri_decay::environment()` |
 | `decay-api.md` | The same, for a person | the same model as the JSON |
 | `decay-language.json` | What is the language itself? | the lexer, parser, analyzer and runtime tables |
+| `weave-reference.json` | What may a Weave stylesheet declare? | `sindri_weave::PROPERTIES`, the table the bridge applies declarations by |
+| `weave-reference.md` | The same, for a person | the same table |
 | `sindri-capabilities.json` | What may I author? | the built-in `ComponentSchemaRegistry` |
 
 ## Why generated

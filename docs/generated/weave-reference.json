@@ -1,0 +1,414 @@
+{
+  "about": "Every property a Weave stylesheet may declare for Sindri UI: its names, the values it accepts, the Sindri UI data it writes, and a value that applies. A property not listed is ignored. Read from the table `sindri-weave` applies declarations by. docs/weave-reference.md describes the language itself: selectors, the cascade, lengths, colors and responsive rules.",
+  "engine_version": "0.1.0",
+  "generated_by": "cargo run -p sindri-capabilities -- --write",
+  "properties": [
+    {
+      "example": "120px",
+      "group": "Size and position",
+      "inherited": false,
+      "names": [
+        "width",
+        "height"
+      ],
+      "shorthand": false,
+      "summary": "The element's size. `auto` and `fit-content` size a layout to its children, padding and gaps, and a text element to its measured words.",
+      "values": "a length, `auto` or `fit-content`",
+      "writes": "the transform's scale; a text element's `sindri.ui.text` `bounds`"
+    },
+    {
+      "example": "40px",
+      "group": "Size and position",
+      "inherited": false,
+      "names": [
+        "min-width",
+        "max-width",
+        "min-height",
+        "max-height"
+      ],
+      "shorthand": false,
+      "summary": "Limits on the size, which a layout also honors when it grows or shrinks the element. When the two conflict the minimum wins, as in CSS.",
+      "values": "a length",
+      "writes": "the transform's scale, and `sindri.ui.box` `min_size` or `max_size`"
+    },
+    {
+      "example": "10px",
+      "group": "Size and position",
+      "inherited": false,
+      "names": [
+        "x",
+        "y"
+      ],
+      "shorthand": false,
+      "summary": "Where the element is, replacing the position the scene gave it.",
+      "values": "a length",
+      "writes": "the transform's position"
+    },
+    {
+      "example": "top-left",
+      "group": "Size and position",
+      "inherited": false,
+      "names": [
+        "anchor"
+      ],
+      "shorthand": false,
+      "summary": "Which point of the element its position names.",
+      "values": "`center`, `top`, `bottom`, `left`, `right`, `top-left`, `top-right`, `bottom-left` or `bottom-right`",
+      "writes": "`anchor` on `sindri.ui.image`, `sindri.ui.text` and `sindri.ui.shape`"
+    },
+    {
+      "example": "8px",
+      "group": "Box",
+      "inherited": false,
+      "names": [
+        "padding",
+        "padding-top",
+        "padding-right",
+        "padding-bottom",
+        "padding-left"
+      ],
+      "shorthand": true,
+      "summary": "Room inside the element's edge: a layout's children start inside it. A percentage on any side is of the containing element's content width.",
+      "values": "a length of zero or more; `padding` takes one to four, as in CSS",
+      "writes": "`sindri.ui.box` `padding`"
+    },
+    {
+      "example": "8px",
+      "group": "Box",
+      "inherited": false,
+      "names": [
+        "margin",
+        "margin-top",
+        "margin-right",
+        "margin-bottom",
+        "margin-left"
+      ],
+      "shorthand": true,
+      "summary": "Room a layout keeps free around the element. A percentage on any side is of the containing element's content width.",
+      "values": "a length, negative allowed; `margin` takes one to four, as in CSS",
+      "writes": "`sindri.ui.box` `margin`"
+    },
+    {
+      "example": "grid",
+      "group": "Flex layout",
+      "inherited": false,
+      "names": [
+        "display"
+      ],
+      "shorthand": false,
+      "summary": "Makes the element a flex line or a grid that lays out its children.",
+      "values": "`flex` or `grid`",
+      "writes": "adds `sindri.ui.layout` (flex) or `sindri.ui.grid` (grid), removing the other"
+    },
+    {
+      "example": "column",
+      "group": "Flex layout",
+      "inherited": false,
+      "names": [
+        "flex-direction",
+        "direction"
+      ],
+      "shorthand": false,
+      "summary": "The axis a flex line runs along.",
+      "values": "`row` or `column`",
+      "writes": "`sindri.ui.layout` `direction`"
+    },
+    {
+      "example": "center",
+      "group": "Flex layout",
+      "inherited": false,
+      "names": [
+        "justify-content"
+      ],
+      "shorthand": false,
+      "summary": "How a flex line spreads its children along its direction.",
+      "values": "`start`, `center`, `end`, `space-between`, `space-around` or `space-evenly` (`flex-start`/`left` and `flex-end`/`right` mean `start` and `end`)",
+      "writes": "`sindri.ui.layout` `justify`"
+    },
+    {
+      "example": "center",
+      "group": "Flex layout",
+      "inherited": false,
+      "names": [
+        "align-items"
+      ],
+      "shorthand": false,
+      "summary": "Where children sit across a flex line, or across a grid's rows.",
+      "values": "`start`, `center`, `end` or `stretch` (`flex-start` and `flex-end` too)",
+      "writes": "`sindri.ui.layout` `align`, and `sindri.ui.grid` `align_items`"
+    },
+    {
+      "example": "wrap",
+      "group": "Flex layout",
+      "inherited": false,
+      "names": [
+        "flex-wrap"
+      ],
+      "shorthand": false,
+      "summary": "Whether children that do not fit start a new line.",
+      "values": "`wrap` or `nowrap`",
+      "writes": "`sindri.ui.layout` `wrap`"
+    },
+    {
+      "example": "1",
+      "group": "Flex layout",
+      "inherited": false,
+      "names": [
+        "flex"
+      ],
+      "shorthand": true,
+      "summary": "Shorthand for the three below, read as CSS reads it: `flex: 1` makes children share a line equally whatever their sizes.",
+      "values": "`none`, `auto`, `initial`, or `<grow> [<shrink>] [<basis>]`",
+      "writes": "`flex-grow`, `flex-shrink` and `flex-basis`, which it stands for"
+    },
+    {
+      "example": "2",
+      "group": "Flex layout",
+      "inherited": false,
+      "names": [
+        "flex-grow",
+        "flex-shrink"
+      ],
+      "shorthand": false,
+      "summary": "The element's share of a line's spare room, or of its shortfall.",
+      "values": "a number, zero or more",
+      "writes": "`sindri.ui.box` `grow` or `shrink`"
+    },
+    {
+      "example": "50%",
+      "group": "Flex layout",
+      "inherited": false,
+      "names": [
+        "flex-basis"
+      ],
+      "shorthand": false,
+      "summary": "The element's size along the line before growing or shrinking.",
+      "values": "a length of zero or more, `auto` or `content`",
+      "writes": "`sindri.ui.box` `basis`"
+    },
+    {
+      "example": "2",
+      "group": "Flex layout",
+      "inherited": false,
+      "names": [
+        "order"
+      ],
+      "shorthand": false,
+      "summary": "Where the element comes in its layout, lowest first.",
+      "values": "a whole number",
+      "writes": "`sindri.ui.box` `order`"
+    },
+    {
+      "example": "center",
+      "group": "Flex layout",
+      "inherited": false,
+      "names": [
+        "align-self"
+      ],
+      "shorthand": false,
+      "summary": "One child's own `align-items`.",
+      "values": "`auto`, `start`, `center`, `end` or `stretch`",
+      "writes": "`sindri.ui.box` `align_self`"
+    },
+    {
+      "example": "1fr 2fr",
+      "group": "Grid layout",
+      "inherited": false,
+      "names": [
+        "grid-template-columns",
+        "grid-template-rows"
+      ],
+      "shorthand": false,
+      "summary": "A grid's columns or rows.",
+      "values": "tracks: `1fr`, `auto`, lengths and `repeat(n, …)`, or `none`",
+      "writes": "`sindri.ui.grid` `columns` or `rows`"
+    },
+    {
+      "example": "8px",
+      "group": "Grid layout",
+      "inherited": false,
+      "names": [
+        "gap",
+        "row-gap",
+        "column-gap"
+      ],
+      "shorthand": false,
+      "summary": "Space between a grid's tracks. A flex line takes the gap along it.",
+      "values": "a length of zero or more; `gap` takes a row gap and a column gap",
+      "writes": "`sindri.ui.grid` `gap`, and `sindri.ui.layout` `spacing`"
+    },
+    {
+      "example": "center",
+      "group": "Grid layout",
+      "inherited": false,
+      "names": [
+        "justify-items"
+      ],
+      "shorthand": false,
+      "summary": "Where grid items sit across their cells.",
+      "values": "`start`, `center`, `end` or `stretch`",
+      "writes": "`sindri.ui.grid` `justify_items`"
+    },
+    {
+      "example": "2 / span 2",
+      "group": "Grid layout",
+      "inherited": false,
+      "names": [
+        "grid-column",
+        "grid-row"
+      ],
+      "shorthand": false,
+      "summary": "Where an item starts in a grid, and how many tracks it spans.",
+      "values": "`2`, `span 2`, `2 / 4`, `2 / span 3` or `auto`",
+      "writes": "`sindri.ui.box` `grid_column` or `grid_row`"
+    },
+    {
+      "example": "#ff8800",
+      "group": "Text",
+      "inherited": true,
+      "names": [
+        "color"
+      ],
+      "shorthand": false,
+      "summary": "The text's color.",
+      "values": "a color",
+      "writes": "`sindri.ui.text` `color`"
+    },
+    {
+      "example": "24px",
+      "group": "Text",
+      "inherited": true,
+      "names": [
+        "font-size",
+        "line-height",
+        "letter-spacing"
+      ],
+      "shorthand": false,
+      "summary": "The glyphs' size, the distance between baselines, and extra space after every glyph.",
+      "values": "a length",
+      "writes": "`sindri.ui.text` `font_size`, `line_height` or `letter_spacing`"
+    },
+    {
+      "example": "bold",
+      "group": "Text",
+      "inherited": true,
+      "names": [
+        "font-weight"
+      ],
+      "shorthand": false,
+      "summary": "The font's own bold face, or its regular one.",
+      "values": "`normal`, `400`, `bold` or `700`",
+      "writes": "`sindri.ui.text` `bold`"
+    },
+    {
+      "example": "italic",
+      "group": "Text",
+      "inherited": true,
+      "names": [
+        "font-style"
+      ],
+      "shorthand": false,
+      "summary": "The font's own italic face, or its upright one.",
+      "values": "`normal` or `italic`",
+      "writes": "`sindri.ui.text` `italic`"
+    },
+    {
+      "example": "center",
+      "group": "Text",
+      "inherited": true,
+      "names": [
+        "text-align"
+      ],
+      "shorthand": false,
+      "summary": "Where each line sits across the text's box.",
+      "values": "`start` (or `left`), `center`, `end` (or `right`) or `justify`",
+      "writes": "`sindri.ui.text` `line_align`"
+    },
+    {
+      "example": "word",
+      "group": "Text",
+      "inherited": true,
+      "names": [
+        "text-wrap"
+      ],
+      "shorthand": false,
+      "summary": "Whether lines break, and where: between words, or between any two glyphs.",
+      "values": "`none` (or `nowrap`), `word` (or `wrap`) or `glyph`",
+      "writes": "`sindri.ui.text` `wrap`"
+    },
+    {
+      "example": "uppercase",
+      "group": "Text",
+      "inherited": true,
+      "names": [
+        "text-transform"
+      ],
+      "shorthand": false,
+      "summary": "The case the text is shown in, leaving the text itself as written.",
+      "values": "`none`, `uppercase` or `lowercase`",
+      "writes": "`sindri.ui.text` `case`"
+    },
+    {
+      "example": "#1f2937",
+      "group": "Shape",
+      "inherited": false,
+      "names": [
+        "background"
+      ],
+      "shorthand": false,
+      "summary": "The element's fill.",
+      "values": "a color",
+      "writes": "`sindri.ui.shape` `fill`"
+    },
+    {
+      "example": "#ffffff",
+      "group": "Shape",
+      "inherited": false,
+      "names": [
+        "border-color"
+      ],
+      "shorthand": false,
+      "summary": "The color of the element's outline.",
+      "values": "a color",
+      "writes": "`sindri.ui.shape` `stroke`"
+    },
+    {
+      "example": "4px",
+      "group": "Shape",
+      "inherited": false,
+      "names": [
+        "border-width",
+        "border-radius"
+      ],
+      "shorthand": false,
+      "summary": "The outline's thickness, and how round the corners are.",
+      "values": "a length in `px`, `vw` or `vh`, a percentage, or a plain number as a fraction of the element's shorter side",
+      "writes": "`sindri.ui.shape` `stroke_width` or `corner_radius`"
+    },
+    {
+      "example": "0 4px 8px #00000080",
+      "group": "Shape",
+      "inherited": false,
+      "names": [
+        "box-shadow"
+      ],
+      "shorthand": false,
+      "summary": "A shadow behind the element's shape.",
+      "values": "`<x> <y> [<blur> [<spread>]] [<color>]`, or `none`; one shadow, no `inset`",
+      "writes": "`sindri.ui.shape` `shadow`"
+    },
+    {
+      "example": "background 150ms ease-out",
+      "group": "Motion",
+      "inherited": false,
+      "names": [
+        "transition"
+      ],
+      "shorthand": false,
+      "summary": "Eases a property to a new value instead of jumping, for example on `:hover`. Colors, lengths and plain numbers ease; anything else changes at once.",
+      "values": "comma-separated `<property> <duration> [<delay>] [<easing>]`; a property may be `all`, a duration is `ms` or `s`, and an easing is `linear`, `ease`, `ease-in`, `ease-out` or `ease-in-out`",
+      "writes": "nothing itself: the properties it names ease to each new value"
+    }
+  ],
+  "schema_version": 1
+}

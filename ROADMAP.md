@@ -823,7 +823,8 @@ the benchmark shows agents without a shell falling behind. See
 
 - [ ] `sindri project check --format json` over scenes, prefabs, Weave, Decay and `sindri.toml`, with diagnostics raised by the crate that found them, naming the file and the JSON path or source span. `SceneDocument::validate`, `ComponentSchemaRegistry::validate_scene` and `decay-lsp --check --json` already exist and are the parts it composes
 - [ ] Generate JSON Schemas for `.scene` and `.prefab` files from the component registry into `docs/generated/`, carrying the format version they describe
-- [ ] Generate a Weave reference an agent can read, as `decay-api.json` is for Decay
+- [x] Generate the Weave property reference an agent can read, as `decay-api.json` is for Decay: `docs/generated/weave-reference.json` and `.md`, from the property table `sindri-weave` applies declarations by
+- [ ] Generate the rest of the Weave reference from the language's own tables: selectors, interaction states, units, colors and responsive conditions, still hand-written in `docs/weave-reference.md`
 - [ ] `sindri play --headless` with a structured per-frame log, scripted input and frame capture, generalizing the games' existing scripted-run tests and `*-capture` binaries
 - [ ] The editor reloads a scene changed on disk when it has no unsaved edits, and asks when it has; scripts, textures, prefabs and Weave styles are already watched
 - [ ] `sindri new` writes a short per-project agent guide pointing at the workflow and generated documents, also packaged as a skill for agents that load them

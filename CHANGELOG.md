@@ -11,6 +11,12 @@
   the feature examples whole. Built from the repository's own documents by
   `site/build_knowledge_pack.py`.
 
+- Generate the Weave property reference, `docs/generated/weave-reference.json`
+  and `.md`, from the table `sindri-weave` now applies declarations by: every
+  property's names, values, what it writes and an example. `font-style:
+  italic` now asks for the font's italic face; it was listed as inherited but
+  never applied.
+
 - Rebuild Orbital Last Stand around a complete flight deck: four ship sidegrades,
   difficulty choices, salvage unlocks, commendations, a flight log and archive,
   evasive burst, finite Boss Rush, responsive menus and accessibility settings.

@@ -41,6 +41,7 @@ to change what it holds, change the lists in the builder.
 ## Known gaps
 
 Most subsystem documents are engine contracts written for people working on
-Sindri, so they explain Rust internals a game author does not need. Weave has
-no generated reference the way Decay does, so `08-weave-ui.md` is only as
-complete as `docs/weave-reference.md`.
+Sindri, so they explain Rust internals a game author does not need. Weave's
+properties come from the generated `docs/generated/weave-reference.md`, but its
+selectors, states and units are only as complete as the hand-written
+`docs/weave-reference.md`.
