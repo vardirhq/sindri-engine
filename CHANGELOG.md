@@ -6,6 +6,10 @@
   page, and a dip into the first battle as the camera settles into its view.
   Wide screens keep the logo and menu in a shaded column beside the island;
   a phone stacks them above and below it.
+- Draw a lit world in the browser player again when post-processing is on:
+  the bloom drew its scene in `Rgba8UnormSrgb` while every pipeline was
+  built for the canvas's `Bgra8UnormSrgb`, so WebGPU rejected each frame. The
+  scene now takes an sRGB output's own format.
 - Fade a text's shadow with its letters, so words faded in through a
   `[color=#rrggbbaa]` span no longer leave their shadow on the screen ahead
   of them.

@@ -200,13 +200,30 @@ struct Pipelines {
 }
 
 impl Bloom {
-    /// The format the scene is drawn in, and so the format the frame's
-    /// renderers must be built for.
+    /// The format the scene is drawn in when the output is not itself an sRGB
+    /// picture.
     ///
     /// sRGB, like every other color target here: the scene is a picture, and a
     /// picture is stored encoded. The chain's own targets are not — see
     /// [`chain::Chain::FORMAT`].
     pub const SCENE_FORMAT: wgpu::TextureFormat = crate::COLOR_TARGET_FORMAT;
+
+    /// The format the scene is drawn in for this output, and so the format the
+    /// frame's renderers must be built for.
+    ///
+    /// The output's own, when that is sRGB. A host builds one set of renderers
+    /// for its surface and draws the world into the scene and the interface
+    /// onto the surface with them, so the two have to agree: a browser canvas
+    /// negotiates `Bgra8UnormSrgb`, and a scene fixed at `Rgba8UnormSrgb` had
+    /// every world pipeline rejected there.
+    #[must_use]
+    pub fn scene_format_for(output_format: wgpu::TextureFormat) -> wgpu::TextureFormat {
+        if output_format.is_srgb() {
+            output_format
+        } else {
+            Self::SCENE_FORMAT
+        }
+    }
 
     /// `output_format` is the format of the target [`Self::resolve`] will write
     /// to — a surface's negotiated format, usually.
@@ -302,6 +319,12 @@ impl Bloom {
         self.output_format
     }
 
+    /// The format [`Self::scene_view`] is drawn in.
+    #[must_use]
+    pub fn scene_format(&self) -> wgpu::TextureFormat {
+        Self::scene_format_for(self.output_format)
+    }
+
     /// Sizes the scene target and the chain to this viewport, rebuilding them
     /// only when the size actually changed.
     ///
@@ -319,7 +342,13 @@ impl Bloom {
         {
             return;
         }
-        self.chain = Some(Chain::new(device, width, height, DOWNSCALE));
+        self.chain = Some(Chain::new(
+            device,
+            width,
+            height,
+            DOWNSCALE,
+            self.scene_format(),
+        ));
     }
 
     /// Where a frame should be drawn so that it can glow.
@@ -453,7 +482,25 @@ fn glow_layout(device: &wgpu::Device) -> wgpu::BindGroupLayout {
 
 #[cfg(test)]
 mod tests {
-    use super::{BloomSettings, MAX_PASSES, PostProcessSettings, ToneMapping};
+    use super::{Bloom, BloomSettings, MAX_PASSES, PostProcessSettings, ToneMapping};
+
+    /// The world is drawn into the scene with the same pipelines that draw the
+    /// interface onto the output, so a browser's `Bgra8UnormSrgb` canvas gets a
+    /// scene in that format rather than one its pipelines are rejected by.
+    #[test]
+    fn the_scene_is_drawn_in_an_srgb_outputs_own_format() {
+        for output in [
+            wgpu::TextureFormat::Bgra8UnormSrgb,
+            wgpu::TextureFormat::Rgba8UnormSrgb,
+        ] {
+            assert_eq!(Bloom::scene_format_for(output), output);
+        }
+        assert_eq!(
+            Bloom::scene_format_for(wgpu::TextureFormat::Rgba16Float),
+            Bloom::SCENE_FORMAT,
+            "a linear output still gets an encoded picture to glow from"
+        );
+    }
 
     /// Every setting that would draw something other than a glow is clamped
     /// rather than refused.

@@ -140,8 +140,9 @@ script TitleShow {
         mood = min(1.0, mood + dt / 1.2);
         angle = sin(clock * TAU / sway_seconds) * sway;
 
-        // Up out of the dark, a piece at a time.
-        fade("TitleFade", 1.0 - ramp(0.0, 1.8));
+        // Up out of the dusk, a piece at a time. Not from black: straight after
+        // a loading screen, a black frame reads as a game that has hung.
+        fade("TitleFade", 0.55 * (1.0 - ramp(0.0, 1.0)));
         fade("TitleShadeTop", ramp(0.3, 1.6));
         if Viewport.aspect > 1.2 { fade("TitleShadeSide", ramp(0.3, 1.6)); } else { fade("TitleShadeSide", 0.0); }
         fade("TitleShadeBottom", ramp(0.3, 1.6));

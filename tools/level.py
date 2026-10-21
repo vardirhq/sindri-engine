@@ -416,7 +416,7 @@ def title_screen(e):
     # Over everything and outside the title, so it can cover the change from
     # the title's island to the first battle's after the title is put away.
     e.append(entity("title-fade", "TitleFade", {**styled("title-fade"), **image("textures/white.png", 400,
-                                                                                (0.01, 0.02, 0.04, 1))},
+                                                                                (0.01, 0.02, 0.04, 0.55))},
                     spatial=False))
     e.append(entity("title-director", "TitleDirector", script(
         "TitleShow", "scripts/title.decay", walker="prefabs/walker.prefab"), spatial=False))
