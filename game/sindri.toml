@@ -7,4 +7,4 @@ main_scene = "assets/causeway.scene"
 # What the scene does not name: the stylesheet the host composes, and every
 # sound a script plays by name, which no walk of a scene can see.
 [assets]
-include = ["ui/causeway.weave", "audio/step.wav", "audio/select.wav", "audio/swing.wav", "audio/bolt.wav", "audio/heave.wav", "audio/hit.wav", "audio/bump.wav", "audio/shove.wav", "audio/splash.wav", "audio/crumble.wav", "audio/emerge.wav", "audio/tide.wav", "audio/boon.wav", "audio/victory.wav", "audio/defeat.wav", "audio/tide-song.wav"]
+include = ["ui/causeway.weave", "audio/step.wav", "audio/select.wav", "audio/swing.wav", "audio/bolt.wav", "audio/heave.wav", "audio/hit.wav", "audio/bump.wav", "audio/shove.wav", "audio/splash.wav", "audio/crumble.wav", "audio/emerge.wav", "audio/tide.wav", "audio/boon.wav", "audio/victory.wav", "audio/defeat.wav", "audio/tide-song.ogg"]

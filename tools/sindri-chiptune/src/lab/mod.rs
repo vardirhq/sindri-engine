@@ -13,6 +13,8 @@ mod gui;
 mod instruments;
 mod live;
 mod midi;
+#[cfg(not(target_arch = "wasm32"))]
+mod ogg;
 mod project;
 mod sfx;
 mod song;

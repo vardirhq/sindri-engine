@@ -2311,7 +2311,7 @@
         "sindri.audio.source": {
           "autoplay": true,
           "bus": "music",
-          "clip": "audio/tide-song.wav",
+          "clip": "audio/tide-song.ogg",
           "looping": true,
           "volume": 0.45
         }

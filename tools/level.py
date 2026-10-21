@@ -234,7 +234,7 @@ def world_entities():
         mark="prefabs/mark.prefab", label="prefabs/label.prefab", popup="prefabs/popup.prefab",
         missile="prefabs/missile.prefab", spark="prefabs/spark.prefab", **prefabs), spatial=False))
     e.append(entity("music", "Music", {"sindri.audio.source": {
-        "autoplay": True, "bus": "music", "clip": "audio/tide-song.wav", "looping": True, "volume": 0.45}},
+        "autoplay": True, "bus": "music", "clip": "audio/tide-song.ogg", "looping": True, "volume": 0.45}},
         spatial=False))
     return e
 

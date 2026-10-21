@@ -191,13 +191,14 @@ fn deliver(
     let channels = if music { 2 } else { 1 };
     if let Some(root) = &out.project {
         let name = out.name.as_deref().unwrap_or(fallback);
-        let placed = project::place(
-            root,
-            name,
-            &wav::encode(samples, channels)?,
-            extension,
-            source,
-        )?;
+        // A song goes in compressed; an effect is short enough that WAV costs
+        // nothing and starts without decoding.
+        let (audio, format) = if music {
+            (super::ogg::encode(samples, 2)?, "ogg")
+        } else {
+            (wav::encode(samples, channels)?, "wav")
+        };
+        let placed = project::place(root, name, &audio, format, extension, source)?;
         println!(
             "Wrote {} and {}",
             placed.wav.display(),
@@ -217,7 +218,11 @@ fn deliver(
             .then(|| format!("{fallback}.wav").into())
     });
     if let Some(path) = wav_path {
-        wav::write(&path, samples, channels)?;
+        if path.extension().is_some_and(|ext| ext.eq_ignore_ascii_case("ogg")) {
+            std::fs::write(&path, super::ogg::encode(samples, u8::try_from(channels)?)?)?;
+        } else {
+            wav::write(&path, samples, channels)?;
+        }
         println!("Wrote {}", path.display());
     }
     if let Some(path) = &out.source {
