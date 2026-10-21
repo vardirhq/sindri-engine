@@ -139,6 +139,12 @@ short agent guide — the workflow and where to find the generated documents —
 written by `sindri new`, and packaged as a skill for the agents that support
 one. It stays thin: discovery and checks, not API facts.
 
+**Packed for chat models.** A model with no shell and no repository, such as
+a custom GPT, is given the [knowledge pack](../site/knowledge-pack/README.md)
+instead: these same documents, generated and hand-written, assembled into a
+few searchable files with the feature examples whole. It is built from the
+repository on every Pages build, so it is never edited by hand.
+
 ## 2. Checks an agent can run
 
 An agent that cannot tell whether its edit is valid hands its mistakes to a
