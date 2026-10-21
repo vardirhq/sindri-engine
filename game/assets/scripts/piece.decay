@@ -1,0 +1,216 @@
+// One thing on the board, as it is drawn: a warden, a Hollow, a house.
+//
+// A piece knows nothing about the rules. The battle director tells it what
+// just happened -- hop there, get hit, sink -- and it shows that in its own
+// time, turning to face the way it was last told. Which cell it is really on
+// is the director's business; a piece only ever eases towards where it was
+// sent.
+//
+// The figures are models facing +X when unturned, and every motion is the
+// transform's: a hop is an arc, a hit is a squash, a strike is a lunge out and
+// back. Nothing swaps a picture, so a figure keeps its shape and its light
+// whatever it is doing.
+
+// The yaw that turns a figure authored facing +X to face direction `d`:
+// north is -Z, east +X, south +Z, west -X.
+shared fn yaw_of(d: number) -> number {
+    if d == 0.0 { return PI * 0.5; }
+    if d == 2.0 { return -PI * 0.5; }
+    if d == 3.0 { return PI; }
+    return 0.0;
+}
+
+enum Motion { Still, Hop, Slide, Lunge, Nudge, Sink, Crumble, Rise }
+
+script Piece {
+    // Whether it breathes while it stands, and turns to face where it goes.
+    // Buildings and stones do neither.
+    @export let alive: bool = true;
+    // Its size, which a squash or a crumble works from.
+    @export let size: number = 1.0;
+
+    var motion: Motion = Motion.Still;
+    var from: Vec3 = Vec3(0.0, 0.0, 0.0);
+    var to: Vec3 = Vec3(0.0, 0.0, 0.0);
+    var home: Vec3 = Vec3(0.0, 0.0, 0.0);
+    var tip: Vec3 = Vec3(0.0, 0.0, 0.0);
+    var clock = Timer(0.0);
+    // How hard it was last struck, fading: a squash, and a little jolt.
+    var struck = Timer(0.0);
+    var arc: number = 0.35;
+    var yaw: number = 0.0;
+    var wanted_yaw: number = 0.0;
+    var gone: bool = false;
+    var phase: number = 0.0;
+
+    fn start() {
+        phase = Random.range(0.0, TAU);
+        to = this.transform.position;
+    }
+
+    // Stands it on a point at once.
+    fn place(x: number, y: number, z: number) {
+        this.transform.position = Vec3(x, y, z);
+        to = Vec3(x, y, z);
+        motion = Motion.Still;
+        gone = false;
+        this.transform.scale = Vec3(size, size, size);
+    }
+
+    fn face(d: number) {
+        if d < 0.0 || !alive { return; }
+        wanted_yaw = yaw_of(d);
+    }
+
+    // Faces at once, for a piece just placed.
+    fn face_now(d: number) {
+        face(d);
+        yaw = wanted_yaw;
+        this.transform.yaw = yaw;
+    }
+
+    fn begin(kind: Motion, x: number, y: number, z: number, seconds: number) {
+        from = this.transform.position;
+        to = Vec3(x, y, z);
+        motion = kind;
+        clock = Timer(seconds);
+    }
+
+    // One step of a walk.
+    fn hop(x: number, y: number, z: number, seconds: number) {
+        let dx = x - to.x;
+        let dz = z - to.z;
+        if abs(dx) > abs(dz) {
+            if dx > 0.0 { face(1.0); } else { face(3.0); }
+        } else if abs(dz) > 0.001 {
+            if dz > 0.0 { face(2.0); } else { face(0.0); }
+        }
+        arc = 0.28 + max(0.0, y - to.y) * 0.6;
+        begin(Motion.Hop, x, y, z, seconds);
+    }
+
+    // Shoved: it goes without choosing to, so it does not turn.
+    fn slide(x: number, y: number, z: number, seconds: number) {
+        arc = max(0.0, y - to.y) * 0.6 + 0.1;
+        begin(Motion.Slide, x, y, z, seconds);
+    }
+
+    // A strike towards a direction: out quickly and home slowly.
+    fn lunge(d: number, seconds: number) {
+        face(d);
+        home = to;
+        tip = Vec3(home.x + dir_x(d) * 0.38, home.y + 0.08, home.z + dir_z(d) * 0.38);
+        begin(Motion.Lunge, home.x, home.y, home.z, seconds);
+    }
+
+    // Pushed into something that would not give.
+    fn nudge(d: number, seconds: number) {
+        home = to;
+        tip = Vec3(home.x + dir_x(d) * 0.26, home.y, home.z + dir_z(d) * 0.26);
+        begin(Motion.Nudge, home.x, home.y, home.z, seconds);
+    }
+
+    fn hit() {
+        struck = Timer(0.28);
+    }
+
+    // Into the water, and gone.
+    fn sink(seconds: number) {
+        begin(Motion.Sink, to.x, to.y - 1.6, to.z, seconds);
+    }
+
+    // Destroyed where it stands.
+    fn crumble(seconds: number) {
+        begin(Motion.Crumble, to.x, to.y, to.z, seconds);
+    }
+
+    // Up out of the ground: a Hollow climbing out, or a stone raised.
+    fn rise(seconds: number) {
+        let p = to;
+        this.transform.position = Vec3(p.x, p.y - 1.1, p.z);
+        begin(Motion.Rise, p.x, p.y, p.z, seconds);
+    }
+
+    fn ease_out(t: number) -> number {
+        return 1.0 - (1.0 - t) * (1.0 - t);
+    }
+
+    fn update(dt: number) {
+        // Turning eases round the short way.
+        var turn = wanted_yaw - yaw;
+        while turn > PI { turn -= TAU; }
+        while turn < -PI { turn += TAU; }
+        yaw += turn * min(1.0, dt * 14.0);
+        if alive { this.transform.yaw = yaw; }
+
+        // A breath while standing, a squash when struck, a stretch in the air.
+        var sx = size;
+        var sy = size;
+        if alive && motion == Motion.Still && !gone {
+            let breath = sin(Time.elapsed * 2.4 + phase) * 0.018;
+            sy = size * (1.0 + breath);
+            sx = size * (1.0 - breath * 0.5);
+        }
+        if !struck.done {
+            let k = struck.left / max(0.001, struck.duration);
+            sy = sy * (1.0 - 0.22 * k);
+            sx = sx * (1.0 + 0.16 * k);
+        }
+
+        if motion == Motion.Still {
+            if !gone { this.transform.scale = Vec3(sx, sy, sx); }
+            return;
+        }
+        let t = clamp(clock.progress, 0.0, 1.0);
+        match motion {
+            Motion.Hop => {
+                var p = from.lerp(to, t);
+                p.y += sin(t * PI) * arc;
+                this.transform.position = p;
+                let stretch = sin(t * PI) * 0.12;
+                sy = sy * (1.0 + stretch);
+                sx = sx * (1.0 - stretch * 0.5);
+            }
+            Motion.Slide => {
+                var p = from.lerp(to, ease_out(t));
+                p.y += sin(t * PI) * arc;
+                this.transform.position = p;
+            }
+            Motion.Lunge | Motion.Nudge => {
+                var amount = 0.0;
+                if t < 0.3 { amount = ease_out(t / 0.3); } else { amount = 1.0 - (t - 0.3) / 0.7; }
+                this.transform.position = home.lerp(tip, amount);
+            }
+            Motion.Sink => {
+                this.transform.position = from.lerp(to, t * t);
+                sx = sx * (1.0 - t * 0.3);
+            }
+            Motion.Crumble => {
+                // Squashed flat and spread, then gone.
+                sy = size * max(0.02, 1.0 - t);
+                sx = size * (1.0 + t * 0.4) * max(0.02, 1.0 - t * t);
+            }
+            Motion.Rise => {
+                this.transform.position = from.lerp(to, ease_out(t));
+            }
+            _ => {}
+        }
+        this.transform.scale = Vec3(sx, sy, sx);
+        if clock.done {
+            match motion {
+                Motion.Sink | Motion.Crumble => {
+                    gone = true;
+                    this.transform.scale = Vec3(0.001, 0.001, 0.001);
+                }
+                Motion.Lunge | Motion.Nudge => {
+                    this.transform.position = home;
+                    to = home;
+                }
+                _ => {
+                    this.transform.position = to;
+                }
+            }
+            motion = Motion.Still;
+        }
+    }
+}

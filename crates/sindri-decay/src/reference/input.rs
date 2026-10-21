@@ -189,6 +189,14 @@ pub(super) const TYPES: &[TypeEntry] = &[
                 "Whether a mouse button was let go this frame, or the last finger lifted.",
             ),
             value(
+                "ray_origin",
+                "Read-only Vec3 where the world camera's ray through the pointer starts, in world space: with `ray_direction`, what a game casts against its own ground to learn which cell or object the pointer is over, when that ground is not a voxel world `Aim` can answer for. Zero when there is no pointer or no world camera.",
+            ),
+            value(
+                "ray_direction",
+                "Read-only unit Vec3 the world camera's ray through the pointer travels along: straight into the screen for an orthographic camera, through the pointer's pixel for a perspective one. Zero, with `ray_origin`, when there is no pointer or no world camera, so check its length before using it.",
+            ),
+            value(
                 "over_ui",
                 "Whether the pointer is over part of the interface, such as a button. Check it so clicking a button does not also shoot or move in the game.",
             ),

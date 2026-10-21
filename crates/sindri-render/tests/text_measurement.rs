@@ -24,9 +24,9 @@ fn renderer() -> TextRenderer {
     let mut text = TextRenderer::new();
     let bytes = std::fs::read(concat!(
         env!("CARGO_MANIFEST_DIR"),
-        "/../../game/assets/fonts/Inter.ttf"
+        "/../../editor/assets/Inter.ttf"
     ))
-    .expect("the companion game's font is in the repository");
+    .expect("the editor's font is in the repository");
     text.bind_font(FONT, "Inter", bytes);
     text
 }

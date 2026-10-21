@@ -13,9 +13,9 @@ use sindri_assets::{AssetBytes, AssetDecoder, TextureAssetDecoder};
 use sindri_core::{AssetId, SpriteSheetDocument, sheet_id_for};
 use sindri_gpu::GpuContext;
 use sindri_render::{
-    DepthTarget, FrameRenderers, FrameTarget, GlyphRenderer, OffscreenTarget, ShapeRenderer,
-    SpriteBatchRenderer, Texture2D, TextureRegistry, TexturedCubeRenderer, Viewport,
-    encode_prepared_frame,
+    Bloom, DepthTarget, FrameRenderers, FrameTarget, GlyphRenderer, Lighting, OffscreenTarget,
+    ShapeRenderer, SpriteBatchRenderer, Texture2D, TextureRegistry, TexturedCubeRenderer, Viewport,
+    encode_lit_frame, encode_prepared_frame,
 };
 use sindri_scene::{CameraView, SceneRuntime, TextureBindings, measure_ui_text};
 
@@ -48,6 +48,7 @@ pub struct ProjectRenderer {
     bindings: TextureBindings,
     target: OffscreenTarget,
     depth: DepthTarget,
+    bloom: Bloom,
     cubes: TexturedCubeRenderer,
     sprites: SpriteBatchRenderer,
     glyphs: GlyphRenderer,
@@ -101,6 +102,11 @@ impl ProjectRenderer {
             bindings,
             target: OffscreenTarget::new(&gpu.device, width, height)?,
             depth: DepthTarget::new(&gpu.device, width, height),
+            bloom: {
+                let mut bloom = Bloom::new(&gpu.device, OffscreenTarget::FORMAT);
+                bloom.resize(&gpu.device, width, height);
+                bloom
+            },
             cubes: TexturedCubeRenderer::new(&gpu.device, OffscreenTarget::FORMAT),
             sprites: SpriteBatchRenderer::new(&gpu.device, OffscreenTarget::FORMAT),
             glyphs: GlyphRenderer::new(&gpu.device, OffscreenTarget::FORMAT),
@@ -163,17 +169,13 @@ impl ProjectRenderer {
         let view = player.viewport();
         let undo = player.session.style(&mut player.world, view)?;
         let styled = Instant::now();
+        let mut post_process = sindri_render::PostProcessSettings::default();
         let prepared = measure_ui_text(&player.world, player.scene.components(), &mut player.text)
             .map_err(Box::<dyn Error>::from)
             .and_then(|sizes| {
-                self.cubes
-                    .set_lighting(player.scene.lighting(&player.world)?);
-                let shadows = player
-                    .scene
-                    .environment(&player.world)?
-                    .map(sindri_scene::EnvironmentComponent::shadow_settings)
-                    .unwrap_or_default();
-                self.cubes.set_shadows(&gpu.device, shadows);
+                post_process = self
+                    .cubes
+                    .configure(&gpu.device, player.scene.world_settings(&player.world)?);
                 let prepared = player.scene.extract_animated(
                     &player.world,
                     Viewport::new(self.size.0, self.size.1),
@@ -209,24 +211,41 @@ impl ProjectRenderer {
         let batches = self.batch_stats();
         let model_uploads = self.cubes.model_cache_stats().uploads;
         let cached_uploads = self.cubes.cached_mesh_stats().buffer_uploads;
-        encode_prepared_frame(
-            FrameRenderers {
-                cube: &mut self.cubes,
-                sprites: &mut self.sprites,
-                text: &mut player.text,
-                glyphs: &mut self.glyphs,
-                shapes: &mut self.shapes,
-                textures: &self.textures,
-            },
-            &gpu.device,
-            &gpu.queue,
-            &mut encoder,
-            FrameTarget {
-                color: self.target.view(),
-                depth: &self.depth,
-            },
-            &prepared,
-        )?;
+        let renderers = FrameRenderers {
+            cube: &mut self.cubes,
+            sprites: &mut self.sprites,
+            text: &mut player.text,
+            glyphs: &mut self.glyphs,
+            shapes: &mut self.shapes,
+            textures: &self.textures,
+        };
+        let target = FrameTarget {
+            color: self.target.view(),
+            depth: &self.depth,
+        };
+        if post_process.is_active() {
+            encode_lit_frame(
+                renderers,
+                &gpu.device,
+                &gpu.queue,
+                &mut encoder,
+                target,
+                &prepared,
+                Lighting {
+                    bloom: &mut self.bloom,
+                    settings: post_process,
+                },
+            )?;
+        } else {
+            encode_prepared_frame(
+                renderers,
+                &gpu.device,
+                &gpu.queue,
+                &mut encoder,
+                target,
+                &prepared,
+            )?;
+        }
         if let Some(timer) = &self.timing {
             timer.finish(&mut encoder);
         }

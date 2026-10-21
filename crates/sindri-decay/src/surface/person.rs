@@ -73,6 +73,10 @@ pub(crate) enum PointerValue {
     Delta,
     Locked,
     Overlay,
+    /// Where the world camera's ray through the pointer starts.
+    RayOrigin,
+    /// Which way that ray goes, one unit long; zero when there is no ray.
+    RayDirection,
 }
 pub(crate) const POINTER_VALUES: &[(&str, PointerValue)] = &[
     ("x", PointerValue::X),
@@ -85,6 +89,8 @@ pub(crate) const POINTER_VALUES: &[(&str, PointerValue)] = &[
     ("overlay", PointerValue::Overlay),
     ("inside", PointerValue::Inside),
     ("over_ui", PointerValue::OverUi),
+    ("ray_origin", PointerValue::RayOrigin),
+    ("ray_direction", PointerValue::RayDirection),
 ];
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]

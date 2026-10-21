@@ -1,0 +1,27 @@
+{
+  "format": 1,
+  "kind": "laser",
+  "seed": 5,
+  "sound": {
+    "wave": "saw",
+    "attack": 0.0,
+    "sustain": 0.0588,
+    "punch": 0.3862,
+    "decay": 0.1499,
+    "frequency": 857.1855,
+    "cutoff": 166.3505,
+    "slide": -5.9382,
+    "accel": 0.0,
+    "vibrato_depth": 0.0,
+    "vibrato_rate": 0.0,
+    "arp_semitones": 0.0,
+    "arp_delay": 0.0,
+    "duty": 0.4323,
+    "duty_sweep": 1.0976,
+    "repeat": 0.0,
+    "low_pass": 20000.0,
+    "high_pass": 0.0,
+    "crush": 1,
+    "volume": 0.6
+  }
+}

@@ -72,11 +72,14 @@ pub(super) struct Placed {
 }
 
 #[cfg(not(target_arch = "wasm32"))]
-/// Writes `audio/<stem>.wav` and its editable source beside it, then lists the clip.
+/// Writes `audio/<stem>.<format>` and its editable source beside it, then
+/// lists the clip. `format` is the clip's file extension: `wav` for an
+/// effect, `ogg` for a song.
 pub(super) fn place(
     root: &Path,
     name: &str,
-    wav: &[u8],
+    audio: &[u8],
+    format: &str,
     source_extension: &str,
     source: &str,
 ) -> Result<Placed, String> {
@@ -95,10 +98,10 @@ pub(super) fn place(
     };
     let folder = assets.join("audio");
     fs::create_dir_all(&folder).map_err(|e| e.to_string())?;
-    let clip = format!("audio/{stem}.wav");
-    let wav_path = folder.join(format!("{stem}.wav"));
+    let clip = format!("audio/{stem}.{format}");
+    let wav_path = folder.join(format!("{stem}.{format}"));
     let source_path = folder.join(format!("{stem}.{source_extension}"));
-    fs::write(&wav_path, wav).map_err(|e| e.to_string())?;
+    fs::write(&wav_path, audio).map_err(|e| e.to_string())?;
     fs::write(&source_path, source).map_err(|e| e.to_string())?;
     let listed = include(&mut doc, &clip);
     if listed {
@@ -163,7 +166,8 @@ mod tests {
     #[test]
     fn placing_a_sound_writes_it_and_lists_it_once() {
         let dir = project("format_version = 1\n\n# keep me\n[project]\nname = \"Demo\"\n");
-        let placed = place(dir.path(), "Big Coin!", b"RIFF", "sindrisfx", "{}").expect("placed");
+        let placed =
+            place(dir.path(), "Big Coin!", b"RIFF", "wav", "sindrisfx", "{}").expect("placed");
         assert_eq!(placed.clip, "audio/big-coin.wav");
         assert!(placed.listed);
         assert!(dir.path().join("assets/audio/big-coin.wav").is_file());
@@ -172,7 +176,8 @@ mod tests {
         assert!(manifest.contains("# keep me"));
         assert!(manifest.contains("\"audio/big-coin.wav\""));
 
-        let again = place(dir.path(), "big-coin", b"RIFF2", "sindrisfx", "{}").expect("again");
+        let again =
+            place(dir.path(), "big-coin", b"RIFF2", "wav", "sindrisfx", "{}").expect("again");
         assert!(!again.listed);
         let manifest = fs::read_to_string(dir.path().join(MANIFEST)).expect("read");
         assert_eq!(manifest.matches("audio/big-coin.wav").count(), 1);
@@ -182,7 +187,7 @@ mod tests {
     #[test]
     fn an_existing_include_list_keeps_its_entries() {
         let dir = project("[project]\nname = \"X\"\n\n[assets]\ninclude = [\"ui.weave\"]\n");
-        place(dir.path(), "zap", b"RIFF", "sindrisfx", "{}").expect("placed");
+        place(dir.path(), "zap", b"RIFF", "wav", "sindrisfx", "{}").expect("placed");
         let manifest = fs::read_to_string(dir.path().join(MANIFEST)).expect("read");
         let doc = manifest.parse::<DocumentMut>().expect("parse");
         let list: Vec<_> = doc["assets"]["include"]
@@ -197,7 +202,7 @@ mod tests {
     #[test]
     fn a_folder_without_a_manifest_is_not_a_project() {
         let dir = tempfile::tempdir().expect("temp");
-        assert!(place(dir.path(), "zap", b"RIFF", "sindrisfx", "{}").is_err());
+        assert!(place(dir.path(), "zap", b"RIFF", "wav", "sindrisfx", "{}").is_err());
         assert!(!dir.path().join("audio").exists());
         assert_eq!(find(&dir.path().join("a/b")), None);
         let inner = project("[project]\n");

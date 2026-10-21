@@ -2105,6 +2105,8 @@ not require the singular 2D behavior camera.
 | `Pointer.overlay` | `Vec2` |
 | `Pointer.inside` | `bool` |
 | `Pointer.over_ui` | `bool` |
+| `Pointer.ray_origin` (read-only) | `Vec3` |
+| `Pointer.ray_direction` (read-only) | `Vec3` |
 
 | Call | Returns |
 | --- | --- |
@@ -2113,6 +2115,11 @@ not require the singular 2D behavior camera.
 | `Pointer.is_down(button)` | `bool` |
 | `Pointer.just_pressed(button)` | `bool` |
 | `Pointer.just_released(button)` | `bool` |
+
+`Pointer.ray_origin` and `Pointer.ray_direction` are the world ray under the
+pointer through the world camera, for picking in a 3D scene: cast it against
+what can be clicked, as Causeway does for its figures and cells. The
+direction is unit length; with no pointer or no world camera both are zero.
 
 `Pointer.delta` (also `Input.Pointer.delta`) is mouse displacement accumulated
 until the next fixed step: positive X is right, positive Y

@@ -98,6 +98,7 @@ impl Fixture {
                 aim: None,
                 gestures: None,
                 camera_pan: None,
+                pointer_ray: None,
                 random: None,
                 saves: None,
                 effects: None,

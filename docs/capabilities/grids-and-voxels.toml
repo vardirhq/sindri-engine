@@ -74,7 +74,7 @@ tests = [
   "crates/sindri-scene/tests/extraction/voxel_world.rs",
   "crates/sindri-voxel/src/terrain/tests.rs",
 ]
-proof = ["game", "games/voxel-lab"]
+proof = ["games/voxel-lab"]
 docs = ["docs/voxel-terrain.md", "docs/voxel-world-plan.md"]
 detail = """
 `sindri-voxel` owns signed voxel and 16³ section coordinates, palette-backed
@@ -119,7 +119,7 @@ summary = "A bounded resident window, optionally following the world camera, loa
 status = { engine = "partial", editor = "partial", decay = "no", proof = "partial" }
 parity = "Bounded voxel residency"
 tests = ["crates/sindri-scene/src/voxel/tests.rs"]
-proof = ["game", "games/voxel-lab"]
+proof = ["games/voxel-lab"]
 detail = """
 A world may keep its resident window under the world camera (`follow_camera`):
 the window centres on where the middle of the picture meets the height of the
@@ -142,7 +142,7 @@ tests = [
   "crates/sindri-scene/tests/extraction/voxel_blocks.rs",
   "crates/sindri-scene/tests/extraction/voxel_surfaces.rs",
 ]
-proof = ["game", "games/voxel-lab"]
+proof = ["games/voxel-lab"]
 limits = ["Only opaque block batches are bridged to the GPU; cutout/transparent pipelines and editor voxel picking/painting remain."]
 detail = """
 The block mesher samples a one-voxel halo through `VoxelSource`, so adjacent
@@ -202,32 +202,33 @@ id = "voxel-collision"
 group = "Voxel world"
 title = "Voxel collision"
 summary = "`sindri.physics3d.voxel_collider` makes an authored voxel world solid near the bodies that can reach it."
-status = { engine = "yes", editor = "yes", decay = "yes", proof = "yes" }
+status = { engine = "yes", editor = "yes", decay = "yes", proof = "partial" }
 parity = "Voxel collision"
 tests = [
   "crates/sindri-scene/src/physics_sync3d/voxel_tests.rs",
   "crates/sindri-scene/src/voxel_collision3d/tests.rs",
   "crates/sindri-scene/src/voxel_collision3d/lifecycle_tests.rs",
-  "game/tests/the_game_is_played/tumbling.rs",
-  "game/tests/browser_voxel_landing.decay",
+  "game/tests/a_block_lands_on_voxel_lab.rs",
+  "scripts/browser/voxel-landing/observer.decay",
 ]
-proof = ["game"]
+proof = ["games/voxel-lab"]
+limits = ["No game uses voxel collision since Causeway became a tactics game on model islands; the proof is a fixture over Voxel Lab."]
 docs = ["docs/physics.md", "docs/physics-voxel-editor-review.md"]
 detail = """
 `sindri.physics3d.voxel_collider` on a `sindri.voxel_world` entity resolves the
 world's generator, palette and edits through `VoxelGround`, takes each block's
 collision box from its block set (`collides`, default true, with the tile's own
-height/extent bounds; water in Causeway is `false`), and keeps resident only
+height/extent bounds; water is usually `false`), and keeps resident only
 the sections dynamic bodies can reach this step plus a margin.
 `ScenePhysics3d::step_with_tile_sets` validates the voxel snapshot and the body
 batch before committing either, and the shared game session and editor Play
-pass their block sets. Causeway uses it: a block taken back tumbles out of its
-cell, lands on the generated terrain and only then returns to the stock,
-detected through `Physics3d.collision_started`. Scene regressions and the
-Causeway play test exercise landing, owner events/queries, edited shafts under
-a sleeping body, distant residency, non-colliding and slab blocks, release and
-atomic rejection. A CI Chromium fixture lands the same prefab in exported
-Causeway, and the native editor review authors the voxel collider, block-set
+pass their block sets. Causeway used it until it became a tactics game played
+on model islands; now a fixture over Voxel Lab gives the world collision and
+drops a block onto it, natively in `a_block_lands_on_voxel_lab.rs` and in an
+exported build in a CI Chromium run. Scene regressions exercise landing, owner
+events/queries, edited shafts under a sleeping body, distant residency,
+non-colliding and slab blocks, release and atomic rejection, and the native
+editor review authors the voxel collider, block-set
 Collides and 3D bodies and lands them in Play.
 
 `SceneVoxelCollision3d` reconciles explicit complete resident voxel snapshots
@@ -250,7 +251,7 @@ tests = [
   "crates/sindri-decay/tests/a_script_walks_and_builds_on_voxels.rs",
   "games/voxel-lab/tests/a_click_lands_on_what_it_points_at.rs",
 ]
-proof = ["game"]
+proof = ["games/voxel-lab"]
 detail = """
 `VoxelGround` answers gameplay's questions from the same generator and edits —
 the block in a cell, a column's surface, the first block a ray meets —
@@ -264,7 +265,7 @@ read, build and remove blocks with `Grid.block`, `Grid.set_block` and
 `max_step`, reading the ground around the walker and its goal; and
 `voxel::aim_at_with` says which block and face the pointer is on.
 `a_script_walks_and_builds_on_voxels.rs` builds, digs and walks round a wall on
-a generated world, and Causeway is played on it.
+a generated world, and Voxel Lab picks its blocks with it.
 """
 
 [[capability]]

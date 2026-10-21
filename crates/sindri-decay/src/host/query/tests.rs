@@ -60,6 +60,7 @@ fn query(world: &mut World, name: &str, args: &[Value]) -> Result<Value, String>
             aim: None,
             gestures: None,
             camera_pan: None,
+            pointer_ray: None,
             random: None,
             animations: None,
             scenes: None,

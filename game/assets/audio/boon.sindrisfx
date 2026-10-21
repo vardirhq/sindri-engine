@@ -1,0 +1,27 @@
+{
+  "format": 1,
+  "kind": "coin",
+  "seed": 4,
+  "sound": {
+    "wave": "square",
+    "attack": 0.0,
+    "sustain": 0.0507,
+    "punch": 0.3734,
+    "decay": 0.2654,
+    "frequency": 915.8241,
+    "cutoff": 0.0,
+    "slide": 0.0,
+    "accel": 0.0,
+    "vibrato_depth": 0.0,
+    "vibrato_rate": 0.0,
+    "arp_semitones": 12.0,
+    "arp_delay": 0.0759,
+    "duty": 0.3396,
+    "duty_sweep": 0.0,
+    "repeat": 0.0,
+    "low_pass": 20000.0,
+    "high_pass": 0.0,
+    "crush": 1,
+    "volume": 0.6
+  }
+}

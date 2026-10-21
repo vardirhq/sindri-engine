@@ -229,18 +229,35 @@ impl ComposerApp {
     }
 
     /// The current sound as a WAV and its editable source, named for a project.
-    fn deliverable(&mut self) -> Result<(String, Vec<u8>, &'static str, String), String> {
+    fn deliverable(
+        &mut self,
+    ) -> Result<(String, Vec<u8>, &'static str, &'static str, String), String> {
         if self.mode == Mode::Music {
             let song = self.song_file();
             let samples = render_samples(&song.settings(), &song.tracks);
-            let bytes = wav::encode(&samples, 2).map_err(|e| e.to_string())?;
-            Ok((self.song_name.clone(), bytes, "sindrisong", song.to_json()))
+            // Compressed natively, where the encoder builds; a browser download
+            // stays WAV.
+            #[cfg(not(target_arch = "wasm32"))]
+            let (bytes, format) = (
+                super::super::ogg::encode(&samples, 2).map_err(|e| e.to_string())?,
+                "ogg",
+            );
+            #[cfg(target_arch = "wasm32")]
+            let (bytes, format) = (wav::encode(&samples, 2).map_err(|e| e.to_string())?, "wav");
+            Ok((
+                self.song_name.clone(),
+                bytes,
+                format,
+                "sindrisong",
+                song.to_json(),
+            ))
         } else {
             self.sfx.refresh();
             let bytes = wav::encode(&self.sfx.samples, 1).map_err(|e| e.to_string())?;
             Ok((
                 self.sfx.name.clone(),
                 bytes,
+                "wav",
                 "sindrisfx",
                 self.sfx.file.to_json(),
             ))
@@ -259,8 +276,8 @@ impl ComposerApp {
         };
         let placed = self
             .deliverable()
-            .and_then(|(name, bytes, extension, source)| {
-                project::place(&root, &name, &bytes, extension, &source)
+            .and_then(|(name, bytes, format, extension, source)| {
+                project::place(&root, &name, &bytes, format, extension, &source)
             });
         match placed {
             Ok(placed) => {
@@ -285,13 +302,13 @@ impl ComposerApp {
     pub(super) fn send_to_project(&mut self) {
         let downloaded = self
             .deliverable()
-            .and_then(|(name, bytes, extension, source)| {
+            .and_then(|(name, bytes, format, extension, source)| {
                 let stem =
                     project::stem(&name).ok_or("Name the sound with letters or digits first.")?;
                 let wav = SaveAs {
                     title: "",
                     stem: &stem,
-                    extension: "wav",
+                    extension: format,
                     label: "",
                 };
                 let editable = SaveAs {
@@ -302,7 +319,7 @@ impl ComposerApp {
                 };
                 self.files.save(&wav, &bytes)?;
                 self.files.save(&editable, source.as_bytes())?;
-                Ok(format!("audio/{stem}.wav"))
+                Ok(format!("audio/{stem}.{format}"))
             });
         match downloaded {
             Ok(clip) => {

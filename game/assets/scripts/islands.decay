@@ -1,0 +1,240 @@
+// The four islands of a crossing, as text you can read.
+//
+// Each island is two maps of eight rows of eight cells, north row first and
+// west cell first, written so the rows line up with each other:
+//
+// - `heights`: how many blocks tall each cell stands. 0 is open water.
+// - `features`: what stands on it. `.` nothing, `H` a house, `B` the beacon,
+//   `S` a stone, `1` `2` `3` where the Bulwark, Mason and Lamplighter start,
+//   and `L` landing ground, where the Hollow climb out of the mud.
+//
+// The Hollow come over the causeway from the mainland, which is east, so the
+// landing ground is on the east of every island and low: as the tide comes
+// in it drowns, and the arrivals stop. Holding until high tide is winning.
+//
+// Waves are one letter per Hollow: `H` Husk, `B` Brute, `S` Spitter,
+// `M` Mortar, `C` the Colossus. `start` climbs out before the first turn; the
+// waves arrive at the end of each round, in order.
+
+struct IslandDef {
+    name: String,
+    blurb: String,
+    heights: String,
+    features: String,
+    rounds: number,
+    rises: List<number>,
+    start: String,
+    waves: List<String>,
+    // The block a cell's top is made of, from low to high ground.
+    shore: String,
+    land: String,
+    high: String,
+}
+
+shared const ISLAND_COUNT: number = 4.0;
+
+shared fn island_def(index: number) -> IslandDef {
+    if index == 0.0 {
+        return IslandDef(
+            name: "Saltmarsh",
+            blurb: "The first island off the mainland. Two houses and the old beacon, on a hump of grass in the reeds.",
+            heights: "00111100"
+                + "01233210"
+                + "12344321"
+                + "12333211"
+                + "12332211"
+                + "01222111"
+                + "00122110"
+                + "00011100",
+            features: "........"
+                + "...H..L."
+                + "...B..LL"
+                + "..H.1.LL"
+                + "...2.3LL"
+                + ".....LL."
+                + "....LL.."
+                + "........",
+            rounds: 5.0,
+            rises: [2.0, 4.0],
+            start: "HH",
+            waves: ["H", "HS", "H", "S", ""],
+            shore: "mud",
+            land: "ground",
+            high: "moss",
+        );
+    }
+    if index == 1.0 {
+        return IslandDef(
+            name: "The Fold",
+            blurb: "Sheep country, folded into two hills with a dip between. The Hollow come at it from both ends of the dip.",
+            heights: "01111000"
+                + "12332110"
+                + "23443211"
+                + "23322111"
+                + "12211221"
+                + "11222331"
+                + "01233321"
+                + "00111110",
+            features: "........"
+                + "..H...L."
+                + "..B..LLL"
+                + "...1.LL."
+                + ".....2LL"
+                + "..3...H."
+                + "...H...."
+                + "........",
+            rounds: 5.0,
+            rises: [1.0, 3.0],
+            start: "HHS",
+            waves: ["HB", "S", "HM", "B", ""],
+            shore: "sand",
+            land: "ground",
+            high: "ground",
+        );
+    }
+    if index == 2.0 {
+        return IslandDef(
+            name: "Quarry Rise",
+            blurb: "A worked-out quarry, all ledges and drops. Shove a Hollow off a ledge and the fall hurts it.",
+            heights: "00122100"
+                + "01354310"
+                + "12453321"
+                + "23441122"
+                + "12441111"
+                + "12553321"
+                + "01243210"
+                + "00122100",
+            features: "........"
+                + "...H...."
+                + "..B..S.L"
+                + ".1...LLL"
+                + "..S..LLL"
+                + "..H2..L."
+                + "...3...."
+                + "........",
+            rounds: 6.0,
+            rises: [2.0, 4.0],
+            start: "BHS",
+            waves: ["HM", "BS", "HM", "S", "B", ""],
+            shore: "gravel",
+            land: "stone",
+            high: "rock",
+        );
+    }
+    return IslandDef(
+        name: "The Lighthouse",
+        blurb: "The last island before open sea, and the lamp that keeps the causeway. The Colossus has come for it.",
+        heights: "00111100"
+            + "01234310"
+            + "12355321"
+            + "12354221"
+            + "12343211"
+            + "12332111"
+            + "01222110"
+            + "00111100",
+        features: "........"
+            + "...H...."
+            + "...B...."
+            + "..1..LLL"
+            + "...H.LLL"
+            + "..2.3LL."
+            + "......L."
+            + "........",
+        rounds: 6.0,
+        rises: [2.0, 4.0],
+        start: "CHS",
+        waves: ["H", "HS", "M", "HB", "S", ""],
+        shore: "sand",
+        land: "ground",
+        high: "stone",
+    );
+}
+
+shared fn kind_of_letter(letter: String) -> Kind {
+    if letter == "B" { return Kind.Brute; }
+    if letter == "S" { return Kind.Spitter; }
+    if letter == "M" { return Kind.Mortar; }
+    if letter == "C" { return Kind.Colossus; }
+    return Kind.Husk;
+}
+
+shared fn kinds_of(letters: String) -> List<Kind> {
+    var kinds: List<Kind> = [];
+    for i in 0..letters.length {
+        kinds.push(kind_of_letter(letters.slice(i, i + 1.0)));
+    }
+    return kinds;
+}
+
+shared fn digit_of(text: String) -> number {
+    let digits = "0123456789";
+    let at = digits.find(text);
+    if at < 0.0 { return 0.0; }
+    return at;
+}
+
+// The cells the Hollow may climb out on.
+shared fn landing_of(def: IslandDef) -> List<number> {
+    var cells: List<number> = [];
+    for c in 0..(SIZE * SIZE) {
+        if def.features.slice(c, c + 1.0) == "L" {
+            cells.push(c);
+        }
+    }
+    return cells;
+}
+
+// A warden as the run has made it: its kind, what it has earned, and whether
+// it is fit to fight.
+struct Warden {
+    kind: Kind,
+    max_hp: number,
+    move: number,
+    power: number,
+}
+
+// The board an island starts as: its ground, its buildings and stones, the
+// wardens where they deploy, and the first Hollow already climbing out.
+shared fn board_of(def: IslandDef, wardens: List<Warden>, hearth: number) -> Board {
+    var heights: List<number> = [];
+    for c in 0..(SIZE * SIZE) {
+        heights.push(digit_of(def.heights.slice(c, c + 1.0)));
+    }
+    var board = Board(heights: heights, tide: 0.0, units: [], spawns: [], beats: [],
+        round: 1.0, rounds: def.rounds, rises: def.rises, hearth: hearth, next_id: 1.0,
+        arrivals: kinds_of(def.start));
+    for c in 0..(SIZE * SIZE) {
+        let mark = def.features.slice(c, c + 1.0);
+        let x = c % SIZE;
+        let z = floor(c / SIZE);
+        var kind = Kind.Stone;
+        var placed = false;
+        if mark == "H" { kind = Kind.House; placed = true; }
+        if mark == "B" { kind = Kind.Beacon; placed = true; }
+        if mark == "S" { kind = Kind.Stone; placed = true; }
+        if placed {
+            board.units.push(Unit(id: board.next_id, kind: kind, x: x, z: z, hp: kind_hp(kind),
+                max_hp: kind_hp(kind), move: 0.0));
+            board.next_id += 1.0;
+        }
+        for w in 0..wardens.length {
+            if mark == "" + (w + 1.0) {
+                let warden = wardens[w];
+                board.units.push(Unit(id: board.next_id, kind: warden.kind, x: x, z: z,
+                    hp: warden.max_hp, max_hp: warden.max_hp, move: warden.move, power: warden.power));
+                board.next_id += 1.0;
+            }
+        }
+    }
+    return board;
+}
+
+// The Hollow that arrive at the end of a round, or none past the last wave.
+shared fn wave_of(def: IslandDef, round: number) -> List<Kind> {
+    let index = round - 1.0;
+    if index < 0.0 || index >= def.waves.length {
+        var none: List<Kind> = [];
+        return none;
+    }
+    return kinds_of(def.waves[index]);
+}

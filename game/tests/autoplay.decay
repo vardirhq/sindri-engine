@@ -1,0 +1,149 @@
+// A crossing played by a bot, for the tests.
+//
+// It plays through the real rules with nothing drawn: every warden tries every
+// cell it can reach and every target from there, keeps whichever leaves the
+// Hollow's coming strikes doing the least harm, and the Hollow answer as they
+// always do. What it reports is how the crossing went, so a change to the
+// rules that makes an island unwinnable, or trivial, fails a test rather than
+// a play-test.
+
+// How good a board is for the wardens, before the Hollow strike.
+fn worth(board: Board) -> number {
+    let after = hollow_turn(board);
+    var score = 0.0;
+    score -= (board.hearth - after.hearth) * 10.0;
+    for u in after.units {
+        if is_warden(u.kind) {
+            score += u.hp * 2.0;
+            if u.hp <= 0.0 { score -= 12.0; }
+        }
+    }
+    for u in board.units {
+        if is_hollow(u.kind) {
+            if u.hp <= 0.0 { score += 6.0; } else { score -= u.hp; }
+        }
+    }
+    return score;
+}
+
+script Autoplay {
+    @export let seed: number = 7.0;
+
+    var island: number = 0.0;
+    var board: Board = board_of(island_def(0.0), [], 0.0);
+    var started: bool = false;
+    var turn_warden: number = 0.0;
+    var done: bool = false;
+
+    fn roster() -> List<Warden> {
+        return [
+            Warden(kind: Kind.Bulwark, max_hp: kind_hp(Kind.Bulwark), move: kind_move(Kind.Bulwark), power: 0.0),
+            Warden(kind: Kind.Mason, max_hp: kind_hp(Kind.Mason), move: kind_move(Kind.Mason), power: 0.0),
+            Warden(kind: Kind.Lamplighter, max_hp: kind_hp(Kind.Lamplighter), move: kind_move(Kind.Lamplighter), power: 0.0),
+        ];
+    }
+
+    fn begin(hearth: number) {
+        let def = island_def(island);
+        board = board_of(def, roster(), hearth);
+        board = mark_spawns(board, landing_of(def));
+        board = emerge(board);
+        board = plan_all(board);
+        board.arrivals = wave_of(def, board.round);
+        board = mark_spawns(board, landing_of(def));
+        board.beats.clear();
+        turn_warden = 0.0;
+    }
+
+    // The warden being decided, the cells it may move to, and the best of
+    // what it has tried so far. One cell is tried a frame, so no frame's work
+    // outgrows the script budget.
+    var deciding: number = -1.0;
+    var cells: List<number> = [];
+    var tried: number = 0.0;
+    var best: Board = board_of(island_def(0.0), [], 0.0);
+    var best_score: number = 0.0;
+
+    fn decide(index: number) {
+        deciding = index;
+        cells = reachable(board, index);
+        cells.insert(0, cell_of(board.units[index].x, board.units[index].z));
+        tried = 0.0;
+        best = board;
+        best_score = worth(board);
+    }
+
+    fn try_next() {
+        let c = cells[tried];
+        tried += 1.0;
+        var moved = board;
+        if c != cells[0] {
+            moved = move_warden(board, deciding, c % SIZE, floor(c / SIZE));
+        }
+        for t in skill_targets(moved, deciding) {
+            let result = use_skill(moved, deciding, t % SIZE, floor(t / SIZE));
+            let score = worth(result);
+            if score > best_score {
+                best_score = score;
+                best = result;
+            }
+        }
+        if tried >= cells.length {
+            board = best;
+            var spent = board.units[deciding];
+            spent.acted = true;
+            board.units[deciding] = spent;
+            deciding = -1.0;
+        }
+    }
+
+    fn update(dt: number) {
+        if done { return; }
+        if !started {
+            started = true;
+            Random.seed(seed);
+            Game.set("hearth", 7.0);
+            begin(7.0);
+            return;
+        }
+        if deciding >= 0.0 {
+            try_next();
+            return;
+        }
+        while turn_warden < board.units.length {
+            let u = board.units[turn_warden];
+            turn_warden += 1.0;
+            if is_warden(u.kind) && u.hp > 0.0 {
+                decide(turn_warden - 1.0);
+                return;
+            }
+        }
+        board = hollow_turn(board);
+        Game.set("hearth", board.hearth);
+        if board.hearth <= 0.0 || count_alive(board, true) == 0.0 {
+            Game.set("lost_on", island + 1.0);
+            done = true;
+            return;
+        }
+        board.round += 1.0;
+        if board.round > board.rounds {
+            Game.set("won_" + island, 1.0);
+            island += 1.0;
+            if island >= ISLAND_COUNT {
+                Game.set("crossed", 1.0);
+                done = true;
+                return;
+            }
+            begin(board.hearth);
+            return;
+        }
+        let def = island_def(island);
+        board = new_turn(board);
+        board = plan_all(board);
+        board.arrivals = wave_of(def, board.round);
+        board = mark_spawns(board, landing_of(def));
+        board.beats.clear();
+        turn_warden = 0.0;
+        Game.set("rounds_played", Game.get("rounds_played", 0.0) + 1.0);
+    }
+}

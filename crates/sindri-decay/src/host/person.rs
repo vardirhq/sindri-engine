@@ -186,7 +186,11 @@ impl WorldHost<'_> {
         } else {
             root
         };
-        namespace == Some(POINTER) && matches!(parts.next(), Some("delta" | "locked"))
+        namespace == Some(POINTER)
+            && matches!(
+                parts.next(),
+                Some("delta" | "locked" | "ray_origin" | "ray_direction")
+            )
     }
 
     pub(super) fn pointer_value(&self, value: PointerValue) -> Value {
@@ -219,6 +223,11 @@ impl WorldHost<'_> {
             PointerValue::Y => Value::Number(f64::from(position.unwrap_or([0.0, 0.0])[1])),
             PointerValue::OverlayX => Value::Number(f64::from(overlay()[0])),
             PointerValue::OverlayY => Value::Number(f64::from(overlay()[1])),
+            PointerValue::RayOrigin | PointerValue::RayDirection => {
+                let which = usize::from(value == PointerValue::RayDirection);
+                let [x, y, z] = self.pointer_ray.map_or([0.0; 3], |ray| ray[which]);
+                Value::Vec3([f64::from(x), f64::from(y), f64::from(z)])
+            }
         }
     }
 

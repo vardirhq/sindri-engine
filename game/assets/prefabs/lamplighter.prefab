@@ -1,0 +1,44 @@
+{
+  "format_version": 1,
+  "metadata": {
+    "name": "Lamplighter"
+  },
+  "entities": [
+    {
+      "id": "lamplighter",
+      "name": "Lamplighter",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.model": {
+          "asset": "models/lamplighter.glb",
+          "layer": 0
+        },
+        "sindri.script": {
+          "script": "Piece",
+          "source": "scripts/piece.decay",
+          "properties": {
+            "alive": true,
+            "size": 1.0
+          }
+        }
+      }
+    }
+  ]
+}

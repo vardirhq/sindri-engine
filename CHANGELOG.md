@@ -1,5 +1,33 @@
 # Changelog
 
+- Give Causeway a title worth opening on: the Lighthouse at dusk with its
+  lamps lit, the camera swaying round it and Hollow trudging over the
+  causeway, the logo and a plated menu rising out of the dark, a How to play
+  page, and a dip into the first battle as the camera settles into its view.
+  Wide screens keep the logo and menu in a shaded column beside the island;
+  a phone stacks them above and below it.
+- Draw a lit world in the browser player again when post-processing is on:
+  the bloom drew its scene in `Rgba8UnormSrgb` while every pipeline was
+  built for the canvas's `Bgra8UnormSrgb`, so WebGPU rejected each frame. The
+  scene now takes an sRGB output's own format.
+- Fade a text's shadow with its letters, so words faded in through a
+  `[color=#rrggbbaa]` span no longer leave their shadow on the screen ahead
+  of them.
+- Rebuild Causeway as a turn-based tactics game. Three wardens hold four
+  islands against the Hollow, who show every strike before it lands, until the
+  rising tide drowns them. The diorama is generated low-poly GLB models lit by
+  the sun, lanterns and a beacon, with Weave panels, an Ogg score and a bot
+  that plays the whole crossing in its tests.
+- Give Decay the pointer's world ray, `Pointer.ray_origin` and
+  `Pointer.ray_direction`, so a script can pick what is under the cursor in a
+  3D scene.
+- Apply an environment's fog, occlusion, grade and bloom in the shared player
+  and the offscreen project renderer, as the editor already did.
+- Draw a font bound from a bold-only file in its own face instead of falling
+  back to a system font.
+- Deliver Sound Lab songs to a project as Ogg Vorbis, about a seventh of the
+  size of WAV. The engine already plays WAV, Ogg and MP3.
+
 - Add Sindri Game Dev plugin overview, support, privacy and terms pages to
   the published documentation and site directory.
 

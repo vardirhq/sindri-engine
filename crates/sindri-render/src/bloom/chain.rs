@@ -66,19 +66,19 @@ impl Chain {
     /// away anything brighter than white before it had a chance to spread.
     pub(super) const FORMAT: wgpu::TextureFormat = wgpu::TextureFormat::Rgba16Float;
 
-    pub(super) fn new(device: &wgpu::Device, width: u32, height: u32, downscale: u32) -> Self {
+    pub(super) fn new(
+        device: &wgpu::Device,
+        width: u32,
+        height: u32,
+        downscale: u32,
+        scene_format: wgpu::TextureFormat,
+    ) -> Self {
         // At least one texel each way, however small the viewport: a texture of
         // no width is an error rather than an empty picture.
         let small = (width / downscale).max(1);
         let tall = (height / downscale).max(1);
         Self {
-            scene: Target::new(
-                device,
-                "Sindri bloom scene",
-                width,
-                height,
-                super::Bloom::SCENE_FORMAT,
-            ),
+            scene: Target::new(device, "Sindri bloom scene", width, height, scene_format),
             ping: Target::new(device, "Sindri bloom ping", small, tall, Self::FORMAT),
             pong: Target::new(device, "Sindri bloom pong", small, tall, Self::FORMAT),
             width,

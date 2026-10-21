@@ -1,0 +1,11 @@
+{
+  "format_version": 1,
+  "anchor": "center",
+  "grid": {
+    "columns": 4,
+    "rows": 1,
+    "size": [268, 64],
+    "spacing": [4, 0],
+    "names": ["spark-0", "spark-1", "spark-2", "spark-3"]
+  }
+}

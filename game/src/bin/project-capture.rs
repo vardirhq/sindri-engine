@@ -18,10 +18,9 @@
 
 #[cfg(not(target_arch = "wasm32"))]
 mod capture {
-    use std::{error::Error, fs, io::BufWriter, path::Path};
+    use std::{error::Error, path::Path};
 
-    use sindri_causeway::project::{OpenedProject, ProjectRenderer, open};
-    use sindri_gpu::{GpuContext, GpuRequestOptions};
+    use sindri_causeway::project::{open, photograph};
 
     pub(super) async fn run(args: Vec<String>) -> Result<(), Box<dyn Error>> {
         env_logger::builder()
@@ -40,38 +39,8 @@ mod capture {
             opened.player.perform(step)?;
         }
         opened.player.play(0.3)?;
-        photograph(&mut opened, (width, height), Path::new(out)).await
-    }
-
-    /// Draws the player's world once, offscreen, and writes it to `path`.
-    async fn photograph(
-        opened: &mut OpenedProject,
-        size: (u32, u32),
-        path: &Path,
-    ) -> Result<(), Box<dyn Error>> {
-        let instance = wgpu::Instance::default();
-        let gpu = GpuContext::request(&instance, None, &GpuRequestOptions::default()).await?;
-        let mut renderer = ProjectRenderer::new(&gpu, &opened.images, &opened.sheets, size)?;
-        renderer.bind_shaders(&opened.shaders)?;
-        renderer.draw(&mut opened.player, &gpu)?;
-        let mut encoder = gpu
-            .device
-            .create_command_encoder(&wgpu::CommandEncoderDescriptor {
-                label: Some("project capture readback"),
-            });
-        let readback = renderer
-            .target()
-            .copy_to_buffer(&gpu.device, &mut encoder)?;
-        gpu.queue.submit([encoder.finish()]);
-        let pixels = readback.read_rgba8(&gpu.device)?;
-        if let Some(parent) = path.parent() {
-            fs::create_dir_all(parent)?;
-        }
-        let mut png = png::Encoder::new(BufWriter::new(fs::File::create(path)?), size.0, size.1);
-        png.set_color(png::ColorType::Rgba);
-        png.set_depth(png::BitDepth::Eight);
-        png.write_header()?.write_image_data(&pixels)?;
-        println!("wrote {}", path.display());
+        photograph(&mut opened, (width, height), Path::new(out)).await?;
+        println!("wrote {out}");
         Ok(())
     }
 

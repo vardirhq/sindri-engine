@@ -1,0 +1,27 @@
+{
+  "format": 1,
+  "kind": "thud",
+  "seed": 6,
+  "sound": {
+    "wave": "noise",
+    "attack": 0.0,
+    "sustain": 0.0228,
+    "punch": 0.7144,
+    "decay": 0.1148,
+    "frequency": 63.4853,
+    "cutoff": 0.0,
+    "slide": -2.804,
+    "accel": 0.0,
+    "vibrato_depth": 0.0,
+    "vibrato_rate": 0.0,
+    "arp_semitones": 0.0,
+    "arp_delay": 0.0,
+    "duty": 0.5,
+    "duty_sweep": 0.0,
+    "repeat": 0.0,
+    "low_pass": 1064.4821,
+    "high_pass": 0.0,
+    "crush": 1,
+    "volume": 0.8
+  }
+}

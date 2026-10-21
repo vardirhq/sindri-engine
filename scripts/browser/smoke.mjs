@@ -276,7 +276,7 @@ if (process.env.SINDRI_PLATFORMER_GOAL === '1') {
 }
 
 if (process.env.SINDRI_VOXEL_LANDING === '1') {
-  // Causeway's own loose block, dropped by a read-only observer onto the
+  // A block dropped by a read-only observer onto Voxel Lab's
   // generated voxel terrain: it must be stopped by the world's blocks (and
   // reported by a downward ray) rather than returned by the give-up timer.
   // Timed from the reveal, which is when the game starts: it is held paused

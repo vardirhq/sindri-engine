@@ -109,6 +109,7 @@ impl Fixture {
                 screen_ui: None,
                 gestures: None,
                 camera_pan: None,
+                pointer_ray: None,
                 aim: None,
                 random: None,
                 saves: None,

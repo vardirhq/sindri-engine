@@ -118,10 +118,13 @@ fn send_delivers_the_current_effect_and_song_into_the_project() {
     app.send_to_project();
     assert_eq!(
         app.song_snippet.as_deref(),
-        Some("Audio.loop(\"audio/title-theme.wav\", 0.6);")
+        Some("Audio.loop(\"audio/title-theme.ogg\", 0.6);")
     );
+    // A song goes in compressed; an effect stays WAV.
+    let song = std::fs::read(dir.path().join("assets/audio/title-theme.ogg")).expect("the song");
+    assert_eq!(&song[..4], b"OggS");
     let manifest = std::fs::read_to_string(dir.path().join("sindri.toml")).expect("manifest");
-    assert!(manifest.contains("audio/laser.wav") && manifest.contains("audio/title-theme.wav"));
+    assert!(manifest.contains("audio/laser.wav") && manifest.contains("audio/title-theme.ogg"));
 }
 
 #[test]

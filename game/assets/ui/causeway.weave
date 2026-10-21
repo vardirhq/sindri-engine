@@ -1,1 +1,525 @@
-@use "hud.weave";
+/* Causeway's screens: a captain's log on the sea. Ink-dark panels with a
+   brass edge, small caps for the names of things, and the board left as clear
+   as it can be -- the HUD hugs the corners and the middle belongs to the
+   island. */
+
+.panel {
+    background: #0b1a22e0;
+    border-color: #e9c98a55;
+    border-width: 1.5px;
+    border-radius: 10px;
+}
+
+/* --- The HUD ------------------------------------------------------------- */
+
+/* The whole screen, invisible, so the panels inside it anchor to its edges. */
+.hud {
+    width: 100vw;
+    height: 100vh;
+}
+
+/* An anchored element is placed by its middle, so each corner panel sits
+   half its own size in from the margin. */
+.status {
+    width: 300px;
+    height: 112px;
+    x: 170px;
+    y: -76px;
+    anchor: top_left;
+    padding: 14px;
+    direction: column;
+    gap: 2px;
+    align-items: start;
+}
+
+.island-name {
+    width: 100%;
+    height: 40px;
+    color: #f3d79a;
+    font-size: 34px;
+    line-height: 40px;
+    text-align: start;
+}
+
+.status-line {
+    width: 100%;
+    height: 24px;
+    color: #e8eef2;
+    font-size: 19px;
+    line-height: 24px;
+    text-align: start;
+}
+
+.dim {
+    color: #9fb4bf;
+}
+
+.hearth {
+    width: 250px;
+    height: 84px;
+    x: -145px;
+    y: -62px;
+    anchor: top_right;
+    padding: 14px;
+    direction: column;
+    gap: 2px;
+    align-items: end;
+}
+
+.hearth-title {
+    width: 100%;
+    height: 24px;
+    color: #f3d79a;
+    font-size: 20px;
+    line-height: 24px;
+    letter-spacing: 3px;
+    text-align: end;
+}
+
+.hearth-pips {
+    width: 100%;
+    height: 32px;
+    font-size: 28px;
+    line-height: 32px;
+    letter-spacing: 3px;
+    text-align: end;
+}
+
+.card {
+    width: 420px;
+    height: 220px;
+    x: 230px;
+    y: 130px;
+    anchor: bottom_left;
+    padding: 16px;
+    direction: column;
+    gap: 4px;
+    align-items: start;
+}
+
+.unit-name {
+    width: 100%;
+    height: 36px;
+    color: #f3d79a;
+    font-size: 30px;
+    line-height: 36px;
+    text-align: start;
+}
+
+.unit-stats, .skill-name {
+    width: 100%;
+    height: 24px;
+    color: #e8eef2;
+    font-size: 19px;
+    line-height: 24px;
+    text-align: start;
+}
+
+.skill-name {
+    color: #ffcf7a;
+}
+
+.skill-text, .unit-hint, .preview {
+    width: 100%;
+    height: auto;
+    color: #c9d6dc;
+    font-size: 17px;
+    line-height: 22px;
+    text-align: start;
+    text-wrap: word;
+}
+
+.unit-hint {
+    color: #8fa7b2;
+}
+
+.preview {
+    color: #ffd27a;
+}
+
+.actions {
+    width: 560px;
+    height: 60px;
+    x: -300px;
+    y: 50px;
+    anchor: bottom_right;
+    direction: row;
+    gap: 12px;
+    justify-content: end;
+    align-items: center;
+}
+
+.button {
+    background: #12303a;
+    border-color: #e9c98a88;
+    border-width: 1.5px;
+    border-radius: 9px;
+    transition: background 90ms ease, border-color 90ms ease;
+}
+
+.button:hover {
+    background: #1d4a57;
+    border-color: #ffe2a6;
+}
+
+.button:active {
+    background: #0b222a;
+}
+
+.button.small {
+    width: 150px;
+    height: 48px;
+}
+
+.button.primary {
+    width: 190px;
+    height: 56px;
+    background: #b5642a;
+    border-color: #ffd58a;
+}
+
+.button.primary:hover {
+    background: #d07733;
+}
+
+.button.wide {
+    width: 300px;
+    height: 58px;
+}
+
+.button-label {
+    width: 100%;
+    height: 100%;
+    color: #fff4dc;
+    font-size: 21px;
+    line-height: 26px;
+    text-align: center;
+}
+
+.banner {
+    width: 620px;
+    height: 112px;
+    x: 0px;
+    y: -80px;
+    anchor: top;
+    padding: 14px;
+    direction: column;
+    gap: 2px;
+    align-items: center;
+    background: #0b1a22d0;
+    border-color: #e9c98a66;
+    border-width: 1.5px;
+    border-radius: 10px;
+}
+
+.banner-title {
+    width: 100%;
+    height: 50px;
+    color: #f3d79a;
+    font-size: 42px;
+    line-height: 50px;
+    text-align: center;
+}
+
+.banner-text {
+    width: 100%;
+    height: auto;
+    color: #d5e0e5;
+    font-size: 19px;
+    line-height: 24px;
+    text-align: center;
+    text-wrap: word;
+}
+
+/* --- The screens between battles ------------------------------------------ */
+
+.screen {
+    width: 100vw;
+    height: 100vh;
+    direction: column;
+    gap: 22px;
+    justify-content: center;
+    align-items: center;
+    background: #04101688;
+}
+
+.screen-card {
+    width: 640px;
+    height: auto;
+    padding: 34px;
+    direction: column;
+    gap: 18px;
+    align-items: center;
+}
+
+.screen-title {
+    width: 100%;
+    height: auto;
+    color: #f3d79a;
+    font-size: 64px;
+    line-height: 74px;
+    text-align: center;
+}
+
+.screen-text {
+    width: 100%;
+    height: auto;
+    color: #dfe8ec;
+    font-size: 21px;
+    line-height: 28px;
+    text-align: center;
+    text-wrap: word;
+}
+
+.boons {
+    width: 92vw;
+    max-width: 1100px;
+    height: 230px;
+    direction: row;
+    gap: 16px;
+    justify-content: center;
+    align-items: center;
+}
+
+.boon {
+    width: 240px;
+    height: 210px;
+    padding: 18px;
+    direction: column;
+    gap: 10px;
+    align-items: center;
+    background: #0b1a22ee;
+    border-color: #e9c98a77;
+    border-width: 1.5px;
+    border-radius: 12px;
+}
+
+.boon:hover {
+    background: #163541;
+    border-color: #ffe2a6;
+}
+
+.boon-title {
+    width: 100%;
+    height: 40px;
+    color: #f3d79a;
+    font-size: 28px;
+    line-height: 34px;
+    text-align: center;
+}
+
+.boon-text {
+    width: 100%;
+    height: auto;
+    color: #d5e0e5;
+    font-size: 18px;
+    line-height: 23px;
+    text-align: center;
+    text-wrap: word;
+}
+
+.boon-key {
+    width: 100%;
+    height: 22px;
+    font-size: 16px;
+    line-height: 20px;
+    text-align: center;
+}
+
+/* --- The title ------------------------------------------------------------------ */
+
+/* Sized in vh so the title is the same picture at any window height; the
+   phone layout below switches to vw, the narrow side. Every piece starts
+   transparent and `title.decay` brings it in. */
+
+.title-root, .title-fade, .howto-root, .howto-dim {
+    width: 100vw;
+    height: 100vh;
+}
+
+/* A wide screen keeps the logo and menu in a shaded column on the left and
+   gives the right to the island. */
+
+.title-shade-side {
+    width: 120vh;
+    height: 100vh;
+    x: 60vh;
+    anchor: left;
+}
+
+.title-shade-top {
+    width: 100vw;
+    height: 30vh;
+    y: -15vh;
+    anchor: top;
+}
+
+.title-shade-bottom {
+    width: 100vw;
+    height: 30vh;
+    y: 15vh;
+    anchor: bottom;
+}
+
+.title-halo {
+    width: 116vh;
+    height: 58vh;
+    x: 46vh;
+    y: -31vh;
+    anchor: top_left;
+}
+
+/* The logo is 1200 x 555. */
+.title-logo {
+    width: 80vh;
+    height: 37vh;
+    x: 46vh;
+    y: -30.5vh;
+    anchor: top_left;
+}
+
+.title-tagline {
+    width: 84vh;
+    height: 4vh;
+    x: 46vh;
+    y: -53vh;
+    anchor: top_left;
+    font-size: 2.5vh;
+    line-height: 3vh;
+    letter-spacing: 0.7vh;
+    text-align: center;
+}
+
+.title-menu {
+    width: 60vh;
+    height: 23.6vh;
+    x: 46vh;
+    y: 25vh;
+    anchor: bottom_left;
+    direction: column;
+    gap: 1.4vh;
+    align-items: center;
+    justify-content: center;
+}
+
+.plate-button.begin { width: 52vh; height: 10.4vh; }
+.plate-button.guide { width: 34vh; height: 6.8vh; }
+.plate-button.close { width: 30vh; height: 6vh; }
+
+.plate {
+    width: 100%;
+    height: 100%;
+}
+
+.plate-label {
+    width: 100%;
+    height: 100%;
+    font-size: 3.3vh;
+    line-height: 4vh;
+    letter-spacing: 0.1vh;
+    text-align: center;
+}
+
+.plate-label.guide, .plate-label.close {
+    font-size: 2.4vh;
+    line-height: 3vh;
+}
+
+.title-record {
+    width: 100%;
+    height: 3vh;
+    font-size: 2.1vh;
+    line-height: 2.6vh;
+    text-align: center;
+}
+
+.title-prompt {
+    width: 60vh;
+    height: 3vh;
+    x: 46vh;
+    y: 6vh;
+    anchor: bottom_left;
+    font-size: 1.9vh;
+    line-height: 2.4vh;
+    letter-spacing: 0.4vh;
+    text-align: center;
+}
+
+.howto {
+    width: 78vh;
+    height: auto;
+    padding: 3.4vh;
+    direction: column;
+    gap: 0.9vh;
+    align-items: center;
+    background: #0b1a22f2;
+}
+
+.howto-title {
+    width: 100%;
+    height: 6vh;
+    color: #f3d79a;
+    font-size: 4.6vh;
+    line-height: 5.6vh;
+    text-align: center;
+}
+
+.howto-head {
+    width: 100%;
+    height: 3.2vh;
+    color: #ffcf7a;
+    font-size: 2.4vh;
+    line-height: 3vh;
+    text-align: start;
+}
+
+.howto-body {
+    width: 100%;
+    height: auto;
+    color: #dfe8ec;
+    font-size: 2.1vh;
+    line-height: 2.8vh;
+    text-align: start;
+    text-wrap: word;
+}
+
+/* --- A phone held upright -------------------------------------------------- */
+
+@media (orientation: portrait) {
+    .status { width: 46vw; height: 86px; x: 26vw; y: -46px; padding: 10px; }
+    .island-name { font-size: 24px; line-height: 30px; height: 30px; }
+    .status-line { font-size: 15px; line-height: 19px; height: 19px; }
+    .hearth { width: 44vw; height: 70px; x: -25vw; y: -38px; padding: 10px; }
+    .hearth-pips { font-size: 22px; line-height: 26px; height: 26px; }
+    .card { width: 94vw; height: 180px; x: 50vw; y: 182px; padding: 12px; }
+    .unit-name { font-size: 24px; line-height: 28px; height: 28px; }
+    .skill-text, .unit-hint, .preview { font-size: 15px; line-height: 19px; }
+    .actions { width: 94vw; height: 62px; x: -50vw; y: 46px; justify-content: center; }
+    .button.small { width: 28vw; height: 56px; }
+    .button.primary { width: 32vw; height: 60px; }
+    .banner { width: 94vw; height: 96px; y: -150px; }
+    .banner-title { font-size: 30px; line-height: 36px; height: 36px; }
+    .screen-card { width: 90vw; padding: 22px; }
+    .title-shade-side { width: 1px; height: 1px; }
+    .title-shade-top { height: 42vh; y: -21vh; }
+    .title-shade-bottom { height: 40vh; y: 20vh; }
+    .title-halo { width: 140vw; height: 70vw; x: 0px; y: -30vw; anchor: top; }
+    .title-logo { width: 94vw; height: 43.5vw; x: 0px; y: -27vw; anchor: top; }
+    .title-tagline { width: 96vw; height: 6vw; x: 0px; y: -54vw; anchor: top; font-size: 3.5vw; line-height: 4.4vw; letter-spacing: 0.9vw; }
+    .title-menu { width: 92vw; height: 36vw; x: 0px; y: 30vw; anchor: bottom; gap: 2vw; }
+    .plate-button.begin { width: 82vw; height: 16.4vw; }
+    .plate-button.guide { width: 56vw; height: 11.2vw; }
+    .plate-button.close { width: 50vw; height: 10vw; }
+    .plate-label { font-size: 5.2vw; line-height: 6.2vw; }
+    .plate-label.guide, .plate-label.close { font-size: 4vw; line-height: 5vw; }
+    .title-record { height: 5vw; font-size: 3.4vw; line-height: 4.2vw; }
+    .title-prompt { width: 92vw; height: 5vw; x: 0px; y: 6vw; anchor: bottom; font-size: 3.2vw; line-height: 4vw; }
+    .howto { width: 92vw; padding: 5vw; gap: 1.6vw; }
+    .howto-title { height: 10vw; font-size: 8vw; line-height: 9.6vw; }
+    .howto-head { height: 5.4vw; font-size: 4.2vw; line-height: 5.2vw; }
+    .howto-body { font-size: 3.6vw; line-height: 4.8vw; }
+    .screen-title { font-size: 44px; line-height: 52px; }
+    .boons { direction: column; height: auto; gap: 10px; }
+    .boon { width: 86vw; height: 120px; padding: 12px; gap: 6px; }
+    .boon-title { height: 30px; font-size: 22px; line-height: 26px; }
+}

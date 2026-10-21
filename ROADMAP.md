@@ -772,8 +772,9 @@ Exit gate: a representative scripted vertical slice runs with equivalent behavio
 
 Causeway made the deferred terrain engine immediate: a free Build camera can
 leave any finite generated island, and deep editable terrain cannot be generated
-or rebuilt as one volume. This track is engine work found by making Causeway a
-better game; Causeway is its vertical proof.
+or rebuilt as one volume. This track is engine work found by making Causeway, then a
+voxel builder, a better game. Causeway has since become a tactics game, so
+Voxel Lab (`games/voxel-lab`) carries the vertical proof.
 
 The detailed ordered remainder is maintained in
 [`docs/voxel-system-completion-checklist.md`](docs/voxel-system-completion-checklist.md).
