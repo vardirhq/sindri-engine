@@ -34,8 +34,23 @@ pub struct TextRenderer {
     font_system: FontSystem,
     swash_cache: SwashCache,
     atlas: GlyphAtlas,
-    /// Logical asset reference to the family declared inside its bytes.
-    fonts: BTreeMap<String, String>,
+    /// Logical asset reference to the face its bytes hold.
+    fonts: BTreeMap<String, BoundFace>,
+}
+
+/// The face a font file holds: its family, and the weight and slant it was
+/// drawn at.
+///
+/// A scene names a file, so it means that file's face. Asking only for the
+/// family meant asking for its *regular* weight, and a project that shipped
+/// just `Something-Bold.ttf` was drawn in whatever the system had instead --
+/// the shaper would rather find a regular face anywhere than a bold one in the
+/// family it was told to use.
+#[derive(Clone, Debug, PartialEq, Eq)]
+struct BoundFace {
+    family: String,
+    weight: Weight,
+    style: Style,
 }
 impl Default for TextRenderer {
     fn default() -> Self {
@@ -61,12 +76,28 @@ impl TextRenderer {
         family: impl Into<String>,
         bytes: Vec<u8>,
     ) -> Option<String> {
-        self.font_system.db_mut().load_font_data(bytes);
-        self.fonts.insert(reference.into(), family.into())
+        let ids = self
+            .font_system
+            .db_mut()
+            .load_font_source(glyphon::fontdb::Source::Binary(std::sync::Arc::new(bytes)));
+        let (weight, style) = ids
+            .first()
+            .and_then(|id| self.font_system.db().face(*id))
+            .map_or((Weight::NORMAL, Style::Normal), |face| (face.weight, face.style));
+        self.fonts
+            .insert(
+                reference.into(),
+                BoundFace {
+                    family: family.into(),
+                    weight,
+                    style,
+                },
+            )
+            .map(|face| face.family)
     }
 
     pub fn unbind_font(&mut self, reference: &str) -> Option<String> {
-        self.fonts.remove(reference)
+        self.fonts.remove(reference).map(|face| face.family)
     }
 
     pub fn clear_bindings(&mut self) {
@@ -95,8 +126,8 @@ impl TextRenderer {
     /// near its edges. So the answer comes from the same shaping the frame is
     /// drawn from.
     pub fn measure(&mut self, instance: &TextInstance) -> Option<[f32; 2]> {
-        let family = self.fonts.get(instance.font()).cloned()?;
-        let laid = self.lay_out(instance, &family);
+        let face = self.fonts.get(instance.font()).cloned()?;
+        let laid = self.lay_out(instance, &face);
         Some(laid.block)
     }
 
@@ -110,8 +141,8 @@ impl TextRenderer {
     /// Answered as a centre and a size, because that is the shape every other
     /// element in the scene is described by.
     pub fn rect(&mut self, instance: &TextInstance) -> Option<([f32; 2], [f32; 2])> {
-        let family = self.fonts.get(instance.font()).cloned()?;
-        let laid = self.lay_out(instance, &family);
+        let face = self.fonts.get(instance.font()).cloned()?;
+        let laid = self.lay_out(instance, &face);
         let (corner, outer) = outer_corner(instance, laid.block);
         Some((
             [corner[0] + outer[0] * 0.5, corner[1] - outer[1] * 0.5],
@@ -124,9 +155,9 @@ impl TextRenderer {
     /// Shared by drawing and measuring rather than written twice, because two
     /// copies is exactly how a pick box ends up disagreeing with the picture it
     /// is meant to be over.
-    fn lay_out(&mut self, instance: &TextInstance, family: &str) -> LaidOut {
-        let size = self.fitted_size(instance, family);
-        let buffer = self.shape(instance, family, size);
+    fn lay_out(&mut self, instance: &TextInstance, face: &BoundFace) -> LaidOut {
+        let size = self.fitted_size(instance, face);
+        let buffer = self.shape(instance, face, size);
         let scale = TextInstance::units_per_raster_pixel(size);
         let [width, height] = laid_out(&buffer, instance.line_height / scale);
         LaidOut {
@@ -151,7 +182,7 @@ impl TextRenderer {
     /// largest size in range whose block fits. A bisection rather than a walk
     /// down from the maximum: a dozen shapes settles a range to within a
     /// thousandth of it, and a walk is unbounded in how many it takes.
-    fn fitted_size(&mut self, instance: &TextInstance, family: &str) -> f32 {
+    fn fitted_size(&mut self, instance: &TextInstance, face: &BoundFace) -> f32 {
         let Some(fit) = instance.fit else {
             return instance.font_size;
         };
@@ -161,7 +192,7 @@ impl TextRenderer {
             return instance.font_size;
         }
         let fits = |renderer: &mut Self, size: f32| {
-            let buffer = renderer.shape(instance, family, size);
+            let buffer = renderer.shape(instance, face, size);
             let scale = TextInstance::units_per_raster_pixel(size);
             // The line height is a share of the authored size, so it has to
             // travel with the trial size or a shrunk block keeps its old leading.
@@ -192,7 +223,7 @@ impl TextRenderer {
     /// size would key glyphs that are not in it. The requested size becomes the
     /// scale everything else is measured against, so it reaches the layout as a
     /// wrap width and a line height rather than as an em.
-    fn shape(&mut self, instance: &TextInstance, family: &str, size: f32) -> Buffer {
+    fn shape(&mut self, instance: &TextInstance, face: &BoundFace, size: f32) -> Buffer {
         let scale = TextInstance::units_per_raster_pixel(size);
         // The authored leading is a share of the authored size; at a fitted size
         // it keeps the same share.
@@ -213,9 +244,12 @@ impl TextRenderer {
             TextWrap::Glyph => Wrap::Glyph,
         });
 
-        let mut attrs = Attrs::new().family(Family::Name(family));
+        let mut attrs = Attrs::new()
+            .family(Family::Name(&face.family))
+            .weight(face.weight)
+            .style(face.style);
         if instance.style.bold {
-            attrs = attrs.weight(Weight::BOLD);
+            attrs = attrs.weight(Weight::BOLD.max(face.weight));
         }
         if instance.style.italic {
             attrs = attrs.style(Style::Italic);
@@ -241,7 +275,7 @@ impl TextRenderer {
                 spans.iter().enumerate().map(|(index, (text, span))| {
                     let mut own = attrs.clone().metadata(index + 1);
                     if span.bold {
-                        own = own.weight(Weight::BOLD);
+                        own = own.weight(Weight::BOLD.max(face.weight));
                     }
                     if span.italic {
                         own = own.style(Style::Italic);
@@ -288,13 +322,13 @@ impl TextRenderer {
         queue: &wgpu::Queue,
         instances: &[TextInstance],
     ) -> Result<Option<GlyphQuads<'_>>, TextError> {
-        let resolved: Vec<(&TextInstance, String)> = instances
+        let resolved: Vec<(&TextInstance, BoundFace)> = instances
             .iter()
             .filter_map(|instance| {
                 self.fonts
                     .get(instance.font())
                     .cloned()
-                    .map(|family| (instance, family))
+                    .map(|face| (instance, face))
             })
             .collect();
         if resolved.is_empty() {
@@ -302,7 +336,7 @@ impl TextRenderer {
         }
         let laid: Vec<LaidOut> = resolved
             .iter()
-            .map(|(instance, family)| self.lay_out(instance, family))
+            .map(|(instance, face)| self.lay_out(instance, face))
             .collect();
 
         // Fill the atlas before reading it, and let it settle before reading it:
@@ -472,5 +506,59 @@ fn face_color(laid: &LaidOut, string: [f32; 4], span: usize) -> [f32; 4] {
     {
         Some([r, g, b, a]) => [r, g, b, a * string[3]],
         None => string,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::TextRenderer;
+    use crate::text::{TextAlign, TextInstance};
+
+    /// The families every glyph of `text`, shaped in `font`, was taken from.
+    fn families_shaping(renderer: &mut TextRenderer, font: &str, text: &str) -> Vec<String> {
+        let instance = TextInstance::new(
+            text,
+            font,
+            [0.0, 0.0],
+            0.06,
+            0.07,
+            [1.0; 4],
+            [TextAlign::Start; 2],
+        )
+        .expect("a valid instance");
+        let face = renderer.fonts[font].clone();
+        let buffer = renderer.shape(&instance, &face, 0.06);
+        let mut families = Vec::new();
+        for run in buffer.layout_runs() {
+            for glyph in run.glyphs {
+                let face = renderer
+                    .font_system
+                    .db()
+                    .face(glyph.font_id)
+                    .expect("a shaped glyph names a loaded face");
+                families.push(face.families[0].0.clone());
+            }
+        }
+        families
+    }
+
+    /// A project that ships only a bold file means that file. Asked for its
+    /// family at the regular weight, the shaper went to whatever regular face
+    /// the system had, and every Flappy title was drawn in a font nobody chose.
+    #[test]
+    fn a_bold_only_font_is_drawn_in_its_own_face() {
+        let bytes = std::fs::read(concat!(
+            env!("CARGO_MANIFEST_DIR"),
+            "/../../games/flappy/assets/fonts/ChakraPetch-Bold.ttf"
+        ))
+        .expect("the fixture font is in the repository");
+        let mut renderer = TextRenderer::new();
+        renderer.bind_font("fonts/ChakraPetch-Bold.ttf", "Chakra Petch", bytes);
+        let families = families_shaping(&mut renderer, "fonts/ChakraPetch-Bold.ttf", "FLAPPY");
+        assert!(!families.is_empty(), "the word was shaped");
+        assert!(
+            families.iter().all(|family| family == "Chakra Petch"),
+            "every glyph is the bound face's, not a system fallback: {families:?}"
+        );
     }
 }

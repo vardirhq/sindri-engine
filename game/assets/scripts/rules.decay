@@ -1,0 +1,981 @@
+// The rules of Causeway, and nothing else.
+//
+// A battle is one value, a `Board`, and everything that can happen to it is a
+// shared function that takes one and gives back the next. Nothing here touches
+// an entity, plays a sound or reads the clock: the battle director owns the
+// pictures and the timing, and asks these functions what happens.
+//
+// That split is what lets the game show the future. Aiming a skill runs the
+// skill on a copy of the board, and the beats the copy produced are what the
+// preview draws; playing it for real runs the same function on the real board.
+// A preview and its outcome cannot disagree, because they are one computation.
+//
+// Every change also leaves a `Beat` behind: a unit walked, a stone flew, a
+// Hollow went into the water. The director plays the beats back in order, so
+// the rules decide what happened and the pictures only say so.
+
+// The board is always eight cells square.
+shared const SIZE: number = 8.0;
+
+enum Kind {
+    // The three wardens.
+    Bulwark,
+    Mason,
+    Lamplighter,
+    // The Hollow, who cross at low tide.
+    Husk,
+    Brute,
+    Spitter,
+    Mortar,
+    Colossus,
+    // What stands on the island and does not move.
+    House,
+    Beacon,
+    Stone,
+}
+
+enum BeatKind {
+    // A unit walked to (x, z) from (tx, tz), one cell at a time.
+    Walk,
+    // A unit struck towards (tx, tz).
+    Strike,
+    // A bolt flew from (x, z) to (tx, tz).
+    Bolt,
+    // A stone or a glob arced from (x, z) to (tx, tz).
+    Lob,
+    // A unit lost `amount` health.
+    Hit,
+    // A unit was pushed from (x, z) to (tx, tz).
+    Push,
+    // A push was stopped at (x, z) by whatever is at (tx, tz).
+    Bump,
+    // A unit fell from a height and is hurt by it.
+    Fall,
+    // A Hollow went into the water and sank.
+    Drown,
+    // A unit was destroyed.
+    Die,
+    // A Hollow climbed out of the mud at (x, z).
+    Emerge,
+    // Something stood on a Hollow's way up, and was hurt for it.
+    Smother,
+    // A stone rose from the ground at (x, z).
+    Raise,
+    // The tide rose to `amount`.
+    Tide,
+    // A strike that found nothing.
+    Miss,
+}
+
+struct Unit {
+    id: number,
+    kind: Kind,
+    x: number,
+    z: number,
+    hp: number,
+    max_hp: number,
+    move: number = 3.0,
+    // Extra damage a warden's skill does, from upgrades.
+    power: number = 0.0,
+    moved: bool = false,
+    acted: bool = false,
+    // Where a warden stood before it moved this turn, so the move can be
+    // taken back.
+    from_x: number = -1.0,
+    from_z: number = -1.0,
+    // A Hollow's intent: the direction it will strike, and how far. -1 is
+    // none. The direction is kept rather than the target cell, which is the
+    // whole game: push a Hollow and its strike goes with it.
+    dir: number = -1.0,
+    reach: number = 1.0,
+    // When it strikes, among the Hollow: 1 first.
+    order: number = 0.0,
+}
+
+struct Spawn {
+    x: number,
+    z: number,
+    kind: Kind,
+}
+
+struct Beat {
+    kind: BeatKind,
+    unit: number = -1.0,
+    x: number = 0.0,
+    z: number = 0.0,
+    tx: number = 0.0,
+    tz: number = 0.0,
+    amount: number = 0.0,
+}
+
+struct Board {
+    heights: List<number>,
+    tide: number,
+    units: List<Unit>,
+    spawns: List<Spawn>,
+    beats: List<Beat>,
+    // The round being played, from 1, and how many until high tide.
+    round: number,
+    rounds: number,
+    // The rounds after which the tide comes up a level.
+    rises: List<number>,
+    // What the island has left to lose; it is the run's, carried between
+    // islands, and every point of damage a building takes comes off it.
+    hearth: number,
+    next_id: number,
+    // The kinds that may climb out this round and how many.
+    arrivals: List<Kind>,
+}
+
+// --- Cells and directions ----------------------------------------------
+
+shared fn in_bounds(x: number, z: number) -> bool {
+    return x >= 0.0 && z >= 0.0 && x < SIZE && z < SIZE;
+}
+
+shared fn cell_of(x: number, z: number) -> number {
+    return z * SIZE + x;
+}
+
+// North is towards smaller z, then clockwise: east, south, west.
+shared fn dir_x(d: number) -> number {
+    if d == 1.0 { return 1.0; }
+    if d == 3.0 { return -1.0; }
+    return 0.0;
+}
+
+shared fn dir_z(d: number) -> number {
+    if d == 0.0 { return -1.0; }
+    if d == 2.0 { return 1.0; }
+    return 0.0;
+}
+
+// The direction from one cell to another on the same row or column, or -1.
+shared fn dir_towards(x: number, z: number, tx: number, tz: number) -> number {
+    if tx == x && tz < z { return 0.0; }
+    if tz == z && tx > x { return 1.0; }
+    if tx == x && tz > z { return 2.0; }
+    if tz == z && tx < x { return 3.0; }
+    return -1.0;
+}
+
+shared fn steps_between(x: number, z: number, tx: number, tz: number) -> number {
+    return abs(tx - x) + abs(tz - z);
+}
+
+// --- What each kind is ----------------------------------------------------
+
+shared fn is_warden(kind: Kind) -> bool {
+    return kind == Kind.Bulwark || kind == Kind.Mason || kind == Kind.Lamplighter;
+}
+
+shared fn is_hollow(kind: Kind) -> bool {
+    return kind == Kind.Husk || kind == Kind.Brute || kind == Kind.Spitter
+        || kind == Kind.Mortar || kind == Kind.Colossus;
+}
+
+shared fn is_building(kind: Kind) -> bool {
+    return kind == Kind.House || kind == Kind.Beacon;
+}
+
+// Nothing pushes these: the buildings, the stones, and the Colossus, which is
+// too heavy for anything the wardens carry.
+shared fn is_fixed(kind: Kind) -> bool {
+    return is_building(kind) || kind == Kind.Stone || kind == Kind.Colossus;
+}
+
+shared fn kind_hp(kind: Kind) -> number {
+    return match kind {
+        Kind.Bulwark => 4.0,
+        Kind.Mason => 3.0,
+        Kind.Lamplighter => 3.0,
+        Kind.Husk => 2.0,
+        Kind.Brute => 3.0,
+        Kind.Spitter => 2.0,
+        Kind.Mortar => 2.0,
+        Kind.Colossus => 8.0,
+        Kind.House => 1.0,
+        Kind.Beacon => 2.0,
+        Kind.Stone => 1.0,
+    };
+}
+
+shared fn kind_move(kind: Kind) -> number {
+    return match kind {
+        Kind.Bulwark => 3.0,
+        Kind.Mason => 3.0,
+        Kind.Lamplighter => 4.0,
+        Kind.Husk => 3.0,
+        Kind.Brute => 2.0,
+        Kind.Spitter => 2.0,
+        Kind.Mortar => 2.0,
+        Kind.Colossus => 2.0,
+        _ => 0.0,
+    };
+}
+
+// How hard a Hollow's strike lands.
+shared fn kind_damage(kind: Kind) -> number {
+    return match kind {
+        Kind.Husk => 1.0,
+        Kind.Brute => 2.0,
+        Kind.Spitter => 1.0,
+        Kind.Mortar => 2.0,
+        Kind.Colossus => 2.0,
+        _ => 0.0,
+    };
+}
+
+shared fn kind_name(kind: Kind) -> String {
+    return match kind {
+        Kind.Bulwark => "Bulwark",
+        Kind.Mason => "Mason",
+        Kind.Lamplighter => "Lamplighter",
+        Kind.Husk => "Husk",
+        Kind.Brute => "Brute",
+        Kind.Spitter => "Spitter",
+        Kind.Mortar => "Mortar",
+        Kind.Colossus => "The Colossus",
+        Kind.House => "House",
+        Kind.Beacon => "Beacon",
+        Kind.Stone => "Stone",
+    };
+}
+
+shared fn skill_name(kind: Kind) -> String {
+    return match kind {
+        Kind.Bulwark => "Shield Bash",
+        Kind.Mason => "Heave Stone",
+        Kind.Lamplighter => "Lantern Bolt",
+        Kind.Husk => "Claw",
+        Kind.Brute => "Maul",
+        Kind.Spitter => "Spit",
+        Kind.Mortar => "Lob",
+        Kind.Colossus => "Sweep",
+        _ => "",
+    };
+}
+
+shared fn skill_text(kind: Kind) -> String {
+    return match kind {
+        Kind.Bulwark => "Strike a neighbour for 2 and shove it a cell away.",
+        Kind.Mason => "Throw a stone 2 to 4 cells. It hits for 1 and shoves everything beside it outward. On open ground it stays, a new stone.",
+        Kind.Lamplighter => "Fire along a line. The first thing in the way takes 1 and is knocked back a cell.",
+        Kind.Husk => "Claws the cell in front for 1.",
+        Kind.Brute => "Mauls the cell in front for 2 and shoves it.",
+        Kind.Spitter => "Spits along a line: the first thing in the way takes 1.",
+        Kind.Mortar => "Lobs a glob onto a cell 2 to 4 away for 2.",
+        Kind.Colossus => "Sweeps the three cells in front for 2. Too heavy to push.",
+        Kind.House => "Somebody lives here. Every point of damage costs the Hearth.",
+        Kind.Beacon => "The island's beacon. Every point of damage costs the Hearth.",
+        Kind.Stone => "In the way. Shoving something into it hurts both.",
+        _ => "",
+    };
+}
+
+// --- Reading the board ------------------------------------------------------
+
+shared fn height_at(board: Board, x: number, z: number) -> number {
+    return board.heights[cell_of(x, z)];
+}
+
+// Whether the sea covers a cell.
+shared fn is_wet(board: Board, x: number, z: number) -> bool {
+    return height_at(board, x, z) <= board.tide;
+}
+
+// How high something standing on a cell stands: on the ground, or on the
+// water where the sea covers it.
+shared fn stand_height(board: Board, x: number, z: number) -> number {
+    return max(height_at(board, x, z), board.tide);
+}
+
+// The index of the unit standing on a cell, or -1. The fallen stand nowhere.
+shared fn unit_at(board: Board, x: number, z: number) -> number {
+    for i in 0..board.units.length {
+        let u = board.units[i];
+        if u.hp > 0.0 && u.x == x && u.z == z {
+            return i;
+        }
+    }
+    return -1.0;
+}
+
+shared fn unit_index(board: Board, id: number) -> number {
+    for i in 0..board.units.length {
+        if board.units[i].id == id {
+            return i;
+        }
+    }
+    return -1.0;
+}
+
+shared fn spawn_at(board: Board, x: number, z: number) -> bool {
+    for s in board.spawns {
+        if s.x == x && s.z == z {
+            return true;
+        }
+    }
+    return false;
+}
+
+shared fn count_alive(board: Board, wardens: bool) -> number {
+    var count = 0.0;
+    for u in board.units {
+        if u.hp > 0.0 {
+            if wardens && is_warden(u.kind) { count += 1.0; }
+            if !wardens && is_hollow(u.kind) { count += 1.0; }
+        }
+    }
+    return count;
+}
+
+// Whether the tide comes up at the end of this round.
+shared fn rises_this_round(board: Board) -> bool {
+    return board.rises.contains(board.round);
+}
+
+// Whether a cell will be under water once this round's tide has come.
+shared fn floods_next(board: Board, x: number, z: number) -> bool {
+    if rises_this_round(board) {
+        return height_at(board, x, z) <= board.tide + 1.0;
+    }
+    return is_wet(board, x, z);
+}
+
+// Whether a unit of this kind may stand on a cell. The Hollow are made of the
+// mud they climb out of, and the sea takes them apart; the wardens wade.
+shared fn can_stand(board: Board, kind: Kind, x: number, z: number) -> bool {
+    if !in_bounds(x, z) { return false; }
+    if is_hollow(kind) && kind != Kind.Colossus && is_wet(board, x, z) { return false; }
+    return true;
+}
+
+// Every cell a unit can walk to this turn, as cell indices, nearest first.
+// A step climbs or drops at most one level, and nothing walks through
+// anything else.
+shared fn reachable(board: Board, index: number) -> List<number> {
+    let unit = board.units[index];
+    var found: List<number> = [];
+    var cost: List<number> = [];
+    for i in 0..(SIZE * SIZE) { cost.push(-1.0); }
+    var frontier: List<number> = [cell_of(unit.x, unit.z)];
+    cost[cell_of(unit.x, unit.z)] = 0.0;
+    var head = 0.0;
+    while head < frontier.length {
+        let c = frontier[head];
+        head += 1.0;
+        let cx = c % SIZE;
+        let cz = floor(c / SIZE);
+        if cost[c] >= unit.move { continue; }
+        for d in 0..4 {
+            let nx = cx + dir_x(d);
+            let nz = cz + dir_z(d);
+            if !in_bounds(nx, nz) { continue; }
+            let n = cell_of(nx, nz);
+            if cost[n] >= 0.0 { continue; }
+            if !can_stand(board, unit.kind, nx, nz) { continue; }
+            if abs(stand_height(board, nx, nz) - stand_height(board, cx, cz)) > 1.0 { continue; }
+            if unit_at(board, nx, nz) >= 0.0 { continue; }
+            cost[n] = cost[c] + 1.0;
+            frontier.push(n);
+            found.push(n);
+        }
+    }
+    return found;
+}
+
+// The cells a walk passes through, start excluded, found the same way as
+// `reachable` and walked back from the end.
+shared fn walk_path(board: Board, index: number, tx: number, tz: number) -> List<number> {
+    let unit = board.units[index];
+    var came: List<number> = [];
+    for i in 0..(SIZE * SIZE) { came.push(-1.0); }
+    let start = cell_of(unit.x, unit.z);
+    let goal = cell_of(tx, tz);
+    var frontier: List<number> = [start];
+    came[start] = start;
+    var head = 0.0;
+    while head < frontier.length {
+        let c = frontier[head];
+        head += 1.0;
+        if c == goal { break; }
+        let cx = c % SIZE;
+        let cz = floor(c / SIZE);
+        for d in 0..4 {
+            let nx = cx + dir_x(d);
+            let nz = cz + dir_z(d);
+            if !in_bounds(nx, nz) { continue; }
+            let n = cell_of(nx, nz);
+            if came[n] >= 0.0 { continue; }
+            if !can_stand(board, unit.kind, nx, nz) { continue; }
+            if abs(stand_height(board, nx, nz) - stand_height(board, cx, cz)) > 1.0 { continue; }
+            if unit_at(board, nx, nz) >= 0.0 { continue; }
+            came[n] = c;
+            frontier.push(n);
+        }
+    }
+    var path: List<number> = [];
+    if came[goal] < 0.0 { return path; }
+    var at = goal;
+    while at != start {
+        path.insert(0, at);
+        at = came[at];
+    }
+    return path;
+}
+
+// --- Changing the board ------------------------------------------------------
+
+shared fn with_beat(board: Board, beat: Beat) -> Board {
+    var next = board;
+    next.beats.push(beat);
+    return next;
+}
+
+// Moves a unit along a walk, leaving one beat per cell so the picture can hop
+// it there.
+shared fn walk(board: Board, index: number, tx: number, tz: number) -> Board {
+    var next = board;
+    var unit = next.units[index];
+    let path = walk_path(board, index, tx, tz);
+    var px = unit.x;
+    var pz = unit.z;
+    for c in path {
+        let cx = c % SIZE;
+        let cz = floor(c / SIZE);
+        next.beats.push(Beat(kind: BeatKind.Walk, unit: unit.id, x: cx, z: cz, tx: px, tz: pz));
+        px = cx;
+        pz = cz;
+    }
+    unit.x = tx;
+    unit.z = tz;
+    next.units[index] = unit;
+    return next;
+}
+
+// Takes health off a unit. A building's loss comes off the Hearth too, point
+// for point, and anything that reaches nothing is gone.
+shared fn hurt(board: Board, index: number, amount: number) -> Board {
+    var next = board;
+    var unit = next.units[index];
+    if unit.hp <= 0.0 || amount <= 0.0 { return next; }
+    let taken = min(unit.hp, amount);
+    unit.hp -= taken;
+    next.beats.push(Beat(kind: BeatKind.Hit, unit: unit.id, x: unit.x, z: unit.z, amount: taken));
+    if is_building(unit.kind) {
+        next.hearth = max(0.0, next.hearth - taken);
+    }
+    if unit.hp <= 0.0 {
+        next.beats.push(Beat(kind: BeatKind.Die, unit: unit.id, x: unit.x, z: unit.z));
+    }
+    next.units[index] = unit;
+    return next;
+}
+
+shared fn hurt_at(board: Board, x: number, z: number, amount: number) -> Board {
+    let index = unit_at(board, x, z);
+    if index < 0.0 { return board; }
+    return hurt(board, index, amount);
+}
+
+// The sea takes a Hollow standing in it.
+shared fn drown(board: Board, index: number) -> Board {
+    var next = board;
+    var unit = next.units[index];
+    if unit.hp <= 0.0 { return next; }
+    unit.hp = 0.0;
+    next.units[index] = unit;
+    next.beats.push(Beat(kind: BeatKind.Drown, unit: unit.id, x: unit.x, z: unit.z));
+    return next;
+}
+
+// Shoves whatever stands on (x, z) one cell in direction `d`.
+//
+// Into something: both take 1 and neither moves. Up a step of two or more:
+// it hits the wall and takes 1. Off a drop of two or more: it lands, and
+// takes 1. Into the sea, a Hollow sinks.
+shared fn push(board: Board, x: number, z: number, d: number) -> Board {
+    let index = unit_at(board, x, z);
+    if index < 0.0 { return board; }
+    let unit = board.units[index];
+    if is_fixed(unit.kind) { return board; }
+    let tx = x + dir_x(d);
+    let tz = z + dir_z(d);
+    var next = board;
+    if !in_bounds(tx, tz) {
+        // The edge of the board is the deep channel. A Hollow shoved off it
+        // is gone; a warden catches itself on the edge.
+        if is_hollow(unit.kind) {
+            next.beats.push(Beat(kind: BeatKind.Push, unit: unit.id, x: x, z: z, tx: tx, tz: tz));
+            return drown(next, index);
+        }
+        next.beats.push(Beat(kind: BeatKind.Bump, unit: unit.id, x: x, z: z, tx: tx, tz: tz));
+        return next;
+    }
+    let other = unit_at(board, tx, tz);
+    if other >= 0.0 {
+        next.beats.push(Beat(kind: BeatKind.Bump, unit: unit.id, x: x, z: z, tx: tx, tz: tz));
+        next = hurt(next, index, 1.0);
+        return hurt(next, other, 1.0);
+    }
+    let rise = stand_height(board, tx, tz) - stand_height(board, x, z);
+    if rise >= 2.0 {
+        next.beats.push(Beat(kind: BeatKind.Bump, unit: unit.id, x: x, z: z, tx: tx, tz: tz));
+        return hurt(next, index, 1.0);
+    }
+    var moved = next.units[index];
+    moved.x = tx;
+    moved.z = tz;
+    next.units[index] = moved;
+    next.beats.push(Beat(kind: BeatKind.Push, unit: unit.id, x: x, z: z, tx: tx, tz: tz));
+    if is_hollow(unit.kind) && !can_stand(next, unit.kind, tx, tz) {
+        return drown(next, index);
+    }
+    if rise <= -2.0 {
+        next.beats.push(Beat(kind: BeatKind.Fall, unit: unit.id, x: tx, z: tz));
+        return hurt(next, index, 1.0);
+    }
+    return next;
+}
+
+// The first cell along a line from (x, z) that something stands on, as a cell
+// index, or the last cell on the board when nothing does. `ignore` is a unit
+// id the line passes through: the shooter, wherever it is imagined to stand.
+shared fn line_end(board: Board, x: number, z: number, d: number, ignore: number) -> number {
+    var cx = x + dir_x(d);
+    var cz = z + dir_z(d);
+    var last = -1.0;
+    while in_bounds(cx, cz) {
+        let at = unit_at(board, cx, cz);
+        if at >= 0.0 && board.units[at].id != ignore {
+            return cell_of(cx, cz);
+        }
+        last = cell_of(cx, cz);
+        cx += dir_x(d);
+        cz += dir_z(d);
+    }
+    return last;
+}
+
+// --- The wardens' skills -------------------------------------------------------
+
+// Every cell a warden's skill may be aimed at from where it stands.
+shared fn skill_targets(board: Board, index: number) -> List<number> {
+    let unit = board.units[index];
+    var cells: List<number> = [];
+    for d in 0..4 {
+        var low = 1.0;
+        var high = 1.0;
+        if unit.kind == Kind.Mason { low = 2.0; high = 4.0; }
+        if unit.kind == Kind.Lamplighter { high = SIZE; }
+        for r in low..(high + 1.0) {
+            let tx = unit.x + dir_x(d) * r;
+            let tz = unit.z + dir_z(d) * r;
+            if in_bounds(tx, tz) {
+                cells.push(cell_of(tx, tz));
+            }
+        }
+    }
+    return cells;
+}
+
+// Uses a warden's skill on a cell, which must be one of its targets.
+shared fn use_skill(board: Board, index: number, tx: number, tz: number) -> Board {
+    var next = board;
+    var unit = next.units[index];
+    let d = dir_towards(unit.x, unit.z, tx, tz);
+    if d < 0.0 { return board; }
+    unit.acted = true;
+    unit.moved = true;
+    next.units[index] = unit;
+    if unit.kind == Kind.Bulwark {
+        next.beats.push(Beat(kind: BeatKind.Strike, unit: unit.id, x: unit.x, z: unit.z, tx: tx, tz: tz));
+        if unit_at(next, tx, tz) < 0.0 {
+            next.beats.push(Beat(kind: BeatKind.Miss, unit: unit.id, x: tx, z: tz));
+            return next;
+        }
+        next = hurt_at(next, tx, tz, 2.0 + unit.power);
+        return push(next, tx, tz, d);
+    }
+    if unit.kind == Kind.Lamplighter {
+        let end = line_end(next, unit.x, unit.z, d, unit.id);
+        let ex = end % SIZE;
+        let ez = floor(end / SIZE);
+        next.beats.push(Beat(kind: BeatKind.Bolt, unit: unit.id, x: unit.x, z: unit.z, tx: ex, tz: ez));
+        if unit_at(next, ex, ez) < 0.0 {
+            next.beats.push(Beat(kind: BeatKind.Miss, unit: unit.id, x: ex, z: ez));
+            return next;
+        }
+        next = hurt_at(next, ex, ez, 1.0 + unit.power);
+        return push(next, ex, ez, d);
+    }
+    // The Mason's stone.
+    next.beats.push(Beat(kind: BeatKind.Lob, unit: unit.id, x: unit.x, z: unit.z, tx: tx, tz: tz));
+    if unit_at(next, tx, tz) >= 0.0 {
+        next = hurt_at(next, tx, tz, 1.0 + unit.power);
+    } else if !is_wet(next, tx, tz) {
+        next = raise_stone(next, tx, tz);
+    } else {
+        next.beats.push(Beat(kind: BeatKind.Miss, unit: unit.id, x: tx, z: tz));
+    }
+    for side in 0..4 {
+        next = push(next, tx + dir_x(side), tz + dir_z(side), side);
+    }
+    return next;
+}
+
+shared fn raise_stone(board: Board, x: number, z: number) -> Board {
+    var next = board;
+    next.units.push(Unit(id: next.next_id, kind: Kind.Stone, x: x, z: z,
+        hp: kind_hp(Kind.Stone), max_hp: kind_hp(Kind.Stone), move: 0.0));
+    next.beats.push(Beat(kind: BeatKind.Raise, unit: next.next_id, x: x, z: z));
+    next.next_id += 1.0;
+    return next;
+}
+
+// Puts a warden back where it started this turn, if it has not acted.
+shared fn undo_move(board: Board, index: number) -> Board {
+    var next = board;
+    var unit = next.units[index];
+    if !unit.moved || unit.acted || unit.from_x < 0.0 { return board; }
+    unit.x = unit.from_x;
+    unit.z = unit.from_z;
+    unit.moved = false;
+    next.units[index] = unit;
+    return next;
+}
+
+// A warden walks to a cell it can reach.
+shared fn move_warden(board: Board, index: number, tx: number, tz: number) -> Board {
+    var unit = board.units[index];
+    if unit.moved || unit.acted { return board; }
+    if !reachable(board, index).contains(cell_of(tx, tz)) { return board; }
+    unit.from_x = unit.x;
+    unit.from_z = unit.z;
+    unit.moved = true;
+    var next = board;
+    next.units[index] = unit;
+    return walk(next, index, tx, tz);
+}
+
+// --- The Hollow ---------------------------------------------------------------
+
+// Every cell a Hollow's strike reaches from (x, z) in direction `d`, as cell
+// indices: one for most, the three in front for the Colossus, and the end of
+// the line for a Spitter. `ignore` is the striker's own id.
+shared fn strike_cells(board: Board, kind: Kind, x: number, z: number, d: number, reach: number,
+    ignore: number) -> List<number> {
+    var cells: List<number> = [];
+    if kind == Kind.Spitter {
+        let end = line_end(board, x, z, d, ignore);
+        if end >= 0.0 { cells.push(end); }
+        return cells;
+    }
+    let tx = x + dir_x(d) * reach;
+    let tz = z + dir_z(d) * reach;
+    if in_bounds(tx, tz) { cells.push(cell_of(tx, tz)); }
+    if kind == Kind.Colossus {
+        // The two cells either side of the one in front.
+        let sx = dir_x((d + 1.0) % 4.0);
+        let sz = dir_z((d + 1.0) % 4.0);
+        if in_bounds(tx + sx, tz + sz) { cells.push(cell_of(tx + sx, tz + sz)); }
+        if in_bounds(tx - sx, tz - sz) { cells.push(cell_of(tx - sx, tz - sz)); }
+    }
+    return cells;
+}
+
+// One Hollow carries out the strike it showed, from wherever it stands now.
+shared fn hollow_strike(board: Board, index: number) -> Board {
+    let unit = board.units[index];
+    if unit.hp <= 0.0 || unit.dir < 0.0 { return board; }
+    var next = board;
+    let cells = strike_cells(board, unit.kind, unit.x, unit.z, unit.dir, unit.reach, unit.id);
+    if cells.length == 0.0 {
+        return next;
+    }
+    let first = cells[0];
+    let fx = first % SIZE;
+    let fz = floor(first / SIZE);
+    if unit.kind == Kind.Spitter {
+        next.beats.push(Beat(kind: BeatKind.Bolt, unit: unit.id, x: unit.x, z: unit.z, tx: fx, tz: fz));
+    } else if unit.kind == Kind.Mortar {
+        next.beats.push(Beat(kind: BeatKind.Lob, unit: unit.id, x: unit.x, z: unit.z, tx: fx, tz: fz));
+    } else {
+        next.beats.push(Beat(kind: BeatKind.Strike, unit: unit.id, x: unit.x, z: unit.z, tx: fx, tz: fz));
+    }
+    var landed = false;
+    for c in cells {
+        let cx = c % SIZE;
+        let cz = floor(c / SIZE);
+        if unit_at(next, cx, cz) >= 0.0 {
+            landed = true;
+            next = hurt_at(next, cx, cz, kind_damage(unit.kind));
+            if unit.kind == Kind.Brute {
+                next = push(next, cx, cz, unit.dir);
+            }
+        }
+    }
+    if !landed {
+        next.beats.push(Beat(kind: BeatKind.Miss, unit: unit.id, x: fx, z: fz));
+    }
+    return next;
+}
+
+// How much a Hollow wants what its strike would hit.
+shared fn want_of(board: Board, cells: List<number>, striker: number, damage: number) -> number {
+    var score = 0.0;
+    for c in cells {
+        let at = unit_at(board, c % SIZE, floor(c / SIZE));
+        if at < 0.0 { continue; }
+        let target = board.units[at];
+        if target.id == striker { continue; }
+        if target.kind == Kind.Beacon { score += 13.0; }
+        else if is_building(target.kind) { score += 10.0; }
+        else if is_warden(target.kind) {
+            score += 6.0;
+            if target.hp <= damage { score += 3.0; }
+        } else if is_hollow(target.kind) { score -= 7.0; }
+        else { score += 0.5; }
+    }
+    return score;
+}
+
+// Where a Hollow would rather stand when nothing is in reach: as close as it
+// can get to the nearest building or warden.
+shared fn nearest_prey(board: Board, x: number, z: number) -> number {
+    var best = 99.0;
+    for u in board.units {
+        if u.hp <= 0.0 { continue; }
+        if is_building(u.kind) || is_warden(u.kind) {
+            best = min(best, steps_between(x, z, u.x, u.z));
+        }
+    }
+    return best;
+}
+
+// One Hollow chooses where to go and what to strike. It is moved and its
+// intent is set; the strike itself waits for the end of the wardens' turn.
+shared fn plan_hollow(board: Board, index: number) -> Board {
+    var next = board;
+    let unit = next.units[index];
+    if unit.hp <= 0.0 { return next; }
+    var options: List<number> = reachable(next, index);
+    options.insert(0, cell_of(unit.x, unit.z));
+    var best_score = -999.0;
+    var best_cell = cell_of(unit.x, unit.z);
+    var best_dir = -1.0;
+    var best_reach = 1.0;
+    for option in options {
+        let ox = option % SIZE;
+        let oz = floor(option / SIZE);
+        // The Hollow know the sea is coming.
+        var place = 0.0;
+        if floods_next(next, ox, oz) && unit.kind != Kind.Colossus { place -= 20.0; }
+        // A little noise, so two equal choices are not always the same one,
+        // and a seeded run still repeats exactly.
+        place += Random.range(0.0, 0.4);
+        place -= nearest_prey(next, ox, oz) * 0.05;
+        for d in 0..4 {
+            var low = 1.0;
+            var high = 1.0;
+            if unit.kind == Kind.Mortar { low = 2.0; high = 4.0; }
+            for r in low..(high + 1.0) {
+                let cells = strike_cells(next, unit.kind, ox, oz, d, r, unit.id);
+                let score = place + want_of(next, cells, unit.id, kind_damage(unit.kind));
+                if score > best_score {
+                    best_score = score;
+                    best_cell = option;
+                    best_dir = d;
+                    best_reach = r;
+                }
+            }
+        }
+    }
+    // Nothing worth striking: close in on the nearest prey instead, and
+    // strike the way it lies.
+    if best_score < 1.0 {
+        var closest = 999.0;
+        for option in options {
+            let ox = option % SIZE;
+            let oz = floor(option / SIZE);
+            var distance = nearest_prey(next, ox, oz);
+            if floods_next(next, ox, oz) && unit.kind != Kind.Colossus { distance += 50.0; }
+            if distance < closest {
+                closest = distance;
+                best_cell = option;
+            }
+        }
+    }
+    let bx = best_cell % SIZE;
+    let bz = floor(best_cell / SIZE);
+    if bx != unit.x || bz != unit.z {
+        next = walk(next, index, bx, bz);
+    }
+    var planned = next.units[index];
+    planned.dir = best_dir;
+    planned.reach = best_reach;
+    if best_dir < 0.0 {
+        // Strike towards the nearest prey along whichever axis is longer.
+        planned.dir = facing_towards_prey(next, bx, bz);
+        planned.reach = 1.0;
+        if unit.kind == Kind.Mortar { planned.reach = 2.0; }
+    }
+    next.units[index] = planned;
+    return next;
+}
+
+shared fn facing_towards_prey(board: Board, x: number, z: number) -> number {
+    var best = 99.0;
+    var dx = 0.0;
+    var dz = 1.0;
+    for u in board.units {
+        if u.hp <= 0.0 { continue; }
+        if !(is_building(u.kind) || is_warden(u.kind)) { continue; }
+        let distance = steps_between(x, z, u.x, u.z);
+        if distance < best {
+            best = distance;
+            dx = u.x - x;
+            dz = u.z - z;
+        }
+    }
+    if abs(dx) > abs(dz) {
+        if dx > 0.0 { return 1.0; }
+        return 3.0;
+    }
+    if dz < 0.0 { return 0.0; }
+    return 2.0;
+}
+
+// Every Hollow plans, in the order they will strike.
+shared fn plan_all(board: Board) -> Board {
+    var next = board;
+    var order = 1.0;
+    for i in 0..next.units.length {
+        let unit = next.units[i];
+        if unit.hp > 0.0 && is_hollow(unit.kind) {
+            next = plan_hollow(next, i);
+            var planned = next.units[i];
+            planned.order = order;
+            next.units[i] = planned;
+            order += 1.0;
+        }
+    }
+    return next;
+}
+
+// Where Hollow will climb out next round: dry cells marked as landing
+// ground on the island, free, and not already promised.
+shared fn mark_spawns(board: Board, landing: List<number>) -> Board {
+    var next = board;
+    next.spawns.clear();
+    for kind in next.arrivals {
+        var choices: List<number> = [];
+        for c in landing {
+            let x = c % SIZE;
+            let z = floor(c / SIZE);
+            if floods_next(next, x, z) { continue; }
+            if unit_at(next, x, z) >= 0.0 { continue; }
+            if spawn_at(next, x, z) { continue; }
+            choices.push(c);
+        }
+        if choices.length == 0.0 { continue; }
+        let pick = choices[Random.int(0.0, choices.length - 1.0)];
+        next.spawns.push(Spawn(x: pick % SIZE, z: floor(pick / SIZE), kind: kind));
+    }
+    return next;
+}
+
+// The marked Hollow climb out. One that finds its cell taken hurts whatever
+// is standing there and does not come up at all.
+shared fn emerge(board: Board) -> Board {
+    var next = board;
+    for s in board.spawns {
+        let there = unit_at(next, s.x, s.z);
+        if there >= 0.0 {
+            next.beats.push(Beat(kind: BeatKind.Smother, x: s.x, z: s.z));
+            next = hurt(next, there, 1.0);
+            continue;
+        }
+        if is_wet(next, s.x, s.z) { continue; }
+        next.units.push(Unit(id: next.next_id, kind: s.kind, x: s.x, z: s.z, hp: kind_hp(s.kind),
+            max_hp: kind_hp(s.kind), move: kind_move(s.kind)));
+        next.beats.push(Beat(kind: BeatKind.Emerge, unit: next.next_id, x: s.x, z: s.z));
+        next.next_id += 1.0;
+    }
+    next.spawns.clear();
+    return next;
+}
+
+// The tide comes up a level, and every Hollow it reaches sinks. Buildings it
+// reaches are lost with everything in them.
+shared fn raise_tide(board: Board) -> Board {
+    var next = board;
+    next.tide += 1.0;
+    next.beats.push(Beat(kind: BeatKind.Tide, amount: next.tide));
+    for i in 0..next.units.length {
+        let unit = next.units[i];
+        if unit.hp <= 0.0 { continue; }
+        if !is_wet(next, unit.x, unit.z) { continue; }
+        if is_hollow(unit.kind) && unit.kind != Kind.Colossus {
+            next = drown(next, i);
+        } else if is_building(unit.kind) {
+            next = hurt(next, i, unit.hp);
+        }
+    }
+    return next;
+}
+
+// The end of the wardens' turn: every Hollow strikes in order, the tide
+// comes if it is due, and the marked Hollow climb out.
+shared fn hollow_turn(board: Board) -> Board {
+    var next = board;
+    for order in 1..(count_alive(next, false) + 1.0) {
+        for i in 0..next.units.length {
+            let unit = next.units[i];
+            if unit.hp > 0.0 && is_hollow(unit.kind) && unit.order == order {
+                next = hollow_strike(next, i);
+            }
+        }
+    }
+    if rises_this_round(next) {
+        next = raise_tide(next);
+    }
+    return emerge(next);
+}
+
+// Clears the dead off the board and readies the wardens for a new turn.
+shared fn new_turn(board: Board) -> Board {
+    var next = board;
+    var kept: List<Unit> = [];
+    for unit in next.units {
+        if unit.hp > 0.0 || is_warden(unit.kind) {
+            var fresh = unit;
+            fresh.moved = false;
+            fresh.acted = false;
+            fresh.from_x = -1.0;
+            fresh.from_z = -1.0;
+            if !is_hollow(fresh.kind) { fresh.dir = -1.0; }
+            kept.push(fresh);
+        }
+    }
+    next.units = kept;
+    next.beats.clear();
+    return next;
+}
+
+// Whether every warden has done all it can this turn.
+shared fn all_spent(board: Board) -> bool {
+    for u in board.units {
+        if u.hp > 0.0 && is_warden(u.kind) && !u.acted {
+            return false;
+        }
+    }
+    return true;
+}
+
+// The total a Hollow's strike would do to the Hearth, for the danger readout.
+shared fn hearth_threat(board: Board) -> number {
+    var preview = hollow_turn(board);
+    return board.hearth - preview.hearth;
+}

@@ -86,7 +86,7 @@ pub use text::{
 pub use texture::{
     RegistryIdentity, Texture2D, TextureError, TextureFilter, TextureId, TextureRegistry,
 };
-pub use textured_cube::{DrawContext, TexturedCubeRenderer};
+pub use textured_cube::{DrawContext, TexturedCubeRenderer, WorldSettings};
 pub use textured_mesh_cache::{
     CachedMeshId, CachedTexturedMeshUpload, MeshSurface, TexturedMeshCacheStats,
 };

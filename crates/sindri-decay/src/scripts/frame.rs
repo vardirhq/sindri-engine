@@ -54,6 +54,9 @@ pub struct ScriptFrame<'a> {
     /// Worked out by whatever is running the game, because it needs the view
     /// matrix and the viewport and a script has neither.
     pub camera_pan: Option<[f32; 3]>,
+    /// The world camera's ray through the pointer, origin then unit
+    /// direction, when there is a pointer and a camera to cast it from.
+    pub pointer_ray: Option<[[f32; 3]; 2]>,
     /// What the person just did, recognised from the presses.
     ///
     /// Borrowed rather than copied because a recogniser has to remember what
@@ -122,6 +125,7 @@ impl<'a> ScriptFrame<'a> {
             aim: None,
             gestures: None,
             camera_pan: None,
+            pointer_ray: None,
             random: None,
             saves: None,
             effects: None,
@@ -180,6 +184,14 @@ impl<'a> ScriptFrame<'a> {
     #[must_use]
     pub const fn with_camera_pan(mut self, pan: [f32; 3]) -> Self {
         self.camera_pan = Some(pan);
+        self
+    }
+
+    /// The same frame, with the world camera's ray through the pointer:
+    /// origin, then unit direction.
+    #[must_use]
+    pub const fn with_pointer_ray(mut self, ray: [[f32; 3]; 2]) -> Self {
+        self.pointer_ray = Some(ray);
         self
     }
 

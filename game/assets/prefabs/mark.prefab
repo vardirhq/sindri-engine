@@ -1,0 +1,111 @@
+{
+  "format_version": 1,
+  "metadata": {
+    "name": "Mark"
+  },
+  "entities": [
+    {
+      "id": "mark",
+      "name": "Mark",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          -0.707107,
+          0.0,
+          0.0,
+          0.707107
+        ],
+        "scale": [
+          0.94,
+          0.94,
+          1.0
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/marks.png#move",
+          "tint": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "layer": 5,
+          "unlit": true
+        },
+        "sindri.animation.sprite": {
+          "clips": {
+            "move": {
+              "frames": [
+                "move"
+              ],
+              "looping": true,
+              "seconds_per_frame": 1.0
+            },
+            "aim": {
+              "frames": [
+                "aim"
+              ],
+              "looping": true,
+              "seconds_per_frame": 1.0
+            },
+            "danger": {
+              "frames": [
+                "danger"
+              ],
+              "looping": true,
+              "seconds_per_frame": 1.0
+            },
+            "spawn": {
+              "frames": [
+                "spawn"
+              ],
+              "looping": true,
+              "seconds_per_frame": 1.0
+            },
+            "tide": {
+              "frames": [
+                "tide"
+              ],
+              "looping": true,
+              "seconds_per_frame": 1.0
+            },
+            "selected": {
+              "frames": [
+                "selected"
+              ],
+              "looping": true,
+              "seconds_per_frame": 1.0
+            },
+            "cursor": {
+              "frames": [
+                "cursor"
+              ],
+              "looping": true,
+              "seconds_per_frame": 1.0
+            },
+            "arrow": {
+              "frames": [
+                "arrow"
+              ],
+              "looping": true,
+              "seconds_per_frame": 1.0
+            },
+            "push": {
+              "frames": [
+                "push"
+              ],
+              "looping": true,
+              "seconds_per_frame": 1.0
+            }
+          },
+          "speed": 1.0
+        }
+      }
+    }
+  ]
+}

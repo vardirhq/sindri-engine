@@ -135,8 +135,15 @@ pub(super) fn add_pointer_surface(environment: &mut Environment) {
             }
             PointerValue::Inside | PointerValue::OverUi | PointerValue::Locked => Type::Bool,
             PointerValue::Position | PointerValue::Delta | PointerValue::Overlay => Type::Vec2,
+            PointerValue::RayOrigin | PointerValue::RayDirection => Type::Vec3,
         };
-        pointer = if matches!(value, PointerValue::Delta | PointerValue::Locked) {
+        pointer = if matches!(
+            value,
+            PointerValue::Delta
+                | PointerValue::Locked
+                | PointerValue::RayOrigin
+                | PointerValue::RayDirection
+        ) {
             pointer.with_read_only_value(*name, value_type)
         } else {
             pointer.with_value(*name, value_type)

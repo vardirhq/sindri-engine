@@ -1,0 +1,11 @@
+{
+  "format_version": 1,
+  "anchor": "center",
+  "grid": {
+    "columns": 9,
+    "rows": 1,
+    "size": [608, 64],
+    "spacing": [4, 0],
+    "names": ["move", "aim", "danger", "spawn", "tide", "selected", "cursor", "arrow", "push"]
+  }
+}

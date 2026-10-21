@@ -240,6 +240,7 @@ fn runtime_refuses_direction_writes_even_without_the_compiler() {
             aim: None,
             gestures: None,
             camera_pan: None,
+            pointer_ray: None,
             random: None,
             saves: None,
             effects: None,

@@ -31,6 +31,9 @@ pub struct WorldServices<'a> {
     pub gestures: Option<&'a sindri_core::Gestures>,
     /// How far this frame's drag asks the camera to move.
     pub camera_pan: Option<[f32; 3]>,
+    /// The world camera's ray through the pointer, origin then unit
+    /// direction, when there is a pointer and a camera to cast it from.
+    pub pointer_ray: Option<[[f32; 3]; 2]>,
     pub random: Option<&'a mut sindri_core::Rng>,
     /// Where each animated sprite has got to, when the host advances any.
     pub animations: Option<&'a mut sindri_scene::SpriteAnimations>,
@@ -61,6 +64,7 @@ impl<'a> WorldHost<'a> {
             aim,
             gestures,
             camera_pan,
+            pointer_ray,
             random,
             animations,
             scenes,
@@ -78,6 +82,7 @@ impl<'a> WorldHost<'a> {
             aim,
             gestures,
             camera_pan,
+            pointer_ray,
             random,
             saves,
             effects,

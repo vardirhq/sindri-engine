@@ -5,540 +5,4294 @@
   },
   "entities": [
     {
-      "id": "beacon",
-      "name": "Beacon",
-      "transform_3d": {
-        "position": [0.0, 0.0, 0.0],
-        "rotation": [0.0, 0.0, 0.0, 1.0],
-        "scale": [0.68, 1.79, 1.0]
-      },
+      "id": "actions",
+      "name": "Actions",
+      "parent": "hud",
       "components": {
-        "sindri.grid.placement": {
-          "cell": [32642, 32552],
-          "grid": "floor"
+        "weave.style": {
+          "classes": [
+            "actions"
+          ]
         },
-        "sindri.script": {
-          "script": "Beacon",
-          "source": "scripts/beacon.decay"
+        "sindri.ui.layout": {
+          "direction": "row",
+          "spacing": 0.015,
+          "align": "center",
+          "justify": "end"
         },
-        "sindri.sequence": {
-          "playing": null,
-          "sequences": {
-            "arrive": {
-              "cues": [
-                {
-                  "name": "lit",
-                  "sound": {
-                    "bus": "",
-                    "clip": "audio/victory.wav",
-                    "volume": 1.0
-                  },
-                  "time": 0.0
-                }
-              ],
-              "duration": 1.2,
-              "looping": false,
-              "tracks": [
-                {
-                  "keys": [
-                    {
-                      "ease": "ease-out",
-                      "time": 0.0,
-                      "value": 0.68
-                    },
-                    {
-                      "ease": "ease-in-out",
-                      "time": 0.45,
-                      "value": 0.952
-                    },
-                    {
-                      "ease": "linear",
-                      "time": 1.2,
-                      "value": 0.85
-                    }
-                  ],
-                  "property": "scale.x",
-                  "target": ""
-                },
-                {
-                  "keys": [
-                    {
-                      "ease": "ease-out",
-                      "time": 0.0,
-                      "value": 1.79
-                    },
-                    {
-                      "ease": "ease-in-out",
-                      "time": 0.45,
-                      "value": 2.506
-                    },
-                    {
-                      "ease": "linear",
-                      "time": 1.2,
-                      "value": 2.2375
-                    }
-                  ],
-                  "property": "scale.y",
-                  "target": ""
-                }
-              ]
-            },
-            "glow": {
-              "cues": [],
-              "duration": 2.1,
-              "looping": true,
-              "tracks": [
-                {
-                  "keys": [
-                    {
-                      "ease": "ease-in-out",
-                      "time": 0.0,
-                      "value": 0.85
-                    },
-                    {
-                      "ease": "ease-in-out",
-                      "time": 1.05,
-                      "value": 0.901
-                    },
-                    {
-                      "ease": "linear",
-                      "time": 2.1,
-                      "value": 0.85
-                    }
-                  ],
-                  "property": "scale.x",
-                  "target": ""
-                },
-                {
-                  "keys": [
-                    {
-                      "ease": "ease-in-out",
-                      "time": 0.0,
-                      "value": 2.2375
-                    },
-                    {
-                      "ease": "ease-in-out",
-                      "time": 1.05,
-                      "value": 2.3718
-                    },
-                    {
-                      "ease": "linear",
-                      "time": 2.1,
-                      "value": 2.2375
-                    }
-                  ],
-                  "property": "scale.y",
-                  "target": ""
-                }
-              ]
-            }
-          },
-          "speed": 1.0
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "anchor": "center",
+          "layer": 100,
+          "fill": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0.0
         },
-        "sindri.sprite": {
-          "billboard": true,
-          "texture": "textures/beacon.png#south",
-          "tint": [1.0, 1.0, 1.0, 1.0]
+        "sindri.ui.box": {
+          "order": 3
         }
       }
     },
     {
-      "id": "builder",
-      "name": "Builder",
-      "transform_3d": {
-        "position": [0.0, 0.0, 0.0],
-        "rotation": [0.0, 0.0, 0.0, 1.0],
-        "scale": [1.0, 1.0, 1.0]
-      },
+      "id": "banner",
+      "name": "Banner",
       "components": {
-        "sindri.script": {
-          "properties": {
-            "loose_block": "prefabs/loose-block.prefab",
-            "stock": 12.0
-          },
-          "script": "Builder",
-          "source": "scripts/builder.decay"
+        "weave.style": {
+          "classes": [
+            "banner"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "anchor": "center",
+          "layer": 140,
+          "fill": [
+            0.04,
+            0.08,
+            0.11,
+            0.86
+          ],
+          "stroke": [
+            0.95,
+            0.8,
+            0.5,
+            0.35
+          ],
+          "stroke_width": 0.004,
+          "corner_radius": 0.012
+        },
+        "sindri.ui.layout": {
+          "direction": "column",
+          "spacing": 0.004,
+          "align": "center",
+          "justify": "center"
         }
-      }
+      },
+      "disabled": true
     },
     {
-      "id": "floor",
-      "name": "Floor",
-      "transform_3d": {
-        "position": [0.0, 0.0, 0.0],
-        "rotation": [0.0, 0.0, 0.0, 1.0],
-        "scale": [1.0, 1.0, 1.0]
-      },
+      "id": "banner-text",
+      "name": "BannerText",
+      "parent": "banner",
       "components": {
-        "sindri.grid.navigation": {
-          "max_step": 1.0
+        "weave.style": {
+          "classes": [
+            "banner-text"
+          ]
         },
-        "sindri.physics3d.voxel_collider": {
-          "friction": 0.8,
-          "layers": {
-            "filter": 4294967295,
-            "memberships": 4294967295
-          },
-          "margin": 2.0,
-          "restitution": 0.0
-        },
-        "sindri.tile_grid": {
-          "cell_height": 1.0,
-          "cell_size": [1.0, 1.0],
-          "columns": 65536,
-          "projection": "isometric",
-          "rows": 65536,
-          "space": "solid"
-        },
-        "sindri.voxel_world": {
-          "blocks": "causeway.tileset",
-          "edits": [],
-          "focus": [0, 0, 0],
-          "follow_camera": true,
-          "generator": {
-            "beach_voxel": "sand",
-            "biomes": [
-              {
-                "moisture": 0.3,
-                "name": "Meadow",
-                "relief": 0.8,
-                "subsurface_depth": 3,
-                "subsurface_voxel": "earth",
-                "surface_voxel": "ground",
-                "temperature": 0.6,
-                "terraces": 0,
-                "trees": 0.08
-              },
-              {
-                "moisture": 0.72,
-                "name": "Forest",
-                "relief": 1.0,
-                "subsurface_depth": 3,
-                "subsurface_voxel": "earth",
-                "surface_voxel": "ground",
-                "temperature": 0.55,
-                "terraces": 0,
-                "trees": 0.5
-              },
-              {
-                "moisture": 0.92,
-                "name": "Swamp",
-                "relief": 0.3,
-                "subsurface_depth": 3,
-                "subsurface_voxel": "mud",
-                "surface_voxel": "mud",
-                "temperature": 0.75,
-                "terraces": 0,
-                "trees": 0.2
-              },
-              {
-                "moisture": 0.65,
-                "name": "Taiga",
-                "relief": 1.1,
-                "subsurface_depth": 3,
-                "subsurface_voxel": "earth",
-                "surface_voxel": "moss",
-                "temperature": 0.15,
-                "terraces": 0,
-                "trees": 0.4
-              }
-            ],
-            "caves": false,
-            "cliff_voxel": "rock",
-            "feature_size": 64,
-            "ice_voxel": "ice",
-            "kind": "natural_terrain",
-            "leaves_voxel": "leaves",
-            "relief": 40,
-            "rivers": true,
-            "sea_bed_voxel": "gravel",
-            "sea_level": 0,
-            "seed": 1,
-            "snow_line": 18,
-            "snow_voxel": "snow",
-            "stone_voxel": "stone",
-            "tree_line": 12,
-            "trunk_voxel": "log",
-            "water_voxel": "water"
-          },
-          "layer": 0,
-          "materials": [],
-          "render_radius": 3,
-          "variant_seed": 0,
-          "vertical_radius": 2
-        }
-      }
-    },
-    {
-      "id": "hint",
-      "name": "Hint",
-      "transform_3d": {
-        "position": [0.0, 0.0, 2.0],
-        "rotation": [0.0, 0.0, 0.0, 1.0],
-        "scale": [1.0, 1.0, 1.0]
-      },
-      "components": {
         "sindri.ui.text": {
-          "anchor": "bottom_left",
-          "color": [0.604, 0.651, 0.733, 1.0],
-          "font": "fonts/Inter.ttf",
-          "font_size": 0.0346,
-          "layer": 101,
-          "line_height": 0.0481,
-          "text": "Tap a block's side to build from it. Hold to take one back. Drag to look. 1-2-3-4 to choose."
+          "text": "",
+          "font": "fonts/AlegreyaSans-Medium.ttf",
+          "font_size": 0.028,
+          "line_height": 0.03416,
+          "anchor": "center",
+          "layer": 142,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "bounds": [
+            0.0,
+            0.0
+          ],
+          "wrap": "word"
+        },
+        "sindri.ui.box": {
+          "order": 1
+        }
+      }
+    },
+    {
+      "id": "banner-title",
+      "name": "BannerTitle",
+      "parent": "banner",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "banner-title"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "",
+          "font": "fonts/AlegreyaSC-Bold.ttf",
+          "font_size": 0.06,
+          "line_height": 0.0732,
+          "anchor": "center",
+          "layer": 142,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "bounds": [
+            0.0,
+            0.0
+          ]
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "battle",
+      "name": "Battle",
+      "components": {
+        "sindri.script": {
+          "script": "Battle",
+          "source": "scripts/battle.decay",
+          "properties": {
+            "mark": "prefabs/mark.prefab",
+            "label": "prefabs/label.prefab",
+            "popup": "prefabs/popup.prefab",
+            "missile": "prefabs/missile.prefab",
+            "spark": "prefabs/spark.prefab",
+            "bulwark": "prefabs/bulwark.prefab",
+            "mason": "prefabs/mason.prefab",
+            "lamplighter": "prefabs/lamplighter.prefab",
+            "husk": "prefabs/husk.prefab",
+            "brute": "prefabs/brute.prefab",
+            "spitter": "prefabs/spitter.prefab",
+            "mortar": "prefabs/mortar.prefab",
+            "colossus": "prefabs/colossus.prefab",
+            "house": "prefabs/house.prefab",
+            "beacon": "prefabs/beacon.prefab",
+            "stone": "prefabs/stone.prefab"
+          }
+        }
+      }
+    },
+    {
+      "id": "beacon-light",
+      "name": "Beacon Light",
+      "transform_3d": {
+        "position": [
+          28.0,
+          4,
+          28.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.light": {
+          "kind": "point",
+          "color": [
+            1.0,
+            0.6,
+            0.28
+          ],
+          "intensity": 4.0,
+          "range": 4.5
+        }
+      }
+    },
+    {
+      "id": "boon-0",
+      "name": "Boon0",
+      "parent": "boons",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "boon",
+            "button"
+          ]
+        },
+        "sindri.ui.button": {
+          "label": "Thicker plate"
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "anchor": "center",
+          "layer": 205,
+          "fill": [
+            0.04,
+            0.08,
+            0.11,
+            0.86
+          ],
+          "stroke": [
+            0.95,
+            0.8,
+            0.5,
+            0.35
+          ],
+          "stroke_width": 0.004,
+          "corner_radius": 0.012
+        },
+        "sindri.ui.layout": {
+          "direction": "column",
+          "spacing": 0.012,
+          "align": "center",
+          "justify": "center"
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "boon-0-key",
+      "name": "Boon0Key",
+      "parent": "boon-0",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "boon-key",
+            "dim"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "1",
+          "font": "fonts/AlegreyaSans-Bold.ttf",
+          "font_size": 0.024,
+          "line_height": 0.02928,
+          "anchor": "center",
+          "layer": 210,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "bounds": [
+            0.0,
+            0.0
+          ]
+        },
+        "sindri.ui.box": {
+          "order": 2
+        }
+      }
+    },
+    {
+      "id": "boon-0-text",
+      "name": "Boon0Text",
+      "parent": "boon-0",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "boon-text"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "The Bulwark gains a point of health.",
+          "font": "fonts/AlegreyaSans-Medium.ttf",
+          "font_size": 0.026,
+          "line_height": 0.03172,
+          "anchor": "center",
+          "layer": 210,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "bounds": [
+            0.0,
+            0.0
+          ],
+          "wrap": "word"
+        },
+        "sindri.ui.box": {
+          "order": 1
+        }
+      }
+    },
+    {
+      "id": "boon-0-title",
+      "name": "Boon0Title",
+      "parent": "boon-0",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "boon-title"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "Thicker plate",
+          "font": "fonts/AlegreyaSC-Bold.ttf",
+          "font_size": 0.04,
+          "line_height": 0.0488,
+          "anchor": "center",
+          "layer": 210,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "bounds": [
+            0.0,
+            0.0
+          ]
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "boon-1",
+      "name": "Boon1",
+      "parent": "boons",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "boon",
+            "button"
+          ]
+        },
+        "sindri.ui.button": {
+          "label": "Heavier stone"
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "anchor": "center",
+          "layer": 205,
+          "fill": [
+            0.04,
+            0.08,
+            0.11,
+            0.86
+          ],
+          "stroke": [
+            0.95,
+            0.8,
+            0.5,
+            0.35
+          ],
+          "stroke_width": 0.004,
+          "corner_radius": 0.012
+        },
+        "sindri.ui.layout": {
+          "direction": "column",
+          "spacing": 0.012,
+          "align": "center",
+          "justify": "center"
+        },
+        "sindri.ui.box": {
+          "order": 1
+        }
+      }
+    },
+    {
+      "id": "boon-1-key",
+      "name": "Boon1Key",
+      "parent": "boon-1",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "boon-key",
+            "dim"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "2",
+          "font": "fonts/AlegreyaSans-Bold.ttf",
+          "font_size": 0.024,
+          "line_height": 0.02928,
+          "anchor": "center",
+          "layer": 210,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "bounds": [
+            0.0,
+            0.0
+          ]
+        },
+        "sindri.ui.box": {
+          "order": 2
+        }
+      }
+    },
+    {
+      "id": "boon-1-text",
+      "name": "Boon1Text",
+      "parent": "boon-1",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "boon-text"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "The Mason's stone hits 1 harder.",
+          "font": "fonts/AlegreyaSans-Medium.ttf",
+          "font_size": 0.026,
+          "line_height": 0.03172,
+          "anchor": "center",
+          "layer": 210,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "bounds": [
+            0.0,
+            0.0
+          ],
+          "wrap": "word"
+        },
+        "sindri.ui.box": {
+          "order": 1
+        }
+      }
+    },
+    {
+      "id": "boon-1-title",
+      "name": "Boon1Title",
+      "parent": "boon-1",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "boon-title"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "Heavier stone",
+          "font": "fonts/AlegreyaSC-Bold.ttf",
+          "font_size": 0.04,
+          "line_height": 0.0488,
+          "anchor": "center",
+          "layer": 210,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "bounds": [
+            0.0,
+            0.0
+          ]
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "boon-2",
+      "name": "Boon2",
+      "parent": "boons",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "boon",
+            "button"
+          ]
+        },
+        "sindri.ui.button": {
+          "label": "Longer legs"
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "anchor": "center",
+          "layer": 205,
+          "fill": [
+            0.04,
+            0.08,
+            0.11,
+            0.86
+          ],
+          "stroke": [
+            0.95,
+            0.8,
+            0.5,
+            0.35
+          ],
+          "stroke_width": 0.004,
+          "corner_radius": 0.012
+        },
+        "sindri.ui.layout": {
+          "direction": "column",
+          "spacing": 0.012,
+          "align": "center",
+          "justify": "center"
+        },
+        "sindri.ui.box": {
+          "order": 2
+        }
+      }
+    },
+    {
+      "id": "boon-2-key",
+      "name": "Boon2Key",
+      "parent": "boon-2",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "boon-key",
+            "dim"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "3",
+          "font": "fonts/AlegreyaSans-Bold.ttf",
+          "font_size": 0.024,
+          "line_height": 0.02928,
+          "anchor": "center",
+          "layer": 210,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "bounds": [
+            0.0,
+            0.0
+          ]
+        },
+        "sindri.ui.box": {
+          "order": 2
+        }
+      }
+    },
+    {
+      "id": "boon-2-text",
+      "name": "Boon2Text",
+      "parent": "boon-2",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "boon-text"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "The Lamplighter moves a cell further.",
+          "font": "fonts/AlegreyaSans-Medium.ttf",
+          "font_size": 0.026,
+          "line_height": 0.03172,
+          "anchor": "center",
+          "layer": 210,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "bounds": [
+            0.0,
+            0.0
+          ],
+          "wrap": "word"
+        },
+        "sindri.ui.box": {
+          "order": 1
+        }
+      }
+    },
+    {
+      "id": "boon-2-title",
+      "name": "Boon2Title",
+      "parent": "boon-2",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "boon-title"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "Longer legs",
+          "font": "fonts/AlegreyaSC-Bold.ttf",
+          "font_size": 0.04,
+          "line_height": 0.0488,
+          "anchor": "center",
+          "layer": 210,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "bounds": [
+            0.0,
+            0.0
+          ]
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "boon-3",
+      "name": "Boon3",
+      "parent": "boons",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "boon",
+            "button"
+          ]
+        },
+        "sindri.ui.button": {
+          "label": "Bank the fire"
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "anchor": "center",
+          "layer": 205,
+          "fill": [
+            0.04,
+            0.08,
+            0.11,
+            0.86
+          ],
+          "stroke": [
+            0.95,
+            0.8,
+            0.5,
+            0.35
+          ],
+          "stroke_width": 0.004,
+          "corner_radius": 0.012
+        },
+        "sindri.ui.layout": {
+          "direction": "column",
+          "spacing": 0.012,
+          "align": "center",
+          "justify": "center"
+        },
+        "sindri.ui.box": {
+          "order": 3
+        }
+      }
+    },
+    {
+      "id": "boon-3-key",
+      "name": "Boon3Key",
+      "parent": "boon-3",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "boon-key",
+            "dim"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "4",
+          "font": "fonts/AlegreyaSans-Bold.ttf",
+          "font_size": 0.024,
+          "line_height": 0.02928,
+          "anchor": "center",
+          "layer": 210,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "bounds": [
+            0.0,
+            0.0
+          ]
+        },
+        "sindri.ui.box": {
+          "order": 2
+        }
+      }
+    },
+    {
+      "id": "boon-3-text",
+      "name": "Boon3Text",
+      "parent": "boon-3",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "boon-text"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "The Hearth regains two points.",
+          "font": "fonts/AlegreyaSans-Medium.ttf",
+          "font_size": 0.026,
+          "line_height": 0.03172,
+          "anchor": "center",
+          "layer": 210,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "bounds": [
+            0.0,
+            0.0
+          ],
+          "wrap": "word"
+        },
+        "sindri.ui.box": {
+          "order": 1
+        }
+      }
+    },
+    {
+      "id": "boon-3-title",
+      "name": "Boon3Title",
+      "parent": "boon-3",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "boon-title"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "Bank the fire",
+          "font": "fonts/AlegreyaSC-Bold.ttf",
+          "font_size": 0.04,
+          "line_height": 0.0488,
+          "anchor": "center",
+          "layer": 210,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "bounds": [
+            0.0,
+            0.0
+          ]
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "boons",
+      "name": "Boons",
+      "parent": "upgrade",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "boons"
+          ]
+        },
+        "sindri.ui.layout": {
+          "direction": "row",
+          "spacing": 0.02,
+          "align": "center",
+          "justify": "center"
+        },
+        "sindri.ui.box": {
+          "order": 1
+        }
+      }
+    },
+    {
+      "id": "card",
+      "name": "Card",
+      "parent": "hud",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "card",
+            "panel"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "anchor": "center",
+          "layer": 100,
+          "fill": [
+            0.04,
+            0.08,
+            0.11,
+            0.86
+          ],
+          "stroke": [
+            0.95,
+            0.8,
+            0.5,
+            0.35
+          ],
+          "stroke_width": 0.004,
+          "corner_radius": 0.012
+        },
+        "sindri.ui.layout": {
+          "direction": "column",
+          "spacing": 0.006,
+          "align": "start",
+          "justify": "start"
+        },
+        "sindri.ui.box": {
+          "order": 2
+        }
+      }
+    },
+    {
+      "id": "crossed",
+      "name": "Crossed",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "screen"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "anchor": "center",
+          "layer": 200,
+          "fill": [
+            0.02,
+            0.05,
+            0.07,
+            0.55
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0.004,
+          "corner_radius": 0.012
+        },
+        "sindri.ui.layout": {
+          "direction": "column",
+          "spacing": 0.02,
+          "align": "center",
+          "justify": "center"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "id": "crossed-button",
+      "name": "CrossedButton",
+      "parent": "crossed-card",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "button",
+            "primary",
+            "wide"
+          ]
+        },
+        "sindri.ui.button": {
+          "label": "Back to the shore"
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "anchor": "center",
+          "layer": 212,
+          "fill": [
+            0.1,
+            0.16,
+            0.2,
+            1.0
+          ],
+          "stroke": [
+            0.95,
+            0.8,
+            0.5,
+            0.6
+          ],
+          "stroke_width": 0.004,
+          "corner_radius": 0.01
+        },
+        "sindri.ui.box": {
+          "order": 2
+        }
+      }
+    },
+    {
+      "id": "crossed-button-label",
+      "name": "CrossedButton Label",
+      "parent": "crossed-button",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "button-label"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "Back to the shore",
+          "font": "fonts/AlegreyaSans-Bold.ttf",
+          "font_size": 0.034,
+          "line_height": 0.04148,
+          "anchor": "center",
+          "layer": 214,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "bounds": [
+            0.0,
+            0.0
+          ]
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "crossed-card",
+      "name": "Crossed Card",
+      "parent": "crossed",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "screen-card",
+            "panel"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "anchor": "center",
+          "layer": 205,
+          "fill": [
+            0.04,
+            0.08,
+            0.11,
+            0.86
+          ],
+          "stroke": [
+            0.95,
+            0.8,
+            0.5,
+            0.35
+          ],
+          "stroke_width": 0.004,
+          "corner_radius": 0.012
+        },
+        "sindri.ui.layout": {
+          "direction": "column",
+          "spacing": 0.02,
+          "align": "center",
+          "justify": "center"
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "crossed-text",
+      "name": "CrossedText",
+      "parent": "crossed-card",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "screen-text"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "",
+          "font": "fonts/AlegreyaSans-Medium.ttf",
+          "font_size": 0.032,
+          "line_height": 0.03904,
+          "anchor": "center",
+          "layer": 210,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "bounds": [
+            0.0,
+            0.0
+          ],
+          "wrap": "word"
+        },
+        "sindri.ui.box": {
+          "order": 1
+        }
+      }
+    },
+    {
+      "id": "crossed-title",
+      "name": "CrossedTitle",
+      "parent": "crossed-card",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "screen-title"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "The lamp is lit",
+          "font": "fonts/AlegreyaSC-Bold.ttf",
+          "font_size": 0.09,
+          "line_height": 0.1098,
+          "anchor": "center",
+          "layer": 210,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "bounds": [
+            0.0,
+            0.0
+          ]
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "cursor",
+      "name": "Cursor",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          -0.707107,
+          0.0,
+          0.0,
+          0.707107
+        ],
+        "scale": [
+          0.98,
+          0.98,
+          1.0
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/marks.png#cursor",
+          "tint": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "layer": 8,
+          "unlit": true
+        }
+      }
+    },
+    {
+      "id": "end-turn",
+      "name": "EndTurn",
+      "parent": "actions",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "button",
+            "primary"
+          ]
+        },
+        "sindri.ui.button": {
+          "label": "End turn"
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "anchor": "center",
+          "layer": 130,
+          "fill": [
+            0.1,
+            0.16,
+            0.2,
+            1.0
+          ],
+          "stroke": [
+            0.95,
+            0.8,
+            0.5,
+            0.6
+          ],
+          "stroke_width": 0.004,
+          "corner_radius": 0.01
+        },
+        "sindri.ui.box": {
+          "order": 2
+        }
+      }
+    },
+    {
+      "id": "end-turn-label",
+      "name": "EndTurn Label",
+      "parent": "end-turn",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "button-label"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "End turn",
+          "font": "fonts/AlegreyaSans-Bold.ttf",
+          "font_size": 0.034,
+          "line_height": 0.04148,
+          "anchor": "center",
+          "layer": 132,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "bounds": [
+            0.0,
+            0.0
+          ]
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "environment",
+      "name": "Environment",
+      "components": {
+        "sindri.environment": {
+          "background": [
+            0.06,
+            0.15,
+            0.19,
+            1.0
+          ],
+          "ambient_color": [
+            0.56,
+            0.68,
+            0.88
+          ],
+          "ambient_intensity": 0.42,
+          "ambient_occlusion": {
+            "enabled": true,
+            "strength": 0.6
+          },
+          "shadows": {
+            "enabled": true,
+            "distance": 14.0,
+            "map_size": 2048,
+            "bias": 0.0015
+          },
+          "post_process": {
+            "exposure": 0.0,
+            "contrast": 1.04,
+            "saturation": 0.95,
+            "tone_mapping": "aces",
+            "vignette": 0.3
+          },
+          "bloom": {
+            "enabled": true,
+            "threshold": 0.85,
+            "knee": 0.25,
+            "intensity": 0.55,
+            "passes": 4
+          }
+        }
+      }
+    },
+    {
+      "id": "fallen",
+      "name": "Fallen",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "screen"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "anchor": "center",
+          "layer": 200,
+          "fill": [
+            0.02,
+            0.05,
+            0.07,
+            0.55
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0.004,
+          "corner_radius": 0.012
+        },
+        "sindri.ui.layout": {
+          "direction": "column",
+          "spacing": 0.02,
+          "align": "center",
+          "justify": "center"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "id": "fallen-button",
+      "name": "FallenButton",
+      "parent": "fallen-card",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "button",
+            "primary",
+            "wide"
+          ]
+        },
+        "sindri.ui.button": {
+          "label": "Back to the shore"
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "anchor": "center",
+          "layer": 212,
+          "fill": [
+            0.1,
+            0.16,
+            0.2,
+            1.0
+          ],
+          "stroke": [
+            0.95,
+            0.8,
+            0.5,
+            0.6
+          ],
+          "stroke_width": 0.004,
+          "corner_radius": 0.01
+        },
+        "sindri.ui.box": {
+          "order": 2
+        }
+      }
+    },
+    {
+      "id": "fallen-button-label",
+      "name": "FallenButton Label",
+      "parent": "fallen-button",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "button-label"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "Back to the shore",
+          "font": "fonts/AlegreyaSans-Bold.ttf",
+          "font_size": 0.034,
+          "line_height": 0.04148,
+          "anchor": "center",
+          "layer": 214,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "bounds": [
+            0.0,
+            0.0
+          ]
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "fallen-card",
+      "name": "Fallen Card",
+      "parent": "fallen",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "screen-card",
+            "panel"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "anchor": "center",
+          "layer": 205,
+          "fill": [
+            0.04,
+            0.08,
+            0.11,
+            0.86
+          ],
+          "stroke": [
+            0.95,
+            0.8,
+            0.5,
+            0.35
+          ],
+          "stroke_width": 0.004,
+          "corner_radius": 0.012
+        },
+        "sindri.ui.layout": {
+          "direction": "column",
+          "spacing": 0.02,
+          "align": "center",
+          "justify": "center"
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "fallen-text",
+      "name": "FallenText",
+      "parent": "fallen-card",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "screen-text"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "",
+          "font": "fonts/AlegreyaSans-Medium.ttf",
+          "font_size": 0.032,
+          "line_height": 0.03904,
+          "anchor": "center",
+          "layer": 210,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "bounds": [
+            0.0,
+            0.0
+          ],
+          "wrap": "word"
+        },
+        "sindri.ui.box": {
+          "order": 1
+        }
+      }
+    },
+    {
+      "id": "fallen-title",
+      "name": "FallenTitle",
+      "parent": "fallen-card",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "screen-title"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "The light goes out",
+          "font": "fonts/AlegreyaSC-Bold.ttf",
+          "font_size": 0.09,
+          "line_height": 0.1098,
+          "anchor": "center",
+          "layer": 210,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "bounds": [
+            0.0,
+            0.0
+          ]
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "hearth",
+      "name": "Hearth",
+      "parent": "hud",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "hearth",
+            "panel"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "anchor": "center",
+          "layer": 100,
+          "fill": [
+            0.04,
+            0.08,
+            0.11,
+            0.86
+          ],
+          "stroke": [
+            0.95,
+            0.8,
+            0.5,
+            0.35
+          ],
+          "stroke_width": 0.004,
+          "corner_radius": 0.012
+        },
+        "sindri.ui.layout": {
+          "direction": "column",
+          "spacing": 0.002,
+          "align": "end",
+          "justify": "start"
+        },
+        "sindri.ui.box": {
+          "order": 1
+        }
+      }
+    },
+    {
+      "id": "hearth-pips",
+      "name": "HearthPips",
+      "parent": "hearth",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "hearth-pips"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "",
+          "font": "fonts/AlegreyaSans-Bold.ttf",
+          "font_size": 0.04,
+          "line_height": 0.0488,
+          "anchor": "center",
+          "layer": 122,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "rich": true,
+          "bounds": [
+            0.0,
+            0.0
+          ]
+        },
+        "sindri.ui.box": {
+          "order": 1
+        }
+      }
+    },
+    {
+      "id": "hearth-title",
+      "name": "HearthTitle",
+      "parent": "hearth",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "hearth-title"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "HEARTH",
+          "font": "fonts/AlegreyaSC-Bold.ttf",
+          "font_size": 0.03,
+          "line_height": 0.0366,
+          "anchor": "center",
+          "layer": 122,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "bounds": [
+            0.0,
+            0.0
+          ]
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "held",
+      "name": "Held",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "screen"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "anchor": "center",
+          "layer": 200,
+          "fill": [
+            0.02,
+            0.05,
+            0.07,
+            0.55
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0.004,
+          "corner_radius": 0.012
+        },
+        "sindri.ui.layout": {
+          "direction": "column",
+          "spacing": 0.02,
+          "align": "center",
+          "justify": "center"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "id": "held-button",
+      "name": "HeldButton",
+      "parent": "held-card",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "button",
+            "primary",
+            "wide"
+          ]
+        },
+        "sindri.ui.button": {
+          "label": "Onward"
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "anchor": "center",
+          "layer": 212,
+          "fill": [
+            0.1,
+            0.16,
+            0.2,
+            1.0
+          ],
+          "stroke": [
+            0.95,
+            0.8,
+            0.5,
+            0.6
+          ],
+          "stroke_width": 0.004,
+          "corner_radius": 0.01
+        },
+        "sindri.ui.box": {
+          "order": 2
+        }
+      }
+    },
+    {
+      "id": "held-button-label",
+      "name": "HeldButton Label",
+      "parent": "held-button",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "button-label"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "Onward",
+          "font": "fonts/AlegreyaSans-Bold.ttf",
+          "font_size": 0.034,
+          "line_height": 0.04148,
+          "anchor": "center",
+          "layer": 214,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "bounds": [
+            0.0,
+            0.0
+          ]
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "held-card",
+      "name": "Held Card",
+      "parent": "held",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "screen-card",
+            "panel"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "anchor": "center",
+          "layer": 205,
+          "fill": [
+            0.04,
+            0.08,
+            0.11,
+            0.86
+          ],
+          "stroke": [
+            0.95,
+            0.8,
+            0.5,
+            0.35
+          ],
+          "stroke_width": 0.004,
+          "corner_radius": 0.012
+        },
+        "sindri.ui.layout": {
+          "direction": "column",
+          "spacing": 0.02,
+          "align": "center",
+          "justify": "center"
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "held-text",
+      "name": "HeldText",
+      "parent": "held-card",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "screen-text"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "",
+          "font": "fonts/AlegreyaSans-Medium.ttf",
+          "font_size": 0.032,
+          "line_height": 0.03904,
+          "anchor": "center",
+          "layer": 210,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "bounds": [
+            0.0,
+            0.0
+          ],
+          "wrap": "word"
+        },
+        "sindri.ui.box": {
+          "order": 1
+        }
+      }
+    },
+    {
+      "id": "held-title",
+      "name": "HeldTitle",
+      "parent": "held-card",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "screen-title"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "Saltmarsh holds",
+          "font": "fonts/AlegreyaSC-Bold.ttf",
+          "font_size": 0.09,
+          "line_height": 0.1098,
+          "anchor": "center",
+          "layer": 210,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "bounds": [
+            0.0,
+            0.0
+          ]
+        },
+        "sindri.ui.box": {
+          "order": 0
         }
       }
     },
     {
       "id": "hud",
       "name": "Hud",
-      "transform_3d": {
-        "position": [0.0, 0.0, 0.0],
-        "rotation": [0.0, 0.0, 0.0, 1.0],
-        "scale": [1.0, 1.0, 1.0]
-      },
       "components": {
-        "sindri.script": {
-          "script": "Hud",
-          "source": "scripts/hud.decay"
+        "weave.style": {
+          "classes": [
+            "hud"
+          ]
         }
       }
     },
     {
-      "id": "kind",
-      "name": "Kind",
+      "id": "island-0",
+      "name": "Island 0",
       "transform_3d": {
-        "position": [0.0, 0.0, 2.0],
-        "rotation": [0.0, 0.0, 0.0, 1.0],
-        "scale": [1.0, 1.0, 1.0]
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
       },
       "components": {
-        "sindri.ui.text": {
-          "anchor": "top_left",
-          "color": [0.875, 0.902, 0.949, 1.0],
-          "font": "fonts/Inter.ttf",
-          "font_size": 0.0407,
-          "layer": 101,
-          "line_height": 0.0519,
-          "text": "planks"
+        "sindri.model": {
+          "asset": "models/island-saltmarsh.glb",
+          "layer": 0
         }
       }
     },
     {
-      "id": "mode-button",
-      "name": "ModeButton",
+      "id": "island-1",
+      "name": "Island 1",
       "transform_3d": {
-        "position": [0.0, 0.86, 0.0],
-        "rotation": [0.0, 0.0, 0.0, 1.0],
-        "scale": [0.34, 0.1, 1.0]
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
       },
       "components": {
-        "sindri.script": {
-          "script": "ModeButton",
-          "source": "scripts/mode-button.decay"
+        "sindri.model": {
+          "asset": "models/island-fold.glb",
+          "layer": 0
+        }
+      },
+      "disabled": true
+    },
+    {
+      "id": "island-2",
+      "name": "Island 2",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.model": {
+          "asset": "models/island-quarry-rise.glb",
+          "layer": 0
+        }
+      },
+      "disabled": true
+    },
+    {
+      "id": "island-3",
+      "name": "Island 3",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.model": {
+          "asset": "models/island-lighthouse.glb",
+          "layer": 0
+        }
+      },
+      "disabled": true
+    },
+    {
+      "id": "island-name",
+      "name": "IslandName",
+      "parent": "status",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "island-name"
+          ]
         },
-        "sindri.ui.button": {
-          "label": "mode"
-        },
-        "sindri.ui.shape": {
-          "anchor": "center",
-          "blend": "over",
-          "corner_radius": 0.02,
-          "count": 6.0,
-          "dash_duty": 0.5,
-          "dashes": 0.0,
-          "fill": [0.09, 0.11, 0.15, 0.94],
-          "kind": "rect",
-          "layer": 110,
-          "stroke": [0.949, 0.722, 0.294, 1.0],
-          "stroke_width": 0.012,
-          "sweep_start": 0.0,
-          "sweep_turns": 1.0
-        }
-      }
-    },
-    {
-      "id": "mode-label",
-      "name": "ModeLabel",
-      "transform_3d": {
-        "position": [0.0, 0.86, 0.0],
-        "rotation": [0.0, 0.0, 0.0, 1.0],
-        "scale": [1.0, 1.0, 1.0]
-      },
-      "components": {
         "sindri.ui.text": {
+          "text": "Saltmarsh",
+          "font": "fonts/AlegreyaSC-Bold.ttf",
+          "font_size": 0.05,
+          "line_height": 0.061,
           "anchor": "center",
-          "color": [0.949, 0.722, 0.294, 1.0],
-          "font": "fonts/Inter.ttf",
-          "font_size": 0.038,
-          "layer": 140,
-          "line_height": 0.045,
-          "text": "BUILD"
+          "layer": 122,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "bounds": [
+            0.0,
+            0.0
+          ]
+        },
+        "sindri.ui.box": {
+          "order": 0
         }
       }
     },
     {
-      "id": "modes",
-      "name": "Modes",
+      "id": "lantern-light",
+      "name": "Lantern Light",
       "transform_3d": {
-        "position": [0.0, 0.0, 0.0],
-        "rotation": [0.0, 0.0, 0.0, 1.0],
-        "scale": [1.0, 1.0, 1.0]
+        "position": [
+          28.0,
+          3,
+          28.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
       },
       "components": {
-        "sindri.script": {
-          "script": "Modes",
-          "source": "scripts/modes.decay"
+        "sindri.light": {
+          "kind": "point",
+          "color": [
+            1.0,
+            0.76,
+            0.42
+          ],
+          "intensity": 2.6,
+          "range": 3.2
         }
       }
     },
     {
       "id": "music",
       "name": "Music",
-      "transform_3d": {
-        "position": [0.0, 0.0, 0.0],
-        "rotation": [0.0, 0.0, 0.0, 1.0],
-        "scale": [1.0, 1.0, 1.0]
-      },
       "components": {
         "sindri.audio.source": {
           "autoplay": true,
-          "clip": "audio/background.wav",
+          "bus": "music",
+          "clip": "audio/tide-song.wav",
           "looping": true,
-          "volume": 0.2
+          "volume": 0.45
         }
       }
     },
     {
-      "id": "physics",
-      "name": "Physics",
+      "id": "preview",
+      "name": "Preview",
+      "parent": "card",
       "components": {
-        "sindri.physics3d.world": {
-          "gravity": [0.0, -9.81, 0.0],
-          "layers": ["solid"]
-        }
-      }
-    },
-    {
-      "id": "play-debug",
-      "name": "PlayDebug",
-      "transform_3d": {
-        "position": [0.0, -0.72, 2.0],
-        "rotation": [0.0, 0.0, 0.0, 1.0],
-        "scale": [1.0, 1.0, 1.0]
-      },
-      "components": {
-        "sindri.ui.text": {
-          "anchor": "center",
-          "color": [1.0, 0.85, 0.35, 1.0],
-          "font": "fonts/Inter.ttf",
-          "font_size": 0.03,
-          "layer": 160,
-          "line_height": 0.04,
-          "text": "tap {}  aim {}",
-          "values": [0.0, 0.0]
-        }
-      }
-    },
-    {
-      "id": "stock",
-      "name": "Stock",
-      "transform_3d": {
-        "position": [0.0, 0.0, 2.0],
-        "rotation": [0.0, 0.0, 0.0, 1.0],
-        "scale": [1.0, 1.0, 1.0]
-      },
-      "components": {
-        "sindri.ui.text": {
-          "anchor": "top_left",
-          "color": [0.949, 0.722, 0.294, 1.0],
-          "font": "fonts/Inter.ttf",
-          "font_size": 0.0407,
-          "layer": 101,
-          "line_height": 0.0519,
-          "text": "x {}",
-          "values": [12.0]
-        }
-      }
-    },
-    {
-      "id": "target",
-      "name": "Target",
-      "transform_3d": {
-        "position": [32656.0, 0.0, 32552.0],
-        "rotation": [0.0, 0.0, 0.0, 1.0],
-        "scale": [0.38, 0.38, 1.0]
-      },
-      "components": {
-        "sindri.grid.placement": {
-          "grid": "floor"
+        "weave.style": {
+          "classes": [
+            "preview"
+          ]
         },
+        "sindri.ui.text": {
+          "text": "",
+          "font": "fonts/AlegreyaSans-Bold.ttf",
+          "font_size": 0.026,
+          "line_height": 0.03172,
+          "anchor": "center",
+          "layer": 122,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "rich": true,
+          "bounds": [
+            0.0,
+            0.0
+          ],
+          "wrap": "word"
+        },
+        "sindri.ui.box": {
+          "order": 5
+        }
+      }
+    },
+    {
+      "id": "rewind",
+      "name": "Rewind",
+      "parent": "actions",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "button",
+            "small"
+          ]
+        },
+        "sindri.ui.button": {
+          "label": "Rewind (1)"
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "anchor": "center",
+          "layer": 130,
+          "fill": [
+            0.1,
+            0.16,
+            0.2,
+            1.0
+          ],
+          "stroke": [
+            0.95,
+            0.8,
+            0.5,
+            0.6
+          ],
+          "stroke_width": 0.004,
+          "corner_radius": 0.01
+        },
+        "sindri.ui.box": {
+          "order": 1
+        }
+      }
+    },
+    {
+      "id": "rewind-label",
+      "name": "RewindLabel",
+      "parent": "rewind",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "button-label"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "Rewind (1)",
+          "font": "fonts/AlegreyaSans-Bold.ttf",
+          "font_size": 0.028,
+          "line_height": 0.03416,
+          "anchor": "center",
+          "layer": 132,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "bounds": [
+            0.0,
+            0.0
+          ]
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "round-text",
+      "name": "RoundText",
+      "parent": "status",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "status-line"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "Round 1 of 5",
+          "font": "fonts/AlegreyaSans-Bold.ttf",
+          "font_size": 0.03,
+          "line_height": 0.0366,
+          "anchor": "center",
+          "layer": 122,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "bounds": [
+            0.0,
+            0.0
+          ]
+        },
+        "sindri.ui.box": {
+          "order": 1
+        }
+      }
+    },
+    {
+      "id": "sea",
+      "name": "Sea",
+      "transform_3d": {
+        "position": [
+          28.0,
+          0.08,
+          28.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {}
+    },
+    {
+      "id": "sea-0-0",
+      "name": "Sea Tile",
+      "parent": "sea",
+      "transform_3d": {
+        "position": [
+          -48.0,
+          0.0,
+          -48.0
+        ],
+        "rotation": [
+          -0.707107,
+          0.0,
+          0.0,
+          0.707107
+        ],
+        "scale": [
+          24.0,
+          24.0,
+          1.0
+        ]
+      },
+      "components": {
         "sindri.sprite": {
-          "billboard": true,
-          "texture": "textures/beacon.png#south",
-          "tint": [1.0, 0.25, 0.25, 0.9]
+          "texture": "textures/water.png",
+          "tint": [
+            0.07,
+            0.32,
+            0.4,
+            0.82
+          ],
+          "layer": -10,
+          "unlit": true
+        }
+      }
+    },
+    {
+      "id": "sea-0-1",
+      "name": "Sea Tile",
+      "parent": "sea",
+      "transform_3d": {
+        "position": [
+          -48.0,
+          0.0,
+          -24.0
+        ],
+        "rotation": [
+          -0.707107,
+          0.0,
+          0.0,
+          0.707107
+        ],
+        "scale": [
+          24.0,
+          24.0,
+          1.0
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/water.png",
+          "tint": [
+            0.07,
+            0.32,
+            0.4,
+            0.82
+          ],
+          "layer": -10,
+          "unlit": true
+        }
+      }
+    },
+    {
+      "id": "sea-0-2",
+      "name": "Sea Tile",
+      "parent": "sea",
+      "transform_3d": {
+        "position": [
+          -48.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          -0.707107,
+          0.0,
+          0.0,
+          0.707107
+        ],
+        "scale": [
+          24.0,
+          24.0,
+          1.0
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/water.png",
+          "tint": [
+            0.07,
+            0.32,
+            0.4,
+            0.82
+          ],
+          "layer": -10,
+          "unlit": true
+        }
+      }
+    },
+    {
+      "id": "sea-0-3",
+      "name": "Sea Tile",
+      "parent": "sea",
+      "transform_3d": {
+        "position": [
+          -48.0,
+          0.0,
+          24.0
+        ],
+        "rotation": [
+          -0.707107,
+          0.0,
+          0.0,
+          0.707107
+        ],
+        "scale": [
+          24.0,
+          24.0,
+          1.0
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/water.png",
+          "tint": [
+            0.07,
+            0.32,
+            0.4,
+            0.82
+          ],
+          "layer": -10,
+          "unlit": true
+        }
+      }
+    },
+    {
+      "id": "sea-0-4",
+      "name": "Sea Tile",
+      "parent": "sea",
+      "transform_3d": {
+        "position": [
+          -48.0,
+          0.0,
+          48.0
+        ],
+        "rotation": [
+          -0.707107,
+          0.0,
+          0.0,
+          0.707107
+        ],
+        "scale": [
+          24.0,
+          24.0,
+          1.0
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/water.png",
+          "tint": [
+            0.07,
+            0.32,
+            0.4,
+            0.82
+          ],
+          "layer": -10,
+          "unlit": true
+        }
+      }
+    },
+    {
+      "id": "sea-1-0",
+      "name": "Sea Tile",
+      "parent": "sea",
+      "transform_3d": {
+        "position": [
+          -24.0,
+          0.0,
+          -48.0
+        ],
+        "rotation": [
+          -0.707107,
+          0.0,
+          0.0,
+          0.707107
+        ],
+        "scale": [
+          24.0,
+          24.0,
+          1.0
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/water.png",
+          "tint": [
+            0.07,
+            0.32,
+            0.4,
+            0.82
+          ],
+          "layer": -10,
+          "unlit": true
+        }
+      }
+    },
+    {
+      "id": "sea-1-1",
+      "name": "Sea Tile",
+      "parent": "sea",
+      "transform_3d": {
+        "position": [
+          -24.0,
+          0.0,
+          -24.0
+        ],
+        "rotation": [
+          -0.707107,
+          0.0,
+          0.0,
+          0.707107
+        ],
+        "scale": [
+          24.0,
+          24.0,
+          1.0
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/water.png",
+          "tint": [
+            0.07,
+            0.32,
+            0.4,
+            0.82
+          ],
+          "layer": -10,
+          "unlit": true
+        }
+      }
+    },
+    {
+      "id": "sea-1-2",
+      "name": "Sea Tile",
+      "parent": "sea",
+      "transform_3d": {
+        "position": [
+          -24.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          -0.707107,
+          0.0,
+          0.0,
+          0.707107
+        ],
+        "scale": [
+          24.0,
+          24.0,
+          1.0
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/water.png",
+          "tint": [
+            0.07,
+            0.32,
+            0.4,
+            0.82
+          ],
+          "layer": -10,
+          "unlit": true
+        }
+      }
+    },
+    {
+      "id": "sea-1-3",
+      "name": "Sea Tile",
+      "parent": "sea",
+      "transform_3d": {
+        "position": [
+          -24.0,
+          0.0,
+          24.0
+        ],
+        "rotation": [
+          -0.707107,
+          0.0,
+          0.0,
+          0.707107
+        ],
+        "scale": [
+          24.0,
+          24.0,
+          1.0
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/water.png",
+          "tint": [
+            0.07,
+            0.32,
+            0.4,
+            0.82
+          ],
+          "layer": -10,
+          "unlit": true
+        }
+      }
+    },
+    {
+      "id": "sea-1-4",
+      "name": "Sea Tile",
+      "parent": "sea",
+      "transform_3d": {
+        "position": [
+          -24.0,
+          0.0,
+          48.0
+        ],
+        "rotation": [
+          -0.707107,
+          0.0,
+          0.0,
+          0.707107
+        ],
+        "scale": [
+          24.0,
+          24.0,
+          1.0
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/water.png",
+          "tint": [
+            0.07,
+            0.32,
+            0.4,
+            0.82
+          ],
+          "layer": -10,
+          "unlit": true
+        }
+      }
+    },
+    {
+      "id": "sea-2-0",
+      "name": "Sea Tile",
+      "parent": "sea",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          -48.0
+        ],
+        "rotation": [
+          -0.707107,
+          0.0,
+          0.0,
+          0.707107
+        ],
+        "scale": [
+          24.0,
+          24.0,
+          1.0
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/water.png",
+          "tint": [
+            0.07,
+            0.32,
+            0.4,
+            0.82
+          ],
+          "layer": -10,
+          "unlit": true
+        }
+      }
+    },
+    {
+      "id": "sea-2-1",
+      "name": "Sea Tile",
+      "parent": "sea",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          -24.0
+        ],
+        "rotation": [
+          -0.707107,
+          0.0,
+          0.0,
+          0.707107
+        ],
+        "scale": [
+          24.0,
+          24.0,
+          1.0
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/water.png",
+          "tint": [
+            0.07,
+            0.32,
+            0.4,
+            0.82
+          ],
+          "layer": -10,
+          "unlit": true
+        }
+      }
+    },
+    {
+      "id": "sea-2-2",
+      "name": "Sea Tile",
+      "parent": "sea",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          -0.707107,
+          0.0,
+          0.0,
+          0.707107
+        ],
+        "scale": [
+          24.0,
+          24.0,
+          1.0
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/water.png",
+          "tint": [
+            0.07,
+            0.32,
+            0.4,
+            0.82
+          ],
+          "layer": -10,
+          "unlit": true
+        }
+      }
+    },
+    {
+      "id": "sea-2-3",
+      "name": "Sea Tile",
+      "parent": "sea",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          24.0
+        ],
+        "rotation": [
+          -0.707107,
+          0.0,
+          0.0,
+          0.707107
+        ],
+        "scale": [
+          24.0,
+          24.0,
+          1.0
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/water.png",
+          "tint": [
+            0.07,
+            0.32,
+            0.4,
+            0.82
+          ],
+          "layer": -10,
+          "unlit": true
+        }
+      }
+    },
+    {
+      "id": "sea-2-4",
+      "name": "Sea Tile",
+      "parent": "sea",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          48.0
+        ],
+        "rotation": [
+          -0.707107,
+          0.0,
+          0.0,
+          0.707107
+        ],
+        "scale": [
+          24.0,
+          24.0,
+          1.0
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/water.png",
+          "tint": [
+            0.07,
+            0.32,
+            0.4,
+            0.82
+          ],
+          "layer": -10,
+          "unlit": true
+        }
+      }
+    },
+    {
+      "id": "sea-3-0",
+      "name": "Sea Tile",
+      "parent": "sea",
+      "transform_3d": {
+        "position": [
+          24.0,
+          0.0,
+          -48.0
+        ],
+        "rotation": [
+          -0.707107,
+          0.0,
+          0.0,
+          0.707107
+        ],
+        "scale": [
+          24.0,
+          24.0,
+          1.0
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/water.png",
+          "tint": [
+            0.07,
+            0.32,
+            0.4,
+            0.82
+          ],
+          "layer": -10,
+          "unlit": true
+        }
+      }
+    },
+    {
+      "id": "sea-3-1",
+      "name": "Sea Tile",
+      "parent": "sea",
+      "transform_3d": {
+        "position": [
+          24.0,
+          0.0,
+          -24.0
+        ],
+        "rotation": [
+          -0.707107,
+          0.0,
+          0.0,
+          0.707107
+        ],
+        "scale": [
+          24.0,
+          24.0,
+          1.0
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/water.png",
+          "tint": [
+            0.07,
+            0.32,
+            0.4,
+            0.82
+          ],
+          "layer": -10,
+          "unlit": true
+        }
+      }
+    },
+    {
+      "id": "sea-3-2",
+      "name": "Sea Tile",
+      "parent": "sea",
+      "transform_3d": {
+        "position": [
+          24.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          -0.707107,
+          0.0,
+          0.0,
+          0.707107
+        ],
+        "scale": [
+          24.0,
+          24.0,
+          1.0
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/water.png",
+          "tint": [
+            0.07,
+            0.32,
+            0.4,
+            0.82
+          ],
+          "layer": -10,
+          "unlit": true
+        }
+      }
+    },
+    {
+      "id": "sea-3-3",
+      "name": "Sea Tile",
+      "parent": "sea",
+      "transform_3d": {
+        "position": [
+          24.0,
+          0.0,
+          24.0
+        ],
+        "rotation": [
+          -0.707107,
+          0.0,
+          0.0,
+          0.707107
+        ],
+        "scale": [
+          24.0,
+          24.0,
+          1.0
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/water.png",
+          "tint": [
+            0.07,
+            0.32,
+            0.4,
+            0.82
+          ],
+          "layer": -10,
+          "unlit": true
+        }
+      }
+    },
+    {
+      "id": "sea-3-4",
+      "name": "Sea Tile",
+      "parent": "sea",
+      "transform_3d": {
+        "position": [
+          24.0,
+          0.0,
+          48.0
+        ],
+        "rotation": [
+          -0.707107,
+          0.0,
+          0.0,
+          0.707107
+        ],
+        "scale": [
+          24.0,
+          24.0,
+          1.0
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/water.png",
+          "tint": [
+            0.07,
+            0.32,
+            0.4,
+            0.82
+          ],
+          "layer": -10,
+          "unlit": true
+        }
+      }
+    },
+    {
+      "id": "sea-4-0",
+      "name": "Sea Tile",
+      "parent": "sea",
+      "transform_3d": {
+        "position": [
+          48.0,
+          0.0,
+          -48.0
+        ],
+        "rotation": [
+          -0.707107,
+          0.0,
+          0.0,
+          0.707107
+        ],
+        "scale": [
+          24.0,
+          24.0,
+          1.0
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/water.png",
+          "tint": [
+            0.07,
+            0.32,
+            0.4,
+            0.82
+          ],
+          "layer": -10,
+          "unlit": true
+        }
+      }
+    },
+    {
+      "id": "sea-4-1",
+      "name": "Sea Tile",
+      "parent": "sea",
+      "transform_3d": {
+        "position": [
+          48.0,
+          0.0,
+          -24.0
+        ],
+        "rotation": [
+          -0.707107,
+          0.0,
+          0.0,
+          0.707107
+        ],
+        "scale": [
+          24.0,
+          24.0,
+          1.0
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/water.png",
+          "tint": [
+            0.07,
+            0.32,
+            0.4,
+            0.82
+          ],
+          "layer": -10,
+          "unlit": true
+        }
+      }
+    },
+    {
+      "id": "sea-4-2",
+      "name": "Sea Tile",
+      "parent": "sea",
+      "transform_3d": {
+        "position": [
+          48.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          -0.707107,
+          0.0,
+          0.0,
+          0.707107
+        ],
+        "scale": [
+          24.0,
+          24.0,
+          1.0
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/water.png",
+          "tint": [
+            0.07,
+            0.32,
+            0.4,
+            0.82
+          ],
+          "layer": -10,
+          "unlit": true
+        }
+      }
+    },
+    {
+      "id": "sea-4-3",
+      "name": "Sea Tile",
+      "parent": "sea",
+      "transform_3d": {
+        "position": [
+          48.0,
+          0.0,
+          24.0
+        ],
+        "rotation": [
+          -0.707107,
+          0.0,
+          0.0,
+          0.707107
+        ],
+        "scale": [
+          24.0,
+          24.0,
+          1.0
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/water.png",
+          "tint": [
+            0.07,
+            0.32,
+            0.4,
+            0.82
+          ],
+          "layer": -10,
+          "unlit": true
+        }
+      }
+    },
+    {
+      "id": "sea-4-4",
+      "name": "Sea Tile",
+      "parent": "sea",
+      "transform_3d": {
+        "position": [
+          48.0,
+          0.0,
+          48.0
+        ],
+        "rotation": [
+          -0.707107,
+          0.0,
+          0.0,
+          0.707107
+        ],
+        "scale": [
+          24.0,
+          24.0,
+          1.0
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/water.png",
+          "tint": [
+            0.07,
+            0.32,
+            0.4,
+            0.82
+          ],
+          "layer": -10,
+          "unlit": true
+        }
+      }
+    },
+    {
+      "id": "skill-name",
+      "name": "SkillName",
+      "parent": "card",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "skill-name"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "",
+          "font": "fonts/AlegreyaSans-Bold.ttf",
+          "font_size": 0.03,
+          "line_height": 0.0366,
+          "anchor": "center",
+          "layer": 122,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "rich": true,
+          "bounds": [
+            0.0,
+            0.0
+          ],
+          "wrap": "word"
+        },
+        "sindri.ui.box": {
+          "order": 2
+        }
+      }
+    },
+    {
+      "id": "skill-text",
+      "name": "SkillText",
+      "parent": "card",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "skill-text"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "",
+          "font": "fonts/AlegreyaSans-Medium.ttf",
+          "font_size": 0.026,
+          "line_height": 0.03172,
+          "anchor": "center",
+          "layer": 122,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "rich": true,
+          "bounds": [
+            0.0,
+            0.0
+          ],
+          "wrap": "word"
+        },
+        "sindri.ui.box": {
+          "order": 3
+        }
+      }
+    },
+    {
+      "id": "status",
+      "name": "Status",
+      "parent": "hud",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "status",
+            "panel"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "anchor": "center",
+          "layer": 100,
+          "fill": [
+            0.04,
+            0.08,
+            0.11,
+            0.86
+          ],
+          "stroke": [
+            0.95,
+            0.8,
+            0.5,
+            0.35
+          ],
+          "stroke_width": 0.004,
+          "corner_radius": 0.012
+        },
+        "sindri.ui.layout": {
+          "direction": "column",
+          "spacing": 0.004,
+          "align": "start",
+          "justify": "start"
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "sun",
+      "name": "Sun",
+      "transform_3d": {
+        "position": [
+          0,
+          10,
+          0
+        ],
+        "rotation": [
+          -0.467713,
+          -0.17237,
+          -0.093543,
+          0.861849
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.light": {
+          "kind": "directional",
+          "color": [
+            1.0,
+            0.85,
+            0.66
+          ],
+          "intensity": 2.4
+        }
+      }
+    },
+    {
+      "id": "tide-text",
+      "name": "TideText",
+      "parent": "status",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "status-line",
+            "dim"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "Tide 0",
+          "font": "fonts/AlegreyaSans-Medium.ttf",
+          "font_size": 0.026,
+          "line_height": 0.03172,
+          "anchor": "center",
+          "layer": 122,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "bounds": [
+            0.0,
+            0.0
+          ]
+        },
+        "sindri.ui.box": {
+          "order": 2
         }
       }
     },
     {
       "id": "title",
       "name": "Title",
-      "transform_3d": {
-        "position": [0.0, 0.0, 2.0],
-        "rotation": [0.0, 0.0, 0.0, 1.0],
-        "scale": [1.0, 1.0, 1.0]
-      },
       "components": {
-        "sindri.ui.text": {
-          "anchor": "top_left",
-          "color": [0.949, 0.722, 0.294, 1.0],
-          "font": "fonts/Inter.ttf",
-          "font_size": 0.0611,
-          "layer": 101,
-          "line_height": 0.0778,
-          "text": "CAUSEWAY"
+        "weave.style": {
+          "classes": [
+            "screen"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "anchor": "center",
+          "layer": 200,
+          "fill": [
+            0.02,
+            0.05,
+            0.07,
+            0.55
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0.004,
+          "corner_radius": 0.012
+        },
+        "sindri.ui.layout": {
+          "direction": "column",
+          "spacing": 0.02,
+          "align": "center",
+          "justify": "center"
         }
       }
     },
     {
-      "id": "wanderer",
-      "name": "Wanderer",
-      "transform_3d": {
-        "position": [32656.0, 0.0, 32552.0],
-        "rotation": [0.0, 0.0, 0.0, 1.0],
-        "scale": [0.6, 2.95, 1.0]
-      },
+      "id": "title-button",
+      "name": "TitleButton",
+      "parent": "title-card",
       "components": {
-        "sindri.animation.sprite": {
-          "clips": {
-            "bob": {
-              "frames": ["bob-0", "bob-1", "bob-2", "bob-3"],
-              "looping": true,
-              "seconds_per_frame": 0.16
-            }
-          },
-          "speed": 1.0
+        "weave.style": {
+          "classes": [
+            "button",
+            "primary",
+            "wide"
+          ]
         },
-        "sindri.grid.occupant": {
-          "footprint": [
-            [0, 0]
+        "sindri.ui.button": {
+          "label": "Begin a crossing"
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "anchor": "center",
+          "layer": 212,
+          "fill": [
+            0.1,
+            0.16,
+            0.2,
+            1.0
           ],
-          "grid": "floor"
+          "stroke": [
+            0.95,
+            0.8,
+            0.5,
+            0.6
+          ],
+          "stroke_width": 0.004,
+          "corner_radius": 0.01
         },
-        "sindri.grid.placement": {
-          "grid": "floor"
+        "sindri.ui.box": {
+          "order": 2
+        }
+      }
+    },
+    {
+      "id": "title-button-label",
+      "name": "TitleButton Label",
+      "parent": "title-button",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "button-label"
+          ]
         },
-        "sindri.script": {
-          "properties": {
-            "step_seconds": 0.34
+        "sindri.ui.text": {
+          "text": "Begin a crossing",
+          "font": "fonts/AlegreyaSans-Bold.ttf",
+          "font_size": 0.034,
+          "line_height": 0.04148,
+          "anchor": "center",
+          "layer": 214,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
           },
-          "script": "Wanderer",
-          "source": "scripts/wanderer.decay"
+          "bounds": [
+            0.0,
+            0.0
+          ]
         },
-        "sindri.sprite": {
-          "billboard": true,
-          "texture": "textures/wanderer.png#bob-0",
-          "tint": [1.0, 1.0, 1.0, 1.0]
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "title-card",
+      "name": "Title Card",
+      "parent": "title",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "screen-card",
+            "panel"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "anchor": "center",
+          "layer": 205,
+          "fill": [
+            0.04,
+            0.08,
+            0.11,
+            0.86
+          ],
+          "stroke": [
+            0.95,
+            0.8,
+            0.5,
+            0.35
+          ],
+          "stroke_width": 0.004,
+          "corner_radius": 0.012
+        },
+        "sindri.ui.layout": {
+          "direction": "column",
+          "spacing": 0.02,
+          "align": "center",
+          "justify": "center"
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "title-controls",
+      "name": "TitleControls",
+      "parent": "title-card",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "screen-text",
+            "dim"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "Click a warden, then where to move, then what to strike.  Arrows and Enter work too.  E ends the turn, Z undoes a move, R rewinds the turn once per island.",
+          "font": "fonts/AlegreyaSans-Medium.ttf",
+          "font_size": 0.024,
+          "line_height": 0.02928,
+          "anchor": "center",
+          "layer": 210,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "bounds": [
+            0.0,
+            0.0
+          ],
+          "wrap": "word"
+        },
+        "sindri.ui.box": {
+          "order": 4
+        }
+      }
+    },
+    {
+      "id": "title-record",
+      "name": "TitleRecord",
+      "parent": "title-card",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "screen-text",
+            "dim"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "",
+          "font": "fonts/AlegreyaSans-Medium.ttf",
+          "font_size": 0.026,
+          "line_height": 0.03172,
+          "anchor": "center",
+          "layer": 210,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "bounds": [
+            0.0,
+            0.0
+          ]
+        },
+        "sindri.ui.box": {
+          "order": 3
+        }
+      }
+    },
+    {
+      "id": "title-text",
+      "name": "TitleText",
+      "parent": "title-card",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "screen-text"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "The Hollow cross at low tide. Hold each island until the sea comes in and closes the causeway behind them.",
+          "font": "fonts/AlegreyaSans-Medium.ttf",
+          "font_size": 0.032,
+          "line_height": 0.03904,
+          "anchor": "center",
+          "layer": 210,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "bounds": [
+            0.0,
+            0.0
+          ],
+          "wrap": "word"
+        },
+        "sindri.ui.box": {
+          "order": 1
+        }
+      }
+    },
+    {
+      "id": "title-title",
+      "name": "TitleTitle",
+      "parent": "title-card",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "screen-title"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "Causeway",
+          "font": "fonts/AlegreyaSC-Bold.ttf",
+          "font_size": 0.16,
+          "line_height": 0.1952,
+          "anchor": "center",
+          "layer": 210,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "bounds": [
+            0.0,
+            0.0
+          ]
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "undo-move",
+      "name": "UndoMove",
+      "parent": "actions",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "button",
+            "small"
+          ]
+        },
+        "sindri.ui.button": {
+          "label": "Undo move"
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "anchor": "center",
+          "layer": 130,
+          "fill": [
+            0.1,
+            0.16,
+            0.2,
+            1.0
+          ],
+          "stroke": [
+            0.95,
+            0.8,
+            0.5,
+            0.6
+          ],
+          "stroke_width": 0.004,
+          "corner_radius": 0.01
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "undo-move-label",
+      "name": "UndoMove Label",
+      "parent": "undo-move",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "button-label"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "Undo move",
+          "font": "fonts/AlegreyaSans-Bold.ttf",
+          "font_size": 0.028,
+          "line_height": 0.03416,
+          "anchor": "center",
+          "layer": 132,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "bounds": [
+            0.0,
+            0.0
+          ]
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "unit-hint",
+      "name": "UnitHint",
+      "parent": "card",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "unit-hint"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "",
+          "font": "fonts/AlegreyaSans-Medium.ttf",
+          "font_size": 0.024,
+          "line_height": 0.02928,
+          "anchor": "center",
+          "layer": 122,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "rich": true,
+          "bounds": [
+            0.0,
+            0.0
+          ],
+          "wrap": "word"
+        },
+        "sindri.ui.box": {
+          "order": 4
+        }
+      }
+    },
+    {
+      "id": "unit-name",
+      "name": "UnitName",
+      "parent": "card",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "unit-name"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "",
+          "font": "fonts/AlegreyaSC-Bold.ttf",
+          "font_size": 0.044,
+          "line_height": 0.05368,
+          "anchor": "center",
+          "layer": 122,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "rich": true,
+          "bounds": [
+            0.0,
+            0.0
+          ],
+          "wrap": "word"
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "unit-stats",
+      "name": "UnitStats",
+      "parent": "card",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "unit-stats"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "",
+          "font": "fonts/AlegreyaSans-Bold.ttf",
+          "font_size": 0.03,
+          "line_height": 0.0366,
+          "anchor": "center",
+          "layer": 122,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "rich": true,
+          "bounds": [
+            0.0,
+            0.0
+          ],
+          "wrap": "word"
+        },
+        "sindri.ui.box": {
+          "order": 1
+        }
+      }
+    },
+    {
+      "id": "upgrade",
+      "name": "Upgrade",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "screen"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "anchor": "center",
+          "layer": 200,
+          "fill": [
+            0.02,
+            0.05,
+            0.07,
+            0.55
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0.004,
+          "corner_radius": 0.012
+        },
+        "sindri.ui.layout": {
+          "direction": "column",
+          "spacing": 0.03,
+          "align": "center",
+          "justify": "center"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "id": "upgrade-title",
+      "name": "UpgradeTitle",
+      "parent": "upgrade",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "screen-title"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "Choose a boon",
+          "font": "fonts/AlegreyaSC-Bold.ttf",
+          "font_size": 0.08,
+          "line_height": 0.0976,
+          "anchor": "center",
+          "layer": 210,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "bounds": [
+            0.0,
+            0.0
+          ]
+        },
+        "sindri.ui.box": {
+          "order": 0
         }
       }
     },
@@ -546,25 +4300,42 @@
       "id": "world-camera",
       "name": "World Camera",
       "transform_3d": {
-        "position": [32727.16, 67.3567, 32623.16],
-        "rotation": [-0.262396, 0.366924, 0.108688, 0.885834],
-        "scale": [1.0, 1.0, 1.0]
+        "position": [
+          56.46,
+          24.63749,
+          56.46
+        ],
+        "rotation": [
+          -0.239118,
+          0.369644,
+          0.099046,
+          0.892399
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
       },
       "components": {
         "sindri.camera": {
-          "far": 600.0,
-          "near": 0.1,
           "projection": "orthographic",
-          "vertical_size": 22.0
+          "vertical_size": 10.0,
+          "near": 0.1,
+          "far": 92.0
+        },
+        "sindri.camera.behavior": {
+          "shake": {
+            "strength": 0.09,
+            "frequency": 38.0,
+            "decay": 3.2,
+            "trauma": 0.0,
+            "phase": 0.0
+          }
         },
         "sindri.script": {
-          "properties": {
-            "dead_zone": 1.25,
-            "ease": 4.0,
-            "height_dead_zone": 1.0
-          },
-          "script": "CameraFollow",
-          "source": "scripts/camera-follow.decay"
+          "script": "CameraRig",
+          "source": "scripts/camera.decay"
         }
       }
     }

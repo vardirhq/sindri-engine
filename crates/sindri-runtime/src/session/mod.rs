@@ -284,6 +284,36 @@ impl Session {
         )
     }
 
+    /// The world camera's ray through the pointer: where it starts, on the
+    /// near plane, and the unit direction it travels. `None` with no pointer
+    /// in the window or no world camera to cast from.
+    ///
+    /// Worked out here for the reason `aim` is: it needs the camera and the
+    /// viewport, and a script has neither. Given the ray, a game whose ground
+    /// is a model rather than a voxel world finds the cell it points at itself.
+    fn pointer_ray(
+        world: &World,
+        components: &ComponentSchemaRegistry,
+        input: &InputState,
+        viewport: (f32, f32),
+    ) -> Option<[[f32; 3]; 2]> {
+        let position = input.pointer_position()?;
+        if viewport.0 <= 0.0 || viewport.1 <= 0.0 {
+            return None;
+        }
+        let camera = sindri_scene::world_camera_of(world, components, viewport.0 / viewport.1)
+            .ok()
+            .flatten()?;
+        let inverse = camera.view_projection.inverse();
+        let ndc_x = position[0] / viewport.0 * 2.0 - 1.0;
+        let ndc_y = 1.0 - position[1] / viewport.1 * 2.0;
+        let near = inverse.project_point3([ndc_x, ndc_y, 0.0].into());
+        let far = inverse.project_point3([ndc_x, ndc_y, 1.0].into());
+        let direction = (far - near).normalize_or_zero();
+        (near.is_finite() && direction.length_squared() > 0.0)
+            .then(|| [near.to_array(), direction.to_array()])
+    }
+
     /// One fixed step: physics, the screen UI, effects, the scripts, then
     /// what moves after them. Every host runs this, and only this, so a
     /// scene steps the same in each.
@@ -334,6 +364,7 @@ impl Session {
         // is are the same instant.
         self.gestures.update(input.presses());
         let aim = Self::aim(world, &self.components, &self.tile_sets, input, viewport);
+        let pointer_ray = Self::pointer_ray(world, &self.components, input, viewport);
         // Worked out here rather than by the scripts, for the same reason the
         // aim is: it needs the view matrix and the viewport, and a script has
         // neither. Zero when nothing is being dragged, so a camera script can
@@ -377,6 +408,9 @@ impl Session {
         frame = frame.with_gestures(&self.gestures).with_camera_pan(pan);
         if let Some(aim) = aim {
             frame = frame.with_aim(aim);
+        }
+        if let Some(ray) = pointer_ray {
+            frame = frame.with_pointer_ray(ray);
         }
         // Handed over only when this host actually binds any, the same way the
         // scene channel is. An empty set is not "no tile sets" to the host that

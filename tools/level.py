@@ -1,375 +1,395 @@
-"""Generates Causeway's level.
+"""Generates Causeway's scene, prefabs, stylesheet and manifest.
 
-Written down rather than hand-edited because the shape of a shore is a formula
-and 400-odd cells of JSON is not something to keep correct by hand. Re-running
-this is how the level changes.
+    python3 tools/level.py
+
+Written as code rather than edited by hand because most of a scene is the same
+decision made many times -- every figure's prefab, every water tile, every
+screen's buttons -- and those drift apart when they are typed out one by one.
+The editor still opens and saves what this writes; this is the way to change
+many things at once.
+
+What the game does is in `game/assets/scripts/`. What it looks like comes from
+`tools/causeway_art.py`. This is only where things are and what they are made
+of.
 """
-import json, math, pathlib, sys
-sys.path.insert(0, '/tmp')
-from look import look_at
+import json
+import math
+import pathlib
 
-COLUMNS, ROWS, CELL = 65_536, 65_536, 1.0
-# The grid is the voxel world's ground, so a cell is a voxel column. These two
-# are where seed 1 puts a sandy bank with the beacon across a river from it:
-# eight blocks of water, and no way round within reach, so the way over is
-# built.
-WANDERER = (32_656, 32_552)
-BEACON = (32_642, 32_552)
+GAME = pathlib.Path(__file__).resolve().parents[1] / "game"
+ASSETS = GAME / "assets"
 
-
-def biome(name, temperature, moisture, surface, subsurface, trees, relief):
-    return {"name": name, "temperature": temperature, "moisture": moisture,
-            "surface_voxel": surface, "subsurface_voxel": subsurface,
-            "subsurface_depth": 3, "trees": trees, "relief": relief,
-            "terraces": 0}
+ORIGIN = 24.0
+CENTRE = (ORIGIN + 4.0, 1.4, ORIGIN + 4.0)
+TITLE_FONT = "fonts/AlegreyaSC-Bold.ttf"
+BODY_FONT = "fonts/AlegreyaSans-Medium.ttf"
+BOLD_FONT = "fonts/AlegreyaSans-Bold.ttf"
+FLAT = [-0.7071068, 0.0, 0.0, 0.7071068]
 
 
-def voxel_world():
-    """The engine's natural terrain, drawn with Causeway's blocks.
+def transform(position=(0.0, 0.0, 0.0), rotation=(0.0, 0.0, 0.0, 1.0), scale=(1.0, 1.0, 1.0)):
+    return {"position": [round(v, 5) for v in position],
+            "rotation": [round(v, 6) for v in rotation],
+            "scale": [round(v, 5) for v in scale]}
 
-    Temperate on purpose: no tundra or desert biome, so snow is what lies
-    above the snow line and sand is what lies along the water.
+
+def look(yaw, pitch):
+    """A rotation that faces `yaw` round and `pitch` up, as a camera or light does."""
+    cy, sy = math.cos(yaw / 2), math.sin(yaw / 2)
+    cp, sp = math.cos(pitch / 2), math.sin(pitch / 2)
+    return (cy * sp, sy * cp, -sy * sp, cy * cp)
+
+
+def towards(dx, dy, dz):
+    length = math.sqrt(dx * dx + dy * dy + dz * dz)
+    return look(math.atan2(-dx, -dz), math.asin(dy / length))
+
+
+def entity(id, name, components, parent=None, position=None, rotation=None, scale=None,
+           disabled=False, spatial=True):
+    e = {"id": id, "name": name}
+    if parent:
+        e["parent"] = parent
+    if spatial:
+        e["transform_3d"] = transform(position or (0, 0, 0), rotation or (0, 0, 0, 1), scale or (1, 1, 1))
+    e["components"] = components
+    if disabled:
+        e["disabled"] = True
+    return e
+
+
+def script(name, source, **properties):
+    payload = {"script": name, "source": source}
+    if properties:
+        payload["properties"] = properties
+    return {"sindri.script": payload}
+
+
+def styled(*classes):
+    return {"weave.style": {"classes": list(classes)}}
+
+
+def text(value, font=BODY_FONT, size=0.04, layer=120, anchor="center", rich=False, color=(1, 1, 1, 1),
+         bounds=(0.0, 0.0), wrap="none", bold=False):
+    payload = {"text": value, "font": font, "font_size": size, "line_height": size * 1.22,
+               "anchor": anchor, "layer": layer, "color": list(color),
+               "shadow": {"offset": [0.0, -0.003], "color": [0.0, 0.02, 0.05, 0.6], "softness": 0.003}}
+    if rich:
+        payload["rich"] = True
+    # Always present, so the stylesheet's width becomes the box the words
+    # wrap and align in.
+    payload["bounds"] = list(bounds)
+    if wrap != "none":
+        payload["wrap"] = wrap
+    if bold:
+        payload["bold"] = True
+    return {"sindri.ui.text": payload}
+
+
+def panel(layer=100, fill=(0.04, 0.08, 0.11, 0.86), stroke=(0.95, 0.8, 0.5, 0.35), layout=None):
+    components = {"sindri.ui.shape": {"kind": "rect", "anchor": "center", "layer": layer,
+                                      "fill": list(fill), "stroke": list(stroke), "stroke_width": 0.004,
+                                      "corner_radius": 0.012}}
+    if layout:
+        components["sindri.ui.layout"] = layout
+    return components
+
+
+def column(spacing=0.01, align="start", justify="start"):
+    return {"direction": "column", "spacing": spacing, "align": align, "justify": justify}
+
+
+def button(entities, id, name, label, parent, classes, layer=130, label_size=0.034):
+    entities.append(entity(id, name, {**styled("button", *classes), "sindri.ui.button": {"label": label},
+                                      "sindri.ui.shape": {"kind": "rect", "anchor": "center", "layer": layer,
+                                                          "fill": [0.1, 0.16, 0.2, 1.0],
+                                                          "stroke": [0.95, 0.8, 0.5, 0.6],
+                                                          "stroke_width": 0.004, "corner_radius": 0.01}},
+                           parent=parent, spatial=False))
+    entities.append(entity(id + "-label", name + " Label",
+                           {**styled("button-label"), **text(label, BOLD_FONT, label_size, layer + 2)},
+                           parent=id, spatial=False))
+
+
+# --- Prefabs -----------------------------------------------------------------
+
+FIGURES = {
+    # kind: (model, alive, size)
+    "bulwark": ("bulwark", True, 1.0),
+    "mason": ("mason", True, 1.0),
+    "lamplighter": ("lamplighter", True, 1.0),
+    "husk": ("husk", True, 1.0),
+    "brute": ("brute", True, 1.0),
+    "spitter": ("spitter", True, 1.0),
+    "mortar": ("mortar", True, 1.0),
+    "colossus": ("colossus", True, 1.0),
+    "house": ("house", False, 1.0),
+    "beacon": ("beacon", False, 1.0),
+    "stone": ("stone", False, 1.0),
+}
+
+MARKS = ["move", "aim", "danger", "spawn", "tide", "selected", "cursor", "arrow", "push"]
+
+
+def prefab(name, entities):
+    return {"format_version": 1, "metadata": {"name": name}, "entities": entities}
+
+
+def write_prefabs():
+    folder = ASSETS / "prefabs"
+    folder.mkdir(parents=True, exist_ok=True)
+    for kind, (model, alive, size) in FIGURES.items():
+        title = kind.capitalize()
+        root = entity(kind, title, {
+            "sindri.model": {"asset": f"models/{model}.glb", "layer": 0},
+            **script("Piece", "scripts/piece.decay", alive=alive, size=size),
+        })
+        write(folder / f"{kind}.prefab", prefab(title, [root]))
+    mark = entity("mark", "Mark", {
+        "sindri.sprite": {"texture": "textures/marks.png#move", "tint": [1.0, 1.0, 1.0, 1.0], "layer": 5,
+                          "unlit": True},
+        "sindri.animation.sprite": {"clips": {
+            name: {"frames": [name], "looping": True, "seconds_per_frame": 1.0} for name in MARKS
+        }, "speed": 1.0},
+    }, rotation=FLAT, scale=(0.94, 0.94, 1.0))
+    write(folder / "mark.prefab", prefab("Mark", [mark]))
+    label = entity("label", "Label", {"sindri.text": {
+        "text": "", "font": BOLD_FONT, "font_size": 0.24, "line_height": 0.28, "anchor": "bottom",
+        "layer": 40, "rich": True, "color": [1.0, 1.0, 1.0, 1.0],
+        "outline": {"width": 0.025, "color": [0.03, 0.05, 0.08, 0.95]},
+    }})
+    write(folder / "label.prefab", prefab("Label", [label]))
+    popup = entity("popup", "Popup", {"sindri.text": {
+        "text": "", "font": BOLD_FONT, "font_size": 0.42, "line_height": 0.5, "anchor": "bottom",
+        "layer": 50, "rich": True, "color": [1.0, 1.0, 1.0, 1.0],
+        "outline": {"width": 0.04, "color": [0.05, 0.03, 0.02, 0.95]},
+    }, **script("Popup", "scripts/effects.decay")})
+    write(folder / "popup.prefab", prefab("Popup", [popup]))
+    missile = entity("missile", "Missile", {"sindri.model": {"asset": "models/missile.glb", "layer": 0},
+                                            **script("Missile", "scripts/effects.decay")})
+    write(folder / "missile.prefab", prefab("Missile", [missile]))
+    spark = entity("spark", "Spark", {
+        "sindri.sprite": {"texture": "textures/spark.png#spark-0", "billboard": True, "layer": 30,
+                          "unlit": True, "tint": [1.0, 0.95, 0.8, 1.0]},
+        "sindri.animation.sprite": {"clips": {"burst": {
+            "frames": [f"spark-{i}" for i in range(4)], "looping": False, "seconds_per_frame": 0.06}},
+            "speed": 1.0},
+        **script("Spark", "scripts/effects.decay"),
+    }, scale=(0.9, 0.9, 1.0))
+    write(folder / "spark.prefab", prefab("Spark", [spark]))
+
+
+# --- The scene ---------------------------------------------------------------
+
+def world_entities():
+    e = []
+    e.append(entity("environment", "Environment", {"sindri.environment": {
+        "background": [0.06, 0.15, 0.19, 1.0],
+        "ambient_color": [0.56, 0.68, 0.88],
+        "ambient_intensity": 0.42,
+        "ambient_occlusion": {"enabled": True, "strength": 0.6},
+        "shadows": {"enabled": True, "distance": 14.0, "map_size": 2048, "bias": 0.0015},
+        "post_process": {"exposure": 0.0, "contrast": 1.04, "saturation": 0.95, "tone_mapping": "aces",
+                         "vignette": 0.3},
+        "bloom": {"enabled": True, "threshold": 0.85, "knee": 0.25, "intensity": 0.55, "passes": 4},
+    }}, spatial=False))
+    e.append(entity("sun", "Sun", {"sindri.light": {"kind": "directional", "color": [1.0, 0.85, 0.66],
+                                                   "intensity": 2.4}},
+                    position=(0, 10, 0), rotation=towards(0.25, -1.0, -0.6)))
+    names = ["Saltmarsh", "The Fold", "Quarry Rise", "The Lighthouse"]
+    files = ["saltmarsh", "fold", "quarry-rise", "lighthouse"]
+    for i, (name, file) in enumerate(zip(names, files)):
+        e.append(entity(f"island-{i}", f"Island {i}", {"sindri.model": {"asset": f"models/island-{file}.glb",
+                                                                        "layer": 0}},
+                        disabled=i != 0))
+    e.append(entity("sea", "Sea", {}, position=(CENTRE[0], 0.08, CENTRE[2])))
+    for gx in range(-2, 3):
+        for gz in range(-2, 3):
+            e.append(entity(f"sea-{gx + 2}-{gz + 2}", "Sea Tile", {"sindri.sprite": {
+                "texture": "textures/water.png", "tint": [0.07, 0.32, 0.4, 0.82], "layer": -10, "unlit": True,
+            }}, parent="sea", position=(gx * 24.0, 0.0, gz * 24.0), rotation=FLAT, scale=(24.0, 24.0, 1.0)))
+    e.append(entity("lantern-light", "Lantern Light", {"sindri.light": {
+        "kind": "point", "color": [1.0, 0.76, 0.42], "intensity": 2.6, "range": 3.2}},
+        position=(CENTRE[0], 3, CENTRE[2])))
+    e.append(entity("beacon-light", "Beacon Light", {"sindri.light": {
+        "kind": "point", "color": [1.0, 0.6, 0.28], "intensity": 4.0, "range": 4.5}},
+        position=(CENTRE[0], 4, CENTRE[2])))
+    distance = 28.46
+    offset = (distance, distance * math.sqrt(2) * math.tan(math.radians(30)), distance)
+    e.append(entity("world-camera", "World Camera", {
+        "sindri.camera": {"projection": "orthographic", "vertical_size": 10.0, "near": 0.1, "far": 92.0},
+        "sindri.camera.behavior": {"shake": {"strength": 0.09, "frequency": 38.0, "decay": 3.2, "trauma": 0.0,
+                                             "phase": 0.0}},
+        **script("CameraRig", "scripts/camera.decay"),
+    }, position=(CENTRE[0] + offset[0], CENTRE[1] + offset[1], CENTRE[2] + offset[2]),
+        rotation=look(math.radians(45), math.radians(-30))))
+    cursor = entity("cursor", "Cursor", {
+        "sindri.sprite": {"texture": "textures/marks.png#cursor", "tint": [1.0, 1.0, 1.0, 1.0], "layer": 8,
+                          "unlit": True},
+    }, rotation=FLAT, scale=(0.98, 0.98, 1.0))
+    e.append(cursor)
+    prefabs = {kind: f"prefabs/{kind}.prefab" for kind in FIGURES}
+    e.append(entity("battle", "Battle", script(
+        "Battle", "scripts/battle.decay",
+        mark="prefabs/mark.prefab", label="prefabs/label.prefab", popup="prefabs/popup.prefab",
+        missile="prefabs/missile.prefab", spark="prefabs/spark.prefab", **prefabs), spatial=False))
+    e.append(entity("music", "Music", {"sindri.audio.source": {
+        "autoplay": True, "bus": "music", "clip": "audio/tide-song.wav", "looping": True, "volume": 0.45}},
+        spatial=False))
+    return e
+
+
+def hud_entities():
+    e = []
+    # Top left: where and when.
+    e.append(entity("hud", "Hud", {**styled("hud")}, spatial=False))
+    e.append(entity("status", "Status", {**styled("status", "panel"), **panel(layout=column(0.004))},
+                    parent="hud", spatial=False))
+    e.append(entity("island-name", "IslandName", {**styled("island-name"), **text("Saltmarsh", TITLE_FONT, 0.05,
+                                                                                   122)},
+                    parent="status", spatial=False))
+    e.append(entity("round-text", "RoundText", {**styled("status-line"), **text("Round 1 of 5", BOLD_FONT, 0.03,
+                                                                                122)},
+                    parent="status", spatial=False))
+    e.append(entity("tide-text", "TideText", {**styled("status-line", "dim"), **text("Tide 0", BODY_FONT, 0.026,
+                                                                                    122)},
+                    parent="status", spatial=False))
+    # Top right: the Hearth.
+    e.append(entity("hearth", "Hearth", {**styled("hearth", "panel"), **panel(layout=column(0.002, "end"))},
+                    parent="hud", spatial=False))
+    e.append(entity("hearth-title", "HearthTitle", {**styled("hearth-title"), **text("HEARTH", TITLE_FONT, 0.03,
+                                                                                    122)},
+                    parent="hearth", spatial=False))
+    e.append(entity("hearth-pips", "HearthPips", {**styled("hearth-pips"), **text("", BOLD_FONT, 0.04, 122,
+                                                                                  rich=True)},
+                    parent="hearth", spatial=False))
+    # Bottom left: the warden in hand.
+    e.append(entity("card", "Card", {**styled("card", "panel"), **panel(layout=column(0.006))},
+                    parent="hud", spatial=False))
+    for id, name, font, size, classes in (
+            ("unit-name", "UnitName", TITLE_FONT, 0.044, ("unit-name",)),
+            ("unit-stats", "UnitStats", BOLD_FONT, 0.03, ("unit-stats",)),
+            ("skill-name", "SkillName", BOLD_FONT, 0.03, ("skill-name",)),
+            ("skill-text", "SkillText", BODY_FONT, 0.026, ("skill-text",)),
+            ("unit-hint", "UnitHint", BODY_FONT, 0.024, ("unit-hint",)),
+            ("preview", "Preview", BOLD_FONT, 0.026, ("preview",))):
+        e.append(entity(id, name, {**styled(*classes), **text("", font, size, 122, rich=True, wrap="word")},
+                        parent="card", spatial=False))
+    # Bottom right: the turn's controls.
+    # A shape that draws nothing, because an anchor belongs to what is drawn:
+    # without one the row would be placed by its middle from the screen's.
+    e.append(entity("actions", "Actions", {**styled("actions"), "sindri.ui.layout": {
+        "direction": "row", "spacing": 0.015, "align": "center", "justify": "end"},
+        "sindri.ui.shape": {"kind": "rect", "anchor": "center", "layer": 100, "fill": [0, 0, 0, 0],
+                            "stroke": [0, 0, 0, 0], "stroke_width": 0.0}}, parent="hud", spatial=False))
+    button(e, "undo-move", "UndoMove", "Undo move", "actions", ("small",), label_size=0.028)
+    button(e, "rewind", "Rewind", "Rewind (1)", "actions", ("small",), label_size=0.028)
+    e[-1] = entity("rewind-label", "RewindLabel", {**styled("button-label"), **text("Rewind (1)", BOLD_FONT,
+                                                                                    0.028, 132)},
+                   parent="rewind", spatial=False)
+    button(e, "end-turn", "EndTurn", "End turn", "actions", ("primary",), label_size=0.034)
+    # The banner across the top for what just happened.
+    e.append(entity("banner", "Banner", {**styled("banner"), **panel(140, layout=column(0.004, "center", "center"))},
+                    disabled=True, spatial=False))
+    e.append(entity("banner-title", "BannerTitle", {**styled("banner-title"), **text("", TITLE_FONT, 0.06, 142)},
+                    parent="banner", spatial=False))
+    e.append(entity("banner-text", "BannerText", {**styled("banner-text"), **text("", BODY_FONT, 0.028, 142,
+                                                                                  wrap="word")},
+                    parent="banner", spatial=False))
+    return e
+
+
+def screen(e, id, name, title, body, button_label, title_size=0.09, disabled=True):
+    e.append(entity(id, name, {**styled("screen"), **panel(200, fill=(0.02, 0.05, 0.07, 0.55), stroke=(0, 0, 0, 0),
+                                                           layout=column(0.02, "center", "center"))},
+                    disabled=disabled, spatial=False))
+    e.append(entity(id + "-card", name + " Card", {**styled("screen-card", "panel"),
+                                                   **panel(205, layout=column(0.02, "center", "center"))},
+                    parent=id, spatial=False))
+    e.append(entity(id + "-title", name + "Title", {**styled("screen-title"), **text(title, TITLE_FONT, title_size,
+                                                                                    210)},
+                    parent=id + "-card", spatial=False))
+    e.append(entity(id + "-text", name + "Text", {**styled("screen-text"), **text(body, BODY_FONT, 0.032, 210,
+                                                                                  wrap="word")},
+                    parent=id + "-card", spatial=False))
+    if button_label:
+        button(e, id + "-button", name + "Button", button_label, id + "-card", ("primary", "wide"), layer=212)
+
+
+def screens():
+    e = []
+    screen(e, "title", "Title", "Causeway",
+           "The Hollow cross at low tide. Hold each island until the sea comes in and closes the causeway "
+           "behind them.", "Begin a crossing", title_size=0.16, disabled=False)
+    e.append(entity("title-record", "TitleRecord", {**styled("screen-text", "dim"), **text("", BODY_FONT, 0.026, 210)},
+                    parent="title-card", spatial=False))
+    e.append(entity("title-controls", "TitleControls", {**styled("screen-text", "dim"), **text(
+        "Click a warden, then where to move, then what to strike.  Arrows and Enter work too.  "
+        "E ends the turn, Z undoes a move, R rewinds the turn once per island.", BODY_FONT, 0.024, 210,
+        wrap="word")}, parent="title-card", spatial=False))
+    screen(e, "held", "Held", "Saltmarsh holds", "", "Onward")
+    screen(e, "fallen", "Fallen", "The light goes out", "", "Back to the shore")
+    screen(e, "crossed", "Crossed", "The lamp is lit", "", "Back to the shore")
+    # Boons between islands, one card each.
+    e.append(entity("upgrade", "Upgrade", {**styled("screen"), **panel(200, fill=(0.02, 0.05, 0.07, 0.55),
+                                                                       stroke=(0, 0, 0, 0),
+                                                                       layout=column(0.03, "center", "center"))},
+                    disabled=True, spatial=False))
+    e.append(entity("upgrade-title", "UpgradeTitle", {**styled("screen-title"), **text("Choose a boon", TITLE_FONT,
+                                                                                      0.08, 210)},
+                    parent="upgrade", spatial=False))
+    e.append(entity("boons", "Boons", {**styled("boons"), "sindri.ui.layout": {
+        "direction": "row", "spacing": 0.02, "align": "center", "justify": "center"}}, parent="upgrade",
+        spatial=False))
+    boons = [("Thicker plate", "The Bulwark gains a point of health."),
+             ("Heavier stone", "The Mason's stone hits 1 harder."),
+             ("Longer legs", "The Lamplighter moves a cell further."),
+             ("Bank the fire", "The Hearth regains two points.")]
+    for i, (title, body) in enumerate(boons):
+        e.append(entity(f"boon-{i}", f"Boon{i}", {**styled("boon", "button"), "sindri.ui.button": {"label": title},
+                                                  **panel(205, layout=column(0.012, "center", "center"))},
+                        parent="boons", spatial=False))
+        e.append(entity(f"boon-{i}-title", f"Boon{i}Title", {**styled("boon-title"), **text(title, TITLE_FONT, 0.04,
+                                                                                            210)},
+                        parent=f"boon-{i}", spatial=False))
+        e.append(entity(f"boon-{i}-text", f"Boon{i}Text", {**styled("boon-text"), **text(body, BODY_FONT, 0.026, 210,
+                                                                                          wrap="word")},
+                        parent=f"boon-{i}", spatial=False))
+        e.append(entity(f"boon-{i}-key", f"Boon{i}Key", {**styled("boon-key", "dim"), **text(str(i + 1), BOLD_FONT,
+                                                                                             0.024, 210)},
+                        parent=f"boon-{i}", spatial=False))
+    return e
+
+
+def write(path, document):
+    path.write_text(json.dumps(document, indent=2) + "\n")
+
+
+def ordered(entities):
+    """Gives every screen element its place among its siblings.
+
+    A layout lays its children out in scene order, and the editor saves a
+    scene sorted by id, so the order they were written in here would not
+    survive the first save. Stated, it does.
     """
-    return {
-        "blocks": "causeway.tileset",
-        "edits": [],
-        "focus": [0, 0, 0],
-        "follow_camera": True,
-        "generator": {
-            "kind": "natural_terrain", "seed": 1, "sea_level": 0,
-            "relief": 40, "feature_size": 64, "tree_line": 12,
-            "snow_line": 18, "caves": False, "rivers": True,
-            "stone_voxel": "stone", "water_voxel": "water",
-            "beach_voxel": "sand", "sea_bed_voxel": "gravel",
-            "cliff_voxel": "rock", "snow_voxel": "snow", "ice_voxel": "ice",
-            "trunk_voxel": "log", "leaves_voxel": "leaves",
-            "biomes": [
-                biome("Meadow", 0.6, 0.3, "ground", "earth", 0.08, 0.8),
-                biome("Forest", 0.55, 0.72, "ground", "earth", 0.5, 1.0),
-                biome("Swamp", 0.75, 0.92, "mud", "mud", 0.2, 0.3),
-                biome("Taiga", 0.15, 0.65, "moss", "earth", 0.4, 1.1),
-            ],
-        },
-        "layer": 0,
-        "materials": [],
-        "render_radius": 3,
-        "variant_seed": 0,
-        "vertical_radius": 2,
-    }
+    seen = {}
+    for e in entities:
+        parent = e.get("parent")
+        if parent is None or not any(key.startswith("sindri.ui.") for key in e["components"]):
+            continue
+        index = seen.get(parent, 0)
+        seen[parent] = index + 1
+        e["components"].setdefault("sindri.ui.box", {})["order"] = index
+    return entities
 
 
-def keys(*points):
-    """Keys as (time, value[, ease]); between two keys the earlier's ease runs."""
-    return [{"time": t, "value": v, "ease": rest[0] if rest else "ease-in-out"}
-            for t, v, *rest in points]
+def main():
+    write_prefabs()
+    entities = ordered(world_entities() + hud_entities() + screens())
+    entities.sort(key=lambda item: item["id"])
+    write(ASSETS / "causeway.scene", {"format_version": 10, "metadata": {"name": "Causeway"}, "entities": entities})
+    print(f"wrote causeway.scene with {len(entities)} entities")
 
-
-def beacon_sequences():
-    """How the beacon lights: a swell with the chime, then a slow breath.
-
-    Scaled from its own 0.68 by 1.79, so each axis is a track of its own.
-    """
-    def scaled(x_keys, y_keys):
-        return [{"target": "", "property": "scale.x", "keys": keys(*x_keys)},
-                {"target": "", "property": "scale.y", "keys": keys(*y_keys)}]
-    return {
-        "sequences": {
-            "arrive": {
-                "duration": 1.2, "looping": False,
-                "tracks": scaled(
-                    [(0.0, 0.68, "ease-out"), (0.45, 0.952), (1.2, 0.85, "linear")],
-                    [(0.0, 1.79, "ease-out"), (0.45, 2.506), (1.2, 2.2375, "linear")]),
-                "cues": [{"time": 0.0, "name": "lit",
-                          "sound": {"clip": "audio/victory.wav", "bus": "", "volume": 1.0}}],
-            },
-            "glow": {
-                "duration": 2.1, "looping": True,
-                "tracks": scaled(
-                    [(0.0, 0.85), (1.05, 0.901), (2.1, 0.85, "linear")],
-                    [(0.0, 2.2375), (1.05, 2.3718), (2.1, 2.2375, "linear")]),
-                "cues": [],
-            },
-        },
-        "playing": None,
-        "speed": 1.0,
-    }
-
-
-def transform(position, rotation=None, scale=(1.0, 1.0, 1.0)):
-    return {
-        "position": [float(v) for v in position],
-        "rotation": [float(v) for v in (rotation or (0.0, 0.0, 0.0, 1.0))],
-        "scale": [float(v) for v in scale],
-    }
-
-def camera():
-    """Framed on the walker rather than on the whole world.
-
-    A board small enough to see at once can be framed once; a world this size
-    cannot, so the camera sits a fixed distance from where the game starts and
-    a script keeps that offset as the walker moves. The arm is long because
-    the projection is orthographic: its length changes nothing in the picture
-    but what the near plane cuts, and the relief rises well above a short one.
-    """
-    centre = [WANDERER[0] * CELL, 2.0, WANDERER[1] * CELL]
-    distance, pitch, yaw = 120.0, math.radians(33.0), math.radians(45.0)
-    eye = [
-        round(centre[0] + distance * math.cos(pitch) * math.sin(yaw), 4),
-        round(centre[1] + distance * math.sin(pitch), 4),
-        round(centre[2] + distance * math.cos(pitch) * math.cos(yaw), 4),
-    ]
-    rotation = look_at(eye, centre)
-    # At large streamed-world coordinates these values are stored as f32.
-    # Keep the generated JSON on their canonical shortest representation.
-    eye[0] = round(eye[0], 2)
-    eye[2] = round(eye[2], 2)
-    return eye, rotation
-
-
-def entities():
-    eye, rotation = camera()
-    return [
-        {
-            "id": "floor",
-            "name": "Floor",
-            "transform_3d": transform((0.0, 0.0, 0.0)),
-            "components": {
-                "sindri.tile_grid": {
-                    "columns": COLUMNS, "rows": ROWS,
-                    "cell_size": [CELL, CELL], "cell_height": CELL,
-                    "projection": "isometric", "space": "solid",
-                },
-                # The ground: generated from a seed as the camera looks
-                # around, with only what the player changes written down.
-                "sindri.voxel_world": voxel_world(),
-                # One block up and no more, which is what makes the pillar a
-                # thing to build a way up rather than a thing to walk up.
-                "sindri.grid.navigation": {"max_step": 1.0},
-            },
-        },
-        {
-            "id": "wanderer",
-            "name": "Wanderer",
-            # The scale the bake reports, which is the frame's own size in
-            # world units. The frame is twice the figure's height because the
-            # canvas is symmetric about the model's origin -- the walker stands
-            # on that origin, so the quad's centre is at its feet and it stands
-            # on the ground rather than sinking to the waist.
-            "transform_3d": transform(
-                (WANDERER[0] * CELL, 0.0, WANDERER[1] * CELL), scale=(0.6, 2.95, 1.0)),
-            "components": {
-                "sindri.sprite": {"texture": "textures/wanderer.png#bob-0",
-                                  "tint": [1.0, 1.0, 1.0, 1.0], "billboard": True},
-                "sindri.animation.sprite": {
-                    "clips": {"bob": {"frames": ["bob-0", "bob-1", "bob-2", "bob-3"],
-                                      "looping": True, "seconds_per_frame": 0.16}},
-                    "speed": 1.0,
-                },
-                # No cell: a walker's place is wherever walking left it, and
-                # only its height is the ground's to answer.
-                "sindri.grid.placement": {"grid": "floor"},
-                # What makes it a thing the pathfinder knows about. Without it
-                # the walker is scenery standing on the grid rather than
-                # somebody moving across it.
-                "sindri.grid.occupant": {"grid": "floor", "footprint": [[0, 0]]},
-                "sindri.script": {"source": "scripts/wanderer.decay", "script": "Wanderer",
-                                  "properties": {"step_seconds": 0.34}},
-            },
-        },
-        {
-            "id": "beacon",
-            "name": "Beacon",
-            # 66 by 174, so a square scale would squash it to a smudge.
-            "transform_3d": transform((0.0, 0.0, 0.0), scale=(0.68, 1.79, 1.0)),
-            "components": {
-                "sindri.sprite": {"texture": "textures/beacon.png#south",
-                                  "tint": [1.0, 1.0, 1.0, 1.0], "billboard": True},
-                # Deliberately not an occupant. A goal that fills its own cell
-                # is a goal nothing can reach: the pathfinder will not route
-                # into an occupied square, so marking the beacon would make the
-                # whole game unwinnable in a way nothing else would report.
-                "sindri.grid.placement": {"grid": "floor", "cell": list(BEACON)},
-                "sindri.script": {"source": "scripts/beacon.decay", "script": "Beacon"},
-                "sindri.sequence": beacon_sequences(),
-            },
-        },
-        {
-            # Where the walker was last told to go, in play mode.
-            #
-            # A marker rather than a pair of numbers on the walker, because
-            # routing already takes an entity as its destination -- the same
-            # call that walks to the beacon walks to this, and tap-to-move
-            # needs no new way to ask. Deliberately not an occupant, for the
-            # reason the beacon is not: nothing routes into a filled cell, so
-            # marking it would make the place you tapped the one place you
-            # could not go.
-            "id": "target",
-            "name": "Target",
-            "transform_3d": transform(
-                (WANDERER[0] * CELL, 0.0, WANDERER[1] * CELL),
-                scale=(0.38, 0.38, 1.0)),
-            "components": {
-                # Target moves at runtime, so an authored cell would pin it
-                # back here after every script update.
-                "sindri.grid.placement": {"grid": "floor"},
-                # Temporary diagnostic marker: if this moves where the player taps,
-                # gesture/Aim/placement worked and any bad movement is downstream.
-                "sindri.sprite": {"texture": "textures/beacon.png#south",
-                                  "tint": [1.0, 0.25, 0.25, 0.9], "billboard": True},
-            },
-        },
-        {
-            "id": "builder",
-            "name": "Builder",
-            "transform_3d": transform((0.0, 0.0, 0.0)),
-            "components": {
-                "sindri.script": {"source": "scripts/builder.decay", "script": "Builder",
-                                  "properties": {"stock": 12.0}},
-            },
-        },
-        {
-            "id": "music",
-            "name": "Music",
-            "transform_3d": transform((0.0, 0.0, 0.0)),
-            "components": {
-                "sindri.audio.source": {
-                    "autoplay": True, "clip": "audio/background.wav",
-                    "looping": True, "volume": 0.2,
-                },
-            },
-        },
-        {
-            "id": "title",
-            "name": "Title",
-            "transform_3d": transform((0.0, 0.0, 2.0)),
-            "components": {
-                "sindri.ui.text": {
-                    "anchor": "top_left", "color": [0.949, 0.722, 0.294, 1.0],
-                    "font": "fonts/Inter.ttf", "font_size": 0.0611,
-                    "layer": 101, "line_height": 0.0778, "text": "CAUSEWAY",
-                },
-            },
-        },
-        {
-            "id": "kind",
-            "name": "Kind",
-            "transform_3d": transform((0.0, 0.0, 2.0)),
-            "components": {
-                "sindri.ui.text": {
-                    "anchor": "top_left", "color": [0.875, 0.902, 0.949, 1.0],
-                    "font": "fonts/Inter.ttf", "font_size": 0.0407,
-                    "layer": 101, "line_height": 0.0519, "text": "planks",
-                },
-            },
-        },
-        {
-            "id": "play-debug",
-            "name": "PlayDebug",
-            "transform_3d": transform((0.0, -0.72, 2.0)),
-            "components": {
-                "sindri.ui.text": {
-                    "anchor": "center", "color": [1.0, 0.85, 0.35, 1.0],
-                    "font": "fonts/Inter.ttf", "font_size": 0.03,
-                    "layer": 160, "line_height": 0.04,
-                    "text": "tap {}  aim {}",
-                    "values": [0.0, 0.0],
-                },
-            },
-        },
-        {
-            "id": "stock",
-            "name": "Stock",
-            "transform_3d": transform((0.0, 0.0, 2.0)),
-            "components": {
-                "sindri.ui.text": {
-                    "anchor": "top_left", "color": [0.949, 0.722, 0.294, 1.0],
-                    "font": "fonts/Inter.ttf", "font_size": 0.0407,
-                    "layer": 101, "line_height": 0.0519, "text": "x {}",
-                    "values": [12.0],
-                },
-            },
-        },
-        {
-            # Which game you are playing at the moment. One entity so there is
-            # one answer, read by the camera, the builder and the walker.
-            "id": "modes",
-            "name": "Modes",
-            "transform_3d": transform((0.0, 0.0, 0.0)),
-            "components": {
-                "sindri.script": {"source": "scripts/modes.decay", "script": "Modes"},
-            },
-        },
-        {
-            # Switching modes without a keyboard, which is the only way to do
-            # it on the device this was hardest to play on.
-            "id": "mode-button",
-            "name": "ModeButton",
-            "transform_3d": transform((0.0, 0.86, 0.0), scale=(0.34, 0.1, 1.0)),
-            "components": {
-                "sindri.ui.button": {"label": "mode"},
-                "sindri.ui.shape": {
-                    "kind": "rect", "count": 6.0, "fill": [0.09, 0.11, 0.15, 0.94],
-                    "stroke": [0.949, 0.722, 0.294, 1.0], "stroke_width": 0.012,
-                    "corner_radius": 0.02, "dashes": 0.0, "dash_duty": 0.5,
-                    "sweep_start": 0.0, "sweep_turns": 1.0, "blend": "over",
-                    "anchor": "center", "layer": 110,
-                },
-                "sindri.script": {"source": "scripts/mode-button.decay",
-                                  "script": "ModeButton"},
-            },
-        },
-        {
-            "id": "mode-label",
-            "name": "ModeLabel",
-            "transform_3d": transform((0.0, 0.86, 0.0)),
-            "components": {
-                "sindri.ui.text": {
-                    "anchor": "center", "color": [0.949, 0.722, 0.294, 1.0],
-                    "font": "fonts/Inter.ttf", "font_size": 0.038,
-                    "layer": 140, "line_height": 0.045, "text": "BUILD",
-                },
-            },
-        },
-        {
-            "id": "hint",
-            "name": "Hint",
-            "transform_3d": transform((0.0, 0.0, 2.0)),
-            "components": {
-                "sindri.ui.text": {
-                    "anchor": "bottom_left", "color": [0.604, 0.651, 0.733, 1.0],
-                    "font": "fonts/Inter.ttf", "font_size": 0.0346,
-                    "layer": 101, "line_height": 0.0481,
-                    "text": "Tap a block's side to build from it. Hold to take one back. Drag to look. 1-2-3-4 to choose.",
-                },
-            },
-        },
-        {
-            "id": "hud",
-            "name": "Hud",
-            "transform_3d": transform((0.0, 0.0, 0.0)),
-            "components": {
-                "sindri.script": {"source": "scripts/hud.decay", "script": "Hud"},
-            },
-        },
-        {
-            "id": "world-camera",
-            "name": "World Camera",
-            "transform_3d": transform(eye, rotation),
-            "components": {
-                "sindri.camera": {
-                    "projection": "orthographic", "vertical_size": 22.0,
-                    "near": 0.1, "far": 600.0,
-                },
-                "sindri.script": {"source": "scripts/camera-follow.decay",
-                                  "script": "CameraFollow",
-                                  "properties": {"dead_zone": 1.25, "ease": 4.0,
-                                                 "height_dead_zone": 1.0}},
-            },
-        },
-    ]
 
 if __name__ == "__main__":
-    document = {"format_version": 9, "metadata": {"name": "Causeway"}, "entities": entities()}
-    pathlib.Path('game/assets/causeway.scene').write_text(
-        json.dumps(document, indent=2) + "\n")
-    print("wrote the level")
+    main()

@@ -58,6 +58,7 @@ pub(super) struct TickWorld<'a> {
     pub(super) gestures: Option<&'a sindri_core::Gestures>,
     /// How far this frame's drag asks the camera to move.
     pub(super) camera_pan: Option<[f32; 3]>,
+    pub(super) pointer_ray: Option<[[f32; 3]; 2]>,
     /// The run's random stream, when the host is running one.
     pub(super) random: Option<&'a mut sindri_core::Rng>,
     /// What the game remembers, when the host is keeping a save.
@@ -281,6 +282,7 @@ fn host_for<'b>(
             aim: at.aim,
             gestures: at.gestures,
             camera_pan: at.camera_pan,
+            pointer_ray: at.pointer_ray,
             // Reborrowed per tick like physics: one stream, shared by every
             // script in the pass, so a run's numbers are the run's.
             random: at.random.as_deref_mut(),

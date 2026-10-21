@@ -1,0 +1,79 @@
+// The small things that fly and float: damage numbers, bolts and stones.
+
+// A number that rises off whatever was hit and fades.
+script Popup {
+    var clock = Timer(0.0);
+    var origin: Vec3 = Vec3(0.0, 0.0, 0.0);
+    var live: bool = false;
+
+    fn show(x: number, y: number, z: number, text: String) {
+        origin = Vec3(x, y, z);
+        this.transform.position = origin;
+        Ui.set_text(this.entity, text);
+        this.world_text.color.a = 1.0;
+        clock = Timer(0.9);
+        live = true;
+    }
+
+    fn update(dt: number) {
+        if !live { return; }
+        let t = clock.progress;
+        this.transform.position = Vec3(origin.x, origin.y + t * 0.7, origin.z);
+        this.world_text.color.a = clamp(1.6 - t * 1.6, 0.0, 1.0);
+        if clock.done {
+            live = false;
+            World.set_active(this.entity, false);
+        }
+    }
+}
+
+// A bolt along a line or a stone on an arc.
+script Missile {
+    var clock = Timer(0.0);
+    var from: Vec3 = Vec3(0.0, 0.0, 0.0);
+    var to: Vec3 = Vec3(0.0, 0.0, 0.0);
+    var arc: number = 0.0;
+    var live: bool = false;
+
+    fn launch(start: Vec3, end: Vec3, seconds: number, height: number) {
+        from = start;
+        to = end;
+        arc = height;
+        clock = Timer(seconds);
+        live = true;
+        this.transform.position = start;
+    }
+
+    fn update(dt: number) {
+        if !live { return; }
+        let t = clock.progress;
+        var p = from.lerp(to, t);
+        p.y += sin(t * PI) * arc;
+        this.transform.position = p;
+        if clock.done {
+            live = false;
+            World.set_active(this.entity, false);
+        }
+    }
+}
+
+// A hit's spark: a star that opens over whatever was struck and is gone.
+script Spark {
+    var clock = Timer(0.0);
+    var live: bool = false;
+
+    fn show(at: Vec3) {
+        this.transform.position = at;
+        Animation.restart(this.entity);
+        Animation.play(this.entity, "burst");
+        clock = Timer(0.3);
+        live = true;
+    }
+
+    fn update(dt: number) {
+        if live && clock.done {
+            live = false;
+            World.set_active(this.entity, false);
+        }
+    }
+}

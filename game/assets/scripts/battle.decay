@@ -1,0 +1,1246 @@
+// The battle director: the one script that holds a battle and shows it.
+//
+// The rules live in `rules.decay` and never touch the world. This script owns
+// the `Board` they act on, turns what the player points at into calls on it,
+// and plays back the beats each call leaves so that every change is seen to
+// happen: a hop per cell walked, a flash per hit, a splash per Hollow the sea
+// takes. While beats play the board is already in its new state; the pictures
+// are catching up with it.
+//
+// Between battles it carries the run: which island, what the Hearth has left,
+// and what each warden has earned.
+
+// Where cell (0, 0) of the board is in the world. The island models are
+// built round the same point, by `tools/causeway_art.py`.
+shared const ORIGIN_X: number = 24.0;
+shared const ORIGIN_Z: number = 24.0;
+
+enum Phase { Title, Resolving, Player, Won, Upgrade, Lost, Crossed }
+// What happens once the beats being played have all been shown.
+enum After { Plan, Mark, Player, HollowDone, Nothing }
+enum Mode { Move, Aim }
+
+script Battle {
+    @export let bulwark: Prefab;
+    @export let mason: Prefab;
+    @export let lamplighter: Prefab;
+    @export let husk: Prefab;
+    @export let brute: Prefab;
+    @export let spitter: Prefab;
+    @export let mortar: Prefab;
+    @export let colossus: Prefab;
+    @export let house: Prefab;
+    @export let beacon: Prefab;
+    @export let stone: Prefab;
+    @export let mark: Prefab;
+    @export let label: Prefab;
+    @export let popup: Prefab;
+    @export let missile: Prefab;
+    @export let spark: Prefab;
+    // Seconds a beat of each kind is given before the next begins.
+    @export let step_seconds: number = 0.13;
+    @export let starting_hearth: number = 7.0;
+
+    var phase: Phase = Phase.Title;
+    var after: After = After.Nothing;
+    var sea: Entity = null;
+    var cursor: Entity = null;
+    var islands: List<Entity> = [];
+    var lantern: Entity = null;
+    var fire: Entity = null;
+
+    // The run.
+    var island: number = 0.0;
+    var hearth: number = 7.0;
+    var wardens: List<Warden> = [];
+    var rewinds: number = 1.0;
+
+    // The battle.
+    var def: IslandDef = island_def(0.0);
+    var board: Board = board_of(island_def(0.0), [], 0.0);
+    var turn_start: Board = board_of(island_def(0.0), [], 0.0);
+    var landing: List<number> = [];
+
+    // What the board looks like.
+    var pieces: Map<number, Entity> = [:];
+    var pips: Map<number, Entity> = [:];
+    var badges: Map<number, Entity> = [:];
+    var plan_marks: List<Entity> = [];
+    var threat_marks: List<Entity> = [];
+    var popups: List<Entity> = [];
+    var next_popup: number = 0.0;
+    var missiles: List<Entity> = [];
+    var next_missile: number = 0.0;
+    var sparks: List<Entity> = [];
+    var next_spark: number = 0.0;
+    var shown_tide: number = 0.0;
+    var tide_tween = Timer(0.0);
+    var tide_from: number = 0.0;
+
+    // Playing beats back.
+    var queue: List<Beat> = [];
+    var beat_index: number = 0.0;
+    var wait = Timer(0.0);
+
+    // The player's hand.
+    var selected: number = -1.0;
+    var mode: Mode = Mode.Move;
+    var cursor_x: number = 3.0;
+    var cursor_z: number = 3.0;
+    var hover_cell: number = -1.0;
+    var preview_cell: number = -2.0;
+    var banner_clock = Timer(0.0);
+
+    fn start() {
+        sea = World.find("Sea");
+        cursor = World.find("Cursor");
+        lantern = World.find("Lantern Light");
+        fire = World.find("Beacon Light");
+        for i in 0..ISLAND_COUNT {
+            islands.push(World.find("Island " + i));
+        }
+        for c in 0..(SIZE * SIZE) {
+            let plan = World.spawn(this.mark);
+            plan_marks.push(plan);
+            let threat = World.spawn(this.mark);
+            threat_marks.push(threat);
+            World.set_active(plan, false);
+            World.set_active(threat, false);
+        }
+        for i in 0..10 {
+            let p = World.spawn(this.popup);
+            World.set_active(p, false);
+            popups.push(p);
+        }
+        for i in 0..4 {
+            let m = World.spawn(this.missile);
+            World.set_active(m, false);
+            missiles.push(m);
+        }
+        for i in 0..6 {
+            let k = World.spawn(this.spark);
+            World.set_active(k, false);
+            sparks.push(k);
+        }
+        hearth = starting_hearth;
+        show_title();
+    }
+
+    // --- Where things are ---------------------------------------------------
+
+    fn world_x(x: number) -> number { return ORIGIN_X + x + 0.5; }
+    fn world_z(z: number) -> number { return ORIGIN_Z + z + 0.5; }
+    fn ground_y(x: number, z: number) -> number {
+        if !in_bounds(x, z) { return shown_tide; }
+        return max(height_at(board, x, z), shown_tide);
+    }
+    fn spot(x: number, z: number) -> Vec3 {
+        return Vec3(world_x(x), ground_y(x, z), world_z(z));
+    }
+
+    // --- The island --------------------------------------------------------
+
+    // Shows the island being played, and only that one.
+    fn show_island() {
+        for i in 0..islands.length {
+            if islands[i] != null {
+                World.set_active(islands[i], i == island);
+            }
+        }
+    }
+
+    fn floor_of(c: number) -> number { return floor(c / SIZE); }
+
+    // --- Pieces --------------------------------------------------------------
+
+    fn prefab_of(kind: Kind) -> Prefab {
+        return match kind {
+            Kind.Bulwark => this.bulwark,
+            Kind.Mason => this.mason,
+            Kind.Lamplighter => this.lamplighter,
+            Kind.Husk => this.husk,
+            Kind.Brute => this.brute,
+            Kind.Spitter => this.spitter,
+            Kind.Mortar => this.mortar,
+            Kind.Colossus => this.colossus,
+            Kind.House => this.house,
+            Kind.Beacon => this.beacon,
+            Kind.Stone => this.stone,
+        };
+    }
+
+    fn piece_of(id: number) -> Entity {
+        if pieces.contains(id) { return pieces[id]; }
+        return null;
+    }
+
+    fn spawn_piece(unit: Unit) -> Entity {
+        let piece = World.spawn(prefab_of(unit.kind));
+        let at = spot(unit.x, unit.z);
+        Piece.on(piece).place(at.x, at.y, at.z);
+        pieces[unit.id] = piece;
+        if !is_fixed(unit.kind) || is_building(unit.kind) || unit.kind == Kind.Colossus {
+            let pip = World.spawn(this.label);
+            pips[unit.id] = pip;
+        }
+        if is_hollow(unit.kind) {
+            let badge = World.spawn(this.label);
+            badges[unit.id] = badge;
+        }
+        if is_hollow(unit.kind) {
+            Piece.on(piece).face_now(3.0);
+        } else {
+            Piece.on(piece).face_now(1.0);
+        }
+        return piece;
+    }
+
+    fn remove_piece(id: number) {
+        if pieces.contains(id) {
+            World.despawn(pieces[id]);
+            pieces.remove(id);
+        }
+        if pips.contains(id) {
+            World.despawn(pips[id]);
+            pips.remove(id);
+        }
+        if badges.contains(id) {
+            World.despawn(badges[id]);
+            badges.remove(id);
+        }
+    }
+
+    fn clear_pieces() {
+        for id in pieces.keys() {
+            remove_piece(id);
+        }
+    }
+
+    // Makes every piece agree with the board: the fallen gone, the living
+    // where they stand, and their health and order shown.
+    fn sync_pieces() {
+        var living: List<number> = [];
+        for unit in board.units {
+            if unit.hp <= 0.0 { continue; }
+            living.push(unit.id);
+            var piece = piece_of(unit.id);
+            if piece == null {
+                piece = spawn_piece(unit);
+            }
+            let at = spot(unit.x, unit.z);
+            let p = piece.transform.position;
+            if abs(p.x - at.x) + abs(p.y - at.y) + abs(p.z - at.z) > 0.01 {
+                Piece.on(piece).place(at.x, at.y, at.z);
+            }
+            if is_hollow(unit.kind) && unit.dir >= 0.0 {
+                Piece.on(piece).face(unit.dir);
+            }
+        }
+        for id in pieces.keys() {
+            if !living.contains(id) {
+                remove_piece(id);
+            }
+        }
+        refresh_labels();
+    }
+
+    fn pip_text(unit: Unit) -> String {
+        var text = "[color=#ffd76a]";
+        for i in 0..unit.hp { text += "◆"; }
+        text += "[/color][color=#40343a]";
+        for i in unit.hp..unit.max_hp { text += "◆"; }
+        return text + "[/color]";
+    }
+
+    // Health over every piece that has some, and the order each Hollow
+    // strikes in.
+    fn refresh_labels() {
+        for unit in board.units {
+            if unit.hp <= 0.0 { continue; }
+            let piece = piece_of(unit.id);
+            if piece == null { continue; }
+            let p = piece.transform.position;
+            if pips.contains(unit.id) {
+                let pip = pips[unit.id];
+                Ui.set_text(pip, pip_text(unit));
+                pip.transform.position = Vec3(p.x, p.y + label_height(unit.kind), p.z);
+            }
+            if badges.contains(unit.id) {
+                let badge = badges[unit.id];
+                if unit.dir >= 0.0 {
+                    Ui.set_text(badge, "[color=#ff8a6a]" + unit.order + "[/color]");
+                } else {
+                    Ui.set_text(badge, "");
+                }
+                badge.transform.position = Vec3(p.x - 0.36, p.y + label_height(unit.kind) - 0.05, p.z + 0.36);
+            }
+        }
+    }
+
+    fn label_height(kind: Kind) -> number {
+        return match kind {
+            Kind.Colossus => 2.5,
+            Kind.Beacon => 2.3,
+            Kind.House => 1.55,
+            Kind.Brute => 1.5,
+            _ => 1.25,
+        };
+    }
+
+    // Keeps the labels over pieces that are moving.
+    fn follow_labels() {
+        for id in pips.keys() {
+            let piece = piece_of(id);
+            let index = unit_index(board, id);
+            if piece == null || index < 0.0 { continue; }
+            let p = piece.transform.position;
+            let pip = pips[id];
+            pip.transform.position = Vec3(p.x, p.y + label_height(board.units[index].kind), p.z);
+        }
+        for id in badges.keys() {
+            let piece = piece_of(id);
+            let index = unit_index(board, id);
+            if piece == null || index < 0.0 { continue; }
+            let p = piece.transform.position;
+            let badge = badges[id];
+            badge.transform.position = Vec3(p.x - 0.36, p.y + label_height(board.units[index].kind) - 0.05, p.z + 0.36);
+        }
+    }
+
+    // --- Marks on the ground -----------------------------------------------
+
+    fn set_mark(marks: List<Entity>, c: number, clip: String) {
+        let m = marks[c];
+        if clip == "" {
+            World.set_active(m, false);
+            return;
+        }
+        World.set_active(m, true);
+        let x = c % SIZE;
+        let z = floor_of(c);
+        var lift = 0.03;
+        if marks == threat_marks { lift = 0.05; }
+        m.transform.position = Vec3(world_x(x), ground_y(x, z) + lift, world_z(z));
+        Animation.play(m, clip);
+    }
+
+    // The Hollow's intents, the cells they will climb out on, and the cells
+    // the tide is about to cover, read from `shown` -- the real board, or a
+    // preview of what the player is about to do to it.
+    fn show_threats(shown: Board) {
+        var clips: List<String> = [];
+        for c in 0..(SIZE * SIZE) {
+            var clip = "";
+            let x = c % SIZE;
+            let z = floor_of(c);
+            if floods_next(shown, x, z) && !is_wet(shown, x, z) { clip = "tide"; }
+            clips.push(clip);
+        }
+        for s in shown.spawns {
+            clips[cell_of(s.x, s.z)] = "spawn";
+        }
+        for unit in shown.units {
+            if unit.hp <= 0.0 || !is_hollow(unit.kind) || unit.dir < 0.0 { continue; }
+            for c in strike_cells(shown, unit.kind, unit.x, unit.z, unit.dir, unit.reach, unit.id) {
+                clips[c] = "danger";
+            }
+        }
+        for c in 0..(SIZE * SIZE) {
+            set_mark(threat_marks, c, clips[c]);
+        }
+    }
+
+    fn clear_plan() {
+        for c in 0..(SIZE * SIZE) {
+            set_mark(plan_marks, c, "");
+        }
+    }
+
+    // What the selected warden can do, drawn on the ground.
+    fn show_plan() {
+        clear_plan();
+        if selected < 0.0 { return; }
+        let index = unit_index(board, selected);
+        if index < 0.0 { return; }
+        let unit = board.units[index];
+        if mode == Mode.Move && !unit.moved {
+            for c in reachable(board, index) {
+                set_mark(plan_marks, c, "move");
+            }
+        }
+        if mode == Mode.Aim && !unit.acted {
+            for c in skill_targets(board, index) {
+                set_mark(plan_marks, c, "aim");
+            }
+        }
+        set_mark(plan_marks, cell_of(unit.x, unit.z), "selected");
+    }
+
+    // --- Popups and missiles -------------------------------------------------
+
+    fn pop(x: number, y: number, z: number, text: String) {
+        let p = popups[next_popup];
+        next_popup = (next_popup + 1.0) % popups.length;
+        World.set_active(p, true);
+        Popup.on(p).show(x, y, z, text);
+    }
+
+    fn burst(at: Vec3) {
+        let k = sparks[next_spark];
+        next_spark = (next_spark + 1.0) % sparks.length;
+        World.set_active(k, true);
+        Spark.on(k).show(at);
+    }
+
+    fn fly(from: Vec3, to: Vec3, seconds: number, arc: number) {
+        let m = missiles[next_missile];
+        next_missile = (next_missile + 1.0) % missiles.length;
+        World.set_active(m, true);
+        Missile.on(m).launch(from, to, seconds, arc);
+    }
+
+    // --- Playing beats ----------------------------------------------------------
+
+    fn play(next: Board, then: After) {
+        queue = next.beats;
+        board = next;
+        board.beats.clear();
+        beat_index = 0.0;
+        wait = Timer(0.0);
+        after = then;
+        phase = Phase.Resolving;
+        clear_plan();
+    }
+
+    fn shake(amount: number) {
+        Camera.impact(amount);
+    }
+
+    fn show_beat(beat: Beat) -> number {
+        let piece = piece_of(beat.unit);
+        match beat.kind {
+            BeatKind.Walk => {
+                if piece != null {
+                    let at = spot(beat.x, beat.z);
+                    Piece.on(piece).hop(at.x, at.y, at.z, step_seconds);
+                }
+                Audio.play("audio/step.wav", 0.35);
+                return step_seconds;
+            }
+            BeatKind.Strike => {
+                if piece != null {
+                    Piece.on(piece).lunge(dir_towards(beat.x, beat.z, beat.tx, beat.tz), 0.26);
+                }
+                Audio.play("audio/swing.wav", 0.55);
+                return 0.16;
+            }
+            BeatKind.Bolt => {
+                let distance = steps_between(beat.x, beat.z, beat.tx, beat.tz);
+                let seconds = 0.05 + distance * 0.035;
+                if piece != null {
+                    Piece.on(piece).lunge(dir_towards(beat.x, beat.z, beat.tx, beat.tz), 0.22);
+                }
+                fly(spot(beat.x, beat.z) + Vec3(0.0, 0.6, 0.0), spot(beat.tx, beat.tz) + Vec3(0.0, 0.5, 0.0), seconds, 0.0);
+                Audio.play("audio/bolt.wav", 0.5);
+                return seconds;
+            }
+            BeatKind.Lob => {
+                if piece != null {
+                    Piece.on(piece).lunge(dir_towards(beat.x, beat.z, beat.tx, beat.tz), 0.3);
+                }
+                fly(spot(beat.x, beat.z) + Vec3(0.0, 0.7, 0.0), spot(beat.tx, beat.tz) + Vec3(0.0, 0.3, 0.0), 0.5, 2.2);
+                Audio.play("audio/heave.wav", 0.5);
+                return 0.5;
+            }
+            BeatKind.Hit => {
+                if piece != null {
+                    Piece.on(piece).hit();
+                    let p = piece.transform.position;
+                    pop(p.x, p.y + 1.3, p.z, "[color=#ffcf5a]-" + beat.amount + "[/color]");
+                    burst(Vec3(p.x, p.y + 0.55, p.z));
+                }
+                refresh_hit(beat.unit, beat.amount);
+                shake(0.25 + beat.amount * 0.15);
+                Audio.play("audio/hit.wav", 0.7);
+                return 0.16;
+            }
+            BeatKind.Push => {
+                if piece != null {
+                    var at = spot(beat.tx, beat.tz);
+                    if !in_bounds(beat.tx, beat.tz) {
+                        at = Vec3(world_x(beat.tx), shown_tide, world_z(beat.tz));
+                    }
+                    Piece.on(piece).slide(at.x, at.y, at.z, 0.16);
+                }
+                Audio.play("audio/shove.wav", 0.5);
+                return 0.17;
+            }
+            BeatKind.Bump => {
+                if piece != null {
+                    Piece.on(piece).nudge(dir_towards(beat.x, beat.z, beat.tx, beat.tz), 0.2);
+                }
+                shake(0.35);
+                Audio.play("audio/bump.wav", 0.6);
+                return 0.14;
+            }
+            BeatKind.Fall => {
+                shake(0.3);
+                Audio.play("audio/bump.wav", 0.45);
+                return 0.08;
+            }
+            BeatKind.Drown => {
+                if piece != null {
+                    Piece.on(piece).sink(0.6);
+                    let p = piece.transform.position;
+                    pop(p.x, p.y + 0.6, p.z, "[color=#8fd3ff]drowned[/color]");
+                }
+                hide_labels(beat.unit);
+                Audio.play("audio/splash.wav", 0.7);
+                return 0.4;
+            }
+            BeatKind.Die => {
+                if piece != null {
+                    Piece.on(piece).crumble(0.45);
+                }
+                hide_labels(beat.unit);
+                shake(0.4);
+                Audio.play("audio/crumble.wav", 0.6);
+                return 0.3;
+            }
+            BeatKind.Emerge => {
+                let index = unit_index(board, beat.unit);
+                if index >= 0.0 {
+                    let fresh = spawn_piece(board.units[index]);
+                    Piece.on(fresh).rise(0.4);
+                    refresh_labels();
+                }
+                Audio.play("audio/emerge.wav", 0.5);
+                return 0.3;
+            }
+            BeatKind.Smother => {
+                let at = spot(beat.x, beat.z);
+                pop(at.x, at.y + 0.9, at.z, "[color=#c9a0ff]blocked[/color]");
+                return 0.12;
+            }
+            BeatKind.Raise => {
+                let index = unit_index(board, beat.unit);
+                if index >= 0.0 {
+                    let fresh = spawn_piece(board.units[index]);
+                    Piece.on(fresh).rise(0.25);
+                }
+                shake(0.3);
+                Audio.play("audio/crumble.wav", 0.5);
+                return 0.2;
+            }
+            BeatKind.Tide => {
+                tide_from = shown_tide;
+                tide_tween = Timer(1.4);
+                banner("The tide rises", "Anything low is under water. Hollow in the sea are gone.");
+                Audio.play("audio/tide.wav", 0.7);
+                return 1.5;
+            }
+            BeatKind.Miss => {
+                let at = spot(beat.x, beat.z);
+                pop(at.x, at.y + 0.6, at.z, "[color=#c7c7c7]miss[/color]");
+                return 0.1;
+            }
+        }
+    }
+
+    fn hide_labels(id: number) {
+        if pips.contains(id) { Ui.set_text(pips[id], ""); }
+        if badges.contains(id) { Ui.set_text(badges[id], ""); }
+    }
+
+    // A hit's pips change as the hit lands, not when the turn is over.
+    fn refresh_hit(id: number, amount: number) {
+        if !pips.contains(id) { return; }
+        let index = unit_index(board, id);
+        if index < 0.0 { return; }
+        var shown = board.units[index];
+        Ui.set_text(pips[id], pip_text(shown));
+    }
+
+    fn advance_beats() {
+        follow_labels();
+        if !wait.done { return; }
+        if beat_index < queue.length {
+            let beat = queue[beat_index];
+            beat_index += 1.0;
+            wait = Timer(show_beat(beat));
+            return;
+        }
+        if !tide_tween.done { return; }
+        sync_pieces();
+        finish_beats();
+    }
+
+    fn finish_beats() {
+        let then = after;
+        after = After.Nothing;
+        match then {
+            After.Plan => {
+                // The Hollow move and choose their strikes.
+                play(plan_all(board), After.Mark);
+            }
+            After.Mark => {
+                board.arrivals = wave_of(def, board.round);
+                board = mark_spawns(board, landing);
+                board.beats.clear();
+                begin_player_turn();
+            }
+            After.Player => {
+                phase = Phase.Player;
+                if count_alive(board, false) == 0.0 && board.spawns.length == 0.0 {
+                    // Nothing left to fight this round.
+                }
+                show_threats(board);
+                show_plan();
+                update_hud();
+            }
+            After.HollowDone => {
+                end_round();
+            }
+            After.Nothing => {
+                phase = Phase.Player;
+                show_threats(board);
+                show_plan();
+            }
+        }
+    }
+
+    // --- The flow of a battle -----------------------------------------------------
+
+    fn roster() -> List<Warden> {
+        return [
+            Warden(kind: Kind.Bulwark, max_hp: kind_hp(Kind.Bulwark), move: kind_move(Kind.Bulwark), power: 0.0),
+            Warden(kind: Kind.Mason, max_hp: kind_hp(Kind.Mason), move: kind_move(Kind.Mason), power: 0.0),
+            Warden(kind: Kind.Lamplighter, max_hp: kind_hp(Kind.Lamplighter), move: kind_move(Kind.Lamplighter), power: 0.0),
+        ];
+    }
+
+    fn new_run() {
+        island = 0.0;
+        hearth = starting_hearth;
+        wardens = roster();
+        Random.seed(Save.number("seed", 1.0) * 7919.0 + 17.0);
+        Save.set_number("seed", Save.number("seed", 1.0) + 1.0);
+        begin_island();
+    }
+
+    fn begin_island() {
+        def = island_def(island);
+        landing = landing_of(def);
+        board = board_of(def, wardens, hearth);
+        rewinds = 1.0;
+        shown_tide = 0.0;
+        place_sea(0.0);
+        clear_pieces();
+        show_island();
+        sync_pieces();
+        hide_screens();
+        show_hud(true);
+        banner(def.name, def.blurb);
+        // The first Hollow climb out, then plan, before the wardens' first turn.
+        var first = mark_spawns(board, landing);
+        first = emerge(first);
+        play(first, After.Plan);
+    }
+
+    fn begin_player_turn() {
+        turn_start = board;
+        selected = -1.0;
+        mode = Mode.Move;
+        phase = Phase.Player;
+        select_next();
+        show_threats(board);
+        show_plan();
+        update_hud();
+    }
+
+    fn end_turn() {
+        if phase != Phase.Player { return; }
+        selected = -1.0;
+        clear_plan();
+        banner("The Hollow strike", "");
+        play(hollow_turn(board), After.HollowDone);
+    }
+
+    fn end_round() {
+        hearth = board.hearth;
+        if board.hearth <= 0.0 || count_alive(board, true) == 0.0 {
+            lose();
+            return;
+        }
+        board.round += 1.0;
+        if board.round > board.rounds {
+            win_island();
+            return;
+        }
+        board = new_turn(board);
+        sync_pieces();
+        play(plan_all(board), After.Mark);
+    }
+
+    fn rewind() {
+        if phase != Phase.Player || rewinds <= 0.0 { return; }
+        rewinds -= 1.0;
+        board = turn_start;
+        sync_pieces();
+        selected = -1.0;
+        select_next();
+        show_threats(board);
+        show_plan();
+        update_hud();
+        banner("Rewound", "The turn starts over. Once per island.");
+    }
+
+    // --- The player's hand ----------------------------------------------------------
+
+    fn select_next() {
+        var first = -1.0;
+        var after_current = -1.0;
+        var passed = selected < 0.0;
+        for unit in board.units {
+            if unit.hp <= 0.0 || !is_warden(unit.kind) || unit.acted { continue; }
+            if first < 0.0 { first = unit.id; }
+            if passed && after_current < 0.0 && unit.id != selected { after_current = unit.id; }
+            if unit.id == selected { passed = true; }
+        }
+        if after_current >= 0.0 { select(after_current); } else { select(first); }
+    }
+
+    fn select(id: number) {
+        selected = id;
+        mode = Mode.Move;
+        let index = unit_index(board, id);
+        if index >= 0.0 {
+            let unit = board.units[index];
+            if unit.moved { mode = Mode.Aim; }
+            cursor_x = unit.x;
+            cursor_z = unit.z;
+        }
+        preview_cell = -2.0;
+        show_plan();
+        update_hud();
+    }
+
+    // Whatever the player pointed at and confirmed.
+    fn press(x: number, z: number) {
+        if !in_bounds(x, z) { return; }
+        let at = unit_at(board, x, z);
+        if at >= 0.0 {
+            let unit = board.units[at];
+            if is_warden(unit.kind) && !unit.acted && unit.id != selected
+                && !(mode == Mode.Aim && selected_targets().contains(cell_of(x, z))) {
+                select(unit.id);
+                Audio.play("audio/select.wav", 0.4);
+                return;
+            }
+        }
+        if selected < 0.0 { return; }
+        let index = unit_index(board, selected);
+        if index < 0.0 { return; }
+        let unit = board.units[index];
+        if mode == Mode.Move {
+            if x == unit.x && z == unit.z {
+                mode = Mode.Aim;
+                show_plan();
+                update_hud();
+                return;
+            }
+            if reachable(board, index).contains(cell_of(x, z)) {
+                var moved = move_warden(board, index, x, z);
+                play(moved, After.Nothing);
+                mode = Mode.Aim;
+                return;
+            }
+            return;
+        }
+        if selected_targets().contains(cell_of(x, z)) {
+            let used = use_skill(board, index, x, z);
+            selected_after_act();
+            play(used, After.Nothing);
+            return;
+        }
+        if x == unit.x && z == unit.z && !unit.moved {
+            mode = Mode.Move;
+            show_plan();
+            update_hud();
+        }
+    }
+
+    // Once a warden has acted, the next one that can is taken up.
+    fn selected_after_act() {
+        let was = selected;
+        selected = -1.0;
+        for unit in board.units {
+            if unit.hp > 0.0 && is_warden(unit.kind) && !unit.acted && unit.id != was {
+                selected = unit.id;
+                break;
+            }
+        }
+        mode = Mode.Move;
+    }
+
+    fn selected_targets() -> List<number> {
+        var none: List<number> = [];
+        if selected < 0.0 { return none; }
+        let index = unit_index(board, selected);
+        if index < 0.0 { return none; }
+        return skill_targets(board, index);
+    }
+
+    fn cancel() {
+        if selected < 0.0 { return; }
+        let index = unit_index(board, selected);
+        if index < 0.0 { return; }
+        let unit = board.units[index];
+        if mode == Mode.Aim && unit.moved && !unit.acted {
+            board = undo_move(board, index);
+            sync_pieces();
+            mode = Mode.Move;
+            Audio.play("audio/select.wav", 0.3);
+        } else if mode == Mode.Aim {
+            mode = Mode.Move;
+        } else {
+            selected = -1.0;
+        }
+        show_plan();
+        show_threats(board);
+        update_hud();
+    }
+
+    fn undo() {
+        if selected < 0.0 { return; }
+        let index = unit_index(board, selected);
+        if index < 0.0 { return; }
+        board = undo_move(board, index);
+        sync_pieces();
+        mode = Mode.Move;
+        show_plan();
+        show_threats(board);
+        update_hud();
+    }
+
+    // The cell under the pointer, or -1: the camera's ray through the
+    // pointer, tested against every figure standing on the board and then
+    // against the top of every cell, nearest first. A figure is in front of
+    // the ground it stands on, so pointing at a figure picks its cell.
+    fn pointed_cell() -> number {
+        if Pointer.over_ui { return -1.0; }
+        let o = Pointer.ray_origin;
+        let d = Pointer.ray_direction;
+        if d.length < 0.5 || abs(d.y) < 0.0001 { return -1.0; }
+        var best = -1.0;
+        var nearest = 1000000.0;
+        let flat = d.x * d.x + d.z * d.z;
+        for unit in board.units {
+            if unit.hp <= 0.0 { continue; }
+            let base = spot(unit.x, unit.z);
+            if flat < 0.000001 { continue; }
+            let t = ((base.x - o.x) * d.x + (base.z - o.z) * d.z) / flat;
+            let px = o.x + d.x * t - base.x;
+            let pz = o.z + d.z * t - base.z;
+            let py = o.y + d.y * t - base.y;
+            if px * px + pz * pz < 0.36 * 0.36 && py > 0.0 && py < figure_height(unit.kind) && t < nearest {
+                nearest = t;
+                best = cell_of(unit.x, unit.z);
+            }
+        }
+        for c in 0..(SIZE * SIZE) {
+            let x = c % SIZE;
+            let z = floor_of(c);
+            let top = ground_y(x, z);
+            let t = (top - o.y) / d.y;
+            if t <= 0.0 || t >= nearest { continue; }
+            let px = o.x + d.x * t - ORIGIN_X - x;
+            let pz = o.z + d.z * t - ORIGIN_Z - z;
+            if px >= 0.0 && px < 1.0 && pz >= 0.0 && pz < 1.0 {
+                nearest = t;
+                best = c;
+            }
+        }
+        return best;
+    }
+
+    fn figure_height(kind: Kind) -> number {
+        return match kind {
+            Kind.Colossus => 2.0,
+            Kind.Beacon => 1.6,
+            Kind.House => 1.0,
+            Kind.Stone => 0.7,
+            _ => 1.2,
+        };
+    }
+
+    fn handle_input() {
+        // Keys move a cursor over the board, a quarter turn apart.
+        var moved_cursor = false;
+        if Input.Keyboard.just_pressed("ArrowUp") || Input.Keyboard.just_pressed("W") { cursor_z -= 1.0; moved_cursor = true; }
+        if Input.Keyboard.just_pressed("ArrowDown") || Input.Keyboard.just_pressed("S") { cursor_z += 1.0; moved_cursor = true; }
+        if Input.Keyboard.just_pressed("ArrowLeft") || Input.Keyboard.just_pressed("A") { cursor_x -= 1.0; moved_cursor = true; }
+        if Input.Keyboard.just_pressed("ArrowRight") || Input.Keyboard.just_pressed("D") { cursor_x += 1.0; moved_cursor = true; }
+        cursor_x = clamp(cursor_x, 0.0, SIZE - 1.0);
+        cursor_z = clamp(cursor_z, 0.0, SIZE - 1.0);
+
+        let pointed = pointed_cell();
+        if pointed >= 0.0 && Pointer.delta.length > 0.0 {
+            cursor_x = pointed % SIZE;
+            cursor_z = floor_of(pointed);
+        }
+        hover_cell = cell_of(cursor_x, cursor_z);
+        show_cursor();
+        update_preview();
+
+        if Gesture.tapped && !Pointer.over_ui {
+            if pointed >= 0.0 {
+                cursor_x = pointed % SIZE;
+                cursor_z = floor_of(pointed);
+                press(cursor_x, cursor_z);
+            }
+            return;
+        }
+        if Input.Keyboard.just_pressed("Enter") || Input.Keyboard.just_pressed("Space") {
+            press(cursor_x, cursor_z);
+            return;
+        }
+        if Input.Keyboard.just_pressed("Tab") {
+            select_next();
+            Audio.play("audio/select.wav", 0.3);
+        }
+        if Input.Keyboard.just_pressed("Escape") || Pointer.just_pressed("Right") {
+            cancel();
+        }
+        if Input.Keyboard.just_pressed("Z") || Input.Keyboard.just_pressed("Backspace") {
+            undo();
+        }
+        if Input.Keyboard.just_pressed("E") { end_turn(); }
+        if Input.Keyboard.just_pressed("R") { rewind(); }
+        let end_button = World.find("EndTurn");
+        if end_button != null && Ui.is_pressed(end_button) { end_turn(); }
+        let undo_button = World.find("UndoMove");
+        if undo_button != null && Ui.is_pressed(undo_button) { undo(); }
+        let rewind_button = World.find("Rewind");
+        if rewind_button != null && Ui.is_pressed(rewind_button) { rewind(); }
+    }
+
+    fn show_cursor() {
+        if cursor == null { return; }
+        if hover_cell < 0.0 {
+            World.set_active(cursor, false);
+            return;
+        }
+        World.set_active(cursor, true);
+        let x = hover_cell % SIZE;
+        let z = floor_of(hover_cell);
+        cursor.transform.position = Vec3(world_x(x), ground_y(x, z) + 0.07, world_z(z));
+    }
+
+    // While a target is under the cursor, the ground shows what would happen:
+    // the Hollow's strikes as they would be after it, which is how a shove that
+    // turns one Hollow's strike onto another is seen before it is made.
+    fn update_preview() {
+        var wanted = -1.0;
+        if mode == Mode.Aim && selected >= 0.0 && selected_targets().contains(hover_cell) {
+            wanted = hover_cell;
+        }
+        if wanted == preview_cell { return; }
+        preview_cell = wanted;
+        if wanted < 0.0 {
+            show_threats(board);
+            update_hud();
+            return;
+        }
+        let index = unit_index(board, selected);
+        let preview = use_skill(board, index, wanted % SIZE, floor_of(wanted));
+        show_threats(preview);
+        var harm = "";
+        for beat in preview.beats {
+            if beat.kind == BeatKind.Hit {
+                let hit = unit_index(preview, beat.unit);
+                if hit >= 0.0 {
+                    harm += kind_name(preview.units[hit].kind) + " -" + beat.amount + "  ";
+                }
+            }
+            if beat.kind == BeatKind.Drown { harm += "drowns  "; }
+            if beat.kind == BeatKind.Raise { harm += "a stone rises  "; }
+        }
+        if harm == "" { harm = "No effect."; }
+        set_text("Preview", harm);
+    }
+
+    // --- Winning, losing and the run ----------------------------------------------
+
+    fn win_island() {
+        phase = Phase.Won;
+        clear_plan();
+        show_threats(new_turn(board));
+        for c in 0..(SIZE * SIZE) { set_mark(threat_marks, c, ""); }
+        hearth = board.hearth;
+        island += 1.0;
+        Audio.play("audio/victory.wav", 0.8);
+        if island >= ISLAND_COUNT {
+            phase = Phase.Crossed;
+            show_screen("Crossed", true);
+            set_text("CrossedText", "The causeway is closed behind you and the lamp is lit. Hearth left: " + hearth + ".");
+            Save.set_number("crossings", Save.number("crossings", 0.0) + 1.0);
+            return;
+        }
+        show_screen("Held", true);
+        set_text("HeldTitle", def.name + " holds");
+        set_text("HeldText", "High tide. The causeway is under water and the Hollow turn back. Hearth: " + hearth + ".");
+    }
+
+    fn lose() {
+        phase = Phase.Lost;
+        clear_plan();
+        show_screen("Fallen", true);
+        if board.hearth <= 0.0 {
+            set_text("FallenText", "The Hearth went out on " + def.name + ".");
+        } else {
+            set_text("FallenText", "The last warden fell on " + def.name + ".");
+        }
+        Audio.play("audio/defeat.wav", 0.8);
+    }
+
+    // The three boons on offer after an island, one per warden.
+    fn take_boon(which: number) {
+        if which == 0.0 {
+            var w = wardens[0];
+            w.max_hp += 1.0;
+            wardens[0] = w;
+        } else if which == 1.0 {
+            var w = wardens[1];
+            w.power += 1.0;
+            wardens[1] = w;
+        } else if which == 2.0 {
+            var w = wardens[2];
+            w.move += 1.0;
+            wardens[2] = w;
+        } else {
+            hearth = min(hearth + 2.0, starting_hearth);
+        }
+        Audio.play("audio/boon.wav", 0.6);
+        begin_island();
+    }
+
+    // --- Screens --------------------------------------------------------------------
+
+    fn show_title() {
+        phase = Phase.Title;
+        hide_screens();
+        show_screen("Title", true);
+        if Save.number("crossings", 0.0) > 0.0 {
+            set_text("TitleRecord", "Crossings made: " + Save.number("crossings", 0.0));
+        } else {
+            set_text("TitleRecord", "");
+        }
+        // A quiet island behind the title.
+        def = island_def(0.0);
+        board = board_of(def, roster(), starting_hearth);
+        shown_tide = 0.0;
+        place_sea(0.0);
+        clear_pieces();
+        show_island();
+        sync_pieces();
+        clear_plan();
+        for c in 0..(SIZE * SIZE) { set_mark(threat_marks, c, ""); }
+        update_hud();
+    }
+
+    fn hide_screens() {
+        for name in ["Title", "Held", "Upgrade", "Fallen", "Crossed"] {
+            show_screen(name, false);
+        }
+    }
+
+    fn show_screen(name: String, on: bool) {
+        let screen = World.find(name);
+        if screen != null { World.set_active(screen, on); }
+        // The HUD is for a battle in progress; any screen over it hides it.
+        if on { show_hud(false); }
+    }
+
+    fn show_hud(on: bool) {
+        let hud = World.find("Hud");
+        if hud != null { World.set_active(hud, on); }
+        if !on {
+            let b = World.find("Banner");
+            if b != null { World.set_active(b, false); }
+        }
+    }
+
+    fn set_text(name: String, text: String) {
+        let e = World.find(name);
+        if e != null { Ui.set_text(e, text); }
+    }
+
+    fn pressed(name: String) -> bool {
+        let e = World.find(name);
+        return e != null && World.is_active(e) && Ui.is_pressed(e);
+    }
+
+    fn banner(title: String, sub: String) {
+        set_text("BannerTitle", title);
+        set_text("BannerText", sub);
+        let b = World.find("Banner");
+        if b != null { World.set_active(b, true); }
+        banner_clock = Timer(2.2);
+    }
+
+    fn update_banner() {
+        let b = World.find("Banner");
+        if b == null { return; }
+        if banner_clock.done && World.is_active(b) {
+            World.set_active(b, false);
+        }
+    }
+
+    fn update_hud() {
+        set_text("IslandName", def.name);
+        set_text("RoundText", "Round " + min(board.round, board.rounds) + " of " + board.rounds);
+        var tide = "Tide " + board.tide;
+        if rises_this_round(board) {
+            tide += "  —  rising after this round";
+        } else {
+            tide += "  —  steady this round";
+        }
+        set_text("TideText", tide);
+        var hearth_pips = "[color=#ffb347]";
+        for i in 0..board.hearth { hearth_pips += "◆"; }
+        hearth_pips += "[/color][color=#4a3b33]";
+        for i in board.hearth..starting_hearth { hearth_pips += "◆"; }
+        set_text("HearthPips", hearth_pips + "[/color]");
+        set_text("RewindLabel", "Rewind (" + rewinds + ")");
+        set_text("Preview", "");
+        if selected >= 0.0 {
+            let index = unit_index(board, selected);
+            if index >= 0.0 {
+                let unit = board.units[index];
+                set_text("UnitName", kind_name(unit.kind));
+                set_text("UnitStats", pip_text(unit) + "   Move " + unit.move);
+                set_text("SkillName", skill_name(unit.kind));
+                set_text("SkillText", skill_text(unit.kind));
+                if unit.acted {
+                    set_text("UnitHint", "Done for this turn.");
+                } else if mode == Mode.Move {
+                    set_text("UnitHint", "Choose where to move, or click the warden to act from here.");
+                } else {
+                    set_text("UnitHint", "Choose a target. Esc takes the move back.");
+                }
+                return;
+            }
+        }
+        set_text("UnitName", "");
+        set_text("UnitStats", "");
+        set_text("SkillName", "");
+        set_text("SkillText", "");
+        if phase == Phase.Player && all_spent(board) {
+            set_text("UnitHint", "Every warden has acted. End the turn.");
+        } else {
+            set_text("UnitHint", "");
+        }
+    }
+
+    // --- The sea -------------------------------------------------------------------
+
+    fn place_sea(level: number) {
+        if sea == null { return; }
+        sea.transform.position.y = level + 0.08;
+    }
+
+    fn update_sea() {
+        if tide_tween.done {
+            if shown_tide != board.tide {
+                shown_tide = board.tide;
+                place_sea(shown_tide);
+            }
+            return;
+        }
+        let t = tide_tween.progress;
+        let eased = t * t * (3.0 - 2.0 * t);
+        shown_tide = tide_from + (board.tide - tide_from) * eased;
+        place_sea(shown_tide);
+    }
+
+    // --- Every frame --------------------------------------------------------------------
+
+    // The lamplighter's lantern and the beacon's fire light what is round
+    // them, wherever they are.
+    fn update_lights() {
+        var lamp_on = false;
+        var fire_on = false;
+        for unit in board.units {
+            if unit.hp <= 0.0 { continue; }
+            let piece = piece_of(unit.id);
+            if piece == null { continue; }
+            let p = piece.transform.position;
+            if unit.kind == Kind.Lamplighter && lantern != null {
+                lantern.transform.position = Vec3(p.x + 0.2, p.y + 1.4, p.z + 0.2);
+                lamp_on = true;
+            }
+            if unit.kind == Kind.Beacon && fire != null {
+                fire.transform.position = Vec3(p.x, p.y + 1.6, p.z);
+                fire_on = true;
+            }
+        }
+        if lantern != null { World.set_active(lantern, lamp_on); }
+        if fire != null { World.set_active(fire, fire_on); }
+    }
+
+    fn update(dt: number) {
+        update_banner();
+        update_sea();
+        update_lights();
+        match phase {
+            Phase.Title => {
+                if pressed("BeginButton") || Input.Keyboard.just_pressed("Enter") {
+                    Audio.play("audio/boon.wav", 0.6);
+                    new_run();
+                }
+            }
+            Phase.Resolving => { advance_beats(); }
+            Phase.Player => {
+                handle_input();
+            }
+            Phase.Won => {
+                if pressed("HeldButton") || Input.Keyboard.just_pressed("Enter") {
+                    show_screen("Held", false);
+                    phase = Phase.Upgrade;
+                    show_screen("Upgrade", true);
+                }
+            }
+            Phase.Upgrade => {
+                for i in 0..4 {
+                    if pressed("Boon" + i) || Input.Keyboard.just_pressed("Digit" + (i + 1.0)) {
+                        show_screen("Upgrade", false);
+                        take_boon(i);
+                        return;
+                    }
+                }
+            }
+            Phase.Lost | Phase.Crossed => {
+                if pressed("FallenButton") || pressed("CrossedButton") || Input.Keyboard.just_pressed("Enter") {
+                    show_title();
+                }
+            }
+        }
+        Game.set("phase", phase_number());
+        Game.set("round", board.round);
+        Game.set("hearth", board.hearth);
+        Game.set("island", island);
+    }
+
+    fn phase_number() -> number {
+        return match phase {
+            Phase.Title => 0.0,
+            Phase.Resolving => 1.0,
+            Phase.Player => 2.0,
+            Phase.Won => 3.0,
+            Phase.Upgrade => 4.0,
+            Phase.Lost => 5.0,
+            Phase.Crossed => 6.0,
+        };
+    }
+}
