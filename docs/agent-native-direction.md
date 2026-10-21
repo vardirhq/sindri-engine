@@ -2,7 +2,7 @@
 
 **Status:** Accepted direction  
 **Scope:** How Sindri supports AI coding agents: external ones (Claude Code, Codex, and whatever follows them) and its own local one  
-**Last updated:** 2026-10-07
+**Last updated:** 2026-10-21
 
 ## The decision
 
@@ -215,7 +215,8 @@ cannot be done safely says what it needs rather than guessing.
 
 - **A mutation CLI or MCP tool set.** `sindri scene edit --ops` in
   `cli-conventions.md` remains the agreed shape if one is ever needed, but it is
-  not built ahead of evidence.
+  not built ahead of evidence. The read-only adapter below is a different thing:
+  it changes how an agent reaches the checks, not how it changes a project.
 - **A live editor bridge.** Unity shipped an MCP server inside its editor and
   then deprecated it in favor of its CLI. Reading live state is the one thing
   files cannot give, and headless play covers most of it. Revisit only if the
@@ -230,6 +231,33 @@ slices. A few narrow commands — painting a tilemap region, setting a rotation
 from Euler angles — may earn their place. Add each one when the benchmark shows
 agents failing at that edit, not before.
 
+## MCP as an adapter, not an interface
+
+The files remain the interface, but running a check needs a shell, and not
+every agent has one. Chat and IDE agents often reach tools only through MCP;
+`AGENTS.md` already allows for agents that edit this repository without a
+shell. For them `sindri project check` and `sindri play --headless` do not
+exist, and the foundation is reduced to its docs.
+
+So once those commands exist, a thin MCP server may expose them:
+
+- `project_check`, returning the command's JSON unchanged;
+- `play_headless`, returning its per-frame log and any captured frames as
+  images, which MCP carries inline rather than as files an agent must find;
+- the generated documents in `docs/generated/` and the project's agent guide,
+  as resources.
+
+The rules that keep it honest:
+
+- **Read-only.** It runs checks and reports results. It never writes a project
+  file; an agent still changes a project by editing its files.
+- **A caller of the CLI, not a second implementation.** Each tool invokes the
+  command and passes its JSON through, so the CLI's JSON stays the one contract
+  (see [`cli-conventions.md`](cli-conventions.md)) and the two cannot drift.
+- **Built on evidence.** The benchmark below runs agents with and without a
+  shell. The adapter is built when the agents without one fall measurably
+  behind, and its value is judged by whether it closes that gap.
+
 ## Measuring it
 
 "Agent-native" is a claim, so it gets a test. `tools/ai-authoring-eval`
@@ -238,6 +266,8 @@ gives an unmodified external agent a fresh project and a fixed task — "make th
 player dash on Shift with a cooldown", "add a coin that plays a sound when
 collected" — and grades the result with `sindri project check` and a headless
 run. The pass rate, per agent, is the number that decides what to build next.
+Each agent runs both with a shell and with file access only, so the benchmark
+also shows whether the MCP adapter above is worth building.
 
 ## Order of work
 
@@ -248,6 +278,8 @@ run. The pass rate, per agent, is the number that decides what to build next.
 4. The editor reloads a scene changed on disk.
 5. A per-project agent guide written by `sindri new`, packaged as a skill.
 6. The external-agent benchmark, after which its failures order the rest.
+   Among the candidates it decides: the read-only MCP adapter, if agents
+   without a shell fall behind.
 7. The local agent on the same checks: writing one script from a description,
    then selected-entity edits through the proposal protocol, then explaining a
    check failure. The benchmark gains a local-model column for the tasks the
