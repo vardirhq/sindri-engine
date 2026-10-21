@@ -136,12 +136,46 @@ impl Game {
         f32::from(digit)
     }
 
+    /// A neighbour of `from` that nothing stands on and that is at most a
+    /// step up or down from it.
+    pub fn free_step_from(&self, from: (i32, i32)) -> (i32, i32) {
+        let taken: Vec<(i32, i32)> = self
+            .run
+            .world
+            .entities()
+            .filter(|(entity, data)| {
+                self.run.world.is_active(*entity)
+                    && data.components.contains_key(ModelComponent::TYPE_NAME)
+                    && data.transform_3d.is_some_and(|t| t.scale[1] > 0.1)
+            })
+            .map(|(entity, _)| self.cell_of(entity))
+            .collect();
+        [(0, -1), (1, 0), (0, 1), (-1, 0)]
+            .into_iter()
+            .map(|(dx, dz)| (from.0 + dx, from.1 + dz))
+            .find(|&cell| {
+                (0..8).contains(&cell.0)
+                    && (0..8).contains(&cell.1)
+                    && !taken.contains(&cell)
+                    && (self.top_of(cell) - self.top_of(from)).abs() <= 1.0
+            })
+            .expect("the Bulwark has somewhere to step")
+    }
+
     /// A click on the middle of a cell, pressed and released as a host
     /// delivers one.
     pub fn click_cell(&mut self, cell: (i32, i32)) {
         let [x, y] = self.pixel_of(cell, self.top_of(cell));
         self.run.input.apply(InputEvent::PointerMoved { x, y });
         self.step();
+        let expected = cell.1 * 8 + cell.0;
+        #[allow(clippy::cast_precision_loss)]
+        let expected = expected as f32;
+        assert_eq!(
+            self.board("pointed"),
+            expected,
+            "the pointer at ({x:.0}, {y:.0}) should be over cell {cell:?}"
+        );
         self.run
             .input
             .apply(InputEvent::ButtonPressed(MouseButton::Left));

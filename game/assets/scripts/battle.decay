@@ -743,17 +743,22 @@ script Battle {
         if index < 0.0 { return; }
         let unit = board.units[index];
         if mode == Mode.Move {
+            // Its own cell is where it already is: nothing to do.
             if x == unit.x && z == unit.z {
-                mode = Mode.Aim;
-                show_plan();
-                update_hud();
                 return;
             }
-            if reachable(board, index).contains(cell_of(x, z)) {
+            if !unit.moved && reachable(board, index).contains(cell_of(x, z)) {
                 var moved = move_warden(board, index, x, z);
                 play(moved, After.Nothing);
                 mode = Mode.Aim;
                 return;
+            }
+            // A cell it cannot walk to but can strike: strike from here,
+            // which is how a warden acts without moving.
+            if selected_targets().contains(cell_of(x, z)) {
+                let used = use_skill(board, index, x, z);
+                selected_after_act();
+                play(used, After.Nothing);
             }
             return;
         }
@@ -789,6 +794,20 @@ script Battle {
         let index = unit_index(board, selected);
         if index < 0.0 { return none; }
         return skill_targets(board, index);
+    }
+
+    fn toggle_aim() {
+        if selected < 0.0 { return; }
+        let index = unit_index(board, selected);
+        if index < 0.0 || board.units[index].acted { return; }
+        if mode == Mode.Move {
+            mode = Mode.Aim;
+        } else if !board.units[index].moved {
+            mode = Mode.Move;
+        }
+        preview_cell = -2.0;
+        show_plan();
+        update_hud();
     }
 
     fn cancel() {
@@ -885,6 +904,9 @@ script Battle {
         cursor_z = clamp(cursor_z, 0.0, SIZE - 1.0);
 
         let pointed = pointed_cell();
+        // What the pointer is over, for anybody asking: the tests, and a
+        // tutorial one day.
+        Game.set("pointed", pointed);
         if pointed >= 0.0 && Pointer.delta.length > 0.0 {
             cursor_x = pointed % SIZE;
             cursor_z = floor_of(pointed);
@@ -916,6 +938,8 @@ script Battle {
             undo();
         }
         if Input.Keyboard.just_pressed("E") { end_turn(); }
+        // Aim from where the warden stands, or back to walking.
+        if Input.Keyboard.just_pressed("Q") || pressed("SkillName") { toggle_aim(); }
         if Input.Keyboard.just_pressed("R") { rewind(); }
         let end_button = World.find("EndTurn");
         if end_button != null && Ui.is_pressed(end_button) { end_turn(); }
@@ -1125,7 +1149,7 @@ script Battle {
                 if unit.acted {
                     set_text("UnitHint", "Done for this turn.");
                 } else if mode == Mode.Move {
-                    set_text("UnitHint", "Choose where to move, or click the warden to act from here.");
+                    set_text("UnitHint", "Choose where to move, or strike from here: Q shows the targets.");
                 } else {
                     set_text("UnitHint", "Choose a target. Esc takes the move back.");
                 }

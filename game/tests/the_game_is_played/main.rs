@@ -35,9 +35,9 @@ fn clicking_a_warden_and_then_the_ground_walks_it_there() {
     game.tap_key(Key::Enter);
     game.until_players_turn();
     let start = game.cell_of(game.pieces("bulwark")[0]);
-    // Two cells along a row the Bulwark can reach on Saltmarsh: west of it is
-    // open grass at its own height.
-    let goal = (start.0 - 2, start.1);
+    // Wherever the Hollow happened to climb out, a free neighbour within a
+    // step of the Bulwark's height is somewhere it can walk.
+    let goal = game.free_step_from(start);
     game.click_cell(start);
     game.click_cell(goal);
     game.until_players_turn();
