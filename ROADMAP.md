@@ -817,7 +817,9 @@ Two agents stand on one foundation: external coding agents for people who use
 one, and a narrow local agent in the editor for people who do not. The
 foundation is docs an agent can trust, checks it can run, and a way to see the
 result. The files are the interface, so there is no mutation CLI or MCP tool
-set ahead of evidence. See `docs/agent-native-direction.md`.
+set ahead of evidence; a read-only MCP adapter over the checks is built only if
+the benchmark shows agents without a shell falling behind. See
+`docs/agent-native-direction.md`.
 
 - [ ] `sindri project check --format json` over scenes, prefabs, Weave, Decay and `sindri.toml`, with diagnostics raised by the crate that found them, naming the file and the JSON path or source span. `SceneDocument::validate`, `ComponentSchemaRegistry::validate_scene` and `decay-lsp --check --json` already exist and are the parts it composes
 - [ ] Generate JSON Schemas for `.scene` and `.prefab` files from the component registry into `docs/generated/`, carrying the format version they describe
@@ -825,7 +827,8 @@ set ahead of evidence. See `docs/agent-native-direction.md`.
 - [ ] `sindri play --headless` with a structured per-frame log, scripted input and frame capture, generalizing the games' existing scripted-run tests and `*-capture` binaries
 - [ ] The editor reloads a scene changed on disk when it has no unsaved edits, and asks when it has; scripts, textures, prefabs and Weave styles are already watched
 - [ ] `sindri new` writes a short per-project agent guide pointing at the workflow and generated documents, also packaged as a skill for agents that load them
-- [ ] An external-agent benchmark in `tools/ai-authoring-eval`: unmodified agents given a fresh project and fixed tasks, graded by `sindri project check` and a headless run, with the pass rate per agent recorded
+- [ ] An external-agent benchmark in `tools/ai-authoring-eval`: unmodified agents given a fresh project and fixed tasks, graded by `sindri project check` and a headless run, with the pass rate per agent recorded, each agent run both with a shell and with file access only
+- [ ] If agents without a shell fall behind in the benchmark: a read-only MCP adapter exposing `sindri project check`, `sindri play --headless` (log and captured frames) and the generated documents, calling the CLI and passing its JSON through, never writing project files
 - [ ] Local agent: write one Decay script from a description, through the same draft, check and bounded-repair loop as Decay repair, shown as a diff and applied on acceptance
 - [ ] Local agent: add or change components on the selected entity through the proposal protocol, validated by the same scene checks as `sindri project check`, applied as one undo step
 - [ ] Local agent: explain a `sindri project check` failure in the editor
