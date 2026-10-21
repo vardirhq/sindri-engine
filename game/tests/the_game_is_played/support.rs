@@ -14,16 +14,24 @@ pub const PLAYER: f32 = 2.0;
 /// Where cell (0, 0) of the board is in the world; `battle.decay` says the same.
 const ORIGIN: f32 = 24.0;
 
+/// A phone held upright.
+pub const PHONE: [f32; 2] = [390.0, 844.0];
+
 pub struct Game {
     run: ProjectRun,
+    size: [f32; 2],
 }
 
 impl Game {
     pub fn open() -> Self {
-        let mut run = ProjectRun::open(&sindri_causeway::project_dir(), SIZE)
+        Self::open_at(SIZE)
+    }
+
+    pub fn open_at(size: [f32; 2]) -> Self {
+        let mut run = ProjectRun::open(&sindri_causeway::project_dir(), size)
             .expect("the game opens from its folder");
         run.step(STEP).expect("the first step runs");
-        Self { run }
+        Self { run, size }
     }
 
     pub fn step(&mut self) {
@@ -111,7 +119,7 @@ impl Game {
         let camera = sindri_scene::world_camera_of(
             &self.run.world,
             self.run.scene.components(),
-            SIZE[0] / SIZE[1],
+            self.size[0] / self.size[1],
         )
         .expect("the camera resolves")
         .expect("the scene has a world camera");
@@ -123,7 +131,10 @@ impl Game {
         );
         let clip = camera.view_projection * point.extend(1.0);
         let ndc = clip.truncate() / clip.w;
-        [(ndc.x + 1.0) * 0.5 * SIZE[0], (1.0 - ndc.y) * 0.5 * SIZE[1]]
+        [
+            (ndc.x + 1.0) * 0.5 * self.size[0],
+            (1.0 - ndc.y) * 0.5 * self.size[1],
+        ]
     }
 
     /// A neighbour of `from` that nothing stands on and that is at most a
@@ -173,6 +184,19 @@ impl Game {
         self.run
             .input
             .apply(InputEvent::ButtonReleased(MouseButton::Left));
+        self.step();
+        self.step();
+    }
+
+    /// A finger put down on the middle of a cell and lifted again, with no
+    /// mouse anywhere -- a phone's tap.
+    pub fn tap_cell(&mut self, cell: (i32, i32)) {
+        let [x, y] = self.pixel_of(cell, top_of(cell));
+        self.run
+            .input
+            .apply(InputEvent::TouchStarted { id: 1, x, y });
+        self.step();
+        self.run.input.apply(InputEvent::TouchEnded { id: 1 });
         self.step();
         self.step();
     }

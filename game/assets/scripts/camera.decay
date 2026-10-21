@@ -7,7 +7,7 @@
 
 script CameraRig {
     // World units of island that must fit across and up.
-    @export let board_width: number = 12.5;
+    @export let board_width: number = 9.5;
     @export let board_height: number = 10.0;
 
     var aspect: number = 0.0;

@@ -1149,9 +1149,11 @@ script Battle {
                 if unit.acted {
                     set_text("UnitHint", "Done for this turn.");
                 } else if mode == Mode.Move {
-                    set_text("UnitHint", "Choose where to move, or strike from here: Q shows the targets.");
+                    set_text("UnitHint", "Choose where to move, or tap the skill (Q) to strike from here.");
+                } else if unit.moved {
+                    set_text("UnitHint", "Choose a target. Undo move (Esc) takes the step back.");
                 } else {
-                    set_text("UnitHint", "Choose a target. Esc takes the move back.");
+                    set_text("UnitHint", "Choose a target, or tap the skill (Q) again to move instead.");
                 }
                 return;
             }

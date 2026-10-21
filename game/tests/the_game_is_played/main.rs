@@ -89,3 +89,20 @@ fn the_keyboard_alone_can_move_a_warden() {
         (start.0 - 1, start.1)
     );
 }
+
+#[test]
+fn a_phone_held_upright_plays_by_tapping() {
+    let mut game = Game::open_at(PHONE);
+    game.tap_key(Key::Enter);
+    game.until_players_turn();
+    let start = game.cell_of(game.pieces("bulwark")[0]);
+    let goal = game.free_step_from(start);
+    game.tap_cell(start);
+    game.tap_cell(goal);
+    game.until_players_turn();
+    assert_eq!(
+        game.cell_of(game.pieces("bulwark")[0]),
+        goal,
+        "two taps took up the warden and walked it, with no mouse and no keys"
+    );
+}
