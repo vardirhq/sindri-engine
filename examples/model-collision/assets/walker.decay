@@ -7,7 +7,7 @@ script Walker {
     fn start() {
         print("Model collision ready: D into the wall, S around it, D then W to the gold pad");
     }
-    fn update(dt: f32) {
+    fn update(dt: number) {
         let motion = Physics3d.character_motion(this.entity);
         var grounded = false;
         if motion != null {
@@ -65,7 +65,7 @@ script CameraRig {
 script Prop {
     var pushed: bool = false;
     var arrived: bool = false;
-    fn update(dt: f32) {
+    fn update(dt: number) {
         let position = this.transform.world_position;
         if !pushed {
             for other in Physics3d.collision_started() {

@@ -2,9 +2,9 @@
 // the profile, so adding a module does not add a branch here.
 script Module {
     @export let catalog: Profile;
-    @export let slot: f32 = 0.0;
+    @export let slot: number = 0.0;
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         if Game.run_state != 2.0 || !Ui.is_pressed(this.entity) { return; }
         let index = offered_index();
         if index < 0.0 { return; }
@@ -21,13 +21,13 @@ script Module {
         Game.run_state = 1.0;
     }
 
-    fn offered_index() -> f32 {
+    fn offered_index() -> number {
         return Game.get("offer_" + this.slot, -1.0);
     }
 
-    fn apply(index: f32) {
+    fn apply(index: number) {
         let id = Profiles.number_at(this.catalog, "modules", index, "id", -1.0);
-        var effect: f32 = 0.0;
+        var effect: number = 0.0;
         let count = Profiles.count(this.catalog, "effects");
         while effect < count {
             if Profiles.number_at(this.catalog, "effects", effect, "module_id", -2.0) == id {
@@ -37,7 +37,7 @@ script Module {
         }
     }
 
-    fn apply_effect(index: f32) {
+    fn apply_effect(index: number) {
         let operation = Profiles.text_at(this.catalog, "effects", index, "operation", "");
         let key = Profiles.text_at(this.catalog, "effects", index, "key", "");
         let value = Profiles.number_at(this.catalog, "effects", index, "value", 0.0);

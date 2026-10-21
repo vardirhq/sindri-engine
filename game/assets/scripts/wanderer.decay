@@ -9,19 +9,19 @@ script Wanderer {
     // Seconds a step takes. The pathfinder still commits one whole grid step,
     // while the transform crosses that step continuously for rendering.
     @export
-    let step_seconds: f32 = 0.34;
+    let step_seconds: number = 0.34;
 
     var moving: bool = false;
     var waiting: bool = true;
-    var step_elapsed: f32 = 0.0;
-    var from_x: f32 = 0.0;
-    var from_y: f32 = 0.0;
-    var from_z: f32 = 0.0;
-    var to_x: f32 = 0.0;
-    var to_y: f32 = 0.0;
-    var to_z: f32 = 0.0;
+    var step_elapsed: number = 0.0;
+    var from_x: number = 0.0;
+    var from_y: number = 0.0;
+    var from_z: number = 0.0;
+    var to_x: number = 0.0;
+    var to_y: number = 0.0;
+    var to_z: number = 0.0;
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         let floor = World.find("Floor");
         let beacon = World.find("Beacon");
         if floor == null || beacon == null {

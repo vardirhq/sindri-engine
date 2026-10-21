@@ -1,5 +1,11 @@
 # Changelog
 
+- Write Decay's numeric type as `number` in every checked-in script and in
+  the docs' Decay snippets. The examples and games still said `f32`, its first
+  spelling, so the knowledge pack taught a model to write it. A test in
+  `sindri-capabilities` now fails on any `.decay` file that uses `f32`, which
+  still compiles.
+
 - Add Sindri Game Dev plugin overview, support, privacy and terms pages to
   the published documentation and site directory.
 

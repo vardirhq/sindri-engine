@@ -7,19 +7,19 @@
 
 script Quarry {
     @export let crate_prefab: Prefab;
-    @export let sweep: f32 = 8.0;
-    @export let laser_speed: f32 = 3.0;
+    @export let sweep: number = 8.0;
+    @export let laser_speed: number = 3.0;
 
     // Every block dug, and what it was, so RESET can fill the holes again.
     var dug: List<Vec3> = [];
     var was: List<String> = [];
     var dropped: List<Entity> = [];
-    var scan: f32 = -8.0;
-    var scan_direction: f32 = 1.0;
+    var scan: number = -8.0;
+    var scan_direction: number = 1.0;
     var laser_on: bool = true;
     var ray: String = "";
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         if Input.just_pressed("K") || Ui.is_pressed(World.find("q-back")) {
             print("Playground quarry back to the room");
             Scene.go("playground.scene");
@@ -45,7 +45,7 @@ script Quarry {
 
     // Takes one block out of the floor, remembering what it was. Bodies near
     // the hole are nudged awake so a resting crate notices the floor is gone.
-    fn dig(column: f32, row: f32, level: f32) -> bool {
+    fn dig(column: number, row: number, level: number) -> bool {
         let ground = World.find("Quarry Floor");
         let block = Grid.block(ground, column, row, level);
         if block == "" { return false; }
@@ -124,7 +124,7 @@ script Quarry {
 
     // A 3D ray fired straight down from above the quarry, swept back and
     // forth; the laser is drawn as long as the ray travelled.
-    fn laser(dt: f32) {
+    fn laser(dt: number) {
         let beam = World.find("q-laser");
         let spot = World.find("q-laser-hit");
         World.set_active(beam, this.laser_on);

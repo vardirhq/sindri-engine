@@ -5,14 +5,14 @@
 // visible transform. That keeps shape and collider on the same entity and in
 // the same place, so a shot that visually reaches a plate actually hits it.
 script ShieldSegment {
-    @export let angle: f32 = 0.0;
-    @export let radius: f32 = 1.5;
-    @export let spin: f32 = 0.5;
-    @export let health: f32 = 8.0;
+    @export let angle: number = 0.0;
+    @export let radius: number = 1.5;
+    @export let spin: number = 0.5;
+    @export let health: number = 8.0;
 
-    var hp: f32 = 0.0;
-    var state: f32 = -1.0;
-    var turn: f32 = 0.0;
+    var hp: number = 0.0;
+    var state: number = -1.0;
+    var turn: number = 0.0;
 
     fn start() {
         this.hp = this.health;
@@ -41,7 +41,7 @@ script ShieldSegment {
         this.transform.rotation_z = a;
     }
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         let hull = boss();
         if hull == null {
             World.despawn(this.entity);
@@ -97,7 +97,7 @@ script ShieldSegment {
 
     // Whole is the hub's blue with a bright rim; cracked dims and breaks the
     // rim into dashes; failing burns ember with a sparse, guttering rim.
-    fn wear(next: f32, clip: String) {
+    fn wear(next: number, clip: String) {
         if next == this.state { return; }
         this.state = next;
         if clip == "whole" {
@@ -109,7 +109,7 @@ script ShieldSegment {
         }
     }
 
-    fn plate(r: f32, g: f32, b: f32, rim_r: f32, rim_g: f32, rim_b: f32, dashes: f32) {
+    fn plate(r: number, g: number, b: number, rim_r: number, rim_g: number, rim_b: number, dashes: number) {
         this.shape.fill.r = r;
         this.shape.fill.g = g;
         this.shape.fill.b = b;

@@ -1,13 +1,13 @@
 // The camera stays on the walker's side of the barrier, then returns to its orbit.
 script CameraRig {
-    var yaw: f32 = 0.0;
-    var pitch: f32 = 0.35;
+    var yaw: number = 0.0;
+    var pitch: number = 0.35;
     var was_locked: bool = false;
     var scale_pending: bool = false;
     var inspect_scale: bool = false;
-    var barrier_width: f32 = 10.0;
+    var barrier_width: number = 10.0;
     @export
-    var sensitivity: f32 = 0.005;
+    var sensitivity: number = 0.005;
     fn start() {
         let target = World.find("Walker");
         Camera.perspective_fov(this.entity, 65.0);
@@ -16,7 +16,7 @@ script CameraRig {
         Camera.orbit_smoothing(this.entity, 8.0);
         Camera.orbit_collision(this.entity, 1.0, 0.2);
     }
-    fn update(dt: f32) {
+    fn update(dt: number) {
         verify_scale();
         if Input.Keyboard.just_pressed("Digit1") { resize_barrier(0.02); }
         if Input.Keyboard.just_pressed("Digit2") { resize_barrier(10.0); }
@@ -58,7 +58,7 @@ script CameraRig {
         }
         Camera.orbit(this.entity, World.find("Walker"), yaw, pitch, 6.0);
     }
-    fn resize_barrier(width: f32) {
+    fn resize_barrier(width: number) {
         let barrier = World.find("Barrier");
         World.set_active(barrier, true);
         Barrier.on(barrier).manual = true;
@@ -91,7 +91,7 @@ script CameraRig {
 
 script Walker {
     var arrived: bool = false;
-    fn update(dt: f32) {
+    fn update(dt: number) {
         if arrived { return; }
         let goal = World.find("Goal");
         let distance = this.transform.world_position.distance(goal.transform.world_position);
@@ -106,9 +106,9 @@ script Walker {
 }
 
 script Barrier {
-    var elapsed: f32 = 0.0;
+    var elapsed: number = 0.0;
     var manual: bool = false;
-    fn update(dt: f32) {
+    fn update(dt: number) {
         if manual { return; }
         elapsed += dt;
         if elapsed >= 2.0 { World.set_active(this.entity, false); }

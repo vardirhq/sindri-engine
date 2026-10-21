@@ -1,6 +1,6 @@
 script Query3d {
     var verified: bool = false;
-    fn update(dt: f32) {
+    fn update(dt: number) {
         let mask = Physics3d.mask(["targets", "targets"]);
         if mask != Physics3d.layer("targets") { return; }
         let hit = Physics3d.raycast(Vec3(0.0, 0.0, 0.0), Vec3(0.0, 0.0, 2.0), 10.0, mask, false, null);

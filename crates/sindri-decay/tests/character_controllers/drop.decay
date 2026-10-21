@@ -1,5 +1,5 @@
 script ControllerDrop {
-    fn update(dt: f32) {
+    fn update(dt: number) {
         Physics.drop_through(this.entity, 1.0);
         Physics.move_character(this.entity, Vec2(0.0, -0.3), false);
     }

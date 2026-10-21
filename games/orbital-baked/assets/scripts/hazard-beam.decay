@@ -2,17 +2,17 @@
 // line hazards, so one script owns the shared readable-danger lifecycle.
 script HazardBeam {
     // 1 = Ember Belt edge band, 2 = Core Approach pulse.
-    @export let mode: f32 = 2.0;
-    @export let axis: f32 = 1.0;
-    @export let side: f32 = 1.0;
-    @export let warning: f32 = 1.05;
-    @export let active_for: f32 = 0.55;
-    @export let player_dps: f32 = 4.5;
-    @export let enemy_dps: f32 = 3.4;
-    @export let flare_enemy_dps: f32 = 1.2;
+    @export let mode: number = 2.0;
+    @export let axis: number = 1.0;
+    @export let side: number = 1.0;
+    @export let warning: number = 1.05;
+    @export let active_for: number = 0.55;
+    @export let player_dps: number = 4.5;
+    @export let enemy_dps: number = 3.4;
+    @export let flare_enemy_dps: number = 1.2;
 
-    var warn_left: f32 = 0.0;
-    var active_left: f32 = 0.0;
+    var warn_left: number = 0.0;
+    var active_left: number = 0.0;
 
     fn start() {
         this.warn_left = this.warning;
@@ -25,7 +25,7 @@ script HazardBeam {
         }
     }
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         if Game.run_state != 1.0 {
             return;
         }
@@ -36,7 +36,7 @@ script HazardBeam {
         }
     }
 
-    fn update_flare(dt: f32) {
+    fn update_flare(dt: number) {
         let time = Game.elapsed;
         let intensity = (sin(time * 0.72) + 1.0) * 0.5;
         let half_x = visible_half_x(VIEW_SIZE);
@@ -65,7 +65,7 @@ script HazardBeam {
         damage_enemies_flare(safe, dt);
     }
 
-    fn update_pulse(dt: f32) {
+    fn update_pulse(dt: number) {
         if this.warn_left > 0.0 {
             this.warn_left -= dt;
             size_warning();
@@ -103,7 +103,7 @@ script HazardBeam {
         }
     }
 
-    fn damage_line(dt: f32) {
+    fn damage_line(dt: number) {
         let player = World.find("Player");
         if player != null && line_distance(player) < 0.28 {
             Game.hp = Game.hp - this.player_dps * dt * Game.incoming_damage;
@@ -115,7 +115,7 @@ script HazardBeam {
         }
     }
 
-    fn damage_enemies_flare(safe: f32, dt: f32) {
+    fn damage_enemies_flare(safe: number, dt: number) {
         for enemy in World.with_tag("enemy") {
             if World.exists(enemy) && abs(enemy.transform.position.y) > safe {
                 add_enemy_damage(enemy, this.flare_enemy_dps * dt);
@@ -143,14 +143,14 @@ script HazardBeam {
         this.shape.dashes = 10.0;
     }
 
-    fn line_distance(entity: Entity) -> f32 {
+    fn line_distance(entity: Entity) -> number {
         if this.axis == 1.0 {
             return abs(entity.transform.position.x - this.transform.position.x);
         }
         return abs(entity.transform.position.y - this.transform.position.y);
     }
 
-    fn add_enemy_damage(enemy: Entity, amount: f32) {
+    fn add_enemy_damage(enemy: Entity, amount: number) {
         let current = World.property_number(enemy, "hazard_damage", 0.0);
         World.set_property(enemy, "hazard_damage", current + amount);
     }

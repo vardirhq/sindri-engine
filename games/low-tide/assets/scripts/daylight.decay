@@ -13,8 +13,8 @@ script Sun {
     // How bright the day is, as a 2D light's intensity. The sun is low, so a
     // flat surface faces it at under a third; what faces north-west catches
     // much more, which is what makes the relief read.
-    @export let day: f32 = 2.9;
-    @export let night: f32 = 0.5;
+    @export let day: number = 2.9;
+    @export let night: number = 0.5;
     @export let noon: Color = Color(1.0, 0.94, 0.82);
     @export let sunset: Color = Color(1.0, 0.64, 0.3);
     @export let moon: Color = Color(0.5, 0.62, 0.95);
@@ -28,7 +28,7 @@ script Sun {
         this.dive_camera = World.find("Dive camera");
     }
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         Game.daylight = daylight_now();
         if Game.diving && this.dive_camera != null {
             // Sunlight through the water: brightest at the surface, fading
@@ -59,7 +59,7 @@ script Sun {
 // How much of the day there is: one through most of low water, a golden
 // hour as the ebb runs out, falling through the flood to nothing at high
 // water, and rising again with the ebb.
-fn daylight_now() -> f32 {
+fn daylight_now() -> number {
     let golden = 0.55;
     let through = 1.0 - Game.tide_left / max(1.0, Game.tide_duration);
     let eased = through * through * (3.0 - 2.0 * through);
@@ -74,13 +74,13 @@ fn daylight_now() -> f32 {
 // A lamp, a headlight or a lantern: dim by day, bright by night, with a
 // little life in the flame.
 script Lamp {
-    @export let by_day: f32 = 0.2;
-    @export let by_night: f32 = 1.3;
-    @export let flicker: f32 = 0.05;
+    @export let by_day: number = 0.2;
+    @export let by_night: number = 1.3;
+    @export let flicker: number = 0.05;
 
-    var time: f32 = 0.0;
+    var time: number = 0.0;
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         this.time += dt;
         let wave = sin(this.time * 7.3) * 0.6 + sin(this.time * 12.9 + 1.7) * 0.4;
         // Lit as the golden hour turns to dusk, full by nightfall.
@@ -94,7 +94,7 @@ script Lamp {
 script TreadDust {
     var kicking: bool = false;
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         let dry = Game.ground != Ground.Brine && Game.ground != Ground.Nothing;
         let moving = abs(Game.speed) > 0.25 || abs(Game.rudder) > 0.1;
         let kick = moving && dry && !Game.flooded;
@@ -109,7 +109,7 @@ script TreadDust {
 script Exhaust {
     var smoking: bool = false;
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         let smoke = (abs(Game.throttle) > 0.01 || abs(Game.speed) > 0.1) && !Game.flooded;
         if smoke != this.smoking {
             this.smoking = smoke;

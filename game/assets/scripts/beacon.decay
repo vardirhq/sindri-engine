@@ -11,7 +11,7 @@
 script Beacon {
     var lit: bool = false;
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         if !lit && Game.get("arrived", 0.0) > 0.0 {
             Sequence.play(this.entity, "arrive");
             lit = true;

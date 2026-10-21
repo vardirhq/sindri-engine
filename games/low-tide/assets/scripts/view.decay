@@ -8,27 +8,27 @@
 // between the two is eased rather than snapped.
 
 script View {
-    @export let follow: f32 = 5.0;
-    @export let turn: f32 = 3.0;
-    @export let lead: f32 = 1.4;
+    @export let follow: number = 5.0;
+    @export let turn: number = 3.0;
+    @export let lead: number = 1.4;
 
-    var roll: f32 = 0.0;
-    var size: f32 = 30.0;
+    var roll: number = 0.0;
+    var size: number = 30.0;
     var view_button: Entity = null;
 
     fn start() {
         this.view_button = World.find("View button");
     }
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         if Action.pressed("view") || Ui.is_pressed(this.view_button) {
             Game.prefer_north = !Game.prefer_north;
         }
-        var wanted: f32 = 0.0;
+        var wanted: number = 0.0;
         if Game.aboard && !Game.at_helm && !Game.prefer_north {
             wanted = Game.heading;
         }
-        var gap: f32 = wanted - this.roll;
+        var gap: number = wanted - this.roll;
         while gap > PI { gap -= TAU; }
         while gap < -PI { gap += TAU; }
         this.roll += gap * (1.0 - exp(-this.turn * dt));

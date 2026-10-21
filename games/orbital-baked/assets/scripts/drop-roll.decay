@@ -3,20 +3,20 @@
 // implementation without requiring a game-specific engine hook.
 script DropRoll {
     @export let powerup: Prefab;
-    @export let elite: f32 = 0.0;
-    @export let boss: f32 = 0.0;
-    @export let regular_chance: f32 = 0.058;
-    @export let elite_chance: f32 = 0.26;
-    @export let boss_chance: f32 = 1.0;
-    @export let low_health_bonus: f32 = 0.055;
-    @export let repair_weight: f32 = 0.44;
-    @export let repair_bias: f32 = 0.26;
-    @export let pulse_weight: f32 = 0.24;
-    @export let pity_kills: f32 = 120.0;
+    @export let elite: number = 0.0;
+    @export let boss: number = 0.0;
+    @export let regular_chance: number = 0.058;
+    @export let elite_chance: number = 0.26;
+    @export let boss_chance: number = 1.0;
+    @export let low_health_bonus: number = 0.055;
+    @export let repair_weight: number = 0.44;
+    @export let repair_bias: number = 0.26;
+    @export let pulse_weight: number = 0.24;
+    @export let pity_kills: number = 120.0;
     // The reference flat repair is 28 on a 100-hull baseline. Sindri's
     // normalized baseline is five hull, so 1.4 preserves the same proportion.
-    @export let repair_flat: f32 = 1.4;
-    @export let repair_hull: f32 = 0.08;
+    @export let repair_flat: number = 1.4;
+    @export let repair_hull: number = 0.08;
 
     fn start() {
         let since_repair = Game.kills_since_repair + 1.0;
@@ -28,7 +28,7 @@ script DropRoll {
         let pity = since_repair >= this.pity_kills;
         let wounded_boss = this.boss > 0.0 && health_ratio < 0.62;
 
-        var chance: f32 = this.regular_chance;
+        var chance: number = this.regular_chance;
         if this.elite > 0.0 { chance = this.elite_chance; }
         if this.boss > 0.0 { chance = this.boss_chance; }
         chance += missing * this.low_health_bonus;
@@ -38,7 +38,7 @@ script DropRoll {
             return;
         }
 
-        var kind: f32 = 0.0;
+        var kind: number = 0.0;
         if !pity && !wounded_boss {
             let repair = this.repair_weight + missing * this.repair_bias;
             let choice = Random.value();

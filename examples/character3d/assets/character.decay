@@ -1,12 +1,12 @@
 // Gameplay owns gravity, jump permission and speed. The engine clips each move.
 script Walker {
     @export
-    var speed: f32 = 3.0;
+    var speed: number = 3.0;
     @export
-    var gravity: f32 = 12.0;
+    var gravity: number = 12.0;
     @export
-    var jump_speed: f32 = 5.0;
-    var rise: f32 = 0.0;
+    var jump_speed: number = 5.0;
+    var rise: number = 0.0;
     var carried: bool = false;
     var jumped: bool = false;
     var landed: bool = false;
@@ -14,7 +14,7 @@ script Walker {
     fn start() {
         print("Character lab ready: ride, Space to jump, D to reach the gold pad");
     }
-    fn update(dt: f32) {
+    fn update(dt: number) {
         let motion = Physics3d.character_motion(this.entity);
         var grounded = false;
         if motion != null {
@@ -62,7 +62,7 @@ script Walker {
 }
 
 script Ferry {
-    fn update(dt: f32) {
+    fn update(dt: number) {
         let x = this.transform.world_position.x;
         if x >= 2.0 { Physics3d.set_velocity(this.entity, Vec3(-1.0, 0.0, 0.0)); }
         if x <= -1.0 { Physics3d.set_velocity(this.entity, Vec3(1.0, 0.0, 0.0)); }

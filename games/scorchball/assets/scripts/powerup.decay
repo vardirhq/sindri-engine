@@ -15,14 +15,14 @@ script PowerUp {
     @export let kind = Power.Grow;
     @export let sign: Prefab;
     @export let shadow: Prefab;
-    @export let drop_height: f32 = 12.0;
-    @export let gravity: f32 = 30.0;
-    @export let life: f32 = 10.0;
-    @export let reach: f32 = 1.2;
+    @export let drop_height: number = 12.0;
+    @export let gravity: number = 30.0;
+    @export let life: number = 10.0;
+    @export let reach: number = 1.2;
 
-    var height: f32 = 12.0;
-    var falling: f32 = 0.0;
-    var landed: f32 = -1.0;
+    var height: number = 12.0;
+    var falling: number = 0.0;
+    var landed: number = -1.0;
     var shown: Entity = null;
     var ground: Entity = null;
 
@@ -41,7 +41,7 @@ script PowerUp {
         place();
     }
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         if this.landed < 0.0 {
             fall(dt);
             return;
@@ -62,7 +62,7 @@ script PowerUp {
         }
     }
 
-    fn fall(dt: f32) {
+    fn fall(dt: number) {
         this.falling += this.gravity * dt;
         this.height -= this.falling * dt;
         if this.height <= 0.0 {
@@ -99,7 +99,7 @@ script PowerUp {
             Power.Grow | Power.Boost => { picker.power_up(this.kind); }
             Power.Wind => {
                 // Blue attack the right goal, so their wind blows right.
-                var blow: f32 = -1.0;
+                var blow: number = -1.0;
                 if picker.team == 1.0 { blow = 1.0; }
                 WindPicked.emit(blow);
             }

@@ -2,13 +2,13 @@
 // kind: 0 repair, 1 pulse, 2 overdrive.
 script Powerup {
     @export let pulse: Prefab;
-    @export let kind: f32 = 0.0;
-    @export let value: f32 = 1.8;
-    @export let life: f32 = 17.0;
-    @export let attraction_radius: f32 = 4.2;
-    @export let attraction_speed: f32 = 4.2;
+    @export let kind: number = 0.0;
+    @export let value: number = 1.8;
+    @export let life: number = 17.0;
+    @export let attraction_radius: number = 4.2;
+    @export let attraction_speed: number = 4.2;
 
-    var age: f32 = 0.0;
+    var age: number = 0.0;
     var appearance: Vec3Tween = null;
     // The glow's breathing: up and back for as long as the pickup lasts, from
     // the moment it has finished appearing.
@@ -27,7 +27,7 @@ script Powerup {
         else { tint(1.0, 0.68, 0.24); }
     }
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         if Game.run_state != 1.0 {
             Tween.pause(this.appearance);
             Tween.pause(this.glow);
@@ -88,7 +88,7 @@ script Powerup {
         World.despawn(this.entity);
     }
 
-    fn tint(r: f32, g: f32, b: f32) {
+    fn tint(r: number, g: number, b: number) {
         this.shape.stroke.r = r;
         this.shape.stroke.g = g;
         this.shape.stroke.b = b;

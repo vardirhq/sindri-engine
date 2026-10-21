@@ -3,11 +3,11 @@
 // and stopped the block -- landing, not the give-up fallback.
 script BrowserVoxelLanding {
     @export let block: Prefab;
-    var frames: f32 = 0.0;
+    var frames: number = 0.0;
     var dropped: Entity? = null;
     var queried: bool = false;
     var verified: bool = false;
-    fn update(dt: f32) {
+    fn update(dt: number) {
         frames += 1.0;
         let floor = World.find("Floor");
         let wanderer = World.find("Wanderer");

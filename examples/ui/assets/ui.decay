@@ -22,7 +22,7 @@ script WidgetDemo {
         print("UI demo ready");
     }
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         if Ui.changed(this.assist) {
             print("UI toggle changed " + Ui.is_checked(this.assist));
             show_switches();
@@ -136,7 +136,7 @@ script WidgetDemo {
 script ArchiveRow {
     @export let module: String = "";
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         if Ui.is_pressed(this.entity) {
             Ui.set_text(World.find("status"), "SELECTED / " + this.module);
             print("UI selected " + this.module);

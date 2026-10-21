@@ -13,9 +13,9 @@
 script Modes {
     // Zero is build, one is play. A number because that is what the
     // blackboard carries, and because the HUD counts rather than reads.
-    var playing: f32 = 0.0;
+    var playing: number = 0.0;
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         // Tab on a keyboard, and the mode button for everyone else. The
         // button writes "toggle_mode" and this clears it, so the press is
         // acted on once however long the finger stays down.

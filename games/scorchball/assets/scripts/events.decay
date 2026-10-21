@@ -2,10 +2,10 @@
 // causes one emits it, and does not need to know who is listening.
 
 // The ball crossed a goal mouth: 1 for Blue, 2 for Red.
-event GoalScored(team: f32);
+event GoalScored(team: number);
 
 // Someone picked up the wind: which way it blows, 1 right or -1 left.
-event WindPicked(blow: f32);
+event WindPicked(blow: number);
 
 // Someone picked up the fireball: the team that lit it.
-event FirePicked(team: f32);
+event FirePicked(team: number);

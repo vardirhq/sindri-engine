@@ -16,14 +16,14 @@
 // sprite, so the flash is added through its colour offset and shed over the
 // first few frames.
 script Detonation {
-    var age: f32 = 0.0;
+    var age: number = 0.0;
 
     fn start() {
         Animation.play(this.entity, "boom");
         this.sprite.color_offset = Color(0.6, 0.5, 0.35, 0.0);
     }
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         this.age += dt;
         let heat = max(0.0, 1.0 - this.age / 0.16);
         this.sprite.color_offset = Color(heat * 0.6, heat * 0.5, heat * 0.35, 0.0);

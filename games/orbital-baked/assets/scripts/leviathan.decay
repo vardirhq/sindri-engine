@@ -7,18 +7,18 @@ script Leviathan {
     @export let core: Prefab;
     @export let drop_roll: Prefab;
     @export let death_burst: Prefab;
-    @export let hazard_damage: f32 = 0.0;
+    @export let hazard_damage: number = 0.0;
 
-    var hp: f32 = 0.0;
-    var phase: f32 = 1.0;
-    var previous_phase: f32 = 1.0;
-    var attack: f32 = 0.75;
-    var special: f32 = 2.7;
-    var clock: f32 = 0.0;
-    var offset: f32 = 0.0;
-    var phase_flash: f32 = 0.0;
-    var death_burst_damage: f32 = 0.0;
-    var sweep: f32 = 0.0;
+    var hp: number = 0.0;
+    var phase: number = 1.0;
+    var previous_phase: number = 1.0;
+    var attack: number = 0.75;
+    var special: number = 2.7;
+    var clock: number = 0.0;
+    var offset: number = 0.0;
+    var phase_flash: number = 0.0;
+    var death_burst_damage: number = 0.0;
+    var sweep: number = 0.0;
 
     fn start() {
         // Bosses that arrive later in a run are the same boss with more to
@@ -47,7 +47,7 @@ script Leviathan {
         this.shape.stroke.b = 0.5906;
     }
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         if Game.run_state != 1.0 {
             Physics.set_velocity(this.entity, 0.0, 0.0);
             return;
@@ -80,7 +80,7 @@ script Leviathan {
         if this.hp <= 0.0 { die(); }
     }
 
-    fn update_phase(dt: f32) {
+    fn update_phase(dt: number) {
         let share = this.hp / max(Game.boss_max, 1.0);
         if share <= 0.56 { this.phase = 2.0; } else { this.phase = 1.0; }
         if this.phase != this.previous_phase {
@@ -101,12 +101,12 @@ script Leviathan {
         }
     }
 
-    fn receive_hits(player: Entity, dx: f32, dy: f32, far: f32) {
+    fn receive_hits(player: Entity, dx: number, dy: number, far: number) {
         for hit in Physics.sensor_entered() {
             if hit == player {
                 Game.player_damage_taken = max(Game.player_damage_taken, 2.65);
             } else if World.exists(hit) && World.has_tag(hit, "player_damage") {
-                var damage: f32 = World.property_number(hit, "damage", 0.0);
+                var damage: number = World.property_number(hit, "damage", 0.0);
                 damage = taken(damage, player, dx, dy, far);
                 this.hp -= damage;
                 if this.hp <= 0.0 && World.property_number(hit, "nova", 0.0) > 0.0 {
@@ -116,16 +116,16 @@ script Leviathan {
         }
     }
 
-    fn chase(dx: f32, dy: f32, far: f32, scale: f32) {
+    fn chase(dx: number, dy: number, far: number, scale: number) {
         if far > 0.001 {
             Physics.set_velocity(this.entity, dx / far * 0.68 * scale,
                                  dy / far * 0.68 * scale);
         }
     }
 
-    fn orbit(dx: f32, dy: f32, far: f32, want: f32, tangent: f32) {
+    fn orbit(dx: number, dy: number, far: number, want: number, tangent: number) {
         if far <= 0.001 { return; }
-        var radial: f32 = 0.0;
+        var radial: number = 0.0;
         if far > want + 0.45 { radial = 1.0; }
         if far < want - 0.45 { radial = -0.55; }
         let nx = dx / far;
@@ -135,7 +135,7 @@ script Leviathan {
             (ny * radial + nx * tangent) * 0.68);
     }
 
-    fn anchor_move(target_y: f32) {
+    fn anchor_move(target_y: number) {
         let dx = -this.transform.position.x;
         let dy = target_y - this.transform.position.y;
         let far = sqrt(dx * dx + dy * dy);
@@ -146,10 +146,10 @@ script Leviathan {
         }
     }
 
-    fn fire_fan(nx: f32, ny: f32, count: f32, velocity: f32, spread: f32) {
+    fn fire_fan(nx: number, ny: number, count: number, velocity: number, spread: number) {
         let base = atan2(ny, nx);
         let half = (count - 1.0) * 0.5;
-        var slot: f32 = 0.0;
+        var slot: number = 0.0;
         while slot < count {
             fire_at(this.transform.position.x, this.transform.position.y,
                     base + (slot - half) * spread, velocity, 1.0);
@@ -158,8 +158,8 @@ script Leviathan {
         Audio.play("audio/boss.wav", 0.38);
     }
 
-    fn fire_ring(count: f32, velocity: f32, gaps: f32) {
-        var slot: f32 = 0.0;
+    fn fire_ring(count: number, velocity: number, gaps: number) {
+        var slot: number = 0.0;
         let gap = (this.clock * 1.4) % count;
         while slot < count {
             let distance = abs(slot - gap);
@@ -172,7 +172,7 @@ script Leviathan {
         Audio.play("audio/boss.wav", 0.4);
     }
 
-    fn fire_at(x: f32, y: f32, angle: f32, velocity: f32, damage: f32) {
+    fn fire_at(x: number, y: number, angle: number, velocity: number, damage: number) {
         let bolt = World.spawn(this.shot);
         bolt.transform.position.x = x + cos(angle) * 0.65;
         bolt.transform.position.y = y + sin(angle) * 0.65;
@@ -196,7 +196,7 @@ script Leviathan {
         Game.score = Game.score + 80.0 * 10.0;
         Game.boss_hp = 0.0;
         Game.boss_max = 0.0;
-        var made: f32 = 0.0;
+        var made: number = 0.0;
         while made < 8.0 {
             let angle = made / 8.0 * 6.2831853;
             let drop = World.spawn(this.core);
@@ -213,10 +213,10 @@ script Leviathan {
     }
 
     // What this boss is. Everything above is plumbing every boss shares.
-    fn act(dt: f32, player: Entity, dx: f32, dy: f32, far: f32) {
+    fn act(dt: number, player: Entity, dx: number, dy: number, far: number) {
         anchor_move(0.0);
         // Turns at a fixed rate whatever the player does. It is weather.
-        var rate: f32 = 0.85;
+        var rate: number = 0.85;
         if this.phase == 2.0 { rate = 1.25; }
         this.sweep += dt * rate;
         this.attack -= dt;
@@ -230,20 +230,20 @@ script Leviathan {
     }
 
     // What it does to damage on the way in.
-    fn taken(damage: f32, player: Entity, dx: f32, dy: f32, far: f32) -> f32 {
+    fn taken(damage: number, player: Entity, dx: number, dy: number, far: number) -> number {
         return damage;
     }
 
     // The beam: a line of bolts laid outward along one angle, every frame,
     // while the angle turns. Drawn by the shots themselves rather than by a
     // beam entity, so it can be dodged by standing between them at range.
-    fn lay_beam(angle: f32) {
+    fn lay_beam(angle: number) {
         // Spaced wide and moving out briskly. A denser, slower beam looked
         // better in a screenshot and played as a wall: the bolts outlived their
         // own sweep several times over, so a "rotating beam" became two hundred
         // standing bullets and the safe ground it is supposed to leave behind
         // never opened.
-        var reach: f32 = 1.4;
+        var reach: number = 1.4;
         while reach < 8.5 {
             fire_at(this.transform.position.x + cos(angle) * reach,
                     this.transform.position.y + sin(angle) * reach,

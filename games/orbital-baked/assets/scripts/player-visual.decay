@@ -4,11 +4,11 @@
 // leak into the presentation so a run changes the ship, not just its numbers.
 script PlayerVisual {
     // 1 = shield, 2 = engine trail, 3 = canopy core, 4 = hull chevron.
-    @export let kind: f32 = 1.0;
-    @export let side: f32 = 0.0;
+    @export let kind: number = 1.0;
+    @export let side: number = 0.0;
 
     var player: Entity = null;
-    var clock: f32 = 0.0;
+    var clock: number = 0.0;
 
     fn start() {
         this.player = World.find("Player");
@@ -20,7 +20,7 @@ script PlayerVisual {
         }
     }
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         let player = this.player;
         if player == null || !World.exists(player) { return; }
 
@@ -41,7 +41,7 @@ script PlayerVisual {
         else { update_core(); }
     }
 
-    fn update_shield(dt: f32, state: f32) {
+    fn update_shield(dt: number, state: number) {
         var impact = Game.shield_impact;
         if state == 1.0 && impact > 0.0 {
             impact = max(0.0, impact - dt / 0.22);
@@ -122,7 +122,7 @@ script PlayerVisual {
         this.shape.stroke_width = 0.045 + overdrive * 0.025 + signatures * 0.004;
     }
 
-    fn apply_core_signature(arc: f32, nova: f32, beam: f32, missile: f32, pierce: f32) {
+    fn apply_core_signature(arc: number, nova: number, beam: number, missile: number, pierce: number) {
         // Priority keeps mixed builds readable instead of averaging everything into mud.
         if beam > 0.0 {
             this.shape.fill.r = 0.78; this.shape.fill.g = 0.42; this.shape.fill.b = 1.0;

@@ -7,18 +7,18 @@ script Spine {
     @export let drop_roll: Prefab;
     @export let death_burst: Prefab;
     @export let segment: Prefab;
-    @export let hazard_damage: f32 = 0.0;
+    @export let hazard_damage: number = 0.0;
 
-    var hp: f32 = 0.0;
-    var phase: f32 = 1.0;
-    var previous_phase: f32 = 1.0;
-    var clock: f32 = 0.0;
-    var built: f32 = 0.0;
-    var death_burst_damage: f32 = 0.0;
-    var dir_x: f32 = 1.0;
-    var dir_y: f32 = 0.0;
-    var turn_serial: f32 = 0.0;
-    var turn_clock: f32 = 0.0;
+    var hp: number = 0.0;
+    var phase: number = 1.0;
+    var previous_phase: number = 1.0;
+    var clock: number = 0.0;
+    var built: number = 0.0;
+    var death_burst_damage: number = 0.0;
+    var dir_x: number = 1.0;
+    var dir_y: number = 0.0;
+    var turn_serial: number = 0.0;
+    var turn_clock: number = 0.0;
 
     fn start() {
         let scale = boss_scale();
@@ -36,7 +36,7 @@ script Spine {
     fn build_body() {
         if this.built > 0.0 { return; }
         this.built = 1.0;
-        var slot: f32 = 0.0;
+        var slot: number = 0.0;
         while slot < 9.0 {
             let part = World.spawn(this.segment);
             World.set_property(part, "spawn_x",
@@ -54,8 +54,8 @@ script Spine {
         }
     }
 
-    fn segment_count() -> f32 {
-        var count: f32 = 0.0;
+    fn segment_count() -> number {
+        var count: number = 0.0;
         for part in World.with_tag("spine_segment") {
             if World.exists(part) { count += 1.0; }
         }
@@ -74,7 +74,7 @@ script Spine {
         return null;
     }
 
-    fn publish_turn(x: f32, y: f32) {
+    fn publish_turn(x: number, y: number) {
         let part = first_section();
         if part == null { return; }
         this.turn_serial += 1.0;
@@ -87,7 +87,7 @@ script Spine {
         World.send_signal(part, "spine_turn_serial", this.turn_serial);
     }
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         if Game.run_state != 1.0 {
             Physics.set_velocity(this.entity, 0.0, 0.0);
             return;
@@ -139,13 +139,13 @@ script Spine {
         }
     }
 
-    fn half_x() -> f32 {
+    fn half_x() -> number {
         let aspect = max(Viewport.aspect, 0.001);
         if aspect >= 1.0 { return VIEW_SIZE * 0.5 * aspect - 0.9; }
         return VIEW_SIZE * 0.5 - 0.9;
     }
 
-    fn half_y() -> f32 {
+    fn half_y() -> number {
         let aspect = max(Viewport.aspect, 0.001);
         if aspect >= 1.0 { return VIEW_SIZE * 0.5 - 0.9; }
         return VIEW_SIZE * 0.5 / aspect - 0.9;
@@ -179,7 +179,7 @@ script Spine {
         if dy < 0.0 { this.dir_y = -1.0; }
     }
 
-    fn turn_delay() -> f32 {
+    fn turn_delay() -> number {
         // Leave enough time for the last surviving section to reach a corner
         // before the two-slot corner relay receives another one.
         if this.phase == 3.0 { return 0.72; }
@@ -187,13 +187,13 @@ script Spine {
         return 2.10;
     }
 
-    fn grid_move(player: Entity, dt: f32) {
+    fn grid_move(player: Entity, dt: number) {
         let hx = half_x();
         let hy = half_y();
         let x = this.transform.position.x;
         let y = this.transform.position.y;
         let margin = 0.12;
-        var turning: f32 = 0.0;
+        var turning: number = 0.0;
         this.turn_clock -= dt;
 
         if this.dir_x > 0.0 && x >= hx - margin { turning = 1.0; turn_from_horizontal_lane(player); }
@@ -213,7 +213,7 @@ script Spine {
             this.turn_clock = turn_delay();
         }
 
-        var speed: f32 = 3.0;
+        var speed: number = 3.0;
         if this.phase == 2.0 { speed = 3.45; }
         if this.phase == 3.0 { speed = 3.9; }
         Physics.set_velocity(this.entity, this.dir_x * speed, this.dir_y * speed);
@@ -237,7 +237,7 @@ script Spine {
         Game.score = Game.score + 900.0;
         Game.boss_hp = 0.0;
         Game.boss_max = 0.0;
-        var made: f32 = 0.0;
+        var made: number = 0.0;
         while made < 8.0 {
             let angle = made / 8.0 * 6.2831853;
             let drop = World.spawn(this.core);

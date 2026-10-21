@@ -1,9 +1,9 @@
 script ControllerMotion {
     var missing: bool = false;
-    var x: f32 = 0.0;
+    var x: number = 0.0;
     var grounded: bool = false;
     var copied: bool = false;
-    fn update(dt: f32) {
+    fn update(dt: number) {
         let previous = Physics.character_motion(this.entity);
         missing = previous == null;
         if previous != null {

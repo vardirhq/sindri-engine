@@ -3,24 +3,24 @@
 // diamond and burst at every hop make the chain readable without a bespoke
 // renderer.
 script Arc {
-    @export let speed: f32 = 14.0;
-    @export let life: f32 = 0.55;
-    @export let damage: f32 = 0.27;
-    @export let jumps: f32 = 2.0;
+    @export let speed: number = 14.0;
+    @export let life: number = 0.55;
+    @export let damage: number = 0.27;
+    @export let jumps: number = 2.0;
     @export let impact_fx: Prefab;
 
-    var age: f32 = 0.0;
-    var spent: f32 = 0.0;
+    var age: number = 0.0;
+    var spent: number = 0.0;
     var retiring: bool = false;
     var trail: Entity = null;
-    var trail_clock: f32 = 0.0;
+    var trail_clock: number = 0.0;
 
     fn start() {
         this.trail = World.find("TrailCyan");
         retarget();
     }
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         if !World.exists(this.entity) {
             return;
         }

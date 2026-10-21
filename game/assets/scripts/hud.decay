@@ -1,6 +1,6 @@
 // Temporary phone diagnostic for Causeway Play input.
 script Hud {
-    fn update(dt: f32) {
+    fn update(dt: number) {
         let kind = World.find("Kind");
         let stock = World.find("Stock");
         let debug = World.find("PlayDebug");

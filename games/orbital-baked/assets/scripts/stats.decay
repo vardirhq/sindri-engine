@@ -1,20 +1,20 @@
 // The ship's module-derived state and the runtime effects that belong to the
 // build as a whole rather than to one projectile or enemy.
 script Stats {
-    var granted_hp: f32 = 0.0;
+    var granted_hp: number = 0.0;
     var player: Entity = null;
-    var last_kills: f32 = 0.0;
-    var last_elite_kills: f32 = 0.0;
-    var last_boss_hp: f32 = 0.0;
-    var last_level: f32 = 1.0;
-    var white_noise: f32 = 4.0;
+    var last_kills: number = 0.0;
+    var last_elite_kills: number = 0.0;
+    var last_boss_hp: number = 0.0;
+    var last_level: number = 1.0;
+    var white_noise: number = 4.0;
 
     fn start() {
         this.player = World.find("Player");
         wipe();
     }
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         if Game.stats_reset > 0.0 {
             Game.stats_reset = 0.0;
             wipe();
@@ -95,7 +95,7 @@ script Stats {
         clear_flag("special_pulse_heart"); clear_flag("special_execution_mark");
     }
 
-    fn stat(out: String, add: String, mul: String, base: f32) {
+    fn stat(out: String, add: String, mul: String, base: number) {
         Game.set(out, (base + Game.get(add, 0.0)) * Game.get(mul, 1.0));
     }
 
@@ -134,7 +134,7 @@ script Stats {
         Game.fire_gap = max(0.05, 1.0 / max(0.1, Game.fire_rate));
     }
 
-    fn runtime(dt: f32) {
+    fn runtime(dt: number) {
         let regen = Game.regen;
         if regen > 0.0 { heal(regen * dt); }
         process_kills();
@@ -196,7 +196,7 @@ script Stats {
         this.last_level = level;
     }
 
-    fn process_white_noise(dt: f32) {
+    fn process_white_noise(dt: number) {
         if Game.special_white_noise <= 0.0 { this.white_noise = 4.0; return; }
         this.white_noise -= dt;
         if this.white_noise <= 0.0 {
@@ -206,7 +206,7 @@ script Stats {
         }
     }
 
-    fn purge_hostile(radius: f32) {
+    fn purge_hostile(radius: number) {
         let player = this.player;
         if player == null { return; }
         for shot in World.with_tag("hostile_shot") {
@@ -218,8 +218,8 @@ script Stats {
     }
 
     fn publish_auras() {
-        var radius: f32 = 0.0;
-        var dps: f32 = 0.0;
+        var radius: number = 0.0;
+        var dps: number = 0.0;
         if Game.special_black_sun > 0.0 { radius = 2.5; dps = Game.damage * 0.18; }
         if Game.special_dead_god_circuit > 0.0 { radius = 3.5; dps = Game.damage * 0.34; }
         Game.player_aura_radius = radius;
@@ -228,7 +228,7 @@ script Stats {
         else { Game.orbit_loom_dps = 0.0; }
     }
 
-    fn heal(amount: f32) {
+    fn heal(amount: number) {
         Game.hp = min(Game.max_hp, Game.hp + max(0.0, amount));
     }
 }

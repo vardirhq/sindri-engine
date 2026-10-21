@@ -63,9 +63,9 @@ Decay is Sindri's Rust-inspired, statically typed gameplay language. The languag
 ```rust
 script Player {
     @export
-    var speed: f32 = 6.0;
+    var speed: number = 6.0;
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         let movement = Input.axis("ArrowLeft", "ArrowRight");
         this.transform.position.x += movement * speed * dt;
     }

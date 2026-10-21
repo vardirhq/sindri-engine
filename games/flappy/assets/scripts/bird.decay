@@ -1,16 +1,16 @@
 // One-button flight. Physics supplies gravity; the script supplies the flap.
 script Bird {
-    @export let flap_speed: f32 = 7.2;
-    @export let spawn_x: f32 = -1.5;
-    @export let spawn_y: f32 = 0.5;
-    @export let floor_y: f32 = -4.45;
-    @export let ceiling_y: f32 = 6.4;
-    @export let restart_delay: f32 = 0.6;
+    @export let flap_speed: number = 7.2;
+    @export let spawn_x: number = -1.5;
+    @export let spawn_y: number = 0.5;
+    @export let floor_y: number = -4.45;
+    @export let ceiling_y: number = 6.4;
+    @export let restart_delay: number = 0.6;
 
     var look: Entity = null;
     var wing: Entity = null;
-    var clock: f32 = 0.0;
-    var tilt: f32 = 0.0;
+    var clock: number = 0.0;
+    var tilt: number = 0.0;
 
     fn start() {
         this.look = World.find("BirdLook");
@@ -18,7 +18,7 @@ script Bird {
         reset();
     }
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         this.clock += dt;
         let flap = Input.just_pressed("Space") || Input.just_pressed("W") || Input.just_pressed("ArrowUp")
             || Pointer.just_pressed("Left");

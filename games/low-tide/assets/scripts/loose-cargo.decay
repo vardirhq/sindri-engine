@@ -2,14 +2,14 @@
 script LooseCargo {
     var kind: Resource = Resource.Scrap;
     var owner: Entity = null;
-    var slot: f32 = -1.0;
+    var slot: number = -1.0;
     var claimed: bool = false;
-    var clock: f32 = 0.2;
+    var clock: number = 0.2;
     var submerged: bool = false;
 
     fn start() { Animation.play(this.entity, cargo_name(this.kind)); }
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         if this.claimed { World.despawn(this.entity); return; }
         this.clock += dt;
         if this.clock < 0.2 { return; }

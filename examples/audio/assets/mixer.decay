@@ -8,7 +8,7 @@ script Mixer {
         show("effects");
     }
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         follow("master");
         follow("music");
         follow("effects");
@@ -40,7 +40,7 @@ script Mixer {
         Ui.set_text(World.find(bus + "-value"), percent(volume));
     }
 
-    fn percent(volume: f32) -> String {
+    fn percent(volume: number) -> String {
         return (volume * 100.0).fixed(0) + "%";
     }
 

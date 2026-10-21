@@ -6,28 +6,28 @@
 // then hands the same corner to the next piece. The route therefore propagates
 // through the body instead of being broadcast ahead of the body itself.
 script SpineSegment {
-    @export let slot: f32 = 0.0;
-    @export var group: f32 = 0.0;
-    @export var head: f32 = 0.0;
-    @export let health: f32 = 10.0;
-    @export let spacing: f32 = 0.62;
-    @export var spawn_x: f32 = 0.0;
-    @export var spawn_y: f32 = 0.0;
-    @export var initial_dir_x: f32 = 1.0;
-    @export var initial_dir_y: f32 = 0.0;
+    @export let slot: number = 0.0;
+    @export var group: number = 0.0;
+    @export var head: number = 0.0;
+    @export let health: number = 10.0;
+    @export let spacing: number = 0.62;
+    @export var spawn_x: number = 0.0;
+    @export var spawn_y: number = 0.0;
+    @export var initial_dir_x: number = 1.0;
+    @export var initial_dir_y: number = 0.0;
 
-    var hp: f32 = 0.0;
-    var state: f32 = 0.0;
-    var dir_x: f32 = 1.0;
-    var dir_y: f32 = 0.0;
-    var consumed_turn_serial: f32 = 0.0;
-    var issued_turn_serial: f32 = 0.0;
-    var corner_count: f32 = 0.0;
-    var corner_x: f32 = 0.0;
-    var corner_y: f32 = 0.0;
-    var next_corner_x: f32 = 0.0;
-    var next_corner_y: f32 = 0.0;
-    var turn_clock: f32 = 0.0;
+    var hp: number = 0.0;
+    var state: number = 0.0;
+    var dir_x: number = 1.0;
+    var dir_y: number = 0.0;
+    var consumed_turn_serial: number = 0.0;
+    var issued_turn_serial: number = 0.0;
+    var corner_count: number = 0.0;
+    var corner_x: number = 0.0;
+    var corner_y: number = 0.0;
+    var next_corner_x: number = 0.0;
+    var next_corner_y: number = 0.0;
+    var turn_clock: number = 0.0;
 
     fn start() {
         this.hp = this.health;
@@ -126,7 +126,7 @@ script SpineSegment {
         }
     }
 
-    fn forward_corner(x: f32, y: f32) {
+    fn forward_corner(x: number, y: number) {
         let next = next_member();
         if next == null { return; }
         this.issued_turn_serial += 1.0;
@@ -135,7 +135,7 @@ script SpineSegment {
         World.send_signal(next, "spine_turn_serial", this.issued_turn_serial);
     }
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         if Game.run_state != 1.0 {
             Physics.set_velocity(this.entity, 0.0, 0.0);
             return;
@@ -163,17 +163,17 @@ script SpineSegment {
         follow(ahead, dt);
     }
 
-    fn axis_velocity(distance: f32, dt: f32, speed: f32) -> f32 {
+    fn axis_velocity(distance: number, dt: number, speed: number) -> number {
         if abs(distance) <= 0.0001 { return 0.0; }
         return max(-speed, min(speed, distance / max(dt, 0.0001)));
     }
 
-    fn follow_corner(dt: f32, speed: f32) -> bool {
+    fn follow_corner(dt: number, speed: number) -> bool {
         while this.corner_count > 0.0 {
             let dx = this.corner_x - this.transform.position.x;
             let dy = this.corner_y - this.transform.position.y;
-            var vx: f32 = 0.0;
-            var vy: f32 = 0.0;
+            var vx: number = 0.0;
+            var vy: number = 0.0;
             // Finish the lane we entered on before taking the corner.
             // Choosing X merely because of tiny cross-axis drift lets a vertical
             // follower peel sideways before it has reached the recorded point.
@@ -209,7 +209,7 @@ script SpineSegment {
         return false;
     }
 
-    fn follow(ahead: Entity, dt: f32) {
+    fn follow(ahead: Entity, dt: number) {
         let avx = Physics.velocity_x(ahead);
         let avy = Physics.velocity_y(ahead);
         let speed = max(abs(avx), abs(avy));
@@ -234,7 +234,7 @@ script SpineSegment {
         }
     }
 
-    fn publish_group_turn(x: f32, y: f32) {
+    fn publish_group_turn(x: number, y: number) {
         let next = next_member();
         if next == null { return; }
         this.issued_turn_serial += 1.0;
@@ -243,13 +243,13 @@ script SpineSegment {
         World.send_signal(next, "spine_turn_serial", this.issued_turn_serial);
     }
 
-    fn half_x() -> f32 {
+    fn half_x() -> number {
         let aspect = max(Viewport.aspect, 0.001);
         if aspect >= 1.0 { return 11.0 * 0.5 * aspect - 0.9; }
         return 11.0 * 0.5 - 0.9;
     }
 
-    fn half_y() -> f32 {
+    fn half_y() -> number {
         let aspect = max(Viewport.aspect, 0.001);
         if aspect >= 1.0 { return 11.0 * 0.5 - 0.9; }
         return 11.0 * 0.5 / aspect - 0.9;
@@ -281,7 +281,7 @@ script SpineSegment {
         if dy < 0.0 { this.dir_y = -1.0; }
     }
 
-    fn grid_hunt(dt: f32) {
+    fn grid_hunt(dt: number) {
         let player = World.find("Player");
         if player == null { return; }
         let hx = half_x();
@@ -289,7 +289,7 @@ script SpineSegment {
         let x = this.transform.position.x;
         let y = this.transform.position.y;
         let margin = 0.12;
-        var turning: f32 = 0.0;
+        var turning: number = 0.0;
         this.turn_clock -= dt;
 
         if this.dir_x > 0.0 && x >= hx - margin { turning = 1.0; turn_from_horizontal_lane(player); }

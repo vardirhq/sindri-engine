@@ -1,17 +1,17 @@
 // Persistent area-denial attack. The cloud is an entity, not a boss special case:
 // anything can spawn it, move it and tune its radius/damage/lifetime.
 script GasCloud {
-    @export let radius: f32 = 1.45;
-    @export let lifetime: f32 = 6.0;
-    @export let damage: f32 = 0.7;
-    @export let tick_gap: f32 = 0.45;
-    @export let drift_x: f32 = 0.0;
-    @export let drift_y: f32 = 0.0;
-    @export let grow: f32 = 0.18;
+    @export let radius: number = 1.45;
+    @export let lifetime: number = 6.0;
+    @export let damage: number = 0.7;
+    @export let tick_gap: number = 0.45;
+    @export let drift_x: number = 0.0;
+    @export let drift_y: number = 0.0;
+    @export let grow: number = 0.18;
 
-    var age: f32 = 0.0;
-    var tick: f32 = 0.0;
-    var current_radius: f32 = 0.0;
+    var age: number = 0.0;
+    var tick: number = 0.0;
+    var current_radius: number = 0.0;
 
     fn start() {
         this.current_radius = this.radius * 0.58;
@@ -19,7 +19,7 @@ script GasCloud {
         sync_visual();
     }
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         if Game.run_state != 1.0 { return; }
         this.age += dt;
         if World.take_signal("ignite") > 0.0 {
@@ -47,7 +47,7 @@ script GasCloud {
         if this.age >= this.lifetime { World.despawn(this.entity); }
     }
 
-    fn damage_targets(amount: f32) {
+    fn damage_targets(amount: number) {
         for target in World.with_tag("attack_damageable") {
             if !World.exists(target) { continue; }
             let dx = target.transform.position.x - this.transform.position.x;

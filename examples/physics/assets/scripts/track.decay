@@ -7,26 +7,26 @@
 // is an impulse at the point of contact.
 
 script Robot {
-    @export let speed: f32 = 6.0;
-    @export let acceleration: f32 = 60.0;
-    @export let air_acceleration: f32 = 30.0;
-    @export let jump_speed: f32 = 13.0;
+    @export let speed: number = 6.0;
+    @export let acceleration: number = 60.0;
+    @export let air_acceleration: number = 30.0;
+    @export let jump_speed: number = 13.0;
     // How much harder than the room's gravity the robot falls: snappy jumps.
-    @export let heft: f32 = 1.9;
-    @export let shove: f32 = 0.35;
-    @export let kick: f32 = 5.5;
+    @export let heft: number = 1.9;
+    @export let shove: number = 0.35;
+    @export let kick: number = 5.5;
 
     var home: Vec3 = Vec3(0.0, 0.0, 0.0);
-    var horizontal: f32 = 0.0;
-    var rise: f32 = 0.0;
+    var horizontal: number = 0.0;
+    var rise: number = 0.0;
     var grounded: bool = false;
     var on_one_way: bool = false;
-    var drop_left: f32 = 0.0;
-    var facing: f32 = 1.0;
-    var boot_left: f32 = 0.0;
+    var drop_left: number = 0.0;
+    var facing: number = 1.0;
+    var boot_left: number = 0.0;
     var jump_asked: bool = false;
     var kick_asked: bool = false;
-    var kicks: f32 = 0.0;
+    var kicks: number = 0.0;
 
     fn start() { this.home = this.transform.position; }
 
@@ -40,7 +40,7 @@ script Robot {
         if toy == 0.0 || toy == 7.0 { go_home(); }
     }
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         this.drop_left = max(0.0, this.drop_left - dt);
         this.boot_left = max(0.0, this.boot_left - dt);
         World.set_active(World.find("robot-boot"), this.boot_left > 0.0);
@@ -112,7 +112,7 @@ script Robot {
         }
     }
 
-    fn face(direction: f32) {
+    fn face(direction: number) {
         this.facing = sign(direction);
         World.find("robot-visor").transform.position.x = 0.12 * this.facing;
         World.find("robot-boot").transform.position.x = 0.4 * this.facing;
@@ -153,11 +153,11 @@ script Robot {
 // a robot standing underneath. The controller carries the rider from the
 // platform's solved motion; nothing here moves the robot.
 script TrackLift {
-    @export let bottom: f32 = -7.6;
-    @export let top: f32 = -2.15;
-    @export let speed: f32 = 2.4;
-    @export let half_width: f32 = 0.9;
-    var waiting: f32 = 0.0;
+    @export let bottom: number = -7.6;
+    @export let top: number = -2.15;
+    @export let speed: number = 2.4;
+    @export let half_width: number = 0.9;
+    var waiting: number = 0.0;
     var rising: bool = false;
 
     on ResetToy(toy) {
@@ -168,7 +168,7 @@ script TrackLift {
         }
     }
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         let here = this.transform.position;
         let robot = World.find("Robot").transform.position;
         // The robot stands about 0.75 above the platform's middle when on it.
@@ -201,13 +201,13 @@ script TrackLift {
 // far enough down, by a domino or anything else heavy, it sets off DROP
 // EVERYTHING; it re-arms once the spring has it back up.
 script RedButton {
-    @export let toy: f32 = 8.0;
-    @export let travel: f32 = 0.2;
+    @export let toy: number = 8.0;
+    @export let travel: number = 0.2;
     var home: Vec3 = Vec3(0.0, 0.0, 0.0);
     var armed: bool = true;
     var down: bool = false;
-    var settle: f32 = 1.0;
-    var presses: f32 = 0.0;
+    var settle: number = 1.0;
+    var presses: number = 0.0;
 
     fn start() { this.home = this.transform.position; }
 
@@ -239,7 +239,7 @@ script RedButton {
         }
     }
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         this.settle = max(0.0, this.settle - dt);
         let depth = this.home.y - this.transform.position.y;
         if !this.down && depth > this.travel && this.settle <= 0.0 {
@@ -258,4 +258,4 @@ script RedButton {
 }
 
 // The red button went down while armed.
-event ButtonPressed(x: f32, y: f32);
+event ButtonPressed(x: number, y: number);

@@ -26,7 +26,7 @@ script Result {
         this.pilot = World.find("ResultPilot");
     }
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         let over = Game.run_state == 4.0;
         if !over {
             this.shown = false;
@@ -52,7 +52,7 @@ script Result {
         else { Ui.set_text(this.pilot, "PILOT  /  " + name); }
     }
 
-    fn sector_name(sector: f32) -> String {
+    fn sector_name(sector: number) -> String {
         if sector <= 1.0 { return "OUTER DRIFT"; }
         if sector == 2.0 { return "EMBER BELT"; }
         if sector == 3.0 { return "VIOLET WAKE"; }

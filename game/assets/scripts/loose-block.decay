@@ -8,12 +8,12 @@ script LooseBlock {
     // Somewhere it never lands -- water, or off the edge of what is built --
     // still gives the block back, a little later.
     @export
-    let give_up_seconds: f32 = 3.0;
+    let give_up_seconds: number = 3.0;
 
-    var age: f32 = 0.0;
+    var age: number = 0.0;
     var returned: bool = false;
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         if returned {
             return;
         }

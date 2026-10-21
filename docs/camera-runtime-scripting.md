@@ -33,7 +33,7 @@ The editor-authored values are the initial state. Runtime calls change the live 
 | --- | --- |
 | `Camera.orthographic_size(camera, size)` | unit |
 
-`Camera.orthographic_size(camera: Entity, size: f32)` changes the selected orthographic camera's live `vertical_size`. A positive finite size is required; a missing camera or perspective projection produces a runtime error without changing it. The existing `fit`, clipping planes and unknown payload fields are preserved. This projection call does not require a behavior component and selects an explicit entity, so a game can prepare an inactive camera without ambiguity.
+`Camera.orthographic_size(camera: Entity, size: number)` changes the selected orthographic camera's live `vertical_size`. A positive finite size is required; a missing camera or perspective projection produces a runtime error without changing it. The existing `fit`, clipping planes and unknown payload fields are preserved. This projection call does not require a behavior component and selects an explicit entity, so a game can prepare an inactive camera without ambiguity.
 
 Low Tide eases the size in Decay between driving, walking the deck and following the crew ashore. Portrait framing still leaves room for both crawler treads while aboard. The scene extraction path consumes the same changed camera payload on native and web.
 
