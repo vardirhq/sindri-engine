@@ -486,17 +486,20 @@
 /* --- A phone held upright -------------------------------------------------- */
 
 @media (orientation: portrait) {
-    .status { width: 46vw; height: 86px; x: 26vw; y: -46px; padding: 10px; }
-    .island-name { font-size: 24px; line-height: 30px; height: 30px; }
-    .status-line { font-size: 15px; line-height: 19px; height: 19px; }
-    .hearth { width: 44vw; height: 70px; x: -25vw; y: -38px; padding: 10px; }
-    .hearth-pips { font-size: 22px; line-height: 26px; height: 26px; }
-    .card { width: 94vw; height: 180px; x: 50vw; y: 182px; padding: 12px; }
-    .unit-name { font-size: 24px; line-height: 28px; height: 28px; }
-    .skill-text, .unit-hint, .preview { font-size: 15px; line-height: 19px; }
-    .actions { width: 94vw; height: 62px; x: -50vw; y: 46px; justify-content: center; }
-    .button.small { width: 28vw; height: 56px; }
-    .button.primary { width: 32vw; height: 60px; }
+    .status { width: 46vw; height: 72px; x: 26vw; y: -40px; padding: 7px; gap: 0px; }
+    .island-name { font-size: 19px; line-height: 23px; height: 23px; }
+    .status-line { font-size: 12px; line-height: 17px; height: 17px; }
+    .hearth { width: 44vw; height: 62px; x: -25vw; y: -35px; padding: 7px; }
+    .hearth-title { font-size: 15px; line-height: 19px; height: 19px; }
+    .hearth-pips { font-size: 18px; line-height: 23px; height: 23px; }
+    .card { width: 94vw; height: 142px; x: 50vw; y: 116px; padding: 9px; gap: 2px; }
+    .unit-name { font-size: 20px; line-height: 24px; height: 24px; }
+    .unit-stats, .skill-name { font-size: 15px; line-height: 19px; height: 19px; }
+    .skill-text, .unit-hint, .preview { font-size: 12px; line-height: 16px; }
+    .actions { width: 94vw; height: 48px; x: -50vw; y: 30px; gap: 6px; justify-content: center; }
+    .button.small { width: 28vw; height: 44px; }
+    .button.primary { width: 32vw; height: 46px; }
+    .button-label { font-size: 15px; line-height: 19px; }
     .banner { width: 94vw; height: 96px; y: -150px; }
     .banner-title { font-size: 30px; line-height: 36px; height: 36px; }
     .screen-card { width: 90vw; padding: 22px; }
@@ -518,7 +521,10 @@
     .howto-title { height: 10vw; font-size: 8vw; line-height: 9.6vw; }
     .howto-head { height: 5.4vw; font-size: 4.2vw; line-height: 5.2vw; }
     .howto-body { font-size: 3.6vw; line-height: 4.8vw; }
-    .screen-title { font-size: 44px; line-height: 52px; }
+    .screen-title { font-size: 8vw; line-height: 10vw; text-wrap: word; }
+    .screen-card { gap: 12px; }
+    .screen-text { font-size: 17px; line-height: 23px; }
+    .screen-card .button.wide { width: 70vw; height: 52px; }
     .boons { direction: column; height: auto; gap: 10px; }
     .boon { width: 86vw; height: 120px; padding: 12px; gap: 6px; }
     .boon-title { height: 30px; font-size: 22px; line-height: 26px; }
