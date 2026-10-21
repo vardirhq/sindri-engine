@@ -1,5 +1,8 @@
 # Changelog
 
+- Add Sindri Game Dev plugin overview, support, privacy and terms pages to
+  the published documentation and site directory.
+
 - Publish an AI knowledge pack at `/knowledge-pack/` on the site: fifteen
   Markdown files and a zip a chat model can be given as its knowledge, such as
   a custom GPT's. It covers the project layout, writing scenes the way the
