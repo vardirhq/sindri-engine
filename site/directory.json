@@ -527,5 +527,53 @@
       "rust",
       "design"
     ]
+  },
+  {
+    "category": "docs",
+    "title": "Sindri Game Dev",
+    "path": "docs/sindri-game-dev/",
+    "source": "docs/sindri-game-dev.md",
+    "description": "Free Sindri game-development assistance from Vardir.",
+    "tags": [
+      "plugin",
+      "vardir",
+      "sindri-game-dev"
+    ]
+  },
+  {
+    "category": "docs",
+    "title": "Plugin support",
+    "path": "docs/plugin-support/",
+    "source": "docs/plugin-support.md",
+    "description": "Get help with Sindri Game Dev through GitHub or email.",
+    "tags": [
+      "plugin",
+      "vardir",
+      "plugin-support"
+    ]
+  },
+  {
+    "category": "docs",
+    "title": "Plugin privacy",
+    "path": "docs/plugin-privacy/",
+    "source": "docs/plugin-privacy.md",
+    "description": "How the plugin and its support channels handle information.",
+    "tags": [
+      "plugin",
+      "vardir",
+      "plugin-privacy"
+    ]
+  },
+  {
+    "category": "docs",
+    "title": "Plugin terms",
+    "path": "docs/plugin-terms/",
+    "source": "docs/plugin-terms.md",
+    "description": "Terms for the free Sindri Game Dev assistant plugin.",
+    "tags": [
+      "plugin",
+      "vardir",
+      "plugin-terms"
+    ]
   }
 ]

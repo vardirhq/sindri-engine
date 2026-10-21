@@ -1,5 +1,16 @@
 # Changelog
 
+- Add Sindri Game Dev plugin overview, support, privacy and terms pages to
+  the published documentation and site directory.
+
+- Publish an AI knowledge pack at `/knowledge-pack/` on the site: fifteen
+  Markdown files and a zip a chat model can be given as its knowledge, such as
+  a custom GPT's. It covers the project layout, writing scenes the way the
+  editor does, the Decay language and generated API, every scene component with
+  its defaults and a real use, Weave, physics, 2D and 3D, what works today, and
+  the feature examples whole. Built from the repository's own documents by
+  `site/build_knowledge_pack.py`.
+
 - Rebuild Orbital Last Stand around a complete flight deck: four ship sidegrades,
   difficulty choices, salvage unlocks, commendations, a flight log and archive,
   evasive burst, finite Boss Rush, responsive menus and accessibility settings.

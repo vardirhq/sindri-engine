@@ -30,6 +30,10 @@ PAGES = [
     ("export", "Web export", "docs/export.md", "SHIPPING"),
     ("parity", "Engine parity", "docs/parity.md", "STATUS"),
     ("architecture", "Architecture & direction", "docs/FEASIBILITY.md", "INTERNALS"),
+    ("sindri-game-dev", "Sindri Game Dev", "docs/sindri-game-dev.md", "PLUGIN"),
+    ("plugin-support", "Plugin support", "docs/plugin-support.md", "PLUGIN"),
+    ("plugin-privacy", "Plugin privacy", "docs/plugin-privacy.md", "PLUGIN"),
+    ("plugin-terms", "Plugin terms", "docs/plugin-terms.md", "PLUGIN"),
 ]
 
 NAV = [
@@ -60,6 +64,15 @@ NAV = [
             ("export", "Web export"),
             ("parity", "Engine parity"),
             ("architecture", "Architecture"),
+        ],
+    ),
+    (
+        "Sindri Game Dev",
+        [
+            ("sindri-game-dev", "Sindri Game Dev"),
+            ("plugin-support", "Plugin support"),
+            ("plugin-privacy", "Plugin privacy"),
+            ("plugin-terms", "Plugin terms"),
         ],
     ),
 ]

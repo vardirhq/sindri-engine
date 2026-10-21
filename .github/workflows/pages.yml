@@ -215,6 +215,7 @@ jobs:
           cp -R tools/sindri-chiptune/pkg/. target/pages/examples/sound-lab/pkg/
           python site/build_docs.py target/pages
           python site/build_directory.py target/pages
+          python site/build_knowledge_pack.py target/pages/knowledge-pack
           touch target/pages/.nojekyll
       - name: Verify assembled routes
         env:
@@ -222,6 +223,8 @@ jobs:
         run: |
           test -f target/pages/index.html
           test -f target/pages/directory/index.html
+          test -f target/pages/knowledge-pack/index.html
+          test -f target/pages/knowledge-pack/sindri-knowledge-pack.zip
           python - <<'CHECK'
           import os, pathlib, re, sys
 

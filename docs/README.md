@@ -75,6 +75,8 @@ valuable explanations of how bugs escaped code review, but
 - [Local-first AI authoring architecture](local-ai-architecture.md) — the
   narrow local agent in the editor
 - [AI authoring protocol](ai-authoring-protocol.md)
+- [AI knowledge pack](../site/knowledge-pack/README.md) — the files a chat
+  model is given as its knowledge, built from these documents
 
 ## Decay
 
