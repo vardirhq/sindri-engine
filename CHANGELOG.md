@@ -1,5 +1,14 @@
 # Changelog
 
+- Give Causeway a title worth opening on: the Lighthouse at dusk with its
+  lamps lit, the camera swaying round it and Hollow trudging over the
+  causeway, the logo and a plated menu rising out of the dark, a How to play
+  page, and a dip into the first battle as the camera settles into its view.
+  Wide screens keep the logo and menu in a shaded column beside the island;
+  a phone stacks them above and below it.
+- Fade a text's shadow with its letters, so words faded in through a
+  `[color=#rrggbbaa]` span no longer leave their shadow on the screen ahead
+  of them.
 - Rebuild Causeway as a turn-based tactics game. Three wardens hold four
   islands against the Hollow, who show every strike before it lands, until the
   rising tide drowns them. The diorama is generated low-poly GLB models lit by

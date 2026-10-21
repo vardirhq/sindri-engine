@@ -11,14 +11,22 @@ script CameraRig {
     @export let board_height: number = 10.0;
 
     var aspect: number = 0.0;
+    // Nearer than the board needs, below 1: the title draws the island in.
+    var zoom: number = 1.0;
+    var applied: number = 1.0;
+
+    fn set_zoom(value: number) {
+        zoom = value;
+    }
 
     fn update(dt: number) {
-        if abs(Viewport.aspect - aspect) < 0.001 { return; }
+        if abs(Viewport.aspect - aspect) < 0.001 && abs(zoom - applied) < 0.0001 { return; }
         aspect = Viewport.aspect;
+        applied = zoom;
         var size = board_height;
         if aspect > 0.0 && board_width / aspect > size {
             size = board_width / aspect;
         }
-        Camera.orthographic_size(this.entity, size);
+        Camera.orthographic_size(this.entity, size * zoom);
     }
 }

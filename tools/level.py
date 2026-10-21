@@ -168,6 +168,10 @@ def write_prefabs():
     missile = entity("missile", "Missile", {"sindri.model": {"asset": "models/missile.glb", "layer": 0},
                                             **script("Missile", "scripts/effects.decay")})
     write(folder / "missile.prefab", prefab("Missile", [missile]))
+    # A Hollow on the causeway behind the title: the husk's model and nothing
+    # else, walked by `title.decay`.
+    walker = entity("walker", "Walker", {"sindri.model": {"asset": "models/husk.glb", "layer": 0}})
+    write(folder / "walker.prefab", prefab("Walker", [walker]))
     spark = entity("spark", "Spark", {
         "sindri.sprite": {"texture": "textures/spark.png#spark-0", "billboard": True, "layer": 30,
                           "unlit": True, "tint": [1.0, 0.95, 0.8, 1.0]},
@@ -207,7 +211,7 @@ def world_entities():
         for gz in range(-2, 3):
             e.append(entity(f"sea-{gx + 2}-{gz + 2}", "Sea Tile", {"sindri.sprite": {
                 "texture": "textures/water.png", "tint": [0.07, 0.32, 0.4, 0.82], "layer": -10, "unlit": True,
-            }}, parent="sea", position=(gx * 24.0, 0.0, gz * 24.0), rotation=FLAT, scale=(24.0, 24.0, 1.0)))
+            }, "sindri.tags": {"tags": ["sea"]}}, parent="sea", position=(gx * 24.0, 0.0, gz * 24.0), rotation=FLAT, scale=(24.0, 24.0, 1.0)))
     e.append(entity("lantern-light", "Lantern Light", {"sindri.light": {
         "kind": "point", "color": [1.0, 0.76, 0.42], "intensity": 2.6, "range": 3.2}},
         position=(CENTRE[0], 3, CENTRE[2])))
@@ -316,17 +320,111 @@ def screen(e, id, name, title, body, button_label, title_size=0.09, disabled=Tru
         button(e, id + "-button", name + "Button", button_label, id + "-card", ("primary", "wide"), layer=212)
 
 
+def image(texture, layer, tint=(1, 1, 1, 1)):
+    return {"sindri.ui.image": {"texture": texture, "tint": list(tint), "anchor": "center", "layer": layer}}
+
+
+def clear_shape(layer):
+    """A shape nobody sees, so a box has something to anchor and be hit by."""
+    return {"sindri.ui.shape": {"kind": "rect", "anchor": "center", "layer": layer, "fill": [0, 0, 0, 0],
+                                "stroke": [0, 0, 0, 0], "stroke_width": 0.0, "corner_radius": 0.0}}
+
+
+def plate_button(e, id, name, label, parent, plate, classes, layer):
+    """A button drawn as a plate image the title script can fade and light,
+    over a box the pointer hits."""
+    e.append(entity(id, name, {**styled("plate-button", *classes), "sindri.ui.button": {"label": label},
+                               **clear_shape(layer)}, parent=parent, spatial=False))
+    e.append(entity(id + "-plate", name + " Plate", {**styled("plate"), **image(plate, layer + 1, (1, 1, 1, 0))},
+                    parent=id, spatial=False))
+    e.append(entity(id + "-label", name + " Label", {**styled("plate-label", *classes), **text(
+        "", BOLD_FONT, 0.034, layer + 3, rich=True)}, parent=id, spatial=False))
+
+
+def title_screen(e):
+    """The title: the Lighthouse at dusk behind the logo, a menu below, and
+    a page on how to play. `title.decay` brings it in and takes it away; it
+    starts transparent so nothing shows before the script does."""
+    # No shape on the root, as on the HUD's: its children then anchor to the
+    # screen's edges rather than to a box's middle.
+    e.append(entity("title", "Title", {**styled("title-root")}, spatial=False))
+    e.append(entity("title-shade-top", "TitleShadeTop", {**styled("title-shade-top"),
+                                                         **image("textures/shade-down.png", 182, (1, 1, 1, 0))},
+                    parent="title", spatial=False))
+    e.append(entity("title-shade-side", "TitleShadeSide", {**styled("title-shade-side"),
+                                                           **image("textures/shade-side.png", 182, (1, 1, 1, 0))},
+                    parent="title", spatial=False))
+    e.append(entity("title-shade-bottom", "TitleShadeBottom", {**styled("title-shade-bottom"),
+                                                               **image("textures/shade-up.png", 182,
+                                                                       (1, 1, 1, 0))},
+                    parent="title", spatial=False))
+    e.append(entity("title-halo", "TitleHalo", {**styled("title-halo"), **image("textures/halo.png", 184,
+                                                                                (1, 1, 1, 0))},
+                    parent="title", spatial=False))
+    e.append(entity("title-logo", "TitleLogo", {**styled("title-logo"), **image("textures/logo.png", 186,
+                                                                                (1, 1, 1, 0))},
+                    parent="title", spatial=False))
+    e.append(entity("title-tagline", "TitleTagline", {**styled("title-tagline"), **text(
+        "", TITLE_FONT, 0.03, 188, rich=True)}, parent="title", spatial=False))
+    e.append(entity("title-menu", "TitleMenu", {**styled("title-menu"), **clear_shape(190),
+                                                "sindri.ui.layout": column(0.02, "center", "center")},
+                    parent="title", spatial=False))
+    ordered_menu = []
+    plate_button(ordered_menu, "begin-button", "BeginButton", "Begin a crossing", "title-menu",
+                 "textures/plate-ember.png", ("begin",), 192)
+    plate_button(ordered_menu, "howto-button", "HowToButton", "How to play", "title-menu",
+                 "textures/plate-ink.png", ("guide",), 192)
+    ordered_menu.append(entity("title-record", "TitleRecord", {**styled("title-record"), **text(
+        "", BODY_FONT, 0.026, 196, rich=True)}, parent="title-menu", spatial=False))
+    e.extend(ordered_menu)
+    e.append(entity("title-prompt", "TitlePrompt", {**styled("title-prompt"), **text(
+        "", BODY_FONT, 0.024, 196, rich=True)}, parent="title", spatial=False))
+
+    # How to play: a page over the title, opened from its menu.
+    e.append(entity("howto", "HowTo", {**styled("howto-root")}, parent="title", disabled=True, spatial=False))
+    e.append(entity("howto-dim", "HowToDim", {**styled("howto-dim"), **image("textures/white.png", 296,
+                                                                           (0.01, 0.03, 0.05, 0.62))},
+                    parent="howto", spatial=False))
+    e.append(entity("howto-card", "HowToCard", {**styled("howto", "panel"),
+                                                **panel(300, layout=column(0.02, "center", "start"))},
+                    parent="howto", spatial=False))
+    e.append(entity("howto-title", "HowToTitle", {**styled("howto-title"), **text("How to play", TITLE_FONT,
+                                                                                 0.05, 302)},
+                    parent="howto-card", spatial=False))
+    pages = [
+        ("The Hollow show their hand.",
+         "Every Hollow marks the cell it will strike before it strikes. Read the marks, then move."),
+        ("Each warden moves, then acts.",
+         "Choose a warden, then where it walks, then its skill: the Bulwark shoves, the Mason raises stone, "
+         "the Lamplighter burns at range."),
+        ("The tide is on your side.",
+         "Each round the sea rises. Shove the Hollow into it, and hold until high tide closes the causeway."),
+        ("Guard the Hearth.",
+         "Houses and the beacon feed it. Lose them all and the light goes out."),
+    ]
+    for i, (head, body) in enumerate(pages):
+        e.append(entity(f"howto-head-{i}", f"HowToHead{i}", {**styled("howto-head"), **text(
+            head, BOLD_FONT, 0.03, 302)}, parent="howto-card", spatial=False))
+        e.append(entity(f"howto-body-{i}", f"HowToBody{i}", {**styled("howto-body"), **text(
+            body, BODY_FONT, 0.026, 302, wrap="word")}, parent="howto-card", spatial=False))
+    e.append(entity("howto-keys", "HowToKeys", {**styled("howto-body", "dim"), **text(
+        "Click or tap to play.  Keys: arrows and Enter, Q aims, Tab next warden, Z undoes a move, "
+        "E ends the turn, R rewinds once per island.", BODY_FONT, 0.022, 302, wrap="word")},
+                    parent="howto-card", spatial=False))
+    plate_button(e, "howto-close", "HowToClose", "Back", "howto-card", "textures/plate-ink.png", ("close",), 304)
+
+    # Over everything and outside the title, so it can cover the change from
+    # the title's island to the first battle's after the title is put away.
+    e.append(entity("title-fade", "TitleFade", {**styled("title-fade"), **image("textures/white.png", 400,
+                                                                                (0.01, 0.02, 0.04, 1))},
+                    spatial=False))
+    e.append(entity("title-director", "TitleDirector", script(
+        "TitleShow", "scripts/title.decay", walker="prefabs/walker.prefab"), spatial=False))
+
+
 def screens():
     e = []
-    screen(e, "title", "Title", "Causeway",
-           "The Hollow cross at low tide. Hold each island until the sea comes in and closes the causeway "
-           "behind them.", "Begin a crossing", title_size=0.16, disabled=False)
-    e.append(entity("title-record", "TitleRecord", {**styled("screen-text", "dim"), **text("", BODY_FONT, 0.026, 210)},
-                    parent="title-card", spatial=False))
-    e.append(entity("title-controls", "TitleControls", {**styled("screen-text", "dim"), **text(
-        "Click a warden, then where to move, then what to strike.  Arrows and Enter work too.  "
-        "E ends the turn, Z undoes a move, R rewinds the turn once per island.", BODY_FONT, 0.024, 210,
-        wrap="word")}, parent="title-card", spatial=False))
+    title_screen(e)
     screen(e, "held", "Held", "Saltmarsh holds", "", "Onward")
     screen(e, "fallen", "Fallen", "The light goes out", "", "Back to the shore")
     screen(e, "crossed", "Crossed", "The lamp is lit", "", "Back to the shore")

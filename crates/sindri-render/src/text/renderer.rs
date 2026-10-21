@@ -408,7 +408,12 @@ impl TextRenderer {
                     origin[0] + instance.shadow.offset[0],
                     origin[1] + instance.shadow.offset[1],
                 ],
-                |_| instance.shadow.color,
+                |span| {
+                    shadow_color(
+                        instance.shadow.color,
+                        face_color(laid, instance.color, span),
+                    )
+                },
             );
         }
 
@@ -511,56 +516,12 @@ fn face_color(laid: &LaidOut, string: [f32; 4], span: usize) -> [f32; 4] {
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::TextRenderer;
-    use crate::text::{TextAlign, TextInstance};
-
-    /// The families every glyph of `text`, shaped in `font`, was taken from.
-    fn families_shaping(renderer: &mut TextRenderer, font: &str, text: &str) -> Vec<String> {
-        let instance = TextInstance::new(
-            text,
-            font,
-            [0.0, 0.0],
-            0.06,
-            0.07,
-            [1.0; 4],
-            [TextAlign::Start; 2],
-        )
-        .expect("a valid instance");
-        let face = renderer.fonts[font].clone();
-        let buffer = renderer.shape(&instance, &face, 0.06);
-        let mut families = Vec::new();
-        for run in buffer.layout_runs() {
-            for glyph in run.glyphs {
-                let face = renderer
-                    .font_system
-                    .db()
-                    .face(glyph.font_id)
-                    .expect("a shaped glyph names a loaded face");
-                families.push(face.families[0].0.clone());
-            }
-        }
-        families
-    }
-
-    /// A project that ships only a bold file means that file. Asked for its
-    /// family at the regular weight, the shaper went to whatever regular face
-    /// the system had, and every Flappy title was drawn in a font nobody chose.
-    #[test]
-    fn a_bold_only_font_is_drawn_in_its_own_face() {
-        let bytes = std::fs::read(concat!(
-            env!("CARGO_MANIFEST_DIR"),
-            "/../../games/flappy/assets/fonts/ChakraPetch-Bold.ttf"
-        ))
-        .expect("the fixture font is in the repository");
-        let mut renderer = TextRenderer::new();
-        renderer.bind_font("fonts/ChakraPetch-Bold.ttf", "Chakra Petch", bytes);
-        let families = families_shaping(&mut renderer, "fonts/ChakraPetch-Bold.ttf", "FLAPPY");
-        assert!(!families.is_empty(), "the word was shaped");
-        assert!(
-            families.iter().all(|family| family == "Chakra Petch"),
-            "every glyph is the bound face's, not a system fallback: {families:?}"
-        );
-    }
+/// A shadow is as see-through as the letters casting it, so words faded in
+/// with a `[color=#rrggbbaa]` span bring their shadow with them rather than
+/// leaving it on the screen ahead of them.
+fn shadow_color(shadow: [f32; 4], face: [f32; 4]) -> [f32; 4] {
+    [shadow[0], shadow[1], shadow[2], shadow[3] * face[3]]
 }
+
+#[cfg(test)]
+mod tests;

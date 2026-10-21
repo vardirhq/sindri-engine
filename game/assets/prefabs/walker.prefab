@@ -1,0 +1,36 @@
+{
+  "format_version": 1,
+  "metadata": {
+    "name": "Walker"
+  },
+  "entities": [
+    {
+      "id": "walker",
+      "name": "Walker",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.model": {
+          "asset": "models/husk.glb",
+          "layer": 0
+        }
+      }
+    }
+  ]
+}

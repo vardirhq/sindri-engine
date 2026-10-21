@@ -261,12 +261,6 @@
     text-align: center;
 }
 
-#title-title {
-    font-size: 104px;
-    line-height: 112px;
-    letter-spacing: 4px;
-}
-
 .screen-text {
     width: 100%;
     height: auto;
@@ -332,6 +326,163 @@
     text-align: center;
 }
 
+/* --- The title ------------------------------------------------------------------ */
+
+/* Sized in vh so the title is the same picture at any window height; the
+   phone layout below switches to vw, the narrow side. Every piece starts
+   transparent and `title.decay` brings it in. */
+
+.title-root, .title-fade, .howto-root, .howto-dim {
+    width: 100vw;
+    height: 100vh;
+}
+
+/* A wide screen keeps the logo and menu in a shaded column on the left and
+   gives the right to the island. */
+
+.title-shade-side {
+    width: 120vh;
+    height: 100vh;
+    x: 60vh;
+    anchor: left;
+}
+
+.title-shade-top {
+    width: 100vw;
+    height: 30vh;
+    y: -15vh;
+    anchor: top;
+}
+
+.title-shade-bottom {
+    width: 100vw;
+    height: 30vh;
+    y: 15vh;
+    anchor: bottom;
+}
+
+.title-halo {
+    width: 116vh;
+    height: 58vh;
+    x: 46vh;
+    y: -31vh;
+    anchor: top_left;
+}
+
+/* The logo is 1200 x 555. */
+.title-logo {
+    width: 80vh;
+    height: 37vh;
+    x: 46vh;
+    y: -30.5vh;
+    anchor: top_left;
+}
+
+.title-tagline {
+    width: 84vh;
+    height: 4vh;
+    x: 46vh;
+    y: -53vh;
+    anchor: top_left;
+    font-size: 2.5vh;
+    line-height: 3vh;
+    letter-spacing: 0.7vh;
+    text-align: center;
+}
+
+.title-menu {
+    width: 60vh;
+    height: 23.6vh;
+    x: 46vh;
+    y: 25vh;
+    anchor: bottom_left;
+    direction: column;
+    gap: 1.4vh;
+    align-items: center;
+    justify-content: center;
+}
+
+.plate-button.begin { width: 52vh; height: 10.4vh; }
+.plate-button.guide { width: 34vh; height: 6.8vh; }
+.plate-button.close { width: 30vh; height: 6vh; }
+
+.plate {
+    width: 100%;
+    height: 100%;
+}
+
+.plate-label {
+    width: 100%;
+    height: 100%;
+    font-size: 3.3vh;
+    line-height: 4vh;
+    letter-spacing: 0.1vh;
+    text-align: center;
+}
+
+.plate-label.guide, .plate-label.close {
+    font-size: 2.4vh;
+    line-height: 3vh;
+}
+
+.title-record {
+    width: 100%;
+    height: 3vh;
+    font-size: 2.1vh;
+    line-height: 2.6vh;
+    text-align: center;
+}
+
+.title-prompt {
+    width: 60vh;
+    height: 3vh;
+    x: 46vh;
+    y: 6vh;
+    anchor: bottom_left;
+    font-size: 1.9vh;
+    line-height: 2.4vh;
+    letter-spacing: 0.4vh;
+    text-align: center;
+}
+
+.howto {
+    width: 78vh;
+    height: auto;
+    padding: 3.4vh;
+    direction: column;
+    gap: 0.9vh;
+    align-items: center;
+    background: #0b1a22f2;
+}
+
+.howto-title {
+    width: 100%;
+    height: 6vh;
+    color: #f3d79a;
+    font-size: 4.6vh;
+    line-height: 5.6vh;
+    text-align: center;
+}
+
+.howto-head {
+    width: 100%;
+    height: 3.2vh;
+    color: #ffcf7a;
+    font-size: 2.4vh;
+    line-height: 3vh;
+    text-align: start;
+}
+
+.howto-body {
+    width: 100%;
+    height: auto;
+    color: #dfe8ec;
+    font-size: 2.1vh;
+    line-height: 2.8vh;
+    text-align: start;
+    text-wrap: word;
+}
+
 /* --- A phone held upright -------------------------------------------------- */
 
 @media (orientation: portrait) {
@@ -349,7 +500,24 @@
     .banner { width: 94vw; height: 96px; y: -150px; }
     .banner-title { font-size: 30px; line-height: 36px; height: 36px; }
     .screen-card { width: 90vw; padding: 22px; }
-    #title-title { font-size: 64px; line-height: 72px; }
+    .title-shade-side { width: 1px; height: 1px; }
+    .title-shade-top { height: 42vh; y: -21vh; }
+    .title-shade-bottom { height: 40vh; y: 20vh; }
+    .title-halo { width: 140vw; height: 70vw; x: 0px; y: -30vw; anchor: top; }
+    .title-logo { width: 94vw; height: 43.5vw; x: 0px; y: -27vw; anchor: top; }
+    .title-tagline { width: 96vw; height: 6vw; x: 0px; y: -54vw; anchor: top; font-size: 3.5vw; line-height: 4.4vw; letter-spacing: 0.9vw; }
+    .title-menu { width: 92vw; height: 36vw; x: 0px; y: 30vw; anchor: bottom; gap: 2vw; }
+    .plate-button.begin { width: 82vw; height: 16.4vw; }
+    .plate-button.guide { width: 56vw; height: 11.2vw; }
+    .plate-button.close { width: 50vw; height: 10vw; }
+    .plate-label { font-size: 5.2vw; line-height: 6.2vw; }
+    .plate-label.guide, .plate-label.close { font-size: 4vw; line-height: 5vw; }
+    .title-record { height: 5vw; font-size: 3.4vw; line-height: 4.2vw; }
+    .title-prompt { width: 92vw; height: 5vw; x: 0px; y: 6vw; anchor: bottom; font-size: 3.2vw; line-height: 4vw; }
+    .howto { width: 92vw; padding: 5vw; gap: 1.6vw; }
+    .howto-title { height: 10vw; font-size: 8vw; line-height: 9.6vw; }
+    .howto-head { height: 5.4vw; font-size: 4.2vw; line-height: 5.2vw; }
+    .howto-body { font-size: 3.6vw; line-height: 4.8vw; }
     .screen-title { font-size: 44px; line-height: 52px; }
     .boons { direction: column; height: auto; gap: 10px; }
     .boon { width: 86vw; height: 120px; padding: 12px; gap: 6px; }

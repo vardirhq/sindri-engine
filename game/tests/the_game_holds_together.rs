@@ -101,13 +101,18 @@ fn centre(run: &ProjectRun, id: &str) -> [f32; 2] {
 fn the_hud_keeps_to_the_corners_on_a_desk_and_reflows_on_a_phone() {
     for size in [[1280.0, 720.0], [390.0, 844.0]] {
         let mut run = open(size);
-        // Into a battle, so the HUD is showing.
+        // Into a battle, so the HUD is showing. The title takes its leave
+        // first, settling the camera into the battle's view.
         run.key(sindri_platform::Key::Enter, true);
         run.step(1.0 / 60.0).expect("steps");
         run.key(sindri_platform::Key::Enter, false);
-        for _ in 0..30 {
+        for _ in 0..60 * 10 {
             run.step(1.0 / 60.0).expect("steps");
+            if run.board("phase") == 2.0 {
+                break;
+            }
         }
+        assert_eq!(run.board("phase"), 2.0, "the wardens' turn came");
         for (id, left, top) in [
             ("status", true, true),
             ("hearth", false, true),

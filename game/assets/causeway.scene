@@ -236,6 +236,118 @@
       }
     },
     {
+      "id": "begin-button",
+      "name": "BeginButton",
+      "parent": "title-menu",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "plate-button",
+            "begin"
+          ]
+        },
+        "sindri.ui.button": {
+          "label": "Begin a crossing"
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "anchor": "center",
+          "layer": 192,
+          "fill": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0.0,
+          "corner_radius": 0.0
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "begin-button-label",
+      "name": "BeginButton Label",
+      "parent": "begin-button",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "plate-label",
+            "begin"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "",
+          "font": "fonts/AlegreyaSans-Bold.ttf",
+          "font_size": 0.034,
+          "line_height": 0.04148,
+          "anchor": "center",
+          "layer": 195,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "rich": true,
+          "bounds": [
+            0.0,
+            0.0
+          ]
+        },
+        "sindri.ui.box": {
+          "order": 1
+        }
+      }
+    },
+    {
+      "id": "begin-button-plate",
+      "name": "BeginButton Plate",
+      "parent": "begin-button",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "plate"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/plate-ember.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 193
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
       "id": "boon-0",
       "name": "Boon0",
       "parent": "boons",
@@ -2099,6 +2211,776 @@
       }
     },
     {
+      "id": "howto",
+      "name": "HowTo",
+      "parent": "title",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "howto-root"
+          ]
+        }
+      },
+      "disabled": true
+    },
+    {
+      "id": "howto-body-0",
+      "name": "HowToBody0",
+      "parent": "howto-card",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "howto-body"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "Every Hollow marks the cell it will strike before it strikes. Read the marks, then move.",
+          "font": "fonts/AlegreyaSans-Medium.ttf",
+          "font_size": 0.026,
+          "line_height": 0.03172,
+          "anchor": "center",
+          "layer": 302,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "bounds": [
+            0.0,
+            0.0
+          ],
+          "wrap": "word"
+        },
+        "sindri.ui.box": {
+          "order": 2
+        }
+      }
+    },
+    {
+      "id": "howto-body-1",
+      "name": "HowToBody1",
+      "parent": "howto-card",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "howto-body"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "Choose a warden, then where it walks, then its skill: the Bulwark shoves, the Mason raises stone, the Lamplighter burns at range.",
+          "font": "fonts/AlegreyaSans-Medium.ttf",
+          "font_size": 0.026,
+          "line_height": 0.03172,
+          "anchor": "center",
+          "layer": 302,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "bounds": [
+            0.0,
+            0.0
+          ],
+          "wrap": "word"
+        },
+        "sindri.ui.box": {
+          "order": 4
+        }
+      }
+    },
+    {
+      "id": "howto-body-2",
+      "name": "HowToBody2",
+      "parent": "howto-card",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "howto-body"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "Each round the sea rises. Shove the Hollow into it, and hold until high tide closes the causeway.",
+          "font": "fonts/AlegreyaSans-Medium.ttf",
+          "font_size": 0.026,
+          "line_height": 0.03172,
+          "anchor": "center",
+          "layer": 302,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "bounds": [
+            0.0,
+            0.0
+          ],
+          "wrap": "word"
+        },
+        "sindri.ui.box": {
+          "order": 6
+        }
+      }
+    },
+    {
+      "id": "howto-body-3",
+      "name": "HowToBody3",
+      "parent": "howto-card",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "howto-body"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "Houses and the beacon feed it. Lose them all and the light goes out.",
+          "font": "fonts/AlegreyaSans-Medium.ttf",
+          "font_size": 0.026,
+          "line_height": 0.03172,
+          "anchor": "center",
+          "layer": 302,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "bounds": [
+            0.0,
+            0.0
+          ],
+          "wrap": "word"
+        },
+        "sindri.ui.box": {
+          "order": 8
+        }
+      }
+    },
+    {
+      "id": "howto-button",
+      "name": "HowToButton",
+      "parent": "title-menu",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "plate-button",
+            "guide"
+          ]
+        },
+        "sindri.ui.button": {
+          "label": "How to play"
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "anchor": "center",
+          "layer": 192,
+          "fill": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0.0,
+          "corner_radius": 0.0
+        },
+        "sindri.ui.box": {
+          "order": 1
+        }
+      }
+    },
+    {
+      "id": "howto-button-label",
+      "name": "HowToButton Label",
+      "parent": "howto-button",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "plate-label",
+            "guide"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "",
+          "font": "fonts/AlegreyaSans-Bold.ttf",
+          "font_size": 0.034,
+          "line_height": 0.04148,
+          "anchor": "center",
+          "layer": 195,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "rich": true,
+          "bounds": [
+            0.0,
+            0.0
+          ]
+        },
+        "sindri.ui.box": {
+          "order": 1
+        }
+      }
+    },
+    {
+      "id": "howto-button-plate",
+      "name": "HowToButton Plate",
+      "parent": "howto-button",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "plate"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/plate-ink.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 193
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "howto-card",
+      "name": "HowToCard",
+      "parent": "howto",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "howto",
+            "panel"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "anchor": "center",
+          "layer": 300,
+          "fill": [
+            0.04,
+            0.08,
+            0.11,
+            0.86
+          ],
+          "stroke": [
+            0.95,
+            0.8,
+            0.5,
+            0.35
+          ],
+          "stroke_width": 0.004,
+          "corner_radius": 0.012
+        },
+        "sindri.ui.layout": {
+          "direction": "column",
+          "spacing": 0.02,
+          "align": "center",
+          "justify": "start"
+        },
+        "sindri.ui.box": {
+          "order": 1
+        }
+      }
+    },
+    {
+      "id": "howto-close",
+      "name": "HowToClose",
+      "parent": "howto-card",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "plate-button",
+            "close"
+          ]
+        },
+        "sindri.ui.button": {
+          "label": "Back"
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "anchor": "center",
+          "layer": 304,
+          "fill": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0.0,
+          "corner_radius": 0.0
+        },
+        "sindri.ui.box": {
+          "order": 10
+        }
+      }
+    },
+    {
+      "id": "howto-close-label",
+      "name": "HowToClose Label",
+      "parent": "howto-close",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "plate-label",
+            "close"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "",
+          "font": "fonts/AlegreyaSans-Bold.ttf",
+          "font_size": 0.034,
+          "line_height": 0.04148,
+          "anchor": "center",
+          "layer": 307,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "rich": true,
+          "bounds": [
+            0.0,
+            0.0
+          ]
+        },
+        "sindri.ui.box": {
+          "order": 1
+        }
+      }
+    },
+    {
+      "id": "howto-close-plate",
+      "name": "HowToClose Plate",
+      "parent": "howto-close",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "plate"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/plate-ink.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 305
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "howto-dim",
+      "name": "HowToDim",
+      "parent": "howto",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "howto-dim"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/white.png",
+          "tint": [
+            0.01,
+            0.03,
+            0.05,
+            0.62
+          ],
+          "anchor": "center",
+          "layer": 296
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "howto-head-0",
+      "name": "HowToHead0",
+      "parent": "howto-card",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "howto-head"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "The Hollow show their hand.",
+          "font": "fonts/AlegreyaSans-Bold.ttf",
+          "font_size": 0.03,
+          "line_height": 0.0366,
+          "anchor": "center",
+          "layer": 302,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "bounds": [
+            0.0,
+            0.0
+          ]
+        },
+        "sindri.ui.box": {
+          "order": 1
+        }
+      }
+    },
+    {
+      "id": "howto-head-1",
+      "name": "HowToHead1",
+      "parent": "howto-card",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "howto-head"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "Each warden moves, then acts.",
+          "font": "fonts/AlegreyaSans-Bold.ttf",
+          "font_size": 0.03,
+          "line_height": 0.0366,
+          "anchor": "center",
+          "layer": 302,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "bounds": [
+            0.0,
+            0.0
+          ]
+        },
+        "sindri.ui.box": {
+          "order": 3
+        }
+      }
+    },
+    {
+      "id": "howto-head-2",
+      "name": "HowToHead2",
+      "parent": "howto-card",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "howto-head"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "The tide is on your side.",
+          "font": "fonts/AlegreyaSans-Bold.ttf",
+          "font_size": 0.03,
+          "line_height": 0.0366,
+          "anchor": "center",
+          "layer": 302,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "bounds": [
+            0.0,
+            0.0
+          ]
+        },
+        "sindri.ui.box": {
+          "order": 5
+        }
+      }
+    },
+    {
+      "id": "howto-head-3",
+      "name": "HowToHead3",
+      "parent": "howto-card",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "howto-head"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "Guard the Hearth.",
+          "font": "fonts/AlegreyaSans-Bold.ttf",
+          "font_size": 0.03,
+          "line_height": 0.0366,
+          "anchor": "center",
+          "layer": 302,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "bounds": [
+            0.0,
+            0.0
+          ]
+        },
+        "sindri.ui.box": {
+          "order": 7
+        }
+      }
+    },
+    {
+      "id": "howto-keys",
+      "name": "HowToKeys",
+      "parent": "howto-card",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "howto-body",
+            "dim"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "Click or tap to play.  Keys: arrows and Enter, Q aims, Tab next warden, Z undoes a move, E ends the turn, R rewinds once per island.",
+          "font": "fonts/AlegreyaSans-Medium.ttf",
+          "font_size": 0.022,
+          "line_height": 0.02684,
+          "anchor": "center",
+          "layer": 302,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "bounds": [
+            0.0,
+            0.0
+          ],
+          "wrap": "word"
+        },
+        "sindri.ui.box": {
+          "order": 9
+        }
+      }
+    },
+    {
+      "id": "howto-title",
+      "name": "HowToTitle",
+      "parent": "howto-card",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "howto-title"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "How to play",
+          "font": "fonts/AlegreyaSC-Bold.ttf",
+          "font_size": 0.05,
+          "line_height": 0.061,
+          "anchor": "center",
+          "layer": 302,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "bounds": [
+            0.0,
+            0.0
+          ]
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
       "id": "hud",
       "name": "Hud",
       "components": {
@@ -2551,6 +3433,11 @@
           ],
           "layer": -10,
           "unlit": true
+        },
+        "sindri.tags": {
+          "tags": [
+            "sea"
+          ]
         }
       }
     },
@@ -2587,6 +3474,11 @@
           ],
           "layer": -10,
           "unlit": true
+        },
+        "sindri.tags": {
+          "tags": [
+            "sea"
+          ]
         }
       }
     },
@@ -2623,6 +3515,11 @@
           ],
           "layer": -10,
           "unlit": true
+        },
+        "sindri.tags": {
+          "tags": [
+            "sea"
+          ]
         }
       }
     },
@@ -2659,6 +3556,11 @@
           ],
           "layer": -10,
           "unlit": true
+        },
+        "sindri.tags": {
+          "tags": [
+            "sea"
+          ]
         }
       }
     },
@@ -2695,6 +3597,11 @@
           ],
           "layer": -10,
           "unlit": true
+        },
+        "sindri.tags": {
+          "tags": [
+            "sea"
+          ]
         }
       }
     },
@@ -2731,6 +3638,11 @@
           ],
           "layer": -10,
           "unlit": true
+        },
+        "sindri.tags": {
+          "tags": [
+            "sea"
+          ]
         }
       }
     },
@@ -2767,6 +3679,11 @@
           ],
           "layer": -10,
           "unlit": true
+        },
+        "sindri.tags": {
+          "tags": [
+            "sea"
+          ]
         }
       }
     },
@@ -2803,6 +3720,11 @@
           ],
           "layer": -10,
           "unlit": true
+        },
+        "sindri.tags": {
+          "tags": [
+            "sea"
+          ]
         }
       }
     },
@@ -2839,6 +3761,11 @@
           ],
           "layer": -10,
           "unlit": true
+        },
+        "sindri.tags": {
+          "tags": [
+            "sea"
+          ]
         }
       }
     },
@@ -2875,6 +3802,11 @@
           ],
           "layer": -10,
           "unlit": true
+        },
+        "sindri.tags": {
+          "tags": [
+            "sea"
+          ]
         }
       }
     },
@@ -2911,6 +3843,11 @@
           ],
           "layer": -10,
           "unlit": true
+        },
+        "sindri.tags": {
+          "tags": [
+            "sea"
+          ]
         }
       }
     },
@@ -2947,6 +3884,11 @@
           ],
           "layer": -10,
           "unlit": true
+        },
+        "sindri.tags": {
+          "tags": [
+            "sea"
+          ]
         }
       }
     },
@@ -2983,6 +3925,11 @@
           ],
           "layer": -10,
           "unlit": true
+        },
+        "sindri.tags": {
+          "tags": [
+            "sea"
+          ]
         }
       }
     },
@@ -3019,6 +3966,11 @@
           ],
           "layer": -10,
           "unlit": true
+        },
+        "sindri.tags": {
+          "tags": [
+            "sea"
+          ]
         }
       }
     },
@@ -3055,6 +4007,11 @@
           ],
           "layer": -10,
           "unlit": true
+        },
+        "sindri.tags": {
+          "tags": [
+            "sea"
+          ]
         }
       }
     },
@@ -3091,6 +4048,11 @@
           ],
           "layer": -10,
           "unlit": true
+        },
+        "sindri.tags": {
+          "tags": [
+            "sea"
+          ]
         }
       }
     },
@@ -3127,6 +4089,11 @@
           ],
           "layer": -10,
           "unlit": true
+        },
+        "sindri.tags": {
+          "tags": [
+            "sea"
+          ]
         }
       }
     },
@@ -3163,6 +4130,11 @@
           ],
           "layer": -10,
           "unlit": true
+        },
+        "sindri.tags": {
+          "tags": [
+            "sea"
+          ]
         }
       }
     },
@@ -3199,6 +4171,11 @@
           ],
           "layer": -10,
           "unlit": true
+        },
+        "sindri.tags": {
+          "tags": [
+            "sea"
+          ]
         }
       }
     },
@@ -3235,6 +4212,11 @@
           ],
           "layer": -10,
           "unlit": true
+        },
+        "sindri.tags": {
+          "tags": [
+            "sea"
+          ]
         }
       }
     },
@@ -3271,6 +4253,11 @@
           ],
           "layer": -10,
           "unlit": true
+        },
+        "sindri.tags": {
+          "tags": [
+            "sea"
+          ]
         }
       }
     },
@@ -3307,6 +4294,11 @@
           ],
           "layer": -10,
           "unlit": true
+        },
+        "sindri.tags": {
+          "tags": [
+            "sea"
+          ]
         }
       }
     },
@@ -3343,6 +4335,11 @@
           ],
           "layer": -10,
           "unlit": true
+        },
+        "sindri.tags": {
+          "tags": [
+            "sea"
+          ]
         }
       }
     },
@@ -3379,6 +4376,11 @@
           ],
           "layer": -10,
           "unlit": true
+        },
+        "sindri.tags": {
+          "tags": [
+            "sea"
+          ]
         }
       }
     },
@@ -3415,6 +4417,11 @@
           ],
           "layer": -10,
           "unlit": true
+        },
+        "sindri.tags": {
+          "tags": [
+            "sea"
+          ]
         }
       }
     },
@@ -3641,204 +4648,92 @@
       "components": {
         "weave.style": {
           "classes": [
-            "screen"
+            "title-root"
+          ]
+        }
+      }
+    },
+    {
+      "id": "title-director",
+      "name": "TitleDirector",
+      "components": {
+        "sindri.script": {
+          "script": "TitleShow",
+          "source": "scripts/title.decay",
+          "properties": {
+            "walker": "prefabs/walker.prefab"
+          }
+        }
+      }
+    },
+    {
+      "id": "title-fade",
+      "name": "TitleFade",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "title-fade"
           ]
         },
-        "sindri.ui.shape": {
-          "kind": "rect",
-          "anchor": "center",
-          "layer": 200,
-          "fill": [
+        "sindri.ui.image": {
+          "texture": "textures/white.png",
+          "tint": [
+            0.01,
             0.02,
-            0.05,
-            0.07,
-            0.55
-          ],
-          "stroke": [
-            0,
-            0,
-            0,
-            0
-          ],
-          "stroke_width": 0.004,
-          "corner_radius": 0.012
-        },
-        "sindri.ui.layout": {
-          "direction": "column",
-          "spacing": 0.02,
-          "align": "center",
-          "justify": "center"
-        }
-      }
-    },
-    {
-      "id": "title-button",
-      "name": "TitleButton",
-      "parent": "title-card",
-      "components": {
-        "weave.style": {
-          "classes": [
-            "button",
-            "primary",
-            "wide"
-          ]
-        },
-        "sindri.ui.button": {
-          "label": "Begin a crossing"
-        },
-        "sindri.ui.shape": {
-          "kind": "rect",
-          "anchor": "center",
-          "layer": 212,
-          "fill": [
-            0.1,
-            0.16,
-            0.2,
-            1.0
-          ],
-          "stroke": [
-            0.95,
-            0.8,
-            0.5,
-            0.6
-          ],
-          "stroke_width": 0.004,
-          "corner_radius": 0.01
-        },
-        "sindri.ui.box": {
-          "order": 2
-        }
-      }
-    },
-    {
-      "id": "title-button-label",
-      "name": "TitleButton Label",
-      "parent": "title-button",
-      "components": {
-        "weave.style": {
-          "classes": [
-            "button-label"
-          ]
-        },
-        "sindri.ui.text": {
-          "text": "Begin a crossing",
-          "font": "fonts/AlegreyaSans-Bold.ttf",
-          "font_size": 0.034,
-          "line_height": 0.04148,
-          "anchor": "center",
-          "layer": 214,
-          "color": [
-            1,
-            1,
-            1,
+            0.04,
             1
           ],
-          "shadow": {
-            "offset": [
-              0.0,
-              -0.003
-            ],
-            "color": [
-              0.0,
-              0.02,
-              0.05,
-              0.6
-            ],
-            "softness": 0.003
-          },
-          "bounds": [
-            0.0,
-            0.0
-          ]
-        },
-        "sindri.ui.box": {
-          "order": 0
+          "anchor": "center",
+          "layer": 400
         }
       }
     },
     {
-      "id": "title-card",
-      "name": "Title Card",
+      "id": "title-halo",
+      "name": "TitleHalo",
       "parent": "title",
       "components": {
         "weave.style": {
           "classes": [
-            "screen-card",
-            "panel"
+            "title-halo"
           ]
         },
-        "sindri.ui.shape": {
-          "kind": "rect",
+        "sindri.ui.image": {
+          "texture": "textures/halo.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
           "anchor": "center",
-          "layer": 205,
-          "fill": [
-            0.04,
-            0.08,
-            0.11,
-            0.86
-          ],
-          "stroke": [
-            0.95,
-            0.8,
-            0.5,
-            0.35
-          ],
-          "stroke_width": 0.004,
-          "corner_radius": 0.012
-        },
-        "sindri.ui.layout": {
-          "direction": "column",
-          "spacing": 0.02,
-          "align": "center",
-          "justify": "center"
+          "layer": 184
         },
         "sindri.ui.box": {
-          "order": 0
+          "order": 3
         }
       }
     },
     {
-      "id": "title-controls",
-      "name": "TitleControls",
-      "parent": "title-card",
+      "id": "title-logo",
+      "name": "TitleLogo",
+      "parent": "title",
       "components": {
         "weave.style": {
           "classes": [
-            "screen-text",
-            "dim"
+            "title-logo"
           ]
         },
-        "sindri.ui.text": {
-          "text": "Click a warden, then where to move, then what to strike.  Arrows and Enter work too.  E ends the turn, Z undoes a move, R rewinds the turn once per island.",
-          "font": "fonts/AlegreyaSans-Medium.ttf",
-          "font_size": 0.024,
-          "line_height": 0.02928,
+        "sindri.ui.image": {
+          "texture": "textures/logo.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
           "anchor": "center",
-          "layer": 210,
-          "color": [
-            1,
-            1,
-            1,
-            1
-          ],
-          "shadow": {
-            "offset": [
-              0.0,
-              -0.003
-            ],
-            "color": [
-              0.0,
-              0.02,
-              0.05,
-              0.6
-            ],
-            "softness": 0.003
-          },
-          "bounds": [
-            0.0,
-            0.0
-          ],
-          "wrap": "word"
+          "layer": 186
         },
         "sindri.ui.box": {
           "order": 4
@@ -3846,14 +4741,100 @@
       }
     },
     {
-      "id": "title-record",
-      "name": "TitleRecord",
-      "parent": "title-card",
+      "id": "title-menu",
+      "name": "TitleMenu",
+      "parent": "title",
       "components": {
         "weave.style": {
           "classes": [
-            "screen-text",
-            "dim"
+            "title-menu"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "anchor": "center",
+          "layer": 190,
+          "fill": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0.0,
+          "corner_radius": 0.0
+        },
+        "sindri.ui.layout": {
+          "direction": "column",
+          "spacing": 0.02,
+          "align": "center",
+          "justify": "center"
+        },
+        "sindri.ui.box": {
+          "order": 6
+        }
+      }
+    },
+    {
+      "id": "title-prompt",
+      "name": "TitlePrompt",
+      "parent": "title",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "title-prompt"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "",
+          "font": "fonts/AlegreyaSans-Medium.ttf",
+          "font_size": 0.024,
+          "line_height": 0.02928,
+          "anchor": "center",
+          "layer": 196,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "rich": true,
+          "bounds": [
+            0.0,
+            0.0
+          ]
+        },
+        "sindri.ui.box": {
+          "order": 7
+        }
+      }
+    },
+    {
+      "id": "title-record",
+      "name": "TitleRecord",
+      "parent": "title-menu",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "title-record"
           ]
         },
         "sindri.ui.text": {
@@ -3862,7 +4843,7 @@
           "font_size": 0.026,
           "line_height": 0.03172,
           "anchor": "center",
-          "layer": 210,
+          "layer": 196,
           "color": [
             1,
             1,
@@ -3882,57 +4863,63 @@
             ],
             "softness": 0.003
           },
+          "rich": true,
           "bounds": [
             0.0,
             0.0
           ]
         },
         "sindri.ui.box": {
-          "order": 3
+          "order": 2
         }
       }
     },
     {
-      "id": "title-text",
-      "name": "TitleText",
-      "parent": "title-card",
+      "id": "title-shade-bottom",
+      "name": "TitleShadeBottom",
+      "parent": "title",
       "components": {
         "weave.style": {
           "classes": [
-            "screen-text"
+            "title-shade-bottom"
           ]
         },
-        "sindri.ui.text": {
-          "text": "The Hollow cross at low tide. Hold each island until the sea comes in and closes the causeway behind them.",
-          "font": "fonts/AlegreyaSans-Medium.ttf",
-          "font_size": 0.032,
-          "line_height": 0.03904,
+        "sindri.ui.image": {
+          "texture": "textures/shade-up.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
           "anchor": "center",
-          "layer": 210,
-          "color": [
+          "layer": 182
+        },
+        "sindri.ui.box": {
+          "order": 2
+        }
+      }
+    },
+    {
+      "id": "title-shade-side",
+      "name": "TitleShadeSide",
+      "parent": "title",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "title-shade-side"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/shade-side.png",
+          "tint": [
             1,
             1,
             1,
-            1
+            0
           ],
-          "shadow": {
-            "offset": [
-              0.0,
-              -0.003
-            ],
-            "color": [
-              0.0,
-              0.02,
-              0.05,
-              0.6
-            ],
-            "softness": 0.003
-          },
-          "bounds": [
-            0.0,
-            0.0
-          ],
-          "wrap": "word"
+          "anchor": "center",
+          "layer": 182
         },
         "sindri.ui.box": {
           "order": 1
@@ -3940,22 +4927,48 @@
       }
     },
     {
-      "id": "title-title",
-      "name": "TitleTitle",
-      "parent": "title-card",
+      "id": "title-shade-top",
+      "name": "TitleShadeTop",
+      "parent": "title",
       "components": {
         "weave.style": {
           "classes": [
-            "screen-title"
+            "title-shade-top"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/shade-down.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 182
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "title-tagline",
+      "name": "TitleTagline",
+      "parent": "title",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "title-tagline"
           ]
         },
         "sindri.ui.text": {
-          "text": "Causeway",
+          "text": "",
           "font": "fonts/AlegreyaSC-Bold.ttf",
-          "font_size": 0.16,
-          "line_height": 0.1952,
+          "font_size": 0.03,
+          "line_height": 0.0366,
           "anchor": "center",
-          "layer": 210,
+          "layer": 188,
           "color": [
             1,
             1,
@@ -3975,13 +4988,14 @@
             ],
             "softness": 0.003
           },
+          "rich": true,
           "bounds": [
             0.0,
             0.0
           ]
         },
         "sindri.ui.box": {
-          "order": 0
+          "order": 5
         }
       }
     },

@@ -1,7 +1,9 @@
 """Fails when Causeway's checked-in art and scene differ from what
 `causeway_art.py` and `level.py` make.
 
-Run after both scripts. Models, scenes and prefabs must match byte for byte.
+Run after both scripts, on a tree with nothing else changed under
+`game/assets`: anything differing from the last commit there is reported,
+which on CI's clean checkout is exactly what the scripts changed. Models, scenes and prefabs must match byte for byte.
 PNGs are compared by pixel, because the same image compresses to different
 bytes under different zlib builds and that is not drift.
 """

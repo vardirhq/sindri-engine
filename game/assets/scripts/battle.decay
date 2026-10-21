@@ -619,6 +619,10 @@ script Battle {
         ];
     }
 
+    on CrossingBegins() {
+        if phase == Phase.Title { new_run(); }
+    }
+
     fn new_run() {
         island = 0.0;
         hearth = starting_hearth;
@@ -1054,14 +1058,10 @@ script Battle {
     fn show_title() {
         phase = Phase.Title;
         hide_screens();
-        show_screen("Title", true);
-        if Save.number("crossings", 0.0) > 0.0 {
-            set_text("TitleRecord", "Crossings made: " + Save.number("crossings", 0.0));
-        } else {
-            set_text("TitleRecord", "");
-        }
-        // A quiet island behind the title.
-        def = island_def(0.0);
+        show_hud(false);
+        // The Lighthouse behind the title, its wardens standing ready.
+        island = ISLAND_COUNT - 1.0;
+        def = island_def(island);
         board = board_of(def, roster(), starting_hearth);
         shown_tide = 0.0;
         place_sea(0.0);
@@ -1071,6 +1071,7 @@ script Battle {
         clear_plan();
         for c in 0..(SIZE * SIZE) { set_mark(threat_marks, c, ""); }
         update_hud();
+        TitleShown.emit();
     }
 
     fn hide_screens() {
@@ -1220,12 +1221,8 @@ script Battle {
         update_sea();
         update_lights();
         match phase {
-            Phase.Title => {
-                if pressed("BeginButton") || Input.Keyboard.just_pressed("Enter") {
-                    Audio.play("audio/boon.wav", 0.6);
-                    new_run();
-                }
-            }
+            // `title.decay` has the title, and says when a crossing begins.
+            Phase.Title => {}
             Phase.Resolving => { advance_beats(); }
             Phase.Player => {
                 handle_input();

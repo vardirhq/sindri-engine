@@ -603,6 +603,82 @@ def textures():
         '    "spacing": [4, 0],\n    "names": ["spark-0", "spark-1", "spark-2", "spark-3"]\n  }\n}\n')
 
 
+def title_textures():
+    """The title's shading, the halo behind its logo, its button plates and a
+    white square to fade with. Drawn at four times their size and scaled down,
+    which is the antialiasing."""
+    from PIL import Image, ImageDraw
+
+    ink = (5, 13, 19)
+
+    # Shade over the top and bottom of the screen, so the logo and the menu
+    # read over a bright sea.
+    for name, flip in (("shade-down", False), ("shade-up", True)):
+        shade = Image.new("RGBA", (8, 256))
+        for y in range(256):
+            t = y / 255
+            alpha = int(235 * (1 - t) ** 1.7)
+            for x in range(8):
+                shade.putpixel((x, 255 - y if flip else y), (*ink, alpha))
+        shade.save(TEXTURES / f"{name}.png")
+
+    # And down the left of a wide screen, where the logo and menu stand.
+    side = Image.new("RGBA", (256, 8))
+    for x in range(256):
+        t = x / 255
+        alpha = int(225 * (1 - t) ** 1.5)
+        for y in range(8):
+            side.putpixel((x, y), (*ink, alpha))
+    side.save(TEXTURES / "shade-side.png")
+
+    # A soft dark cloud behind the logo, wider than tall.
+    halo = Image.new("RGBA", (256, 128))
+    for y in range(128):
+        for x in range(256):
+            d2 = ((x - 127.5) / 128) ** 2 + ((y - 63.5) / 64) ** 2
+            halo.putpixel((x, y), (*ink, int(max(0.0, 1.0 - d2) ** 2 * 170)))
+    halo.save(TEXTURES / "halo.png")
+
+    white = Image.new("RGBA", (4, 4), (255, 255, 255, 255))
+    white.save(TEXTURES / "white.png")
+
+    # A button plate: a banner with pointed ends, a brass rim, an inner line
+    # and a diamond at each point. Ember for the way in, ink for the rest.
+    scale = 4
+    w, h = 640, 128
+    for name, top, bottom, rim in (
+        ("plate-ember", (214, 124, 56), (148, 66, 28), (255, 222, 160)),
+        ("plate-ink", (22, 46, 58), (10, 24, 32), (233, 201, 138)),
+    ):
+        big = Image.new("RGBA", (w * scale, h * scale), (0, 0, 0, 0))
+        W, H = big.size
+        tip = H * 0.42
+        inset = H * 0.16
+
+        def banner(margin):
+            m = margin
+            return [(tip + m * 0.4, m), (W - tip - m * 0.4, m), (W - m * 1.6, H / 2), (W - tip - m * 0.4, H - m),
+                    (tip + m * 0.4, H - m), (m * 1.6, H / 2)]
+
+        body = Image.new("RGBA", big.size, (0, 0, 0, 0))
+        mask = Image.new("L", big.size, 0)
+        ImageDraw.Draw(mask).polygon(banner(inset), fill=255)
+        for y in range(H):
+            t = y / (H - 1)
+            c = tuple(int(top[i] + (bottom[i] - top[i]) * t) for i in range(3))
+            ImageDraw.Draw(body).line((0, y, W, y), fill=(*c, 238))
+        big.paste(body, (0, 0), mask)
+        d = ImageDraw.Draw(big)
+        d.line(banner(inset) + [banner(inset)[0]], fill=(*rim, 255), width=3 * scale, joint="curve")
+        d.line(banner(inset + 7 * scale) + [banner(inset + 7 * scale)[0]], fill=(*rim, 110), width=scale,
+               joint="curve")
+        for cx in (inset * 0.55, W - inset * 0.55):
+            r = H * 0.1
+            d.polygon([(cx, H / 2 - r), (cx + r * 0.7, H / 2), (cx, H / 2 + r), (cx - r * 0.7, H / 2)],
+                      fill=(*rim, 255))
+        big.resize((w, h), Image.LANCZOS).save(TEXTURES / f"{name}.png")
+
+
 def main():
     MODELS.mkdir(parents=True, exist_ok=True)
     for name, (build, palette, poses) in FIGURES.items():
@@ -617,6 +693,7 @@ def main():
         mesh.write(MODELS / f"island-{slug}.glb", GROUND, island["name"])
         print(f"island {index}: {island['name']} -> island-{slug}.glb")
     textures()
+    title_textures()
     print("wrote", len(list(MODELS.glob("*.glb"))), "models")
 
 
