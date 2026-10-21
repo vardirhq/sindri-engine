@@ -162,6 +162,9 @@ pub struct WorldHost<'a> {
     gestures: Option<&'a sindri_core::Gestures>,
     /// How far this frame's drag asks the camera to move.
     camera_pan: Option<[f32; 3]>,
+    /// The world camera's ray through the pointer, worked out by the host
+    /// before scripts ran, for the same reason `aim` is.
+    pointer_ray: Option<[[f32; 3]; 2]>,
     /// Where each animated sprite has got to, when the host advances any.
     ///
     /// Mutable for one call: playing the clip already playing has to reset the

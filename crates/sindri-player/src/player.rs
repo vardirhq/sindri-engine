@@ -15,9 +15,9 @@ use sindri_desktop::{AppContext, DesktopApp, Flow};
 use sindri_platform::BrowserAudioBackend;
 use sindri_platform::{AudioBackend, AudioClip, EngineHost, InputEvent};
 use sindri_render::{
-    DepthTarget, FrameRenderers, FrameTarget, GlyphRenderer, ShapeRenderer, SpriteBatchRenderer,
-    TextRenderer, Texture2D, TextureRegistry, TexturedCubeRenderer, Viewport,
-    encode_prepared_frame,
+    Bloom, DepthTarget, FrameRenderers, FrameTarget, GlyphRenderer, Lighting, ShapeRenderer,
+    SpriteBatchRenderer, TextRenderer, Texture2D, TextureRegistry, TexturedCubeRenderer, Viewport,
+    encode_lit_frame, encode_prepared_frame,
 };
 use sindri_scene::{
     CameraView, SceneExtractor, SceneRuntime, TextureBindings, TileSetBindings, measure_ui_text,
@@ -56,6 +56,9 @@ pub(crate) struct Player {
     tile_sets: TileSetBindings,
     textures: TextureRegistry,
     depth: DepthTarget,
+    /// Where a world with post-processing is drawn before it is graded and
+    /// glows, sized with the window.
+    bloom: Bloom,
     cubes: TexturedCubeRenderer,
     sprites: SpriteBatchRenderer,
     text: TextRenderer,
@@ -273,6 +276,11 @@ impl DesktopApp for Player {
             tile_sets,
             textures,
             depth: DepthTarget::new(context.device(), context.width(), context.height()),
+            bloom: {
+                let mut bloom = Bloom::new(context.device(), context.format());
+                bloom.resize(context.device(), context.width(), context.height());
+                bloom
+            },
             cubes: TexturedCubeRenderer::new(context.device(), context.format()),
             sprites: SpriteBatchRenderer::new(context.device(), context.format()),
             text: TextRenderer::new(),
@@ -339,6 +347,8 @@ impl DesktopApp for Player {
     fn resize(&mut self, context: &AppContext<'_>) -> Result<(), Self::Error> {
         self.depth
             .resize(context.device(), context.width(), context.height());
+        self.bloom
+            .resize(context.device(), context.width(), context.height());
         self.viewport = [context.width(), context.height()];
         self.layout_viewport = [context.logical_width(), context.logical_height()];
         let viewport = self.weave_viewport();
@@ -404,14 +414,11 @@ impl DesktopApp for Player {
             .game_mut()
             .style(&mut world, viewport)
             .map_err(PlayerError::from);
+        let mut post_process = sindri_render::PostProcessSettings::default();
         let prepared = styled.and_then(|undo| {
-            self.cubes.set_lighting(self.scene.lighting(&world)?);
-            let shadows = self
-                .scene
-                .environment(&world)?
-                .map(sindri_scene::EnvironmentComponent::shadow_settings)
-                .unwrap_or_default();
-            self.cubes.set_shadows(context.device(), shadows);
+            post_process = self
+                .cubes
+                .configure(context.device(), self.scene.world_settings(&world)?);
             // Measured as styled, since a stylesheet sets the font size.
             let prepared = measure_ui_text(&world, self.scene.components(), &mut self.text)
                 .map_err(PlayerError::from)
@@ -444,24 +451,41 @@ impl DesktopApp for Player {
                 .create_command_encoder(&wgpu::CommandEncoderDescriptor {
                     label: Some("Sindri player encoder"),
                 });
-        encode_prepared_frame(
-            FrameRenderers {
-                cube: &mut self.cubes,
-                sprites: &mut self.sprites,
-                text: &mut self.text,
-                glyphs: &mut self.glyphs,
-                shapes: &mut self.shapes,
-                textures: &self.textures,
-            },
-            context.device(),
-            context.queue(),
-            &mut encoder,
-            FrameTarget {
-                color: view,
-                depth: &self.depth,
-            },
-            &prepared,
-        )?;
+        let renderers = FrameRenderers {
+            cube: &mut self.cubes,
+            sprites: &mut self.sprites,
+            text: &mut self.text,
+            glyphs: &mut self.glyphs,
+            shapes: &mut self.shapes,
+            textures: &self.textures,
+        };
+        let target = FrameTarget {
+            color: view,
+            depth: &self.depth,
+        };
+        if post_process.is_active() {
+            encode_lit_frame(
+                renderers,
+                context.device(),
+                context.queue(),
+                &mut encoder,
+                target,
+                &prepared,
+                Lighting {
+                    bloom: &mut self.bloom,
+                    settings: post_process,
+                },
+            )?;
+        } else {
+            encode_prepared_frame(
+                renderers,
+                context.device(),
+                context.queue(),
+                &mut encoder,
+                target,
+                &prepared,
+            )?;
+        }
         context.queue().submit([encoder.finish()]);
         Ok(())
     }
@@ -477,9 +501,12 @@ impl Source {
     /// Reads the project named on the command line.
     #[cfg(not(target_arch = "wasm32"))]
     fn open() -> Result<Self, PlayerError> {
-        let directory = std::env::args_os().nth(1).ok_or_else(|| {
-            PlayerError::Project("usage: sindri-player <project directory>".to_owned())
-        })?;
+        let directory = match crate::PROJECT.get() {
+            Some((directory, _)) => directory.clone().into_os_string(),
+            None => std::env::args_os().nth(1).ok_or_else(|| {
+                PlayerError::Project("usage: sindri-player <project directory>".to_owned())
+            })?,
+        };
         let project = crate::directory::read(std::path::Path::new(&directory))?;
         Ok(Self::Ready(Box::new(project)))
     }

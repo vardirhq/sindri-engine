@@ -19,7 +19,7 @@ Each entry links its tests and the projects that exercise it. Surface marks matc
 | [Bounded voxel residency](#voxel-residency) | 🟡 | 🟡 | ❌ | 🟡 |
 | [Neighbour-aware block meshing](#voxel-meshing) | 🟡 | 🟡 | ❌ | 🟡 |
 | [Persistent voxel compiled/GPU mesh cache](#voxel-mesh-cache) | 🟡 | 🟡 | ❌ | 🟡 |
-| [Voxel collision](#voxel-collision) | ✅ | ✅ | ✅ | ✅ |
+| [Voxel collision](#voxel-collision) | ✅ | ✅ | ✅ | 🟡 |
 | [Voxel ground for gameplay](#voxel-gameplay-ground) | ✅ | — | ✅ | ✅ |
 | [Voxel world viewed as a map](#voxel-map-view) | ✅ | 🟡 | ✅ | ✅ |
 | [Reversible voxel map flooding](#voxel-map-flooding) | ✅ | 🟡 | ✅ | ✅ |
@@ -99,7 +99,7 @@ Engine 🟡 · Editor 🟡 · Decay 🟡 · Proof 🟡 — parity row *Engine-ow
 
 **Tested by:** [`crates/sindri-scene/src/voxel/tests.rs`](../../crates/sindri-scene/src/voxel/tests.rs), [`crates/sindri-scene/tests/extraction/voxel_world.rs`](../../crates/sindri-scene/tests/extraction/voxel_world.rs), [`crates/sindri-voxel/src/terrain/tests.rs`](../../crates/sindri-voxel/src/terrain/tests.rs)
 
-**Exercised in:** [`game`](../../game), [`games/voxel-lab`](../../games/voxel-lab)
+**Exercised in:** [`games/voxel-lab`](../../games/voxel-lab)
 
 **See:** [`docs/voxel-terrain.md`](../../docs/voxel-terrain.md), [`docs/voxel-world-plan.md`](../../docs/voxel-world-plan.md)
 
@@ -151,7 +151,7 @@ Engine 🟡 · Editor 🟡 · Decay ❌ · Proof 🟡 — parity row *Bounded vo
 
 **Tested by:** [`crates/sindri-scene/src/voxel/tests.rs`](../../crates/sindri-scene/src/voxel/tests.rs)
 
-**Exercised in:** [`game`](../../game), [`games/voxel-lab`](../../games/voxel-lab)
+**Exercised in:** [`games/voxel-lab`](../../games/voxel-lab)
 
 <details markdown="1">
 <summary>Evidence</summary>
@@ -176,7 +176,7 @@ Engine 🟡 · Editor 🟡 · Decay ❌ · Proof 🟡 — parity row *Neighbour-
 
 **Tested by:** [`crates/sindri-voxel/src/mesh_tests.rs`](../../crates/sindri-voxel/src/mesh_tests.rs), [`crates/sindri-scene/tests/extraction/voxel_blocks.rs`](../../crates/sindri-scene/tests/extraction/voxel_blocks.rs), [`crates/sindri-scene/tests/extraction/voxel_surfaces.rs`](../../crates/sindri-scene/tests/extraction/voxel_surfaces.rs)
 
-**Exercised in:** [`game`](../../game), [`games/voxel-lab`](../../games/voxel-lab)
+**Exercised in:** [`games/voxel-lab`](../../games/voxel-lab)
 
 **Limits:**
 
@@ -250,13 +250,17 @@ persistent-cache and settled-remesh counters.
 
 `sindri.physics3d.voxel_collider` makes an authored voxel world solid near the bodies that can reach it.
 
-Engine ✅ · Editor ✅ · Decay ✅ · Proof ✅ — parity row *Voxel collision*
+Engine ✅ · Editor ✅ · Decay ✅ · Proof 🟡 — parity row *Voxel collision*
 
-**Tested by:** [`crates/sindri-scene/src/physics_sync3d/voxel_tests.rs`](../../crates/sindri-scene/src/physics_sync3d/voxel_tests.rs), [`crates/sindri-scene/src/voxel_collision3d/tests.rs`](../../crates/sindri-scene/src/voxel_collision3d/tests.rs), [`crates/sindri-scene/src/voxel_collision3d/lifecycle_tests.rs`](../../crates/sindri-scene/src/voxel_collision3d/lifecycle_tests.rs), [`game/tests/the_game_is_played/tumbling.rs`](../../game/tests/the_game_is_played/tumbling.rs), [`game/tests/browser_voxel_landing.decay`](../../game/tests/browser_voxel_landing.decay)
+**Tested by:** [`crates/sindri-scene/src/physics_sync3d/voxel_tests.rs`](../../crates/sindri-scene/src/physics_sync3d/voxel_tests.rs), [`crates/sindri-scene/src/voxel_collision3d/tests.rs`](../../crates/sindri-scene/src/voxel_collision3d/tests.rs), [`crates/sindri-scene/src/voxel_collision3d/lifecycle_tests.rs`](../../crates/sindri-scene/src/voxel_collision3d/lifecycle_tests.rs), [`game/tests/a_block_lands_on_voxel_lab.rs`](../../game/tests/a_block_lands_on_voxel_lab.rs), [`scripts/browser/voxel-landing/observer.decay`](../../scripts/browser/voxel-landing/observer.decay)
 
-**Exercised in:** [`game`](../../game)
+**Exercised in:** [`games/voxel-lab`](../../games/voxel-lab)
 
 **See:** [`docs/physics.md`](../../docs/physics.md), [`docs/physics-voxel-editor-review.md`](../../docs/physics-voxel-editor-review.md)
+
+**Limits:**
+
+- No game uses voxel collision since Causeway became a tactics game on model islands; the proof is a fixture over Voxel Lab.
 
 <details markdown="1">
 <summary>Evidence</summary>
@@ -264,17 +268,17 @@ Engine ✅ · Editor ✅ · Decay ✅ · Proof ✅ — parity row *Voxel collisi
 `sindri.physics3d.voxel_collider` on a `sindri.voxel_world` entity resolves the
 world's generator, palette and edits through `VoxelGround`, takes each block's
 collision box from its block set (`collides`, default true, with the tile's own
-height/extent bounds; water in Causeway is `false`), and keeps resident only
+height/extent bounds; water is usually `false`), and keeps resident only
 the sections dynamic bodies can reach this step plus a margin.
 `ScenePhysics3d::step_with_tile_sets` validates the voxel snapshot and the body
 batch before committing either, and the shared game session and editor Play
-pass their block sets. Causeway uses it: a block taken back tumbles out of its
-cell, lands on the generated terrain and only then returns to the stock,
-detected through `Physics3d.collision_started`. Scene regressions and the
-Causeway play test exercise landing, owner events/queries, edited shafts under
-a sleeping body, distant residency, non-colliding and slab blocks, release and
-atomic rejection. A CI Chromium fixture lands the same prefab in exported
-Causeway, and the native editor review authors the voxel collider, block-set
+pass their block sets. Causeway used it until it became a tactics game played
+on model islands; now a fixture over Voxel Lab gives the world collision and
+drops a block onto it, natively in `a_block_lands_on_voxel_lab.rs` and in an
+exported build in a CI Chromium run. Scene regressions exercise landing, owner
+events/queries, edited shafts under a sleeping body, distant residency,
+non-colliding and slab blocks, release and atomic rejection, and the native
+editor review authors the voxel collider, block-set
 Collides and 3D bodies and lands them in Play.
 
 `SceneVoxelCollision3d` reconciles explicit complete resident voxel snapshots
@@ -296,7 +300,7 @@ Engine ✅ · Editor — · Decay ✅ · Proof ✅
 
 **Tested by:** [`crates/sindri-scene/src/extract/voxel_ground_tests.rs`](../../crates/sindri-scene/src/extract/voxel_ground_tests.rs), [`crates/sindri-scene/tests/placement/on_voxel_ground.rs`](../../crates/sindri-scene/tests/placement/on_voxel_ground.rs), [`crates/sindri-decay/tests/a_script_walks_and_builds_on_voxels.rs`](../../crates/sindri-decay/tests/a_script_walks_and_builds_on_voxels.rs), [`games/voxel-lab/tests/a_click_lands_on_what_it_points_at.rs`](../../games/voxel-lab/tests/a_click_lands_on_what_it_points_at.rs)
 
-**Exercised in:** [`game`](../../game)
+**Exercised in:** [`games/voxel-lab`](../../games/voxel-lab)
 
 <details markdown="1">
 <summary>Evidence</summary>
@@ -313,7 +317,7 @@ read, build and remove blocks with `Grid.block`, `Grid.set_block` and
 `max_step`, reading the ground around the walker and its goal; and
 `voxel::aim_at_with` says which block and face the pointer is on.
 `a_script_walks_and_builds_on_voxels.rs` builds, digs and walks round a wall on
-a generated world, and Causeway is played on it.
+a generated world, and Voxel Lab picks its blocks with it.
 
 </details>
 

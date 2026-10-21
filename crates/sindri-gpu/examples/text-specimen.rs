@@ -114,7 +114,7 @@ async fn run(path: &Path) -> Result<(), Box<dyn Error>> {
     let mut text = TextRenderer::new();
     let bytes = fs::read(concat!(
         env!("CARGO_MANIFEST_DIR"),
-        "/../../game/assets/fonts/Inter.ttf"
+        "/../../editor/assets/Inter.ttf"
     ))?;
     text.bind_font(FONT, "Inter", bytes);
 

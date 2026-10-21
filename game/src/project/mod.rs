@@ -6,7 +6,7 @@
 //! a project from its directory rather than from what the native game embeds,
 //! so any project in the repository can be opened, not only Causeway.
 
-use std::{collections::BTreeMap, error::Error, path::Path, time::Duration};
+use std::{collections::BTreeMap, error::Error, fs, io::BufWriter, path::Path, time::Duration};
 
 use sindri_assets::{AssetBytes, AssetDecoder, FontAssetDecoder};
 use sindri_core::{AssetId, SceneEntityId, World};
@@ -22,6 +22,8 @@ mod draw;
 mod models;
 
 pub use draw::{DrawTimes, ProjectRenderer};
+
+use sindri_gpu::{GpuContext, GpuRequestOptions};
 
 pub use sindri_runtime::STEP;
 
@@ -219,4 +221,35 @@ pub fn open(project: &Path, size: [f32; 2]) -> Result<OpenedProject, Box<dyn Err
         sheets: files_under(&assets, ".sheet"),
         shaders: files_under(&assets, ".wgsl"),
     })
+}
+
+/// Draws the player's world once, offscreen, and writes it to `path`.
+pub async fn photograph(
+    opened: &mut OpenedProject,
+    size: (u32, u32),
+    path: &Path,
+) -> Result<(), Box<dyn Error>> {
+    let instance = wgpu::Instance::default();
+    let gpu = GpuContext::request(&instance, None, &GpuRequestOptions::default()).await?;
+    let mut renderer = ProjectRenderer::new(&gpu, &opened.images, &opened.sheets, size)?;
+    renderer.bind_shaders(&opened.shaders)?;
+    renderer.draw(&mut opened.player, &gpu)?;
+    let mut encoder = gpu
+        .device
+        .create_command_encoder(&wgpu::CommandEncoderDescriptor {
+            label: Some("project capture readback"),
+        });
+    let readback = renderer
+        .target()
+        .copy_to_buffer(&gpu.device, &mut encoder)?;
+    gpu.queue.submit([encoder.finish()]);
+    let pixels = readback.read_rgba8(&gpu.device)?;
+    if let Some(parent) = path.parent() {
+        fs::create_dir_all(parent)?;
+    }
+    let mut png = png::Encoder::new(BufWriter::new(fs::File::create(path)?), size.0, size.1);
+    png.set_color(png::ColorType::Rgba);
+    png.set_depth(png::BitDepth::Eight);
+    png.write_header()?.write_image_data(&pixels)?;
+    Ok(())
 }

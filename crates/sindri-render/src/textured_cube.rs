@@ -112,6 +112,20 @@ impl TexturedCubeRenderer {
         }
     }
 
+    /// Sets everything a frame's environment asks of 3D drawing at once, and
+    /// answers the post-processing it is to be finished with.
+    pub fn configure(
+        &mut self,
+        device: &wgpu::Device,
+        settings: WorldSettings,
+    ) -> crate::PostProcessSettings {
+        self.set_lighting(settings.lighting);
+        self.set_shadows(device, settings.shadows);
+        self.set_fog(settings.fog);
+        self.set_ambient_occlusion(settings.ambient_occlusion);
+        settings.post_process
+    }
+
     /// Sets the world lighting used by subsequent textured 3D draws.
     pub fn set_lighting(&mut self, lighting: WorldLighting) {
         self.lighting = lighting;
@@ -503,4 +517,16 @@ impl TexturedCubeRenderer {
     pub fn batch_slots(&self) -> usize {
         self.batches.len()
     }
+}
+
+/// How a frame's world is lit and finished, gathered in one value so every
+/// host applies all of it rather than whichever parts it remembered.
+#[derive(Clone, Copy, Debug, Default, PartialEq)]
+pub struct WorldSettings {
+    pub lighting: WorldLighting,
+    pub shadows: ShadowSettings,
+    pub fog: FogSettings,
+    /// How strongly mesh-authored ambient occlusion darkens world geometry.
+    pub ambient_occlusion: f32,
+    pub post_process: crate::PostProcessSettings,
 }

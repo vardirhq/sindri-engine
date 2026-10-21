@@ -4,10 +4,10 @@
     "title": "Causeway",
     "path": "examples/causeway/",
     "source": "game",
-    "description": "Build a path through a voxel world and guide the wanderer.",
+    "description": "Hold four islands against the Hollow until the tide rises, in a turn-based tactics crossing.",
     "tags": [
-      "voxels",
-      "construction",
+      "tactics",
+      "3d",
       "flagship"
     ]
   },

@@ -34,7 +34,7 @@ const GRAY8: &[u8] = include_bytes!("fixtures/decode/gray8.png");
 const PALETTE8: &[u8] = include_bytes!("fixtures/decode/palette8.png");
 const RGB16: &[u8] = include_bytes!("fixtures/decode/rgb16.png");
 const JPEG: &[u8] = include_bytes!("fixtures/decode/solid.jpg");
-const INTER: &[u8] = include_bytes!("../../../game/assets/fonts/Inter.ttf");
+const INTER: &[u8] = include_bytes!("../../../editor/assets/Inter.ttf");
 
 /// What every two-by-two fixture that carries color decodes to, in the order
 /// `TextureAsset` packs them: top left, top right, bottom left, bottom right.

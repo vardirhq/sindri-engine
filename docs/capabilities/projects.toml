@@ -19,26 +19,32 @@ evidence of a capability.
 id = "causeway"
 group = "Games"
 title = "Causeway"
-summary = "The flagship showcase: build a path through a voxel world and guide the wanderer to the beacon."
+summary = "The flagship showcase: a tactics game of three wardens holding islands against the Hollow until the tide closes the causeway."
 status = { engine = "n/a", editor = "n/a", decay = "yes", proof = "yes" }
 tests = [
   "game/tests/the_game_is_played/main.rs",
-  "game/tests/the_game_is_played/crossing.rs",
-  "game/tests/the_game_is_played/tumbling.rs",
   "game/tests/the_game_holds_together.rs",
-  "game/tests/the_beacon_lights.rs",
+  "game/tests/a_crossing_is_played.rs",
 ]
 proof = ["game"]
 detail = """
-Causeway's floor is a grid of boxes whose ground is a `sindri.voxel_world`: the
-engine's natural terrain from seed 1, drawn with Causeway's own blocks — grass
-with its variants and buried look, earth, sand, mud, moss, rock, snow, water,
-trees — and following the camera. Nothing in `game/` generates, streams or
-meshes terrain. The walker starts on a bank with the beacon across a river;
-clicks on the water lay planks as edits on the world, and the walker crosses
-them to the beacon. A block taken back tumbles out of its cell under 3D physics,
-lands on the terrain and only then returns to the stock. The beacon lights by
-its own sequences when the walker arrives.
+Causeway is a turn-based tactics game. Three wardens hold an eight-by-eight
+island while the Hollow cross the causeway from the mainland at low tide; each
+Hollow shows on the ground what it will strike, and a shove that moves it moves
+its strike, so a turn is read and answered rather than raced. The tide comes in
+on a schedule shown in advance, drowning any Hollow it reaches, and high tide
+closes the causeway and wins the island. Four islands make a crossing, with a
+boon chosen between them and the Hearth carried from one to the next.
+
+The rules are one value and pure shared functions in `rules.decay`, so aiming
+previews a skill by running it on a copy of the board; the director plays back
+the beats each change leaves. The islands are text in `islands.decay`, read by
+the rules and by `tools/causeway_art.py`, which builds every island, figure and
+building as a low-poly GLB. It uses imported models with point lights, the
+environment's grade and bloom in the shipped player, Weave screens, the
+pointer's world ray for picking cells, camera shake, and Sound Lab effects and
+an Ogg song. `a_crossing_is_played.rs` plays a whole crossing with a bot
+through the real rules; `the_game_is_played` plays it by clicks and keys.
 """
 
 [[capability]]

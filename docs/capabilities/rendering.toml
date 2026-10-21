@@ -687,11 +687,11 @@ id = "glb-models"
 group = "3D models"
 title = "glTF / model import"
 summary = "Self-contained binary GLB decodes to reusable geometry, hierarchy, materials and textures, and draws natively and in the browser."
-status = { engine = "partial", editor = "no", decay = "no", proof = "no" }
+status = { engine = "partial", editor = "no", decay = "no", proof = "yes" }
 parity = "glTF / model import"
-tests = ["crates/sindri-assets/src/decode/model/tests.rs", "crates/sindri-render/src/model/tests.rs", "crates/sindri-gpu/tests/imported_models.rs", "crates/sindri-scene/tests/extraction/models.rs", "crates/sindri-export/tests/imported_models.rs", "crates/sindri/tests/imported_model.rs"]
+tests = ["game/tests/the_game_holds_together.rs", "crates/sindri-assets/src/decode/model/tests.rs", "crates/sindri-render/src/model/tests.rs", "crates/sindri-gpu/tests/imported_models.rs", "crates/sindri-scene/tests/extraction/models.rs", "crates/sindri-export/tests/imported_models.rs", "crates/sindri/tests/imported_model.rs"]
 docs = ["docs/imported-models.md"]
-limits = ["Full model authoring, animation and skinning remain deferred.", "Feature labs and external Low Tide are evidence; in-tree model gameplay adoption remains open."]
+limits = ["Full model authoring, animation and skinning remain deferred.", "Causeway draws only static, generated models; no flagship imports artist-authored animated GLB yet."]
 detail = '''
 `ModelAssetDecoder` parses self-contained binary GLB into reusable CPU geometry,
 node local matrices/children, materials and embedded base-color textures. The
@@ -721,9 +721,11 @@ the repository's in-tree game completion surface. Model Collision Lab now also
 has native player-window visual proof on X11/software Vulkan, after editor asset
 selection and save/reopen; the imported wall blocks keyboard movement and the
 walker renders on the goal pad.
+Causeway draws every island, figure and building as a generated GLB with
+emissive materials, lit by the sun and point lights.
 See [imported models](../imported-models.md).
 '''
-proof = ["examples/model-collision"]
+proof = ["game", "examples/model-collision"]
 
 [[capability]]
 id = "font-fallback"
@@ -959,14 +961,23 @@ in-tree game adoption and fog/post controls remain open.
 
 [[capability]]
 id = "project-host-fog-post"
-group = "Not yet"
+group = "World presentation"
 title = "Authored fog/AO/post stack in shipped project hosts"
-summary = "Editor viewports apply these environment settings; the shared native/browser player and offscreen project renderer still only apply background, ambient/directional lighting and shadows"
-status = { engine = "no", editor = "n/a", decay = "no", proof = "no" }
+summary = "The shared native/browser player and the offscreen project renderer apply an environment's fog, occlusion, grade and bloom as the editor does"
+status = { engine = "yes", editor = "n/a", decay = "no", proof = "yes" }
 parity = "Authored fog/AO/post stack in shipped project hosts"
+tests = ["game/tests/the_game_holds_together.rs"]
+proof = ["game"]
 docs = ["docs/3d-foundation-review.md"]
+limits = ["Decay cannot change fog or post-processing at runtime."]
 detail = '''
-Editor viewports apply these environment settings; the shared native/browser player and offscreen project renderer still only apply background, ambient/directional lighting and shadows. Fog/AO/post delivery remains separate work
+`SceneExtractor::world_settings` gathers an environment's light, shadows, fog,
+occlusion strength and grade into one `WorldSettings`, and
+`TexturedCubeRenderer::configure` applies them, so the shared native/browser
+player and the offscreen project renderer light a frame as the editor does. A
+frame with post-processing goes through `encode_lit_frame` and its bloom.
+Causeway ships tone mapping, grade, vignette and bloom on its lanterns and
+beacon this way.
 '''
 
 

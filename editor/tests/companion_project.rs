@@ -122,7 +122,9 @@ fn the_listing_starts_at_the_assets_and_the_rest_is_still_there() {
         .collect();
     assert_eq!(
         in_assets,
-        ["audio", "fonts", "prefabs", "scripts", "textures", "ui"]
+        [
+            "audio", "fonts", "models", "prefabs", "scripts", "textures", "ui"
+        ]
     );
 
     let whole_project: Vec<&str> = tree
@@ -138,8 +140,8 @@ fn the_listing_starts_at_the_assets_and_the_rest_is_still_there() {
 
 /// The tile and sprite palettes read the file behind a reference by joining it
 /// onto a directory, and it has to be the same directory the loader uses.
-/// Joined onto the project root, the game's `textures/blocks-top.png` names
-/// `game/textures/blocks-top.png`, which is nothing: the tile inspector
+/// Joined onto the project root, the game's `textures/marks.png` names
+/// `game/textures/marks.png`, which is nothing: the tile inspector
 /// showed a missing-file message instead of the tiles, and the animation
 /// preview showed one instead of the sheet.
 #[test]
@@ -147,15 +149,15 @@ fn the_palette_reads_a_reference_from_where_the_scene_resolves_it() {
     let assets = companion().join("assets");
     let mut palette = SpritePalette::default();
 
-    palette.ensure(Some(&assets), "textures/blocks-top.png");
+    palette.ensure(Some(&assets), "textures/marks.png");
     assert_eq!(palette.problem(), None);
     assert!(
         !palette.sprites().is_empty(),
-        "the game's block sheet names its faces, and the palette lists them"
+        "the game's sheet of ground marks names them, and the palette lists them"
     );
 
     let mut from_the_root = SpritePalette::default();
-    from_the_root.ensure(Some(&companion()), "textures/blocks-top.png");
+    from_the_root.ensure(Some(&companion()), "textures/marks.png");
     assert!(
         from_the_root.problem().is_some(),
         "and the project root is not that directory, which is the whole point"

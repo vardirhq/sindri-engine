@@ -1,255 +1,213 @@
-//! Playing the game the way a person does: a session, a camera, clicks and
-//! taps, and the world they change.
+//! A game of Causeway opened from its folder, and the hands to play it.
 
-use glam::{Mat4, Vec3};
-use sindri_causeway::{Session, extractor, world};
-use sindri_core::World;
-use sindri_platform::{InputEvent, InputState, MouseButton};
-use sindri_scene::{SceneExtractor, UiTextComponent, VoxelGround, VoxelWorldComponent};
+use glam::Vec3;
+use sindri_core::{EntityId, SceneComponent};
+use sindri_platform::{InputEvent, Key, MouseButton};
+use sindri_runtime::ProjectRun;
+use sindri_scene::ModelComponent;
 
-/// The level water fills to in Causeway's world.
-pub(crate) const SEA: i32 = 0;
+pub const STEP: f32 = 1.0 / 60.0;
+pub const SIZE: [f32; 2] = [1280.0, 720.0];
+pub const TITLE: f32 = 0.0;
+pub const PLAYER: f32 = 2.0;
 
-pub(crate) const VIEWPORT: (f32, f32) = (1000.0, 720.0);
-pub(crate) const STEP: f32 = 1.0 / 60.0;
+/// Where cell (0, 0) of the board is in the world; `battle.decay` says the same.
+const ORIGIN: f32 = 24.0;
 
-pub(crate) fn session() -> (World, SceneExtractor, Session) {
-    let scene = extractor().expect("the schemas register");
-    let (world, loaded) = world().expect("the world loads");
-    let session = sindri_causeway::session(scene.components().clone())
-        .with_scenes(sindri_causeway::scenes().expect("the scenes load"), loaded)
-        .with_tile_sets(sindri_causeway::bind_tile_sets().expect("the tile set binds"));
-    (world, scene, session)
+/// A phone held upright.
+pub const PHONE: [f32; 2] = [390.0, 844.0];
+
+pub struct Game {
+    run: ProjectRun,
+    size: [f32; 2],
 }
 
-pub(crate) fn view_projection(world: &World, scene: &SceneExtractor) -> Mat4 {
-    sindri_scene::world_camera_of(world, scene.components(), VIEWPORT.0 / VIEWPORT.1)
+impl Game {
+    pub fn open() -> Self {
+        Self::open_at(SIZE)
+    }
+
+    pub fn open_at(size: [f32; 2]) -> Self {
+        let mut run = ProjectRun::open(&sindri_causeway::project_dir(), size)
+            .expect("the game opens from its folder");
+        run.step(STEP).expect("the first step runs");
+        Self { run, size }
+    }
+
+    pub fn step(&mut self) {
+        let report = self.run.step(STEP).expect("the step runs");
+        let notes = report.notes();
+        assert!(notes.is_empty(), "a step went wrong: {notes:?}");
+    }
+
+    pub fn play(&mut self, seconds: f32) {
+        #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
+        for _ in 0..(seconds / STEP).ceil() as usize {
+            self.step();
+        }
+    }
+
+    pub fn board(&self, name: &str) -> f32 {
+        self.run.board(name)
+    }
+
+    pub fn phase(&self) -> f32 {
+        self.board("phase")
+    }
+
+    /// Plays on until it is the wardens' turn and nothing is moving.
+    pub fn until_players_turn(&mut self) {
+        for _ in 0..60 * 30 {
+            self.step();
+            if self.phase() == PLAYER {
+                // A few more frames, so a hop that just finished has landed.
+                self.play(0.1);
+                return;
+            }
+        }
+        panic!(
+            "the wardens' turn never came; the game is in phase {}",
+            self.phase()
+        );
+    }
+
+    pub fn tap_key(&mut self, key: Key) {
+        self.run.key(key, true);
+        self.step();
+        self.run.key(key, false);
+        self.step();
+    }
+
+    /// Every piece drawn with this figure's model.
+    pub fn pieces(&self, figure: &str) -> Vec<EntityId> {
+        let asset = format!("models/{figure}.glb");
+        self.run
+            .world
+            .entities()
+            .filter(|(entity, data)| {
+                self.run.world.is_active(*entity)
+                    && data
+                        .components
+                        .get(ModelComponent::TYPE_NAME)
+                        .and_then(|model| model.get("asset"))
+                        .and_then(serde_json::Value::as_str)
+                        == Some(asset.as_str())
+                    && data.transform_3d.is_some_and(|t| t.scale[1] > 0.1)
+            })
+            .map(|(entity, _)| entity)
+            .collect()
+    }
+
+    /// The cell a piece stands on.
+    pub fn cell_of(&self, entity: EntityId) -> (i32, i32) {
+        let position = self
+            .run
+            .world
+            .get(entity)
+            .and_then(|data| data.transform_3d)
+            .expect("a piece is placed")
+            .position;
+        #[allow(clippy::cast_possible_truncation)]
+        (
+            (position[0] - ORIGIN).floor() as i32,
+            (position[2] - ORIGIN).floor() as i32,
+        )
+    }
+
+    /// The pixel over the middle of a cell's top, as the camera draws it.
+    fn pixel_of(&self, cell: (i32, i32), top: f32) -> [f32; 2] {
+        let camera = sindri_scene::world_camera_of(
+            &self.run.world,
+            self.run.scene.components(),
+            self.size[0] / self.size[1],
+        )
         .expect("the camera resolves")
-        .expect("the scene has a world camera")
-        .view_projection
-}
+        .expect("the scene has a world camera");
+        #[allow(clippy::cast_precision_loss)]
+        let point = Vec3::new(
+            ORIGIN + cell.0 as f32 + 0.5,
+            top,
+            ORIGIN + cell.1 as f32 + 0.5,
+        );
+        let clip = camera.view_projection * point.extend(1.0);
+        let ndc = clip.truncate() / clip.w;
+        [
+            (ndc.x + 1.0) * 0.5 * self.size[0],
+            (1.0 - ndc.y) * 0.5 * self.size[1],
+        ]
+    }
 
-pub(crate) fn project(point: Vec3, view_projection: Mat4) -> [f32; 2] {
-    let clip = view_projection * point.extend(1.0);
-    let ndc = clip.truncate() / clip.w;
-    [
-        (ndc.x + 1.0) * 0.5 * VIEWPORT.0,
-        (1.0 - ndc.y) * 0.5 * VIEWPORT.1,
-    ]
-}
+    /// A neighbour of `from` that nothing stands on and that is at most a
+    /// step up or down from it.
+    pub fn free_step_from(&self, from: (i32, i32)) -> (i32, i32) {
+        let taken: Vec<(i32, i32)> = self
+            .run
+            .world
+            .entities()
+            .filter(|(entity, data)| {
+                self.run.world.is_active(*entity)
+                    && data.components.contains_key(ModelComponent::TYPE_NAME)
+                    && data.transform_3d.is_some_and(|t| t.scale[1] > 0.1)
+            })
+            .map(|(entity, _)| self.cell_of(entity))
+            .collect();
+        [(0, -1), (1, 0), (0, 1), (-1, 0)]
+            .into_iter()
+            .map(|(dx, dz)| (from.0 + dx, from.1 + dz))
+            .find(|&cell| {
+                (0..8).contains(&cell.0)
+                    && (0..8).contains(&cell.1)
+                    && !taken.contains(&cell)
+                    && (top_of(cell) - top_of(from)).abs() <= 1.0
+            })
+            .expect("the Bulwark has somewhere to step")
+    }
 
-pub(crate) fn click(world: &mut World, session: &mut Session, at: [f32; 2], button: MouseButton) {
-    let mut held = InputState::default();
-    held.apply(InputEvent::PointerMoved { x: at[0], y: at[1] });
-    held.apply(InputEvent::ButtonPressed(button));
-    session
-        .step(world, &held, VIEWPORT, STEP)
-        .expect("the press steps")
-        .log();
-    // A frame boundary, exactly as a host puts one there. Without it the press
-    // edge is still set on the next step and one click lays two blocks.
-    held.begin_frame(std::time::Duration::from_secs_f32(STEP));
-    held.apply(InputEvent::ButtonReleased(button));
-    session
-        .step(world, &held, VIEWPORT, STEP)
-        .expect("the release steps")
-        .log();
-    // One frame with nothing down, which is what a host does between two
-    // clicks. Without it the finished press is still in the set when the next
-    // one starts, and the recogniser -- which keeps what it has decided about
-    // a press for as long as the press exists -- carries the first click's
-    // verdict onto the second.
-    held.begin_frame(std::time::Duration::from_secs_f32(STEP));
-    session
-        .step(world, &held, VIEWPORT, STEP)
-        .expect("the empty frame steps")
-        .log();
-}
+    /// A click on the middle of a cell, pressed and released as a host
+    /// delivers one.
+    pub fn click_cell(&mut self, cell: (i32, i32)) {
+        let [x, y] = self.pixel_of(cell, top_of(cell));
+        self.run.input.apply(InputEvent::PointerMoved { x, y });
+        self.step();
+        let expected = cell.1 * 8 + cell.0;
+        #[allow(clippy::cast_precision_loss)]
+        let expected = expected as f32;
+        assert_eq!(
+            self.board("pointed"),
+            expected,
+            "the pointer at ({x:.0}, {y:.0}) should be over cell {cell:?}"
+        );
+        self.run
+            .input
+            .apply(InputEvent::ButtonPressed(MouseButton::Left));
+        self.step();
+        self.run
+            .input
+            .apply(InputEvent::ButtonReleased(MouseButton::Left));
+        self.step();
+        self.step();
+    }
 
-/// Holding still, which is how a block is taken back.
-///
-/// A finger has no second button, so removing is a press that stays put and
-/// stays down past the long-press limit. The press is left down for a good
-/// while rather than one step, because that duration is the whole gesture.
-pub(crate) fn hold(world: &mut World, session: &mut Session, at: [f32; 2]) {
-    let mut held = InputState::default();
-    held.apply(InputEvent::PointerMoved { x: at[0], y: at[1] });
-    held.apply(InputEvent::ButtonPressed(MouseButton::Left));
-    session
-        .step(world, &held, VIEWPORT, STEP)
-        .expect("the press steps")
-        .log();
-    // Past the long-press limit without moving. Reported once, while the
-    // finger is still down, so one hold takes one block.
-    held.begin_frame(std::time::Duration::from_millis(600));
-    session
-        .step(world, &held, VIEWPORT, STEP)
-        .expect("the hold steps")
-        .log();
-    held.begin_frame(std::time::Duration::from_secs_f32(STEP));
-    held.apply(InputEvent::ButtonReleased(MouseButton::Left));
-    session
-        .step(world, &held, VIEWPORT, STEP)
-        .expect("the release steps")
-        .log();
-}
-
-pub(crate) fn tap_touch(
-    world: &mut World,
-    scene: &SceneExtractor,
-    session: &mut Session,
-    at: [f32; 2],
-) -> [i32; 3] {
-    let mut input = InputState::default();
-    input.apply(InputEvent::TouchStarted {
-        id: 7,
-        x: at[0],
-        y: at[1],
-    });
-    session
-        .step(world, &input, VIEWPORT, STEP)
-        .expect("the touch press steps")
-        .log();
-
-    input.begin_frame(std::time::Duration::from_secs_f32(STEP));
-    input.apply(InputEvent::TouchEnded { id: 7 });
-    // Play's follow camera can advance between press and release. Capture the
-    // release-frame Aim the script will consume rather than assuming touch-down
-    // and touch-up project onto the same voxel.
-    let aim = aim(world, scene, [at[0] / VIEWPORT.0, at[1] / VIEWPORT.1])
-        .expect("the released touch still points at the world");
-    let touched = [aim.cell.x, aim.cell.y, aim.cell.z];
-    session
-        .step(world, &input, VIEWPORT, STEP)
-        .expect("the touch release steps")
-        .log();
-
-    input.begin_frame(std::time::Duration::from_secs_f32(STEP));
-    session
-        .step(world, &input, VIEWPORT, STEP)
-        .expect("the empty touch frame steps")
-        .log();
-    touched
-}
-
-pub(crate) fn entity_position(world: &World, name: &str) -> [f32; 3] {
-    world
-        .entities()
-        .find(|(_, data)| data.name.as_deref() == Some(name))
-        .and_then(|(_, data)| data.transform_3d)
-        .expect("named entity has a transform")
-        .position
-}
-
-pub(crate) fn planar_distance(left: [f32; 3], right: [f32; 3]) -> f32 {
-    let dx = left[0] - right[0];
-    let dz = left[2] - right[2];
-    (dx * dx + dz * dz).sqrt()
-}
-
-pub(crate) fn ui_text(world: &World, scene: &SceneExtractor, name: &str) -> UiTextComponent {
-    let entity = world
-        .entities()
-        .find(|(_, data)| data.name.as_deref() == Some(name))
-        .map(|(entity, _)| entity)
-        .expect("named UI entity exists");
-    scene
-        .components()
-        .get::<UiTextComponent>(world, entity)
-        .expect("the UI text schema reads")
-        .expect("the named UI text is active")
-}
-
-pub(crate) fn settle(world: &mut World, session: &mut Session, steps: usize) {
-    let idle = InputState::default();
-    for _ in 0..steps {
-        session
-            .step(world, &idle, VIEWPORT, STEP)
-            .expect("an idle step")
-            .log();
+    /// A finger put down on the middle of a cell and lifted again, with no
+    /// mouse anywhere -- a phone's tap.
+    pub fn tap_cell(&mut self, cell: (i32, i32)) {
+        let [x, y] = self.pixel_of(cell, top_of(cell));
+        self.run
+            .input
+            .apply(InputEvent::TouchStarted { id: 1, x, y });
+        self.step();
+        self.run.input.apply(InputEvent::TouchEnded { id: 1 });
+        self.step();
+        self.step();
     }
 }
 
-/// The world's ground as it stands now, generated and edited.
-pub(crate) fn ground(world: &World, scene: &SceneExtractor) -> VoxelGround {
-    let (_, component) = scene
-        .components()
-        .query::<VoxelWorldComponent>(world)
-        .expect("the voxel world schema reads")
-        .into_iter()
-        .next()
-        .expect("the world has a voxel world");
-    let tile_sets = sindri_causeway::bind_tile_sets().expect("the tile set binds");
-    VoxelGround::of(&component, Some(&tile_sets)).expect("the world reads")
-}
-
-/// The block in a grid cell -- a column, a row and a level -- if any.
-pub(crate) fn block_at(world: &World, scene: &SceneExtractor, cell: [i32; 3]) -> Option<String> {
-    let block = ground(world, scene).block([cell[0], cell[2], cell[1]]);
-    (!block.is_empty()).then_some(block)
-}
-
-/// Where a click on the picture lands, as the session aims it.
-pub(crate) fn aim(
-    world: &World,
-    scene: &SceneExtractor,
-    point: [f32; 2],
-) -> Option<sindri_scene::voxel::VolumeAim> {
-    let tile_sets = sindri_causeway::bind_tile_sets().expect("the tile set binds");
-    sindri_scene::voxel::aim_at_with(
-        world,
-        scene.components(),
-        Some(&tile_sets),
-        view_projection(world, scene),
-        point,
-    )
-}
-
-/// A block the camera can actually see, and where on the picture it is.
-///
-/// Asked of the picker rather than worked out from the world, and the
-/// difference matters: a column can be perfectly good ground and still be
-/// behind a hill from here, and a click aimed at one lands on the hill. What a
-/// test wants is somewhere a *player* could click, which is exactly what the
-/// pointer already answers.
-pub(crate) fn in_view(world: &World, scene: &SceneExtractor) -> ([i32; 3], [f32; 2]) {
-    for (across, down) in [(0.5, 0.55), (0.42, 0.6), (0.58, 0.5), (0.5, 0.45)] {
-        let at = [across * VIEWPORT.0, down * VIEWPORT.1];
-        if let Some(aim) = aim(world, scene, [across, down])
-            && aim.face == sindri_core::TileFace::Top
-        {
-            return ([aim.cell.x, aim.cell.y, aim.cell.z], at);
-        }
-    }
-    panic!("nothing in the middle of the picture to point at");
-}
-
-/// A visible top face outside one logical grid cell.
-///
-/// Play starts with Target under the Wanderer and the camera centred there,
-/// so the ordinary centre-of-view helper can legitimately return Target's
-/// current cell. A movement regression must choose somewhere else or a
-/// correctly handled tap can look like no movement at all.
-pub(crate) fn in_view_away_from(
-    world: &World,
-    scene: &SceneExtractor,
-    excluded: [i32; 2],
-) -> ([i32; 3], [f32; 2]) {
-    for (across, down) in [
-        (0.32, 0.58),
-        (0.68, 0.42),
-        (0.36, 0.42),
-        (0.64, 0.58),
-        (0.5, 0.68),
-        (0.5, 0.32),
-    ] {
-        let at = [across * VIEWPORT.0, down * VIEWPORT.1];
-        if let Some(aim) = aim(world, scene, [across, down])
-            && aim.face == sindri_core::TileFace::Top
-            && (aim.cell.x - excluded[0]).abs() + (aim.cell.y - excluded[1]).abs() >= 4
-        {
-            return ([aim.cell.x, aim.cell.y, aim.cell.z], at);
-        }
-    }
-    panic!("nothing outside {excluded:?} is visible to tap");
+/// The height of a cell's top on the first island, Saltmarsh, from the same
+/// heights `islands.decay` gives it.
+fn top_of(cell: (i32, i32)) -> f32 {
+    const SALTMARSH: &str = "00111100012332101234432112333211123322110122211100122110\
+                             00011100";
+    let index = usize::try_from(cell.1 * 8 + cell.0).expect("a cell on the board");
+    let digit = SALTMARSH.as_bytes()[index] - b'0';
+    f32::from(digit)
 }

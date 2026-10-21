@@ -119,6 +119,9 @@ pub struct HostServices<'a> {
     pub gestures: Option<&'a sindri_core::Gestures>,
     /// How far this frame's drag asks the camera to move.
     pub camera_pan: Option<[f32; 3]>,
+    /// The world camera's ray through the pointer, origin then unit
+    /// direction, when there is a pointer and a camera to cast it from.
+    pub pointer_ray: Option<[[f32; 3]; 2]>,
     /// Which block the pointer is on, when the host picked one this frame.
     pub aim: Option<sindri_scene::voxel::VolumeAim>,
     /// The run's random stream, when the host is running one.
@@ -204,6 +207,7 @@ impl<'a> WorldHost<'a> {
             aim,
             gestures,
             camera_pan,
+            pointer_ray,
             random,
             saves,
             effects,
@@ -228,6 +232,7 @@ impl<'a> WorldHost<'a> {
                     aim,
                     gestures,
                     camera_pan,
+                    pointer_ray,
                     random,
                     animations,
                     scenes,
@@ -413,6 +418,7 @@ mod tests {
                 aim: None,
                 gestures: None,
                 camera_pan: None,
+                pointer_ray: None,
                 random: None,
                 saves: None,
                 effects: None,
@@ -513,6 +519,7 @@ mod tests {
                 aim: None,
                 gestures: None,
                 camera_pan: None,
+                pointer_ray: None,
                 random: None,
                 saves: None,
                 effects: None,

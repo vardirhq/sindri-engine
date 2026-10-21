@@ -492,6 +492,8 @@ The mouse, or a finger on a touch screen, handled the same way so one game works
 - `overlay_x`: `number` — The pointer's sideways position in screen units, where 0 is the centre.
 - `overlay_y`: `number` — The pointer's up-down position in screen units, where 0 is the centre.
 - `position`: `Vec2` — The pointer's position in pixels, from the top-left corner of the game's view.
+- `ray_direction`: `Vec3` (read-only) — Read-only unit Vec3 the world camera's ray through the pointer travels along: straight into the screen for an orthographic camera, through the pointer's pixel for a perspective one. Zero, with `ray_origin`, when there is no pointer or no world camera, so check its length before using it.
+- `ray_origin`: `Vec3` (read-only) — Read-only Vec3 where the world camera's ray through the pointer starts, in world space: with `ray_direction`, what a game casts against its own ground to learn which cell or object the pointer is over, when that ground is not a voxel world `Aim` can answer for. Zero when there is no pointer or no world camera.
 - `unlock()` → `unit` — Requests cursor release. Escape, focus loss and suspension also release capture; no automatic recapture.
 - `x`: `number` — The pointer's distance from the left edge of the game's view, in pixels.
 - `y`: `number` — The pointer's distance from the top edge of the game's view, in pixels.
