@@ -1,0 +1,44 @@
+// Read-only browser observer: drops a block from high over Voxel Lab and
+// reports once it has come to rest on the voxel world -- stopped by its blocks,
+// with a downward ray agreeing, rather than falling through. Collision is built
+// round bodies, so the ground is asked about once the block is near it.
+script BrowserVoxelLanding {
+    @export let block: Prefab;
+    var frames: number = 0.0;
+    var dropped: Entity? = null;
+    var resting: number = 0.0;
+    var verified: bool = false;
+    fn update(dt: number) {
+        frames += 1.0;
+        let world = World.find("Engine Voxel World");
+        if world == null || verified {
+            return;
+        }
+        let solid = Physics3d.layer("solid");
+        if frames == 30.0 {
+            let body = World.spawn(this.block);
+            body.transform.position = Vec3(8.5, 70.0, 8.5);
+            dropped = body;
+            print("Voxel landing dropped");
+        }
+        let body = dropped;
+        if body == null || !World.exists(body) {
+            return;
+        }
+        let below = Physics3d.raycast(body.transform.world_position, Vec3(0.0, -1.0, 0.0), 1.0, solid, false, body);
+        let still = Physics3d.velocity(body).length < 0.05;
+        var on_world = false;
+        if below != null {
+            on_world = below.entity == world;
+        }
+        if on_world && still {
+            resting += 1.0;
+        } else {
+            resting = 0.0;
+        }
+        if resting > 20.0 {
+            verified = true;
+            print("Voxel collision landing verified");
+        }
+    }
+}

@@ -810,12 +810,13 @@ jobs:
           done
           # Keep the shipped gameplay/starting pose and add read-only telemetry
           # for a real keyboard-driven run to the platformer's goal.
-          # Causeway plus a read-only observer that drops its loose block onto
-          # the generated voxel terrain, proving voxel collision in a browser.
-          python3 scripts/browser/prepare-causeway-voxels.py target/browser-causeway-voxels
+          # Voxel Lab with collision and a read-only observer that drops a
+          # block onto its generated terrain, proving voxel collision in a
+          # browser. `a_block_lands_on_voxel_lab` plays the same fixture natively.
+          python3 scripts/browser/prepare-voxel-landing.py target/browser-voxel-landing
           cargo run --quiet --package sindri-export --bin sindri-export -- \
-            target/browser-causeway-voxels target/dist/causeway-voxels --base /sindri-engine/
-          cp -R crates/sindri-player/pkg/. target/dist/causeway-voxels/pkg/
+            target/browser-voxel-landing target/dist/voxel-landing --base /sindri-engine/
+          cp -R crates/sindri-player/pkg/. target/dist/voxel-landing/pkg/
           python3 examples/benchmark3d/assets/generate.py --check
           cargo run --quiet --package sindri-export --bin sindri-export -- \
             examples/benchmark3d target/dist/benchmark3d --base /examples/benchmark3d/
@@ -968,7 +969,7 @@ jobs:
           SINDRI_EXPECT_ASSETS=1 SINDRI_BASE_PATH=/sindri-engine/ \
             node scripts/browser/smoke.mjs target/dist/causeway target/render-artifacts/browser-causeway.png
           SINDRI_EXPECT_ASSETS=1 SINDRI_VOXEL_LANDING=1 SINDRI_BASE_PATH=/sindri-engine/ \
-            node scripts/browser/smoke.mjs target/dist/causeway-voxels target/render-artifacts/browser-causeway-voxels.png
+            node scripts/browser/smoke.mjs target/dist/voxel-landing target/render-artifacts/browser-voxel-landing.png
           SINDRI_EXPECT_ASSETS=1 \
             SINDRI_BASE_PATH=/sindri-engine/examples/weave-poc/ \
             SINDRI_VIEWPORT_WIDTH=390 SINDRI_VIEWPORT_HEIGHT=844 \
