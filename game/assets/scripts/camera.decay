@@ -39,6 +39,7 @@ script CameraRig {
         target = 0.0;
         elapsed = 1.0;
         last_position = home_position;
+        if on { print("Causeway battlefield ready"); }
     }
 
     fn rotate(direction: number) {

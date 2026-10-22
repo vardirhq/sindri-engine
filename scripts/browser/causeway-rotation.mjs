@@ -31,8 +31,10 @@ try {
     const page = await context.newPage();
     const errors = [];
     const turns = [];
+    let battlefieldReady = false;
     page.on('pageerror', (error) => errors.push(error.message));
     page.on('console', (message) => {
+      if (message.text().includes('Causeway battlefield ready')) battlefieldReady = true;
       if (message.text().includes('Causeway view settled:')) turns.push(message.text());
       if (message.type() === 'error' || /error while parsing wgsl|is invalid|InvalidTransform/.test(message.text())) errors.push(message.text());
     });
@@ -40,7 +42,12 @@ try {
     await page.waitForFunction(() => !document.querySelector('#sindri-loading'), null, { timeout: 60000 });
     await page.waitForTimeout(5000);
     await page.keyboard.press('Enter');
-    await page.waitForTimeout(5000);
+    for (let attempt = 0; attempt < 300 && !battlefieldReady; attempt++) await page.waitForTimeout(100);
+    assert(battlefieldReady, `${name} title handed the camera to the battlefield`);
+    const waitForTurns = async (count) => {
+      for (let attempt = 0; attempt < 100 && turns.length < count; attempt++) await page.waitForTimeout(100);
+      assert.equal(turns.length, count, `${name} completed ${count} quarter turns`);
+    };
     const before = await page.locator('canvas').screenshot();
     if (name === 'desktop') {
       await page.keyboard.press('l');
@@ -48,7 +55,7 @@ try {
       await page.touchscreen.tap(359, 102);
     }
     await page.waitForTimeout(1000);
-    assert.equal(turns.length, 1, `${name} completed a quarter turn`);
+    await waitForTurns(1);
     const after = await page.locator('canvas').screenshot();
     assert(!before.equals(after), `${name} view changes after rotation input`);
     if (name === 'phone') {
@@ -59,7 +66,7 @@ try {
       await page.waitForTimeout(100);
       await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
       await page.waitForTimeout(1000);
-      assert.equal(turns.length, 2, 'sea swipe completed a second quarter turn');
+      await waitForTurns(2);
     }
     await page.screenshot({ path: join(output, `browser-${name}.png`) });
     assert.deepEqual(errors, [], `${name} has no runtime or GPU errors`);

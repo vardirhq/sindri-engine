@@ -5492,6 +5492,24 @@
           "direction": "row",
           "spacing": 0.01
         },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "anchor": "center",
+          "layer": 100,
+          "fill": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0.0
+        },
         "sindri.ui.box": {
           "order": 2
         }

@@ -271,7 +271,9 @@ def hud_entities():
                                                                                   rich=True)},
                     parent="hearth", spatial=False))
     e.append(entity("view-controls", "ViewControls", {
-        **styled("view-controls"), "sindri.ui.layout": {"direction": "row", "spacing": 0.01}},
+        **styled("view-controls"), "sindri.ui.layout": {"direction": "row", "spacing": 0.01},
+        "sindri.ui.shape": {"kind": "rect", "anchor": "center", "layer": 100,
+                            "fill": [0, 0, 0, 0], "stroke": [0, 0, 0, 0], "stroke_width": 0.0}},
         parent="hud", spatial=False))
     button(e, "rotate-left", "RotateLeft", "<", "view-controls", ("rotate",))
     button(e, "rotate-right", "RotateRight", ">", "view-controls", ("rotate",))

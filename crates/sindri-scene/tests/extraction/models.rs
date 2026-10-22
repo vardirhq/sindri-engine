@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use glam::Vec3;
 use sindri_core::{AssetId, SceneComponent, SceneDocument, UnknownComponentPolicy};
-use sindri_render::{FrameCommand, ModelData, RenderModel};
+use sindri_render::{FrameCommand, ModelData, RenderModel, RenderStage};
 use sindri_scene::{
     CameraView, ModelComponent, SceneExtractError, SceneExtractor, TextureBindings,
     referenced_models,
@@ -176,7 +176,6 @@ fn occluded_models_share_geometry_and_draw_after_terrain() {
             &TextureBindings::new(),
         )
         .unwrap();
-    use sindri_render::RenderStage;
     assert_eq!(
         frame.passes().iter().map(|p| p.stage).collect::<Vec<_>>(),
         [

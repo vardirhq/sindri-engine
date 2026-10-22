@@ -1,6 +1,6 @@
 use super::support::*;
 use glam::Vec3;
-use sindri_platform::{InputEvent, Key};
+use sindri_platform::{InputEvent, Key, MouseButton};
 
 fn pose(game: &Game) -> sindri_core::Transform3D {
     game.run
@@ -66,7 +66,27 @@ fn picking_movement_and_combat_work_in_every_view() {
             game.play(0.4);
         }
         let start = game.cell_of(game.pieces("bulwark")[0]);
-        game.click_cell(start);
+        // Aim at the figure's body, not the floor below it: a foreground
+        // figure may legitimately cover that floor pixel after a turn.
+        let [x, y] = game.pixel_of(start, top_of(start) + 0.6);
+        game.run.input.apply(InputEvent::PointerMoved { x, y });
+        game.step();
+        #[allow(clippy::cast_precision_loss)]
+        let expected = (start.1 * 8 + start.0) as f32;
+        assert_eq!(
+            game.board("pointed"),
+            expected,
+            "body picked in view {turns}"
+        );
+        game.run
+            .input
+            .apply(InputEvent::ButtonPressed(MouseButton::Left));
+        game.step();
+        game.run
+            .input
+            .apply(InputEvent::ButtonReleased(MouseButton::Left));
+        game.step();
+        game.step();
         // Use keyboard confirmation for an unoccupied neighboring ground cell;
         // body picking has priority when a silhouette overlaps a ground pixel.
         let key = [
@@ -128,6 +148,7 @@ fn phone_button_rotates_and_tapping_still_moves() {
     game.tap_key(Key::Enter);
     game.until_players_turn();
     game.play(1.0);
+    let home = pose(&game);
     game.run.input.apply(InputEvent::TouchStarted {
         id: 1,
         x: 309.0,
@@ -137,9 +158,20 @@ fn phone_button_rotates_and_tapping_still_moves() {
     game.run.input.apply(InputEvent::TouchEnded { id: 1 });
     game.step();
     game.play(0.5);
+    assert!(
+        !Vec3::from(pose(&game).position).abs_diff_eq(Vec3::from(home.position), 0.1),
+        "touch button turns the view"
+    );
     let start = game.cell_of(game.pieces("bulwark")[0]);
     let goal = game.free_step_from(start);
-    game.tap_cell(start);
+    let [x, y] = game.pixel_of(start, top_of(start) + 0.6);
+    game.run
+        .input
+        .apply(InputEvent::TouchStarted { id: 1, x, y });
+    game.step();
+    game.run.input.apply(InputEvent::TouchEnded { id: 1 });
+    game.step();
+    game.step();
     game.tap_cell(goal);
     game.until_players_turn();
     assert_eq!(game.cell_of(game.pieces("bulwark")[0]), goal);
