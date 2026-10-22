@@ -4862,7 +4862,7 @@
           "corner_radius": 0.01
         },
         "sindri.ui.box": {
-          "order": 1
+          "order": 2
         }
       }
     },
@@ -6267,6 +6267,91 @@
         },
         "sindri.ui.box": {
           "order": 2
+        }
+      }
+    },
+    {
+      "id": "view-top",
+      "name": "ViewTop",
+      "parent": "view-controls",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "button",
+            "rotate",
+            "top"
+          ]
+        },
+        "sindri.ui.button": {
+          "label": "Top"
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "anchor": "center",
+          "layer": 130,
+          "fill": [
+            0.1,
+            0.16,
+            0.2,
+            1.0
+          ],
+          "stroke": [
+            0.95,
+            0.8,
+            0.5,
+            0.6
+          ],
+          "stroke_width": 0.004,
+          "corner_radius": 0.01
+        },
+        "sindri.ui.box": {
+          "order": 1
+        }
+      }
+    },
+    {
+      "id": "view-top-label",
+      "name": "ViewTop Label",
+      "parent": "view-top",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "button-label"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "Top",
+          "font": "fonts/AlegreyaSans-Bold.ttf",
+          "font_size": 0.034,
+          "line_height": 0.04148,
+          "anchor": "center",
+          "layer": 132,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "bounds": [
+            0.0,
+            0.0
+          ]
+        },
+        "sindri.ui.box": {
+          "order": 0
         }
       }
     },

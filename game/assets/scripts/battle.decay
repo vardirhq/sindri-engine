@@ -1076,7 +1076,8 @@ script Battle {
     fn handle_input() {
         if BattlefieldView.turning || BattlefieldView.dragging || view_pointer_blocked
             || Input.Keyboard.just_pressed("J") || Input.Keyboard.just_pressed("L")
-            || pressed("RotateLeft") || pressed("RotateRight") { return; }
+            || Input.Keyboard.just_pressed("T")
+            || pressed("RotateLeft") || pressed("RotateRight") || pressed("ViewTop") { return; }
         let c = round(cos(BattlefieldView.angle));
         let s = round(sin(BattlefieldView.angle));
         // Keys move a cursor over the board, a quarter turn apart.

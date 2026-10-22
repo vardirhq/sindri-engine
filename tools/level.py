@@ -301,6 +301,8 @@ def hud_entities():
                             "fill": [0, 0, 0, 0], "stroke": [0, 0, 0, 0], "stroke_width": 0.0}},
         parent="hud", spatial=False))
     button(e, "rotate-left", "RotateLeft", "<", "view-controls", ("rotate",))
+    # Straight down from above and back; `CameraRig` says which it will do.
+    button(e, "view-top", "ViewTop", "Top", "view-controls", ("rotate", "top"))
     button(e, "rotate-right", "RotateRight", ">", "view-controls", ("rotate",))
     # Bottom left: the warden in hand.
     e.append(entity("card", "Card", {**styled("card", "panel"), **panel(layout=column(0.006))},

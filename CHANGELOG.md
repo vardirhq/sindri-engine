@@ -1,5 +1,11 @@
 # Changelog
 
+- Add a floor-plan view to Causeway: T or the new Top button tips the camera
+  up over the board to look straight down, squared up with the screen so the
+  cursor's up key goes up it, and eases back the same way. Cells in pits and
+  behind ledges can be seen and picked from there, and the quarter turns
+  still work from above.
+
 - Give Causeway's air more to it: smoke curls from every chimney with somebody
   home and bends with the wind, violet motes rise from each rift the Hollow
   will climb out of, and mist banks drift low over The Fold. Window and rift
