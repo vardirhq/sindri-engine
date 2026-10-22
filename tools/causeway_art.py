@@ -636,8 +636,17 @@ def title_textures():
     for y in range(128):
         for x in range(256):
             d2 = ((x - 127.5) / 128) ** 2 + ((y - 63.5) / 64) ** 2
-            halo.putpixel((x, y), (*ink, int(max(0.0, 1.0 - d2) ** 2 * 170)))
+            halo.putpixel((x, y), (*ink, int(max(0.0, 1.0 - d2) ** 1.1 * 240)))
     halo.save(TEXTURES / "halo.png")
+
+    # A soft round speck for whatever drifts in the air; white, so a tint
+    # makes it pollen, rain, a firefly or an ember.
+    mote = Image.new("RGBA", (32, 32))
+    for y in range(32):
+        for x in range(32):
+            d2 = ((x - 15.5) / 15.5) ** 2 + ((y - 15.5) / 15.5) ** 2
+            mote.putpixel((x, y), (255, 255, 255, int(max(0.0, 1.0 - d2) ** 1.6 * 255)))
+    mote.save(TEXTURES / "mote.png")
 
     white = Image.new("RGBA", (4, 4), (255, 255, 255, 255))
     white.save(TEXTURES / "white.png")
@@ -677,6 +686,33 @@ def title_textures():
             d.polygon([(cx, H / 2 - r), (cx + r * 0.7, H / 2), (cx, H / 2 + r), (cx - r * 0.7, H / 2)],
                       fill=(*rim, 255))
         big.resize((w, h), Image.LANCZOS).save(TEXTURES / f"{name}.png")
+
+    # A boon card: dark and near grey, with a light rim and corner diamonds,
+    # so a tint colors it for the warden it is for.
+    w, h = 300, 400
+    big = Image.new("RGBA", (w * scale, h * scale), (0, 0, 0, 0))
+    W, H = big.size
+    d = ImageDraw.Draw(big)
+    m = 10 * scale
+    for y in range(m, H - m):
+        t = (y - m) / (H - 2 * m)
+        c = int(40 - 18 * t)
+        d.line((m, y, W - m, y), fill=(c, c + 4, c + 8, 236))
+    d.rounded_rectangle((m, m, W - m, H - m), 14 * scale, outline=(236, 226, 205, 255), width=3 * scale)
+    d.rounded_rectangle((m + 9 * scale, m + 9 * scale, W - m - 9 * scale, H - m - 9 * scale), 10 * scale,
+                        outline=(236, 226, 205, 110), width=scale)
+    # Diamonds in the corners, which a nine-slice never stretches.
+    for cx, cy in ((m + 6 * scale, m + 6 * scale), (W - m - 6 * scale, m + 6 * scale),
+                   (m + 6 * scale, H - m - 6 * scale), (W - m - 6 * scale, H - m - 6 * scale)):
+        r = 8 * scale
+        d.polygon([(cx, cy - r), (cx + r * 0.7, cy), (cx, cy + r), (cx - r * 0.7, cy)], fill=(236, 226, 205, 255))
+    big.resize((w, h), Image.LANCZOS).save(TEXTURES / "card.png")
+    # Drawn sliced, so a card keeps its rim whether it stands tall on a desk or
+    # lies wide on a phone.
+    (TEXTURES / "card.sheet").write_text(
+        '{\n  "format_version": 1,\n  "size": [300, 400],\n'
+        '  "grid": { "columns": 1, "rows": 1, "names": ["card"] },\n'
+        '  "borders": { "": [40, 40, 40, 40] }\n}\n')
 
 
 def main():

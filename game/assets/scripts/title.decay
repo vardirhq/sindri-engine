@@ -1,11 +1,12 @@
 // The title: the Lighthouse at dusk, the camera drifting round it, Hollow
 // trudging over the causeway, and the logo and menu coming up out of the
 // dark over it. Beginning a crossing hands the camera back to the battle's
-// view and the light back to day before the battle is told to start, so the
-// first thing a player sees of the board is it settling into place.
+// view before the battle is told to start, so the first thing a player sees
+// of the board is it settling into place. The light is `Atmosphere`'s: this
+// asks for the title's dusk, and the battle for each island's mood.
 //
 // The battle says when the title is wanted (`TitleShown`) and this says when
-// it is done (`CrossingBegins`). Between the two, the camera, the sun, the sea
+// it is done (`CrossingBegins`). Between the two, the camera, the walkers
 // and the title's own screen are this script's.
 
 event TitleShown();
@@ -49,57 +50,27 @@ script TitleShow {
     var hovered: String = "";
     var howto_open: bool = false;
     var swapped: bool = false;
+    var shown_before: bool = false;
     var fader: Entity = null;
 
     var root: Entity = null;
     var camera: Entity = null;
-    var sun: Entity = null;
     var world: Entity = null;
-    var lantern: Entity = null;
-    var beacon: Entity = null;
     var walkers: List<Entity> = [];
-    // Alpha as two hex digits for a `[color=#rrggbbaa]` span, in sixteenths.
-    var alpha_hex: List<String> = ["00", "11", "22", "33", "44", "55", "66", "77", "88", "99", "aa", "bb", "cc", "dd", "ee", "ff"];
     var walked: List<number> = [];
 
     // The battle's view and the day, as the scene authored them.
     var home_position: Vec3 = Vec3(0.0, 0.0, 0.0);
     var home_rotation: Quat = Quat(x: 0.0, y: 0.0, z: 0.0, w: 1.0);
-    var day_sun: Color = Color(1.0, 1.0, 1.0);
-    var day_sun_intensity: number = 1.0;
-    var day_pitch: number = 0.0;
-    var day_ambient: Color = Color(1.0, 1.0, 1.0);
-    var day_ambient_intensity: number = 1.0;
-    var day_background: Color = Color(0.0, 0.0, 0.0);
-    var day_sea: Color = Color(1.0, 1.0, 1.0);
-    var day_sea_alpha: number = 1.0;
-    var day_lantern: number = 1.0;
-    var day_beacon: number = 1.0;
 
     fn start() {
         root = World.find("Title");
         fader = World.find("TitleFade");
         camera = World.find("World Camera");
-        sun = World.find("Sun");
         world = World.find("Environment");
-        lantern = World.find("Lantern Light");
-        beacon = World.find("Beacon Light");
         home_position = camera.transform.position;
         home_rotation = camera.transform.rotation;
         CameraRig.on(camera).set_home(home_position, home_rotation);
-        day_sun = sun.light.color;
-        day_sun_intensity = sun.light.intensity;
-        day_pitch = sun.transform.pitch;
-        day_ambient = world.environment.ambient_color;
-        day_ambient_intensity = world.environment.ambient_intensity;
-        day_background = world.environment.background;
-        let tiles = World.with_tag("sea");
-        if tiles.length > 0 {
-            day_sea = tiles[0].sprite.tint;
-            day_sea_alpha = tiles[0].sprite.tint.a;
-        }
-        day_lantern = lantern.light.intensity;
-        day_beacon = beacon.light.intensity;
         for i in 0..3 {
             let w = World.spawn(walker);
             World.set_active(w, false);
@@ -110,6 +81,12 @@ script TitleShow {
 
     on TitleShown() {
         CameraRig.on(camera).battle_view(false);
+        // Dusk at once on the first showing, which is under the loading
+        // screen; eased in when a crossing ends.
+        var over = 2.0;
+        if !shown_before { over = 0.01; }
+        shown_before = true;
+        Atmosphere.on(world).go(TITLE_MOOD, over);
         stage = Stage.Showing;
         clock = 0.0;
         angle = 0.0;
@@ -132,7 +109,6 @@ script TitleShow {
             Stage.Leaving => { leaving(dt); }
         }
         place_camera();
-        shade_world();
         walk(dt);
     }
 
@@ -240,8 +216,7 @@ script TitleShow {
             CameraRig.on(camera).battle_view(true);
             fade("TitleFade", 0.0);
             place_camera();
-            shade_world();
-        }
+            }
     }
 
     // --- The world behind it ------------------------------------------------------
@@ -265,24 +240,6 @@ script TitleShow {
         CameraRig.on(camera).set_zoom(1.0 + (zoom - 1.0) * mood - 0.18 * near);
     }
 
-    // Day for a battle, dusk for the title: a low warm sun, a cool sky, a
-    // darker sea and the lamps up.
-    fn shade_world() {
-        sun.light.color = day_sun.lerp(Color(1.0, 0.46, 0.26), mood);
-        sun.light.intensity = day_sun_intensity + (1.35 - day_sun_intensity) * mood;
-        sun.transform.pitch = day_pitch + (-0.33 - day_pitch) * mood;
-        world.environment.ambient_color = day_ambient.lerp(Color(0.34, 0.34, 0.7), mood);
-        world.environment.ambient_intensity = day_ambient_intensity + (0.42 - day_ambient_intensity) * mood;
-        world.environment.background = day_background.lerp(Color(0.03, 0.05, 0.1), mood);
-        let sea = day_sea.lerp(Color(0.05, 0.16, 0.26), mood);
-        for tile in World.with_tag("sea") {
-            tile.sprite.tint = sea;
-            tile.sprite.tint.a = day_sea_alpha;
-        }
-        lantern.light.intensity = day_lantern + (4.5 - day_lantern) * mood;
-        beacon.light.intensity = day_beacon + (9.0 - day_beacon) * mood;
-    }
-
     // Hollow on the causeway, spaced along it, coming out of the mainland's
     // haze and fading where the island begins.
     fn walk(dt: number) {
@@ -297,7 +254,14 @@ script TitleShow {
             let step = abs(sin(Time.elapsed * 5.0 + i * 1.7));
             w.transform.position = Vec3(x, ROAD_TOP + step * 0.06, ROAD_Z + sin(i * 2.3) * 0.25);
             w.transform.yaw = PI + sin(Time.elapsed * 2.5 + i) * 0.08;
-            w.transform.scale = Vec3(show, show * (1.0 - step * 0.04), show);
+            // Off rather than shrunk to nothing where it is all but gone: a
+            // figure scaled to a speck has no shape left to draw.
+            // And off for good once the title's island has gone.
+            let shown = show > 0.02 && !(stage == Stage.Leaving && swapped);
+            World.set_active(w, shown);
+            if shown {
+                w.transform.scale = Vec3(show, show * (1.0 - step * 0.04), show);
+            }
         }
     }
 
@@ -305,43 +269,24 @@ script TitleShow {
 
     // How far along `from`..`to` seconds the opening is, eased.
     fn ramp(from: number, to: number) -> number {
-        return smooth(clamp((clock - from) / (to - from), 0.0, 1.0));
+        return ramp_at(clock, from, to);
     }
 
     fn smooth(t: number) -> number {
         return t * t * (3.0 - 2.0 * t);
     }
 
-    fn fade(name: String, alpha: number) {
-        let e = World.find(name);
-        if e != null { e.ui_image.tint.a = alpha; }
-    }
+    fn fade(name: String, alpha: number) { fade_image(name, alpha); }
 
-    fn alpha_of(name: String) -> number {
-        let e = World.find(name);
-        if e == null { return 0.0; }
-        return e.ui_image.tint.a;
-    }
+    fn alpha_of(name: String) -> number { return image_alpha(name); }
 
     fn words(name: String, text: String, rgb: String, alpha: number) {
-        let e = World.find(name);
-        if e == null { return; }
-        if text == "" || alpha <= 0.0 {
-            Ui.set_text(e, "");
-            return;
-        }
-        let level = clamp(floor(alpha * 15.0 + 0.5), 0.0, 15.0);
-        Ui.set_text(e, "[color=#" + rgb + alpha_hex[level] + "]" + text + "[/color]");
+        fade_words(name, text, rgb, alpha);
     }
 
-    // A plate button: its plate and label at `alpha`, the plate lit while
-    // the pointer is over it and pressed down while held.
+    // A plate button, with a tick when the pointer comes onto it.
     fn plate(name: String, label: String, rgb: String, alpha: number) {
-        let button = World.find(name);
-        if button == null { return; }
-        var light = 0.86;
-        if alpha > 0.9 && Ui.is_hovered(button) {
-            light = 1.0;
+        if fade_plate(name, label, rgb, alpha) {
             if hovered != name {
                 hovered = name;
                 Audio.play("audio/select.wav", 0.15);
@@ -349,13 +294,6 @@ script TitleShow {
         } else if hovered == name {
             hovered = "";
         }
-        if Ui.is_held(button) { light = 0.72; }
-        let plate = World.find(name + " Plate");
-        if plate != null {
-            plate.ui_image.tint = Color(light, light, light);
-            plate.ui_image.tint.a = alpha;
-        }
-        words(name + " Label", label, rgb, alpha);
     }
 
     fn pressed(name: String) -> bool {

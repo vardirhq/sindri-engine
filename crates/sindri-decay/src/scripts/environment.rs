@@ -504,9 +504,12 @@ pub(super) fn describe_node(node: &Node) -> Type {
         // whole, and still read channel by channel.
         Node::Group(name, _) if *name == crate::surface::names::RGBA => Type::Color,
         Node::Group(name, _) => Type::Named((*name).to_owned()),
-        Node::Leaf(crate::surface::Leaf::Light(crate::surface::light::LightField::Enabled)) => {
-            Type::Bool
-        }
+        Node::Leaf(
+            crate::surface::Leaf::Light(crate::surface::light::LightField::Enabled)
+            | crate::surface::Leaf::Environment(crate::surface::environment::EnvironmentField::Flag(
+                ..,
+            )),
+        ) => Type::Bool,
         Node::Leaf(_) => Type::Number,
         Node::Handle(_) => Type::Named(ENTITY.to_owned()),
     }

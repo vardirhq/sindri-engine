@@ -100,6 +100,11 @@ pub struct UiBoxComponent {
     /// In a grid: the row line it starts at, and how many rows it spans.
     #[serde(default)]
     pub grid_row: [u32; 2],
+    /// Taken out of its parent's layout, as CSS's `position: absolute`: the
+    /// line or grid closes up as if it were not there, and it is placed by
+    /// its own position from the parent's middle, over or under its siblings.
+    #[serde(default)]
+    pub absolute: bool,
 }
 
 const fn one() -> f32 {
@@ -125,6 +130,7 @@ impl Default for UiBoxComponent {
             fit_content: [false; 2],
             grid_column: [0, 0],
             grid_row: [0, 0],
+            absolute: false,
         }
     }
 }

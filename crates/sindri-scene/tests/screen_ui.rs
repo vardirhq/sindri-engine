@@ -6,8 +6,8 @@ use sindri_core::{
     World,
 };
 use sindri_scene::{
-    SafeArea, SceneExtractor, ScreenExtent, ScreenUi, UiButtonComponent, UiImageComponent,
-    UiLayoutComponent,
+    SafeArea, SceneExtractor, ScreenExtent, ScreenUi, UiBoxComponent, UiButtonComponent,
+    UiImageComponent, UiLayoutComponent,
 };
 use std::time::Duration;
 
@@ -329,6 +329,69 @@ fn a_column_closes_up_around_a_hidden_entry() {
         .map(|rect| rect.center[1])
         .sum();
     assert!(middle.abs() < 1.0e-5, "the menu drifted off its middle");
+}
+
+/// `position: absolute`: an entry taken out of the flow leaves no gap and keeps
+/// its own place from the parent's middle.
+#[test]
+fn an_absolute_entry_is_out_of_the_column_and_keeps_its_own_place() {
+    let mut world = World::default();
+    let parent = world.spawn(EntityData {
+        transform_3d: Some(Transform3D::default()),
+        components: [(
+            UiLayoutComponent::TYPE_NAME.to_owned(),
+            json!({ "direction": "column", "spacing": 0.5 }),
+        )]
+        .into_iter()
+        .collect(),
+        ..EntityData::default()
+    });
+    let entries: Vec<EntityId> = (0..3)
+        .map(|_| {
+            let child = button(&mut world, [0.0, 0.0], [0.5, 0.2]);
+            world.set_parent(child, Some(parent)).expect("parented");
+            child
+        })
+        .collect();
+    let spread = |screen: &ScreenUi, of: &[EntityId]| {
+        of.iter()
+            .filter_map(|entity| screen.rect(*entity))
+            .map(|rect| rect.center[1])
+            .fold(f32::NEG_INFINITY, f32::max)
+    };
+    let three = spread(&updated(&mut world, &Hand::mouse()), &entries);
+
+    let lifted = entries[1];
+    let entity = world.get_mut(lifted).expect("there");
+    entity.components.insert(
+        UiBoxComponent::TYPE_NAME.to_owned(),
+        json!({ "absolute": true }),
+    );
+    if let Some(transform) = entity.transform_3d.as_mut() {
+        transform.position = [0.3, 0.4, 0.0];
+    }
+    let screen = updated(&mut world, &Hand::mouse());
+    let flowing = [entries[0], entries[2]];
+    assert!(
+        spread(&screen, &flowing) < three,
+        "the column kept a gap for the absolute entry"
+    );
+    let middle: f32 = flowing
+        .iter()
+        .filter_map(|entity| screen.rect(*entity))
+        .map(|rect| rect.center[1])
+        .sum();
+    assert!(middle.abs() < 1.0e-5, "the column drifted off its middle");
+    // The parent sits at the middle of the screen, so its own place is
+    // where it is drawn.
+    let own = screen
+        .rect(lifted)
+        .expect("the absolute entry is still drawn");
+    assert!(
+        own.center[0] > 0.0 && own.center[1] != 0.0,
+        "the absolute entry lost its own place: {:?}",
+        own.center
+    );
 }
 
 /// A notch is not in the scene; it is in the hardware the scene is running on.

@@ -144,6 +144,14 @@ Where the element comes in its layout, lowest first.
 - **Writes:** `sindri.ui.box` `order`
 - **Example:** `order: 2;`
 
+### `position`
+
+`absolute` takes the element out of its parent's line or grid, which closes up as if it were not there; `x` and `y` then place it from the parent's middle, over or under its siblings.
+
+- **Values:** `absolute`, or `static` (`relative` reads the same)
+- **Writes:** `sindri.ui.box` `absolute`
+- **Example:** `position: absolute;`
+
 ### `align-self`
 
 One child's own `align-items`.

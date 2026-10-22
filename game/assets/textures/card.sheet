@@ -1,0 +1,6 @@
+{
+  "format_version": 1,
+  "size": [300, 400],
+  "grid": { "columns": 1, "rows": 1, "names": ["card"] },
+  "borders": { "": [40, 40, 40, 40] }
+}

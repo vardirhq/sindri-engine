@@ -13,6 +13,20 @@ pub(super) fn transform(matrix: Mat4) -> Result<(), ModelRenderError> {
     Ok(())
 }
 
+/// Whether a model placed with this world transform has anything to draw.
+///
+/// An entity scaled to nothing is how a game shrinks a figure away, and it
+/// leaves no pixels behind, so it is skipped rather than refused: refusing
+/// it stopped the whole frame — and in the browser, the game — over a
+/// figure no one could see. A transform that is not finite still is an
+/// error, because nothing a game means to do produces one.
+pub(super) fn drawable(matrix: Mat4) -> Result<bool, ModelRenderError> {
+    if !matrix.is_finite() {
+        return Err(ModelRenderError::InvalidTransform);
+    }
+    Ok(matrix.determinant().abs() >= 1e-12)
+}
+
 pub(super) fn data(data: &ModelData) -> Result<(), ModelRenderError> {
     for mesh in &data.meshes {
         for primitive in mesh {

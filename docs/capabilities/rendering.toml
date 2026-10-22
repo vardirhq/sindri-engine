@@ -965,12 +965,11 @@ id = "project-host-fog-post"
 group = "World presentation"
 title = "Authored fog/AO/post stack in shipped project hosts"
 summary = "The shared native/browser player and the offscreen project renderer apply an environment's fog, occlusion, grade and bloom as the editor does"
-status = { engine = "yes", editor = "n/a", decay = "no", proof = "yes" }
+status = { engine = "yes", editor = "n/a", decay = "yes", proof = "yes" }
 parity = "Authored fog/AO/post stack in shipped project hosts"
-tests = ["game/tests/the_game_holds_together.rs"]
+tests = ["game/tests/the_game_holds_together.rs", "crates/sindri-decay/tests/environment.rs"]
 proof = ["game"]
 docs = ["docs/3d-foundation-review.md"]
-limits = ["Decay cannot change fog or post-processing at runtime."]
 detail = '''
 `SceneExtractor::world_settings` gathers an environment's light, shadows, fog,
 occlusion strength and grade into one `WorldSettings`, and
@@ -978,7 +977,10 @@ occlusion strength and grade into one `WorldSettings`, and
 player and the offscreen project renderer light a frame as the editor does. A
 frame with post-processing goes through `encode_lit_frame` and its bloom.
 Causeway ships tone mapping, grade, vignette and bloom on its lanterns and
-beacon this way.
+beacon this way. Decay reaches the same settings while a game runs:
+`this.environment.fog`, `.post_process` and `.bloom` read and write each field,
+checked as the scene's own values are, and Causeway eases every island's fog,
+grade and bloom from one mood to the next, flashing them for lightning.
 '''
 
 

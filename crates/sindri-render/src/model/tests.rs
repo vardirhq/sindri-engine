@@ -115,6 +115,28 @@ fn singular_and_nonfinite_transforms_are_diagnosed() {
     );
 }
 
+/// A figure scaled to nothing is skipped, not an error: a game shrinks one
+/// away on purpose, and on a phone's short first frame Causeway's title
+/// shrank one below the threshold and stopped the game.
+#[test]
+fn a_model_scaled_to_nothing_is_skipped_rather_than_refused() {
+    for scale in [0.0, 1e-5] {
+        assert_eq!(
+            validate::drawable(Mat4::from_scale(Vec3::splat(scale))),
+            Ok(false)
+        );
+    }
+    assert_eq!(
+        validate::drawable(Mat4::from_scale(Vec3::splat(0.01))),
+        Ok(true)
+    );
+    assert_eq!(
+        validate::drawable(Mat4::from_translation(Vec3::splat(f32::NAN))),
+        Err(ModelRenderError::InvalidTransform),
+        "a transform that is not finite is still a bug"
+    );
+}
+
 #[test]
 fn resource_rejects_invalid_emission_but_accepts_hdr() {
     for emissive in [[-0.1, 0.0, 0.0], [f32::NAN; 3], [f32::INFINITY; 3]] {

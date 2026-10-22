@@ -44,7 +44,7 @@ Each entry links its tests and the projects that exercise it. Surface marks matc
 | [3D directional + ambient lighting](#environment-lighting) | 🟡 | 🟡 | 🟡 | 🟡 |
 | [Voxel ambient occlusion / contact depth](#voxel-ao) | 🟡 | 🟡 | ❌ | 🟡 |
 | [Post-processing stack](#post-processing) | 🟡 | 🟡 | ❌ | 🟡 |
-| [Authored fog/AO/post stack in shipped project hosts](#project-host-fog-post) | ✅ | — | ❌ | ✅ |
+| [Authored fog/AO/post stack in shipped project hosts](#project-host-fog-post) | ✅ | — | ✅ | ✅ |
 | **3D models** | | | | |
 | [glTF / model import](#glb-models) | 🟡 | ❌ | ❌ | ✅ |
 | **Not yet** | | | | |
@@ -862,17 +862,13 @@ Engine 🟡 · Editor 🟡 · Decay ❌ · Proof 🟡 — parity row *Post-proce
 
 The shared native/browser player and the offscreen project renderer apply an environment's fog, occlusion, grade and bloom as the editor does
 
-Engine ✅ · Editor — · Decay ❌ · Proof ✅ — parity row *Authored fog/AO/post stack in shipped project hosts*
+Engine ✅ · Editor — · Decay ✅ · Proof ✅ — parity row *Authored fog/AO/post stack in shipped project hosts*
 
-**Tested by:** [`game/tests/the_game_holds_together.rs`](../../game/tests/the_game_holds_together.rs)
+**Tested by:** [`game/tests/the_game_holds_together.rs`](../../game/tests/the_game_holds_together.rs), [`crates/sindri-decay/tests/environment.rs`](../../crates/sindri-decay/tests/environment.rs)
 
 **Exercised in:** [`game`](../../game)
 
 **See:** [`docs/3d-foundation-review.md`](../../docs/3d-foundation-review.md)
-
-**Limits:**
-
-- Decay cannot change fog or post-processing at runtime.
 
 <details markdown="1">
 <summary>Evidence</summary>
@@ -883,7 +879,10 @@ occlusion strength and grade into one `WorldSettings`, and
 player and the offscreen project renderer light a frame as the editor does. A
 frame with post-processing goes through `encode_lit_frame` and its bloom.
 Causeway ships tone mapping, grade, vignette and bloom on its lanterns and
-beacon this way.
+beacon this way. Decay reaches the same settings while a game runs:
+`this.environment.fog`, `.post_process` and `.bloom` read and write each field,
+checked as the scene's own values are, and Causeway eases every island's fog,
+grade and bloom from one mood to the next, flashing them for lightning.
 
 </details>
 

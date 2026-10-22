@@ -176,6 +176,16 @@ pub const PROPERTIES: &[Property] = &[
         example: "2",
     },
     Property {
+        names: &["position"],
+        group: FLEX,
+        values: "`absolute`, or `static` (`relative` reads the same)",
+        writes: "`sindri.ui.box` `absolute`",
+        summary: "`absolute` takes the element out of its parent's line or grid, which \
+                  closes up as if it were not there; `x` and `y` then place it from the \
+                  parent's middle, over or under its siblings.",
+        example: "absolute",
+    },
+    Property {
         names: &["align-self"],
         group: FLEX,
         values: "`auto`, `start`, `center`, `end` or `stretch`",

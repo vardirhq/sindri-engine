@@ -226,6 +226,35 @@ fn a_script_can_change_its_sprite() {
     assert_eq!(sprite["texture"], json!("procedural:checkerboard"));
 }
 
+/// A color channel is a fraction whatever the scene wrote it as: a tint
+/// authored `[1, 1, 1, 0]` holds integers, and rounding every write to one of
+/// them made a fade jump from nothing to all at once.
+#[test]
+fn a_tint_authored_in_whole_numbers_still_fades() {
+    let (mut world, entity, sources) = world(
+        r"script S { fn update(dt: f32) { this.sprite.tint.a = 0.45; this.sprite.layer = 3.4; } }",
+    );
+    world
+        .get_mut(entity)
+        .unwrap()
+        .components
+        .get_mut("sindri.sprite")
+        .unwrap()["tint"] = json!([1, 1, 1, 0]);
+    let report = Scripts::new().advance(
+        &mut world,
+        &registry(),
+        ScriptFrame::new(&sources, &InputState::default(), 0.5),
+    );
+    assert!(report.is_quiet(), "{report:?}");
+    let sprite = sprite(&world, entity);
+    assert_eq!(sprite["tint"][3], json!(0.45));
+    assert_eq!(
+        sprite["layer"],
+        json!(3),
+        "a whole-number field still rounds"
+    );
+}
+
 /// A sprite's tint is a `Color`: read whole, blended, and written back whole,
 /// while one channel is still one number.
 #[test]

@@ -25,17 +25,60 @@ fn color_name(under: &[&str]) -> Option<&'static str> {
         ["environment", "background"] | ["entity", "environment", "background"] => {
             Some("background")
         }
+        ["environment", "fog", "color"] | ["entity", "environment", "fog", "color"] => {
+            Some("fog.color")
+        }
         _ => None,
     }
 }
 
 fn color(environment: EnvironmentComponent, name: &str) -> [f32; 4] {
-    if name == "background" {
-        environment.background
-    } else {
-        let [r, g, b] = environment.ambient_color;
-        [r, g, b, 1.0]
+    match name {
+        "background" => environment.background,
+        "fog.color" => {
+            let [r, g, b] = environment.fog.color;
+            [r, g, b, 1.0]
+        }
+        _ => {
+            let [r, g, b] = environment.ambient_color;
+            [r, g, b, 1.0]
+        }
     }
+}
+
+/// The JSON slot a color lives in: top level, or `color` inside `fog`.
+fn color_slot<'a>(
+    payload: &'a mut serde_json::Value,
+    current: EnvironmentComponent,
+    name: &str,
+) -> &'a mut serde_json::Value {
+    if name == "fog.color" {
+        &mut section(payload, current, "fog")["color"]
+    } else {
+        &mut payload[name]
+    }
+}
+
+/// A section of the payload such as `fog`, filled from the checked view when
+/// the scene never authored it, so a write keeps every other field's default.
+fn section<'a>(
+    payload: &'a mut serde_json::Value,
+    current: EnvironmentComponent,
+    name: &str,
+) -> &'a mut serde_json::Value {
+    if payload.get(name).is_none() {
+        let full = serde_json::to_value(current).unwrap_or_default();
+        payload[name] = full.get(name).cloned().unwrap_or_default();
+    }
+    &mut payload[name]
+}
+
+/// What the checked view holds at `section.key`, defaults included.
+fn nested(environment: EnvironmentComponent, section: &str, key: &str) -> serde_json::Value {
+    serde_json::to_value(environment)
+        .ok()
+        .and_then(|full| full.get(section)?.get(key).cloned())
+        .unwrap_or_default()
 }
 
 fn finite(value: f64, path: &Path) -> Result<(), RuntimeError> {
@@ -83,11 +126,26 @@ impl WorldHost<'_> {
         path: &Path,
     ) -> Result<Value, RuntimeError> {
         let environment = checked(self.environment_payload(entity, path)?, path)?;
-        Ok(Value::Number(f64::from(match field {
-            EnvironmentField::AmbientIntensity => environment.ambient_intensity,
-            EnvironmentField::AmbientColor(index) => color(environment, "ambient_color")[index],
-            EnvironmentField::Background(index) => environment.background[index],
-        })))
+        Ok(match field {
+            EnvironmentField::AmbientIntensity => {
+                Value::Number(f64::from(environment.ambient_intensity))
+            }
+            EnvironmentField::AmbientColor(index) => {
+                Value::Number(f64::from(color(environment, "ambient_color")[index]))
+            }
+            EnvironmentField::Background(index) => {
+                Value::Number(f64::from(environment.background[index]))
+            }
+            EnvironmentField::FogColor(index) => {
+                Value::Number(f64::from(color(environment, "fog.color")[index]))
+            }
+            EnvironmentField::Number(section, key) => {
+                Value::Number(nested(environment, section, key).as_f64().unwrap_or(0.0))
+            }
+            EnvironmentField::Flag(section, key) => {
+                Value::Bool(nested(environment, section, key).as_bool().unwrap_or(false))
+            }
+        })
     }
 
     pub(super) fn store_environment(
@@ -99,9 +157,28 @@ impl WorldHost<'_> {
     ) -> Result<bool, RuntimeError> {
         let mut payload = self.environment_payload(entity, path)?.clone();
         let current = checked(&payload, path)?;
+        if let EnvironmentField::Flag(name, key) = field {
+            let Value::Bool(on) = value else {
+                return Err(error(path, "takes true or false"));
+            };
+            section(&mut payload, current, name)[key] = serde_json::Value::Bool(*on);
+            return self.commit_environment(entity, payload, path);
+        }
         let number = number(path, value)?;
         finite(number, path)?;
         let (name, index) = match field {
+            EnvironmentField::Flag(..) => unreachable!("handled above"),
+            EnvironmentField::Number(name, key) => {
+                section(&mut payload, current, name)[key] = serde_json::Value::from(number);
+                return self.commit_environment(entity, payload, path);
+            }
+            EnvironmentField::FogColor(3) => {
+                if (number - 1.0).abs() > f64::EPSILON {
+                    return Err(error(path, "fog color requires alpha one"));
+                }
+                return Ok(true);
+            }
+            EnvironmentField::FogColor(index) => ("fog.color", index),
             EnvironmentField::AmbientIntensity => {
                 if number < 0.0 {
                     return Err(error(path, "ambient intensity must be nonnegative"));
@@ -118,12 +195,13 @@ impl WorldHost<'_> {
             EnvironmentField::AmbientColor(index) => ("ambient_color", index),
             EnvironmentField::Background(index) => ("background", index),
         };
-        if payload.get(name).is_none() {
-            let channels = color(current, name);
-            let count = if name == "background" { 4 } else { 3 };
-            payload[name] = serde_json::json!(&channels[..count]);
+        let channels = color(current, name);
+        let count = if name == "background" { 4 } else { 3 };
+        let slot = color_slot(&mut payload, current, name);
+        if slot.is_null() {
+            *slot = serde_json::json!(&channels[..count]);
         }
-        payload[name][index] = serde_json::Value::from(number);
+        slot[index] = serde_json::Value::from(number);
         self.commit_environment(entity, payload, path)
     }
 
@@ -161,12 +239,12 @@ impl WorldHost<'_> {
         }
         let count = if name == "background" { 4 } else { 3 };
         if count == 3 && (channels[3] - 1.0).abs() > f64::EPSILON {
-            return Err(error(path, "ambient color requires alpha one"));
+            return Err(error(path, "this color requires alpha one"));
         }
         let entity = self.subject(subject, path)?;
         let mut payload = self.environment_payload(entity, path)?.clone();
-        checked(&payload, path)?;
-        payload[name] = serde_json::json!(&channels[..count]);
+        let current = checked(&payload, path)?;
+        *color_slot(&mut payload, current, name) = serde_json::json!(&channels[..count]);
         self.commit_environment(entity, payload, path)
     }
 }

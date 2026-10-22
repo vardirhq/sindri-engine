@@ -199,6 +199,18 @@
       "writes": "`sindri.ui.box` `order`"
     },
     {
+      "example": "absolute",
+      "group": "Flex layout",
+      "inherited": false,
+      "names": [
+        "position"
+      ],
+      "shorthand": false,
+      "summary": "`absolute` takes the element out of its parent's line or grid, which closes up as if it were not there; `x` and `y` then place it from the parent's middle, over or under its siblings.",
+      "values": "`absolute`, or `static` (`relative` reads the same)",
+      "writes": "`sindri.ui.box` `absolute`"
+    },
+    {
       "example": "center",
       "group": "Flex layout",
       "inherited": false,

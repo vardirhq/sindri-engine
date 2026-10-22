@@ -144,7 +144,7 @@ pub(super) fn lay_out(
         .collect();
     for (parent, layout) in layouts.iter().rev() {
         let padding = boxes.get(parent).map_or([0.0; 4], |own| own.padding);
-        let shown = shown_children(world, *parent);
+        let shown = scene.flowing(*parent);
         let children = scene.children_of(&laid.sizes, *parent);
         let parent_size = size_of(world, &laid.sizes, *parent);
         // A scroll region's content is as tall as it is, not squeezed into
@@ -216,12 +216,21 @@ struct Context<'a> {
 }
 
 impl Context<'_> {
+    /// The children a layout places: the shown ones, less any taken out of the
+    /// flow with `absolute`, which keep their own position.
+    fn flowing(&self, parent: EntityId) -> Vec<EntityId> {
+        shown_children(self.world, parent)
+            .into_iter()
+            .filter(|child| !self.item(*child).absolute)
+            .collect()
+    }
+
     fn children_of(
         &self,
         sizes: &BTreeMap<EntityId, [f32; 2]>,
         parent: EntityId,
     ) -> Vec<UiLayoutChild> {
-        shown_children(self.world, parent)
+        self.flowing(parent)
             .into_iter()
             .map(|child| UiLayoutChild {
                 size: size_of(self.world, sizes, child),
@@ -250,7 +259,8 @@ impl Context<'_> {
                 ]
             });
         };
-        let children: Vec<UiLayoutChild> = shown_children(self.world, entity)
+        let children: Vec<UiLayoutChild> = self
+            .flowing(entity)
             .into_iter()
             .map(|child| UiLayoutChild {
                 size: size_of(self.world, sizes, child),

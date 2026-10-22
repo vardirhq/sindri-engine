@@ -2392,6 +2392,7 @@
       "addable": true,
       "apply": {},
       "default_payload": {
+        "absolute": false,
         "align_self": "auto",
         "basis": -1.0,
         "fit_content": [
@@ -2432,6 +2433,7 @@
       },
       "display_name": "UI Box",
       "fields": {
+        "absolute": false,
         "align_self": "auto",
         "basis": -1.0,
         "fit_content": [

@@ -124,13 +124,17 @@ impl ModelRenderer {
         asset: &Arc<RenderModel>,
         draw: ModelShadowDraw<'_>,
     ) -> Result<(), ModelRenderError> {
-        super::validate::transform(draw.world)?;
+        if !super::validate::drawable(draw.world)? {
+            return Ok(());
+        }
         let key = self.ensure_cached(device, queue, asset)?;
         let cached = &self.cache[&key];
         let fallback = ModelSurface::default();
         for instance in asset.instances() {
             let world = draw.world * instance.transform;
-            super::validate::transform(world)?;
+            if !super::validate::drawable(world)? {
+                continue;
+            }
             for (index, primitive) in asset.data().meshes[instance.mesh].iter().enumerate() {
                 let surface = primitive
                     .material
