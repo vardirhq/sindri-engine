@@ -1791,7 +1791,7 @@ script Battle {
             let index = unit_index(board, selected);
             if piece != null && index >= 0.0 {
                 let p = piece.transform.position;
-                target = Vec3(p.x, p.y + label_height(board.units[index].kind) + 0.45, p.z);
+                target = Vec3(p.x, p.y + label_height(board.units[index].kind) + 0.6, p.z);
                 wanted = 1.0;
             }
         }
@@ -1804,10 +1804,10 @@ script Battle {
         }
         World.set_active(marker, marker_shown > 0.01);
         if marker_shown <= 0.01 { return; }
-        let bob = sin(Time.elapsed * 3.2) * 0.07;
+        let bob = sin(Time.elapsed * 3.2) * 0.1;
         marker.transform.position = marker_at + Vec3(0.0, bob, 0.0);
         marker.transform.yaw = Time.elapsed * 1.8;
-        let size = 0.9 * marker_shown;
+        let size = 1.7 * marker_shown;
         marker.transform.scale = Vec3(size, size, size);
     }
 
