@@ -173,6 +173,12 @@ def write_prefabs():
     write(folder / "missile.prefab", prefab("Missile", [missile]))
     # A Hollow on the causeway behind the title: the husk's model and nothing
     # else, walked by `title.decay`.
+    # A speck in the air: pollen, dust, rain, a firefly or an ember, as
+    # `Atmosphere` tints and scales it.
+    fleck = entity("fleck", "Fleck", {"sindri.sprite": {
+        "texture": "textures/mote.png", "billboard": True, "layer": 32, "unlit": True,
+        "tint": [1.0, 1.0, 1.0, 0.0]}}, scale=(0.05, 0.05, 0.05))
+    write(folder / "fleck.prefab", prefab("Fleck", [fleck]))
     walker = entity("walker", "Walker", {"sindri.model": {"asset": "models/husk.glb", "layer": 0}})
     write(folder / "walker.prefab", prefab("Walker", [walker]))
     spark = entity("spark", "Spark", {
@@ -190,7 +196,11 @@ def write_prefabs():
 
 def world_entities():
     e = []
-    e.append(entity("environment", "Environment", {"sindri.environment": {
+    # `Atmosphere` sets the light, fog, grade and sea for each island and the
+    # title; what is authored here is only where it starts.
+    e.append(entity("environment", "Environment", {
+        **script("Atmosphere", "scripts/atmosphere.decay", fleck="prefabs/fleck.prefab"),
+        "sindri.environment": {
         "background": [0.06, 0.15, 0.19, 1.0],
         "ambient_color": [0.56, 0.68, 0.88],
         "ambient_intensity": 0.42,
@@ -212,9 +222,15 @@ def world_entities():
     e.append(entity("sea", "Sea", {}, position=(CENTRE[0], 0.08, CENTRE[2])))
     for gx in range(-2, 3):
         for gz in range(-2, 3):
-            e.append(entity(f"sea-{gx + 2}-{gz + 2}", "Sea Tile", {"sindri.sprite": {
-                "texture": "textures/water.png", "tint": [0.07, 0.32, 0.4, 0.82], "layer": -10, "unlit": True,
-            }, "sindri.tags": {"tags": ["sea"]}}, parent="sea", position=(gx * 24.0, 0.0, gz * 24.0), rotation=FLAT, scale=(24.0, 24.0, 1.0)))
+            # Drawn by `shaders/sea.wgsl`: the tint is the deep water's color,
+            # the params swell, foam, glints and how far the shallows reach.
+            e.append(entity(f"sea-{gx + 2}-{gz + 2}", "Sea Tile", {
+                "sindri.sprite": {
+                    "texture": "textures/white.png", "tint": [0.02, 0.15, 0.22, 0.88], "layer": -10,
+                    "unlit": True, "shader": "shaders/sea.wgsl", "shader_params": [0.8, 0.8, 0.6, 2.5],
+                },
+                "sindri.tags": {"tags": ["sea"]},
+            }, parent="sea", position=(gx * 24.0, 0.0, gz * 24.0), rotation=FLAT, scale=(24.0, 24.0, 1.0)))
     e.append(entity("lantern-light", "Lantern Light", {"sindri.light": {
         "kind": "point", "color": [1.0, 0.76, 0.42], "intensity": 2.6, "range": 3.2}},
         position=(CENTRE[0], 3, CENTRE[2])))

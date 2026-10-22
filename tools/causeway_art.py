@@ -639,6 +639,15 @@ def title_textures():
             halo.putpixel((x, y), (*ink, int(max(0.0, 1.0 - d2) ** 2 * 170)))
     halo.save(TEXTURES / "halo.png")
 
+    # A soft round speck for whatever drifts in the air; white, so a tint
+    # makes it pollen, rain, a firefly or an ember.
+    mote = Image.new("RGBA", (32, 32))
+    for y in range(32):
+        for x in range(32):
+            d2 = ((x - 15.5) / 15.5) ** 2 + ((y - 15.5) / 15.5) ** 2
+            mote.putpixel((x, y), (255, 255, 255, int(max(0.0, 1.0 - d2) ** 1.6 * 255)))
+    mote.save(TEXTURES / "mote.png")
+
     white = Image.new("RGBA", (4, 4), (255, 255, 255, 255))
     white.save(TEXTURES / "white.png")
 

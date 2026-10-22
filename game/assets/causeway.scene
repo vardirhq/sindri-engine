@@ -1524,6 +1524,13 @@
       "id": "environment",
       "name": "Environment",
       "components": {
+        "sindri.script": {
+          "script": "Atmosphere",
+          "source": "scripts/atmosphere.decay",
+          "properties": {
+            "fleck": "prefabs/fleck.prefab"
+          }
+        },
         "sindri.environment": {
           "background": [
             0.06,
@@ -3592,15 +3599,22 @@
       },
       "components": {
         "sindri.sprite": {
-          "texture": "textures/water.png",
+          "texture": "textures/white.png",
           "tint": [
-            0.07,
-            0.32,
-            0.4,
-            0.82
+            0.02,
+            0.15,
+            0.22,
+            0.88
           ],
           "layer": -10,
-          "unlit": true
+          "unlit": true,
+          "shader": "shaders/sea.wgsl",
+          "shader_params": [
+            0.8,
+            0.8,
+            0.6,
+            2.5
+          ]
         },
         "sindri.tags": {
           "tags": [
@@ -3633,15 +3647,22 @@
       },
       "components": {
         "sindri.sprite": {
-          "texture": "textures/water.png",
+          "texture": "textures/white.png",
           "tint": [
-            0.07,
-            0.32,
-            0.4,
-            0.82
+            0.02,
+            0.15,
+            0.22,
+            0.88
           ],
           "layer": -10,
-          "unlit": true
+          "unlit": true,
+          "shader": "shaders/sea.wgsl",
+          "shader_params": [
+            0.8,
+            0.8,
+            0.6,
+            2.5
+          ]
         },
         "sindri.tags": {
           "tags": [
@@ -3674,15 +3695,22 @@
       },
       "components": {
         "sindri.sprite": {
-          "texture": "textures/water.png",
+          "texture": "textures/white.png",
           "tint": [
-            0.07,
-            0.32,
-            0.4,
-            0.82
+            0.02,
+            0.15,
+            0.22,
+            0.88
           ],
           "layer": -10,
-          "unlit": true
+          "unlit": true,
+          "shader": "shaders/sea.wgsl",
+          "shader_params": [
+            0.8,
+            0.8,
+            0.6,
+            2.5
+          ]
         },
         "sindri.tags": {
           "tags": [
@@ -3715,15 +3743,22 @@
       },
       "components": {
         "sindri.sprite": {
-          "texture": "textures/water.png",
+          "texture": "textures/white.png",
           "tint": [
-            0.07,
-            0.32,
-            0.4,
-            0.82
+            0.02,
+            0.15,
+            0.22,
+            0.88
           ],
           "layer": -10,
-          "unlit": true
+          "unlit": true,
+          "shader": "shaders/sea.wgsl",
+          "shader_params": [
+            0.8,
+            0.8,
+            0.6,
+            2.5
+          ]
         },
         "sindri.tags": {
           "tags": [
@@ -3756,15 +3791,22 @@
       },
       "components": {
         "sindri.sprite": {
-          "texture": "textures/water.png",
+          "texture": "textures/white.png",
           "tint": [
-            0.07,
-            0.32,
-            0.4,
-            0.82
+            0.02,
+            0.15,
+            0.22,
+            0.88
           ],
           "layer": -10,
-          "unlit": true
+          "unlit": true,
+          "shader": "shaders/sea.wgsl",
+          "shader_params": [
+            0.8,
+            0.8,
+            0.6,
+            2.5
+          ]
         },
         "sindri.tags": {
           "tags": [
@@ -3797,15 +3839,22 @@
       },
       "components": {
         "sindri.sprite": {
-          "texture": "textures/water.png",
+          "texture": "textures/white.png",
           "tint": [
-            0.07,
-            0.32,
-            0.4,
-            0.82
+            0.02,
+            0.15,
+            0.22,
+            0.88
           ],
           "layer": -10,
-          "unlit": true
+          "unlit": true,
+          "shader": "shaders/sea.wgsl",
+          "shader_params": [
+            0.8,
+            0.8,
+            0.6,
+            2.5
+          ]
         },
         "sindri.tags": {
           "tags": [
@@ -3838,15 +3887,22 @@
       },
       "components": {
         "sindri.sprite": {
-          "texture": "textures/water.png",
+          "texture": "textures/white.png",
           "tint": [
-            0.07,
-            0.32,
-            0.4,
-            0.82
+            0.02,
+            0.15,
+            0.22,
+            0.88
           ],
           "layer": -10,
-          "unlit": true
+          "unlit": true,
+          "shader": "shaders/sea.wgsl",
+          "shader_params": [
+            0.8,
+            0.8,
+            0.6,
+            2.5
+          ]
         },
         "sindri.tags": {
           "tags": [
@@ -3879,15 +3935,22 @@
       },
       "components": {
         "sindri.sprite": {
-          "texture": "textures/water.png",
+          "texture": "textures/white.png",
           "tint": [
-            0.07,
-            0.32,
-            0.4,
-            0.82
+            0.02,
+            0.15,
+            0.22,
+            0.88
           ],
           "layer": -10,
-          "unlit": true
+          "unlit": true,
+          "shader": "shaders/sea.wgsl",
+          "shader_params": [
+            0.8,
+            0.8,
+            0.6,
+            2.5
+          ]
         },
         "sindri.tags": {
           "tags": [
@@ -3920,15 +3983,22 @@
       },
       "components": {
         "sindri.sprite": {
-          "texture": "textures/water.png",
+          "texture": "textures/white.png",
           "tint": [
-            0.07,
-            0.32,
-            0.4,
-            0.82
+            0.02,
+            0.15,
+            0.22,
+            0.88
           ],
           "layer": -10,
-          "unlit": true
+          "unlit": true,
+          "shader": "shaders/sea.wgsl",
+          "shader_params": [
+            0.8,
+            0.8,
+            0.6,
+            2.5
+          ]
         },
         "sindri.tags": {
           "tags": [
@@ -3961,15 +4031,22 @@
       },
       "components": {
         "sindri.sprite": {
-          "texture": "textures/water.png",
+          "texture": "textures/white.png",
           "tint": [
-            0.07,
-            0.32,
-            0.4,
-            0.82
+            0.02,
+            0.15,
+            0.22,
+            0.88
           ],
           "layer": -10,
-          "unlit": true
+          "unlit": true,
+          "shader": "shaders/sea.wgsl",
+          "shader_params": [
+            0.8,
+            0.8,
+            0.6,
+            2.5
+          ]
         },
         "sindri.tags": {
           "tags": [
@@ -4002,15 +4079,22 @@
       },
       "components": {
         "sindri.sprite": {
-          "texture": "textures/water.png",
+          "texture": "textures/white.png",
           "tint": [
-            0.07,
-            0.32,
-            0.4,
-            0.82
+            0.02,
+            0.15,
+            0.22,
+            0.88
           ],
           "layer": -10,
-          "unlit": true
+          "unlit": true,
+          "shader": "shaders/sea.wgsl",
+          "shader_params": [
+            0.8,
+            0.8,
+            0.6,
+            2.5
+          ]
         },
         "sindri.tags": {
           "tags": [
@@ -4043,15 +4127,22 @@
       },
       "components": {
         "sindri.sprite": {
-          "texture": "textures/water.png",
+          "texture": "textures/white.png",
           "tint": [
-            0.07,
-            0.32,
-            0.4,
-            0.82
+            0.02,
+            0.15,
+            0.22,
+            0.88
           ],
           "layer": -10,
-          "unlit": true
+          "unlit": true,
+          "shader": "shaders/sea.wgsl",
+          "shader_params": [
+            0.8,
+            0.8,
+            0.6,
+            2.5
+          ]
         },
         "sindri.tags": {
           "tags": [
@@ -4084,15 +4175,22 @@
       },
       "components": {
         "sindri.sprite": {
-          "texture": "textures/water.png",
+          "texture": "textures/white.png",
           "tint": [
-            0.07,
-            0.32,
-            0.4,
-            0.82
+            0.02,
+            0.15,
+            0.22,
+            0.88
           ],
           "layer": -10,
-          "unlit": true
+          "unlit": true,
+          "shader": "shaders/sea.wgsl",
+          "shader_params": [
+            0.8,
+            0.8,
+            0.6,
+            2.5
+          ]
         },
         "sindri.tags": {
           "tags": [
@@ -4125,15 +4223,22 @@
       },
       "components": {
         "sindri.sprite": {
-          "texture": "textures/water.png",
+          "texture": "textures/white.png",
           "tint": [
-            0.07,
-            0.32,
-            0.4,
-            0.82
+            0.02,
+            0.15,
+            0.22,
+            0.88
           ],
           "layer": -10,
-          "unlit": true
+          "unlit": true,
+          "shader": "shaders/sea.wgsl",
+          "shader_params": [
+            0.8,
+            0.8,
+            0.6,
+            2.5
+          ]
         },
         "sindri.tags": {
           "tags": [
@@ -4166,15 +4271,22 @@
       },
       "components": {
         "sindri.sprite": {
-          "texture": "textures/water.png",
+          "texture": "textures/white.png",
           "tint": [
-            0.07,
-            0.32,
-            0.4,
-            0.82
+            0.02,
+            0.15,
+            0.22,
+            0.88
           ],
           "layer": -10,
-          "unlit": true
+          "unlit": true,
+          "shader": "shaders/sea.wgsl",
+          "shader_params": [
+            0.8,
+            0.8,
+            0.6,
+            2.5
+          ]
         },
         "sindri.tags": {
           "tags": [
@@ -4207,15 +4319,22 @@
       },
       "components": {
         "sindri.sprite": {
-          "texture": "textures/water.png",
+          "texture": "textures/white.png",
           "tint": [
-            0.07,
-            0.32,
-            0.4,
-            0.82
+            0.02,
+            0.15,
+            0.22,
+            0.88
           ],
           "layer": -10,
-          "unlit": true
+          "unlit": true,
+          "shader": "shaders/sea.wgsl",
+          "shader_params": [
+            0.8,
+            0.8,
+            0.6,
+            2.5
+          ]
         },
         "sindri.tags": {
           "tags": [
@@ -4248,15 +4367,22 @@
       },
       "components": {
         "sindri.sprite": {
-          "texture": "textures/water.png",
+          "texture": "textures/white.png",
           "tint": [
-            0.07,
-            0.32,
-            0.4,
-            0.82
+            0.02,
+            0.15,
+            0.22,
+            0.88
           ],
           "layer": -10,
-          "unlit": true
+          "unlit": true,
+          "shader": "shaders/sea.wgsl",
+          "shader_params": [
+            0.8,
+            0.8,
+            0.6,
+            2.5
+          ]
         },
         "sindri.tags": {
           "tags": [
@@ -4289,15 +4415,22 @@
       },
       "components": {
         "sindri.sprite": {
-          "texture": "textures/water.png",
+          "texture": "textures/white.png",
           "tint": [
-            0.07,
-            0.32,
-            0.4,
-            0.82
+            0.02,
+            0.15,
+            0.22,
+            0.88
           ],
           "layer": -10,
-          "unlit": true
+          "unlit": true,
+          "shader": "shaders/sea.wgsl",
+          "shader_params": [
+            0.8,
+            0.8,
+            0.6,
+            2.5
+          ]
         },
         "sindri.tags": {
           "tags": [
@@ -4330,15 +4463,22 @@
       },
       "components": {
         "sindri.sprite": {
-          "texture": "textures/water.png",
+          "texture": "textures/white.png",
           "tint": [
-            0.07,
-            0.32,
-            0.4,
-            0.82
+            0.02,
+            0.15,
+            0.22,
+            0.88
           ],
           "layer": -10,
-          "unlit": true
+          "unlit": true,
+          "shader": "shaders/sea.wgsl",
+          "shader_params": [
+            0.8,
+            0.8,
+            0.6,
+            2.5
+          ]
         },
         "sindri.tags": {
           "tags": [
@@ -4371,15 +4511,22 @@
       },
       "components": {
         "sindri.sprite": {
-          "texture": "textures/water.png",
+          "texture": "textures/white.png",
           "tint": [
-            0.07,
-            0.32,
-            0.4,
-            0.82
+            0.02,
+            0.15,
+            0.22,
+            0.88
           ],
           "layer": -10,
-          "unlit": true
+          "unlit": true,
+          "shader": "shaders/sea.wgsl",
+          "shader_params": [
+            0.8,
+            0.8,
+            0.6,
+            2.5
+          ]
         },
         "sindri.tags": {
           "tags": [
@@ -4412,15 +4559,22 @@
       },
       "components": {
         "sindri.sprite": {
-          "texture": "textures/water.png",
+          "texture": "textures/white.png",
           "tint": [
-            0.07,
-            0.32,
-            0.4,
-            0.82
+            0.02,
+            0.15,
+            0.22,
+            0.88
           ],
           "layer": -10,
-          "unlit": true
+          "unlit": true,
+          "shader": "shaders/sea.wgsl",
+          "shader_params": [
+            0.8,
+            0.8,
+            0.6,
+            2.5
+          ]
         },
         "sindri.tags": {
           "tags": [
@@ -4453,15 +4607,22 @@
       },
       "components": {
         "sindri.sprite": {
-          "texture": "textures/water.png",
+          "texture": "textures/white.png",
           "tint": [
-            0.07,
-            0.32,
-            0.4,
-            0.82
+            0.02,
+            0.15,
+            0.22,
+            0.88
           ],
           "layer": -10,
-          "unlit": true
+          "unlit": true,
+          "shader": "shaders/sea.wgsl",
+          "shader_params": [
+            0.8,
+            0.8,
+            0.6,
+            2.5
+          ]
         },
         "sindri.tags": {
           "tags": [
@@ -4494,15 +4655,22 @@
       },
       "components": {
         "sindri.sprite": {
-          "texture": "textures/water.png",
+          "texture": "textures/white.png",
           "tint": [
-            0.07,
-            0.32,
-            0.4,
-            0.82
+            0.02,
+            0.15,
+            0.22,
+            0.88
           ],
           "layer": -10,
-          "unlit": true
+          "unlit": true,
+          "shader": "shaders/sea.wgsl",
+          "shader_params": [
+            0.8,
+            0.8,
+            0.6,
+            2.5
+          ]
         },
         "sindri.tags": {
           "tags": [
@@ -4535,15 +4703,22 @@
       },
       "components": {
         "sindri.sprite": {
-          "texture": "textures/water.png",
+          "texture": "textures/white.png",
           "tint": [
-            0.07,
-            0.32,
-            0.4,
-            0.82
+            0.02,
+            0.15,
+            0.22,
+            0.88
           ],
           "layer": -10,
-          "unlit": true
+          "unlit": true,
+          "shader": "shaders/sea.wgsl",
+          "shader_params": [
+            0.8,
+            0.8,
+            0.6,
+            2.5
+          ]
         },
         "sindri.tags": {
           "tags": [
@@ -4576,15 +4751,22 @@
       },
       "components": {
         "sindri.sprite": {
-          "texture": "textures/water.png",
+          "texture": "textures/white.png",
           "tint": [
-            0.07,
-            0.32,
-            0.4,
-            0.82
+            0.02,
+            0.15,
+            0.22,
+            0.88
           ],
           "layer": -10,
-          "unlit": true
+          "unlit": true,
+          "shader": "shaders/sea.wgsl",
+          "shader_params": [
+            0.8,
+            0.8,
+            0.6,
+            2.5
+          ]
         },
         "sindri.tags": {
           "tags": [

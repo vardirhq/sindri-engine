@@ -15,7 +15,7 @@
 shared const ORIGIN_X: number = 24.0;
 shared const ORIGIN_Z: number = 24.0;
 
-enum Phase { Title, Resolving, Player, Won, Upgrade, Lost, Crossed }
+enum Phase { Title, Arriving, Resolving, Player, Won, Upgrade, Lost, Crossed }
 // What happens once the beats being played have all been shown.
 enum After { Plan, Mark, Player, HollowDone, Nothing }
 enum Mode { Move, Aim }
@@ -51,6 +51,14 @@ script Battle {
 
     // The run.
     var island: number = 0.0;
+    // Crossing to an island: the last one sinking, the next rising out of the
+    // sea and its people rising onto it, before the Hollow come.
+    var shown_island: number = -1.0;
+    var leaving_island: number = -1.0;
+    var arrival_clock: number = 0.0;
+    var arrival_tide: number = 0.0;
+    var risen: bool = false;
+    var sunk: List<Entity> = [];
     var hearth: number = 7.0;
     var wardens: List<Warden> = [];
     var rewinds: number = 1.0;
@@ -66,6 +74,11 @@ script Battle {
     var pips: Map<number, Entity> = [:];
     var badges: Map<number, Entity> = [:];
     var plan_marks: List<Entity> = [];
+    // How visible each mark is and is heading to: the plan's 64, then the
+    // threats' 64.
+    var mark_alpha: List<number> = [];
+    var mark_wanted: List<number> = [];
+    var cursor_at: Vec3 = Vec3(0.0, 0.0, 0.0);
     var threat_marks: List<Entity> = [];
     var popups: List<Entity> = [];
     var next_popup: number = 0.0;
@@ -111,6 +124,10 @@ script Battle {
             World.set_active(plan, false);
             World.set_active(threat, false);
         }
+        for i in 0..(SIZE * SIZE * 2.0) {
+            mark_alpha.push(0.0);
+            mark_wanted.push(0.0);
+        }
         for i in 0..10 {
             let p = World.spawn(this.popup);
             World.set_active(p, false);
@@ -149,8 +166,10 @@ script Battle {
         for i in 0..islands.length {
             if islands[i] != null {
                 World.set_active(islands[i], i == island);
+                islands[i].transform.position.y = 0.0;
             }
         }
+        shown_island = island;
     }
 
     fn floor_of(c: number) -> number { return floor(c / SIZE); }
@@ -315,17 +334,51 @@ script Battle {
 
     fn set_mark(marks: List<Entity>, c: number, clip: String) {
         let m = marks[c];
+        // Which layer this is, by its first mark: comparing whole lists of
+        // entities never matched, so threats used to share the plan's slots.
+        let threat = marks[0] == threat_marks[0];
+        var slot = c;
+        if threat { slot = c + SIZE * SIZE; }
         if clip == "" {
-            World.set_active(m, false);
+            // Faded out by `fade_marks`, which switches it off once it is gone.
+            mark_wanted[slot] = 0.0;
             return;
         }
-        World.set_active(m, true);
+        if !World.is_active(m) {
+            World.set_active(m, true);
+            mark_alpha[slot] = 0.0;
+            m.sprite.tint.a = 0.0;
+        }
+        mark_wanted[slot] = 1.0;
         let x = c % SIZE;
         let z = floor_of(c);
         var lift = 0.03;
-        if marks == threat_marks { lift = 0.05; }
+        if threat { lift = 0.05; }
         m.transform.position = Vec3(world_x(x), ground_y(x, z) + lift, world_z(z));
         Animation.play(m, clip);
+    }
+
+    // Marks come and go over a few frames rather than in one.
+    fn fade_marks(dt: number) {
+        for slot in 0..mark_wanted.length {
+            let wanted = mark_wanted[slot];
+            var alpha = mark_alpha[slot];
+            if alpha == wanted { continue; }
+            var m = plan_marks[0];
+            if slot < SIZE * SIZE {
+                m = plan_marks[slot];
+            } else {
+                m = threat_marks[slot - SIZE * SIZE];
+            }
+            if alpha < wanted {
+                alpha = min(wanted, alpha + dt * 7.0);
+            } else {
+                alpha = max(wanted, alpha - dt * 7.0);
+            }
+            mark_alpha[slot] = alpha;
+            m.sprite.tint.a = alpha;
+            if alpha <= 0.0 { World.set_active(m, false); }
+        }
     }
 
     // The Hollow's intents, the cells they will climb out on, and the cells
@@ -628,7 +681,9 @@ script Battle {
     }
 
     fn new_run() {
-        island = 0.0;
+        // From the first island, unless a capture or a test asked for
+        // another through `start_island`; nothing in play sets it.
+        island = clamp(floor(Game.get("start_island", 0.0)), 0.0, ISLAND_COUNT - 1.0);
         hearth = starting_hearth;
         wardens = roster();
         Random.seed(Save.number("seed", 1.0) * 7919.0 + 17.0);
@@ -637,22 +692,84 @@ script Battle {
     }
 
     fn begin_island() {
+        // Each island has its own light; `Atmosphere` eases into it.
+        Atmosphere.on(World.find("Environment")).go(island, 2.5);
         def = island_def(island);
         landing = landing_of(def);
         board = board_of(def, wardens, hearth);
         rewinds = 1.0;
-        shown_tide = 0.0;
-        place_sea(0.0);
-        clear_pieces();
-        show_island();
-        sync_pieces();
         hide_screens();
         show_hud(true);
-        banner(def.name, def.blurb);
-        // The first Hollow climb out, then plan, before the wardens' first turn.
-        var first = mark_spawns(board, landing);
-        first = emerge(first);
-        play(first, After.Plan);
+        clear_plan();
+        for c in 0..(SIZE * SIZE) { set_mark(threat_marks, c, ""); }
+        // The last island's people go down with it.
+        for id in pieces.keys() {
+            Piece.on(pieces[id]).sink(0.7);
+            sunk.push(pieces[id]);
+            pieces.remove(id);
+        }
+        for id in pips.keys() { World.despawn(pips[id]); }
+        for id in badges.keys() { World.despawn(badges[id]); }
+        pips = [:];
+        badges = [:];
+        leaving_island = shown_island;
+        if leaving_island == island { leaving_island = -1.0; }
+        let next = islands[island];
+        World.set_active(next, true);
+        next.transform.position.y = -ISLAND_DEPTH;
+        shown_island = island;
+        arrival_tide = shown_tide;
+        arrival_clock = 0.0;
+        risen = false;
+        phase = Phase.Arriving;
+        update_hud();
+    }
+
+    // How far below the sea an island waits, and sinks back to.
+    let ISLAND_DEPTH: number = 6.0;
+
+    fn advance_arrival(dt: number) {
+        arrival_clock += dt;
+        // The last island goes down, the tide falls back...
+        let sink = clamp(arrival_clock / 1.1, 0.0, 1.0);
+        if leaving_island >= 0.0 {
+            let old = islands[leaving_island];
+            old.transform.position.y = -ISLAND_DEPTH * sink * sink;
+            if sink >= 1.0 {
+                World.set_active(old, false);
+                old.transform.position.y = 0.0;
+                leaving_island = -1.0;
+            }
+        }
+        let fall = clamp(arrival_clock / 1.6, 0.0, 1.0);
+        shown_tide = arrival_tide * (1.0 - fall * fall * (3.0 - 2.0 * fall));
+        place_sea(shown_tide);
+        // ...and the next comes up out of it, slowing as it settles.
+        let up = clamp((arrival_clock - 0.4) / 1.5, 0.0, 1.0);
+        let settle = 1.0 - (1.0 - up) * (1.0 - up) * (1.0 - up);
+        islands[island].transform.position.y = -ISLAND_DEPTH * (1.0 - settle);
+        if up >= 1.0 && !risen {
+            // Its people climb up onto it, one after another.
+            risen = true;
+            for e in sunk { World.despawn(e); }
+            sunk = [];
+            sync_pieces();
+            var order = 0.0;
+            for unit in board.units {
+                let piece = piece_of(unit.id);
+                if piece == null { continue; }
+                Piece.on(piece).rise(0.35 + order * 0.07);
+                order += 1.0;
+            }
+            Audio.play("audio/emerge.wav", 0.4);
+        }
+        if risen && arrival_clock >= 2.6 {
+            banner(def.name, def.blurb);
+            // The first Hollow climb out, then plan, before the wardens' first turn.
+            var first = mark_spawns(board, landing);
+            first = emerge(first);
+            play(first, After.Plan);
+        }
     }
 
     fn begin_player_turn() {
@@ -1010,10 +1127,16 @@ script Battle {
             World.set_active(cursor, false);
             return;
         }
-        World.set_active(cursor, true);
         let x = hover_cell % SIZE;
         let z = floor_of(hover_cell);
-        cursor.transform.position = Vec3(world_x(x), ground_y(x, z) + 0.07, world_z(z));
+        let wanted = Vec3(world_x(x), ground_y(x, z) + 0.07, world_z(z));
+        if !World.is_active(cursor) {
+            World.set_active(cursor, true);
+            cursor_at = wanted;
+        }
+        // Glides to the cell rather than jumping, quickly enough to keep up.
+        cursor_at = cursor_at.lerp(wanted, min(1.0, Time.delta * 22.0));
+        cursor.transform.position = cursor_at;
     }
 
     // While a target is under the cursor, the ground shows what would happen:
@@ -1207,6 +1330,7 @@ script Battle {
                 } else {
                     set_text("UnitHint", "Choose a target, or tap the skill (Q) again to move instead.");
                 }
+                show_card(true);
                 return;
             }
         }
@@ -1216,9 +1340,17 @@ script Battle {
         set_text("SkillText", "");
         if phase == Phase.Player && all_spent(board) {
             set_text("UnitHint", "Every warden has acted. End the turn.");
+            show_card(true);
         } else {
             set_text("UnitHint", "");
+            // An empty card is just a box over the board.
+            show_card(false);
         }
+    }
+
+    fn show_card(on: bool) {
+        let card = World.find("Card");
+        if card != null && World.is_active(card) != on { World.set_active(card, on); }
     }
 
     // --- The sea -------------------------------------------------------------------
@@ -1269,12 +1401,14 @@ script Battle {
 
     fn update(dt: number) {
         handle_view_drag();
+        fade_marks(dt);
         update_banner();
         update_sea();
         update_lights();
         match phase {
             // `title.decay` has the title, and says when a crossing begins.
             Phase.Title => {}
+            Phase.Arriving => { advance_arrival(dt); }
             Phase.Resolving => { advance_beats(); }
             Phase.Player => {
                 handle_input();
@@ -1310,7 +1444,7 @@ script Battle {
     fn phase_number() -> number {
         return match phase {
             Phase.Title => 0.0,
-            Phase.Resolving => 1.0,
+            Phase.Arriving | Phase.Resolving => 1.0,
             Phase.Player => 2.0,
             Phase.Won => 3.0,
             Phase.Upgrade => 4.0,
