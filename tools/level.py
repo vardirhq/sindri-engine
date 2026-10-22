@@ -220,17 +220,16 @@ def world_entities():
                                                                         "layer": 0}},
                         disabled=i != 0))
     e.append(entity("sea", "Sea", {}, position=(CENTRE[0], 0.08, CENTRE[2])))
-    for gx in range(-2, 3):
-        for gz in range(-2, 3):
-            # Drawn by `shaders/sea.wgsl`: the tint is the deep water's color,
-            # the params swell, foam, glints and rain on the water.
-            e.append(entity(f"sea-{gx + 2}-{gz + 2}", "Sea Tile", {
-                "sindri.sprite": {
-                    "texture": "textures/white.png", "tint": [0.02, 0.15, 0.22, 0.88], "layer": -10,
-                    "unlit": True, "shader": "shaders/sea.wgsl", "shader_params": [0.8, 0.8, 0.6, 0.0],
-                },
-                "sindri.tags": {"tags": ["sea"]},
-            }, parent="sea", position=(gx * 24.0, 0.0, gz * 24.0), rotation=FLAT, scale=(24.0, 24.0, 1.0)))
+    # One quad, drawn by `shaders/sea.wgsl`, which works from world position
+    # so needs no tiling: the tint is the deep water's color, the params
+    # swell, foam, glints and rain on the water.
+    e.append(entity("sea-surface", "Sea Surface", {
+        "sindri.sprite": {
+            "texture": "textures/white.png", "tint": [0.02, 0.15, 0.22, 0.88], "layer": -10,
+            "unlit": True, "shader": "shaders/sea.wgsl", "shader_params": [0.8, 0.8, 0.6, 0.0],
+        },
+        "sindri.tags": {"tags": ["sea"]},
+    }, parent="sea", rotation=FLAT, scale=(120.0, 120.0, 1.0)))
     e.append(entity("lantern-light", "Lantern Light", {"sindri.light": {
         "kind": "point", "color": [1.0, 0.76, 0.42], "intensity": 2.6, "range": 3.2}},
         position=(CENTRE[0], 3, CENTRE[2])))
