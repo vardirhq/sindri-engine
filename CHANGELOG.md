@@ -1,5 +1,13 @@
 # Changelog
 
+- Give Causeway's air more to it: smoke curls from every chimney with somebody
+  home and bends with the wind, violet motes rise from each rift the Hollow
+  will climb out of, and mist banks drift low over The Fold. Window and rift
+  lights now ease on and off instead of switching. A house's light burns
+  inside it and stays with that house, so it no longer glares off the walls
+  or jumps to the next house when one falls; it gutters out instead. A rift
+  flares as the Hollow climb out of it.
+
 - Give each Causeway island its own mood and weather: a clear morning on
   Saltmarsh, mist and drizzle over The Fold, a gold afternoon on Quarry Rise and
   a night storm at The Lighthouse, with lightning, thunder and rain rings on
