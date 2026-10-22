@@ -123,7 +123,7 @@ fn the_listing_starts_at_the_assets_and_the_rest_is_still_there() {
     assert_eq!(
         in_assets,
         [
-            "audio", "fonts", "models", "prefabs", "scripts", "textures", "ui"
+            "audio", "fonts", "models", "prefabs", "scripts", "shaders", "textures", "ui"
         ]
     );
 
