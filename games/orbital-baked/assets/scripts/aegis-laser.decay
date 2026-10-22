@@ -2,17 +2,17 @@
 // until the telegraph expires, so random directions are threatening rather
 // than cheap.
 script AegisLaser {
-    @export let angle: f32 = 0.0;
-    @export let length: f32 = 13.0;
-    @export let telegraph: f32 = 0.62;
-    @export let live_time: f32 = 0.24;
-    @export let damage: f32 = 2.8;
+    @export let angle: number = 0.0;
+    @export let length: number = 13.0;
+    @export let telegraph: number = 0.62;
+    @export let live_time: number = 0.24;
+    @export let damage: number = 2.8;
 
-    var age: f32 = 0.0;
+    var age: number = 0.0;
     var fired: bool = false;
     var dealt: bool = false;
-    var origin_x: f32 = 0.0;
-    var origin_y: f32 = 0.0;
+    var origin_x: number = 0.0;
+    var origin_y: number = 0.0;
 
     fn start() {
         this.origin_x = this.transform.position.x;
@@ -21,7 +21,7 @@ script AegisLaser {
         telegraph_visual();
     }
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         if Game.run_state != 1.0 {
             World.despawn(this.entity);
             return;

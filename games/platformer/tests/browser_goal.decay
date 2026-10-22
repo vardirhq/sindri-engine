@@ -1,16 +1,16 @@
 // Read-only observation for the browser player; no movement or game-state writes.
 script BrowserGoalObserver {
-    var elapsed: f32 = 0.0;
+    var elapsed: number = 0.0;
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         this.elapsed += dt;
         let hero = World.find("Hero");
         let motion = Physics.character_motion(hero);
         if motion == null { return; }
         let p = hero.transform.world_position;
-        var grounded: f32 = 0.0;
-        var won: f32 = 0.0;
-        var jump_held: f32 = 0.0;
+        var grounded: number = 0.0;
+        var won: number = 0.0;
+        var jump_held: number = 0.0;
         if motion.grounded { grounded = 1.0; }
         if Game.won { won = 1.0; }
         if Action.held("jump") { jump_held = 1.0; }

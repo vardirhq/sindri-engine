@@ -103,7 +103,7 @@ DOC_FILES = [
         "Weave UI",
         "Screen UI and HUDs: Weave stylesheets, responsive layout, and the full "
         "Weave language reference.",
-        ["docs/weave.md", "docs/weave-reference.md"],
+        ["docs/weave.md", "docs/weave-reference.md", "docs/generated/weave-reference.md"],
     ),
     (
         "09-3d.md",

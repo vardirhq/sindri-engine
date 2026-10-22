@@ -7,16 +7,16 @@ script Spin {
     // Authored in the scene rather than here. `let` means the script does not
     // reassign it; @export means the author does.
     @export
-    let turns_per_second: f32 = 0.25;
+    let turns_per_second: number = 0.25;
 
     @export
-    let move_speed: f32 = 1.5;
+    let move_speed: number = 1.5;
 
     // Instance state. It survives between frames and is deliberately not in the
     // scene, so watching the cube turn is not an unsaved change to the file.
-    var elapsed: f32 = 0.0;
+    var elapsed: number = 0.0;
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         elapsed += dt;
         this.transform.rotation_z = elapsed * turns_per_second * 6.2831855;
 

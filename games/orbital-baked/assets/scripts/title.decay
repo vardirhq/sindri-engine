@@ -14,7 +14,7 @@ script Title {
     var callsign: Entity = null;
     var callsign_text: Entity = null;
     var compact: Entity = null;
-    var shown_pick: f32 = -1.0;
+    var shown_pick: number = -1.0;
 
 
     fn start() {
@@ -38,7 +38,7 @@ script Title {
         Ui.set_text(this.hint, "Hold the evacuation corridor for ten minutes. Collect salvage. Build something impossible.");
     }
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         if Game.run_state != 0.0 {
             return;
         }
@@ -88,7 +88,7 @@ script Title {
 
     /// The roster, in the order a rush walks it: the Warden, then the eleven
     /// bosses, each of which is now its own prefab.
-    fn name_pick(pick: f32) {
+    fn name_pick(pick: number) {
         if pick == 0.0 { Ui.set_text(this.pick_label, "OPENS ON  /  WARDEN"); }
         else if pick == 1.0 { Ui.set_text(this.pick_label, "OPENS ON  /  HARROWER"); }
         else if pick == 2.0 { Ui.set_text(this.pick_label, "OPENS ON  /  PRISM"); }

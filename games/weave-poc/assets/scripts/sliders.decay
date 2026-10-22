@@ -1,5 +1,5 @@
 script SliderDemo {
-    fn update(dt: f32) {
+    fn update(dt: number) {
         let red = World.find("Red Slider");
         let green = World.find("Green Slider");
         let blue = World.find("Blue Slider");

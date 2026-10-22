@@ -5,9 +5,9 @@
 script CombatLabButton {
     /// 1-4 spawn primitives, 5 cycles presets, 6 clears, 7 toggles autoplay,
     /// 8 toggles damage, 9 returns to the normal Orbital scene.
-    @export let action: f32 = 0.0;
+    @export let action: number = 0.0;
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         if !Ui.is_pressed(this.entity) { return; }
         Audio.play("audio/click.wav", 0.3);
 

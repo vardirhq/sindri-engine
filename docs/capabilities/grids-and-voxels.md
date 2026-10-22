@@ -350,7 +350,7 @@ with sprites and tilemaps. Only the columns under the world camera's four
 corners are worked out, sixteen square at a time, capped at 48 chunks a side,
 and remembered until the entity, its textures or its block set change;
 switching a world to a map releases its meshed sections. `Grid.surface` and
-`Grid.height` read a column's top from Decay (the latter `f32?`, `null` where
+`Grid.height` read a column's top from Decay (the latter `number?`, `null` where
 nothing stands). Extraction tests cover the squares, row direction, relief,
 edits and the absence of meshes; Low Tide's Basin is the proof in a game.
 

@@ -152,9 +152,9 @@ before mutation; rotation locks prevent angular motion while retaining linear
 impulses. Collider mass properties are available immediately after insertion,
 so impulses work before the first step. Existing velocity/impulse APIs remain.
 
-Typed Decay adds `Physics.apply_force(entity, Vec2)`, `apply_torque(entity, f32)`,
-`angular_velocity(entity)`, `set_angular_velocity(entity, f32)`,
-`apply_angular_impulse(entity, f32)` and
+Typed Decay adds `Physics.apply_force(entity, Vec2)`, `apply_torque(entity, number)`,
+`angular_velocity(entity)`, `set_angular_velocity(entity, number)`,
+`apply_angular_impulse(entity, number)` and
 `apply_impulse_at_point(entity, Vec2, Vec2)`. The point is in world space.
 An authored body can receive these requests between spawning and synchronization:
 requests replay in call order when the body materializes, after its collider

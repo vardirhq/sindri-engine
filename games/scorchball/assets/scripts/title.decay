@@ -9,7 +9,7 @@ script Title {
         this.bot_button = World.find("Play vs Bot");
     }
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         if Ui.is_pressed(this.bot_button) {
             Game.versus_bot = true;
             begin();

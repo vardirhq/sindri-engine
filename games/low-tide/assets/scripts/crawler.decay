@@ -15,20 +15,20 @@
 // it are children of this entity, so they come along with no help from here.
 
 script Crawler {
-    @export let base_mass: f32 = 60.0;
-    @export let crate_mass: f32 = 6.0;
-    @export let top_speed: f32 = 4.2;
-    @export let acceleration: f32 = 0.8;
-    @export let turn_rate: f32 = 0.55;
-    @export let soft_going: f32 = 0.6;
-    @export let rough_going: f32 = 0.4;
+    @export let base_mass: number = 60.0;
+    @export let crate_mass: number = 6.0;
+    @export let top_speed: number = 4.2;
+    @export let acceleration: number = 0.8;
+    @export let turn_rate: number = 0.55;
+    @export let soft_going: number = 0.6;
+    @export let rough_going: number = 0.4;
     // The highest step up the treads can climb, in levels.
-    @export let climb: f32 = 2.0;
+    @export let climb: number = 2.0;
     // How far ahead of the middle the bow looks, in units.
-    @export let reach: f32 = 4.5;
+    @export let reach: number = 4.5;
 
-    var last_wash: f32 = -1.0;
-    var speed: f32 = 0.0;
+    var last_wash: number = -1.0;
+    var speed: number = 0.0;
     var deck: Entity = null;
     var floors: Entity = null;
     var basin: Entity = null;
@@ -56,7 +56,7 @@ script Crawler {
         Game.rudder = 0.0;
     }
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         let mass = this.base_mass + Game.structure_mass + Game.crates * this.crate_mass;
         let lightness = this.base_mass / mass;
         let heading = this.transform.rotation_z;
@@ -113,7 +113,7 @@ script Crawler {
     }
 
     // How much the ground under a point holds the crawler back.
-    fn going_at(at: Vec2) -> f32 {
+    fn going_at(at: Vec2) -> number {
         if tagged_at(this.basin, at, "rough") {
             return this.rough_going;
         }
@@ -161,7 +161,7 @@ script Crawler {
     }
 
     // Over the side with it: lighter, and poorer.
-    fn jettison(column: f32, row: f32) {
+    fn jettison(column: number, row: number) {
         if tile_cargo(Grid.tile(this.deck, column, row)) != Resource.None {
             let kind = tile_cargo(Grid.tile(this.deck, column, row));
             Grid.set_tile(this.deck, column, row, 0.0);
@@ -171,7 +171,7 @@ script Crawler {
     }
 
     // Count actual cargo tiles, not potentially stale display totals.
-    fn bundles(kind: Resource) -> f32 {
+    fn bundles(kind: Resource) -> number {
         var count = 0.0;
         for i in 0..this.hold_columns.length {
             if tile_cargo(Grid.tile(this.deck, this.hold_columns[i], this.hold_rows[i])) == kind {
@@ -181,7 +181,7 @@ script Crawler {
         return count;
     }
 
-    fn spend(kind: Resource, amount: f32) {
+    fn spend(kind: Resource, amount: number) {
         var left = amount;
         for i in 0..this.hold_columns.length {
             let column = this.hold_columns[i];

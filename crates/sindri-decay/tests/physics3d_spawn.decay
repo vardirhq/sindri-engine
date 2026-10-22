@@ -14,7 +14,7 @@ script Spawn3d {
         copied = Physics3d.velocity(body).x == 2.0;
         Physics3d.set_velocity(body, Vec3(4.0, 0.0, 0.0));
     }
-    fn update(dt: f32) {
+    fn update(dt: number) {
         let body = spawned;
         if body != null && copied && !verified {
             let at = body.transform.world_position;

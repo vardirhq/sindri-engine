@@ -7,13 +7,16 @@
 //!   surface: every namespace, call, and member, with its types.
 //! - *What am I allowed to author?* Answered by the component registry: every
 //!   built-in component, what fields it has, and what a fresh one is.
+//! - *What may a Weave stylesheet say?* Answered by the property table
+//!   `sindri-weave` applies declarations by.
 //!
-//! Both already have exactly one authority in the repository. The Decay
+//! Each already has exactly one authority in the repository. The Decay
 //! surface is described once in `sindri-decay` and read by the analyzer and
 //! the host alike; the component schemas are registered once in
-//! `sindri-scene`. This crate does not add a third: it *reads* those two and
-//! writes what it found to `docs/generated/`, and a test fails when the files
-//! on disk disagree with the code.
+//! `sindri-scene`; the Weave properties are tabled once in `sindri-weave`.
+//! This crate does not add another: it *reads* those and writes what it found
+//! to `docs/generated/`, and a test fails when the files on disk disagree with
+//! the code.
 //!
 //! That is the whole design constraint. A hand-maintained reference is a
 //! reference that is wrong one release later, and an agent that has read a
@@ -24,6 +27,7 @@ mod decay;
 mod decay_language;
 mod entries;
 mod markdown;
+mod weave_properties;
 
 use std::{fmt, path::Path};
 
@@ -130,6 +134,14 @@ pub fn documents() -> Result<Vec<GeneratedDocument>, CapabilitiesError> {
         GeneratedDocument {
             path: "docs/generated/sindri-capabilities.json".to_owned(),
             contents: to_json(&capabilities)?,
+        },
+        GeneratedDocument {
+            path: "docs/generated/weave-reference.json".to_owned(),
+            contents: to_json(&weave_properties::describe())?,
+        },
+        GeneratedDocument {
+            path: "docs/generated/weave-reference.md".to_owned(),
+            contents: weave_properties::render(),
         },
     ];
     documents.extend(pages.into_iter().map(|page| GeneratedDocument {

@@ -1,8 +1,8 @@
 // A shallow cutaway entered from swimming at a permanent submerged wreck.
 // Surfacing returns to the same water; floated salvage still needs hauling home.
 script Dive {
-    @export let air_seconds: f32 = 30.0;
-    @export let swim_speed: f32 = 3.0;
+    @export let air_seconds: number = 30.0;
+    @export let swim_speed: number = 3.0;
     var stage: Entity = null;
     var camera: Entity = null;
     var map_camera: Entity = null;
@@ -45,7 +45,7 @@ script Dive {
         World.set_active(this.cache, !Game.dive_empty);
     }
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         Game.dive_notice = max(0.0, Game.dive_notice - dt);
         if !Game.diving { return; }
         if Action.pressed("cancel") || Action.pressed("drop") || Ui.is_pressed(this.drop_button) {
@@ -83,7 +83,7 @@ script Dive {
         }
     }
 
-    fn open_at(x: f32, y: f32) -> bool {
+    fn open_at(x: number, y: number) -> bool {
         for dx in [-0.22, 0.22] {
             for dy in [-0.22, 0.22] {
                 if Grid.tile(this.hull, floor(x + dx + 7.0), floor(1.0 - y - dy)) == 1.0 { return false; }

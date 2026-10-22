@@ -3,7 +3,7 @@
 // Each boss's own number is the original's hull for it divided by its base
 // shot (18), times Normal's 1.16 and the durability it gives every boss from
 // the third on, so a base build needs as many shots as it did there.
-shared fn boss_scale() -> f32 {
+shared fn boss_scale() -> number {
     let minutes = Game.elapsed / 60.0;
     let minute = max(1.0, minutes - minutes % 1.0);
     return 1.0 + (minute - 1.0) * 0.18;

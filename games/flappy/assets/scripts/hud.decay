@@ -14,7 +14,7 @@ script Hud {
         this.best = World.find("BestLabel");
     }
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         Ui.set_number(this.score, Game.score);
         Ui.set_number(this.best, Game.best);
         World.set_active(this.score, Game.started);

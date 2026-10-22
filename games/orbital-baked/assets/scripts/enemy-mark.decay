@@ -2,10 +2,10 @@
 // movement and combat; these children inherit its rotation and add only the
 // renderer-specific ring/arc/triangle treatment.
 script EnemyMark {
-    @export let mode: f32 = 0.0;
+    @export let mode: number = 0.0;
 
-    var clock: f32 = 0.0;
-    var phase: f32 = 0.0;
+    var clock: number = 0.0;
+    var phase: number = 0.0;
 
     fn start() {
         if this.mode == 0.0 {
@@ -60,7 +60,7 @@ script EnemyMark {
         }
     }
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         this.clock += dt;
         if this.mode == 2.0 {
             let cycle = this.clock % 3.4;

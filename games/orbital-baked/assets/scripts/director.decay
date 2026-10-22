@@ -21,38 +21,38 @@ script Director {
     @export let leviathan: Prefab;
     @export let last_light: Prefab;
     @export let aegis: Prefab;
-    @export let wave_gap: f32 = 6.0;
-    @export let boss_at: f32 = 180.0;
-    @export let first_boss_at: f32 = 60.0;
-    @export let boss_interval: f32 = 60.0;
-    @export let run_limit: f32 = 600.0;
-    @export let normal_spawn: f32 = 1.12;
-    @export let elite_after: f32 = 105.0;
-    @export let elite_base: f32 = 0.025;
-    @export let elite_time_divisor: f32 = 3000.0;
-    @export let elite_bonus_scale: f32 = 0.65;
-    @export let elite_cap: f32 = 0.32;
-    @export let arena: f32 = 7.5;
+    @export let wave_gap: number = 6.0;
+    @export let boss_at: number = 180.0;
+    @export let first_boss_at: number = 60.0;
+    @export let boss_interval: number = 60.0;
+    @export let run_limit: number = 600.0;
+    @export let normal_spawn: number = 1.12;
+    @export let elite_after: number = 105.0;
+    @export let elite_base: number = 0.025;
+    @export let elite_time_divisor: number = 3000.0;
+    @export let elite_bonus_scale: number = 0.65;
+    @export let elite_cap: number = 0.32;
+    @export let arena: number = 7.5;
     // How far past the visible edge something arrives, so a body with a radius
     // is wholly outside the frame rather than clipping into it.
-    @export let spawn_margin: f32 = 1.4;
+    @export let spawn_margin: number = 1.4;
 
     var title: Entity = null;
     var hud: Entity = null;
     var pause_screen: Entity = null;
     var result_screen: Entity = null;
     var hazards: Entity = null;
-    var elapsed: f32 = 0.0;
-    var spawn_timer: f32 = 0.0;
-    var next_boss: f32 = 60.0;
-    var event_next: f32 = 42.0;
-    var event_left: f32 = 0.0;
-    var boss_was_alive: f32 = 0.0;
-    var rush_index: f32 = 0.0;
-    var boss_count: f32 = 0.0;
-    var last_boss: f32 = -1.0;
-    var previous_boss: f32 = -1.0;
-    var was_state: f32 = -1.0;
+    var elapsed: number = 0.0;
+    var spawn_timer: number = 0.0;
+    var next_boss: number = 60.0;
+    var event_next: number = 42.0;
+    var event_left: number = 0.0;
+    var boss_was_alive: number = 0.0;
+    var rush_index: number = 0.0;
+    var boss_count: number = 0.0;
+    var last_boss: number = -1.0;
+    var previous_boss: number = -1.0;
+    var was_state: number = -1.0;
 
     fn start() {
         this.title = World.find("Title");
@@ -141,7 +141,7 @@ script Director {
     }
 
     /// Whether this run is a boss rush.
-    fn rushing() -> f32 {
+    fn rushing() -> number {
         return Game.mode;
     }
 
@@ -149,7 +149,7 @@ script Director {
         for entity in World.with_tag(tag) { World.despawn(entity); }
     }
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         let state = Game.run_state;
         if state != this.was_state {
             this.was_state = state;
@@ -256,7 +256,7 @@ script Director {
         }
     }
 
-    fn next_xp(threshold: f32) -> f32 {
+    fn next_xp(threshold: number) -> number {
         // Reference: floor(threshold * 1.28 + 8). Decay has modulo but no
         // floor builtin. 1.28 is exactly 32/25 for these integer thresholds,
         // so remove the remainder before dividing instead of approximating.
@@ -264,7 +264,7 @@ script Director {
         return (scaled - scaled % 25.0) / 25.0 + 8.0;
     }
 
-    fn publish_module_pool(level: f32) {
+    fn publish_module_pool(level: number) {
         // 0 salvage, 1 boss relic, 2 Foundry Signal. The chooser consumes this
         // without needing to know why a level belongs to a particular pool.
         if level % 7.0 == 0.0 { Game.module_pool = 2.0; }
@@ -290,7 +290,7 @@ script Director {
         clear_tag("drop_roll");
     }
 
-    fn spawn_rate() -> f32 {
+    fn spawn_rate() -> number {
         return max(0.085, 0.7 - this.elapsed * 0.00092) /
                (this.normal_spawn * sector_pressure() * Game.event_spawn * Game.run_pressure);
     }
@@ -298,7 +298,7 @@ script Director {
     // The event clock (see events.decay). A rush is bosses only, so it has
     // none. `event_shown` is what the banner names: the event while it runs,
     // and the one that just ended while "EVENT COMPLETE" is up.
-    fn update_events(dt: f32) {
+    fn update_events(dt: number) {
         if rushing() > 0.0 { return; }
         Game.event_banner = max(0.0, Game.event_banner - dt);
         if this.event_left > 0.0 {
@@ -320,7 +320,7 @@ script Director {
         }
     }
 
-    fn sector_pressure() -> f32 {
+    fn sector_pressure() -> number {
         if this.elapsed >= 480.0 { return 1.27; }
         if this.elapsed >= 360.0 { return 1.18; }
         if this.elapsed >= 240.0 { return 1.12; }
@@ -349,7 +349,7 @@ script Director {
         spawn_roster(slot);
     }
 
-    fn unlocked_count() -> f32 {
+    fn unlocked_count() -> number {
         if this.elapsed >= 545.0 { return 15.0; }
         if this.elapsed >= 505.0 { return 14.0; }
         if this.elapsed >= 455.0 { return 13.0; }
@@ -367,7 +367,7 @@ script Director {
         return 1.0;
     }
 
-    fn spawn_roster(kind: f32) {
+    fn spawn_roster(kind: number) {
         Save.set_flag("enemy_seen_" + kind, true);
         let enemy = World.spawn(this.drifter);
         World.set_property(enemy, "kind", kind);
@@ -394,7 +394,7 @@ script Director {
     // crosses the screen there. Worth is in the original's experience (a scout
     // is 8), and touch is its contact damage of 100 hull at Normal's 1.08,
     // taken on this ship's five.
-    fn configure(enemy: Entity, speed: f32, health: f32, worth: f32, touch: f32) {
+    fn configure(enemy: Entity, speed: number, health: number, worth: number, touch: number) {
         World.set_property(enemy, "speed", speed * 0.845);
         World.set_property(enemy, "health", health);
         World.set_property(enemy, "worth", worth * 8.0);
@@ -423,8 +423,8 @@ script Director {
         }
     }
 
-    fn scale_elite(enemy: Entity, trait: f32, hp: f32, damage: f32,
-                   speed: f32, value: f32, charger_enemy: bool) {
+    fn scale_elite(enemy: Entity, trait: number, hp: number, damage: number,
+                   speed: number, value: number, charger_enemy: bool) {
         World.set_property(enemy, "elite", 1.0);
         World.set_property(enemy, "elite_trait", trait);
         World.set_property(enemy, "health",
@@ -463,8 +463,8 @@ script Director {
             return;
         }
 
-        var pick: f32 = Random.int(0.0, boss_pool - 1.0);
-        var attempts: f32 = 0.0;
+        var pick: number = Random.int(0.0, boss_pool - 1.0);
+        var attempts: number = 0.0;
         while attempts < 8.0 && (pick == this.last_boss || pick == this.previous_boss) {
             pick = Random.int(0.0, boss_pool - 1.0);
             attempts += 1.0;
@@ -481,7 +481,7 @@ script Director {
 
     /// Put one boss on the field. The pick is an index into the roster in the
     /// order a run meets them, and each one is simply its own prefab.
-    fn send_kind(pick: f32) {
+    fn send_kind(pick: number) {
         Save.set_flag("boss_seen_" + pick, true);
         var boss: Entity = null;
         if pick == 0.0 { boss = World.spawn(this.warden); }
@@ -502,7 +502,7 @@ script Director {
         boss.transform.position.y = spawn_ring_y();
     }
 
-    fn eligible_boss_count() -> f32 {
+    fn eligible_boss_count() -> number {
         // Twelve, and every one of them reachable: a boss the pool cannot pick
         // is a boss nobody ever fights.
         if this.elapsed >= 480.0 { return 12.0; }
@@ -535,11 +535,11 @@ script Director {
         enemy.transform.position.y = dy * reach;
     }
 
-    fn spawn_ring_x() -> f32 {
+    fn spawn_ring_x() -> number {
         return max(visible_half_x(VIEW_SIZE) + this.spawn_margin, this.arena);
     }
 
-    fn spawn_ring_y() -> f32 {
+    fn spawn_ring_y() -> number {
         return max(visible_half_y(VIEW_SIZE) + this.spawn_margin, this.arena);
     }
 

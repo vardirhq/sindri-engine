@@ -8,37 +8,37 @@
 // sets how it shakes, and a hit calls `Camera.impact`. So nothing here moves
 // the camera -- the engine owns its position while it shakes.
 script CameraFx {
-    var ambience: f32 = 0.0;
+    var ambience: number = 0.0;
     var grid: Entity = null;
     var backdrop: Entity = null;
     // The grid's authored size and line count, from the scene.
-    @export let grid_extent: f32 = 60.0;
-    @export let grid_cells: f32 = 61.0;
+    @export let grid_extent: number = 60.0;
+    @export let grid_cells: number = 61.0;
 
     // The colours being shown, eased towards the sector's.
-    var bg_r: f32 = 0.0015;
-    var bg_g: f32 = 0.0033;
-    var bg_b: f32 = 0.0065;
-    var grid_r: f32 = 0.052;
-    var grid_g: f32 = 0.479;
-    var grid_b: f32 = 0.716;
-    var grid_a: f32 = 0.07;
+    var bg_r: number = 0.0015;
+    var bg_g: number = 0.0033;
+    var bg_b: number = 0.0065;
+    var grid_r: number = 0.052;
+    var grid_g: number = 0.479;
+    var grid_b: number = 0.716;
+    var grid_a: number = 0.07;
 
     // The sector's colours, the original's hex values in linear light.
-    var want_bg_r: f32 = 0.0015;
-    var want_bg_g: f32 = 0.0033;
-    var want_bg_b: f32 = 0.0065;
-    var want_grid_r: f32 = 0.052;
-    var want_grid_g: f32 = 0.479;
-    var want_grid_b: f32 = 0.716;
-    var want_grid_a: f32 = 0.07;
+    var want_bg_r: number = 0.0015;
+    var want_bg_g: number = 0.0033;
+    var want_bg_b: number = 0.0065;
+    var want_grid_r: number = 0.052;
+    var want_grid_g: number = 0.479;
+    var want_grid_b: number = 0.716;
+    var want_grid_a: number = 0.07;
 
     fn start() {
         this.grid = World.find("backdrop-grid");
         this.backdrop = World.find("backdrop");
     }
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         if !Game.reduced_motion { this.ambience += dt; }
         choose_sector_colours();
         let ease = min(1.0, dt * 1.5);
@@ -72,7 +72,7 @@ script CameraFx {
         }
     }
 
-    fn want(bg_r: f32, bg_g: f32, bg_b: f32, r: f32, g: f32, b: f32, a: f32) {
+    fn want(bg_r: number, bg_g: number, bg_b: number, r: number, g: number, b: number, a: number) {
         this.want_bg_r = bg_r;
         this.want_bg_g = bg_g;
         this.want_bg_b = bg_b;
@@ -86,7 +86,7 @@ script CameraFx {
         let grid = this.grid;
         let backdrop = this.backdrop;
         let pulse = 0.5 + 0.5 * sin(this.ambience * 0.72);
-        var boss_energy: f32 = 0.0;
+        var boss_energy: number = 0.0;
         let boss_max = max(1.0, Game.boss_max);
         let boss_hp = max(0.0, Game.boss_hp);
         if boss_hp > 0.0 {

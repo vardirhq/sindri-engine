@@ -3,31 +3,31 @@
 // says which toy is selected and passes on what the player asked of it.
 
 state Game {
-    var toy: f32 = 0.0;
-    var tool: f32 = 0.0;
+    var toy: number = 0.0;
+    var tool: number = 0.0;
     var debug: bool = false;
-    var gravity: f32 = 0.0;
+    var gravity: number = 0.0;
     var chaos: bool = false;
-    var spawned: f32 = 0.0;
-    var blasts: f32 = 0.0;
-    var grabs: f32 = 0.0;
+    var spawned: number = 0.0;
+    var blasts: number = 0.0;
+    var grabs: number = 0.0;
     // The probe's query (0 ray, 1 circle cast, 2 box cast, 3 area) and mask.
-    var probe: f32 = 0.0;
-    var probe_mask: f32 = 0.0;
-    var queries: f32 = 0.0;
+    var probe: number = 0.0;
+    var probe_mask: number = 0.0;
+    var queries: number = 0.0;
 }
 
 // A toy was asked to do one of its four things: 1 to 4.
-event ToyAction(toy: f32, action: f32);
+event ToyAction(toy: number, action: number);
 // A toy, or 0 for the whole room, goes back to how the scene authored it.
-event ResetToy(toy: f32);
+event ResetToy(toy: number);
 // DROP EVERYTHING: every joint lets go, every motor stops.
 event DropEverything(on: bool);
 
-const TOOLS: f32 = 4.0;
-const TOYS: f32 = 8.0;
+const TOOLS: number = 4.0;
+const TOYS: number = 8.0;
 
-shared fn toy_name(toy: f32) -> String {
+shared fn toy_name(toy: number) -> String {
     if toy == 1.0 { return "WRECKING BALL"; }
     if toy == 2.0 { return "GANTRY CRANE"; }
     if toy == 3.0 { return "CANNON GALLERY"; }
@@ -40,7 +40,7 @@ shared fn toy_name(toy: f32) -> String {
 }
 
 // What a toy's four buttons say, comma-free so it fits a chip.
-shared fn action_name(toy: f32, action: f32) -> String {
+shared fn action_name(toy: number, action: number) -> String {
     if toy == 1.0 {
         if action == 1.0 { return "WIND UP"; }
         if action == 2.0 { return "LET GO"; }
@@ -96,7 +96,7 @@ shared fn action_name(toy: f32, action: f32) -> String {
 }
 
 // Where the camera looks for each toy: centre and how much height it shows.
-shared fn toy_view(toy: f32) -> Vec3 {
+shared fn toy_view(toy: number) -> Vec3 {
     if toy == 1.0 { return Vec3(-20.0, 7.0, 15.0); }
     if toy == 2.0 { return Vec3(-16.0, 6.5, 17.0); }
     if toy == 3.0 { return Vec3(18.0, -7.5, 14.0); }
@@ -110,7 +110,7 @@ shared fn toy_view(toy: f32) -> Vec3 {
 
 // One line under the dock saying what to try; a toy may replace it with a
 // live readout while it is selected.
-shared fn toy_hint(toy: f32) -> String {
+shared fn toy_hint(toy: number) -> String {
     if toy == 1.0 { return "Wind it up, let it go. Cut the rope mid-swing."; }
     if toy == 2.0 { return "Hold the arrows to drive. HOIST lowers onto whatever is below; GRAB ties it on."; }
     if toy == 3.0 { return "Hold aim, hold FIRE. Turn CCD off and watch shells pass through the glass."; }
@@ -122,7 +122,7 @@ shared fn toy_hint(toy: f32) -> String {
     return "Grab, throw, blast, spawn. Q and E visit each contraption.";
 }
 
-shared fn gravity_name(index: f32) -> String {
+shared fn gravity_name(index: number) -> String {
     if index == 1.0 { return "MOON"; }
     if index == 2.0 { return "ZERO-G"; }
     if index == 3.0 { return "UPSIDE DOWN"; }
@@ -131,7 +131,7 @@ shared fn gravity_name(index: f32) -> String {
 }
 
 // Which way is down for each GRAVITY setting, in units per second squared.
-shared fn gravity_pull(index: f32) -> Vec2 {
+shared fn gravity_pull(index: number) -> Vec2 {
     if index == 1.0 { return Vec2(0.0, -3.0); }
     if index == 2.0 { return Vec2(0.0, 0.0); }
     if index == 3.0 { return Vec2(0.0, 16.0); }
@@ -139,7 +139,7 @@ shared fn gravity_pull(index: f32) -> Vec2 {
     return Vec2(0.0, -16.0);
 }
 
-shared fn tool_name(index: f32) -> String {
+shared fn tool_name(index: number) -> String {
     if index == 1.0 { return "BLAST"; }
     if index == 2.0 { return "SPAWN"; }
     if index == 3.0 { return "PROBE"; }
@@ -147,7 +147,7 @@ shared fn tool_name(index: f32) -> String {
 }
 
 // Everything the pointer's tools may pick up, push or probe: what moves.
-shared fn movable_mask() -> f32 {
+shared fn movable_mask() -> number {
     return Physics.mask(["props", "balls", "shells", "glass"]);
 }
 
@@ -160,28 +160,28 @@ script Director {
     @export let hand_prefab: Prefab;
 
     // The room the overview fits, in world units.
-    @export let room_width: f32 = 62.0;
-    @export let room_height: f32 = 30.0;
+    @export let room_width: number = 62.0;
+    @export let room_height: number = 30.0;
 
     var view_center: Vec2 = Vec2(0.0, 0.0);
-    var view_height: f32 = 30.0;
-    var item: f32 = 0.0;
-    var balls_owed: f32 = 0.0;
+    var view_height: number = 30.0;
+    var item: number = 0.0;
+    var balls_owed: number = 0.0;
     var spawned: List<Entity> = [];
     var hand: Entity? = null;
     var held: Entity? = null;
     var hold_offset: Vec2 = Vec2(0.0, 0.0);
     var started: bool = false;
-    var frames: f32 = 0.0;
+    var frames: number = 0.0;
     // The clear band of screen between the bars, in overlay units.
-    var band_low: f32 = -0.62;
-    var band_high: f32 = 0.82;
+    var band_low: number = -0.62;
+    var band_high: number = 0.82;
 
     fn start() {
         refresh_labels();
     }
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         if !this.started {
             this.started = true;
             let goal = target_view();
@@ -224,7 +224,7 @@ script Director {
         this.band_high = Ui.position(high).y - Ui.size(high).y * 0.5;
     }
 
-    fn follow_view(dt: f32) {
+    fn follow_view(dt: number) {
         let goal = target_view();
         let blend = 1.0 - exp(-6.0 * dt);
         this.view_center = this.view_center.lerp(Vec2(goal.x, goal.y), blend);
@@ -299,7 +299,7 @@ script Director {
         if !Game.chaos { drop_everything(); }
     }
 
-    fn act(action: f32) {
+    fn act(action: number) {
         if Game.toy == 0.0 {
             if action == 1.0 { drop_everything(); }
             if action == 2.0 { this.balls_owed += 100.0; }
@@ -310,13 +310,13 @@ script Director {
         ToyAction.emit(Game.toy, action);
     }
 
-    fn choose_tool(index: f32) {
+    fn choose_tool(index: number) {
         Game.tool = index;
         let_go();
         refresh_labels();
     }
 
-    fn choose_toy(index: f32) {
+    fn choose_toy(index: number) {
         var toy = index;
         if toy < 0.0 { toy = TOYS; }
         if toy > TOYS { toy = 0.0; }
@@ -432,7 +432,7 @@ script Director {
     }
 
     // Spawns item 0 ball, 1 crate, 2 plank, 3 anvil or 4 bowling ball.
-    fn make(kind: f32, at: Vec2) -> Entity {
+    fn make(kind: number, at: Vec2) -> Entity {
         var prefab = this.ball;
         if kind == 1.0 { prefab = this.crate_box; }
         if kind == 2.0 { prefab = this.plank; }
@@ -450,7 +450,7 @@ script Director {
         return thing;
     }
 
-    fn pointer(dt: f32) {
+    fn pointer(dt: number) {
         let at = pointer_world();
         let cursor = World.find("cursor");
         cursor.transform.position = Vec3(at.x, at.y, 2.0);
@@ -484,7 +484,7 @@ script Director {
         print("Playground grabbed");
     }
 
-    fn hold(at: Vec2, dt: f32) {
+    fn hold(at: Vec2, dt: number) {
         let hand = this.hand;
         if hand == null { return; }
         let now = hand.transform.world_position;
@@ -511,7 +511,7 @@ script Director {
 
     // Shoves everything movable inside a circle outwards, pushing each at a
     // point on its near side so it spins as well as flies.
-    fn blast(at: Vec2, radius: f32, strength: f32) {
+    fn blast(at: Vec2, radius: number, strength: number) {
         for thing in Physics.overlap_circle(at, radius, movable_mask(), false, null) {
             let place = thing.transform.world_position;
             let away = Vec2(place.x, place.y) - at;
@@ -578,7 +578,7 @@ script Director {
 }
 
 // Draws an entity as a bar from one point to another.
-shared fn line(entity: Entity, start: Vec2, end: Vec2, width: f32) {
+shared fn line(entity: Entity, start: Vec2, end: Vec2, width: number) {
     let delta = end - start;
     entity.transform.position.x = (start.x + end.x) * 0.5;
     entity.transform.position.y = (start.y + end.y) * 0.5;
@@ -588,14 +588,14 @@ shared fn line(entity: Entity, start: Vec2, end: Vec2, width: f32) {
 
 // The ring a blast leaves, growing and fading.
 script BlastRing {
-    var age: f32 = 1.0;
-    var radius: f32 = 1.0;
-    fn go(at: Vec2, size: f32) {
+    var age: number = 1.0;
+    var radius: number = 1.0;
+    fn go(at: Vec2, size: number) {
         this.age = 0.0;
         this.radius = size;
         this.transform.position = Vec3(at.x, at.y, 1.5);
     }
-    fn update(dt: f32) {
+    fn update(dt: number) {
         this.age += dt;
         let t = min(1.0, this.age / 0.35);
         let size = this.radius * 2.0 * (0.3 + 0.7 * t);

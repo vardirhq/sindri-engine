@@ -6,7 +6,7 @@ script Hud {
         this.banner = World.find("Banner");
     }
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         Ui.set_numbers(this.entity, Game.coins, Game.coins_total);
         let probe = World.find("Ground clearance");
         if Game.ground_found {

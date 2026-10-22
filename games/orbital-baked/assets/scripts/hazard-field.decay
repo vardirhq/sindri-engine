@@ -2,14 +2,14 @@
 // One authored field covers both because their difference is behaviour, not
 // lifecycle: gravity bends projectiles; null moves and suppresses the ship.
 script HazardField {
-    @export let kind: f32 = 1.0;
-    @export let radius: f32 = 1.8;
-    @export let pull: f32 = 2.1;
-    @export let roam_speed: f32 = 0.55;
+    @export let kind: number = 1.0;
+    @export let radius: number = 1.8;
+    @export let pull: number = 2.1;
+    @export let roam_speed: number = 0.55;
 
-    var vx: f32 = 0.0;
-    var vy: f32 = 0.0;
-    var phase: f32 = 0.0;
+    var vx: number = 0.0;
+    var vy: number = 0.0;
+    var phase: number = 0.0;
 
     fn start() {
         this.phase = Random.range(0.0, 6.2831853);
@@ -25,7 +25,7 @@ script HazardField {
         }
     }
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         if Game.run_state != 1.0 {
             return;
         }
@@ -43,7 +43,7 @@ script HazardField {
         }
     }
 
-    fn bend(dt: f32) {
+    fn bend(dt: number) {
         // Gravity acts on an explicit capability tag rather than broad gameplay
         // categories such as `hostile_shot`. Some hostile attacks are scripted
         // beams with no rigid body, so asking physics for their velocity is a
@@ -65,7 +65,7 @@ script HazardField {
         }
     }
 
-    fn roam(dt: f32) {
+    fn roam(dt: number) {
         this.phase += dt * 0.7;
         this.vx += cos(this.phase) * sin(Game.elapsed * 0.38 + this.phase) * 0.08 * dt;
         this.vy += sin(this.phase * 0.83) * sin(Game.elapsed * 0.38 + this.phase) * 0.08 * dt;

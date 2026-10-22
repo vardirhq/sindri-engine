@@ -1,12 +1,12 @@
 // Expanding ring attack. Crossing the moving band hurts once; the empty middle is safe.
 script Shockwave {
-    @export let start_radius: f32 = 0.35;
-    @export let max_radius: f32 = 6.2;
-    @export let speed: f32 = 3.0;
-    @export let width: f32 = 0.42;
-    @export let damage: f32 = 1.0;
+    @export let start_radius: number = 0.35;
+    @export let max_radius: number = 6.2;
+    @export let speed: number = 3.0;
+    @export let width: number = 0.42;
+    @export let damage: number = 1.0;
 
-    var radius: f32 = 0.0;
+    var radius: number = 0.0;
     var hit_player: bool = false;
 
     fn start() {
@@ -14,7 +14,7 @@ script Shockwave {
         sync_visual();
     }
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         if Game.run_state != 1.0 { return; }
         let previous = this.radius;
         this.radius += this.speed * dt;
@@ -40,11 +40,11 @@ script Shockwave {
         if this.radius >= this.max_radius { World.despawn(this.entity); }
     }
 
-    fn crossed(distance: f32, previous: f32) -> bool {
+    fn crossed(distance: number, previous: number) -> bool {
         return distance > previous && distance <= this.radius;
     }
 
-    fn hit_targets(previous: f32) {
+    fn hit_targets(previous: number) {
         for target in World.with_tag("attack_damageable") {
             if !World.exists(target) { continue; }
             let dx = target.transform.position.x - this.transform.position.x;
@@ -62,7 +62,7 @@ script Shockwave {
         }
     }
 
-    fn trigger_mines(previous: f32) {
+    fn trigger_mines(previous: number) {
         for mine in World.with_tag("attack_mine") {
             if !World.exists(mine) { continue; }
             let dx = mine.transform.position.x - this.transform.position.x;

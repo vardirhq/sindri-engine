@@ -2,8 +2,8 @@
 
 script Wreck {
     @export let template: Prefab;
-    @export var cargo_mask: f32 = 63.0;
-    var scrap: f32 = 3.0;
+    @export var cargo_mask: number = 63.0;
+    var scrap: number = 3.0;
 
     fn start() {
         this.scrap = 0.0;
@@ -23,12 +23,12 @@ script Wreck {
         if this.cargo_mask <= 0.0 { this.sprite.tint = Color("#9a948a"); }
     }
 
-    fn has_slot(slot: f32) -> bool {
+    fn has_slot(slot: number) -> bool {
         let bit = [1.0, 2.0, 4.0, 8.0, 16.0, 32.0][slot];
         return this.cargo_mask % (bit * 2.0) >= bit;
     }
 
-    fn take_slot(slot: f32) {
+    fn take_slot(slot: number) {
         if !has_slot(slot) { return; }
         this.cargo_mask -= [1.0, 2.0, 4.0, 8.0, 16.0, 32.0][slot];
         if wreck_cargo(slot) == Resource.Scrap { this.scrap -= 1.0; }
@@ -38,14 +38,14 @@ script Wreck {
     }
 }
 
-shared fn wreck_cargo(slot: f32) -> Resource {
+shared fn wreck_cargo(slot: number) -> Resource {
     if slot == 3.0 { return Resource.Wood; }
     if slot == 4.0 { return Resource.Ore; }
     if slot == 5.0 { return Resource.Fibre; }
     return Resource.Scrap;
 }
 
-shared fn wreck_slot(slot: f32) -> Vec2 {
+shared fn wreck_slot(slot: number) -> Vec2 {
     return [Vec2(0.0, 0.0), Vec2(-2.0, 0.0), Vec2(2.0, 0.0),
             Vec2(-2.0, 1.5), Vec2(0.0, 1.5), Vec2(2.0, 1.5)][slot];
 }

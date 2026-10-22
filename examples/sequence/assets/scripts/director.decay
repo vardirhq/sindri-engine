@@ -1,9 +1,9 @@
 // A feature example: choreography authored in the Timeline, driven by a
 // script that only says which sequence plays and listens for its cues.
 script Director {
-    var beats: f32 = 0.0;
+    var beats: number = 0.0;
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         if Sequence.cued(this.entity, "launch") { print("Sequence cue launch"); }
         if Sequence.cued(this.entity, "landed") { print("Sequence cue landed"); }
         if Sequence.cued(this.entity, "ready") { print("Sequence cue ready"); }

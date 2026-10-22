@@ -2,14 +2,14 @@
 // reference archetype index; keeping the common combat/death path here avoids
 // twelve scripts differing mostly by arithmetic.
 script Drifter {
-    @export let kind: f32 = 0.0;
-    @export let speed: f32 = 1.5;
-    @export let health: f32 = 2.0;
-    @export let worth: f32 = 1.0;
-    @export let touch_damage: f32 = 1.0;
-    @export let elite: f32 = 0.0;
-    @export let elite_trait: f32 = 0.0;
-    @export let hazard_damage: f32 = 0.0;
+    @export let kind: number = 0.0;
+    @export let speed: number = 1.5;
+    @export let health: number = 2.0;
+    @export let worth: number = 1.0;
+    @export let touch_damage: number = 1.0;
+    @export let elite: number = 0.0;
+    @export let elite_trait: number = 0.0;
+    @export let hazard_damage: number = 0.0;
     @export let core: Prefab;
     @export let death_burst: Prefab;
     @export let shot: Prefab;
@@ -20,22 +20,22 @@ script Drifter {
     @export let phaser_mark: Prefab;
     @export let prong_mark: Prefab;
 
-    var hp: f32 = 0.0;
-    var death_burst_damage: f32 = 0.0;
-    var attack: f32 = 1.2;
-    var clock: f32 = 0.0;
-    var phase_offset: f32 = 0.0;
-    var burrow: f32 = 0.0;
+    var hp: number = 0.0;
+    var death_burst_damage: number = 0.0;
+    var attack: number = 1.2;
+    var clock: number = 0.0;
+    var phase_offset: number = 0.0;
+    var burrow: number = 0.0;
     // The body is a filled polygon in the archetype's own colour, as the
     // original draws it. A hit whitens it for a moment; burrowing and phasing
     // fade it. Everything that changes how it looks writes these, and `paint`
     // turns them into the shape once a frame.
-    var sides: f32 = 5.0;
-    var body_r: f32 = 1.0;
-    var body_g: f32 = 0.5;
-    var body_b: f32 = 0.4;
-    var body_alpha: f32 = 1.0;
-    var flash: f32 = 0.0;
+    var sides: number = 5.0;
+    var body_r: number = 1.0;
+    var body_g: number = 0.5;
+    var body_b: number = 0.4;
+    var body_alpha: number = 1.0;
+    var flash: number = 0.0;
 
     fn start() {
         let late = max(0.0, Game.elapsed - 180.0);
@@ -49,7 +49,7 @@ script Drifter {
         spawn_elite_visuals();
     }
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         if Game.run_state != 1.0 {
             Physics.set_velocity(this.entity, 0.0, 0.0);
             return;
@@ -117,14 +117,14 @@ script Drifter {
         if this.hp <= 0.0 { die(); }
     }
 
-    fn chase(dx: f32, dy: f32, far: f32, scale: f32) {
+    fn chase(dx: number, dy: number, far: number, scale: number) {
         if far > 0.001 {
             Physics.set_velocity(this.entity, dx / far * this.speed * scale * Game.event_enemy_speed,
                                  dy / far * this.speed * scale * Game.event_enemy_speed);
         }
     }
 
-    fn wobble_chase(dx: f32, dy: f32, far: f32, scale: f32) {
+    fn wobble_chase(dx: number, dy: number, far: number, scale: number) {
         if far <= 0.001 { return; }
         let tangent = sin(this.clock * 5.0) * 0.42;
         Physics.set_velocity(this.entity,
@@ -132,9 +132,9 @@ script Drifter {
             (dy / far + dx / far * tangent) * this.speed * scale * Game.event_enemy_speed);
     }
 
-    fn steer_range(dx: f32, dy: f32, far: f32, target: f32, tangent: f32) {
+    fn steer_range(dx: number, dy: number, far: number, target: number, tangent: number) {
         if far <= 0.001 { return; }
-        var radial: f32 = 0.0;
+        var radial: number = 0.0;
         if far > target + 0.5 { radial = 1.0; }
         if far < target - 0.5 { radial = -0.65; }
         let nx = dx / far;
@@ -144,14 +144,14 @@ script Drifter {
             (ny * radial + nx * tangent) * this.speed * Game.event_enemy_speed);
     }
 
-    fn aimed_fire(dt: f32, dx: f32, dy: f32, far: f32, gap: f32, velocity: f32) {
+    fn aimed_fire(dt: number, dx: number, dy: number, far: number, gap: number, velocity: number) {
         this.attack -= dt;
         if this.attack > 0.0 || far <= 0.001 { return; }
         fire(dx / far, dy / far, velocity);
         this.attack = gap;
     }
 
-    fn paired_fire(dt: f32, dx: f32, dy: f32, far: f32, gap: f32, velocity: f32) {
+    fn paired_fire(dt: number, dx: number, dy: number, far: number, gap: number, velocity: number) {
         this.attack -= dt;
         if this.attack > 0.0 || far <= 0.001 { return; }
         let a = atan2(dy, dx);
@@ -160,11 +160,11 @@ script Drifter {
         this.attack = gap;
     }
 
-    fn fan_fire(dt: f32, dx: f32, dy: f32, far: f32, gap: f32, velocity: f32) {
+    fn fan_fire(dt: number, dx: number, dy: number, far: number, gap: number, velocity: number) {
         this.attack -= dt;
         if this.attack > 0.0 || far <= 0.001 { return; }
         let base = atan2(dy, dx);
-        var slot: f32 = -2.0;
+        var slot: number = -2.0;
         while slot <= 2.0 {
             let a = base + slot * 0.16;
             fire(cos(a), sin(a), velocity);
@@ -173,10 +173,10 @@ script Drifter {
         this.attack = gap;
     }
 
-    fn radial_fire(dt: f32, gap: f32, count: f32, velocity: f32) {
+    fn radial_fire(dt: number, gap: number, count: number, velocity: number) {
         this.attack -= dt;
         if this.attack > 0.0 { return; }
-        var slot: f32 = 0.0;
+        var slot: number = 0.0;
         while slot < count {
             let a = slot / count * 6.2831853 + this.clock * 0.12;
             fire(cos(a), sin(a), velocity);
@@ -185,7 +185,7 @@ script Drifter {
         this.attack = gap;
     }
 
-    fn fire(nx: f32, ny: f32, velocity: f32) {
+    fn fire(nx: number, ny: number, velocity: number) {
         let bolt = World.spawn(this.shot);
         bolt.transform.position.x = this.transform.position.x;
         bolt.transform.position.y = this.transform.position.y;
@@ -196,7 +196,7 @@ script Drifter {
         World.set_property(bolt, "damage", 0.6);
     }
 
-    fn burrow_move(dt: f32, dx: f32, dy: f32, far: f32) {
+    fn burrow_move(dt: number, dx: number, dy: number, far: number) {
         this.burrow += dt;
         if this.burrow >= 3.4 { this.burrow = 0.0; }
         if this.burrow < 1.7 {
@@ -208,7 +208,7 @@ script Drifter {
         }
     }
 
-    fn phaser_move(dt: f32, dx: f32, dy: f32, far: f32, player: Entity, visible: bool) {
+    fn phaser_move(dt: number, dx: number, dy: number, far: number, player: Entity, visible: bool) {
         wobble_chase(dx, dy, far, 1.05);
         this.body_alpha = 0.6 + sin(this.clock * 12.0) * 0.25;
         this.attack -= dt;
@@ -223,7 +223,7 @@ script Drifter {
 
     // Contact hurts for as long as it lasts, as in the original: the ship's
     // short mercy window is what spaces the hits, not the moment of touching.
-    fn press_on(far: f32) {
+    fn press_on(far: number) {
         if far < CONTACT_REACH {
             Game.player_damage_taken = max(Game.player_damage_taken, this.touch_damage);
         }
@@ -249,8 +249,8 @@ script Drifter {
 
     fn is_visible() -> bool {
         let aspect = max(Viewport.aspect, 0.001);
-        var half_x: f32 = 5.5;
-        var half_y: f32 = 5.5;
+        var half_x: number = 5.5;
+        var half_y: number = 5.5;
         if aspect >= 1.0 { half_x *= aspect; } else { half_y /= aspect; }
         let radius = max(abs(this.transform.scale.x), abs(this.transform.scale.y)) * 0.5;
         return this.transform.position.x + radius >= -half_x &&
@@ -280,7 +280,7 @@ script Drifter {
         else { set_visual(3.0, 0.6867, 0.3515, 1.0000); }
     }
 
-    fn set_visual(sides: f32, r: f32, g: f32, b: f32) {
+    fn set_visual(sides: number, r: number, g: number, b: number) {
         this.sides = sides;
         this.shape.count = sides;
         this.body_r = r;
@@ -324,14 +324,14 @@ script Drifter {
         }
     }
 
-    fn spawn_arc_mark(mode: f32) {
+    fn spawn_arc_mark(mode: number) {
         let mark = World.spawn(this.arc_mark);
         World.set_property(mark, "mode", mode);
         World.set_parent(mark, this.entity);
     }
 
-    fn spawn_radial_prongs(mode: f32, count: f32) {
-        var slot: f32 = 0.0;
+    fn spawn_radial_prongs(mode: number, count: number) {
+        var slot: number = 0.0;
         while slot < count {
             let mark = World.spawn(this.prong_mark);
             World.set_property(mark, "mode", mode);
@@ -362,7 +362,7 @@ script Drifter {
         World.set_parent(ring, this.entity);
     }
 
-    fn damage_from(hit: Entity) -> f32 {
+    fn damage_from(hit: Entity) -> number {
         if World.has_tag(hit, "player_damage") {
             return World.property_number(hit, "damage", 0.0);
         }

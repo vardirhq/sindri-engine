@@ -1,20 +1,20 @@
 // One piece of a pipe pair. Every piece of a pair shares a seed, so they agree
 // on where the gap is each lap without having to find one another.
 script Pipe {
-    @export let offset: f32 = 0.0;
-    @export let seed: f32 = 1.0;
-    @export let wrap_x: f32 = -11.5;
-    @export let span: f32 = 23.0;
+    @export let offset: number = 0.0;
+    @export let seed: number = 1.0;
+    @export let wrap_x: number = -11.5;
+    @export let span: number = 23.0;
 
-    var home_x: f32 = 0.0;
-    var lap: f32 = 0.0;
-    var run: f32 = -1.0;
+    var home_x: number = 0.0;
+    var lap: number = 0.0;
+    var run: number = -1.0;
 
     fn start() {
         this.home_x = this.transform.position.x;
     }
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         if this.run != Game.run {
             this.run = Game.run;
             this.lap = 0.0;

@@ -5,7 +5,7 @@
 // go switches the motor off so the arm swings free; cutting the rope disables
 // the hinge, and the ball keeps whatever speed it had.
 script WreckingBall {
-    @export let wind_angle: f32 = -1.15;
+    @export let wind_angle: number = -1.15;
     var winding: bool = false;
 
     fn start() { relax(); }
@@ -45,19 +45,19 @@ script WreckingBall {
 // motor; a hook on a spring whose rest length is the winch; and a grip, a
 // distance joint created at runtime between the hook and the cargo under it.
 script Crane {
-    @export let speed: f32 = 5.0;
-    @export let high: f32 = 1.4;
-    @export let low: f32 = 9.5;
-    var cable: f32 = 1.4;
-    var depth: f32 = 9.5;
+    @export let speed: number = 5.0;
+    @export let high: number = 1.4;
+    @export let low: number = 9.5;
+    var cable: number = 1.4;
+    var depth: number = 9.5;
     var lowering: bool = false;
     // Where the trolley is told to be, along the rail from its middle.
-    var target: f32 = -4.0;
+    var target: number = -4.0;
     var parked: bool = false;
     var gripping: bool = false;
     var held: Entity? = null;
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         var drive = 0.0;
         if Game.toy == 2.0 {
             if Ui.is_held(World.find("act-1")) || Input.is_down("Digit1") || Input.is_down("ArrowLeft") { drive = -1.0; }
@@ -109,7 +109,7 @@ script Crane {
     // How far down to let the hook go: the hook's own footprint, swept
     // straight down, finds the first thing it would land on, so it stops
     // just above the load instead of shoving it off whatever it stands on.
-    fn sound() -> f32 {
+    fn sound() -> number {
         let hook = World.find("crane-hook");
         let at = hook.transform.world_position;
         let mask = Physics.mask(["static", "props", "balls", "glass"]);
@@ -165,19 +165,19 @@ script Crane {
 // covers more than a pane's thickness in one fixed step, so with continuous
 // collision off most of them pass through the glass without touching it.
 state Gallery {
-    var hits: f32 = 0.0;
-    var ghosts: f32 = 0.0;
-    var fired: f32 = 0.0;
+    var hits: number = 0.0;
+    var ghosts: number = 0.0;
+    var fired: number = 0.0;
     var ccd: bool = true;
 }
 
 script Cannon {
     @export let shell: Prefab;
-    @export let muzzle_speed: f32 = 90.0;
-    var aim: f32 = 0.25;
-    var cooldown: f32 = 0.0;
+    @export let muzzle_speed: number = 90.0;
+    var aim: number = 0.25;
+    var cooldown: number = 0.0;
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         this.cooldown = max(0.0, this.cooldown - dt);
         if Game.toy == 3.0 {
             var turn = 0.0;
@@ -238,9 +238,9 @@ script Cannon {
 
 // A shell: remembers whether it touched glass, and leaves after a while.
 script Shell {
-    var age: f32 = 0.0;
+    var age: number = 0.0;
     var hit_glass: bool = false;
-    fn update(dt: f32) {
+    fn update(dt: number) {
         this.age += dt;
         for other in Physics.collision_started() {
             if World.exists(other) && World.has_tag(other, "glass") { this.hit_glass = true; }
@@ -252,11 +252,11 @@ script Shell {
 // A pane of glass on a hinge. A shell that touches it knocks it off its
 // hinge; a reset hangs it back up.
 script GlassPane {
-    @export let index: f32 = 0.0;
+    @export let index: number = 0.0;
     var home: Vec3 = Vec3(0.0, 0.0, 0.0);
     var broken: bool = false;
     fn start() { this.home = this.transform.position; }
-    fn update(dt: f32) {
+    fn update(dt: number) {
         for other in Physics.collision_started() {
             if !this.broken && World.exists(other) && World.has_tag(other, "shell") {
                 this.broken = true;
@@ -285,9 +285,9 @@ script GlassPane {
 // Every pane hangs across the gallery's whole height, so a shell at that
 // height that reached here while a pane still hung must have crossed one.
 script BackStop {
-    @export let top: f32 = -2.9;
-    @export let bottom: f32 = -11.5;
-    fn update(dt: f32) {
+    @export let top: number = -2.9;
+    @export let bottom: number = -11.5;
+    fn update(dt: number) {
         for other in Physics.sensor_entered() {
             if World.exists(other) && World.has_tag(other, "shell") {
                 let y = other.transform.world_position.y;
@@ -303,9 +303,9 @@ script BackStop {
 }
 
 state Pit {
-    var score: f32 = 0.0;
+    var score: number = 0.0;
     var lifting: bool = true;
-    var lifts: f32 = 0.0;
+    var lifts: number = 0.0;
 }
 
 // The pinball wall and the lift that feeds it. The flippers are position
@@ -313,16 +313,16 @@ state Pit {
 // position motor that waits at the bottom, climbs, and tips its bucket.
 script Pinball {
     @export let ball: Prefab;
-    @export let wait_bottom: f32 = 2.5;
-    @export let wait_top: f32 = 1.2;
+    @export let wait_bottom: number = 2.5;
+    @export let wait_top: number = 1.2;
     // 0 waiting below, 1 climbing, 2 pouring, 3 coming down.
-    var phase: f32 = 0.0;
-    var clock: f32 = 0.0;
+    var phase: number = 0.0;
+    var clock: number = 0.0;
     var left_up: bool = false;
     var right_up: bool = false;
     var balls: List<Entity> = [];
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         flippers();
         lift(dt);
         if Game.toy == 4.0 {
@@ -350,7 +350,7 @@ script Pinball {
         }
     }
 
-    fn lift(dt: f32) {
+    fn lift(dt: number) {
         if !Pit.lifting && this.phase == 0.0 { return; }
         this.clock += dt;
         let slider = World.find("lift-slider");
@@ -423,8 +423,8 @@ script Pinball {
 // A bumper: whatever touches it is kicked away along the contact normal, and
 // it lights up. The kick is an impulse, so a heavy ball leaves slower.
 script Bumper {
-    var glow: f32 = 0.0;
-    fn update(dt: f32) {
+    var glow: number = 0.0;
+    fn update(dt: number) {
         this.glow = max(0.0, this.glow - dt * 4.0);
         for other in Physics.collision_started() {
             if World.exists(other) && (World.has_tag(other, "loose") || World.has_tag(other, "body")) {
@@ -445,9 +445,9 @@ script Bumper {
 // Ice, wood and rubber on one frictionless ramp. They do not collide with one
 // another, so each has the ramp to itself; only their materials differ.
 script Racer {
-    @export let lane: f32 = 0.0;
+    @export let lane: number = 0.0;
     var home: Vec3 = Vec3(0.0, 0.0, 0.0);
-    var turn: f32 = 0.0;
+    var turn: number = 0.0;
     fn start() {
         this.home = this.transform.position;
         this.turn = this.transform.rotation_z;
@@ -461,7 +461,7 @@ script Racer {
         if toy == 0.0 || toy == 5.0 { go(0.0); }
     }
     // Back to the top of the ramp, then the same push down the slope for all.
-    fn go(push: f32) {
+    fn go(push: number) {
         this.transform.position = this.home;
         this.transform.rotation_z = this.turn;
         let along = Vec2(cos(this.turn), sin(this.turn));
@@ -470,23 +470,23 @@ script Racer {
     }
     // Read by the lab's readout. A field, because another script's function
     // is a message: it runs after the pass and gives nothing back.
-    var travelled: f32 = 0.0;
-    fn update(dt: f32) {
+    var travelled: number = 0.0;
+    fn update(dt: number) {
         this.travelled = this.transform.position.x - this.home.x;
     }
 }
 
 // The same ball dropped on four pads; remembers how high it came back up.
 script Bouncer {
-    @export let pad: f32 = 0.0;
+    @export let pad: number = 0.0;
     var home: Vec3 = Vec3(0.0, 0.0, 0.0);
     var landed: bool = false;
-    var bounces: f32 = 0.0;
-    var peak: f32 = 0.0;
+    var bounces: number = 0.0;
+    var peak: number = 0.0;
     // How high the bounce came back above where it rests on its pad.
-    var rebound: f32 = 0.0;
+    var rebound: number = 0.0;
     fn start() { this.home = this.transform.position; }
-    fn update(dt: f32) {
+    fn update(dt: number) {
         // The first bounce only: later ones are lower and would hide it.
         for other in Physics.collision_started() {
             this.bounces += 1.0;
@@ -520,7 +520,7 @@ script Bouncer {
     }
 }
 
-shared fn pad_name(index: f32) -> String {
+shared fn pad_name(index: number) -> String {
     if index == 1.0 { return "steel"; }
     if index == 2.0 { return "wood"; }
     if index == 3.0 { return "clay"; }
@@ -528,7 +528,7 @@ shared fn pad_name(index: f32) -> String {
 }
 
 script MaterialLab {
-    fn update(dt: f32) {
+    fn update(dt: number) {
         if Game.toy != 5.0 { return; }
         let ice = Racer.on(World.find("racer-ice")).travelled;
         let wood = Racer.on(World.find("racer-wood")).travelled;
@@ -548,8 +548,8 @@ script MaterialLab {
 // The seesaw's anvil hangs on a rope; dropping it cuts the rope. The
 // trampoline's two springs can be made stiffer or softer.
 script Seesaw {
-    var stiffness: f32 = 160.0;
-    fn update(dt: f32) {
+    var stiffness: number = 160.0;
+    fn update(dt: number) {
         let rope = World.find("anvil-rope-line");
         let hanging = Physics.joint_enabled(World.find("anvil-rope"));
         World.set_active(rope, hanging);
@@ -581,7 +581,7 @@ script Seesaw {
     on ResetToy(toy) {
         if toy == 0.0 || toy == 6.0 { tune(160.0); }
     }
-    fn tune(stiffness: f32) {
+    fn tune(stiffness: number) {
         this.stiffness = clamp(round(stiffness), 20.0, 1200.0);
         Physics.set_spring(World.find("tramp-spring-left"), 2.2, this.stiffness, 0.4);
         Physics.set_spring(World.find("tramp-spring-right"), 2.2, this.stiffness, 0.4);

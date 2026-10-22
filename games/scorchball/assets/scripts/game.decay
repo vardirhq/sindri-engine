@@ -10,14 +10,14 @@ enum Power { Grow, Boost, Wind, Fire }
 
 state Game {
     var phase = Phase.Lobby;
-    var score_blue: f32 = 0.0;
-    var score_red: f32 = 0.0;
+    var score_blue: number = 0.0;
+    var score_red: number = 0.0;
     // Sideways push on the pitch while a Wind power-up blows; 0 when calm.
-    var wind: f32 = 0.0;
+    var wind: number = 0.0;
     // The slot of whoever has the ball, or 0 when it is loose.
-    var holder: f32 = 0.0;
+    var holder: number = 0.0;
     // How many players the match has made, bots included.
-    var joins: f32 = 0.0;
+    var joins: number = 0.0;
     // The title screen has been dismissed.
     var menu_done: bool = false;
     // The title screen asked for a bot to play against.

@@ -1,5 +1,11 @@
 # Changelog
 
+- Write Decay's numeric type as `number` in every checked-in script and in
+  the docs' Decay snippets. The examples and games still said `f32`, its first
+  spelling, so the knowledge pack taught a model to write it. A test in
+  `sindri-capabilities` now fails on any `.decay` file that uses `f32`, which
+  still compiles.
+
 - Give Causeway a title worth opening on: the Lighthouse at dusk with its
   lamps lit, the camera swaying round it and Hollow trudging over the
   causeway, the logo and a plated menu rising out of the dark, a How to play
@@ -38,6 +44,12 @@
   its defaults and a real use, Weave, physics, 2D and 3D, what works today, and
   the feature examples whole. Built from the repository's own documents by
   `site/build_knowledge_pack.py`.
+
+- Generate the Weave property reference, `docs/generated/weave-reference.json`
+  and `.md`, from the table `sindri-weave` now applies declarations by: every
+  property's names, values, what it writes and an example. `font-style:
+  italic` now asks for the font's italic face; it was listed as inherited but
+  never applied.
 
 - Rebuild Orbital Last Stand around a complete flight deck: four ship sidegrades,
   difficulty choices, salvage unlocks, commendations, a flight log and archive,

@@ -4,16 +4,16 @@
 // past half its health, which is when the original's boss changes phase.
 script BossRing {
     // Turns per second, in radians; negative turns the other way.
-    @export let spin: f32 = 1.0;
+    @export let spin: number = 1.0;
     // How wide the outline is while the boss is whole, and past its phase.
-    @export let width: f32 = 0.03;
+    @export let width: number = 0.03;
 
-    var clock: f32 = 0.0;
+    var clock: number = 0.0;
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         if Game.run_state == 1.0 { this.clock += dt; }
         this.transform.rotation_z = this.clock * this.spin;
-        var share: f32 = 1.0;
+        var share: number = 1.0;
         if Game.boss_max > 0.0 { share = max(0.0, Game.boss_hp) / Game.boss_max; }
         let pulse = 0.5 + 0.5 * sin(this.clock * 5.0);
         if share < 0.5 {

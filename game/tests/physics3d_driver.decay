@@ -1,12 +1,12 @@
 // Gameplay-free host contract fixture: controls, copied values and actual landing.
 script Physics3dDriver {
-    var elapsed: f32 = 0.0;
+    var elapsed: number = 0.0;
     var started: bool = false;
     var touched: bool = false;
     var copied: bool = false;
     var locked: bool = false;
     var verified: bool = false;
-    fn update(dt: f32) {
+    fn update(dt: number) {
         elapsed += dt;
         if !started {
             started = true;

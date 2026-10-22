@@ -6,15 +6,15 @@
 script Hud {
     var hint: Entity = null;
     var panel: Entity = null;
-    var seen_washed: f32 = 0.0;
-    var washed_notice: f32 = 0.0;
+    var seen_washed: number = 0.0;
+    var washed_notice: number = 0.0;
 
     fn start() {
         this.hint = World.find("Hint");
         this.panel = World.find("Instrument panel");
     }
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         this.washed_notice = max(0.0, this.washed_notice - dt);
         if Game.washed > this.seen_washed { this.seen_washed = Game.washed; this.washed_notice = 5.0; }
         instruments();
@@ -96,7 +96,7 @@ script Hud {
         }
     }
 
-    fn meter(track: String, fill: String, x: f32, y: f32, width: f32, fraction: f32) {
+    fn meter(track: String, fill: String, x: number, y: number, width: number, fraction: number) {
         let back = World.find(track);
         let bar = World.find(fill);
         let amount = clamp(fraction, 0.0, 1.0);

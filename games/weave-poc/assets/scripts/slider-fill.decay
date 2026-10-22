@@ -2,15 +2,15 @@
 // this ordinary UI child owns presentation, so Weave remains free to style it.
 script SliderFill {
     @export
-    let channel: f32 = 0.0;
+    let channel: number = 0.0;
 
-    var full_height: f32 = 1.0;
+    var full_height: number = 1.0;
 
     fn start() {
         this.full_height = this.transform.scale.y;
     }
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         var slider: Entity = World.find("Red Slider");
         if this.channel == 1.0 {
             slider = World.find("Green Slider");

@@ -23,80 +23,80 @@ enum TidePhase { Low, Rising, High, Falling }
 
 state Game {
     var discard_armed: bool = false;
-    var discard_left: f32 = 0.0;
+    var discard_left: number = 0.0;
     var focus_kind: Resource = Resource.None;
-    var focus_x: f32 = -1.0;
-    var focus_y: f32 = -1.0;
-    var tide_duration: f32 = 180.0;
+    var focus_x: number = -1.0;
+    var focus_y: number = -1.0;
+    var tide_duration: number = 180.0;
     var diving: bool = false;
-    var dive_air: f32 = 30.0;
-    var dive_x: f32 = -1.5;
-    var dive_y: f32 = 0.0;
+    var dive_air: number = 30.0;
+    var dive_x: number = -1.5;
+    var dive_y: number = 0.0;
     var dive_loot: bool = false;
     var dive_empty: bool = false;
-    var dive_notice: f32 = 0.0;
+    var dive_notice: number = 0.0;
     var dive_report: DiveReport = DiveReport.None;
-    var tide_time: f32 = 0.0;
-    var tide_level: f32 = -17.0;
+    var tide_time: number = 0.0;
+    var tide_level: number = -17.0;
     var tide_phase: TidePhase = TidePhase.Low;
-    var tide_left: f32 = 180.0;
-    var season: f32 = 0.0;
+    var tide_left: number = 180.0;
+    var season: number = 0.0;
     var flooded: bool = false;
-    var washed: f32 = 0.0;
+    var washed: number = 0.0;
     // The crawler.
-    var crawler_x: f32 = 0.0;
-    var crawler_y: f32 = 0.0;
-    var heading: f32 = 0.0;
-    var speed: f32 = 0.0;
-    var top_speed: f32 = 0.0;
-    var throttle: f32 = 0.0;
-    var rudder: f32 = 0.0;
-    var crates: f32 = 0.0;
-    var capacity: f32 = 0.0;
-    var hull_left: f32 = 2.0;
-    var hull_right: f32 = 9.0;
-    var hull_top: f32 = 3.0;
-    var hull_bottom: f32 = 12.0;
-    var structure_mass: f32 = 0.0;
-    var extensions: f32 = 0.0;
+    var crawler_x: number = 0.0;
+    var crawler_y: number = 0.0;
+    var heading: number = 0.0;
+    var speed: number = 0.0;
+    var top_speed: number = 0.0;
+    var throttle: number = 0.0;
+    var rudder: number = 0.0;
+    var crates: number = 0.0;
+    var capacity: number = 0.0;
+    var hull_left: number = 2.0;
+    var hull_right: number = 9.0;
+    var hull_top: number = 3.0;
+    var hull_bottom: number = 12.0;
+    var structure_mass: number = 0.0;
+    var extensions: number = 0.0;
     var building: bool = false;
     var blueprint: Blueprint = Blueprint.Extension;
     var build_result: BuildResult = BuildResult.None;
     var has_bunk: bool = false;
-    var engine_level: f32 = 0.0;
+    var engine_level: number = 0.0;
     // What the crawler is driving on, and how much it holds it back: one is
     // a clear run, less is soft or rough going.
     var ground: Ground = Ground.Salt;
-    var going: f32 = 1.0;
+    var going: number = 1.0;
     // Whether the last move was refused: brine or a cliff ahead.
     var blocked: bool = false;
     // The crew.
     var swimming: bool = false;
     var aboard: bool = true;
     var at_helm: bool = false;
-    var crew_x: f32 = 0.0;
-    var crew_y: f32 = 0.0;
+    var crew_x: number = 0.0;
+    var crew_y: number = 0.0;
     var hint: Hint = Hint.None;
     // Scrap hauled aboard over the voyage, and how much is still aboard.
-    var wood: f32 = 0.0;
-    var stone: f32 = 0.0;
-    var ore: f32 = 0.0;
-    var fibre: f32 = 0.0;
-    var salt: f32 = 0.0;
+    var wood: number = 0.0;
+    var stone: number = 0.0;
+    var ore: number = 0.0;
+    var fibre: number = 0.0;
+    var salt: number = 0.0;
     var carried_kind: Resource = Resource.None;
     var gather_kind: Resource = Resource.None;
-    var scrap: f32 = 0.0;
-    var salvaged: f32 = 0.0;
+    var scrap: number = 0.0;
+    var salvaged: number = 0.0;
     // The view: how far the camera is rolled, and whether the player asked
     // for the map to stay north-up.
-    var view_rot: f32 = 0.0;
+    var view_rot: number = 0.0;
     var prefer_north: bool = false;
     // Whether a finger has touched the screen: the phone's controls show
     // from then on, and the hints talk about them instead of keys.
     var touch: bool = false;
     // How much daylight there is, kept by the sun in step with the tide:
     // one at low water, nothing at high water.
-    var daylight: f32 = 1.0;
+    var daylight: number = 1.0;
 }
 
 // The Basin's block on top at a point in the plane.
@@ -105,7 +105,7 @@ shared fn surface_at(basin: Entity, at: Vec2) -> String {
 }
 
 // How high the top is at a point, or very low where nothing stands.
-shared fn height_at(basin: Entity, at: Vec2) -> f32 {
+shared fn height_at(basin: Entity, at: Vec2) -> number {
     return Grid.height(basin, floor(at.x), floor(-at.y)) ?? -1000.0;
 }
 

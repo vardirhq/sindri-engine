@@ -4,33 +4,33 @@
 //   2  telegraphed charges followed by a close-range fan
 //   3  faster rings and charges, with occasional reinforcements
 script Warden {
-    @export let health: f32 = 58.0;
-    @export let worth: f32 = 40.0;
-    @export let touch_damage: f32 = 2.0;
-    @export let ring_shots: f32 = 12.0;
-    @export let volley_gap: f32 = 2.4;
-    @export let approach: f32 = 0.9;
-    @export let dash_speed: f32 = 7.0;
-    @export let hazard_damage: f32 = 0.0;
+    @export let health: number = 58.0;
+    @export let worth: number = 40.0;
+    @export let touch_damage: number = 2.0;
+    @export let ring_shots: number = 12.0;
+    @export let volley_gap: number = 2.4;
+    @export let approach: number = 0.9;
+    @export let dash_speed: number = 7.0;
+    @export let hazard_damage: number = 0.0;
     @export let shot: Prefab;
     @export let minion: Prefab;
     @export let drop_roll: Prefab;
     @export let core: Prefab;
     @export let death_burst: Prefab;
 
-    var hp: f32 = 0.0;
-    var death_burst_damage: f32 = 0.0;
-    var phase: f32 = 1.0;
-    var previous_phase: f32 = 1.0;
-    var until_volley: f32 = 0.0;
-    var until_summon: f32 = 0.0;
-    var dash_timer: f32 = 0.0;
-    var dash_windup: f32 = 0.0;
-    var dash_time: f32 = 0.0;
-    var dash_x: f32 = 0.0;
-    var dash_y: f32 = 0.0;
-    var ring_offset: f32 = 0.0;
-    var phase_flash: f32 = 0.0;
+    var hp: number = 0.0;
+    var death_burst_damage: number = 0.0;
+    var phase: number = 1.0;
+    var previous_phase: number = 1.0;
+    var until_volley: number = 0.0;
+    var until_summon: number = 0.0;
+    var dash_timer: number = 0.0;
+    var dash_windup: number = 0.0;
+    var dash_time: number = 0.0;
+    var dash_x: number = 0.0;
+    var dash_y: number = 0.0;
+    var ring_offset: number = 0.0;
+    var phase_flash: number = 0.0;
 
     fn start() {
         this.hp = this.health * boss_scale();
@@ -42,7 +42,7 @@ script Warden {
         Game.boss_kind = 0.0;
     }
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         if Game.run_state != 1.0 {
             Physics.set_velocity(this.entity, 0.0, 0.0);
             return;
@@ -151,7 +151,7 @@ script Warden {
         }
     }
 
-    fn drive_charge(dt: f32, dx: f32, dy: f32, far: f32) {
+    fn drive_charge(dt: number, dx: number, dy: number, far: number) {
         if this.dash_windup > 0.0 {
             this.dash_windup -= dt;
             Physics.set_velocity(this.entity, 0.0, 0.0);
@@ -195,24 +195,24 @@ script Warden {
         }
     }
 
-    fn stand_off() -> f32 {
+    fn stand_off() -> number {
         let tightest = min(visible_half_x(VIEW_SIZE), visible_half_y(VIEW_SIZE));
         let radius = max(abs(this.transform.scale.x), abs(this.transform.scale.y)) * 0.5;
         return min(6.5, max(1.5, tightest - radius));
     }
 
-    fn damage_from(hit: Entity) -> f32 {
+    fn damage_from(hit: Entity) -> number {
         if World.has_tag(hit, "player_damage") {
             return World.property_number(hit, "damage", 0.0);
         }
         return 0.0;
     }
 
-    fn hold_at(dx: f32, dy: f32, far: f32, want: f32) {
+    fn hold_at(dx: number, dy: number, far: number, want: number) {
         if far <= 0.001 {
             return;
         }
-        var pace: f32 = this.approach;
+        var pace: number = this.approach;
         if far < want {
             pace = -this.approach;
         }
@@ -220,8 +220,8 @@ script Warden {
     }
 
     fn fire_ring() {
-        var slots: f32 = this.ring_shots;
-        var speed: f32 = 3.2;
+        var slots: number = this.ring_shots;
+        var speed: number = 3.2;
         if this.phase == 2.0 {
             slots = this.ring_shots + 2.0;
             speed = 3.6;
@@ -232,7 +232,7 @@ script Warden {
         }
 
         let bullets = slots - 2.0;
-        var made: f32 = 0.0;
+        var made: number = 0.0;
         Audio.play("audio/boss.wav", 0.4);
         while made < bullets {
             let angle = made / slots * 6.2831853 + this.ring_offset;
@@ -249,7 +249,7 @@ script Warden {
 
     fn fire_fan() {
         let base = atan2(this.dash_y, this.dash_x);
-        var made: f32 = -2.0;
+        var made: number = -2.0;
         while made <= 2.0 {
             let angle = base + made * 0.18;
             let bolt = World.spawn(this.shot);
@@ -264,7 +264,7 @@ script Warden {
     }
 
     fn summon() {
-        var made: f32 = 0.0;
+        var made: number = 0.0;
         while made < 2.0 {
             let angle = Random.range(0.0, 6.2831853);
             let helper = World.spawn(this.minion);
@@ -285,7 +285,7 @@ script Warden {
         Game.boss_max = 0.0;
         Save.set_flag("beat_warden", true);
 
-        var made: f32 = 0.0;
+        var made: number = 0.0;
         while made < 8.0 {
             let angle = made / 8.0 * 6.2831853;
             let drop = World.spawn(this.core);

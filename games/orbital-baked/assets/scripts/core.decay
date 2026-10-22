@@ -1,14 +1,14 @@
 // What a kill leaves behind. Module economy is applied when salvage is
 // collected, so an upgrade taken while a gem is in flight affects that gem too.
 script Core {
-    @export let worth: f32 = 1.0;
-    @export let pull: f32 = 11.4;
-    @export let reach: f32 = 0.0;
-    @export let life: f32 = 120.0;
+    @export let worth: number = 1.0;
+    @export let pull: number = 11.4;
+    @export let reach: number = 0.0;
+    @export let life: number = 120.0;
 
-    var age: f32 = 0.0;
+    var age: number = 0.0;
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         if Game.run_state != 1.0 {
             Physics.set_velocity(this.entity, 0.0, 0.0);
             return;
@@ -36,7 +36,7 @@ script Core {
         }
 
         for hit in Physics.sensor_entered() {
-            var xp: f32 = this.worth * Game.xp_gain * Game.event_xp;
+            var xp: number = this.worth * Game.xp_gain * Game.event_xp;
             if Game.special_scrap_feast > 0.0 { xp *= 1.35; }
             Game.cores = Game.cores + xp;
             Game.score = Game.score + this.worth * 0.625;

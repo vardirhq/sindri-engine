@@ -10,31 +10,31 @@
 // Keyboard, gamepad and touch all feed the same run/jump path. Touch uses
 // Sindri's virtual Stick for movement; a second finger is the jump button.
 script Hero {
-    @export let speed: f32 = 6.5;
-    @export let acceleration: f32 = 120.0;
-    @export let deceleration: f32 = 90.0;
-    @export let air_acceleration: f32 = 90.0;
-    @export let jump_speed: f32 = 14.0;
-    @export let gravity: f32 = 30.0;
-    @export let terminal_speed: f32 = 30.0;
-    @export let coyote: f32 = 0.1;
-    @export let buffer: f32 = 0.12;
-    @export let fall_limit: f32 = -3.0;
-    @export let spawn_x: f32 = 2.5;
-    @export let spawn_y: f32 = 4.0;
+    @export let speed: number = 6.5;
+    @export let acceleration: number = 120.0;
+    @export let deceleration: number = 90.0;
+    @export let air_acceleration: number = 90.0;
+    @export let jump_speed: number = 14.0;
+    @export let gravity: number = 30.0;
+    @export let terminal_speed: number = 30.0;
+    @export let coyote: number = 0.1;
+    @export let buffer: number = 0.12;
+    @export let fall_limit: number = -3.0;
+    @export let spawn_x: number = 2.5;
+    @export let spawn_y: number = 4.0;
 
     // Supporting ground beneath the feet, rather than a sensor overlap.
-    var ground: f32 = 0.0;
-    var horizontal: f32 = 0.0;
-    var rise: f32 = 0.0;
-    var drop_left: f32 = 0.0;
+    var ground: number = 0.0;
+    var horizontal: number = 0.0;
+    var rise: number = 0.0;
+    var drop_left: number = 0.0;
     var on_one_way: bool = false;
-    var since_ground: f32 = 1.0;
-    var since_press: f32 = 1.0;
-    var facing: f32 = 1.0;
+    var since_ground: number = 1.0;
+    var since_press: number = 1.0;
+    var facing: number = 1.0;
     var jump_held: bool = false;
     // 0 idle, 1 run, 2 jump, 3 fall: which clip is showing.
-    var shown: f32 = 0.0;
+    var shown: number = 0.0;
 
     fn start() {
         Game.coins = 0.0;
@@ -43,7 +43,7 @@ script Hero {
         Game.falls = 0.0;
     }
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         this.drop_left = max(0.0, this.drop_left - dt);
         touch();
         probe_ground();
@@ -61,7 +61,7 @@ script Hero {
         // What the player means, from the scene's input actions: `run` is
         // A/D, the arrows, the stick or the d-pad, and `jump` Space, W, Up or
         // South, whichever is being used. A finger steers and jumps besides.
-        var run: f32 = Action.axis("run");
+        var run: number = Action.axis("run");
         if Stick.held && abs(Stick.x) > abs(run) { run = Stick.x; }
         run = max(-1.0, min(1.0, run));
 
@@ -79,7 +79,7 @@ script Hero {
             this.since_ground += dt;
         }
 
-        var rise: f32 = this.rise;
+        var rise: number = this.rise;
         if Action.pressed("drop") && this.on_one_way && this.ground > 0.0 {
             Physics.drop_through(this.entity, 0.35);
             this.drop_left = 0.35;
@@ -104,9 +104,9 @@ script Hero {
         // Build and shed horizontal speed instead of snapping straight to the
         // target. The short ramp preserves the showcase's established jump
         // timing while still making starts, stops and reversals feel physical.
-        var horizontal: f32 = this.horizontal;
+        var horizontal: number = this.horizontal;
         let target = run * this.speed;
-        var rate: f32 = this.air_acceleration;
+        var rate: number = this.air_acceleration;
         if this.ground > 0.0 {
             if run == 0.0 {
                 rate = this.deceleration;
@@ -147,7 +147,7 @@ script Hero {
 
     // Velocity, gravity and snap permission are gameplay decisions. The scene
     // applies this displacement once at the next fixed step, after platform carry.
-    fn move(dt: f32) {
+    fn move(dt: number) {
         this.rise = max(-this.terminal_speed, this.rise - this.gravity * dt);
         Physics.move_character(this.entity, Vec2(this.horizontal * dt, this.rise * dt), this.ground > 0.0 && this.drop_left <= 0.0);
     }
@@ -222,7 +222,7 @@ script Hero {
         Game.falls += 1.0;
     }
 
-    fn show(state: f32) {
+    fn show(state: number) {
         if state == this.shown {
             return;
         }

@@ -186,31 +186,9 @@ or divide by plain numbers; `u` names the overlay's own unit inside one.
 
 ## Layout properties
 
-| Property | Accepted values | Effect |
-| --- | --- | --- |
-| `width`, `height` | length | Resolved UI box size |
-| `min-width`, `max-width` | length | Horizontal size constraint |
-| `min-height`, `max-height` | length | Vertical size constraint |
-| `x`, `y` | length | Authored transform position override |
-| `padding`, `padding-top`, `-right`, `-bottom`, `-left` | length, one to four as in CSS | Room inside the element's edge; layout children start inside it |
-| `margin`, `margin-top`, `-right`, `-bottom`, `-left` | length, one to four as in CSS | Room a layout keeps free around the element |
-| `anchor` | Sindri anchor name | Anchor for text, image, and shape |
-| `direction`, `flex-direction` | `row`, `column` | Main layout axis |
-| `gap` | length | Empty space between adjacent child edges, and between wrapped lines |
-| `justify-content` | `start`, `center`, `end`, `space-between`, `space-around`, `space-evenly` | Main-axis distribution |
-| `align-items` | `start`, `center`, `end`, `stretch` | Cross-axis alignment |
-| `flex-wrap` | `nowrap`, `wrap` | Whether children that do not fit start a new line |
-| `flex` | `none`, `auto`, or `<grow> [<shrink>] [<basis>]` | Shorthand for the three below, as in CSS |
-| `flex-grow`, `flex-shrink` | number, 0 or more | Share of a line's spare room or shortfall |
-| `flex-basis` | length, or `auto` | Size along the line before growing or shrinking |
-| `order` | integer | Position in the layout, lowest first |
-| `align-self` | `auto`, `start`, `center`, `end`, `stretch` | One item's cross-axis alignment |
-| `display` | `grid`, `flex` | Makes the element a grid or a flex line |
-| `grid-template-columns`, `grid-template-rows` | tracks: `1fr`, `auto`, lengths, `repeat(n, …)`, or `none` | The grid's columns and rows |
-| `gap`, `row-gap`, `column-gap` | length (`gap` takes a row and a column gap) | Space between grid tracks; a flex line takes the gap along it |
-| `justify-items` | `start`, `center`, `end`, `stretch` | Where grid items sit across their cells |
-| `grid-column`, `grid-row` | `2`, `span 2`, `2 / 4`, `2 / span 3`, `auto` | Where an item starts in a grid and how many tracks it spans |
-| `width`, `height` | `auto` | On a layout: size to its children, padding and gaps. On a text element: size to its measured words and padding. A width or height given on a text element is also the box its words wrap and align in, as in CSS |
+Every property, with the values it accepts, what it writes and an example, is listed
+in the generated [Weave property reference](generated/weave-reference.md), read from
+the table Sindri applies declarations by. A property not listed there is ignored.
 
 Layout is hierarchical. A child must be parented beneath the layout entity in
 the scene; visual overlap does not establish layout membership. Explicit child
@@ -275,13 +253,8 @@ distributes remaining space between the interior gaps.
 
 ## Shape properties
 
-| Property | Accepted values |
-| --- | --- |
-| `background` | color |
-| `border-color` | color |
-| `border-width` | length |
-| `border-radius` | length |
-| `box-shadow` | `<x> <y> [<blur> [<spread>]] [<color>]`, or `none` |
+`background`, `border-color`, `border-width`, `border-radius` and `box-shadow`
+are listed in the [property reference](generated/weave-reference.md).
 
 These declarations target `sindri.ui.shape`.
 
@@ -299,16 +272,9 @@ space; alpha is unchanged.
 
 ## Text properties
 
-| Property | Accepted values | Notes |
-| --- | --- | --- |
-| `color` | color | Text color |
-| `font-size` | length | Glyph size |
-| `line-height` | length | Baseline-to-baseline distance |
-| `letter-spacing` | length | Additional glyph spacing |
-| `font-weight` | `normal`, `400`, `bold`, `700` | Normal or bold |
-| `text-align` | `start`, `center`, `end` | Alignment inside the text box |
-| `text-wrap` | `none`, `nowrap`, `word`, `wrap`, `glyph` | Line breaking mode |
-| `text-transform` | `none`, `uppercase`, `lowercase` | Presentation-only case |
+`color`, `font-size`, `line-height`, `letter-spacing`, `font-weight`,
+`font-style`, `text-align`, `text-wrap` and `text-transform` are listed in the
+[property reference](generated/weave-reference.md).
 
 Wrapping requires a finite text width and enough height for the expected lines.
 Use `word` for ordinary copy and `glyph` only when a long unbroken token must

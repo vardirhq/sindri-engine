@@ -19,28 +19,28 @@ script Hud {
     var event_panel: Entity = null;
     var event_title: Entity = null;
     var event_body: Entity = null;
-    var shown_event: f32 = -1.0;
+    var shown_event: number = -1.0;
     var pilot: Entity = null;
     var callsign: Entity = null;
     var shown_pilot: String = "?";
     // -1 until the first step, so the chrome is set once either way.
-    var shown_compact: f32 = -1.0;
+    var shown_compact: number = -1.0;
 
-    var health_bar_scale_x: f32 = 1.0;
-    var health_bar_scale_y: f32 = 1.0;
-    var cores_bar_scale_y: f32 = 1.0;
-    var previous_cores: f32 = 0.0;
-    var core_flash: f32 = 0.0;
-    var health_text_scale_x: f32 = 1.0;
-    var health_text_scale_y: f32 = 1.0;
-    var boss_presence: f32 = 0.0;
-    var boss_panel_y: f32 = 0.0;
-    var boss_panel_scale_x: f32 = 1.0;
-    var boss_panel_scale_y: f32 = 1.0;
-    var previous_boss_hp: f32 = 0.0;
-    var boss_hit: f32 = 0.0;
-    var hud_clock: f32 = 0.0;
-    var shown_second: f32 = -1.0;
+    var health_bar_scale_x: number = 1.0;
+    var health_bar_scale_y: number = 1.0;
+    var cores_bar_scale_y: number = 1.0;
+    var previous_cores: number = 0.0;
+    var core_flash: number = 0.0;
+    var health_text_scale_x: number = 1.0;
+    var health_text_scale_y: number = 1.0;
+    var boss_presence: number = 0.0;
+    var boss_panel_y: number = 0.0;
+    var boss_panel_scale_x: number = 1.0;
+    var boss_panel_scale_y: number = 1.0;
+    var previous_boss_hp: number = 0.0;
+    var boss_hit: number = 0.0;
+    var hud_clock: number = 0.0;
+    var shown_second: number = -1.0;
 
     fn start() {
         this.score = World.find("Score");
@@ -95,7 +95,7 @@ script Hud {
         update_sector();
     }
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         this.hud_clock += dt;
         show_pilot();
         apply_compact();
@@ -116,7 +116,7 @@ script Hud {
         // Hull is kept on a five-point scale and damage takes fractions of a
         // point, so the raw value reads "0.65/5". Round up for the label: a
         // ship that is still flying shows at least one point left.
-        var shown_hp: f32 = hp - hp % 1.0;
+        var shown_hp: number = hp - hp % 1.0;
         if shown_hp < hp { shown_hp += 1.0; }
         Ui.set_numbers(this.health_text, shown_hp, max_hp);
         animate_player_health();
@@ -160,7 +160,7 @@ script Hud {
         health_text.transform.scale.y = this.health_text_scale_y * (1.0 + impact * 0.05);
     }
 
-    fn update_boss(dt: f32) {
+    fn update_boss(dt: number) {
         let boss_max = Game.boss_max;
         let boss_hp = max(0.0, Game.boss_hp);
         let target = if_number(boss_max > 0.0);
@@ -204,7 +204,7 @@ script Hud {
     // Compact keeps the numbers and meters and drops the panels and captions
     // around them, for a player who wants more of the field.
     fn apply_compact() {
-        var compact: f32 = 0.0;
+        var compact: number = 0.0;
         if Save.flag("compact_hud", false) { compact = 1.0; }
         if compact == this.shown_compact { return; }
         this.shown_compact = compact;
@@ -229,7 +229,7 @@ script Hud {
         let showing = Game.event_banner > 0.0 && Game.event_shown > 0.0;
         World.set_active(this.event_panel, showing);
         if !showing { return; }
-        var key: f32 = Game.event_shown;
+        var key: number = Game.event_shown;
         if Game.event == 0.0 { key = -Game.event_shown; }
         if key == this.shown_event { return; }
         this.shown_event = key;
@@ -258,7 +258,7 @@ script Hud {
         else { Ui.set_text(this.boss_name, "AEGIS"); }
     }
 
-    fn if_number(value: bool) -> f32 {
+    fn if_number(value: bool) -> number {
         if value { return 1.0; }
         return 0.0;
     }
@@ -267,7 +267,7 @@ script Hud {
 // A run's time as a clock reads it, `4:07`: whole minutes, then whole seconds
 // led with a zero. The scene's number slots could not write this -- `{.2}`
 // asks for two decimals, not two digits, so 65.3 seconds read as `1:5.30`.
-shared fn clock_text(seconds: f32) -> String {
+shared fn clock_text(seconds: number) -> String {
     let whole = floor(max(seconds, 0.0));
     let minutes = floor(whole / 60.0);
     return minutes.fixed(0) + ":" + (whole - minutes * 60.0).padded(2);

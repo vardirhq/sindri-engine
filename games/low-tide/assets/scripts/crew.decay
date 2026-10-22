@@ -12,17 +12,17 @@
 // turned, so the stick is turned into the frame it is walking in. Keys, the
 // d-pad and a thumb on the touch stick all arrive through `steering()`.
 
-const DECK_COLUMNS: f32 = 11.0;
-const DECK_ROWS: f32 = 14.0;
-const HELM_X: f32 = 5.5;
-const HELM_Y: f32 = -4.5;
-const RAMP: f32 = 10.0;
+const DECK_COLUMNS: number = 11.0;
+const DECK_ROWS: number = 14.0;
+const HELM_X: number = 5.5;
+const HELM_Y: number = -4.5;
+const RAMP: number = 10.0;
 
 script Crew {
     @export let cargo_template: Prefab;
-    @export let walk_speed: f32 = 2.6;
-    @export let radius: f32 = 0.3;
-    @export let reach: f32 = 3.8;
+    @export let walk_speed: number = 2.6;
+    @export let radius: number = 0.3;
+    @export let reach: number = 3.8;
 
     var deck: Entity = null;
     var crawler: Entity = null;
@@ -48,7 +48,7 @@ script Crew {
         Game.at_helm = false;
     }
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         if Game.diving { return; }
         Game.discard_left = max(0.0, Game.discard_left - dt);
         if Game.discard_left <= 0.0 || Action.pressed("cancel") { Game.discard_armed = false; }
@@ -166,7 +166,7 @@ script Crew {
         }
     }
 
-    fn walk_aboard(stick: Vec2, dt: f32) {
+    fn walk_aboard(stick: Vec2, dt: number) {
         // Screen up, turned into the floor plan's frame.
         let way = turned(stick, Game.view_rot - Game.heading) * this.walk_speed * dt;
         var at = this.transform.position;
@@ -185,7 +185,7 @@ script Crew {
         }
     }
 
-    fn walk_ashore(stick: Vec2, dt: f32) {
+    fn walk_ashore(stick: Vec2, dt: number) {
         var at = this.transform.position;
         let current = Vec2(at.x, at.y);
         let caught = wet_at(this.basin, current);
@@ -252,7 +252,7 @@ script Crew {
     }
 
     // Whether the crew, centred here, fits between the walls.
-    fn open_at(x: f32, y: f32) -> bool {
+    fn open_at(x: number, y: number) -> bool {
         let r = this.radius;
         return walkable(x - r, y - r) && walkable(x + r, y - r) && walkable(x - r, y + r) && walkable(x + r, y + r);
     }
@@ -260,7 +260,7 @@ script Crew {
     // Deck, doors, the hatch, the helm and the ramp can be walked on; walls,
     // treads, furniture and crates cannot. Off the plan is the open salt,
     // which only the ramp reaches.
-    fn walkable(x: f32, y: f32) -> bool {
+    fn walkable(x: number, y: number) -> bool {
         let tile = Grid.tile(this.deck, floor(x), floor(-y));
         if x >= Game.hull_right && floor(-y) == 7.0 {
             return true;
@@ -441,7 +441,7 @@ script Crew {
 }
 
 // A vector turned anticlockwise by an angle in radians.
-shared fn turned(v: Vec2, angle: f32) -> Vec2 {
+shared fn turned(v: Vec2, angle: number) -> Vec2 {
     let c = cos(angle);
     let s = sin(angle);
     return Vec2(v.x * c - v.y * s, v.x * s + v.y * c);

@@ -1,14 +1,14 @@
 // Decorative child used by elite enemies. The parent owns gameplay; this layer
 // makes elites read instantly through motion, sweep, dashes and breathing scale.
 script EliteVisual {
-    @export let mode: f32 = 0.0;
-    @export let sides: f32 = 6.0;
-    @export let trait: f32 = 0.0;
+    @export let mode: number = 0.0;
+    @export let sides: number = 6.0;
+    @export let trait: number = 0.0;
     @export let identity_ring: Prefab;
     @export let identity_crack: Prefab;
 
-    var clock: f32 = 0.0;
-    var phase: f32 = 0.0;
+    var clock: number = 0.0;
+    var phase: number = 0.0;
 
     fn start() {
         this.shape.count = this.sides;
@@ -17,7 +17,7 @@ script EliteVisual {
         apply_color();
     }
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         this.clock += dt;
         apply_color();
         let pulse = 0.5 + 0.5 * sin(this.clock * (5.0 + this.trait * 0.75) + this.phase);
@@ -47,10 +47,10 @@ script EliteVisual {
     fn spawn_identity() {
         if this.trait == 1.0 { return; }
         if this.trait == 0.0 {
-            var slot: f32 = 0.0;
+            var slot: number = 0.0;
             while slot < 3.0 { spawn_identity_ring(slot); slot += 1.0; }
         } else if this.trait == 4.0 {
-            var slot: f32 = 0.0;
+            var slot: number = 0.0;
             while slot < 3.0 {
                 let mark = World.spawn_child(this.identity_crack, this.entity);
                 World.set_property(mark, "trait", this.trait);
@@ -61,7 +61,7 @@ script EliteVisual {
         } else { spawn_identity_ring(0.0); }
     }
 
-    fn spawn_identity_ring(index: f32) {
+    fn spawn_identity_ring(index: number) {
         let mark = World.spawn_child(this.identity_ring, this.entity);
         World.set_property(mark, "trait", this.trait);
         World.set_property(mark, "index", index);
@@ -76,7 +76,7 @@ script EliteVisual {
         else { color(0.45, 1.0, 0.82); }
     }
 
-    fn color(r: f32, g: f32, b: f32) {
+    fn color(r: number, g: number, b: number) {
         this.shape.stroke.r = r;
         this.shape.stroke.g = g;
         this.shape.stroke.b = b;

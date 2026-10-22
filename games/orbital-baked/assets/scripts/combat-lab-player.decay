@@ -1,8 +1,8 @@
 // Lightweight player used only by the combat playground. The attacks are real;
 // this ship is intentionally tiny so the lab does not boot the whole campaign.
 script CombatLabPlayer {
-    @export let speed: f32 = 5.2;
-    var mercy: f32 = 0.0;
+    @export let speed: number = 5.2;
+    var mercy: number = 0.0;
 
     fn start() {
         Game.run_state = 1.0;
@@ -11,7 +11,7 @@ script CombatLabPlayer {
         Game.player_damage_taken = 0.0;
     }
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         move();
         if this.mercy > 0.0 { this.mercy -= dt; }
         let raw = Game.player_damage_taken;
@@ -26,8 +26,8 @@ script CombatLabPlayer {
     }
 
     fn move() {
-        var dx: f32 = Input.axis("A", "D") + Input.axis("ArrowLeft", "ArrowRight");
-        var dy: f32 = Input.axis("S", "W") + Input.axis("ArrowDown", "ArrowUp");
+        var dx: number = Input.axis("A", "D") + Input.axis("ArrowLeft", "ArrowRight");
+        var dy: number = Input.axis("S", "W") + Input.axis("ArrowDown", "ArrowUp");
         if dx == 0.0 && dy == 0.0 && Stick.held && !Pointer.over_ui {
             dx = Stick.x;
             dy = -Stick.y;

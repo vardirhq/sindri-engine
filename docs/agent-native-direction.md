@@ -120,7 +120,7 @@ popularity, and it makes a wrong document worse than none.
 | What gameplay code may I write? | `docs/generated/decay-api.json` / `.md` | Exists |
 | What is the Decay language? | `docs/generated/decay-language.json` | Exists |
 | What shape is a `.scene` or `.prefab` file? | JSON Schema generated from the component registry | Missing |
-| What may a Weave stylesheet say? | A generated Weave reference | Missing |
+| What may a Weave stylesheet say? | `docs/generated/weave-reference.json` / `.md` | Exists for properties; selectors, states and units are still hand-written |
 
 The JSON Schemas are the cheapest large win: an agent reads them, and a person
 editing a scene in VS Code gets validation and completion from the same file.

@@ -1,7 +1,7 @@
 // Decorative radial line used by Sentinel and Anchor. The parent enemy owns
 // gameplay and motion; this child only reproduces the reference silhouette mark.
 script EnemyProng {
-    @export let mode: f32 = 0.0;
+    @export let mode: number = 0.0;
 
     fn start() {
         if this.mode == 0.0 {

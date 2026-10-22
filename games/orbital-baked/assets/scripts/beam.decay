@@ -2,24 +2,24 @@
 // than a direct world query, so collision layers, pause, lifetime and damage
 // use the same general path as every other shot.
 script Beam {
-    @export let speed: f32 = 18.0;
-    @export let life: f32 = 0.45;
-    @export let dir_x: f32 = 1.0;
-    @export let dir_y: f32 = 0.0;
-    @export let damage: f32 = 0.23;
+    @export let speed: number = 18.0;
+    @export let life: number = 0.45;
+    @export let dir_x: number = 1.0;
+    @export let dir_y: number = 0.0;
+    @export let damage: number = 0.23;
     @export let impact_fx: Prefab;
 
-    var age: f32 = 0.0;
+    var age: number = 0.0;
     var retiring: bool = false;
     var trail: Entity = null;
-    var trail_clock: f32 = 0.0;
+    var trail_clock: number = 0.0;
 
     fn start() {
         this.trail = World.find("TrailCyan");
         Physics.set_velocity(this.entity, this.dir_x * this.speed, this.dir_y * this.speed);
     }
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         if this.retiring {
             World.despawn(this.entity);
             return;

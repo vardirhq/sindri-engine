@@ -3,13 +3,13 @@
 // is a bold gold span, which fades with the rest because a span's color
 // is multiplied by the text's own alpha.
 script DamageNumber {
-    @export let amount: f32 = 10.0;
-    @export let crit: f32 = 0.0;
-    @export let life: f32 = 0.75;
+    @export let amount: number = 10.0;
+    @export let crit: number = 0.0;
+    @export let life: number = 0.75;
 
-    var age: f32 = 0.0;
-    var drift_x: f32 = 0.0;
-    var size: f32 = 0.34;
+    var age: number = 0.0;
+    var drift_x: number = 0.0;
+    var size: number = 0.34;
 
     fn start() {
         if this.crit > 0.0 {
@@ -21,7 +21,7 @@ script DamageNumber {
         this.world_text.font_size = this.size * 1.4;
     }
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         this.age += dt;
         let t = min(1.0, this.age / this.life);
         // A quick pop from oversized to its own size, then a slow rise.

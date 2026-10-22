@@ -1,13 +1,13 @@
 script ControllerCarry {
-    var carried: f32 = 0.0;
-    var requested: f32 = 0.0;
+    var carried: number = 0.0;
+    var requested: number = 0.0;
     var platform: Entity = null;
     var ground: Entity = null;
     var grounded: bool = false;
-    var collisions: f32 = 0.0;
-    var carry_collisions: f32 = 0.0;
+    var collisions: number = 0.0;
+    var carry_collisions: number = 0.0;
     var flags_clear: bool = false;
-    fn update(dt: f32) {
+    fn update(dt: number) {
         let motion = Physics.character_motion(World.find("Actor"));
         if motion == null { return; }
         carried = motion.carry_translation.x;

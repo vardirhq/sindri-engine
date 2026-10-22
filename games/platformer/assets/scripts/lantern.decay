@@ -1,6 +1,6 @@
 // Wind moves the body; the authored constraint keeps it attached to the hook.
 script Lantern {
-    var age: f32 = 0.0;
+    var age: number = 0.0;
     var hook: Entity = null;
     var cord: Entity = null;
     var tether: Entity = null;
@@ -11,13 +11,13 @@ script Lantern {
         this.cord = World.find("Lantern cord");
         this.tether = World.find("Lantern tether");
     }
-    fn update(dt: f32) {
+    fn update(dt: number) {
         this.age += dt;
         var enabled: bool = false;
         if !World.exists(this.tether) && Input.just_pressed("C") {
             let owner = World.find("Lantern tether");
             if World.exists(owner) {
-                var distance: f32 = 2.0;
+                var distance: number = 2.0;
                 if this.short { distance = 1.25; }
                 Physics.create_distance_joint(owner, this.hook, this.entity, distance);
                 this.tether = owner;

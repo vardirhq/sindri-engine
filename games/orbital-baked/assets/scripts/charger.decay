@@ -1,34 +1,34 @@
 // Closes to a distance, broadcasts its intent, then turns into a neon missile.
 script Charger {
-    @export let health: f32 = 3.0;
-    @export let worth: f32 = 14.0;
-    @export let approach: f32 = 1.2;
-    @export let wind_up: f32 = 0.75;
-    @export let dash_speed: f32 = 9.5;
-    @export let rest: f32 = 1.1;
-    @export let touch_damage: f32 = 0.54;
-    @export let elite: f32 = 0.0;
-    @export let elite_trait: f32 = 0.0;
-    @export let hazard_damage: f32 = 0.0;
+    @export let health: number = 3.0;
+    @export let worth: number = 14.0;
+    @export let approach: number = 1.2;
+    @export let wind_up: number = 0.75;
+    @export let dash_speed: number = 9.5;
+    @export let rest: number = 1.1;
+    @export let touch_damage: number = 0.54;
+    @export let elite: number = 0.0;
+    @export let elite_trait: number = 0.0;
+    @export let hazard_damage: number = 0.0;
     @export let core: Prefab;
     @export let death_burst: Prefab;
     @export let drop_roll: Prefab;
     @export let elite_shell: Prefab;
     @export let elite_ring: Prefab;
 
-    var hp: f32 = 0.0;
-    var death_burst_damage: f32 = 0.0;
-    var phase: f32 = 0.0;
-    var timer: f32 = 0.0;
-    var dash_x: f32 = 0.0;
-    var dash_y: f32 = 0.0;
-    var visual_time: f32 = 0.0;
-    var visual_phase: f32 = 0.0;
+    var hp: number = 0.0;
+    var death_burst_damage: number = 0.0;
+    var phase: number = 0.0;
+    var timer: number = 0.0;
+    var dash_x: number = 0.0;
+    var dash_y: number = 0.0;
+    var visual_time: number = 0.0;
+    var visual_phase: number = 0.0;
     // The dart's body: the original's amber triangle, heated towards white as
     // it winds up and cooling through the dash. `heat` is how far towards
     // white, `body_alpha` how solid; `paint` turns them into the shape.
-    var heat: f32 = 0.0;
-    var body_alpha: f32 = 1.0;
+    var heat: number = 0.0;
+    var body_alpha: number = 1.0;
 
     fn start() {
         let late = max(0.0, Game.elapsed - 180.0);
@@ -39,7 +39,7 @@ script Charger {
         spawn_elite_visuals();
     }
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         if Game.run_state != 1.0 { Physics.set_velocity(this.entity, 0.0, 0.0); return; }
         this.visual_time += dt;
         animate_body();
@@ -101,9 +101,9 @@ script Charger {
     }
 
     fn paint() {
-        let r: f32 = 1.0;
-        let g: f32 = 0.4508;
-        let b: f32 = 0.1022;
+        let r: number = 1.0;
+        let g: number = 0.4508;
+        let b: number = 0.1022;
         let h = min(1.0, this.heat);
         this.shape.fill.r = r;
         this.shape.fill.g = g + (1.0 - g) * h;
@@ -127,13 +127,13 @@ script Charger {
 
     fn is_visible() -> bool {
         let aspect = max(Viewport.aspect, 0.001);
-        var half_x: f32 = VIEW_SIZE * 0.5; var half_y: f32 = VIEW_SIZE * 0.5;
+        var half_x: number = VIEW_SIZE * 0.5; var half_y: number = VIEW_SIZE * 0.5;
         if aspect >= 1.0 { half_x *= aspect; } else { half_y /= aspect; }
         let radius = max(abs(this.transform.scale.x), abs(this.transform.scale.y)) * 0.5;
         return this.transform.position.x + radius >= -half_x && this.transform.position.x - radius <= half_x && this.transform.position.y + radius >= -half_y && this.transform.position.y - radius <= half_y;
     }
 
-    fn damage_from(hit: Entity) -> f32 { if World.has_tag(hit, "player_damage") { return World.property_number(hit, "damage", 0.0); } return 0.0; }
+    fn damage_from(hit: Entity) -> number { if World.has_tag(hit, "player_damage") { return World.property_number(hit, "damage", 0.0); } return 0.0; }
 
     fn spawn_elite_visuals() {
         if this.elite <= 0.0 { return; }
@@ -151,5 +151,5 @@ script Charger {
 
     fn burst_on_death() { if this.death_burst_damage <= 0.0 { return; } let wave = World.spawn(this.death_burst); wave.transform.position.x = this.transform.position.x; wave.transform.position.y = this.transform.position.y; World.set_property(wave, "damage", this.death_burst_damage); }
 
-    fn if_number(value: bool) -> f32 { if value { return 1.0; } return 0.0; }
+    fn if_number(value: bool) -> number { if value { return 1.0; } return 0.0; }
 }

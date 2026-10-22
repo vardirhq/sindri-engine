@@ -1,10 +1,10 @@
 // What the run shares, declared once: the hero keeps it, the HUD shows it.
 state Game {
-    var coins: f32 = 0.0;
-    var coins_total: f32 = 0.0;
-    var falls: f32 = 0.0;
+    var coins: number = 0.0;
+    var coins_total: number = 0.0;
+    var falls: number = 0.0;
     var won: bool = false;
     var ground_found: bool = false;
-    var ground_clearance: f32 = 0.0;
-    var crate_impacts: f32 = 0.0;
+    var ground_clearance: number = 0.0;
+    var crate_impacts: number = 0.0;
 }

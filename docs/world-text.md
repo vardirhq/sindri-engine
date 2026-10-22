@@ -61,10 +61,10 @@ The words are written the way a HUD label's are, with `Ui.set_text` and
 
 | Path | Type |
 | --- | --- |
-| `this.world_text.color`, `this.world_text.color.{r,g,b,a}` | `Color`, `f32` |
-| `this.world_text.font_size` | `f32` |
-| `this.world_text.visible` | `f32` |
-| `this.world_text.layer` | `f32` |
+| `this.world_text.color`, `this.world_text.color.{r,g,b,a}` | `Color`, `number` |
+| `this.world_text.font_size` | `number` |
+| `this.world_text.visible` | `number` |
+| `this.world_text.layer` | `number` |
 
 ## Rich text
 

@@ -37,7 +37,7 @@ script Workbench {
         Game.build_result = BuildResult.None;
     }
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         if Game.building {
             if Action.pressed("cancel") || Ui.is_pressed(this.close_button) { Game.building = false; }
             else {
