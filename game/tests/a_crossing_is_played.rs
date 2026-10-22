@@ -20,9 +20,17 @@ fn game() -> PathBuf {
 }
 
 /// A project holding the game's rules and the bot, played with `seed`.
+/// `CAUSEWAY_TRACE` has the bot print every board it plays, for a report.
 fn project(seed: u32) -> PathBuf {
-    let root =
-        std::env::temp_dir().join(format!("causeway-autoplay-{}-{seed}", std::process::id()));
+    project_from(seed, 0)
+}
+
+/// The same, with the bot starting on island `first`.
+fn project_from(seed: u32, first: u32) -> PathBuf {
+    let root = std::env::temp_dir().join(format!(
+        "causeway-autoplay-{}-{seed}-{first}",
+        std::process::id()
+    ));
     let scripts = root.join("assets/scripts");
     std::fs::create_dir_all(&scripts).expect("the project folder is made");
     std::fs::write(
@@ -42,6 +50,7 @@ fn project(seed: u32) -> PathBuf {
         scripts.join("autoplay.decay"),
     )
     .expect("the bot copies");
+    let tracing = std::env::var("CAUSEWAY_TRACE").is_ok() && seed == 1;
     let scene = format!(
         r#"{{
   "format_version": 10,
@@ -54,7 +63,7 @@ fn project(seed: u32) -> PathBuf {
         "sindri.script": {{
           "source": "scripts/autoplay.decay",
           "script": "Autoplay",
-          "properties": {{ "seed": {seed}.0 }}
+          "properties": {{ "seed": {seed}.0, "first": {first}.0, "tracing": {tracing} }}
         }}
       }}
     }}
@@ -69,8 +78,13 @@ fn project(seed: u32) -> PathBuf {
 /// any script error.
 fn play(root: &Path) -> ProjectRun {
     let mut run = ProjectRun::open(root, [1280.0, 720.0]).expect("the project opens");
-    for _ in 0..20000 {
+    for _ in 0..40000 {
         let report = run.step(STEP).expect("the step runs");
+        if std::env::var("CAUSEWAY_TRACE").is_ok() {
+            for line in &report.scripts.printed {
+                println!("{}", line.message);
+            }
+        }
         let notes = report.notes();
         assert!(notes.is_empty(), "a step went wrong: {notes:?}");
         if run.board("crossed") > 0.5 || run.board("lost_on") > 0.5 {
@@ -114,20 +128,40 @@ fn a_seed_plays_the_same_crossing_every_time() {
 /// to tune islands and waves against; the bot plays greedily and takes no
 /// boons, so a person does better.
 ///
+/// `CAUSEWAY_FIRST` starts every run on that island with a fresh Hearth, so a
+/// later world can be tuned on its own.
+///
 /// ```bash
 /// cargo test --release -p sindri-causeway --test a_crossing_is_played -- --ignored --nocapture
+/// CAUSEWAY_FIRST=4 cargo test --release -p sindri-causeway --test a_crossing_is_played -- --ignored --nocapture
 /// ```
 #[test]
 #[ignore = "a report for tuning, slow without --release"]
 fn how_hard_each_island_is() {
-    let (mut crossed, mut lost) = (0, [0; 4]);
+    let first: u32 = std::env::var("CAUSEWAY_FIRST")
+        .ok()
+        .and_then(|value| value.parse().ok())
+        .unwrap_or(0);
+    let (mut crossed, mut lost) = (0, [0; 7]);
     for seed in 1..=24u32 {
-        let run = play(&project(seed));
-        let hearths: Vec<f32> = (0..4).map(|i| run.board(&format!("hearth_{i}"))).collect();
+        let run = play(&project_from(seed, first));
+        let hearths: Vec<f32> = (0..7).map(|i| run.board(&format!("hearth_{i}"))).collect();
         println!(
             "seed {seed:2}: Hearth after each island {hearths:?}, lost on {}",
             run.board("lost_on")
         );
+        for i in first..7 {
+            let k = |cause: &str| run.board(&format!("{cause}_{i}"));
+            println!(
+                "  island {i}: Hearth lost to strikes {}, vents {}, the level {}; wardens' health {}, {}, {}",
+                k("dmg_strike"),
+                k("dmg_vent"),
+                k("dmg_level"),
+                k("wdmg_strike"),
+                k("wdmg_vent"),
+                k("wdmg_level")
+            );
+        }
         if run.board("crossed") > 0.5 {
             crossed += 1;
         }
@@ -138,4 +172,8 @@ fn how_hard_each_island_is() {
         }
     }
     println!("crossed {crossed} of 24; fell on each island {lost:?}");
+    // Keep the fixtures from piling up in the temp folder between reports.
+    for seed in 1..=24u32 {
+        let _ = std::fs::remove_dir_all(project_from(seed, first));
+    }
 }

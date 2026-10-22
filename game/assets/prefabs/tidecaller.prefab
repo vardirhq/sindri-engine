@@ -1,0 +1,50 @@
+{
+  "format_version": 1,
+  "metadata": {
+    "name": "Tidecaller"
+  },
+  "entities": [
+    {
+      "id": "tidecaller",
+      "name": "Tidecaller",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.model": {
+          "asset": "models/tidecaller.glb",
+          "layer": 0,
+          "occluded_color": [
+            0.85,
+            0.67,
+            0.32,
+            0.32
+          ]
+        },
+        "sindri.script": {
+          "script": "Piece",
+          "source": "scripts/piece.decay",
+          "properties": {
+            "alive": true,
+            "size": 1.0
+          }
+        }
+      }
+    }
+  ]
+}

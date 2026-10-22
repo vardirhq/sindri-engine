@@ -15,6 +15,10 @@ of.
 import json
 import math
 import pathlib
+import sys
+
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+from causeway_art import island_slug, islands  # noqa: E402
 
 GAME = pathlib.Path(__file__).resolve().parents[1] / "game"
 ASSETS = GAME / "assets"
@@ -123,10 +127,18 @@ FIGURES = {
     "spitter": ("spitter", True, 1.0),
     "mortar": ("mortar", True, 1.0),
     "colossus": ("colossus", True, 1.0),
+    "tidecaller": ("tidecaller", True, 1.0),
+    "imp": ("imp", True, 1.0),
+    "burster": ("burster", True, 1.0),
+    "kiln": ("kiln", True, 1.0),
     "house": ("house", False, 1.0),
     "beacon": ("beacon", False, 1.0),
     "stone": ("stone", False, 1.0),
+    "vent": ("vent", False, 1.0),
+    # Ground cooled out of lava and water, raised and stretched by the battle.
+    "basalt": ("basalt", False, 1.0),
 }
+WARDEN_KINDS = ("bulwark", "mason", "lamplighter", "tidecaller")
 
 MARKS = ["move", "aim", "danger", "spawn", "tide", "selected", "cursor", "arrow", "push"]
 
@@ -143,7 +155,7 @@ def write_prefabs():
         root = entity(kind, title, {
             "sindri.model": {"asset": f"models/{model}.glb", "layer": 0,
                              **({"occluded_color": [0.85, 0.67, 0.32, 0.32] if kind in
-                                ("bulwark", "mason", "lamplighter") else [0.65, 0.24, 0.18, 0.3]}
+                                WARDEN_KINDS else [0.65, 0.24, 0.18, 0.3]}
                                 if alive else {})},
             **script("Piece", "scripts/piece.decay", alive=alive, size=size),
         })
@@ -171,6 +183,27 @@ def write_prefabs():
     missile = entity("missile", "Missile", {"sindri.model": {"asset": "models/missile.glb", "layer": 0},
                                             **script("Missile", "scripts/effects.decay")})
     write(folder / "missile.prefab", prefab("Missile", [missile]))
+    # The Tidecaller's water in flight.
+    droplet = entity("droplet", "Droplet", {"sindri.model": {"asset": "models/droplet.glb", "layer": 0},
+                                            **script("Missile", "scripts/effects.decay")})
+    write(folder / "droplet.prefab", prefab("Droplet", [droplet]))
+    pointer = entity("pointer", "Pointer", {"sindri.model": {"asset": "models/pointer.glb", "layer": 0}})
+    write(folder / "pointer.prefab", prefab("Pointer", [pointer]))
+    # A pool on a cell: water drawn as the sea is, so the mood colors it with
+    # the sea, and lava drawn as the lava lake is. Both are a cell across, a
+    # little above the cell's top.
+    water = entity("water-pool", "Water Pool", {
+        "sindri.sprite": {"texture": "textures/white.png", "tint": [0.02, 0.15, 0.22, 0.88], "layer": 4,
+                          "unlit": True, "shader": "shaders/sea.wgsl", "shader_params": [0.8, 0.0, 0.6, 0.0]},
+        "sindri.tags": {"tags": ["sea"]},
+    }, rotation=FLAT, scale=(0.94, 0.94, 1.0))
+    write(folder / "water-pool.prefab", prefab("Water Pool", [water]))
+    lava = entity("lava-pool", "Lava Pool", {
+        "sindri.sprite": {"texture": "textures/white.png", "tint": [0.09, 0.045, 0.04, 1.0], "layer": 4,
+                          "unlit": True, "shader": "shaders/lava.wgsl", "shader_params": [1.3, 0.6, 0.35, 1.0]},
+        "sindri.tags": {"tags": ["lava"]},
+    }, rotation=FLAT, scale=(0.96, 0.96, 1.0))
+    write(folder / "lava-pool.prefab", prefab("Lava Pool", [lava]))
     # A Hollow on the causeway behind the title: the husk's model and nothing
     # else, walked by `title.decay`.
     # A speck in the air: pollen, dust, rain, a firefly or an ember, as
@@ -213,12 +246,11 @@ def world_entities():
     e.append(entity("sun", "Sun", {"sindri.light": {"kind": "directional", "color": [1.0, 0.85, 0.66],
                                                    "intensity": 2.4}},
                     position=(0, 10, 0), rotation=towards(0.25, -1.0, -0.6)))
-    names = ["Saltmarsh", "The Fold", "Quarry Rise", "The Lighthouse"]
-    files = ["saltmarsh", "fold", "quarry-rise", "lighthouse"]
-    for i, (name, file) in enumerate(zip(names, files)):
-        e.append(entity(f"island-{i}", f"Island {i}", {"sindri.model": {"asset": f"models/island-{file}.glb",
-                                                                        "layer": 0}},
-                        disabled=i != 0))
+    # Every island the rules know, read from the same text they read.
+    for i, island in enumerate(islands()):
+        e.append(entity(f"island-{i}", f"Island {i}", {"sindri.model": {
+            "asset": f"models/island-{island_slug(island['name'])}.glb", "layer": 0}},
+            disabled=i != 0))
     e.append(entity("sea", "Sea", {}, position=(CENTRE[0], 0.08, CENTRE[2])))
     # One quad, drawn by `shaders/sea.wgsl`, which works from world position
     # so needs no tiling: the tint is the deep water's color, the params
@@ -230,6 +262,15 @@ def world_entities():
         },
         "sindri.tags": {"tags": ["sea"]},
     }, parent="sea", rotation=FLAT, scale=(120.0, 120.0, 1.0)))
+    # The lake round a burning island, at the same level and in the same place:
+    # `Atmosphere` fades one out and the other in with the world.
+    e.append(entity("lava-surface", "Lava Surface", {
+        "sindri.sprite": {
+            "texture": "textures/white.png", "tint": [0.09, 0.045, 0.04, 1.0], "layer": -10,
+            "unlit": True, "shader": "shaders/lava.wgsl", "shader_params": [1.2, 0.5, 0.3, 0.0],
+        },
+        "sindri.tags": {"tags": ["lava"]},
+    }, parent="sea", rotation=FLAT, scale=(120.0, 120.0, 1.0), disabled=True))
     e.append(entity("lantern-light", "Lantern Light", {"sindri.light": {
         "kind": "point", "color": [1.0, 0.76, 0.42], "intensity": 2.6, "range": 3.2}},
         position=(CENTRE[0], 3, CENTRE[2])))
@@ -264,10 +305,18 @@ def world_entities():
     e.append(entity("battle", "Battle", script(
         "Battle", "scripts/battle.decay",
         mark="prefabs/mark.prefab", label="prefabs/label.prefab", popup="prefabs/popup.prefab",
-        missile="prefabs/missile.prefab", spark="prefabs/spark.prefab", **prefabs), spatial=False))
-    e.append(entity("music", "Music", {"sindri.audio.source": {
-        "autoplay": True, "bus": "music", "clip": "audio/tide-song.ogg", "looping": True, "volume": 0.45}},
+        missile="prefabs/missile.prefab", spark="prefabs/spark.prefab", droplet="prefabs/droplet.prefab",
+        pointer="prefabs/pointer.prefab",
+        water_pool="prefabs/water-pool.prefab", lava_pool="prefabs/lava-pool.prefab", **prefabs),
         spatial=False))
+    # A song for each world, both always playing, each through its own bus:
+    # `Atmosphere` crossfades the buses with the world's mood.
+    e.append(entity("music", "Music", {"sindri.audio.source": {
+        "autoplay": True, "bus": "music-shallows", "clip": "audio/tide-song.ogg", "looping": True,
+        "volume": 0.45}}, spatial=False))
+    e.append(entity("music-cinderfast", "Music Cinderfast", {"sindri.audio.source": {
+        "autoplay": True, "bus": "music-cinderfast", "clip": "audio/cinder-song.ogg", "looping": True,
+        "volume": 0.45}}, spatial=False))
     return e
 
 

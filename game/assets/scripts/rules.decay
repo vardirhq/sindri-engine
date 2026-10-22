@@ -18,21 +18,36 @@
 shared const SIZE: number = 8.0;
 
 enum Kind {
-    // The three wardens.
+    // The wardens.
     Bulwark,
     Mason,
     Lamplighter,
+    Tidecaller,
     // The Hollow, who cross at low tide.
     Husk,
     Brute,
     Spitter,
     Mortar,
     Colossus,
+    // The Hollow of the burning mountain.
+    Imp,
+    Burster,
+    Kiln,
     // What stands on the island and does not move.
     House,
     Beacon,
     Stone,
+    // A crack in a burning island that throws up lava.
+    Vent,
 }
+
+// What lies on a cell above its ground: nothing, a pool of water, or lava.
+shared const DRY: number = 0.0;
+shared const WATER: number = 1.0;
+shared const LAVA: number = 2.0;
+
+// Rounds a vent rests after it erupts.
+shared const VENT_REST: number = 1.0;
 
 enum BeatKind {
     // A unit walked to (x, z) from (tx, tz), one cell at a time.
@@ -65,6 +80,24 @@ enum BeatKind {
     Tide,
     // A strike that found nothing.
     Miss,
+    // A Hollow went into lava and burned.
+    Burn,
+    // A unit standing in lava was scorched by it.
+    Scorch,
+    // A vent at (x, z) threw lava onto (tx, tz).
+    Erupt,
+    // A pool of `amount` (WATER or LAVA) formed at (x, z).
+    Pool,
+    // Lava at (x, z) met water at (tx, tz) and both went to steam and stone.
+    Quench,
+    // The ground at (x, z) rose to `amount`, cooled out of lava and water.
+    Basalt,
+    // Water hissed at (x, z): a vent choked, a pool dried.
+    Steam,
+    // A Burster at (x, z) burst and threw everything round it outward.
+    Burst,
+    // Water was thrown from (x, z) to (tx, tz).
+    Douse,
 }
 
 struct Unit {
@@ -90,6 +123,8 @@ struct Unit {
     reach: number = 1.0,
     // When it strikes, among the Hollow: 1 first.
     order: number = 0.0,
+    // A vent's rounds of rest before it erupts again.
+    charge: number = 0.0,
 }
 
 struct Spawn {
@@ -125,6 +160,10 @@ struct Board {
     next_id: number,
     // The kinds that may climb out this round and how many.
     arrivals: List<Kind>,
+    // What lies on each cell above its ground: DRY, WATER or LAVA.
+    pools: List<number>,
+    // Whether what rises round the island is lava rather than the sea.
+    molten: bool = false,
 }
 
 // --- Cells and directions ----------------------------------------------
@@ -166,12 +205,25 @@ shared fn steps_between(x: number, z: number, tx: number, tz: number) -> number 
 // --- What each kind is ----------------------------------------------------
 
 shared fn is_warden(kind: Kind) -> bool {
-    return kind == Kind.Bulwark || kind == Kind.Mason || kind == Kind.Lamplighter;
+    return kind == Kind.Bulwark || kind == Kind.Mason || kind == Kind.Lamplighter
+        || kind == Kind.Tidecaller;
 }
 
 shared fn is_hollow(kind: Kind) -> bool {
     return kind == Kind.Husk || kind == Kind.Brute || kind == Kind.Spitter
-        || kind == Kind.Mortar || kind == Kind.Colossus;
+        || kind == Kind.Mortar || kind == Kind.Colossus || kind == Kind.Imp
+        || kind == Kind.Burster || kind == Kind.Kiln;
+}
+
+// What strikes at the end of the wardens' turn and shows where first: the
+// Hollow, and the vents.
+shared fn is_threat(kind: Kind) -> bool {
+    return is_hollow(kind) || kind == Kind.Vent;
+}
+
+// Born of the mountain: lava does not burn these, and water does.
+shared fn is_fireproof(kind: Kind) -> bool {
+    return kind == Kind.Imp || kind == Kind.Kiln;
 }
 
 shared fn is_building(kind: Kind) -> bool {
@@ -181,7 +233,8 @@ shared fn is_building(kind: Kind) -> bool {
 // Nothing pushes these: the buildings, the stones, and the Colossus, which is
 // too heavy for anything the wardens carry.
 shared fn is_fixed(kind: Kind) -> bool {
-    return is_building(kind) || kind == Kind.Stone || kind == Kind.Colossus;
+    return is_building(kind) || kind == Kind.Stone || kind == Kind.Colossus
+        || kind == Kind.Kiln || kind == Kind.Vent;
 }
 
 shared fn kind_hp(kind: Kind) -> number {
@@ -189,14 +242,19 @@ shared fn kind_hp(kind: Kind) -> number {
         Kind.Bulwark => 4.0,
         Kind.Mason => 3.0,
         Kind.Lamplighter => 3.0,
+        Kind.Tidecaller => 3.0,
         Kind.Husk => 2.0,
         Kind.Brute => 3.0,
         Kind.Spitter => 2.0,
         Kind.Mortar => 2.0,
         Kind.Colossus => 8.0,
+        Kind.Imp => 2.0,
+        Kind.Burster => 2.0,
+        Kind.Kiln => 9.0,
         Kind.House => 1.0,
         Kind.Beacon => 2.0,
         Kind.Stone => 1.0,
+        Kind.Vent => 99.0,
     };
 }
 
@@ -205,11 +263,15 @@ shared fn kind_move(kind: Kind) -> number {
         Kind.Bulwark => 3.0,
         Kind.Mason => 3.0,
         Kind.Lamplighter => 4.0,
+        Kind.Tidecaller => 3.0,
         Kind.Husk => 3.0,
         Kind.Brute => 2.0,
         Kind.Spitter => 2.0,
         Kind.Mortar => 2.0,
         Kind.Colossus => 2.0,
+        Kind.Imp => 3.0,
+        Kind.Burster => 2.0,
+        Kind.Kiln => 1.0,
         _ => 0.0,
     };
 }
@@ -222,6 +284,9 @@ shared fn kind_damage(kind: Kind) -> number {
         Kind.Spitter => 1.0,
         Kind.Mortar => 2.0,
         Kind.Colossus => 2.0,
+        Kind.Imp => 1.0,
+        Kind.Burster => 1.0,
+        Kind.Kiln => 2.0,
         _ => 0.0,
     };
 }
@@ -231,14 +296,19 @@ shared fn kind_name(kind: Kind) -> String {
         Kind.Bulwark => "Bulwark",
         Kind.Mason => "Mason",
         Kind.Lamplighter => "Lamplighter",
+        Kind.Tidecaller => "Tidecaller",
         Kind.Husk => "Husk",
         Kind.Brute => "Brute",
         Kind.Spitter => "Spitter",
         Kind.Mortar => "Mortar",
         Kind.Colossus => "The Colossus",
+        Kind.Imp => "Cinder Imp",
+        Kind.Burster => "Burster",
+        Kind.Kiln => "The Kiln",
         Kind.House => "House",
         Kind.Beacon => "Beacon",
         Kind.Stone => "Stone",
+        Kind.Vent => "Vent",
     };
 }
 
@@ -247,11 +317,16 @@ shared fn skill_name(kind: Kind) -> String {
         Kind.Bulwark => "Shield Bash",
         Kind.Mason => "Heave Stone",
         Kind.Lamplighter => "Lantern Bolt",
+        Kind.Tidecaller => "Drench",
         Kind.Husk => "Claw",
         Kind.Brute => "Maul",
         Kind.Spitter => "Spit",
         Kind.Mortar => "Lob",
         Kind.Colossus => "Sweep",
+        Kind.Imp => "Scratch",
+        Kind.Burster => "Butt",
+        Kind.Kiln => "Belch",
+        Kind.Vent => "Erupt",
         _ => "",
     };
 }
@@ -261,11 +336,16 @@ shared fn skill_text(kind: Kind) -> String {
         Kind.Bulwark => "Strike a neighbour for 2 and shove it a cell away.",
         Kind.Mason => "Throw a stone 2 to 4 cells. It hits for 1 and shoves everything beside it outward. On open ground it stays, a new stone.",
         Kind.Lamplighter => "Fire along a line. The first thing in the way takes 1 and is knocked back a cell.",
+        Kind.Tidecaller => "Throw water 1 to 3 cells along a line. Lava cools to stone, and lava by water makes new ground. A figure is washed a cell back; fire takes 2; a vent chokes. Bare ground is left a pool the Hollow cannot cross.",
         Kind.Husk => "Claws the cell in front for 1.",
         Kind.Brute => "Mauls the cell in front for 2 and shoves it.",
         Kind.Spitter => "Spits along a line: the first thing in the way takes 1.",
         Kind.Mortar => "Lobs a glob onto a cell 2 to 4 away for 2.",
         Kind.Colossus => "Sweeps the three cells in front for 2. Too heavy to push.",
+        Kind.Imp => "Scratches the cell in front for 1. Walks in lava, and leaves lava where it stood. Water puts it out.",
+        Kind.Burster => "Butts the cell in front for 1. Bursts when it dies, throwing everything beside it a cell away.",
+        Kind.Kiln => "Belches fire onto a cell 2 to 4 away for 2, and leaves it lava. Too heavy to push; water hurts it.",
+        Kind.Vent => "Throws lava 2 or 3 cells every other round. Water chokes it for a round.",
         Kind.House => "Somebody lives here. Every point of damage costs the Hearth.",
         Kind.Beacon => "The island's beacon. Every point of damage costs the Hearth.",
         Kind.Stone => "In the way. Shoving something into it hurts both.",
@@ -279,9 +359,28 @@ shared fn height_at(board: Board, x: number, z: number) -> number {
     return board.heights[cell_of(x, z)];
 }
 
-// Whether the sea covers a cell.
-shared fn is_wet(board: Board, x: number, z: number) -> bool {
+shared fn pool_at(board: Board, x: number, z: number) -> number {
+    return board.pools[cell_of(x, z)];
+}
+
+// Whether what rises round the island covers a cell.
+shared fn under_level(board: Board, x: number, z: number) -> bool {
     return height_at(board, x, z) <= board.tide;
+}
+
+shared fn is_water(board: Board, x: number, z: number) -> bool {
+    if under_level(board, x, z) { return !board.molten; }
+    return pool_at(board, x, z) == WATER;
+}
+
+shared fn is_lava(board: Board, x: number, z: number) -> bool {
+    if under_level(board, x, z) { return board.molten; }
+    return pool_at(board, x, z) == LAVA;
+}
+
+// Whether water or lava covers a cell rather than bare ground.
+shared fn is_wet(board: Board, x: number, z: number) -> bool {
+    return is_water(board, x, z) || is_lava(board, x, z);
 }
 
 // How high something standing on a cell stands: on the ground, or on the
@@ -344,11 +443,20 @@ shared fn floods_next(board: Board, x: number, z: number) -> bool {
 }
 
 // Whether a unit of this kind may stand on a cell. The Hollow are made of the
-// mud they climb out of, and the sea takes them apart; the wardens wade.
+// mud they climb out of, and water takes them apart, but the ones born of the
+// mountain stand in lava. The wardens wade water, and nobody walks into lava
+// who can burn.
 shared fn can_stand(board: Board, kind: Kind, x: number, z: number) -> bool {
     if !in_bounds(x, z) { return false; }
-    if is_hollow(kind) && kind != Kind.Colossus && is_wet(board, x, z) { return false; }
+    if is_water(board, x, z) && is_hollow(kind) && kind != Kind.Colossus { return false; }
+    if is_lava(board, x, z) && !is_fireproof(kind) { return false; }
     return true;
+}
+
+// Whether what is rising round the island will not hurt this kind.
+shared fn braves_level(board: Board, kind: Kind) -> bool {
+    if board.molten { return is_fireproof(kind); }
+    return kind == Kind.Colossus || is_warden(kind);
 }
 
 // Every cell a unit can walk to this turn, as cell indices, nearest first.
@@ -470,6 +578,20 @@ shared fn hurt(board: Board, index: number, amount: number) -> Board {
         next.beats.push(Beat(kind: BeatKind.Die, unit: unit.id, x: unit.x, z: unit.z));
     }
     next.units[index] = unit;
+    if unit.hp <= 0.0 && unit.kind == Kind.Burster {
+        next = burst(next, unit.x, unit.z);
+    }
+    return next;
+}
+
+// A Burster dies loud: everything beside it is thrown a cell outward, and
+// another Burster thrown into something may go the same way.
+shared fn burst(board: Board, x: number, z: number) -> Board {
+    var next = board;
+    next.beats.push(Beat(kind: BeatKind.Burst, x: x, z: z));
+    for side in 0..4 {
+        next = push(next, x + dir_x(side), z + dir_z(side), side);
+    }
     return next;
 }
 
@@ -490,6 +612,33 @@ shared fn drown(board: Board, index: number) -> Board {
     return next;
 }
 
+// Lava takes a Hollow standing in it.
+shared fn burn(board: Board, index: number) -> Board {
+    var next = board;
+    var unit = next.units[index];
+    if unit.hp <= 0.0 { return next; }
+    unit.hp = 0.0;
+    next.units[index] = unit;
+    next.beats.push(Beat(kind: BeatKind.Burn, unit: unit.id, x: unit.x, z: unit.z));
+    return next;
+}
+
+// A Hollow where it cannot stand: lava burns it, water drowns it.
+shared fn sink(board: Board, index: number) -> Board {
+    let unit = board.units[index];
+    if in_bounds(unit.x, unit.z) && is_lava(board, unit.x, unit.z) { return burn(board, index); }
+    if !in_bounds(unit.x, unit.z) && board.molten { return burn(board, index); }
+    return drown(board, index);
+}
+
+// A warden in lava: it is scorched, and climbs out next turn if it can.
+shared fn scorch(board: Board, index: number, amount: number) -> Board {
+    var next = board;
+    let unit = next.units[index];
+    next.beats.push(Beat(kind: BeatKind.Scorch, unit: unit.id, x: unit.x, z: unit.z, amount: amount));
+    return hurt(next, index, amount);
+}
+
 // Shoves whatever stands on (x, z) one cell in direction `d`.
 //
 // Into something: both take 1 and neither moves. Up a step of two or more:
@@ -508,7 +657,11 @@ shared fn push(board: Board, x: number, z: number, d: number) -> Board {
         // is gone; a warden catches itself on the edge.
         if is_hollow(unit.kind) {
             next.beats.push(Beat(kind: BeatKind.Push, unit: unit.id, x: x, z: z, tx: tx, tz: tz));
-            return drown(next, index);
+            var gone = next.units[index];
+            gone.x = tx;
+            gone.z = tz;
+            next.units[index] = gone;
+            return sink(next, index);
         }
         next.beats.push(Beat(kind: BeatKind.Bump, unit: unit.id, x: x, z: z, tx: tx, tz: tz));
         return next;
@@ -530,7 +683,10 @@ shared fn push(board: Board, x: number, z: number, d: number) -> Board {
     next.units[index] = moved;
     next.beats.push(Beat(kind: BeatKind.Push, unit: unit.id, x: x, z: z, tx: tx, tz: tz));
     if is_hollow(unit.kind) && !can_stand(next, unit.kind, tx, tz) {
-        return drown(next, index);
+        return sink(next, index);
+    }
+    if is_warden(unit.kind) && is_lava(next, tx, tz) {
+        next = scorch(next, index, 2.0);
     }
     if rise <= -2.0 {
         next.beats.push(Beat(kind: BeatKind.Fall, unit: unit.id, x: tx, z: tz));
@@ -569,6 +725,7 @@ shared fn skill_targets(board: Board, index: number) -> List<number> {
         var high = 1.0;
         if unit.kind == Kind.Mason { low = 2.0; high = 4.0; }
         if unit.kind == Kind.Lamplighter { high = SIZE; }
+        if unit.kind == Kind.Tidecaller { high = 3.0; }
         for r in low..(high + 1.0) {
             let tx = unit.x + dir_x(d) * r;
             let tz = unit.z + dir_z(d) * r;
@@ -610,6 +767,9 @@ shared fn use_skill(board: Board, index: number, tx: number, tz: number) -> Boar
         next = hurt_at(next, ex, ez, 1.0 + unit.power);
         return push(next, ex, ez, d);
     }
+    if unit.kind == Kind.Tidecaller {
+        return drench(next, index, tx, tz, d);
+    }
     // The Mason's stone.
     next.beats.push(Beat(kind: BeatKind.Lob, unit: unit.id, x: unit.x, z: unit.z, tx: tx, tz: tz));
     if unit_at(next, tx, tz) >= 0.0 {
@@ -621,6 +781,104 @@ shared fn use_skill(board: Board, index: number, tx: number, tz: number) -> Boar
     }
     for side in 0..4 {
         next = push(next, tx + dir_x(side), tz + dir_z(side), side);
+    }
+    return next;
+}
+
+// The Tidecaller's water, thrown onto (tx, tz) in direction `d`.
+shared fn drench(board: Board, index: number, tx: number, tz: number, d: number) -> Board {
+    var next = board;
+    let unit = next.units[index];
+    next.beats.push(Beat(kind: BeatKind.Douse, unit: unit.id, x: unit.x, z: unit.z, tx: tx, tz: tz));
+    let at = unit_at(next, tx, tz);
+    if at >= 0.0 {
+        let target = next.units[at];
+        if target.kind == Kind.Vent {
+            // Choked: it throws nothing this round, and tries again next.
+            var vent = target;
+            vent.dir = -1.0;
+            next.units[at] = vent;
+            next.beats.push(Beat(kind: BeatKind.Steam, x: tx, z: tz));
+            return next;
+        }
+        if is_fireproof(target.kind) {
+            next.beats.push(Beat(kind: BeatKind.Steam, x: tx, z: tz));
+            next = hurt(next, at, 2.0 + unit.power);
+        }
+        next = push(next, tx, tz, d);
+        return settle(next);
+    }
+    if is_lava(next, tx, tz) {
+        next.beats.push(Beat(kind: BeatKind.Steam, x: tx, z: tz));
+        return settle(cool(next, tx, tz));
+    }
+    if is_water(next, tx, tz) {
+        next.beats.push(Beat(kind: BeatKind.Miss, unit: unit.id, x: tx, z: tz));
+        return next;
+    }
+    return settle(make_pool(next, tx, tz, WATER));
+}
+
+// Leaves a pool on bare ground.
+shared fn make_pool(board: Board, x: number, z: number, pool: number) -> Board {
+    if !in_bounds(x, z) || under_level(board, x, z) { return board; }
+    var next = board;
+    next.pools[cell_of(x, z)] = pool;
+    next.beats.push(Beat(kind: BeatKind.Pool, x: x, z: z, amount: pool));
+    return next;
+}
+
+// Water or lava at a cell set hard: a pool dries off, and where the level
+// itself is cooled the ground rises out of it, a new cell to stand on.
+shared fn cool(board: Board, x: number, z: number) -> Board {
+    var next = board;
+    let c = cell_of(x, z);
+    if under_level(next, x, z) {
+        next.heights[c] = next.tide + 1.0;
+        next.pools[c] = DRY;
+        next.beats.push(Beat(kind: BeatKind.Basalt, x: x, z: z, amount: next.heights[c]));
+        return next;
+    }
+    next.pools[c] = DRY;
+    next.beats.push(Beat(kind: BeatKind.Pool, x: x, z: z, amount: DRY));
+    return next;
+}
+
+// Wherever lava now touches water, the two quench each other: both set, in
+// steam, and new ground rises out of whichever was the level.
+//
+// What rises round the island is all one liquid, so lava can only meet water
+// where at least one of them is a pool: only pools are looked round. That
+// keeps this cheap enough to run after every change, which the bot does
+// thousands of times a turn.
+shared fn settle(board: Board) -> Board {
+    var next = board;
+    var changed = true;
+    while changed {
+        changed = false;
+        for c in 0..(SIZE * SIZE) {
+            let pool = next.pools[c];
+            if pool == DRY { continue; }
+            let x = c % SIZE;
+            let z = floor(c / SIZE);
+            for d in 0..4 {
+                let nx = x + dir_x(d);
+                let nz = z + dir_z(d);
+                if !in_bounds(nx, nz) { continue; }
+                var meets = false;
+                if pool == LAVA { meets = is_water(next, nx, nz); } else { meets = is_lava(next, nx, nz); }
+                if !meets { continue; }
+                if pool == LAVA {
+                    next.beats.push(Beat(kind: BeatKind.Quench, x: x, z: z, tx: nx, tz: nz));
+                } else {
+                    next.beats.push(Beat(kind: BeatKind.Quench, x: nx, z: nz, tx: x, tz: z));
+                }
+                next = cool(next, x, z);
+                next = cool(next, nx, nz);
+                changed = true;
+                break;
+            }
+        }
     }
     return next;
 }
@@ -699,7 +957,7 @@ shared fn hollow_strike(board: Board, index: number) -> Board {
     let fz = floor(first / SIZE);
     if unit.kind == Kind.Spitter {
         next.beats.push(Beat(kind: BeatKind.Bolt, unit: unit.id, x: unit.x, z: unit.z, tx: fx, tz: fz));
-    } else if unit.kind == Kind.Mortar {
+    } else if unit.kind == Kind.Mortar || unit.kind == Kind.Kiln {
         next.beats.push(Beat(kind: BeatKind.Lob, unit: unit.id, x: unit.x, z: unit.z, tx: fx, tz: fz));
     } else {
         next.beats.push(Beat(kind: BeatKind.Strike, unit: unit.id, x: unit.x, z: unit.z, tx: fx, tz: fz));
@@ -719,7 +977,98 @@ shared fn hollow_strike(board: Board, index: number) -> Board {
     if !landed {
         next.beats.push(Beat(kind: BeatKind.Miss, unit: unit.id, x: fx, z: fz));
     }
+    if unit.kind == Kind.Kiln {
+        next = spill_lava(next, fx, fz);
+    }
     return next;
+}
+
+// Lava thrown onto a cell: a Hollow there burns, a building is lost, a warden
+// is scorched and thrown clear, and the cell is left a lava pool.
+shared fn spill_lava(board: Board, x: number, z: number) -> Board {
+    var next = board;
+    if !in_bounds(x, z) || is_wet(next, x, z) { return next; }
+    let at = unit_at(next, x, z);
+    if at >= 0.0 {
+        let unit = next.units[at];
+        if is_building(unit.kind) || unit.kind == Kind.Stone {
+            next = hurt(next, at, unit.hp);
+        } else if is_hollow(unit.kind) && !is_fireproof(unit.kind) {
+            next = make_pool(next, x, z, LAVA);
+            next = burn(next, at);
+            return settle(next);
+        }
+    }
+    next = make_pool(next, x, z, LAVA);
+    let still = unit_at(next, x, z);
+    if still >= 0.0 && is_warden(next.units[still].kind) {
+        next = scorch(next, still, 1.0);
+    }
+    return settle(next);
+}
+
+// A vent throws what it aimed at. It rests after, unless it was choked.
+shared fn erupt(board: Board, index: number) -> Board {
+    var next = board;
+    var vent = next.units[index];
+    if vent.dir < 0.0 { return next; }
+    let tx = vent.x + dir_x(vent.dir) * vent.reach;
+    let tz = vent.z + dir_z(vent.dir) * vent.reach;
+    next.beats.push(Beat(kind: BeatKind.Erupt, unit: vent.id, x: vent.x, z: vent.z, tx: tx, tz: tz));
+    vent.dir = -1.0;
+    vent.charge = VENT_REST;
+    next.units[index] = vent;
+    let at = unit_at(next, tx, tz);
+    if at >= 0.0 && is_warden(next.units[at].kind) {
+        // Thrown clear of it, the way the lava came.
+        next = hurt(next, at, 1.0);
+        next = push(next, tx, tz, board.units[index].dir);
+    }
+    return spill_lava(next, tx, tz);
+}
+
+// Where a vent will throw next, if it is ready: a cell two or three away
+// along a line, bare ground, chosen by the mountain.
+shared fn plan_vent(board: Board, index: number) -> Board {
+    var next = board;
+    var vent = next.units[index];
+    vent.dir = -1.0;
+    if vent.charge > 0.0 {
+        vent.charge -= 1.0;
+        next.units[index] = vent;
+        return next;
+    }
+    var dirs: List<number> = [];
+    var reaches: List<number> = [];
+    for d in 0..4 {
+        for r in 2..4 {
+            let tx = vent.x + dir_x(d) * r;
+            let tz = vent.z + dir_z(d) * r;
+            if !in_bounds(tx, tz) || is_wet(next, tx, tz) { continue; }
+            // The mountain is blind, but the island's people built well
+            // clear of its vents.
+            let at = unit_at(next, tx, tz);
+            if at >= 0.0 && (next.units[at].kind == Kind.Vent || is_building(next.units[at].kind)) { continue; }
+            dirs.push(d);
+            reaches.push(r);
+        }
+    }
+    if dirs.length > 0.0 {
+        let pick = Random.int(0.0, dirs.length - 1.0);
+        vent.dir = dirs[pick];
+        vent.reach = reaches[pick];
+    }
+    next.units[index] = vent;
+    return next;
+}
+
+// Whether a vent means to throw onto (x, z) this round.
+shared fn vent_aims_at(board: Board, x: number, z: number) -> bool {
+    for u in board.units {
+        if u.kind != Kind.Vent || u.dir < 0.0 { continue; }
+        if u.x + dir_x(u.dir) * u.reach == x && u.z + dir_z(u.dir) * u.reach == z { return true; }
+    }
+    return false;
 }
 
 // How much a Hollow wants what its strike would hit.
@@ -730,6 +1079,7 @@ shared fn want_of(board: Board, cells: List<number>, striker: number, damage: nu
         if at < 0.0 { continue; }
         let target = board.units[at];
         if target.id == striker { continue; }
+        if target.kind == Kind.Vent { continue; }
         if target.kind == Kind.Beacon { score += 13.0; }
         else if is_building(target.kind) { score += 10.0; }
         else if is_warden(target.kind) {
@@ -769,9 +1119,10 @@ shared fn plan_hollow(board: Board, index: number) -> Board {
     for option in options {
         let ox = option % SIZE;
         let oz = floor(option / SIZE);
-        // The Hollow know the sea is coming.
+        // The Hollow know the sea is coming, and where the mountain will spit.
         var place = 0.0;
-        if floods_next(next, ox, oz) && unit.kind != Kind.Colossus { place -= 20.0; }
+        if floods_next(next, ox, oz) && !braves_level(next, unit.kind) { place -= 20.0; }
+        if vent_aims_at(next, ox, oz) && !is_fireproof(unit.kind) { place -= 15.0; }
         // A little noise, so two equal choices are not always the same one,
         // and a seeded run still repeats exactly.
         place += Random.range(0.0, 0.4);
@@ -779,7 +1130,7 @@ shared fn plan_hollow(board: Board, index: number) -> Board {
         for d in 0..4 {
             var low = 1.0;
             var high = 1.0;
-            if unit.kind == Kind.Mortar { low = 2.0; high = 4.0; }
+            if unit.kind == Kind.Mortar || unit.kind == Kind.Kiln { low = 2.0; high = 4.0; }
             for r in low..(high + 1.0) {
                 let cells = strike_cells(next, unit.kind, ox, oz, d, r, unit.id);
                 let score = place + want_of(next, cells, unit.id, kind_damage(unit.kind));
@@ -800,7 +1151,7 @@ shared fn plan_hollow(board: Board, index: number) -> Board {
             let ox = option % SIZE;
             let oz = floor(option / SIZE);
             var distance = nearest_prey(next, ox, oz);
-            if floods_next(next, ox, oz) && unit.kind != Kind.Colossus { distance += 50.0; }
+            if floods_next(next, ox, oz) && !braves_level(next, unit.kind) { distance += 50.0; }
             if distance < closest {
                 closest = distance;
                 best_cell = option;
@@ -811,6 +1162,10 @@ shared fn plan_hollow(board: Board, index: number) -> Board {
     let bz = floor(best_cell / SIZE);
     if bx != unit.x || bz != unit.z {
         next = walk(next, index, bx, bz);
+        // An Imp leaves lava where it stood.
+        if unit.kind == Kind.Imp {
+            next = settle(make_pool(next, unit.x, unit.z, LAVA));
+        }
     }
     var planned = next.units[index];
     planned.dir = best_dir;
@@ -819,7 +1174,7 @@ shared fn plan_hollow(board: Board, index: number) -> Board {
         // Strike towards the nearest prey along whichever axis is longer.
         planned.dir = facing_towards_prey(next, bx, bz);
         planned.reach = 1.0;
-        if unit.kind == Kind.Mortar { planned.reach = 2.0; }
+        if unit.kind == Kind.Mortar || unit.kind == Kind.Kiln { planned.reach = 2.0; }
     }
     next.units[index] = planned;
     return next;
@@ -850,6 +1205,11 @@ shared fn facing_towards_prey(board: Board, x: number, z: number) -> number {
 // Every Hollow plans, in the order they will strike.
 shared fn plan_all(board: Board) -> Board {
     var next = board;
+    for i in 0..next.units.length {
+        if next.units[i].kind == Kind.Vent && next.units[i].hp > 0.0 {
+            next = plan_vent(next, i);
+        }
+    }
     var order = 1.0;
     for i in 0..next.units.length {
         let unit = next.units[i];
@@ -874,7 +1234,7 @@ shared fn mark_spawns(board: Board, landing: List<number>) -> Board {
         for c in landing {
             let x = c % SIZE;
             let z = floor(c / SIZE);
-            if floods_next(next, x, z) { continue; }
+            if floods_next(next, x, z) || is_wet(next, x, z) { continue; }
             if unit_at(next, x, z) >= 0.0 { continue; }
             if spawn_at(next, x, z) { continue; }
             choices.push(c);
@@ -913,17 +1273,23 @@ shared fn raise_tide(board: Board) -> Board {
     var next = board;
     next.tide += 1.0;
     next.beats.push(Beat(kind: BeatKind.Tide, amount: next.tide));
+    // What the level now covers is the level's, not a pool's.
+    for c in 0..(SIZE * SIZE) {
+        if next.heights[c] <= next.tide { next.pools[c] = DRY; }
+    }
     for i in 0..next.units.length {
         let unit = next.units[i];
         if unit.hp <= 0.0 { continue; }
-        if !is_wet(next, unit.x, unit.z) { continue; }
-        if is_hollow(unit.kind) && unit.kind != Kind.Colossus {
-            next = drown(next, i);
-        } else if is_building(unit.kind) {
+        if !under_level(next, unit.x, unit.z) { continue; }
+        if is_building(unit.kind) {
             next = hurt(next, i, unit.hp);
+        } else if is_hollow(unit.kind) && !can_stand(next, unit.kind, unit.x, unit.z) {
+            next = sink(next, i);
+        } else if is_warden(unit.kind) && next.molten {
+            next = scorch(next, i, 2.0);
         }
     }
-    return next;
+    return settle(next);
 }
 
 // The end of the wardens' turn: every Hollow strikes in order, the tide
@@ -938,8 +1304,21 @@ shared fn hollow_turn(board: Board) -> Board {
             }
         }
     }
+    for i in 0..next.units.length {
+        let unit = next.units[i];
+        if unit.kind == Kind.Vent && unit.hp > 0.0 {
+            next = erupt(next, i);
+        }
+    }
     if rises_this_round(next) {
         next = raise_tide(next);
+    }
+    // Anyone still standing in lava who can burn is scorched for it.
+    for i in 0..next.units.length {
+        let unit = next.units[i];
+        if unit.hp > 0.0 && is_warden(unit.kind) && is_lava(next, unit.x, unit.z) {
+            next = scorch(next, i, 1.0);
+        }
     }
     return emerge(next);
 }

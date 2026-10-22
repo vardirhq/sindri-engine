@@ -214,6 +214,10 @@
             "popup": "prefabs/popup.prefab",
             "missile": "prefabs/missile.prefab",
             "spark": "prefabs/spark.prefab",
+            "droplet": "prefabs/droplet.prefab",
+            "pointer": "prefabs/pointer.prefab",
+            "water_pool": "prefabs/water-pool.prefab",
+            "lava_pool": "prefabs/lava-pool.prefab",
             "bulwark": "prefabs/bulwark.prefab",
             "mason": "prefabs/mason.prefab",
             "lamplighter": "prefabs/lamplighter.prefab",
@@ -222,9 +226,15 @@
             "spitter": "prefabs/spitter.prefab",
             "mortar": "prefabs/mortar.prefab",
             "colossus": "prefabs/colossus.prefab",
+            "tidecaller": "prefabs/tidecaller.prefab",
+            "imp": "prefabs/imp.prefab",
+            "burster": "prefabs/burster.prefab",
+            "kiln": "prefabs/kiln.prefab",
             "house": "prefabs/house.prefab",
             "beacon": "prefabs/beacon.prefab",
-            "stone": "prefabs/stone.prefab"
+            "stone": "prefabs/stone.prefab",
+            "vent": "prefabs/vent.prefab",
+            "basalt": "prefabs/basalt.prefab"
           }
         }
       }
@@ -4450,6 +4460,93 @@
       "disabled": true
     },
     {
+      "id": "island-4",
+      "name": "Island 4",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.model": {
+          "asset": "models/island-ashfall-shelf.glb",
+          "layer": 0
+        }
+      },
+      "disabled": true
+    },
+    {
+      "id": "island-5",
+      "name": "Island 5",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.model": {
+          "asset": "models/island-crucible.glb",
+          "layer": 0
+        }
+      },
+      "disabled": true
+    },
+    {
+      "id": "island-6",
+      "name": "Island 6",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.model": {
+          "asset": "models/island-kilns-throat.glb",
+          "layer": 0
+        }
+      },
+      "disabled": true
+    },
+    {
       "id": "island-name",
       "name": "IslandName",
       "parent": "status",
@@ -4530,13 +4627,75 @@
       }
     },
     {
+      "id": "lava-surface",
+      "name": "Lava Surface",
+      "parent": "sea",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          -0.707107,
+          0.0,
+          0.0,
+          0.707107
+        ],
+        "scale": [
+          120.0,
+          120.0,
+          1.0
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/white.png",
+          "tint": [
+            0.09,
+            0.045,
+            0.04,
+            1.0
+          ],
+          "layer": -10,
+          "unlit": true,
+          "shader": "shaders/lava.wgsl",
+          "shader_params": [
+            1.2,
+            0.5,
+            0.3,
+            0.0
+          ]
+        },
+        "sindri.tags": {
+          "tags": [
+            "lava"
+          ]
+        }
+      },
+      "disabled": true
+    },
+    {
       "id": "music",
       "name": "Music",
       "components": {
         "sindri.audio.source": {
           "autoplay": true,
-          "bus": "music",
+          "bus": "music-shallows",
           "clip": "audio/tide-song.ogg",
+          "looping": true,
+          "volume": 0.45
+        }
+      }
+    },
+    {
+      "id": "music-cinderfast",
+      "name": "Music Cinderfast",
+      "components": {
+        "sindri.audio.source": {
+          "autoplay": true,
+          "bus": "music-cinderfast",
+          "clip": "audio/cinder-song.ogg",
           "looping": true,
           "volume": 0.45
         }

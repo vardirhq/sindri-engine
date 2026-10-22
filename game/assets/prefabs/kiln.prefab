@@ -1,0 +1,50 @@
+{
+  "format_version": 1,
+  "metadata": {
+    "name": "Kiln"
+  },
+  "entities": [
+    {
+      "id": "kiln",
+      "name": "Kiln",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.model": {
+          "asset": "models/kiln.glb",
+          "layer": 0,
+          "occluded_color": [
+            0.65,
+            0.24,
+            0.18,
+            0.3
+          ]
+        },
+        "sindri.script": {
+          "script": "Piece",
+          "source": "scripts/piece.decay",
+          "properties": {
+            "alive": true,
+            "size": 1.0
+          }
+        }
+      }
+    }
+  ]
+}

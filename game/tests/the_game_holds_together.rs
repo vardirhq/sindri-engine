@@ -143,8 +143,16 @@ fn the_art_is_built_from_the_islands_the_rules_read() {
     )
     .expect("the islands");
     let count = rules.matches("IslandDef(").count();
-    assert_eq!(count, 4, "four islands to a crossing");
-    for file in ["saltmarsh", "fold", "quarry-rise", "lighthouse"] {
+    assert_eq!(count, 7, "seven islands to a crossing");
+    for file in [
+        "saltmarsh",
+        "fold",
+        "quarry-rise",
+        "lighthouse",
+        "ashfall-shelf",
+        "crucible",
+        "kilns-throat",
+    ] {
         assert!(
             Path::new(&sindri_causeway::project_dir())
                 .join(format!("assets/models/island-{file}.glb"))

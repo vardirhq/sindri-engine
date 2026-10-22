@@ -14,6 +14,8 @@
 // built round the same point, by `tools/causeway_art.py`.
 shared const ORIGIN_X: number = 24.0;
 shared const ORIGIN_Z: number = 24.0;
+// The island behind the title: the Lighthouse at dusk.
+shared const TITLE_ISLAND: number = 3.0;
 
 enum Phase { Title, Arriving, Resolving, Player, Won, Upgrade, Lost, Crossed }
 // What happens once the beats being played have all been shown.
@@ -29,9 +31,19 @@ script Battle {
     @export let spitter: Prefab;
     @export let mortar: Prefab;
     @export let colossus: Prefab;
+    @export let tidecaller: Prefab;
+    @export let imp: Prefab;
+    @export let burster: Prefab;
+    @export let kiln: Prefab;
     @export let house: Prefab;
     @export let beacon: Prefab;
     @export let stone: Prefab;
+    @export let vent: Prefab;
+    @export let basalt: Prefab;
+    @export let water_pool: Prefab;
+    @export let lava_pool: Prefab;
+    @export let droplet: Prefab;
+    @export let pointer: Prefab;
     @export let mark: Prefab;
     @export let label: Prefab;
     @export let popup: Prefab;
@@ -67,6 +79,8 @@ script Battle {
     var sunk: List<Entity> = [];
     var hearth: number = 7.0;
     var wardens: List<Warden> = [];
+    // Who joined on this island, named on its banner.
+    var recruited: String = "";
     var rewinds: number = 1.0;
 
     // The battle.
@@ -92,6 +106,19 @@ script Battle {
     var next_missile: number = 0.0;
     var sparks: List<Entity> = [];
     var next_spark: number = 0.0;
+    var droplets: List<Entity> = [];
+    var next_droplet: number = 0.0;
+    // What lies on the board besides its figures: a pool on a cell, by cell,
+    // and the columns of new ground cooled out of lava and water. `base` is
+    // the island's own heights, which a column stands above.
+    var water_tiles: Map<number, Entity> = [:];
+    var lava_tiles: Map<number, Entity> = [:];
+    var columns: Map<number, Entity> = [:];
+    var base: List<number> = [];
+    // The gem over the warden in hand.
+    var marker: Entity = null;
+    var marker_at: Vec3 = Vec3(0.0, 0.0, 0.0);
+    var marker_shown: number = 0.0;
     var shown_tide: number = 0.0;
     var tide_tween = Timer(0.0);
     var tide_from: number = 0.0;
@@ -153,6 +180,13 @@ script Battle {
             World.set_active(k, false);
             sparks.push(k);
         }
+        for i in 0..3 {
+            let d = World.spawn(this.droplet);
+            World.set_active(d, false);
+            droplets.push(d);
+        }
+        marker = World.spawn(this.pointer);
+        World.set_active(marker, false);
         hearth = starting_hearth;
         show_title();
     }
@@ -196,9 +230,14 @@ script Battle {
             Kind.Spitter => this.spitter,
             Kind.Mortar => this.mortar,
             Kind.Colossus => this.colossus,
+            Kind.Tidecaller => this.tidecaller,
+            Kind.Imp => this.imp,
+            Kind.Burster => this.burster,
+            Kind.Kiln => this.kiln,
             Kind.House => this.house,
             Kind.Beacon => this.beacon,
             Kind.Stone => this.stone,
+            Kind.Vent => this.vent,
         };
     }
 
@@ -212,7 +251,7 @@ script Battle {
         let at = spot(unit.x, unit.z);
         Piece.on(piece).place(at.x, at.y, at.z);
         pieces[unit.id] = piece;
-        if !is_fixed(unit.kind) || is_building(unit.kind) || unit.kind == Kind.Colossus {
+        if !is_fixed(unit.kind) || is_building(unit.kind) || unit.kind == Kind.Colossus || unit.kind == Kind.Kiln {
             let pip = World.spawn(this.label);
             pips[unit.id] = pip;
         }
@@ -275,6 +314,72 @@ script Battle {
             }
         }
         refresh_labels();
+        sync_ground();
+    }
+
+    // --- Pools and new ground -----------------------------------------------
+
+    // Makes the pools and the cooled ground agree with the board.
+    fn sync_ground() {
+        for c in 0..(SIZE * SIZE) {
+            show_pool(c, board.pools[c]);
+            show_column(c, board.heights[c]);
+        }
+    }
+
+    // Shows what pool lies on cell `c`, and takes away one that does not.
+    fn show_pool(c: number, pool: number) {
+        let x = c % SIZE;
+        let z = floor_of(c);
+        var wanted = pool;
+        if under_level(board, x, z) { wanted = DRY; }
+        let at = Vec3(world_x(x), height_at(board, x, z) + 0.035, world_z(z));
+        if wanted == WATER {
+            if !water_tiles.contains(c) { water_tiles[c] = World.spawn(this.water_pool); }
+            water_tiles[c].transform.position = at;
+        } else if water_tiles.contains(c) {
+            World.despawn(water_tiles[c]);
+            water_tiles.remove(c);
+        }
+        if wanted == LAVA {
+            if !lava_tiles.contains(c) { lava_tiles[c] = World.spawn(this.lava_pool); }
+            lava_tiles[c].transform.position = at;
+        } else if lava_tiles.contains(c) {
+            World.despawn(lava_tiles[c]);
+            lava_tiles.remove(c);
+        }
+    }
+
+    // A column of new ground under a cell raised above the island's own,
+    // stretched from below the level to the cell's top.
+    fn show_column(c: number, height: number) {
+        if c >= base.length { return; }
+        if height <= base[c] {
+            if columns.contains(c) {
+                World.despawn(columns[c]);
+                columns.remove(c);
+            }
+            return;
+        }
+        var fresh = false;
+        if !columns.contains(c) {
+            columns[c] = World.spawn(this.basalt);
+            fresh = true;
+        }
+        let column = columns[c];
+        column.transform.scale = Vec3(1.0, height + 1.0, 1.0);
+        Piece.on(column).place(world_x(c % SIZE), -1.0, world_z(floor_of(c)));
+        if fresh { Piece.on(column).rise(0.45); }
+    }
+
+    // Everything on the board that is not a figure goes, for a new island.
+    fn clear_ground() {
+        for c in water_tiles.keys() { World.despawn(water_tiles[c]); }
+        for c in lava_tiles.keys() { World.despawn(lava_tiles[c]); }
+        for c in columns.keys() { World.despawn(columns[c]); }
+        water_tiles = [:];
+        lava_tiles = [:];
+        columns = [:];
     }
 
     fn pip_text(unit: Unit) -> String {
@@ -313,6 +418,7 @@ script Battle {
     fn label_height(kind: Kind) -> number {
         return match kind {
             Kind.Colossus => 2.5,
+            Kind.Kiln => 2.4,
             Kind.Beacon => 2.3,
             Kind.House => 1.55,
             Kind.Brute => 1.5,
@@ -407,7 +513,7 @@ script Battle {
             clips[cell_of(s.x, s.z)] = "spawn";
         }
         for unit in shown.units {
-            if unit.hp <= 0.0 || !is_hollow(unit.kind) || unit.dir < 0.0 { continue; }
+            if unit.hp <= 0.0 || !is_threat(unit.kind) || unit.dir < 0.0 { continue; }
             for c in strike_cells(shown, unit.kind, unit.x, unit.z, unit.dir, unit.reach, unit.id) {
                 clips[c] = "danger";
             }
@@ -464,6 +570,18 @@ script Battle {
         next_missile = (next_missile + 1.0) % missiles.length;
         World.set_active(m, true);
         Missile.on(m).launch(from, to, seconds, arc);
+    }
+
+    // The Tidecaller's water, thrown.
+    fn splash(from: Vec3, to: Vec3, seconds: number, arc: number) {
+        let d = droplets[next_droplet];
+        next_droplet = (next_droplet + 1.0) % droplets.length;
+        World.set_active(d, true);
+        Missile.on(d).launch(from, to, seconds, arc);
+    }
+
+    fn air() -> Atmosphere {
+        return Atmosphere.on(World.find("Environment"));
     }
 
     // --- Playing beats ----------------------------------------------------------
@@ -602,9 +720,84 @@ script Battle {
             BeatKind.Tide => {
                 tide_from = shown_tide;
                 tide_tween = Timer(1.4);
-                banner("The tide rises", "Anything low is under water. Hollow in the sea are gone.");
-                Audio.play("audio/tide.wav", 0.7);
+                if board.molten {
+                    banner("The lava rises", "Anything low is under fire. Only what the mountain made stands in it.");
+                    Audio.play("audio/erupt.wav", 0.6);
+                } else {
+                    banner("The tide rises", "Anything low is under water. Hollow in the sea are gone.");
+                    Audio.play("audio/tide.wav", 0.7);
+                }
                 return 1.5;
+            }
+            BeatKind.Burn => {
+                if piece != null {
+                    Piece.on(piece).sink(0.6);
+                    let p = piece.transform.position;
+                    pop(p.x, p.y + 0.6, p.z, "[color=#ffa04a]burned[/color]");
+                    burst(Vec3(p.x, p.y + 0.3, p.z));
+                }
+                hide_labels(beat.unit);
+                Audio.play("audio/sizzle.wav", 0.7);
+                return 0.4;
+            }
+            BeatKind.Scorch => {
+                if piece != null {
+                    let p = piece.transform.position;
+                    pop(p.x, p.y + 1.6, p.z, "[color=#ff8a4a]scorched[/color]");
+                }
+                Audio.play("audio/sizzle.wav", 0.4);
+                return 0.1;
+            }
+            BeatKind.Erupt => {
+                if piece != null { Piece.on(piece).hit(); }
+                fly(spot(beat.x, beat.z) + Vec3(0.0, 0.6, 0.0), spot(beat.tx, beat.tz) + Vec3(0.0, 0.2, 0.0), 0.55, 2.8);
+                shake(0.5);
+                Audio.play("audio/erupt.wav", 0.8);
+                return 0.55;
+            }
+            BeatKind.Pool => {
+                show_pool(cell_of(beat.x, beat.z), beat.amount);
+                if beat.amount == WATER { Audio.play("audio/splash.wav", 0.4); }
+                return 0.08;
+            }
+            BeatKind.Quench => {
+                let lava = spot(beat.x, beat.z);
+                let water = spot(beat.tx, beat.tz);
+                air().steam(lava);
+                air().steam(water);
+                Audio.play("audio/sizzle.wav", 0.6);
+                return 0.18;
+            }
+            BeatKind.Basalt => {
+                show_column(cell_of(beat.x, beat.z), beat.amount);
+                show_pool(cell_of(beat.x, beat.z), DRY);
+                let at = Vec3(world_x(beat.x), beat.amount, world_z(beat.z));
+                pop(at.x, at.y + 0.5, at.z, "[color=#d8c8ff]new ground[/color]");
+                shake(0.25);
+                Audio.play("audio/crumble.wav", 0.5);
+                return 0.35;
+            }
+            BeatKind.Steam => {
+                let at = spot(beat.x, beat.z);
+                air().steam(at);
+                pop(at.x, at.y + 0.9, at.z, "[color=#cfefff]hiss[/color]");
+                Audio.play("audio/sizzle.wav", 0.5);
+                return 0.14;
+            }
+            BeatKind.Burst => {
+                let at = spot(beat.x, beat.z);
+                burst(at + Vec3(0.0, 0.4, 0.0));
+                shake(0.6);
+                Audio.play("audio/erupt.wav", 0.6);
+                return 0.22;
+            }
+            BeatKind.Douse => {
+                if piece != null {
+                    Piece.on(piece).lunge(dir_towards(beat.x, beat.z, beat.tx, beat.tz), 0.26);
+                }
+                splash(spot(beat.x, beat.z) + Vec3(0.0, 0.7, 0.0), spot(beat.tx, beat.tz) + Vec3(0.0, 0.2, 0.0), 0.36, 1.3);
+                Audio.play("audio/splash.wav", 0.55);
+                return 0.36;
             }
             BeatKind.Miss => {
                 let at = spot(beat.x, beat.z);
@@ -698,6 +891,12 @@ script Battle {
         max_hearth = starting_hearth;
         extra_rewinds = 0.0;
         wardens = roster();
+        // Starting past an island that recruits still brings its recruit.
+        for i in 0..island {
+            for kind in recruit_of(island_def(i)) {
+                wardens.push(Warden(kind: kind, max_hp: kind_hp(kind), move: kind_move(kind), power: 0.0));
+            }
+        }
         Random.seed(Save.number("seed", 1.0) * 7919.0 + 17.0);
         Save.set_number("seed", Save.number("seed", 1.0) + 1.0);
         begin_island();
@@ -708,7 +907,24 @@ script Battle {
         Atmosphere.on(World.find("Environment")).go(island, 2.5);
         def = island_def(island);
         landing = landing_of(def);
+        // A new world rekindles the Hearth, and whoever is met there joins.
+        var joined = "";
+        if island > 0.0 && world_of(island) != world_of(island - 1.0) {
+            hearth = max_hearth;
+        }
+        for kind in recruit_of(def) {
+            var has = false;
+            for w in wardens { if w.kind == kind { has = true; } }
+            if !has {
+                wardens.push(Warden(kind: kind, max_hp: kind_hp(kind), move: kind_move(kind), power: 0.0));
+                joined = kind_name(kind);
+            }
+        }
+        recruited = joined;
         board = board_of(def, wardens, hearth);
+        base = [];
+        for h in board.heights { base.push(h); }
+        clear_ground();
         rewinds = 1.0 + extra_rewinds;
         hide_screens();
         show_hud(true);
@@ -776,7 +992,11 @@ script Battle {
             Audio.play("audio/emerge.wav", 0.4);
         }
         if risen && arrival_clock >= 2.6 {
-            banner(def.name, def.blurb);
+            if recruited != "" {
+                banner(def.name, "The " + recruited + " joins you. " + def.blurb);
+            } else {
+                banner(def.name, def.blurb);
+            }
             // The first Hollow climb out, then plan, before the wardens' first turn.
             var first = mark_spawns(board, landing);
             first = emerge(first);
@@ -1032,6 +1252,8 @@ script Battle {
     fn figure_height(kind: Kind) -> number {
         return match kind {
             Kind.Colossus => 2.0,
+            Kind.Kiln => 2.0,
+            Kind.Vent => 0.7,
             Kind.Beacon => 1.6,
             Kind.House => 1.0,
             Kind.Stone => 0.7,
@@ -1180,7 +1402,11 @@ script Battle {
                 }
             }
             if beat.kind == BeatKind.Drown { harm += "drowns  "; }
+            if beat.kind == BeatKind.Burn { harm += "burns  "; }
             if beat.kind == BeatKind.Raise { harm += "a stone rises  "; }
+            if beat.kind == BeatKind.Basalt { harm += "new ground  "; }
+            if beat.kind == BeatKind.Steam { harm += "hiss  "; }
+            if beat.kind == BeatKind.Pool && beat.amount == WATER { harm += "a pool  "; }
         }
         if harm == "" { harm = "No effect."; }
         set_text("Preview", harm);
@@ -1210,9 +1436,15 @@ script Battle {
             return;
         }
         show_screen("Held", true);
+        var why = "High tide. The causeway is under water and the Hollow turn back.";
+        if board.molten { why = "The lava has sealed the gate, and the Hollow cannot come through it."; }
+        var next = "next, " + island_def(island).name;
+        if world_of(island) != world_of(island - 1.0) {
+            why += " Beyond the Lighthouse, the road goes on into the burning mountain.";
+            next = "next, " + world_name(island) + ": the Hearth will be rekindled";
+        }
         screen_words("Held", "Island " + island + " of " + ISLAND_COUNT + " held", def.name + " holds",
-            "High tide. The causeway is under water and the Hollow turn back.",
-            "Hearth " + hearth + " of " + max_hearth + "  ·  next, " + island_def(island).name);
+            why, "Hearth " + hearth + " of " + max_hearth + "  ·  " + next);
     }
 
     fn lose() {
@@ -1325,12 +1557,15 @@ script Battle {
         hide_screens();
         show_hud(false);
         // The Lighthouse behind the title, its wardens standing ready.
-        island = ISLAND_COUNT - 1.0;
+        island = TITLE_ISLAND;
         def = island_def(island);
         board = board_of(def, roster(), starting_hearth);
         shown_tide = 0.0;
         place_sea(0.0);
         clear_pieces();
+        base = [];
+        for h in board.heights { base.push(h); }
+        clear_ground();
         show_island();
         sync_pieces();
         clear_plan();
@@ -1397,6 +1632,7 @@ script Battle {
         set_text("IslandName", def.name);
         set_text("RoundText", "Round " + min(board.round, board.rounds) + " of " + board.rounds);
         var tide = "Tide " + board.tide;
+        if board.molten { tide = "Lava " + board.tide; }
         if rises_this_round(board) {
             tide += "  —  rising after this round";
         } else {
@@ -1543,6 +1779,38 @@ script Battle {
         }
     }
 
+    // A gem over the warden in hand, turning and bobbing, so which one is
+    // taken up is never in doubt. It glides from warden to warden rather than
+    // jumping, and fades when nobody is in hand.
+    fn update_marker(dt: number) {
+        if marker == null { return; }
+        var wanted = 0.0;
+        var target = marker_at;
+        if phase == Phase.Player && selected >= 0.0 {
+            let piece = piece_of(selected);
+            let index = unit_index(board, selected);
+            if piece != null && index >= 0.0 {
+                let p = piece.transform.position;
+                target = Vec3(p.x, p.y + label_height(board.units[index].kind) + 0.6, p.z);
+                wanted = 1.0;
+            }
+        }
+        if marker_shown <= 0.01 && wanted > 0.0 { marker_at = target; }
+        marker_at = marker_at.lerp(target, min(1.0, dt * 14.0));
+        if wanted > marker_shown {
+            marker_shown = min(wanted, marker_shown + dt * 5.0);
+        } else {
+            marker_shown = max(wanted, marker_shown - dt * 5.0);
+        }
+        World.set_active(marker, marker_shown > 0.01);
+        if marker_shown <= 0.01 { return; }
+        let bob = sin(Time.elapsed * 3.2) * 0.1;
+        marker.transform.position = marker_at + Vec3(0.0, bob, 0.0);
+        marker.transform.yaw = Time.elapsed * 1.8;
+        let size = 1.7 * marker_shown;
+        marker.transform.scale = Vec3(size, size, size);
+    }
+
     fn update(dt: number) {
         preview_screen();
         handle_view_drag();
@@ -1550,6 +1818,7 @@ script Battle {
         update_banner();
         update_sea();
         update_lights();
+        update_marker(dt);
         match phase {
             // `title.decay` has the title, and says when a crossing begins.
             Phase.Title => {}

@@ -33,8 +33,11 @@ island while the Hollow cross the causeway from the mainland at low tide; each
 Hollow shows on the ground what it will strike, and a shove that moves it moves
 its strike, so a turn is read and answered rather than raced. The tide comes in
 on a schedule shown in advance, drowning any Hollow it reaches, and high tide
-closes the causeway and wins the island. Four islands make a crossing, with a
-boon chosen between them and the Hearth carried from one to the next.
+closes the causeway and wins the island. Seven islands in two worlds make a
+crossing, with a boon chosen between them and the Hearth carried from one to
+the next. In the second world, the Cinderfast, lava rises instead of the tide:
+it burns what it reaches, vents spill it across the board, and water a warden
+throws on it cools into new ground.
 
 The rules are one value and pure shared functions in `rules.decay`, so aiming
 previews a skill by running it on a copy of the board; the director plays back
