@@ -1055,7 +1055,8 @@ script Battle {
         if !Pointer.is_down("Left") && !Pointer.just_released("Left") { view_pointer_blocked = false; }
         if !Pointer.is_down("Left") && !Pointer.just_released("Left") { BattlefieldView.dragging = false; }
         if Input.Touch.count > 1.0 { view_drag_used = true; }
-        if phase != Phase.Player && phase != Phase.Resolving { return; }
+        // The view turns while an island rises too, as it does from the keys.
+        if phase != Phase.Player && phase != Phase.Resolving && phase != Phase.Arriving { return; }
         if Pointer.just_pressed("Left") && !BattlefieldView.turning {
             BattlefieldView.dragging = view_drag_region();
             if BattlefieldView.dragging { print("Causeway sea swipe began"); }
