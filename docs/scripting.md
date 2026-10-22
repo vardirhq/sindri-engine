@@ -2213,8 +2213,9 @@ script Aim {
 
 What each unified answer means when both a mouse and a finger are present:
 
-- **Position** is the mouse when there is one, and the first finger otherwise. A
-  machine with both is a machine someone is using the mouse on.
+- **Position** follows the first active finger, including its final position on
+  the release frame, then returns to the mouse. A parked mouse cannot mask a
+  touch gesture on a device that supports both.
 - **`is_down("Left")`** is the left mouse button *or* any finger. A tap and a
   click are the same line of gameplay code, which is the convention the web
   settled on. A finger is `Left` and nothing else — it is not a right-click.

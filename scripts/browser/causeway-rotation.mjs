@@ -41,14 +41,18 @@ try {
     await page.goto(`http://127.0.0.1:${server.address().port}${base}`);
     await page.waitForFunction(() => !document.querySelector('#sindri-loading'), null, { timeout: 60000 });
     await page.waitForTimeout(5000);
+    await page.locator('canvas').click();
     await page.keyboard.press('Enter');
-    for (let attempt = 0; attempt < 300 && !battlefieldReady; attempt++) await page.waitForTimeout(100);
+    for (let attempt = 0; attempt < 600 && !battlefieldReady; attempt++) await page.waitForTimeout(100);
     assert(battlefieldReady, `${name} title handed the camera to the battlefield`);
     const waitForTurns = async (count) => {
       for (let attempt = 0; attempt < 100 && turns.length < count; attempt++) await page.waitForTimeout(100);
       assert.equal(turns.length, count, `${name} completed ${count} quarter turns`);
     };
-    const before = await page.locator('canvas').screenshot();
+    const captureCanvas = async () => page.screenshot({
+      clip: await page.locator('canvas').boundingBox(), timeout: 90000,
+    });
+    const before = await captureCanvas();
     if (name === 'desktop') {
       await page.keyboard.press('l');
     } else {
@@ -56,14 +60,14 @@ try {
     }
     await page.waitForTimeout(1000);
     await waitForTurns(1);
-    const after = await page.locator('canvas').screenshot();
+    const after = await captureCanvas();
     assert(!before.equals(after), `${name} view changes after rotation input`);
     if (name === 'phone') {
       const cdp = await context.newCDPSession(page);
       await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: 80, y: 180 }] });
-      await page.waitForTimeout(100);
+      await page.waitForTimeout(500);
       await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: 180, y: 180 }] });
-      await page.waitForTimeout(100);
+      await page.waitForTimeout(500);
       await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
       await page.waitForTimeout(1000);
       await waitForTurns(2);

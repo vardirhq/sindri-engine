@@ -1,5 +1,8 @@
 # Changelog
 
+- Let active touches drive the unified pointer on hybrid devices, retaining the
+  release position for taps before returning to the mouse.
+
 - Add four smoothly eased Causeway battlefield views, J/L and compact touch
   buttons, and horizontal swipes beginning in empty sea. Keep picking and
   keyboard movement aligned with the view.

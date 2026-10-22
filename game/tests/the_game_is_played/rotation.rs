@@ -137,6 +137,11 @@ fn phone_swipes_turn_only_when_they_begin_in_empty_sea() {
     let point = game.pixel_of(start, top_of(start));
     swipe(&mut game, point, [point[0] + 70.0, point[1]]);
     assert!(Vec3::from(pose(&game).position).abs_diff_eq(Vec3::from(home.position), 0.002));
+    // A prior mouse hover must not mask touch input on hybrid devices.
+    game.run
+        .input
+        .apply(InputEvent::PointerMoved { x: 359.0, y: 102.0 });
+    game.step();
     swipe(&mut game, [80.0, 180.0], [180.0, 180.0]);
     assert!(!Vec3::from(pose(&game).position).abs_diff_eq(Vec3::from(home.position), 0.1));
     assert_eq!(game.cell_of(game.pieces("bulwark")[0]), start);

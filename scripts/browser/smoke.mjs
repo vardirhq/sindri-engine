@@ -468,8 +468,11 @@ const canvas = await page.evaluate(() => {
 // canvas gives nothing back to `drawImage` -- the browser composites its
 // contents but does not keep them readable. The screenshot is what a player
 // sees, which is the thing in question anyway.
-const drawn = canvas
-  ? imageStatistics(await page.locator('canvas').screenshot())
+// Capture the canvas bounds directly: element screenshots wait for animation
+// frames to establish layout stability, which can starve under software WebGPU.
+const canvasBounds = canvas ? await page.locator('canvas').boundingBox() : null;
+const drawn = canvasBounds
+  ? imageStatistics(await page.screenshot({ clip: canvasBounds, timeout: 90000 }))
   : null;
 
 if (SHOT) await page.screenshot({ path: SHOT });

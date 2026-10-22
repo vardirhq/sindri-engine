@@ -45,8 +45,10 @@ parity = "Unified pointer, bounded fingers"
 tests = [
   "crates/sindri-platform/src/input/state_tests.rs",
   "crates/sindri-decay/tests/a_script_reads_the_pointer.rs",
+  "game/tests/the_game_is_played/rotation.rs",
+  "scripts/browser/causeway-rotation.mjs",
 ]
-proof = ["examples/physics"]
+proof = ["examples/physics", "game"]
 detail = """
 Touch is held beside the mouse rather than folded into it, because they are
 different facts: a mouse has one position and is always somewhere, while
@@ -55,7 +57,9 @@ ordered by the id their host gave them so one keeps its place while it stays
 down, and let go of when a window loses focus — a finger cannot be reported as
 lifted once the window has stopped hearing about it. What *unifies* the two is
 a separate question and is answered where a game reads it: `pointer_position`
-is the mouse if there is one and the first finger otherwise, and
+follows the first active finger, retains its final position through the release
+frame, and otherwise follows the mouse. A parked mouse cannot mask touch on a
+hybrid device, and
 `pointer_down(Left)` is the left button or any finger.
 """
 
