@@ -62,6 +62,8 @@ Each entry links its tests and the projects that exercise it. Surface marks matc
 | [Retained inline mesh geometry](#retained-inline-meshes) | 🟡 | 🟡 | — | 🟡 |
 | [Authored material sidedness](#material-sidedness) | 🟡 | 🟡 | — | 🟡 |
 | [Shared render material profiles](#render-material-profiles) | 🟡 | 🟡 | — | 🟡 |
+| **3D rendering** | | | | |
+| [Imported-model occlusion silhouettes](#model-occlusion-silhouettes) | ✅ | ❌ | — | ✅ |
 
 ## Hosts and GPU
 
@@ -1311,5 +1313,33 @@ and shared-edit controls, exercised in native and real Chromium/WebGPU captures.
 Native editor review covers creation, selection/history, validated Save/correction,
 reload, reopen and Play. Material texture ownership, unified alpha and in-tree
 game adoption remain open.
+
+</details>
+
+## 3D rendering
+
+<a id="model-occlusion-silhouettes"></a>
+
+### Imported-model occlusion silhouettes
+
+Optional muted model silhouettes keep Causeway units visible behind elevated terrain.
+
+Engine ✅ · Editor ❌ · Decay — · Proof ✅ — parity row *Imported-model occlusion silhouettes*
+
+**Tested by:** [`crates/sindri-scene/tests/extraction/models.rs`](../../crates/sindri-scene/tests/extraction/models.rs), [`crates/sindri-gpu/tests/imported_models/occlusion.rs`](../../crates/sindri-gpu/tests/imported_models/occlusion.rs)
+
+**Exercised in:** [`game`](../../game)
+
+**See:** [`docs/model-occlusion.md`](../../docs/model-occlusion.md)
+
+<details markdown="1">
+<summary>Evidence</summary>
+
+`sindri.model.occluded_color` opts into a depth-tested flat RGBA pass. Opaque
+non-subject geometry fills depth first, then silhouettes, then normally lit
+subjects. Shared geometry, material facing and cutouts are preserved. No
+subject self-occlusion; opted-in subjects do not reveal each other. Filled
+silhouettes may accumulate alpha where primitives overlap; transparency can
+cover them. JSON authoring only; editor color interaction is not proven.
 
 </details>
