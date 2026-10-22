@@ -684,14 +684,14 @@ Engine ❌ · Editor — · Decay — · Proof —
 
 ### Fractional component writes from integer-authored numbers
 
-Existing generic numeric component leaves round writes when the stored JSON slot is an integer, so fractional 2D light intensity or tint can be lost
+A generic numeric leaf the scene wrote as an integer rounds a script's write, so a fractional 2D light intensity can be lost; color and shader-parameter channels no longer round
 
 Engine ❌ · Editor — · Decay ❌ · Proof ❌ — parity row *Fractional component writes from integer-authored numbers*
 
 <details markdown="1">
 <summary>Evidence</summary>
 
-Existing generic numeric component leaves round writes when the stored JSON slot is an integer, so fractional 2D light intensity or tint can be lost. Checked 3D light/environment setters use dedicated floating-point storage; other leaves still need declared storage semantics (`sindri-decay/host/access.rs`)
+A generic numeric leaf the scene wrote as an integer rounds a script's write, so a fractional 2D light intensity can be lost. A channel reached by index -- a color's `a`, a shader parameter -- is always a fraction and never rounds, so a tint authored as `[1, 1, 1, 0]` fades. Checked 3D light/environment setters use dedicated floating-point storage; other leaves still need declared storage semantics (`sindri-decay/host/access.rs`)
 
 </details>
 

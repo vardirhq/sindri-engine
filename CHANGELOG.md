@@ -1,5 +1,27 @@
 # Changelog
 
+- Give each Causeway island its own mood and weather: a clear morning on
+  Saltmarsh, mist and drizzle over The Fold, a gold afternoon on Quarry Rise and
+  a night storm at The Lighthouse, with lightning, thunder and rain rings on
+  the sea, and dusk on the title. The sun, sky, fog, grade, bloom, lamps,
+  window and rift lights and the drifting pollen, dust, fireflies and embers
+  all ease between them. The sea is a shader with shallows, swell, glints and
+  foam. Islands sink and rise rather than swapping, marks, the cursor and the
+  banner fade, and the screens between islands come up a piece at a time.
+- Rebalance Causeway so its islands ramp: Saltmarsh and The Fold ask more,
+  The Lighthouse less, and a seeded bot crosses about half its runs. Boons are
+  now four cards drawn from nine, including more hearth, extra rewinds and
+  upgrades per warden.
+- Let Decay read and write fog, the color grade and bloom while a game runs,
+  through `this.environment.fog`, `.post_process` and `.bloom`, checked as the
+  scene's own values are.
+- Never round a color or shader-parameter channel a script writes, so a tint
+  the scene authored as `[1, 1, 1, 0]` fades instead of jumping between 0 and 1.
+- Add Weave `position: absolute`: the element leaves its parent's line or grid,
+  which closes up, and is placed by its own `x` and `y` from the parent's middle.
+- Add `ProjectRun::set_board`, so a test can set a shared board value as a
+  script would.
+
 - Skip an imported model scaled to nothing instead of stopping the frame. A
   figure a game shrinks away has nothing left to draw, but its singular
   transform was refused, and in the browser that ended the game: Causeway's

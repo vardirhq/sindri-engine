@@ -242,7 +242,7 @@ CSS flexbox and grid layout in the engine, margin/padding/box-shadow, and text t
 
 Engine ✅ · Editor ✅ · Decay — · Proof ✅
 
-**Tested by:** [`crates/sindri-weave/tests/flex.rs`](../../crates/sindri-weave/tests/flex.rs), [`crates/sindri-weave/tests/grid.rs`](../../crates/sindri-weave/tests/grid.rs), [`crates/sindri-weave/tests/padding.rs`](../../crates/sindri-weave/tests/padding.rs), [`crates/sindri-scene/src/screen_ui/flex/tests.rs`](../../crates/sindri-scene/src/screen_ui/flex/tests.rs), [`crates/sindri-scene/src/screen_ui/grid/tests.rs`](../../crates/sindri-scene/src/screen_ui/grid/tests.rs), [`crates/sindri-scene/tests/text_sizing.rs`](../../crates/sindri-scene/tests/text_sizing.rs)
+**Tested by:** [`crates/sindri-weave/tests/flex.rs`](../../crates/sindri-weave/tests/flex.rs), [`crates/sindri-weave/tests/grid.rs`](../../crates/sindri-weave/tests/grid.rs), [`crates/sindri-weave/tests/padding.rs`](../../crates/sindri-weave/tests/padding.rs), [`crates/sindri-scene/src/screen_ui/flex/tests.rs`](../../crates/sindri-scene/src/screen_ui/flex/tests.rs), [`crates/sindri-scene/src/screen_ui/grid/tests.rs`](../../crates/sindri-scene/src/screen_ui/grid/tests.rs), [`crates/sindri-scene/tests/text_sizing.rs`](../../crates/sindri-scene/tests/text_sizing.rs), [`crates/sindri-scene/tests/screen_ui.rs`](../../crates/sindri-scene/tests/screen_ui.rs)
 
 **Exercised in:** [`games/orbital-baked`](../../games/orbital-baked), [`games/weave-poc`](../../games/weave-poc)
 
@@ -259,7 +259,10 @@ content, and each child's `sindri.ui.box` grows, shrinks, takes a basis, orders
 and aligns itself within min/max limits. Layout decides sizes as well as
 places, and drawing, hit-testing and the editor's picking use them. Weave's
 `flex`, its longhands, `flex-wrap`, `order`, `align-self`, `width: auto` and
-the rest write the same data.
+the rest write the same data. `position: absolute` takes an element out of
+its parent's line or grid, which closes up as if it were not there, and places
+it by its own `x` and `y` from the parent's middle; Causeway lays its island
+banner's cloud under the words that way.
 
 Text sizes what holds it: a text element whose `sindri.ui.box` fits its content
 (Weave's `width: auto`) is measured by its font each draw, so a label sizes a
