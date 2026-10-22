@@ -406,3 +406,5 @@ unsupported, and extension policy is unchanged (required extensions rejected,
 optional extensions warned/ignored). Decoder, facade, GPU readback and native/
 browser GLB controls exercise the path. See [material evidence](rendering-materials.md).
 This feature proof precedes Explorer game adoption.
+
+Optional [occlusion silhouettes](model-occlusion.md) reveal model subjects behind opaque terrain.

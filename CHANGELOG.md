@@ -1,5 +1,13 @@
 # Changelog
 
+- Let active touches drive the unified pointer on hybrid devices, retaining the
+  release position for taps before returning to the mouse.
+
+- Add four smoothly eased Causeway battlefield views, J/L and compact touch
+  buttons, and horizontal swipes beginning in empty sea. Keep picking and
+  keyboard movement aligned with the view.
+- Keep Causeway units visible behind raised terrain with muted silhouettes,
+  using the reusable optional `sindri.model.occluded_color` rendering path.
 - Write Decay's numeric type as `number` in every checked-in script and in
   the docs' Decay snippets. The examples and games still said `f32`, its first
   spelling, so the knowledge pack taught a model to write it. A test in

@@ -221,7 +221,7 @@ fn encode_directional_shadows(
     }
     let Some(camera) = passes
         .iter()
-        .find(|pass| pass.stage == RenderStage::Opaque3d)
+        .find(|pass| matches!(pass.stage, RenderStage::Opaque3d | RenderStage::Visible3d))
         .map(|pass| pass.camera.view_projection)
     else {
         return Ok(());
@@ -230,7 +230,7 @@ fn encode_directional_shadows(
     cube.begin_shadow_pass(encoder, camera);
     for pass in passes
         .iter()
-        .filter(|pass| pass.stage == RenderStage::Opaque3d)
+        .filter(|pass| matches!(pass.stage, RenderStage::Opaque3d | RenderStage::Visible3d))
     {
         cube.set_material(pass.material)?;
         cube.set_sidedness(pass.sidedness);
@@ -336,13 +336,13 @@ fn encode_passes<'p>(
         cube_renderer.set_sidedness(pass.sidedness);
         match &pass.command {
             FrameCommand::Model { model, asset } => {
-                cube_renderer.encode_model(
+                cube_renderer.encode_model_occluded(
                     device,
                     queue,
                     encoder,
                     target,
                     asset,
-                    (*model, pass.camera),
+                    (*model, pass.camera, pass.occluded_color),
                 )?;
             }
             FrameCommand::TexturedCube { model, texture } => cube_renderer.encode_world(

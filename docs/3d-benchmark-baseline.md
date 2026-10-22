@@ -371,3 +371,14 @@ normals change 1,451 pixels (maximum channel difference 45). Lighting Lab's live
 phase controls show 109,227 added red and 154,881 removed blue pixels, alongside
 its expected background changes. No runtime or GPU errors are reported.
 The native editor authored-color capture also passes the scene color verifier.
+
+## Optional model silhouette accounting
+
+Causeway's terrain-occlusion pass adds a 16-byte optional silhouette color to
+each model color uniform, increasing its size from 928 to 944 bytes. The
+historical measurements above predate this addition. The current fixed workload
+writes 293,744 bytes with shadows and 271,280 without, retaining the same draw,
+pass, write and settled geometry-upload counts. Three-frame software-Vulkan
+standalone reports verify both totals with nonzero GPU timings through
+`scripts/check-3d-benchmark.py`. Models without an occlusion color require no
+additional draws.

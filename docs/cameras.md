@@ -136,3 +136,20 @@ Format 6 used orthographic `sindri.camera` components for the old screen-overlay
 The built-in 6 -> 7 migration therefore removes format-6 orthographic camera components while preserving their entities and unrelated data. Perspective cameras survive unchanged. From format 7 onward, an authored orthographic camera is a normal transform-driven world camera.
 
 The earlier 5 -> 6 migration remains part of the chain: old perspective `target`/`up` look-at data is converted to the equivalent `Transform3D.rotation`. `target` and `up` are not part of the current camera model and must not be reintroduced.
+
+## Causeway quarter views
+
+Causeway's `CameraRig` uses the existing world-space `rotate_around` API to
+turn around (28, 1.4, 28) in four 90-degree steps with 300 ms smoothstep easing.
+The authored pitch, distance, focus, orthographic size and aspect fitting are
+preserved. `TitleShow` supplies the authored pose and explicitly hands ownership
+to the battle rig after the opening. Impact shake remains an engine behavior.
+
+J/L and the compact HUD arrows rotate on desktop or touch. A single-finger
+horizontal swipe of at least 48 pixels can also rotate when it begins outside
+the board or over an empty wet cell. HUD and playable-cell starts retain their
+original meaning; multi-touch cancels the swipe. One gesture requests one turn.
+Picking and game commands wait until the new view's ray has settled, and a
+pointer held across a turn must be released before it can act. Keyboard cursor
+movement follows the current quarter view; movement and combat remain in board
+coordinates. [Model silhouettes](model-occlusion.md) retain hidden-unit visibility.

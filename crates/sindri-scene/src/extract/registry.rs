@@ -169,7 +169,7 @@ fn register_drawables(components: &mut ComponentSchemaRegistry) -> Result<(), Sc
     // An asset reference has no honest blank model the engine can invent.
     components.register_with_fields::<crate::ModelComponent>(
         "Model",
-        serde_json::json!({ "asset": "models/model.glb", "layer": 0 }),
+        serde_json::json!({ "asset": "models/model.glb", "layer": 0, "occluded_color": null }),
     )?;
     components.describe::<crate::ModelComponent>([(
         "asset",

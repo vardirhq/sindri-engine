@@ -39,7 +39,7 @@
           "stroke_width": 0.0
         },
         "sindri.ui.box": {
-          "order": 3
+          "order": 4
         }
       }
     },
@@ -1141,7 +1141,7 @@
           "justify": "start"
         },
         "sindri.ui.box": {
-          "order": 2
+          "order": 3
         }
       }
     },
@@ -2898,7 +2898,7 @@
           ]
         },
         "sindri.ui.text": {
-          "text": "Click or tap to play.  Keys: arrows and Enter, Q aims, Tab next warden, Z undoes a move, E ends the turn, R rewinds once per island.",
+          "text": "Click or tap to play.  Keys: arrows and Enter, Q aims, Tab next warden, Z undoes a move, E ends the turn, R rewinds. J/L or < > rotate; swipe across empty sea on touch.",
           "font": "fonts/AlegreyaSans-Medium.ttf",
           "font_size": 0.022,
           "line_height": 0.02684,
@@ -3300,6 +3300,174 @@
           "font": "fonts/AlegreyaSans-Bold.ttf",
           "font_size": 0.028,
           "line_height": 0.03416,
+          "anchor": "center",
+          "layer": 132,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "bounds": [
+            0.0,
+            0.0
+          ]
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "rotate-left",
+      "name": "RotateLeft",
+      "parent": "view-controls",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "button",
+            "rotate"
+          ]
+        },
+        "sindri.ui.button": {
+          "label": "<"
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "anchor": "center",
+          "layer": 130,
+          "fill": [
+            0.1,
+            0.16,
+            0.2,
+            1.0
+          ],
+          "stroke": [
+            0.95,
+            0.8,
+            0.5,
+            0.6
+          ],
+          "stroke_width": 0.004,
+          "corner_radius": 0.01
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "rotate-left-label",
+      "name": "RotateLeft Label",
+      "parent": "rotate-left",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "button-label"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "<",
+          "font": "fonts/AlegreyaSans-Bold.ttf",
+          "font_size": 0.034,
+          "line_height": 0.04148,
+          "anchor": "center",
+          "layer": 132,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "bounds": [
+            0.0,
+            0.0
+          ]
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "rotate-right",
+      "name": "RotateRight",
+      "parent": "view-controls",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "button",
+            "rotate"
+          ]
+        },
+        "sindri.ui.button": {
+          "label": ">"
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "anchor": "center",
+          "layer": 130,
+          "fill": [
+            0.1,
+            0.16,
+            0.2,
+            1.0
+          ],
+          "stroke": [
+            0.95,
+            0.8,
+            0.5,
+            0.6
+          ],
+          "stroke_width": 0.004,
+          "corner_radius": 0.01
+        },
+        "sindri.ui.box": {
+          "order": 1
+        }
+      }
+    },
+    {
+      "id": "rotate-right-label",
+      "name": "RotateRight Label",
+      "parent": "rotate-right",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "button-label"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": ">",
+          "font": "fonts/AlegreyaSans-Bold.ttf",
+          "font_size": 0.034,
+          "line_height": 0.04148,
           "anchor": "center",
           "layer": 132,
           "color": [
@@ -5307,6 +5475,43 @@
         },
         "sindri.ui.box": {
           "order": 0
+        }
+      }
+    },
+    {
+      "id": "view-controls",
+      "name": "ViewControls",
+      "parent": "hud",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "view-controls"
+          ]
+        },
+        "sindri.ui.layout": {
+          "direction": "row",
+          "spacing": 0.01
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "anchor": "center",
+          "layer": 100,
+          "fill": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0.0
+        },
+        "sindri.ui.box": {
+          "order": 2
         }
       }
     },

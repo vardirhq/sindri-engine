@@ -28,7 +28,13 @@
       "components": {
         "sindri.model": {
           "asset": "models/spitter.glb",
-          "layer": 0
+          "layer": 0,
+          "occluded_color": [
+            0.65,
+            0.24,
+            0.18,
+            0.3
+          ]
         },
         "sindri.script": {
           "script": "Piece",

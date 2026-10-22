@@ -48,10 +48,10 @@ shading as it does to sun shading; imported geometry still has no authored
 mesh-AO channel.
 
 Each color draw carries eight 64-byte records, including empty slots. Textured
-color uniforms are 880 bytes and model color uniforms 928 bytes; pass/write
+color uniforms are 880 bytes and model color uniforms 944 bytes (including the optional silhouette color); pass/write
 counts, shadow uniforms and retained geometry do not change. Batching, shared
 light buffers and whole-frame performance targets remain open. The fixed 3D
-workload now uploads 292,144/269,680 uniform bytes with shadows on/off,
+workload now uploads 293,744/271,280 uniform bytes with shadows on/off,
 retaining 602/301 draws and 603/301 passes.
 
 The editor offers Create Point Light and Create Spot Light, with one checked

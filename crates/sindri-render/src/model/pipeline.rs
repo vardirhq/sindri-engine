@@ -59,6 +59,7 @@ pub(super) fn create(
     device: &wgpu::Device,
     format: wgpu::TextureFormat,
     layout: &wgpu::BindGroupLayout,
+    occluded: bool,
 ) -> wgpu::RenderPipeline {
     let shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
         label: Some("Imported model shader"),
@@ -86,12 +87,14 @@ pub(super) fn create(
                 attributes: &wgpu::vertex_attr_array![0 => Float32x3, 1 => Float32x3, 2 => Float32x2],
             })], compilation_options: wgpu::PipelineCompilationOptions::default(),
         },
-        fragment: Some(wgpu::FragmentState { module: &shader, entry_point: Some("fs_main"), targets: &[Some(format.into())], compilation_options: wgpu::PipelineCompilationOptions::default() }),
+        fragment: Some(wgpu::FragmentState { module: &shader, entry_point: Some(if occluded { "fs_occluded" } else { "fs_main" }), targets: &[Some(wgpu::ColorTargetState {
+            format, blend: if occluded { Some(wgpu::BlendState::ALPHA_BLENDING) } else { None }, write_mask: wgpu::ColorWrites::ALL,
+        })], compilation_options: wgpu::PipelineCompilationOptions::default() }),
         // Handle sidedness in the shader so mirrored instances retain correct
         // facing without multiplying pipelines and GPU geometry.
         primitive: wgpu::PrimitiveState { cull_mode: None, ..Default::default() },
         depth_stencil: Some(wgpu::DepthStencilState {
-            format: DepthTarget::FORMAT, depth_write_enabled: Some(true), depth_compare: Some(wgpu::CompareFunction::Less), stencil: wgpu::StencilState::default(), bias: wgpu::DepthBiasState::default(),
+            format: DepthTarget::FORMAT, depth_write_enabled: Some(!occluded), depth_compare: Some(if occluded { wgpu::CompareFunction::Greater } else { wgpu::CompareFunction::Less }), stencil: wgpu::StencilState::default(), bias: wgpu::DepthBiasState::default(),
         }), multisample: wgpu::MultisampleState::default(), multiview_mask: None, cache: None,
     })
 }

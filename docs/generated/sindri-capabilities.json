@@ -839,7 +839,8 @@
       "display_name": "Model",
       "fields": {
         "asset": "models/model.glb",
-        "layer": 0
+        "layer": 0,
+        "occluded_color": null
       },
       "meanings": {
         "asset": {

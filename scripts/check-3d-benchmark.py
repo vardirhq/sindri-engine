@@ -15,8 +15,8 @@ def check(path: str, shadows: bool, require_timing: bool = False) -> None:
         "draw_calls": 602 if shadows else 301,
         "render_passes": 603 if shadows else 301,
         "uniform_writes": 602 if shadows else 301,
-        # Color uniforms: 201 * 880 + 100 * 928; shadow matrices: 201 * 64; model shadow uniforms: 100 * 96.
-        "uniform_bytes": 292144 if shadows else 269680,
+        # Color uniforms: 201 * 880 + 100 * 944; shadow matrices: 201 * 64; model shadow uniforms: 100 * 96.
+        "uniform_bytes": 293744 if shadows else 271280,
         "transient_geometry_uploads": 0,
         "model_uploads": 0,
         "cached_geometry_uploads": 0,

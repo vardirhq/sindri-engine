@@ -25,6 +25,9 @@ script BrowserVoxelLanding {
         if body == null || !World.exists(body) {
             return;
         }
+        if frames % 60.0 == 0.0 {
+            print("Voxel landing progress: " + frames + " steps, y=" + body.transform.world_position.y);
+        }
         let below = Physics3d.raycast(body.transform.world_position, Vec3(0.0, -1.0, 0.0), 1.0, solid, false, body);
         let still = Physics3d.velocity(body).length < 0.05;
         var on_world = false;

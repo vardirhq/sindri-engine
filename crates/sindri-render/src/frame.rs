@@ -52,6 +52,10 @@ impl Default for ClearOperations {
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub enum RenderStage {
     Opaque3d,
+    /// Hidden subject fragments against opaque scene depth, without depth writes.
+    Occluded3d,
+    /// Normally lit subjects, drawn after their silhouettes.
+    Visible3d,
     Transparent2d,
     Overlay,
 }
@@ -159,6 +163,8 @@ pub struct FramePass {
     pub material: Option<crate::MaterialFactors>,
     /// Face visibility, independent of standard factors and geometry ownership.
     pub sidedness: crate::MaterialSidedness,
+    /// Imported-model silhouette RGBA; finite channels in 0..=1.
+    pub occluded_color: Option<[f32; 4]>,
 }
 
 impl FramePass {
@@ -182,6 +188,7 @@ impl FramePass {
             insertion_order: 0,
             clip: None,
             material: None,
+            occluded_color: None,
             sidedness: crate::MaterialSidedness::Inherit,
         }
     }
@@ -243,6 +250,13 @@ impl ExtractedFrame {
             return Err(FramePlanError::NonFiniteClearValue);
         }
         for pass in &self.passes {
+            if pass.occluded_color.is_some_and(|color| {
+                color
+                    .into_iter()
+                    .any(|c| !c.is_finite() || !(0.0..=1.0).contains(&c))
+            }) {
+                return Err(FramePlanError::InvalidOccludedColor);
+            }
             if let Some(material) = pass.material {
                 material.validate()?;
             }
@@ -311,6 +325,8 @@ pub enum FramePlanError {
     NonFiniteClearValue,
     #[error("textured vertex normals must be finite; zero requests flat shading")]
     NonFiniteNormal,
+    #[error("model silhouette color must contain finite channels in 0..=1")]
+    InvalidOccludedColor,
 }
 
 #[cfg(test)]
@@ -370,6 +386,20 @@ mod tests {
             frame.prepare().unwrap_err(),
             FramePlanError::Material(crate::MaterialError::InvalidFactor("roughness"))
         );
+    }
+
+    #[test]
+    fn preparation_rejects_invalid_silhouette_channels() {
+        for channel in [f32::NAN, -0.1, 1.1] {
+            let mut frame = ExtractedFrame::new(Viewport::new(64, 64), ClearOperations::default());
+            let mut subject = pass(RenderStage::Occluded3d, RenderLayer(0));
+            subject.occluded_color = Some([channel, 0.5, 0.5, 0.3]);
+            frame.push(subject);
+            assert_eq!(
+                frame.prepare().unwrap_err(),
+                FramePlanError::InvalidOccludedColor
+            );
+        }
     }
 
     #[test]

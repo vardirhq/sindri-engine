@@ -64,9 +64,9 @@ Touch is kept beside the mouse; `pointer_position` and `pointer_down` unify them
 
 Engine ✅ · Editor ✅ · Decay ✅ · Proof ✅ — parity row *Unified pointer, bounded fingers*
 
-**Tested by:** [`crates/sindri-platform/src/input/state_tests.rs`](../../crates/sindri-platform/src/input/state_tests.rs), [`crates/sindri-decay/tests/a_script_reads_the_pointer.rs`](../../crates/sindri-decay/tests/a_script_reads_the_pointer.rs)
+**Tested by:** [`crates/sindri-platform/src/input/state_tests.rs`](../../crates/sindri-platform/src/input/state_tests.rs), [`crates/sindri-decay/tests/a_script_reads_the_pointer.rs`](../../crates/sindri-decay/tests/a_script_reads_the_pointer.rs), [`game/tests/the_game_is_played/rotation.rs`](../../game/tests/the_game_is_played/rotation.rs), [`scripts/browser/causeway-rotation.mjs`](../../scripts/browser/causeway-rotation.mjs)
 
-**Exercised in:** [`examples/physics`](../../examples/physics)
+**Exercised in:** [`examples/physics`](../../examples/physics), [`game`](../../game)
 
 <details markdown="1">
 <summary>Evidence</summary>
@@ -78,7 +78,9 @@ ordered by the id their host gave them so one keeps its place while it stays
 down, and let go of when a window loses focus — a finger cannot be reported as
 lifted once the window has stopped hearing about it. What *unifies* the two is
 a separate question and is answered where a game reads it: `pointer_position`
-is the mouse if there is one and the first finger otherwise, and
+follows the first active finger, retains its final position through the release
+frame, and otherwise follows the mouse. A parked mouse cannot mask touch on a
+hybrid device, and
 `pointer_down(Left)` is the left button or any finger.
 
 </details>

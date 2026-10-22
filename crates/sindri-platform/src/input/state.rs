@@ -386,23 +386,19 @@ impl InputState {
         self.mouse.position
     }
 
-    /// Where *the* pointer is: the mouse if there is one, else the first
-    /// finger.
+    /// Where *the* pointer is: the first active finger, otherwise the mouse.
     ///
-    /// One position for both, because a game that aims at a point should not
-    /// have to ask which device the person is using — and a game written for a
-    /// mouse then works on a phone without a second code path. The mouse wins
-    /// when both are present, because a machine with both is a machine someone
-    /// is using the mouse on.
+    /// Touch takes priority over a parked mouse on hybrid devices. A finger
+    /// that lifted this frame keeps its final position for the release frame,
+    /// so a tap completes where it ended. The mouse resumes on the next frame.
     #[must_use]
     pub fn pointer_position(&self) -> Option<[f32; 2]> {
-        self.mouse
-            .position
-            .or_else(|| self.touches.values().next().copied())
-            // A finger that lifted this frame is still the answer to "where is
-            // the pointer" for the rest of it, so a tap completes where it
-            // ended rather than nowhere.
+        self.touches
+            .values()
+            .next()
+            .copied()
             .or_else(|| self.touches_ended.values().next().copied())
+            .or(self.mouse.position)
     }
 
     /// Whether the pointer is being pressed: this mouse button, or any finger.

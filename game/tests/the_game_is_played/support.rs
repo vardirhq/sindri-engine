@@ -18,7 +18,7 @@ const ORIGIN: f32 = 24.0;
 pub const PHONE: [f32; 2] = [390.0, 844.0];
 
 pub struct Game {
-    run: ProjectRun,
+    pub(super) run: ProjectRun,
     size: [f32; 2],
 }
 
@@ -115,7 +115,7 @@ impl Game {
     }
 
     /// The pixel over the middle of a cell's top, as the camera draws it.
-    fn pixel_of(&self, cell: (i32, i32), top: f32) -> [f32; 2] {
+    pub(super) fn pixel_of(&self, cell: (i32, i32), top: f32) -> [f32; 2] {
         let camera = sindri_scene::world_camera_of(
             &self.run.world,
             self.run.scene.components(),
@@ -204,7 +204,7 @@ impl Game {
 
 /// The height of a cell's top on the first island, Saltmarsh, from the same
 /// heights `islands.decay` gives it.
-fn top_of(cell: (i32, i32)) -> f32 {
+pub(super) fn top_of(cell: (i32, i32)) -> f32 {
     const SALTMARSH: &str = "00111100012332101234432112333211123322110122211100122110\
                              00011100";
     let index = usize::try_from(cell.1 * 8 + cell.0).expect("a cell on the board");

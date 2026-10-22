@@ -138,15 +138,23 @@ fn a_finger_is_where_the_host_put_it() {
 /// A game that aims at a point should not have to ask which device the
 /// person is using.
 #[test]
-fn the_pointer_is_the_mouse_or_the_first_finger() {
+fn touch_takes_priority_over_a_parked_mouse_through_release() {
     let mut state = InputState::default();
     assert_eq!(state.pointer_position(), None);
-
+    state.apply(InputEvent::PointerMoved { x: 1.0, y: 2.0 });
+    assert_eq!(state.pointer_position(), Some([1.0, 2.0]));
     down(&mut state, 7, 5.0, 6.0);
     assert_eq!(state.pointer_position(), Some([5.0, 6.0]));
-
-    // A machine with both is a machine someone is using the mouse on.
-    state.apply(InputEvent::PointerMoved { x: 1.0, y: 2.0 });
+    state.apply(InputEvent::TouchMoved {
+        id: 7,
+        x: 8.0,
+        y: 9.0,
+    });
+    assert_eq!(state.pointer_position(), Some([8.0, 9.0]));
+    assert_eq!(state.pointer(), Some([1.0, 2.0]));
+    state.apply(InputEvent::TouchEnded { id: 7 });
+    assert_eq!(state.pointer_position(), Some([8.0, 9.0]));
+    state.begin_frame(FRAME);
     assert_eq!(state.pointer_position(), Some([1.0, 2.0]));
 }
 
