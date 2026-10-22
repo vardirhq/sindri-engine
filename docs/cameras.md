@@ -153,3 +153,10 @@ Picking and game commands wait until the new view's ray has settled, and a
 pointer held across a turn must be released before it can act. Keyboard cursor
 movement follows the current quarter view; movement and combat remain in board
 coordinates. [Model silhouettes](model-occlusion.md) retain hidden-unit visibility.
+
+T and the HUD's Top button tip the rig into a floor plan and back: after the
+quarter turn, a second `rotate_around` about the camera's own right axis by the
+authored pitch's distance from straight down, and a turn about Y that squares
+the grid with the screen so the cursor's up key goes up it. Both angles are read
+from the authored pose when `TitleShow` hands it over, and turning and tipping
+share one eased animation, so picking waits for either to settle.
