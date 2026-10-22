@@ -97,11 +97,28 @@ fn flex_auto_and_none_keep_their_css_meanings() {
 }
 
 #[test]
+fn position_absolute_takes_an_item_out_of_the_flow() {
+    let item = component(
+        &styled("#item { position: absolute; }"),
+        "item",
+        "sindri.ui.box",
+    );
+    assert_eq!(item["absolute"], true);
+    let item = component(
+        &styled("#item { position: static; }"),
+        "item",
+        "sindri.ui.box",
+    );
+    assert_eq!(item["absolute"], false);
+}
+
+#[test]
 fn nonsense_is_refused_with_the_property_named() {
     for sheet in [
         "#bar { flex-wrap: sometimes; }",
         "#item { flex-grow: -1; }",
         "#item { align-self: middle; }",
+        "#item { position: sticky; }",
     ] {
         let document = SceneDocument::from_json(
             r#"{ "format_version": 10, "metadata": { "name": "t" },

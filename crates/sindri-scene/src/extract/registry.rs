@@ -139,7 +139,8 @@ fn register_ui_layout(components: &mut ComponentSchemaRegistry) -> Result<(), Sc
             "max_size": [0.0, 0.0],
             "fit_content": [false, false],
             "grid_column": [0, 0],
-            "grid_row": [0, 0]
+            "grid_row": [0, 0],
+            "absolute": false
         }),
     )?;
     // Two equal columns: the smallest grid that shows it is one, and adding

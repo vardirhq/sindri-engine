@@ -91,6 +91,14 @@ pub(crate) fn apply(
             let order = trimmed.parse::<i32>().map_err(|_| refuse())?;
             box_model::set_field(world, entity, "order", order.into());
         }
+        "position" => {
+            let absolute = match trimmed {
+                "absolute" => true,
+                "static" | "relative" => false,
+                _ => return Err(refuse()),
+            };
+            box_model::set_field(world, entity, "absolute", absolute.into());
+        }
         "align-self" => {
             let stored = if trimmed == "auto" {
                 "auto"

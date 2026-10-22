@@ -57,19 +57,19 @@
           "anchor": "center",
           "layer": 140,
           "fill": [
-            0.04,
-            0.08,
-            0.11,
-            0.86
+            0,
+            0,
+            0,
+            0
           ],
           "stroke": [
-            0.95,
-            0.8,
-            0.5,
-            0.35
+            0,
+            0,
+            0,
+            0
           ],
-          "stroke_width": 0.004,
-          "corner_radius": 0.012
+          "stroke_width": 0.0,
+          "corner_radius": 0.0
         },
         "sindri.ui.layout": {
           "direction": "column",
@@ -79,6 +79,32 @@
         }
       },
       "disabled": true
+    },
+    {
+      "id": "banner-halo",
+      "name": "BannerHalo",
+      "parent": "banner",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "banner-halo"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/halo.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 141
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
     },
     {
       "id": "banner-text",
@@ -116,6 +142,7 @@
             ],
             "softness": 0.003
           },
+          "rich": true,
           "bounds": [
             0.0,
             0.0
@@ -123,7 +150,7 @@
           "wrap": "word"
         },
         "sindri.ui.box": {
-          "order": 1
+          "order": 2
         }
       }
     },
@@ -163,13 +190,14 @@
             ],
             "softness": 0.003
           },
+          "rich": true,
           "bounds": [
             0.0,
             0.0
           ]
         },
         "sindri.ui.box": {
-          "order": 0
+          "order": 1
         }
       }
     },

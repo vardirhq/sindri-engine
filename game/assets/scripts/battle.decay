@@ -108,7 +108,9 @@ script Battle {
     var cursor_z: number = 3.0;
     var hover_cell: number = -1.0;
     var preview_cell: number = -2.0;
-    var banner_clock = Timer(0.0);
+    var banner_age: number = 0.0;
+    var banner_title: String = "";
+    var banner_text: String = "";
 
     var view_drag_start: Vec2 = Vec2(0.0, 0.0);
     var view_drag_used: bool = false;
@@ -1367,20 +1369,26 @@ script Battle {
         return e != null && World.is_active(e) && Ui.is_pressed(e);
     }
 
+    // A line across the top for what just happened, rising in, held and
+    // fading away over the board.
     fn banner(title: String, sub: String) {
-        set_text("BannerTitle", title);
-        set_text("BannerText", sub);
+        banner_title = title;
+        banner_text = sub;
+        banner_age = 0.0;
         let b = World.find("Banner");
         if b != null { World.set_active(b, true); }
-        banner_clock = Timer(2.2);
     }
 
     fn update_banner() {
         let b = World.find("Banner");
-        if b == null { return; }
-        if banner_clock.done && World.is_active(b) {
-            World.set_active(b, false);
-        }
+        if b == null || !World.is_active(b) { return; }
+        banner_age += Time.delta;
+        let hold = 2.4;
+        let alpha = ramp_at(banner_age, 0.0, 0.4) * (1.0 - ramp_at(banner_age, hold, hold + 0.6));
+        fade_image("BannerHalo", alpha);
+        fade_words("BannerTitle", banner_title, "f3d79a", alpha);
+        fade_words("BannerText", banner_text, "d5e0e5", alpha);
+        if banner_age >= hold + 0.6 { World.set_active(b, false); }
     }
 
     fn update_hud() {

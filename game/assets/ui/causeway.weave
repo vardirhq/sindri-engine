@@ -202,14 +202,19 @@
     x: 0px;
     y: -80px;
     anchor: top;
-    padding: 14px;
     direction: column;
     gap: 2px;
     align-items: center;
-    background: #0b1a22d0;
-    border-color: #e9c98a66;
-    border-width: 1.5px;
-    border-radius: 10px;
+    justify-content: center;
+}
+
+/* A soft dark cloud under the words, out of the column's flow. */
+.banner-halo {
+    position: absolute;
+    x: 0px;
+    y: 0px;
+    width: 930px;
+    height: 230px;
 }
 
 .banner-title {

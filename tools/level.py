@@ -328,13 +328,20 @@ def hud_entities():
                                                                                     0.028, 132)},
                    parent="rewind", spatial=False)
     button(e, "end-turn", "EndTurn", "End turn", "actions", ("primary",), label_size=0.034)
-    # The banner across the top for what just happened.
-    e.append(entity("banner", "Banner", {**styled("banner"), **panel(140, layout=column(0.004, "center", "center"))},
+    # The banner across the top for what just happened: words over a soft
+    # dark cloud rather than a box, faded in and out by the battle.
+    e.append(entity("banner", "Banner", {**styled("banner"), **clear_shape(140),
+                                         "sindri.ui.layout": column(0.004, "center", "center")},
                     disabled=True, spatial=False))
-    e.append(entity("banner-title", "BannerTitle", {**styled("banner-title"), **text("", TITLE_FONT, 0.06, 142)},
+    # Out of the column's flow, so it lies under the words at their middle.
+    e.append(entity("banner-halo", "BannerHalo", {**styled("banner-halo"), **image("textures/halo.png", 141,
+                                                                                (1, 1, 1, 0))},
+                    parent="banner", spatial=False))
+    e.append(entity("banner-title", "BannerTitle", {**styled("banner-title"), **text("", TITLE_FONT, 0.06, 142,
+                                                                                    rich=True)},
                     parent="banner", spatial=False))
     e.append(entity("banner-text", "BannerText", {**styled("banner-text"), **text("", BODY_FONT, 0.028, 142,
-                                                                                  wrap="word")},
+                                                                                  wrap="word", rich=True)},
                     parent="banner", spatial=False))
     return e
 

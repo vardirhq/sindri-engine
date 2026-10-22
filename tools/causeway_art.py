@@ -636,7 +636,7 @@ def title_textures():
     for y in range(128):
         for x in range(256):
             d2 = ((x - 127.5) / 128) ** 2 + ((y - 63.5) / 64) ** 2
-            halo.putpixel((x, y), (*ink, int(max(0.0, 1.0 - d2) ** 2 * 170)))
+            halo.putpixel((x, y), (*ink, int(max(0.0, 1.0 - d2) ** 1.1 * 240)))
     halo.save(TEXTURES / "halo.png")
 
     # A soft round speck for whatever drifts in the air; white, so a tint
