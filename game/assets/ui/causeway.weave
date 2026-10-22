@@ -580,10 +580,11 @@
 }
 
 /* A compact quarter-turn pair under the Hearth, reachable with either hand. */
-.view-controls { anchor: top_right; x: -69px; y: -136px; width: 98px; height: 48px; direction: row; gap: 6px; }
+.view-controls { anchor: top_right; x: -99px; y: -136px; width: 158px; height: 48px; direction: row; gap: 6px; }
 .button.rotate { width: 44px; height: 44px; }
+.button.rotate.top { width: 58px; }
 @media (orientation: portrait) {
-    .view-controls { x: -56px; y: -102px; }
+    .view-controls { x: -86px; y: -102px; }
     .banner { y: -186px; }
     .screen-kicker { height: 5vw; font-size: 3.6vw; line-height: 4.4vw; letter-spacing: 1vw; }
     .screen-title { height: 13vw; font-size: 11vw; line-height: 13vw; letter-spacing: 0.3vw; }

@@ -301,6 +301,8 @@ def hud_entities():
                             "fill": [0, 0, 0, 0], "stroke": [0, 0, 0, 0], "stroke_width": 0.0}},
         parent="hud", spatial=False))
     button(e, "rotate-left", "RotateLeft", "<", "view-controls", ("rotate",))
+    # Straight down from above and back; `CameraRig` says which it will do.
+    button(e, "view-top", "ViewTop", "Top", "view-controls", ("rotate", "top"))
     button(e, "rotate-right", "RotateRight", ">", "view-controls", ("rotate",))
     # Bottom left: the warden in hand.
     e.append(entity("card", "Card", {**styled("card", "panel"), **panel(layout=column(0.006))},
@@ -434,7 +436,7 @@ def title_screen(e):
             body, BODY_FONT, 0.026, 302, wrap="word")}, parent="howto-card", spatial=False))
     e.append(entity("howto-keys", "HowToKeys", {**styled("howto-body", "dim"), **text(
         "Click or tap to play.  Keys: arrows and Enter, Q aims, Tab next warden, Z undoes a move, "
-        "E ends the turn, R rewinds. J/L or < > rotate; swipe across empty sea on touch.", BODY_FONT, 0.022, 302, wrap="word")},
+        "E ends the turn, R rewinds. J/L or < > rotate, T or Top looks straight down; swipe across empty sea on touch.", BODY_FONT, 0.022, 302, wrap="word")},
                     parent="howto-card", spatial=False))
     plate_button(e, "howto-close", "HowToClose", "Back", "howto-card", "textures/plate-ink.png", ("close",), 304)
 
