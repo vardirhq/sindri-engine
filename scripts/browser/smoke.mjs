@@ -456,7 +456,13 @@ const audio = await page.evaluate(() =>
 
 const canvas = await page.evaluate(() => {
   const element = document.querySelector('canvas');
-  return element ? { width: element.width, height: element.height } : null;
+  if (!element) return null;
+  const box = element.getBoundingClientRect();
+  return {
+    width: element.width,
+    height: element.height,
+    clip: { x: box.x, y: box.y, width: box.width, height: box.height },
+  };
 });
 
 // What reached the canvas, rather than whether one exists. Every check above
@@ -468,11 +474,16 @@ const canvas = await page.evaluate(() => {
 // canvas gives nothing back to `drawImage` -- the browser composites its
 // contents but does not keep them readable. The screenshot is what a player
 // sees, which is the thing in question anyway.
+//
+// The page cropped to the canvas rather than an element screenshot: that one
+// first waits for the canvas to hold still across two animation frames, and a
+// heavy lit scene on the software renderer can take longer than its timeout to
+// draw two, though the canvas never moves. Causeway did.
 const drawn = canvas
-  ? imageStatistics(await page.locator('canvas').screenshot())
+  ? imageStatistics(await page.screenshot({ clip: canvas.clip, timeout: 60000 }))
   : null;
 
-if (SHOT) await page.screenshot({ path: SHOT });
+if (SHOT) await page.screenshot({ path: SHOT, timeout: 60000 });
 await browser.close();
 server.close();
 
