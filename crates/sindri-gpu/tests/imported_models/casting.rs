@@ -152,8 +152,10 @@ fn mirrored_casters_and_double_sided_backfaces_follow_material_facing() {
     }
 }
 
+/// A caster scaled to nothing draws its frame and casts nothing: a game
+/// shrinks a figure away on purpose, and refusing the frame stopped it.
 #[test]
-fn invalid_model_shadow_transform_returns_the_frame_error() {
+fn a_caster_scaled_to_nothing_casts_nothing_and_stops_nothing() {
     let Some(gpu) = gpu() else {
         return;
     };
@@ -161,6 +163,23 @@ fn invalid_model_shadow_transform_returns_the_frame_error() {
     scene.replace_caster(
         &caster([255; 3], None, 1.0, false),
         Mat4::from_scale(Vec3::ZERO),
+    );
+    let clear = scene.draw(&gpu, false, 256, FogSettings::default());
+    let shadow = scene
+        .draw_result(&gpu, true, 256, FogSettings::default())
+        .expect("a model scaled to nothing is skipped, not an error");
+    assert_eq!(darkened(&clear, &shadow), 0, "nothing is there to cast");
+}
+
+#[test]
+fn a_caster_whose_transform_is_not_finite_returns_the_frame_error() {
+    let Some(gpu) = gpu() else {
+        return;
+    };
+    let mut scene = Scene::new(&gpu);
+    scene.replace_caster(
+        &caster([255; 3], None, 1.0, false),
+        Mat4::from_translation(Vec3::splat(f32::NAN)),
     );
     assert!(matches!(
         scene.draw_result(&gpu, true, 256, FogSettings::default()),

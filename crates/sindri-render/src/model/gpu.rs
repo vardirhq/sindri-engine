@@ -160,7 +160,9 @@ impl ModelRenderer {
         asset: &Arc<RenderModel>,
         draw: &ModelDraw<'_>,
     ) -> Result<(), ModelRenderError> {
-        validate::transform(draw.world)?;
+        if !validate::drawable(draw.world)? {
+            return Ok(());
+        }
         if draw.occluded_color.is_some_and(|color| {
             color
                 .into_iter()
@@ -175,7 +177,9 @@ impl ModelRenderer {
         let fallback = ModelSurface::default();
         for instance in asset.instances() {
             let world = draw.world * instance.transform;
-            validate::transform(world)?;
+            if !validate::drawable(world)? {
+                continue;
+            }
             for (index, primitive) in asset.data().meshes[instance.mesh].iter().enumerate() {
                 let surface = primitive
                     .material

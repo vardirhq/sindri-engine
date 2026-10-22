@@ -1,5 +1,11 @@
 # Changelog
 
+- Skip an imported model scaled to nothing instead of stopping the frame. A
+  figure a game shrinks away has nothing left to draw, but its singular
+  transform was refused, and in the browser that ended the game: Causeway's
+  title shrank a Hollow below the limit on a phone's short first frame. A
+  transform that is not finite is still an error. Causeway's title also
+  switches those walkers off rather than shrinking them to a speck.
 - Let active touches drive the unified pointer on hybrid devices, retaining the
   release position for taps before returning to the mouse.
 
