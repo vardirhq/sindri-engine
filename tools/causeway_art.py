@@ -64,6 +64,28 @@ WARDENS = {
     "hat": mat("#2b2533", 0.8),
     "lamp": mat("#fff1b0", 0.6, 0.0, "#ffc94d", 4.0),
     "eye": mat("#1d1a22", 0.6),
+    "tide": mat("#2f8fb0", 0.8),
+    "tide-d": mat("#225f78", 0.8),
+    "shell-w": mat("#efe2cf", 0.6),
+    "clay": mat("#b5683f", 0.85),
+    "water": mat("#8fdcff", 0.3, 0.0, "#4ec2ff", 2.2),
+}
+
+# The burning mountain's Hollow are char and slag rather than tidal mud, with
+# fire showing through the cracks; the same glowing eyes say whose side they
+# are on.
+FIRE = {
+    "char": mat("#2e2629", 0.95),
+    "char-d": mat("#1d181b", 0.95),
+    "char-l": mat("#4a3c3c", 0.9),
+    "slag": mat("#5a3b31", 0.85),
+    "brick": mat("#7d4836", 0.9),
+    "brick-d": mat("#5e3428", 0.9),
+    "obsidian": mat("#221d2b", 0.25, 0.3),
+    "lava": mat("#ff7a2a", 0.5, 0.0, "#ff5a1a", 6.0),
+    "lava-hot": mat("#ffd36b", 0.5, 0.0, "#ffb33a", 8.0),
+    "eye": mat("#ffe08a", 0.5, 0.0, "#ffc23a", 7.0),
+    "bone": mat("#d9ccb0", 0.8),
 }
 
 HOLLOW = {
@@ -131,6 +153,22 @@ GROUND = {
     "road-d": mat("#8f8878", 0.95),
     "post": mat("#5c4632", 0.9),
     "rope": mat("#c9b37e", 0.9),
+    # The burning mountain: ash on the low ground, basalt above, cinder on the
+    # heights, and the char and slag it is all made of.
+    "ash": mat("#a39b96", 0.98),
+    "ash-b": mat("#99918c", 0.98),
+    "basalt": mat("#66606c", 0.92),
+    "basalt-b": mat("#5d5763", 0.92),
+    "cinder": mat("#8c5a48", 0.95),
+    "cinder-b": mat("#7f503f", 0.95),
+    "char": mat("#2e2629", 0.95),
+    "char-b": mat("#26201f", 0.95),
+    "slag": mat("#6e4a3d", 0.9),
+    "slag-b": mat("#654438", 0.9),
+    "obsidian": mat("#221d2b", 0.25, 0.3),
+    "lavabed": mat("#2a1410", 1.0),
+    "glow": mat("#ff7a2a", 0.5, 0.0, "#ff5a1a", 5.0),
+    "glow-hot": mat("#ffd36b", 0.5, 0.0, "#ffb33a", 7.0),
 }
 
 
@@ -292,6 +330,131 @@ def colossus(m, pose):
     m.box("shell", (arm_x + 0.06, arm_y - 0.44, 0.4), (0.32, 0.28, 0.26), bevel=0.06)
 
 
+def tidecaller(m, pose):
+    """A wader in a long blue coat, with a clay jar of seawater on her hip."""
+    m.box("boot", (0, 0.08, -0.1), (0.22, 0.16, 0.13), bevel=0.03)
+    m.box("boot", (0, 0.08, 0.1), (0.22, 0.16, 0.13), bevel=0.03)
+    m.box("tide", (0, 0.42, 0), (0.32, 0.56, 0.4), bevel=0.05)
+    m.box("tide-d", (0.02, 0.2, 0), (0.36, 0.12, 0.44), bevel=0.03)
+    m.box("shell-w", (0.165, 0.68, -0.08), (0.02, 0.05, 0.05))
+    m.box("shell-w", (0.165, 0.7, 0.0), (0.02, 0.06, 0.06))
+    m.box("shell-w", (0.165, 0.68, 0.08), (0.02, 0.05, 0.05))
+    m.box("skin", (0.02, 0.9, 0), (0.25, 0.25, 0.25), bevel=0.05)
+    m.box("eye", (0.15, 0.93, -0.06), (0.01, 0.04, 0.04))
+    m.box("eye", (0.15, 0.93, 0.06), (0.01, 0.04, 0.04))
+    m.box("tide-d", (-0.02, 1.06, 0), (0.29, 0.1, 0.29), bevel=0.04)
+    m.box("tide-d", (-0.12, 0.98, 0), (0.08, 0.2, 0.27), bevel=0.03)
+    if pose == "strike":
+        # The jar swung up and tipped, its water going out ahead.
+        m.box("tide", (0.12, 0.74, -0.22), (0.3, 0.11, 0.11), bevel=0.03)
+        m.box("tide", (0.12, 0.74, 0.22), (0.3, 0.11, 0.11), bevel=0.03)
+        m.cylinder("clay", (0.32, 0.8, 0), 0.15, 0.3, top=0.09, segments=8, rotation=(0, 0, -70))
+        m.sphere("water", (0.5, 0.72, 0), 0.1, rings=3, segments=6)
+    else:
+        m.box("tide", (0, 0.62, -0.23), (0.13, 0.32, 0.11), bevel=0.03)
+        m.box("tide", (0.04, 0.62, 0.23), (0.13, 0.32, 0.11), bevel=0.03)
+        m.cylinder("clay", (0.04, 0.42, 0.3), 0.15, 0.32, top=0.09, segments=8)
+        m.cylinder("water", (0.04, 0.585, 0.3), 0.075, 0.02, segments=8)
+
+
+def imp(m, pose):
+    """A small hunched thing of char, cracked through with fire."""
+    reach = 0.1 if pose == "strike" else 0.0
+    m.box("char-d", (-0.04, 0.1, -0.11), (0.15, 0.2, 0.1), bevel=0.03)
+    m.box("char-d", (-0.04, 0.1, 0.11), (0.15, 0.2, 0.1), bevel=0.03)
+    m.sphere("char", (-0.04, 0.36, 0), 0.22, rings=4, segments=7)
+    m.box("lava", (0.05, 0.36, 0), (0.2, 0.03, 0.3), (0, 0, 20))
+    m.box("lava", (-0.06, 0.42, 0), (0.03, 0.2, 0.36), (12, 0, 0))
+    m.sphere("char-l", (0.12, 0.54, 0), 0.15, rings=3, segments=7)
+    m.box("eye", (0.25, 0.56, -0.06), (0.03, 0.05, 0.05))
+    m.box("eye", (0.25, 0.56, 0.06), (0.03, 0.05, 0.05))
+    m.cone("obsidian", (0.08, 0.7, -0.09), 0.04, 0.16, rotation=(-20, 0, -15), segments=4)
+    m.cone("obsidian", (0.08, 0.7, 0.09), 0.04, 0.16, rotation=(20, 0, -15), segments=4)
+    m.box("char-d", (0.1 + reach, 0.3, -0.2), (0.26, 0.07, 0.07), (0, 0, -20), bevel=0.02)
+    m.box("char-d", (0.1 + reach, 0.3, 0.2), (0.26, 0.07, 0.07), (0, 0, -20), bevel=0.02)
+    m.cone("lava-hot", (-0.3, 0.3, 0), 0.06, 0.24, rotation=(0, 0, 70), segments=5)
+
+
+def burster(m, pose):
+    """A swollen sack of slag on stubby legs, glowing where it is splitting."""
+    swell = 1.08 if pose == "strike" else 1.0
+    for x in (-0.12, 0.12):
+        for z in (-1, 1):
+            m.box("char-d", (x, 0.08, z * 0.18), (0.1, 0.16, 0.1), bevel=0.02)
+    m.sphere("slag", (0, 0.44, 0), 0.32 * swell, rings=5, segments=9)
+    for angle, y in ((20, 0.36), (110, 0.52), (200, 0.4), (290, 0.56)):
+        a = math.radians(angle)
+        m.box("lava-hot", (math.cos(a) * 0.3 * swell, y, math.sin(a) * 0.3 * swell), (0.04, 0.2, 0.04),
+              (0, -angle, 25))
+    m.sphere("char-l", (0.2, 0.62, 0), 0.12, rings=3, segments=6)
+    m.box("eye", (0.31, 0.64, -0.05), (0.03, 0.05, 0.05))
+    m.box("eye", (0.31, 0.64, 0.05), (0.03, 0.05, 0.05))
+    m.cone("lava", (-0.04, 0.8 * swell, 0), 0.07, 0.12, segments=6)
+
+
+def kiln(m, pose):
+    """The mountain's own furnace, walked out of it: brick and slag with the
+    fire showing in its belly and a flue for a head."""
+    arm_y = 0.95 if pose != "strike" else 1.3
+    m.box("char-d", (0, 0.3, -0.22), (0.34, 0.6, 0.26), bevel=0.06)
+    m.box("char-d", (0, 0.3, 0.22), (0.34, 0.6, 0.26), bevel=0.06)
+    m.box("brick", (0, 1.0, 0), (0.66, 0.84, 0.72), bevel=0.08)
+    for y in (0.72, 0.92, 1.12, 1.32):
+        m.box("brick-d", (0.0, y, 0), (0.67, 0.03, 0.73))
+    # The furnace mouth, and the fire in it.
+    m.box("char-d", (0.31, 0.98, 0), (0.06, 0.4, 0.42), bevel=0.03)
+    m.box("lava", (0.335, 0.95, 0), (0.03, 0.3, 0.32))
+    m.box("lava-hot", (0.345, 0.9, 0), (0.02, 0.14, 0.2))
+    # Shoulders, the flue and its glow.
+    m.box("slag", (0, 1.44, -0.34), (0.5, 0.3, 0.32), bevel=0.07)
+    m.box("slag", (0, 1.44, 0.34), (0.5, 0.3, 0.32), bevel=0.07)
+    m.cylinder("brick-d", (-0.04, 1.62, 0), 0.22, 0.42, top=0.16, segments=8)
+    m.cylinder("lava-hot", (-0.04, 1.84, 0), 0.12, 0.03, segments=8)
+    m.box("eye", (0.14, 1.66, -0.08), (0.02, 0.06, 0.06))
+    m.box("eye", (0.14, 1.66, 0.08), (0.02, 0.06, 0.06))
+    for z in (-1, 1):
+        m.box("char", (0.08, arm_y, z * 0.44), (0.26, 0.72, 0.22), bevel=0.05)
+        m.box("obsidian", (0.14, arm_y - 0.44, z * 0.44), (0.32, 0.28, 0.26), bevel=0.06)
+        m.box("lava", (0.3, arm_y - 0.44, z * 0.44), (0.02, 0.12, 0.14))
+
+
+def vent(m, pose):
+    """A cone of black rock with fire in its throat."""
+    m.cylinder("char-d", (0, 0.1, 0), 0.46, 0.2, top=0.42, segments=9)
+    m.cylinder("obsidian", (0, 0.34, 0), 0.4, 0.3, top=0.24, segments=9)
+    m.cylinder("char", (0, 0.56, 0), 0.25, 0.16, top=0.2, segments=9)
+    m.cylinder("lava", (0, 0.645, 0), 0.17, 0.02, segments=9)
+    m.cylinder("lava-hot", (0, 0.655, 0), 0.09, 0.02, segments=7)
+    for angle in (30, 150, 260):
+        a = math.radians(angle)
+        m.box("char-d", (math.cos(a) * 0.42, 0.1, math.sin(a) * 0.42), (0.18, 0.16, 0.14), (0, angle, 10),
+              bevel=0.03)
+        m.box("lava", (math.cos(a) * 0.3, 0.36, math.sin(a) * 0.3), (0.03, 0.22, 0.03), (0, -angle, 30))
+
+
+def basalt(m, pose):
+    """New ground cooled out of lava and water: a column a cell across and one
+    level tall, from y 0 to 1, stretched to the cell's height. Its top keeps
+    the cracks of the lava it was."""
+    m.box("basalt", (0, 0.5, 0), (0.98, 0.98, 0.98), bevel=0.035)
+    m.box("basalt-b", (0, 0.93, 0), (1.0, 0.14, 1.0), bevel=0.04)
+    m.box("glow", (0.12, 1.004, -0.05), (0.5, 0.012, 0.03), (0, 25, 0))
+    m.box("glow", (-0.18, 1.004, 0.16), (0.03, 0.012, 0.36), (0, 15, 0))
+
+
+def droplet(m, pose):
+    """What a Tidecaller's water is while it flies."""
+    m.sphere("water", (0, 0, 0), 0.13, rings=3, segments=6)
+    m.sphere("water", (-0.12, 0.02, 0), 0.08, rings=3, segments=5)
+
+
+def pointer(m, pose):
+    """The gem over the warden in hand: brass, pointing down, lit from inside."""
+    m.cone("brass", (0, 0.0, 0), 0.16, 0.3, segments=4, rotation=(180, 0, 0))
+    m.cone("brass", (0, 0.15, 0), 0.16, 0.12, segments=4)
+    m.cylinder("lamp", (0, 0.15, 0), 0.1, 0.02, segments=4)
+
+
 def house(m, pose):
     m.box("stone-d", (0, 0.05, 0), (0.78, 0.1, 0.84), bevel=0.02)
     m.box("wall", (0, 0.32, 0), (0.7, 0.5, 0.76), bevel=0.03)
@@ -341,6 +504,14 @@ FIGURES = {
     "spitter": (spitter, HOLLOW, ["idle"]),
     "mortar": (mortar, HOLLOW, ["idle"]),
     "colossus": (colossus, HOLLOW, ["idle"]),
+    "tidecaller": (tidecaller, WARDENS, ["idle"]),
+    "imp": (imp, FIRE, ["idle"]),
+    "burster": (burster, FIRE, ["idle"]),
+    "kiln": (kiln, FIRE, ["idle"]),
+    "vent": (vent, FIRE, ["idle"]),
+    "basalt": (basalt, GROUND, ["idle"]),
+    "droplet": (droplet, WARDENS, ["idle"]),
+    "pointer": (pointer, WARDENS, ["idle"]),
     "house": (house, STEAD, ["idle"]),
     "beacon": (beacon, STEAD, ["idle"]),
     "stone": (stone, STEAD, ["idle"]),
@@ -365,8 +536,16 @@ def islands():
             "shore": field("shore"),
             "land": field("land"),
             "high": field("high"),
+            "world": field("world") if re.search(r"world:", block) else "sea",
         })
     return found
+
+
+def island_slug(name):
+    """The file an island's model is written to: its name, lower case, without
+    its article or anything a file name should not carry."""
+    words = re.sub(r"[^a-z ]", "", name.lower()).split()
+    return "-".join(word for word in words if word != "the")
 
 
 def column_top(island, height):
@@ -378,9 +557,9 @@ def column_top(island, height):
 
 
 SIDE = {"ground": "earth", "moss": "earth", "stone": "stone", "rock": "rock", "sand": "sand",
-        "mud": "mud", "gravel": "gravel"}
+        "mud": "mud", "gravel": "gravel", "ash": "basalt", "basalt": "basalt", "cinder": "slag"}
 TOP = {"ground": "grass", "moss": "moss", "stone": "stone", "rock": "rock", "sand": "sand",
-       "mud": "mud", "gravel": "gravel"}
+       "mud": "mud", "gravel": "gravel", "ash": "ash", "basalt": "basalt", "cinder": "cinder"}
 
 
 def scatter(m, rng, top, cx, cy, cz, busy):
@@ -405,6 +584,11 @@ def scatter(m, rng, top, cx, cy, cz, busy):
         for _ in range(rng.randint(0, 2)):
             u, v = spot()
             m.box("pebble", (cx + u, cy + 0.025, cz + v), (0.08, 0.05, 0.07),
+                  (0, rng.uniform(0, 90), 0), bevel=0.015)
+    elif top in ("ash", "cinder", "basalt"):
+        for _ in range(rng.randint(0, 2)):
+            u, v = spot()
+            m.box(rng.choice(["slag", "obsidian", "char"]), (cx + u, cy + 0.03, cz + v), (0.08, 0.06, 0.07),
                   (0, rng.uniform(0, 90), 0), bevel=0.015)
     elif top == "mud":
         for _ in range(rng.randint(1, 3)):
@@ -451,6 +635,10 @@ def island_mesh(island, seed):
         busy = island["features"][c] != "."
         scatter(m, rng, top, cx, h, cz, busy)
 
+    if island.get("world") == "caldera":
+        caldera(m, rng)
+        return m
+
     # The sea floor: sand round the island fading through weed to deep water,
     # far wider than the screen so the sea has no edge.
     centre = (ORIGIN + 4, 0, ORIGIN + 4)
@@ -494,6 +682,46 @@ def island_mesh(island, seed):
         tree(m, rng, ORIGIN + SIZE + 14 + rng.uniform(0, 3), 1.0, ORIGIN - 8 + t * 3.2 + rng.uniform(-1, 1),
              pine=True)
     return m
+
+
+def caldera(m, rng):
+    """What lies round an island inside the mountain: the floor of the lava lake
+    under its surface, spires of obsidian and rock standing out of it, and the
+    Hollow's road in from the east, a basalt causeway out of a glowing tunnel.
+    No crater wall: the camera looks down too steeply to see the far side of
+    one, and the near side only stands black in front of the board."""
+    centre = (ORIGIN + 4, 0, ORIGIN + 4)
+    m.box("lavabed", (centre[0], -1.6, centre[2]), (140, 0.5, 140))
+    for _ in range(12):
+        while True:
+            x = rng.uniform(-6, 14)
+            z = rng.uniform(-6, 14)
+            if not (-0.8 < x < 8.8 and -0.8 < z < 8.8):
+                break
+        size = rng.uniform(0.25, 0.6)
+        m.cone("obsidian", (ORIGIN + x, -0.6, ORIGIN + z), size, size * rng.uniform(2.5, 4.5),
+               segments=rng.choice([4, 5]))
+    # Spires of rock nearer in, for depth.
+    for k in range(9):
+        angle = rng.uniform(0, math.tau)
+        if abs(math.atan2(math.sin(angle), math.cos(angle))) < 0.3:
+            continue
+        radius = rng.uniform(10.5, 13.0)
+        h = rng.uniform(2.0, 4.0)
+        m.cone(rng.choice(["obsidian", "char"]), (centre[0] + math.cos(angle) * radius, -0.8,
+               centre[2] + math.sin(angle) * radius), rng.uniform(0.6, 1.1), h, segments=5)
+    # The Hollow's road: basalt slabs on pillars, out of a tunnel in the wall.
+    road_z = ORIGIN + 3.5
+    for k in range(10):
+        x = ORIGIN + SIZE + 0.5 + k
+        m.box("basalt" if k % 2 else "basalt-b", (x, 0.55, road_z), (1.0, 0.3, 1.2), bevel=0.04)
+        m.box("char-b", (x - 0.4, -0.2, road_z), (0.3, 1.2, 0.3))
+    tunnel_x = ORIGIN + SIZE + 10.5
+    m.box("char", (tunnel_x + 1.5, 2.0, road_z - 2.2), (3.0, 7.0, 2.4), bevel=0.15)
+    m.box("char", (tunnel_x + 1.5, 2.0, road_z + 2.2), (3.0, 7.0, 2.4), bevel=0.15)
+    m.box("char-b", (tunnel_x + 1.5, 4.6, road_z), (3.0, 1.8, 2.2), bevel=0.15)
+    m.box("glow", (tunnel_x + 2.4, 1.6, road_z), (0.3, 2.2, 1.6))
+    m.box("glow-hot", (tunnel_x + 2.5, 1.4, road_z), (0.2, 1.4, 1.0))
 
 
 # --- Textures ------------------------------------------------------------------
@@ -725,7 +953,7 @@ def main():
             m.write(MODELS / f"{name}{suffix}.glb", palette, name)
     for index, island in enumerate(islands()):
         mesh = island_mesh(island, seed=index + 1)
-        slug = island["name"].lower().replace(" ", "-").replace("the-", "")
+        slug = island_slug(island["name"])
         mesh.write(MODELS / f"island-{slug}.glb", GROUND, island["name"])
         print(f"island {index}: {island['name']} -> island-{slug}.glb")
     textures()

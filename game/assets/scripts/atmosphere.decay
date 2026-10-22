@@ -7,7 +7,7 @@
 // It lives on the Environment entity and is told which mood to show by the
 // battle and the title; it never decides that itself.
 
-enum Drift { Nothing, Pollen, Dust, Fireflies, Mist }
+enum Drift { Nothing, Pollen, Dust, Fireflies, Mist, Ash }
 
 struct Mood {
     sun: Color,
@@ -46,11 +46,18 @@ struct Mood {
     rain: number,
     wind: number,
     storm: number,
+    // The burning mountain: how much of the level is lava rather than the
+    // sea (0..1), how hot the lava burns, and which world's song is heard,
+    // 0 the sea's and 1 the mountain's.
+    molten: number = 0.0,
+    heat: number = 1.2,
+    song: number = 0.0,
 }
 
-shared const TITLE_MOOD: number = 4.0;
+shared const TITLE_MOOD: number = 10.0;
 
 shared fn mood_of(index: number) -> Mood {
+    if index >= 4.0 && index <= 6.0 { return fire_mood(index); }
     if index == 1.0 {
         // The Fold: overcast and still, mist lying in the hollows, rain.
         return Mood(
@@ -134,6 +141,27 @@ shared fn mood_of(index: number) -> Mood {
     );
 }
 
+// Inside the mountain: no sky but the dark of the crater and the glow of
+// the lava, ash falling, embers rising, the light coming red from below.
+// Each island deeper in is hotter and darker.
+shared fn fire_mood(index: number) -> Mood {
+    let depth = index - 4.0;
+    return Mood(
+        sun: Color(1.0, 0.55, 0.32), sun_intensity: 1.5 - depth * 0.2, sun_pitch: -0.75, sun_yaw: 0.6 + depth * 0.4,
+        ambient: Color(0.66, 0.5, 0.48), ambient_intensity: 0.46 - depth * 0.04,
+        sky: Color(0.1 + depth * 0.02, 0.03, 0.025),
+        sea: Color(0.03, 0.12, 0.14), swell: 0.5, foam: 0.0, glints: 0.6,
+        fog: Color(0.2, 0.08, 0.06), fog_start: 46.0 - depth * 3.0, fog_distance: 26.0,
+        fog_density: 0.008 + depth * 0.005, mist: 0.0,
+        exposure: 0.05, contrast: 1.12 + depth * 0.03, saturation: 1.05, vignette: 0.5 + depth * 0.05,
+        glow_threshold: 0.6 - depth * 0.04, glow: 0.9 + depth * 0.15,
+        lantern: 3.5, beacon: 6.0, windows: 2.6, rift: 1.6,
+        drift: Drift.Ash, embers: true,
+        rain: 0.0, wind: 0.5 + depth * 0.2, storm: 0.0,
+        molten: 1.0, heat: 1.0 + depth * 0.2, song: 1.0,
+    );
+}
+
 // Everything numeric in a mood, blended.
 shared fn blend(a: Mood, b: Mood, t: number) -> Mood {
     var drift = b.drift;
@@ -160,6 +188,7 @@ shared fn blend(a: Mood, b: Mood, t: number) -> Mood {
         windows: lerp(a.windows, b.windows, t), rift: lerp(a.rift, b.rift, t),
         drift: drift, embers: embers,
         rain: lerp(a.rain, b.rain, t), wind: lerp(a.wind, b.wind, t), storm: lerp(a.storm, b.storm, t),
+        molten: lerp(a.molten, b.molten, t), heat: lerp(a.heat, b.heat, t), song: lerp(a.song, b.song, t),
     );
 }
 
@@ -434,6 +463,21 @@ script Atmosphere {
         this.environment.post_process.vignette = m.vignette;
         this.environment.bloom.threshold = m.glow_threshold;
         this.environment.bloom.intensity = m.glow;
+        // Sea or lava round the island, faded across with the world, and only
+        // the one showing drawn: each is the whole floor.
+        let sea_surface = World.find("Sea Surface");
+        let lava_surface = World.find("Lava Surface");
+        if sea_surface != null { World.set_active(sea_surface, m.molten < 0.99); }
+        if lava_surface != null {
+            World.set_active(lava_surface, m.molten > 0.01);
+            lava_surface.sprite.shader_params.w = m.molten;
+        }
+        for tile in World.with_tag("lava") {
+            tile.sprite.shader_params.x = m.heat + f * 0.4;
+        }
+        // Each world's song, crossfaded with everything else.
+        Audio.set_volume("music-shallows", 1.0 - m.song);
+        Audio.set_volume("music-cinderfast", m.song);
         for tile in World.with_tag("sea") {
             tile.sprite.tint = Color(m.sea.r, m.sea.g, m.sea.b, 0.88);
             tile.sprite.shader_params.x = m.swell;
@@ -487,6 +531,10 @@ script Atmosphere {
                 // Embers wander as they climb.
                 f.vx += sin(Time.elapsed * 2.0 + f.seed * 7.0) * dt * 0.6;
                 f.vz += cos(Time.elapsed * 1.7 + f.seed * 5.0) * dt * 0.6;
+            } else if kind == Drift.Ash {
+                // Ash tumbles as it falls.
+                f.vx += sin(Time.elapsed * 1.7 + f.seed * 9.0) * dt * 0.25;
+                f.vz += cos(Time.elapsed * 1.3 + f.seed * 4.0) * dt * 0.2;
             } else if kind == Drift.Mist {
                 // Mist barely moves of itself; the wind carries it.
                 f.vx += sin(Time.elapsed * 0.3 + f.seed * 4.0) * dt * 0.02;
@@ -510,6 +558,12 @@ script Atmosphere {
             return Fleck(x: p.x + (r1 - 0.5) * 0.3, y: p.y - 0.2, z: p.z + (r2 - 0.5) * 0.3,
                 vx: (r2 - 0.5) * 0.3, vy: 0.6 + r3 * 0.5, vz: (r1 - 0.5) * 0.3,
                 age: 0.0, life: 1.6 + r3 * 1.2, seed: r1 * 10.0, ember: true);
+        }
+        if kind == Drift.Ash {
+            // Falling out of the dark above, slow, drifting with the wind.
+            return Fleck(x: 18.0 + r1 * 20.0, y: 6.0 + r3 * 3.0, z: 18.0 + r2 * 20.0,
+                vx: -shown.wind * 0.25, vy: -0.35 - r3 * 0.25, vz: shown.wind * 0.12,
+                age: 0.0, life: 14.0 + r3 * 6.0, seed: r1 * 10.0, ember: false);
         }
         if kind == Drift.Mist {
             // Wide, low and slow, over the water round the island as well.
@@ -554,6 +608,11 @@ script Atmosphere {
             color = Color(1.0, 0.85, 0.6);
             size = 0.035;
             alpha = 0.55;
+        } else if kind == Drift.Ash {
+            let grey = 0.55 + f.seed * 0.03;
+            color = Color(grey, grey * 0.95, grey * 0.92);
+            size = 0.035 + f.seed * 0.003;
+            alpha = 0.6;
         } else if kind == Drift.Mist {
             // A broad, faint bank the color of the fog, swelling as it goes.
             color = shown.fog.lerp(Color(1.0, 1.0, 1.0), 0.25);
@@ -614,8 +673,13 @@ script Atmosphere {
             World.set_active(e, true);
             e.transform.position = Vec3(f.x, f.y, f.z);
             e.transform.scale = Vec3(size, size, size);
-            let grey = 0.62 * shade;
-            e.sprite.tint = Color(grey, grey, grey * 1.04, a);
+            if f.ember {
+                // Steam: white, thicker, and gone quickly.
+                e.sprite.tint = Color(0.92, 0.94, 0.96, a * 2.2);
+            } else {
+                let grey = 0.62 * shade;
+                e.sprite.tint = Color(grey, grey, grey * 1.04, a);
+            }
         }
     }
 
@@ -668,6 +732,16 @@ script Atmosphere {
             e.transform.position = Vec3(f.x, f.y, f.z);
             e.transform.scale = Vec3(size, size, size);
             e.sprite.tint = Color(0.8, 0.55, 1.0, a);
+        }
+    }
+
+    // A burst of steam where lava and water met, from the smoke's own puffs.
+    fn steam(at: Vec3) {
+        for k in 0..3 {
+            let r = roll();
+            launch_puff(Fleck(x: at.x + (r - 0.5) * 0.5, y: at.y + 0.1, z: at.z + (roll() - 0.5) * 0.5,
+                vx: (r - 0.5) * 0.2, vy: 0.9 + r * 0.5, vz: 0.0,
+                age: 0.0, life: 1.1 + r * 0.5, seed: r * 10.0, ember: true));
         }
     }
 

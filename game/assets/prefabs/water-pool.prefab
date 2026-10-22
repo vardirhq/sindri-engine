@@ -1,0 +1,55 @@
+{
+  "format_version": 1,
+  "metadata": {
+    "name": "Water Pool"
+  },
+  "entities": [
+    {
+      "id": "water-pool",
+      "name": "Water Pool",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          -0.707107,
+          0.0,
+          0.0,
+          0.707107
+        ],
+        "scale": [
+          0.94,
+          0.94,
+          1.0
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/white.png",
+          "tint": [
+            0.02,
+            0.15,
+            0.22,
+            0.88
+          ],
+          "layer": 4,
+          "unlit": true,
+          "shader": "shaders/sea.wgsl",
+          "shader_params": [
+            0.8,
+            0.0,
+            0.6,
+            0.0
+          ]
+        },
+        "sindri.tags": {
+          "tags": [
+            "sea"
+          ]
+        }
+      }
+    }
+  ]
+}

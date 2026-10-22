@@ -1,5 +1,18 @@
 # Changelog
 
+- Add a second world to Causeway, the Cinderfast: three islands inside a
+  volcano after The Lighthouse, ending with the Kiln. Lava rises there instead
+  of the tide and burns what it reaches. Vents mark where they will spill it
+  next. Water poured on lava cools it into a basalt column, which is new ground.
+  The Tidecaller joins the wardens there and throws water: it chokes vents,
+  cools lava, drenches fire-born Hollow and pushes the rest. New Hollow: the
+  Cinder Imp, which leaves lava where it walks; the Burster, which throws its
+  neighbours apart when it dies; and the Kiln, which lobs lava. The lake is a
+  shader of crust and glowing cracks under falling ash. The world has its own
+  song, and the music crossfades between worlds. The Hearth is rekindled when a
+  new world begins.
+- Mark Causeway's selected warden with a brass gem bobbing over its head.
+
 - Add a floor-plan view to Causeway: T or the new Top button tips the camera
   up over the board to look straight down, squared up with the screen so the
   cursor's up key goes up it, and eases back the same way. Cells in pits and

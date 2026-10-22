@@ -144,6 +144,35 @@ shared fn island_def(index: number) -> IslandDef {
             high: "rock",
         );
     }
+    if index == 3.0 {
+        return IslandDef(
+            name: "The Lighthouse",
+            blurb: "The last island before open sea, and the lamp that keeps the causeway. The Colossus has come for it.",
+            heights: "00111100"
+                + "01234310"
+                + "12355321"
+                + "12354221"
+                + "12343211"
+                + "12332111"
+                + "01222110"
+                + "00111100",
+            features: "........"
+                + "...H...."
+                + "...B...."
+                + "..1..LLL"
+                + "...H.LLL"
+                + "..2.3LL."
+                + "......L."
+                + "........",
+            rounds: 6.0,
+            rises: [2.0, 4.0],
+            start: "HHS",
+            waves: ["C", "H", "HS", "M", "S", ""],
+            shore: "sand",
+            land: "ground",
+            high: "stone",
+        );
+    }
     if index == 4.0 {
         return IslandDef(
             name: "Ashfall Shelf",
@@ -205,63 +234,35 @@ shared fn island_def(index: number) -> IslandDef {
             world: "caldera",
         );
     }
-    if index == 6.0 {
-        return IslandDef(
-            name: "The Kiln's Throat",
-            blurb: "The heart of the mountain. The Kiln climbs out of it, belching fire, and nothing the wardens carry will move it.",
-            heights: "00111100"
-                + "01233210"
-                + "12344321"
-                + "12345221"
-                + "12344211"
-                + "12332111"
-                + "01222110"
-                + "00111100",
-            features: "........"
-                + "...HV..."
-                + "...B..L."
-                + ".~1..LLL"
-                + "..2.4LLL"
-                + ".vH3.LL."
-                + "......^."
-                + "........",
-            rounds: 6.0,
-            rises: [2.0, 4.0],
-            start: "KH",
-            waves: ["X", "IX", "H", "XI", "S", ""],
-            shore: "ash",
-            land: "basalt",
-            high: "cinder",
-            world: "caldera",
-        );
-    }
     return IslandDef(
-        name: "The Lighthouse",
-        blurb: "The last island before open sea, and the lamp that keeps the causeway. The Colossus has come for it.",
+        name: "The Kiln's Throat",
+        blurb: "The heart of the mountain. The Kiln climbs out of it, belching fire, and nothing the wardens carry will move it.",
         heights: "00111100"
-            + "01234310"
-            + "12355321"
-            + "12354221"
-            + "12343211"
+            + "01233210"
+            + "12344321"
+            + "12345221"
+            + "12344211"
             + "12332111"
             + "01222110"
             + "00111100",
         features: "........"
-            + "...H...."
-            + "...B...."
-            + "..1..LLL"
-            + "...H.LLL"
-            + "..2.3LL."
-            + "......L."
+            + "...HV..."
+            + "...B..L."
+            + ".~1..LLL"
+            + "..2.4LLL"
+            + ".vH3.LL."
+            + "......^."
             + "........",
         rounds: 6.0,
         rises: [2.0, 4.0],
-        start: "HHS",
-        waves: ["C", "H", "HS", "M", "S", ""],
-        shore: "sand",
-        land: "ground",
-        high: "stone",
+        start: "KH",
+        waves: ["X", "IX", "H", "XI", "S", ""],
+        shore: "ash",
+        land: "basalt",
+        high: "cinder",
+        world: "caldera",
     );
+
 }
 
 shared fn kind_of_letter(letter: String) -> Kind {
