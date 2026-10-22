@@ -1158,8 +1158,9 @@ no in-tree game uses them yet. `sindri.light.kind = "spot"` uses composed world
 position/forward with validated inner/outer half-angles in radians. Points and
 spots share eight strongest-intensity slots, range falloff and Lambert/GGX
 shading across world/voxel meshes and imported models. Cone strength feathers
-with smoothstep between angle cosines. Color uniforms are now 880/928 bytes for
-textured/model draws (eight 64-byte records); shadow uniforms, passes, writes
+with smoothstep between angle cosines. Color uniforms are now 880/944 bytes for
+textured/model draws (eight 64-byte light records, plus the model silhouette
+color); shadow uniforms, passes, writes
 and persistent geometry uploads are unchanged. The editor creates down-facing
 spots in one undo step and paints clipped selected inner/outer range cones.
 Native/browser aimed/away controls and Scene/GPU/guide regressions provide
