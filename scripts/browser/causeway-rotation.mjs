@@ -47,8 +47,11 @@ try {
     });
     await page.goto(`http://127.0.0.1:${server.address().port}${base}`);
     await page.waitForFunction(() => !document.querySelector('#sindri-loading'), null, { timeout: 60000 });
+    // CI renders on a software GPU at around a frame a second, and the game
+    // steps a fixed 1/60 s per frame: the title's 1.7 s handover is a hundred
+    // frames. Before the island moods it already took 78 s of a 90 s wait.
     const waitFor = async (ready, label) => {
-      for (let attempt = 0; attempt < 900 && !ready(); attempt++) await page.waitForTimeout(100);
+      for (let attempt = 0; attempt < 2400 && !ready(); attempt++) await page.waitForTimeout(100);
       if (!ready()) {
         await page.screenshot({ path: join(output, `failed-${name}.png`), timeout: 90000 });
         assert.fail(`${name}: ${label}; runtime errors: ${JSON.stringify(errors)}`);
