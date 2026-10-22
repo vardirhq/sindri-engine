@@ -354,37 +354,58 @@
       "components": {
         "weave.style": {
           "classes": [
-            "boon",
-            "button"
+            "boon-card"
           ]
         },
         "sindri.ui.button": {
-          "label": "Thicker plate"
+          "label": "Boon 1"
         },
         "sindri.ui.shape": {
           "kind": "rect",
           "anchor": "center",
-          "layer": 205,
+          "layer": 200,
           "fill": [
-            0.04,
-            0.08,
-            0.11,
-            0.86
+            0,
+            0,
+            0,
+            0
           ],
           "stroke": [
-            0.95,
-            0.8,
-            0.5,
-            0.35
+            0,
+            0,
+            0,
+            0
           ],
-          "stroke_width": 0.004,
-          "corner_radius": 0.012
+          "stroke_width": 0.0,
+          "corner_radius": 0.0
         },
-        "sindri.ui.layout": {
-          "direction": "column",
-          "spacing": 0.012,
-          "align": "center",
-          "justify": "center"
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "boon-0-art",
+      "name": "Boon0 Card",
+      "parent": "boon-0",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "boon-art"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/card.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 201,
+          "draw": "sliced",
+          "border_scale": 0.0022
         },
         "sindri.ui.box": {
           "order": 0
@@ -394,21 +415,20 @@
     {
       "id": "boon-0-key",
       "name": "Boon0Key",
-      "parent": "boon-0",
+      "parent": "boon-0-words",
       "components": {
         "weave.style": {
           "classes": [
-            "boon-key",
-            "dim"
+            "boon-key"
           ]
         },
         "sindri.ui.text": {
-          "text": "1",
+          "text": "",
           "font": "fonts/AlegreyaSans-Bold.ttf",
           "font_size": 0.024,
           "line_height": 0.02928,
           "anchor": "center",
-          "layer": 210,
+          "layer": 204,
           "color": [
             1,
             1,
@@ -428,33 +448,34 @@
             ],
             "softness": 0.003
           },
+          "rich": true,
           "bounds": [
             0.0,
             0.0
           ]
         },
         "sindri.ui.box": {
-          "order": 2
+          "order": 3
         }
       }
     },
     {
-      "id": "boon-0-text",
-      "name": "Boon0Text",
-      "parent": "boon-0",
+      "id": "boon-0-mark",
+      "name": "Boon0Mark",
+      "parent": "boon-0-words",
       "components": {
         "weave.style": {
           "classes": [
-            "boon-text"
+            "boon-mark"
           ]
         },
         "sindri.ui.text": {
-          "text": "The Bulwark gains a point of health.",
+          "text": "",
           "font": "fonts/AlegreyaSans-Medium.ttf",
-          "font_size": 0.026,
-          "line_height": 0.03172,
+          "font_size": 0.05,
+          "line_height": 0.061,
           "anchor": "center",
-          "layer": 210,
+          "layer": 204,
           "color": [
             1,
             1,
@@ -474,53 +495,7 @@
             ],
             "softness": 0.003
           },
-          "bounds": [
-            0.0,
-            0.0
-          ],
-          "wrap": "word"
-        },
-        "sindri.ui.box": {
-          "order": 1
-        }
-      }
-    },
-    {
-      "id": "boon-0-title",
-      "name": "Boon0Title",
-      "parent": "boon-0",
-      "components": {
-        "weave.style": {
-          "classes": [
-            "boon-title"
-          ]
-        },
-        "sindri.ui.text": {
-          "text": "Thicker plate",
-          "font": "fonts/AlegreyaSC-Bold.ttf",
-          "font_size": 0.04,
-          "line_height": 0.0488,
-          "anchor": "center",
-          "layer": 210,
-          "color": [
-            1,
-            1,
-            1,
-            1
-          ],
-          "shadow": {
-            "offset": [
-              0.0,
-              -0.003
-            ],
-            "color": [
-              0.0,
-              0.02,
-              0.05,
-              0.6
-            ],
-            "softness": 0.003
-          },
+          "rich": true,
           "bounds": [
             0.0,
             0.0
@@ -528,6 +503,141 @@
         },
         "sindri.ui.box": {
           "order": 0
+        }
+      }
+    },
+    {
+      "id": "boon-0-text",
+      "name": "Boon0Text",
+      "parent": "boon-0-words",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "boon-text"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "",
+          "font": "fonts/AlegreyaSans-Medium.ttf",
+          "font_size": 0.026,
+          "line_height": 0.03172,
+          "anchor": "center",
+          "layer": 204,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "rich": true,
+          "bounds": [
+            0.0,
+            0.0
+          ],
+          "wrap": "word"
+        },
+        "sindri.ui.box": {
+          "order": 2
+        }
+      }
+    },
+    {
+      "id": "boon-0-title",
+      "name": "Boon0Title",
+      "parent": "boon-0-words",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "boon-title"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "",
+          "font": "fonts/AlegreyaSC-Bold.ttf",
+          "font_size": 0.04,
+          "line_height": 0.0488,
+          "anchor": "center",
+          "layer": 204,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "rich": true,
+          "bounds": [
+            0.0,
+            0.0
+          ]
+        },
+        "sindri.ui.box": {
+          "order": 1
+        }
+      }
+    },
+    {
+      "id": "boon-0-words",
+      "name": "Boon0Words",
+      "parent": "boon-0",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "boon-words"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "anchor": "center",
+          "layer": 202,
+          "fill": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0.0,
+          "corner_radius": 0.0
+        },
+        "sindri.ui.layout": {
+          "direction": "column",
+          "spacing": 0.01,
+          "align": "center",
+          "justify": "center"
+        },
+        "sindri.ui.box": {
+          "order": 1
         }
       }
     },
@@ -538,61 +648,81 @@
       "components": {
         "weave.style": {
           "classes": [
-            "boon",
-            "button"
+            "boon-card"
           ]
         },
         "sindri.ui.button": {
-          "label": "Heavier stone"
+          "label": "Boon 2"
         },
         "sindri.ui.shape": {
           "kind": "rect",
           "anchor": "center",
-          "layer": 205,
+          "layer": 200,
           "fill": [
-            0.04,
-            0.08,
-            0.11,
-            0.86
+            0,
+            0,
+            0,
+            0
           ],
           "stroke": [
-            0.95,
-            0.8,
-            0.5,
-            0.35
+            0,
+            0,
+            0,
+            0
           ],
-          "stroke_width": 0.004,
-          "corner_radius": 0.012
-        },
-        "sindri.ui.layout": {
-          "direction": "column",
-          "spacing": 0.012,
-          "align": "center",
-          "justify": "center"
+          "stroke_width": 0.0,
+          "corner_radius": 0.0
         },
         "sindri.ui.box": {
           "order": 1
+        }
+      }
+    },
+    {
+      "id": "boon-1-art",
+      "name": "Boon1 Card",
+      "parent": "boon-1",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "boon-art"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/card.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 201,
+          "draw": "sliced",
+          "border_scale": 0.0022
+        },
+        "sindri.ui.box": {
+          "order": 0
         }
       }
     },
     {
       "id": "boon-1-key",
       "name": "Boon1Key",
-      "parent": "boon-1",
+      "parent": "boon-1-words",
       "components": {
         "weave.style": {
           "classes": [
-            "boon-key",
-            "dim"
+            "boon-key"
           ]
         },
         "sindri.ui.text": {
-          "text": "2",
+          "text": "",
           "font": "fonts/AlegreyaSans-Bold.ttf",
           "font_size": 0.024,
           "line_height": 0.02928,
           "anchor": "center",
-          "layer": 210,
+          "layer": 204,
           "color": [
             1,
             1,
@@ -612,33 +742,34 @@
             ],
             "softness": 0.003
           },
+          "rich": true,
           "bounds": [
             0.0,
             0.0
           ]
         },
         "sindri.ui.box": {
-          "order": 2
+          "order": 3
         }
       }
     },
     {
-      "id": "boon-1-text",
-      "name": "Boon1Text",
-      "parent": "boon-1",
+      "id": "boon-1-mark",
+      "name": "Boon1Mark",
+      "parent": "boon-1-words",
       "components": {
         "weave.style": {
           "classes": [
-            "boon-text"
+            "boon-mark"
           ]
         },
         "sindri.ui.text": {
-          "text": "The Mason's stone hits 1 harder.",
+          "text": "",
           "font": "fonts/AlegreyaSans-Medium.ttf",
-          "font_size": 0.026,
-          "line_height": 0.03172,
+          "font_size": 0.05,
+          "line_height": 0.061,
           "anchor": "center",
-          "layer": 210,
+          "layer": 204,
           "color": [
             1,
             1,
@@ -658,53 +789,7 @@
             ],
             "softness": 0.003
           },
-          "bounds": [
-            0.0,
-            0.0
-          ],
-          "wrap": "word"
-        },
-        "sindri.ui.box": {
-          "order": 1
-        }
-      }
-    },
-    {
-      "id": "boon-1-title",
-      "name": "Boon1Title",
-      "parent": "boon-1",
-      "components": {
-        "weave.style": {
-          "classes": [
-            "boon-title"
-          ]
-        },
-        "sindri.ui.text": {
-          "text": "Heavier stone",
-          "font": "fonts/AlegreyaSC-Bold.ttf",
-          "font_size": 0.04,
-          "line_height": 0.0488,
-          "anchor": "center",
-          "layer": 210,
-          "color": [
-            1,
-            1,
-            1,
-            1
-          ],
-          "shadow": {
-            "offset": [
-              0.0,
-              -0.003
-            ],
-            "color": [
-              0.0,
-              0.02,
-              0.05,
-              0.6
-            ],
-            "softness": 0.003
-          },
+          "rich": true,
           "bounds": [
             0.0,
             0.0
@@ -712,6 +797,141 @@
         },
         "sindri.ui.box": {
           "order": 0
+        }
+      }
+    },
+    {
+      "id": "boon-1-text",
+      "name": "Boon1Text",
+      "parent": "boon-1-words",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "boon-text"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "",
+          "font": "fonts/AlegreyaSans-Medium.ttf",
+          "font_size": 0.026,
+          "line_height": 0.03172,
+          "anchor": "center",
+          "layer": 204,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "rich": true,
+          "bounds": [
+            0.0,
+            0.0
+          ],
+          "wrap": "word"
+        },
+        "sindri.ui.box": {
+          "order": 2
+        }
+      }
+    },
+    {
+      "id": "boon-1-title",
+      "name": "Boon1Title",
+      "parent": "boon-1-words",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "boon-title"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "",
+          "font": "fonts/AlegreyaSC-Bold.ttf",
+          "font_size": 0.04,
+          "line_height": 0.0488,
+          "anchor": "center",
+          "layer": 204,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "rich": true,
+          "bounds": [
+            0.0,
+            0.0
+          ]
+        },
+        "sindri.ui.box": {
+          "order": 1
+        }
+      }
+    },
+    {
+      "id": "boon-1-words",
+      "name": "Boon1Words",
+      "parent": "boon-1",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "boon-words"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "anchor": "center",
+          "layer": 202,
+          "fill": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0.0,
+          "corner_radius": 0.0
+        },
+        "sindri.ui.layout": {
+          "direction": "column",
+          "spacing": 0.01,
+          "align": "center",
+          "justify": "center"
+        },
+        "sindri.ui.box": {
+          "order": 1
         }
       }
     },
@@ -722,61 +942,81 @@
       "components": {
         "weave.style": {
           "classes": [
-            "boon",
-            "button"
+            "boon-card"
           ]
         },
         "sindri.ui.button": {
-          "label": "Longer legs"
+          "label": "Boon 3"
         },
         "sindri.ui.shape": {
           "kind": "rect",
           "anchor": "center",
-          "layer": 205,
+          "layer": 200,
           "fill": [
-            0.04,
-            0.08,
-            0.11,
-            0.86
+            0,
+            0,
+            0,
+            0
           ],
           "stroke": [
-            0.95,
-            0.8,
-            0.5,
-            0.35
+            0,
+            0,
+            0,
+            0
           ],
-          "stroke_width": 0.004,
-          "corner_radius": 0.012
-        },
-        "sindri.ui.layout": {
-          "direction": "column",
-          "spacing": 0.012,
-          "align": "center",
-          "justify": "center"
+          "stroke_width": 0.0,
+          "corner_radius": 0.0
         },
         "sindri.ui.box": {
           "order": 2
+        }
+      }
+    },
+    {
+      "id": "boon-2-art",
+      "name": "Boon2 Card",
+      "parent": "boon-2",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "boon-art"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/card.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 201,
+          "draw": "sliced",
+          "border_scale": 0.0022
+        },
+        "sindri.ui.box": {
+          "order": 0
         }
       }
     },
     {
       "id": "boon-2-key",
       "name": "Boon2Key",
-      "parent": "boon-2",
+      "parent": "boon-2-words",
       "components": {
         "weave.style": {
           "classes": [
-            "boon-key",
-            "dim"
+            "boon-key"
           ]
         },
         "sindri.ui.text": {
-          "text": "3",
+          "text": "",
           "font": "fonts/AlegreyaSans-Bold.ttf",
           "font_size": 0.024,
           "line_height": 0.02928,
           "anchor": "center",
-          "layer": 210,
+          "layer": 204,
           "color": [
             1,
             1,
@@ -796,33 +1036,34 @@
             ],
             "softness": 0.003
           },
+          "rich": true,
           "bounds": [
             0.0,
             0.0
           ]
         },
         "sindri.ui.box": {
-          "order": 2
+          "order": 3
         }
       }
     },
     {
-      "id": "boon-2-text",
-      "name": "Boon2Text",
-      "parent": "boon-2",
+      "id": "boon-2-mark",
+      "name": "Boon2Mark",
+      "parent": "boon-2-words",
       "components": {
         "weave.style": {
           "classes": [
-            "boon-text"
+            "boon-mark"
           ]
         },
         "sindri.ui.text": {
-          "text": "The Lamplighter moves a cell further.",
+          "text": "",
           "font": "fonts/AlegreyaSans-Medium.ttf",
-          "font_size": 0.026,
-          "line_height": 0.03172,
+          "font_size": 0.05,
+          "line_height": 0.061,
           "anchor": "center",
-          "layer": 210,
+          "layer": 204,
           "color": [
             1,
             1,
@@ -842,53 +1083,7 @@
             ],
             "softness": 0.003
           },
-          "bounds": [
-            0.0,
-            0.0
-          ],
-          "wrap": "word"
-        },
-        "sindri.ui.box": {
-          "order": 1
-        }
-      }
-    },
-    {
-      "id": "boon-2-title",
-      "name": "Boon2Title",
-      "parent": "boon-2",
-      "components": {
-        "weave.style": {
-          "classes": [
-            "boon-title"
-          ]
-        },
-        "sindri.ui.text": {
-          "text": "Longer legs",
-          "font": "fonts/AlegreyaSC-Bold.ttf",
-          "font_size": 0.04,
-          "line_height": 0.0488,
-          "anchor": "center",
-          "layer": 210,
-          "color": [
-            1,
-            1,
-            1,
-            1
-          ],
-          "shadow": {
-            "offset": [
-              0.0,
-              -0.003
-            ],
-            "color": [
-              0.0,
-              0.02,
-              0.05,
-              0.6
-            ],
-            "softness": 0.003
-          },
+          "rich": true,
           "bounds": [
             0.0,
             0.0
@@ -896,6 +1091,141 @@
         },
         "sindri.ui.box": {
           "order": 0
+        }
+      }
+    },
+    {
+      "id": "boon-2-text",
+      "name": "Boon2Text",
+      "parent": "boon-2-words",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "boon-text"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "",
+          "font": "fonts/AlegreyaSans-Medium.ttf",
+          "font_size": 0.026,
+          "line_height": 0.03172,
+          "anchor": "center",
+          "layer": 204,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "rich": true,
+          "bounds": [
+            0.0,
+            0.0
+          ],
+          "wrap": "word"
+        },
+        "sindri.ui.box": {
+          "order": 2
+        }
+      }
+    },
+    {
+      "id": "boon-2-title",
+      "name": "Boon2Title",
+      "parent": "boon-2-words",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "boon-title"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "",
+          "font": "fonts/AlegreyaSC-Bold.ttf",
+          "font_size": 0.04,
+          "line_height": 0.0488,
+          "anchor": "center",
+          "layer": 204,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "rich": true,
+          "bounds": [
+            0.0,
+            0.0
+          ]
+        },
+        "sindri.ui.box": {
+          "order": 1
+        }
+      }
+    },
+    {
+      "id": "boon-2-words",
+      "name": "Boon2Words",
+      "parent": "boon-2",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "boon-words"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "anchor": "center",
+          "layer": 202,
+          "fill": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0.0,
+          "corner_radius": 0.0
+        },
+        "sindri.ui.layout": {
+          "direction": "column",
+          "spacing": 0.01,
+          "align": "center",
+          "justify": "center"
+        },
+        "sindri.ui.box": {
+          "order": 1
         }
       }
     },
@@ -906,37 +1236,30 @@
       "components": {
         "weave.style": {
           "classes": [
-            "boon",
-            "button"
+            "boon-card"
           ]
         },
         "sindri.ui.button": {
-          "label": "Bank the fire"
+          "label": "Boon 4"
         },
         "sindri.ui.shape": {
           "kind": "rect",
           "anchor": "center",
-          "layer": 205,
+          "layer": 200,
           "fill": [
-            0.04,
-            0.08,
-            0.11,
-            0.86
+            0,
+            0,
+            0,
+            0
           ],
           "stroke": [
-            0.95,
-            0.8,
-            0.5,
-            0.35
+            0,
+            0,
+            0,
+            0
           ],
-          "stroke_width": 0.004,
-          "corner_radius": 0.012
-        },
-        "sindri.ui.layout": {
-          "direction": "column",
-          "spacing": 0.012,
-          "align": "center",
-          "justify": "center"
+          "stroke_width": 0.0,
+          "corner_radius": 0.0
         },
         "sindri.ui.box": {
           "order": 3
@@ -944,23 +1267,50 @@
       }
     },
     {
-      "id": "boon-3-key",
-      "name": "Boon3Key",
+      "id": "boon-3-art",
+      "name": "Boon3 Card",
       "parent": "boon-3",
       "components": {
         "weave.style": {
           "classes": [
-            "boon-key",
-            "dim"
+            "boon-art"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/card.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 201,
+          "draw": "sliced",
+          "border_scale": 0.0022
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "boon-3-key",
+      "name": "Boon3Key",
+      "parent": "boon-3-words",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "boon-key"
           ]
         },
         "sindri.ui.text": {
-          "text": "4",
+          "text": "",
           "font": "fonts/AlegreyaSans-Bold.ttf",
           "font_size": 0.024,
           "line_height": 0.02928,
           "anchor": "center",
-          "layer": 210,
+          "layer": 204,
           "color": [
             1,
             1,
@@ -980,33 +1330,34 @@
             ],
             "softness": 0.003
           },
+          "rich": true,
           "bounds": [
             0.0,
             0.0
           ]
         },
         "sindri.ui.box": {
-          "order": 2
+          "order": 3
         }
       }
     },
     {
-      "id": "boon-3-text",
-      "name": "Boon3Text",
-      "parent": "boon-3",
+      "id": "boon-3-mark",
+      "name": "Boon3Mark",
+      "parent": "boon-3-words",
       "components": {
         "weave.style": {
           "classes": [
-            "boon-text"
+            "boon-mark"
           ]
         },
         "sindri.ui.text": {
-          "text": "The Hearth regains two points.",
+          "text": "",
           "font": "fonts/AlegreyaSans-Medium.ttf",
-          "font_size": 0.026,
-          "line_height": 0.03172,
+          "font_size": 0.05,
+          "line_height": 0.061,
           "anchor": "center",
-          "layer": 210,
+          "layer": 204,
           "color": [
             1,
             1,
@@ -1026,53 +1377,7 @@
             ],
             "softness": 0.003
           },
-          "bounds": [
-            0.0,
-            0.0
-          ],
-          "wrap": "word"
-        },
-        "sindri.ui.box": {
-          "order": 1
-        }
-      }
-    },
-    {
-      "id": "boon-3-title",
-      "name": "Boon3Title",
-      "parent": "boon-3",
-      "components": {
-        "weave.style": {
-          "classes": [
-            "boon-title"
-          ]
-        },
-        "sindri.ui.text": {
-          "text": "Bank the fire",
-          "font": "fonts/AlegreyaSC-Bold.ttf",
-          "font_size": 0.04,
-          "line_height": 0.0488,
-          "anchor": "center",
-          "layer": 210,
-          "color": [
-            1,
-            1,
-            1,
-            1
-          ],
-          "shadow": {
-            "offset": [
-              0.0,
-              -0.003
-            ],
-            "color": [
-              0.0,
-              0.02,
-              0.05,
-              0.6
-            ],
-            "softness": 0.003
-          },
+          "rich": true,
           "bounds": [
             0.0,
             0.0
@@ -1084,14 +1389,168 @@
       }
     },
     {
+      "id": "boon-3-text",
+      "name": "Boon3Text",
+      "parent": "boon-3-words",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "boon-text"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "",
+          "font": "fonts/AlegreyaSans-Medium.ttf",
+          "font_size": 0.026,
+          "line_height": 0.03172,
+          "anchor": "center",
+          "layer": 204,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "rich": true,
+          "bounds": [
+            0.0,
+            0.0
+          ],
+          "wrap": "word"
+        },
+        "sindri.ui.box": {
+          "order": 2
+        }
+      }
+    },
+    {
+      "id": "boon-3-title",
+      "name": "Boon3Title",
+      "parent": "boon-3-words",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "boon-title"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "",
+          "font": "fonts/AlegreyaSC-Bold.ttf",
+          "font_size": 0.04,
+          "line_height": 0.0488,
+          "anchor": "center",
+          "layer": 204,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "rich": true,
+          "bounds": [
+            0.0,
+            0.0
+          ]
+        },
+        "sindri.ui.box": {
+          "order": 1
+        }
+      }
+    },
+    {
+      "id": "boon-3-words",
+      "name": "Boon3Words",
+      "parent": "boon-3",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "boon-words"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "anchor": "center",
+          "layer": 202,
+          "fill": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0.0,
+          "corner_radius": 0.0
+        },
+        "sindri.ui.layout": {
+          "direction": "column",
+          "spacing": 0.01,
+          "align": "center",
+          "justify": "center"
+        },
+        "sindri.ui.box": {
+          "order": 1
+        }
+      }
+    },
+    {
       "id": "boons",
       "name": "Boons",
-      "parent": "upgrade",
+      "parent": "upgrade-column",
       "components": {
         "weave.style": {
           "classes": [
             "boons"
           ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "anchor": "center",
+          "layer": 198,
+          "fill": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0.0,
+          "corner_radius": 0.0
         },
         "sindri.ui.layout": {
           "direction": "row",
@@ -1100,7 +1559,7 @@
           "justify": "center"
         },
         "sindri.ui.box": {
-          "order": 1
+          "order": 5
         }
       }
     },
@@ -1151,33 +1610,8 @@
       "components": {
         "weave.style": {
           "classes": [
-            "screen"
+            "screen-root"
           ]
-        },
-        "sindri.ui.shape": {
-          "kind": "rect",
-          "anchor": "center",
-          "layer": 200,
-          "fill": [
-            0.02,
-            0.05,
-            0.07,
-            0.55
-          ],
-          "stroke": [
-            0,
-            0,
-            0,
-            0
-          ],
-          "stroke_width": 0.004,
-          "corner_radius": 0.012
-        },
-        "sindri.ui.layout": {
-          "direction": "column",
-          "spacing": 0.02,
-          "align": "center",
-          "justify": "center"
         }
       },
       "disabled": true
@@ -1185,13 +1619,12 @@
     {
       "id": "crossed-button",
       "name": "CrossedButton",
-      "parent": "crossed-card",
+      "parent": "crossed-column",
       "components": {
         "weave.style": {
           "classes": [
-            "button",
-            "primary",
-            "wide"
+            "plate-button",
+            "begin"
           ]
         },
         "sindri.ui.button": {
@@ -1200,24 +1633,24 @@
         "sindri.ui.shape": {
           "kind": "rect",
           "anchor": "center",
-          "layer": 212,
+          "layer": 200,
           "fill": [
-            0.1,
-            0.16,
-            0.2,
-            1.0
+            0,
+            0,
+            0,
+            0
           ],
           "stroke": [
-            0.95,
-            0.8,
-            0.5,
-            0.6
+            0,
+            0,
+            0,
+            0
           ],
-          "stroke_width": 0.004,
-          "corner_radius": 0.01
+          "stroke_width": 0.0,
+          "corner_radius": 0.0
         },
         "sindri.ui.box": {
-          "order": 2
+          "order": 5
         }
       }
     },
@@ -1228,16 +1661,17 @@
       "components": {
         "weave.style": {
           "classes": [
-            "button-label"
+            "plate-label",
+            "begin"
           ]
         },
         "sindri.ui.text": {
-          "text": "Back to the shore",
+          "text": "",
           "font": "fonts/AlegreyaSans-Bold.ttf",
           "font_size": 0.034,
           "line_height": 0.04148,
           "anchor": "center",
-          "layer": 214,
+          "layer": 203,
           "color": [
             1,
             1,
@@ -1257,6 +1691,172 @@
             ],
             "softness": 0.003
           },
+          "rich": true,
+          "bounds": [
+            0.0,
+            0.0
+          ]
+        },
+        "sindri.ui.box": {
+          "order": 1
+        }
+      }
+    },
+    {
+      "id": "crossed-button-plate",
+      "name": "CrossedButton Plate",
+      "parent": "crossed-button",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "plate"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/plate-ember.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 201
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "crossed-column",
+      "name": "CrossedColumn",
+      "parent": "crossed",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "screen-column"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "anchor": "center",
+          "layer": 196,
+          "fill": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0.0,
+          "corner_radius": 0.0
+        },
+        "sindri.ui.layout": {
+          "direction": "column",
+          "spacing": 0.016,
+          "align": "center",
+          "justify": "center"
+        },
+        "sindri.ui.box": {
+          "order": 4
+        }
+      }
+    },
+    {
+      "id": "crossed-dim",
+      "name": "CrossedDim",
+      "parent": "crossed",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "screen-dim"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/white.png",
+          "tint": [
+            0.01,
+            0.03,
+            0.05,
+            0
+          ],
+          "anchor": "center",
+          "layer": 194
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "crossed-halo",
+      "name": "CrossedHalo",
+      "parent": "crossed",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "screen-halo"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/halo.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 195
+        },
+        "sindri.ui.box": {
+          "order": 3
+        }
+      }
+    },
+    {
+      "id": "crossed-kicker",
+      "name": "CrossedKicker",
+      "parent": "crossed-column",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "screen-kicker"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "",
+          "font": "fonts/AlegreyaSC-Bold.ttf",
+          "font_size": 0.026,
+          "line_height": 0.03172,
+          "anchor": "center",
+          "layer": 198,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "rich": true,
           "bounds": [
             0.0,
             0.0
@@ -1268,50 +1868,155 @@
       }
     },
     {
-      "id": "crossed-card",
-      "name": "Crossed Card",
+      "id": "crossed-ornament",
+      "name": "CrossedOrnament",
+      "parent": "crossed-column",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "screen-ornament"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "",
+          "font": "fonts/AlegreyaSans-Medium.ttf",
+          "font_size": 0.03,
+          "line_height": 0.0366,
+          "anchor": "center",
+          "layer": 198,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "rich": true,
+          "bounds": [
+            0.0,
+            0.0
+          ]
+        },
+        "sindri.ui.box": {
+          "order": 2
+        }
+      }
+    },
+    {
+      "id": "crossed-screen-shade-bottom",
+      "name": "CrossedShadeBottom",
       "parent": "crossed",
       "components": {
         "weave.style": {
           "classes": [
-            "screen-card",
-            "panel"
+            "screen-shade-bottom"
           ]
         },
-        "sindri.ui.shape": {
-          "kind": "rect",
+        "sindri.ui.image": {
+          "texture": "textures/shade-up.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
           "anchor": "center",
-          "layer": 205,
-          "fill": [
-            0.04,
-            0.08,
-            0.11,
-            0.86
-          ],
-          "stroke": [
-            0.95,
-            0.8,
-            0.5,
-            0.35
-          ],
-          "stroke_width": 0.004,
-          "corner_radius": 0.012
-        },
-        "sindri.ui.layout": {
-          "direction": "column",
-          "spacing": 0.02,
-          "align": "center",
-          "justify": "center"
+          "layer": 195
         },
         "sindri.ui.box": {
-          "order": 0
+          "order": 2
+        }
+      }
+    },
+    {
+      "id": "crossed-screen-shade-top",
+      "name": "CrossedShadeTop",
+      "parent": "crossed",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "screen-shade-top"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/shade-down.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 195
+        },
+        "sindri.ui.box": {
+          "order": 1
+        }
+      }
+    },
+    {
+      "id": "crossed-stats",
+      "name": "CrossedStats",
+      "parent": "crossed-column",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "screen-stats"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "",
+          "font": "fonts/AlegreyaSans-Medium.ttf",
+          "font_size": 0.024,
+          "line_height": 0.02928,
+          "anchor": "center",
+          "layer": 198,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "rich": true,
+          "bounds": [
+            0.0,
+            0.0
+          ]
+        },
+        "sindri.ui.box": {
+          "order": 4
         }
       }
     },
     {
       "id": "crossed-text",
       "name": "CrossedText",
-      "parent": "crossed-card",
+      "parent": "crossed-column",
       "components": {
         "weave.style": {
           "classes": [
@@ -1321,10 +2026,10 @@
         "sindri.ui.text": {
           "text": "",
           "font": "fonts/AlegreyaSans-Medium.ttf",
-          "font_size": 0.032,
-          "line_height": 0.03904,
+          "font_size": 0.03,
+          "line_height": 0.0366,
           "anchor": "center",
-          "layer": 210,
+          "layer": 198,
           "color": [
             1,
             1,
@@ -1344,6 +2049,7 @@
             ],
             "softness": 0.003
           },
+          "rich": true,
           "bounds": [
             0.0,
             0.0
@@ -1351,14 +2057,14 @@
           "wrap": "word"
         },
         "sindri.ui.box": {
-          "order": 1
+          "order": 3
         }
       }
     },
     {
       "id": "crossed-title",
       "name": "CrossedTitle",
-      "parent": "crossed-card",
+      "parent": "crossed-column",
       "components": {
         "weave.style": {
           "classes": [
@@ -1366,12 +2072,12 @@
           ]
         },
         "sindri.ui.text": {
-          "text": "The lamp is lit",
+          "text": "",
           "font": "fonts/AlegreyaSC-Bold.ttf",
           "font_size": 0.09,
           "line_height": 0.1098,
           "anchor": "center",
-          "layer": 210,
+          "layer": 198,
           "color": [
             1,
             1,
@@ -1391,13 +2097,14 @@
             ],
             "softness": 0.003
           },
+          "rich": true,
           "bounds": [
             0.0,
             0.0
           ]
         },
         "sindri.ui.box": {
-          "order": 0
+          "order": 1
         }
       }
     },
@@ -1577,33 +2284,8 @@
       "components": {
         "weave.style": {
           "classes": [
-            "screen"
+            "screen-root"
           ]
-        },
-        "sindri.ui.shape": {
-          "kind": "rect",
-          "anchor": "center",
-          "layer": 200,
-          "fill": [
-            0.02,
-            0.05,
-            0.07,
-            0.55
-          ],
-          "stroke": [
-            0,
-            0,
-            0,
-            0
-          ],
-          "stroke_width": 0.004,
-          "corner_radius": 0.012
-        },
-        "sindri.ui.layout": {
-          "direction": "column",
-          "spacing": 0.02,
-          "align": "center",
-          "justify": "center"
         }
       },
       "disabled": true
@@ -1611,13 +2293,12 @@
     {
       "id": "fallen-button",
       "name": "FallenButton",
-      "parent": "fallen-card",
+      "parent": "fallen-column",
       "components": {
         "weave.style": {
           "classes": [
-            "button",
-            "primary",
-            "wide"
+            "plate-button",
+            "begin"
           ]
         },
         "sindri.ui.button": {
@@ -1626,24 +2307,24 @@
         "sindri.ui.shape": {
           "kind": "rect",
           "anchor": "center",
-          "layer": 212,
+          "layer": 200,
           "fill": [
-            0.1,
-            0.16,
-            0.2,
-            1.0
+            0,
+            0,
+            0,
+            0
           ],
           "stroke": [
-            0.95,
-            0.8,
-            0.5,
-            0.6
+            0,
+            0,
+            0,
+            0
           ],
-          "stroke_width": 0.004,
-          "corner_radius": 0.01
+          "stroke_width": 0.0,
+          "corner_radius": 0.0
         },
         "sindri.ui.box": {
-          "order": 2
+          "order": 5
         }
       }
     },
@@ -1654,16 +2335,17 @@
       "components": {
         "weave.style": {
           "classes": [
-            "button-label"
+            "plate-label",
+            "begin"
           ]
         },
         "sindri.ui.text": {
-          "text": "Back to the shore",
+          "text": "",
           "font": "fonts/AlegreyaSans-Bold.ttf",
           "font_size": 0.034,
           "line_height": 0.04148,
           "anchor": "center",
-          "layer": 214,
+          "layer": 203,
           "color": [
             1,
             1,
@@ -1683,6 +2365,172 @@
             ],
             "softness": 0.003
           },
+          "rich": true,
+          "bounds": [
+            0.0,
+            0.0
+          ]
+        },
+        "sindri.ui.box": {
+          "order": 1
+        }
+      }
+    },
+    {
+      "id": "fallen-button-plate",
+      "name": "FallenButton Plate",
+      "parent": "fallen-button",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "plate"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/plate-ember.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 201
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "fallen-column",
+      "name": "FallenColumn",
+      "parent": "fallen",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "screen-column"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "anchor": "center",
+          "layer": 196,
+          "fill": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0.0,
+          "corner_radius": 0.0
+        },
+        "sindri.ui.layout": {
+          "direction": "column",
+          "spacing": 0.016,
+          "align": "center",
+          "justify": "center"
+        },
+        "sindri.ui.box": {
+          "order": 4
+        }
+      }
+    },
+    {
+      "id": "fallen-dim",
+      "name": "FallenDim",
+      "parent": "fallen",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "screen-dim"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/white.png",
+          "tint": [
+            0.01,
+            0.03,
+            0.05,
+            0
+          ],
+          "anchor": "center",
+          "layer": 194
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "fallen-halo",
+      "name": "FallenHalo",
+      "parent": "fallen",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "screen-halo"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/halo.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 195
+        },
+        "sindri.ui.box": {
+          "order": 3
+        }
+      }
+    },
+    {
+      "id": "fallen-kicker",
+      "name": "FallenKicker",
+      "parent": "fallen-column",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "screen-kicker"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "",
+          "font": "fonts/AlegreyaSC-Bold.ttf",
+          "font_size": 0.026,
+          "line_height": 0.03172,
+          "anchor": "center",
+          "layer": 198,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "rich": true,
           "bounds": [
             0.0,
             0.0
@@ -1694,50 +2542,155 @@
       }
     },
     {
-      "id": "fallen-card",
-      "name": "Fallen Card",
+      "id": "fallen-ornament",
+      "name": "FallenOrnament",
+      "parent": "fallen-column",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "screen-ornament"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "",
+          "font": "fonts/AlegreyaSans-Medium.ttf",
+          "font_size": 0.03,
+          "line_height": 0.0366,
+          "anchor": "center",
+          "layer": 198,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "rich": true,
+          "bounds": [
+            0.0,
+            0.0
+          ]
+        },
+        "sindri.ui.box": {
+          "order": 2
+        }
+      }
+    },
+    {
+      "id": "fallen-screen-shade-bottom",
+      "name": "FallenShadeBottom",
       "parent": "fallen",
       "components": {
         "weave.style": {
           "classes": [
-            "screen-card",
-            "panel"
+            "screen-shade-bottom"
           ]
         },
-        "sindri.ui.shape": {
-          "kind": "rect",
+        "sindri.ui.image": {
+          "texture": "textures/shade-up.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
           "anchor": "center",
-          "layer": 205,
-          "fill": [
-            0.04,
-            0.08,
-            0.11,
-            0.86
-          ],
-          "stroke": [
-            0.95,
-            0.8,
-            0.5,
-            0.35
-          ],
-          "stroke_width": 0.004,
-          "corner_radius": 0.012
-        },
-        "sindri.ui.layout": {
-          "direction": "column",
-          "spacing": 0.02,
-          "align": "center",
-          "justify": "center"
+          "layer": 195
         },
         "sindri.ui.box": {
-          "order": 0
+          "order": 2
+        }
+      }
+    },
+    {
+      "id": "fallen-screen-shade-top",
+      "name": "FallenShadeTop",
+      "parent": "fallen",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "screen-shade-top"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/shade-down.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 195
+        },
+        "sindri.ui.box": {
+          "order": 1
+        }
+      }
+    },
+    {
+      "id": "fallen-stats",
+      "name": "FallenStats",
+      "parent": "fallen-column",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "screen-stats"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "",
+          "font": "fonts/AlegreyaSans-Medium.ttf",
+          "font_size": 0.024,
+          "line_height": 0.02928,
+          "anchor": "center",
+          "layer": 198,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "rich": true,
+          "bounds": [
+            0.0,
+            0.0
+          ]
+        },
+        "sindri.ui.box": {
+          "order": 4
         }
       }
     },
     {
       "id": "fallen-text",
       "name": "FallenText",
-      "parent": "fallen-card",
+      "parent": "fallen-column",
       "components": {
         "weave.style": {
           "classes": [
@@ -1747,10 +2700,10 @@
         "sindri.ui.text": {
           "text": "",
           "font": "fonts/AlegreyaSans-Medium.ttf",
-          "font_size": 0.032,
-          "line_height": 0.03904,
+          "font_size": 0.03,
+          "line_height": 0.0366,
           "anchor": "center",
-          "layer": 210,
+          "layer": 198,
           "color": [
             1,
             1,
@@ -1770,6 +2723,7 @@
             ],
             "softness": 0.003
           },
+          "rich": true,
           "bounds": [
             0.0,
             0.0
@@ -1777,14 +2731,14 @@
           "wrap": "word"
         },
         "sindri.ui.box": {
-          "order": 1
+          "order": 3
         }
       }
     },
     {
       "id": "fallen-title",
       "name": "FallenTitle",
-      "parent": "fallen-card",
+      "parent": "fallen-column",
       "components": {
         "weave.style": {
           "classes": [
@@ -1792,12 +2746,12 @@
           ]
         },
         "sindri.ui.text": {
-          "text": "The light goes out",
+          "text": "",
           "font": "fonts/AlegreyaSC-Bold.ttf",
           "font_size": 0.09,
           "line_height": 0.1098,
           "anchor": "center",
-          "layer": 210,
+          "layer": 198,
           "color": [
             1,
             1,
@@ -1817,13 +2771,14 @@
             ],
             "softness": 0.003
           },
+          "rich": true,
           "bounds": [
             0.0,
             0.0
           ]
         },
         "sindri.ui.box": {
-          "order": 0
+          "order": 1
         }
       }
     },
@@ -1967,33 +2922,8 @@
       "components": {
         "weave.style": {
           "classes": [
-            "screen"
+            "screen-root"
           ]
-        },
-        "sindri.ui.shape": {
-          "kind": "rect",
-          "anchor": "center",
-          "layer": 200,
-          "fill": [
-            0.02,
-            0.05,
-            0.07,
-            0.55
-          ],
-          "stroke": [
-            0,
-            0,
-            0,
-            0
-          ],
-          "stroke_width": 0.004,
-          "corner_radius": 0.012
-        },
-        "sindri.ui.layout": {
-          "direction": "column",
-          "spacing": 0.02,
-          "align": "center",
-          "justify": "center"
         }
       },
       "disabled": true
@@ -2001,13 +2931,12 @@
     {
       "id": "held-button",
       "name": "HeldButton",
-      "parent": "held-card",
+      "parent": "held-column",
       "components": {
         "weave.style": {
           "classes": [
-            "button",
-            "primary",
-            "wide"
+            "plate-button",
+            "begin"
           ]
         },
         "sindri.ui.button": {
@@ -2016,24 +2945,24 @@
         "sindri.ui.shape": {
           "kind": "rect",
           "anchor": "center",
-          "layer": 212,
+          "layer": 200,
           "fill": [
-            0.1,
-            0.16,
-            0.2,
-            1.0
+            0,
+            0,
+            0,
+            0
           ],
           "stroke": [
-            0.95,
-            0.8,
-            0.5,
-            0.6
+            0,
+            0,
+            0,
+            0
           ],
-          "stroke_width": 0.004,
-          "corner_radius": 0.01
+          "stroke_width": 0.0,
+          "corner_radius": 0.0
         },
         "sindri.ui.box": {
-          "order": 2
+          "order": 5
         }
       }
     },
@@ -2044,16 +2973,17 @@
       "components": {
         "weave.style": {
           "classes": [
-            "button-label"
+            "plate-label",
+            "begin"
           ]
         },
         "sindri.ui.text": {
-          "text": "Onward",
+          "text": "",
           "font": "fonts/AlegreyaSans-Bold.ttf",
           "font_size": 0.034,
           "line_height": 0.04148,
           "anchor": "center",
-          "layer": 214,
+          "layer": 203,
           "color": [
             1,
             1,
@@ -2073,6 +3003,172 @@
             ],
             "softness": 0.003
           },
+          "rich": true,
+          "bounds": [
+            0.0,
+            0.0
+          ]
+        },
+        "sindri.ui.box": {
+          "order": 1
+        }
+      }
+    },
+    {
+      "id": "held-button-plate",
+      "name": "HeldButton Plate",
+      "parent": "held-button",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "plate"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/plate-ember.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 201
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "held-column",
+      "name": "HeldColumn",
+      "parent": "held",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "screen-column"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "anchor": "center",
+          "layer": 196,
+          "fill": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0.0,
+          "corner_radius": 0.0
+        },
+        "sindri.ui.layout": {
+          "direction": "column",
+          "spacing": 0.016,
+          "align": "center",
+          "justify": "center"
+        },
+        "sindri.ui.box": {
+          "order": 4
+        }
+      }
+    },
+    {
+      "id": "held-dim",
+      "name": "HeldDim",
+      "parent": "held",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "screen-dim"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/white.png",
+          "tint": [
+            0.01,
+            0.03,
+            0.05,
+            0
+          ],
+          "anchor": "center",
+          "layer": 194
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "held-halo",
+      "name": "HeldHalo",
+      "parent": "held",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "screen-halo"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/halo.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 195
+        },
+        "sindri.ui.box": {
+          "order": 3
+        }
+      }
+    },
+    {
+      "id": "held-kicker",
+      "name": "HeldKicker",
+      "parent": "held-column",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "screen-kicker"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "",
+          "font": "fonts/AlegreyaSC-Bold.ttf",
+          "font_size": 0.026,
+          "line_height": 0.03172,
+          "anchor": "center",
+          "layer": 198,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "rich": true,
           "bounds": [
             0.0,
             0.0
@@ -2084,50 +3180,155 @@
       }
     },
     {
-      "id": "held-card",
-      "name": "Held Card",
+      "id": "held-ornament",
+      "name": "HeldOrnament",
+      "parent": "held-column",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "screen-ornament"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "",
+          "font": "fonts/AlegreyaSans-Medium.ttf",
+          "font_size": 0.03,
+          "line_height": 0.0366,
+          "anchor": "center",
+          "layer": 198,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "rich": true,
+          "bounds": [
+            0.0,
+            0.0
+          ]
+        },
+        "sindri.ui.box": {
+          "order": 2
+        }
+      }
+    },
+    {
+      "id": "held-screen-shade-bottom",
+      "name": "HeldShadeBottom",
       "parent": "held",
       "components": {
         "weave.style": {
           "classes": [
-            "screen-card",
-            "panel"
+            "screen-shade-bottom"
           ]
         },
-        "sindri.ui.shape": {
-          "kind": "rect",
+        "sindri.ui.image": {
+          "texture": "textures/shade-up.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
           "anchor": "center",
-          "layer": 205,
-          "fill": [
-            0.04,
-            0.08,
-            0.11,
-            0.86
-          ],
-          "stroke": [
-            0.95,
-            0.8,
-            0.5,
-            0.35
-          ],
-          "stroke_width": 0.004,
-          "corner_radius": 0.012
-        },
-        "sindri.ui.layout": {
-          "direction": "column",
-          "spacing": 0.02,
-          "align": "center",
-          "justify": "center"
+          "layer": 195
         },
         "sindri.ui.box": {
-          "order": 0
+          "order": 2
+        }
+      }
+    },
+    {
+      "id": "held-screen-shade-top",
+      "name": "HeldShadeTop",
+      "parent": "held",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "screen-shade-top"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/shade-down.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 195
+        },
+        "sindri.ui.box": {
+          "order": 1
+        }
+      }
+    },
+    {
+      "id": "held-stats",
+      "name": "HeldStats",
+      "parent": "held-column",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "screen-stats"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "",
+          "font": "fonts/AlegreyaSans-Medium.ttf",
+          "font_size": 0.024,
+          "line_height": 0.02928,
+          "anchor": "center",
+          "layer": 198,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "rich": true,
+          "bounds": [
+            0.0,
+            0.0
+          ]
+        },
+        "sindri.ui.box": {
+          "order": 4
         }
       }
     },
     {
       "id": "held-text",
       "name": "HeldText",
-      "parent": "held-card",
+      "parent": "held-column",
       "components": {
         "weave.style": {
           "classes": [
@@ -2137,10 +3338,10 @@
         "sindri.ui.text": {
           "text": "",
           "font": "fonts/AlegreyaSans-Medium.ttf",
-          "font_size": 0.032,
-          "line_height": 0.03904,
+          "font_size": 0.03,
+          "line_height": 0.0366,
           "anchor": "center",
-          "layer": 210,
+          "layer": 198,
           "color": [
             1,
             1,
@@ -2160,6 +3361,7 @@
             ],
             "softness": 0.003
           },
+          "rich": true,
           "bounds": [
             0.0,
             0.0
@@ -2167,14 +3369,14 @@
           "wrap": "word"
         },
         "sindri.ui.box": {
-          "order": 1
+          "order": 3
         }
       }
     },
     {
       "id": "held-title",
       "name": "HeldTitle",
-      "parent": "held-card",
+      "parent": "held-column",
       "components": {
         "weave.style": {
           "classes": [
@@ -2182,12 +3384,12 @@
           ]
         },
         "sindri.ui.text": {
-          "text": "Saltmarsh holds",
+          "text": "",
           "font": "fonts/AlegreyaSC-Bold.ttf",
           "font_size": 0.09,
           "line_height": 0.1098,
           "anchor": "center",
-          "layer": 210,
+          "layer": 198,
           "color": [
             1,
             1,
@@ -2207,15 +3409,121 @@
             ],
             "softness": 0.003
           },
+          "rich": true,
           "bounds": [
             0.0,
             0.0
           ]
         },
         "sindri.ui.box": {
-          "order": 0
+          "order": 1
         }
       }
+    },
+    {
+      "id": "house-light-0",
+      "name": "House Light 0",
+      "transform_3d": {
+        "position": [
+          28.0,
+          2,
+          28.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.light": {
+          "kind": "point",
+          "color": [
+            1.0,
+            0.68,
+            0.36
+          ],
+          "intensity": 0.0,
+          "range": 2.4
+        }
+      },
+      "disabled": true
+    },
+    {
+      "id": "house-light-1",
+      "name": "House Light 1",
+      "transform_3d": {
+        "position": [
+          28.0,
+          2,
+          28.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.light": {
+          "kind": "point",
+          "color": [
+            1.0,
+            0.68,
+            0.36
+          ],
+          "intensity": 0.0,
+          "range": 2.4
+        }
+      },
+      "disabled": true
+    },
+    {
+      "id": "house-light-2",
+      "name": "House Light 2",
+      "transform_3d": {
+        "position": [
+          28.0,
+          2,
+          28.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.light": {
+          "kind": "point",
+          "color": [
+            1.0,
+            0.68,
+            0.36
+          ],
+          "intensity": 0.0,
+          "range": 2.4
+        }
+      },
+      "disabled": true
     },
     {
       "id": "howto",
@@ -3339,6 +4647,76 @@
       }
     },
     {
+      "id": "rift-light-0",
+      "name": "Rift Light 0",
+      "transform_3d": {
+        "position": [
+          28.0,
+          2,
+          28.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.light": {
+          "kind": "point",
+          "color": [
+            0.62,
+            0.32,
+            1.0
+          ],
+          "intensity": 0.0,
+          "range": 2.2
+        }
+      },
+      "disabled": true
+    },
+    {
+      "id": "rift-light-1",
+      "name": "Rift Light 1",
+      "transform_3d": {
+        "position": [
+          28.0,
+          2,
+          28.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.light": {
+          "kind": "point",
+          "color": [
+            0.62,
+            0.32,
+            1.0
+          ],
+          "intensity": 0.0,
+          "range": 2.2
+        }
+      },
+      "disabled": true
+    },
+    {
       "id": "rotate-left",
       "name": "RotateLeft",
       "parent": "view-controls",
@@ -3549,6 +4927,16 @@
         },
         "sindri.ui.box": {
           "order": 1
+        }
+      }
+    },
+    {
+      "id": "screens",
+      "name": "Screens",
+      "components": {
+        "sindri.script": {
+          "script": "Screens",
+          "source": "scripts/screens.decay"
         }
       }
     },
@@ -5583,18 +6971,31 @@
       "components": {
         "weave.style": {
           "classes": [
-            "screen"
+            "screen-root"
+          ]
+        }
+      },
+      "disabled": true
+    },
+    {
+      "id": "upgrade-column",
+      "name": "UpgradeColumn",
+      "parent": "upgrade",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "screen-column"
           ]
         },
         "sindri.ui.shape": {
           "kind": "rect",
           "anchor": "center",
-          "layer": 200,
+          "layer": 196,
           "fill": [
-            0.02,
-            0.05,
-            0.07,
-            0.55
+            0,
+            0,
+            0,
+            0
           ],
           "stroke": [
             0,
@@ -5602,35 +7003,89 @@
             0,
             0
           ],
-          "stroke_width": 0.004,
-          "corner_radius": 0.012
+          "stroke_width": 0.0,
+          "corner_radius": 0.0
         },
         "sindri.ui.layout": {
           "direction": "column",
-          "spacing": 0.03,
+          "spacing": 0.016,
           "align": "center",
           "justify": "center"
+        },
+        "sindri.ui.box": {
+          "order": 4
         }
-      },
-      "disabled": true
+      }
     },
     {
-      "id": "upgrade-title",
-      "name": "UpgradeTitle",
+      "id": "upgrade-dim",
+      "name": "UpgradeDim",
       "parent": "upgrade",
       "components": {
         "weave.style": {
           "classes": [
-            "screen-title"
+            "screen-dim"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/white.png",
+          "tint": [
+            0.01,
+            0.03,
+            0.05,
+            0
+          ],
+          "anchor": "center",
+          "layer": 194
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "upgrade-halo",
+      "name": "UpgradeHalo",
+      "parent": "upgrade",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "screen-halo"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/halo.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 195
+        },
+        "sindri.ui.box": {
+          "order": 3
+        }
+      }
+    },
+    {
+      "id": "upgrade-kicker",
+      "name": "UpgradeKicker",
+      "parent": "upgrade-column",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "screen-kicker"
           ]
         },
         "sindri.ui.text": {
-          "text": "Choose a boon",
+          "text": "",
           "font": "fonts/AlegreyaSC-Bold.ttf",
-          "font_size": 0.08,
-          "line_height": 0.0976,
+          "font_size": 0.026,
+          "line_height": 0.03172,
           "anchor": "center",
-          "layer": 210,
+          "layer": 198,
           "color": [
             1,
             1,
@@ -5650,6 +7105,7 @@
             ],
             "softness": 0.003
           },
+          "rich": true,
           "bounds": [
             0.0,
             0.0
@@ -5657,6 +7113,247 @@
         },
         "sindri.ui.box": {
           "order": 0
+        }
+      }
+    },
+    {
+      "id": "upgrade-ornament",
+      "name": "UpgradeOrnament",
+      "parent": "upgrade-column",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "screen-ornament"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "",
+          "font": "fonts/AlegreyaSans-Medium.ttf",
+          "font_size": 0.03,
+          "line_height": 0.0366,
+          "anchor": "center",
+          "layer": 198,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "rich": true,
+          "bounds": [
+            0.0,
+            0.0
+          ]
+        },
+        "sindri.ui.box": {
+          "order": 2
+        }
+      }
+    },
+    {
+      "id": "upgrade-screen-shade-bottom",
+      "name": "UpgradeShadeBottom",
+      "parent": "upgrade",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "screen-shade-bottom"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/shade-up.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 195
+        },
+        "sindri.ui.box": {
+          "order": 2
+        }
+      }
+    },
+    {
+      "id": "upgrade-screen-shade-top",
+      "name": "UpgradeShadeTop",
+      "parent": "upgrade",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "screen-shade-top"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/shade-down.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 195
+        },
+        "sindri.ui.box": {
+          "order": 1
+        }
+      }
+    },
+    {
+      "id": "upgrade-stats",
+      "name": "UpgradeStats",
+      "parent": "upgrade-column",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "screen-stats"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "",
+          "font": "fonts/AlegreyaSans-Medium.ttf",
+          "font_size": 0.024,
+          "line_height": 0.02928,
+          "anchor": "center",
+          "layer": 198,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "rich": true,
+          "bounds": [
+            0.0,
+            0.0
+          ]
+        },
+        "sindri.ui.box": {
+          "order": 4
+        }
+      }
+    },
+    {
+      "id": "upgrade-text",
+      "name": "UpgradeText",
+      "parent": "upgrade-column",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "screen-text"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "",
+          "font": "fonts/AlegreyaSans-Medium.ttf",
+          "font_size": 0.03,
+          "line_height": 0.0366,
+          "anchor": "center",
+          "layer": 198,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "rich": true,
+          "bounds": [
+            0.0,
+            0.0
+          ],
+          "wrap": "word"
+        },
+        "sindri.ui.box": {
+          "order": 3
+        }
+      }
+    },
+    {
+      "id": "upgrade-title",
+      "name": "UpgradeTitle",
+      "parent": "upgrade-column",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "screen-title"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "",
+          "font": "fonts/AlegreyaSC-Bold.ttf",
+          "font_size": 0.09,
+          "line_height": 0.1098,
+          "anchor": "center",
+          "layer": 198,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "rich": true,
+          "bounds": [
+            0.0,
+            0.0
+          ]
+        },
+        "sindri.ui.box": {
+          "order": 1
         }
       }
     },

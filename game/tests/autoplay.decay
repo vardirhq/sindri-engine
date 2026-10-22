@@ -128,6 +128,7 @@ script Autoplay {
         board.round += 1.0;
         if board.round > board.rounds {
             Game.set("won_" + island, 1.0);
+            Game.set("hearth_" + island, board.hearth);
             island += 1.0;
             if island >= ISLAND_COUNT {
                 Game.set("crossed", 1.0);

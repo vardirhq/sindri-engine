@@ -687,6 +687,33 @@ def title_textures():
                       fill=(*rim, 255))
         big.resize((w, h), Image.LANCZOS).save(TEXTURES / f"{name}.png")
 
+    # A boon card: dark and near grey, with a light rim and corner diamonds,
+    # so a tint colors it for the warden it is for.
+    w, h = 300, 400
+    big = Image.new("RGBA", (w * scale, h * scale), (0, 0, 0, 0))
+    W, H = big.size
+    d = ImageDraw.Draw(big)
+    m = 10 * scale
+    for y in range(m, H - m):
+        t = (y - m) / (H - 2 * m)
+        c = int(40 - 18 * t)
+        d.line((m, y, W - m, y), fill=(c, c + 4, c + 8, 236))
+    d.rounded_rectangle((m, m, W - m, H - m), 14 * scale, outline=(236, 226, 205, 255), width=3 * scale)
+    d.rounded_rectangle((m + 9 * scale, m + 9 * scale, W - m - 9 * scale, H - m - 9 * scale), 10 * scale,
+                        outline=(236, 226, 205, 110), width=scale)
+    # Diamonds in the corners, which a nine-slice never stretches.
+    for cx, cy in ((m + 6 * scale, m + 6 * scale), (W - m - 6 * scale, m + 6 * scale),
+                   (m + 6 * scale, H - m - 6 * scale), (W - m - 6 * scale, H - m - 6 * scale)):
+        r = 8 * scale
+        d.polygon([(cx, cy - r), (cx + r * 0.7, cy), (cx, cy + r), (cx - r * 0.7, cy)], fill=(236, 226, 205, 255))
+    big.resize((w, h), Image.LANCZOS).save(TEXTURES / "card.png")
+    # Drawn sliced, so a card keeps its rim whether it stands tall on a desk or
+    # lies wide on a phone.
+    (TEXTURES / "card.sheet").write_text(
+        '{\n  "format_version": 1,\n  "size": [300, 400],\n'
+        '  "grid": { "columns": 1, "rows": 1, "names": ["card"] },\n'
+        '  "borders": { "": [40, 40, 40, 40] }\n}\n')
+
 
 def main():
     MODELS.mkdir(parents=True, exist_ok=True)

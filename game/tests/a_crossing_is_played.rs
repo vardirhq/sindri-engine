@@ -108,3 +108,34 @@ fn a_seed_plays_the_same_crossing_every_time() {
         assert_eq!(first.board(key), second.board(key), "{key} differs");
     }
 }
+
+/// How hard each island is for the bot, over many seeds: the Hearth left after
+/// each island it held, or where it fell. Not a pass or a fail but the numbers
+/// to tune islands and waves against; the bot plays greedily and takes no
+/// boons, so a person does better.
+///
+/// ```bash
+/// cargo test --release -p sindri-causeway --test a_crossing_is_played -- --ignored --nocapture
+/// ```
+#[test]
+#[ignore = "a report for tuning, slow without --release"]
+fn how_hard_each_island_is() {
+    let (mut crossed, mut lost) = (0, [0; 4]);
+    for seed in 1..=24u32 {
+        let run = play(&project(seed));
+        let hearths: Vec<f32> = (0..4).map(|i| run.board(&format!("hearth_{i}"))).collect();
+        println!(
+            "seed {seed:2}: Hearth after each island {hearths:?}, lost on {}",
+            run.board("lost_on")
+        );
+        if run.board("crossed") > 0.5 {
+            crossed += 1;
+        }
+        #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
+        let on = run.board("lost_on") as usize;
+        if on > 0 {
+            lost[on - 1] += 1;
+        }
+    }
+    println!("crossed {crossed} of 24; fell on each island {lost:?}");
+}

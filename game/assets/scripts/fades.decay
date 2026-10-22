@@ -1,0 +1,61 @@
+// Fading screen pieces in and out, shared by the title and the screens
+// between islands. An image fades by its tint; words fade through a
+// `[color=#rrggbbaa]` span, since text has no alpha of its own a script can
+// reach, and their shadow fades with them.
+
+// `alpha` as the two hex digits a color span takes.
+shared fn alpha_hex(alpha: number) -> String {
+    let digits = "0123456789abcdef";
+    let level = clamp(floor(alpha * 255.0 + 0.5), 0.0, 255.0);
+    let high = floor(level / 16.0);
+    let low = level % 16.0;
+    return digits.slice(high, high + 1.0) + digits.slice(low, low + 1.0);
+}
+
+shared fn fade_image(name: String, alpha: number) {
+    let e = World.find(name);
+    if e != null { e.ui_image.tint.a = alpha; }
+}
+
+shared fn image_alpha(name: String) -> number {
+    let e = World.find(name);
+    if e == null { return 0.0; }
+    return e.ui_image.tint.a;
+}
+
+// Words in color `rgb` (six hex digits) at `alpha`; nothing at all when they
+// are gone, so an invisible line costs no glyphs.
+shared fn fade_words(name: String, text: String, rgb: String, alpha: number) {
+    let e = World.find(name);
+    if e == null { return; }
+    if text == "" || alpha <= 0.004 {
+        Ui.set_text(e, "");
+        return;
+    }
+    Ui.set_text(e, "[color=#" + rgb + alpha_hex(alpha) + "]" + text + "[/color]");
+}
+
+// A plate button at `alpha`: its plate lit while the pointer is over it and
+// pressed down while held, its label faded with it. Says whether the pointer
+// is over it, so a caller can play a sound when that starts.
+shared fn fade_plate(name: String, label: String, rgb: String, alpha: number) -> bool {
+    let button = World.find(name);
+    if button == null { return false; }
+    var light = 0.86;
+    let over = alpha > 0.9 && Ui.is_hovered(button);
+    if over { light = 1.0; }
+    if Ui.is_held(button) { light = 0.72; }
+    let plate = World.find(name + " Plate");
+    if plate != null {
+        plate.ui_image.tint = Color(light, light, light);
+        plate.ui_image.tint.a = alpha;
+    }
+    fade_words(name + " Label", label, rgb, alpha);
+    return over;
+}
+
+// How far through `from`..`to` seconds `clock` is, eased in and out.
+shared fn ramp_at(clock: number, from: number, to: number) -> number {
+    let t = clamp((clock - from) / (to - from), 0.0, 1.0);
+    return t * t * (3.0 - 2.0 * t);
+}

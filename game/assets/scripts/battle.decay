@@ -47,10 +47,16 @@ script Battle {
     var cursor: Entity = null;
     var islands: List<Entity> = [];
     var lantern: Entity = null;
+    var house_lights: List<Entity> = [];
+    var rift_lights: List<Entity> = [];
     var fire: Entity = null;
 
     // The run.
     var island: number = 0.0;
+    // What the run has earned between islands.
+    var max_hearth: number = 7.0;
+    var extra_rewinds: number = 0.0;
+    var offered: List<number> = [0.0, 1.0, 2.0, 3.0];
     // Crossing to an island: the last one sinking, the next rising out of the
     // sea and its people rising onto it, before the Hollow come.
     var shown_island: number = -1.0;
@@ -113,6 +119,8 @@ script Battle {
         cursor = World.find("Cursor");
         lantern = World.find("Lantern Light");
         fire = World.find("Beacon Light");
+        for i in 0..3 { house_lights.push(World.find("House Light " + i)); }
+        for i in 0..2 { rift_lights.push(World.find("Rift Light " + i)); }
         for i in 0..ISLAND_COUNT {
             islands.push(World.find("Island " + i));
         }
@@ -685,6 +693,8 @@ script Battle {
         // another through `start_island`; nothing in play sets it.
         island = clamp(floor(Game.get("start_island", 0.0)), 0.0, ISLAND_COUNT - 1.0);
         hearth = starting_hearth;
+        max_hearth = starting_hearth;
+        extra_rewinds = 0.0;
         wardens = roster();
         Random.seed(Save.number("seed", 1.0) * 7919.0 + 17.0);
         Save.set_number("seed", Save.number("seed", 1.0) + 1.0);
@@ -697,7 +707,7 @@ script Battle {
         def = island_def(island);
         landing = landing_of(def);
         board = board_of(def, wardens, hearth);
-        rewinds = 1.0;
+        rewinds = 1.0 + extra_rewinds;
         hide_screens();
         show_hud(true);
         clear_plan();
@@ -1185,46 +1195,123 @@ script Battle {
         if island >= ISLAND_COUNT {
             phase = Phase.Crossed;
             show_screen("Crossed", true);
-            set_text("CrossedText", "The causeway is closed behind you and the lamp is lit. Hearth left: " + hearth + ".");
+            Atmosphere.on(World.find("Environment")).celebrate(3.0);
             Save.set_number("crossings", Save.number("crossings", 0.0) + 1.0);
+            let made = Save.number("crossings", 0.0);
+            var record = "Your first crossing.";
+            if made > 1.0 { record = "Crossings made: " + made; }
+            screen_words("Crossed", "The crossing is made", "The lamp is lit",
+                "The causeway is under the sea behind you, and the beacon burns over open water.",
+                "Hearth " + hearth + " of " + max_hearth + "  ·  " + record);
             return;
         }
         show_screen("Held", true);
-        set_text("HeldTitle", def.name + " holds");
-        set_text("HeldText", "High tide. The causeway is under water and the Hollow turn back. Hearth: " + hearth + ".");
+        screen_words("Held", "Island " + island + " of " + ISLAND_COUNT + " held", def.name + " holds",
+            "High tide. The causeway is under water and the Hollow turn back.",
+            "Hearth " + hearth + " of " + max_hearth + "  ·  next, " + island_def(island).name);
     }
 
     fn lose() {
         phase = Phase.Lost;
         clear_plan();
         show_screen("Fallen", true);
-        if board.hearth <= 0.0 {
-            set_text("FallenText", "The Hearth went out on " + def.name + ".");
-        } else {
-            set_text("FallenText", "The last warden fell on " + def.name + ".");
-        }
+        var why = "The last warden fell on " + def.name + ".";
+        if board.hearth <= 0.0 { why = "The Hearth went out on " + def.name + "."; }
+        Atmosphere.on(World.find("Environment")).mourn(2.5);
+        screen_words("Fallen", "The crossing ends", "The light goes out", why,
+            "Round " + min(board.round, board.rounds) + " of " + board.rounds + "  ·  island "
+                + (island + 1.0) + " of " + ISLAND_COUNT);
         Audio.play("audio/defeat.wav", 0.8);
     }
 
+    fn screen_words(screen: String, kicker: String, title: String, body: String, line: String) {
+        Screens.on(World.find("Screens")).words(screen, kicker, title, body, line);
+    }
+
     // The three boons on offer after an island, one per warden.
-    fn take_boon(which: number) {
-        if which == 0.0 {
-            var w = wardens[0];
-            w.max_hp += 1.0;
-            wardens[0] = w;
-        } else if which == 1.0 {
-            var w = wardens[1];
-            w.power += 1.0;
-            wardens[1] = w;
-        } else if which == 2.0 {
-            var w = wardens[2];
-            w.move += 1.0;
-            wardens[2] = w;
-        } else {
-            hearth = min(hearth + 2.0, starting_hearth);
+    // Four boons drawn from the nine, from the run's own seeded dice, so a
+    // seed still plays the same crossing.
+    fn offer_boons() {
+        var pool: List<number> = [];
+        for i in 0..9 { pool.push(i); }
+        offered = [];
+        for slot in 0..4 {
+            let pick = Random.int(0.0, pool.length - 1.0);
+            let boon = pool[pick];
+            pool.remove_at(pick);
+            offered.push(boon);
+            Screens.on(World.find("Screens")).card(slot, boon_mark(boon), boon_title(boon), boon_text(boon),
+                boon_color(boon));
+        }
+        screen_words("Upgrade", "Before " + island_def(island).name, "Choose a boon", "",
+            "Hearth " + hearth + " of " + max_hearth);
+    }
+
+    // Which warden a boon is for, by its mark and color: a block for the
+    // Bulwark, a stone for the Mason, a flame for the Lamplighter. Marks the
+    // game's own font has, since a browser has no system font to fall back on.
+    fn boon_mark(boon: number) -> String {
+        let marks = ["■", "▲", "◆", "◇", "◆", "■", "▲", "▽", "△"];
+        return marks[boon];
+    }
+
+    fn boon_color(boon: number) -> Color {
+        if boon == 0.0 || boon == 5.0 { return Color(0.62, 0.78, 1.0); }
+        if boon == 1.0 || boon == 6.0 { return Color(0.9, 0.82, 0.68); }
+        if boon == 2.0 || boon == 4.0 { return Color(1.0, 0.76, 0.42); }
+        if boon == 3.0 { return Color(1.0, 0.55, 0.38); }
+        if boon == 7.0 { return Color(0.5, 0.92, 0.86); }
+        return Color(0.86, 0.9, 0.72);
+    }
+
+    fn boon_title(boon: number) -> String {
+        let titles = ["Thicker plate", "Heavier stone", "Longer legs", "Bank the fire", "Hotter flame",
+            "Shield wall", "Sure feet", "Second chance", "Stout hearts"];
+        return titles[boon];
+    }
+
+    fn boon_text(boon: number) -> String {
+        let texts = [
+            "The Bulwark gains a point of health.",
+            "The Mason's stone hits 1 harder.",
+            "The Lamplighter moves a cell further.",
+            "The Hearth regains two points, and can hold one more.",
+            "The Lamplighter's bolt burns 1 harder.",
+            "The Bulwark's bash hits 1 harder.",
+            "The Mason moves a cell further.",
+            "Rewind one more turn on every island.",
+            "The Mason and the Lamplighter gain a point of health.",
+        ];
+        return texts[boon];
+    }
+
+    fn take_boon(slot: number) {
+        let boon = offered[slot];
+        if boon == 0.0 { boost(0.0, 1.0, 0.0, 0.0); }
+        if boon == 1.0 { boost(1.0, 0.0, 0.0, 1.0); }
+        if boon == 2.0 { boost(2.0, 0.0, 1.0, 0.0); }
+        if boon == 3.0 {
+            max_hearth += 1.0;
+            hearth = min(hearth + 2.0, max_hearth);
+        }
+        if boon == 4.0 { boost(2.0, 0.0, 0.0, 1.0); }
+        if boon == 5.0 { boost(0.0, 0.0, 0.0, 1.0); }
+        if boon == 6.0 { boost(1.0, 0.0, 1.0, 0.0); }
+        if boon == 7.0 { extra_rewinds += 1.0; }
+        if boon == 8.0 {
+            boost(1.0, 1.0, 0.0, 0.0);
+            boost(2.0, 1.0, 0.0, 0.0);
         }
         Audio.play("audio/boon.wav", 0.6);
         begin_island();
+    }
+
+    fn boost(warden: number, health: number, move: number, power: number) {
+        var w = wardens[warden];
+        w.max_hp += health;
+        w.move += move;
+        w.power += power;
+        wardens[warden] = w;
     }
 
     // --- Screens --------------------------------------------------------------------
@@ -1309,7 +1396,7 @@ script Battle {
         var hearth_pips = "[color=#ffb347]";
         for i in 0..board.hearth { hearth_pips += "◆"; }
         hearth_pips += "[/color][color=#4a3b33]";
-        for i in board.hearth..starting_hearth { hearth_pips += "◆"; }
+        for i in board.hearth..max_hearth { hearth_pips += "◆"; }
         set_text("HearthPips", hearth_pips + "[/color]");
         set_text("RewindLabel", "Rewind (" + rewinds + ")");
         set_text("Preview", "");
@@ -1381,6 +1468,7 @@ script Battle {
     fn update_lights() {
         var lamp_on = false;
         var fire_on = false;
+        var houses = 0.0;
         for unit in board.units {
             if unit.hp <= 0.0 { continue; }
             let piece = piece_of(unit.id);
@@ -1394,12 +1482,52 @@ script Battle {
                 fire.transform.position = Vec3(p.x, p.y + 1.6, p.z);
                 fire_on = true;
             }
+            // Light in the windows of every house still standing.
+            if unit.kind == Kind.House && houses < house_lights.length {
+                let light = house_lights[houses];
+                light.transform.position = Vec3(p.x + 0.35, p.y + 0.55, p.z + 0.35);
+                World.set_active(light, true);
+                houses += 1.0;
+            }
         }
+        for i in houses..house_lights.length { World.set_active(house_lights[i], false); }
         if lantern != null { World.set_active(lantern, lamp_on); }
         if fire != null { World.set_active(fire, fire_on); }
+        // A violet glow where the Hollow are about to climb out.
+        var rifts = 0.0;
+        for spawn in board.spawns {
+            if rifts >= rift_lights.length { break; }
+            let light = rift_lights[rifts];
+            light.transform.position = Vec3(world_x(spawn.x), ground_y(spawn.x, spawn.z) + 0.4, world_z(spawn.z));
+            World.set_active(light, true);
+            rifts += 1.0;
+        }
+        for i in rifts..rift_lights.length { World.set_active(rift_lights[i], false); }
+    }
+
+    // Opens a screen between islands on request, for captures and the tests
+    // that check every screen fits: 1 held, 2 the boons, 3 fallen, 4 the
+    // crossing made. Like `start_island`, nothing in play sets it.
+    fn preview_screen() {
+        let which = Game.get("preview_screen", 0.0);
+        if which <= 0.0 || phase != Phase.Player { return; }
+        Game.set("preview_screen", 0.0);
+        if which == 1.0 || which == 2.0 { win_island(); }
+        if which == 2.0 {
+            show_screen("Held", false);
+            phase = Phase.Upgrade;
+            offer_boons();
+            show_screen("Upgrade", true);
+        }
+        if which == 3.0 { lose(); }
+        if which == 4.0 {
+            island = ISLAND_COUNT - 1.0;
+            win_island();
+        }
     }
 
     fn update(dt: number) {
+        preview_screen();
         handle_view_drag();
         fade_marks(dt);
         update_banner();
@@ -1417,6 +1545,7 @@ script Battle {
                 if pressed("HeldButton") || Input.Keyboard.just_pressed("Enter") {
                     show_screen("Held", false);
                     phase = Phase.Upgrade;
+                    offer_boons();
                     show_screen("Upgrade", true);
                 }
             }

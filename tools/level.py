@@ -234,6 +234,16 @@ def world_entities():
     e.append(entity("lantern-light", "Lantern Light", {"sindri.light": {
         "kind": "point", "color": [1.0, 0.76, 0.42], "intensity": 2.6, "range": 3.2}},
         position=(CENTRE[0], 3, CENTRE[2])))
+    # Windows lit in each house, and a violet glow where the Hollow climb out;
+    # the battle places them and `Atmosphere` sets how bright they are.
+    for i in range(3):
+        e.append(entity(f"house-light-{i}", f"House Light {i}", {"sindri.light": {
+            "kind": "point", "color": [1.0, 0.68, 0.36], "intensity": 0.0, "range": 2.4}},
+            position=(CENTRE[0], 2, CENTRE[2]), disabled=True))
+    for i in range(2):
+        e.append(entity(f"rift-light-{i}", f"Rift Light {i}", {"sindri.light": {
+            "kind": "point", "color": [0.62, 0.32, 1.0], "intensity": 0.0, "range": 2.2}},
+            position=(CENTRE[0], 2, CENTRE[2]), disabled=True))
     e.append(entity("beacon-light", "Beacon Light", {"sindri.light": {
         "kind": "point", "color": [1.0, 0.6, 0.28], "intensity": 4.0, "range": 4.5}},
         position=(CENTRE[0], 4, CENTRE[2])))
@@ -327,23 +337,6 @@ def hud_entities():
                                                                                   wrap="word")},
                     parent="banner", spatial=False))
     return e
-
-
-def screen(e, id, name, title, body, button_label, title_size=0.09, disabled=True):
-    e.append(entity(id, name, {**styled("screen"), **panel(200, fill=(0.02, 0.05, 0.07, 0.55), stroke=(0, 0, 0, 0),
-                                                           layout=column(0.02, "center", "center"))},
-                    disabled=disabled, spatial=False))
-    e.append(entity(id + "-card", name + " Card", {**styled("screen-card", "panel"),
-                                                   **panel(205, layout=column(0.02, "center", "center"))},
-                    parent=id, spatial=False))
-    e.append(entity(id + "-title", name + "Title", {**styled("screen-title"), **text(title, TITLE_FONT, title_size,
-                                                                                    210)},
-                    parent=id + "-card", spatial=False))
-    e.append(entity(id + "-text", name + "Text", {**styled("screen-text"), **text(body, BODY_FONT, 0.032, 210,
-                                                                                  wrap="word")},
-                    parent=id + "-card", spatial=False))
-    if button_label:
-        button(e, id + "-button", name + "Button", button_label, id + "-card", ("primary", "wide"), layer=212)
 
 
 def image(texture, layer, tint=(1, 1, 1, 1)):
@@ -448,40 +441,72 @@ def title_screen(e):
         "TitleShow", "scripts/title.decay", walker="prefabs/walker.prefab"), spatial=False))
 
 
+def between_screen(e, id, name, button_label):
+    """A screen between islands: the board dimmed and shaded, a column of
+    words over it and a plate to go on. `screens.decay` fills the words and
+    brings it all in; it starts transparent."""
+    e.append(entity(id, name, {**styled("screen-root")}, disabled=True, spatial=False))
+    e.append(entity(id + "-dim", name + "Dim", {**styled("screen-dim"), **image("textures/white.png", 194,
+                                                                              (0.01, 0.03, 0.05, 0))},
+                    parent=id, spatial=False))
+    for part, texture, cls in (("ShadeTop", "shade-down", "screen-shade-top"),
+                               ("ShadeBottom", "shade-up", "screen-shade-bottom")):
+        e.append(entity(f"{id}-{cls}", name + part, {**styled(cls), **image(f"textures/{texture}.png", 195,
+                                                                            (1, 1, 1, 0))},
+                        parent=id, spatial=False))
+    e.append(entity(id + "-halo", name + "Halo", {**styled("screen-halo"), **image("textures/halo.png", 195,
+                                                                                (1, 1, 1, 0))},
+                    parent=id, spatial=False))
+    column_id = id + "-column"
+    e.append(entity(column_id, name + "Column", {**styled("screen-column"), **clear_shape(196),
+                                                 "sindri.ui.layout": column(0.016, "center", "center")},
+                    parent=id, spatial=False))
+    for part, cls, font, size in (("Kicker", "screen-kicker", TITLE_FONT, 0.026),
+                                  ("Title", "screen-title", TITLE_FONT, 0.09),
+                                  ("Ornament", "screen-ornament", BODY_FONT, 0.03),
+                                  ("Text", "screen-text", BODY_FONT, 0.03),
+                                  ("Stats", "screen-stats", BODY_FONT, 0.024)):
+        wrap = "word" if part == "Text" else "none"
+        e.append(entity(f"{id}-{part.lower()}", name + part, {**styled(cls), **text(
+            "", font, size, 198, rich=True, wrap=wrap)}, parent=column_id, spatial=False))
+    if id == "upgrade":
+        e.append(entity("boons", "Boons", {**styled("boons"), **clear_shape(198), "sindri.ui.layout": {
+            "direction": "row", "spacing": 0.02, "align": "center", "justify": "center"}},
+            parent=column_id, spatial=False))
+        for i in range(4):
+            card = f"boon-{i}"
+            e.append(entity(card, f"Boon{i}", {**styled("boon-card"), "sindri.ui.button": {"label": f"Boon {i + 1}"},
+                                               **clear_shape(200)}, parent="boons", spatial=False))
+            art = image("textures/card.png", 201, (1, 1, 1, 0))
+            art["sindri.ui.image"]["draw"] = "sliced"
+            art["sindri.ui.image"]["border_scale"] = 0.0022
+            e.append(entity(card + "-art", f"Boon{i} Card", {**styled("boon-art"), **art}, parent=card,
+                            spatial=False))
+            inner = card + "-words"
+            e.append(entity(inner, f"Boon{i}Words", {**styled("boon-words"), **clear_shape(202),
+                                                     "sindri.ui.layout": column(0.01, "center", "center")},
+                            parent=card, spatial=False))
+            for part, cls, font, size in (("Mark", "boon-mark", BODY_FONT, 0.05),
+                                          ("Title", "boon-title", TITLE_FONT, 0.04),
+                                          ("Text", "boon-text", BODY_FONT, 0.026),
+                                          ("Key", "boon-key", BOLD_FONT, 0.024)):
+                wrap = "word" if part == "Text" else "none"
+                e.append(entity(f"{card}-{part.lower()}", f"Boon{i}{part}", {**styled(cls), **text(
+                    "", font, size, 204, rich=True, wrap=wrap)}, parent=inner, spatial=False))
+    else:
+        plate_button(e, id + "-button", name + "Button", button_label, column_id, "textures/plate-ember.png",
+                     ("begin",), 200)
+
+
 def screens():
     e = []
     title_screen(e)
-    screen(e, "held", "Held", "Saltmarsh holds", "", "Onward")
-    screen(e, "fallen", "Fallen", "The light goes out", "", "Back to the shore")
-    screen(e, "crossed", "Crossed", "The lamp is lit", "", "Back to the shore")
-    # Boons between islands, one card each.
-    e.append(entity("upgrade", "Upgrade", {**styled("screen"), **panel(200, fill=(0.02, 0.05, 0.07, 0.55),
-                                                                       stroke=(0, 0, 0, 0),
-                                                                       layout=column(0.03, "center", "center"))},
-                    disabled=True, spatial=False))
-    e.append(entity("upgrade-title", "UpgradeTitle", {**styled("screen-title"), **text("Choose a boon", TITLE_FONT,
-                                                                                      0.08, 210)},
-                    parent="upgrade", spatial=False))
-    e.append(entity("boons", "Boons", {**styled("boons"), "sindri.ui.layout": {
-        "direction": "row", "spacing": 0.02, "align": "center", "justify": "center"}}, parent="upgrade",
-        spatial=False))
-    boons = [("Thicker plate", "The Bulwark gains a point of health."),
-             ("Heavier stone", "The Mason's stone hits 1 harder."),
-             ("Longer legs", "The Lamplighter moves a cell further."),
-             ("Bank the fire", "The Hearth regains two points.")]
-    for i, (title, body) in enumerate(boons):
-        e.append(entity(f"boon-{i}", f"Boon{i}", {**styled("boon", "button"), "sindri.ui.button": {"label": title},
-                                                  **panel(205, layout=column(0.012, "center", "center"))},
-                        parent="boons", spatial=False))
-        e.append(entity(f"boon-{i}-title", f"Boon{i}Title", {**styled("boon-title"), **text(title, TITLE_FONT, 0.04,
-                                                                                            210)},
-                        parent=f"boon-{i}", spatial=False))
-        e.append(entity(f"boon-{i}-text", f"Boon{i}Text", {**styled("boon-text"), **text(body, BODY_FONT, 0.026, 210,
-                                                                                          wrap="word")},
-                        parent=f"boon-{i}", spatial=False))
-        e.append(entity(f"boon-{i}-key", f"Boon{i}Key", {**styled("boon-key", "dim"), **text(str(i + 1), BOLD_FONT,
-                                                                                             0.024, 210)},
-                        parent=f"boon-{i}", spatial=False))
+    between_screen(e, "held", "Held", "Onward")
+    between_screen(e, "upgrade", "Upgrade", "")
+    between_screen(e, "fallen", "Fallen", "Back to the shore")
+    between_screen(e, "crossed", "Crossed", "Back to the shore")
+    # Fills and fades the screens between islands as the battle opens them.
+    e.append(entity("screens", "Screens", script("Screens", "scripts/screens.decay"), spatial=False))
     return e
 
 

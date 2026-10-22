@@ -1,0 +1,110 @@
+// The screens between islands -- an island held, the boon to take, the
+// light gone out, the crossing made -- filled and brought in.
+//
+// The battle opens and closes them, and tells this what they say. This lives
+// on its own entity that is never switched off, so the words reach it
+// whichever screen is showing, and each screen comes up in pieces from the
+// moment it is switched on: the board dims, the words rise in one after
+// another, the plate last.
+
+script Screens {
+    var names: List<String> = ["Held", "Upgrade", "Fallen", "Crossed"];
+    var buttons: List<String> = ["Onward", "", "Back to the shore", "Back to the shore"];
+    // The title's color on each screen: gold for good news, ember for bad.
+    var title_colors: List<String> = ["f3d79a", "f3d79a", "ff9e80", "ffd76a"];
+    var clocks: List<number> = [0.0, 0.0, 0.0, 0.0];
+    var was_on: List<bool> = [false, false, false, false];
+    var kickers: List<String> = ["", "", "", ""];
+    var titles: List<String> = ["", "", "", ""];
+    var bodies: List<String> = ["", "", "", ""];
+    var stats: List<String> = ["", "", "", ""];
+    var card_titles: List<String> = ["", "", "", ""];
+    var card_texts: List<String> = ["", "", "", ""];
+    var card_marks: List<String> = ["", "", "", ""];
+    var card_colors: List<Color> = [Color(1.0, 1.0, 1.0), Color(1.0, 1.0, 1.0), Color(1.0, 1.0, 1.0),
+        Color(1.0, 1.0, 1.0)];
+    var hovered: String = "";
+
+    fn words(screen: String, kicker: String, title: String, body: String, line: String) {
+        let i = names.index_of(screen);
+        if i < 0.0 { return; }
+        kickers[i] = kicker;
+        titles[i] = title;
+        bodies[i] = body;
+        stats[i] = line;
+    }
+
+    // A boon card's words, its mark and the color of the warden it is for.
+    fn card(index: number, mark: String, title: String, text: String, color: Color) {
+        card_marks[index] = mark;
+        card_titles[index] = title;
+        card_texts[index] = text;
+        card_colors[index] = color;
+    }
+
+    fn update(dt: number) {
+        for i in 0..names.length {
+            let root = World.find(names[i]);
+            let on = root != null && World.is_active(root);
+            if on && !was_on[i] { clocks[i] = 0.0; }
+            was_on[i] = on;
+            if !on { continue; }
+            clocks[i] += dt;
+            draw(i);
+        }
+    }
+
+    fn draw(i: number) {
+        let n = names[i];
+        let c = clocks[i];
+        fade_image(n + "Dim", ramp_at(c, 0.0, 0.6) * 0.5);
+        fade_image(n + "Halo", ramp_at(c, 0.1, 0.7));
+        fade_image(n + "ShadeTop", ramp_at(c, 0.0, 0.8));
+        fade_image(n + "ShadeBottom", ramp_at(c, 0.0, 0.8));
+        fade_words(n + "Kicker", kickers[i], "e9c98a", ramp_at(c, 0.15, 0.6));
+        fade_words(n + "Title", titles[i], title_colors[i], ramp_at(c, 0.25, 0.85));
+        fade_words(n + "Ornament", "—  ◆  —", "c9a96a", ramp_at(c, 0.35, 0.9));
+        fade_words(n + "Text", bodies[i], "dfe8ec", ramp_at(c, 0.45, 1.0));
+        fade_words(n + "Stats", stats[i], "9fb4bf", ramp_at(c, 0.55, 1.1));
+        if n == "Upgrade" {
+            for k in 0..4 { draw_card(k, ramp_at(c, 0.5 + k * 0.1, 0.95 + k * 0.1)); }
+            return;
+        }
+        let over = fade_plate(n + "Button", buttons[i], "fff4dc", ramp_at(c, 0.65, 1.2));
+        tick(n + "Button", over);
+    }
+
+    // A card lit by its warden's color, brighter under the pointer.
+    fn draw_card(k: number, alpha: number) {
+        let button = World.find("Boon" + k);
+        var light = 0.78;
+        var over = false;
+        if button != null && alpha > 0.9 && Ui.is_hovered(button) {
+            light = 1.0;
+            over = true;
+        }
+        if button != null && Ui.is_held(button) { light = 0.65; }
+        tick("Boon" + k, over);
+        let art = World.find("Boon" + k + " Card");
+        if art != null {
+            let color = card_colors[k];
+            art.ui_image.tint = Color(color.r * light, color.g * light, color.b * light);
+            art.ui_image.tint.a = alpha;
+        }
+        fade_words("Boon" + k + "Mark", card_marks[k], "ffd27a", alpha);
+        fade_words("Boon" + k + "Title", card_titles[k], "f3d79a", alpha);
+        fade_words("Boon" + k + "Text", card_texts[k], "dfe8ec", alpha);
+        fade_words("Boon" + k + "Key", "" + (k + 1.0), "9fb4bf", alpha);
+    }
+
+    fn tick(name: String, over: bool) {
+        if over {
+            if hovered != name {
+                hovered = name;
+                Audio.play("audio/select.wav", 0.15);
+            }
+        } else if hovered == name {
+            hovered = "";
+        }
+    }
+}

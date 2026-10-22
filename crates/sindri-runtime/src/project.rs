@@ -419,6 +419,12 @@ impl ProjectRun {
         value
     }
 
+    /// Writes a number on the shared board, as a capture's `set:` step does:
+    /// how a test asks a game for a state its scripts offer a way into.
+    pub fn set_board(&mut self, name: &str, value: f32) {
+        self.session.set_board(name, value);
+    }
+
     /// The entity a scene gave this stable ID.
     #[must_use]
     pub fn entity(&self, id: &str) -> Option<EntityId> {

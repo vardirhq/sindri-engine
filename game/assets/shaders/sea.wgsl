@@ -48,7 +48,8 @@ fn sprite_shader(input: SpriteShaderInput) -> vec4<f32> {
     // Shallows: the deep color lifted towards turquoise near the shore.
     let d = shore_distance(p);
     let shallow_mix = 1.0 - smoothstep(0.0, reach, d);
-    let shallow = deep * 1.6 + vec3<f32>(0.02, 0.12, 0.1);
+    // Shallows are the deep water lit through, so they darken with it at night.
+    let shallow = deep * 2.4 + vec3<f32>(0.0, 0.02, 0.02) * (deep.g * 10.0);
     var color = mix(deep, shallow, shallow_mix * shallow_mix);
 
     // The swell: broad bands rolling diagonally, broken up by slow noise.
