@@ -155,3 +155,84 @@ fn absent_stale_and_invalid_components_report_errors_and_types_are_checked() {
         assert!(!check_source(&source).diagnostics.is_empty());
     }
 }
+
+/// Fog, the grade and the bloom are as live as the ambient light: a game can
+/// roll a mist in, warm the grade at dusk or let the lamps glow harder, and
+/// the next frame shows it. A section the scene never authored is filled from
+/// its defaults, so one write keeps every other field as it was.
+#[test]
+fn fog_grade_and_bloom_are_live_and_keep_their_other_fields() {
+    let payload = json!({"bloom":{"enabled":true,"passes":3}});
+    let (mut world, entity, registry) = fixture(payload);
+    let result = run(
+        &mut world,
+        &registry,
+        r#"
+        let world = World.find("World");
+        if !world.environment.fog.enabled && world.environment.bloom.enabled {
+            world.environment.fog.enabled = true;
+            world.environment.fog.color = Color(0.5, 0.6, 0.7);
+            this.environment.fog.color.b = 0.75;
+            world.environment.fog.density = 0.25;
+            world.environment.fog.start = 4.0;
+            world.environment.post_process.exposure = -0.5;
+            world.environment.post_process.saturation = 0.75;
+            world.environment.post_process.vignette = 0.5;
+            world.environment.bloom.intensity = 1.5;
+            world.environment.bloom.threshold = 0.5;
+            if world.environment.fog.density == 0.25 && world.environment.bloom.intensity == 1.5 {
+                this.transform.position.x = 1.0;
+            }
+        }
+    "#,
+    );
+    assert!(result.is_empty(), "{result}");
+    let data = world.get(entity).unwrap();
+    assert!(
+        (data.transform_3d.unwrap().position[0] - 1.0).abs() < f32::EPSILON,
+        "the writes read back"
+    );
+    let payload = &data.components["sindri.environment"];
+    assert_eq!(payload["fog"]["enabled"], json!(true));
+    assert_eq!(payload["fog"]["color"], json!([0.5, 0.6, 0.75]));
+    assert_eq!(payload["fog"]["density"], json!(0.25));
+    assert_eq!(payload["fog"]["start"], json!(4.0));
+    assert!(
+        payload["fog"]["distance"].as_f64().is_some(),
+        "untouched fields keep their default"
+    );
+    assert_eq!(payload["post_process"]["exposure"], json!(-0.5));
+    assert_eq!(payload["post_process"]["saturation"], json!(0.75));
+    assert_eq!(payload["post_process"]["vignette"], json!(0.5));
+    assert_eq!(payload["bloom"]["intensity"], json!(1.5));
+    assert_eq!(payload["bloom"]["threshold"], json!(0.5));
+    assert_eq!(
+        payload["bloom"]["passes"],
+        json!(3),
+        "an authored field is kept"
+    );
+}
+
+#[test]
+fn out_of_range_fog_and_grade_are_refused_and_leave_the_payload() {
+    let (mut world, entity, registry) = fixture(json!({}));
+    for (body, field) in [
+        ("this.environment.fog.density = 2.0;", "fog.density"),
+        (
+            "this.environment.post_process.exposure = 12.0;",
+            "post_process.exposure",
+        ),
+        (
+            "this.environment.fog.color = Color(0.5, 0.5, 0.5, 0.5);",
+            "alpha one",
+        ),
+    ] {
+        let result = run(&mut world, &registry, body);
+        assert!(result.contains(field), "{body}: {result}");
+        assert_eq!(
+            world.get(entity).unwrap().components["sindri.environment"],
+            json!({}),
+            "{body} left nothing behind"
+        );
+    }
+}
