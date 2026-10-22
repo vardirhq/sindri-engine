@@ -578,13 +578,46 @@ Scenes are a game's separate places or screens, such as a menu, a level or a sho
 - `current()` → `String` — The name of the scene being played.
 - `go(name: String)` → `unit` — Moves to another scene by name, at the end of this frame.
 
+### `SceneBloom`
+
+The glow that spreads from bright light, such as a lamp or an emissive model.
+
+- `enabled`: `bool` — Whether anything glows.
+- `intensity`: `number` — How strong the glow is; not negative.
+- `knee`: `number` — How softly glow fades in around the threshold, 0.0001 to 1.
+- `threshold`: `number` — How bright a pixel must be to glow; not negative.
+
 ### `SceneEnvironment`
 
-The existing authored scene environment on an entity. Changes affect the next extracted frame without restarting. Missing components and stale entities are runtime errors; writes validate the full payload atomically. Fog and post-processing controls are not exposed here.
+The existing authored scene environment on an entity. Changes affect the next extracted frame without restarting. Missing components and stale entities are runtime errors; writes validate the full payload atomically. Fog, the color grade and bloom are reached through `fog`, `post_process` and `bloom`.
 
 - `ambient_color`: `Color` — Ambient RGB as a Color with alpha one. Whole and channel writes are checked; alpha must remain one. RGB follows the authored environment contract: finite f32 values.
 - `ambient_intensity`: `number` — Finite nonnegative ambient strength. Fractional writes preserve their value even when the authored JSON number was an integer.
 - `background`: `Color` — The scene clear color as RGBA Color. Whole and channel writes retain finite f32 values, including authored alpha. Failed writes preserve the old payload.
+- `bloom`: `SceneBloom` — The glow around bright light, as `SceneBloom`.
+- `fog`: `SceneFog` — The distance and height fog, as `SceneFog`.
+- `post_process`: `ScenePostProcess` — The color grade applied to the lit world, as `ScenePostProcess`.
+
+### `SceneFog`
+
+Fog over the 3D world, from the camera outward and thickest low down. A section the scene never authored starts from its defaults, and a write keeps every other field. Refused values leave the payload as it was.
+
+- `color`: `Color` — What the fog fades towards, as a Color with alpha one.
+- `density`: `number` — Extra exponential fog, 0 to 1. Zero leaves only the distance term.
+- `distance`: `number` — World distance over which it thickens to full; greater than 0.
+- `enabled`: `bool` — Whether the fog is drawn at all.
+- `height`: `number` — World height below which extra fog gathers.
+- `height_falloff`: `number` — How strongly fog gathers below `height`, 0 to 1.
+- `start`: `number` — World distance where fog begins; not negative.
+
+### `ScenePostProcess`
+
+The grade applied to the lit world before the interface is drawn over it.
+
+- `contrast`: `number` — Contrast about mid-grey, 0 to 4; 1 leaves it alone.
+- `exposure`: `number` — Brightness in photographic stops, -8 to 8; one stop doubles it.
+- `saturation`: `number` — Color strength, 0 to 4; 0 is grey and 1 leaves it alone.
+- `vignette`: `number` — How much the edges darken, 0 to 1.
 
 ### `Sequence`
 

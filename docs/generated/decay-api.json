@@ -3979,7 +3979,41 @@
       "name": "Scene"
     },
     {
-      "description": "The existing authored scene environment on an entity. Changes affect the next extracted frame without restarting. Missing components and stale entities are runtime errors; writes validate the full payload atomically. Fog and post-processing controls are not exposed here.",
+      "description": "The glow that spreads from bright light, such as a lamp or an emissive model.",
+      "members": [
+        {
+          "description": "Whether anything glows.",
+          "kind": "value",
+          "name": "enabled",
+          "read_only": false,
+          "type": "bool"
+        },
+        {
+          "description": "How strong the glow is; not negative.",
+          "kind": "value",
+          "name": "intensity",
+          "read_only": false,
+          "type": "number"
+        },
+        {
+          "description": "How softly glow fades in around the threshold, 0.0001 to 1.",
+          "kind": "value",
+          "name": "knee",
+          "read_only": false,
+          "type": "number"
+        },
+        {
+          "description": "How bright a pixel must be to glow; not negative.",
+          "kind": "value",
+          "name": "threshold",
+          "read_only": false,
+          "type": "number"
+        }
+      ],
+      "name": "SceneBloom"
+    },
+    {
+      "description": "The existing authored scene environment on an entity. Changes affect the next extracted frame without restarting. Missing components and stale entities are runtime errors; writes validate the full payload atomically. Fog, the color grade and bloom are reached through `fog`, `post_process` and `bloom`.",
       "members": [
         {
           "description": "Ambient RGB as a Color with alpha one. Whole and channel writes are checked; alpha must remain one. RGB follows the authored environment contract: finite f32 values.",
@@ -4001,9 +4035,119 @@
           "name": "background",
           "read_only": false,
           "type": "Color"
+        },
+        {
+          "description": "The glow around bright light, as `SceneBloom`.",
+          "kind": "value",
+          "name": "bloom",
+          "read_only": false,
+          "type": "SceneBloom"
+        },
+        {
+          "description": "The distance and height fog, as `SceneFog`.",
+          "kind": "value",
+          "name": "fog",
+          "read_only": false,
+          "type": "SceneFog"
+        },
+        {
+          "description": "The color grade applied to the lit world, as `ScenePostProcess`.",
+          "kind": "value",
+          "name": "post_process",
+          "read_only": false,
+          "type": "ScenePostProcess"
         }
       ],
       "name": "SceneEnvironment"
+    },
+    {
+      "description": "Fog over the 3D world, from the camera outward and thickest low down. A section the scene never authored starts from its defaults, and a write keeps every other field. Refused values leave the payload as it was.",
+      "members": [
+        {
+          "description": "What the fog fades towards, as a Color with alpha one.",
+          "kind": "value",
+          "name": "color",
+          "read_only": false,
+          "type": "Color"
+        },
+        {
+          "description": "Extra exponential fog, 0 to 1. Zero leaves only the distance term.",
+          "kind": "value",
+          "name": "density",
+          "read_only": false,
+          "type": "number"
+        },
+        {
+          "description": "World distance over which it thickens to full; greater than 0.",
+          "kind": "value",
+          "name": "distance",
+          "read_only": false,
+          "type": "number"
+        },
+        {
+          "description": "Whether the fog is drawn at all.",
+          "kind": "value",
+          "name": "enabled",
+          "read_only": false,
+          "type": "bool"
+        },
+        {
+          "description": "World height below which extra fog gathers.",
+          "kind": "value",
+          "name": "height",
+          "read_only": false,
+          "type": "number"
+        },
+        {
+          "description": "How strongly fog gathers below `height`, 0 to 1.",
+          "kind": "value",
+          "name": "height_falloff",
+          "read_only": false,
+          "type": "number"
+        },
+        {
+          "description": "World distance where fog begins; not negative.",
+          "kind": "value",
+          "name": "start",
+          "read_only": false,
+          "type": "number"
+        }
+      ],
+      "name": "SceneFog"
+    },
+    {
+      "description": "The grade applied to the lit world before the interface is drawn over it.",
+      "members": [
+        {
+          "description": "Contrast about mid-grey, 0 to 4; 1 leaves it alone.",
+          "kind": "value",
+          "name": "contrast",
+          "read_only": false,
+          "type": "number"
+        },
+        {
+          "description": "Brightness in photographic stops, -8 to 8; one stop doubles it.",
+          "kind": "value",
+          "name": "exposure",
+          "read_only": false,
+          "type": "number"
+        },
+        {
+          "description": "Color strength, 0 to 4; 0 is grey and 1 leaves it alone.",
+          "kind": "value",
+          "name": "saturation",
+          "read_only": false,
+          "type": "number"
+        },
+        {
+          "description": "How much the edges darken, 0 to 1.",
+          "kind": "value",
+          "name": "vignette",
+          "read_only": false,
+          "type": "number"
+        }
+      ],
+      "name": "ScenePostProcess"
     },
     {
       "description": "Playing an object's sequences: choreography set up for it in the scene's Timeline, such as a title sliding in or a door opening, with named cues along the way.",
