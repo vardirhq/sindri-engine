@@ -2,9 +2,9 @@
 // stream of fire sweeps across it often. It hits nothing itself; the Player
 // splits whatever rounds cross it (see `split_through_prism`).
 script ForkPrism {
-    var age: f32 = 0.0;
+    var age: number = 0.0;
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         if Game.run_state != 1.0 { return; }
         let player = World.find("Player");
         if player == null { return; }

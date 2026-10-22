@@ -1,7 +1,7 @@
 // A wooden crate carried by a gentle wind. K or the west pad button tosses
 // it when the hero is nearby; hitting above its centre makes it tumble.
 script Crate {
-    var impact_flash: f32 = 0.0;
+    var impact_flash: number = 0.0;
     var flash: Entity = null;
     fn start() {
         Physics.set_continuous_collision(this.entity, true);
@@ -9,7 +9,7 @@ script Crate {
         Physics.set_angular_velocity(this.entity, 0.0);
     }
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         this.impact_flash = max(0.0, this.impact_flash - dt);
         for contact in Physics.contacts(this.entity) {
             if contact.normal_impulse > 0.6 {
@@ -42,7 +42,7 @@ script Crate {
             for hero in World.with_tag("hero") {
                 let h = hero.transform.world_position;
                 if abs(h.x - p.x) < 2.2 && abs(h.y - p.y) < 2.0 {
-                    var direction: f32 = 1.0;
+                    var direction: number = 1.0;
                     if h.x > p.x { direction = -1.0; }
                     Physics.apply_impulse_at_point(this.entity, Vec2(direction, 2.0), Vec2(p.x + 0.3, p.y + 0.55));
                     Physics.apply_angular_impulse(this.entity, direction * 0.02);

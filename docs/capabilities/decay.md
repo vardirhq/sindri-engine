@@ -215,7 +215,7 @@ Engine ✅ · Editor ✅ · Decay ✅ · Proof ✅ — parity row *Events (emit,
 <details markdown="1">
 <summary>Evidence</summary>
 
-A project declares events (`event GoalScored(team: f32);`) that any script
+A project declares events (`event GoalScored(team: number);`) that any script
 emits and any script handles with `on GoalScored(team) { }`, delivered after
 the pass and checked across files.
 
@@ -225,7 +225,7 @@ the pass and checked across files.
 
 ### Shared game state, declared and typed
 
-`state Game { var score: f32 = 0.0; }` makes a checked, typed name on the game's board.
+`state Game { var score: number = 0.0; }` makes a checked, typed name on the game's board.
 
 Engine 🟡 · Editor ✅ · Decay 🟡 · Proof 🟡 — parity row *Shared game state, declared and typed*
 
@@ -238,7 +238,7 @@ Engine 🟡 · Editor ✅ · Decay 🟡 · Proof 🟡 — parity row *Shared gam
 
 The board earns its place for facts that belong to the game rather than to an
 entity — the score, whether the game is won. A project can declare what goes on
-it: `state Game { var score: f32 = 0.0; }` in any file makes `Game.score` a
+it: `state Game { var score: number = 0.0; }` in any file makes `Game.score` a
 checked name every script reads and writes, with one type and one starting
 value, stored under the same board name so `Game.get("score", 0.0)` still sees
 it. A misspelt name, a wrong type and a write to a `let` are compile errors
@@ -541,7 +541,7 @@ Engine ✅ · Editor ✅ · Decay ✅ · Proof ✅ — parity row *Enums and exh
 
 ### Optional values
 
-Nullable types such as `f32?` and `Entity?` are checked before use.
+Nullable types such as `number?` and `Entity?` are checked before use.
 
 Engine ✅ · Editor ✅ · Decay ✅ · Proof ✅ — parity row *Optional values*
 
@@ -577,7 +577,7 @@ Engine ✅ · Editor — · Decay ✅ · Proof ✅
 
 **Limits:**
 
-- The only numeric type is spelled `f32` and every value it holds is an `f64`.
+- The only numeric type is `number`, a 64-bit float; `f32`, its first spelling, still works.
 
 <details markdown="1">
 <summary>Evidence</summary>

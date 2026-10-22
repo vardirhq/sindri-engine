@@ -2,12 +2,12 @@
 // the rest: the night is masked outside it, so the meadow shows through, and
 // the gem is masked inside it, so it is only ever seen through the hole.
 script Wander {
-    @export let width: f32 = 2.6;
-    @export let height: f32 = 1.1;
-    @export let seconds: f32 = 8.0;
-    var clock: f32 = 0.0;
+    @export let width: number = 2.6;
+    @export let height: number = 1.1;
+    @export let seconds: number = 8.0;
+    var clock: number = 0.0;
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         this.clock = this.clock + dt;
         let phase = this.clock / this.seconds * 6.2831853;
         let at = this.transform.position;

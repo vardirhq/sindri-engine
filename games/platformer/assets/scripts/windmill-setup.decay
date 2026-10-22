@@ -2,7 +2,7 @@
 script WindmillSetup {
     @export let template: Prefab;
     var made: Entity = null;
-    fn update(dt: f32) {
+    fn update(dt: number) {
         if Input.just_pressed("H") {
             let owner = World.find("Windmill hinge");
             let axle = World.find("Windmill axle");

@@ -9,9 +9,9 @@ script CombatLab {
     @export let gravity_well: Prefab;
     @export let target: Prefab;
 
-    var autoplay_clock: f32 = 4.5;
-    var autoplay_step: f32 = 0.0;
-    var combo_step: f32 = 0.0;
+    var autoplay_clock: number = 4.5;
+    var autoplay_step: number = 0.0;
+    var combo_step: number = 0.0;
 
     fn start() {
         Game.lab_active = 1.0;
@@ -28,7 +28,7 @@ script CombatLab {
         publish_ui();
     }
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         if Game.run_state != 1.0 { return; }
 
         if Game.lab_invulnerable > 0.0 {
@@ -108,10 +108,10 @@ script CombatLab {
         else { spawn_combo(this.autoplay_step - 4.0); }
     }
 
-    fn spawn_kind(kind: f32) {
+    fn spawn_kind(kind: number) {
         let player = World.find("Player");
-        var x: f32 = 0.0;
-        var y: f32 = 1.8;
+        var x: number = 0.0;
+        var y: number = 1.8;
         if player != null {
             x = player.transform.position.x;
             y = player.transform.position.y + 1.8;
@@ -140,11 +140,11 @@ script CombatLab {
         Game.lab_last = kind;
     }
 
-    fn spawn_combo(kind: f32) {
+    fn spawn_combo(kind: number) {
         clear();
         let player = World.find("Player");
-        var px: f32 = 0.0;
-        var py: f32 = 0.0;
+        var px: number = 0.0;
+        var py: number = 0.0;
         if player != null { px = player.transform.position.x; py = player.transform.position.y; }
 
         if kind == 1.0 {
@@ -174,7 +174,7 @@ script CombatLab {
         Game.lab_last = 10.0 + kind;
     }
 
-    fn spawn_at(prefab: Prefab, x: f32, y: f32) -> Entity {
+    fn spawn_at(prefab: Prefab, x: number, y: number) -> Entity {
         let attack = World.spawn(prefab);
         attack.transform.position.x = x;
         attack.transform.position.y = y;
@@ -202,7 +202,7 @@ script CombatLab {
     }
 
     fn publish_count() {
-        var count: f32 = 0.0;
+        var count: number = 0.0;
         for attack in World.with_tag("lab_attack") {
             if World.exists(attack) { count += 1.0; }
         }

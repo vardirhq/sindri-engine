@@ -4,11 +4,11 @@ script Synergies {
     @export let catalog: Profile;
     @export let celebration: Prefab;
 
-    var previous_count: f32 = 0.0;
+    var previous_count: number = 0.0;
 
-    fn update(dt: f32) {
-        var index: f32 = 0.0;
-        var active_count: f32 = 0.0;
+    fn update(dt: number) {
+        var index: number = 0.0;
+        var active_count: number = 0.0;
         var damage: number = 0.0;
         var fire: number = 0.0;
         var magnet: number = 0.0;
@@ -39,10 +39,10 @@ script Synergies {
         this.previous_count = active_count;
     }
 
-    fn celebrate(unlocked: f32) {
+    fn celebrate(unlocked: number) {
         let player = World.find("Player");
         if player == null { return; }
-        var ring: f32 = 0.0;
+        var ring: number = 0.0;
         while ring < 3.0 {
             let flare = World.spawn(this.celebration);
             flare.transform.position.x = player.transform.position.x;
@@ -57,7 +57,7 @@ script Synergies {
         flight_impact(0.58);
     }
 
-    fn evaluate(index: f32) -> bool {
+    fn evaluate(index: number) -> bool {
         var active: bool = true;
         if !meets(index, "required_0", "minimum_0") { active = false; }
         if !meets(index, "required_1", "minimum_1") { active = false; }
@@ -70,7 +70,7 @@ script Synergies {
         return active;
     }
 
-    fn meets(index: f32, key_field: String, minimum_field: String) -> bool {
+    fn meets(index: number, key_field: String, minimum_field: String) -> bool {
         let key = Profiles.text_at(this.catalog, "synergies", index, key_field, "");
         if key == "" { return true; }
         let minimum = Profiles.number_at(this.catalog, "synergies", index, minimum_field, 0.0);

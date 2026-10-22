@@ -8,9 +8,9 @@ script Button {
     ///   0  start a run          2  resume from pause
     ///   1  quit to the title    3  give up
     ///   4  start a boss rush    5  cycle which boss the rush opens on
-    @export let action: f32 = 0.0;
+    @export let action: number = 0.0;
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         if !Ui.is_pressed(this.entity) {
             return;
         }

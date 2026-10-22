@@ -1,13 +1,13 @@
 script Observe3d {
-    var total: f32 = 0.0;
-    var carried: f32 = 0.0;
-    var requested: f32 = 0.0;
+    var total: number = 0.0;
+    var carried: number = 0.0;
+    var requested: number = 0.0;
     var raw_grounded: bool = false;
     var grounded: bool = false;
     var platform: Entity;
     var ground: Entity;
-    var collisions: f32 = 0.0;
-    fn update(dt: f32) {
+    var collisions: number = 0.0;
+    fn update(dt: number) {
         let actor = World.find("Actor");
         let result = Physics3d.character_motion(actor);
         if result == null { return; }

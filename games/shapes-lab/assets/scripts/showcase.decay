@@ -1,26 +1,26 @@
 // Shapes Lab deliberately uses only engine-rendered shapes. No textures.
 script Showcase {
-    @export let spin: f32 = 0.0;
-    @export let pulse: f32 = 0.0;
-    @export let pulse_speed: f32 = 2.5;
-    @export let phase: f32 = 0.0;
-    @export let bob_x: f32 = 0.0;
-    @export let bob_y: f32 = 0.0;
-    @export let bob_speed: f32 = 1.0;
-    @export let orbit_radius: f32 = 0.0;
-    @export let orbit_speed: f32 = 1.0;
-    @export let tap_radius: f32 = 0.0;
-    @export let tap_mode: f32 = 0.0;
+    @export let spin: number = 0.0;
+    @export let pulse: number = 0.0;
+    @export let pulse_speed: number = 2.5;
+    @export let phase: number = 0.0;
+    @export let bob_x: number = 0.0;
+    @export let bob_y: number = 0.0;
+    @export let bob_speed: number = 1.0;
+    @export let orbit_radius: number = 0.0;
+    @export let orbit_speed: number = 1.0;
+    @export let tap_radius: number = 0.0;
+    @export let tap_mode: number = 0.0;
 
-    var age: f32 = 0.0;
-    var base_x: f32 = 1.0;
-    var base_y: f32 = 1.0;
-    var base_pos_x: f32 = 0.0;
-    var base_pos_y: f32 = 0.0;
-    var base_stroke: f32 = 0.0;
-    var base_fill_alpha: f32 = 0.0;
-    var tap_energy: f32 = 0.0;
-    var spin_impulse: f32 = 0.0;
+    var age: number = 0.0;
+    var base_x: number = 1.0;
+    var base_y: number = 1.0;
+    var base_pos_x: number = 0.0;
+    var base_pos_y: number = 0.0;
+    var base_stroke: number = 0.0;
+    var base_fill_alpha: number = 0.0;
+    var tap_energy: number = 0.0;
+    var spin_impulse: number = 0.0;
 
     fn start() {
         this.base_x = this.transform.scale.x;
@@ -31,7 +31,7 @@ script Showcase {
         this.base_fill_alpha = this.shape.fill.a;
     }
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         this.age += dt;
 
         if this.tap_radius > 0.0 && Pointer.just_pressed("Left") && Pointer.inside && !Pointer.over_ui {

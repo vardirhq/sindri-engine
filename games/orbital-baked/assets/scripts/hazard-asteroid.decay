@@ -2,21 +2,21 @@
 // next authored size; collider radii live in the prefabs so visuals and hits
 // stay honest instead of relying on transform scale.
 script HazardAsteroid {
-    @export let health: f32 = 5.0;
-    @export let impact_damage: f32 = 0.7;
-    @export var vx: f32 = 0.0;
-    @export var vy: f32 = 0.5;
-    @export let child_count: f32 = 2.0;
+    @export let health: number = 5.0;
+    @export let impact_damage: number = 0.7;
+    @export var vx: number = 0.0;
+    @export var vy: number = 0.5;
+    @export let child_count: number = 2.0;
     @export let child: Prefab;
 
-    var hp: f32 = 0.0;
-    var drift_x: f32 = 0.0;
-    var drift_y: f32 = 0.0;
-    var spin: f32 = 0.0;
-    var phase: f32 = 0.0;
-    var age: f32 = 0.0;
-    var impact_cd: f32 = 0.0;
-    var hit_flash: f32 = 0.0;
+    var hp: number = 0.0;
+    var drift_x: number = 0.0;
+    var drift_y: number = 0.0;
+    var spin: number = 0.0;
+    var phase: number = 0.0;
+    var age: number = 0.0;
+    var impact_cd: number = 0.0;
+    var hit_flash: number = 0.0;
     var suspended: bool = false;
 
     fn start() {
@@ -30,7 +30,7 @@ script HazardAsteroid {
         Physics.set_velocity(this.entity, this.drift_x, this.drift_y);
     }
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         if Game.run_state != 1.0 || Game.sector != 1.0 {
             // Preserve whatever momentum physics produced before freezing for an
             // overlay/sector transition. Resume from that momentum once play returns.
@@ -100,9 +100,9 @@ script HazardAsteroid {
 
     fn split() {
         if this.child_count <= 0.0 { return; }
-        var total: f32 = this.child_count;
+        var total: number = this.child_count;
         if total > 2.0 { total = Random.int(2.0, 3.0); }
-        var made: f32 = 0.0;
+        var made: number = 0.0;
         while made < total {
             let angle = Random.range(0.0, 6.2831853);
             let speed = Random.range(0.43, 0.96);
@@ -120,7 +120,7 @@ script HazardAsteroid {
     // nudged a little in angle and reach so no two rocks share a silhouette.
     // Points are in the shape's own unit square, so 0.5 is the prefab's radius.
     fn author_rock() {
-        var corner: f32 = 0.0;
+        var corner: number = 0.0;
         while corner < 8.0 {
             let rhythm = corner - 3.0 * floor(corner / 3.0);
             let reach = 0.5 * (0.78 + rhythm * 0.1) * Random.range(0.92, 1.04);
@@ -134,9 +134,9 @@ script HazardAsteroid {
         let damage = 1.0 - this.hp / max(this.health, 0.001);
         // The original's slate rim, which pales once the rock is more than
         // half broken; a hit lights the rim white for a moment.
-        var rim_r: f32 = 0.188;
-        var rim_g: f32 = 0.296;
-        var rim_b: f32 = 0.381;
+        var rim_r: number = 0.188;
+        var rim_g: number = 0.296;
+        var rim_b: number = 0.381;
         if damage > 0.55 {
             rim_r = 0.474;
             rim_g = 0.565;

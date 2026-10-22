@@ -1,22 +1,22 @@
 // Left in the ship's wake. Anchor Clock shortens the fuse and enlarges the
 // collapse, matching the module's promise instead of merely changing its card.
 script Mine {
-    @export let damage: f32 = 0.65;
-    @export let arm_after: f32 = 0.35;
-    @export let life: f32 = 7.0;
+    @export let damage: number = 0.65;
+    @export let arm_after: number = 0.35;
+    @export let life: number = 7.0;
     @export let blast: Prefab;
     @export let flash: Prefab;
 
-    var age: f32 = 0.0;
+    var age: number = 0.0;
     var tripped: bool = false;
     var trail: Entity = null;
-    var spark_clock: f32 = 0.0;
+    var spark_clock: number = 0.0;
 
     fn start() {
         this.trail = World.find("TrailMagenta");
     }
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         if Game.run_state != 1.0 { return; }
         this.age += dt;
         this.transform.rotation_z += dt * 1.8;
@@ -28,7 +28,7 @@ script Mine {
             Effects.burst_at(this.trail, this.transform.position.x, this.transform.position.y);
         }
         for enemy in Physics.sensor_entered() { this.tripped = true; }
-        var arm: f32 = this.arm_after;
+        var arm: number = this.arm_after;
         if Game.special_anchor_clock > 0.0 { arm *= 0.65; }
         if this.age < arm {
             this.shape.fill.a = 0.2 + this.age / arm * 0.6;

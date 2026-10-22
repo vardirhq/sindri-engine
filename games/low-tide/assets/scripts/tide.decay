@@ -1,14 +1,14 @@
 // The returning sea is a season, never a deadline or a game over.
 // Its level is an overlay: generator, biomes and harvested blocks stay put.
 script Tide {
-    @export let low_seconds: f32 = 180.0;
-    @export let rise_seconds: f32 = 90.0;
-    @export let high_seconds: f32 = 45.0;
-    @export let fall_seconds: f32 = 90.0;
-    @export let low_level: f32 = -17.0;
-    @export let high_level: f32 = -4.0;
+    @export let low_seconds: number = 180.0;
+    @export let rise_seconds: number = 90.0;
+    @export let high_seconds: number = 45.0;
+    @export let fall_seconds: number = 90.0;
+    @export let low_level: number = -17.0;
+    @export let high_level: number = -4.0;
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         let low = max(1.0, this.low_seconds);
         let rise = max(1.0, this.rise_seconds);
         let high = max(1.0, this.high_seconds);

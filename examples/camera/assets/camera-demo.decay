@@ -1,13 +1,13 @@
 // Decay selects modes; the engine performs camera motion and shake.
 script CameraDemo {
-    @export let speed: f32 = 5.0;
+    @export let speed: number = 5.0;
     var follow: bool = true;
     var bounds: bool = true;
     var shake: bool = true;
     var smooth: bool = true;
     var zone: bool = true;
     var tour: bool = false;
-    var leg: f32 = 0.0;
+    var leg: number = 0.0;
 
     fn start() { configure(); }
     fn configure() {
@@ -43,7 +43,7 @@ script CameraDemo {
         Ui.set_text(World.find("tour-label"), "START TOUR");
         if this.tour { Ui.set_text(World.find("tour-label"), "STOP TOUR"); }
     }
-    fn update(dt: f32) {
+    fn update(dt: number) {
         controls();
         var x = Input.axis("ArrowLeft", "ArrowRight");
         var y = Input.axis("ArrowDown", "ArrowUp");
@@ -96,10 +96,10 @@ script CameraDemo {
     }
 }
 script CameraLayout {
-    @export let x: f32 = 0.0;
-    @export let width: f32 = 1.0;
+    @export let x: number = 0.0;
+    @export let width: number = 1.0;
     @export let button: bool = false;
-    fn update(dt: f32) {
+    fn update(dt: number) {
         let span = min(1.0, Viewport.aspect);
         this.transform.position.x = this.x * span;
         if this.button { this.transform.scale.x = this.width * span; }

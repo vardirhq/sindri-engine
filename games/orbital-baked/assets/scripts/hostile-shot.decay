@@ -1,21 +1,21 @@
 // What the Warden fires. It only knows how to travel and how long it lasts.
 script HostileShot {
-    @export let speed: f32 = 3.4;
-    @export let life: f32 = 5.0;
-    @export let dir_x: f32 = 0.0;
-    @export let dir_y: f32 = 1.0;
-    @export let damage: f32 = 1.0;
+    @export let speed: number = 3.4;
+    @export let life: number = 5.0;
+    @export let dir_x: number = 0.0;
+    @export let dir_y: number = 1.0;
+    @export let damage: number = 1.0;
 
-    var age: f32 = 0.0;
+    var age: number = 0.0;
     var trail: Entity = null;
-    var trail_clock: f32 = 0.0;
+    var trail_clock: number = 0.0;
 
     fn start() {
         this.trail = World.find("TrailHostile");
         Physics.set_velocity(this.entity, this.dir_x * this.speed, this.dir_y * this.speed);
     }
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         if Game.run_state != 1.0 {
             Physics.set_velocity(this.entity, 0.0, 0.0);
             return;

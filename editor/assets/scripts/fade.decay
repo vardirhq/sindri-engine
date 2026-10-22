@@ -7,9 +7,9 @@
 // says `this.ui_image` instead, because it is a different component.
 script Fade {
     @export
-    let cycles_per_second: f32 = 0.5;
+    let cycles_per_second: number = 0.5;
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         // A cosine from 0 to 1 rather than -1 to 1, so the sprite fades out and
         // back rather than spending half its time inverted.
         let wave = cos(Time.elapsed * cycles_per_second * 6.2831855);

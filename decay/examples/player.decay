@@ -1,11 +1,11 @@
 script PlayerController {
     @export
-    let speed: f32 = 6.0;
+    let speed: number = 6.0;
 
     @export
-    let jump_force: f32 = 8.0;
+    let jump_force: number = 8.0;
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         let movement = Input.axis("move_left", "move_right");
         this.transform.position.x += movement * speed * dt;
 

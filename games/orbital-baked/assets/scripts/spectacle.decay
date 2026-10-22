@@ -1,13 +1,13 @@
 // One reusable, short-lived additive flare. Gameplay chooses a palette and
 // scale; this script supplies the expanding ring, spin, sweep and clean exit.
 script Spectacle {
-    @export let style: f32 = 0.0;
-    @export let duration: f32 = 0.32;
-    @export let start_size: f32 = 0.35;
-    @export let end_size: f32 = 1.8;
-    @export let spin: f32 = 2.4;
+    @export let style: number = 0.0;
+    @export let duration: number = 0.32;
+    @export let start_size: number = 0.35;
+    @export let end_size: number = 1.8;
+    @export let spin: number = 2.4;
 
-    var age: f32 = 0.0;
+    var age: number = 0.0;
 
     fn start() {
         tint();
@@ -15,7 +15,7 @@ script Spectacle {
         this.transform.scale.y = this.start_size;
     }
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         this.age += dt;
         let t = min(1.0, this.age / max(0.01, this.duration));
         let eased = 1.0 - (1.0 - t) * (1.0 - t);
@@ -42,7 +42,7 @@ script Spectacle {
         else { color(0.34, 1.0, 0.72); }
     }
 
-    fn color(r: f32, g: f32, b: f32) {
+    fn color(r: number, g: number, b: number) {
         this.shape.stroke.r = r; this.shape.stroke.g = g; this.shape.stroke.b = b;
         this.shape.fill.r = r; this.shape.fill.g = g; this.shape.fill.b = b;
     }

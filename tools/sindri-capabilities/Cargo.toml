@@ -16,9 +16,11 @@ decay-syntax = { path = "../../decay/crates/decay-syntax" }
 sindri-core = { path = "../../crates/sindri-core" }
 sindri-decay = { path = "../../crates/sindri-decay" }
 sindri-scene = { path = "../../crates/sindri-scene" }
+sindri-weave = { path = "../../crates/sindri-weave" }
 serde.workspace = true
 serde_json.workspace = true
 toml = "1.1"
+weave = { path = "../../weave/crates/weave" }
 
 [lints]
 workspace = true

@@ -2,10 +2,10 @@
 // drawing; the script only says how far a burn has got or how bright a flash
 // is, which is the split a game keeps too.
 script Burn {
-    @export let seconds: f32 = 3.0;
-    var clock: f32 = 0.0;
+    @export let seconds: number = 3.0;
+    var clock: number = 0.0;
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         this.clock = this.clock + dt;
         // Burns away, then grows back, over and over.
         let phase = this.clock / this.seconds;
@@ -14,10 +14,10 @@ script Burn {
 }
 
 script HitFlash {
-    @export let every: f32 = 1.2;
-    var since: f32 = 0.0;
+    @export let every: number = 1.2;
+    var since: number = 0.0;
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         this.since = this.since + dt;
         if this.since > this.every || Input.just_pressed("Space") {
             this.since = 0.0;

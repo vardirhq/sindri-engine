@@ -6,20 +6,20 @@ script Aegis {
     @export let core: Prefab;
     @export let drop_roll: Prefab;
     @export let death_burst: Prefab;
-    @export let hazard_damage: f32 = 0.0;
+    @export let hazard_damage: number = 0.0;
     @export let shield_segment: Prefab;
     @export let desperation_laser: Prefab;
 
-    var hp: f32 = 0.0;
-    var phase: f32 = 1.0;
-    var previous_phase: f32 = 1.0;
-    var attack: f32 = 0.75;
-    var special: f32 = 2.7;
-    var clock: f32 = 0.0;
-    var offset: f32 = 0.0;
-    var phase_flash: f32 = 0.0;
-    var death_burst_damage: f32 = 0.0;
-    var ring_built: f32 = 0.0;
+    var hp: number = 0.0;
+    var phase: number = 1.0;
+    var previous_phase: number = 1.0;
+    var attack: number = 0.75;
+    var special: number = 2.7;
+    var clock: number = 0.0;
+    var offset: number = 0.0;
+    var phase_flash: number = 0.0;
+    var death_burst_damage: number = 0.0;
+    var ring_built: number = 0.0;
 
     fn start() {
         let scale = boss_scale();
@@ -49,7 +49,7 @@ script Aegis {
         }
     }
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         if Game.run_state != 1.0 {
             Physics.set_velocity(this.entity, 0.0, 0.0);
             return;
@@ -65,7 +65,7 @@ script Aegis {
         build_shield_ring();
         this.clock += dt;
         update_phase(dt);
-        var spin: f32 = 0.3;
+        var spin: number = 0.3;
         if this.phase == 3.0 { spin = 0.72; }
         this.transform.rotation_z = this.offset + this.clock * spin;
 
@@ -80,15 +80,15 @@ script Aegis {
         if this.hp <= 0.0 { die(); }
     }
 
-    fn shield_count() -> f32 {
-        var count: f32 = 0.0;
+    fn shield_count() -> number {
+        var count: number = 0.0;
         for plate in World.with_tag("aegis_shield") {
             if World.exists(plate) { count += 1.0; }
         }
         return count;
     }
 
-    fn update_phase(dt: f32) {
+    fn update_phase(dt: number) {
         let shields = shield_count();
         let share = this.hp / max(Game.boss_max, 1.0);
         if shields <= 0.0 { this.phase = 3.0; }
@@ -120,7 +120,7 @@ script Aegis {
             if hit == player {
                 Game.player_damage_taken = max(Game.player_damage_taken, 2.4);
             } else if World.exists(hit) && World.has_tag(hit, "player_damage") {
-                var damage: f32 = World.property_number(hit, "damage", 0.0);
+                var damage: number = World.property_number(hit, "damage", 0.0);
                 damage = taken(hit, damage);
                 this.hp -= damage;
                 if this.hp <= 0.0 && World.property_number(hit, "nova", 0.0) > 0.0 {
@@ -134,7 +134,7 @@ script Aegis {
     // step. The plate consumes ordinary projectiles immediately, but the hull
     // also validates the projectile's actual incoming lane so script update
     // order cannot leak damage through a surviving plate.
-    fn taken(hit: Entity, damage: f32) -> f32 {
+    fn taken(hit: Entity, damage: number) -> number {
         if shield_count() <= 0.0 { return damage; }
 
         var nx = World.property_number(hit, "dir_x", 0.0);
@@ -168,16 +168,16 @@ script Aegis {
         return damage;
     }
 
-    fn chase(dx: f32, dy: f32, far: f32, scale: f32) {
+    fn chase(dx: number, dy: number, far: number, scale: number) {
         if far > 0.001 {
             Physics.set_velocity(this.entity, dx / far * 0.72 * scale,
                                  dy / far * 0.72 * scale);
         }
     }
 
-    fn orbit(dx: f32, dy: f32, far: f32, want: f32, tangent: f32) {
+    fn orbit(dx: number, dy: number, far: number, want: number, tangent: number) {
         if far <= 0.001 { return; }
-        var radial: f32 = 0.0;
+        var radial: number = 0.0;
         if far > want + 0.45 { radial = 1.0; }
         if far < want - 0.45 { radial = -0.55; }
         let nx = dx / far;
@@ -187,10 +187,10 @@ script Aegis {
             (ny * radial + nx * tangent) * 0.72);
     }
 
-    fn fire_fan(nx: f32, ny: f32, count: f32, velocity: f32, spread: f32) {
+    fn fire_fan(nx: number, ny: number, count: number, velocity: number, spread: number) {
         let base = atan2(ny, nx);
         let half = (count - 1.0) * 0.5;
-        var slot: f32 = 0.0;
+        var slot: number = 0.0;
         while slot < count {
             fire_at(base + (slot - half) * spread, velocity, 1.0);
             slot += 1.0;
@@ -198,8 +198,8 @@ script Aegis {
         Audio.play("audio/boss.wav", 0.38);
     }
 
-    fn fire_ring(count: f32, velocity: f32, gaps: f32) {
-        var slot: f32 = 0.0;
+    fn fire_ring(count: number, velocity: number, gaps: number) {
+        var slot: number = 0.0;
         let gap = (this.clock * 1.4) % count;
         while slot < count {
             let distance = abs(slot - gap);
@@ -211,7 +211,7 @@ script Aegis {
         Audio.play("audio/boss.wav", 0.4);
     }
 
-    fn fire_at(angle: f32, velocity: f32, damage: f32) {
+    fn fire_at(angle: number, velocity: number, damage: number) {
         let bolt = World.spawn(this.shot);
         bolt.transform.position.x = this.transform.position.x + cos(angle) * 0.65;
         bolt.transform.position.y = this.transform.position.y + sin(angle) * 0.65;
@@ -221,7 +221,7 @@ script Aegis {
         World.set_property(bolt, "damage", damage);
     }
 
-    fn fire_laser(angle: f32) {
+    fn fire_laser(angle: number) {
         let beam = World.spawn(this.desperation_laser);
         beam.transform.position.x = this.transform.position.x;
         beam.transform.position.y = this.transform.position.y;
@@ -237,7 +237,7 @@ script Aegis {
         }
     }
 
-    fn act(dt: f32, dx: f32, dy: f32, far: f32) {
+    fn act(dt: number, dx: number, dy: number, far: number) {
         if this.phase == 1.0 { orbit(dx, dy, far, 4.15, 0.27); }
         else if this.phase == 2.0 { orbit(dx, dy, far, 3.7, 0.39); }
         else { orbit(dx, dy, far, 3.25, 0.58); }
@@ -278,7 +278,7 @@ script Aegis {
     fn build_shield_ring() {
         if this.ring_built > 0.0 { return; }
         this.ring_built = 1.0;
-        var slot: f32 = 0.0;
+        var slot: number = 0.0;
         while slot < 8.0 {
             let plate = World.spawn(this.shield_segment);
             World.set_property(plate, "angle", slot / 8.0 * 6.2831853);
@@ -304,7 +304,7 @@ script Aegis {
         Game.score = Game.score + 920.0;
         Game.boss_hp = 0.0;
         Game.boss_max = 0.0;
-        var made: f32 = 0.0;
+        var made: number = 0.0;
         while made < 8.0 {
             let angle = made / 8.0 * 6.2831853;
             let drop = World.spawn(this.core);

@@ -8,14 +8,14 @@ shared fn cargo_name(kind: Resource) -> String {
     };
 }
 
-shared fn cargo_tile(kind: Resource) -> f32 {
+shared fn cargo_tile(kind: Resource) -> number {
     return match kind {
         Resource.Scrap => 11.0, Resource.Wood => 16.0, Resource.Stone => 17.0,
         Resource.Ore => 18.0, Resource.Fibre => 19.0, Resource.Salt => 20.0, _ => 0.0,
     };
 }
 
-shared fn tile_cargo(tile: f32) -> Resource {
+shared fn tile_cargo(tile: number) -> Resource {
     if tile == 11.0 { return Resource.Scrap; }
     if tile == 16.0 { return Resource.Wood; }
     if tile == 17.0 { return Resource.Stone; }
@@ -25,7 +25,7 @@ shared fn tile_cargo(tile: f32) -> Resource {
     return Resource.None;
 }
 
-shared fn cargo_change(kind: Resource, amount: f32) {
+shared fn cargo_change(kind: Resource, amount: number) {
     match kind {
         Resource.Wood => { Game.wood += amount; }
         Resource.Stone => { Game.stone += amount; }
@@ -38,12 +38,12 @@ shared fn cargo_change(kind: Resource, amount: f32) {
 }
 
 // Stable scatter in world coordinates; travelling away does not reroll loot.
-shared fn basin_scatter(column: f32, row: f32, seed: f32) -> f32 {
+shared fn basin_scatter(column: number, row: number, seed: number) -> number {
     let n = sin(column * 12.9898 + row * 78.233 + seed * 17.31) * 43758.5453;
     return n - floor(n);
 }
 
-shared fn resource_at(basin: Entity, column: f32, row: f32) -> Resource {
+shared fn resource_at(basin: Entity, column: number, row: number) -> Resource {
     let block = Grid.surface(basin, column, row);
     if block == "trunk" { return Resource.Wood; }
     if block == "leaves" || block == "kelp" { return Resource.Fibre; }

@@ -3,9 +3,9 @@
 // each is bound to, and the buttons below rebind `boost` while it runs.
 script InputDemo {
     // Which binding of `boost` the next key goes to, or -1 when not waiting.
-    var waiting: f32 = -1.0;
+    var waiting: number = -1.0;
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         if this.waiting < 0.0 {
             if Ui.is_pressed(World.find("rebind")) || Input.just_pressed("K") {
                 listen(0.0);
@@ -29,7 +29,7 @@ script InputDemo {
         let status = World.find("status");
         let upper = Ui.position(bindings).y - Ui.size(bindings).y * 0.5;
         let lower = Ui.position(status).y + Ui.size(status).y * 0.5;
-        var high: f32 = 12.0;
+        var high: number = 12.0;
         if Viewport.aspect < 1.0 { high = 12.0 / Viewport.aspect; }
         let unit = high * 0.5;
         let gap = 0.04;
@@ -39,7 +39,7 @@ script InputDemo {
         arena.transform.position = Vec3(0.0, (upper + lower) * 0.5 * unit, -0.5);
     }
 
-    fn listen(index: f32) {
+    fn listen(index: number) {
         this.waiting = index;
         Ui.set_text(World.find("status"), "Press a key or a pad button for BOOST. Escape cancels.");
         print("Input waiting");
@@ -73,9 +73,9 @@ script InputDemo {
 }
 
 script Ship {
-    @export let speed: f32 = 3.0;
+    @export let speed: number = 3.0;
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         let way = Action.vector("move");
         var pace = this.speed;
         this.shape.fill = Color(0.18, 0.82, 1.0, 1.0);

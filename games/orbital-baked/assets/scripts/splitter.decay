@@ -7,15 +7,15 @@
 script Hazards {
     // Kept only for the old prefab durability acceptance check while the scene
     // still carries this legacy asset slot. Hazards never read it.
-    @export let health: f32 = 2.0;
+    @export let health: number = 2.0;
     @export let asteroid: Prefab;
     @export let field: Prefab;
     @export let beam: Prefab;
 
-    var was_sector: f32 = -1.0;
-    var beam_timer: f32 = 0.0;
+    var was_sector: number = -1.0;
+    var beam_timer: number = 0.0;
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         let state = Game.run_state;
         if state != 1.0 {
             // Choices and manual pause freeze the reference world. Director
@@ -49,7 +49,7 @@ script Hazards {
         }
     }
 
-    fn setup_sector(sector: f32) {
+    fn setup_sector(sector: number) {
         if sector == 1.0 {
             spawn_asteroids();
         } else if sector == 2.0 {
@@ -74,13 +74,13 @@ script Hazards {
         let player = World.find("Player");
         let half_x = visible_half_x(VIEW_SIZE);
         let half_y = visible_half_y(VIEW_SIZE);
-        var made: f32 = 0.0;
+        var made: number = 0.0;
         while made < 7.0 {
             let rock = World.spawn(this.asteroid);
-            var x: f32 = 0.0;
-            var y: f32 = 0.0;
+            var x: number = 0.0;
+            var y: number = 0.0;
             var safe: bool = false;
-            var tries: f32 = 0.0;
+            var tries: number = 0.0;
             while tries < 30.0 && !safe {
                 x = Random.range(-half_x + 0.9, half_x - 0.9);
                 y = Random.range(-half_y + 0.9, half_y - 0.9);
@@ -99,7 +99,7 @@ script Hazards {
         }
     }
 
-    fn spawn_flare(side: f32) {
+    fn spawn_flare(side: number) {
         let flare = World.spawn(this.beam);
         World.set_property(flare, "mode", 1.0);
         World.set_property(flare, "side", side);
@@ -116,7 +116,7 @@ script Hazards {
         World.set_property(gravity, "radius", Random.range(1.6, 2.3));
     }
 
-    fn update_core(dt: f32) {
+    fn update_core(dt: number) {
         this.beam_timer -= dt;
         if this.beam_timer > 0.0 {
             return;
@@ -137,7 +137,7 @@ script Hazards {
         }
     }
 
-    fn distance_from(entity: Entity, x: f32, y: f32) -> f32 {
+    fn distance_from(entity: Entity, x: number, y: number) -> number {
         let dx = entity.transform.position.x - x;
         let dy = entity.transform.position.y - y;
         return sqrt(dx * dx + dy * dy);

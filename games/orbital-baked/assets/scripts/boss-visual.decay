@@ -3,28 +3,28 @@
 script BossVisual {
     // 0 = outer energy cage, 1 = inner shell, 2 = reactor core,
     // 3 = orbiting phase node.
-    @export let kind: f32 = 0.0;
-    @export let phase_offset: f32 = 0.0;
+    @export let kind: number = 0.0;
+    @export let phase_offset: number = 0.0;
 
     var boss: Entity = null;
-    var clock: f32 = 0.0;
+    var clock: number = 0.0;
 
     fn start() {
         this.boss = World.find("Warden");
     }
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         let boss = this.boss;
         if boss == null || !World.exists(boss) { return; }
         if Game.run_state == 1.0 { this.clock += dt; }
 
         // Full until the boss has put its health on the board, which is
         // what `boss_max` of zero means.
-        var hp_share: f32 = 1.0;
+        var hp_share: number = 1.0;
         if Game.boss_max > 0.0 {
             hp_share = max(0.0, Game.boss_hp) / Game.boss_max;
         }
-        var phase: f32 = 1.0;
+        var phase: number = 1.0;
         if hp_share <= 0.30 { phase = 3.0; }
         else if hp_share <= 0.65 { phase = 2.0; }
         let fury = (phase - 1.0) * 0.5;
@@ -67,7 +67,7 @@ script BossVisual {
         }
     }
 
-    fn update_orbit_node(phase: f32, fury: f32, pulse: f32) {
+    fn update_orbit_node(phase: number, fury: number, pulse: number) {
         let speed = 0.65 + phase * 0.46;
         let angle = this.phase_offset + this.clock * speed;
         let radius = 0.86 + fury * 0.22 + pulse * 0.06;

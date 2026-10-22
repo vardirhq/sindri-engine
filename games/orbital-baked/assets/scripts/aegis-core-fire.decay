@@ -2,10 +2,10 @@
 // pooled flecks from sindri.effect.burst, so the desperation phase can look
 // properly broken without turning every ember into an entity.
 script AegisCoreFire {
-    @export let pulse: f32 = 0.09;
-    var clock: f32 = 0.0;
+    @export let pulse: number = 0.09;
+    var clock: number = 0.0;
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         if Game.run_state != 1.0 {
             World.despawn(this.entity);
             return;

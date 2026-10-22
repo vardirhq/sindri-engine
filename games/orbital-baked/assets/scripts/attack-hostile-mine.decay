@@ -1,17 +1,17 @@
 // Proximity mine attack primitive. It arms, warns, then detonates as its own entity.
 script HostileMine {
-    @export let trigger_radius: f32 = 1.25;
-    @export let blast_radius: f32 = 1.75;
-    @export let arm_delay: f32 = 0.55;
-    @export let fuse: f32 = 0.7;
-    @export let lifetime: f32 = 8.0;
-    @export let damage: f32 = 1.4;
+    @export let trigger_radius: number = 1.25;
+    @export let blast_radius: number = 1.75;
+    @export let arm_delay: number = 0.55;
+    @export let fuse: number = 0.7;
+    @export let lifetime: number = 8.0;
+    @export let damage: number = 1.4;
 
-    var age: f32 = 0.0;
-    var countdown: f32 = -1.0;
+    var age: number = 0.0;
+    var countdown: number = -1.0;
     var exploded: bool = false;
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         if Game.run_state != 1.0 { return; }
         this.age += dt;
         this.transform.rotation_z += dt * 1.7;

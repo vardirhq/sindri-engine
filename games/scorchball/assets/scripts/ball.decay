@@ -11,27 +11,27 @@
 // Possession is decided by distance rather than by a collider, so an enlarged
 // player reaches further without a body of a different size.
 script Ball {
-    @export let friction: f32 = 2.2;
-    @export let reach: f32 = 0.9;
-    @export let goal_line: f32 = 14.9;
-    @export let mouth: f32 = 2.1;
-    @export let post_radius: f32 = 0.42;
-    @export let fire_time: f32 = 20.0;
-    @export let heat_threshold: f32 = 24.0;
-    @export let heat_gain: f32 = 24.0;
-    @export let heat_cool: f32 = 0.055;
+    @export let friction: number = 2.2;
+    @export let reach: number = 0.9;
+    @export let goal_line: number = 14.9;
+    @export let mouth: number = 2.1;
+    @export let post_radius: number = 0.42;
+    @export let fire_time: number = 20.0;
+    @export let heat_threshold: number = 24.0;
+    @export let heat_gain: number = 24.0;
+    @export let heat_cool: number = 0.055;
 
     var velocity: Vec2 = Vec2(0.0, 0.0);
     var holder: Entity = null;
     var holder_right: bool = true;
     var kicker: Entity = null;
-    var kicked_ago: f32 = 1.0;
-    var fire_left: f32 = 0.0;
-    var fire_team: f32 = 0.0;
-    var fire_clock: f32 = 0.0;
-    var heat: f32 = 0.0;
-    var heat_clock: f32 = 0.0;
-    var aftertouch_slot: f32 = 0.0;
+    var kicked_ago: number = 1.0;
+    var fire_left: number = 0.0;
+    var fire_team: number = 0.0;
+    var fire_clock: number = 0.0;
+    var heat: number = 0.0;
+    var heat_clock: number = 0.0;
+    var aftertouch_slot: number = 0.0;
     var zone: Entity = null;
 
     fn start() {
@@ -39,7 +39,7 @@ script Ball {
         Game.holder = 0.0;
     }
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         if Game.phase != Phase.Play {
             // Waiting at the centre spot for kickoff.
             reset();
@@ -61,7 +61,7 @@ script Ball {
 
     // A player kicked it: off it goes, and whoever kicked it may bend the
     // shot for a moment.
-    fn kick(velocity: Vec2, slot: f32) {
+    fn kick(velocity: Vec2, slot: number) {
         this.velocity = velocity;
         this.kicker = this.holder;
         this.kicked_ago = 0.0;
@@ -114,7 +114,7 @@ script Ball {
         }
     }
 
-    fn bounce(player: Entity, offset: Vec2, distance: f32) {
+    fn bounce(player: Entity, offset: Vec2, distance: number) {
         this.velocity = offset / max(0.01, distance) * 12.0;
         this.kicker = player;
         this.kicked_ago = 0.0;
@@ -130,14 +130,14 @@ script Ball {
         let moving = Physics.velocity_x(holder);
         if moving > 1.0 { this.holder_right = true; }
         if moving < -1.0 { this.holder_right = false; }
-        var side: f32 = -0.5;
+        var side: number = -0.5;
         if this.holder_right { side = 0.5; }
         this.transform.position.x = holder.transform.position.x + side * scale;
         this.transform.position.y = holder.transform.position.y - 1.1 * scale;
         Game.holder = World.property_number(holder, "slot", 0.0);
     }
 
-    fn roll(dt: f32) {
+    fn roll(dt: number) {
         Game.holder = 0.0;
         this.velocity.x += Game.wind * dt;
         this.velocity *= max(0.0, 1.0 - this.friction * dt);
@@ -145,7 +145,7 @@ script Ball {
         this.transform.position += Vec3(step.x, step.y, 0.0);
     }
 
-    fn burn(dt: f32) {
+    fn burn(dt: number) {
         if this.fire_left <= 0.0 {
             return;
         }
@@ -160,7 +160,7 @@ script Ball {
     // Scorch is deliberately not the Fireball power-up. Repeated hard shots
     // make the ordinary ball look hotter and more violent, but do not change
     // possession or hurt players. Stop hammering it and it cools back down.
-    fn scorch(dt: f32) {
+    fn scorch(dt: number) {
         this.heat = max(0.0, this.heat - this.heat_cool * dt);
         if this.fire_left > 0.0 || this.heat < 0.2 {
             return;
@@ -237,7 +237,7 @@ script Ball {
         }
     }
 
-    fn team(player: Entity) -> f32 {
+    fn team(player: Entity) -> number {
         if World.property_number(player, "slot", 1.0) % 2.0 == 1.0 {
             return 1.0;
         }

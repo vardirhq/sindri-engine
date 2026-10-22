@@ -25,7 +25,7 @@ script Mixer {
         restore(World.find("PortEffects"), World.find("PortEffectsFill"), "effects");
     }
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         follow(this.master, this.master_fill, "master");
         follow(this.music, this.music_fill, "music");
         follow(this.effects, this.effects_fill, "effects");

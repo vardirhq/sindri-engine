@@ -156,7 +156,7 @@ tests = [
 ]
 proof = ["games/scorchball"]
 detail = """
-A project declares events (`event GoalScored(team: f32);`) that any script
+A project declares events (`event GoalScored(team: number);`) that any script
 emits and any script handles with `on GoalScored(team) { }`, delivered after
 the pass and checked across files.
 """
@@ -165,7 +165,7 @@ the pass and checked across files.
 id = "shared-state"
 group = "Scripts and the host"
 title = "Shared game state, declared and typed"
-summary = "`state Game { var score: f32 = 0.0; }` makes a checked, typed name on the game's board."
+summary = "`state Game { var score: number = 0.0; }` makes a checked, typed name on the game's board."
 status = { engine = "partial", editor = "yes", decay = "partial", proof = "partial" }
 parity = "Shared game state, declared and typed"
 tests = [
@@ -176,7 +176,7 @@ proof = ["games/scorchball", "games/platformer"]
 detail = """
 The board earns its place for facts that belong to the game rather than to an
 entity — the score, whether the game is won. A project can declare what goes on
-it: `state Game { var score: f32 = 0.0; }` in any file makes `Game.score` a
+it: `state Game { var score: number = 0.0; }` in any file makes `Game.score` a
 checked name every script reads and writes, with one type and one starting
 value, stored under the same board name so `Game.get("score", 0.0)` still sees
 it. A misspelt name, a wrong type and a write to a `let` are compile errors
@@ -425,7 +425,7 @@ proof = ["games/scorchball"]
 id = "optionals"
 group = "Language"
 title = "Optional values"
-summary = "Nullable types such as `f32?` and `Entity?` are checked before use."
+summary = "Nullable types such as `number?` and `Entity?` are checked before use."
 status = { engine = "yes", editor = "yes", decay = "yes", proof = "yes" }
 parity = "Optional values"
 tests = ["decay/crates/decay-runtime/src/tests/optionals.rs", "decay/crates/decay-semantic/src/tests/optionals.rs"]
@@ -455,7 +455,7 @@ tests = [
 ]
 proof = ["decay/examples/player.decay"]
 docs = ["decay/LANGUAGE.md"]
-limits = ["The only numeric type is spelled `f32` and every value it holds is an `f64`."]
+limits = ["The only numeric type is `number`, a 64-bit float; `f32`, its first spelling, still works."]
 detail = """
 `decay-syntax` lexes and parses a script, reporting diagnostics with a span,
 line, and column; the parser recovers rather than stopping at the first error,

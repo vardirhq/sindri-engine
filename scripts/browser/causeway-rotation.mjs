@@ -1,4 +1,4 @@
-// Exercise the exported battlefield through keyboard, touch buttons and a sea swipe.
+// Exercise the exported battlefield through keyboard and touch sea swipes.
 import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
 import { readFile, mkdir } from 'node:fs/promises';
@@ -31,48 +31,69 @@ try {
     const page = await context.newPage();
     const errors = [];
     const turns = [];
+    let titleReady = false;
     let battlefieldReady = false;
-    page.on('pageerror', (error) => errors.push(error.message));
+    let swipes = 0;
+    page.on('pageerror', (error) => {
+      errors.push(error.message);
+      console.error(`${name}: ${error.message}`);
+    });
     page.on('console', (message) => {
+      if (message.text().includes('Causeway title ready')) titleReady = true;
+      if (message.text().includes('Causeway sea swipe began')) swipes++;
       if (message.text().includes('Causeway battlefield ready')) battlefieldReady = true;
       if (message.text().includes('Causeway view settled:')) turns.push(message.text());
       if (message.type() === 'error' || /error while parsing wgsl|is invalid|InvalidTransform/.test(message.text())) errors.push(message.text());
     });
     await page.goto(`http://127.0.0.1:${server.address().port}${base}`);
     await page.waitForFunction(() => !document.querySelector('#sindri-loading'), null, { timeout: 60000 });
-    await page.waitForTimeout(5000);
-    await page.locator('canvas').click();
-    await page.keyboard.press('Enter');
-    for (let attempt = 0; attempt < 600 && !battlefieldReady; attempt++) await page.waitForTimeout(100);
-    assert(battlefieldReady, `${name} title handed the camera to the battlefield`);
+    const waitFor = async (ready, label) => {
+      for (let attempt = 0; attempt < 900 && !ready(); attempt++) await page.waitForTimeout(100);
+      if (!ready()) {
+        await page.screenshot({ path: join(output, `failed-${name}.png`), timeout: 90000 });
+        assert.fail(`${name}: ${label}; runtime errors: ${JSON.stringify(errors)}`);
+      }
+    };
+    // The loading overlay can disappear before the first scripted title step.
+    // Wait for that step, and keep inputs down until gameplay acknowledges them.
+    await waitFor(() => titleReady, 'title ready');
+    console.log(`${name}: title initialized`);
+    await page.locator('canvas').focus();
+    await page.keyboard.down('Enter');
+    await waitFor(() => battlefieldReady, 'title handed the camera to the battlefield');
+    await page.keyboard.up('Enter');
+    console.log(`${name}: battlefield ready`);
     const waitForTurns = async (count) => {
-      for (let attempt = 0; attempt < 100 && turns.length < count; attempt++) await page.waitForTimeout(100);
-      assert.equal(turns.length, count, `${name} completed ${count} quarter turns`);
+      await waitFor(() => turns.length >= count, `completed ${count} quarter turns`);
+      assert.equal(turns.length, count, `${name} completes exactly one turn per input`);
+    };
+    const swipe = async (from, to, count) => {
+      const cdp = await context.newCDPSession(page);
+      const previous = swipes;
+      await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [from] });
+      await waitFor(() => swipes > previous, 'sea owns the touch gesture');
+      await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [to] });
+      await waitForTurns(count);
+      await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+      await cdp.detach();
     };
     const captureCanvas = async () => page.screenshot({
       clip: await page.locator('canvas').boundingBox(), timeout: 90000,
     });
     const before = await captureCanvas();
     if (name === 'desktop') {
-      await page.keyboard.press('l');
+      await page.keyboard.down('l');
+      await waitForTurns(1);
+      await page.keyboard.up('l');
     } else {
-      await page.touchscreen.tap(359, 102);
+      // Leave a mouse position behind, as on a touchscreen laptop. Touch must
+      // still own the pointer. Mobile rotation is exercised through sea swipes.
+      await page.mouse.move(359, 102);
+      await swipe({ x: 80, y: 180 }, { x: 180, y: 180 }, 1);
     }
-    await page.waitForTimeout(1000);
-    await waitForTurns(1);
     const after = await captureCanvas();
     assert(!before.equals(after), `${name} view changes after rotation input`);
-    if (name === 'phone') {
-      const cdp = await context.newCDPSession(page);
-      await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: 80, y: 180 }] });
-      await page.waitForTimeout(500);
-      await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: 180, y: 180 }] });
-      await page.waitForTimeout(500);
-      await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
-      await page.waitForTimeout(1000);
-      await waitForTurns(2);
-    }
-    await page.screenshot({ path: join(output, `browser-${name}.png`) });
+    await page.screenshot({ path: join(output, `browser-${name}.png`), timeout: 90000 });
     assert.deepEqual(errors, [], `${name} has no runtime or GPU errors`);
     console.log(`Causeway ${name}: rotation input and rendered battlefield passed`);
     await context.close();

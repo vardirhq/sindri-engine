@@ -1,13 +1,13 @@
 // An authored area hit. Its collider is the damage radius and its stroked ring
 // is the same radius, so what the player sees is what the simulation tests.
 script Nova {
-    @export let damage: f32 = 0.3;
+    @export let damage: number = 0.3;
     @export let impact: number = 0.26;
-    @export let life: f32 = 0.13;
-    var age: f32 = 0.0;
+    @export let life: number = 0.13;
+    var age: number = 0.0;
     var retiring: bool = false;
-    var initial_x: f32 = 1.0;
-    var initial_y: f32 = 1.0;
+    var initial_x: number = 1.0;
+    var initial_y: number = 1.0;
 
     fn start() {
         this.initial_x = this.transform.scale.x;
@@ -16,7 +16,7 @@ script Nova {
         flight_impact(this.impact);
     }
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         if this.retiring {
             World.despawn(this.entity);
             return;

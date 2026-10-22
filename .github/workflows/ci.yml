@@ -193,8 +193,11 @@ jobs:
             base="$(git merge-base origin/main HEAD)"
           fi
 
+          # decay/ is the engine-agnostic language workspace: its scripts
+          # run against a test host, not Sindri, and its own tests check them.
           mapfile -t scripts < <(
-            git diff --name-only --diff-filter=ACMRT "$base" HEAD -- '*.decay'
+            git diff --name-only --diff-filter=ACMRT "$base" HEAD -- '*.decay' \
+              ':(exclude)decay/**'
           )
 
           if ! git diff --quiet "$base" HEAD -- tools/decay-lsp crates/sindri-decay \
@@ -349,7 +352,9 @@ jobs:
     needs: reuse
     if: ${{ !cancelled() && needs.reuse.outputs.verified != 'true' }}
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    # Both jobs take 20 to 25 minutes, so at 25 a slow runner was cancelled
+    # partway through, with nothing failed.
+    timeout-minutes: 40
     outputs:
       failure: ${{ steps.failure.outputs.failure }}
     steps:
@@ -686,7 +691,9 @@ jobs:
     needs: reuse
     if: ${{ !cancelled() && needs.reuse.outputs.verified != 'true' }}
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    # Both jobs take 20 to 25 minutes, so at 25 a slow runner was cancelled
+    # partway through, with nothing failed.
+    timeout-minutes: 40
     outputs:
       failure: ${{ steps.failure.outputs.failure }}
     steps:

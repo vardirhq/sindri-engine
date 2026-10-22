@@ -18,7 +18,9 @@ mod flex;
 mod grid;
 mod inspect;
 mod presenter;
+mod properties;
 mod shadow;
+mod text;
 mod transition;
 mod tree;
 mod undo;
@@ -28,6 +30,7 @@ use tree::elements;
 
 pub use inspect::{InspectedRule, Inspection, inspect};
 pub use presenter::{Presenter, pointer_states, with_focus};
+pub use properties::{PROPERTIES, Property, property};
 pub use transition::Transitions;
 pub use undo::Undo;
 
@@ -112,8 +115,11 @@ pub(crate) fn apply(
     for (position, node) in tree.nodes.iter().enumerate() {
         let parent = node.parent.and_then(|parent| computed.get(parent));
         let style = weave::cascade(stylesheet, &tree, position, viewport, parent);
+        // Only what the property table names is applied; anything else was
+        // always ignored, and the table is what the reference documents.
         let mut declarations: BTreeMap<String, String> = style
             .declarations()
+            .filter(|(property, _)| properties::property(property).is_some())
             .map(|(property, value)| (property.to_owned(), value.to_owned()))
             .collect();
         computed.push(style);
@@ -341,6 +347,7 @@ fn apply_property(
     if box_model::apply(world, entity, id, property, value, viewport)?
         || grid::apply(world, entity, id, property, value, viewport)?
         || flex::apply(world, entity, id, property, value, viewport)?
+        || text::apply(world, entity, id, property, value, viewport)?
     {
         return Ok(());
     }
@@ -373,15 +380,6 @@ fn apply_property(
                 }
             }
         }
-        "font-size" | "line-height" | "letter-spacing" => {
-            let resolved = length(value, viewport).ok_or_else(|| invalid(id, property, value))?;
-            let field = match property {
-                "font-size" => "font_size",
-                "line-height" => "line_height",
-                _ => "letter_spacing",
-            };
-            set_component_field(world, entity, "sindri.ui.text", field, resolved.into());
-        }
         "background" => {
             let resolved = color(value).ok_or_else(|| invalid(id, property, value))?;
             set_component_field(
@@ -389,16 +387,6 @@ fn apply_property(
                 entity,
                 "sindri.ui.shape",
                 "fill",
-                serde_json::json!(resolved),
-            );
-        }
-        "color" => {
-            let resolved = color(value).ok_or_else(|| invalid(id, property, value))?;
-            set_component_field(
-                world,
-                entity,
-                "sindri.ui.text",
-                "color",
                 serde_json::json!(resolved),
             );
         }
@@ -423,44 +411,8 @@ fn apply_property(
             };
             set_component_field(world, entity, "sindri.ui.shape", field, resolved.into());
         }
-        "text-align" => {
-            let stored = match value.trim() {
-                "start" | "left" => "left",
-                "center" => "center",
-                "end" | "right" => "right",
-                "justify" => "justify",
-                _ => return Err(invalid(id, property, value)),
-            };
-            set_component_field(world, entity, "sindri.ui.text", "line_align", stored.into());
-        }
-        "text-wrap" => {
-            let stored = match value.trim() {
-                "none" | "nowrap" => "none",
-                "wrap" | "word" => "word",
-                "glyph" => "glyph",
-                _ => return Err(invalid(id, property, value)),
-            };
-            set_component_field(world, entity, "sindri.ui.text", "wrap", stored.into());
-        }
-        "text-transform" => {
-            let stored = match value.trim() {
-                "none" => "as_written",
-                "uppercase" => "upper",
-                "lowercase" => "lower",
-                _ => return Err(invalid(id, property, value)),
-            };
-            set_component_field(world, entity, "sindri.ui.text", "case", stored.into());
-        }
-        "font-weight" => {
-            let bold = match value.trim() {
-                "normal" | "400" => false,
-                "bold" | "700" => true,
-                _ => return Err(invalid(id, property, value)),
-            };
-            set_component_field(world, entity, "sindri.ui.text", "bold", bold.into());
-        }
-        // Unknown properties are ignored in this intentionally tiny POC. A real
-        // language surface should diagnose them from a registered property table.
+        // Anything else is not in the property table, which `apply` already
+        // filtered by, or is applied before this: sizing and `display`.
         _ => {}
     }
     Ok(())

@@ -929,6 +929,7 @@ script Battle {
         if phase != Phase.Player && phase != Phase.Resolving { return; }
         if Pointer.just_pressed("Left") && !BattlefieldView.turning {
             BattlefieldView.dragging = view_drag_region();
+            if BattlefieldView.dragging { print("Causeway sea swipe began"); }
             view_drag_start = Pointer.position;
             view_drag_used = false;
         }

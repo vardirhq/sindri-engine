@@ -119,6 +119,7 @@ script TitleShow {
         World.set_active(World.find("HowTo"), false);
         for w in walkers { World.set_active(w, true); }
         Audio.play("audio/tide.wav", 0.35);
+        print("Causeway title ready");
     }
 
     fn update(dt: number) {

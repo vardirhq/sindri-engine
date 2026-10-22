@@ -1,13 +1,13 @@
 // Wind moves the body; the authored spring keeps it attached to the trolley.
 script SpringLantern {
-    var age: f32 = 0.0;
+    var age: number = 0.0;
     var hook: Entity = null;
     var cord: Entity = null;
     fn start() {
         this.hook = World.find("Lantern trolley");
         this.cord = World.find("Spring lantern cord");
     }
-    fn update(dt: f32) {
+    fn update(dt: number) {
         this.age += dt;
         Physics.apply_force(this.entity, Vec2(sin(this.age * 1.8) * 0.15, 0.0));
         let p = this.transform.world_position;

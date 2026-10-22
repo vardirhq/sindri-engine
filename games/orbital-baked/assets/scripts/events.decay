@@ -7,7 +7,7 @@
 // Ids, in the original's order: 1 System Overload, 2 Signal Harvest,
 // 3 Elite Hunt, 4 Swarm Tide, 5 Glass Space, 6 Temporal Echo.
 
-shared fn event_duration(id: f32) -> f32 {
+shared fn event_duration(id: number) -> number {
     if id == 1.0 { return 14.0; }
     if id == 2.0 { return 16.0; }
     if id == 3.0 { return 18.0; }
@@ -17,7 +17,7 @@ shared fn event_duration(id: f32) -> f32 {
 }
 
 // Writes the board values an event changes; 0 puts them all back.
-shared fn apply_event(id: f32) {
+shared fn apply_event(id: number) {
     Game.event_fire = 1.0;
     Game.event_enemy_speed = 1.0;
     Game.event_magnet = 1.0;
@@ -48,7 +48,7 @@ shared fn apply_event(id: f32) {
     }
 }
 
-shared fn event_name(id: f32) -> String {
+shared fn event_name(id: number) -> String {
     if id == 1.0 { return "SYSTEM OVERLOAD"; }
     if id == 2.0 { return "SIGNAL HARVEST"; }
     if id == 3.0 { return "ELITE HUNT"; }
@@ -57,7 +57,7 @@ shared fn event_name(id: f32) -> String {
     return "TEMPORAL ECHO";
 }
 
-shared fn event_text(id: f32) -> String {
+shared fn event_text(id: number) -> String {
     if id == 1.0 { return "Fire rate doubled. Hostiles accelerate."; }
     if id == 2.0 { return "XP attraction massively increased."; }
     if id == 3.0 { return "Elites flood the sector. Score bonus active."; }

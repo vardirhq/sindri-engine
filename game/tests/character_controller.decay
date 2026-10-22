@@ -1,6 +1,6 @@
 script ControllerSession {
     var verified: bool = false;
-    fn update(dt: f32) {
+    fn update(dt: number) {
         let motion = Physics.character_motion(this.entity);
         if motion == null { return; }
         if motion.grounded && motion.translation.x > 0.01 && !verified {

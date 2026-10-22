@@ -17,21 +17,21 @@ struct JointLink {
     second_anchor: Vec2,
 }
 
-shared fn probe_name(index: f32) -> String {
+shared fn probe_name(index: number) -> String {
     if index == 1.0 { return "CIRCLE CAST"; }
     if index == 2.0 { return "BOX CAST"; }
     if index == 3.0 { return "AREA"; }
     return "RAY";
 }
 
-shared fn mask_name(index: f32) -> String {
+shared fn mask_name(index: number) -> String {
     if index == 1.0 { return "SOLIDS"; }
     if index == 2.0 { return "PROPS"; }
     if index == 3.0 { return "BALLS"; }
     return "EVERYTHING";
 }
 
-shared fn probe_mask(index: f32) -> f32 {
+shared fn probe_mask(index: number) -> number {
     if index == 1.0 { return Physics.mask(["static"]); }
     if index == 2.0 { return Physics.mask(["props", "glass", "shells"]); }
     if index == 3.0 { return Physics.mask(["balls"]); }
@@ -72,11 +72,11 @@ script Probe {
     var dragging: bool = false;
     var showing: bool = false;
     var marks: List<Entity> = [];
-    var marked: f32 = 0.0;
+    var marked: number = 0.0;
     // What the probe found, for the readout under the title.
     var text: String = "";
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         let probing = Game.tool == 3.0;
         World.set_active(World.find("btn-mask"), probing);
         if !probing {
@@ -150,7 +150,7 @@ script Probe {
     }
 
     // The shape a cast sweeps, drawn where it stops.
-    fn ghost(at: Vec2, turn: f32) {
+    fn ghost(at: Vec2, turn: number) {
         let round = World.find("probe-ghost-circle");
         let square = World.find("probe-ghost-box");
         World.set_active(round, Game.probe == 1.0);
@@ -160,7 +160,7 @@ script Probe {
         square.transform.rotation_z = turn;
     }
 
-    fn area(radius: f32, mask: f32, kind: String) {
+    fn area(radius: number, mask: number, kind: String) {
         World.set_active(World.find("probe-line"), false);
         World.set_active(World.find("probe-hit"), false);
         World.set_active(World.find("probe-normal"), false);
@@ -195,7 +195,7 @@ script Probe {
         this.text = kind + " / " + count + " within " + radius.fixed(2) + " u";
     }
 
-    fn hide_marks(from: f32) {
+    fn hide_marks(from: number) {
         var index = from;
         while index < this.marked {
             World.set_active(this.marks[index], false);
@@ -227,12 +227,12 @@ script DebugOverlay {
     var dots: List<Entity> = [];
     // How many of each kind were drawn this frame, and the frame before:
     // 0 outline, 1 ring, 2 bar, 3 dot.
-    var used: List<f32> = [0.0, 0.0, 0.0, 0.0];
-    var before: List<f32> = [0.0, 0.0, 0.0, 0.0];
+    var used: List<number> = [0.0, 0.0, 0.0, 0.0];
+    var before: List<number> = [0.0, 0.0, 0.0, 0.0];
     var shown: bool = false;
     var text: String = "";
 
-    fn update(dt: f32) {
+    fn update(dt: number) {
         let layer = World.find("debug-layer");
         if !Game.debug {
             if this.shown {
@@ -322,14 +322,14 @@ script DebugOverlay {
         mark.shape.stroke_width = min(0.45, 0.1 / max(0.05, min(abs(size.x), abs(size.y))));
     }
 
-    fn stroke(from: Vec2, to: Vec2, width: f32, color: Color) {
+    fn stroke(from: Vec2, to: Vec2, width: number, color: Color) {
         let mark = take(2.0);
         line(mark, from, to, width);
         mark.transform.position.z = 1.85;
         mark.shape.fill = color;
     }
 
-    fn spot(at: Vec2, size: f32, color: Color) {
+    fn spot(at: Vec2, size: number, color: Color) {
         let mark = take(3.0);
         mark.transform.position = Vec3(at.x, at.y, 1.9);
         mark.transform.scale = Vec3(size, size, 1.0);
@@ -338,7 +338,7 @@ script DebugOverlay {
 
     // The next free mark of a kind: 0 outline, 1 ring, 2 bar, 3 dot. A mark
     // hidden last frame is switched back on; the pool only grows.
-    fn take(kind: f32) -> Entity {
+    fn take(kind: number) -> Entity {
         var pool = this.rects;
         var prefab = this.outline;
         if kind == 1.0 { pool = this.rings; prefab = this.ring; }
@@ -367,7 +367,7 @@ script DebugOverlay {
         hide_from(this.dots, this.used[3], this.before[3]);
     }
 
-    fn hide_from(pool: List<Entity>, from: f32, to: f32) {
+    fn hide_from(pool: List<Entity>, from: number, to: number) {
         var index = from;
         while index < to && index < pool.length {
             World.set_active(pool[index], false);
