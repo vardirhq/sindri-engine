@@ -5,16 +5,24 @@
 //
 // - `heights`: how many blocks tall each cell stands. 0 is open water.
 // - `features`: what stands on it. `.` nothing, `H` a house, `B` the beacon,
-//   `S` a stone, `1` `2` `3` where the Bulwark, Mason and Lamplighter start,
-//   and `L` landing ground, where the Hollow climb out of the mud.
+//   `S` a stone, `1` to `4` where the wardens start, in the order they joined,
+//   `L` landing ground, where the Hollow climb out of the mud, `~` a pool of
+//   water, `^` a pool of lava, and `V` or `v` a vent: `V` throws lava from
+//   the first round, `v` rests a round first.
 //
 // The Hollow come over the causeway from the mainland, which is east, so the
 // landing ground is on the east of every island and low: as the tide comes
 // in it drowns, and the arrivals stop. Holding until high tide is winning.
 //
 // Waves are one letter per Hollow: `H` Husk, `B` Brute, `S` Spitter,
-// `M` Mortar, `C` the Colossus. `start` climbs out before the first turn; the
-// waves arrive at the end of each round, in order.
+// `M` Mortar, `C` the Colossus, `I` Cinder Imp, `X` Burster, `K` the Kiln.
+// `start` climbs out before the first turn; the waves arrive at the end of
+// each round, in order.
+//
+// An island is in a world: `sea`, the islands of the causeway, or `caldera`,
+// the burning mountain beyond it, where lava rises round the island instead
+// of the tide. A warden named in `recruit` (`T` the Tidecaller) joins the
+// crossing on that island.
 
 struct IslandDef {
     name: String,
@@ -29,9 +37,24 @@ struct IslandDef {
     shore: String,
     land: String,
     high: String,
+    world: String = "sea",
+    recruit: String = "",
 }
 
-shared const ISLAND_COUNT: number = 4.0;
+shared const ISLAND_COUNT: number = 7.0;
+
+// Which world an island is in, as a number the pictures can use: 0 the sea,
+// 1 the burning mountain.
+shared fn world_of(index: number) -> number {
+    if island_def(index).world == "caldera" { return 1.0; }
+    return 0.0;
+}
+
+// The name of the world an island is in, for the screens.
+shared fn world_name(index: number) -> String {
+    if world_of(index) == 1.0 { return "The Cinderfast"; }
+    return "The Shallows";
+}
 
 shared fn island_def(index: number) -> IslandDef {
     if index == 0.0 {
@@ -121,6 +144,97 @@ shared fn island_def(index: number) -> IslandDef {
             high: "rock",
         );
     }
+    if index == 4.0 {
+        return IslandDef(
+            name: "Ashfall Shelf",
+            blurb: "A shelf of cooled stone inside the mountain, and a lake of fire round it. Throw water on lava and it sets into new ground.",
+            heights: "00122100"
+                + "01233210"
+                + "12344321"
+                + "12343221"
+                + "12332211"
+                + "01232111"
+                + "00122110"
+                + "00011100",
+            features: "........"
+                + "..H.~.L."
+                + ".~.B..LL"
+                + "..1V..LL"
+                + "..2.4.LL"
+                + ".^.3..L."
+                + "...H...."
+                + "........",
+            rounds: 5.0,
+            rises: [2.0, 4.0],
+            start: "HI",
+            waves: ["H", "IH", "HX", "I", ""],
+            shore: "ash",
+            land: "basalt",
+            high: "cinder",
+            world: "caldera",
+            recruit: "T",
+        );
+    }
+    if index == 5.0 {
+        return IslandDef(
+            name: "The Crucible",
+            blurb: "A ring of rock round a pit of fire, and two vents that never sleep. Bursters come with the Imps.",
+            heights: "01122100"
+                + "12333210"
+                + "23444321"
+                + "23411122"
+                + "23410111"
+                + "12433321"
+                + "01233210"
+                + "00111100",
+            features: "........"
+                + "...H...."
+                + ".V.B.~L."
+                + ".1...LLL"
+                + "..2..LLL"
+                + ".3.4.^v."
+                + "...H...."
+                + "........",
+            rounds: 6.0,
+            rises: [2.0, 4.0],
+            start: "IX",
+            waves: ["HI", "XS", "IX", "B", "H", ""],
+            shore: "ash",
+            land: "basalt",
+            high: "cinder",
+            world: "caldera",
+        );
+    }
+    if index == 6.0 {
+        return IslandDef(
+            name: "The Kiln's Throat",
+            blurb: "The heart of the mountain. The Kiln climbs out of it, belching fire, and nothing the wardens carry will move it.",
+            heights: "00111100"
+                + "01233210"
+                + "12344321"
+                + "12345221"
+                + "12344211"
+                + "12332111"
+                + "01222110"
+                + "00111100",
+            features: "........"
+                + "...HV..."
+                + "...B..L."
+                + ".~1..LLL"
+                + "..2.4LLL"
+                + ".vH3.LL."
+                + "......^."
+                + "........",
+            rounds: 6.0,
+            rises: [2.0, 4.0],
+            start: "KH",
+            waves: ["X", "IX", "H", "XI", "S", ""],
+            shore: "ash",
+            land: "basalt",
+            high: "cinder",
+            world: "caldera",
+        );
+    }
     return IslandDef(
         name: "The Lighthouse",
         blurb: "The last island before open sea, and the lamp that keeps the causeway. The Colossus has come for it.",
@@ -155,6 +269,9 @@ shared fn kind_of_letter(letter: String) -> Kind {
     if letter == "S" { return Kind.Spitter; }
     if letter == "M" { return Kind.Mortar; }
     if letter == "C" { return Kind.Colossus; }
+    if letter == "I" { return Kind.Imp; }
+    if letter == "X" { return Kind.Burster; }
+    if letter == "K" { return Kind.Kiln; }
     return Kind.Husk;
 }
 
@@ -200,9 +317,17 @@ shared fn board_of(def: IslandDef, wardens: List<Warden>, hearth: number) -> Boa
     for c in 0..(SIZE * SIZE) {
         heights.push(digit_of(def.heights.slice(c, c + 1.0)));
     }
+    var pools: List<number> = [];
+    for c in 0..(SIZE * SIZE) {
+        let mark = def.features.slice(c, c + 1.0);
+        var pool = DRY;
+        if mark == "~" { pool = WATER; }
+        if mark == "^" { pool = LAVA; }
+        pools.push(pool);
+    }
     var board = Board(heights: heights, tide: 0.0, units: [], spawns: [], beats: [],
         round: 1.0, rounds: def.rounds, rises: def.rises, hearth: hearth, next_id: 1.0,
-        arrivals: kinds_of(def.start));
+        arrivals: kinds_of(def.start), pools: pools, molten: def.world == "caldera");
     for c in 0..(SIZE * SIZE) {
         let mark = def.features.slice(c, c + 1.0);
         let x = c % SIZE;
@@ -212,9 +337,12 @@ shared fn board_of(def: IslandDef, wardens: List<Warden>, hearth: number) -> Boa
         if mark == "H" { kind = Kind.House; placed = true; }
         if mark == "B" { kind = Kind.Beacon; placed = true; }
         if mark == "S" { kind = Kind.Stone; placed = true; }
+        if mark == "V" || mark == "v" { kind = Kind.Vent; placed = true; }
         if placed {
+            var charge = 0.0;
+            if mark == "v" { charge = 1.0; }
             board.units.push(Unit(id: board.next_id, kind: kind, x: x, z: z, hp: kind_hp(kind),
-                max_hp: kind_hp(kind), move: 0.0));
+                max_hp: kind_hp(kind), move: 0.0, charge: charge));
             board.next_id += 1.0;
         }
         for w in 0..wardens.length {
@@ -237,4 +365,11 @@ shared fn wave_of(def: IslandDef, round: number) -> List<Kind> {
         return none;
     }
     return kinds_of(def.waves[index]);
+}
+
+// The warden who joins the crossing on this island, if one does.
+shared fn recruit_of(def: IslandDef) -> List<Kind> {
+    var kinds: List<Kind> = [];
+    if def.recruit == "T" { kinds.push(Kind.Tidecaller); }
+    return kinds;
 }
