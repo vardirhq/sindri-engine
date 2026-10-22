@@ -1475,10 +1475,26 @@ script Battle {
     // The lamplighter's lantern and the beacon's fire light what is round
     // them, wherever they are.
     fn update_lights() {
+        let air = Atmosphere.on(World.find("Environment"));
         var lamp_on = false;
         var fire_on = false;
         var houses = 0.0;
         for unit in board.units {
+            // Every house keeps its own light, standing or fallen, so a light
+            // never moves to another house when one falls. It burns inside:
+            // walls and thatch face away from it, so it spills out on the
+            // ground round the house rather than glaring off its walls.
+            if unit.kind == Kind.House {
+                let piece = piece_of(unit.id);
+                if piece == null {
+                    air.window_out(houses);
+                } else {
+                    let p = piece.transform.position;
+                    air.window(houses, Vec3(p.x, p.y + 0.4, p.z), unit.hp > 0.0);
+                }
+                houses += 1.0;
+                continue;
+            }
             if unit.hp <= 0.0 { continue; }
             let piece = piece_of(unit.id);
             if piece == null { continue; }
@@ -1491,27 +1507,18 @@ script Battle {
                 fire.transform.position = Vec3(p.x, p.y + 1.6, p.z);
                 fire_on = true;
             }
-            // Light in the windows of every house still standing.
-            if unit.kind == Kind.House && houses < house_lights.length {
-                let light = house_lights[houses];
-                light.transform.position = Vec3(p.x + 0.35, p.y + 0.55, p.z + 0.35);
-                World.set_active(light, true);
-                houses += 1.0;
-            }
         }
-        for i in houses..house_lights.length { World.set_active(house_lights[i], false); }
+        for i in houses..house_lights.length { air.window_out(i); }
         if lantern != null { World.set_active(lantern, lamp_on); }
         if fire != null { World.set_active(fire, fire_on); }
         // A violet glow where the Hollow are about to climb out.
         var rifts = 0.0;
         for spawn in board.spawns {
             if rifts >= rift_lights.length { break; }
-            let light = rift_lights[rifts];
-            light.transform.position = Vec3(world_x(spawn.x), ground_y(spawn.x, spawn.z) + 0.4, world_z(spawn.z));
-            World.set_active(light, true);
+            air.rift(rifts, Vec3(world_x(spawn.x), ground_y(spawn.x, spawn.z) + 0.4, world_z(spawn.z)), true);
             rifts += 1.0;
         }
-        for i in rifts..rift_lights.length { World.set_active(rift_lights[i], false); }
+        for i in rifts..rift_lights.length { air.rift_shut(i); }
     }
 
     // Opens a screen between islands on request, for captures and the tests
