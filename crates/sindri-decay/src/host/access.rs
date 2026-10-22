@@ -12,9 +12,9 @@ use super::convert::{describe, number};
 use super::{WorldHost, print};
 use crate::surface::{
     AIM, AIM_VALUES, CAMERA, CAMERA_VALUES, FUNCTIONS, GESTURE, GESTURE_VALUES, Handle,
-    HostFunction, Leaf, POINTER, POINTER_VALUES, PRINT, STICK, STICK_VALUES, TOUCH, TOUCH_COUNT,
-    VIEWPORT, VIEWPORT_VALUES, ViewportValue, follow_mut, handle, leaf, leaf_through_reference,
-    ungrouped, vector_components,
+    HostFunction, Leaf, POINTER, POINTER_VALUES, PRINT, STICK, STICK_VALUES, Seg, TOUCH,
+    TOUCH_COUNT, VIEWPORT, VIEWPORT_VALUES, ViewportValue, follow_mut, handle, leaf,
+    leaf_through_reference, ungrouped, vector_components,
 };
 
 impl Host for WorldHost<'_> {
@@ -222,8 +222,12 @@ impl Host for WorldHost<'_> {
                 };
                 // Written as the number the payload already held it as, so a
                 // layer stays an integer and a tint channel stays a float --
-                // the scene round-trips byte for byte either way.
-                *slot = if slot.is_i64() || slot.is_u64() {
+                // the scene round-trips byte for byte either way. A channel
+                // of a color or of shader parameters is reached by index and
+                // is a float whatever the scene wrote: a tint authored as
+                // `[1, 1, 1, 0]` took every fade as 0 or 1.
+                let channel = matches!(pointer.last(), Some(Seg::Index(_)));
+                *slot = if !channel && (slot.is_i64() || slot.is_u64()) {
                     // Rounded and narrowed on purpose: the payload held an
                     // integer, and a layer that came back as `7.0` would change
                     // a scene byte for byte because a script touched it. A

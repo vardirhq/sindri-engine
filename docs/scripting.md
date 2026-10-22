@@ -271,9 +271,10 @@ through a project shader (`sindri.sprite.shader`, see
 `this.sprite.shader_params` as `input.params`; what each one means is the
 shader's to say, so a script sets how far a dissolve has got or how bright a
 hit flash is and leaves the drawing to the shader. They ride on the instance,
-so changing them every frame never splits a draw. Author them as decimals in a
-hand-written scene (`0.0`, not `0`): a write keeps the number kind the scene
-stored, and an integer rounds.
+so changing them every frame never splits a draw. A write keeps the number
+kind the scene stored, so a whole-number field such as `layer` rounds; a
+channel of a color or of the shader parameters is always a fraction, however
+the scene wrote it.
 
 | `this.sprite.layer` | `number` | yes | yes |
 | `this.sprite.shader_params.{x,y,z,w}` | `number` | yes | yes |
