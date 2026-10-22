@@ -21,6 +21,10 @@ scene_path = destination / "assets/voxel-lab.scene"
 scene = json.loads(scene_path.read_text())
 for entity in scene["entities"]:
     if entity["id"] == "voxel-world":
+        # Collision residency follows the dropped body, not render residency.
+        # Keep the proof's picture bounded so software WebGPU can advance the
+        # full fall inside the smoke deadline instead of rendering 405 sections.
+        entity["components"]["sindri.voxel_world"]["render_radius"] = 2
         entity["components"]["sindri.physics3d.voxel_collider"] = {
             "friction": 0.8,
             "layers": {"filter": 4294967295, "memberships": 4294967295},

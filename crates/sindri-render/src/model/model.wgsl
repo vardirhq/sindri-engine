@@ -16,6 +16,7 @@ struct Uniforms {
     fog_params: vec4<f32>,
     emissive: vec4<f32>,
     local_lights: array<LocalLight, 8>,
+    occluded_color: vec4<f32>,
 }
 @group(0) @binding(0) var<uniform> u: Uniforms;
 @group(0) @binding(1) var color_texture: texture_2d<f32>;
@@ -50,4 +51,12 @@ struct Vertex {
         + local_lighting(u.local_lights, base.rgb, n, v.position, view,
             u.surface.x, u.surface.y, true);
     return vec4(atmosphere(color, v.position, u.eye, u.fog_color, u.fog_params), 1.0);
+}
+
+@fragment fn fs_occluded(v: Vertex, @builtin(front_facing) front: bool) -> @location(0) vec4<f32> {
+    let facing = front == (u.direction.w > 0.0);
+    if !facing && u.surface.w < 0.5 { discard; }
+    let base = u.base_color * textureSample(color_texture, color_sampler, v.uv);
+    if base.a < u.surface.z { discard; }
+    return u.occluded_color;
 }

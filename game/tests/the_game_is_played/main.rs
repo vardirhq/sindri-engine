@@ -10,6 +10,7 @@
 // The board holds whole numbers the scripts wrote, so they compare exactly.
 #![allow(clippy::float_cmp)]
 
+mod rotation;
 mod support;
 
 use sindri_platform::Key;

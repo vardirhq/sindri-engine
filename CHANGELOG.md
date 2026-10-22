@@ -1,5 +1,11 @@
 # Changelog
 
+- Add four smoothly eased Causeway battlefield views, J/L and compact touch
+  buttons, and horizontal swipes beginning in empty sea. Keep picking and
+  keyboard movement aligned with the view.
+- Keep Causeway units visible behind raised terrain with muted silhouettes,
+  using the reusable optional `sindri.model.occluded_color` rendering path.
+
 - Give Causeway a title worth opening on: the Lighthouse at dusk with its
   lamps lit, the camera swaying round it and Hollow trudging over the
   causeway, the logo and a plated menu rising out of the dark, a How to play

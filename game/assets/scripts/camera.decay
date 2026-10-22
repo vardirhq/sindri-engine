@@ -1,9 +1,10 @@
-// Frames the island whatever shape the screen is.
-//
-// The camera never follows anything: a tactics board is read best from one
-// place. What changes is how much it shows -- a phone held upright needs the
-// whole board across its narrow width, a wide screen fits it by height -- and
-// that is the orthographic size, set once per change of shape.
+// Four fixed views of the battlefield. The title owns the camera until it
+// hands the authored pose back; turns preserve its pitch, focus and lens.
+state BattlefieldView {
+    var angle: number = 0.0;
+    var turning: bool = false;
+    var dragging: bool = false;
+}
 
 script CameraRig {
     // World units of island that must fit across and up.
@@ -15,11 +16,75 @@ script CameraRig {
     var zoom: number = 1.0;
     var applied: number = 1.0;
 
+    var enabled: bool = false;
+    var home_position: Vec3 = Vec3(0.0, 0.0, 0.0);
+    var home_rotation: Quat = Quat(x: 0.0, y: 0.0, z: 0.0, w: 1.0);
+    var last_position: Vec3 = Vec3(0.0, 0.0, 0.0);
+    var from: number = 0.0;
+    var target: number = 0.0;
+    var elapsed: number = 1.0;
+
+    fn set_home(position: Vec3, rotation: Quat) {
+        home_position = position;
+        home_rotation = rotation;
+        last_position = position;
+    }
+
+    fn battle_view(on: bool) {
+        enabled = on;
+        BattlefieldView.angle = 0.0;
+        BattlefieldView.turning = false;
+        BattlefieldView.dragging = false;
+        from = 0.0;
+        target = 0.0;
+        elapsed = 1.0;
+        last_position = home_position;
+    }
+
+    fn rotate(direction: number) {
+        if !enabled || BattlefieldView.turning { return; }
+        from = target;
+        target += direction * PI / 2.0;
+        elapsed = 0.0;
+        BattlefieldView.turning = true;
+    }
+
+    fn pressed(name: String) -> bool {
+        let e = World.find(name);
+        return e != null && World.is_active(e) && Ui.is_pressed(e);
+    }
+
+    fn turn(dt: number) {
+        if !enabled { return; }
+        if Input.Keyboard.just_pressed("J") || pressed("RotateLeft") { rotate(-1.0); }
+        if Input.Keyboard.just_pressed("L") || pressed("RotateRight") { rotate(1.0); }
+        if !BattlefieldView.turning { return; }
+        elapsed += dt;
+        let t = min(1.0, elapsed / 0.3);
+        let angle = from + (target - from) * t * t * (3.0 - 2.0 * t);
+        if angle != BattlefieldView.angle {
+            // Keep the engine's transient impact shake separate from the pose.
+            let shake = this.transform.position - last_position;
+            this.transform.position = home_position;
+            this.transform.rotation = home_rotation;
+            this.transform.rotate_around(Vec3(28.0, 1.4, 28.0), Vec3(0.0, 1.0, 0.0), angle);
+            last_position = this.transform.position;
+            this.transform.position = last_position + shake;
+            BattlefieldView.angle = angle;
+        }
+        // Rays are sampled before scripts: leave a settling frame before picking.
+        if elapsed >= 0.35 {
+            BattlefieldView.turning = false;
+            print("Causeway view settled: " + BattlefieldView.angle);
+        }
+    }
+
     fn set_zoom(value: number) {
         zoom = value;
     }
 
     fn update(dt: number) {
+        turn(dt);
         if abs(Viewport.aspect - aspect) < 0.001 && abs(zoom - applied) < 0.0001 { return; }
         aspect = Viewport.aspect;
         applied = zoom;

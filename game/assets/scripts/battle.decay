@@ -91,6 +91,10 @@ script Battle {
     var preview_cell: number = -2.0;
     var banner_clock = Timer(0.0);
 
+    var view_drag_start: Vec2 = Vec2(0.0, 0.0);
+    var view_drag_used: bool = false;
+    var view_pointer_blocked: bool = false;
+
     fn start() {
         sea = World.find("Sea");
         cursor = World.find("Cursor");
@@ -857,6 +861,8 @@ script Battle {
         if d.length < 0.5 || abs(d.y) < 0.0001 { return -1.0; }
         var best = -1.0;
         var nearest = 1000000.0;
+        var body = -1.0;
+        var nearest_body = 1000000.0;
         let flat = d.x * d.x + d.z * d.z;
         for unit in board.units {
             if unit.hp <= 0.0 { continue; }
@@ -866,9 +872,15 @@ script Battle {
             let px = o.x + d.x * t - base.x;
             let pz = o.z + d.z * t - base.z;
             let py = o.y + d.y * t - base.y;
-            if px * px + pz * pz < 0.36 * 0.36 && py > 0.0 && py < figure_height(unit.kind) && t < nearest {
-                nearest = t;
-                best = cell_of(unit.x, unit.z);
+            if t > 0.0 && px * px + pz * pz < 0.36 * 0.36 && py > 0.0 && py < figure_height(unit.kind) {
+                if (!is_fixed(unit.kind) || is_hollow(unit.kind)) && t < nearest_body {
+                    nearest_body = t;
+                    body = cell_of(unit.x, unit.z);
+                }
+                if t < nearest {
+                    nearest = t;
+                    best = cell_of(unit.x, unit.z);
+                }
             }
         }
         for c in 0..(SIZE * SIZE) {
@@ -884,6 +896,7 @@ script Battle {
                 best = c;
             }
         }
+        if body >= 0.0 { return body; }
         return best;
     }
 
@@ -897,13 +910,50 @@ script Battle {
         };
     }
 
+    // A gesture belongs to the sea only if it began there. Crossing the
+    // board later never converts a selection gesture into a camera gesture.
+    fn view_drag_region() -> bool {
+        if Input.Touch.count != 1.0 || Pointer.over_ui { return false; }
+        let c = pointed_cell();
+        if c < 0.0 { return true; }
+        let x = c % SIZE;
+        let z = floor_of(c);
+        return is_wet(board, x, z) && unit_at(board, x, z) < 0.0;
+    }
+
+    fn handle_view_drag() {
+        if BattlefieldView.turning && Pointer.is_down("Left") { view_pointer_blocked = true; }
+        if !Pointer.is_down("Left") && !Pointer.just_released("Left") { view_pointer_blocked = false; }
+        if !Pointer.is_down("Left") && !Pointer.just_released("Left") { BattlefieldView.dragging = false; }
+        if Input.Touch.count > 1.0 { view_drag_used = true; }
+        if phase != Phase.Player && phase != Phase.Resolving { return; }
+        if Pointer.just_pressed("Left") && !BattlefieldView.turning {
+            BattlefieldView.dragging = view_drag_region();
+            view_drag_start = Pointer.position;
+            view_drag_used = false;
+        }
+        if !BattlefieldView.dragging || view_drag_used || Input.Touch.count != 1.0 { return; }
+        let delta = Pointer.position - view_drag_start;
+        if abs(delta.x) >= 48.0 && abs(delta.x) > abs(delta.y) * 1.5 {
+            view_drag_used = true;
+            var direction = 1.0;
+            if delta.x < 0.0 { direction = -1.0; }
+            CameraRig.on(World.find("World Camera")).rotate(direction);
+        }
+    }
+
     fn handle_input() {
+        if BattlefieldView.turning || BattlefieldView.dragging || view_pointer_blocked
+            || Input.Keyboard.just_pressed("J") || Input.Keyboard.just_pressed("L")
+            || pressed("RotateLeft") || pressed("RotateRight") { return; }
+        let c = round(cos(BattlefieldView.angle));
+        let s = round(sin(BattlefieldView.angle));
         // Keys move a cursor over the board, a quarter turn apart.
         var moved_cursor = false;
-        if Input.Keyboard.just_pressed("ArrowUp") || Input.Keyboard.just_pressed("W") { cursor_z -= 1.0; moved_cursor = true; }
-        if Input.Keyboard.just_pressed("ArrowDown") || Input.Keyboard.just_pressed("S") { cursor_z += 1.0; moved_cursor = true; }
-        if Input.Keyboard.just_pressed("ArrowLeft") || Input.Keyboard.just_pressed("A") { cursor_x -= 1.0; moved_cursor = true; }
-        if Input.Keyboard.just_pressed("ArrowRight") || Input.Keyboard.just_pressed("D") { cursor_x += 1.0; moved_cursor = true; }
+        if Input.Keyboard.just_pressed("ArrowUp") || Input.Keyboard.just_pressed("W") { cursor_x -= s; cursor_z -= c; moved_cursor = true; }
+        if Input.Keyboard.just_pressed("ArrowDown") || Input.Keyboard.just_pressed("S") { cursor_x += s; cursor_z += c; moved_cursor = true; }
+        if Input.Keyboard.just_pressed("ArrowLeft") || Input.Keyboard.just_pressed("A") { cursor_x -= c; cursor_z += s; moved_cursor = true; }
+        if Input.Keyboard.just_pressed("ArrowRight") || Input.Keyboard.just_pressed("D") { cursor_x += c; cursor_z -= s; moved_cursor = true; }
         cursor_x = clamp(cursor_x, 0.0, SIZE - 1.0);
         cursor_z = clamp(cursor_z, 0.0, SIZE - 1.0);
 
@@ -1217,6 +1267,7 @@ script Battle {
     }
 
     fn update(dt: number) {
+        handle_view_drag();
         update_banner();
         update_sea();
         update_lights();

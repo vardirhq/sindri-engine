@@ -45,6 +45,9 @@ environment's grade and bloom in the shipped player, Weave screens, the
 pointer's world ray for picking cells, camera shake, and Sound Lab effects and
 an Ogg song. `a_crossing_is_played.rs` plays a whole crossing with a bot
 through the real rules; `the_game_is_played` plays it by clicks and keys.
+Four 300 ms quarter views use J/L, compact touch buttons and sea swipes.
+View-relative keys and guarded ray picking preserve movement and combat;
+muted model silhouettes reveal units behind raised terrain.
 """
 
 [[capability]]

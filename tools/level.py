@@ -141,7 +141,10 @@ def write_prefabs():
     for kind, (model, alive, size) in FIGURES.items():
         title = kind.capitalize()
         root = entity(kind, title, {
-            "sindri.model": {"asset": f"models/{model}.glb", "layer": 0},
+            "sindri.model": {"asset": f"models/{model}.glb", "layer": 0,
+                             **({"occluded_color": [0.85, 0.67, 0.32, 0.32] if kind in
+                                ("bulwark", "mason", "lamplighter") else [0.65, 0.24, 0.18, 0.3]}
+                                if alive else {})},
             **script("Piece", "scripts/piece.decay", alive=alive, size=size),
         })
         write(folder / f"{kind}.prefab", prefab(title, [root]))
@@ -267,6 +270,11 @@ def hud_entities():
     e.append(entity("hearth-pips", "HearthPips", {**styled("hearth-pips"), **text("", BOLD_FONT, 0.04, 122,
                                                                                   rich=True)},
                     parent="hearth", spatial=False))
+    e.append(entity("view-controls", "ViewControls", {
+        **styled("view-controls"), "sindri.ui.layout": {"direction": "row", "spacing": 0.01}},
+        parent="hud", spatial=False))
+    button(e, "rotate-left", "RotateLeft", "<", "view-controls", ("rotate",))
+    button(e, "rotate-right", "RotateRight", ">", "view-controls", ("rotate",))
     # Bottom left: the warden in hand.
     e.append(entity("card", "Card", {**styled("card", "panel"), **panel(layout=column(0.006))},
                     parent="hud", spatial=False))
@@ -409,7 +417,7 @@ def title_screen(e):
             body, BODY_FONT, 0.026, 302, wrap="word")}, parent="howto-card", spatial=False))
     e.append(entity("howto-keys", "HowToKeys", {**styled("howto-body", "dim"), **text(
         "Click or tap to play.  Keys: arrows and Enter, Q aims, Tab next warden, Z undoes a move, "
-        "E ends the turn, R rewinds once per island.", BODY_FONT, 0.022, 302, wrap="word")},
+        "E ends the turn, R rewinds. J/L or < > rotate; swipe across empty sea on touch.", BODY_FONT, 0.022, 302, wrap="word")},
                     parent="howto-card", spatial=False))
     plate_button(e, "howto-close", "HowToClose", "Back", "howto-card", "textures/plate-ink.png", ("close",), 304)
 

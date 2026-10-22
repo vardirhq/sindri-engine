@@ -89,6 +89,15 @@ impl SceneExtractor {
             if !self.apply_material(world, entity, &mut pass)? {
                 continue;
             }
+            if let Some(color) = component.occluded_color {
+                // Draw against terrain depth before any subject writes its own
+                // depth: limbs and overlapping primitives cannot outline themselves.
+                let mut silhouette = pass.clone();
+                silhouette.stage = RenderStage::Occluded3d;
+                silhouette.occluded_color = Some(color);
+                frame.push(silhouette);
+                pass.stage = RenderStage::Visible3d;
+            }
             frame.push(pass);
         }
         Ok(())

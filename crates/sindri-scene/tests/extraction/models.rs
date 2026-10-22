@@ -158,3 +158,49 @@ fn collision_only_and_shared_models_are_discovered_once() {
         ["models/collision.glb", "models/shared.glb"]
     );
 }
+
+#[test]
+fn occluded_models_share_geometry_and_draw_after_terrain() {
+    let world = world_from(&scene(&MODELS.replace(
+        "\"layer\": 4",
+        "\"layer\": 4, \"occluded_color\": [0.8,0.6,0.3,0.3]",
+    )));
+    let asset = Arc::new(RenderModel::new(ModelData::default()).unwrap());
+    let mut extractor = SceneExtractor::new().unwrap();
+    extractor.bind_model(AssetId::new("models/test.glb").unwrap(), Arc::clone(&asset));
+    let frame = extractor
+        .extract(
+            &world,
+            VIEWPORT,
+            CameraView::default(),
+            &TextureBindings::new(),
+        )
+        .unwrap();
+    use sindri_render::RenderStage;
+    assert_eq!(
+        frame.passes().iter().map(|p| p.stage).collect::<Vec<_>>(),
+        [
+            RenderStage::Opaque3d,
+            RenderStage::Occluded3d,
+            RenderStage::Visible3d
+        ]
+    );
+    let FrameCommand::Model {
+        model: hidden,
+        asset: first,
+    } = &frame.passes()[1].command
+    else {
+        panic!("model");
+    };
+    let FrameCommand::Model {
+        model: lit,
+        asset: second,
+    } = &frame.passes()[2].command
+    else {
+        panic!("model");
+    };
+    assert_eq!(hidden, lit);
+    assert!(Arc::ptr_eq(first, second));
+    assert!(frame.passes()[1].occluded_color.is_some());
+    assert!(frame.passes()[2].occluded_color.is_none());
+}

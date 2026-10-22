@@ -964,6 +964,8 @@ jobs:
             node scripts/browser/model-collision.mjs target/dist/model-collision target/render-artifacts/browser-model-collision.png
           SINDRI_EXPECT_ASSETS=1 SINDRI_BASE_PATH=/sindri-engine/ \
             node scripts/browser/smoke.mjs target/dist/causeway target/render-artifacts/browser-causeway.png
+          SINDRI_BASE_PATH=/sindri-engine/ \
+            node scripts/browser/causeway-rotation.mjs target/dist/causeway target/render-artifacts/causeway-rotation
           SINDRI_EXPECT_ASSETS=1 SINDRI_VOXEL_LANDING=1 SINDRI_BASE_PATH=/sindri-engine/ \
             node scripts/browser/smoke.mjs target/dist/voxel-landing target/render-artifacts/browser-voxel-landing.png
           SINDRI_EXPECT_ASSETS=1 \
@@ -1085,6 +1087,7 @@ jobs:
             target/render-artifacts/browser-model-receiver-no-shadows.png
             target/render-artifacts/browser-benchmark3d-no-shadows.png
             target/render-artifacts/browser-causeway.png
+            target/render-artifacts/causeway-rotation/
             target/render-artifacts/browser-weave-phone.png
             target/render-artifacts/browser-orbital-baked-phone.png
             target/render-artifacts/orbital-complete/

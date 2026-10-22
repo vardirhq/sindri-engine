@@ -529,3 +529,11 @@
     .boon { width: 86vw; height: 120px; padding: 12px; gap: 6px; }
     .boon-title { height: 30px; font-size: 22px; line-height: 26px; }
 }
+
+/* A compact quarter-turn pair under the Hearth, reachable with either hand. */
+.view-controls { anchor: top_right; x: -69px; y: -136px; width: 98px; height: 48px; direction: row; gap: 6px; }
+.button.rotate { width: 44px; height: 44px; }
+@media (orientation: portrait) {
+    .view-controls { x: -56px; y: -102px; }
+    .banner { y: -186px; }
+}

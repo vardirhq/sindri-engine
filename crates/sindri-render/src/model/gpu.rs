@@ -29,12 +29,14 @@ pub(crate) struct ModelDraw<'a> {
     pub fog: FogSettings,
     pub material: Option<crate::MaterialFactors>,
     pub sidedness: crate::MaterialSidedness,
+    pub occluded_color: Option<[f32; 4]>,
 }
 
 #[derive(Debug)]
 pub(crate) struct ModelRenderer {
     shadow: shadow::ShadowRenderer,
     pipeline: wgpu::RenderPipeline,
+    occluded: wgpu::RenderPipeline,
     layout: wgpu::BindGroupLayout,
     cache: HashMap<usize, CachedModel>,
     slots: Vec<Slot>,
@@ -83,15 +85,18 @@ struct Uniform {
     fog_params: [f32; 4],
     emissive: [f32; 4],
     local_lights: [crate::lighting::LocalLightUniform; crate::MAX_LOCAL_LIGHTS],
+    occluded_color: [f32; 4],
 }
 
 impl ModelRenderer {
     pub(crate) fn new(device: &wgpu::Device, format: wgpu::TextureFormat) -> Self {
         let layout = pipeline::layout(device);
-        let pipeline = pipeline::create(device, format, &layout);
+        let pipeline = pipeline::create(device, format, &layout, false);
+        let occluded = pipeline::create(device, format, &layout, true);
         Self {
             shadow: shadow::ShadowRenderer::new(device),
             pipeline,
+            occluded,
             layout,
             cache: HashMap::new(),
             slots: Vec::new(),
@@ -156,6 +161,15 @@ impl ModelRenderer {
         draw: &ModelDraw<'_>,
     ) -> Result<(), ModelRenderError> {
         validate::transform(draw.world)?;
+        if draw.occluded_color.is_some_and(|color| {
+            color
+                .into_iter()
+                .any(|c| !c.is_finite() || !(0.0..=1.0).contains(&c))
+        }) {
+            return Err(ModelRenderError::InvalidData(
+                "silhouette RGBA must be finite and in 0..=1".into(),
+            ));
+        }
         let key = self.ensure_cached(device, queue, asset)?;
         let cached = &self.cache[&key];
         let fallback = ModelSurface::default();
@@ -224,7 +238,11 @@ impl ModelRenderer {
                     }),
                     ..Default::default()
                 });
-                pass.set_pipeline(&self.pipeline);
+                pass.set_pipeline(if draw.occluded_color.is_some() {
+                    &self.occluded
+                } else {
+                    &self.pipeline
+                });
                 if let Some((_, group)) = &slot.binding {
                     pass.set_bind_group(0, group, &[]);
                 }
@@ -252,6 +270,7 @@ fn uniform(draw: &ModelDraw<'_>, world: Mat4, surface: &ModelSurface) -> Uniform
     let direction = -Vec3::from_array(lighting.directional_direction);
     Uniform {
         local_lights: lighting.local_uniforms(),
+        occluded_color: draw.occluded_color.unwrap_or([0.0; 4]),
         view_projection: draw.camera.view_projection.to_cols_array_2d(),
         world: world.to_cols_array_2d(),
         normal: world.inverse().transpose().to_cols_array_2d(),

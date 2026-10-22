@@ -23,6 +23,21 @@ pub(super) struct Scene {
 }
 
 impl Scene {
+    pub(super) fn show_occluded_subject(&mut self) {
+        let mut frame = ExtractedFrame::new(self.frame.viewport(), self.frame.clear());
+        for mut pass in self.frame.passes().iter().cloned() {
+            if matches!(pass.command, FrameCommand::Model { .. }) {
+                let mut silhouette = pass.clone();
+                silhouette.stage = RenderStage::Occluded3d;
+                silhouette.occluded_color = Some([0.0, 0.0, 1.0, 0.5]);
+                frame.push(silhouette);
+                pass.stage = RenderStage::Visible3d;
+            }
+            frame.push(pass);
+        }
+        self.frame = frame.prepare().unwrap();
+    }
+
     pub(super) fn edit_caster(&mut self, mut edit: impl FnMut(&mut FramePass)) {
         let mut frame = ExtractedFrame::new(self.frame.viewport(), self.frame.clear());
         let last = self.frame.passes().len() - 1;
