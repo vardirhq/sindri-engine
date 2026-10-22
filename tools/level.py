@@ -223,11 +223,11 @@ def world_entities():
     for gx in range(-2, 3):
         for gz in range(-2, 3):
             # Drawn by `shaders/sea.wgsl`: the tint is the deep water's color,
-            # the params swell, foam, glints and how far the shallows reach.
+            # the params swell, foam, glints and rain on the water.
             e.append(entity(f"sea-{gx + 2}-{gz + 2}", "Sea Tile", {
                 "sindri.sprite": {
                     "texture": "textures/white.png", "tint": [0.02, 0.15, 0.22, 0.88], "layer": -10,
-                    "unlit": True, "shader": "shaders/sea.wgsl", "shader_params": [0.8, 0.8, 0.6, 2.5],
+                    "unlit": True, "shader": "shaders/sea.wgsl", "shader_params": [0.8, 0.8, 0.6, 0.0],
                 },
                 "sindri.tags": {"tags": ["sea"]},
             }, parent="sea", position=(gx * 24.0, 0.0, gz * 24.0), rotation=FLAT, scale=(24.0, 24.0, 1.0)))

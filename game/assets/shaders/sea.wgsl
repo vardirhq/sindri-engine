@@ -8,12 +8,14 @@
 //   x  swell, how much the rolling bands lighten and darken (0..1)
 //   y  foam along the shore (0..1)
 //   z  glints off the crests (0..1)
-//   w  how far the island's shallows reach, in world units
+//   w  rain on the water, rings spreading where drops land (0..1)
 
 // The island's footprint, an 8 x 8 board from (24, 24), and the causeway
 // running east from its middle.
 const ISLAND_MIN: vec2<f32> = vec2<f32>(24.0, 24.0);
 const ISLAND_MAX: vec2<f32> = vec2<f32>(32.0, 32.0);
+// How far the island's shallows reach, in world units.
+const REACH: f32 = 2.5;
 
 fn sea_hash(p: vec2<f32>) -> f32 {
     let q = fract(p * vec2<f32>(127.1, 311.7));
@@ -43,7 +45,7 @@ fn sprite_shader(input: SpriteShaderInput) -> vec4<f32> {
     let p = input.world_position.xz;
     let t = input.time;
     let deep = input.color.rgb;
-    let reach = max(input.params.w, 0.5);
+    let reach = REACH;
 
     // Shallows: the deep color lifted towards turquoise near the shore.
     let d = shore_distance(p);
@@ -73,6 +75,27 @@ fn sprite_shader(input: SpriteShaderInput) -> vec4<f32> {
     let ring = (1.0 - smoothstep(0.0, 0.06, abs(d - 0.35 - wash))) * lace * 0.25;
     let foam = clamp((edge * (0.5 + lace * 0.5) + ring) * input.params.y, 0.0, 1.0);
     color = mix(color, vec3<f32>(0.8, 0.88, 0.9) * (0.45 + deep * 1.5), foam);
+
+    // Rain: in each small cell of water a drop lands now and then and a ring
+    // spreads from it and fades, cells out of step with each other.
+    let rain = clamp(input.params.w, 0.0, 1.0);
+    if rain > 0.0 {
+        var rings = 0.0;
+        for (var layer = 0; layer < 2; layer++) {
+            let shift = f32(layer) * 0.37;
+            let q = p * 1.1 + vec2<f32>(shift, shift * 1.7);
+            let cell = floor(q);
+            let h = sea_hash(cell + vec2<f32>(f32(layer) * 13.0, 7.0));
+            let phase = fract(t * (0.9 + h * 0.5) + h * 7.0);
+            let centre = cell + vec2<f32>(0.25, 0.25) + vec2<f32>(h, fract(h * 17.0)) * 0.5;
+            let radius = phase * 0.45;
+            let ring = 1.0 - smoothstep(0.0, 0.035, abs(length(q - centre) - radius));
+            // Only some cells have a drop at any moment, more in heavier rain.
+            let falling = step(sea_hash(cell + vec2<f32>(floor(t * (0.9 + h * 0.5) + h * 7.0), 3.0)), rain * 0.45);
+            rings += ring * (1.0 - phase) * falling;
+        }
+        color += vec3<f32>(0.55, 0.62, 0.68) * rings * 0.3 * (0.3 + deep * 3.0);
+    }
 
     // Clearer at the shore, so the seabed shows through, and deeper out.
     let alpha = mix(input.color.a, input.color.a * 0.72, shallow_mix) + foam * 0.3;

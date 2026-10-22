@@ -7,7 +7,7 @@
 // It lives on the Environment entity and is told which mood to show by the
 // battle and the title; it never decides that itself.
 
-enum Drift { Nothing, Pollen, Drizzle, Dust, Fireflies }
+enum Drift { Nothing, Pollen, Dust, Fireflies }
 
 struct Mood {
     sun: Color,
@@ -41,6 +41,11 @@ struct Mood {
     rift: number,
     drift: Drift,
     embers: bool,
+    // The weather: how hard it rains (0..1), how hard the wind pushes the
+    // rain and everything in the air, and how often lightning comes (0..1).
+    rain: number,
+    wind: number,
+    storm: number,
 }
 
 shared const TITLE_MOOD: number = 4.0;
@@ -58,7 +63,8 @@ shared fn mood_of(index: number) -> Mood {
             exposure: -0.05, contrast: 0.98, saturation: 0.78, vignette: 0.4,
             glow_threshold: 0.9, glow: 0.35,
             lantern: 3.2, beacon: 4.5, windows: 1.4, rift: 1.0,
-            drift: Drift.Drizzle, embers: false,
+            drift: Drift.Nothing, embers: false,
+            rain: 0.45, wind: 0.8, storm: 0.0,
         );
     }
     if index == 2.0 {
@@ -75,11 +81,13 @@ shared fn mood_of(index: number) -> Mood {
             glow_threshold: 0.72, glow: 0.75,
             lantern: 2.6, beacon: 4.0, windows: 0.9, rift: 0.8,
             drift: Drift.Dust, embers: false,
+            rain: 0.0, wind: 0.5, storm: 0.0,
         );
     }
     if index == 3.0 {
-        // The Lighthouse: night. A cold moon, the sea black under it, and the
-        // beacon and lanterns burning against it, fireflies in the grass.
+        // The Lighthouse: night and a storm coming in off the sea. A cold
+        // moon, the sea black under it, rain driving across, lightning, and
+        // the beacon and lanterns burning against it all.
         return Mood(
             sun: Color(0.5, 0.62, 1.0), sun_intensity: 0.5, sun_pitch: -0.8, sun_yaw: 0.35,
             ambient: Color(0.22, 0.28, 0.55), ambient_intensity: 0.42,
@@ -90,7 +98,8 @@ shared fn mood_of(index: number) -> Mood {
             exposure: 0.1, contrast: 1.12, saturation: 0.95, vignette: 0.55,
             glow_threshold: 0.55, glow: 1.1,
             lantern: 6.0, beacon: 14.0, windows: 4.5, rift: 3.5,
-            drift: Drift.Fireflies, embers: true,
+            drift: Drift.Nothing, embers: true,
+            rain: 0.85, wind: 2.2, storm: 1.0,
         );
     }
     if index == TITLE_MOOD {
@@ -106,6 +115,7 @@ shared fn mood_of(index: number) -> Mood {
             glow_threshold: 0.68, glow: 0.8,
             lantern: 4.5, beacon: 9.0, windows: 3.0, rift: 1.8,
             drift: Drift.Fireflies, embers: true,
+            rain: 0.0, wind: 0.3, storm: 0.0,
         );
     }
     // Saltmarsh: a clear, bright morning, a little haze far out.
@@ -120,6 +130,7 @@ shared fn mood_of(index: number) -> Mood {
         glow_threshold: 0.85, glow: 0.55,
         lantern: 2.6, beacon: 4.0, windows: 0.0, rift: 0.6,
         drift: Drift.Pollen, embers: false,
+        rain: 0.0, wind: 0.4, storm: 0.0,
     );
 }
 
@@ -148,6 +159,7 @@ shared fn blend(a: Mood, b: Mood, t: number) -> Mood {
         lantern: lerp(a.lantern, b.lantern, t), beacon: lerp(a.beacon, b.beacon, t),
         windows: lerp(a.windows, b.windows, t), rift: lerp(a.rift, b.rift, t),
         drift: drift, embers: embers,
+        rain: lerp(a.rain, b.rain, t), wind: lerp(a.wind, b.wind, t), storm: lerp(a.storm, b.storm, t),
     );
 }
 
@@ -168,6 +180,8 @@ struct Fleck {
 script Atmosphere {
     @export let fleck: Prefab;
     @export let flecks_max: number = 48.0;
+    // Streaks of rain at the heaviest; a lighter rain uses fewer.
+    @export let rain_max: number = 80.0;
 
     var shown: Mood = mood_of(0.0);
     var from: Mood = mood_of(0.0);
@@ -188,6 +202,15 @@ script Atmosphere {
     var dice: number = 0.5;
     var pool: List<Entity> = [];
     var flecks: List<Fleck> = [];
+    var rain_pool: List<Entity> = [];
+    var drops: List<Fleck> = [];
+    // Lightning: how bright the sky is from the last strike (0..1), how long
+    // since it struck, when the next comes and when its thunder arrives.
+    var flash: number = 0.0;
+    var since_strike: number = 10.0;
+    var next_strike: number = 6.0;
+    var thunder_in: number = -1.0;
+    var thunder_volume: number = 0.0;
 
     fn start() {
         sun = World.find("Sun");
@@ -200,6 +223,13 @@ script Atmosphere {
             World.set_active(e, false);
             pool.push(e);
             flecks.push(Fleck(x: 0.0, y: 0.0, z: 0.0, vx: 0.0, vy: 0.0, vz: 0.0,
+                age: 1.0, life: 0.0, seed: i * 0.618, ember: false));
+        }
+        for i in 0..rain_max {
+            let e = World.spawn(fleck);
+            World.set_active(e, false);
+            rain_pool.push(e);
+            drops.push(Fleck(x: 0.0, y: 0.0, z: 0.0, vx: 0.0, vy: 0.0, vz: 0.0,
                 age: 1.0, life: 0.0, seed: i * 0.618, ember: false));
         }
         apply(shown);
@@ -226,9 +256,14 @@ script Atmosphere {
         ease_to(dark, over);
     }
 
-    // The crossing made: the beacon flares over the night sea.
+    // The crossing made: the storm breaks and the beacon flares over the
+    // night sea.
     fn celebrate(over: number) {
         var bright = mood_of(3.0);
+        bright.rain = 0.0;
+        bright.storm = 0.0;
+        bright.wind = 0.4;
+        bright.drift = Drift.Fireflies;
         bright.beacon = 26.0;
         bright.lantern = 8.0;
         bright.windows = 6.0;
@@ -257,26 +292,31 @@ script Atmosphere {
         } else {
             drift_amount = 1.0;
         }
+        storm(dt);
         flicker();
         drift(dt);
+        rain(dt);
     }
 
     fn apply(m: Mood) {
-        sun.light.color = m.sun;
-        sun.light.intensity = m.sun_intensity;
+        // A strike lights the whole sky for a moment, cold and white.
+        let f = flash;
+        sun.light.color = m.sun.lerp(Color(0.8, 0.86, 1.0), f);
+        sun.light.intensity = m.sun_intensity + f * 2.5;
         sun.transform.pitch = m.sun_pitch;
         sun.transform.yaw = m.sun_yaw;
         this.environment.ambient_color = m.ambient;
-        this.environment.ambient_intensity = m.ambient_intensity;
-        this.environment.background = Color(m.sky.r, m.sky.g, m.sky.b, 1.0);
+        this.environment.ambient_intensity = m.ambient_intensity + f * 0.9;
+        let sky = m.sky.lerp(Color(0.36, 0.4, 0.55), f * 0.8);
+        this.environment.background = Color(sky.r, sky.g, sky.b, 1.0);
         this.environment.fog.enabled = true;
-        this.environment.fog.color = m.fog;
+        this.environment.fog.color = m.fog.lerp(Color(0.5, 0.55, 0.7), f * 0.7);
         this.environment.fog.start = m.fog_start;
         this.environment.fog.distance = m.fog_distance;
         this.environment.fog.density = m.fog_density;
         this.environment.fog.height = 1.2;
         this.environment.fog.height_falloff = m.mist;
-        this.environment.post_process.exposure = m.exposure;
+        this.environment.post_process.exposure = m.exposure + f * 0.6;
         this.environment.post_process.contrast = m.contrast;
         this.environment.post_process.saturation = m.saturation;
         this.environment.post_process.vignette = m.vignette;
@@ -286,7 +326,8 @@ script Atmosphere {
             tile.sprite.tint = Color(m.sea.r, m.sea.g, m.sea.b, 0.88);
             tile.sprite.shader_params.x = m.swell;
             tile.sprite.shader_params.y = m.foam;
-            tile.sprite.shader_params.z = m.glints;
+            tile.sprite.shader_params.z = m.glints + f * 1.5;
+            tile.sprite.shader_params.w = m.rain;
         }
     }
 
@@ -354,16 +395,13 @@ script Atmosphere {
         }
         let x = 22.0 + r1 * 12.0;
         let z = 22.0 + r2 * 12.0;
-        if kind == Drift.Drizzle {
-            return Fleck(x: x, y: 7.0 + r3 * 3.0, z: z, vx: -0.9, vy: -9.0 - r3 * 2.0, vz: 0.6,
-                age: 0.0, life: 0.9 + r3 * 0.3, seed: r1, ember: false);
-        }
         if kind == Drift.Fireflies {
             return Fleck(x: x, y: 1.0 + r3 * 3.5, z: z, vx: (r3 - 0.5) * 0.3, vy: 0.0, vz: (r1 - 0.5) * 0.3,
                 age: 0.0, life: 3.0 + r3 * 3.0, seed: r1 * 10.0, ember: false);
         }
-        // Pollen and dust drift slowly through the light.
-        return Fleck(x: x, y: 0.8 + r3 * 4.0, z: z, vx: 0.15 + r3 * 0.2, vy: 0.04, vz: -0.08,
+        // Pollen and dust drift slowly through the light, with the wind.
+        return Fleck(x: x, y: 0.8 + r3 * 4.0, z: z, vx: 0.15 + r3 * 0.2 - shown.wind * 0.2, vy: 0.04,
+            vz: -0.08 + shown.wind * 0.12,
             age: 0.0, life: 4.0 + r3 * 4.0, seed: r1 * 10.0, ember: false);
     }
 
@@ -383,10 +421,6 @@ script Atmosphere {
             color = Color(1.0, 0.62 - k * 0.3, 0.25);
             size = 0.07 * (1.0 - k * 0.5);
             alpha = 1.0;
-        } else if kind == Drift.Drizzle {
-            color = Color(0.8, 0.86, 0.92);
-            size = 0.035;
-            alpha = 0.35;
         } else if kind == Drift.Fireflies {
             let blink = 0.5 + 0.5 * sin(Time.elapsed * 3.0 + f.seed * 6.0);
             color = Color(0.85, 1.0, 0.45);
@@ -408,12 +442,85 @@ script Atmosphere {
         }
         World.set_active(e, true);
         e.transform.position = Vec3(f.x, f.y, f.z);
-        // Rain is a streak, everything else a speck.
-        if kind == Drift.Drizzle && !f.ember {
-            e.transform.scale = Vec3(size, size * 9.0, size);
-        } else {
-            e.transform.scale = Vec3(size, size, size);
-        }
+        e.transform.scale = Vec3(size, size, size);
         e.sprite.tint = Color(color.r, color.g, color.b, a);
+    }
+
+    // --- Weather ---------------------------------------------------------------
+
+    // Lightning, as often as the storm says: the sky flashes once, flickers
+    // and fades, and the thunder follows a moment later, nearer or further.
+    fn storm(dt: number) {
+        since_strike += dt;
+        if shown.storm > 0.05 {
+            next_strike -= dt * shown.storm;
+            if next_strike <= 0.0 {
+                since_strike = 0.0;
+                next_strike = 5.0 + roll() * 9.0;
+                thunder_in = 0.5 + roll() * 1.4;
+                thunder_volume = 0.55 - thunder_in * 0.15;
+            }
+        }
+        if thunder_in >= 0.0 {
+            thunder_in -= dt;
+            if thunder_in < 0.0 { Audio.play("audio/thunder.wav", thunder_volume * shown.storm); }
+        }
+        // A bright stroke, a dip, a second fainter one, then gone.
+        let s = since_strike;
+        var lit = 0.0;
+        if s < 0.08 {
+            lit = 1.0;
+        } else if s < 0.16 {
+            lit = 0.25;
+        } else if s < 0.24 {
+            lit = 0.7;
+        } else {
+            lit = 0.7 * max(0.0, 1.0 - (s - 0.24) / 0.5);
+        }
+        let was = flash;
+        flash = lit * min(1.0, shown.storm * 1.5);
+        // The light is set every frame while a strike shows, and once more
+        // when it has gone, so it settles back to the mood exactly.
+        if settled && (flash > 0.0 || was > 0.0) { apply(shown); }
+    }
+
+    // Rain, as heavy as the mood says, driven by the wind. A lighter rain
+    // lets streaks run out rather than switching them off, so it thins.
+    fn rain(dt: number) {
+        let wanted = floor(shown.rain * rain_max + 0.5);
+        for i in 0..drops.length {
+            var d = drops[i];
+            let e = rain_pool[i];
+            d.age += dt;
+            if d.age >= d.life {
+                if i >= wanted {
+                    World.set_active(e, false);
+                    drops[i] = d;
+                    continue;
+                }
+                let r1 = roll();
+                let r2 = roll();
+                let r3 = roll();
+                // Upwind of the island, so the slant carries it over.
+                d = Fleck(x: 18.0 + r1 * 20.0 + shown.wind * 0.6, y: 8.0 + r3 * 3.0, z: 18.0 + r2 * 20.0,
+                    vx: -shown.wind * 1.2, vy: -12.0 - r3 * 3.0, vz: shown.wind * 0.5,
+                    age: 0.0, life: 0.55 + r3 * 0.25, seed: r1, ember: false);
+            }
+            d.x += d.vx * dt;
+            d.y += d.vy * dt;
+            d.z += d.vz * dt;
+            drops[i] = d;
+            if d.y < -0.2 {
+                World.set_active(e, false);
+                continue;
+            }
+            World.set_active(e, true);
+            e.transform.position = Vec3(d.x, d.y, d.z);
+            // A streak, longer the harder it falls.
+            e.transform.scale = Vec3(0.028, 0.32 + shown.rain * 0.2, 0.028);
+            let k = d.age / max(d.life, 0.01);
+            let a = (0.22 + 0.2 * shown.rain + flash * 0.4) * min(1.0, k * 6.0);
+            e.sprite.tint = Color(0.78 + flash * 0.2, 0.85 + flash * 0.15, 0.95, a);
+        }
     }
 }
