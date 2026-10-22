@@ -352,7 +352,9 @@ jobs:
     needs: reuse
     if: ${{ !cancelled() && needs.reuse.outputs.verified != 'true' }}
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    # Both jobs take 20 to 25 minutes, so at 25 a slow runner was cancelled
+    # partway through, with nothing failed.
+    timeout-minutes: 40
     outputs:
       failure: ${{ steps.failure.outputs.failure }}
     steps:
@@ -689,7 +691,9 @@ jobs:
     needs: reuse
     if: ${{ !cancelled() && needs.reuse.outputs.verified != 'true' }}
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    # Both jobs take 20 to 25 minutes, so at 25 a slow runner was cancelled
+    # partway through, with nothing failed.
+    timeout-minutes: 40
     outputs:
       failure: ${{ steps.failure.outputs.failure }}
     steps:
