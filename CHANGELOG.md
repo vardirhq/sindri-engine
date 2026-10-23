@@ -1,5 +1,9 @@
 # Changelog
 
+- Show a thin health bar over a Hollow once it has been hurt, in place of its
+  row of diamonds that was always there; one that dies to a single blow shows
+  none.
+
 - Run less CI for a pull request that only changes the companion game: when
   every changed file is a game script, asset, test, generator or its changelog
   and capability entry, CI runs the game's own tests, the Decay preflight,

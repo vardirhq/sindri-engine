@@ -518,6 +518,16 @@ script Battle {
     }
 
     fn pip_text(unit: Unit) -> String {
+        // A Hollow shows a thin bar of its health only once it has been hurt,
+        // and not at all if one blow would end it.
+        if is_hollow(unit.kind) {
+            if unit.max_hp <= 1.0 || unit.hp >= unit.max_hp { return ""; }
+            var bar = "[color=#ff6a4a]";
+            for i in 0..unit.hp { bar += "–"; }
+            bar += "[/color][color=#40343a]";
+            for i in unit.hp..unit.max_hp { bar += "–"; }
+            return bar + "[/color]";
+        }
         var text = "";
         // A ward shows as a pale shield before the health it guards.
         if unit.ward > 0.0 { text += "[color=#9fe6ff]◇[/color] "; }
