@@ -17,7 +17,7 @@ shared const ORIGIN_Z: number = 24.0;
 // The island behind the title: the Lighthouse at dusk.
 shared const TITLE_ISLAND: number = 3.0;
 
-enum Phase { Title, Arriving, Resolving, Player, Won, Upgrade, Lost, Crossed }
+enum Phase { Title, Muster, Arriving, Resolving, Player, Won, Upgrade, Route, Lost, Crossed }
 // What happens once the beats being played have all been shown.
 enum After { Plan, Mark, Player, HollowDone, Nothing }
 enum Mode { Move, Aim }
@@ -32,6 +32,8 @@ script Battle {
     @export let mortar: Prefab;
     @export let colossus: Prefab;
     @export let tidecaller: Prefab;
+    @export let harpooner: Prefab;
+    @export let shieldback: Prefab;
     @export let imp: Prefab;
     @export let burster: Prefab;
     @export let kiln: Prefab;
@@ -65,6 +67,15 @@ script Battle {
 
     // The run.
     var island: number = 0.0;
+    // The heroes being mustered, by their place in the muster, in the order
+    // they were taken.
+    var chosen: List<number> = [0.0, 1.0, 2.0];
+    // The islands taken so far, one a step, and the islands the road forks
+    // to next.
+    var path: List<number> = [];
+    var roads: List<number> = [];
+    // The world the last island was in, so a new world can be met.
+    var last_world: number = -1.0;
     // What the run has earned between islands.
     var max_hearth: number = 7.0;
     var extra_rewinds: number = 0.0;
@@ -231,6 +242,8 @@ script Battle {
             Kind.Mortar => this.mortar,
             Kind.Colossus => this.colossus,
             Kind.Tidecaller => this.tidecaller,
+            Kind.Harpooner => this.harpooner,
+            Kind.Shieldback => this.shieldback,
             Kind.Imp => this.imp,
             Kind.Burster => this.burster,
             Kind.Kiln => this.kiln,
@@ -383,7 +396,10 @@ script Battle {
     }
 
     fn pip_text(unit: Unit) -> String {
-        var text = "[color=#ffd76a]";
+        var text = "";
+        // A ward shows as a pale shield before the health it guards.
+        if unit.ward > 0.0 { text += "[color=#9fe6ff]◇[/color] "; }
+        text += "[color=#ffd76a]";
         for i in 0..unit.hp { text += "◆"; }
         text += "[/color][color=#40343a]";
         for i in unit.hp..unit.max_hp { text += "◆"; }
@@ -799,6 +815,40 @@ script Battle {
                 Audio.play("audio/splash.wav", 0.55);
                 return 0.36;
             }
+            BeatKind.Harpoon => {
+                let distance = steps_between(beat.x, beat.z, beat.tx, beat.tz);
+                let seconds = 0.08 + distance * 0.04;
+                if piece != null {
+                    Piece.on(piece).lunge(dir_towards(beat.x, beat.z, beat.tx, beat.tz), 0.3);
+                }
+                fly(spot(beat.x, beat.z) + Vec3(0.0, 0.75, 0.0), spot(beat.tx, beat.tz) + Vec3(0.0, 0.55, 0.0), seconds, 0.3);
+                Audio.play("audio/swing.wav", 0.6);
+                return seconds;
+            }
+            BeatKind.Ward => {
+                if piece != null {
+                    let p = piece.transform.position;
+                    pop(p.x, p.y + 1.5, p.z, "[color=#9fe6ff]warded[/color]");
+                }
+                let index = unit_index(board, beat.unit);
+                if index >= 0.0 && pips.contains(beat.unit) {
+                    Ui.set_text(pips[beat.unit], pip_text(board.units[index]));
+                }
+                Audio.play("audio/boon.wav", 0.35);
+                return 0.22;
+            }
+            BeatKind.Block => {
+                if piece != null {
+                    Piece.on(piece).nudge(1.0, 0.1);
+                    let p = piece.transform.position;
+                    pop(p.x, p.y + 1.4, p.z, "[color=#9fe6ff]blocked[/color]");
+                    burst(Vec3(p.x, p.y + 0.7, p.z));
+                }
+                refresh_hit(beat.unit, 0.0);
+                shake(0.2);
+                Audio.play("audio/bump.wav", 0.7);
+                return 0.2;
+            }
             BeatKind.Miss => {
                 let at = spot(beat.x, beat.z);
                 pop(at.x, at.y + 0.6, at.z, "[color=#c7c7c7]miss[/color]");
@@ -883,23 +933,124 @@ script Battle {
         if phase == Phase.Title { new_run(); }
     }
 
+    fn fresh(kind: Kind) -> Warden {
+        return Warden(kind: kind, max_hp: kind_hp(kind), move: kind_move(kind), power: 0.0);
+    }
+
+    // A crossing begins with the muster: three of the six wardens, the last
+    // three taken offered again.
     fn new_run() {
-        // From the first island, unless a capture or a test asked for
-        // another through `start_island`; nothing in play sets it.
+        phase = Phase.Muster;
+        chosen = [];
+        for i in 0..3 {
+            let hero = Save.number("party_" + i, i);
+            if hero >= 0.0 && hero < HERO_COUNT && !chosen.contains(hero) { chosen.push(hero); }
+        }
+        if chosen.length < 3.0 { chosen = [0.0, 1.0, 2.0]; }
+        show_muster();
+        show_screen("Muster", true);
+        print("Causeway muster ready");
+    }
+
+    fn show_muster() {
+        let screens = Screens.on(World.find("Screens"));
+        for i in 0..HERO_COUNT {
+            let kind = hero_kind(i);
+            screens.card("Muster", i, hero_mark(kind), kind_name(kind),
+                hero_blurb(kind) + "  [color=#9fb4bf]Health " + kind_hp(kind) + ", move " + kind_move(kind) + ".[/color]",
+                hero_color(kind));
+            screens.taken("Muster", i, chosen.contains(i));
+        }
+        var line = chosen.length + " of 3 chosen";
+        if chosen.length == 3.0 { line += ", ready to set out"; }
+        screen_words("Muster", "Before the crossing", "Muster three wardens", "", line);
+        screens.ready("Muster", chosen.length == 3.0);
+    }
+
+    // Takes a hero into the muster, or puts one back. Taking a fourth puts
+    // back the first taken, so a keyboard can change its mind in one press.
+    fn toggle_hero(hero: number) {
+        if chosen.contains(hero) {
+            chosen.remove_at(chosen.index_of(hero));
+        } else {
+            if chosen.length >= 3.0 { chosen.remove_at(0.0); }
+            chosen.push(hero);
+        }
+        Audio.play("audio/select.wav", 0.4);
+        show_muster();
+    }
+
+    // The muster done: the crossing sets out from the first island, unless
+    // a capture or a test asked for another through `start_island`.
+    fn set_out() {
+        show_screen("Muster", false);
+        for i in 0..3 { Save.set_number("party_" + i, chosen[i]); }
         island = clamp(floor(Game.get("start_island", 0.0)), 0.0, ISLAND_COUNT - 1.0);
         hearth = starting_hearth;
         max_hearth = starting_hearth;
         extra_rewinds = 0.0;
-        wardens = roster();
-        // Starting past an island that recruits still brings its recruit.
-        for i in 0..island {
-            for kind in recruit_of(island_def(i)) {
-                wardens.push(Warden(kind: kind, max_hp: kind_hp(kind), move: kind_move(kind), power: 0.0));
-            }
+        wardens = [];
+        for hero in chosen { wardens.push(fresh(hero_kind(hero))); }
+        path = [];
+        // Starting past a step where a warden joins still brings one: the
+        // first of the six not taken.
+        for layer in 0..layer_of(island) {
+            let first = layer_islands(layer)[0];
+            path.push(first);
+            if recruits_on(first) { wardens.push(fresh(hero_kind(left_behind()[0]))); }
         }
+        last_world = world_of(island);
         Random.seed(Save.number("seed", 1.0) * 7919.0 + 17.0);
         Save.set_number("seed", Save.number("seed", 1.0) + 1.0);
+        Audio.play("audio/boon.wav", 0.6);
+        print("Causeway crossing set out");
         begin_island();
+    }
+
+    // The heroes not in the crossing, in muster order.
+    fn left_behind() -> List<number> {
+        var left: List<number> = [];
+        for i in 0..HERO_COUNT {
+            var has = false;
+            for w in wardens { if w.kind == hero_kind(i) { has = true; } }
+            if !has { left.push(i); }
+        }
+        return left;
+    }
+
+    // What a warden is for, short enough for its muster card.
+    fn hero_blurb(kind: Kind) -> String {
+        return match kind {
+            Kind.Bulwark => "Bashes a neighbour for 2 and shoves it.",
+            Kind.Mason => "Throws stone 2 to 4 cells, shoving all round it.",
+            Kind.Lamplighter => "Fires down a line, knocking back the first in the way.",
+            Kind.Tidecaller => "Throws water: cools lava into ground, leaves pools.",
+            Kind.Harpooner => "Harpoons the first thing in a line and drags it in.",
+            _ => "Wards a warden or a building from the next blow. Won't be shoved.",
+        };
+    }
+
+    // A warden's mark and color, on its muster card and its boons.
+    fn hero_mark(kind: Kind) -> String {
+        return match kind {
+            Kind.Bulwark => "■",
+            Kind.Mason => "▲",
+            Kind.Lamplighter => "◆",
+            Kind.Tidecaller => "▽",
+            Kind.Harpooner => "△",
+            _ => "◇",
+        };
+    }
+
+    fn hero_color(kind: Kind) -> Color {
+        return match kind {
+            Kind.Bulwark => Color(0.62, 0.78, 1.0),
+            Kind.Mason => Color(0.9, 0.82, 0.68),
+            Kind.Lamplighter => Color(1.0, 0.76, 0.42),
+            Kind.Tidecaller => Color(0.5, 0.86, 1.0),
+            Kind.Harpooner => Color(1.0, 0.86, 0.45),
+            _ => Color(0.72, 0.86, 0.6),
+        };
     }
 
     fn begin_island() {
@@ -907,20 +1058,10 @@ script Battle {
         Atmosphere.on(World.find("Environment")).go(island, 2.5);
         def = island_def(island);
         landing = landing_of(def);
-        // A new world rekindles the Hearth, and whoever is met there joins.
-        var joined = "";
-        if island > 0.0 && world_of(island) != world_of(island - 1.0) {
-            hearth = max_hearth;
-        }
-        for kind in recruit_of(def) {
-            var has = false;
-            for w in wardens { if w.kind == kind { has = true; } }
-            if !has {
-                wardens.push(Warden(kind: kind, max_hp: kind_hp(kind), move: kind_move(kind), power: 0.0));
-                joined = kind_name(kind);
-            }
-        }
-        recruited = joined;
+        // A new world rekindles the Hearth.
+        if world_of(island) != last_world { hearth = max_hearth; }
+        last_world = world_of(island);
+        path.push(island);
         board = board_of(def, wardens, hearth);
         base = [];
         for h in board.heights { base.push(h); }
@@ -994,6 +1135,7 @@ script Battle {
         if risen && arrival_clock >= 2.6 {
             if recruited != "" {
                 banner(def.name, "The " + recruited + " joins you. " + def.blurb);
+                recruited = "";
             } else {
                 banner(def.name, def.blurb);
             }
@@ -1407,6 +1549,7 @@ script Battle {
             if beat.kind == BeatKind.Basalt { harm += "new ground  "; }
             if beat.kind == BeatKind.Steam { harm += "hiss  "; }
             if beat.kind == BeatKind.Pool && beat.amount == WATER { harm += "a pool  "; }
+            if beat.kind == BeatKind.Ward { harm += "warded  "; }
         }
         if harm == "" { harm = "No effect."; }
         set_text("Preview", harm);
@@ -1420,9 +1563,9 @@ script Battle {
         show_threats(new_turn(board));
         for c in 0..(SIZE * SIZE) { set_mark(threat_marks, c, ""); }
         hearth = board.hearth;
-        island += 1.0;
+        let step = layer_of(island) + 1.0;
         Audio.play("audio/victory.wav", 0.8);
-        if island >= ISLAND_COUNT {
+        if step >= LAYER_COUNT {
             phase = Phase.Crossed;
             show_screen("Crossed", true);
             Atmosphere.on(World.find("Environment")).celebrate(3.0);
@@ -1436,15 +1579,76 @@ script Battle {
             return;
         }
         show_screen("Held", true);
+        roads = layer_islands(step);
         var why = "High tide. The causeway is under water and the Hollow turn back.";
         if board.molten { why = "The lava has sealed the gate, and the Hollow cannot come through it."; }
-        var next = "next, " + island_def(island).name;
-        if world_of(island) != world_of(island - 1.0) {
+        var next = "next, " + island_def(roads[0]).name;
+        if roads.length > 1.0 { next = "next, the road forks"; }
+        if world_of(roads[0]) != world_of(island) {
             why += " Beyond the Lighthouse, the road goes on into the burning mountain.";
-            next = "next, " + world_name(island) + ": the Hearth will be rekindled";
+            next = "next, " + world_name(roads[0]) + ": the Hearth will be rekindled";
         }
-        screen_words("Held", "Island " + island + " of " + ISLAND_COUNT + " held", def.name + " holds",
+        screen_words("Held", "Step " + step + " of " + LAYER_COUNT + " held", def.name + " holds",
             why, "Hearth " + hearth + " of " + max_hearth + "  ·  " + next);
+    }
+
+    // After the boon: on down the road, or a choice where it forks.
+    fn go_on() {
+        if roads.length == 1.0 {
+            island = roads[0];
+            begin_island();
+            return;
+        }
+        phase = Phase.Route;
+        let screens = Screens.on(World.find("Screens"));
+        for k in 0..2 {
+            let road = roads[k];
+            let at = island_def(road);
+            var waves = "";
+            for wave in at.waves { waves += wave; }
+            screens.card("Route", k, "◆", at.name, at.blurb + "  " + at.rounds + " rounds, "
+                + (waves.length + at.start.length) + " Hollow.", world_color(road));
+            screens.taken("Route", k, false);
+        }
+        screen_words("Route", "The road forks", "Choose your road", route_map(), "Hearth " + hearth + " of " + max_hearth);
+        show_screen("Route", true);
+    }
+
+    fn world_color(index: number) -> Color {
+        if world_of(index) == 1.0 { return Color(1.0, 0.6, 0.42); }
+        return Color(0.55, 0.85, 0.95);
+    }
+
+    // The whole road as a line of names: the islands held in gold, the fork
+    // ahead in white, and the steps beyond it dim.
+    fn route_map() -> String {
+        var map = "";
+        let here = layer_of(roads[0]);
+        for layer in 0..LAYER_COUNT {
+            if layer > 0.0 { map += "[color=#7f8f99]  ›  [/color]"; }
+            if layer < here && layer < path.length {
+                map += "[color=#f3d79a]" + island_def(path[layer]).name + "[/color]";
+                continue;
+            }
+            var names = "";
+            for i in layer_islands(layer) {
+                if names != "" { names += " or "; }
+                names += island_def(i).name;
+            }
+            if layer == here {
+                map += "[color=#ffffff]" + names + "[/color]";
+            } else {
+                map += "[color=#8fa3ad]" + names + "[/color]";
+            }
+        }
+        return map;
+    }
+
+    fn take_road(k: number) {
+        show_screen("Route", false);
+        island = roads[k];
+        Audio.play("audio/boon.wav", 0.6);
+        begin_island();
     }
 
     fn lose() {
@@ -1455,8 +1659,8 @@ script Battle {
         if board.hearth <= 0.0 { why = "The Hearth went out on " + def.name + "."; }
         Atmosphere.on(World.find("Environment")).mourn(2.5);
         screen_words("Fallen", "The crossing ends", "The light goes out", why,
-            "Round " + min(board.round, board.rounds) + " of " + board.rounds + "  ·  island "
-                + (island + 1.0) + " of " + ISLAND_COUNT);
+            "Round " + min(board.round, board.rounds) + " of " + board.rounds + "  ·  step "
+                + (layer_of(island) + 1.0) + " of " + LAYER_COUNT);
         Audio.play("audio/defeat.wav", 0.8);
     }
 
@@ -1464,82 +1668,157 @@ script Battle {
         Screens.on(World.find("Screens")).words(screen, kicker, title, body, line);
     }
 
-    // The three boons on offer after an island, one per warden.
-    // Four boons drawn from the nine, from the run's own seeded dice, so a
-    // seed still plays the same crossing.
+    // Four boons drawn from what the party could use: a point of health, a
+    // harder skill or a longer stride for each warden, and three for the
+    // whole crossing. Drawn from the run's own seeded dice, so a seed still
+    // plays the same crossing. A boon is a number: ten a warden plus 0 for
+    // health, 1 for its skill and 2 for its stride, or 100 and up for the
+    // crossing's.
     fn offer_boons() {
-        var pool: List<number> = [];
-        for i in 0..9 { pool.push(i); }
+        var pool: List<number> = [100.0, 101.0, 102.0];
+        for w in 0..wardens.length {
+            for kind in 0..3 { pool.push(w * 10.0 + kind); }
+        }
         offered = [];
         for slot in 0..4 {
             let pick = Random.int(0.0, pool.length - 1.0);
-            let boon = pool[pick];
+            offered.push(pool[pick]);
             pool.remove_at(pick);
-            offered.push(boon);
-            Screens.on(World.find("Screens")).card(slot, boon_mark(boon), boon_title(boon), boon_text(boon),
-                boon_color(boon));
         }
-        screen_words("Upgrade", "Before " + island_def(island).name, "Choose a boon", "",
-            "Hearth " + hearth + " of " + max_hearth);
+        show_offers("Before " + next_name(), "Choose a boon");
     }
 
-    // Which warden a boon is for, by its mark and color: a block for the
-    // Bulwark, a stone for the Mason, a flame for the Lamplighter. Marks the
-    // game's own font has, since a browser has no system font to fall back on.
+    // Where the road goes on to, or that it forks.
+    fn next_name() -> String {
+        if roads.length > 1.0 { return "the fork"; }
+        return island_def(roads[0]).name;
+    }
+
+    // Entering a new world, a warden joins in place of a boon: one of those
+    // left behind at the muster, or none, and the Hearth grows instead.
+    fn offer_recruits() {
+        offered = [];
+        for hero in left_behind() {
+            if offered.length < 3.0 { offered.push(200.0 + hero); }
+        }
+        offered.push(300.0);
+        show_offers("Into " + world_name(roads[0]), "Who joins the crossing?");
+    }
+
+    fn show_offers(kicker: String, title: String) {
+        let screens = Screens.on(World.find("Screens"));
+        for slot in 0..4 {
+            let boon = offered[slot];
+            screens.card("Upgrade", slot, boon_mark(boon), boon_title(boon), boon_text(boon), boon_color(boon));
+        }
+        screen_words("Upgrade", kicker, title, "", "Hearth " + hearth + " of " + max_hearth);
+    }
+
+    fn boon_kind(boon: number) -> Kind {
+        if boon >= 300.0 { return Kind.House; }
+        if boon >= 200.0 { return hero_kind(boon - 200.0); }
+        if boon >= 100.0 { return Kind.Beacon; }
+        return wardens[floor(boon / 10.0)].kind;
+    }
+
+    // Which warden a boon is for, by its mark and color. Marks the game's own
+    // font has, since a browser has no system font to fall back on.
     fn boon_mark(boon: number) -> String {
-        let marks = ["■", "▲", "◆", "◇", "◆", "■", "▲", "▽", "△"];
-        return marks[boon];
+        if boon == 100.0 || boon == 300.0 { return "◆"; }
+        if boon == 101.0 { return "▽"; }
+        if boon == 102.0 { return "△"; }
+        return hero_mark(boon_kind(boon));
     }
 
     fn boon_color(boon: number) -> Color {
-        if boon == 0.0 || boon == 5.0 { return Color(0.62, 0.78, 1.0); }
-        if boon == 1.0 || boon == 6.0 { return Color(0.9, 0.82, 0.68); }
-        if boon == 2.0 || boon == 4.0 { return Color(1.0, 0.76, 0.42); }
-        if boon == 3.0 { return Color(1.0, 0.55, 0.38); }
-        if boon == 7.0 { return Color(0.5, 0.92, 0.86); }
-        return Color(0.86, 0.9, 0.72);
+        if boon == 100.0 || boon == 300.0 { return Color(1.0, 0.55, 0.38); }
+        if boon == 101.0 { return Color(0.5, 0.92, 0.86); }
+        if boon == 102.0 { return Color(0.86, 0.9, 0.72); }
+        return hero_color(boon_kind(boon));
     }
 
     fn boon_title(boon: number) -> String {
-        let titles = ["Thicker plate", "Heavier stone", "Longer legs", "Bank the fire", "Hotter flame",
-            "Shield wall", "Sure feet", "Second chance", "Stout hearts"];
-        return titles[boon];
+        if boon == 100.0 { return "Bank the fire"; }
+        if boon == 101.0 { return "Second chance"; }
+        if boon == 102.0 { return "Stout hearts"; }
+        if boon == 300.0 { return "Go on as we are"; }
+        let kind = boon_kind(boon);
+        if boon >= 200.0 { return kind_name(kind); }
+        let part = boon % 10.0;
+        if part == 0.0 {
+            return match kind {
+                Kind.Bulwark => "Thicker plate",
+                Kind.Mason => "Broad back",
+                Kind.Lamplighter => "Warm coat",
+                Kind.Tidecaller => "Salt blood",
+                Kind.Harpooner => "Weathered",
+                _ => "Iron hide",
+            };
+        }
+        if part == 1.0 {
+            return match kind {
+                Kind.Bulwark => "Shield wall",
+                Kind.Mason => "Heavier stone",
+                Kind.Lamplighter => "Hotter flame",
+                Kind.Tidecaller => "Colder water",
+                Kind.Harpooner => "Barbed head",
+                _ => "Double ward",
+            };
+        }
+        return match kind {
+            Kind.Bulwark => "Light step",
+            Kind.Mason => "Sure feet",
+            Kind.Lamplighter => "Longer legs",
+            Kind.Tidecaller => "Sea legs",
+            Kind.Harpooner => "Quick feet",
+            _ => "Steady march",
+        };
     }
 
     fn boon_text(boon: number) -> String {
-        let texts = [
-            "The Bulwark gains a point of health.",
-            "The Mason's stone hits 1 harder.",
-            "The Lamplighter moves a cell further.",
-            "The Hearth regains two points, and can hold one more.",
-            "The Lamplighter's bolt burns 1 harder.",
-            "The Bulwark's bash hits 1 harder.",
-            "The Mason moves a cell further.",
-            "Rewind one more turn on every island.",
-            "The Mason and the Lamplighter gain a point of health.",
-        ];
-        return texts[boon];
+        if boon == 100.0 { return "The Hearth regains two points, and can hold one more."; }
+        if boon == 101.0 { return "Rewind one more turn on every island."; }
+        if boon == 102.0 { return "Every warden gains a point of health."; }
+        if boon == 300.0 { return "Nobody joins. The Hearth can hold two more."; }
+        let kind = boon_kind(boon);
+        let name = "The " + kind_name(kind);
+        if boon >= 200.0 {
+            return hero_blurb(kind) + "  Health " + kind_hp(kind) + ", move " + kind_move(kind) + ".";
+        }
+        let part = boon % 10.0;
+        if part == 0.0 { return name + " gains a point of health."; }
+        if part == 2.0 { return name + " moves a cell further."; }
+        return match kind {
+            Kind.Tidecaller => name + "'s water burns the fire-born 1 harder.",
+            Kind.Shieldback => name + "'s ward turns one more blow.",
+            _ => name + "'s " + skill_name(kind) + " hits 1 harder.",
+        };
     }
 
     fn take_boon(slot: number) {
         let boon = offered[slot];
-        if boon == 0.0 { boost(0.0, 1.0, 0.0, 0.0); }
-        if boon == 1.0 { boost(1.0, 0.0, 0.0, 1.0); }
-        if boon == 2.0 { boost(2.0, 0.0, 1.0, 0.0); }
-        if boon == 3.0 {
+        if boon >= 300.0 {
+            max_hearth += 2.0;
+        } else if boon >= 200.0 {
+            let kind = hero_kind(boon - 200.0);
+            wardens.push(fresh(kind));
+            recruited = kind_name(kind);
+        } else if boon == 100.0 {
             max_hearth += 1.0;
             hearth = min(hearth + 2.0, max_hearth);
-        }
-        if boon == 4.0 { boost(2.0, 0.0, 0.0, 1.0); }
-        if boon == 5.0 { boost(0.0, 0.0, 0.0, 1.0); }
-        if boon == 6.0 { boost(1.0, 0.0, 1.0, 0.0); }
-        if boon == 7.0 { extra_rewinds += 1.0; }
-        if boon == 8.0 {
-            boost(1.0, 1.0, 0.0, 0.0);
-            boost(2.0, 1.0, 0.0, 0.0);
+        } else if boon == 101.0 {
+            extra_rewinds += 1.0;
+        } else if boon == 102.0 {
+            for w in 0..wardens.length { boost(w, 1.0, 0.0, 0.0); }
+        } else {
+            let part = boon % 10.0;
+            let w = floor(boon / 10.0);
+            if part == 0.0 { boost(w, 1.0, 0.0, 0.0); }
+            if part == 1.0 { boost(w, 0.0, 0.0, 1.0); }
+            if part == 2.0 { boost(w, 0.0, 1.0, 0.0); }
         }
         Audio.play("audio/boon.wav", 0.6);
-        begin_island();
+        go_on();
     }
 
     fn boost(warden: number, health: number, move: number, power: number) {
@@ -1575,7 +1854,7 @@ script Battle {
     }
 
     fn hide_screens() {
-        for name in ["Title", "Held", "Upgrade", "Fallen", "Crossed"] {
+        for name in ["Title", "Muster", "Held", "Upgrade", "Route", "Fallen", "Crossed"] {
             show_screen(name, false);
         }
     }
@@ -1777,6 +2056,16 @@ script Battle {
             island = ISLAND_COUNT - 1.0;
             win_island();
         }
+        if which == 5.0 {
+            hide_screens();
+            new_run();
+        }
+        if which == 6.0 {
+            island = 0.0;
+            win_island();
+            show_screen("Held", false);
+            go_on();
+        }
     }
 
     // A gem over the warden in hand, turning and bobbing, so which one is
@@ -1827,17 +2116,40 @@ script Battle {
             Phase.Player => {
                 handle_input();
             }
+            Phase.Muster => {
+                for i in 0..HERO_COUNT {
+                    if pressed("Muster" + i) || Input.Keyboard.just_pressed("Digit" + (i + 1.0)) {
+                        toggle_hero(i);
+                    }
+                }
+                if chosen.length == 3.0 && (pressed("MusterButton") || Input.Keyboard.just_pressed("Enter")) {
+                    set_out();
+                }
+            }
             Phase.Won => {
                 if pressed("HeldButton") || Input.Keyboard.just_pressed("Enter") {
                     show_screen("Held", false);
                     phase = Phase.Upgrade;
-                    offer_boons();
+                    // A warden joins where the road enters a new world.
+                    if world_of(roads[0]) != world_of(island) && wardens.length < 4.0 {
+                        offer_recruits();
+                    } else {
+                        offer_boons();
+                    }
                     show_screen("Upgrade", true);
+                }
+            }
+            Phase.Route => {
+                for k in 0..2 {
+                    if pressed("Route" + k) || Input.Keyboard.just_pressed("Digit" + (k + 1.0)) {
+                        take_road(k);
+                        return;
+                    }
                 }
             }
             Phase.Upgrade => {
                 for i in 0..4 {
-                    if pressed("Boon" + i) || Input.Keyboard.just_pressed("Digit" + (i + 1.0)) {
+                    if pressed("Upgrade" + i) || Input.Keyboard.just_pressed("Digit" + (i + 1.0)) {
                         show_screen("Upgrade", false);
                         take_boon(i);
                         return;
@@ -1859,6 +2171,8 @@ script Battle {
     fn phase_number() -> number {
         return match phase {
             Phase.Title => 0.0,
+            Phase.Muster => 7.0,
+            Phase.Route => 8.0,
             Phase.Arriving | Phase.Resolving => 1.0,
             Phase.Player => 2.0,
             Phase.Won => 3.0,

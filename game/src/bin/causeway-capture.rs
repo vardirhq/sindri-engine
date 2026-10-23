@@ -2,7 +2,7 @@
 //!
 //! The window is not always available and never reproducible; this is. It
 //! opens the project in the same session the window plays, begins a crossing
-//! from the title, lets the first Hollow climb out and choose their strikes,
+//! from the title and its muster, lets the first Hollow climb out and choose their strikes,
 //! and takes up the first warden -- so the picture shows the board as a player
 //! meets it: figures standing, intents marked on the ground, a move offered.
 //!
@@ -34,8 +34,10 @@ mod capture {
         let size = [width as f32, height as f32];
         let mut opened = open(&sindri_causeway::project_dir(), size)?;
         opened.player.play(0.5)?;
-        // From the title into the first island, and long enough for the
-        // Hollow to climb out, walk and choose.
+        // From the title to the muster, out with the wardens it offers, and
+        // long enough for the Hollow to climb out, walk and choose.
+        opened.player.perform("key:Enter")?;
+        opened.player.play(1.5)?;
         opened.player.perform("key:Enter")?;
         opened.player.play(6.0)?;
         for step in args {

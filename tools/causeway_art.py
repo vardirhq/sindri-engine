@@ -69,6 +69,13 @@ WARDENS = {
     "shell-w": mat("#efe2cf", 0.6),
     "clay": mat("#b5683f", 0.85),
     "water": mat("#8fdcff", 0.3, 0.0, "#4ec2ff", 2.2),
+    "oilskin": mat("#e0ad35", 0.55),
+    "oilskin-d": mat("#a97a22", 0.6),
+    "rope": mat("#cfae76", 0.9),
+    "fern": mat("#5f7040", 0.85),
+    "fern-d": mat("#414d2b", 0.9),
+    "shell": mat("#7b5a35", 0.7),
+    "shell-d": mat("#563e24", 0.75),
 }
 
 # The burning mountain's Hollow are char and slag rather than tidal mud, with
@@ -166,6 +173,9 @@ GROUND = {
     "slag": mat("#6e4a3d", 0.9),
     "slag-b": mat("#654438", 0.9),
     "obsidian": mat("#221d2b", 0.25, 0.3),
+    # The Glass Stair's terraces: volcanic glass, dark and polished.
+    "glass": mat("#4b4459", 0.3, 0.2),
+    "glass-b": mat("#433d51", 0.3, 0.2),
     "lavabed": mat("#2a1410", 1.0),
     "glow": mat("#ff7a2a", 0.5, 0.0, "#ff5a1a", 5.0),
     "glow-hot": mat("#ffd36b", 0.5, 0.0, "#ffb33a", 7.0),
@@ -357,6 +367,67 @@ def tidecaller(m, pose):
         m.cylinder("water", (0.04, 0.585, 0.3), 0.075, 0.02, segments=8)
 
 
+def harpooner(m, pose):
+    """A whaler in yellow oilskins and a sou'wester, a barbed harpoon in
+    hand and a coil of line on the hip."""
+    m.box("boot", (0, 0.09, -0.1), (0.22, 0.18, 0.14), bevel=0.03)
+    m.box("boot", (0, 0.09, 0.1), (0.22, 0.18, 0.14), bevel=0.03)
+    m.box("oilskin", (0, 0.45, 0), (0.31, 0.56, 0.42), bevel=0.05)
+    m.box("oilskin-d", (0.16, 0.42, 0), (0.01, 0.44, 0.06))
+    m.cylinder("rope", (0.0, 0.42, -0.25), 0.13, 0.07, segments=10, rotation=(90, 0, 0))
+    m.box("skin", (0.02, 0.88, 0), (0.25, 0.24, 0.25), bevel=0.05)
+    m.box("eye", (0.15, 0.91, -0.06), (0.01, 0.04, 0.04))
+    m.box("eye", (0.15, 0.91, 0.06), (0.01, 0.04, 0.04))
+    m.box("beard", (0.14, 0.8, 0), (0.06, 0.08, 0.2), bevel=0.02)
+    # The sou'wester: a round brim, longer behind.
+    m.cylinder("oilskin", (-0.03, 1.02, 0), 0.25, 0.04, segments=10)
+    m.box("oilskin", (0, 1.1, 0), (0.24, 0.14, 0.24), bevel=0.06)
+    m.box("oilskin-d", (-0.2, 0.98, 0), (0.12, 0.04, 0.3), (0, 0, 20))
+    if pose == "strike":
+        # Arm back, the harpoon level and going.
+        m.box("oilskin", (0.06, 0.72, 0.22), (0.34, 0.11, 0.11), bevel=0.03)
+        m.box("oak", (0.25, 0.76, 0.22), (1.0, 0.04, 0.04))
+        m.cone("steel", (0.8, 0.76, 0.22), 0.06, 0.16, segments=4, rotation=(0, 0, -90))
+        m.box("rope", (-0.15, 0.6, 0.0), (0.4, 0.02, 0.02), (0, 25, 0))
+    else:
+        m.box("oilskin", (0.02, 0.62, 0.23), (0.13, 0.32, 0.11), bevel=0.03)
+        m.box("oilskin", (0, 0.62, -0.23), (0.13, 0.32, 0.11), bevel=0.03)
+        m.box("oak", (0.1, 0.72, 0.3), (0.04, 1.2, 0.04), (0, 0, -8))
+        m.cone("steel", (0.18, 1.4, 0.3), 0.06, 0.18, segments=4, rotation=(0, 0, -8))
+        m.box("steel", (0.18, 1.33, 0.3), (0.16, 0.03, 0.03), (0, 0, -8))
+
+
+def shieldback(m, pose):
+    """Broad and slow, with a great round shield of oak and brass slung on
+    its back like a shell, which it sets in front of whatever it guards."""
+    m.box("boot", (0, 0.1, -0.15), (0.26, 0.2, 0.2), bevel=0.04)
+    m.box("boot", (0, 0.1, 0.15), (0.26, 0.2, 0.2), bevel=0.04)
+    m.box("fern-d", (0, 0.3, -0.14), (0.22, 0.2, 0.2), bevel=0.03)
+    m.box("fern-d", (0, 0.3, 0.14), (0.22, 0.2, 0.2), bevel=0.03)
+    m.box("fern", (0, 0.6, 0), (0.44, 0.46, 0.6), bevel=0.06)
+    m.box("steel-d", (0.02, 0.44, 0), (0.46, 0.08, 0.62), bevel=0.02)
+    m.box("fern", (0, 0.66, -0.36), (0.2, 0.36, 0.16), bevel=0.04)
+    m.box("fern", (0, 0.66, 0.36), (0.2, 0.36, 0.16), bevel=0.04)
+    m.box("skin", (0.04, 0.98, 0), (0.28, 0.26, 0.28), bevel=0.06)
+    m.box("eye", (0.185, 1.0, -0.07), (0.01, 0.04, 0.04))
+    m.box("eye", (0.185, 1.0, 0.07), (0.01, 0.04, 0.04))
+    m.box("steel", (0.03, 1.13, 0), (0.32, 0.08, 0.32), bevel=0.03)
+    m.box("steel", (0.03, 1.19, 0), (0.18, 0.06, 0.18), bevel=0.02)
+    if pose == "strike":
+        # The shield brought round in front and set.
+        x = 0.36
+        m.cylinder("shell", (x, 0.62, 0), 0.4, 0.1, segments=12, rotation=(0, 0, 90))
+        m.cylinder("shell-d", (x + 0.05, 0.62, 0), 0.3, 0.02, segments=12, rotation=(0, 0, 90))
+        m.cylinder("brass", (x + 0.08, 0.62, 0), 0.1, 0.04, segments=8, rotation=(0, 0, 90))
+    else:
+        x = -0.32
+        m.cylinder("shell", (x, 0.68, 0), 0.42, 0.12, segments=12, rotation=(0, 0, 90))
+        m.cylinder("shell-d", (x - 0.06, 0.68, 0), 0.32, 0.02, segments=12, rotation=(0, 0, 90))
+        m.cylinder("brass", (x - 0.08, 0.68, 0), 0.1, 0.04, segments=8, rotation=(0, 0, 90))
+        for z in (-0.24, 0.24):
+            m.box("brass", (x - 0.07, 0.68, z), (0.02, 0.06, 0.06))
+
+
 def imp(m, pose):
     """A small hunched thing of char, cracked through with fire."""
     reach = 0.1 if pose == "strike" else 0.0
@@ -505,6 +576,8 @@ FIGURES = {
     "mortar": (mortar, HOLLOW, ["idle"]),
     "colossus": (colossus, HOLLOW, ["idle"]),
     "tidecaller": (tidecaller, WARDENS, ["idle"]),
+    "harpooner": (harpooner, WARDENS, ["idle"]),
+    "shieldback": (shieldback, WARDENS, ["idle"]),
     "imp": (imp, FIRE, ["idle"]),
     "burster": (burster, FIRE, ["idle"]),
     "kiln": (kiln, FIRE, ["idle"]),
@@ -557,9 +630,11 @@ def column_top(island, height):
 
 
 SIDE = {"ground": "earth", "moss": "earth", "stone": "stone", "rock": "rock", "sand": "sand",
-        "mud": "mud", "gravel": "gravel", "ash": "basalt", "basalt": "basalt", "cinder": "slag"}
+        "mud": "mud", "gravel": "gravel", "ash": "basalt", "basalt": "basalt", "cinder": "slag",
+        "glass": "basalt"}
 TOP = {"ground": "grass", "moss": "moss", "stone": "stone", "rock": "rock", "sand": "sand",
-       "mud": "mud", "gravel": "gravel", "ash": "ash", "basalt": "basalt", "cinder": "cinder"}
+       "mud": "mud", "gravel": "gravel", "ash": "ash", "basalt": "basalt", "cinder": "cinder",
+       "glass": "glass"}
 
 
 def scatter(m, rng, top, cx, cy, cz, busy):

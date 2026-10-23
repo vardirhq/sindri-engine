@@ -128,6 +128,8 @@ FIGURES = {
     "mortar": ("mortar", True, 1.0),
     "colossus": ("colossus", True, 1.0),
     "tidecaller": ("tidecaller", True, 1.0),
+    "harpooner": ("harpooner", True, 1.0),
+    "shieldback": ("shieldback", True, 1.0),
     "imp": ("imp", True, 1.0),
     "burster": ("burster", True, 1.0),
     "kiln": ("kiln", True, 1.0),
@@ -138,7 +140,7 @@ FIGURES = {
     # Ground cooled out of lava and water, raised and stretched by the battle.
     "basalt": ("basalt", False, 1.0),
 }
-WARDEN_KINDS = ("bulwark", "mason", "lamplighter", "tidecaller")
+WARDEN_KINDS = ("bulwark", "mason", "lamplighter", "tidecaller", "harpooner", "shieldback")
 
 MARKS = ["move", "aim", "danger", "spawn", "tide", "selected", "cursor", "arrow", "push"]
 
@@ -471,12 +473,13 @@ def title_screen(e):
         ("The Hollow show their hand.",
          "Every Hollow marks the cell it will strike before it strikes. Read the marks, then move."),
         ("Each warden moves, then acts.",
-         "Choose a warden, then where it walks, then its skill: the Bulwark shoves, the Mason raises stone, "
-         "the Lamplighter burns at range."),
+         "Muster three of the six before you set out. Choose a warden, then where it walks, then its skill; "
+         "its card says what the skill does."),
         ("The tide is on your side.",
          "Each round the sea rises. Shove the Hollow into it, and hold until high tide closes the causeway."),
         ("Guard the Hearth.",
-         "Houses and the beacon feed it. Lose them all and the light goes out."),
+         "Houses and the beacon feed it. Lose them all and the light goes out. Where the road forks, "
+         "choose your island; a fourth warden joins in the burning mountain."),
     ]
     for i, (head, body) in enumerate(pages):
         e.append(entity(f"howto-head-{i}", f"HowToHead{i}", {**styled("howto-head"), **text(
@@ -498,10 +501,13 @@ def title_screen(e):
         "TitleShow", "scripts/title.decay", walker="prefabs/walker.prefab"), spatial=False))
 
 
-def between_screen(e, id, name, button_label):
+def between_screen(e, id, name, button_label, cards=0, per_row=4, kind="boon"):
     """A screen between islands: the board dimmed and shaded, a column of
-    words over it and a plate to go on. `screens.decay` fills the words and
-    brings it all in; it starts transparent."""
+    words over it, a row or two of cards and a plate to go on. `screens.decay`
+    fills the words and brings it all in; it starts transparent.
+
+    A card is a button named for its screen and place (`Upgrade0`, `Muster5`)
+    with an art image and its words under it."""
     e.append(entity(id, name, {**styled("screen-root")}, disabled=True, spatial=False))
     e.append(entity(id + "-dim", name + "Dim", {**styled("screen-dim"), **image("textures/white.png", 194,
                                                                               (0.01, 0.03, 0.05, 0))},
@@ -515,7 +521,7 @@ def between_screen(e, id, name, button_label):
                                                                                 (1, 1, 1, 0))},
                     parent=id, spatial=False))
     column_id = id + "-column"
-    e.append(entity(column_id, name + "Column", {**styled("screen-column"), **clear_shape(196),
+    e.append(entity(column_id, name + "Column", {**styled("screen-column", f"{id}-column"), **clear_shape(196),
                                                  "sindri.ui.layout": column(0.016, "center", "center")},
                     parent=id, spatial=False))
     for part, cls, font, size in (("Kicker", "screen-kicker", TITLE_FONT, 0.026),
@@ -524,33 +530,39 @@ def between_screen(e, id, name, button_label):
                                   ("Text", "screen-text", BODY_FONT, 0.03),
                                   ("Stats", "screen-stats", BODY_FONT, 0.024)):
         wrap = "word" if part == "Text" else "none"
-        e.append(entity(f"{id}-{part.lower()}", name + part, {**styled(cls), **text(
+        e.append(entity(f"{id}-{part.lower()}", name + part, {**styled(cls, f"{id}-{part.lower()}"), **text(
             "", font, size, 198, rich=True, wrap=wrap)}, parent=column_id, spatial=False))
-    if id == "upgrade":
-        e.append(entity("boons", "Boons", {**styled("boons"), **clear_shape(198), "sindri.ui.layout": {
-            "direction": "row", "spacing": 0.02, "align": "center", "justify": "center"}},
-            parent=column_id, spatial=False))
-        for i in range(4):
-            card = f"boon-{i}"
-            e.append(entity(card, f"Boon{i}", {**styled("boon-card"), "sindri.ui.button": {"label": f"Boon {i + 1}"},
-                                               **clear_shape(200)}, parent="boons", spatial=False))
+    for row in range((cards + per_row - 1) // per_row):
+        row_id = f"{id}-cards-{row}"
+        e.append(entity(row_id, f"{name}Cards{row}", {**styled("boons", f"{kind}s"), **clear_shape(198),
+                                                       "sindri.ui.layout": {"direction": "row", "spacing": 0.02,
+                                                                            "align": "center",
+                                                                            "justify": "center"}},
+                        parent=column_id, spatial=False))
+        for i in range(row * per_row, min(cards, (row + 1) * per_row)):
+            card = f"{id}-card-{i}"
+            e.append(entity(card, f"{name}{i}", {**styled("boon-card", f"{kind}-card"),
+                                                 "sindri.ui.button": {"label": f"{name} {i + 1}"},
+                                                 **clear_shape(200)}, parent=row_id, spatial=False))
             art = image("textures/card.png", 201, (1, 1, 1, 0))
             art["sindri.ui.image"]["draw"] = "sliced"
             art["sindri.ui.image"]["border_scale"] = 0.0022
-            e.append(entity(card + "-art", f"Boon{i} Card", {**styled("boon-art"), **art}, parent=card,
+            e.append(entity(card + "-art", f"{name}{i} Card", {**styled("boon-art"), **art}, parent=card,
                             spatial=False))
             inner = card + "-words"
-            e.append(entity(inner, f"Boon{i}Words", {**styled("boon-words"), **clear_shape(202),
-                                                     "sindri.ui.layout": column(0.01, "center", "center")},
+            e.append(entity(inner, f"{name}{i}Words", {**styled("boon-words", f"{kind}-words"),
+                                                      **clear_shape(202),
+                                                      "sindri.ui.layout": column(0.01, "center", "center")},
                             parent=card, spatial=False))
             for part, cls, font, size in (("Mark", "boon-mark", BODY_FONT, 0.05),
                                           ("Title", "boon-title", TITLE_FONT, 0.04),
                                           ("Text", "boon-text", BODY_FONT, 0.026),
                                           ("Key", "boon-key", BOLD_FONT, 0.024)):
                 wrap = "word" if part == "Text" else "none"
-                e.append(entity(f"{card}-{part.lower()}", f"Boon{i}{part}", {**styled(cls), **text(
-                    "", font, size, 204, rich=True, wrap=wrap)}, parent=inner, spatial=False))
-    else:
+                e.append(entity(f"{card}-{part.lower()}", f"{name}{i}{part}",
+                                {**styled(cls, f"{kind}-{part.lower()}"), **text(
+                                    "", font, size, 204, rich=True, wrap=wrap)}, parent=inner, spatial=False))
+    if button_label:
         plate_button(e, id + "-button", name + "Button", button_label, column_id, "textures/plate-ember.png",
                      ("begin",), 200)
 
@@ -558,8 +570,10 @@ def between_screen(e, id, name, button_label):
 def screens():
     e = []
     title_screen(e)
+    between_screen(e, "muster", "Muster", "Set out", cards=6, per_row=3, kind="hero")
     between_screen(e, "held", "Held", "Onward")
-    between_screen(e, "upgrade", "Upgrade", "")
+    between_screen(e, "upgrade", "Upgrade", "", cards=4)
+    between_screen(e, "route", "Route", "", cards=2, kind="road")
     between_screen(e, "fallen", "Fallen", "Back to the shore")
     between_screen(e, "crossed", "Crossed", "Back to the shore")
     # Fills and fades the screens between islands as the battle opens them.

@@ -23,6 +23,8 @@ enum Kind {
     Mason,
     Lamplighter,
     Tidecaller,
+    Harpooner,
+    Shieldback,
     // The Hollow, who cross at low tide.
     Husk,
     Brute,
@@ -98,6 +100,12 @@ enum BeatKind {
     Burst,
     // Water was thrown from (x, z) to (tx, tz).
     Douse,
+    // A harpoon flew from (x, z) to (tx, tz), and its line went taut.
+    Harpoon,
+    // A unit at (x, z) was warded against the next blow.
+    Ward,
+    // A ward at (x, z) took a blow, and the unit under it took none.
+    Block,
 }
 
 struct Unit {
@@ -125,6 +133,8 @@ struct Unit {
     order: number = 0.0,
     // A vent's rounds of rest before it erupts again.
     charge: number = 0.0,
+    // Blows a ward will still turn aside this round.
+    ward: number = 0.0,
 }
 
 struct Spawn {
@@ -206,7 +216,27 @@ shared fn steps_between(x: number, z: number, tx: number, tz: number) -> number 
 
 shared fn is_warden(kind: Kind) -> bool {
     return kind == Kind.Bulwark || kind == Kind.Mason || kind == Kind.Lamplighter
-        || kind == Kind.Tidecaller;
+        || kind == Kind.Tidecaller || kind == Kind.Harpooner || kind == Kind.Shieldback;
+}
+
+// The six wardens a crossing may be mustered from, in the order the muster
+// shows them.
+shared const HERO_COUNT: number = 6.0;
+
+shared fn hero_kind(index: number) -> Kind {
+    if index == 1.0 { return Kind.Mason; }
+    if index == 2.0 { return Kind.Lamplighter; }
+    if index == 3.0 { return Kind.Tidecaller; }
+    if index == 4.0 { return Kind.Harpooner; }
+    if index == 5.0 { return Kind.Shieldback; }
+    return Kind.Bulwark;
+}
+
+shared fn hero_index(kind: Kind) -> number {
+    for i in 0..HERO_COUNT {
+        if hero_kind(i) == kind { return i; }
+    }
+    return -1.0;
 }
 
 shared fn is_hollow(kind: Kind) -> bool {
@@ -237,12 +267,20 @@ shared fn is_fixed(kind: Kind) -> bool {
         || kind == Kind.Kiln || kind == Kind.Vent;
 }
 
+// What a shove, a burst or a harpoon cannot move: the fixed, and the
+// Shieldback, who sets its feet.
+shared fn is_heavy(kind: Kind) -> bool {
+    return is_fixed(kind) || kind == Kind.Shieldback;
+}
+
 shared fn kind_hp(kind: Kind) -> number {
     return match kind {
         Kind.Bulwark => 4.0,
         Kind.Mason => 3.0,
         Kind.Lamplighter => 3.0,
         Kind.Tidecaller => 3.0,
+        Kind.Harpooner => 3.0,
+        Kind.Shieldback => 5.0,
         Kind.Husk => 2.0,
         Kind.Brute => 3.0,
         Kind.Spitter => 2.0,
@@ -264,6 +302,8 @@ shared fn kind_move(kind: Kind) -> number {
         Kind.Mason => 3.0,
         Kind.Lamplighter => 4.0,
         Kind.Tidecaller => 3.0,
+        Kind.Harpooner => 3.0,
+        Kind.Shieldback => 2.0,
         Kind.Husk => 3.0,
         Kind.Brute => 2.0,
         Kind.Spitter => 2.0,
@@ -297,6 +337,8 @@ shared fn kind_name(kind: Kind) -> String {
         Kind.Mason => "Mason",
         Kind.Lamplighter => "Lamplighter",
         Kind.Tidecaller => "Tidecaller",
+        Kind.Harpooner => "Harpooner",
+        Kind.Shieldback => "Shieldback",
         Kind.Husk => "Husk",
         Kind.Brute => "Brute",
         Kind.Spitter => "Spitter",
@@ -318,6 +360,8 @@ shared fn skill_name(kind: Kind) -> String {
         Kind.Mason => "Heave Stone",
         Kind.Lamplighter => "Lantern Bolt",
         Kind.Tidecaller => "Drench",
+        Kind.Harpooner => "Harpoon",
+        Kind.Shieldback => "Brace",
         Kind.Husk => "Claw",
         Kind.Brute => "Maul",
         Kind.Spitter => "Spit",
@@ -337,6 +381,8 @@ shared fn skill_text(kind: Kind) -> String {
         Kind.Mason => "Throw a stone 2 to 4 cells. It hits for 1 and shoves everything beside it outward. On open ground it stays, a new stone.",
         Kind.Lamplighter => "Fire along a line. The first thing in the way takes 1 and is knocked back a cell.",
         Kind.Tidecaller => "Throw water 1 to 3 cells along a line. Lava cools to stone, and lava by water makes new ground. A figure is washed a cell back; fire takes 2; a vent chokes. Bare ground is left a pool the Hollow cannot cross.",
+        Kind.Harpooner => "Throw a harpoon up to 5 cells along a line and haul in the first thing it bites: a Hollow takes 1 and is dragged to you. Anything too heavy to drag hauls you to it instead.",
+        Kind.Shieldback => "Ward itself, or a warden or building up to 2 cells away: the next blow it takes this round does nothing. Too heavy to shove.",
         Kind.Husk => "Claws the cell in front for 1.",
         Kind.Brute => "Mauls the cell in front for 2 and shoves it.",
         Kind.Spitter => "Spits along a line: the first thing in the way takes 1.",
@@ -568,6 +614,12 @@ shared fn hurt(board: Board, index: number, amount: number) -> Board {
     var next = board;
     var unit = next.units[index];
     if unit.hp <= 0.0 || amount <= 0.0 { return next; }
+    if unit.ward > 0.0 {
+        unit.ward -= 1.0;
+        next.units[index] = unit;
+        next.beats.push(Beat(kind: BeatKind.Block, unit: unit.id, x: unit.x, z: unit.z));
+        return next;
+    }
     let taken = min(unit.hp, amount);
     unit.hp -= taken;
     next.beats.push(Beat(kind: BeatKind.Hit, unit: unit.id, x: unit.x, z: unit.z, amount: taken));
@@ -648,7 +700,7 @@ shared fn push(board: Board, x: number, z: number, d: number) -> Board {
     let index = unit_at(board, x, z);
     if index < 0.0 { return board; }
     let unit = board.units[index];
-    if is_fixed(unit.kind) { return board; }
+    if is_heavy(unit.kind) { return board; }
     let tx = x + dir_x(d);
     let tz = z + dir_z(d);
     var next = board;
@@ -726,6 +778,8 @@ shared fn skill_targets(board: Board, index: number) -> List<number> {
         if unit.kind == Kind.Mason { low = 2.0; high = 4.0; }
         if unit.kind == Kind.Lamplighter { high = SIZE; }
         if unit.kind == Kind.Tidecaller { high = 3.0; }
+        if unit.kind == Kind.Harpooner { high = 5.0; }
+        if unit.kind == Kind.Shieldback { high = 2.0; }
         for r in low..(high + 1.0) {
             let tx = unit.x + dir_x(d) * r;
             let tz = unit.z + dir_z(d) * r;
@@ -734,6 +788,8 @@ shared fn skill_targets(board: Board, index: number) -> List<number> {
             }
         }
     }
+    // The Shieldback may brace itself where it stands.
+    if unit.kind == Kind.Shieldback { cells.push(cell_of(unit.x, unit.z)); }
     return cells;
 }
 
@@ -742,10 +798,17 @@ shared fn use_skill(board: Board, index: number, tx: number, tz: number) -> Boar
     var next = board;
     var unit = next.units[index];
     let d = dir_towards(unit.x, unit.z, tx, tz);
-    if d < 0.0 { return board; }
+    let own = tx == unit.x && tz == unit.z;
+    if d < 0.0 && !(own && unit.kind == Kind.Shieldback) { return board; }
     unit.acted = true;
     unit.moved = true;
     next.units[index] = unit;
+    if unit.kind == Kind.Shieldback {
+        return brace(next, index, tx, tz);
+    }
+    if unit.kind == Kind.Harpooner {
+        return harpoon(next, index, d);
+    }
     if unit.kind == Kind.Bulwark {
         next.beats.push(Beat(kind: BeatKind.Strike, unit: unit.id, x: unit.x, z: unit.z, tx: tx, tz: tz));
         if unit_at(next, tx, tz) < 0.0 {
@@ -781,6 +844,77 @@ shared fn use_skill(board: Board, index: number, tx: number, tz: number) -> Boar
     }
     for side in 0..4 {
         next = push(next, tx + dir_x(side), tz + dir_z(side), side);
+    }
+    return next;
+}
+
+// The Shieldback's ward, on whatever stands at (tx, tz): a warden or a
+// building turns the next blow aside. A Hollow or bare ground is no use.
+shared fn brace(board: Board, index: number, tx: number, tz: number) -> Board {
+    var next = board;
+    let unit = next.units[index];
+    let at = unit_at(next, tx, tz);
+    if at < 0.0 || !(is_warden(next.units[at].kind) || is_building(next.units[at].kind)) {
+        next.beats.push(Beat(kind: BeatKind.Miss, unit: unit.id, x: tx, z: tz));
+        return next;
+    }
+    var warded = next.units[at];
+    warded.ward = 1.0 + unit.power;
+    next.units[at] = warded;
+    next.beats.push(Beat(kind: BeatKind.Ward, unit: warded.id, x: tx, z: tz));
+    return next;
+}
+
+// The Harpooner's harpoon, thrown along direction `d` at the first thing in
+// reach. A Hollow is hurt and hauled in, a cell at a time, until it is beside
+// the Harpooner or something stops it; a warden is hauled the same way,
+// unhurt. Whatever cannot be dragged hauls the Harpooner to it instead.
+shared fn harpoon(board: Board, index: number, d: number) -> Board {
+    var next = board;
+    let unit = next.units[index];
+    var reach = 0.0;
+    var hx = unit.x;
+    var hz = unit.z;
+    var hit = -1.0;
+    while reach < 5.0 && hit < 0.0 {
+        let cx = hx + dir_x(d);
+        let cz = hz + dir_z(d);
+        if !in_bounds(cx, cz) { break; }
+        hx = cx;
+        hz = cz;
+        reach += 1.0;
+        hit = unit_at(next, hx, hz);
+    }
+    next.beats.push(Beat(kind: BeatKind.Harpoon, unit: unit.id, x: unit.x, z: unit.z, tx: hx, tz: hz));
+    if hit < 0.0 {
+        next.beats.push(Beat(kind: BeatKind.Miss, unit: unit.id, x: hx, z: hz));
+        return next;
+    }
+    let target = next.units[hit];
+    if is_hollow(target.kind) {
+        next = hurt(next, hit, 1.0 + unit.power);
+    }
+    let back = (d + 2.0) % 4.0;
+    if is_heavy(target.kind) {
+        // Hauled along the line to it, the same way a shove moves anyone.
+        return haul(next, unit.id, d, steps_between(unit.x, unit.z, hx, hz) - 1.0);
+    }
+    return haul(next, target.id, back, steps_between(unit.x, unit.z, hx, hz) - 1.0);
+}
+
+// Drags a unit up to `cells` cells in direction `d`, one shove at a time,
+// stopping as soon as a shove does not move it or it is gone.
+shared fn haul(board: Board, id: number, d: number, cells: number) -> Board {
+    var next = board;
+    for step in 0..cells {
+        let at = unit_index(next, id);
+        if at < 0.0 { return next; }
+        let before = next.units[at];
+        if before.hp <= 0.0 { return next; }
+        next = push(next, before.x, before.z, d);
+        let after = next.units[unit_index(next, id)];
+        if after.x == before.x && after.z == before.z { return next; }
+        if after.hp <= 0.0 || !in_bounds(after.x, after.z) { return next; }
     }
     return next;
 }
@@ -1334,6 +1468,7 @@ shared fn new_turn(board: Board) -> Board {
             fresh.acted = false;
             fresh.from_x = -1.0;
             fresh.from_z = -1.0;
+            fresh.ward = 0.0;
             if !is_hollow(fresh.kind) { fresh.dir = -1.0; }
             kept.push(fresh);
         }

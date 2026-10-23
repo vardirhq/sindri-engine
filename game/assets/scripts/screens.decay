@@ -1,29 +1,48 @@
-// The screens between islands -- an island held, the boon to take, the
-// light gone out, the crossing made -- filled and brought in.
+// The screens between islands -- the muster, an island held, the boon to
+// take, the fork in the road, the light gone out, the crossing made -- filled
+// and brought in.
 //
 // The battle opens and closes them, and tells this what they say. This lives
 // on its own entity that is never switched off, so the words reach it
 // whichever screen is showing, and each screen comes up in pieces from the
 // moment it is switched on: the board dims, the words rise in one after
-// another, the plate last.
+// another, the cards and the plate last.
+
+// The most cards a screen has: the muster's six wardens.
+const MOST_CARDS: number = 6.0;
 
 script Screens {
-    var names: List<String> = ["Held", "Upgrade", "Fallen", "Crossed"];
-    var buttons: List<String> = ["Onward", "", "Back to the shore", "Back to the shore"];
+    var names: List<String> = ["Muster", "Held", "Upgrade", "Route", "Fallen", "Crossed"];
+    var buttons: List<String> = ["Set out", "Onward", "", "", "Back to the shore", "Back to the shore"];
+    // How many cards each screen deals.
+    var card_counts: List<number> = [6.0, 0.0, 4.0, 2.0, 0.0, 0.0];
     // The title's color on each screen: gold for good news, ember for bad.
-    var title_colors: List<String> = ["f3d79a", "f3d79a", "ff9e80", "ffd76a"];
-    var clocks: List<number> = [0.0, 0.0, 0.0, 0.0];
-    var was_on: List<bool> = [false, false, false, false];
-    var kickers: List<String> = ["", "", "", ""];
-    var titles: List<String> = ["", "", "", ""];
-    var bodies: List<String> = ["", "", "", ""];
-    var stats: List<String> = ["", "", "", ""];
-    var card_titles: List<String> = ["", "", "", ""];
-    var card_texts: List<String> = ["", "", "", ""];
-    var card_marks: List<String> = ["", "", "", ""];
-    var card_colors: List<Color> = [Color(1.0, 1.0, 1.0), Color(1.0, 1.0, 1.0), Color(1.0, 1.0, 1.0),
-        Color(1.0, 1.0, 1.0)];
+    var title_colors: List<String> = ["f3d79a", "f3d79a", "f3d79a", "f3d79a", "ff9e80", "ffd76a"];
+    var clocks: List<number> = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0];
+    var was_on: List<bool> = [false, false, false, false, false, false];
+    var kickers: List<String> = ["", "", "", "", "", ""];
+    var titles: List<String> = ["", "", "", "", "", ""];
+    var bodies: List<String> = ["", "", "", "", "", ""];
+    var stats: List<String> = ["", "", "", "", "", ""];
+    // Whether a screen's plate may be pressed yet.
+    var ready_flags: List<bool> = [true, true, true, true, true, true];
+    // Each screen's cards, MOST_CARDS to a screen.
+    var card_titles: List<String> = [];
+    var card_texts: List<String> = [];
+    var card_marks: List<String> = [];
+    var card_colors: List<Color> = [];
+    var card_lit: List<bool> = [];
     var hovered: String = "";
+
+    fn start() {
+        for i in 0..(names.length * MOST_CARDS) {
+            card_titles.push("");
+            card_texts.push("");
+            card_marks.push("");
+            card_colors.push(Color(1.0, 1.0, 1.0));
+            card_lit.push(false);
+        }
+    }
 
     fn words(screen: String, kicker: String, title: String, body: String, line: String) {
         let i = names.index_of(screen);
@@ -34,12 +53,31 @@ script Screens {
         stats[i] = line;
     }
 
-    // A boon card's words, its mark and the color of the warden it is for.
-    fn card(index: number, mark: String, title: String, text: String, color: Color) {
-        card_marks[index] = mark;
-        card_titles[index] = title;
-        card_texts[index] = text;
-        card_colors[index] = color;
+    // A card's words, its mark and the color of whom it is for.
+    fn card(screen: String, index: number, mark: String, title: String, text: String, color: Color) {
+        let at = slot(screen, index);
+        if at < 0.0 { return; }
+        card_marks[at] = mark;
+        card_titles[at] = title;
+        card_texts[at] = text;
+        card_colors[at] = color;
+    }
+
+    // A card taken, as the muster's chosen wardens are: lit and edged gold.
+    fn taken(screen: String, index: number, on: bool) {
+        let at = slot(screen, index);
+        if at >= 0.0 { card_lit[at] = on; }
+    }
+
+    fn ready(screen: String, on: bool) {
+        let i = names.index_of(screen);
+        if i >= 0.0 { ready_flags[i] = on; }
+    }
+
+    fn slot(screen: String, index: number) -> number {
+        let i = names.index_of(screen);
+        if i < 0.0 || index >= MOST_CARDS { return -1.0; }
+        return i * MOST_CARDS + index;
     }
 
     fn update(dt: number) {
@@ -66,35 +104,50 @@ script Screens {
         fade_words(n + "Ornament", "—  ◆  —", "c9a96a", ramp_at(c, 0.35, 0.9));
         fade_words(n + "Text", bodies[i], "dfe8ec", ramp_at(c, 0.45, 1.0));
         fade_words(n + "Stats", stats[i], "9fb4bf", ramp_at(c, 0.55, 1.1));
-        if n == "Upgrade" {
-            for k in 0..4 { draw_card(k, ramp_at(c, 0.5 + k * 0.1, 0.95 + k * 0.1)); }
-            return;
+        for k in 0..card_counts[i] {
+            draw_card(i, k, ramp_at(c, 0.5 + k * 0.08, 0.95 + k * 0.08));
         }
-        let over = fade_plate(n + "Button", buttons[i], "fff4dc", ramp_at(c, 0.65, 1.2));
-        tick(n + "Button", over);
+        if buttons[i] == "" { return; }
+        var plate = ramp_at(c, 0.65, 1.2);
+        if !ready_flags[i] { plate *= 0.35; }
+        let over = fade_plate(n + "Button", buttons[i], "fff4dc", plate);
+        tick(n + "Button", over && ready_flags[i]);
     }
 
-    // A card lit by its warden's color, brighter under the pointer.
-    fn draw_card(k: number, alpha: number) {
-        let button = World.find("Boon" + k);
+    // A card lit by the color of whom it is for, brighter under the pointer
+    // and brightest when taken.
+    fn draw_card(i: number, k: number, alpha: number) {
+        let name = names[i] + k;
+        let at = i * MOST_CARDS + k;
+        let button = World.find(name);
         var light = 0.78;
+        if card_counts[i] > 4.0 && !card_lit[at] { light = 0.5; }
+        if card_lit[at] { light = 1.0; }
         var over = false;
         if button != null && alpha > 0.9 && Ui.is_hovered(button) {
-            light = 1.0;
+            light = min(1.0, light + 0.22);
             over = true;
         }
         if button != null && Ui.is_held(button) { light = 0.65; }
-        tick("Boon" + k, over);
-        let art = World.find("Boon" + k + " Card");
+        tick(name, over);
+        let art = World.find(name + " Card");
         if art != null {
-            let color = card_colors[k];
+            let color = card_colors[at];
             art.ui_image.tint = Color(color.r * light, color.g * light, color.b * light);
             art.ui_image.tint.a = alpha;
         }
-        fade_words("Boon" + k + "Mark", card_marks[k], "ffd27a", alpha);
-        fade_words("Boon" + k + "Title", card_titles[k], "f3d79a", alpha);
-        fade_words("Boon" + k + "Text", card_texts[k], "dfe8ec", alpha);
-        fade_words("Boon" + k + "Key", "" + (k + 1.0), "9fb4bf", alpha);
+        var mark_color = "ffd27a";
+        var title_color = "f3d79a";
+        if card_counts[i] > 4.0 && !card_lit[at] {
+            mark_color = "9fb4bf";
+            title_color = "c9d2d6";
+        }
+        fade_words(name + "Mark", card_marks[at], mark_color, alpha);
+        fade_words(name + "Title", card_titles[at], title_color, alpha);
+        fade_words(name + "Text", card_texts[at], "dfe8ec", alpha);
+        var key = "" + (k + 1.0);
+        if card_lit[at] { key = "◆ " + key; }
+        fade_words(name + "Key", key, "9fb4bf", alpha);
     }
 
     fn tick(name: String, over: bool) {
