@@ -27,8 +27,14 @@ fn project(seed: u32) -> PathBuf {
 
 /// The same, with the bot starting on island `first`.
 fn project_from(seed: u32, first: u32) -> PathBuf {
+    project_with(seed, first, "", 0)
+}
+
+/// The same, with the bot playing one island generated in `world`, `depth`
+/// steps in, or the crossing when `world` is empty.
+fn project_with(seed: u32, first: u32, world: &str, depth: u32) -> PathBuf {
     let root = std::env::temp_dir().join(format!(
-        "causeway-autoplay-{}-{seed}-{first}",
+        "causeway-autoplay-{}-{seed}-{first}-{world}{depth}",
         std::process::id()
     ));
     let scripts = root.join("assets/scripts");
@@ -38,7 +44,7 @@ fn project_from(seed: u32, first: u32) -> PathBuf {
         "format_version = 1\n\n[project]\nname = \"Autoplay\"\nmain_scene = \"assets/autoplay.scene\"\n",
     )
     .expect("the manifest writes");
-    for script in ["rules.decay", "islands.decay"] {
+    for script in ["rules.decay", "islands.decay", "generate.decay"] {
         std::fs::copy(
             game().join("assets/scripts").join(script),
             scripts.join(script),
@@ -63,7 +69,8 @@ fn project_from(seed: u32, first: u32) -> PathBuf {
         "sindri.script": {{
           "source": "scripts/autoplay.decay",
           "script": "Autoplay",
-          "properties": {{ "seed": {seed}.0, "first": {first}.0, "tracing": {tracing} }}
+          "properties": {{ "seed": {seed}.0, "first": {first}.0, "tracing": {tracing},
+            "gen_world": "{world}", "gen_depth": {depth}.0 }}
         }}
       }}
     }}
@@ -142,7 +149,7 @@ fn how_hard_each_island_is() {
         .ok()
         .and_then(|value| value.parse().ok())
         .unwrap_or(0);
-    let (mut crossed, mut lost) = (0, [0; 12]);
+    let (mut crossed, mut lost) = (0, [0; 15]);
     let names = [
         "Bulwark",
         "Mason",
@@ -154,7 +161,7 @@ fn how_hard_each_island_is() {
     let mut with = [(0, 0); 6];
     for seed in 1..=24u32 {
         let run = play(&project_from(seed, first));
-        let hearths: Vec<f32> = (0..12).map(|i| run.board(&format!("hearth_{i}"))).collect();
+        let hearths: Vec<f32> = (0..15).map(|i| run.board(&format!("hearth_{i}"))).collect();
         #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
         let party: Vec<usize> = (0..4)
             .map(|i| run.board(&format!("party_{i}")) as usize)
@@ -175,7 +182,7 @@ fn how_hard_each_island_is() {
             }
         }
         // Only the islands this run's road went through.
-        for i in first..12 {
+        for i in first..15 {
             if run.board(&format!("won_{i}")) < 0.5 && on != i as usize + 1 {
                 continue;
             }
@@ -204,5 +211,47 @@ fn how_hard_each_island_is() {
     // Keep the fixtures from piling up in the temp folder between reports.
     for seed in 1..=24u32 {
         let _ = std::fs::remove_dir_all(project_from(seed, first));
+    }
+}
+
+#[test]
+fn every_world_makes_an_island_the_bot_can_play() {
+    for world in ["sea", "caldera", "rime"] {
+        let root = project_with(1, 0, world, 1);
+        let run = play(&root);
+        assert!(
+            run.board("crossed") > 0.5 || run.board("lost_on") > 0.5,
+            "a generated {world} island is played to its end"
+        );
+        let _ = std::fs::remove_dir_all(root);
+    }
+}
+
+/// How generated islands play, world by world and step by step: how many the
+/// bot holds and the Hearth they cost. The numbers to tune the generator by.
+///
+/// ```bash
+/// cargo test --release -p sindri-causeway --test a_crossing_is_played generated -- --ignored --nocapture
+/// ```
+#[test]
+#[ignore = "a report for tuning, slow without --release"]
+fn how_generated_islands_play() {
+    for world in ["sea", "caldera", "rime"] {
+        for depth in 0..3u32 {
+            let (mut held, mut lost_hearth) = (0, 0.0);
+            for seed in 1..=16u32 {
+                let root = project_with(seed, 0, world, depth);
+                let run = play(&root);
+                if run.board("crossed") > 0.5 {
+                    held += 1;
+                    lost_hearth += 7.0 - run.board("hearth_0");
+                }
+                let _ = std::fs::remove_dir_all(root);
+            }
+            println!(
+                "{world} step {depth}: held {held} of 16, Hearth lost on those {:.1} on average",
+                lost_hearth / f32::from(u8::try_from(held.max(1)).unwrap_or(1))
+            );
+        }
     }
 }

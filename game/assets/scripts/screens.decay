@@ -11,10 +11,11 @@
 // The most cards a screen has: the muster's six wardens.
 const MOST_CARDS: number = 6.0;
 
-// The route map's stops: six steps of the road, four islands at most to
-// each, which is both worlds' forks seen from where the road divides.
+// The route map's stops: six steps of the road, six islands at most to
+// each, which is both worlds' forks, written and uncharted, seen from where
+// the road divides.
 const ROUTE_STEPS: number = 6.0;
-shared const ROUTE_STOPS: number = 4.0;
+shared const ROUTE_STOPS: number = 6.0;
 
 // What a stop on the route map is to this crossing.
 shared const STOP_NONE: number = 0.0;

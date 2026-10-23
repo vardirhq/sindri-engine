@@ -1,5 +1,32 @@
 # Changelog
 
+- Generate uncharted islands for Causeway from each crossing's seed, in
+  `generate.decay`, to each world's rules: a hump of ground highest in the
+  west with low landing ground east, the beacon and houses above the tide
+  with a way up to each, the wardens near what they guard, stones, vents and
+  lava, or ice by world, and waves from the world's Hollow. An island that
+  breaks a rule is thrown away and the next seed tried. Off the causeway and
+  deep in the mountain and the ice, a fork offers an uncharted island beside a
+  written one; the battle builds it at runtime from per-world column models,
+  in its world's surroundings. The bot reports how generated islands play.
+
+- Let Causeway's crossings open things for the next: four wardens answer the
+  first muster, holding the Lighthouse calls the Harpooner, and making a
+  crossing calls the Shieldback and opens spring tides, a harder crossing
+  with one more Hollow every round and a smaller Hearth, chosen at the muster.
+
+- Give each of Causeway's islands a bonus objective, rolled with its omen and
+  followed in the HUD: lose no house, send three Hollow into the sea or the
+  lava, destroy six, lose no warden, or lose no more than one Hearth. Meeting
+  it earns one more boon, and a rewind puts its count back with the board.
+
+- Hang an omen over each of Causeway's islands past the first, rolled when a
+  crossing sets out and shown on the road's cards, the banner and the HUD:
+  still water brings a Hollow fewer each round and no boon after; a Hollow host
+  one more each round and two boons; a wreck ashore an upgrade for the boon;
+  and lit windows rekindle the Hearth. A fork in the road is now a choice of
+  risk and reward as well as of island.
+
 - Give each of Causeway's wardens two upgrades that change how its skill
   works, won as boons between islands: the Bulwark's bash can shove two cells
   or ward the Bulwark, the Mason's stone can hurt everything beside it or fly

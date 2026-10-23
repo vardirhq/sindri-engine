@@ -239,7 +239,37 @@
             "beacon": "prefabs/beacon.prefab",
             "stone": "prefabs/stone.prefab",
             "vent": "prefabs/vent.prefab",
-            "basalt": "prefabs/basalt.prefab"
+            "basalt": "prefabs/basalt.prefab",
+            "column_sea_1": "prefabs/column-sea-1.prefab",
+            "column_sea_1b": "prefabs/column-sea-1b.prefab",
+            "column_sea_2": "prefabs/column-sea-2.prefab",
+            "column_sea_2b": "prefabs/column-sea-2b.prefab",
+            "column_sea_3": "prefabs/column-sea-3.prefab",
+            "column_sea_3b": "prefabs/column-sea-3b.prefab",
+            "column_sea_4": "prefabs/column-sea-4.prefab",
+            "column_sea_4b": "prefabs/column-sea-4b.prefab",
+            "column_sea_5": "prefabs/column-sea-5.prefab",
+            "column_sea_5b": "prefabs/column-sea-5b.prefab",
+            "column_caldera_1": "prefabs/column-caldera-1.prefab",
+            "column_caldera_1b": "prefabs/column-caldera-1b.prefab",
+            "column_caldera_2": "prefabs/column-caldera-2.prefab",
+            "column_caldera_2b": "prefabs/column-caldera-2b.prefab",
+            "column_caldera_3": "prefabs/column-caldera-3.prefab",
+            "column_caldera_3b": "prefabs/column-caldera-3b.prefab",
+            "column_caldera_4": "prefabs/column-caldera-4.prefab",
+            "column_caldera_4b": "prefabs/column-caldera-4b.prefab",
+            "column_caldera_5": "prefabs/column-caldera-5.prefab",
+            "column_caldera_5b": "prefabs/column-caldera-5b.prefab",
+            "column_rime_1": "prefabs/column-rime-1.prefab",
+            "column_rime_1b": "prefabs/column-rime-1b.prefab",
+            "column_rime_2": "prefabs/column-rime-2.prefab",
+            "column_rime_2b": "prefabs/column-rime-2b.prefab",
+            "column_rime_3": "prefabs/column-rime-3.prefab",
+            "column_rime_3b": "prefabs/column-rime-3b.prefab",
+            "column_rime_4": "prefabs/column-rime-4.prefab",
+            "column_rime_4b": "prefabs/column-rime-4b.prefab",
+            "column_rime_5": "prefabs/column-rime-5.prefab",
+            "column_rime_5b": "prefabs/column-rime-5b.prefab"
           }
         }
       }
@@ -4042,6 +4072,93 @@
       "components": {
         "sindri.model": {
           "asset": "models/island-white-barrow.glb",
+          "layer": 0
+        }
+      },
+      "disabled": true
+    },
+    {
+      "id": "island-12",
+      "name": "Island 12",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.model": {
+          "asset": "models/surround-sea.glb",
+          "layer": 0
+        }
+      },
+      "disabled": true
+    },
+    {
+      "id": "island-13",
+      "name": "Island 13",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.model": {
+          "asset": "models/surround-caldera.glb",
+          "layer": 0
+        }
+      },
+      "disabled": true
+    },
+    {
+      "id": "island-14",
+      "name": "Island 14",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.model": {
+          "asset": "models/surround-rime.glb",
           "layer": 0
         }
       },
@@ -7877,6 +7994,118 @@
       }
     },
     {
+      "id": "muster-spring",
+      "name": "MusterSpring",
+      "parent": "muster-column",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "plate-button",
+            "guide"
+          ]
+        },
+        "sindri.ui.button": {
+          "label": ""
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "anchor": "center",
+          "layer": 200,
+          "fill": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0.0,
+          "corner_radius": 0.0
+        },
+        "sindri.ui.box": {
+          "order": 8
+        }
+      }
+    },
+    {
+      "id": "muster-spring-label",
+      "name": "MusterSpring Label",
+      "parent": "muster-spring",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "plate-label",
+            "guide"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "",
+          "font": "fonts/AlegreyaSans-Bold.ttf",
+          "font_size": 0.034,
+          "line_height": 0.04148,
+          "anchor": "center",
+          "layer": 203,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "rich": true,
+          "bounds": [
+            0.0,
+            0.0
+          ]
+        },
+        "sindri.ui.box": {
+          "order": 1
+        }
+      }
+    },
+    {
+      "id": "muster-spring-plate",
+      "name": "MusterSpring Plate",
+      "parent": "muster-spring",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "plate"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/plate-ink.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 201
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
       "id": "muster-stats",
       "name": "MusterStats",
       "parent": "muster-column",
@@ -8018,6 +8247,54 @@
         },
         "sindri.ui.box": {
           "order": 1
+        }
+      }
+    },
+    {
+      "id": "objective-text",
+      "name": "ObjectiveText",
+      "parent": "status",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "status-line",
+            "dim"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "",
+          "font": "fonts/AlegreyaSans-Medium.ttf",
+          "font_size": 0.026,
+          "line_height": 0.03172,
+          "anchor": "center",
+          "layer": 122,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "rich": true,
+          "bounds": [
+            0.0,
+            0.0
+          ]
+        },
+        "sindri.ui.box": {
+          "order": 4
         }
       }
     },
@@ -10886,6 +11163,234 @@
       }
     },
     {
+      "id": "route-stop-0-4",
+      "name": "RouteStop0_4",
+      "parent": "route-step-0",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "route-stop"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "anchor": "center",
+          "layer": 200,
+          "fill": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0.0,
+          "corner_radius": 0.0
+        },
+        "sindri.ui.layout": {
+          "direction": "row",
+          "spacing": 0.004,
+          "align": "center",
+          "justify": "start"
+        },
+        "sindri.ui.box": {
+          "order": 4
+        }
+      }
+    },
+    {
+      "id": "route-stop-0-4-name",
+      "name": "RouteName0_4",
+      "parent": "route-stop-0-4",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "route-name"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "",
+          "font": "fonts/AlegreyaSans-Medium.ttf",
+          "font_size": 0.022,
+          "line_height": 0.02684,
+          "anchor": "center",
+          "layer": 202,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "rich": true,
+          "bounds": [
+            0.0,
+            0.0
+          ],
+          "wrap": "word"
+        },
+        "sindri.ui.box": {
+          "order": 1
+        }
+      }
+    },
+    {
+      "id": "route-stop-0-4-node",
+      "name": "RouteNode0_4",
+      "parent": "route-stop-0-4",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "route-node"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/node.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 201
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "route-stop-0-5",
+      "name": "RouteStop0_5",
+      "parent": "route-step-0",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "route-stop"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "anchor": "center",
+          "layer": 200,
+          "fill": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0.0,
+          "corner_radius": 0.0
+        },
+        "sindri.ui.layout": {
+          "direction": "row",
+          "spacing": 0.004,
+          "align": "center",
+          "justify": "start"
+        },
+        "sindri.ui.box": {
+          "order": 5
+        }
+      }
+    },
+    {
+      "id": "route-stop-0-5-name",
+      "name": "RouteName0_5",
+      "parent": "route-stop-0-5",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "route-name"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "",
+          "font": "fonts/AlegreyaSans-Medium.ttf",
+          "font_size": 0.022,
+          "line_height": 0.02684,
+          "anchor": "center",
+          "layer": 202,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "rich": true,
+          "bounds": [
+            0.0,
+            0.0
+          ],
+          "wrap": "word"
+        },
+        "sindri.ui.box": {
+          "order": 1
+        }
+      }
+    },
+    {
+      "id": "route-stop-0-5-node",
+      "name": "RouteNode0_5",
+      "parent": "route-stop-0-5",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "route-node"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/node.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 201
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
       "id": "route-stop-1-0",
       "name": "RouteStop1_0",
       "parent": "route-step-1",
@@ -11319,6 +11824,234 @@
       "id": "route-stop-1-3-node",
       "name": "RouteNode1_3",
       "parent": "route-stop-1-3",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "route-node"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/node.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 201
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "route-stop-1-4",
+      "name": "RouteStop1_4",
+      "parent": "route-step-1",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "route-stop"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "anchor": "center",
+          "layer": 200,
+          "fill": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0.0,
+          "corner_radius": 0.0
+        },
+        "sindri.ui.layout": {
+          "direction": "row",
+          "spacing": 0.004,
+          "align": "center",
+          "justify": "start"
+        },
+        "sindri.ui.box": {
+          "order": 4
+        }
+      }
+    },
+    {
+      "id": "route-stop-1-4-name",
+      "name": "RouteName1_4",
+      "parent": "route-stop-1-4",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "route-name"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "",
+          "font": "fonts/AlegreyaSans-Medium.ttf",
+          "font_size": 0.022,
+          "line_height": 0.02684,
+          "anchor": "center",
+          "layer": 202,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "rich": true,
+          "bounds": [
+            0.0,
+            0.0
+          ],
+          "wrap": "word"
+        },
+        "sindri.ui.box": {
+          "order": 1
+        }
+      }
+    },
+    {
+      "id": "route-stop-1-4-node",
+      "name": "RouteNode1_4",
+      "parent": "route-stop-1-4",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "route-node"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/node.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 201
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "route-stop-1-5",
+      "name": "RouteStop1_5",
+      "parent": "route-step-1",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "route-stop"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "anchor": "center",
+          "layer": 200,
+          "fill": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0.0,
+          "corner_radius": 0.0
+        },
+        "sindri.ui.layout": {
+          "direction": "row",
+          "spacing": 0.004,
+          "align": "center",
+          "justify": "start"
+        },
+        "sindri.ui.box": {
+          "order": 5
+        }
+      }
+    },
+    {
+      "id": "route-stop-1-5-name",
+      "name": "RouteName1_5",
+      "parent": "route-stop-1-5",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "route-name"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "",
+          "font": "fonts/AlegreyaSans-Medium.ttf",
+          "font_size": 0.022,
+          "line_height": 0.02684,
+          "anchor": "center",
+          "layer": 202,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "rich": true,
+          "bounds": [
+            0.0,
+            0.0
+          ],
+          "wrap": "word"
+        },
+        "sindri.ui.box": {
+          "order": 1
+        }
+      }
+    },
+    {
+      "id": "route-stop-1-5-node",
+      "name": "RouteNode1_5",
+      "parent": "route-stop-1-5",
       "components": {
         "weave.style": {
           "classes": [
@@ -11798,6 +12531,234 @@
       }
     },
     {
+      "id": "route-stop-2-4",
+      "name": "RouteStop2_4",
+      "parent": "route-step-2",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "route-stop"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "anchor": "center",
+          "layer": 200,
+          "fill": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0.0,
+          "corner_radius": 0.0
+        },
+        "sindri.ui.layout": {
+          "direction": "row",
+          "spacing": 0.004,
+          "align": "center",
+          "justify": "start"
+        },
+        "sindri.ui.box": {
+          "order": 4
+        }
+      }
+    },
+    {
+      "id": "route-stop-2-4-name",
+      "name": "RouteName2_4",
+      "parent": "route-stop-2-4",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "route-name"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "",
+          "font": "fonts/AlegreyaSans-Medium.ttf",
+          "font_size": 0.022,
+          "line_height": 0.02684,
+          "anchor": "center",
+          "layer": 202,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "rich": true,
+          "bounds": [
+            0.0,
+            0.0
+          ],
+          "wrap": "word"
+        },
+        "sindri.ui.box": {
+          "order": 1
+        }
+      }
+    },
+    {
+      "id": "route-stop-2-4-node",
+      "name": "RouteNode2_4",
+      "parent": "route-stop-2-4",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "route-node"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/node.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 201
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "route-stop-2-5",
+      "name": "RouteStop2_5",
+      "parent": "route-step-2",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "route-stop"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "anchor": "center",
+          "layer": 200,
+          "fill": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0.0,
+          "corner_radius": 0.0
+        },
+        "sindri.ui.layout": {
+          "direction": "row",
+          "spacing": 0.004,
+          "align": "center",
+          "justify": "start"
+        },
+        "sindri.ui.box": {
+          "order": 5
+        }
+      }
+    },
+    {
+      "id": "route-stop-2-5-name",
+      "name": "RouteName2_5",
+      "parent": "route-stop-2-5",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "route-name"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "",
+          "font": "fonts/AlegreyaSans-Medium.ttf",
+          "font_size": 0.022,
+          "line_height": 0.02684,
+          "anchor": "center",
+          "layer": 202,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "rich": true,
+          "bounds": [
+            0.0,
+            0.0
+          ],
+          "wrap": "word"
+        },
+        "sindri.ui.box": {
+          "order": 1
+        }
+      }
+    },
+    {
+      "id": "route-stop-2-5-node",
+      "name": "RouteNode2_5",
+      "parent": "route-stop-2-5",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "route-node"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/node.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 201
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
       "id": "route-stop-3-0",
       "name": "RouteStop3_0",
       "parent": "route-step-3",
@@ -12231,6 +13192,234 @@
       "id": "route-stop-3-3-node",
       "name": "RouteNode3_3",
       "parent": "route-stop-3-3",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "route-node"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/node.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 201
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "route-stop-3-4",
+      "name": "RouteStop3_4",
+      "parent": "route-step-3",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "route-stop"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "anchor": "center",
+          "layer": 200,
+          "fill": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0.0,
+          "corner_radius": 0.0
+        },
+        "sindri.ui.layout": {
+          "direction": "row",
+          "spacing": 0.004,
+          "align": "center",
+          "justify": "start"
+        },
+        "sindri.ui.box": {
+          "order": 4
+        }
+      }
+    },
+    {
+      "id": "route-stop-3-4-name",
+      "name": "RouteName3_4",
+      "parent": "route-stop-3-4",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "route-name"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "",
+          "font": "fonts/AlegreyaSans-Medium.ttf",
+          "font_size": 0.022,
+          "line_height": 0.02684,
+          "anchor": "center",
+          "layer": 202,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "rich": true,
+          "bounds": [
+            0.0,
+            0.0
+          ],
+          "wrap": "word"
+        },
+        "sindri.ui.box": {
+          "order": 1
+        }
+      }
+    },
+    {
+      "id": "route-stop-3-4-node",
+      "name": "RouteNode3_4",
+      "parent": "route-stop-3-4",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "route-node"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/node.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 201
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "route-stop-3-5",
+      "name": "RouteStop3_5",
+      "parent": "route-step-3",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "route-stop"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "anchor": "center",
+          "layer": 200,
+          "fill": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0.0,
+          "corner_radius": 0.0
+        },
+        "sindri.ui.layout": {
+          "direction": "row",
+          "spacing": 0.004,
+          "align": "center",
+          "justify": "start"
+        },
+        "sindri.ui.box": {
+          "order": 5
+        }
+      }
+    },
+    {
+      "id": "route-stop-3-5-name",
+      "name": "RouteName3_5",
+      "parent": "route-stop-3-5",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "route-name"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "",
+          "font": "fonts/AlegreyaSans-Medium.ttf",
+          "font_size": 0.022,
+          "line_height": 0.02684,
+          "anchor": "center",
+          "layer": 202,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "rich": true,
+          "bounds": [
+            0.0,
+            0.0
+          ],
+          "wrap": "word"
+        },
+        "sindri.ui.box": {
+          "order": 1
+        }
+      }
+    },
+    {
+      "id": "route-stop-3-5-node",
+      "name": "RouteNode3_5",
+      "parent": "route-stop-3-5",
       "components": {
         "weave.style": {
           "classes": [
@@ -12710,6 +13899,234 @@
       }
     },
     {
+      "id": "route-stop-4-4",
+      "name": "RouteStop4_4",
+      "parent": "route-step-4",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "route-stop"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "anchor": "center",
+          "layer": 200,
+          "fill": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0.0,
+          "corner_radius": 0.0
+        },
+        "sindri.ui.layout": {
+          "direction": "row",
+          "spacing": 0.004,
+          "align": "center",
+          "justify": "start"
+        },
+        "sindri.ui.box": {
+          "order": 4
+        }
+      }
+    },
+    {
+      "id": "route-stop-4-4-name",
+      "name": "RouteName4_4",
+      "parent": "route-stop-4-4",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "route-name"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "",
+          "font": "fonts/AlegreyaSans-Medium.ttf",
+          "font_size": 0.022,
+          "line_height": 0.02684,
+          "anchor": "center",
+          "layer": 202,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "rich": true,
+          "bounds": [
+            0.0,
+            0.0
+          ],
+          "wrap": "word"
+        },
+        "sindri.ui.box": {
+          "order": 1
+        }
+      }
+    },
+    {
+      "id": "route-stop-4-4-node",
+      "name": "RouteNode4_4",
+      "parent": "route-stop-4-4",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "route-node"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/node.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 201
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "route-stop-4-5",
+      "name": "RouteStop4_5",
+      "parent": "route-step-4",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "route-stop"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "anchor": "center",
+          "layer": 200,
+          "fill": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0.0,
+          "corner_radius": 0.0
+        },
+        "sindri.ui.layout": {
+          "direction": "row",
+          "spacing": 0.004,
+          "align": "center",
+          "justify": "start"
+        },
+        "sindri.ui.box": {
+          "order": 5
+        }
+      }
+    },
+    {
+      "id": "route-stop-4-5-name",
+      "name": "RouteName4_5",
+      "parent": "route-stop-4-5",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "route-name"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "",
+          "font": "fonts/AlegreyaSans-Medium.ttf",
+          "font_size": 0.022,
+          "line_height": 0.02684,
+          "anchor": "center",
+          "layer": 202,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "rich": true,
+          "bounds": [
+            0.0,
+            0.0
+          ],
+          "wrap": "word"
+        },
+        "sindri.ui.box": {
+          "order": 1
+        }
+      }
+    },
+    {
+      "id": "route-stop-4-5-node",
+      "name": "RouteNode4_5",
+      "parent": "route-stop-4-5",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "route-node"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/node.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 201
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
       "id": "route-stop-5-0",
       "name": "RouteStop5_0",
       "parent": "route-step-5",
@@ -13143,6 +14560,234 @@
       "id": "route-stop-5-3-node",
       "name": "RouteNode5_3",
       "parent": "route-stop-5-3",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "route-node"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/node.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 201
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "route-stop-5-4",
+      "name": "RouteStop5_4",
+      "parent": "route-step-5",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "route-stop"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "anchor": "center",
+          "layer": 200,
+          "fill": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0.0,
+          "corner_radius": 0.0
+        },
+        "sindri.ui.layout": {
+          "direction": "row",
+          "spacing": 0.004,
+          "align": "center",
+          "justify": "start"
+        },
+        "sindri.ui.box": {
+          "order": 4
+        }
+      }
+    },
+    {
+      "id": "route-stop-5-4-name",
+      "name": "RouteName5_4",
+      "parent": "route-stop-5-4",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "route-name"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "",
+          "font": "fonts/AlegreyaSans-Medium.ttf",
+          "font_size": 0.022,
+          "line_height": 0.02684,
+          "anchor": "center",
+          "layer": 202,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "rich": true,
+          "bounds": [
+            0.0,
+            0.0
+          ],
+          "wrap": "word"
+        },
+        "sindri.ui.box": {
+          "order": 1
+        }
+      }
+    },
+    {
+      "id": "route-stop-5-4-node",
+      "name": "RouteNode5_4",
+      "parent": "route-stop-5-4",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "route-node"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/node.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 201
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "route-stop-5-5",
+      "name": "RouteStop5_5",
+      "parent": "route-step-5",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "route-stop"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "anchor": "center",
+          "layer": 200,
+          "fill": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0.0,
+          "corner_radius": 0.0
+        },
+        "sindri.ui.layout": {
+          "direction": "row",
+          "spacing": 0.004,
+          "align": "center",
+          "justify": "start"
+        },
+        "sindri.ui.box": {
+          "order": 5
+        }
+      }
+    },
+    {
+      "id": "route-stop-5-5-name",
+      "name": "RouteName5_5",
+      "parent": "route-stop-5-5",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "route-name"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "",
+          "font": "fonts/AlegreyaSans-Medium.ttf",
+          "font_size": 0.022,
+          "line_height": 0.02684,
+          "anchor": "center",
+          "layer": 202,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "rich": true,
+          "bounds": [
+            0.0,
+            0.0
+          ],
+          "wrap": "word"
+        },
+        "sindri.ui.box": {
+          "order": 1
+        }
+      }
+    },
+    {
+      "id": "route-stop-5-5-node",
+      "name": "RouteNode5_5",
+      "parent": "route-stop-5-5",
       "components": {
         "weave.style": {
           "classes": [

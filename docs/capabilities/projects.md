@@ -54,7 +54,8 @@ Lighthouse it divides between two worlds, where a fourth warden joins. In the
 Cinderfast lava rises instead of the tide: it burns what it reaches, vents
 spill it across the board, and water a warden throws on it cools into new
 ground. In the Rime anything shoved onto ice skids on until something stops
-it, and thrown water freezes.
+it, and thrown water freezes. Some forks offer an uncharted island, generated
+from the crossing's seed to its world's rules and built at runtime.
 
 The rules are one value and pure shared functions in `rules.decay`, so aiming
 previews a skill by running it on a copy of the board; the director plays back

@@ -1,0 +1,36 @@
+{
+  "format_version": 1,
+  "metadata": {
+    "name": "column-sea-1"
+  },
+  "entities": [
+    {
+      "id": "column-sea-1",
+      "name": "column-sea-1",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.model": {
+          "asset": "models/column-sea-1.glb",
+          "layer": 0
+        }
+      }
+    }
+  ]
+}

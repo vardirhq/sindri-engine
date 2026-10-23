@@ -49,6 +49,37 @@ script Battle {
     @export let water_pool: Prefab;
     @export let lava_pool: Prefab;
     @export let ice_pool: Prefab;
+    // The cells uncharted islands are built of, per world, height and shade.
+    @export let column_sea_1: Prefab;
+    @export let column_sea_1b: Prefab;
+    @export let column_sea_2: Prefab;
+    @export let column_sea_2b: Prefab;
+    @export let column_sea_3: Prefab;
+    @export let column_sea_3b: Prefab;
+    @export let column_sea_4: Prefab;
+    @export let column_sea_4b: Prefab;
+    @export let column_sea_5: Prefab;
+    @export let column_sea_5b: Prefab;
+    @export let column_caldera_1: Prefab;
+    @export let column_caldera_1b: Prefab;
+    @export let column_caldera_2: Prefab;
+    @export let column_caldera_2b: Prefab;
+    @export let column_caldera_3: Prefab;
+    @export let column_caldera_3b: Prefab;
+    @export let column_caldera_4: Prefab;
+    @export let column_caldera_4b: Prefab;
+    @export let column_caldera_5: Prefab;
+    @export let column_caldera_5b: Prefab;
+    @export let column_rime_1: Prefab;
+    @export let column_rime_1b: Prefab;
+    @export let column_rime_2: Prefab;
+    @export let column_rime_2b: Prefab;
+    @export let column_rime_3: Prefab;
+    @export let column_rime_3b: Prefab;
+    @export let column_rime_4: Prefab;
+    @export let column_rime_4b: Prefab;
+    @export let column_rime_5: Prefab;
+    @export let column_rime_5b: Prefab;
     @export let droplet: Prefab;
     @export let pointer: Prefab;
     @export let mark: Prefab;
@@ -81,6 +112,24 @@ script Battle {
     var roads: List<number> = [];
     // The world the last island was in, so a new world can be met.
     var last_world: number = -1.0;
+    // The omen over each island this crossing, and how many boons are still
+    // to be chosen before going on.
+    var omens: List<number> = [];
+    var boons_left: number = 0.0;
+    // Spring tides: the harder crossing, opened by making one.
+    var spring: bool = false;
+    // What this crossing opened for the next, said on its last screen.
+    var opened: String = "";
+    // Each island's bonus objective this crossing, and how the one in play is
+    // going: what it has counted, whether it has failed, and the Hearth it
+    // began with. Kept as they stood at the start of the turn too, for a
+    // rewind.
+    var objectives: List<number> = [];
+    var obj_count: number = 0.0;
+    var obj_failed: bool = false;
+    var obj_hearth: number = 0.0;
+    var turn_obj_count: number = 0.0;
+    var turn_obj_failed: bool = false;
     // What the run has earned between islands.
     var max_hearth: number = 7.0;
     var extra_rewinds: number = 0.0;
@@ -130,6 +179,8 @@ script Battle {
     var water_tiles: Map<number, Entity> = [:];
     var lava_tiles: Map<number, Entity> = [:];
     var ice_tiles: Map<number, Entity> = [:];
+    // The columns built for each uncharted island this crossing.
+    var built: Map<number, List<Entity>> = [:];
     var columns: Map<number, Entity> = [:];
     var base: List<number> = [];
     // The gem over the warden in hand.
@@ -218,6 +269,60 @@ script Battle {
     }
     fn spot(x: number, z: number) -> Vec3 {
         return Vec3(world_x(x), ground_y(x, z), world_z(z));
+    }
+
+    // The prefab for one cell of an uncharted island.
+    fn column_prefab(world: String, height: number, alt: bool) -> Prefab {
+        if world == "sea" && height == 1.0 && alt == false { return this.column_sea_1; }
+        if world == "sea" && height == 1.0 && alt == true { return this.column_sea_1b; }
+        if world == "sea" && height == 2.0 && alt == false { return this.column_sea_2; }
+        if world == "sea" && height == 2.0 && alt == true { return this.column_sea_2b; }
+        if world == "sea" && height == 3.0 && alt == false { return this.column_sea_3; }
+        if world == "sea" && height == 3.0 && alt == true { return this.column_sea_3b; }
+        if world == "sea" && height == 4.0 && alt == false { return this.column_sea_4; }
+        if world == "sea" && height == 4.0 && alt == true { return this.column_sea_4b; }
+        if world == "sea" && height == 5.0 && alt == false { return this.column_sea_5; }
+        if world == "sea" && height == 5.0 && alt == true { return this.column_sea_5b; }
+        if world == "caldera" && height == 1.0 && alt == false { return this.column_caldera_1; }
+        if world == "caldera" && height == 1.0 && alt == true { return this.column_caldera_1b; }
+        if world == "caldera" && height == 2.0 && alt == false { return this.column_caldera_2; }
+        if world == "caldera" && height == 2.0 && alt == true { return this.column_caldera_2b; }
+        if world == "caldera" && height == 3.0 && alt == false { return this.column_caldera_3; }
+        if world == "caldera" && height == 3.0 && alt == true { return this.column_caldera_3b; }
+        if world == "caldera" && height == 4.0 && alt == false { return this.column_caldera_4; }
+        if world == "caldera" && height == 4.0 && alt == true { return this.column_caldera_4b; }
+        if world == "caldera" && height == 5.0 && alt == false { return this.column_caldera_5; }
+        if world == "caldera" && height == 5.0 && alt == true { return this.column_caldera_5b; }
+        if world == "rime" && height == 1.0 && alt == false { return this.column_rime_1; }
+        if world == "rime" && height == 1.0 && alt == true { return this.column_rime_1b; }
+        if world == "rime" && height == 2.0 && alt == false { return this.column_rime_2; }
+        if world == "rime" && height == 2.0 && alt == true { return this.column_rime_2b; }
+        if world == "rime" && height == 3.0 && alt == false { return this.column_rime_3; }
+        if world == "rime" && height == 3.0 && alt == true { return this.column_rime_3b; }
+        if world == "rime" && height == 4.0 && alt == false { return this.column_rime_4; }
+        if world == "rime" && height == 4.0 && alt == true { return this.column_rime_4b; }
+        if world == "rime" && height == 5.0 && alt == false { return this.column_rime_5; }
+        if world == "rime" && height == 5.0 && alt == true { return this.column_rime_5b; }
+        return this.column_sea_1;
+    }
+
+    // Builds an uncharted island on its root, a column a cell, taking down
+    // whatever was built there for an earlier crossing.
+    fn build_uncharted(root: Entity, island_index: number, made: IslandDef) {
+        if built.contains(island_index) {
+            for e in built[island_index] { World.despawn(e); }
+        }
+        var pieces: List<Entity> = [];
+        for c in 0..(SIZE * SIZE) {
+            let h = digit_of(made.heights.slice(c, c + 1.0));
+            if h <= 0.0 { continue; }
+            let x = c % SIZE;
+            let z = floor_of(c);
+            let column = World.spawn_child(column_prefab(made.world, min(h, 5.0), (x + z) % 2.0 == 1.0), root);
+            column.transform.position = Vec3(world_x(x), 0.0, world_z(z));
+            pieces.push(column);
+        }
+        built[island_index] = pieces;
     }
 
     // --- The island --------------------------------------------------------
@@ -621,6 +726,7 @@ script Battle {
     // --- Playing beats ----------------------------------------------------------
 
     fn play(next: Board, then: After) {
+        tally(next);
         queue = next.beats;
         board = next;
         board.beats.clear();
@@ -912,7 +1018,7 @@ script Battle {
                 play(plan_all(board), After.Mark);
             }
             After.Mark => {
-                board.arrivals = wave_of(def, board.round);
+                board.arrivals = wave_for(def, board.round, omen_on(island), spring);
                 board = mark_spawns(board, landing);
                 board.beats.clear();
                 begin_player_turn();
@@ -964,7 +1070,12 @@ script Battle {
             let hero = Save.number("party_" + i, i);
             if hero >= 0.0 && hero < HERO_COUNT && !chosen.contains(hero) { chosen.push(hero); }
         }
+        var open: List<number> = [];
+        for hero in chosen { if hero_open(hero) { open.push(hero); } }
+        chosen = open;
         if chosen.length < 3.0 { chosen = [0.0, 1.0, 2.0]; }
+        spring = Save.flag("open_spring", false) && Save.flag("spring", false);
+        opened = "";
         show_muster();
         show_screen("Muster", true);
         print("Causeway muster ready");
@@ -974,14 +1085,24 @@ script Battle {
         let screens = Screens.on(World.find("Screens"));
         for i in 0..HERO_COUNT {
             let kind = hero_kind(i);
-            screens.card("Muster", i, hero_mark(kind), kind_name(kind),
-                hero_blurb(kind) + "  [color=#9fb4bf]Health " + kind_hp(kind) + ", move " + kind_move(kind) + ".[/color]",
-                hero_color(kind));
+            var about = hero_blurb(kind) + "  [color=#9fb4bf]Health " + kind_hp(kind) + ", move " + kind_move(kind) + ".[/color]";
+            var title = kind_name(kind);
+            var color = hero_color(kind);
+            if !hero_open(i) {
+                about = "[color=#9fb4bf]" + hero_calling(i) + "[/color]";
+                title = "[color=#8fa3ad]" + title + "[/color]";
+                color = Color(0.45, 0.5, 0.55);
+            }
+            screens.card("Muster", i, hero_mark(kind), title, about, color);
             screens.taken("Muster", i, chosen.contains(i));
-            screens.face("Muster", i, i);
+            // A warden not yet called shows no face, only a mark.
+            if hero_open(i) { screens.face("Muster", i, i); } else { screens.face("Muster", i, -1.0); }
         }
         var line = chosen.length + " of 3 chosen";
         if chosen.length == 3.0 { line += ", ready to set out"; }
+        if Save.flag("open_spring", false) {
+            if spring { line += "  ·  [color=#ffcf7a]spring tides[/color] (S)"; } else { line += "  ·  calm tides (S)"; }
+        }
         screen_words("Muster", "Before the crossing", "Muster three wardens", "", line);
         screens.ready("Muster", chosen.length == 3.0);
     }
@@ -989,6 +1110,10 @@ script Battle {
     // Takes a hero into the muster, or puts one back. Taking a fourth puts
     // back the first taken, so a keyboard can change its mind in one press.
     fn toggle_hero(hero: number) {
+        if !hero_open(hero) {
+            Audio.play("audio/bump.wav", 0.4);
+            return;
+        }
         if chosen.contains(hero) {
             chosen.remove_at(chosen.index_of(hero));
         } else {
@@ -1007,6 +1132,11 @@ script Battle {
         island = clamp(floor(Game.get("start_island", 0.0)), 0.0, ISLAND_COUNT - 1.0);
         hearth = starting_hearth;
         max_hearth = starting_hearth;
+        // Spring tides: one more Hollow every round, and a smaller Hearth.
+        if spring {
+            hearth -= 2.0;
+            max_hearth -= 2.0;
+        }
         extra_rewinds = 0.0;
         wardens = [];
         for hero in chosen { wardens.push(fresh(hero_kind(hero))); }
@@ -1020,10 +1150,37 @@ script Battle {
         }
         last_world = world_of(island);
         Random.seed(Save.number("seed", 1.0) * 7919.0 + 17.0);
+        // The uncharted islands this crossing are made from its seed.
+        Game.set("crossing_seed", Save.number("seed", 1.0) * 13.0);
         Save.set_number("seed", Save.number("seed", 1.0) + 1.0);
+        omens = [];
+        for i in 0..ISLAND_COUNT { omens.push(omen_of_roll(i, Random.int(0.0, 99.0))); }
+        objectives = [];
+        for i in 0..ISLAND_COUNT { objectives.push(Random.int(0.0, OBJECTIVE_COUNT - 1.0)); }
         Audio.play("audio/boon.wav", 0.6);
         print("Causeway crossing set out");
         begin_island();
+    }
+
+    // Whether a warden answers the muster yet: four do from the start, and
+    // two are called by what a crossing does.
+    fn hero_open(hero: number) -> bool {
+        if hero == 4.0 { return Save.flag("open_harpooner", false); }
+        if hero == 5.0 { return Save.flag("open_shieldback", false); }
+        return true;
+    }
+
+    fn hero_calling(hero: number) -> String {
+        if hero == 4.0 { return "Not yet called. Hold the Lighthouse, and the Harpooner will hear of it."; }
+        return "Not yet called. Make a crossing, and the Shieldback will come.";
+    }
+
+    // Opens something for the crossings after this one, once.
+    fn open_for_next(key: String, news: String) {
+        if Save.flag(key, false) { return; }
+        Save.set_flag(key, true);
+        if opened != "" { opened += "  "; }
+        opened += news;
     }
 
     // The heroes not in the crossing, in muster order.
@@ -1032,7 +1189,7 @@ script Battle {
         for i in 0..HERO_COUNT {
             var has = false;
             for w in wardens { if w.kind == hero_kind(i) { has = true; } }
-            if !has { left.push(i); }
+            if !has && hero_open(i) { left.push(i); }
         }
         return left;
     }
@@ -1082,6 +1239,9 @@ script Battle {
         last_world = world_of(island);
         path.push(island);
         board = board_of(def, wardens, hearth);
+        obj_count = 0.0;
+        obj_failed = false;
+        obj_hearth = hearth;
         base = [];
         for h in board.heights { base.push(h); }
         clear_ground();
@@ -1103,6 +1263,7 @@ script Battle {
         leaving_island = shown_island;
         if leaving_island == island { leaving_island = -1.0; }
         let next = islands[island];
+        if is_uncharted(island) { build_uncharted(next, island, def); }
         World.set_active(next, true);
         next.transform.position.y = -ISLAND_DEPTH;
         shown_island = island;
@@ -1155,6 +1316,8 @@ script Battle {
             if recruited != "" {
                 banner(def.name, "The " + recruited + " joins you. " + def.blurb);
                 recruited = "";
+            } else if omen_line(island) != "" {
+                banner(def.name, omen_line(island));
             } else {
                 banner(def.name, def.blurb);
             }
@@ -1167,6 +1330,8 @@ script Battle {
 
     fn begin_player_turn() {
         turn_start = board;
+        turn_obj_count = obj_count;
+        turn_obj_failed = obj_failed;
         selected = -1.0;
         mode = Mode.Move;
         phase = Phase.Player;
@@ -1204,6 +1369,8 @@ script Battle {
         if phase != Phase.Player || rewinds <= 0.0 { return; }
         rewinds -= 1.0;
         board = turn_start;
+        obj_count = turn_obj_count;
+        obj_failed = turn_obj_failed;
         sync_pieces();
         selected = -1.0;
         select_next();
@@ -1584,6 +1751,13 @@ script Battle {
         show_threats(new_turn(board));
         for c in 0..(SIZE * SIZE) { set_mark(threat_marks, c, ""); }
         hearth = board.hearth;
+        if island == TITLE_ISLAND {
+            open_for_next("open_harpooner", "The Harpooner has heard, and will answer the next muster.");
+        }
+        if omen_on(island) == OMEN_LIT {
+            max_hearth += 1.0;
+            hearth = min(hearth + 2.0, max_hearth);
+        }
         let step = layer_of(island) + 1.0;
         Audio.play("audio/victory.wav", 0.8);
         if step >= LAYER_COUNT {
@@ -1594,15 +1768,41 @@ script Battle {
             let made = Save.number("crossings", 0.0);
             var record = "Your first crossing.";
             if made > 1.0 { record = "Crossings made: " + made; }
-            screen_words("Crossed", "The crossing is made", "The lamp is lit",
-                "The causeway is under the sea behind you, and the beacon burns over open water.",
+            if spring { record += "  In spring tides."; }
+            open_for_next("open_shieldback", "The Shieldback will answer the next muster.");
+            open_for_next("open_spring", "Spring tides are open at the muster.");
+            var body = "The causeway is under the sea behind you, and the beacon burns over open water.";
+            if opened != "" { body += " " + opened; }
+            opened = "";
+            screen_words("Crossed", "The crossing is made", "The lamp is lit", body,
                 "Hearth " + hearth + " of " + max_hearth + "  ·  " + record);
             return;
         }
         show_screen("Held", true);
         roads = roads_from(island);
+        // Where a fork has more roads than a choice can show, the uncharted
+        // island is offered beside one of the written ones.
+        if roads.length > 2.0 {
+            var written: List<number> = [];
+            var uncharted: List<number> = [];
+            for r in roads {
+                if is_uncharted(r) { uncharted.push(r); } else { written.push(r); }
+            }
+            roads = [written[Random.int(0.0, written.length - 1.0)]];
+            for r in uncharted { if roads.length < 2.0 { roads.push(r); } }
+        }
         var why = "High tide. The causeway is under water and the Hollow turn back.";
         if board.molten { why = "The lava has sealed the gate, and the Hollow cannot come through it."; }
+        if objective_met() {
+            why += " " + objective_name(objective_on(island), def) + ": one more boon.";
+        }
+        if omen_on(island) == OMEN_LIT { why += " The lit windows rekindle the Hearth."; }
+        if opened != "" {
+            why += " " + opened;
+            opened = "";
+        }
+        if omen_on(island) == OMEN_HOST { why += " The host is beaten: choose two boons."; }
+        if omen_on(island) == OMEN_WRECK { why += " The wreck holds an upgrade."; }
         var next = "next, " + island_def(roads[0]).name;
         if roads.length > 1.0 { next = "next, the road forks"; }
         if world_of(roads[0]) != world_of(island) {
@@ -1611,6 +1811,69 @@ script Battle {
         }
         screen_words("Held", "Step " + step + " of " + LAYER_COUNT + " held", def.name + " holds",
             why, "Hearth " + hearth + " of " + max_hearth + "  ·  " + next);
+    }
+
+    // The bonus objective on an island this crossing.
+    fn objective_on(index: number) -> number {
+        if index < objectives.length { return objectives[index]; }
+        return OBJ_HOUSES;
+    }
+
+    // Counts what a change did towards the island's objective, from the beats
+    // it left: Hollow lost to the sea or the lava, Hollow destroyed, and
+    // houses or wardens lost.
+    fn tally(next: Board) {
+        let objective = objective_on(island);
+        for beat in next.beats {
+            if beat.kind != BeatKind.Die && beat.kind != BeatKind.Drown && beat.kind != BeatKind.Burn { continue; }
+            let at = unit_index(next, beat.unit);
+            if at < 0.0 { continue; }
+            let kind = next.units[at].kind;
+            if is_hollow(kind) {
+                if objective == OBJ_SLAY { obj_count += 1.0; }
+                if objective == OBJ_DEEP && beat.kind != BeatKind.Die { obj_count += 1.0; }
+            }
+            if objective == OBJ_HOUSES && kind == Kind.House { obj_failed = true; }
+            if objective == OBJ_STAND && is_warden(kind) { obj_failed = true; }
+        }
+    }
+
+    // Whether the island's objective is met, so far as it can be told yet.
+    fn objective_met() -> bool {
+        let objective = objective_on(island);
+        if obj_failed { return false; }
+        if objective == OBJ_EMBER { return obj_hearth - board.hearth <= 1.0; }
+        if objective_goal(objective) > 0.0 { return obj_count >= objective_goal(objective); }
+        return true;
+    }
+
+    // The objective's line for the HUD: its name, how far along it is, and a
+    // mark once it is won or lost.
+    fn objective_line() -> String {
+        let objective = objective_on(island);
+        var line = "[color=#9fe6ff]" + objective_name(objective, def) + "[/color]";
+        let goal = objective_goal(objective);
+        if goal > 0.0 { line += "  " + min(obj_count, goal) + " of " + goal; }
+        if objective == OBJ_EMBER { line += "  " + max(0.0, obj_hearth - board.hearth) + " lost"; }
+        if obj_failed || (objective == OBJ_EMBER && !objective_met()) {
+            line += "  [color=#ff9e80]failed[/color]";
+        } else if goal > 0.0 && objective_met() {
+            line += "  [color=#c8ff9a]done[/color]";
+        }
+        return line;
+    }
+
+    // The omen over an island on this crossing.
+    fn omen_on(index: number) -> number {
+        if index < omens.length { return omens[index]; }
+        return OMEN_PLAIN;
+    }
+
+    // An omen as a line for a card or a banner, or nothing for a plain one.
+    fn omen_line(index: number) -> String {
+        let omen = omen_on(index);
+        if omen == OMEN_PLAIN { return ""; }
+        return "[color=#ffcf7a]" + omen_name(omen) + ":[/color] " + omen_text(omen);
     }
 
     // After the boon: on down the road, or a choice where it forks.
@@ -1627,8 +1890,10 @@ script Battle {
             let at = island_def(road);
             var waves = "";
             for wave in at.waves { waves += wave; }
-            screens.card("Route", k, "◆", at.name, at.blurb + "  " + at.rounds + " rounds, "
-                + (waves.length + at.start.length) + " Hollow.", world_color(road));
+            var text = at.blurb + "  " + at.rounds + " rounds, " + (waves.length + at.start.length) + " Hollow.";
+            if is_uncharted(road) { text = "[color=#9fe6ff]Uncharted.[/color] " + text; }
+            if omen_line(road) != "" { text += "  " + omen_line(road); }
+            screens.card("Route", k, "◆", at.name, text, world_color(road));
             screens.taken("Route", k, false);
             screens.face("Route", k, -1.0);
         }
@@ -1717,10 +1982,13 @@ script Battle {
     // plays the same crossing. A boon is a number: ten a warden plus 0 for
     // health, 1 for its skill and 2 for its stride, or 100 and up for the
     // crossing's.
-    fn offer_boons() {
-        var pool: List<number> = [100.0, 101.0, 102.0];
+    fn offer_boons(upgrades_only: bool) {
+        var pool: List<number> = [];
+        if !upgrades_only { pool = [100.0, 101.0, 102.0]; }
         for w in 0..wardens.length {
-            for kind in 0..3 { pool.push(w * 10.0 + kind); }
+            if !upgrades_only {
+                for kind in 0..3 { pool.push(w * 10.0 + kind); }
+            }
             // An upgrade the warden lacks, twice over: they change how a
             // crossing plays, so they should come up often.
             if !knows(wardens[w].perks, PERK_A) { pool.push(w * 10.0 + 3.0); pool.push(w * 10.0 + 3.0); }
@@ -1736,6 +2004,16 @@ script Battle {
             var left: List<number> = [];
             for b in pool { if b != boon { left.push(b); } }
             pool = left;
+        }
+        // An upgrade-only hand short of cards fills out with ordinary boons.
+        if offered.length < 4.0 && upgrades_only {
+            let had = offered;
+            offer_boons(false);
+            var mixed = had;
+            for b in offered {
+                if mixed.length < 4.0 && !mixed.contains(b) { mixed.push(b); }
+            }
+            offered = mixed;
         }
         show_offers("Before " + next_name(), "Choose a boon");
     }
@@ -1879,6 +2157,13 @@ script Battle {
             if part == 4.0 { learn(w, PERK_B); }
         }
         Audio.play("audio/boon.wav", 0.6);
+        boons_left -= 1.0;
+        if boons_left > 0.0 {
+            offer_boons(false);
+            screen_words("Upgrade", "One more", "Choose a boon", "", "Hearth " + hearth + " of " + max_hearth);
+            show_screen("Upgrade", true);
+            return;
+        }
         go_on();
     }
 
@@ -1976,7 +2261,15 @@ script Battle {
 
     fn update_hud() {
         set_text("IslandName", def.name);
-        set_text("RoundText", "Round " + min(board.round, board.rounds) + " of " + board.rounds);
+        var round = "Round " + min(board.round, board.rounds) + " of " + board.rounds;
+        let omen = omen_on(island);
+        if omen != OMEN_PLAIN && phase != Phase.Title { round += "  ·  [color=#ffcf7a]" + omen_name(omen) + "[/color]"; }
+        set_text("RoundText", round);
+        if phase == Phase.Title {
+            set_text("ObjectiveText", "");
+        } else {
+            set_text("ObjectiveText", objective_line());
+        }
         var tide = "Tide " + board.tide;
         if board.molten { tide = "Lava " + board.tide; }
         if rises_this_round(board) {
@@ -2162,12 +2455,12 @@ script Battle {
         if which == 2.0 {
             show_screen("Held", false);
             phase = Phase.Upgrade;
-            offer_boons();
+            offer_boons(false);
             show_screen("Upgrade", true);
         }
         if which == 3.0 { lose(); }
         if which == 4.0 {
-            island = ISLAND_COUNT - 1.0;
+            island = layer_islands(LAYER_COUNT - 1.0)[0];
             win_island();
         }
         if which == 5.0 {
@@ -2237,6 +2530,19 @@ script Battle {
                         toggle_hero(i);
                     }
                 }
+                if Save.flag("open_spring", false) && (pressed("MusterSpring") || Input.Keyboard.just_pressed("S")) {
+                    spring = !spring;
+                    Save.set_flag("spring", spring);
+                    Audio.play("audio/select.wav", 0.4);
+                    show_muster();
+                }
+                if Save.flag("open_spring", false) {
+                    var label = "Calm tides";
+                    if spring { label = "Spring tides"; }
+                    fade_plate("MusterSpring", label, "fff4dc", 1.0);
+                } else {
+                    fade_plate("MusterSpring", "", "fff4dc", 0.0);
+                }
                 if chosen.length == 3.0 && (pressed("MusterButton") || Input.Keyboard.just_pressed("Enter")) {
                     set_out();
                 }
@@ -2246,10 +2552,22 @@ script Battle {
                     show_screen("Held", false);
                     phase = Phase.Upgrade;
                     // A warden joins where the road enters a new world.
+                    // What the island's omen pays: two boons, an upgrade, or
+                    // none at all after still water.
+                    let omen = omen_on(island);
+                    boons_left = 1.0;
+                    if omen == OMEN_HOST { boons_left = 2.0; }
+                    if omen == OMEN_STILL { boons_left = 0.0; }
+                    // A bonus objective met is one more.
+                    if objective_met() { boons_left += 1.0; }
                     if world_of(roads[0]) != world_of(island) && wardens.length < 4.0 {
+                        // A recruit is chosen first; the boons follow it.
                         offer_recruits();
+                    } else if boons_left == 0.0 {
+                        go_on();
+                        return;
                     } else {
-                        offer_boons();
+                        offer_boons(omen == OMEN_WRECK);
                     }
                     show_screen("Upgrade", true);
                 }

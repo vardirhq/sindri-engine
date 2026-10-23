@@ -22,9 +22,9 @@
    half its own size in from the margin. */
 .status {
     width: 320px;
-    height: 128px;
+    height: 152px;
     x: 180px;
-    y: -84px;
+    y: -96px;
     anchor: top_left;
     padding: 16px 20px;
     direction: column;
@@ -495,7 +495,7 @@
 .route-map {
     width: 136vh;
     max-width: 96vw;
-    height: 15vh;
+    height: 18vh;
     direction: row;
     gap: 0.6vh;
     justify-content: center;
@@ -504,7 +504,7 @@
 
 .route-step {
     width: 19vh;
-    height: 15vh;
+    height: 18vh;
     direction: column;
     gap: 0.4vh;
     justify-content: center;
@@ -513,22 +513,22 @@
 
 .route-stop {
     width: 100%;
-    height: 3.4vh;
+    height: 2.7vh;
     direction: row;
     gap: 0.6vh;
     align-items: center;
 }
 
 .route-node {
-    width: 3vh;
-    height: 3vh;
+    width: 2.4vh;
+    height: 2.4vh;
 }
 
 .route-name {
-    width: 15vh;
-    height: 3.4vh;
-    font-size: 1.7vh;
-    line-height: 1.9vh;
+    width: 15.6vh;
+    height: 2.7vh;
+    font-size: 1.55vh;
+    line-height: 1.8vh;
     text-align: start;
     text-wrap: word;
 }
@@ -741,10 +741,10 @@
 /* --- A phone held upright -------------------------------------------------- */
 
 @media (orientation: portrait) {
-    .status { width: 47vw; height: 120px; x: 26vw; y: -64px; padding: 28px 22px; gap: 0px; }
+    .status { width: 47vw; height: 144px; x: 26vw; y: -76px; padding: 28px 22px; gap: 0px; }
     .island-name { font-size: 19px; line-height: 23px; height: 23px; }
     .status-line { font-size: 12px; line-height: 17px; height: 17px; }
-    .hearth { width: 46vw; height: 120px; x: -25vw; y: -64px; padding: 28px 14px; }
+    .hearth { width: 46vw; height: 144px; x: -25vw; y: -76px; padding: 40px 14px; }
     .hearth-title { font-size: 14px; line-height: 18px; height: 18px; }
     .hearth-lamps { height: 26px; gap: 0px; }
     .hearth-lamp { width: 13px; height: 18px; }
@@ -787,7 +787,7 @@
 .button.rotate { width: 44px; height: 44px; }
 .button.rotate.top { width: 58px; }
 @media (orientation: portrait) {
-    .view-controls { x: -86px; y: -150px; }
+    .view-controls { x: -86px; y: -174px; }
     .banner { y: -186px; }
     .screen-kicker { height: 5vw; font-size: 3.6vw; line-height: 4.4vw; letter-spacing: 1vw; }
     .screen-title { height: 13vw; font-size: 11vw; line-height: 13vw; letter-spacing: 0.3vw; }
@@ -813,11 +813,11 @@
     .boon-text.hero-text { width: 46vw; font-size: 2.7vw; line-height: 3.5vw; text-align: start; }
     .boon-key.hero-key { width: 8vw; height: 4vw; font-size: 2.6vw; line-height: 3.4vw; }
     .screen-title.muster-title { font-size: 8.4vw; letter-spacing: 0px; }
-    .route-map { width: 96vw; height: 48vw; gap: 0.4vw; }
-    .route-step { width: 14.6vw; height: 48vw; gap: 0.8vw; align-items: center; }
-    .route-stop { height: 11vw; direction: column; gap: 0.4vw; align-items: center; }
-    .route-node { width: 4.4vw; height: 4.4vw; }
-    .route-name { width: 14.6vw; height: 6vw; font-size: 2.2vw; line-height: 2.6vw; text-align: center; }
+    .route-map { width: 96vw; height: 62vw; gap: 0.4vw; }
+    .route-step { width: 14.6vw; height: 62vw; gap: 0.6vw; align-items: center; }
+    .route-stop { height: 9.6vw; direction: column; gap: 0.2vw; align-items: center; }
+    .route-node { width: 3.6vw; height: 3.6vw; }
+    .route-name { width: 14.6vw; height: 5.6vw; font-size: 2vw; line-height: 2.4vw; text-align: center; }
     .route-link { width: 1.4vw; height: 0.5vw; }
     .boons.roads { width: 92vw; height: auto; direction: column; gap: 2vw; }
     .boon-card.road-card { width: 88vw; height: 30vw; }
