@@ -1,6 +1,6 @@
 # Changelog
 
-- Put the isometric baker on the website as a tool, at
+- Put the isometric baker on the website as a tool called Sprite Baker, at
   `/examples/isometric-baker/`: edit a recipe, see the sheet it bakes, and
   download the PNG, `.sheet` and prefab, or all three as a zip. It runs the
   tool's own sources in the page, so it bakes the same pixels as the command

@@ -39,7 +39,9 @@ The same bake runs in a page at `/examples/isometric-baker/`: a recipe on the
 left, the baked sheet on the right, and the PNG, `.sheet` and prefab to download
 singly or as a zip laid out like an asset root. It is for trying a recipe, or
 making a sprite for a project without Node installed, and it is listed in the
-directory as a tool.
+directory as a tool. Its title there is **Sprite Baker**, because it bakes three
+views and not only isometric; the tool, its folder and its route keep the
+older name (see the provenance key below).
 
 It is not a second implementation. `tools/isometric-baker/web/build.mjs` copies
 the tool's own TypeScript into the site with the types stripped by Node's

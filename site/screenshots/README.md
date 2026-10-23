@@ -133,9 +133,9 @@ node scripts/browser/sound-lab.mjs target/sound-lab target/sound-lab-captures
 cp target/sound-lab-captures/sound-lab-desktop-sfx.png site/screenshots/sound-lab.png
 ```
 
-## The Isometric Baker
+## The Sprite Baker
 
-`isometric-baker.png` is the browser baker on its first example, taken by the
+`isometric-baker.png` is the browser Sprite Baker on its first example, taken by the
 smoke test that checks the page works.
 
 ```

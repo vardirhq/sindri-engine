@@ -1,4 +1,4 @@
-// Opens the browser Isometric Baker at desktop and phone sizes and bakes in it.
+// Opens the browser Sprite Baker at desktop and phone sizes and bakes in it.
 //
 //   node scripts/browser/baker.mjs <site-dir> [capture-dir]
 //
