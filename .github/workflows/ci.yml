@@ -80,6 +80,44 @@ jobs:
             --repo-id "$GITHUB_REPOSITORY_ID" --tree "$(git rev-parse 'HEAD^{tree}')" \
             --changed "$changed"
 
+  # A pull request that only touches the companion game -- its scripts,
+  # assets, tests and the generators that write them -- cannot change what the
+  # engine, the editor or the browser host do, so it does not pay for the
+  # engine's whole workspace test run, the render captures or the browser run
+  # (about half an hour on a software GPU). It runs the game's own tests
+  # instead. Anything else in the diff, or any event other than a pull request,
+  # runs everything. The push to main after the merge is the full check: a
+  # light run leaves no verified record, so nothing there is skipped.
+  scope:
+    name: What changed
+    runs-on: ubuntu-latest
+    outputs:
+      light: ${{ steps.scope.outputs.light }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 2
+      - name: Is the diff only the game
+        id: scope
+        shell: bash
+        run: |
+          light=false
+          if [[ "$GITHUB_EVENT_NAME" == pull_request ]]; then
+            # The checkout is the merge of the head into main, so HEAD^ is the
+            # whole pull request's diff.
+            light=true
+            while IFS= read -r file; do
+              case "$file" in
+                game/assets/*|game/tests/*|game/sindri.toml|CHANGELOG.md) ;;
+                tools/causeway_art.py|tools/level.py|tools/check_causeway_art.py) ;;
+                docs/capabilities/projects.md|docs/capabilities/projects.toml) ;;
+                *) light=false; echo "Full run: $file"; break ;;
+              esac
+            done < <(git diff --name-only HEAD^ HEAD)
+          fi
+          echo "light=$light" >>"$GITHUB_OUTPUT"
+          echo "Game-only pull request: $light" >>"$GITHUB_STEP_SUMMARY"
+
   # Nothing here compiles anything, so it reports in well under a minute. It
   # used to gate every compiling job, which saved their runners when a missing
   # newline was going to fail the run anyway, but it also hid every Clippy and
@@ -349,8 +387,8 @@ jobs:
 
   test:
     name: Test and render captures
-    needs: reuse
-    if: ${{ !cancelled() && needs.reuse.outputs.verified != 'true' }}
+    needs: [reuse, scope]
+    if: ${{ !cancelled() && needs.reuse.outputs.verified != 'true' && needs.scope.outputs.light != 'true' }}
     runs-on: ubuntu-latest
     # Both jobs take 20 to 25 minutes, so at 25 a slow runner was cancelled
     # partway through, with nothing failed.
@@ -616,8 +654,8 @@ jobs:
 
   wasm:
     name: Browser target
-    needs: reuse
-    if: ${{ !cancelled() && needs.reuse.outputs.verified != 'true' }}
+    needs: [reuse, scope]
+    if: ${{ !cancelled() && needs.reuse.outputs.verified != 'true' && needs.scope.outputs.light != 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
     outputs:
@@ -688,8 +726,8 @@ jobs:
   # started announcing it.
   browser:
     name: Run the engine in a browser
-    needs: reuse
-    if: ${{ !cancelled() && needs.reuse.outputs.verified != 'true' }}
+    needs: [reuse, scope]
+    if: ${{ !cancelled() && needs.reuse.outputs.verified != 'true' && needs.scope.outputs.light != 'true' }}
     runs-on: ubuntu-latest
     # Both jobs take 20 to 25 minutes, so at 25 a slow runner was cancelled
     # partway through, with nothing failed.
@@ -1146,18 +1184,46 @@ jobs:
             exit 1
           fi
 
+  # What a game-only pull request runs in place of the workspace tests: the
+  # game's own suite, which holds the rules, the bot's whole crossings and the
+  # screen layouts.
+  game_tests:
+    name: Game tests
+    needs: scope
+    if: ${{ needs.scope.outputs.light == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@1.95.0
+      - uses: Swatinem/rust-cache@v2
+        with:
+          save-if: ${{ github.ref == 'refs/heads/main' }}
+      - uses: ./.github/actions/linux-deps
+        with:
+          packages: libasound2-dev libudev-dev libvulkan1 libxkbcommon-x11-0 mesa-vulkan-drivers
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-nextest@0.9.143
+      - name: Test the game
+        env:
+          WGPU_BACKEND: vulkan
+          SINDRI_REQUIRE_GPU: 1
+          SINDRI_REQUIRE_GPU_TIMESTAMPS: 1
+        run: cargo nextest run --package sindri-causeway --all-features --no-fail-fast
+
   # The record the reuse job looks for: an artifact named after the tree this
   # run tested, left only when every job passed. Runs from forks never leave
   # one, and the reuse job would not trust one from a fork anyway.
   record:
     name: Record the verified tree
-    needs: [reuse, quick, decay_preflight, baker, clippy, test, wasm, browser]
+    needs: [reuse, scope, quick, decay_preflight, baker, clippy, test, wasm, browser, game_tests]
     if: >-
       ${{ !cancelled() && needs.reuse.outputs.verified != 'true'
       && needs.quick.result == 'success' && needs.decay_preflight.result == 'success'
       && needs.baker.result == 'success' && needs.clippy.result == 'success'
       && needs.test.result == 'success' && needs.wasm.result == 'success'
-      && needs.browser.result == 'success'
+      && needs.browser.result == 'success' && needs.scope.outputs.light != 'true'
       && (github.event_name != 'pull_request'
           || github.event.pull_request.head.repo.full_name == github.repository) }}
     runs-on: ubuntu-latest
@@ -1177,8 +1243,8 @@ jobs:
 
   diagnostics_summary:
     name: CI failure summary
-    if: ${{ always() && (needs.quick.result == 'failure' || needs.decay_preflight.result == 'failure' || needs.clippy.result == 'failure' || needs.test.result == 'failure' || needs.wasm.result == 'failure' || needs.browser.result == 'failure') }}
-    needs: [quick, decay_preflight, clippy, test, wasm, browser]
+    if: ${{ always() && (needs.quick.result == 'failure' || needs.decay_preflight.result == 'failure' || needs.clippy.result == 'failure' || needs.test.result == 'failure' || needs.wasm.result == 'failure' || needs.browser.result == 'failure' || needs.game_tests.result == 'failure') }}
+    needs: [quick, decay_preflight, clippy, test, wasm, browser, game_tests]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
