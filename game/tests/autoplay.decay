@@ -35,6 +35,10 @@ script Autoplay {
     @export let first: number = 0.0;
     // Prints the board before every Hollow turn, for reading a game through.
     @export let tracing: bool = false;
+    // A world to play one generated island of instead of a crossing, and how
+    // deep into it, for judging the generator.
+    @export let gen_world: String = "";
+    @export let gen_depth: number = 0.0;
 
     var island: number = 0.0;
     var party: List<Warden> = [];
@@ -80,10 +84,16 @@ script Autoplay {
         }
     }
 
+    // The island being played: a written one, or the generated one.
+    fn def_here() -> IslandDef {
+        if gen_world != "" { return generated_island(gen_world, gen_depth, seed); }
+        return island_def(island);
+    }
+
     fn begin(hearth: number) {
-        let def = island_def(island);
+        let def = def_here();
         // The first island of a new world brings a fourth warden.
-        if recruits_on(island) && party.length < 4.0 {
+        if (recruits_on(island) || (gen_world != "" && gen_world != "sea")) && party.length < 4.0 {
             party.push(stranger());
             record_party();
         }
@@ -188,6 +198,7 @@ script Autoplay {
             started = true;
             Random.seed(seed);
             Game.set("hearth", 7.0);
+            Game.set("crossing_seed", seed * 13.0);
             island = first;
             for i in 0..ISLAND_COUNT { omens.push(omen_of_roll(i, Random.int(0.0, 99.0))); }
             // Three wardens mustered by the dice; starting past the island
@@ -251,7 +262,7 @@ script Autoplay {
             if omen == OMEN_STILL { boons = 0.0; }
             for b in 0..boons { learn_something(); }
             if omen == OMEN_LIT { board.hearth = min(board.hearth + 2.0, 8.0); }
-            if layer_of(island) + 1.0 >= LAYER_COUNT {
+            if gen_world != "" || layer_of(island) + 1.0 >= LAYER_COUNT {
                 Game.set("crossed", 1.0);
                 done = true;
                 return;
@@ -268,7 +279,7 @@ script Autoplay {
             begin(board.hearth);
             return;
         }
-        let def = island_def(island);
+        let def = def_here();
         board = new_turn(board);
         board = plan_all(board);
         board.arrivals = wave_under(def, board.round, omens[island]);

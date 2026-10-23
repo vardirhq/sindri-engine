@@ -808,13 +808,25 @@ def island_mesh(island, seed):
         busy = island["features"][c] != "."
         scatter(m, rng, top, cx, h, cz, busy)
 
-    if island.get("world") == "caldera":
-        caldera(m, rng)
-        return m
-    if island.get("world") == "rime":
-        rime(m, rng)
-        return m
+    surroundings(m, rng, island.get("world", "sea"))
+    return m
 
+
+def surroundings(m, rng, world):
+    """Everything round the board: a world's floor, its scenery, and the
+    Hollow's road in from the east."""
+    if world == "caldera":
+        caldera(m, rng)
+        return
+    if world == "rime":
+        rime(m, rng)
+        return
+    shallows(m, rng)
+
+
+def shallows(m, rng):
+    """Round an island of the causeway: the sea floor, rocks and islets, the
+    causeway itself out to the mainland."""
     # The sea floor: sand round the island fading through weed to deep water,
     # far wider than the screen so the sea has no edge.
     centre = (ORIGIN + 4, 0, ORIGIN + 4)
@@ -857,7 +869,47 @@ def island_mesh(island, seed):
     for t in range(9):
         tree(m, rng, ORIGIN + SIZE + 14 + rng.uniform(0, 3), 1.0, ORIGIN - 8 + t * 3.2 + rng.uniform(-1, 1),
              pine=True)
+
+
+# --- Islands built as they are played ----------------------------------------------
+
+# The blocks a generated island is built of in each world, low to high, as
+# `generate.decay` names them.
+GENERATED_TOPS = {"sea": ("sand", "ground", "ground"), "caldera": ("ash", "basalt", "cinder"),
+                  "rime": ("frost", "snow", "snow")}
+
+
+def column_mesh(world, height, alt, seed):
+    """One cell of a generated island, `height` blocks tall, its top in the
+    world's block for that height, with the same small things scattered on
+    it that a written island has. `alt` is the checker's second shade."""
+    m = Mesh()
+    rng = random.Random(seed)
+    shore, land, high = GENERATED_TOPS[world]
+    top_block = column_top({"shore": shore, "land": land, "high": high}, height)
+    top, side = TOP[top_block], SIDE[top_block]
+    suffix = "-b" if alt else ""
+    for level in range(height):
+        shade = side + ("-b" if level % 2 else "")
+        bottom = -1.0 if level == 0 else float(level)
+        top_y = level + 1.0 - (0.16 if level == height - 1 else 0.0)
+        m.box(shade, (0, (bottom + top_y) / 2, 0), (0.98, top_y - bottom - 0.02, 0.98), bevel=BEVEL)
+    m.box(top + suffix, (0, height - 0.08, 0), (1.0, 0.16, 1.0), bevel=0.04)
+    scatter(m, rng, top, 0, height, 0, False)
     return m
+
+
+def generated_pieces():
+    """The columns and surroundings generated islands are built from."""
+    for world in GENERATED_TOPS:
+        for height in range(1, 6):
+            for alt in (False, True):
+                name = f"column-{world}-{height}{'b' if alt else ''}"
+                column_mesh(world, height, alt, height * 13 + (7 if alt else 0)).write(
+                    MODELS / f"{name}.glb", GROUND, name)
+        m = Mesh()
+        surroundings(m, random.Random(len(world) * 101), world)
+        m.write(MODELS / f"surround-{world}.glb", GROUND, f"surround-{world}")
 
 
 def rime(m, rng):
@@ -1402,6 +1454,7 @@ def main():
         slug = island_slug(island["name"])
         mesh.write(MODELS / f"island-{slug}.glb", GROUND, island["name"])
         print(f"island {index}: {island['name']} -> island-{slug}.glb")
+    generated_pieces()
     textures()
     title_textures()
     hud_textures()

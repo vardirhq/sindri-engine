@@ -123,7 +123,8 @@ fn centre(run: &ProjectRun, id: &str) -> [f32; 2] {
         .world
         .entity_for_source_id(&SceneEntityId::new(id).expect("an id"))
         .expect("the element exists");
-    run.on_screen(entity).expect("the element is laid out")
+    run.on_screen(entity)
+        .unwrap_or_else(|| panic!("{id} is laid out"))
 }
 
 #[test]

@@ -47,7 +47,25 @@ struct IslandDef {
     world: String = "sea",
 }
 
-shared const ISLAND_COUNT: number = 12.0;
+shared const ISLAND_COUNT: number = 15.0;
+
+// The islands from `UNCHARTED` on are not written here but made from the
+// crossing's seed by `generate.decay`, one where each fork can offer it: off
+// the causeway, deep in the mountain and deep in the ice. The seed is the
+// board's `crossing_seed`, which the battle and the bot set as a crossing
+// sets out.
+shared const UNCHARTED: number = 12.0;
+
+shared fn is_uncharted(index: number) -> bool {
+    return index >= UNCHARTED;
+}
+
+// The world an uncharted island is in, without making it.
+shared fn uncharted_world(index: number) -> String {
+    if index == 13.0 { return "caldera"; }
+    if index == 14.0 { return "rime"; }
+    return "sea";
+}
 
 // The steps of the road, and which islands lie on each. The road forks after
 // Saltmarsh, between The Fold and Quarry Rise; after the Lighthouse, between
@@ -63,7 +81,9 @@ shared fn layer_of(index: number) -> number {
     if index == 7.0 { return 5.0; }
     if index == 8.0 { return 3.0; }
     if index <= 10.0 { return 4.0; }
-    return 5.0;
+    if index == 11.0 { return 5.0; }
+    if index == 12.0 { return 1.0; }
+    return 4.0;
 }
 
 // Where the road goes on to from an island: the next step's islands in the
@@ -98,7 +118,12 @@ shared fn recruits_on(index: number) -> bool {
 // Which world an island is in, as a number the pictures can use: 0 the sea,
 // 1 the burning mountain.
 shared fn world_of(index: number) -> number {
-    let world = island_def(index).world;
+    var world = "";
+    if is_uncharted(index) {
+        world = uncharted_world(index);
+    } else {
+        world = island_def(index).world;
+    }
     if world == "caldera" { return 1.0; }
     if world == "rime" { return 2.0; }
     return 0.0;
@@ -112,6 +137,9 @@ shared fn world_name(index: number) -> String {
 }
 
 shared fn island_def(index: number) -> IslandDef {
+    if is_uncharted(index) {
+        return generated_island(uncharted_world(index), 1.0, Game.get("crossing_seed", 1.0) + index);
+    }
     if index == 0.0 {
         return IslandDef(
             name: "Saltmarsh",

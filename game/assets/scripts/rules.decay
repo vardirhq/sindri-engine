@@ -472,7 +472,7 @@ shared fn skill_text(kind: Kind) -> String {
         Kind.Bulwark => "Strike a neighbour for 2 and shove it a cell away.",
         Kind.Mason => "Throw a stone 2 to 4 cells. It hits for 1 and shoves everything beside it outward. On open ground it stays, a new stone.",
         Kind.Lamplighter => "Fire along a line. The first thing in the way takes 1 and is knocked back a cell.",
-        Kind.Tidecaller => "Throw water 1 to 3 cells along a line. Lava cools to stone, and lava by water makes new ground. A figure is washed a cell back; fire takes 2; a vent chokes. Bare ground is left a pool the Hollow cannot cross; in the ice, it freezes.",
+        Kind.Tidecaller => "Throw water 1 to 3 cells. A figure is washed back a cell and fire takes 2; a vent chokes, lava cools to stone, and bare ground is left a pool, or ice in the north.",
         Kind.Harpooner => "Throw a harpoon up to 5 cells along a line and haul in the first thing it bites: a Hollow takes 1 and is dragged to you. Anything too heavy to drag hauls you to it instead.",
         Kind.Shieldback => "Ward itself, or a warden or building up to 2 cells away: the next blow it takes this round does nothing. Too heavy to shove.",
         Kind.Husk => "Claws the cell in front for 1.",

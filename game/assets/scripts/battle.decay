@@ -49,6 +49,37 @@ script Battle {
     @export let water_pool: Prefab;
     @export let lava_pool: Prefab;
     @export let ice_pool: Prefab;
+    // The cells uncharted islands are built of, per world, height and shade.
+    @export let column_sea_1: Prefab;
+    @export let column_sea_1b: Prefab;
+    @export let column_sea_2: Prefab;
+    @export let column_sea_2b: Prefab;
+    @export let column_sea_3: Prefab;
+    @export let column_sea_3b: Prefab;
+    @export let column_sea_4: Prefab;
+    @export let column_sea_4b: Prefab;
+    @export let column_sea_5: Prefab;
+    @export let column_sea_5b: Prefab;
+    @export let column_caldera_1: Prefab;
+    @export let column_caldera_1b: Prefab;
+    @export let column_caldera_2: Prefab;
+    @export let column_caldera_2b: Prefab;
+    @export let column_caldera_3: Prefab;
+    @export let column_caldera_3b: Prefab;
+    @export let column_caldera_4: Prefab;
+    @export let column_caldera_4b: Prefab;
+    @export let column_caldera_5: Prefab;
+    @export let column_caldera_5b: Prefab;
+    @export let column_rime_1: Prefab;
+    @export let column_rime_1b: Prefab;
+    @export let column_rime_2: Prefab;
+    @export let column_rime_2b: Prefab;
+    @export let column_rime_3: Prefab;
+    @export let column_rime_3b: Prefab;
+    @export let column_rime_4: Prefab;
+    @export let column_rime_4b: Prefab;
+    @export let column_rime_5: Prefab;
+    @export let column_rime_5b: Prefab;
     @export let droplet: Prefab;
     @export let pointer: Prefab;
     @export let mark: Prefab;
@@ -148,6 +179,8 @@ script Battle {
     var water_tiles: Map<number, Entity> = [:];
     var lava_tiles: Map<number, Entity> = [:];
     var ice_tiles: Map<number, Entity> = [:];
+    // The columns built for each uncharted island this crossing.
+    var built: Map<number, List<Entity>> = [:];
     var columns: Map<number, Entity> = [:];
     var base: List<number> = [];
     // The gem over the warden in hand.
@@ -236,6 +269,60 @@ script Battle {
     }
     fn spot(x: number, z: number) -> Vec3 {
         return Vec3(world_x(x), ground_y(x, z), world_z(z));
+    }
+
+    // The prefab for one cell of an uncharted island.
+    fn column_prefab(world: String, height: number, alt: bool) -> Prefab {
+        if world == "sea" && height == 1.0 && alt == false { return this.column_sea_1; }
+        if world == "sea" && height == 1.0 && alt == true { return this.column_sea_1b; }
+        if world == "sea" && height == 2.0 && alt == false { return this.column_sea_2; }
+        if world == "sea" && height == 2.0 && alt == true { return this.column_sea_2b; }
+        if world == "sea" && height == 3.0 && alt == false { return this.column_sea_3; }
+        if world == "sea" && height == 3.0 && alt == true { return this.column_sea_3b; }
+        if world == "sea" && height == 4.0 && alt == false { return this.column_sea_4; }
+        if world == "sea" && height == 4.0 && alt == true { return this.column_sea_4b; }
+        if world == "sea" && height == 5.0 && alt == false { return this.column_sea_5; }
+        if world == "sea" && height == 5.0 && alt == true { return this.column_sea_5b; }
+        if world == "caldera" && height == 1.0 && alt == false { return this.column_caldera_1; }
+        if world == "caldera" && height == 1.0 && alt == true { return this.column_caldera_1b; }
+        if world == "caldera" && height == 2.0 && alt == false { return this.column_caldera_2; }
+        if world == "caldera" && height == 2.0 && alt == true { return this.column_caldera_2b; }
+        if world == "caldera" && height == 3.0 && alt == false { return this.column_caldera_3; }
+        if world == "caldera" && height == 3.0 && alt == true { return this.column_caldera_3b; }
+        if world == "caldera" && height == 4.0 && alt == false { return this.column_caldera_4; }
+        if world == "caldera" && height == 4.0 && alt == true { return this.column_caldera_4b; }
+        if world == "caldera" && height == 5.0 && alt == false { return this.column_caldera_5; }
+        if world == "caldera" && height == 5.0 && alt == true { return this.column_caldera_5b; }
+        if world == "rime" && height == 1.0 && alt == false { return this.column_rime_1; }
+        if world == "rime" && height == 1.0 && alt == true { return this.column_rime_1b; }
+        if world == "rime" && height == 2.0 && alt == false { return this.column_rime_2; }
+        if world == "rime" && height == 2.0 && alt == true { return this.column_rime_2b; }
+        if world == "rime" && height == 3.0 && alt == false { return this.column_rime_3; }
+        if world == "rime" && height == 3.0 && alt == true { return this.column_rime_3b; }
+        if world == "rime" && height == 4.0 && alt == false { return this.column_rime_4; }
+        if world == "rime" && height == 4.0 && alt == true { return this.column_rime_4b; }
+        if world == "rime" && height == 5.0 && alt == false { return this.column_rime_5; }
+        if world == "rime" && height == 5.0 && alt == true { return this.column_rime_5b; }
+        return this.column_sea_1;
+    }
+
+    // Builds an uncharted island on its root, a column a cell, taking down
+    // whatever was built there for an earlier crossing.
+    fn build_uncharted(root: Entity, island_index: number, made: IslandDef) {
+        if built.contains(island_index) {
+            for e in built[island_index] { World.despawn(e); }
+        }
+        var pieces: List<Entity> = [];
+        for c in 0..(SIZE * SIZE) {
+            let h = digit_of(made.heights.slice(c, c + 1.0));
+            if h <= 0.0 { continue; }
+            let x = c % SIZE;
+            let z = floor_of(c);
+            let column = World.spawn_child(column_prefab(made.world, min(h, 5.0), (x + z) % 2.0 == 1.0), root);
+            column.transform.position = Vec3(world_x(x), 0.0, world_z(z));
+            pieces.push(column);
+        }
+        built[island_index] = pieces;
     }
 
     // --- The island --------------------------------------------------------
@@ -1063,6 +1150,8 @@ script Battle {
         }
         last_world = world_of(island);
         Random.seed(Save.number("seed", 1.0) * 7919.0 + 17.0);
+        // The uncharted islands this crossing are made from its seed.
+        Game.set("crossing_seed", Save.number("seed", 1.0) * 13.0);
         Save.set_number("seed", Save.number("seed", 1.0) + 1.0);
         omens = [];
         for i in 0..ISLAND_COUNT { omens.push(omen_of_roll(i, Random.int(0.0, 99.0))); }
@@ -1174,6 +1263,7 @@ script Battle {
         leaving_island = shown_island;
         if leaving_island == island { leaving_island = -1.0; }
         let next = islands[island];
+        if is_uncharted(island) { build_uncharted(next, island, def); }
         World.set_active(next, true);
         next.transform.position.y = -ISLAND_DEPTH;
         shown_island = island;
@@ -1690,6 +1780,17 @@ script Battle {
         }
         show_screen("Held", true);
         roads = roads_from(island);
+        // Where a fork has more roads than a choice can show, the uncharted
+        // island is offered beside one of the written ones.
+        if roads.length > 2.0 {
+            var written: List<number> = [];
+            var uncharted: List<number> = [];
+            for r in roads {
+                if is_uncharted(r) { uncharted.push(r); } else { written.push(r); }
+            }
+            roads = [written[Random.int(0.0, written.length - 1.0)]];
+            for r in uncharted { if roads.length < 2.0 { roads.push(r); } }
+        }
         var why = "High tide. The causeway is under water and the Hollow turn back.";
         if board.molten { why = "The lava has sealed the gate, and the Hollow cannot come through it."; }
         if objective_met() {
@@ -1790,6 +1891,7 @@ script Battle {
             var waves = "";
             for wave in at.waves { waves += wave; }
             var text = at.blurb + "  " + at.rounds + " rounds, " + (waves.length + at.start.length) + " Hollow.";
+            if is_uncharted(road) { text = "[color=#9fe6ff]Uncharted.[/color] " + text; }
             if omen_line(road) != "" { text += "  " + omen_line(road); }
             screens.card("Route", k, "◆", at.name, text, world_color(road));
             screens.taken("Route", k, false);
@@ -2358,7 +2460,7 @@ script Battle {
         }
         if which == 3.0 { lose(); }
         if which == 4.0 {
-            island = ISLAND_COUNT - 1.0;
+            island = layer_islands(LAYER_COUNT - 1.0)[0];
             win_island();
         }
         if which == 5.0 {

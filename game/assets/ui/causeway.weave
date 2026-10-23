@@ -495,7 +495,7 @@
 .route-map {
     width: 136vh;
     max-width: 96vw;
-    height: 15vh;
+    height: 18vh;
     direction: row;
     gap: 0.6vh;
     justify-content: center;
@@ -504,7 +504,7 @@
 
 .route-step {
     width: 19vh;
-    height: 15vh;
+    height: 18vh;
     direction: column;
     gap: 0.4vh;
     justify-content: center;
@@ -513,22 +513,22 @@
 
 .route-stop {
     width: 100%;
-    height: 3.4vh;
+    height: 2.7vh;
     direction: row;
     gap: 0.6vh;
     align-items: center;
 }
 
 .route-node {
-    width: 3vh;
-    height: 3vh;
+    width: 2.4vh;
+    height: 2.4vh;
 }
 
 .route-name {
-    width: 15vh;
-    height: 3.4vh;
-    font-size: 1.7vh;
-    line-height: 1.9vh;
+    width: 15.6vh;
+    height: 2.7vh;
+    font-size: 1.55vh;
+    line-height: 1.8vh;
     text-align: start;
     text-wrap: word;
 }
@@ -813,11 +813,11 @@
     .boon-text.hero-text { width: 46vw; font-size: 2.7vw; line-height: 3.5vw; text-align: start; }
     .boon-key.hero-key { width: 8vw; height: 4vw; font-size: 2.6vw; line-height: 3.4vw; }
     .screen-title.muster-title { font-size: 8.4vw; letter-spacing: 0px; }
-    .route-map { width: 96vw; height: 48vw; gap: 0.4vw; }
-    .route-step { width: 14.6vw; height: 48vw; gap: 0.8vw; align-items: center; }
-    .route-stop { height: 11vw; direction: column; gap: 0.4vw; align-items: center; }
-    .route-node { width: 4.4vw; height: 4.4vw; }
-    .route-name { width: 14.6vw; height: 6vw; font-size: 2.2vw; line-height: 2.6vw; text-align: center; }
+    .route-map { width: 96vw; height: 62vw; gap: 0.4vw; }
+    .route-step { width: 14.6vw; height: 62vw; gap: 0.6vw; align-items: center; }
+    .route-stop { height: 9.6vw; direction: column; gap: 0.2vw; align-items: center; }
+    .route-node { width: 3.6vw; height: 3.6vw; }
+    .route-name { width: 14.6vw; height: 5.6vw; font-size: 2vw; line-height: 2.4vw; text-align: center; }
     .route-link { width: 1.4vw; height: 0.5vw; }
     .boons.roads { width: 92vw; height: auto; direction: column; gap: 2vw; }
     .boon-card.road-card { width: 88vw; height: 30vw; }

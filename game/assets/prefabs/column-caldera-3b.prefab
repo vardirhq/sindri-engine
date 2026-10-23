@@ -1,0 +1,36 @@
+{
+  "format_version": 1,
+  "metadata": {
+    "name": "column-caldera-3b"
+  },
+  "entities": [
+    {
+      "id": "column-caldera-3b",
+      "name": "column-caldera-3b",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.model": {
+          "asset": "models/column-caldera-3b.glb",
+          "layer": 0
+        }
+      }
+    }
+  ]
+}

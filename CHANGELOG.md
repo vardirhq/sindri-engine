@@ -1,5 +1,15 @@
 # Changelog
 
+- Generate uncharted islands for Causeway from each crossing's seed, in
+  `generate.decay`, to each world's rules: a hump of ground highest in the
+  west with low landing ground east, the beacon and houses above the tide
+  with a way up to each, the wardens near what they guard, stones, vents and
+  lava, or ice by world, and waves from the world's Hollow. An island that
+  breaks a rule is thrown away and the next seed tried. Off the causeway and
+  deep in the mountain and the ice, a fork offers an uncharted island beside a
+  written one; the battle builds it at runtime from per-world column models,
+  in its world's surroundings. The bot reports how generated islands play.
+
 - Let Causeway's crossings open things for the next: four wardens answer the
   first muster, holding the Lighthouse calls the Harpooner, and making a
   crossing calls the Shieldback and opens spring tides, a harder crossing

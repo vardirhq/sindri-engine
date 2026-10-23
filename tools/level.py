@@ -147,6 +147,11 @@ WARDEN_KINDS = ("bulwark", "mason", "lamplighter", "tidecaller", "harpooner", "s
 MARKS = ["move", "aim", "danger", "spawn", "tide", "selected", "cursor", "arrow", "push"]
 
 
+def column_names():
+    return [f"column-{world}-{h}{shade}" for world in UNCHARTED_WORLDS for h in COLUMN_HEIGHTS
+            for shade in ("", "b")]
+
+
 def prefab(name, entities):
     return {"format_version": 1, "metadata": {"name": name}, "entities": entities}
 
@@ -210,6 +215,10 @@ def write_prefabs():
     write(folder / "lava-pool.prefab", prefab("Lava Pool", [lava]))
     ice = entity("ice-pool", "Ice Pool", {"sindri.model": {"asset": "models/ice-slab.glb", "layer": 0}})
     write(folder / "ice-pool.prefab", prefab("Ice Pool", [ice]))
+    # A cell of an uncharted island, per world, height and checker shade.
+    for name in column_names():
+        column = entity(name, name, {"sindri.model": {"asset": f"models/{name}.glb", "layer": 0}})
+        write(folder / f"{name}.prefab", prefab(name, [column]))
     # A Hollow on the causeway behind the title: the husk's model and nothing
     # else, walked by `title.decay`.
     # A speck in the air: pollen, dust, rain, a firefly or an ember, as
@@ -253,10 +262,17 @@ def world_entities():
                                                    "intensity": 2.4}},
                     position=(0, 10, 0), rotation=towards(0.25, -1.0, -0.6)))
     # Every island the rules know, read from the same text they read.
-    for i, island in enumerate(islands()):
+    written = islands()
+    for i, island in enumerate(written):
         e.append(entity(f"island-{i}", f"Island {i}", {"sindri.model": {
             "asset": f"models/island-{island_slug(island['name'])}.glb", "layer": 0}},
             disabled=i != 0))
+    # The uncharted islands: their world's surroundings, and the battle
+    # builds the board on them a column at a time.
+    for k, world in enumerate(UNCHARTED_WORLDS):
+        i = len(written) + k
+        e.append(entity(f"island-{i}", f"Island {i}", {"sindri.model": {
+            "asset": f"models/surround-{world}.glb", "layer": 0}}, disabled=True))
     e.append(entity("sea", "Sea", {}, position=(CENTRE[0], 0.08, CENTRE[2])))
     # One quad, drawn by `shaders/sea.wgsl`, which works from world position
     # so needs no tiling: the tint is the deep water's color, the params
@@ -314,7 +330,8 @@ def world_entities():
         missile="prefabs/missile.prefab", spark="prefabs/spark.prefab", droplet="prefabs/droplet.prefab",
         pointer="prefabs/pointer.prefab",
         water_pool="prefabs/water-pool.prefab", lava_pool="prefabs/lava-pool.prefab",
-        ice_pool="prefabs/ice-pool.prefab", **prefabs),
+        ice_pool="prefabs/ice-pool.prefab", **prefabs,
+        **{name.replace("-", "_"): f"prefabs/{name}.prefab" for name in column_names()}),
         spatial=False))
     # A song for each world, both always playing, each through its own bus:
     # `Atmosphere` crossfades the buses with the world's mood.
@@ -351,6 +368,11 @@ def chip_button(e, id, name, label, parent, classes, layer=130):
                     {**styled("button-label"), **text(label, BOLD_FONT, 0.03, layer + 3)},
                     parent=id, spatial=False))
 
+
+# The worlds of the uncharted islands, in the order `islands.decay` numbers
+# them after the written ones.
+UNCHARTED_WORLDS = ("sea", "caldera", "rime")
+COLUMN_HEIGHTS = range(1, 6)
 
 HERO_PORTRAITS = ("bulwark", "mason", "lamplighter", "tidecaller", "harpooner", "shieldback")
 MOST_HEARTH = 12
@@ -642,8 +664,8 @@ def between_screen(e, id, name, button_label, cards=0, per_row=4, kind="boon"):
 
 
 ROUTE_STEPS = 6
-# Both worlds' forks, seen from where the road divides.
-ROUTE_STOPS = 4
+# Both worlds' forks, written and uncharted, seen from where the road divides.
+ROUTE_STOPS = 6
 
 
 def route_map(e, parent):

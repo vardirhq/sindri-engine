@@ -1,0 +1,306 @@
+// Islands made from a seed, to the rules each world keeps.
+//
+// A generated island is an `IslandDef` like a written one, so the rules, the
+// bot and the battle take it as they take Saltmarsh. It is built the way the
+// written islands were tuned to work:
+//
+// - a hump of ground rising from the sea, highest towards the west, with the
+//   landing ground low on the east where the Hollow climb out and the tide
+//   comes first;
+// - the beacon and the houses on ground the tide never reaches (3 and up),
+//   each with a way up to it a step at a time from the landing ground, so the
+//   Hollow can reach everything they are meant to threaten;
+// - the wardens standing on dry ground near what they guard;
+// - each world's own ground: stones by the sea, vents and lava in the
+//   mountain, ice in the north;
+// - waves drawn from the world's Hollow, more of them deeper in.
+//
+// An island that breaks a rule is thrown away and the next seed tried, so a
+// seed always makes the same island.
+
+// A small seeded generator of its own, so making an island neither reads nor
+// moves the game's dice.
+struct Dice {
+    state: number,
+}
+
+shared fn dice_roll(dice: Dice) -> Dice {
+    var next = dice;
+    next.state = (next.state * 9301.0 + 49297.0) % 233280.0;
+    return next;
+}
+
+shared fn dice_unit(dice: Dice) -> number {
+    return dice.state / 233280.0;
+}
+
+// The island a world makes from a seed, `depth` steps into it (0 the first).
+shared fn generated_island(world: String, depth: number, seed: number) -> IslandDef {
+    var tries = 0.0;
+    while tries < 40.0 {
+        var salt = 0.0;
+        if world == "caldera" { salt = 7919.0; }
+        if world == "rime" { salt = 15887.0; }
+        let def = try_island(world, depth, seed * 31.0 + tries * 977.0 + depth * 4241.0 + salt + 13.0);
+        if island_holds(def) { return def; }
+        tries += 1.0;
+    }
+    // Every seed tried broke a rule: the world's first written island stands in.
+    if world == "caldera" { return island_def(4.0); }
+    if world == "rime" { return island_def(8.0); }
+    return island_def(1.0);
+}
+
+shared fn try_island(world: String, depth: number, seed: number) -> IslandDef {
+    var dice = dice_roll(Dice(state: seed % 233280.0));
+    // A hump with its crown somewhere in the west half, its slopes uneven.
+    dice = dice_roll(dice);
+    let crown_x = 2.2 + dice_unit(dice) * 1.4;
+    dice = dice_roll(dice);
+    let crown_z = 3.0 + dice_unit(dice) * 1.4;
+    dice = dice_roll(dice);
+    let peak = 4.4 + dice_unit(dice) * 1.2;
+    dice = dice_roll(dice);
+    // How steeply it falls away: some islands broad and gentle, some sharp.
+    let slope = 0.62 + dice_unit(dice) * 0.22;
+    var heights: List<number> = [];
+    for c in 0..(SIZE * SIZE) {
+        let x = c % SIZE;
+        let z = floor(c / SIZE);
+        dice = dice_roll(dice);
+        let wobble = (dice_unit(dice) - 0.5) * 1.2;
+        let dx = x - crown_x;
+        let dz = (z - crown_z) * 1.1;
+        var h = floor(peak - sqrt(dx * dx + dz * dz) * slope + wobble + 0.5);
+        // The board's corners are open sea; the east is low, landing ground.
+        let ex = abs(x - 3.5);
+        let ez = abs(z - 3.5);
+        if ex + ez > 6.0 { h = 0.0; }
+        if x >= 5.0 { h = min(h, 2.0); }
+        if x >= 6.0 { h = min(h, 1.0 + floor(dice_unit(dice) * 2.0)); }
+        h = clamp(h, 0.0, 5.0);
+        // Every cell on the east edge stands out of the sea, for the road in.
+        if x == 7.0 && z >= 2.0 && z <= 5.0 { h = max(h, 1.0); }
+        heights.push(h);
+    }
+    var features: List<String> = [];
+    for c in 0..(SIZE * SIZE) { features.push("."); }
+    // Landing ground: the low east, out of the sea.
+    for c in 0..(SIZE * SIZE) {
+        let x = c % SIZE;
+        if x >= 5.0 && heights[c] >= 1.0 && heights[c] <= 2.0 { features[c] = "L"; }
+    }
+    // The beacon on the highest ground in the west.
+    var beacon = -1.0;
+    for c in 0..(SIZE * SIZE) {
+        if c % SIZE > 4.0 { continue; }
+        if beacon < 0.0 || heights[c] > heights[beacon] { beacon = c; }
+    }
+    features[beacon] = "B";
+    // Two houses on high ground, apart from each other.
+    var houses = 0.0;
+    var tries = 0.0;
+    while houses < 2.0 && tries < 60.0 {
+        tries += 1.0;
+        dice = dice_roll(dice);
+        let c = floor(dice_unit(dice) * SIZE * SIZE);
+        if c % SIZE > 4.0 || heights[c] < 3.0 || features[c] != "." { continue; }
+        var crowded = false;
+        for other in 0..(SIZE * SIZE) {
+            if features[other] == "H" || features[other] == "B" {
+                if steps_between(c % SIZE, floor(c / SIZE), other % SIZE, floor(other / SIZE)) < 2.0 { crowded = true; }
+            }
+        }
+        if crowded { continue; }
+        features[c] = "H";
+        houses += 1.0;
+    }
+    // The wardens, on dry ground near the buildings: a fourth beyond the
+    // first world, where one joins.
+    var wardens = 3.0;
+    if world != "sea" { wardens = 4.0; }
+    var placed = 0.0;
+    tries = 0.0;
+    while placed < wardens && tries < 200.0 {
+        tries += 1.0;
+        dice = dice_roll(dice);
+        let c = floor(dice_unit(dice) * SIZE * SIZE);
+        let x = c % SIZE;
+        if x > 4.0 || heights[c] < 2.0 || features[c] != "." { continue; }
+        var near = false;
+        for other in 0..(SIZE * SIZE) {
+            if features[other] == "H" || features[other] == "B" {
+                if steps_between(x, floor(c / SIZE), other % SIZE, floor(other / SIZE)) <= 2.0 { near = true; }
+            }
+        }
+        if !near { continue; }
+        placed += 1.0;
+        features[c] = "" + placed;
+    }
+    // The world's own ground.
+    var marks: List<String> = [];
+    var counts: List<number> = [];
+    if world == "sea" {
+        marks = ["S"];
+        counts = [floor(dice_unit(dice) * 3.0)];
+    }
+    if world == "caldera" {
+        marks = ["V", "^", "~"];
+        counts = [1.0 + floor(depth / 2.0), 1.0 + floor(depth / 2.0), 1.0];
+    }
+    if world == "rime" {
+        marks = ["*"];
+        counts = [5.0 + depth * 2.0];
+    }
+    for m in 0..marks.length {
+        var put = 0.0;
+        tries = 0.0;
+        while put < counts[m] && tries < 120.0 {
+            tries += 1.0;
+            dice = dice_roll(dice);
+            let c = floor(dice_unit(dice) * SIZE * SIZE);
+            if features[c] != "." || heights[c] < 1.0 { continue; }
+            let mark = marks[m];
+            // Vents on high ground; lava kept off the wardens' ground.
+            if mark == "V" && heights[c] < 3.0 { continue; }
+            if mark == "^" && heights[c] > 2.0 { continue; }
+            if mark == "S" && heights[c] < 2.0 { continue; }
+            features[c] = mark;
+            put += 1.0;
+        }
+    }
+    var heights_text = "";
+    var features_text = "";
+    for c in 0..(SIZE * SIZE) {
+        heights_text += "" + heights[c];
+        features_text += features[c];
+    }
+    // The Hollow: a start and a wave a round from the world's kinds, more
+    // and heavier the deeper the island.
+    var pool = "HHSB";
+    if world == "sea" && depth >= 1.0 { pool = "HHSBM"; }
+    if world == "caldera" { pool = "IHXSB"; }
+    if world == "rime" { pool = "AHSB"; }
+    var rounds = 5.0;
+    if depth >= 1.0 { rounds = 6.0; }
+    dice = dice_roll(dice);
+    var start = "";
+    for k in 0..(2.0 + depth) {
+        dice = dice_roll(dice);
+        let at = floor(dice_unit(dice) * pool.length);
+        start += pool.slice(at, at + 1.0);
+    }
+    var waves: List<String> = [];
+    for r in 0..(rounds - 1.0) {
+        var wave = "";
+        dice = dice_roll(dice);
+        let size = 1.0 + floor(dice_unit(dice) * (2.4 + depth * 0.6));
+        for k in 0..size {
+            dice = dice_roll(dice);
+            let at = floor(dice_unit(dice) * pool.length);
+            wave += pool.slice(at, at + 1.0);
+        }
+        waves.push(wave);
+    }
+    waves.push("");
+    var shore = "sand";
+    var land = "ground";
+    var high = "ground";
+    if world == "caldera" {
+        shore = "ash";
+        land = "basalt";
+        high = "cinder";
+    }
+    if world == "rime" {
+        shore = "frost";
+        land = "snow";
+        high = "snow";
+    }
+    return IslandDef(name: generated_name(world, seed), blurb: generated_blurb(world),
+        heights: heights_text, features: features_text, rounds: rounds, rises: [2.0, 4.0],
+        start: start, waves: waves, shore: shore, land: land, high: high, world: world);
+}
+
+// Whether an island keeps the rules: a beacon and two houses out of the
+// tide's reach, the wardens all placed, landing ground for the Hollow, and a
+// way a step at a time from the landing ground to beside every building.
+shared fn island_holds(def: IslandDef) -> bool {
+    var heights: List<number> = [];
+    var landing: List<number> = [];
+    var buildings = 0.0;
+    var wardens = 0.0;
+    for c in 0..(SIZE * SIZE) {
+        heights.push(digit_of(def.heights.slice(c, c + 1.0)));
+        let mark = def.features.slice(c, c + 1.0);
+        if mark == "L" { landing.push(c); }
+        if mark == "H" || mark == "B" {
+            buildings += 1.0;
+            if heights[c] < 3.0 { return false; }
+        }
+        if mark == "1" || mark == "2" || mark == "3" || mark == "4" { wardens += 1.0; }
+    }
+    if buildings < 3.0 || landing.length < 5.0 { return false; }
+    var wanted = 3.0;
+    if def.world != "sea" { wanted = 4.0; }
+    if wardens < wanted { return false; }
+    // Flood out from the landing ground over cells a step apart.
+    var reached: List<bool> = [];
+    for c in 0..(SIZE * SIZE) { reached.push(false); }
+    var frontier = landing;
+    for c in landing { reached[c] = true; }
+    var head = 0.0;
+    while head < frontier.length {
+        let c = frontier[head];
+        head += 1.0;
+        let x = c % SIZE;
+        let z = floor(c / SIZE);
+        for d in 0..4 {
+            let nx = x + dir_x(d);
+            let nz = z + dir_z(d);
+            if !in_bounds(nx, nz) { continue; }
+            let n = cell_of(nx, nz);
+            if reached[n] || heights[n] == 0.0 { continue; }
+            if abs(heights[n] - heights[c]) > 1.0 { continue; }
+            let mark = def.features.slice(n, n + 1.0);
+            if mark == "H" || mark == "B" || mark == "S" || mark == "V" || mark == "^" { continue; }
+            reached[n] = true;
+            frontier.push(n);
+        }
+    }
+    for c in 0..(SIZE * SIZE) {
+        let mark = def.features.slice(c, c + 1.0);
+        if mark != "H" && mark != "B" { continue; }
+        var reachable = false;
+        let x = c % SIZE;
+        let z = floor(c / SIZE);
+        for d in 0..4 {
+            let nx = x + dir_x(d);
+            let nz = z + dir_z(d);
+            if in_bounds(nx, nz) && reached[cell_of(nx, nz)] { reachable = true; }
+        }
+        if !reachable { return false; }
+    }
+    return true;
+}
+
+shared fn generated_name(world: String, seed: number) -> String {
+    var first: List<String> = ["Gull", "Heron", "Brine", "Kelp", "Wrack", "Shingle", "Tern", "Sedge"];
+    var second: List<String> = ["Skerry", "Holm", "Strand", "Ness", "Spit", "Reach"];
+    if world == "caldera" {
+        first = ["Ember", "Cinder", "Scoria", "Slag", "Pumice", "Clinker", "Soot", "Char"];
+        second = ["Ledge", "Shelf", "Step", "Rise", "Floor", "Hearth"];
+    }
+    if world == "rime" {
+        first = ["Frost", "Hoar", "Sleet", "Floe", "Rime", "Snow", "Glaze", "Drift"];
+        second = ["Fell", "Shelf", "Cairn", "Holm", "Strand", "Ness"];
+    }
+    let a = floor(seed % first.length);
+    let b = floor((seed / 7.0) % second.length);
+    return first[a] + " " + second[b];
+}
+
+shared fn generated_blurb(world: String) -> String {
+    if world == "caldera" { return "A shelf of the mountain no map names. The lava has been here before."; }
+    if world == "rime" { return "Ice and old snow, and the wind that never stops. Mind the ice underfoot."; }
+    return "An island off the causeway that nobody has named. The Hollow have found it all the same.";
+}

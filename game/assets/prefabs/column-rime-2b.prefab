@@ -1,0 +1,36 @@
+{
+  "format_version": 1,
+  "metadata": {
+    "name": "column-rime-2b"
+  },
+  "entities": [
+    {
+      "id": "column-rime-2b",
+      "name": "column-rime-2b",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.model": {
+          "asset": "models/column-rime-2b.glb",
+          "layer": 0
+        }
+      }
+    }
+  ]
+}
