@@ -187,6 +187,27 @@ fn the_art_is_built_from_the_islands_the_rules_read() {
     }
 }
 
+/// Past the Lighthouse a warden joins from those the muster left behind, and
+/// at first only some are called, so the offer is shorter than a boon's four
+/// cards. Going Onward from the Lighthouse must reach it without a script
+/// failing, which once left the screen blank with no way on.
+#[test]
+fn the_offer_past_the_lighthouse_is_dealt_with_the_wardens_there_are() {
+    let mut run = open([1280.0, 720.0]);
+    run.set_board("start_island", 3.0);
+    into_battle(&mut run);
+    run.set_board("preview_screen", 1.0);
+    for _ in 0..90 {
+        run.step(1.0 / 60.0).expect("steps");
+    }
+    enter(&mut run);
+    for _ in 0..90 {
+        let report = run.step(1.0 / 60.0).expect("steps");
+        assert!(report.notes().is_empty(), "{:?}", report.notes());
+    }
+    assert_eq!(run.board("phase"), 4.0, "the offer is up and waiting");
+}
+
 #[test]
 fn every_screen_between_islands_fits_a_desk_and_a_phone() {
     for size in [[1280.0, 720.0], [390.0, 844.0]] {

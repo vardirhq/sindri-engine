@@ -2037,7 +2037,8 @@ script Battle {
 
     fn show_offers(kicker: String, title: String) {
         let screens = Screens.on(World.find("Screens"));
-        for slot in 0..4 {
+        screens.deal("Upgrade", offered.length);
+        for slot in 0..offered.length {
             let boon = offered[slot];
             screens.card("Upgrade", slot, boon_mark(boon), boon_title(boon), boon_text(boon), boon_color(boon));
             var hero = -1.0;
@@ -2581,7 +2582,7 @@ script Battle {
                 }
             }
             Phase.Upgrade => {
-                for i in 0..4 {
+                for i in 0..offered.length {
                     if pressed("Upgrade" + i) || Input.Keyboard.just_pressed("Digit" + (i + 1.0)) {
                         show_screen("Upgrade", false);
                         take_boon(i);

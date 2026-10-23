@@ -92,6 +92,18 @@ script Screens {
         stop_states[step * ROUTE_STOPS + k] = state;
     }
 
+    // How many cards a screen deals this time: the rest are put away, so a
+    // short hand is not left with blanks.
+    fn deal(screen: String, count: number) {
+        let i = names.index_of(screen);
+        if i < 0.0 { return; }
+        card_counts[i] = count;
+        for k in 0..MOST_CARDS {
+            let card = World.find(screen + k);
+            if card != null { World.set_active(card, k < count); }
+        }
+    }
+
     // The warden whose portrait a card shows, or -1 to show its mark.
     fn face(screen: String, index: number, hero: number) {
         let at = slot(screen, index);

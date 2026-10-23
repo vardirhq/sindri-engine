@@ -1,5 +1,10 @@
 # Changelog
 
+- Fix Causeway sticking at the Lighthouse: going Onward after it dealt the
+  warden offer four cards when only some wardens were called yet, the script
+  failed, and the screen stayed blank. An offer, or a boon hand, now deals as
+  many cards as it has.
+
 - Generate uncharted islands for Causeway from each crossing's seed, in
   `generate.decay`, to each world's rules: a hump of ground highest in the
   west with low landing ground east, the beacon and houses above the tide
