@@ -33,6 +33,27 @@ either: a tool is not a surface a capability is exercised on.
 It is also not a dependency of anything Sindri ships. The engine, editor, native
 game and browser export do not know it exists, and nothing they build calls it.
 
+## The browser page
+
+The same bake runs in a page at `/examples/isometric-baker/`: a recipe on the
+left, the baked sheet on the right, and the PNG, `.sheet` and prefab to download
+singly or as a zip laid out like an asset root. It is for trying a recipe, or
+making a sprite for a project without Node installed, and it is listed in the
+directory as a tool.
+
+It is not a second implementation. `tools/isometric-baker/web/build.mjs` copies
+the tool's own TypeScript into the site with the types stripped by Node's
+`stripTypeScriptTypes`, so the page and the command line bake with the same
+files. Two are replaced: `cli.ts` reads files and has no place in a page, and
+`png.ts` needs `node:zlib`, so `web/png.ts` writes the same PNG layout through a
+small DEFLATE of its own. Pixels are identical to the command line's, which
+`test/web.test.ts` asserts for every example the page offers; the compressed
+bytes are not, and `--check` compares pixels for exactly that reason. A bake
+hands back `Uint8Array` rather than Node's `Buffer` so the one core serves both.
+
+Nothing was added to the dependency boundary below: the page has no bundler and
+no `node_modules`, and the build needs only the Node the tool already requires.
+
 ## Dependency boundary
 
 The tool is Node and TypeScript, and it has **no dependencies at all** — no
@@ -45,7 +66,8 @@ baker needs a package tree, it acquires a supply chain that
 `docs/dependency-policy.md` has no way to check, for output that is a PNG.
 
 CI runs the tool's tests and re-bakes its fixture in the `Isometric baker` job of
-`.github/workflows/ci.yml`. That job installs nothing.
+`.github/workflows/ci.yml`. That job installs nothing. The Pages workflow builds
+the page and opens it in a real browser (`scripts/browser/baker.mjs`).
 
 ## The compatibility problem it works around
 

@@ -132,3 +132,14 @@ cp -R tools/sindri-chiptune/pkg target/sound-lab/
 node scripts/browser/sound-lab.mjs target/sound-lab target/sound-lab-captures
 cp target/sound-lab-captures/sound-lab-desktop-sfx.png site/screenshots/sound-lab.png
 ```
+
+## The Isometric Baker
+
+`isometric-baker.png` is the browser baker on its first example, taken by the
+smoke test that checks the page works.
+
+```
+node tools/isometric-baker/web/build.mjs target/baker
+node scripts/browser/baker.mjs target/baker target/baker-captures
+cp target/baker-captures/baker-desktop.png site/screenshots/isometric-baker.png
+```

@@ -41,7 +41,7 @@ function pixels(grain: unknown): Uint8Array {
   const baked = bake(recipe(grain));
   const png = baked.files.find((file) => file.path.endsWith('.png'));
   assert.ok(png, 'a bake writes a texture');
-  return decodePng(png.contents).data;
+  return decodePng(Buffer.from(png.contents)).data;
 }
 
 /** How many distinct opaque colors a baked block uses. */

@@ -894,6 +894,38 @@
     }
   },
   {
+    "category": "tools",
+    "title": "Isometric Baker",
+    "path": "examples/isometric-baker/",
+    "source": "tools/isometric-baker",
+    "description": "Bake a 3D model recipe into ordinary Sindri sprites in the browser, then download the PNG, sheet and prefab.",
+    "tags": [
+      "sprites",
+      "isometric",
+      "baker",
+      "art",
+      "tool"
+    ],
+    "play": {
+      "kind": "Tool",
+      "shot": "isometric-baker.png",
+      "input": [
+        "keyboard",
+        "mouse",
+        "touch"
+      ],
+      "about": [
+        "Edit a recipe of boxes, cylinders and spheres and watch it bake into a sprite sheet: isometric, top-down or side view, one to eight directions, banded shading and an outline. Download the PNG, its .sheet and the prefab, or all three as a zip laid out like a project's assets. The same pipeline runs offline from the command line, and the recipes it ships with are the ones the voxel lab and Orbital's mine blast were baked from."
+      ],
+      "proves": [
+        "Offline 3D-to-sprite baking",
+        "Isometric, top-down and side views",
+        "Sheet and prefab export"
+      ],
+      "controls": []
+    }
+  },
+  {
     "category": "demos",
     "title": "Shapes Lab",
     "path": "examples/shapes-lab/",

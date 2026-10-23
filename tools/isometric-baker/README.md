@@ -26,6 +26,22 @@ npm test
 is: the recipe lives beside the prefab it generates, `--out` is the asset root,
 and re-baking rewrites the generated files in place.
 
+## In the browser
+
+The baker is also a page, at `/examples/isometric-baker/` on the site: edit a
+recipe, watch it bake, download the PNG, sheet and prefab (or a zip of the three
+laid out like an asset root). Build it yourself, and serve the folder with any
+static server:
+
+```bash
+node web/build.mjs ../../target/baker-page
+```
+
+It is this tool's own sources with their types stripped by Node, plus a browser
+PNG writer (`web/png.ts`) in place of `src/png.ts`; see
+[`docs/isometric-baker.md`](../../docs/isometric-baker.md#the-browser-page).
+The pixels match the command line's; the PNG's compressed bytes do not.
+
 ## Grain
 
 A flat-shaded box gives three flat faces. That reads as a *shape*, and blocks

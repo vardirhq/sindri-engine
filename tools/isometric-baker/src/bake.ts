@@ -33,7 +33,7 @@ export function sheetIdFor(texture: string): string {
 export interface BakeOutput {
   /** Path relative to the project's asset root, and to the bake's output directory. */
   path: string;
-  contents: Buffer;
+  contents: Uint8Array;
 }
 
 export interface FrameReport {
@@ -164,7 +164,7 @@ export function bake(recipe: Recipe): BakeResult {
   );
   const files: BakeOutput[] = [
     { path: recipe.texture, contents: encodePng(sheet.image) },
-    { path: sheetIdFor(recipe.texture), contents: Buffer.from(toJson(sheet.document)) },
+    { path: sheetIdFor(recipe.texture), contents: utf8(toJson(sheet.document)) },
   ];
 
   const result: BakeResult = {
@@ -180,11 +180,19 @@ export function bake(recipe: Recipe): BakeResult {
   if (recipe.prefab) {
     files.push({
       path: recipe.prefab.path,
-      contents: Buffer.from(buildPrefab(recipe, result, recipe.prefab)),
+      contents: utf8(buildPrefab(recipe, result, recipe.prefab)),
     });
   }
 
   return result;
+}
+
+/**
+ * Text as bytes. A bake runs in a browser as well as in Node, so it hands back
+ * `Uint8Array` rather than Node's `Buffer`.
+ */
+function utf8(text: string): Uint8Array {
+  return new TextEncoder().encode(text);
 }
 
 /**

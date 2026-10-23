@@ -322,7 +322,7 @@ and project/custom-domain routes.
 
 Engine — · Editor — · Decay — · Proof ✅
 
-**Tested by:** [`tools/isometric-baker/test/bake.test.ts`](../../tools/isometric-baker/test/bake.test.ts), [`tools/isometric-baker/test/anchor.test.ts`](../../tools/isometric-baker/test/anchor.test.ts), [`tools/isometric-baker/test/grain.test.ts`](../../tools/isometric-baker/test/grain.test.ts), [`tools/isometric-baker/test/tile-overhang.test.ts`](../../tools/isometric-baker/test/tile-overhang.test.ts)
+**Tested by:** [`tools/isometric-baker/test/bake.test.ts`](../../tools/isometric-baker/test/bake.test.ts), [`tools/isometric-baker/test/anchor.test.ts`](../../tools/isometric-baker/test/anchor.test.ts), [`tools/isometric-baker/test/grain.test.ts`](../../tools/isometric-baker/test/grain.test.ts), [`tools/isometric-baker/test/tile-overhang.test.ts`](../../tools/isometric-baker/test/tile-overhang.test.ts), [`tools/isometric-baker/test/web.test.ts`](../../tools/isometric-baker/test/web.test.ts)
 
 **Exercised in:** [`games/orbital-baked/assets/textures/detonation.isobake`](../../games/orbital-baked/assets/textures/detonation.isobake)
 
@@ -344,6 +344,10 @@ on the model, so the same texel is the same shade in every bake. Height is
 baked rather than scaled, so a slab is its own tile. The baker refuses art that
 overhangs its own footprint, and a sheet declares where its sprites meet the
 ground.
+
+The same bake runs in a page on the site (`web/`), built from the tool's own
+sources with their types stripped. `web.test.ts` asserts its output matches the
+command line's pixel for pixel; a browser smoke test opens it in CI.
 
 Orbital Last Stand uses it for one thing: `textures/detonation.isobake` bakes a
 five-frame blast, top-down, as `variants` of one sheet, and
