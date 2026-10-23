@@ -142,7 +142,7 @@ fn how_hard_each_island_is() {
         .ok()
         .and_then(|value| value.parse().ok())
         .unwrap_or(0);
-    let (mut crossed, mut lost) = (0, [0; 8]);
+    let (mut crossed, mut lost) = (0, [0; 12]);
     let names = [
         "Bulwark",
         "Mason",
@@ -154,7 +154,7 @@ fn how_hard_each_island_is() {
     let mut with = [(0, 0); 6];
     for seed in 1..=24u32 {
         let run = play(&project_from(seed, first));
-        let hearths: Vec<f32> = (0..8).map(|i| run.board(&format!("hearth_{i}"))).collect();
+        let hearths: Vec<f32> = (0..12).map(|i| run.board(&format!("hearth_{i}"))).collect();
         #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
         let party: Vec<usize> = (0..4)
             .map(|i| run.board(&format!("party_{i}")) as usize)
@@ -175,7 +175,7 @@ fn how_hard_each_island_is() {
             }
         }
         // Only the islands this run's road went through.
-        for i in first..8 {
+        for i in first..12 {
             if run.board(&format!("won_{i}")) < 0.5 && on != i as usize + 1 {
                 continue;
             }

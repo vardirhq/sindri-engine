@@ -48,11 +48,13 @@ Hollow shows on the ground what it will strike, and a shove that moves it moves
 its strike, so a turn is read and answered rather than raced. The tide comes in
 on a schedule shown in advance, drowning any Hollow it reaches, and high tide
 closes the causeway and wins the island. Three wardens of six are mustered
-for a crossing, a road of six islands through two worlds that forks twice,
-with a boon chosen between islands and the Hearth carried from one to the
-next. In the second world, the Cinderfast, a fourth warden joins and lava
-rises instead of the tide: it burns what it reaches, vents spill it across the
-board, and water a warden throws on it cools into new ground.
+for a crossing, a road of six islands that forks three times, with a boon
+chosen between islands and the Hearth carried from one to the next. Past the
+Lighthouse it divides between two worlds, where a fourth warden joins. In the
+Cinderfast lava rises instead of the tide: it burns what it reaches, vents
+spill it across the board, and water a warden throws on it cools into new
+ground. In the Rime anything shoved onto ice skids on until something stops
+it, and thrown water freezes.
 
 The rules are one value and pure shared functions in `rules.decay`, so aiming
 previews a skill by running it on a copy of the board; the director plays back

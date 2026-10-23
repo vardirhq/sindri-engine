@@ -133,6 +133,8 @@ FIGURES = {
     "imp": ("imp", True, 1.0),
     "burster": ("burster", True, 1.0),
     "kiln": ("kiln", True, 1.0),
+    "hailer": ("hailer", True, 1.0),
+    "rimeback": ("rimeback", True, 1.0),
     "house": ("house", False, 1.0),
     "beacon": ("beacon", False, 1.0),
     "stone": ("stone", False, 1.0),
@@ -206,6 +208,8 @@ def write_prefabs():
         "sindri.tags": {"tags": ["lava"]},
     }, rotation=FLAT, scale=(0.96, 0.96, 1.0))
     write(folder / "lava-pool.prefab", prefab("Lava Pool", [lava]))
+    ice = entity("ice-pool", "Ice Pool", {"sindri.model": {"asset": "models/ice-slab.glb", "layer": 0}})
+    write(folder / "ice-pool.prefab", prefab("Ice Pool", [ice]))
     # A Hollow on the causeway behind the title: the husk's model and nothing
     # else, walked by `title.decay`.
     # A speck in the air: pollen, dust, rain, a firefly or an ember, as
@@ -309,7 +313,8 @@ def world_entities():
         mark="prefabs/mark.prefab", label="prefabs/label.prefab", popup="prefabs/popup.prefab",
         missile="prefabs/missile.prefab", spark="prefabs/spark.prefab", droplet="prefabs/droplet.prefab",
         pointer="prefabs/pointer.prefab",
-        water_pool="prefabs/water-pool.prefab", lava_pool="prefabs/lava-pool.prefab", **prefabs),
+        water_pool="prefabs/water-pool.prefab", lava_pool="prefabs/lava-pool.prefab",
+        ice_pool="prefabs/ice-pool.prefab", **prefabs),
         spatial=False))
     # A song for each world, both always playing, each through its own bus:
     # `Atmosphere` crossfades the buses with the world's mood.
@@ -318,6 +323,9 @@ def world_entities():
         "volume": 0.45}}, spatial=False))
     e.append(entity("music-cinderfast", "Music Cinderfast", {"sindri.audio.source": {
         "autoplay": True, "bus": "music-cinderfast", "clip": "audio/cinder-song.ogg", "looping": True,
+        "volume": 0.45}}, spatial=False))
+    e.append(entity("music-rime", "Music Rime", {"sindri.audio.source": {
+        "autoplay": True, "bus": "music-rime", "clip": "audio/rime-song.ogg", "looping": True,
         "volume": 0.45}}, spatial=False))
     return e
 
@@ -628,6 +636,8 @@ def between_screen(e, id, name, button_label, cards=0, per_row=4, kind="boon"):
 
 
 ROUTE_STEPS = 6
+# Both worlds' forks, seen from where the road divides.
+ROUTE_STOPS = 4
 
 
 def route_map(e, parent):
@@ -647,7 +657,7 @@ def route_map(e, parent):
         e.append(entity(col, f"RouteStep{step}", {**styled("route-step"), **clear_shape(199),
                                                    "sindri.ui.layout": column(0.006, "center", "center")},
                         parent="route-map", spatial=False))
-        for k in range(2):
+        for k in range(ROUTE_STOPS):
             stop = f"route-stop-{step}-{k}"
             e.append(entity(stop, f"RouteStop{step}_{k}", {**styled("route-stop"), **clear_shape(200),
                                                            "sindri.ui.layout": {"direction": "row",
