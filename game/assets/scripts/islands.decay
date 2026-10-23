@@ -1,4 +1,4 @@
-// The four islands of a crossing, as text you can read.
+// The islands of a crossing, as text you can read.
 //
 // Each island is two maps of eight rows of eight cells, north row first and
 // west cell first, written so the rows line up with each other:
@@ -21,8 +21,11 @@
 //
 // An island is in a world: `sea`, the islands of the causeway, or `caldera`,
 // the burning mountain beyond it, where lava rises round the island instead
-// of the tide. A warden named in `recruit` (`T` the Tidecaller) joins the
-// crossing on that island.
+// of the tide. A fourth warden joins on the first island of a new world, and
+// stands on the `4`.
+//
+// A crossing is a road of six steps, and at some steps the road forks: the
+// crossing takes one island of each step, chosen on the way (`layer_of`).
 
 struct IslandDef {
     name: String,
@@ -38,10 +41,37 @@ struct IslandDef {
     land: String,
     high: String,
     world: String = "sea",
-    recruit: String = "",
 }
 
-shared const ISLAND_COUNT: number = 7.0;
+shared const ISLAND_COUNT: number = 8.0;
+
+// The steps of the road, and which islands lie on each. The road forks after
+// Saltmarsh, between The Fold and Quarry Rise, and again deep in the
+// mountain, between The Crucible and The Glass Stair.
+shared const LAYER_COUNT: number = 6.0;
+
+shared fn layer_of(index: number) -> number {
+    if index == 0.0 { return 0.0; }
+    if index <= 2.0 { return 1.0; }
+    if index == 3.0 { return 2.0; }
+    if index == 4.0 { return 3.0; }
+    if index <= 6.0 { return 4.0; }
+    return 5.0;
+}
+
+shared fn layer_islands(layer: number) -> List<number> {
+    var found: List<number> = [];
+    for i in 0..ISLAND_COUNT {
+        if layer_of(i) == layer { found.push(i); }
+    }
+    return found;
+}
+
+// Whether a warden joins on this island: the first of a new world does.
+shared fn recruits_on(index: number) -> bool {
+    return index > 0.0 && layer_of(index) > 0.0
+        && world_of(index) != world_of(layer_islands(layer_of(index) - 1.0)[0]);
+}
 
 // Which world an island is in, as a number the pictures can use: 0 the sea,
 // 1 the burning mountain.
@@ -201,7 +231,6 @@ shared fn island_def(index: number) -> IslandDef {
             land: "basalt",
             high: "cinder",
             world: "caldera",
-            recruit: "T",
         );
     }
     if index == 5.0 {
@@ -231,6 +260,36 @@ shared fn island_def(index: number) -> IslandDef {
             shore: "ash",
             land: "basalt",
             high: "cinder",
+            world: "caldera",
+        );
+    }
+    if index == 6.0 {
+        return IslandDef(
+            name: "The Glass Stair",
+            blurb: "Terraces of black glass climbing out of the lake. A shove down a step hurts, and the steps are steep.",
+            heights: "00111100"
+                + "01332111"
+                + "13444311"
+                + "13442111"
+                + "13332111"
+                + "11333211"
+                + "01113110"
+                + "00111100",
+            features: "........"
+                + "...H..^."
+                + ".~B.V.L."
+                + ".1...LLL"
+                + "..2..LLL"
+                + "..H34.L."
+                + "....v..."
+                + "........",
+            rounds: 6.0,
+            rises: [2.0, 4.0],
+            start: "HXI",
+            waves: ["ISH", "XHI", "BIS", "MX", "XI", ""],
+            shore: "ash",
+            land: "basalt",
+            high: "glass",
             world: "caldera",
         );
     }
@@ -368,9 +427,3 @@ shared fn wave_of(def: IslandDef, round: number) -> List<Kind> {
     return kinds_of(def.waves[index]);
 }
 
-// The warden who joins the crossing on this island, if one does.
-shared fn recruit_of(def: IslandDef) -> List<Kind> {
-    var kinds: List<Kind> = [];
-    if def.recruit == "T" { kinds.push(Kind.Tidecaller); }
-    return kinds;
-}

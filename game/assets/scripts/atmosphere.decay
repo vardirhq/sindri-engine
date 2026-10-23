@@ -57,7 +57,7 @@ struct Mood {
 shared const TITLE_MOOD: number = 10.0;
 
 shared fn mood_of(index: number) -> Mood {
-    if index >= 4.0 && index <= 6.0 { return fire_mood(index); }
+    if index < ISLAND_COUNT && world_of(index) == 1.0 { return fire_mood(layer_of(index) + 1.0); }
     if index == 1.0 {
         // The Fold: overcast and still, mist lying in the hollows, rain.
         return Mood(

@@ -44,19 +44,36 @@ script Autoplay {
     var turn_hearth: number = 0.0;
     var done: bool = false;
 
-    fn roster() -> List<Warden> {
-        return [
-            Warden(kind: Kind.Bulwark, max_hp: kind_hp(Kind.Bulwark), move: kind_move(Kind.Bulwark), power: 0.0),
-            Warden(kind: Kind.Mason, max_hp: kind_hp(Kind.Mason), move: kind_move(Kind.Mason), power: 0.0),
-            Warden(kind: Kind.Lamplighter, max_hp: kind_hp(Kind.Lamplighter), move: kind_move(Kind.Lamplighter), power: 0.0),
-        ];
+    fn fresh(kind: Kind) -> Warden {
+        return Warden(kind: kind, max_hp: kind_hp(kind), move: kind_move(kind), power: 0.0);
+    }
+
+    // A warden none of the party is, picked by the dice, as a player picking
+    // at random would.
+    fn stranger() -> Warden {
+        var left: List<number> = [];
+        for i in 0..HERO_COUNT {
+            var has = false;
+            for w in party { if w.kind == hero_kind(i) { has = true; } }
+            if !has { left.push(i); }
+        }
+        let pick = left[Random.int(0.0, left.length - 1.0)];
+        return fresh(hero_kind(pick));
+    }
+
+    // Writes who is in the party, as hero numbers, for the report.
+    fn record_party() {
+        for i in 0..party.length {
+            Game.set("party_" + i, hero_index(party[i].kind) + 1.0);
+        }
     }
 
     fn begin(hearth: number) {
         let def = island_def(island);
-        // Whoever joins on this island joins for good.
-        for kind in recruit_of(def) {
-            party.push(Warden(kind: kind, max_hp: kind_hp(kind), move: kind_move(kind), power: 0.0));
+        // The first island of a new world brings a fourth warden.
+        if recruits_on(island) && party.length < 4.0 {
+            party.push(stranger());
+            record_party();
         }
         board = board_of(def, party, hearth);
         board = mark_spawns(board, landing_of(def));
@@ -113,6 +130,7 @@ script Autoplay {
     fn letter(kind: Kind) -> String {
         return match kind {
             Kind.Bulwark => "1", Kind.Mason => "2", Kind.Lamplighter => "3", Kind.Tidecaller => "4",
+            Kind.Harpooner => "5", Kind.Shieldback => "6",
             Kind.Husk => "h", Kind.Brute => "b", Kind.Spitter => "s", Kind.Mortar => "m",
             Kind.Colossus => "c", Kind.Imp => "i", Kind.Burster => "x", Kind.Kiln => "k",
             Kind.House => "H", Kind.Beacon => "B", Kind.Stone => "S", Kind.Vent => "V",
@@ -156,13 +174,14 @@ script Autoplay {
             Random.seed(seed);
             Game.set("hearth", 7.0);
             island = first;
-            party = roster();
-            // Starting past an island that recruits still brings its recruit.
+            // Three wardens mustered by the dice; starting past the island
+            // a fourth joins on still brings one.
+            party = [];
+            for k in 0..3 { party.push(stranger()); }
             for i in 0..first {
-                for kind in recruit_of(island_def(i)) {
-                    party.push(Warden(kind: kind, max_hp: kind_hp(kind), move: kind_move(kind), power: 0.0));
-                }
+                if recruits_on(i) { party.push(stranger()); }
             }
+            record_party();
             begin(7.0);
             return;
         }
@@ -208,14 +227,18 @@ script Autoplay {
         if board.round > board.rounds {
             Game.set("won_" + island, 1.0);
             Game.set("hearth_" + island, board.hearth);
-            island += 1.0;
-            if island >= ISLAND_COUNT {
+            let layer = layer_of(island) + 1.0;
+            if layer >= LAYER_COUNT {
                 Game.set("crossed", 1.0);
                 done = true;
                 return;
             }
+            // Down one road or the other where it forks, by the dice.
+            let was = island;
+            let roads = layer_islands(layer);
+            island = roads[Random.int(0.0, roads.length - 1.0)];
             // A new world rekindles the Hearth, as it does in the game.
-            if world_of(island) != world_of(island - 1.0) {
+            if world_of(island) != world_of(was) {
                 begin(7.0);
                 return;
             }

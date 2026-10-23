@@ -32,6 +32,8 @@ try {
     const errors = [];
     const turns = [];
     let titleReady = false;
+    let musterReady = false;
+    let setOut = false;
     let battlefieldReady = false;
     let swipes = 0;
     page.on('pageerror', (error) => {
@@ -40,6 +42,8 @@ try {
     });
     page.on('console', (message) => {
       if (message.text().includes('Causeway title ready')) titleReady = true;
+      if (message.text().includes('Causeway muster ready')) musterReady = true;
+      if (message.text().includes('Causeway crossing set out')) setOut = true;
       if (message.text().includes('Causeway sea swipe began')) swipes++;
       if (message.text().includes('Causeway battlefield ready')) battlefieldReady = true;
       if (message.text().includes('Causeway view settled:')) turns.push(message.text());
@@ -63,7 +67,11 @@ try {
     console.log(`${name}: title initialized`);
     await page.locator('canvas').focus();
     await page.keyboard.down('Enter');
-    await waitFor(() => battlefieldReady, 'title handed the camera to the battlefield');
+    await waitFor(() => musterReady, 'title handed over to the muster');
+    await page.keyboard.up('Enter');
+    // Set out with the three wardens the muster offers.
+    await page.keyboard.down('Enter');
+    await waitFor(() => setOut && battlefieldReady, 'muster set out and the camera is on the battlefield');
     await page.keyboard.up('Enter');
     console.log(`${name}: battlefield ready`);
     const waitForTurns = async (count) => {

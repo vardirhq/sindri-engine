@@ -383,6 +383,71 @@
     text-align: center;
 }
 
+/* The muster's six wardens, three to a row, and the two roads at a fork:
+   the same cards, shaped for more words. */
+.boons.heros {
+    height: 19vh;
+    gap: 2vh;
+}
+
+.boon-card.hero-card {
+    width: 44vh;
+    height: 19vh;
+}
+
+.boon-words.hero-words {
+    padding: 1.6vh;
+    gap: 0.5vh;
+}
+
+.boon-mark.hero-mark {
+    height: 4.4vh;
+    font-size: 3.8vh;
+    line-height: 4.4vh;
+}
+
+.boon-title.hero-title {
+    height: 3.6vh;
+    font-size: 3vh;
+    line-height: 3.6vh;
+}
+
+.boon-text.hero-text {
+    font-size: 1.9vh;
+    line-height: 2.5vh;
+}
+
+.boon-key.hero-key {
+    height: 2.4vh;
+    font-size: 1.7vh;
+    line-height: 2.2vh;
+}
+
+/* The muster says all it has to say on its cards and its stats line. */
+.screen-text.muster-text {
+    height: 0px;
+}
+
+.screen-text.route-text {
+    width: 130vh;
+    font-size: 2.3vh;
+    line-height: 3.2vh;
+}
+
+.boons.roads {
+    height: 32vh;
+}
+
+.boon-card.road-card {
+    width: 56vh;
+    height: 32vh;
+}
+
+.boon-text.road-text {
+    font-size: 2.2vh;
+    line-height: 2.9vh;
+}
+
 /* --- The title ------------------------------------------------------------------ */
 
 /* Sized in vh so the title is the same picture at any window height; the
@@ -598,4 +663,16 @@
     .boon-title { width: 26vw; height: 6vw; font-size: 4.4vw; line-height: 5.4vw; text-align: start; }
     .boon-text { width: 40vw; font-size: 3.2vw; line-height: 4.2vw; text-align: start; }
     .boon-key { width: 5vw; font-size: 3.2vw; }
+    .boons.heros { width: 92vw; height: auto; direction: column; gap: 1.6vw; }
+    .boon-card.hero-card { width: 88vw; height: 15vw; }
+    .boon-words.hero-words { padding: 1.6vw; direction: row; gap: 2.4vw; }
+    .boon-mark.hero-mark { width: 7vw; height: 7vw; font-size: 5.6vw; line-height: 7vw; }
+    .boon-title.hero-title { width: 22vw; height: 5vw; font-size: 3.8vw; line-height: 4.8vw; text-align: start; }
+    .boon-text.hero-text { width: 46vw; font-size: 2.7vw; line-height: 3.5vw; text-align: start; }
+    .boon-key.hero-key { width: 8vw; height: 4vw; font-size: 2.6vw; line-height: 3.4vw; }
+    .screen-title.muster-title { font-size: 8.4vw; letter-spacing: 0px; }
+    .screen-text.route-text { width: 90vw; font-size: 3.2vw; line-height: 4.4vw; }
+    .boons.roads { width: 92vw; height: auto; direction: column; gap: 2vw; }
+    .boon-card.road-card { width: 88vw; height: 30vw; }
+    .boon-text.road-text { width: 48vw; font-size: 2.9vw; line-height: 3.8vw; text-align: start; }
 }

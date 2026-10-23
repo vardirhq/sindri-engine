@@ -10,6 +10,7 @@ pub const STEP: f32 = 1.0 / 60.0;
 pub const SIZE: [f32; 2] = [1280.0, 720.0];
 pub const TITLE: f32 = 0.0;
 pub const PLAYER: f32 = 2.0;
+pub const MUSTER: f32 = 7.0;
 
 /// Where cell (0, 0) of the board is in the world; `battle.decay` says the same.
 const ORIGIN: f32 = 24.0;
@@ -69,6 +70,22 @@ impl Game {
             "the wardens' turn never came; the game is in phase {}",
             self.phase()
         );
+    }
+
+    /// From the title through the muster, setting out with the three
+    /// wardens it offers first -- the Bulwark, the Mason and the Lamplighter --
+    /// and on to the wardens' first turn.
+    pub fn begin_crossing(&mut self) {
+        self.tap_key(Key::Enter);
+        for _ in 0..60 * 10 {
+            self.step();
+            if self.phase() == MUSTER {
+                break;
+            }
+        }
+        assert_eq!(self.phase(), MUSTER, "the title hands over to the muster");
+        self.tap_key(Key::Enter);
+        self.until_players_turn();
     }
 
     pub fn tap_key(&mut self, key: Key) {

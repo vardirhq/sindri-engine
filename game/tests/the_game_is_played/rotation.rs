@@ -14,8 +14,7 @@ fn pose(game: &Game) -> sindri_core::Transform3D {
 #[test]
 fn four_smooth_turns_preserve_pitch_focus_and_zoom() {
     let mut game = Game::open();
-    game.tap_key(Key::Enter);
-    game.until_players_turn();
+    game.begin_crossing();
     game.play(1.0);
     let home = pose(&game);
     let lens = game
@@ -58,8 +57,7 @@ fn four_smooth_turns_preserve_pitch_focus_and_zoom() {
 fn picking_movement_and_combat_work_in_every_view() {
     for turns in 0..4 {
         let mut game = Game::open();
-        game.tap_key(Key::Enter);
-        game.until_players_turn();
+        game.begin_crossing();
         game.play(1.0);
         for _ in 0..turns {
             game.tap_key(Key::L);
@@ -129,8 +127,7 @@ fn swipe(game: &mut Game, from: [f32; 2], to: [f32; 2]) {
 #[test]
 fn phone_swipes_turn_only_when_they_begin_in_empty_sea() {
     let mut game = Game::open_at(PHONE);
-    game.tap_key(Key::Enter);
-    game.until_players_turn();
+    game.begin_crossing();
     game.play(1.0);
     let home = pose(&game);
     let start = game.cell_of(game.pieces("bulwark")[0]);
@@ -150,8 +147,7 @@ fn phone_swipes_turn_only_when_they_begin_in_empty_sea() {
 #[test]
 fn phone_button_rotates_and_tapping_still_moves() {
     let mut game = Game::open_at(PHONE);
-    game.tap_key(Key::Enter);
-    game.until_players_turn();
+    game.begin_crossing();
     game.play(1.0);
     let home = pose(&game);
     game.run.input.apply(InputEvent::TouchStarted {
@@ -185,8 +181,7 @@ fn phone_button_rotates_and_tapping_still_moves() {
 #[test]
 fn turning_does_not_end_a_turn_or_consume_a_held_touch() {
     let mut game = Game::open_at(PHONE);
-    game.tap_key(Key::Enter);
-    game.until_players_turn();
+    game.begin_crossing();
     game.play(1.0);
     let start = game.cell_of(game.pieces("bulwark")[0]);
     game.tap_key(Key::J);

@@ -20,8 +20,7 @@ use support::*;
 fn the_title_begins_a_crossing_and_the_hollow_climb_out() {
     let mut game = Game::open();
     assert_eq!(game.phase(), TITLE, "the game opens on its title");
-    game.tap_key(Key::Enter);
-    game.until_players_turn();
+    game.begin_crossing();
     assert_eq!(
         game.board("island"),
         0.0,
@@ -44,8 +43,7 @@ fn the_title_begins_a_crossing_and_the_hollow_climb_out() {
 #[test]
 fn clicking_a_warden_and_then_the_ground_walks_it_there() {
     let mut game = Game::open();
-    game.tap_key(Key::Enter);
-    game.until_players_turn();
+    game.begin_crossing();
     let start = game.cell_of(game.pieces("bulwark")[0]);
     // Wherever the Hollow happened to climb out, a free neighbour within a
     // step of the Bulwark's height is somewhere it can walk.
@@ -63,8 +61,7 @@ fn clicking_a_warden_and_then_the_ground_walks_it_there() {
 #[test]
 fn ending_the_turn_lets_the_hollow_strike_and_the_next_round_begin() {
     let mut game = Game::open();
-    game.tap_key(Key::Enter);
-    game.until_players_turn();
+    game.begin_crossing();
     game.tap_key(Key::E);
     game.until_players_turn();
     assert_eq!(game.board("round"), 2.0, "the round moved on");
@@ -77,8 +74,7 @@ fn ending_the_turn_lets_the_hollow_strike_and_the_next_round_begin() {
 #[test]
 fn the_keyboard_alone_can_move_a_warden() {
     let mut game = Game::open();
-    game.tap_key(Key::Enter);
-    game.until_players_turn();
+    game.begin_crossing();
     // The first warden is taken up and the cursor stands on it. Enter on a
     // reachable cell walks it there.
     let start = game.cell_of(game.pieces("bulwark")[0]);
@@ -94,8 +90,7 @@ fn the_keyboard_alone_can_move_a_warden() {
 #[test]
 fn a_phone_held_upright_plays_by_tapping() {
     let mut game = Game::open_at(PHONE);
-    game.tap_key(Key::Enter);
-    game.until_players_turn();
+    game.begin_crossing();
     let start = game.cell_of(game.pieces("bulwark")[0]);
     let goal = game.free_step_from(start);
     game.tap_cell(start);

@@ -88,6 +88,35 @@ fn the_game_opens_and_its_scripts_start() {
     }
 }
 
+/// Presses Enter for a frame.
+fn enter(run: &mut ProjectRun) {
+    run.key(sindri_platform::Key::Enter, true);
+    run.step(1.0 / 60.0).expect("steps");
+    run.key(sindri_platform::Key::Enter, false);
+}
+
+/// From the title into a battle's first turn: Enter takes the title's leave,
+/// settling the camera into the battle's view, and Enter again sets out with
+/// the three wardens the muster offers.
+fn into_battle(run: &mut ProjectRun) {
+    enter(run);
+    for _ in 0..60 * 10 {
+        run.step(1.0 / 60.0).expect("steps");
+        if run.board("phase") == 7.0 {
+            break;
+        }
+    }
+    assert_eq!(run.board("phase"), 7.0, "the muster came");
+    enter(run);
+    for _ in 0..60 * 10 {
+        run.step(1.0 / 60.0).expect("steps");
+        if run.board("phase") == 2.0 {
+            break;
+        }
+    }
+    assert_eq!(run.board("phase"), 2.0, "the wardens' turn came");
+}
+
 /// Where a screen element was laid out, in pixels from the top left.
 fn centre(run: &ProjectRun, id: &str) -> [f32; 2] {
     let entity = run
@@ -101,18 +130,8 @@ fn centre(run: &ProjectRun, id: &str) -> [f32; 2] {
 fn the_hud_keeps_to_the_corners_on_a_desk_and_reflows_on_a_phone() {
     for size in [[1280.0, 720.0], [390.0, 844.0]] {
         let mut run = open(size);
-        // Into a battle, so the HUD is showing. The title takes its leave
-        // first, settling the camera into the battle's view.
-        run.key(sindri_platform::Key::Enter, true);
-        run.step(1.0 / 60.0).expect("steps");
-        run.key(sindri_platform::Key::Enter, false);
-        for _ in 0..60 * 10 {
-            run.step(1.0 / 60.0).expect("steps");
-            if run.board("phase") == 2.0 {
-                break;
-            }
-        }
-        assert_eq!(run.board("phase"), 2.0, "the wardens' turn came");
+        // Into a battle, so the HUD is showing.
+        into_battle(&mut run);
         for (id, left, top) in [
             ("status", true, true),
             ("hearth", false, true),
@@ -143,7 +162,7 @@ fn the_art_is_built_from_the_islands_the_rules_read() {
     )
     .expect("the islands");
     let count = rules.matches("IslandDef(").count();
-    assert_eq!(count, 7, "seven islands to a crossing");
+    assert_eq!(count, 8, "eight islands on the road");
     for file in [
         "saltmarsh",
         "fold",
@@ -151,6 +170,7 @@ fn the_art_is_built_from_the_islands_the_rules_read() {
         "lighthouse",
         "ashfall-shelf",
         "crucible",
+        "glass-stair",
         "kilns-throat",
     ] {
         assert!(
@@ -167,20 +187,14 @@ fn every_screen_between_islands_fits_a_desk_and_a_phone() {
     for size in [[1280.0, 720.0], [390.0, 844.0]] {
         for (screen, parts) in [
             (1.0, ["held-title", "held-button"]),
-            (2.0, ["upgrade-title", "boon-3"]),
+            (2.0, ["upgrade-title", "upgrade-card-3"]),
             (3.0, ["fallen-title", "fallen-button"]),
             (4.0, ["crossed-title", "crossed-button"]),
+            (5.0, ["muster-card-5", "muster-button"]),
+            (6.0, ["route-text", "route-card-1"]),
         ] {
             let mut run = open(size);
-            run.key(sindri_platform::Key::Enter, true);
-            run.step(1.0 / 60.0).expect("steps");
-            run.key(sindri_platform::Key::Enter, false);
-            for _ in 0..60 * 10 {
-                run.step(1.0 / 60.0).expect("steps");
-                if run.board("phase") == 2.0 {
-                    break;
-                }
-            }
+            into_battle(&mut run);
             run.set_board("preview_screen", screen);
             for _ in 0..90 {
                 let report = run.step(1.0 / 60.0).expect("steps");

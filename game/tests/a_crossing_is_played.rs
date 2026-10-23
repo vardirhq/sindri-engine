@@ -142,15 +142,43 @@ fn how_hard_each_island_is() {
         .ok()
         .and_then(|value| value.parse().ok())
         .unwrap_or(0);
-    let (mut crossed, mut lost) = (0, [0; 7]);
+    let (mut crossed, mut lost) = (0, [0; 8]);
+    let names = [
+        "Bulwark",
+        "Mason",
+        "Lamplighter",
+        "Tidecaller",
+        "Harpooner",
+        "Shieldback",
+    ];
+    let mut with = [(0, 0); 6];
     for seed in 1..=24u32 {
         let run = play(&project_from(seed, first));
-        let hearths: Vec<f32> = (0..7).map(|i| run.board(&format!("hearth_{i}"))).collect();
+        let hearths: Vec<f32> = (0..8).map(|i| run.board(&format!("hearth_{i}"))).collect();
+        #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
+        let party: Vec<usize> = (0..4)
+            .map(|i| run.board(&format!("party_{i}")) as usize)
+            .filter(|&hero| hero > 0)
+            .map(|hero| hero - 1)
+            .collect();
         println!(
-            "seed {seed:2}: Hearth after each island {hearths:?}, lost on {}",
+            "seed {seed:2}: {:?}; Hearth after each island {hearths:?}, lost on {}",
+            party.iter().map(|&hero| names[hero]).collect::<Vec<_>>(),
             run.board("lost_on")
         );
-        for i in first..7 {
+        #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
+        let on = run.board("lost_on") as usize;
+        for &hero in &party {
+            with[hero].1 += 1;
+            if run.board("crossed") > 0.5 {
+                with[hero].0 += 1;
+            }
+        }
+        // Only the islands this run's road went through.
+        for i in first..8 {
+            if run.board(&format!("won_{i}")) < 0.5 && on != i as usize + 1 {
+                continue;
+            }
             let k = |cause: &str| run.board(&format!("{cause}_{i}"));
             println!(
                 "  island {i}: Hearth lost to strikes {}, vents {}, the level {}; wardens' health {}, {}, {}",
@@ -165,13 +193,14 @@ fn how_hard_each_island_is() {
         if run.board("crossed") > 0.5 {
             crossed += 1;
         }
-        #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
-        let on = run.board("lost_on") as usize;
         if on > 0 {
             lost[on - 1] += 1;
         }
     }
     println!("crossed {crossed} of 24; fell on each island {lost:?}");
+    for (hero, (won, played)) in with.iter().enumerate() {
+        println!("  {}: crossed {won} of {played}", names[hero]);
+    }
     // Keep the fixtures from piling up in the temp folder between reports.
     for seed in 1..=24u32 {
         let _ = std::fs::remove_dir_all(project_from(seed, first));
