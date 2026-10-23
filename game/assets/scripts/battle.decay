@@ -81,6 +81,10 @@ script Battle {
     var roads: List<number> = [];
     // The world the last island was in, so a new world can be met.
     var last_world: number = -1.0;
+    // The omen over each island this crossing, and how many boons are still
+    // to be chosen before going on.
+    var omens: List<number> = [];
+    var boons_left: number = 0.0;
     // What the run has earned between islands.
     var max_hearth: number = 7.0;
     var extra_rewinds: number = 0.0;
@@ -912,7 +916,7 @@ script Battle {
                 play(plan_all(board), After.Mark);
             }
             After.Mark => {
-                board.arrivals = wave_of(def, board.round);
+                board.arrivals = wave_under(def, board.round, omen_on(island));
                 board = mark_spawns(board, landing);
                 board.beats.clear();
                 begin_player_turn();
@@ -1021,6 +1025,8 @@ script Battle {
         last_world = world_of(island);
         Random.seed(Save.number("seed", 1.0) * 7919.0 + 17.0);
         Save.set_number("seed", Save.number("seed", 1.0) + 1.0);
+        omens = [];
+        for i in 0..ISLAND_COUNT { omens.push(omen_of_roll(i, Random.int(0.0, 99.0))); }
         Audio.play("audio/boon.wav", 0.6);
         print("Causeway crossing set out");
         begin_island();
@@ -1155,6 +1161,8 @@ script Battle {
             if recruited != "" {
                 banner(def.name, "The " + recruited + " joins you. " + def.blurb);
                 recruited = "";
+            } else if omen_line(island) != "" {
+                banner(def.name, omen_line(island));
             } else {
                 banner(def.name, def.blurb);
             }
@@ -1584,6 +1592,10 @@ script Battle {
         show_threats(new_turn(board));
         for c in 0..(SIZE * SIZE) { set_mark(threat_marks, c, ""); }
         hearth = board.hearth;
+        if omen_on(island) == OMEN_LIT {
+            max_hearth += 1.0;
+            hearth = min(hearth + 2.0, max_hearth);
+        }
         let step = layer_of(island) + 1.0;
         Audio.play("audio/victory.wav", 0.8);
         if step >= LAYER_COUNT {
@@ -1603,6 +1615,9 @@ script Battle {
         roads = roads_from(island);
         var why = "High tide. The causeway is under water and the Hollow turn back.";
         if board.molten { why = "The lava has sealed the gate, and the Hollow cannot come through it."; }
+        if omen_on(island) == OMEN_LIT { why += " The lit windows rekindle the Hearth."; }
+        if omen_on(island) == OMEN_HOST { why += " The host is beaten: choose two boons."; }
+        if omen_on(island) == OMEN_WRECK { why += " The wreck holds an upgrade."; }
         var next = "next, " + island_def(roads[0]).name;
         if roads.length > 1.0 { next = "next, the road forks"; }
         if world_of(roads[0]) != world_of(island) {
@@ -1611,6 +1626,19 @@ script Battle {
         }
         screen_words("Held", "Step " + step + " of " + LAYER_COUNT + " held", def.name + " holds",
             why, "Hearth " + hearth + " of " + max_hearth + "  ·  " + next);
+    }
+
+    // The omen over an island on this crossing.
+    fn omen_on(index: number) -> number {
+        if index < omens.length { return omens[index]; }
+        return OMEN_PLAIN;
+    }
+
+    // An omen as a line for a card or a banner, or nothing for a plain one.
+    fn omen_line(index: number) -> String {
+        let omen = omen_on(index);
+        if omen == OMEN_PLAIN { return ""; }
+        return "[color=#ffcf7a]" + omen_name(omen) + ":[/color] " + omen_text(omen);
     }
 
     // After the boon: on down the road, or a choice where it forks.
@@ -1627,8 +1655,9 @@ script Battle {
             let at = island_def(road);
             var waves = "";
             for wave in at.waves { waves += wave; }
-            screens.card("Route", k, "◆", at.name, at.blurb + "  " + at.rounds + " rounds, "
-                + (waves.length + at.start.length) + " Hollow.", world_color(road));
+            var text = at.blurb + "  " + at.rounds + " rounds, " + (waves.length + at.start.length) + " Hollow.";
+            if omen_line(road) != "" { text += "  " + omen_line(road); }
+            screens.card("Route", k, "◆", at.name, text, world_color(road));
             screens.taken("Route", k, false);
             screens.face("Route", k, -1.0);
         }
@@ -1717,10 +1746,13 @@ script Battle {
     // plays the same crossing. A boon is a number: ten a warden plus 0 for
     // health, 1 for its skill and 2 for its stride, or 100 and up for the
     // crossing's.
-    fn offer_boons() {
-        var pool: List<number> = [100.0, 101.0, 102.0];
+    fn offer_boons(upgrades_only: bool) {
+        var pool: List<number> = [];
+        if !upgrades_only { pool = [100.0, 101.0, 102.0]; }
         for w in 0..wardens.length {
-            for kind in 0..3 { pool.push(w * 10.0 + kind); }
+            if !upgrades_only {
+                for kind in 0..3 { pool.push(w * 10.0 + kind); }
+            }
             // An upgrade the warden lacks, twice over: they change how a
             // crossing plays, so they should come up often.
             if !knows(wardens[w].perks, PERK_A) { pool.push(w * 10.0 + 3.0); pool.push(w * 10.0 + 3.0); }
@@ -1736,6 +1768,16 @@ script Battle {
             var left: List<number> = [];
             for b in pool { if b != boon { left.push(b); } }
             pool = left;
+        }
+        // An upgrade-only hand short of cards fills out with ordinary boons.
+        if offered.length < 4.0 && upgrades_only {
+            let had = offered;
+            offer_boons(false);
+            var mixed = had;
+            for b in offered {
+                if mixed.length < 4.0 && !mixed.contains(b) { mixed.push(b); }
+            }
+            offered = mixed;
         }
         show_offers("Before " + next_name(), "Choose a boon");
     }
@@ -1879,6 +1921,13 @@ script Battle {
             if part == 4.0 { learn(w, PERK_B); }
         }
         Audio.play("audio/boon.wav", 0.6);
+        boons_left -= 1.0;
+        if boons_left > 0.0 {
+            offer_boons(false);
+            screen_words("Upgrade", "One more", "Choose a boon", "", "Hearth " + hearth + " of " + max_hearth);
+            show_screen("Upgrade", true);
+            return;
+        }
         go_on();
     }
 
@@ -1976,7 +2025,10 @@ script Battle {
 
     fn update_hud() {
         set_text("IslandName", def.name);
-        set_text("RoundText", "Round " + min(board.round, board.rounds) + " of " + board.rounds);
+        var round = "Round " + min(board.round, board.rounds) + " of " + board.rounds;
+        let omen = omen_on(island);
+        if omen != OMEN_PLAIN && phase != Phase.Title { round += "  ·  [color=#ffcf7a]" + omen_name(omen) + "[/color]"; }
+        set_text("RoundText", round);
         var tide = "Tide " + board.tide;
         if board.molten { tide = "Lava " + board.tide; }
         if rises_this_round(board) {
@@ -2162,7 +2214,7 @@ script Battle {
         if which == 2.0 {
             show_screen("Held", false);
             phase = Phase.Upgrade;
-            offer_boons();
+            offer_boons(false);
             show_screen("Upgrade", true);
         }
         if which == 3.0 { lose(); }
@@ -2246,10 +2298,20 @@ script Battle {
                     show_screen("Held", false);
                     phase = Phase.Upgrade;
                     // A warden joins where the road enters a new world.
+                    // What the island's omen pays: two boons, an upgrade, or
+                    // none at all after still water.
+                    let omen = omen_on(island);
+                    boons_left = 1.0;
+                    if omen == OMEN_HOST { boons_left = 2.0; }
                     if world_of(roads[0]) != world_of(island) && wardens.length < 4.0 {
+                        boons_left = 0.0;
                         offer_recruits();
+                    } else if omen == OMEN_STILL {
+                        boons_left = 0.0;
+                        go_on();
+                        return;
                     } else {
-                        offer_boons();
+                        offer_boons(omen == OMEN_WRECK);
                     }
                     show_screen("Upgrade", true);
                 }

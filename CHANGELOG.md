@@ -1,5 +1,12 @@
 # Changelog
 
+- Hang an omen over each of Causeway's islands past the first, rolled when a
+  crossing sets out and shown on the road's cards, the banner and the HUD:
+  still water brings a Hollow fewer each round and no boon after; a Hollow host
+  one more each round and two boons; a wreck ashore an upgrade for the boon;
+  and lit windows rekindle the Hearth. A fork in the road is now a choice of
+  risk and reward as well as of island.
+
 - Give each of Causeway's wardens two upgrades that change how its skill
   works, won as boons between islands: the Bulwark's bash can shove two cells
   or ward the Bulwark, the Mason's stone can hurt everything beside it or fly

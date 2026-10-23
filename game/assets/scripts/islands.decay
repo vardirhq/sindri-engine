@@ -570,6 +570,68 @@ shared fn board_of(def: IslandDef, wardens: List<Warden>, hearth: number) -> Boa
 }
 
 // The Hollow that arrive at the end of a round, or none past the last wave.
+// --- Omens ---------------------------------------------------------------------
+
+// What hangs over an island on this crossing, rolled when the crossing sets
+// out, and what holding it pays. Each trades danger for reward, so a fork in
+// the road is a choice between them.
+shared const OMEN_PLAIN: number = 0.0;
+// Still water: every wave one Hollow lighter, and no boon after.
+shared const OMEN_STILL: number = 1.0;
+// A Hollow host: one more Hollow every round, and two boons after.
+shared const OMEN_HOST: number = 2.0;
+// A wreck ashore: the boon after is one of the wardens' upgrades.
+shared const OMEN_WRECK: number = 3.0;
+// Lit windows: hold it and the Hearth regains 2 and can hold one more.
+shared const OMEN_LIT: number = 4.0;
+
+shared fn omen_name(omen: number) -> String {
+    if omen == OMEN_STILL { return "Still water"; }
+    if omen == OMEN_HOST { return "A Hollow host"; }
+    if omen == OMEN_WRECK { return "A wreck ashore"; }
+    if omen == OMEN_LIT { return "Lit windows"; }
+    return "";
+}
+
+shared fn omen_text(omen: number) -> String {
+    if omen == OMEN_STILL { return "One Hollow fewer every round, and no boon after."; }
+    if omen == OMEN_HOST { return "One more Hollow every round, and two boons after."; }
+    if omen == OMEN_WRECK { return "Something washed up here: the boon after is an upgrade."; }
+    if omen == OMEN_LIT { return "Hold it and the Hearth regains 2 and can hold one more."; }
+    return "";
+}
+
+// An omen for an island, from a roll of 0 to 99. The first island is always
+// plain: it is where a crossing learns the game.
+shared fn omen_of_roll(index: number, roll: number) -> number {
+    if index == 0.0 { return OMEN_PLAIN; }
+    if roll < 40.0 { return OMEN_PLAIN; }
+    if roll < 55.0 { return OMEN_STILL; }
+    if roll < 75.0 { return OMEN_HOST; }
+    if roll < 90.0 { return OMEN_WRECK; }
+    return OMEN_LIT;
+}
+
+// The lowest of a world's Hollow, the one a host brings more of.
+shared fn host_kind(def: IslandDef) -> Kind {
+    if def.world == "caldera" { return Kind.Imp; }
+    if def.world == "rime" { return Kind.Hailer; }
+    return Kind.Husk;
+}
+
+// A round's arrivals under an island's omen.
+shared fn wave_under(def: IslandDef, round: number, omen: number) -> List<Kind> {
+    var wave = wave_of(def, round);
+    let last_wave = round - 1.0 >= def.waves.length - 1.0;
+    if omen == OMEN_STILL && wave.length > 0.0 {
+        wave.remove_at(wave.length - 1.0);
+    }
+    if omen == OMEN_HOST && !last_wave {
+        wave.push(host_kind(def));
+    }
+    return wave;
+}
+
 shared fn wave_of(def: IslandDef, round: number) -> List<Kind> {
     let index = round - 1.0;
     if index < 0.0 || index >= def.waves.length {
