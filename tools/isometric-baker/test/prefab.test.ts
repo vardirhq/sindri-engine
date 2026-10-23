@@ -25,6 +25,10 @@ async function standingStone(): Promise<Recipe> {
   return parseRecipe(await readFile(path, 'utf8'), path);
 }
 
+function text(contents: Uint8Array): string {
+  return new TextDecoder().decode(contents);
+}
+
 function generated(prefab: string): Record<string, unknown> {
   return JSON.parse(prefab) as Record<string, unknown>;
 }
@@ -50,7 +54,7 @@ test('a recipe with no prefab block writes no prefab', async () => {
 test('the prefab scale is the canvas measured in world units', async () => {
   const recipe = await standingStone();
   const result = bake(recipe);
-  const prefab = generated(result.files[2].contents.toString('utf8')) as {
+  const prefab = generated(text(result.files[2].contents)) as {
     entities: { transform_3d: { scale: number[] } }[];
   };
 
@@ -71,7 +75,7 @@ test('the prefab scale is the canvas measured in world units', async () => {
 
 test('the prefab draws a named frame of the generated sheet', async () => {
   const result = bake(await standingStone());
-  const prefab = generated(result.files[2].contents.toString('utf8')) as {
+  const prefab = generated(text(result.files[2].contents)) as {
     entities: { components: Record<string, { texture: string }> }[];
   };
   assert.equal(
@@ -88,7 +92,7 @@ test('a prefab asking for a frame the bake did not produce says so', async () =>
 
 test('grid occupancy is written only when the recipe names a grid', async () => {
   const recipe = await standingStone();
-  const withoutGrid = generated(bake(recipe).files[2].contents.toString('utf8')) as {
+  const withoutGrid = generated(text(bake(recipe).files[2].contents)) as {
     entities: { components: Record<string, unknown> }[];
   };
   assert.deepEqual(Object.keys(withoutGrid.entities[0].components), ['sindri.sprite']);
@@ -100,7 +104,7 @@ test('grid occupancy is written only when the recipe names a grid', async () => 
     footprint: { width: 2, height: 3 },
     prefab: { ...recipe.prefab!, grid: 'floor' },
   });
-  const occupied = generated(onGrid.files[2].contents.toString('utf8')) as {
+  const occupied = generated(text(onGrid.files[2].contents)) as {
     entities: { components: Record<string, { grid?: string; footprint?: number[][] }> }[];
   };
   const occupant = occupied.entities[0].components['sindri.grid.occupant'];
@@ -118,7 +122,7 @@ test('grid occupancy is written only when the recipe names a grid', async () => 
 test('a single-cell footprint restates nothing', async () => {
   const recipe = await standingStone();
   const result = bake({ ...recipe, prefab: { ...recipe.prefab!, grid: 'floor' } });
-  const prefab = generated(result.files[2].contents.toString('utf8')) as {
+  const prefab = generated(text(result.files[2].contents)) as {
     entities: { components: Record<string, Record<string, unknown>> }[];
   };
   const occupant = prefab.entities[0].components['sindri.grid.occupant'];
@@ -127,11 +131,11 @@ test('a single-cell footprint restates nothing', async () => {
 
 test('the generation record carries no clock reading', async () => {
   const result = bake(await standingStone());
-  const text = result.files[2].contents.toString('utf8');
+  const prefabText = text(result.files[2].contents);
   // IsoGame's generator metadata records a `renderedAt`. That is right for a
   // build artefact and wrong for a file in version control: it would make every
   // rebuild a diff, and the determinism check meaningless.
-  assert.ok(!/\d{4}-\d{2}-\d{2}T/.test(text), 'a timestamp leaked into a generated document');
+  assert.ok(!/\d{4}-\d{2}-\d{2}T/.test(prefabText), 'a timestamp leaked into a generated document');
 });
 
 test('an f32 is written as the shortest decimal that names it', () => {

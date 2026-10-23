@@ -73,7 +73,7 @@ async function difference(root: string, file: BakeOutput): Promise<string | null
   }
 
   if (file.path.endsWith('.png')) {
-    const baked = decodePng(file.contents);
+    const baked = decodePng(Buffer.from(file.contents));
     const stored = decodePng(existing);
     const at = firstDifference(baked, stored);
     if (!at) return null;

@@ -1,5 +1,19 @@
 # Changelog
 
+- Put the isometric baker on the website as a tool called Sprite Baker, at
+  `/examples/isometric-baker/`: edit a recipe, see the sheet it bakes, and
+  download the PNG, `.sheet` and prefab, or all three as a zip. Each direction
+  is drawn where it will stand, on the tiles its footprint reserves with a ring
+  of ground around them (diamonds, squares or a ground line by view), at a
+  chosen zoom with the floor optional; sliders for supersample, alpha cutoff,
+  padding, palette snap, outline, light angle and the shading bands edit the
+  recipe text and bake again as they move. The layout follows IsoGame's Sprite
+  Factory, the tool the baker was adapted from. It runs the tool's own sources
+  in the page, so it bakes the same pixels as the command
+  line; a bake now returns `Uint8Array` rather than a Node `Buffer`. The Sound
+  Lab's web build still exports WAV only, because its Ogg encoder (libvorbis)
+  cannot be built for `wasm32-unknown-unknown`.
+
 - Show a thin health bar over a Hollow once it has been hurt, in place of its
   row of diamonds that was always there; one that dies to a single blow shows
   none.

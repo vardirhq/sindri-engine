@@ -36,7 +36,7 @@ test('the same recipe bakes the same bytes twice', async () => {
   assert.equal(first.files.length, second.files.length);
   for (const [index, file] of first.files.entries()) {
     assert.equal(file.path, second.files[index].path);
-    assert.ok(file.contents.equals(second.files[index].contents), `${file.path} is not deterministic`);
+    assert.ok(Buffer.from(file.contents).equals(second.files[index].contents), `${file.path} is not deterministic`);
   }
 });
 
@@ -47,7 +47,7 @@ test('the fixture still bakes to the picture checked in beside it', async () => 
   const png = result.files.find((file) => file.path.endsWith('.png'));
   assert.ok(png, 'a bake writes a texture');
   const stored = decodePng(await readFile(`${PROJECT}${png.path}`));
-  const baked = decodePng(png.contents);
+  const baked = decodePng(Buffer.from(png.contents));
 
   const at = firstDifference(baked, stored);
   assert.equal(
@@ -60,7 +60,7 @@ test('the fixture still bakes to the picture checked in beside it', async () => 
 
   const sheet = result.files.find((file) => file.path === sheetIdFor(recipe.texture));
   assert.ok(sheet, 'a bake writes a sheet document');
-  assert.equal(sheet.contents.toString('utf8'), await readFile(`${PROJECT}${sheet.path}`, 'utf8'));
+  assert.equal(new TextDecoder().decode(sheet.contents), await readFile(`${PROJECT}${sheet.path}`, 'utf8'));
 });
 
 test('every frame is the same size, with the anchor on its centre', async () => {
@@ -158,7 +158,7 @@ test('a color declared in a different case is still one palette entry', async ()
   assert.deepEqual(result.report.warnings, []);
   const png = bake(recipe).files.find((file) => file.path.endsWith('.png'));
   const shoutedPng = result.files.find((file) => file.path.endsWith('.png'));
-  assert.ok(png && shoutedPng && png.contents.equals(shoutedPng.contents));
+  assert.ok(png && shoutedPng && Buffer.from(png.contents).equals(shoutedPng.contents));
 });
 
 /** A flat-view recipe built in memory, so the assertions are about the view. */
