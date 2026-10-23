@@ -37,19 +37,28 @@ def build(root: Path) -> None:
         escape = html.escape
         terms = " ".join([entry["title"], entry["description"], *entry["tags"]]).lower()
         tags = "".join(f"<li>{escape(tag)}</li>" for tag in entry["tags"])
-        action = {"docs": "Read", "tools": "Open"}.get(category, "Launch")
+        action = {"docs": "Read", "tools": "Open"}.get(category, "Play")
+        # A playable entry opens its play page, which embeds the export.
+        target = entry["path"]
+        if entry.get("play"):
+            target = "play/" + entry["path"].split("/")[1] + "/"
+        shot = (entry.get("play") or {}).get("shot")
+        thumb = (
+            f'<img class="entry-thumb" src="../assets/screenshots/{escape(shot)}" alt="" '
+            f'loading="lazy" decoding="async">' if shot else ""
+        )
         source_link = "https://github.com/vardirhq/sindri-engine/" + (
             "blob/main/" if category == "docs" else "tree/main/"
         ) + source
         cards.append(
             f'<article class="directory-entry" data-category="{category}" '
-            f'data-search="{escape(terms)}">'
+            f'data-search="{escape(terms)}">{thumb}'
             f'<span class="entry-category">{LABELS[category]}</span>'
             f'<h2>{escape(entry["title"])}</h2>'
             f'<p>{escape(entry["description"])}</p>'
             f'<ul class="entry-tags" aria-label="Topics">{tags}</ul>'
             f'<div class="entry-actions">'
-            f'<a href="../{escape(entry["path"])}">{action} →'
+            f'<a href="../{escape(target)}">{action} →'
             f'<span class="sr-only"> {escape(entry["title"])}</span></a>'
             f'<a href="{escape(source_link)}">source ↗'
             f'<span class="sr-only"> for {escape(entry["title"])}</span></a>'
