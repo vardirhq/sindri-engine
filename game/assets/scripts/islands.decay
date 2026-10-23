@@ -570,6 +570,43 @@ shared fn board_of(def: IslandDef, wardens: List<Warden>, hearth: number) -> Boa
 }
 
 // The Hollow that arrive at the end of a round, or none past the last wave.
+// --- Bonus objectives -------------------------------------------------------------
+
+// Something more an island asks of a crossing, rolled with its omen. Meeting
+// it earns one more boon.
+shared const OBJ_HOUSES: number = 0.0;
+shared const OBJ_DEEP: number = 1.0;
+shared const OBJ_SLAY: number = 2.0;
+shared const OBJ_STAND: number = 3.0;
+shared const OBJ_EMBER: number = 4.0;
+shared const OBJECTIVE_COUNT: number = 5.0;
+
+// How many an objective that counts asks for.
+shared fn objective_goal(objective: number) -> number {
+    if objective == OBJ_DEEP { return 3.0; }
+    if objective == OBJ_SLAY { return 6.0; }
+    return 0.0;
+}
+
+shared fn objective_name(objective: number, def: IslandDef) -> String {
+    if objective == OBJ_HOUSES { return "Every house stands"; }
+    if objective == OBJ_DEEP { return "Three to the deep"; }
+    if objective == OBJ_SLAY { return "Six fall"; }
+    if objective == OBJ_STAND { return "No warden falls"; }
+    return "Keep the fire";
+}
+
+shared fn objective_text(objective: number, def: IslandDef) -> String {
+    if objective == OBJ_HOUSES { return "Lose no house on this island."; }
+    if objective == OBJ_DEEP {
+        if def.world == "caldera" { return "Send three Hollow into the lava."; }
+        return "Send three Hollow into the sea.";
+    }
+    if objective == OBJ_SLAY { return "Destroy six Hollow."; }
+    if objective == OBJ_STAND { return "Lose no warden on this island."; }
+    return "Lose no more than 1 Hearth on this island.";
+}
+
 // --- Omens ---------------------------------------------------------------------
 
 // What hangs over an island on this crossing, rolled when the crossing sets

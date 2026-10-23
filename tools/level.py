@@ -373,6 +373,9 @@ def hud_entities():
     e.append(entity("tide-text", "TideText", {**styled("status-line", "dim"), **text("Tide 0", BODY_FONT, 0.026,
                                                                                     122, rich=True)},
                     parent="status", spatial=False))
+    # The island's bonus objective and how it is going.
+    e.append(entity("objective-text", "ObjectiveText", {**styled("status-line", "dim"), **text(
+        "", BODY_FONT, 0.026, 122, rich=True)}, parent="status", spatial=False))
     # Top right: the Hearth, a lantern for every point it can hold.
     e.append(entity("hearth", "Hearth", {**styled("hearth"), **clear_shape(100),
                                          "sindri.ui.layout": column(0.002, "center")},

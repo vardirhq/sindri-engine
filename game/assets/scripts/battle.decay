@@ -85,6 +85,16 @@ script Battle {
     // to be chosen before going on.
     var omens: List<number> = [];
     var boons_left: number = 0.0;
+    // Each island's bonus objective this crossing, and how the one in play is
+    // going: what it has counted, whether it has failed, and the Hearth it
+    // began with. Kept as they stood at the start of the turn too, for a
+    // rewind.
+    var objectives: List<number> = [];
+    var obj_count: number = 0.0;
+    var obj_failed: bool = false;
+    var obj_hearth: number = 0.0;
+    var turn_obj_count: number = 0.0;
+    var turn_obj_failed: bool = false;
     // What the run has earned between islands.
     var max_hearth: number = 7.0;
     var extra_rewinds: number = 0.0;
@@ -625,6 +635,7 @@ script Battle {
     // --- Playing beats ----------------------------------------------------------
 
     fn play(next: Board, then: After) {
+        tally(next);
         queue = next.beats;
         board = next;
         board.beats.clear();
@@ -1027,6 +1038,8 @@ script Battle {
         Save.set_number("seed", Save.number("seed", 1.0) + 1.0);
         omens = [];
         for i in 0..ISLAND_COUNT { omens.push(omen_of_roll(i, Random.int(0.0, 99.0))); }
+        objectives = [];
+        for i in 0..ISLAND_COUNT { objectives.push(Random.int(0.0, OBJECTIVE_COUNT - 1.0)); }
         Audio.play("audio/boon.wav", 0.6);
         print("Causeway crossing set out");
         begin_island();
@@ -1088,6 +1101,9 @@ script Battle {
         last_world = world_of(island);
         path.push(island);
         board = board_of(def, wardens, hearth);
+        obj_count = 0.0;
+        obj_failed = false;
+        obj_hearth = hearth;
         base = [];
         for h in board.heights { base.push(h); }
         clear_ground();
@@ -1175,6 +1191,8 @@ script Battle {
 
     fn begin_player_turn() {
         turn_start = board;
+        turn_obj_count = obj_count;
+        turn_obj_failed = obj_failed;
         selected = -1.0;
         mode = Mode.Move;
         phase = Phase.Player;
@@ -1212,6 +1230,8 @@ script Battle {
         if phase != Phase.Player || rewinds <= 0.0 { return; }
         rewinds -= 1.0;
         board = turn_start;
+        obj_count = turn_obj_count;
+        obj_failed = turn_obj_failed;
         sync_pieces();
         selected = -1.0;
         select_next();
@@ -1615,6 +1635,9 @@ script Battle {
         roads = roads_from(island);
         var why = "High tide. The causeway is under water and the Hollow turn back.";
         if board.molten { why = "The lava has sealed the gate, and the Hollow cannot come through it."; }
+        if objective_met() {
+            why += " " + objective_name(objective_on(island), def) + ": one more boon.";
+        }
         if omen_on(island) == OMEN_LIT { why += " The lit windows rekindle the Hearth."; }
         if omen_on(island) == OMEN_HOST { why += " The host is beaten: choose two boons."; }
         if omen_on(island) == OMEN_WRECK { why += " The wreck holds an upgrade."; }
@@ -1626,6 +1649,56 @@ script Battle {
         }
         screen_words("Held", "Step " + step + " of " + LAYER_COUNT + " held", def.name + " holds",
             why, "Hearth " + hearth + " of " + max_hearth + "  ·  " + next);
+    }
+
+    // The bonus objective on an island this crossing.
+    fn objective_on(index: number) -> number {
+        if index < objectives.length { return objectives[index]; }
+        return OBJ_HOUSES;
+    }
+
+    // Counts what a change did towards the island's objective, from the beats
+    // it left: Hollow lost to the sea or the lava, Hollow destroyed, and
+    // houses or wardens lost.
+    fn tally(next: Board) {
+        let objective = objective_on(island);
+        for beat in next.beats {
+            if beat.kind != BeatKind.Die && beat.kind != BeatKind.Drown && beat.kind != BeatKind.Burn { continue; }
+            let at = unit_index(next, beat.unit);
+            if at < 0.0 { continue; }
+            let kind = next.units[at].kind;
+            if is_hollow(kind) {
+                if objective == OBJ_SLAY { obj_count += 1.0; }
+                if objective == OBJ_DEEP && beat.kind != BeatKind.Die { obj_count += 1.0; }
+            }
+            if objective == OBJ_HOUSES && kind == Kind.House { obj_failed = true; }
+            if objective == OBJ_STAND && is_warden(kind) { obj_failed = true; }
+        }
+    }
+
+    // Whether the island's objective is met, so far as it can be told yet.
+    fn objective_met() -> bool {
+        let objective = objective_on(island);
+        if obj_failed { return false; }
+        if objective == OBJ_EMBER { return obj_hearth - board.hearth <= 1.0; }
+        if objective_goal(objective) > 0.0 { return obj_count >= objective_goal(objective); }
+        return true;
+    }
+
+    // The objective's line for the HUD: its name, how far along it is, and a
+    // mark once it is won or lost.
+    fn objective_line() -> String {
+        let objective = objective_on(island);
+        var line = "[color=#9fe6ff]" + objective_name(objective, def) + "[/color]";
+        let goal = objective_goal(objective);
+        if goal > 0.0 { line += "  " + min(obj_count, goal) + " of " + goal; }
+        if objective == OBJ_EMBER { line += "  " + max(0.0, obj_hearth - board.hearth) + " lost"; }
+        if obj_failed || (objective == OBJ_EMBER && !objective_met()) {
+            line += "  [color=#ff9e80]failed[/color]";
+        } else if goal > 0.0 && objective_met() {
+            line += "  [color=#c8ff9a]done[/color]";
+        }
+        return line;
     }
 
     // The omen over an island on this crossing.
@@ -2029,6 +2102,11 @@ script Battle {
         let omen = omen_on(island);
         if omen != OMEN_PLAIN && phase != Phase.Title { round += "  ·  [color=#ffcf7a]" + omen_name(omen) + "[/color]"; }
         set_text("RoundText", round);
+        if phase == Phase.Title {
+            set_text("ObjectiveText", "");
+        } else {
+            set_text("ObjectiveText", objective_line());
+        }
         var tide = "Tide " + board.tide;
         if board.molten { tide = "Lava " + board.tide; }
         if rises_this_round(board) {
@@ -2303,11 +2381,13 @@ script Battle {
                     let omen = omen_on(island);
                     boons_left = 1.0;
                     if omen == OMEN_HOST { boons_left = 2.0; }
+                    if omen == OMEN_STILL { boons_left = 0.0; }
+                    // A bonus objective met is one more.
+                    if objective_met() { boons_left += 1.0; }
                     if world_of(roads[0]) != world_of(island) && wardens.length < 4.0 {
-                        boons_left = 0.0;
+                        // A recruit is chosen first; the boons follow it.
                         offer_recruits();
-                    } else if omen == OMEN_STILL {
-                        boons_left = 0.0;
+                    } else if boons_left == 0.0 {
                         go_on();
                         return;
                     } else {

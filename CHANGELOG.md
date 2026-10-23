@@ -1,5 +1,10 @@
 # Changelog
 
+- Give each of Causeway's islands a bonus objective, rolled with its omen and
+  followed in the HUD: lose no house, send three Hollow into the sea or the
+  lava, destroy six, lose no warden, or lose no more than one Hearth. Meeting
+  it earns one more boon, and a rewind puts its count back with the board.
+
 - Hang an omen over each of Causeway's islands past the first, rolled when a
   crossing sets out and shown on the road's cards, the banner and the HUD:
   still water brings a Hollow fewer each round and no boon after; a Hollow host

@@ -22,9 +22,9 @@
    half its own size in from the margin. */
 .status {
     width: 320px;
-    height: 128px;
+    height: 152px;
     x: 180px;
-    y: -84px;
+    y: -96px;
     anchor: top_left;
     padding: 16px 20px;
     direction: column;
@@ -741,10 +741,10 @@
 /* --- A phone held upright -------------------------------------------------- */
 
 @media (orientation: portrait) {
-    .status { width: 47vw; height: 120px; x: 26vw; y: -64px; padding: 28px 22px; gap: 0px; }
+    .status { width: 47vw; height: 144px; x: 26vw; y: -76px; padding: 28px 22px; gap: 0px; }
     .island-name { font-size: 19px; line-height: 23px; height: 23px; }
     .status-line { font-size: 12px; line-height: 17px; height: 17px; }
-    .hearth { width: 46vw; height: 120px; x: -25vw; y: -64px; padding: 28px 14px; }
+    .hearth { width: 46vw; height: 144px; x: -25vw; y: -76px; padding: 40px 14px; }
     .hearth-title { font-size: 14px; line-height: 18px; height: 18px; }
     .hearth-lamps { height: 26px; gap: 0px; }
     .hearth-lamp { width: 13px; height: 18px; }
@@ -787,7 +787,7 @@
 .button.rotate { width: 44px; height: 44px; }
 .button.rotate.top { width: 58px; }
 @media (orientation: portrait) {
-    .view-controls { x: -86px; y: -150px; }
+    .view-controls { x: -86px; y: -174px; }
     .banner { y: -186px; }
     .screen-kicker { height: 5vw; font-size: 3.6vw; line-height: 4.4vw; letter-spacing: 1vw; }
     .screen-title { height: 13vw; font-size: 11vw; line-height: 13vw; letter-spacing: 0.3vw; }
