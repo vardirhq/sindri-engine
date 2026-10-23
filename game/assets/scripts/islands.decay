@@ -515,6 +515,8 @@ struct Warden {
     max_hp: number,
     move: number,
     power: number,
+    // The upgrades that change how its skill works (`PERK_A`, `PERK_B`).
+    perks: number = 0.0,
 }
 
 // The board an island starts as: its ground, its buildings and stones, the
@@ -558,7 +560,8 @@ shared fn board_of(def: IslandDef, wardens: List<Warden>, hearth: number) -> Boa
             if mark == "" + (w + 1.0) {
                 let warden = wardens[w];
                 board.units.push(Unit(id: board.next_id, kind: warden.kind, x: x, z: z,
-                    hp: warden.max_hp, max_hp: warden.max_hp, move: warden.move, power: warden.power));
+                    hp: warden.max_hp, max_hp: warden.max_hp, move: warden.move, power: warden.power,
+                    perks: warden.perks));
                 board.next_id += 1.0;
             }
         }

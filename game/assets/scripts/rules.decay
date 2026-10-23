@@ -139,6 +139,8 @@ struct Unit {
     charge: number = 0.0,
     // Blows a ward will still turn aside this round.
     ward: number = 0.0,
+    // A warden's upgrades, as the sum of the `PERK_` flags it has.
+    perks: number = 0.0,
 }
 
 struct Spawn {
@@ -288,6 +290,69 @@ shared fn is_fixed(kind: Kind) -> bool {
 // Shieldback, who sets its feet.
 shared fn is_heavy(kind: Kind) -> bool {
     return is_fixed(kind) || kind == Kind.Shieldback;
+}
+
+// --- Upgrades ------------------------------------------------------------------
+
+// Each warden has two upgrades that change how its skill works, won as boons
+// on the way. A unit's `perks` is the sum of the ones it has.
+shared const PERK_A: number = 1.0;
+shared const PERK_B: number = 2.0;
+
+shared fn has_perk(unit: Unit, perk: number) -> bool {
+    return knows(unit.perks, perk);
+}
+
+// Whether a sum of `PERK_` flags includes `perk`.
+shared fn knows(perks: number, perk: number) -> bool {
+    return floor(perks / perk) % 2.0 == 1.0;
+}
+
+shared fn perk_name(kind: Kind, perk: number) -> String {
+    let a = perk == PERK_A;
+    return match kind {
+        Kind.Bulwark => if_text(a, "Battering Ram", "Shield Up"),
+        Kind.Mason => if_text(a, "Avalanche", "Long Arm"),
+        Kind.Lamplighter => if_text(a, "Lance", "Blast"),
+        Kind.Tidecaller => if_text(a, "Flood", "Undertow"),
+        Kind.Harpooner => if_text(a, "Long Line", "Gaff"),
+        _ => if_text(a, "Phalanx", "Stand Fast"),
+    };
+}
+
+shared fn perk_text(kind: Kind, perk: number) -> String {
+    let a = perk == PERK_A;
+    return match kind {
+        Kind.Bulwark => if_text(a, "The bash shoves its target two cells.",
+            "After a bash, the Bulwark is warded against the next blow."),
+        Kind.Mason => if_text(a, "Everything beside where the stone lands takes 1 before it is shoved.",
+            "The stone can be thrown 2 to 6 cells."),
+        Kind.Lamplighter => if_text(a, "The bolt goes on through the first figure and strikes the next in line too.",
+            "Whatever the bolt strikes is knocked back two cells."),
+        Kind.Tidecaller => if_text(a, "The water also falls on the cells either side of the target.",
+            "A figure the water strikes is drawn a cell towards the Tidecaller instead of washed away."),
+        Kind.Harpooner => if_text(a, "The harpoon reaches to the far edge of the board.",
+            "A Hollow hauled in is struck again for 1 when it arrives."),
+        _ => if_text(a, "The ward also covers every warden and building beside the one braced.",
+            "Wardens beside the Shieldback cannot be shoved."),
+    };
+}
+
+shared fn if_text(choose: bool, yes: String, no: String) -> String {
+    if choose { return yes; }
+    return no;
+}
+
+// Whether a Shieldback with Stand Fast stands beside (x, z).
+shared fn steadied(board: Board, x: number, z: number) -> bool {
+    for side in 0..4 {
+        let at = unit_at(board, x + dir_x(side), z + dir_z(side));
+        if at >= 0.0 {
+            let u = board.units[at];
+            if u.kind == Kind.Shieldback && u.hp > 0.0 && has_perk(u, PERK_B) { return true; }
+        }
+    }
+    return false;
 }
 
 shared fn kind_hp(kind: Kind) -> number {
@@ -735,6 +800,7 @@ shared fn push(board: Board, x: number, z: number, d: number) -> Board {
     if index < 0.0 { return board; }
     let unit = board.units[index];
     if is_heavy(unit.kind) { return board; }
+    if is_warden(unit.kind) && steadied(board, x, z) { return board; }
     let tx = x + dir_x(d);
     let tz = z + dir_z(d);
     var next = board;
@@ -819,10 +885,17 @@ shared fn skill_targets(board: Board, index: number) -> List<number> {
     for d in 0..4 {
         var low = 1.0;
         var high = 1.0;
-        if unit.kind == Kind.Mason { low = 2.0; high = 4.0; }
+        if unit.kind == Kind.Mason {
+            low = 2.0;
+            high = 4.0;
+            if has_perk(unit, PERK_B) { high = 6.0; }
+        }
         if unit.kind == Kind.Lamplighter { high = SIZE; }
         if unit.kind == Kind.Tidecaller { high = 3.0; }
-        if unit.kind == Kind.Harpooner { high = 5.0; }
+        if unit.kind == Kind.Harpooner {
+            high = 5.0;
+            if has_perk(unit, PERK_A) { high = SIZE; }
+        }
         if unit.kind == Kind.Shieldback { high = 2.0; }
         for r in low..(high + 1.0) {
             let tx = unit.x + dir_x(d) * r;
@@ -859,8 +932,23 @@ shared fn use_skill(board: Board, index: number, tx: number, tz: number) -> Boar
             next.beats.push(Beat(kind: BeatKind.Miss, unit: unit.id, x: tx, z: tz));
             return next;
         }
+        let struck = next.units[unit_at(next, tx, tz)].id;
         next = hurt_at(next, tx, tz, 2.0 + unit.power);
-        return push(next, tx, tz, d);
+        if has_perk(unit, PERK_A) {
+            next = haul(next, struck, d, 2.0);
+        } else {
+            next = push(next, tx, tz, d);
+        }
+        if has_perk(unit, PERK_B) {
+            let me = unit_index(next, unit.id);
+            if me >= 0.0 && next.units[me].hp > 0.0 {
+                var guarded = next.units[me];
+                guarded.ward = max(guarded.ward, 1.0);
+                next.units[me] = guarded;
+                next.beats.push(Beat(kind: BeatKind.Ward, unit: unit.id, x: guarded.x, z: guarded.z));
+            }
+        }
+        return next;
     }
     if unit.kind == Kind.Lamplighter {
         let end = line_end(next, unit.x, unit.z, d, unit.id);
@@ -871,11 +959,40 @@ shared fn use_skill(board: Board, index: number, tx: number, tz: number) -> Boar
             next.beats.push(Beat(kind: BeatKind.Miss, unit: unit.id, x: ex, z: ez));
             return next;
         }
-        next = hurt_at(next, ex, ez, 1.0 + unit.power);
-        return push(next, ex, ez, d);
+        let first = next.units[unit_at(next, ex, ez)].id;
+        // With Lance the bolt goes on to the next figure in line.
+        var second = -1.0;
+        if has_perk(unit, PERK_A) {
+            let beyond = line_end(next, ex, ez, d, unit.id);
+            let sx = beyond % SIZE;
+            let sz = floor(beyond / SIZE);
+            let at = unit_at(next, sx, sz);
+            if at >= 0.0 && !(sx == ex && sz == ez) {
+                second = next.units[at].id;
+                next.beats.push(Beat(kind: BeatKind.Bolt, unit: unit.id, x: ex, z: ez, tx: sx, tz: sz));
+            }
+        }
+        var knock = 1.0;
+        if has_perk(unit, PERK_B) { knock = 2.0; }
+        for id in [first, second] {
+            let at = unit_index(next, id);
+            if id < 0.0 || at < 0.0 || next.units[at].hp <= 0.0 { continue; }
+            next = hurt(next, at, 1.0 + unit.power);
+            next = haul(next, id, d, knock);
+        }
+        return next;
     }
     if unit.kind == Kind.Tidecaller {
-        return drench(next, index, tx, tz, d);
+        next = drench(next, index, tx, tz, d);
+        if has_perk(unit, PERK_A) {
+            // Flood: the cells either side of the target too.
+            for side in [(d + 1.0) % 4.0, (d + 3.0) % 4.0] {
+                let sx = tx + dir_x(side);
+                let sz = tz + dir_z(side);
+                if in_bounds(sx, sz) { next = drench(next, unit_index(next, unit.id), sx, sz, d); }
+            }
+        }
+        return next;
     }
     // The Mason's stone.
     next.beats.push(Beat(kind: BeatKind.Lob, unit: unit.id, x: unit.x, z: unit.z, tx: tx, tz: tz));
@@ -887,6 +1004,7 @@ shared fn use_skill(board: Board, index: number, tx: number, tz: number) -> Boar
         next.beats.push(Beat(kind: BeatKind.Miss, unit: unit.id, x: tx, z: tz));
     }
     for side in 0..4 {
+        if has_perk(unit, PERK_A) { next = hurt_at(next, tx + dir_x(side), tz + dir_z(side), 1.0); }
         next = push(next, tx + dir_x(side), tz + dir_z(side), side);
     }
     return next;
@@ -906,6 +1024,18 @@ shared fn brace(board: Board, index: number, tx: number, tz: number) -> Board {
     warded.ward = 1.0 + unit.power;
     next.units[at] = warded;
     next.beats.push(Beat(kind: BeatKind.Ward, unit: warded.id, x: tx, z: tz));
+    if has_perk(unit, PERK_A) {
+        // Phalanx: everyone it protects beside the one braced.
+        for side in 0..4 {
+            let beside = unit_at(next, tx + dir_x(side), tz + dir_z(side));
+            if beside < 0.0 { continue; }
+            var also = next.units[beside];
+            if !(is_warden(also.kind) || is_building(also.kind)) || also.hp <= 0.0 { continue; }
+            also.ward = max(also.ward, 1.0 + unit.power);
+            next.units[beside] = also;
+            next.beats.push(Beat(kind: BeatKind.Ward, unit: also.id, x: also.x, z: also.z));
+        }
+    }
     return next;
 }
 
@@ -920,7 +1050,9 @@ shared fn harpoon(board: Board, index: number, d: number) -> Board {
     var hx = unit.x;
     var hz = unit.z;
     var hit = -1.0;
-    while reach < 5.0 && hit < 0.0 {
+    var most = 5.0;
+    if has_perk(unit, PERK_A) { most = SIZE; }
+    while reach < most && hit < 0.0 {
         let cx = hx + dir_x(d);
         let cz = hz + dir_z(d);
         if !in_bounds(cx, cz) { break; }
@@ -943,7 +1075,13 @@ shared fn harpoon(board: Board, index: number, d: number) -> Board {
         // Hauled along the line to it, the same way a shove moves anyone.
         return haul(next, unit.id, d, steps_between(unit.x, unit.z, hx, hz) - 1.0);
     }
-    return haul(next, target.id, back, steps_between(unit.x, unit.z, hx, hz) - 1.0);
+    next = haul(next, target.id, back, steps_between(unit.x, unit.z, hx, hz) - 1.0);
+    if has_perk(unit, PERK_B) && is_hollow(target.kind) {
+        // Gaff: struck again as it arrives.
+        let at = unit_index(next, target.id);
+        if at >= 0.0 && next.units[at].hp > 0.0 { next = hurt(next, at, 1.0); }
+    }
+    return next;
 }
 
 // Drags a unit up to `cells` cells in direction `d`, one shove at a time,
@@ -983,7 +1121,10 @@ shared fn drench(board: Board, index: number, tx: number, tz: number, d: number)
             next.beats.push(Beat(kind: BeatKind.Steam, x: tx, z: tz));
             next = hurt(next, at, 2.0 + unit.power);
         }
-        next = push(next, tx, tz, d);
+        // Undertow draws it in rather than washing it away.
+        var way = d;
+        if has_perk(unit, PERK_B) { way = (d + 2.0) % 4.0; }
+        next = push(next, tx, tz, way);
         return settle(next);
     }
     if is_lava(next, tx, tz) {

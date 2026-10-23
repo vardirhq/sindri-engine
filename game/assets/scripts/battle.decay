@@ -1721,12 +1721,21 @@ script Battle {
         var pool: List<number> = [100.0, 101.0, 102.0];
         for w in 0..wardens.length {
             for kind in 0..3 { pool.push(w * 10.0 + kind); }
+            // An upgrade the warden lacks, twice over: they change how a
+            // crossing plays, so they should come up often.
+            if !knows(wardens[w].perks, PERK_A) { pool.push(w * 10.0 + 3.0); pool.push(w * 10.0 + 3.0); }
+            if !knows(wardens[w].perks, PERK_B) { pool.push(w * 10.0 + 4.0); pool.push(w * 10.0 + 4.0); }
         }
         offered = [];
         for slot in 0..4 {
+            if pool.length == 0.0 { break; }
             let pick = Random.int(0.0, pool.length - 1.0);
-            offered.push(pool[pick]);
-            pool.remove_at(pick);
+            let boon = pool[pick];
+            offered.push(boon);
+            // Every copy of it goes, so a hand never offers one twice.
+            var left: List<number> = [];
+            for b in pool { if b != boon { left.push(b); } }
+            pool = left;
         }
         show_offers("Before " + next_name(), "Choose a boon");
     }
@@ -1791,6 +1800,8 @@ script Battle {
         let kind = boon_kind(boon);
         if boon >= 200.0 { return kind_name(kind); }
         let part = boon % 10.0;
+        if part == 3.0 { return perk_name(kind, PERK_A); }
+        if part == 4.0 { return perk_name(kind, PERK_B); }
         if part == 0.0 {
             return match kind {
                 Kind.Bulwark => "Thicker plate",
@@ -1832,6 +1843,8 @@ script Battle {
             return hero_blurb(kind) + "  Health " + kind_hp(kind) + ", move " + kind_move(kind) + ".";
         }
         let part = boon % 10.0;
+        if part == 3.0 { return perk_text(kind, PERK_A); }
+        if part == 4.0 { return perk_text(kind, PERK_B); }
         if part == 0.0 { return name + " gains a point of health."; }
         if part == 2.0 { return name + " moves a cell further."; }
         return match kind {
@@ -1862,9 +1875,17 @@ script Battle {
             if part == 0.0 { boost(w, 1.0, 0.0, 0.0); }
             if part == 1.0 { boost(w, 0.0, 0.0, 1.0); }
             if part == 2.0 { boost(w, 0.0, 1.0, 0.0); }
+            if part == 3.0 { learn(w, PERK_A); }
+            if part == 4.0 { learn(w, PERK_B); }
         }
         Audio.play("audio/boon.wav", 0.6);
         go_on();
+    }
+
+    fn learn(warden: number, perk: number) {
+        var w = wardens[warden];
+        w.perks += perk;
+        wardens[warden] = w;
     }
 
     fn boost(warden: number, health: number, move: number, power: number) {
@@ -1983,7 +2004,14 @@ script Battle {
                 set_text("UnitName", kind_name(unit.kind));
                 set_text("UnitStats", pip_text(unit) + "   Move " + unit.move);
                 set_text("SkillName", skill_name(unit.kind));
-                set_text("SkillText", skill_text(unit.kind));
+                var skill = skill_text(unit.kind);
+                for perk in [PERK_A, PERK_B] {
+                    if has_perk(unit, perk) {
+                        skill += "  [color=#9fe6ff]" + perk_name(unit.kind, perk) + ":[/color] "
+                            + perk_text(unit.kind, perk);
+                    }
+                }
+                set_text("SkillText", skill);
                 if unit.acted {
                     set_text("UnitHint", "Done for this turn.");
                 } else if mode == Mode.Move {
