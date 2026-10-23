@@ -1,5 +1,14 @@
 # Changelog
 
+- Give each of Causeway's wardens two upgrades that change how its skill
+  works, won as boons between islands: the Bulwark's bash can shove two cells
+  or ward the Bulwark, the Mason's stone can hurt everything beside it or fly
+  further, the Lamplighter's bolt can pierce to a second figure or knock back
+  two cells, the Tidecaller's water can fall three wide or draw figures in,
+  the Harpooner's line can reach across the board or strike again, and the
+  Shieldback can ward a whole group or hold the wardens beside it in place.
+  The upgrades a warden has are listed on its card.
+
 - Add a third world to Causeway, the Rime: past the Lighthouse the road divides
   between the burning mountain and the ice, and a crossing takes one. The Rime
   is four islands, Icebound Strand, then The Calving or Hoarwood, then The

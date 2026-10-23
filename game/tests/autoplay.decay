@@ -230,6 +230,16 @@ script Autoplay {
         if board.round > board.rounds {
             Game.set("won_" + island, 1.0);
             Game.set("hearth_" + island, board.hearth);
+            // A boon between islands: an upgrade for a warden, as a player
+            // would most often take one.
+            let w = Random.int(0.0, party.length - 1.0);
+            var perk = PERK_A;
+            if Random.int(0.0, 1.0) == 1.0 { perk = PERK_B; }
+            if !knows(party[w].perks, perk) {
+                var learner = party[w];
+                learner.perks += perk;
+                party[w] = learner;
+            }
             if layer_of(island) + 1.0 >= LAYER_COUNT {
                 Game.set("crossed", 1.0);
                 done = true;
