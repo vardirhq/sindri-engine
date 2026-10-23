@@ -143,7 +143,14 @@ fn how_hard_each_island_is() {
         .and_then(|value| value.parse().ok())
         .unwrap_or(0);
     let (mut crossed, mut lost) = (0, [0; 8]);
-    let names = ["Bulwark", "Mason", "Lamplighter", "Tidecaller", "Harpooner", "Shieldback"];
+    let names = [
+        "Bulwark",
+        "Mason",
+        "Lamplighter",
+        "Tidecaller",
+        "Harpooner",
+        "Shieldback",
+    ];
     let mut with = [(0, 0); 6];
     for seed in 1..=24u32 {
         let run = play(&project_from(seed, first));

@@ -1,5 +1,17 @@
 # Changelog
 
+- Muster Causeway's crossing: three of six wardens are chosen before setting
+  out, and where the road enters the burning mountain a fourth joins, chosen
+  from those left behind, or none, and the Hearth grows instead. Two new
+  wardens: the Harpooner throws a harpoon down a line and drags the first
+  thing it bites back to it, or itself to anything too heavy to drag; the
+  Shieldback wards itself, a warden or a building against the next blow, and
+  nothing shoves it. Boons are drawn from what the party can use.
+- Fork Causeway's road: a crossing is six steps, and after Saltmarsh and again
+  deep in the mountain the player chooses the next island on a screen that
+  shows the whole road. The second fork leads to a new island, The Glass
+  Stair, terraces of black glass where a shove down a step hurts.
+
 - Add a second world to Causeway, the Cinderfast: three islands inside a
   volcano after The Lighthouse, ending with the Kiln. Lava rises there instead
   of the tide and burns what it reaches. Vents mark where they will spill it
