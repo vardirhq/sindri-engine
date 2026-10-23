@@ -25,11 +25,21 @@
       h1 { margin: 0; font-size: 13px; letter-spacing: .08em; color: var(--forge); }
       header p { margin: 0; color: var(--muted); font-size: 14px; }
       main {
-        display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: 16px;
+        display: grid; gap: 16px;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr) 250px;
+        grid-template-areas: "recipe preview inspector";
+        align-items: start;
         padding: 16px; padding-left: max(16px, env(safe-area-inset-left)); padding-right: max(16px, env(safe-area-inset-right));
         padding-bottom: max(16px, env(safe-area-inset-bottom));
       }
-      @media (max-width: 860px) { main { grid-template-columns: minmax(0, 1fr); } }
+      #recipe-panel { grid-area: recipe; } #preview-panel { grid-area: preview; } #inspector { grid-area: inspector; }
+      @media (max-width: 1180px) {
+        main { grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); grid-template-areas: "recipe preview" "recipe inspector"; }
+      }
+      @media (max-width: 860px) {
+        main { grid-template-columns: minmax(0, 1fr); grid-template-areas: "recipe" "preview" "inspector"; }
+        textarea { height: 40dvh; min-height: 220px; }
+      }
       section { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 12px; min-width: 0; }
       h2 { margin: 0 0 8px; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
       .bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 8px; }
@@ -54,7 +64,30 @@
         background: repeating-conic-gradient(var(--checker-a) 0 25%, var(--checker-b) 0 50%) 0 0 / 16px 16px;
       }
       .stage.stale { opacity: .45; }
-      canvas { image-rendering: pixelated; max-width: none; display: inline-block; vertical-align: top; }
+      canvas { image-rendering: pixelated; max-width: none; display: block; }
+      .cards { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; text-align: left; }
+      .card { background: #1d242c; border: 1px solid var(--line); border-radius: 8px; padding: 8px; }
+      .card header { display: flex; justify-content: space-between; gap: 12px; color: var(--muted); font-size: 12px; padding-bottom: 6px; }
+      .card header b { color: var(--text); font-weight: 600; }
+      .card canvas { border-radius: 4px; }
+      details { margin-top: 10px; }
+      summary { cursor: pointer; color: var(--muted); font-size: 13px; }
+      details .stage { margin-top: 8px; }
+      fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
+      fieldset:disabled { opacity: .5; }
+      h3 { margin: 14px 0 6px; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+      h3:first-child { margin-top: 0; }
+      label.field { display: block; margin-bottom: 8px; color: var(--muted); font-size: 13px; }
+      label.field span { display: flex; justify-content: space-between; }
+      label.field output { color: var(--text); font-variant-numeric: tabular-nums; }
+      input[type=range] { width: 100%; accent-color: var(--forge); min-height: 28px; }
+      label.check { display: flex; gap: 8px; align-items: center; color: var(--muted); font-size: 14px; min-height: 32px; }
+      input[type=checkbox] { accent-color: var(--forge); width: 18px; height: 18px; }
+      input[type=color] { width: 100%; height: 32px; background: none; border: 1px solid var(--line); border-radius: 4px; padding: 2px; }
+      .bar label.check { margin: 0 4px; }
+      .bar label.zoom { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 14px; }
+      .bar label.zoom input { width: 110px; }
+      .bar label.zoom output { color: var(--text); min-width: 2ch; font-variant-numeric: tabular-nums; }
       dl { display: grid; grid-template-columns: max-content 1fr; gap: 2px 14px; margin: 10px 0; font-size: 14px; }
       dt { color: var(--muted); } dd { margin: 0; font-variant-numeric: tabular-nums; }
       .swatches { display: flex; flex-wrap: wrap; gap: 4px; }
@@ -64,7 +97,7 @@
       ul.plain li code { flex: 1 1 14em; overflow-wrap: anywhere; }
       ul.plain li span { color: var(--muted); font-variant-numeric: tabular-nums; }
       .warn { color: var(--forge); font-size: 14px; margin: 4px 0; }
-      .frames { color: var(--muted); font-size: 13px; margin: 6px 0 0; }
+      .frames { color: var(--muted); font-size: 13px; margin: 8px 0 0; }
       .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
       noscript { display: block; padding: 16px; }
     </style>
@@ -76,7 +109,7 @@
     </header>
     <noscript>The baker needs JavaScript.</noscript>
     <main>
-      <section aria-labelledby="recipe-title">
+      <section id="recipe-panel" aria-labelledby="recipe-title">
         <h2 id="recipe-title">Recipe</h2>
         <div class="bar">
           <label class="sr-only" for="example">Start from an example</label>
@@ -88,22 +121,41 @@
         <textarea id="recipe" spellcheck="false" autocomplete="off" autocapitalize="off"></textarea>
         <p id="status" role="status"></p>
       </section>
-      <section aria-labelledby="preview-title">
-        <h2 id="preview-title">Baked sheet</h2>
+      <section id="preview-panel" aria-labelledby="preview-title">
+        <h2 id="preview-title">In context</h2>
         <div class="bar">
-          <label for="zoom" class="sr-only">Zoom</label>
-          <select id="zoom">
-            <option value="1">1×</option><option value="2" selected>2×</option>
-            <option value="3">3×</option><option value="4">4×</option>
-          </select>
+          <label class="zoom">Zoom <input id="zoom" type="range" min="1" max="8" step="1" value="3" /><output id="zoom-out">3×</output></label>
+          <label class="check"><input id="grid" type="checkbox" checked /> Floor</label>
           <button id="download-all" class="primary" type="button" disabled>Download all (.zip)</button>
         </div>
-        <div id="stage" class="stage"><canvas id="sheet" width="1" height="1" role="img" aria-label="The baked sprite sheet"></canvas></div>
+        <div id="stage" class="stage"><div id="cards" class="cards"></div></div>
         <p id="frames" class="frames"></p>
+        <details>
+          <summary>Packed sheet</summary>
+          <div class="stage"><canvas id="sheet" width="1" height="1" role="img" aria-label="The baked sprite sheet"></canvas></div>
+        </details>
         <dl id="report"></dl>
         <div id="warnings"></div>
         <h2>Files</h2>
         <ul id="files" class="plain"></ul>
+      </section>
+      <section id="inspector" aria-labelledby="inspector-title">
+        <h2 id="inspector-title">Render</h2>
+        <fieldset id="controls" disabled>
+          <label class="field"><span>Supersample <output data-out="supersample"></output></span><input type="range" data-setting="supersample" min="1" max="8" step="1" /></label>
+          <label class="field"><span>Alpha cutoff <output data-out="alpha_cutoff"></output></span><input type="range" data-setting="alpha_cutoff" min="1" max="255" step="1" /></label>
+          <label class="field"><span>Padding <output data-out="padding"></output></span><input type="range" data-setting="padding" min="0" max="8" step="1" /></label>
+          <label class="check"><input type="checkbox" data-setting="palette_snap" /> Snap to palette</label>
+          <label class="check"><input type="checkbox" data-setting="outline_enabled" /> Outline</label>
+          <input type="color" data-setting="outline_color" aria-label="Outline color" />
+          <h3>Light</h3>
+          <label class="field"><span>Azimuth <output data-out="azimuth"></output></span><input type="range" data-setting="azimuth" min="0" max="360" step="1" /></label>
+          <label class="field"><span>Elevation <output data-out="elevation"></output></span><input type="range" data-setting="elevation" min="5" max="89" step="1" /></label>
+          <label class="field"><span>Band 1 <output data-out="band0"></output></span><input type="range" data-setting="band0" min="0" max="1" step="0.01" /></label>
+          <label class="field"><span>Band 2 <output data-out="band1"></output></span><input type="range" data-setting="band1" min="0" max="1" step="0.01" /></label>
+          <label class="field"><span>Band 3 <output data-out="band2"></output></span><input type="range" data-setting="band2" min="0" max="1" step="0.01" /></label>
+        </fieldset>
+        <p class="frames">Sliders edit the recipe, so the text on the left is always what you will save.</p>
       </section>
     </main>
     <script type="module" src="./app.js"></script>

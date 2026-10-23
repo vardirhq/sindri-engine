@@ -37,7 +37,9 @@ static server:
 node web/build.mjs ../../target/baker-page
 ```
 
-It is this tool's own sources with their types stripped by Node, plus a browser
+Every direction is drawn on its floor, and sliders for the render settings and
+the light edit the recipe text as they move. It is this tool's own sources with
+their types stripped by Node, plus a browser
 PNG writer (`web/png.ts`) in place of `src/png.ts`; see
 [`docs/isometric-baker.md`](../../docs/isometric-baker.md#the-browser-page).
 The pixels match the command line's; the PNG's compressed bytes do not.

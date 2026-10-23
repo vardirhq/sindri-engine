@@ -43,6 +43,17 @@ directory as a tool. Its title there is **Sprite Baker**, because it bakes three
 views and not only isometric; the tool, its folder and its route keep the
 older name (see the provenance key below).
 
+Each frame is drawn on its floor, not on a checkerboard: the tiles the recipe's
+footprint reserves, and a ring of ground around them, projected through the
+bake's own camera. The anchor is the floor centre of footprint tile (0, 0) and
+sits at the centre of every frame, so a frame that floats or sinks here will in
+a game. An isometric floor is diamonds, a top-down one squares, and a side view,
+which looks along the ground, a ground line. The render settings are sliders
+over the recipe's `render` block; moving one rewrites the recipe text and bakes
+it again, so the text stays the one source of truth (and is reformatted by the
+first slider you touch). The layout follows IsoGame's Sprite Factory, which the
+baker was adapted from and which had an interactive page of its own.
+
 It is not a second implementation. `tools/isometric-baker/web/build.mjs` copies
 the tool's own TypeScript into the site with the types stripped by Node's
 `stripTypeScriptTypes`, so the page and the command line bake with the same

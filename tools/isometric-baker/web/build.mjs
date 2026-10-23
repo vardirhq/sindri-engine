@@ -9,7 +9,8 @@
 //   src/cli.ts  is the command line, and reads files;
 //   src/png.ts  is replaced by web/png.ts, because it needs `node:zlib`.
 //
-// web/zip.ts joins them, then the page itself and the example recipes.
+// web/zip.ts joins them, then the page itself (index.html, app.js and the
+// frame previews in context.js) and the example recipes.
 import { copyFile, mkdir, readdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { stripTypeScriptTypes } from 'node:module';
 import { basename, join, resolve } from 'node:path';
@@ -54,7 +55,7 @@ export async function build(outDir) {
     );
   }
 
-  for (const file of ['index.html', 'app.js']) await copyFile(join(tool, 'web', file), join(out, file));
+  for (const file of ['index.html', 'app.js', 'context.js']) await copyFile(join(tool, 'web', file), join(out, file));
   for (const [from] of EXAMPLES) await copyFile(join(tool, from), join(out, 'examples', basename(from)));
   await writeFile(
     join(out, 'examples', 'index.json'),

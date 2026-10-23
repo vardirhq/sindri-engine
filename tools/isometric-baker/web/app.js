@@ -1,11 +1,17 @@
-// The baker's page: a recipe on the left, the baked sheet on the right.
+// The baker's page: a recipe on the left, each baked frame in context in the
+// middle, and the render settings on the right.
 //
 // Everything runs here. `baker/` is the tool's own TypeScript with its types
 // stripped (see build.mjs), so a bake in this page is the bake the command line
 // does, except for the PNG's compressed bytes: the pixels are identical.
+//
+// The recipe text is the one source of truth. The sliders read from the recipe
+// the last bake parsed, and move a slider by rewriting that text and baking it
+// again, so what is on the left is always what Save recipe will write.
 import { bake } from './baker/bake.js';
 import { RecipeError, parseRecipe } from './baker/recipe.js';
 import { zip } from './baker/zip.js';
+import { framePreview } from './context.js';
 
 const $ = (id) => document.getElementById(id);
 const recipeBox = $('recipe');
@@ -13,8 +19,11 @@ const status = $('status');
 const stage = $('stage');
 const canvas = $('sheet');
 const zoom = $('zoom');
+const grid = $('grid');
+const controls = $('controls');
 
 let latest = null;
+let latestRecipe = null;
 let timer = 0;
 
 function say(message, kind = '') {
@@ -44,13 +53,39 @@ function drawSheet(image) {
   canvas.width = image.width;
   canvas.height = image.height;
   canvas.getContext('2d').putImageData(new ImageData(image.data, image.width, image.height), 0, 0);
-  applyZoom();
+  sizeSheet();
 }
 
-function applyZoom() {
+function sizeSheet() {
   const factor = Number(zoom.value);
   canvas.style.width = `${canvas.width * factor}px`;
   canvas.style.height = `${canvas.height * factor}px`;
+}
+
+/** Every frame on its floor, at the chosen zoom. Cheap enough to redo on a slider. */
+function drawCards() {
+  if (!latest) return;
+  const options = { zoom: Number(zoom.value), grid: grid.checked };
+  $('zoom-out').textContent = `${options.zoom}×`;
+  $('cards').replaceChildren(
+    ...latest.frames.map((frame, index) => {
+      const card = document.createElement('figure');
+      card.className = 'card';
+      card.style.margin = '0';
+      const header = document.createElement('header');
+      const name = document.createElement('b');
+      name.textContent = latest.report.frames[index].direction;
+      const size = document.createElement('span');
+      size.textContent = `${frame.image.width}×${frame.image.height} · ${frame.footprint.width}×${frame.footprint.height} tiles`;
+      header.append(name, size);
+      const picture = framePreview(latest, index, options);
+      picture.setAttribute('role', 'img');
+      picture.setAttribute('aria-label', `${name.textContent} frame on its floor`);
+      card.append(header, picture);
+      return card;
+    }),
+  );
+  sizeSheet();
 }
 
 function row(term, value) {
@@ -108,29 +143,158 @@ function showFiles(files) {
   );
 }
 
+// ---- The render settings ---------------------------------------------------
+
+const DEGREES = 180 / Math.PI;
+
+/** Where the light is, as the two angles a person thinks in. */
+function lightAngles([x, y, z]) {
+  const length = Math.hypot(x, y, z) || 1;
+  return {
+    azimuth: Math.round(((Math.atan2(z, x) * DEGREES) + 360) % 360),
+    elevation: Math.round(Math.asin(y / length) * DEGREES),
+  };
+}
+
+function lightFrom(azimuth, elevation) {
+  const flat = Math.cos(elevation / DEGREES);
+  const round = (v) => Math.round(v * 1000) / 1000;
+  return [
+    round(flat * Math.cos(azimuth / DEGREES)),
+    round(Math.sin(elevation / DEGREES)),
+    round(flat * Math.sin(azimuth / DEGREES)),
+  ];
+}
+
+/** What each control shows, read from a recipe the baker has parsed. */
+const READ = {
+  supersample: (r) => r.render.supersample,
+  alpha_cutoff: (r) => r.render.alphaCutoff,
+  padding: (r) => r.render.padding,
+  palette_snap: (r) => r.render.paletteSnap,
+  outline_enabled: (r) => r.render.outline.enabled,
+  outline_color: (r) => r.render.outline.color,
+  azimuth: (r) => lightAngles(r.render.shading.light).azimuth,
+  elevation: (r) => lightAngles(r.render.shading.light).elevation,
+  band0: (r) => r.render.shading.thresholds[0],
+  band1: (r) => r.render.shading.thresholds[1],
+  band2: (r) => r.render.shading.thresholds[2],
+};
+
+const LABEL = {
+  supersample: (v) => `${v}×`,
+  alpha_cutoff: (v) => `${v}`,
+  padding: (v) => `${v}px`,
+  azimuth: (v) => `${v}°`,
+  elevation: (v) => `${v}°`,
+  band0: (v) => v.toFixed(2),
+  band1: (v) => v.toFixed(2),
+  band2: (v) => v.toFixed(2),
+};
+
+const inputs = Object.fromEntries(
+  [...controls.querySelectorAll('[data-setting]')].map((input) => [input.dataset.setting, input]),
+);
+
+/** Move the controls to match the recipe, leaving alone the one being dragged. */
+function syncControls(recipe) {
+  for (const [key, input] of Object.entries(inputs)) {
+    if (input === document.activeElement) continue;
+    const value = READ[key](recipe);
+    if (input.type === 'checkbox') input.checked = value;
+    else if (input.type === 'color') input.value = /^#[0-9a-f]{6}$/i.test(value) ? value : '#000000';
+    else input.value = value;
+    const out = controls.querySelector(`[data-out="${key}"]`);
+    if (out) out.textContent = LABEL[key](Number(value));
+  }
+}
+
+/** Write one setting into the recipe's text, then bake it again. */
+function change(key, value) {
+  let recipe;
+  try {
+    recipe = JSON.parse(recipeBox.value);
+  } catch {
+    return;
+  }
+  const render = (recipe.render ??= {});
+  // A shading block needs both its keys, so start it from what the bake is using.
+  const shading = () =>
+    (render.shading ??= {
+      light: [...latestRecipe.render.shading.light],
+      thresholds: [...latestRecipe.render.shading.thresholds],
+    });
+
+  if (key === 'supersample' || key === 'alpha_cutoff' || key === 'padding' || key === 'palette_snap') {
+    render[key] = value;
+  } else if (key === 'outline_enabled') {
+    (render.outline ??= {}).enabled = value;
+  } else if (key === 'outline_color') {
+    (render.outline ??= {}).color = value;
+  } else if (key === 'azimuth' || key === 'elevation') {
+    const now = lightAngles(shading().light);
+    const next = { ...now, [key]: value };
+    shading().light = lightFrom(next.azimuth, next.elevation);
+  } else {
+    // A band edge may not pass its neighbours: the baker requires them ascending.
+    const index = Number(key.slice(4));
+    const edges = shading().thresholds;
+    edges[index] = Math.min(Math.max(value, edges[index - 1] ?? 0), edges[index + 1] ?? 1);
+  }
+  recipeBox.value = `${JSON.stringify(recipe, null, 2)}\n`;
+  schedule(0);
+}
+
+for (const [key, input] of Object.entries(inputs)) {
+  input.addEventListener('input', () => {
+    const value = input.type === 'checkbox' ? input.checked : input.type === 'color' ? input.value : Number(input.value);
+    const out = controls.querySelector(`[data-out="${key}"]`);
+    if (out && LABEL[key]) out.textContent = LABEL[key](value);
+    change(key, value);
+  });
+}
+
+// ---- Baking ----------------------------------------------------------------
+
 function run() {
   clearTimeout(timer);
-  let result;
+  // Sliders work on the text, so they need it to be JSON; a recipe the baker
+  // rejects for another reason can still be mended with them.
   try {
-    result = bake(parseRecipe(recipeBox.value, 'recipe'));
+    JSON.parse(recipeBox.value);
+    controls.disabled = false;
+  } catch {
+    controls.disabled = true;
+  }
+
+  let result;
+  let recipe;
+  const started = performance.now();
+  try {
+    recipe = parseRecipe(recipeBox.value, 'recipe');
+    result = bake(recipe);
   } catch (error) {
     stage.classList.add('stale');
     $('download-all').disabled = true;
     say(error instanceof RecipeError || error instanceof Error ? error.message : String(error), 'error');
     return;
   }
+  const elapsed = Math.round(performance.now() - started);
   latest = result;
+  latestRecipe = recipe;
   stage.classList.remove('stale');
   $('download-all').disabled = false;
   drawSheet(result.sheet.image);
+  drawCards();
   showReport(result);
   showFiles(result.files);
-  say(`Baked ${result.frames.length} frames.`, 'ok');
+  syncControls(recipe);
+  say(`Baked ${result.frames.length} frames in ${elapsed} ms.`, 'ok');
 }
 
-function schedule() {
+function schedule(delay = 300) {
   clearTimeout(timer);
-  timer = setTimeout(run, 300);
+  timer = setTimeout(run, delay);
 }
 
 async function load(name) {
@@ -140,8 +304,9 @@ async function load(name) {
   run();
 }
 
-recipeBox.addEventListener('input', schedule);
-zoom.addEventListener('change', applyZoom);
+recipeBox.addEventListener('input', () => schedule());
+zoom.addEventListener('input', drawCards);
+grid.addEventListener('change', drawCards);
 $('example').addEventListener('change', (event) => load(event.target.value).catch((e) => say(String(e), 'error')));
 $('open').addEventListener('change', async (event) => {
   const [file] = event.target.files;
@@ -164,6 +329,9 @@ $('download-all').addEventListener('click', () => {
   // Laid out as an asset root, so it unzips straight into a project's assets.
   download(`${latest.report.id}.zip`, zip(latest.files), 'application/zip');
 });
+
+// A phone is too narrow for two cards across at the desktop's zoom.
+if (window.innerWidth < 700) zoom.value = '2';
 
 try {
   const names = await (await fetch('./examples/index.json')).json();
