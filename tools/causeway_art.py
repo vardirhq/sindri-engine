@@ -108,6 +108,20 @@ HOLLOW = {
     "ember": mat("#ffb36b", 0.5, 0.0, "#ff8a3a", 5.0),
 }
 
+# The ice's Hollow: the same slate, rimed over, with ice growing out of them
+# and eyes the pale blue of deep ice.
+FROST = {
+    "mud": mat("#6d7488", 0.9),
+    "mud-d": mat("#4a5064", 0.9),
+    "mud-l": mat("#9aa6bb", 0.85),
+    "rime": mat("#e4eef6", 0.6),
+    "ice": mat("#a8dcf2", 0.15, 0.1, "#6cc8ff", 0.6),
+    "ice-d": mat("#79b6d6", 0.2, 0.1),
+    "bone": mat("#ddd2b6", 0.8),
+    "eye": mat("#bfeaff", 0.5, 0.0, "#7fd4ff", 6.0),
+    "maw": mat("#10141c", 0.9),
+}
+
 STEAD = {
     "wall": mat("#efe6d2", 0.9),
     "wall-d": mat("#c9bb9e", 0.9),
@@ -173,6 +187,18 @@ GROUND = {
     "slag": mat("#6e4a3d", 0.9),
     "slag-b": mat("#654438", 0.9),
     "obsidian": mat("#221d2b", 0.25, 0.3),
+    # The ice: snow on the heights, frost and old ice lower down, and the
+    # frozen earth the cliffs are cut from.
+    "snow": mat("#eef3f6", 0.9),
+    "snow-b": mat("#e1e9ef", 0.9),
+    "frost": mat("#c3d4dd", 0.7),
+    "frost-b": mat("#b5c8d2", 0.7),
+    "permafrost": mat("#6f7c86", 0.95),
+    "permafrost-b": mat("#64707a", 0.95),
+    "berg": mat("#dff2fb", 0.25),
+    "berg-d": mat("#9fd0e8", 0.25),
+    "floe": mat("#e8f4fa", 0.4),
+    "snowpine": mat("#36584a", 0.95),
     # The Glass Stair's terraces: volcanic glass, dark and polished.
     "glass": mat("#4b4459", 0.3, 0.2),
     "glass-b": mat("#433d51", 0.3, 0.2),
@@ -428,6 +454,55 @@ def shieldback(m, pose):
             m.box("brass", (x - 0.07, 0.68, z), (0.02, 0.06, 0.06))
 
 
+def hailer(m, pose):
+    """A hunched thing of rimed slate with a sling of hail over its shoulder,
+    ice growing out of its back."""
+    arm = 0.0 if pose != "strike" else 0.16
+    m.box("mud-d", (-0.04, 0.12, -0.13), (0.18, 0.24, 0.12), bevel=0.04)
+    m.box("mud-d", (-0.04, 0.12, 0.13), (0.18, 0.24, 0.12), bevel=0.04)
+    m.sphere("mud", (-0.06, 0.46, 0), 0.27, rings=4, segments=8)
+    m.sphere("rime", (-0.1, 0.62, 0), 0.2, rings=3, segments=7, squash=0.6)
+    m.box("mud-l", (0.14, 0.62, 0), (0.24, 0.22, 0.24), bevel=0.05)
+    m.box("eye", (0.265, 0.66, -0.07), (0.02, 0.05, 0.05))
+    m.box("eye", (0.265, 0.66, 0.07), (0.02, 0.05, 0.05))
+    for z, lean in ((-0.12, -20), (0.0, 0), (0.12, 20)):
+        m.cone("ice", (-0.22, 0.72, z), 0.05, 0.22, rotation=(lean, 0, 30), segments=4)
+    # The sling, and a stone of hail ready in it.
+    m.box("mud-d", (0.1 + arm, 0.5 + arm, 0.28), (0.3, 0.09, 0.09), (0, 0, -30 - arm * 200), bevel=0.02)
+    m.sphere("ice", (0.24 + arm * 1.4, 0.72 + arm * 1.6, 0.28), 0.08, rings=3, segments=6)
+    m.box("bone", (-0.02, 0.4, -0.27), (0.08, 0.3, 0.08), (0, 0, -15))
+
+
+def rimeback(m, pose):
+    """The great beast of the ice: a slate hulk with a ridge of ice down its
+    back and a breath that freezes what it touches."""
+    lift = 0.0 if pose != "strike" else 0.12
+    for x in (-0.32, 0.2):
+        for z in (-0.3, 0.3):
+            m.box("mud-d", (x, 0.22, z), (0.24, 0.44, 0.22), bevel=0.05)
+    m.box("mud", (-0.06, 0.74, 0), (0.92, 0.62, 0.74), bevel=0.12)
+    m.box("rime", (-0.08, 1.06, 0), (0.86, 0.12, 0.66), bevel=0.05)
+    for i, x in enumerate((-0.42, -0.2, 0.02, 0.22)):
+        h = 0.44 + 0.12 * (i % 2)
+        m.cone("ice" if i % 2 else "ice-d", (x, 1.1, 0), 0.13, h, segments=5)
+        m.cone("ice-d", (x + 0.06, 1.06, -0.22), 0.08, h * 0.6, rotation=(-25, 0, 0), segments=4)
+        m.cone("ice", (x - 0.04, 1.06, 0.22), 0.08, h * 0.6, rotation=(25, 0, 0), segments=4)
+    # The head, low and broad, the jaw open when it breathes.
+    m.box("mud-l", (0.5, 0.86 + lift, 0), (0.36, 0.34, 0.46), bevel=0.07)
+    m.box("maw", (0.66, 0.72 + lift, 0), (0.06, 0.08 + lift, 0.3))
+    m.box("eye", (0.685, 0.94 + lift, -0.12), (0.02, 0.06, 0.07))
+    m.box("eye", (0.685, 0.94 + lift, 0.12), (0.02, 0.06, 0.07))
+    m.cone("bone", (0.56, 1.06 + lift, -0.2), 0.05, 0.2, rotation=(-30, 0, -20), segments=5)
+    m.cone("bone", (0.56, 1.06 + lift, 0.2), 0.05, 0.2, rotation=(30, 0, -20), segments=5)
+
+
+def ice_slab(m, pose):
+    """The ice a pool freezes into: a thin, faceted slab over the ground."""
+    m.box("ice", (0, 0.03, 0), (0.92, 0.06, 0.92), bevel=0.02)
+    m.box("rime", (-0.2, 0.065, 0.15), (0.3, 0.01, 0.22), (0, 25, 0))
+    m.box("rime", (0.22, 0.065, -0.18), (0.2, 0.01, 0.16), (0, -15, 0))
+
+
 def imp(m, pose):
     """A small hunched thing of char, cracked through with fire."""
     reach = 0.1 if pose == "strike" else 0.0
@@ -581,6 +656,9 @@ FIGURES = {
     "imp": (imp, FIRE, ["idle"]),
     "burster": (burster, FIRE, ["idle"]),
     "kiln": (kiln, FIRE, ["idle"]),
+    "hailer": (hailer, FROST, ["idle"]),
+    "rimeback": (rimeback, FROST, ["idle"]),
+    "ice-slab": (ice_slab, FROST, ["idle"]),
     "vent": (vent, FIRE, ["idle"]),
     "basalt": (basalt, GROUND, ["idle"]),
     "droplet": (droplet, WARDENS, ["idle"]),
@@ -631,10 +709,10 @@ def column_top(island, height):
 
 SIDE = {"ground": "earth", "moss": "earth", "stone": "stone", "rock": "rock", "sand": "sand",
         "mud": "mud", "gravel": "gravel", "ash": "basalt", "basalt": "basalt", "cinder": "slag",
-        "glass": "basalt"}
+        "glass": "basalt", "snow": "permafrost", "frost": "permafrost"}
 TOP = {"ground": "grass", "moss": "moss", "stone": "stone", "rock": "rock", "sand": "sand",
        "mud": "mud", "gravel": "gravel", "ash": "ash", "basalt": "basalt", "cinder": "cinder",
-       "glass": "glass"}
+       "glass": "glass", "snow": "snow", "frost": "frost"}
 
 
 def scatter(m, rng, top, cx, cy, cz, busy):
@@ -665,6 +743,17 @@ def scatter(m, rng, top, cx, cy, cz, busy):
             u, v = spot()
             m.box(rng.choice(["slag", "obsidian", "char"]), (cx + u, cy + 0.03, cz + v), (0.08, 0.06, 0.07),
                   (0, rng.uniform(0, 90), 0), bevel=0.015)
+    elif top in ("snow", "frost"):
+        for _ in range(rng.randint(0, 2)):
+            u, v = spot()
+            if rng.random() < 0.5:
+                m.sphere("snow", (cx + u, cy + 0.02, cz + v), 0.07, rings=2, segments=6, squash=0.45)
+            else:
+                m.cone(rng.choice(["berg", "berg-d"]), (cx + u, cy, cz + v), 0.04, 0.14,
+                       rotation=(rng.uniform(-15, 15), 0, rng.uniform(-15, 15)), segments=4)
+        if top == "snow" and not busy and rng.random() < 0.22:
+            u, v = spot()
+            snowy_pine(m, cx + u * 0.9, cy, cz + v * 0.9, 0.55)
     elif top == "mud":
         for _ in range(rng.randint(1, 3)):
             u, v = spot()
@@ -682,6 +771,15 @@ def tree(m, rng, x, y, z, pine=False):
     m.box("trunk", (x, y + 0.2, z), (0.1, 0.4, 0.1))
     m.sphere(rng.choice(["leaf", "leaf-d"]), (x, y + 0.58, z), 0.3, rings=3, segments=7)
     m.sphere("leaf", (x + 0.14, y + 0.48, z + 0.08), 0.18, rings=3, segments=6)
+
+
+def snowy_pine(m, x, y, z, scale=1.0):
+    """A pine with snow on its boughs."""
+    m.box("trunk", (x, y + 0.1 * scale, z), (0.08 * scale, 0.2 * scale, 0.08 * scale))
+    for i, r in enumerate((0.34, 0.26, 0.17)):
+        ry = y + (0.3 + i * 0.24) * scale
+        m.cone("snowpine", (x, ry, z), r * scale, 0.4 * scale, segments=7)
+        m.cone("snow", (x, ry + 0.12 * scale, z), r * 0.62 * scale, 0.2 * scale, segments=7)
 
 
 def island_mesh(island, seed):
@@ -712,6 +810,9 @@ def island_mesh(island, seed):
 
     if island.get("world") == "caldera":
         caldera(m, rng)
+        return m
+    if island.get("world") == "rime":
+        rime(m, rng)
         return m
 
     # The sea floor: sand round the island fading through weed to deep water,
@@ -757,6 +858,47 @@ def island_mesh(island, seed):
         tree(m, rng, ORIGIN + SIZE + 14 + rng.uniform(0, 3), 1.0, ORIGIN - 8 + t * 3.2 + rng.uniform(-1, 1),
              pine=True)
     return m
+
+
+def rime(m, rng):
+    """What lies round an island in the ice: a cold sea floor under the water,
+    bergs and floes standing out of it, and the Hollow's road in from the
+    east, slabs of old ice on posts from a snowbound shore."""
+    centre = (ORIGIN + 4, 0, ORIGIN + 4)
+    for name, radius, y in (("seabed", 7.5, -0.7), ("seabed-2", 11.0, -1.0), ("seabed-3", 16.0, -1.5)):
+        m.cylinder(name, (centre[0], y, centre[2]), radius, 0.5, top=radius - 0.4, segments=28)
+    m.box("seabed-4", (centre[0], -2.4, centre[2]), (140, 0.5, 140))
+    # Floes, flat and low, close in; bergs, tall and faceted, further out.
+    for _ in range(12):
+        while True:
+            x = rng.uniform(-5, 13)
+            z = rng.uniform(-5, 13)
+            if not (-0.8 < x < 8.8 and -0.8 < z < 8.8) and not (8.8 < x and 2.4 < z < 4.6):
+                break
+        size = rng.uniform(0.5, 1.3)
+        m.box("floe", (ORIGIN + x, 0.02, ORIGIN + z), (size, 0.16, size * rng.uniform(0.6, 1.0)),
+              (0, rng.uniform(0, 90), 0), bevel=0.05)
+    for k in range(8):
+        angle = rng.uniform(0, math.tau)
+        if abs(math.atan2(math.sin(angle), math.cos(angle))) < 0.35:
+            continue
+        radius = rng.uniform(9.5, 13.0)
+        bx, bz = centre[0] + math.cos(angle) * radius, centre[2] + math.sin(angle) * radius
+        h = rng.uniform(1.2, 3.2)
+        m.cone(rng.choice(["berg", "berg-d"]), (bx, -0.3, bz), rng.uniform(0.6, 1.2), h,
+               segments=rng.choice([4, 5, 6]))
+        m.box("berg", (bx + 0.3, 0.1, bz - 0.2), (1.0, 0.6, 0.8), (0, rng.uniform(0, 90), 0), bevel=0.1)
+    # The Hollow's road: slabs of old ice on posts, low enough for the tide.
+    road_z = ORIGIN + 3.5
+    for k in range(10):
+        x = ORIGIN + SIZE + 0.5 + k
+        m.box("frost" if k % 2 else "frost-b", (x, 0.55, road_z), (1.0, 0.3, 1.2), bevel=0.04)
+        m.box("post", (x - 0.4, 0.15, road_z - 0.62), (0.1, 1.2, 0.1))
+        m.box("post", (x - 0.4, 0.15, road_z + 0.62), (0.1, 1.2, 0.1))
+    m.box("frost", (ORIGIN + SIZE + 14, -0.2, ORIGIN + 4), (8, 1.2, 30), bevel=0.2)
+    m.box("snow", (ORIGIN + SIZE + 15.5, 0.6, ORIGIN + 4), (6, 0.8, 30), bevel=0.2)
+    for t in range(9):
+        snowy_pine(m, ORIGIN + SIZE + 14 + rng.uniform(0, 3), 1.0, ORIGIN - 8 + t * 3.2 + rng.uniform(-1, 1), 1.4)
 
 
 def caldera(m, rng):

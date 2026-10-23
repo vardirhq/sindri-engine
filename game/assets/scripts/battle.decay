@@ -39,6 +39,8 @@ script Battle {
     @export let imp: Prefab;
     @export let burster: Prefab;
     @export let kiln: Prefab;
+    @export let hailer: Prefab;
+    @export let rimeback: Prefab;
     @export let house: Prefab;
     @export let beacon: Prefab;
     @export let stone: Prefab;
@@ -46,6 +48,7 @@ script Battle {
     @export let basalt: Prefab;
     @export let water_pool: Prefab;
     @export let lava_pool: Prefab;
+    @export let ice_pool: Prefab;
     @export let droplet: Prefab;
     @export let pointer: Prefab;
     @export let mark: Prefab;
@@ -126,6 +129,7 @@ script Battle {
     // the island's own heights, which a column stands above.
     var water_tiles: Map<number, Entity> = [:];
     var lava_tiles: Map<number, Entity> = [:];
+    var ice_tiles: Map<number, Entity> = [:];
     var columns: Map<number, Entity> = [:];
     var base: List<number> = [];
     // The gem over the warden in hand.
@@ -249,6 +253,8 @@ script Battle {
             Kind.Imp => this.imp,
             Kind.Burster => this.burster,
             Kind.Kiln => this.kiln,
+            Kind.Hailer => this.hailer,
+            Kind.Rimeback => this.rimeback,
             Kind.House => this.house,
             Kind.Beacon => this.beacon,
             Kind.Stone => this.stone,
@@ -266,7 +272,7 @@ script Battle {
         let at = spot(unit.x, unit.z);
         Piece.on(piece).place(at.x, at.y, at.z);
         pieces[unit.id] = piece;
-        if !is_fixed(unit.kind) || is_building(unit.kind) || unit.kind == Kind.Colossus || unit.kind == Kind.Kiln {
+        if !is_fixed(unit.kind) || is_building(unit.kind) || is_giant(unit.kind) || unit.kind == Kind.Kiln {
             let pip = World.spawn(this.label);
             pips[unit.id] = pip;
         }
@@ -363,6 +369,13 @@ script Battle {
             World.despawn(lava_tiles[c]);
             lava_tiles.remove(c);
         }
+        if wanted == ICE {
+            if !ice_tiles.contains(c) { ice_tiles[c] = World.spawn(this.ice_pool); }
+            ice_tiles[c].transform.position = Vec3(at.x, at.y - 0.03, at.z);
+        } else if ice_tiles.contains(c) {
+            World.despawn(ice_tiles[c]);
+            ice_tiles.remove(c);
+        }
     }
 
     // A column of new ground under a cell raised above the island's own,
@@ -391,9 +404,11 @@ script Battle {
     fn clear_ground() {
         for c in water_tiles.keys() { World.despawn(water_tiles[c]); }
         for c in lava_tiles.keys() { World.despawn(lava_tiles[c]); }
+        for c in ice_tiles.keys() { World.despawn(ice_tiles[c]); }
         for c in columns.keys() { World.despawn(columns[c]); }
         water_tiles = [:];
         lava_tiles = [:];
+        ice_tiles = [:];
         columns = [:];
     }
 
@@ -437,6 +452,7 @@ script Battle {
         return match kind {
             Kind.Colossus => 2.5,
             Kind.Kiln => 2.4,
+            Kind.Rimeback => 2.0,
             Kind.Beacon => 2.3,
             Kind.House => 1.55,
             Kind.Brute => 1.5,
@@ -1398,6 +1414,7 @@ script Battle {
         return match kind {
             Kind.Colossus => 2.0,
             Kind.Kiln => 2.0,
+            Kind.Rimeback => 1.6,
             Kind.Vent => 0.7,
             Kind.Beacon => 1.6,
             Kind.House => 1.0,
@@ -1552,6 +1569,7 @@ script Battle {
             if beat.kind == BeatKind.Basalt { harm += "new ground  "; }
             if beat.kind == BeatKind.Steam { harm += "hiss  "; }
             if beat.kind == BeatKind.Pool && beat.amount == WATER { harm += "a pool  "; }
+            if beat.kind == BeatKind.Pool && beat.amount == ICE { harm += "ice  "; }
             if beat.kind == BeatKind.Ward { harm += "warded  "; }
         }
         if harm == "" { harm = "No effect."; }
@@ -1582,14 +1600,14 @@ script Battle {
             return;
         }
         show_screen("Held", true);
-        roads = layer_islands(step);
+        roads = roads_from(island);
         var why = "High tide. The causeway is under water and the Hollow turn back.";
         if board.molten { why = "The lava has sealed the gate, and the Hollow cannot come through it."; }
         var next = "next, " + island_def(roads[0]).name;
         if roads.length > 1.0 { next = "next, the road forks"; }
         if world_of(roads[0]) != world_of(island) {
-            why += " Beyond the Lighthouse, the road goes on into the burning mountain.";
-            next = "next, " + world_name(roads[0]) + ": the Hearth will be rekindled";
+            why += " Beyond the Lighthouse the road divides: into the burning mountain, or north into the ice.";
+            next = "next, a new world: the Hearth will be rekindled";
         }
         screen_words("Held", "Step " + step + " of " + LAYER_COUNT + " held", def.name + " holds",
             why, "Hearth " + hearth + " of " + max_hearth + "  ·  " + next);
@@ -1621,6 +1639,7 @@ script Battle {
 
     fn world_color(index: number) -> Color {
         if world_of(index) == 1.0 { return Color(1.0, 0.6, 0.42); }
+        if world_of(index) == 2.0 { return Color(0.78, 0.9, 1.0); }
         return Color(0.55, 0.85, 0.95);
     }
 
@@ -1628,9 +1647,30 @@ script Battle {
     // passed by, the fork on offer and the steps beyond it.
     fn show_route_map(screens: Screens) {
         let here = layer_of(roads[0]);
+        // What lies beyond the fork: everywhere either road can go on to.
+        var ahead: List<number> = roads;
+        var shown: List<number> = [];
         for layer in 0..LAYER_COUNT {
-            let on = layer_islands(layer);
-            for k in 0..2 {
+            var on: List<number> = [];
+            if layer < here {
+                // The step taken, with what was passed by in the same world.
+                let held = path[layer];
+                for i in layer_islands(layer) {
+                    if world_of(i) == world_of(held) { on.push(i); }
+                }
+            } else if layer == here {
+                on = roads;
+            } else {
+                var next: List<number> = [];
+                for i in ahead {
+                    for r in roads_from(i) {
+                        if !next.contains(r) { next.push(r); }
+                    }
+                }
+                ahead = next;
+                on = next;
+            }
+            for k in 0..ROUTE_STOPS {
                 if k >= on.length {
                     screens.stop(layer, k, "", STOP_NONE);
                     continue;
@@ -1639,7 +1679,7 @@ script Battle {
                 var state = STOP_AHEAD;
                 if layer < here {
                     state = STOP_PASSED;
-                    if layer < path.length && path[layer] == index { state = STOP_HELD; }
+                    if path[layer] == index { state = STOP_HELD; }
                 }
                 if layer == here { state = STOP_OFFERED; }
                 screens.stop(layer, k, island_def(index).name, state);
@@ -1705,7 +1745,7 @@ script Battle {
             if offered.length < 3.0 { offered.push(200.0 + hero); }
         }
         offered.push(300.0);
-        show_offers("Into " + world_name(roads[0]), "Who joins the crossing?");
+        show_offers("Beyond the Lighthouse", "Who joins the crossing?");
     }
 
     fn show_offers(kicker: String, title: String) {

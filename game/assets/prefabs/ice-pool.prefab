@@ -1,0 +1,36 @@
+{
+  "format_version": 1,
+  "metadata": {
+    "name": "Ice Pool"
+  },
+  "entities": [
+    {
+      "id": "ice-pool",
+      "name": "Ice Pool",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.model": {
+          "asset": "models/ice-slab.glb",
+          "layer": 0
+        }
+      }
+    }
+  ]
+}

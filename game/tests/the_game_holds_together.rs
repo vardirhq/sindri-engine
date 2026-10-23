@@ -162,7 +162,7 @@ fn the_art_is_built_from_the_islands_the_rules_read() {
     )
     .expect("the islands");
     let count = rules.matches("IslandDef(").count();
-    assert_eq!(count, 8, "eight islands on the road");
+    assert_eq!(count, 12, "twelve islands on the road");
     for file in [
         "saltmarsh",
         "fold",
@@ -172,6 +172,10 @@ fn the_art_is_built_from_the_islands_the_rules_read() {
         "crucible",
         "glass-stair",
         "kilns-throat",
+        "icebound-strand",
+        "calving",
+        "hoarwood",
+        "white-barrow",
     ] {
         assert!(
             Path::new(&sindri_causeway::project_dir())

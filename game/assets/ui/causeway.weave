@@ -495,7 +495,7 @@
 .route-map {
     width: 136vh;
     max-width: 96vw;
-    height: 12vh;
+    height: 15vh;
     direction: row;
     gap: 0.6vh;
     justify-content: center;
@@ -504,31 +504,31 @@
 
 .route-step {
     width: 19vh;
-    height: 12vh;
+    height: 15vh;
     direction: column;
-    gap: 0.8vh;
+    gap: 0.4vh;
     justify-content: center;
     align-items: start;
 }
 
 .route-stop {
     width: 100%;
-    height: 4.4vh;
+    height: 3.4vh;
     direction: row;
     gap: 0.6vh;
     align-items: center;
 }
 
 .route-node {
-    width: 3.6vh;
-    height: 3.6vh;
+    width: 3vh;
+    height: 3vh;
 }
 
 .route-name {
-    width: 14.4vh;
-    height: 4.4vh;
-    font-size: 1.9vh;
-    line-height: 2.2vh;
+    width: 15vh;
+    height: 3.4vh;
+    font-size: 1.7vh;
+    line-height: 1.9vh;
     text-align: start;
     text-wrap: word;
 }
@@ -813,11 +813,11 @@
     .boon-text.hero-text { width: 46vw; font-size: 2.7vw; line-height: 3.5vw; text-align: start; }
     .boon-key.hero-key { width: 8vw; height: 4vw; font-size: 2.6vw; line-height: 3.4vw; }
     .screen-title.muster-title { font-size: 8.4vw; letter-spacing: 0px; }
-    .route-map { width: 96vw; height: 30vw; gap: 0.4vw; }
-    .route-step { width: 14.6vw; height: 30vw; gap: 1.6vw; align-items: center; }
-    .route-stop { height: 13vw; direction: column; gap: 0.6vw; align-items: center; }
-    .route-node { width: 5.4vw; height: 5.4vw; }
-    .route-name { width: 14.6vw; height: 7vw; font-size: 2.4vw; line-height: 2.8vw; text-align: center; }
+    .route-map { width: 96vw; height: 48vw; gap: 0.4vw; }
+    .route-step { width: 14.6vw; height: 48vw; gap: 0.8vw; align-items: center; }
+    .route-stop { height: 11vw; direction: column; gap: 0.4vw; align-items: center; }
+    .route-node { width: 4.4vw; height: 4.4vw; }
+    .route-name { width: 14.6vw; height: 6vw; font-size: 2.2vw; line-height: 2.6vw; text-align: center; }
     .route-link { width: 1.4vw; height: 0.5vw; }
     .boons.roads { width: 92vw; height: auto; direction: column; gap: 2vw; }
     .boon-card.road-card { width: 88vw; height: 30vw; }

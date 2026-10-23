@@ -35,6 +35,9 @@ enum Kind {
     Imp,
     Burster,
     Kiln,
+    // The Hollow of the ice.
+    Hailer,
+    Rimeback,
     // What stands on the island and does not move.
     House,
     Beacon,
@@ -47,6 +50,7 @@ enum Kind {
 shared const DRY: number = 0.0;
 shared const WATER: number = 1.0;
 shared const LAVA: number = 2.0;
+shared const ICE: number = 3.0;
 
 // Rounds a vent rests after it erupts.
 shared const VENT_REST: number = 1.0;
@@ -174,6 +178,8 @@ struct Board {
     pools: List<number>,
     // Whether what rises round the island is lava rather than the sea.
     molten: bool = false,
+    // Whether the island is in the ice, where thrown water freezes.
+    frozen: bool = false,
 }
 
 // --- Cells and directions ----------------------------------------------
@@ -242,7 +248,18 @@ shared fn hero_index(kind: Kind) -> number {
 shared fn is_hollow(kind: Kind) -> bool {
     return kind == Kind.Husk || kind == Kind.Brute || kind == Kind.Spitter
         || kind == Kind.Mortar || kind == Kind.Colossus || kind == Kind.Imp
-        || kind == Kind.Burster || kind == Kind.Kiln;
+        || kind == Kind.Burster || kind == Kind.Kiln || kind == Kind.Hailer || kind == Kind.Rimeback;
+}
+
+// The Hollow that lob what they throw onto a cell 2 to 4 away.
+shared fn is_lobber(kind: Kind) -> bool {
+    return kind == Kind.Mortar || kind == Kind.Kiln || kind == Kind.Hailer;
+}
+
+// The giants: they sweep the three cells in front, nothing moves them, and
+// the sea does not take them.
+shared fn is_giant(kind: Kind) -> bool {
+    return kind == Kind.Colossus || kind == Kind.Rimeback;
 }
 
 // What strikes at the end of the wardens' turn and shows where first: the
@@ -263,7 +280,7 @@ shared fn is_building(kind: Kind) -> bool {
 // Nothing pushes these: the buildings, the stones, and the Colossus, which is
 // too heavy for anything the wardens carry.
 shared fn is_fixed(kind: Kind) -> bool {
-    return is_building(kind) || kind == Kind.Stone || kind == Kind.Colossus
+    return is_building(kind) || kind == Kind.Stone || is_giant(kind)
         || kind == Kind.Kiln || kind == Kind.Vent;
 }
 
@@ -289,6 +306,8 @@ shared fn kind_hp(kind: Kind) -> number {
         Kind.Imp => 2.0,
         Kind.Burster => 2.0,
         Kind.Kiln => 9.0,
+        Kind.Hailer => 2.0,
+        Kind.Rimeback => 9.0,
         Kind.House => 1.0,
         Kind.Beacon => 2.0,
         Kind.Stone => 1.0,
@@ -312,6 +331,8 @@ shared fn kind_move(kind: Kind) -> number {
         Kind.Imp => 3.0,
         Kind.Burster => 2.0,
         Kind.Kiln => 1.0,
+        Kind.Hailer => 2.0,
+        Kind.Rimeback => 1.0,
         _ => 0.0,
     };
 }
@@ -327,6 +348,8 @@ shared fn kind_damage(kind: Kind) -> number {
         Kind.Imp => 1.0,
         Kind.Burster => 1.0,
         Kind.Kiln => 2.0,
+        Kind.Hailer => 1.0,
+        Kind.Rimeback => 3.0,
         _ => 0.0,
     };
 }
@@ -347,6 +370,8 @@ shared fn kind_name(kind: Kind) -> String {
         Kind.Imp => "Cinder Imp",
         Kind.Burster => "Burster",
         Kind.Kiln => "The Kiln",
+        Kind.Hailer => "Hailer",
+        Kind.Rimeback => "The Rimeback",
         Kind.House => "House",
         Kind.Beacon => "Beacon",
         Kind.Stone => "Stone",
@@ -370,6 +395,8 @@ shared fn skill_name(kind: Kind) -> String {
         Kind.Imp => "Scratch",
         Kind.Burster => "Butt",
         Kind.Kiln => "Belch",
+        Kind.Hailer => "Hail",
+        Kind.Rimeback => "Frost Sweep",
         Kind.Vent => "Erupt",
         _ => "",
     };
@@ -380,7 +407,7 @@ shared fn skill_text(kind: Kind) -> String {
         Kind.Bulwark => "Strike a neighbour for 2 and shove it a cell away.",
         Kind.Mason => "Throw a stone 2 to 4 cells. It hits for 1 and shoves everything beside it outward. On open ground it stays, a new stone.",
         Kind.Lamplighter => "Fire along a line. The first thing in the way takes 1 and is knocked back a cell.",
-        Kind.Tidecaller => "Throw water 1 to 3 cells along a line. Lava cools to stone, and lava by water makes new ground. A figure is washed a cell back; fire takes 2; a vent chokes. Bare ground is left a pool the Hollow cannot cross.",
+        Kind.Tidecaller => "Throw water 1 to 3 cells along a line. Lava cools to stone, and lava by water makes new ground. A figure is washed a cell back; fire takes 2; a vent chokes. Bare ground is left a pool the Hollow cannot cross; in the ice, it freezes.",
         Kind.Harpooner => "Throw a harpoon up to 5 cells along a line and haul in the first thing it bites: a Hollow takes 1 and is dragged to you. Anything too heavy to drag hauls you to it instead.",
         Kind.Shieldback => "Ward itself, or a warden or building up to 2 cells away: the next blow it takes this round does nothing. Too heavy to shove.",
         Kind.Husk => "Claws the cell in front for 1.",
@@ -391,6 +418,8 @@ shared fn skill_text(kind: Kind) -> String {
         Kind.Imp => "Scratches the cell in front for 1. Walks in lava, and leaves lava where it stood. Water puts it out.",
         Kind.Burster => "Butts the cell in front for 1. Bursts when it dies, throwing everything beside it a cell away.",
         Kind.Kiln => "Belches fire onto a cell 2 to 4 away for 2, and leaves it lava. Too heavy to push; water hurts it.",
+        Kind.Hailer => "Lobs hail onto a cell 2 to 4 away for 1, and leaves it ice.",
+        Kind.Rimeback => "Sweeps the three cells in front for 3 and leaves them ice. Too heavy to push.",
         Kind.Vent => "Throws lava 2 or 3 cells every other round. Water chokes it for a round.",
         Kind.House => "Somebody lives here. Every point of damage costs the Hearth.",
         Kind.Beacon => "The island's beacon. Every point of damage costs the Hearth.",
@@ -425,6 +454,11 @@ shared fn is_lava(board: Board, x: number, z: number) -> bool {
 }
 
 // Whether water or lava covers a cell rather than bare ground.
+// Ice: ground that holds anyone up, and lets nothing shoved onto it stop.
+shared fn is_ice(board: Board, x: number, z: number) -> bool {
+    return !under_level(board, x, z) && pool_at(board, x, z) == ICE;
+}
+
 shared fn is_wet(board: Board, x: number, z: number) -> bool {
     return is_water(board, x, z) || is_lava(board, x, z);
 }
@@ -494,7 +528,7 @@ shared fn floods_next(board: Board, x: number, z: number) -> bool {
 // who can burn.
 shared fn can_stand(board: Board, kind: Kind, x: number, z: number) -> bool {
     if !in_bounds(x, z) { return false; }
-    if is_water(board, x, z) && is_hollow(kind) && kind != Kind.Colossus { return false; }
+    if is_water(board, x, z) && is_hollow(kind) && !is_giant(kind) { return false; }
     if is_lava(board, x, z) && !is_fireproof(kind) { return false; }
     return true;
 }
@@ -502,7 +536,7 @@ shared fn can_stand(board: Board, kind: Kind, x: number, z: number) -> bool {
 // Whether what is rising round the island will not hurt this kind.
 shared fn braves_level(board: Board, kind: Kind) -> bool {
     if board.molten { return is_fireproof(kind); }
-    return kind == Kind.Colossus || is_warden(kind);
+    return is_giant(kind) || is_warden(kind);
 }
 
 // Every cell a unit can walk to this turn, as cell indices, nearest first.
@@ -742,9 +776,19 @@ shared fn push(board: Board, x: number, z: number, d: number) -> Board {
     }
     if rise <= -2.0 {
         next.beats.push(Beat(kind: BeatKind.Fall, unit: unit.id, x: tx, z: tz));
-        return hurt(next, index, 1.0);
+        next = hurt(next, index, 1.0);
     }
-    return next;
+    return slide(next, unit.id, d);
+}
+
+// Whatever a shove leaves on ice keeps going the same way, a cell at a time,
+// until it is off the ice or something stops it.
+shared fn slide(board: Board, id: number, d: number) -> Board {
+    let at = unit_index(board, id);
+    if at < 0.0 { return board; }
+    let unit = board.units[at];
+    if unit.hp <= 0.0 || !in_bounds(unit.x, unit.z) || !is_ice(board, unit.x, unit.z) { return board; }
+    return push(board, unit.x, unit.z, d);
 }
 
 // The first cell along a line from (x, z) that something stands on, as a cell
@@ -946,6 +990,14 @@ shared fn drench(board: Board, index: number, tx: number, tz: number, d: number)
         next.beats.push(Beat(kind: BeatKind.Steam, x: tx, z: tz));
         return settle(cool(next, tx, tz));
     }
+    // In the ice, water thrown on the ground freezes where it lands.
+    if next.frozen {
+        if is_ice(next, tx, tz) || under_level(next, tx, tz) {
+            next.beats.push(Beat(kind: BeatKind.Miss, unit: unit.id, x: tx, z: tz));
+            return next;
+        }
+        return make_pool(next, tx, tz, ICE);
+    }
     if is_water(next, tx, tz) {
         next.beats.push(Beat(kind: BeatKind.Miss, unit: unit.id, x: tx, z: tz));
         return next;
@@ -992,7 +1044,7 @@ shared fn settle(board: Board) -> Board {
         changed = false;
         for c in 0..(SIZE * SIZE) {
             let pool = next.pools[c];
-            if pool == DRY { continue; }
+            if pool == DRY || pool == ICE { continue; }
             let x = c % SIZE;
             let z = floor(c / SIZE);
             for d in 0..4 {
@@ -1067,7 +1119,7 @@ shared fn strike_cells(board: Board, kind: Kind, x: number, z: number, d: number
     let tx = x + dir_x(d) * reach;
     let tz = z + dir_z(d) * reach;
     if in_bounds(tx, tz) { cells.push(cell_of(tx, tz)); }
-    if kind == Kind.Colossus {
+    if is_giant(kind) {
         // The two cells either side of the one in front.
         let sx = dir_x((d + 1.0) % 4.0);
         let sz = dir_z((d + 1.0) % 4.0);
@@ -1091,7 +1143,7 @@ shared fn hollow_strike(board: Board, index: number) -> Board {
     let fz = floor(first / SIZE);
     if unit.kind == Kind.Spitter {
         next.beats.push(Beat(kind: BeatKind.Bolt, unit: unit.id, x: unit.x, z: unit.z, tx: fx, tz: fz));
-    } else if unit.kind == Kind.Mortar || unit.kind == Kind.Kiln {
+    } else if is_lobber(unit.kind) {
         next.beats.push(Beat(kind: BeatKind.Lob, unit: unit.id, x: unit.x, z: unit.z, tx: fx, tz: fz));
     } else {
         next.beats.push(Beat(kind: BeatKind.Strike, unit: unit.id, x: unit.x, z: unit.z, tx: fx, tz: fz));
@@ -1114,7 +1166,20 @@ shared fn hollow_strike(board: Board, index: number) -> Board {
     if unit.kind == Kind.Kiln {
         next = spill_lava(next, fx, fz);
     }
+    // Hail and the Rimeback's breath leave the ground they hit iced over.
+    if unit.kind == Kind.Hailer || unit.kind == Kind.Rimeback {
+        for c in cells { next = freeze(next, c % SIZE, floor(c / SIZE)); }
+    }
     return next;
+}
+
+// Ices a cell over: bare ground or a pool of water. Lava and the sea are
+// too much for it.
+shared fn freeze(board: Board, x: number, z: number) -> Board {
+    if !in_bounds(x, z) || under_level(board, x, z) { return board; }
+    let pool = pool_at(board, x, z);
+    if pool != DRY && pool != WATER { return board; }
+    return make_pool(board, x, z, ICE);
 }
 
 // Lava thrown onto a cell: a Hollow there burns, a building is lost, a warden
@@ -1264,7 +1329,7 @@ shared fn plan_hollow(board: Board, index: number) -> Board {
         for d in 0..4 {
             var low = 1.0;
             var high = 1.0;
-            if unit.kind == Kind.Mortar || unit.kind == Kind.Kiln { low = 2.0; high = 4.0; }
+            if is_lobber(unit.kind) { low = 2.0; high = 4.0; }
             for r in low..(high + 1.0) {
                 let cells = strike_cells(next, unit.kind, ox, oz, d, r, unit.id);
                 let score = place + want_of(next, cells, unit.id, kind_damage(unit.kind));
@@ -1308,7 +1373,7 @@ shared fn plan_hollow(board: Board, index: number) -> Board {
         // Strike towards the nearest prey along whichever axis is longer.
         planned.dir = facing_towards_prey(next, bx, bz);
         planned.reach = 1.0;
-        if unit.kind == Kind.Mortar || unit.kind == Kind.Kiln { planned.reach = 2.0; }
+        if is_lobber(unit.kind) { planned.reach = 2.0; }
     }
     next.units[index] = planned;
     return next;

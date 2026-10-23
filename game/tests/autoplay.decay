@@ -133,6 +133,7 @@ script Autoplay {
             Kind.Harpooner => "5", Kind.Shieldback => "6",
             Kind.Husk => "h", Kind.Brute => "b", Kind.Spitter => "s", Kind.Mortar => "m",
             Kind.Colossus => "c", Kind.Imp => "i", Kind.Burster => "x", Kind.Kiln => "k",
+            Kind.Hailer => "a", Kind.Rimeback => "r",
             Kind.House => "H", Kind.Beacon => "B", Kind.Stone => "S", Kind.Vent => "V",
         };
     }
@@ -158,6 +159,8 @@ script Autoplay {
                     row += "## ";
                 } else if is_water(board, x, z) {
                     row += "~~ ";
+                } else if is_ice(board, x, z) {
+                    row += "** ";
                 } else {
                     row += "." + height_at(board, x, z) + " ";
                 }
@@ -227,15 +230,14 @@ script Autoplay {
         if board.round > board.rounds {
             Game.set("won_" + island, 1.0);
             Game.set("hearth_" + island, board.hearth);
-            let layer = layer_of(island) + 1.0;
-            if layer >= LAYER_COUNT {
+            if layer_of(island) + 1.0 >= LAYER_COUNT {
                 Game.set("crossed", 1.0);
                 done = true;
                 return;
             }
             // Down one road or the other where it forks, by the dice.
             let was = island;
-            let roads = layer_islands(layer);
+            let roads = roads_from(island);
             island = roads[Random.int(0.0, roads.length - 1.0)];
             // A new world rekindles the Hearth, as it does in the game.
             if world_of(island) != world_of(was) {

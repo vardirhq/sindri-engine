@@ -1,5 +1,15 @@
 # Changelog
 
+- Add a third world to Causeway, the Rime: past the Lighthouse the road divides
+  between the burning mountain and the ice, and a crossing takes one. The Rime
+  is four islands, Icebound Strand, then The Calving or Hoarwood, then The
+  White Barrow. Its ground is snow and frost with pools of ice. Anything shoved
+  onto ice skids on until something stops it or it goes into the sea, and the
+  Tidecaller's water freezes where it lands. New Hollow: the Hailer lobs hail
+  that leaves ice behind, and the Rimeback sweeps the three cells in front of
+  it for 3 and ices them over. The ice has its own cold light, snow on the
+  wind, bergs and floes in the sea, and its own song.
+
 - Redesign the website and give every game and demo a page of its own at
   `/play/<route>/`, with the game embedded, what it is, its controls and what
   it proves. The game loads when Play is pressed and plays inline, or over the
