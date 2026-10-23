@@ -1,5 +1,13 @@
 # Changelog
 
+- Run less CI for a pull request that only changes the companion game: when
+  every changed file is a game script, asset, test, generator or its changelog
+  and capability entry, CI runs the game's own tests, the Decay preflight,
+  Clippy, the baker and the format checks, and skips the engine's workspace
+  tests, render captures and browser runs. Any other file in the diff runs
+  everything, and a game-only run leaves no verified record, so the push to
+  main after the merge still runs in full.
+
 - Fix Causeway sticking at the Lighthouse: going Onward after it dealt the
   warden offer four cards when only some wardens were called yet, the script
   failed, and the screen stayed blank. An offer, or a boon hand, now deals as
