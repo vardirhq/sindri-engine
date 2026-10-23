@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b0d11">
+<title>{{title}} — play in your browser · Sindri Engine</title>
+<meta name="description" content="{{description}}">
+<meta property="og:title" content="{{title}} · Sindri Engine">
+<meta property="og:description" content="{{description}}">
+{{og_image}}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&family=Pixelify+Sans:wght@600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/site.css">
+<link rel="stylesheet" href="../../assets/play.css">
+<script defer src="../../assets/play.js"></script>
+</head>
+<body class="play-page">
+
+<header class="nav">
+  <div class="shell">
+    <a class="brand" href="../../" aria-label="Sindri Engine home">
+      <svg width="28" height="28" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+        <polygon points="16,3 27.26,9.5 27.26,22.5 16,29 4.74,22.5 4.74,9.5" stroke="#ece7dc" stroke-width="1.6" fill="none"/>
+        <polygon points="16,9 22.06,12.5 22.06,19.5 16,23 9.94,19.5 9.94,12.5" stroke="#ece7dc" stroke-width="1.2" fill="none"/>
+        <polygon points="16,13.2 18.42,14.6 18.42,17.4 16,18.8 13.58,17.4 13.58,14.6" fill="#f2b84b"/>
+      </svg>
+      <span>
+        <span class="wordmark">S<i>I</i>NDR<i>I</i></span>
+        <span class="tagline"><span class="rule"></span><span class="chip">PLAY</span></span>
+      </span>
+    </a>
+    <nav aria-label="Main">
+      <a href="../../#games">Games</a>
+      <a class="nav-extra" href="../../#examples">Examples</a>
+      <a href="../../docs/documentation/">Docs</a>
+      <a href="../../directory/">Directory</a>
+      <a class="ghost" href="https://github.com/vardirhq/sindri-engine">GitHub ↗</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="shell play-head">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="../../{{group_anchor}}">{{group_label}}</a><span aria-hidden="true">/</span><span aria-current="page">{{title}}</span></nav>
+    <div class="play-title">
+      <h1>{{title}}</h1>
+      <span class="role {{role_class}}">{{kind}}</span>
+    </div>
+    <p class="lede">{{description}}</p>
+  </div>
+
+  <section class="shell" aria-label="Play {{title}}">
+    <div class="stage" id="stage" data-src="../../{{path}}" data-title="{{title}}">
+      <div class="poster {{poster_class}}">
+        {{poster}}
+        <div class="launch">
+          <button type="button" class="launch-button" id="launch">
+            <span class="launch-icon" aria-hidden="true"></span>
+            <span>Play {{title}}</span>
+          </button>
+          <p class="launch-note">Runs in your browser with {{needs}}. Loading takes a moment.</p>
+        </div>
+      </div>
+      <div class="stage-controls" aria-label="Full page controls">
+        <button type="button" data-action="restart" aria-label="Restart {{title}}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.5-5.8M4 4v4.5h4.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <button type="button" data-action="exit" aria-label="Leave full page"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></button>
+      </div>
+    </div>
+    <div class="stage-bar">
+      <p class="stage-hint" id="stage-hint">{{input_hint}}</p>
+      <div class="stage-actions">
+        <label class="switch" title="Fill the whole window when the game starts">
+          <input type="checkbox" id="fullpage-pref">
+          <span class="track" aria-hidden="true"></span>
+          <span>Full page</span>
+        </label>
+        <button type="button" class="tool" data-action="restart" hidden>Restart</button>
+        <button type="button" class="tool" data-action="fullpage">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Expand
+        </button>
+        <a class="tool" href="../../{{path}}">Standalone ↗</a>
+      </div>
+    </div>
+    <noscript><p class="stage-hint">JavaScript is off, so the game can't be embedded. <a href="../../{{path}}">Open {{title}} on its own page</a>.</p></noscript>
+  </section>
+
+  <section class="shell play-info">
+    <div class="about">
+      <h2>About</h2>
+      {{about}}
+      {{note}}
+      <h2>What it proves</h2>
+      <ul class="chips">{{proves}}</ul>
+    </div>
+    <aside class="facts">
+      {{controls}}
+      <dl>
+        <div><dt>Kind</dt><dd>{{kind}}</dd></div>
+        <div><dt>Input</dt><dd>{{inputs}}</dd></div>
+        <div><dt>Needs</dt><dd>{{needs}}</dd></div>
+        <div><dt>Source</dt><dd><a href="https://github.com/vardirhq/sindri-engine/tree/main/{{source}}"><code>{{source}}</code> ↗</a></dd></div>
+      </dl>
+      <p class="open-in-editor">Open <code>{{source}}</code> in the Sindri editor to see its scenes and scripts, then press Play.</p>
+    </aside>
+  </section>
+
+  <section class="shell more" aria-label="More to play">
+    <h2>Keep playing</h2>
+    <div class="cards small">
+{{more}}
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="shell">
+    <span>Built in Rust by Vardir · pre-alpha · MIT or Apache-2.0</span>
+    <nav aria-label="Footer">
+      <a href="../../">Home</a>
+      <a href="../../directory/">Directory</a>
+      <a href="../../docs/documentation/">Docs</a>
+      <a href="https://github.com/vardirhq/sindri-engine">GitHub ↗</a>
+    </nav>
+  </div>
+</footer>
+
+</body>
+</html>

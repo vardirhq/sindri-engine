@@ -4,12 +4,71 @@
     "title": "Causeway",
     "path": "examples/causeway/",
     "source": "game",
-    "description": "Hold four islands against the Hollow until the tide rises, in a turn-based tactics crossing.",
+    "description": "Hold the islands against the Hollow until the tide rises, in a turn-based tactics crossing.",
     "tags": [
       "tactics",
       "3d",
       "flagship"
-    ]
+    ],
+    "play": {
+      "kind": "Flagship",
+      "shot": "causeway.png",
+      "input": [
+        "keyboard",
+        "mouse",
+        "touch"
+      ],
+      "about": [
+        "Three wardens hold small islands against the Hollow, who cross the causeway at low tide, until the rising sea drowns them. Every Hollow shows what it will strike before it strikes, so each turn is a puzzle with a visible answer.",
+        "Causeway is Sindri's showcase: the place a finished capability proves it can be used in a game somebody would choose to play. Its models, textures, sounds and score are generated in the repository, and it runs on the same scenes, Decay scripts and renderer natively and here in the browser."
+      ],
+      "proves": [
+        "Lit low-poly 3D with imported GLB models",
+        "Picking through a pointer ray",
+        "Weather, water and lava shaders",
+        "Weave HUD and menus",
+        "Turn logic written in Decay",
+        "Music that crossfades between worlds"
+      ],
+      "controls": [
+        [
+          "Tap / click",
+          "Select a warden, a cell or a button"
+        ],
+        [
+          "WASD / arrows",
+          "Move the cursor"
+        ],
+        [
+          "Enter / Space",
+          "Confirm"
+        ],
+        [
+          "Q",
+          "Aim the warden's skill"
+        ],
+        [
+          "E",
+          "End the turn"
+        ],
+        [
+          "Z / Backspace",
+          "Undo a move"
+        ],
+        [
+          "R",
+          "Rewind the turn"
+        ],
+        [
+          "J / L",
+          "Turn the board"
+        ],
+        [
+          "T",
+          "Floor-plan view from above"
+        ]
+      ]
+    }
   },
   {
     "category": "games",
@@ -23,7 +82,46 @@
       "prefabs",
       "tweening",
       "flagship"
-    ]
+    ],
+    "play": {
+      "kind": "Flagship",
+      "shot": "orbital-baked-aegis.png",
+      "input": [
+        "keyboard",
+        "mouse",
+        "touch",
+        "gamepad"
+      ],
+      "about": [
+        "The fleet is gone and someone has to hold the line. Build an unlikely warship while an evacuation corridor closes: survive five sectors over ten minutes, or take a field kit into a twelve-boss gauntlet. Firing is automatic; movement, timing your burst and choosing a build make the difference.",
+        "Orbital Last Stand is the forcing function. It recreates a complete game using only the editor and Decay, and every gap it hits is closed as a general Sindri capability rather than something shaped around this game."
+      ],
+      "proves": [
+        "160 modules, 15 enemy types and 12 bosses in Decay",
+        "Prefabs and pooled spawning at scale",
+        "Baked 3D sprite sheets",
+        "Weave menus that fit a phone",
+        "Saved progress and settings"
+      ],
+      "controls": [
+        [
+          "WASD / arrows · left stick · drag",
+          "Steer"
+        ],
+        [
+          "Left Shift · right bumper · BURST",
+          "Evasive burst"
+        ],
+        [
+          "Escape · Start · PAUSE",
+          "Pause and resume"
+        ],
+        [
+          "Pointer · d-pad · tap",
+          "Menus"
+        ]
+      ]
+    }
   },
   {
     "category": "games",
@@ -37,7 +135,50 @@
       "physics",
       "camera",
       "genre"
-    ]
+    ],
+    "play": {
+      "kind": "Genre showcase",
+      "shot": "platformer.png",
+      "input": [
+        "keyboard",
+        "touch",
+        "gamepad"
+      ],
+      "about": [
+        "Run and jump across a painted level, pick up the coins and reach the flag. Along the way: a plank ferry, one-way planks, a crate the wind pushes, a lantern on a tether and windmills on powered hinges.",
+        "The platformer is where Sindri's plain 2D path is proven: tilemap collision, gravity, collider authoring, camera follow and the 2D Scene view. It is also the project to copy when you start a side-view game of your own."
+      ],
+      "proves": [
+        "Tilemap collision and one-way platforms",
+        "Coyote time and jump buffering in Decay",
+        "Distance joints, hinges and motors",
+        "Reusable physics materials",
+        "Lit caves and sliced UI panels",
+        "Sounds made in the Sound Lab"
+      ],
+      "controls": [
+        [
+          "A / D · arrows · left stick",
+          "Run"
+        ],
+        [
+          "Space / W / Up · south button",
+          "Jump"
+        ],
+        [
+          "S / Down",
+          "Drop through planks"
+        ],
+        [
+          "K · west button",
+          "Toss the crate"
+        ],
+        [
+          "First finger · second finger",
+          "Touch stick · jump"
+        ]
+      ]
+    }
   },
   {
     "category": "games",
@@ -50,7 +191,54 @@
       "multiplayer",
       "prefabs",
       "genre"
-    ]
+    ],
+    "play": {
+      "kind": "Genre showcase",
+      "shot": "scorchball.png",
+      "input": [
+        "gamepad",
+        "mouse",
+        "touch"
+      ],
+      "about": [
+        "Couch football for two to four players, each on their own pad, or one player against a bot. A port of an earlier Unity project, rebuilt as a Sindri project with its original pixel art, sounds and tuning.",
+        "Scorchball is the local-multiplayer showcase: gamepads read by player slot, players joining and leaving mid-game, and players made from prefabs were added to Sindri for it."
+      ],
+      "proves": [
+        "Gamepads read by player slot",
+        "Joining and leaving mid-match",
+        "Players spawned from prefabs",
+        "Bots written in Decay",
+        "A responsive Weave title screen"
+      ],
+      "controls": [
+        [
+          "Tap / click",
+          "Play vs Bot or Local Multiplayer"
+        ],
+        [
+          "A (south) / Start",
+          "Join"
+        ],
+        [
+          "D-pad up / down",
+          "Pick a player"
+        ],
+        [
+          "Y (north)",
+          "Ready"
+        ],
+        [
+          "Left stick",
+          "Walk"
+        ],
+        [
+          "Left bumper",
+          "Sprint"
+        ]
+      ],
+      "note": "Best with gamepads. Play vs Bot needs only one."
+    }
   },
   {
     "category": "games",
@@ -63,7 +251,48 @@
       "tilemap",
       "camera",
       "genre"
-    ]
+    ],
+    "play": {
+      "kind": "Genre showcase",
+      "shot": "low-tide.jpg",
+      "input": [
+        "keyboard",
+        "touch"
+      ],
+      "about": [
+        "The ocean drained away generations ago and left the Basin. You crew a crawler, a house on treads, and drive it across the old sea floor gathering wood, stone, salt and scrap. Then the Tide returns, and you head uphill before the lowlands flood.",
+        "Low Tide is the moving-home showcase: a crew walking a tilemap deck in its own coordinates while the deck drives and turns beneath them, a camera that turns with it, and a top-down game played on the engine's generated voxel terrain. There is no game code: it is a scene and Decay scripts."
+      ],
+      "proves": [
+        "A walkable world on a moving, turning parent",
+        "Re-parenting at the ramp",
+        "Tile reads and writes from Decay",
+        "Generated voxel terrain seen as a map",
+        "Phone controls that appear on first touch"
+      ],
+      "controls": [
+        [
+          "WASD / arrows · drag",
+          "Walk"
+        ],
+        [
+          "E / Space · Use",
+          "Take the helm, gather, pick up"
+        ],
+        [
+          "W / S · A / D at the helm",
+          "Throttle · steer"
+        ],
+        [
+          "X · Drop",
+          "Set a crate down"
+        ],
+        [
+          "Tab",
+          "Keep the map north-up"
+        ]
+      ]
+    }
   },
   {
     "category": "games",
@@ -75,7 +304,36 @@
       "2d",
       "arcade",
       "genre"
-    ]
+    ],
+    "play": {
+      "kind": "Genre showcase",
+      "shot": "flappy.png",
+      "input": [
+        "keyboard",
+        "mouse",
+        "touch"
+      ],
+      "about": [
+        "One-button flight through an endless line of gaps. They change height every lap, the course speeds up as the score climbs, and the sky, hills and ground scroll in parallax.",
+        "Flappy is the smallest complete game in the repository: one scene and a handful of Decay scripts. Copy it to start a one-button arcade game."
+      ],
+      "proves": [
+        "A whole arcade loop in Decay",
+        "Impulses and gravity-driven flight",
+        "Parallax scrolling",
+        "Collision, scoring and restart"
+      ],
+      "controls": [
+        [
+          "Tap / click / Space / W / Up",
+          "Flap"
+        ],
+        [
+          "The same after a crash",
+          "Restart"
+        ]
+      ]
+    }
   },
   {
     "category": "demos",
@@ -90,7 +348,34 @@
       "vector",
       "colour",
       "responsive"
-    ]
+    ],
+    "play": {
+      "kind": "Feature example",
+      "shot": "tween.png",
+      "input": [
+        "keyboard",
+        "mouse",
+        "touch"
+      ],
+      "about": [
+        "Five easing curves side by side, applied to movement, scale, colour and rotation. Pause, resume, cancel, restart or replace the running tweens and watch each one answer."
+      ],
+      "proves": [
+        "Number, vector and colour tweens",
+        "Managed playback from Decay",
+        "A layout that fits portrait and landscape"
+      ],
+      "controls": [
+        [
+          "On-screen buttons",
+          "Pause, resume, cancel, restart, replace"
+        ],
+        [
+          "Keyboard",
+          "Shortcuts are shown on each button"
+        ]
+      ]
+    }
   },
   {
     "category": "demos",
@@ -104,7 +389,46 @@
       "shake",
       "decay",
       "responsive"
-    ]
+    ],
+    "play": {
+      "kind": "Feature example",
+      "shot": "camera.png",
+      "input": [
+        "keyboard",
+        "mouse",
+        "touch"
+      ],
+      "about": [
+        "Follow, dead zones, smoothing, confinement and impact shake, with visible guides so you can see what the camera is doing and why. Start the tour to take the target beyond the camera's limits."
+      ],
+      "proves": [
+        "Engine-owned follow and smoothing",
+        "Dead zones and confinement",
+        "Trauma-based shake"
+      ],
+      "controls": [
+        [
+          "Arrows · on-screen pad",
+          "Move the target"
+        ],
+        [
+          "F / B / K / S / Z",
+          "Follow, bounds, shake, smoothing, dead zone"
+        ],
+        [
+          "T",
+          "Start or stop the tour"
+        ],
+        [
+          "Space",
+          "Impact"
+        ],
+        [
+          "R",
+          "Reset"
+        ]
+      ]
+    }
   },
   {
     "category": "demos",
@@ -120,14 +444,53 @@
       "determinism",
       "decay",
       "responsive"
-    ]
+    ],
+    "play": {
+      "kind": "Feature example",
+      "shot": "spatial.png",
+      "input": [
+        "keyboard",
+        "mouse",
+        "touch"
+      ],
+      "about": [
+        "Move a query origin and watch the nearest tagged entity and every target inside the radius, listed in order. Change tags, disable targets or rotate a parent to see that the queries compare real world positions."
+      ],
+      "proves": [
+        "Nearest and radius queries",
+        "Tags and active state",
+        "Composed world transforms"
+      ],
+      "controls": [
+        [
+          "Arrows · on-screen pad",
+          "Move the origin"
+        ],
+        [
+          "Q / E",
+          "Shrink or grow the radius"
+        ],
+        [
+          "T",
+          "Cycle the tag"
+        ],
+        [
+          "A / P / O",
+          "Toggle a target, its parent, rotate the parent"
+        ],
+        [
+          "R",
+          "Reset"
+        ]
+      ]
+    }
   },
   {
     "category": "demos",
     "title": "Physics Playground",
     "path": "examples/physics/",
     "source": "examples/physics",
-    "description": "Cast rays through colliders and triggers while bodies fall and bounce.",
+    "description": "A room full of contraptions, from a wrecking ball to a crane, with tools to grab, blast, spawn and probe them.",
     "tags": [
       "physics",
       "raycast",
@@ -135,7 +498,56 @@
       "layers",
       "decay",
       "responsive"
-    ]
+    ],
+    "play": {
+      "kind": "Feature example",
+      "shot": "physics.png",
+      "input": [
+        "keyboard",
+        "mouse",
+        "touch"
+      ],
+      "about": [
+        "One room full of contraptions and the tools to poke them: a wrecking ball, a gantry crane, a cannon gallery, a bumper pit, a material lab, a seesaw, a robot on a test track, a domino run and a voxel quarry in 3D. Grab, blast, spawn and probe anything."
+      ],
+      "proves": [
+        "Rapier 2D bodies, joints and motors",
+        "Ray, circle and box queries",
+        "Continuous collision",
+        "Physics materials as assets",
+        "3D bodies on a diggable voxel floor"
+      ],
+      "controls": [
+        [
+          "G / B / N / P",
+          "Grab, blast, spawn, probe"
+        ],
+        [
+          "Q / E",
+          "Previous or next contraption"
+        ],
+        [
+          "1–4",
+          "Work the selected contraption"
+        ],
+        [
+          "X",
+          "Drop everything"
+        ],
+        [
+          "V",
+          "Change gravity"
+        ],
+        [
+          "I",
+          "Debug view"
+        ],
+        [
+          "K",
+          "Voxel quarry"
+        ]
+      ]
+    }
   },
   {
     "category": "demos",
@@ -150,7 +562,43 @@
       "gamepad",
       "decay",
       "responsive"
-    ]
+    ],
+    "play": {
+      "kind": "Feature example",
+      "shot": "input.png",
+      "input": [
+        "keyboard",
+        "mouse",
+        "touch",
+        "gamepad"
+      ],
+      "about": [
+        "The ship reads what the player means rather than what they pressed. Steer with WASD, the arrows or a d-pad, boost with Space or a pad, and rebind boost to any key or button while it runs."
+      ],
+      "proves": [
+        "Input actions with several bindings",
+        "Rebinding at runtime",
+        "Arena sized from the Weave layout"
+      ],
+      "controls": [
+        [
+          "WASD / arrows / d-pad",
+          "Move"
+        ],
+        [
+          "Space / south button",
+          "Boost"
+        ],
+        [
+          "K · REBIND BOOST",
+          "Rebind boost"
+        ],
+        [
+          "Escape",
+          "Cancel"
+        ]
+      ]
+    }
   },
   {
     "category": "demos",
@@ -165,7 +613,38 @@
       "sliders",
       "decay",
       "responsive"
-    ]
+    ],
+    "play": {
+      "kind": "Feature example",
+      "shot": "audio.png",
+      "input": [
+        "keyboard",
+        "mouse",
+        "touch"
+      ],
+      "about": [
+        "Every sound plays through a bus, and every bus through master. Drag a slider and hear the theme and effects change as they play. Browsers start audio on the first click or key."
+      ],
+      "proves": [
+        "Audio buses and live volume",
+        "Looping music sources",
+        "Sliders laid out by Weave"
+      ],
+      "controls": [
+        [
+          "Drag or tap a slider",
+          "Set a bus volume"
+        ],
+        [
+          "Up / Down",
+          "Choose a slider"
+        ],
+        [
+          "Left / Right",
+          "Move it a step"
+        ]
+      ]
+    }
   },
   {
     "category": "demos",
@@ -179,7 +658,30 @@
       "choreography",
       "cues",
       "decay"
-    ]
+    ],
+    "play": {
+      "kind": "Feature example",
+      "shot": "sequence.png",
+      "input": [
+        "keyboard",
+        "mouse",
+        "touch"
+      ],
+      "about": [
+        "A ship flies in on a sequence authored in the editor's Timeline, with sound cues, then the stage idles on a loop. The script only says which sequence plays; every track is authored data."
+      ],
+      "proves": [
+        "Sequences and the Timeline",
+        "Cues heard from Decay",
+        "One director driving the whole scene"
+      ],
+      "controls": [
+        [
+          "Space / tap",
+          "Replay the intro"
+        ]
+      ]
+    }
   },
   {
     "category": "demos",
@@ -193,7 +695,28 @@
       "sprites",
       "rendering",
       "decay"
-    ]
+    ],
+    "play": {
+      "kind": "Feature example",
+      "shot": "sprite-shaders.png",
+      "input": [
+        "keyboard"
+      ],
+      "about": [
+        "Five copies of one badge: no shader, then a pulsing outline, a dissolve, a hit flash and a wave. Each shader is one WGSL function the engine wraps in its sprite pipeline, and scripts drive their parameters."
+      ],
+      "proves": [
+        "Project WGSL sprite shaders",
+        "Shader parameters from Decay",
+        "Hot reload with line-accurate errors"
+      ],
+      "controls": [
+        [
+          "Space",
+          "Flash"
+        ]
+      ]
+    }
   },
   {
     "category": "demos",
@@ -206,7 +729,20 @@
       "sprites",
       "rendering",
       "decay"
-    ]
+    ],
+    "play": {
+      "kind": "Feature example",
+      "shot": "sprite-masks.png",
+      "input": [],
+      "about": [
+        "A keyhole wanders over a night sky. The night is masked outside it, so a sunny meadow shows through, and a gem masked inside it is only ever seen through the hole."
+      ],
+      "proves": [
+        "Inside and outside sprite masks",
+        "Masks that move with a script"
+      ],
+      "controls": []
+    }
   },
   {
     "category": "demos",
@@ -220,7 +756,43 @@
       "weave",
       "decay",
       "responsive"
-    ]
+    ],
+    "play": {
+      "kind": "Feature example",
+      "shot": "ui.png",
+      "input": [
+        "keyboard",
+        "mouse",
+        "touch",
+        "gamepad"
+      ],
+      "about": [
+        "Engine widgets styled by Weave and driven by Decay: switches, a checkbox, a locked control, a Unicode callsign field with a caret and selection, and a clipped archive that scrolls by wheel, drag or keyboard focus."
+      ],
+      "proves": [
+        "Focus navigation by keyboard and pad",
+        "Text input, including on a phone",
+        "Clipped scrolling regions"
+      ],
+      "controls": [
+        [
+          "Tab / arrows / d-pad",
+          "Move focus"
+        ],
+        [
+          "Space / Enter / south",
+          "Press"
+        ],
+        [
+          "Escape / east",
+          "Back out"
+        ],
+        [
+          "Wheel / drag",
+          "Scroll the archive"
+        ]
+      ]
+    }
   },
   {
     "category": "demos",
@@ -234,7 +806,24 @@
       "media",
       "queries",
       "layout"
-    ]
+    ],
+    "play": {
+      "kind": "Feature example",
+      "shot": "weave-poc.png",
+      "input": [
+        "mouse",
+        "touch"
+      ],
+      "about": [
+        "One scene recomposed for desktop and portrait viewports through presentation rules that resolve into ordinary Sindri UI data. Resize the window, or turn your phone, to see it change."
+      ],
+      "proves": [
+        "CSS-inspired styles and layout",
+        "Viewport queries",
+        "Typography and media"
+      ],
+      "controls": []
+    }
   },
   {
     "category": "demos",
@@ -248,7 +837,29 @@
       "lighting",
       "bloom",
       "geometry"
-    ]
+    ],
+    "play": {
+      "kind": "Lab",
+      "shot": "voxel-lab.jpg",
+      "input": [
+        "keyboard",
+        "mouse"
+      ],
+      "about": [
+        "Sindri's voxel world on its own: generated terrain streamed in sections, meshed and lit, with the renderer's effects exposed so they can be inspected one at a time."
+      ],
+      "proves": [
+        "Voxel generation and streaming",
+        "Block meshing with ambient occlusion",
+        "Lighting and bloom"
+      ],
+      "controls": [
+        [
+          "On-screen panel",
+          "Change what is drawn"
+        ]
+      ]
+    }
   },
   {
     "category": "tools",
@@ -262,7 +873,25 @@
       "music",
       "chiptune",
       "tool"
-    ]
+    ],
+    "play": {
+      "kind": "Tool",
+      "shot": "sound-lab.png",
+      "input": [
+        "mouse",
+        "touch"
+      ],
+      "needs": "Web Audio",
+      "about": [
+        "Make a game's coin, jump, laser and explosion sounds, or a chiptune song, then download them. From the desktop, the same tool sends them straight into a Sindri project; the platformer's sounds were made with it."
+      ],
+      "proves": [
+        "Sound effect design",
+        "Chiptune composition",
+        "WAV export"
+      ],
+      "controls": []
+    }
   },
   {
     "category": "demos",
@@ -274,7 +903,21 @@
       "geometry",
       "renderer",
       "shapes"
-    ]
+    ],
+    "play": {
+      "kind": "Lab",
+      "shot": "shapes-lab.png",
+      "input": [],
+      "about": [
+        "Sindri's zero-art proving ground: a reactor, a boss, a ship and orbitals built only from engine shapes, hierarchy, transforms, blending and Decay. Not a single texture."
+      ],
+      "proves": [
+        "Procedural shapes and strokes",
+        "Hierarchy-driven motion",
+        "Additive blending"
+      ],
+      "controls": []
+    }
   },
   {
     "category": "demos",
@@ -288,7 +931,21 @@
       "look-at",
       "orbit",
       "decay"
-    ]
+    ],
+    "play": {
+      "kind": "Feature example",
+      "shot": "transform.png",
+      "input": [],
+      "about": [
+        "A cube faces a raised goal and walks to it in world space while a perspective camera orbits the scene. It starts under a scaled parent, and its script uses world coordinates so the parent does not change its speed."
+      ],
+      "proves": [
+        "World-space aiming and look-at",
+        "Direction reads",
+        "Orbiting a scene"
+      ],
+      "controls": []
+    }
   },
   {
     "category": "demos",
@@ -302,7 +959,37 @@
       "orbit",
       "pointer-lock",
       "decay"
-    ]
+    ],
+    "play": {
+      "kind": "Feature example",
+      "shot": "orbit.png",
+      "input": [
+        "keyboard",
+        "mouse"
+      ],
+      "about": [
+        "A third-person orbit camera follows a walker to a raised goal. A barrier blocks the camera's requested distance, so it pulls in, keeps facing the walker, then eases back out when the barrier is removed."
+      ],
+      "proves": [
+        "Engine-owned orbit and obstruction",
+        "Field of view changes",
+        "Pointer lock"
+      ],
+      "controls": [
+        [
+          "Right-drag",
+          "Look around"
+        ],
+        [
+          "Click",
+          "Capture the pointer"
+        ],
+        [
+          "U / Escape",
+          "Release it"
+        ]
+      ]
+    }
   },
   {
     "category": "demos",
@@ -316,7 +1003,32 @@
       "platforms",
       "physics",
       "decay"
-    ]
+    ],
+    "play": {
+      "kind": "Feature example",
+      "shot": "character3d.png",
+      "input": [
+        "keyboard"
+      ],
+      "about": [
+        "Ride a gold ferry, jump off and walk to the goal pad. Gravity, jumping and speed are Decay gameplay; the engine clips movement, classifies support and carries the character on the moving platform."
+      ],
+      "proves": [
+        "Grounded 3D character movement",
+        "Carry on moving platforms",
+        "Ceilings and slopes"
+      ],
+      "controls": [
+        [
+          "WASD",
+          "Move"
+        ],
+        [
+          "Space",
+          "Jump"
+        ]
+      ]
+    }
   },
   {
     "category": "demos",
@@ -331,7 +1043,28 @@
       "collision",
       "physics",
       "decay"
-    ]
+    ],
+    "play": {
+      "kind": "Feature example",
+      "shot": "model-collision.png",
+      "input": [
+        "keyboard"
+      ],
+      "about": [
+        "Walk around a wall that collides from an imported GLB's own triangles. One model holds both the ground and the wall, and the same asset is drawn and collided with."
+      ],
+      "proves": [
+        "GLB model import",
+        "Triangle collision from a model",
+        "Assets loaded before gameplay starts"
+      ],
+      "controls": [
+        [
+          "WASD",
+          "Move"
+        ]
+      ]
+    }
   },
   {
     "category": "demos",
@@ -346,7 +1079,21 @@
       "point lights",
       "shadows",
       "decay"
-    ]
+    ],
+    "play": {
+      "kind": "Feature example",
+      "shot": "lighting3d.png",
+      "input": [],
+      "about": [
+        "Point and spot lights, the sun, ambient fill and the sky change colour and direction from Decay. Two panels compare single- and double-sided materials."
+      ],
+      "proves": [
+        "Point, spot and directional lights",
+        "Shadows",
+        "Material sidedness"
+      ],
+      "controls": []
+    }
   },
   {
     "category": "demos",
@@ -361,7 +1108,21 @@
       "time of day",
       "glb",
       "decay"
-    ]
+    ],
+    "play": {
+      "kind": "Feature example",
+      "shot": "daynight.png",
+      "input": [],
+      "about": [
+        "A twelve-second day moves through sunrise, midday, sunset and night. The sun turns and the sky shifts, then the work lights mounted on a moving prop take over."
+      ],
+      "proves": [
+        "A time-of-day cycle in Decay",
+        "Lights attached to moving models",
+        "Shadows through the day"
+      ],
+      "controls": []
+    }
   },
   {
     "category": "docs",

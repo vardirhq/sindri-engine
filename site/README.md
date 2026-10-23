@@ -9,7 +9,7 @@ routes, missing targets and published routes absent from the catalog. Adding a
 published route requires adding its directory entry in the same change.
 
 The generated page is published at `https://sindri.vardir.no/directory/`.
-The landing page and every documentation page link to it. Search and category
+The landing page, the play pages and every documentation page link to it. Search and category
 filters work together and are stored in `?q=...&type=...` for sharing. Without
 JavaScript, all entries remain accessible.
 
@@ -17,6 +17,41 @@ JavaScript, all entries remain accessible.
 desktop and portrait sizes, including search, category filters, shared URLs,
 empty-result recovery, overflow and the no-script fallback. It uses the existing
 Playwright dependency in `scripts/browser`; Pages retains both screenshots.
+
+## Play pages
+
+Every catalog entry with a `play` block gets a page at `/play/<route>/` that
+embeds its export from `/examples/<route>/` in an iframe, with what the
+project is, how to play it and what it proves. `python site/build_play.py
+target/pages` writes them from `play.html`, `play.css` and `play.js`, after the
+exports and before the directory. It also fills the landing page's game and
+example grids and its counts from the same catalog, so the landing page cannot
+list a game that is not published or miss one that is. It refuses an unknown
+`kind` or input, a missing `about` or `proves`, a named screenshot absent from
+`site/screenshots/`, and a play page with no export behind it.
+
+A `play` block holds:
+
+- `kind`: `Flagship`, `Genre showcase`, `Feature example`, `Lab` or `Tool`.
+  Flagships are featured on the landing page; genre showcases and the rest
+  fill its two grids.
+- `shot`: a file in `site/screenshots/`, used for the poster and thumbnails.
+- `about` (paragraphs), `proves` (short phrases), `controls` (pairs of input
+  and action), `input` (`keyboard`, `mouse`, `touch`, `gamepad`), and
+  optionally `note` and `needs` (defaults to WebGPU).
+
+The game loads only when **Play** is pressed. It then plays inline, or over
+the whole window when **Full page** is on. The switch defaults to on for a
+phone-sized or touch screen and off on a desktop, and is remembered per
+browser. **Expand** enters full page at any time; full page shows only a
+restart and a close button over the game, asks a phone for real fullscreen
+where the browser allows it, and Back leaves full page rather than the page.
+A directory entry with a `play` block links to its play page.
+
+`node scripts/browser/play.mjs target/pages` checks the landing page links
+every playable project, that each play page exists and does not load its game
+early, that full page fills the window on desktop and phone, that Back and the
+close button leave it, that the switch is remembered, and the no-script link.
 
 ## Deployment and WIP previews
 

@@ -61,6 +61,35 @@ cargo run -p sindri-causeway --bin causeway-capture -- site/screenshots/causeway
 cargo run -p sindri-cube --bin capture -- site/screenshots/scene-frame-pipeline.png
 ```
 
+## The play pages' posters
+
+The genre showcases and feature examples are photographed by the same
+`project-capture`, at 1440x900, so a page's poster is what its game draws.
+`low-tide.jpg` and `voxel-lab.jpg` are resized to 1200x750 JPEG, because as
+PNGs their terrain is over a megabyte each.
+
+```
+C="cargo run --release -p sindri-causeway --bin project-capture --"
+for p in games/flappy examples/tween examples/camera examples/spatial \
+  examples/physics examples/input examples/audio examples/sprite-shaders \
+  examples/sprite-masks examples/ui examples/transform examples/orbit \
+  examples/character3d examples/model-collision examples/lighting3d \
+  games/low-tide games/voxel-lab; do
+  $C $p site/screenshots/$(basename $p).png 1440 900 wait:3
+done
+$C games/scorchball site/screenshots/scorchball.png 1440 900 wait:3
+$C examples/sequence site/screenshots/sequence.png 1440 900 wait:2.2
+$C examples/daynight site/screenshots/daynight.png 1440 900 wait:6.3
+$C games/platformer site/screenshots/platformer.png 1440 900 \
+  hold:ArrowRight wait:1.4 release:ArrowRight wait:0.4
+convert site/screenshots/low-tide.png -resize 1200x750 -quality 82 site/screenshots/low-tide.jpg
+convert site/screenshots/voxel-lab.png -resize 1200x750 -quality 82 site/screenshots/voxel-lab.jpg
+```
+
+Scorchball is photographed on its title screen: a match starts only when a
+pad joins, which a capture cannot press. On a machine without a GPU, Mesa's
+software Vulkan driver (`mesa-vulkan-drivers`) is enough to run these.
+
 ## The two without a capture binary
 
 Shapes Lab is assets and tests with no crate of its own, and Weave POC's

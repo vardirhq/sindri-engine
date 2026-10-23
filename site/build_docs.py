@@ -192,11 +192,11 @@ TEMPLATE = """<!doctype html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#0d1117">
+<meta name="theme-color" content="#0b0d11">
 <title>{title} — Sindri Engine docs</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&family=Pixelify+Sans:wght@600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{root}assets/site.css">
 </head>
 <body class="docs-body">
@@ -206,13 +206,13 @@ TEMPLATE = """<!doctype html>
 <span class="wordmark">S<i>I</i>NDR<i>I</i></span>
 <span class="tagline"><span class="rule"></span><span class="chip">DOCS</span></span>
 </span></a>
-<nav>
-<a href="{root}directory/">directory</a>
-<a href="{docs}documentation/">docs</a>
-<a href="{docs}scripting/">decay</a>
-<a href="{docs}weave/">weave</a>
-<a href="{root}examples/causeway/">causeway</a>
-<a class="ghost" href="https://github.com/vardirhq/sindri-engine">github ↗</a>
+<nav aria-label="Main">
+<a href="{root}#games">Games</a>
+<a href="{docs}documentation/">Docs</a>
+<a class="nav-extra" href="{docs}scripting/">Decay</a>
+<a class="nav-extra" href="{docs}weave/">Weave</a>
+<a href="{root}directory/">Directory</a>
+<a class="ghost" href="https://github.com/vardirhq/sindri-engine">GitHub ↗</a>
 </nav>
 </div>
 </header>
@@ -227,8 +227,8 @@ TEMPLATE = """<!doctype html>
 <span class="wordmark">SINDRI</span>
 <span class="tagline"><span class="rule"></span><span class="chip">ENGINE</span></span>
 </span></div>
-<span>generated from the repository sources</span>
-<a href="https://github.com/vardirhq/sindri-engine">edit on github ↗</a>
+<span>Generated from the repository sources</span>
+<a href="https://github.com/vardirhq/sindri-engine">Edit on GitHub ↗</a>
 </div>
 </footer>
 </body>
