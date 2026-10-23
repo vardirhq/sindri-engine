@@ -150,11 +150,10 @@ fn phone_button_rotates_and_tapping_still_moves() {
     game.begin_crossing();
     game.play(1.0);
     let home = pose(&game);
-    game.run.input.apply(InputEvent::TouchStarted {
-        id: 1,
-        x: 309.0,
-        y: 102.0,
-    });
+    let [x, y] = game.centre_of("view-top");
+    game.run
+        .input
+        .apply(InputEvent::TouchStarted { id: 1, x, y });
     game.step();
     game.run.input.apply(InputEvent::TouchEnded { id: 1 });
     game.step();

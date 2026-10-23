@@ -1,0 +1,6 @@
+{
+  "format_version": 1,
+  "size": [96, 72],
+  "grid": { "columns": 1, "rows": 1, "names": ["chip"] },
+  "borders": { "": [24, 24, 24, 24] }
+}

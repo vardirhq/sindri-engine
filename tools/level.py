@@ -322,42 +322,92 @@ def world_entities():
     return e
 
 
+def frame(e, id, name, parent, layer=101):
+    """The framed panel behind a HUD panel's words: out of its parent's flow,
+    filling it, its brass corners kept whole by the nine-slice."""
+    art = image("textures/frame.png", layer)
+    art["sindri.ui.image"]["draw"] = "sliced"
+    art["sindri.ui.image"]["border_scale"] = 0.0011
+    e.append(entity(id, name, {**styled("frame"), **art}, parent=parent, spatial=False))
+
+
+def chip_button(e, id, name, label, parent, classes, layer=130):
+    """A small brass-edged chip, for the view's buttons."""
+    e.append(entity(id, name, {**styled("chip-button", *classes), "sindri.ui.button": {"label": label},
+                               **clear_shape(layer)}, parent=parent, spatial=False))
+    art = image("textures/chip.png", layer + 1)
+    art["sindri.ui.image"]["draw"] = "sliced"
+    art["sindri.ui.image"]["border_scale"] = 0.0014
+    e.append(entity(id + "-chip", name + " Chip", {**styled("frame"), **art}, parent=id, spatial=False))
+    e.append(entity(id + "-label", name + " Label",
+                    {**styled("button-label"), **text(label, BOLD_FONT, 0.03, layer + 3)},
+                    parent=id, spatial=False))
+
+
+HERO_PORTRAITS = ("bulwark", "mason", "lamplighter", "tidecaller", "harpooner", "shieldback")
+MOST_HEARTH = 12
+
+
 def hud_entities():
     e = []
     # Top left: where and when.
     e.append(entity("hud", "Hud", {**styled("hud")}, spatial=False))
-    e.append(entity("status", "Status", {**styled("status", "panel"), **panel(layout=column(0.004))},
+    e.append(entity("status", "Status", {**styled("status"), **clear_shape(100),
+                                         "sindri.ui.layout": column(0.004)},
                     parent="hud", spatial=False))
+    frame(e, "status-frame", "StatusFrame", "status")
     e.append(entity("island-name", "IslandName", {**styled("island-name"), **text("Saltmarsh", TITLE_FONT, 0.05,
                                                                                    122)},
                     parent="status", spatial=False))
     e.append(entity("round-text", "RoundText", {**styled("status-line"), **text("Round 1 of 5", BOLD_FONT, 0.03,
-                                                                                122)},
+                                                                                122, rich=True)},
                     parent="status", spatial=False))
     e.append(entity("tide-text", "TideText", {**styled("status-line", "dim"), **text("Tide 0", BODY_FONT, 0.026,
-                                                                                    122)},
+                                                                                    122, rich=True)},
                     parent="status", spatial=False))
-    # Top right: the Hearth.
-    e.append(entity("hearth", "Hearth", {**styled("hearth", "panel"), **panel(layout=column(0.002, "end"))},
+    # Top right: the Hearth, a lantern for every point it can hold.
+    e.append(entity("hearth", "Hearth", {**styled("hearth"), **clear_shape(100),
+                                         "sindri.ui.layout": column(0.002, "center")},
                     parent="hud", spatial=False))
+    frame(e, "hearth-frame", "HearthFrame", "hearth")
     e.append(entity("hearth-title", "HearthTitle", {**styled("hearth-title"), **text("HEARTH", TITLE_FONT, 0.03,
-                                                                                    122)},
+                                                                                    122, rich=True)},
                     parent="hearth", spatial=False))
-    e.append(entity("hearth-pips", "HearthPips", {**styled("hearth-pips"), **text("", BOLD_FONT, 0.04, 122,
-                                                                                  rich=True)},
+    e.append(entity("hearth-lamps", "HearthLamps", {**styled("hearth-lamps"), **clear_shape(102),
+                                                    "sindri.ui.layout": {"direction": "row", "spacing": 0.002,
+                                                                         "align": "center", "justify": "center"}},
                     parent="hearth", spatial=False))
+    for i in range(MOST_HEARTH):
+        e.append(entity(f"hearth-lamp-{i}", f"HearthLamp{i}", {**styled("hearth-lamp"),
+                                                                **image("textures/lantern-out.png", 120)},
+                        parent="hearth-lamps", disabled=i >= 7, spatial=False))
+        e.append(entity(f"hearth-flame-{i}", f"HearthFlame{i}", {**styled("frame"),
+                                                                  **image("textures/lantern.png", 121)},
+                        parent=f"hearth-lamp-{i}", spatial=False))
     e.append(entity("view-controls", "ViewControls", {
         **styled("view-controls"), "sindri.ui.layout": {"direction": "row", "spacing": 0.01},
         "sindri.ui.shape": {"kind": "rect", "anchor": "center", "layer": 100,
                             "fill": [0, 0, 0, 0], "stroke": [0, 0, 0, 0], "stroke_width": 0.0}},
         parent="hud", spatial=False))
-    button(e, "rotate-left", "RotateLeft", "<", "view-controls", ("rotate",))
+    chip_button(e, "rotate-left", "RotateLeft", "<", "view-controls", ("rotate",))
     # Straight down from above and back; `CameraRig` says which it will do.
-    button(e, "view-top", "ViewTop", "Top", "view-controls", ("rotate", "top"))
-    button(e, "rotate-right", "RotateRight", ">", "view-controls", ("rotate",))
-    # Bottom left: the warden in hand.
-    e.append(entity("card", "Card", {**styled("card", "panel"), **panel(layout=column(0.006))},
+    chip_button(e, "view-top", "ViewTop", "Top", "view-controls", ("rotate", "top"))
+    chip_button(e, "rotate-right", "RotateRight", ">", "view-controls", ("rotate",))
+    # Bottom left: the warden in hand, its portrait beside what it can do.
+    e.append(entity("card", "Card", {**styled("card"), **clear_shape(100),
+                                     "sindri.ui.layout": {"direction": "row", "spacing": 0.012,
+                                                          "align": "start", "justify": "start"}},
                     parent="hud", spatial=False))
+    frame(e, "card-frame", "CardFrame", "card")
+    e.append(entity("card-portrait", "CardPortrait", {**styled("card-portrait"), **clear_shape(102)},
+                    parent="card", spatial=False))
+    for hero in HERO_PORTRAITS:
+        e.append(entity(f"portrait-{hero}", f"Portrait {hero.capitalize()}",
+                        {**styled("frame"), **image(f"textures/portrait-{hero}.png", 110)},
+                        parent="card-portrait", disabled=hero != "bulwark", spatial=False))
+    e.append(entity("card-words", "CardWords", {**styled("card-words"), **clear_shape(102),
+                                                "sindri.ui.layout": column(0.006)},
+                    parent="card", spatial=False))
     for id, name, font, size, classes in (
             ("unit-name", "UnitName", TITLE_FONT, 0.044, ("unit-name",)),
             ("unit-stats", "UnitStats", BOLD_FONT, 0.03, ("unit-stats",)),
@@ -366,20 +416,18 @@ def hud_entities():
             ("unit-hint", "UnitHint", BODY_FONT, 0.024, ("unit-hint",)),
             ("preview", "Preview", BOLD_FONT, 0.026, ("preview",))):
         e.append(entity(id, name, {**styled(*classes), **text("", font, size, 122, rich=True, wrap="word")},
-                        parent="card", spatial=False))
-    # Bottom right: the turn's controls.
+                        parent="card-words", spatial=False))
+    # Bottom right: the turn's controls, as plates the battle lights.
     # A shape that draws nothing, because an anchor belongs to what is drawn:
     # without one the row would be placed by its middle from the screen's.
     e.append(entity("actions", "Actions", {**styled("actions"), "sindri.ui.layout": {
         "direction": "row", "spacing": 0.015, "align": "center", "justify": "end"},
         "sindri.ui.shape": {"kind": "rect", "anchor": "center", "layer": 100, "fill": [0, 0, 0, 0],
                             "stroke": [0, 0, 0, 0], "stroke_width": 0.0}}, parent="hud", spatial=False))
-    button(e, "undo-move", "UndoMove", "Undo move", "actions", ("small",), label_size=0.028)
-    button(e, "rewind", "Rewind", "Rewind (1)", "actions", ("small",), label_size=0.028)
-    e[-1] = entity("rewind-label", "RewindLabel", {**styled("button-label"), **text("Rewind (1)", BOLD_FONT,
-                                                                                    0.028, 132)},
-                   parent="rewind", spatial=False)
-    button(e, "end-turn", "EndTurn", "End turn", "actions", ("primary",), label_size=0.034)
+    plate_button(e, "undo-move", "UndoMove", "Undo move", "actions", "textures/plate-ink.png", ("action",), 130)
+    plate_button(e, "rewind", "Rewind", "Rewind (1)", "actions", "textures/plate-ink.png", ("action",), 130)
+    plate_button(e, "end-turn", "EndTurn", "End turn", "actions", "textures/plate-ember.png", ("action", "end"),
+                 130)
     # The banner across the top for what just happened: words over a soft
     # dark cloud rather than a box, faded in and out by the battle.
     e.append(entity("banner", "Banner", {**styled("banner"), **clear_shape(140),
@@ -532,6 +580,8 @@ def between_screen(e, id, name, button_label, cards=0, per_row=4, kind="boon"):
         wrap = "word" if part == "Text" else "none"
         e.append(entity(f"{id}-{part.lower()}", name + part, {**styled(cls, f"{id}-{part.lower()}"), **text(
             "", font, size, 198, rich=True, wrap=wrap)}, parent=column_id, spatial=False))
+    if id == "route":
+        route_map(e, column_id)
     for row in range((cards + per_row - 1) // per_row):
         row_id = f"{id}-cards-{row}"
         e.append(entity(row_id, f"{name}Cards{row}", {**styled("boons", f"{kind}s"), **clear_shape(198),
@@ -554,8 +604,18 @@ def between_screen(e, id, name, button_label, cards=0, per_row=4, kind="boon"):
                                                       **clear_shape(202),
                                                       "sindri.ui.layout": column(0.01, "center", "center")},
                             parent=card, spatial=False))
-            for part, cls, font, size in (("Mark", "boon-mark", BODY_FONT, 0.05),
-                                          ("Title", "boon-title", TITLE_FONT, 0.04),
+            # Who the card is for: a warden's portrait, or a mark when it is
+            # for the whole crossing. Both lie in one place; the script shows one.
+            face = f"{card}-face"
+            e.append(entity(face, f"{name}{i}Face", {**styled("boon-face", f"{kind}-face"), **clear_shape(203)},
+                            parent=inner, spatial=False))
+            for hero in HERO_PORTRAITS:
+                e.append(entity(f"{face}-{hero}", f"{name}{i} {hero.capitalize()}",
+                                {**styled("frame"), **image(f"textures/portrait-{hero}.png", 204, (1, 1, 1, 0))},
+                                parent=face, disabled=True, spatial=False))
+            e.append(entity(f"{card}-mark", f"{name}{i}Mark", {**styled("boon-mark", f"{kind}-mark"), **text(
+                "", BODY_FONT, 0.05, 205, rich=True)}, parent=face, spatial=False))
+            for part, cls, font, size in (("Title", "boon-title", TITLE_FONT, 0.04),
                                           ("Text", "boon-text", BODY_FONT, 0.026),
                                           ("Key", "boon-key", BOLD_FONT, 0.024)):
                 wrap = "word" if part == "Text" else "none"
@@ -565,6 +625,42 @@ def between_screen(e, id, name, button_label, cards=0, per_row=4, kind="boon"):
     if button_label:
         plate_button(e, id + "-button", name + "Button", button_label, column_id, "textures/plate-ember.png",
                      ("begin",), 200)
+
+
+ROUTE_STEPS = 6
+
+
+def route_map(e, parent):
+    """The road as a strip of stops, a column for each step and a stop for
+    each island on it, joined by short rules. `screens.decay` lights them."""
+    e.append(entity("route-map", "RouteMap", {**styled("route-map"), **clear_shape(198),
+                                              "sindri.ui.layout": {"direction": "row", "spacing": 0.004,
+                                                                   "align": "center", "justify": "center"}},
+                    parent=parent, spatial=False))
+    for step in range(ROUTE_STEPS):
+        if step > 0:
+            e.append(entity(f"route-link-{step}", f"RouteLink{step}", {**styled("route-link"),
+                                                                        **image("textures/white.png", 199,
+                                                                                (1, 1, 1, 0))},
+                            parent="route-map", spatial=False))
+        col = f"route-step-{step}"
+        e.append(entity(col, f"RouteStep{step}", {**styled("route-step"), **clear_shape(199),
+                                                   "sindri.ui.layout": column(0.006, "center", "center")},
+                        parent="route-map", spatial=False))
+        for k in range(2):
+            stop = f"route-stop-{step}-{k}"
+            e.append(entity(stop, f"RouteStop{step}_{k}", {**styled("route-stop"), **clear_shape(200),
+                                                           "sindri.ui.layout": {"direction": "row",
+                                                                                "spacing": 0.004,
+                                                                                "align": "center",
+                                                                                "justify": "start"}},
+                            parent=col, spatial=False))
+            e.append(entity(stop + "-node", f"RouteNode{step}_{k}", {**styled("route-node"),
+                                                                     **image("textures/node.png", 201,
+                                                                             (1, 1, 1, 0))},
+                            parent=stop, spatial=False))
+            e.append(entity(stop + "-name", f"RouteName{step}_{k}", {**styled("route-name"), **text(
+                "", BODY_FONT, 0.022, 202, anchor="center", rich=True, wrap="word")}, parent=stop, spatial=False))
 
 
 def screens():

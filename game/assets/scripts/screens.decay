@@ -11,6 +11,16 @@
 // The most cards a screen has: the muster's six wardens.
 const MOST_CARDS: number = 6.0;
 
+// The route map's stops: six steps of the road, two islands at most to each.
+const ROUTE_STEPS: number = 6.0;
+
+// What a stop on the route map is to this crossing.
+shared const STOP_NONE: number = 0.0;
+shared const STOP_HELD: number = 1.0;
+shared const STOP_PASSED: number = 2.0;
+shared const STOP_OFFERED: number = 3.0;
+shared const STOP_AHEAD: number = 4.0;
+
 script Screens {
     var names: List<String> = ["Muster", "Held", "Upgrade", "Route", "Fallen", "Crossed"];
     var buttons: List<String> = ["Set out", "Onward", "", "", "Back to the shore", "Back to the shore"];
@@ -32,15 +42,25 @@ script Screens {
     var card_marks: List<String> = [];
     var card_colors: List<Color> = [];
     var card_lit: List<bool> = [];
+    // Whose portrait a card shows, as a place in the muster, or -1 for its
+    // mark.
+    var card_faces: List<number> = [];
+    var stop_names: List<String> = [];
+    var stop_states: List<number> = [];
     var hovered: String = "";
 
     fn start() {
+        for i in 0..(ROUTE_STEPS * 2.0) {
+            stop_names.push("");
+            stop_states.push(STOP_NONE);
+        }
         for i in 0..(names.length * MOST_CARDS) {
             card_titles.push("");
             card_texts.push("");
             card_marks.push("");
             card_colors.push(Color(1.0, 1.0, 1.0));
             card_lit.push(false);
+            card_faces.push(-1.0);
         }
     }
 
@@ -61,6 +81,18 @@ script Screens {
         card_titles[at] = title;
         card_texts[at] = text;
         card_colors[at] = color;
+    }
+
+    // An island on the route map, and what it is to this crossing.
+    fn stop(step: number, k: number, name: String, state: number) {
+        stop_names[step * 2.0 + k] = name;
+        stop_states[step * 2.0 + k] = state;
+    }
+
+    // The warden whose portrait a card shows, or -1 to show its mark.
+    fn face(screen: String, index: number, hero: number) {
+        let at = slot(screen, index);
+        if at >= 0.0 { card_faces[at] = hero; }
     }
 
     // A card taken, as the muster's chosen wardens are: lit and edged gold.
@@ -107,6 +139,7 @@ script Screens {
         for k in 0..card_counts[i] {
             draw_card(i, k, ramp_at(c, 0.5 + k * 0.08, 0.95 + k * 0.08));
         }
+        if n == "Route" { draw_route(c); }
         if buttons[i] == "" { return; }
         var plate = ramp_at(c, 0.65, 1.2);
         if !ready_flags[i] { plate *= 0.35; }
@@ -142,12 +175,74 @@ script Screens {
             mark_color = "9fb4bf";
             title_color = "c9d2d6";
         }
-        fade_words(name + "Mark", card_marks[at], mark_color, alpha);
+        let face = card_faces[at];
+        for h in 0..HERO_COUNT {
+            let portrait = World.find(name + " " + kind_name(hero_kind(h)));
+            if portrait == null { continue; }
+            let shown = h == face;
+            if World.is_active(portrait) != shown { World.set_active(portrait, shown); }
+            if shown {
+                var dim = 1.0;
+                if card_counts[i] > 4.0 && !card_lit[at] { dim = 0.6; }
+                portrait.ui_image.tint = Color(dim, dim, dim);
+                portrait.ui_image.tint.a = alpha;
+            }
+        }
+        var mark = card_marks[at];
+        if face >= 0.0 { mark = ""; }
+        fade_words(name + "Mark", mark, mark_color, alpha);
         fade_words(name + "Title", card_titles[at], title_color, alpha);
         fade_words(name + "Text", card_texts[at], "dfe8ec", alpha);
         var key = "" + (k + 1.0);
         if card_lit[at] { key = "◆ " + key; }
         fade_words(name + "Key", key, "9fb4bf", alpha);
+    }
+
+    // The road, a step at a time from the start: islands held in gold, the
+    // fork on offer bright and breathing, the road beyond dim.
+    fn draw_route(c: number) {
+        for step in 0..ROUTE_STEPS {
+            let alpha = ramp_at(c, 0.35 + step * 0.06, 0.8 + step * 0.06);
+            if step > 0.0 {
+                let link = World.find("RouteLink" + step);
+                if link != null {
+                    var tone = 0.35;
+                    if stop_states[step * 2.0] == STOP_HELD { tone = 0.85; }
+                    link.ui_image.tint = Color(0.95 * tone, 0.82 * tone, 0.55 * tone);
+                    link.ui_image.tint.a = alpha;
+                }
+            }
+            for k in 0..2 {
+                let at = step * 2.0 + k;
+                let state = stop_states[at];
+                let stop = World.find("RouteStop" + step + "_" + k);
+                if stop != null && World.is_active(stop) != (state != STOP_NONE) {
+                    World.set_active(stop, state != STOP_NONE);
+                }
+                if state == STOP_NONE { continue; }
+                var tint = Color(0.3, 0.34, 0.38);
+                var words = "6f8089";
+                if state == STOP_HELD {
+                    tint = Color(1.0, 0.82, 0.48);
+                    words = "f3d79a";
+                }
+                if state == STOP_PASSED {
+                    tint = Color(0.26, 0.3, 0.33);
+                    words = "5d6b72";
+                }
+                if state == STOP_OFFERED {
+                    let breath = 0.8 + 0.2 * sin(Time.elapsed * 3.0);
+                    tint = Color(breath, breath * 0.97, breath * 0.9);
+                    words = "ffffff";
+                }
+                let node = World.find("RouteNode" + step + "_" + k);
+                if node != null {
+                    node.ui_image.tint = tint;
+                    node.ui_image.tint.a = alpha;
+                }
+                fade_words("RouteName" + step + "_" + k, stop_names[at], words, alpha);
+            }
+        }
     }
 
     fn tick(name: String, over: bool) {

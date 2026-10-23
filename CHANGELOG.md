@@ -1,5 +1,13 @@
 # Changelog
 
+- Dress Causeway's interface: the HUD's panels are framed in brass with
+  corner brackets, the Hearth is a row of lanterns that go out as it is lost,
+  and the turn's controls are plates that dim while they would do nothing.
+  Each warden has a portrait, drawn by `tools/causeway_art.py` from its own
+  model, on the card of the warden in hand and on its muster, boon and recruit
+  cards. The fork in the road shows the whole route as a map of stops, the
+  islands held in gold and the fork on offer bright.
+
 - Muster Causeway's crossing: three of six wardens are chosen before setting
   out, and where the road enters the burning mountain a fourth joins, chosen
   from those left behind, or none, and the Hearth grows instead. Two new
