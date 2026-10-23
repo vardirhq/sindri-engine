@@ -16,6 +16,8 @@ shared const ORIGIN_X: number = 24.0;
 shared const ORIGIN_Z: number = 24.0;
 // The island behind the title: the Lighthouse at dusk.
 shared const TITLE_ISLAND: number = 3.0;
+// The most lanterns the HUD has for the Hearth.
+const MOST_HEARTH: number = 12.0;
 
 enum Phase { Title, Muster, Arriving, Resolving, Player, Won, Upgrade, Route, Lost, Crossed }
 // What happens once the beats being played have all been shown.
@@ -960,6 +962,7 @@ script Battle {
                 hero_blurb(kind) + "  [color=#9fb4bf]Health " + kind_hp(kind) + ", move " + kind_move(kind) + ".[/color]",
                 hero_color(kind));
             screens.taken("Muster", i, chosen.contains(i));
+            screens.face("Muster", i, i);
         }
         var line = chosen.length + " of 3 chosen";
         if chosen.length == 3.0 { line += ", ready to set out"; }
@@ -1609,8 +1612,10 @@ script Battle {
             screens.card("Route", k, "◆", at.name, at.blurb + "  " + at.rounds + " rounds, "
                 + (waves.length + at.start.length) + " Hollow.", world_color(road));
             screens.taken("Route", k, false);
+            screens.face("Route", k, -1.0);
         }
-        screen_words("Route", "The road forks", "Choose your road", route_map(), "Hearth " + hearth + " of " + max_hearth);
+        show_route_map(screens);
+        screen_words("Route", "The road forks", "Choose your road", "", "Hearth " + hearth + " of " + max_hearth);
         show_screen("Route", true);
     }
 
@@ -1619,29 +1624,27 @@ script Battle {
         return Color(0.55, 0.85, 0.95);
     }
 
-    // The whole road as a line of names: the islands held in gold, the fork
-    // ahead in white, and the steps beyond it dim.
-    fn route_map() -> String {
-        var map = "";
+    // The whole road on the route screen's map: the islands held, the ones
+    // passed by, the fork on offer and the steps beyond it.
+    fn show_route_map(screens: Screens) {
         let here = layer_of(roads[0]);
         for layer in 0..LAYER_COUNT {
-            if layer > 0.0 { map += "[color=#7f8f99]  ›  [/color]"; }
-            if layer < here && layer < path.length {
-                map += "[color=#f3d79a]" + island_def(path[layer]).name + "[/color]";
-                continue;
-            }
-            var names = "";
-            for i in layer_islands(layer) {
-                if names != "" { names += " or "; }
-                names += island_def(i).name;
-            }
-            if layer == here {
-                map += "[color=#ffffff]" + names + "[/color]";
-            } else {
-                map += "[color=#8fa3ad]" + names + "[/color]";
+            let on = layer_islands(layer);
+            for k in 0..2 {
+                if k >= on.length {
+                    screens.stop(layer, k, "", STOP_NONE);
+                    continue;
+                }
+                let index = on[k];
+                var state = STOP_AHEAD;
+                if layer < here {
+                    state = STOP_PASSED;
+                    if layer < path.length && path[layer] == index { state = STOP_HELD; }
+                }
+                if layer == here { state = STOP_OFFERED; }
+                screens.stop(layer, k, island_def(index).name, state);
             }
         }
-        return map;
     }
 
     fn take_road(k: number) {
@@ -1710,6 +1713,9 @@ script Battle {
         for slot in 0..4 {
             let boon = offered[slot];
             screens.card("Upgrade", slot, boon_mark(boon), boon_title(boon), boon_text(boon), boon_color(boon));
+            var hero = -1.0;
+            if boon < 100.0 || (boon >= 200.0 && boon < 300.0) { hero = hero_index(boon_kind(boon)); }
+            screens.face("Upgrade", slot, hero);
         }
         screen_words("Upgrade", kicker, title, "", "Hearth " + hearth + " of " + max_hearth);
     }
@@ -1913,22 +1919,27 @@ script Battle {
         var tide = "Tide " + board.tide;
         if board.molten { tide = "Lava " + board.tide; }
         if rises_this_round(board) {
-            tide += "  —  rising after this round";
+            tide += "  ·  [color=#ffcf7a]rises this round[/color]";
         } else {
-            tide += "  —  steady this round";
+            tide += "  ·  steady";
         }
         set_text("TideText", tide);
-        var hearth_pips = "[color=#ffb347]";
-        for i in 0..board.hearth { hearth_pips += "◆"; }
-        hearth_pips += "[/color][color=#4a3b33]";
-        for i in board.hearth..max_hearth { hearth_pips += "◆"; }
-        set_text("HearthPips", hearth_pips + "[/color]");
-        set_text("RewindLabel", "Rewind (" + rewinds + ")");
+        // A lantern for each point the Hearth can hold, lit for each it has.
+        for i in 0..MOST_HEARTH {
+            let lamp = World.find("HearthLamp" + i);
+            if lamp == null { continue; }
+            let shown = i < max_hearth;
+            if World.is_active(lamp) != shown { World.set_active(lamp, shown); }
+            var lit = 0.0;
+            if i < board.hearth { lit = 1.0; }
+            fade_image("HearthFlame" + i, lit);
+        }
         set_text("Preview", "");
         if selected >= 0.0 {
             let index = unit_index(board, selected);
             if index >= 0.0 {
                 let unit = board.units[index];
+                show_portrait(unit.kind);
                 set_text("UnitName", kind_name(unit.kind));
                 set_text("UnitStats", pip_text(unit) + "   Move " + unit.move);
                 set_text("SkillName", skill_name(unit.kind));
@@ -1958,6 +1969,41 @@ script Battle {
             // An empty card is just a box over the board.
             show_card(false);
         }
+    }
+
+    // The warden in hand's face on the card, and nobody else's.
+    fn show_portrait(kind: Kind) {
+        for i in 0..HERO_COUNT {
+            let hero = hero_kind(i);
+            let portrait = World.find("Portrait " + kind_name(hero));
+            if portrait == null { continue; }
+            let shown = hero == kind;
+            if World.is_active(portrait) != shown { World.set_active(portrait, shown); }
+        }
+    }
+
+    // The turn's plates, lit by whether they would do anything now, and
+    // brighter under the pointer.
+    fn update_actions() {
+        if phase != Phase.Player && phase != Phase.Resolving && phase != Phase.Arriving { return; }
+        let ready = phase == Phase.Player;
+        var can_undo = false;
+        if ready && selected >= 0.0 {
+            let index = unit_index(board, selected);
+            if index >= 0.0 {
+                let unit = board.units[index];
+                can_undo = unit.moved && !unit.acted && unit.from_x >= 0.0;
+            }
+        }
+        plate_action("UndoMove", "Undo move", can_undo);
+        plate_action("Rewind", "Rewind (" + rewinds + ")", ready && rewinds > 0.0);
+        plate_action("EndTurn", "End turn", ready);
+    }
+
+    fn plate_action(name: String, label: String, on: bool) {
+        var alpha = 0.45;
+        if on { alpha = 1.0; }
+        fade_plate(name, label, "fff4dc", alpha);
     }
 
     fn show_card(on: bool) {
@@ -2108,6 +2154,7 @@ script Battle {
         update_sea();
         update_lights();
         update_marker(dt);
+        update_actions();
         match phase {
             // `title.decay` has the title, and says when a crossing begins.
             Phase.Title => {}

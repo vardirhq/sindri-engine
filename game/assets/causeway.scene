@@ -394,8 +394,7 @@
       "components": {
         "weave.style": {
           "classes": [
-            "card",
-            "panel"
+            "card"
           ]
         },
         "sindri.ui.shape": {
@@ -403,19 +402,121 @@
           "anchor": "center",
           "layer": 100,
           "fill": [
-            0.04,
-            0.08,
-            0.11,
-            0.86
+            0,
+            0,
+            0,
+            0
           ],
           "stroke": [
-            0.95,
-            0.8,
-            0.5,
-            0.35
+            0,
+            0,
+            0,
+            0
           ],
-          "stroke_width": 0.004,
-          "corner_radius": 0.012
+          "stroke_width": 0.0,
+          "corner_radius": 0.0
+        },
+        "sindri.ui.layout": {
+          "direction": "row",
+          "spacing": 0.012,
+          "align": "start",
+          "justify": "start"
+        },
+        "sindri.ui.box": {
+          "order": 3
+        }
+      }
+    },
+    {
+      "id": "card-frame",
+      "name": "CardFrame",
+      "parent": "card",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/frame.png",
+          "tint": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "anchor": "center",
+          "layer": 101,
+          "draw": "sliced",
+          "border_scale": 0.0011
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "card-portrait",
+      "name": "CardPortrait",
+      "parent": "card",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "card-portrait"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "anchor": "center",
+          "layer": 102,
+          "fill": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0.0,
+          "corner_radius": 0.0
+        },
+        "sindri.ui.box": {
+          "order": 1
+        }
+      }
+    },
+    {
+      "id": "card-words",
+      "name": "CardWords",
+      "parent": "card",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "card-words"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "anchor": "center",
+          "layer": 102,
+          "fill": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0.0,
+          "corner_radius": 0.0
         },
         "sindri.ui.layout": {
           "direction": "column",
@@ -424,7 +525,7 @@
           "justify": "start"
         },
         "sindri.ui.box": {
-          "order": 3
+          "order": 2
         }
       }
     },
@@ -980,8 +1081,9 @@
       "components": {
         "weave.style": {
           "classes": [
-            "button",
-            "primary"
+            "plate-button",
+            "action",
+            "end"
           ]
         },
         "sindri.ui.button": {
@@ -992,19 +1094,19 @@
           "anchor": "center",
           "layer": 130,
           "fill": [
-            0.1,
-            0.16,
-            0.2,
-            1.0
+            0,
+            0,
+            0,
+            0
           ],
           "stroke": [
-            0.95,
-            0.8,
-            0.5,
-            0.6
+            0,
+            0,
+            0,
+            0
           ],
-          "stroke_width": 0.004,
-          "corner_radius": 0.01
+          "stroke_width": 0.0,
+          "corner_radius": 0.0
         },
         "sindri.ui.box": {
           "order": 2
@@ -1018,16 +1120,18 @@
       "components": {
         "weave.style": {
           "classes": [
-            "button-label"
+            "plate-label",
+            "action",
+            "end"
           ]
         },
         "sindri.ui.text": {
-          "text": "End turn",
+          "text": "",
           "font": "fonts/AlegreyaSans-Bold.ttf",
           "font_size": 0.034,
           "line_height": 0.04148,
           "anchor": "center",
-          "layer": 132,
+          "layer": 133,
           "color": [
             1,
             1,
@@ -1047,10 +1151,37 @@
             ],
             "softness": 0.003
           },
+          "rich": true,
           "bounds": [
             0.0,
             0.0
           ]
+        },
+        "sindri.ui.box": {
+          "order": 1
+        }
+      }
+    },
+    {
+      "id": "end-turn-plate",
+      "name": "EndTurn Plate",
+      "parent": "end-turn",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "plate"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/plate-ember.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 131
         },
         "sindri.ui.box": {
           "order": 0
@@ -1625,8 +1756,7 @@
       "components": {
         "weave.style": {
           "classes": [
-            "hearth",
-            "panel"
+            "hearth"
           ]
         },
         "sindri.ui.shape": {
@@ -1634,24 +1764,24 @@
           "anchor": "center",
           "layer": 100,
           "fill": [
-            0.04,
-            0.08,
-            0.11,
-            0.86
+            0,
+            0,
+            0,
+            0
           ],
           "stroke": [
-            0.95,
-            0.8,
-            0.5,
-            0.35
+            0,
+            0,
+            0,
+            0
           ],
-          "stroke_width": 0.004,
-          "corner_radius": 0.012
+          "stroke_width": 0.0,
+          "corner_radius": 0.0
         },
         "sindri.ui.layout": {
           "direction": "column",
           "spacing": 0.002,
-          "align": "end",
+          "align": "center",
           "justify": "start"
         },
         "sindri.ui.box": {
@@ -1660,49 +1790,699 @@
       }
     },
     {
-      "id": "hearth-pips",
-      "name": "HearthPips",
-      "parent": "hearth",
+      "id": "hearth-flame-0",
+      "name": "HearthFlame0",
+      "parent": "hearth-lamp-0",
       "components": {
         "weave.style": {
           "classes": [
-            "hearth-pips"
+            "frame"
           ]
         },
-        "sindri.ui.text": {
-          "text": "",
-          "font": "fonts/AlegreyaSans-Bold.ttf",
-          "font_size": 0.04,
-          "line_height": 0.0488,
-          "anchor": "center",
-          "layer": 122,
-          "color": [
+        "sindri.ui.image": {
+          "texture": "textures/lantern.png",
+          "tint": [
             1,
             1,
             1,
             1
           ],
-          "shadow": {
-            "offset": [
-              0.0,
-              -0.003
-            ],
-            "color": [
-              0.0,
-              0.02,
-              0.05,
-              0.6
-            ],
-            "softness": 0.003
-          },
-          "rich": true,
-          "bounds": [
-            0.0,
-            0.0
+          "anchor": "center",
+          "layer": 121
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "hearth-flame-1",
+      "name": "HearthFlame1",
+      "parent": "hearth-lamp-1",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
           ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/lantern.png",
+          "tint": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "anchor": "center",
+          "layer": 121
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "hearth-flame-10",
+      "name": "HearthFlame10",
+      "parent": "hearth-lamp-10",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/lantern.png",
+          "tint": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "anchor": "center",
+          "layer": 121
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "hearth-flame-11",
+      "name": "HearthFlame11",
+      "parent": "hearth-lamp-11",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/lantern.png",
+          "tint": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "anchor": "center",
+          "layer": 121
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "hearth-flame-2",
+      "name": "HearthFlame2",
+      "parent": "hearth-lamp-2",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/lantern.png",
+          "tint": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "anchor": "center",
+          "layer": 121
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "hearth-flame-3",
+      "name": "HearthFlame3",
+      "parent": "hearth-lamp-3",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/lantern.png",
+          "tint": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "anchor": "center",
+          "layer": 121
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "hearth-flame-4",
+      "name": "HearthFlame4",
+      "parent": "hearth-lamp-4",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/lantern.png",
+          "tint": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "anchor": "center",
+          "layer": 121
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "hearth-flame-5",
+      "name": "HearthFlame5",
+      "parent": "hearth-lamp-5",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/lantern.png",
+          "tint": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "anchor": "center",
+          "layer": 121
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "hearth-flame-6",
+      "name": "HearthFlame6",
+      "parent": "hearth-lamp-6",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/lantern.png",
+          "tint": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "anchor": "center",
+          "layer": 121
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "hearth-flame-7",
+      "name": "HearthFlame7",
+      "parent": "hearth-lamp-7",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/lantern.png",
+          "tint": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "anchor": "center",
+          "layer": 121
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "hearth-flame-8",
+      "name": "HearthFlame8",
+      "parent": "hearth-lamp-8",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/lantern.png",
+          "tint": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "anchor": "center",
+          "layer": 121
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "hearth-flame-9",
+      "name": "HearthFlame9",
+      "parent": "hearth-lamp-9",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/lantern.png",
+          "tint": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "anchor": "center",
+          "layer": 121
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "hearth-frame",
+      "name": "HearthFrame",
+      "parent": "hearth",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/frame.png",
+          "tint": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "anchor": "center",
+          "layer": 101,
+          "draw": "sliced",
+          "border_scale": 0.0011
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "hearth-lamp-0",
+      "name": "HearthLamp0",
+      "parent": "hearth-lamps",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "hearth-lamp"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/lantern-out.png",
+          "tint": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "anchor": "center",
+          "layer": 120
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "hearth-lamp-1",
+      "name": "HearthLamp1",
+      "parent": "hearth-lamps",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "hearth-lamp"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/lantern-out.png",
+          "tint": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "anchor": "center",
+          "layer": 120
         },
         "sindri.ui.box": {
           "order": 1
+        }
+      }
+    },
+    {
+      "id": "hearth-lamp-10",
+      "name": "HearthLamp10",
+      "parent": "hearth-lamps",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "hearth-lamp"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/lantern-out.png",
+          "tint": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "anchor": "center",
+          "layer": 120
+        },
+        "sindri.ui.box": {
+          "order": 10
+        }
+      },
+      "disabled": true
+    },
+    {
+      "id": "hearth-lamp-11",
+      "name": "HearthLamp11",
+      "parent": "hearth-lamps",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "hearth-lamp"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/lantern-out.png",
+          "tint": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "anchor": "center",
+          "layer": 120
+        },
+        "sindri.ui.box": {
+          "order": 11
+        }
+      },
+      "disabled": true
+    },
+    {
+      "id": "hearth-lamp-2",
+      "name": "HearthLamp2",
+      "parent": "hearth-lamps",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "hearth-lamp"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/lantern-out.png",
+          "tint": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "anchor": "center",
+          "layer": 120
+        },
+        "sindri.ui.box": {
+          "order": 2
+        }
+      }
+    },
+    {
+      "id": "hearth-lamp-3",
+      "name": "HearthLamp3",
+      "parent": "hearth-lamps",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "hearth-lamp"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/lantern-out.png",
+          "tint": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "anchor": "center",
+          "layer": 120
+        },
+        "sindri.ui.box": {
+          "order": 3
+        }
+      }
+    },
+    {
+      "id": "hearth-lamp-4",
+      "name": "HearthLamp4",
+      "parent": "hearth-lamps",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "hearth-lamp"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/lantern-out.png",
+          "tint": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "anchor": "center",
+          "layer": 120
+        },
+        "sindri.ui.box": {
+          "order": 4
+        }
+      }
+    },
+    {
+      "id": "hearth-lamp-5",
+      "name": "HearthLamp5",
+      "parent": "hearth-lamps",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "hearth-lamp"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/lantern-out.png",
+          "tint": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "anchor": "center",
+          "layer": 120
+        },
+        "sindri.ui.box": {
+          "order": 5
+        }
+      }
+    },
+    {
+      "id": "hearth-lamp-6",
+      "name": "HearthLamp6",
+      "parent": "hearth-lamps",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "hearth-lamp"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/lantern-out.png",
+          "tint": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "anchor": "center",
+          "layer": 120
+        },
+        "sindri.ui.box": {
+          "order": 6
+        }
+      }
+    },
+    {
+      "id": "hearth-lamp-7",
+      "name": "HearthLamp7",
+      "parent": "hearth-lamps",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "hearth-lamp"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/lantern-out.png",
+          "tint": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "anchor": "center",
+          "layer": 120
+        },
+        "sindri.ui.box": {
+          "order": 7
+        }
+      },
+      "disabled": true
+    },
+    {
+      "id": "hearth-lamp-8",
+      "name": "HearthLamp8",
+      "parent": "hearth-lamps",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "hearth-lamp"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/lantern-out.png",
+          "tint": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "anchor": "center",
+          "layer": 120
+        },
+        "sindri.ui.box": {
+          "order": 8
+        }
+      },
+      "disabled": true
+    },
+    {
+      "id": "hearth-lamp-9",
+      "name": "HearthLamp9",
+      "parent": "hearth-lamps",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "hearth-lamp"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/lantern-out.png",
+          "tint": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "anchor": "center",
+          "layer": 120
+        },
+        "sindri.ui.box": {
+          "order": 9
+        }
+      },
+      "disabled": true
+    },
+    {
+      "id": "hearth-lamps",
+      "name": "HearthLamps",
+      "parent": "hearth",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "hearth-lamps"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "anchor": "center",
+          "layer": 102,
+          "fill": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0.0,
+          "corner_radius": 0.0
+        },
+        "sindri.ui.layout": {
+          "direction": "row",
+          "spacing": 0.002,
+          "align": "center",
+          "justify": "center"
+        },
+        "sindri.ui.box": {
+          "order": 2
         }
       }
     },
@@ -1742,13 +2522,14 @@
             ],
             "softness": 0.003
           },
+          "rich": true,
           "bounds": [
             0.0,
             0.0
           ]
         },
         "sindri.ui.box": {
-          "order": 0
+          "order": 1
         }
       }
     },
@@ -3421,7 +4202,7 @@
           ]
         },
         "sindri.ui.box": {
-          "order": 0
+          "order": 1
         }
       }
     },
@@ -3725,6 +4506,203 @@
       }
     },
     {
+      "id": "muster-card-0-face",
+      "name": "Muster0Face",
+      "parent": "muster-card-0-words",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "boon-face",
+            "hero-face"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "anchor": "center",
+          "layer": 203,
+          "fill": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0.0,
+          "corner_radius": 0.0
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "muster-card-0-face-bulwark",
+      "name": "Muster0 Bulwark",
+      "parent": "muster-card-0-face",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/portrait-bulwark.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 204
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      },
+      "disabled": true
+    },
+    {
+      "id": "muster-card-0-face-harpooner",
+      "name": "Muster0 Harpooner",
+      "parent": "muster-card-0-face",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/portrait-harpooner.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 204
+        },
+        "sindri.ui.box": {
+          "order": 4
+        }
+      },
+      "disabled": true
+    },
+    {
+      "id": "muster-card-0-face-lamplighter",
+      "name": "Muster0 Lamplighter",
+      "parent": "muster-card-0-face",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/portrait-lamplighter.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 204
+        },
+        "sindri.ui.box": {
+          "order": 2
+        }
+      },
+      "disabled": true
+    },
+    {
+      "id": "muster-card-0-face-mason",
+      "name": "Muster0 Mason",
+      "parent": "muster-card-0-face",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/portrait-mason.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 204
+        },
+        "sindri.ui.box": {
+          "order": 1
+        }
+      },
+      "disabled": true
+    },
+    {
+      "id": "muster-card-0-face-shieldback",
+      "name": "Muster0 Shieldback",
+      "parent": "muster-card-0-face",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/portrait-shieldback.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 204
+        },
+        "sindri.ui.box": {
+          "order": 5
+        }
+      },
+      "disabled": true
+    },
+    {
+      "id": "muster-card-0-face-tidecaller",
+      "name": "Muster0 Tidecaller",
+      "parent": "muster-card-0-face",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/portrait-tidecaller.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 204
+        },
+        "sindri.ui.box": {
+          "order": 3
+        }
+      },
+      "disabled": true
+    },
+    {
       "id": "muster-card-0-key",
       "name": "Muster0Key",
       "parent": "muster-card-0-words",
@@ -3775,7 +4753,7 @@
     {
       "id": "muster-card-0-mark",
       "name": "Muster0Mark",
-      "parent": "muster-card-0-words",
+      "parent": "muster-card-0-face",
       "components": {
         "weave.style": {
           "classes": [
@@ -3789,7 +4767,7 @@
           "font_size": 0.05,
           "line_height": 0.061,
           "anchor": "center",
-          "layer": 204,
+          "layer": 205,
           "color": [
             1,
             1,
@@ -3816,7 +4794,7 @@
           ]
         },
         "sindri.ui.box": {
-          "order": 0
+          "order": 6
         }
       }
     },
@@ -4025,6 +5003,203 @@
       }
     },
     {
+      "id": "muster-card-1-face",
+      "name": "Muster1Face",
+      "parent": "muster-card-1-words",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "boon-face",
+            "hero-face"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "anchor": "center",
+          "layer": 203,
+          "fill": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0.0,
+          "corner_radius": 0.0
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "muster-card-1-face-bulwark",
+      "name": "Muster1 Bulwark",
+      "parent": "muster-card-1-face",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/portrait-bulwark.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 204
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      },
+      "disabled": true
+    },
+    {
+      "id": "muster-card-1-face-harpooner",
+      "name": "Muster1 Harpooner",
+      "parent": "muster-card-1-face",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/portrait-harpooner.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 204
+        },
+        "sindri.ui.box": {
+          "order": 4
+        }
+      },
+      "disabled": true
+    },
+    {
+      "id": "muster-card-1-face-lamplighter",
+      "name": "Muster1 Lamplighter",
+      "parent": "muster-card-1-face",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/portrait-lamplighter.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 204
+        },
+        "sindri.ui.box": {
+          "order": 2
+        }
+      },
+      "disabled": true
+    },
+    {
+      "id": "muster-card-1-face-mason",
+      "name": "Muster1 Mason",
+      "parent": "muster-card-1-face",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/portrait-mason.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 204
+        },
+        "sindri.ui.box": {
+          "order": 1
+        }
+      },
+      "disabled": true
+    },
+    {
+      "id": "muster-card-1-face-shieldback",
+      "name": "Muster1 Shieldback",
+      "parent": "muster-card-1-face",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/portrait-shieldback.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 204
+        },
+        "sindri.ui.box": {
+          "order": 5
+        }
+      },
+      "disabled": true
+    },
+    {
+      "id": "muster-card-1-face-tidecaller",
+      "name": "Muster1 Tidecaller",
+      "parent": "muster-card-1-face",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/portrait-tidecaller.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 204
+        },
+        "sindri.ui.box": {
+          "order": 3
+        }
+      },
+      "disabled": true
+    },
+    {
       "id": "muster-card-1-key",
       "name": "Muster1Key",
       "parent": "muster-card-1-words",
@@ -4075,7 +5250,7 @@
     {
       "id": "muster-card-1-mark",
       "name": "Muster1Mark",
-      "parent": "muster-card-1-words",
+      "parent": "muster-card-1-face",
       "components": {
         "weave.style": {
           "classes": [
@@ -4089,7 +5264,7 @@
           "font_size": 0.05,
           "line_height": 0.061,
           "anchor": "center",
-          "layer": 204,
+          "layer": 205,
           "color": [
             1,
             1,
@@ -4116,7 +5291,7 @@
           ]
         },
         "sindri.ui.box": {
-          "order": 0
+          "order": 6
         }
       }
     },
@@ -4325,6 +5500,203 @@
       }
     },
     {
+      "id": "muster-card-2-face",
+      "name": "Muster2Face",
+      "parent": "muster-card-2-words",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "boon-face",
+            "hero-face"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "anchor": "center",
+          "layer": 203,
+          "fill": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0.0,
+          "corner_radius": 0.0
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "muster-card-2-face-bulwark",
+      "name": "Muster2 Bulwark",
+      "parent": "muster-card-2-face",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/portrait-bulwark.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 204
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      },
+      "disabled": true
+    },
+    {
+      "id": "muster-card-2-face-harpooner",
+      "name": "Muster2 Harpooner",
+      "parent": "muster-card-2-face",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/portrait-harpooner.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 204
+        },
+        "sindri.ui.box": {
+          "order": 4
+        }
+      },
+      "disabled": true
+    },
+    {
+      "id": "muster-card-2-face-lamplighter",
+      "name": "Muster2 Lamplighter",
+      "parent": "muster-card-2-face",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/portrait-lamplighter.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 204
+        },
+        "sindri.ui.box": {
+          "order": 2
+        }
+      },
+      "disabled": true
+    },
+    {
+      "id": "muster-card-2-face-mason",
+      "name": "Muster2 Mason",
+      "parent": "muster-card-2-face",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/portrait-mason.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 204
+        },
+        "sindri.ui.box": {
+          "order": 1
+        }
+      },
+      "disabled": true
+    },
+    {
+      "id": "muster-card-2-face-shieldback",
+      "name": "Muster2 Shieldback",
+      "parent": "muster-card-2-face",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/portrait-shieldback.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 204
+        },
+        "sindri.ui.box": {
+          "order": 5
+        }
+      },
+      "disabled": true
+    },
+    {
+      "id": "muster-card-2-face-tidecaller",
+      "name": "Muster2 Tidecaller",
+      "parent": "muster-card-2-face",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/portrait-tidecaller.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 204
+        },
+        "sindri.ui.box": {
+          "order": 3
+        }
+      },
+      "disabled": true
+    },
+    {
       "id": "muster-card-2-key",
       "name": "Muster2Key",
       "parent": "muster-card-2-words",
@@ -4375,7 +5747,7 @@
     {
       "id": "muster-card-2-mark",
       "name": "Muster2Mark",
-      "parent": "muster-card-2-words",
+      "parent": "muster-card-2-face",
       "components": {
         "weave.style": {
           "classes": [
@@ -4389,7 +5761,7 @@
           "font_size": 0.05,
           "line_height": 0.061,
           "anchor": "center",
-          "layer": 204,
+          "layer": 205,
           "color": [
             1,
             1,
@@ -4416,7 +5788,7 @@
           ]
         },
         "sindri.ui.box": {
-          "order": 0
+          "order": 6
         }
       }
     },
@@ -4625,6 +5997,203 @@
       }
     },
     {
+      "id": "muster-card-3-face",
+      "name": "Muster3Face",
+      "parent": "muster-card-3-words",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "boon-face",
+            "hero-face"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "anchor": "center",
+          "layer": 203,
+          "fill": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0.0,
+          "corner_radius": 0.0
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "muster-card-3-face-bulwark",
+      "name": "Muster3 Bulwark",
+      "parent": "muster-card-3-face",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/portrait-bulwark.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 204
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      },
+      "disabled": true
+    },
+    {
+      "id": "muster-card-3-face-harpooner",
+      "name": "Muster3 Harpooner",
+      "parent": "muster-card-3-face",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/portrait-harpooner.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 204
+        },
+        "sindri.ui.box": {
+          "order": 4
+        }
+      },
+      "disabled": true
+    },
+    {
+      "id": "muster-card-3-face-lamplighter",
+      "name": "Muster3 Lamplighter",
+      "parent": "muster-card-3-face",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/portrait-lamplighter.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 204
+        },
+        "sindri.ui.box": {
+          "order": 2
+        }
+      },
+      "disabled": true
+    },
+    {
+      "id": "muster-card-3-face-mason",
+      "name": "Muster3 Mason",
+      "parent": "muster-card-3-face",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/portrait-mason.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 204
+        },
+        "sindri.ui.box": {
+          "order": 1
+        }
+      },
+      "disabled": true
+    },
+    {
+      "id": "muster-card-3-face-shieldback",
+      "name": "Muster3 Shieldback",
+      "parent": "muster-card-3-face",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/portrait-shieldback.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 204
+        },
+        "sindri.ui.box": {
+          "order": 5
+        }
+      },
+      "disabled": true
+    },
+    {
+      "id": "muster-card-3-face-tidecaller",
+      "name": "Muster3 Tidecaller",
+      "parent": "muster-card-3-face",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/portrait-tidecaller.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 204
+        },
+        "sindri.ui.box": {
+          "order": 3
+        }
+      },
+      "disabled": true
+    },
+    {
       "id": "muster-card-3-key",
       "name": "Muster3Key",
       "parent": "muster-card-3-words",
@@ -4675,7 +6244,7 @@
     {
       "id": "muster-card-3-mark",
       "name": "Muster3Mark",
-      "parent": "muster-card-3-words",
+      "parent": "muster-card-3-face",
       "components": {
         "weave.style": {
           "classes": [
@@ -4689,7 +6258,7 @@
           "font_size": 0.05,
           "line_height": 0.061,
           "anchor": "center",
-          "layer": 204,
+          "layer": 205,
           "color": [
             1,
             1,
@@ -4716,7 +6285,7 @@
           ]
         },
         "sindri.ui.box": {
-          "order": 0
+          "order": 6
         }
       }
     },
@@ -4925,6 +6494,203 @@
       }
     },
     {
+      "id": "muster-card-4-face",
+      "name": "Muster4Face",
+      "parent": "muster-card-4-words",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "boon-face",
+            "hero-face"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "anchor": "center",
+          "layer": 203,
+          "fill": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0.0,
+          "corner_radius": 0.0
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "muster-card-4-face-bulwark",
+      "name": "Muster4 Bulwark",
+      "parent": "muster-card-4-face",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/portrait-bulwark.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 204
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      },
+      "disabled": true
+    },
+    {
+      "id": "muster-card-4-face-harpooner",
+      "name": "Muster4 Harpooner",
+      "parent": "muster-card-4-face",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/portrait-harpooner.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 204
+        },
+        "sindri.ui.box": {
+          "order": 4
+        }
+      },
+      "disabled": true
+    },
+    {
+      "id": "muster-card-4-face-lamplighter",
+      "name": "Muster4 Lamplighter",
+      "parent": "muster-card-4-face",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/portrait-lamplighter.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 204
+        },
+        "sindri.ui.box": {
+          "order": 2
+        }
+      },
+      "disabled": true
+    },
+    {
+      "id": "muster-card-4-face-mason",
+      "name": "Muster4 Mason",
+      "parent": "muster-card-4-face",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/portrait-mason.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 204
+        },
+        "sindri.ui.box": {
+          "order": 1
+        }
+      },
+      "disabled": true
+    },
+    {
+      "id": "muster-card-4-face-shieldback",
+      "name": "Muster4 Shieldback",
+      "parent": "muster-card-4-face",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/portrait-shieldback.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 204
+        },
+        "sindri.ui.box": {
+          "order": 5
+        }
+      },
+      "disabled": true
+    },
+    {
+      "id": "muster-card-4-face-tidecaller",
+      "name": "Muster4 Tidecaller",
+      "parent": "muster-card-4-face",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/portrait-tidecaller.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 204
+        },
+        "sindri.ui.box": {
+          "order": 3
+        }
+      },
+      "disabled": true
+    },
+    {
       "id": "muster-card-4-key",
       "name": "Muster4Key",
       "parent": "muster-card-4-words",
@@ -4975,7 +6741,7 @@
     {
       "id": "muster-card-4-mark",
       "name": "Muster4Mark",
-      "parent": "muster-card-4-words",
+      "parent": "muster-card-4-face",
       "components": {
         "weave.style": {
           "classes": [
@@ -4989,7 +6755,7 @@
           "font_size": 0.05,
           "line_height": 0.061,
           "anchor": "center",
-          "layer": 204,
+          "layer": 205,
           "color": [
             1,
             1,
@@ -5016,7 +6782,7 @@
           ]
         },
         "sindri.ui.box": {
-          "order": 0
+          "order": 6
         }
       }
     },
@@ -5225,6 +6991,203 @@
       }
     },
     {
+      "id": "muster-card-5-face",
+      "name": "Muster5Face",
+      "parent": "muster-card-5-words",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "boon-face",
+            "hero-face"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "anchor": "center",
+          "layer": 203,
+          "fill": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0.0,
+          "corner_radius": 0.0
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "muster-card-5-face-bulwark",
+      "name": "Muster5 Bulwark",
+      "parent": "muster-card-5-face",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/portrait-bulwark.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 204
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      },
+      "disabled": true
+    },
+    {
+      "id": "muster-card-5-face-harpooner",
+      "name": "Muster5 Harpooner",
+      "parent": "muster-card-5-face",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/portrait-harpooner.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 204
+        },
+        "sindri.ui.box": {
+          "order": 4
+        }
+      },
+      "disabled": true
+    },
+    {
+      "id": "muster-card-5-face-lamplighter",
+      "name": "Muster5 Lamplighter",
+      "parent": "muster-card-5-face",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/portrait-lamplighter.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 204
+        },
+        "sindri.ui.box": {
+          "order": 2
+        }
+      },
+      "disabled": true
+    },
+    {
+      "id": "muster-card-5-face-mason",
+      "name": "Muster5 Mason",
+      "parent": "muster-card-5-face",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/portrait-mason.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 204
+        },
+        "sindri.ui.box": {
+          "order": 1
+        }
+      },
+      "disabled": true
+    },
+    {
+      "id": "muster-card-5-face-shieldback",
+      "name": "Muster5 Shieldback",
+      "parent": "muster-card-5-face",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/portrait-shieldback.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 204
+        },
+        "sindri.ui.box": {
+          "order": 5
+        }
+      },
+      "disabled": true
+    },
+    {
+      "id": "muster-card-5-face-tidecaller",
+      "name": "Muster5 Tidecaller",
+      "parent": "muster-card-5-face",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/portrait-tidecaller.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 204
+        },
+        "sindri.ui.box": {
+          "order": 3
+        }
+      },
+      "disabled": true
+    },
+    {
       "id": "muster-card-5-key",
       "name": "Muster5Key",
       "parent": "muster-card-5-words",
@@ -5275,7 +7238,7 @@
     {
       "id": "muster-card-5-mark",
       "name": "Muster5Mark",
-      "parent": "muster-card-5-words",
+      "parent": "muster-card-5-face",
       "components": {
         "weave.style": {
           "classes": [
@@ -5289,7 +7252,7 @@
           "font_size": 0.05,
           "line_height": 0.061,
           "anchor": "center",
-          "layer": 204,
+          "layer": 205,
           "color": [
             1,
             1,
@@ -5316,7 +7279,7 @@
           ]
         },
         "sindri.ui.box": {
-          "order": 0
+          "order": 6
         }
       }
     },
@@ -5927,9 +7890,170 @@
       }
     },
     {
+      "id": "portrait-bulwark",
+      "name": "Portrait Bulwark",
+      "parent": "card-portrait",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/portrait-bulwark.png",
+          "tint": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "anchor": "center",
+          "layer": 110
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "portrait-harpooner",
+      "name": "Portrait Harpooner",
+      "parent": "card-portrait",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/portrait-harpooner.png",
+          "tint": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "anchor": "center",
+          "layer": 110
+        },
+        "sindri.ui.box": {
+          "order": 4
+        }
+      },
+      "disabled": true
+    },
+    {
+      "id": "portrait-lamplighter",
+      "name": "Portrait Lamplighter",
+      "parent": "card-portrait",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/portrait-lamplighter.png",
+          "tint": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "anchor": "center",
+          "layer": 110
+        },
+        "sindri.ui.box": {
+          "order": 2
+        }
+      },
+      "disabled": true
+    },
+    {
+      "id": "portrait-mason",
+      "name": "Portrait Mason",
+      "parent": "card-portrait",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/portrait-mason.png",
+          "tint": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "anchor": "center",
+          "layer": 110
+        },
+        "sindri.ui.box": {
+          "order": 1
+        }
+      },
+      "disabled": true
+    },
+    {
+      "id": "portrait-shieldback",
+      "name": "Portrait Shieldback",
+      "parent": "card-portrait",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/portrait-shieldback.png",
+          "tint": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "anchor": "center",
+          "layer": 110
+        },
+        "sindri.ui.box": {
+          "order": 5
+        }
+      },
+      "disabled": true
+    },
+    {
+      "id": "portrait-tidecaller",
+      "name": "Portrait Tidecaller",
+      "parent": "card-portrait",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/portrait-tidecaller.png",
+          "tint": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "anchor": "center",
+          "layer": 110
+        },
+        "sindri.ui.box": {
+          "order": 3
+        }
+      },
+      "disabled": true
+    },
+    {
       "id": "preview",
       "name": "Preview",
-      "parent": "card",
+      "parent": "card-words",
       "components": {
         "weave.style": {
           "classes": [
@@ -5981,8 +8105,8 @@
       "components": {
         "weave.style": {
           "classes": [
-            "button",
-            "small"
+            "plate-button",
+            "action"
           ]
         },
         "sindri.ui.button": {
@@ -5993,19 +8117,19 @@
           "anchor": "center",
           "layer": 130,
           "fill": [
-            0.1,
-            0.16,
-            0.2,
-            1.0
+            0,
+            0,
+            0,
+            0
           ],
           "stroke": [
-            0.95,
-            0.8,
-            0.5,
-            0.6
+            0,
+            0,
+            0,
+            0
           ],
-          "stroke_width": 0.004,
-          "corner_radius": 0.01
+          "stroke_width": 0.0,
+          "corner_radius": 0.0
         },
         "sindri.ui.box": {
           "order": 1
@@ -6014,21 +8138,22 @@
     },
     {
       "id": "rewind-label",
-      "name": "RewindLabel",
+      "name": "Rewind Label",
       "parent": "rewind",
       "components": {
         "weave.style": {
           "classes": [
-            "button-label"
+            "plate-label",
+            "action"
           ]
         },
         "sindri.ui.text": {
-          "text": "Rewind (1)",
+          "text": "",
           "font": "fonts/AlegreyaSans-Bold.ttf",
-          "font_size": 0.028,
-          "line_height": 0.03416,
+          "font_size": 0.034,
+          "line_height": 0.04148,
           "anchor": "center",
-          "layer": 132,
+          "layer": 133,
           "color": [
             1,
             1,
@@ -6048,10 +8173,37 @@
             ],
             "softness": 0.003
           },
+          "rich": true,
           "bounds": [
             0.0,
             0.0
           ]
+        },
+        "sindri.ui.box": {
+          "order": 1
+        }
+      }
+    },
+    {
+      "id": "rewind-plate",
+      "name": "Rewind Plate",
+      "parent": "rewind",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "plate"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/plate-ink.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 131
         },
         "sindri.ui.box": {
           "order": 0
@@ -6135,7 +8287,7 @@
       "components": {
         "weave.style": {
           "classes": [
-            "button",
+            "chip-button",
             "rotate"
           ]
         },
@@ -6147,19 +8299,47 @@
           "anchor": "center",
           "layer": 130,
           "fill": [
-            0.1,
-            0.16,
-            0.2,
-            1.0
+            0,
+            0,
+            0,
+            0
           ],
           "stroke": [
-            0.95,
-            0.8,
-            0.5,
-            0.6
+            0,
+            0,
+            0,
+            0
           ],
-          "stroke_width": 0.004,
-          "corner_radius": 0.01
+          "stroke_width": 0.0,
+          "corner_radius": 0.0
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "rotate-left-chip",
+      "name": "RotateLeft Chip",
+      "parent": "rotate-left",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/chip.png",
+          "tint": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "anchor": "center",
+          "layer": 131,
+          "draw": "sliced",
+          "border_scale": 0.0014
         },
         "sindri.ui.box": {
           "order": 0
@@ -6179,10 +8359,10 @@
         "sindri.ui.text": {
           "text": "<",
           "font": "fonts/AlegreyaSans-Bold.ttf",
-          "font_size": 0.034,
-          "line_height": 0.04148,
+          "font_size": 0.03,
+          "line_height": 0.0366,
           "anchor": "center",
-          "layer": 132,
+          "layer": 133,
           "color": [
             1,
             1,
@@ -6208,7 +8388,7 @@
           ]
         },
         "sindri.ui.box": {
-          "order": 0
+          "order": 1
         }
       }
     },
@@ -6219,7 +8399,7 @@
       "components": {
         "weave.style": {
           "classes": [
-            "button",
+            "chip-button",
             "rotate"
           ]
         },
@@ -6231,22 +8411,50 @@
           "anchor": "center",
           "layer": 130,
           "fill": [
-            0.1,
-            0.16,
-            0.2,
-            1.0
+            0,
+            0,
+            0,
+            0
           ],
           "stroke": [
-            0.95,
-            0.8,
-            0.5,
-            0.6
+            0,
+            0,
+            0,
+            0
           ],
-          "stroke_width": 0.004,
-          "corner_radius": 0.01
+          "stroke_width": 0.0,
+          "corner_radius": 0.0
         },
         "sindri.ui.box": {
           "order": 2
+        }
+      }
+    },
+    {
+      "id": "rotate-right-chip",
+      "name": "RotateRight Chip",
+      "parent": "rotate-right",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/chip.png",
+          "tint": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "anchor": "center",
+          "layer": 131,
+          "draw": "sliced",
+          "border_scale": 0.0014
+        },
+        "sindri.ui.box": {
+          "order": 0
         }
       }
     },
@@ -6263,10 +8471,10 @@
         "sindri.ui.text": {
           "text": ">",
           "font": "fonts/AlegreyaSans-Bold.ttf",
-          "font_size": 0.034,
-          "line_height": 0.04148,
+          "font_size": 0.03,
+          "line_height": 0.0366,
           "anchor": "center",
-          "layer": 132,
+          "layer": 133,
           "color": [
             1,
             1,
@@ -6292,7 +8500,7 @@
           ]
         },
         "sindri.ui.box": {
-          "order": 0
+          "order": 1
         }
       }
     },
@@ -6332,13 +8540,14 @@
             ],
             "softness": 0.003
           },
+          "rich": true,
           "bounds": [
             0.0,
             0.0
           ]
         },
         "sindri.ui.box": {
-          "order": 1
+          "order": 2
         }
       }
     },
@@ -6421,6 +8630,203 @@
       }
     },
     {
+      "id": "route-card-0-face",
+      "name": "Route0Face",
+      "parent": "route-card-0-words",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "boon-face",
+            "road-face"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "anchor": "center",
+          "layer": 203,
+          "fill": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0.0,
+          "corner_radius": 0.0
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "route-card-0-face-bulwark",
+      "name": "Route0 Bulwark",
+      "parent": "route-card-0-face",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/portrait-bulwark.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 204
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      },
+      "disabled": true
+    },
+    {
+      "id": "route-card-0-face-harpooner",
+      "name": "Route0 Harpooner",
+      "parent": "route-card-0-face",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/portrait-harpooner.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 204
+        },
+        "sindri.ui.box": {
+          "order": 4
+        }
+      },
+      "disabled": true
+    },
+    {
+      "id": "route-card-0-face-lamplighter",
+      "name": "Route0 Lamplighter",
+      "parent": "route-card-0-face",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/portrait-lamplighter.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 204
+        },
+        "sindri.ui.box": {
+          "order": 2
+        }
+      },
+      "disabled": true
+    },
+    {
+      "id": "route-card-0-face-mason",
+      "name": "Route0 Mason",
+      "parent": "route-card-0-face",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/portrait-mason.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 204
+        },
+        "sindri.ui.box": {
+          "order": 1
+        }
+      },
+      "disabled": true
+    },
+    {
+      "id": "route-card-0-face-shieldback",
+      "name": "Route0 Shieldback",
+      "parent": "route-card-0-face",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/portrait-shieldback.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 204
+        },
+        "sindri.ui.box": {
+          "order": 5
+        }
+      },
+      "disabled": true
+    },
+    {
+      "id": "route-card-0-face-tidecaller",
+      "name": "Route0 Tidecaller",
+      "parent": "route-card-0-face",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/portrait-tidecaller.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 204
+        },
+        "sindri.ui.box": {
+          "order": 3
+        }
+      },
+      "disabled": true
+    },
+    {
       "id": "route-card-0-key",
       "name": "Route0Key",
       "parent": "route-card-0-words",
@@ -6471,7 +8877,7 @@
     {
       "id": "route-card-0-mark",
       "name": "Route0Mark",
-      "parent": "route-card-0-words",
+      "parent": "route-card-0-face",
       "components": {
         "weave.style": {
           "classes": [
@@ -6485,7 +8891,7 @@
           "font_size": 0.05,
           "line_height": 0.061,
           "anchor": "center",
-          "layer": 204,
+          "layer": 205,
           "color": [
             1,
             1,
@@ -6512,7 +8918,7 @@
           ]
         },
         "sindri.ui.box": {
-          "order": 0
+          "order": 6
         }
       }
     },
@@ -6721,6 +9127,203 @@
       }
     },
     {
+      "id": "route-card-1-face",
+      "name": "Route1Face",
+      "parent": "route-card-1-words",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "boon-face",
+            "road-face"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "anchor": "center",
+          "layer": 203,
+          "fill": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0.0,
+          "corner_radius": 0.0
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "route-card-1-face-bulwark",
+      "name": "Route1 Bulwark",
+      "parent": "route-card-1-face",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/portrait-bulwark.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 204
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      },
+      "disabled": true
+    },
+    {
+      "id": "route-card-1-face-harpooner",
+      "name": "Route1 Harpooner",
+      "parent": "route-card-1-face",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/portrait-harpooner.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 204
+        },
+        "sindri.ui.box": {
+          "order": 4
+        }
+      },
+      "disabled": true
+    },
+    {
+      "id": "route-card-1-face-lamplighter",
+      "name": "Route1 Lamplighter",
+      "parent": "route-card-1-face",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/portrait-lamplighter.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 204
+        },
+        "sindri.ui.box": {
+          "order": 2
+        }
+      },
+      "disabled": true
+    },
+    {
+      "id": "route-card-1-face-mason",
+      "name": "Route1 Mason",
+      "parent": "route-card-1-face",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/portrait-mason.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 204
+        },
+        "sindri.ui.box": {
+          "order": 1
+        }
+      },
+      "disabled": true
+    },
+    {
+      "id": "route-card-1-face-shieldback",
+      "name": "Route1 Shieldback",
+      "parent": "route-card-1-face",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/portrait-shieldback.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 204
+        },
+        "sindri.ui.box": {
+          "order": 5
+        }
+      },
+      "disabled": true
+    },
+    {
+      "id": "route-card-1-face-tidecaller",
+      "name": "Route1 Tidecaller",
+      "parent": "route-card-1-face",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/portrait-tidecaller.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 204
+        },
+        "sindri.ui.box": {
+          "order": 3
+        }
+      },
+      "disabled": true
+    },
+    {
       "id": "route-card-1-key",
       "name": "Route1Key",
       "parent": "route-card-1-words",
@@ -6771,7 +9374,7 @@
     {
       "id": "route-card-1-mark",
       "name": "Route1Mark",
-      "parent": "route-card-1-words",
+      "parent": "route-card-1-face",
       "components": {
         "weave.style": {
           "classes": [
@@ -6785,7 +9388,7 @@
           "font_size": 0.05,
           "line_height": 0.061,
           "anchor": "center",
-          "layer": 204,
+          "layer": 205,
           "color": [
             1,
             1,
@@ -6812,7 +9415,7 @@
           ]
         },
         "sindri.ui.box": {
-          "order": 0
+          "order": 6
         }
       }
     },
@@ -6991,7 +9594,7 @@
           "justify": "center"
         },
         "sindri.ui.box": {
-          "order": 5
+          "order": 6
         }
       }
     },
@@ -7133,6 +9736,176 @@
         },
         "sindri.ui.box": {
           "order": 0
+        }
+      }
+    },
+    {
+      "id": "route-link-1",
+      "name": "RouteLink1",
+      "parent": "route-map",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "route-link"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/white.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 199
+        },
+        "sindri.ui.box": {
+          "order": 1
+        }
+      }
+    },
+    {
+      "id": "route-link-2",
+      "name": "RouteLink2",
+      "parent": "route-map",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "route-link"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/white.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 199
+        },
+        "sindri.ui.box": {
+          "order": 3
+        }
+      }
+    },
+    {
+      "id": "route-link-3",
+      "name": "RouteLink3",
+      "parent": "route-map",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "route-link"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/white.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 199
+        },
+        "sindri.ui.box": {
+          "order": 5
+        }
+      }
+    },
+    {
+      "id": "route-link-4",
+      "name": "RouteLink4",
+      "parent": "route-map",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "route-link"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/white.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 199
+        },
+        "sindri.ui.box": {
+          "order": 7
+        }
+      }
+    },
+    {
+      "id": "route-link-5",
+      "name": "RouteLink5",
+      "parent": "route-map",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "route-link"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/white.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 199
+        },
+        "sindri.ui.box": {
+          "order": 9
+        }
+      }
+    },
+    {
+      "id": "route-map",
+      "name": "RouteMap",
+      "parent": "route-column",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "route-map"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "anchor": "center",
+          "layer": 198,
+          "fill": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0.0,
+          "corner_radius": 0.0
+        },
+        "sindri.ui.layout": {
+          "direction": "row",
+          "spacing": 0.004,
+          "align": "center",
+          "justify": "center"
+        },
+        "sindri.ui.box": {
+          "order": 5
         }
       }
     },
@@ -7281,6 +10054,1614 @@
         },
         "sindri.ui.box": {
           "order": 4
+        }
+      }
+    },
+    {
+      "id": "route-step-0",
+      "name": "RouteStep0",
+      "parent": "route-map",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "route-step"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "anchor": "center",
+          "layer": 199,
+          "fill": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0.0,
+          "corner_radius": 0.0
+        },
+        "sindri.ui.layout": {
+          "direction": "column",
+          "spacing": 0.006,
+          "align": "center",
+          "justify": "center"
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "route-step-1",
+      "name": "RouteStep1",
+      "parent": "route-map",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "route-step"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "anchor": "center",
+          "layer": 199,
+          "fill": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0.0,
+          "corner_radius": 0.0
+        },
+        "sindri.ui.layout": {
+          "direction": "column",
+          "spacing": 0.006,
+          "align": "center",
+          "justify": "center"
+        },
+        "sindri.ui.box": {
+          "order": 2
+        }
+      }
+    },
+    {
+      "id": "route-step-2",
+      "name": "RouteStep2",
+      "parent": "route-map",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "route-step"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "anchor": "center",
+          "layer": 199,
+          "fill": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0.0,
+          "corner_radius": 0.0
+        },
+        "sindri.ui.layout": {
+          "direction": "column",
+          "spacing": 0.006,
+          "align": "center",
+          "justify": "center"
+        },
+        "sindri.ui.box": {
+          "order": 4
+        }
+      }
+    },
+    {
+      "id": "route-step-3",
+      "name": "RouteStep3",
+      "parent": "route-map",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "route-step"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "anchor": "center",
+          "layer": 199,
+          "fill": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0.0,
+          "corner_radius": 0.0
+        },
+        "sindri.ui.layout": {
+          "direction": "column",
+          "spacing": 0.006,
+          "align": "center",
+          "justify": "center"
+        },
+        "sindri.ui.box": {
+          "order": 6
+        }
+      }
+    },
+    {
+      "id": "route-step-4",
+      "name": "RouteStep4",
+      "parent": "route-map",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "route-step"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "anchor": "center",
+          "layer": 199,
+          "fill": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0.0,
+          "corner_radius": 0.0
+        },
+        "sindri.ui.layout": {
+          "direction": "column",
+          "spacing": 0.006,
+          "align": "center",
+          "justify": "center"
+        },
+        "sindri.ui.box": {
+          "order": 8
+        }
+      }
+    },
+    {
+      "id": "route-step-5",
+      "name": "RouteStep5",
+      "parent": "route-map",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "route-step"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "anchor": "center",
+          "layer": 199,
+          "fill": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0.0,
+          "corner_radius": 0.0
+        },
+        "sindri.ui.layout": {
+          "direction": "column",
+          "spacing": 0.006,
+          "align": "center",
+          "justify": "center"
+        },
+        "sindri.ui.box": {
+          "order": 10
+        }
+      }
+    },
+    {
+      "id": "route-stop-0-0",
+      "name": "RouteStop0_0",
+      "parent": "route-step-0",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "route-stop"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "anchor": "center",
+          "layer": 200,
+          "fill": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0.0,
+          "corner_radius": 0.0
+        },
+        "sindri.ui.layout": {
+          "direction": "row",
+          "spacing": 0.004,
+          "align": "center",
+          "justify": "start"
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "route-stop-0-0-name",
+      "name": "RouteName0_0",
+      "parent": "route-stop-0-0",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "route-name"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "",
+          "font": "fonts/AlegreyaSans-Medium.ttf",
+          "font_size": 0.022,
+          "line_height": 0.02684,
+          "anchor": "center",
+          "layer": 202,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "rich": true,
+          "bounds": [
+            0.0,
+            0.0
+          ],
+          "wrap": "word"
+        },
+        "sindri.ui.box": {
+          "order": 1
+        }
+      }
+    },
+    {
+      "id": "route-stop-0-0-node",
+      "name": "RouteNode0_0",
+      "parent": "route-stop-0-0",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "route-node"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/node.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 201
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "route-stop-0-1",
+      "name": "RouteStop0_1",
+      "parent": "route-step-0",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "route-stop"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "anchor": "center",
+          "layer": 200,
+          "fill": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0.0,
+          "corner_radius": 0.0
+        },
+        "sindri.ui.layout": {
+          "direction": "row",
+          "spacing": 0.004,
+          "align": "center",
+          "justify": "start"
+        },
+        "sindri.ui.box": {
+          "order": 1
+        }
+      }
+    },
+    {
+      "id": "route-stop-0-1-name",
+      "name": "RouteName0_1",
+      "parent": "route-stop-0-1",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "route-name"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "",
+          "font": "fonts/AlegreyaSans-Medium.ttf",
+          "font_size": 0.022,
+          "line_height": 0.02684,
+          "anchor": "center",
+          "layer": 202,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "rich": true,
+          "bounds": [
+            0.0,
+            0.0
+          ],
+          "wrap": "word"
+        },
+        "sindri.ui.box": {
+          "order": 1
+        }
+      }
+    },
+    {
+      "id": "route-stop-0-1-node",
+      "name": "RouteNode0_1",
+      "parent": "route-stop-0-1",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "route-node"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/node.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 201
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "route-stop-1-0",
+      "name": "RouteStop1_0",
+      "parent": "route-step-1",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "route-stop"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "anchor": "center",
+          "layer": 200,
+          "fill": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0.0,
+          "corner_radius": 0.0
+        },
+        "sindri.ui.layout": {
+          "direction": "row",
+          "spacing": 0.004,
+          "align": "center",
+          "justify": "start"
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "route-stop-1-0-name",
+      "name": "RouteName1_0",
+      "parent": "route-stop-1-0",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "route-name"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "",
+          "font": "fonts/AlegreyaSans-Medium.ttf",
+          "font_size": 0.022,
+          "line_height": 0.02684,
+          "anchor": "center",
+          "layer": 202,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "rich": true,
+          "bounds": [
+            0.0,
+            0.0
+          ],
+          "wrap": "word"
+        },
+        "sindri.ui.box": {
+          "order": 1
+        }
+      }
+    },
+    {
+      "id": "route-stop-1-0-node",
+      "name": "RouteNode1_0",
+      "parent": "route-stop-1-0",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "route-node"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/node.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 201
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "route-stop-1-1",
+      "name": "RouteStop1_1",
+      "parent": "route-step-1",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "route-stop"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "anchor": "center",
+          "layer": 200,
+          "fill": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0.0,
+          "corner_radius": 0.0
+        },
+        "sindri.ui.layout": {
+          "direction": "row",
+          "spacing": 0.004,
+          "align": "center",
+          "justify": "start"
+        },
+        "sindri.ui.box": {
+          "order": 1
+        }
+      }
+    },
+    {
+      "id": "route-stop-1-1-name",
+      "name": "RouteName1_1",
+      "parent": "route-stop-1-1",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "route-name"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "",
+          "font": "fonts/AlegreyaSans-Medium.ttf",
+          "font_size": 0.022,
+          "line_height": 0.02684,
+          "anchor": "center",
+          "layer": 202,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "rich": true,
+          "bounds": [
+            0.0,
+            0.0
+          ],
+          "wrap": "word"
+        },
+        "sindri.ui.box": {
+          "order": 1
+        }
+      }
+    },
+    {
+      "id": "route-stop-1-1-node",
+      "name": "RouteNode1_1",
+      "parent": "route-stop-1-1",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "route-node"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/node.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 201
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "route-stop-2-0",
+      "name": "RouteStop2_0",
+      "parent": "route-step-2",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "route-stop"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "anchor": "center",
+          "layer": 200,
+          "fill": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0.0,
+          "corner_radius": 0.0
+        },
+        "sindri.ui.layout": {
+          "direction": "row",
+          "spacing": 0.004,
+          "align": "center",
+          "justify": "start"
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "route-stop-2-0-name",
+      "name": "RouteName2_0",
+      "parent": "route-stop-2-0",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "route-name"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "",
+          "font": "fonts/AlegreyaSans-Medium.ttf",
+          "font_size": 0.022,
+          "line_height": 0.02684,
+          "anchor": "center",
+          "layer": 202,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "rich": true,
+          "bounds": [
+            0.0,
+            0.0
+          ],
+          "wrap": "word"
+        },
+        "sindri.ui.box": {
+          "order": 1
+        }
+      }
+    },
+    {
+      "id": "route-stop-2-0-node",
+      "name": "RouteNode2_0",
+      "parent": "route-stop-2-0",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "route-node"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/node.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 201
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "route-stop-2-1",
+      "name": "RouteStop2_1",
+      "parent": "route-step-2",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "route-stop"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "anchor": "center",
+          "layer": 200,
+          "fill": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0.0,
+          "corner_radius": 0.0
+        },
+        "sindri.ui.layout": {
+          "direction": "row",
+          "spacing": 0.004,
+          "align": "center",
+          "justify": "start"
+        },
+        "sindri.ui.box": {
+          "order": 1
+        }
+      }
+    },
+    {
+      "id": "route-stop-2-1-name",
+      "name": "RouteName2_1",
+      "parent": "route-stop-2-1",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "route-name"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "",
+          "font": "fonts/AlegreyaSans-Medium.ttf",
+          "font_size": 0.022,
+          "line_height": 0.02684,
+          "anchor": "center",
+          "layer": 202,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "rich": true,
+          "bounds": [
+            0.0,
+            0.0
+          ],
+          "wrap": "word"
+        },
+        "sindri.ui.box": {
+          "order": 1
+        }
+      }
+    },
+    {
+      "id": "route-stop-2-1-node",
+      "name": "RouteNode2_1",
+      "parent": "route-stop-2-1",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "route-node"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/node.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 201
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "route-stop-3-0",
+      "name": "RouteStop3_0",
+      "parent": "route-step-3",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "route-stop"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "anchor": "center",
+          "layer": 200,
+          "fill": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0.0,
+          "corner_radius": 0.0
+        },
+        "sindri.ui.layout": {
+          "direction": "row",
+          "spacing": 0.004,
+          "align": "center",
+          "justify": "start"
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "route-stop-3-0-name",
+      "name": "RouteName3_0",
+      "parent": "route-stop-3-0",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "route-name"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "",
+          "font": "fonts/AlegreyaSans-Medium.ttf",
+          "font_size": 0.022,
+          "line_height": 0.02684,
+          "anchor": "center",
+          "layer": 202,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "rich": true,
+          "bounds": [
+            0.0,
+            0.0
+          ],
+          "wrap": "word"
+        },
+        "sindri.ui.box": {
+          "order": 1
+        }
+      }
+    },
+    {
+      "id": "route-stop-3-0-node",
+      "name": "RouteNode3_0",
+      "parent": "route-stop-3-0",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "route-node"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/node.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 201
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "route-stop-3-1",
+      "name": "RouteStop3_1",
+      "parent": "route-step-3",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "route-stop"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "anchor": "center",
+          "layer": 200,
+          "fill": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0.0,
+          "corner_radius": 0.0
+        },
+        "sindri.ui.layout": {
+          "direction": "row",
+          "spacing": 0.004,
+          "align": "center",
+          "justify": "start"
+        },
+        "sindri.ui.box": {
+          "order": 1
+        }
+      }
+    },
+    {
+      "id": "route-stop-3-1-name",
+      "name": "RouteName3_1",
+      "parent": "route-stop-3-1",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "route-name"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "",
+          "font": "fonts/AlegreyaSans-Medium.ttf",
+          "font_size": 0.022,
+          "line_height": 0.02684,
+          "anchor": "center",
+          "layer": 202,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "rich": true,
+          "bounds": [
+            0.0,
+            0.0
+          ],
+          "wrap": "word"
+        },
+        "sindri.ui.box": {
+          "order": 1
+        }
+      }
+    },
+    {
+      "id": "route-stop-3-1-node",
+      "name": "RouteNode3_1",
+      "parent": "route-stop-3-1",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "route-node"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/node.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 201
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "route-stop-4-0",
+      "name": "RouteStop4_0",
+      "parent": "route-step-4",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "route-stop"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "anchor": "center",
+          "layer": 200,
+          "fill": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0.0,
+          "corner_radius": 0.0
+        },
+        "sindri.ui.layout": {
+          "direction": "row",
+          "spacing": 0.004,
+          "align": "center",
+          "justify": "start"
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "route-stop-4-0-name",
+      "name": "RouteName4_0",
+      "parent": "route-stop-4-0",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "route-name"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "",
+          "font": "fonts/AlegreyaSans-Medium.ttf",
+          "font_size": 0.022,
+          "line_height": 0.02684,
+          "anchor": "center",
+          "layer": 202,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "rich": true,
+          "bounds": [
+            0.0,
+            0.0
+          ],
+          "wrap": "word"
+        },
+        "sindri.ui.box": {
+          "order": 1
+        }
+      }
+    },
+    {
+      "id": "route-stop-4-0-node",
+      "name": "RouteNode4_0",
+      "parent": "route-stop-4-0",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "route-node"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/node.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 201
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "route-stop-4-1",
+      "name": "RouteStop4_1",
+      "parent": "route-step-4",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "route-stop"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "anchor": "center",
+          "layer": 200,
+          "fill": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0.0,
+          "corner_radius": 0.0
+        },
+        "sindri.ui.layout": {
+          "direction": "row",
+          "spacing": 0.004,
+          "align": "center",
+          "justify": "start"
+        },
+        "sindri.ui.box": {
+          "order": 1
+        }
+      }
+    },
+    {
+      "id": "route-stop-4-1-name",
+      "name": "RouteName4_1",
+      "parent": "route-stop-4-1",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "route-name"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "",
+          "font": "fonts/AlegreyaSans-Medium.ttf",
+          "font_size": 0.022,
+          "line_height": 0.02684,
+          "anchor": "center",
+          "layer": 202,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "rich": true,
+          "bounds": [
+            0.0,
+            0.0
+          ],
+          "wrap": "word"
+        },
+        "sindri.ui.box": {
+          "order": 1
+        }
+      }
+    },
+    {
+      "id": "route-stop-4-1-node",
+      "name": "RouteNode4_1",
+      "parent": "route-stop-4-1",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "route-node"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/node.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 201
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "route-stop-5-0",
+      "name": "RouteStop5_0",
+      "parent": "route-step-5",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "route-stop"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "anchor": "center",
+          "layer": 200,
+          "fill": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0.0,
+          "corner_radius": 0.0
+        },
+        "sindri.ui.layout": {
+          "direction": "row",
+          "spacing": 0.004,
+          "align": "center",
+          "justify": "start"
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "route-stop-5-0-name",
+      "name": "RouteName5_0",
+      "parent": "route-stop-5-0",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "route-name"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "",
+          "font": "fonts/AlegreyaSans-Medium.ttf",
+          "font_size": 0.022,
+          "line_height": 0.02684,
+          "anchor": "center",
+          "layer": 202,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "rich": true,
+          "bounds": [
+            0.0,
+            0.0
+          ],
+          "wrap": "word"
+        },
+        "sindri.ui.box": {
+          "order": 1
+        }
+      }
+    },
+    {
+      "id": "route-stop-5-0-node",
+      "name": "RouteNode5_0",
+      "parent": "route-stop-5-0",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "route-node"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/node.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 201
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "route-stop-5-1",
+      "name": "RouteStop5_1",
+      "parent": "route-step-5",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "route-stop"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "anchor": "center",
+          "layer": 200,
+          "fill": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0.0,
+          "corner_radius": 0.0
+        },
+        "sindri.ui.layout": {
+          "direction": "row",
+          "spacing": 0.004,
+          "align": "center",
+          "justify": "start"
+        },
+        "sindri.ui.box": {
+          "order": 1
+        }
+      }
+    },
+    {
+      "id": "route-stop-5-1-name",
+      "name": "RouteName5_1",
+      "parent": "route-stop-5-1",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "route-name"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "",
+          "font": "fonts/AlegreyaSans-Medium.ttf",
+          "font_size": 0.022,
+          "line_height": 0.02684,
+          "anchor": "center",
+          "layer": 202,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "rich": true,
+          "bounds": [
+            0.0,
+            0.0
+          ],
+          "wrap": "word"
+        },
+        "sindri.ui.box": {
+          "order": 1
+        }
+      }
+    },
+    {
+      "id": "route-stop-5-1-node",
+      "name": "RouteNode5_1",
+      "parent": "route-stop-5-1",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "route-node"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/node.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 201
+        },
+        "sindri.ui.box": {
+          "order": 0
         }
       }
     },
@@ -7465,7 +11846,7 @@
     {
       "id": "skill-name",
       "name": "SkillName",
-      "parent": "card",
+      "parent": "card-words",
       "components": {
         "weave.style": {
           "classes": [
@@ -7513,7 +11894,7 @@
     {
       "id": "skill-text",
       "name": "SkillText",
-      "parent": "card",
+      "parent": "card-words",
       "components": {
         "weave.style": {
           "classes": [
@@ -7565,8 +11946,7 @@
       "components": {
         "weave.style": {
           "classes": [
-            "status",
-            "panel"
+            "status"
           ]
         },
         "sindri.ui.shape": {
@@ -7574,25 +11954,53 @@
           "anchor": "center",
           "layer": 100,
           "fill": [
-            0.04,
-            0.08,
-            0.11,
-            0.86
+            0,
+            0,
+            0,
+            0
           ],
           "stroke": [
-            0.95,
-            0.8,
-            0.5,
-            0.35
+            0,
+            0,
+            0,
+            0
           ],
-          "stroke_width": 0.004,
-          "corner_radius": 0.012
+          "stroke_width": 0.0,
+          "corner_radius": 0.0
         },
         "sindri.ui.layout": {
           "direction": "column",
           "spacing": 0.004,
           "align": "start",
           "justify": "start"
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "status-frame",
+      "name": "StatusFrame",
+      "parent": "status",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/frame.png",
+          "tint": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "anchor": "center",
+          "layer": 101,
+          "draw": "sliced",
+          "border_scale": 0.0011
         },
         "sindri.ui.box": {
           "order": 0
@@ -7669,13 +12077,14 @@
             ],
             "softness": 0.003
           },
+          "rich": true,
           "bounds": [
             0.0,
             0.0
           ]
         },
         "sindri.ui.box": {
-          "order": 2
+          "order": 3
         }
       }
     },
@@ -8043,8 +12452,8 @@
       "components": {
         "weave.style": {
           "classes": [
-            "button",
-            "small"
+            "plate-button",
+            "action"
           ]
         },
         "sindri.ui.button": {
@@ -8055,19 +12464,19 @@
           "anchor": "center",
           "layer": 130,
           "fill": [
-            0.1,
-            0.16,
-            0.2,
-            1.0
+            0,
+            0,
+            0,
+            0
           ],
           "stroke": [
-            0.95,
-            0.8,
-            0.5,
-            0.6
+            0,
+            0,
+            0,
+            0
           ],
-          "stroke_width": 0.004,
-          "corner_radius": 0.01
+          "stroke_width": 0.0,
+          "corner_radius": 0.0
         },
         "sindri.ui.box": {
           "order": 0
@@ -8081,16 +12490,17 @@
       "components": {
         "weave.style": {
           "classes": [
-            "button-label"
+            "plate-label",
+            "action"
           ]
         },
         "sindri.ui.text": {
-          "text": "Undo move",
+          "text": "",
           "font": "fonts/AlegreyaSans-Bold.ttf",
-          "font_size": 0.028,
-          "line_height": 0.03416,
+          "font_size": 0.034,
+          "line_height": 0.04148,
           "anchor": "center",
-          "layer": 132,
+          "layer": 133,
           "color": [
             1,
             1,
@@ -8110,10 +12520,37 @@
             ],
             "softness": 0.003
           },
+          "rich": true,
           "bounds": [
             0.0,
             0.0
           ]
+        },
+        "sindri.ui.box": {
+          "order": 1
+        }
+      }
+    },
+    {
+      "id": "undo-move-plate",
+      "name": "UndoMove Plate",
+      "parent": "undo-move",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "plate"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/plate-ink.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 131
         },
         "sindri.ui.box": {
           "order": 0
@@ -8123,7 +12560,7 @@
     {
       "id": "unit-hint",
       "name": "UnitHint",
-      "parent": "card",
+      "parent": "card-words",
       "components": {
         "weave.style": {
           "classes": [
@@ -8171,7 +12608,7 @@
     {
       "id": "unit-name",
       "name": "UnitName",
-      "parent": "card",
+      "parent": "card-words",
       "components": {
         "weave.style": {
           "classes": [
@@ -8219,7 +12656,7 @@
     {
       "id": "unit-stats",
       "name": "UnitStats",
-      "parent": "card",
+      "parent": "card-words",
       "components": {
         "weave.style": {
           "classes": [
@@ -8343,6 +12780,203 @@
       }
     },
     {
+      "id": "upgrade-card-0-face",
+      "name": "Upgrade0Face",
+      "parent": "upgrade-card-0-words",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "boon-face",
+            "boon-face"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "anchor": "center",
+          "layer": 203,
+          "fill": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0.0,
+          "corner_radius": 0.0
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "upgrade-card-0-face-bulwark",
+      "name": "Upgrade0 Bulwark",
+      "parent": "upgrade-card-0-face",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/portrait-bulwark.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 204
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      },
+      "disabled": true
+    },
+    {
+      "id": "upgrade-card-0-face-harpooner",
+      "name": "Upgrade0 Harpooner",
+      "parent": "upgrade-card-0-face",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/portrait-harpooner.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 204
+        },
+        "sindri.ui.box": {
+          "order": 4
+        }
+      },
+      "disabled": true
+    },
+    {
+      "id": "upgrade-card-0-face-lamplighter",
+      "name": "Upgrade0 Lamplighter",
+      "parent": "upgrade-card-0-face",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/portrait-lamplighter.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 204
+        },
+        "sindri.ui.box": {
+          "order": 2
+        }
+      },
+      "disabled": true
+    },
+    {
+      "id": "upgrade-card-0-face-mason",
+      "name": "Upgrade0 Mason",
+      "parent": "upgrade-card-0-face",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/portrait-mason.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 204
+        },
+        "sindri.ui.box": {
+          "order": 1
+        }
+      },
+      "disabled": true
+    },
+    {
+      "id": "upgrade-card-0-face-shieldback",
+      "name": "Upgrade0 Shieldback",
+      "parent": "upgrade-card-0-face",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/portrait-shieldback.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 204
+        },
+        "sindri.ui.box": {
+          "order": 5
+        }
+      },
+      "disabled": true
+    },
+    {
+      "id": "upgrade-card-0-face-tidecaller",
+      "name": "Upgrade0 Tidecaller",
+      "parent": "upgrade-card-0-face",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/portrait-tidecaller.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 204
+        },
+        "sindri.ui.box": {
+          "order": 3
+        }
+      },
+      "disabled": true
+    },
+    {
       "id": "upgrade-card-0-key",
       "name": "Upgrade0Key",
       "parent": "upgrade-card-0-words",
@@ -8393,7 +13027,7 @@
     {
       "id": "upgrade-card-0-mark",
       "name": "Upgrade0Mark",
-      "parent": "upgrade-card-0-words",
+      "parent": "upgrade-card-0-face",
       "components": {
         "weave.style": {
           "classes": [
@@ -8407,7 +13041,7 @@
           "font_size": 0.05,
           "line_height": 0.061,
           "anchor": "center",
-          "layer": 204,
+          "layer": 205,
           "color": [
             1,
             1,
@@ -8434,7 +13068,7 @@
           ]
         },
         "sindri.ui.box": {
-          "order": 0
+          "order": 6
         }
       }
     },
@@ -8643,6 +13277,203 @@
       }
     },
     {
+      "id": "upgrade-card-1-face",
+      "name": "Upgrade1Face",
+      "parent": "upgrade-card-1-words",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "boon-face",
+            "boon-face"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "anchor": "center",
+          "layer": 203,
+          "fill": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0.0,
+          "corner_radius": 0.0
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "upgrade-card-1-face-bulwark",
+      "name": "Upgrade1 Bulwark",
+      "parent": "upgrade-card-1-face",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/portrait-bulwark.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 204
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      },
+      "disabled": true
+    },
+    {
+      "id": "upgrade-card-1-face-harpooner",
+      "name": "Upgrade1 Harpooner",
+      "parent": "upgrade-card-1-face",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/portrait-harpooner.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 204
+        },
+        "sindri.ui.box": {
+          "order": 4
+        }
+      },
+      "disabled": true
+    },
+    {
+      "id": "upgrade-card-1-face-lamplighter",
+      "name": "Upgrade1 Lamplighter",
+      "parent": "upgrade-card-1-face",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/portrait-lamplighter.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 204
+        },
+        "sindri.ui.box": {
+          "order": 2
+        }
+      },
+      "disabled": true
+    },
+    {
+      "id": "upgrade-card-1-face-mason",
+      "name": "Upgrade1 Mason",
+      "parent": "upgrade-card-1-face",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/portrait-mason.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 204
+        },
+        "sindri.ui.box": {
+          "order": 1
+        }
+      },
+      "disabled": true
+    },
+    {
+      "id": "upgrade-card-1-face-shieldback",
+      "name": "Upgrade1 Shieldback",
+      "parent": "upgrade-card-1-face",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/portrait-shieldback.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 204
+        },
+        "sindri.ui.box": {
+          "order": 5
+        }
+      },
+      "disabled": true
+    },
+    {
+      "id": "upgrade-card-1-face-tidecaller",
+      "name": "Upgrade1 Tidecaller",
+      "parent": "upgrade-card-1-face",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/portrait-tidecaller.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 204
+        },
+        "sindri.ui.box": {
+          "order": 3
+        }
+      },
+      "disabled": true
+    },
+    {
       "id": "upgrade-card-1-key",
       "name": "Upgrade1Key",
       "parent": "upgrade-card-1-words",
@@ -8693,7 +13524,7 @@
     {
       "id": "upgrade-card-1-mark",
       "name": "Upgrade1Mark",
-      "parent": "upgrade-card-1-words",
+      "parent": "upgrade-card-1-face",
       "components": {
         "weave.style": {
           "classes": [
@@ -8707,7 +13538,7 @@
           "font_size": 0.05,
           "line_height": 0.061,
           "anchor": "center",
-          "layer": 204,
+          "layer": 205,
           "color": [
             1,
             1,
@@ -8734,7 +13565,7 @@
           ]
         },
         "sindri.ui.box": {
-          "order": 0
+          "order": 6
         }
       }
     },
@@ -8943,6 +13774,203 @@
       }
     },
     {
+      "id": "upgrade-card-2-face",
+      "name": "Upgrade2Face",
+      "parent": "upgrade-card-2-words",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "boon-face",
+            "boon-face"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "anchor": "center",
+          "layer": 203,
+          "fill": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0.0,
+          "corner_radius": 0.0
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "upgrade-card-2-face-bulwark",
+      "name": "Upgrade2 Bulwark",
+      "parent": "upgrade-card-2-face",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/portrait-bulwark.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 204
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      },
+      "disabled": true
+    },
+    {
+      "id": "upgrade-card-2-face-harpooner",
+      "name": "Upgrade2 Harpooner",
+      "parent": "upgrade-card-2-face",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/portrait-harpooner.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 204
+        },
+        "sindri.ui.box": {
+          "order": 4
+        }
+      },
+      "disabled": true
+    },
+    {
+      "id": "upgrade-card-2-face-lamplighter",
+      "name": "Upgrade2 Lamplighter",
+      "parent": "upgrade-card-2-face",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/portrait-lamplighter.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 204
+        },
+        "sindri.ui.box": {
+          "order": 2
+        }
+      },
+      "disabled": true
+    },
+    {
+      "id": "upgrade-card-2-face-mason",
+      "name": "Upgrade2 Mason",
+      "parent": "upgrade-card-2-face",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/portrait-mason.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 204
+        },
+        "sindri.ui.box": {
+          "order": 1
+        }
+      },
+      "disabled": true
+    },
+    {
+      "id": "upgrade-card-2-face-shieldback",
+      "name": "Upgrade2 Shieldback",
+      "parent": "upgrade-card-2-face",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/portrait-shieldback.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 204
+        },
+        "sindri.ui.box": {
+          "order": 5
+        }
+      },
+      "disabled": true
+    },
+    {
+      "id": "upgrade-card-2-face-tidecaller",
+      "name": "Upgrade2 Tidecaller",
+      "parent": "upgrade-card-2-face",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/portrait-tidecaller.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 204
+        },
+        "sindri.ui.box": {
+          "order": 3
+        }
+      },
+      "disabled": true
+    },
+    {
       "id": "upgrade-card-2-key",
       "name": "Upgrade2Key",
       "parent": "upgrade-card-2-words",
@@ -8993,7 +14021,7 @@
     {
       "id": "upgrade-card-2-mark",
       "name": "Upgrade2Mark",
-      "parent": "upgrade-card-2-words",
+      "parent": "upgrade-card-2-face",
       "components": {
         "weave.style": {
           "classes": [
@@ -9007,7 +14035,7 @@
           "font_size": 0.05,
           "line_height": 0.061,
           "anchor": "center",
-          "layer": 204,
+          "layer": 205,
           "color": [
             1,
             1,
@@ -9034,7 +14062,7 @@
           ]
         },
         "sindri.ui.box": {
-          "order": 0
+          "order": 6
         }
       }
     },
@@ -9243,6 +14271,203 @@
       }
     },
     {
+      "id": "upgrade-card-3-face",
+      "name": "Upgrade3Face",
+      "parent": "upgrade-card-3-words",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "boon-face",
+            "boon-face"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "anchor": "center",
+          "layer": 203,
+          "fill": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0.0,
+          "corner_radius": 0.0
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "id": "upgrade-card-3-face-bulwark",
+      "name": "Upgrade3 Bulwark",
+      "parent": "upgrade-card-3-face",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/portrait-bulwark.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 204
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      },
+      "disabled": true
+    },
+    {
+      "id": "upgrade-card-3-face-harpooner",
+      "name": "Upgrade3 Harpooner",
+      "parent": "upgrade-card-3-face",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/portrait-harpooner.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 204
+        },
+        "sindri.ui.box": {
+          "order": 4
+        }
+      },
+      "disabled": true
+    },
+    {
+      "id": "upgrade-card-3-face-lamplighter",
+      "name": "Upgrade3 Lamplighter",
+      "parent": "upgrade-card-3-face",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/portrait-lamplighter.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 204
+        },
+        "sindri.ui.box": {
+          "order": 2
+        }
+      },
+      "disabled": true
+    },
+    {
+      "id": "upgrade-card-3-face-mason",
+      "name": "Upgrade3 Mason",
+      "parent": "upgrade-card-3-face",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/portrait-mason.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 204
+        },
+        "sindri.ui.box": {
+          "order": 1
+        }
+      },
+      "disabled": true
+    },
+    {
+      "id": "upgrade-card-3-face-shieldback",
+      "name": "Upgrade3 Shieldback",
+      "parent": "upgrade-card-3-face",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/portrait-shieldback.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 204
+        },
+        "sindri.ui.box": {
+          "order": 5
+        }
+      },
+      "disabled": true
+    },
+    {
+      "id": "upgrade-card-3-face-tidecaller",
+      "name": "Upgrade3 Tidecaller",
+      "parent": "upgrade-card-3-face",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/portrait-tidecaller.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 204
+        },
+        "sindri.ui.box": {
+          "order": 3
+        }
+      },
+      "disabled": true
+    },
+    {
       "id": "upgrade-card-3-key",
       "name": "Upgrade3Key",
       "parent": "upgrade-card-3-words",
@@ -9293,7 +14518,7 @@
     {
       "id": "upgrade-card-3-mark",
       "name": "Upgrade3Mark",
-      "parent": "upgrade-card-3-words",
+      "parent": "upgrade-card-3-face",
       "components": {
         "weave.style": {
           "classes": [
@@ -9307,7 +14532,7 @@
           "font_size": 0.05,
           "line_height": 0.061,
           "anchor": "center",
-          "layer": 204,
+          "layer": 205,
           "color": [
             1,
             1,
@@ -9334,7 +14559,7 @@
           ]
         },
         "sindri.ui.box": {
-          "order": 0
+          "order": 6
         }
       }
     },
@@ -9947,7 +15172,7 @@
       "components": {
         "weave.style": {
           "classes": [
-            "button",
+            "chip-button",
             "rotate",
             "top"
           ]
@@ -9960,22 +15185,50 @@
           "anchor": "center",
           "layer": 130,
           "fill": [
-            0.1,
-            0.16,
-            0.2,
-            1.0
+            0,
+            0,
+            0,
+            0
           ],
           "stroke": [
-            0.95,
-            0.8,
-            0.5,
-            0.6
+            0,
+            0,
+            0,
+            0
           ],
-          "stroke_width": 0.004,
-          "corner_radius": 0.01
+          "stroke_width": 0.0,
+          "corner_radius": 0.0
         },
         "sindri.ui.box": {
           "order": 1
+        }
+      }
+    },
+    {
+      "id": "view-top-chip",
+      "name": "ViewTop Chip",
+      "parent": "view-top",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "frame"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/chip.png",
+          "tint": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "anchor": "center",
+          "layer": 131,
+          "draw": "sliced",
+          "border_scale": 0.0014
+        },
+        "sindri.ui.box": {
+          "order": 0
         }
       }
     },
@@ -9992,10 +15245,10 @@
         "sindri.ui.text": {
           "text": "Top",
           "font": "fonts/AlegreyaSans-Bold.ttf",
-          "font_size": 0.034,
-          "line_height": 0.04148,
+          "font_size": 0.03,
+          "line_height": 0.0366,
           "anchor": "center",
-          "layer": 132,
+          "layer": 133,
           "color": [
             1,
             1,
@@ -10021,7 +15274,7 @@
           ]
         },
         "sindri.ui.box": {
-          "order": 0
+          "order": 1
         }
       }
     },

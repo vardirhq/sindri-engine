@@ -1018,6 +1018,235 @@ def title_textures():
         '  "borders": { "": [40, 40, 40, 40] }\n}\n')
 
 
+# --- The HUD ---------------------------------------------------------------------
+
+BRASS = (226, 186, 106)
+
+
+def hud_textures():
+    """The pieces the battle's HUD is framed in: a panel, a lantern per point
+    of the Hearth, and a chip for the view's small buttons."""
+    from PIL import Image, ImageDraw
+
+    scale = 4
+
+    def sheet(name, size, border):
+        (TEXTURES / f"{name}.sheet").write_text(
+            '{\n  "format_version": 1,\n  "size": [%d, %d],\n'
+            '  "grid": { "columns": 1, "rows": 1, "names": ["%s"] },\n'
+            '  "borders": { "": [%d, %d, %d, %d] }\n}\n' % (*size, name, border, border, border, border))
+
+    # A panel: ink deepening downwards inside a brass rule, a fainter rule
+    # within it, and a bracket and rivet at each corner, which a nine-slice
+    # keeps whole however the panel is stretched.
+    w = h = 240
+    big = Image.new("RGBA", (w * scale, h * scale), (0, 0, 0, 0))
+    W, H = big.size
+    d = ImageDraw.Draw(big)
+    m = 8 * scale
+    body = Image.new("RGBA", big.size, (0, 0, 0, 0))
+    for y in range(H):
+        t = y / H
+        body_line = (int(18 - 8 * t), int(36 - 14 * t), int(46 - 16 * t), 238)
+        ImageDraw.Draw(body).line((0, y, W, y), fill=body_line)
+    mask = Image.new("L", big.size, 0)
+    ImageDraw.Draw(mask).rounded_rectangle((m, m, W - m, H - m), 12 * scale, fill=255)
+    big.paste(body, (0, 0), mask)
+    d.rounded_rectangle((m, m, W - m, H - m), 12 * scale, outline=(*BRASS, 255), width=2 * scale)
+    d.rounded_rectangle((m + 7 * scale, m + 7 * scale, W - m - 7 * scale, H - m - 7 * scale), 8 * scale,
+                        outline=(*BRASS, 70), width=scale)
+    d.line((m + 16 * scale, m + 4 * scale, W - m - 16 * scale, m + 4 * scale), fill=(255, 240, 210, 40),
+           width=scale)
+    arm, thick = 34 * scale, 7 * scale
+    for sx, sy in ((1, 1), (-1, 1), (1, -1), (-1, -1)):
+        cx = m if sx > 0 else W - m
+        cy = m if sy > 0 else H - m
+        d.polygon([(cx - sx * scale, cy - sy * scale), (cx + sx * arm, cy - sy * scale),
+                   (cx + sx * arm, cy + sy * (thick - scale)), (cx + sx * (thick - scale), cy + sy * (thick - scale)),
+                   (cx + sx * (thick - scale), cy + sy * arm), (cx - sx * scale, cy + sy * arm)],
+                  fill=(*BRASS, 255))
+        r = 7 * scale
+        rx, ry = cx + sx * 2 * scale, cy + sy * 2 * scale
+        d.polygon([(rx, ry - r), (rx + r, ry), (rx, ry + r), (rx - r, ry)], fill=(255, 226, 150, 255),
+                  outline=(120, 86, 40, 255))
+    big.resize((w, h), Image.LANCZOS).save(TEXTURES / "frame.png")
+    sheet("frame", (w, h), 48)
+
+    # A lantern of the Hearth, burning, and the same lantern gone out.
+    w, h = 48, 64
+    for name, lit in (("lantern", True), ("lantern-out", False)):
+        big = Image.new("RGBA", (w * scale, h * scale), (0, 0, 0, 0))
+        d = ImageDraw.Draw(big)
+        S = scale
+        cx = w * S / 2
+        brass = BRASS if lit else (110, 96, 80)
+        dark = (70, 48, 26) if lit else (40, 36, 34)
+        if lit:
+            for r in range(22 * S, 0, -S):
+                a = int(70 * (1 - r / (22 * S)) ** 1.6)
+                d.ellipse((cx - r, 36 * S - r, cx + r, 36 * S + r), fill=(255, 170, 70, a))
+        d.ellipse((cx - 5 * S, 2 * S, cx + 5 * S, 10 * S), outline=(*brass, 255), width=2 * S)
+        d.polygon([(cx - 13 * S, 18 * S), (cx - 7 * S, 10 * S), (cx + 7 * S, 10 * S), (cx + 13 * S, 18 * S)],
+                  fill=(*brass, 255), outline=(*dark, 255))
+        glass = (255, 200, 110, 255) if lit else (46, 54, 60, 255)
+        d.rectangle((cx - 11 * S, 18 * S, cx + 11 * S, 50 * S), fill=glass, outline=(*dark, 255), width=S)
+        if lit:
+            d.polygon([(cx, 22 * S), (cx + 6 * S, 36 * S), (cx + 4 * S, 44 * S), (cx - 4 * S, 44 * S),
+                       (cx - 6 * S, 36 * S)], fill=(255, 120, 40, 255))
+            d.polygon([(cx, 29 * S), (cx + 3 * S, 38 * S), (cx, 43 * S), (cx - 3 * S, 38 * S)],
+                      fill=(255, 244, 190, 255))
+        for x in (-11, 0, 11):
+            d.line((cx + x * S, 18 * S, cx + x * S, 50 * S), fill=(*brass, 255), width=2 * S)
+        d.polygon([(cx - 14 * S, 50 * S), (cx + 14 * S, 50 * S), (cx + 11 * S, 57 * S), (cx - 11 * S, 57 * S)],
+                  fill=(*brass, 255), outline=(*dark, 255))
+        big.resize((w, h), Image.LANCZOS).save(TEXTURES / f"{name}.png")
+
+    # A chip for the view's buttons: ink inside a brass edge, lit along the top.
+    w, h = 96, 72
+    big = Image.new("RGBA", (w * scale, h * scale), (0, 0, 0, 0))
+    W, H = big.size
+    d = ImageDraw.Draw(big)
+    m = 4 * scale
+    for y in range(m, H - m):
+        t = (y - m) / (H - 2 * m)
+        d.line((m, y, W - m, y), fill=(int(30 - 16 * t), int(58 - 26 * t), int(70 - 30 * t), 245))
+    mask = Image.new("L", big.size, 0)
+    ImageDraw.Draw(mask).rounded_rectangle((m, m, W - m, H - m), 14 * scale, fill=255)
+    chip = Image.new("RGBA", big.size, (0, 0, 0, 0))
+    chip.paste(big, (0, 0), mask)
+    d = ImageDraw.Draw(chip)
+    d.rounded_rectangle((m, m, W - m, H - m), 14 * scale, outline=(*BRASS, 255), width=3 * scale)
+    d.line((m + 14 * scale, m + 5 * scale, W - m - 14 * scale, m + 5 * scale), fill=(255, 240, 210, 70),
+           width=2 * scale)
+    chip.resize((w, h), Image.LANCZOS).save(TEXTURES / "chip.png")
+    sheet("chip", (w, h), 24)
+
+
+def route_textures():
+    """A stop on the route map: a pale disc in a ring, with a diamond at its
+    heart, drawn light so a tint says whether it is behind, ahead or offered."""
+    from PIL import Image, ImageDraw
+
+    scale = 4
+    w = h = 64
+    big = Image.new("RGBA", (w * scale, h * scale), (0, 0, 0, 0))
+    d = ImageDraw.Draw(big)
+    S = scale
+    d.ellipse((4 * S, 4 * S, 60 * S, 60 * S), fill=(40, 52, 60, 235), outline=(255, 255, 255, 255), width=4 * S)
+    d.ellipse((11 * S, 11 * S, 53 * S, 53 * S), outline=(255, 255, 255, 110), width=S)
+    d.polygon([(32 * S, 18 * S), (44 * S, 32 * S), (32 * S, 46 * S), (20 * S, 32 * S)], fill=(255, 255, 255, 255))
+    big.resize((w, h), Image.LANCZOS).save(TEXTURES / "node.png")
+
+
+# --- Portraits -------------------------------------------------------------------
+
+# Each warden's portrait is its own figure, drawn here rather than painted, so
+# the face on a card is the face on the board. The colors behind are the
+# warden's own, as on its muster card and its boons.
+PORTRAITS = {
+    "bulwark": (158, 199, 255),
+    "mason": (230, 209, 173),
+    "lamplighter": (255, 194, 107),
+    "tidecaller": (128, 219, 255),
+    "harpooner": (255, 219, 115),
+    "shieldback": (184, 219, 153),
+}
+
+
+def linear_to_srgb(channel):
+    channel = max(0.0, min(1.0, channel))
+    if channel <= 0.0031308:
+        return channel * 12.92
+    return 1.055 * channel ** (1 / 2.4) - 0.055
+
+
+def render_figure(mesh, materials, size, centre, half, view=(0.78, 0.24, -0.58)):
+    """Draws a mesh flat-shaded and orthographic, the way the board's light
+    falls on it, onto a transparent square: far faces first, each facet one
+    color. `centre` and `half` frame it, in metres up the figure."""
+    from PIL import Image, ImageDraw
+
+    def unit(v):
+        length = math.sqrt(sum(c * c for c in v)) or 1.0
+        return tuple(c / length for c in v)
+
+    def cross(a, b):
+        return (a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0])
+
+    def dot(a, b):
+        return a[0] * b[0] + a[1] * b[1] + a[2] * b[2]
+
+    toward = unit(view)
+    right = unit(cross((0, 1, 0), toward))
+    up = cross(toward, right)
+    light = unit((0.7, 0.9, 0.35))
+    image = Image.new("RGBA", (size, size), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(image)
+    scale = size / (2 * half)
+    faces = []
+    for name, (positions, normals, indices) in mesh.groups.items():
+        material = materials[name]
+        for i in range(0, len(indices), 3):
+            a, b, c = (positions[j] for j in indices[i:i + 3])
+            normal = normals[indices[i]]
+            if dot(normal, toward) <= 0.0:
+                continue
+            lit = 0.42 + 0.7 * max(0.0, dot(normal, light))
+            rgb = tuple(int(255 * linear_to_srgb(material.base[k] * lit + material.emissive[k] * 0.6))
+                        for k in range(3))
+            points = [(size / 2 + dot(p, right) * scale, size / 2 - (p[1] - centre) * scale) for p in (a, b, c)]
+            depth = sum(dot(p, toward) for p in (a, b, c)) / 3
+            faces.append((depth, points, rgb))
+    for _, points, rgb in sorted(faces, key=lambda face: face[0]):
+        draw.polygon(points, fill=(*rgb, 255), outline=(*rgb, 255))
+    return image
+
+
+def portraits():
+    """A medallion per warden: its head and shoulders on its own color, in a
+    brass ring."""
+    from PIL import Image, ImageDraw, ImageFilter
+
+    size, scale = 160, 4
+    big = size * scale
+    for name, tint in PORTRAITS.items():
+        build, palette, _ = FIGURES[name]
+        m = Mesh()
+        build(m, "idle")
+        figure = render_figure(m, palette, big, centre=0.92, half=0.52)
+        disc = Image.new("RGBA", (big, big), (0, 0, 0, 0))
+        mask = Image.new("L", (big, big), 0)
+        inset = 10 * scale
+        ImageDraw.Draw(mask).ellipse((inset, inset, big - inset, big - inset), fill=255)
+        # The warden's color, light behind the head and darker at the rim.
+        ground = Image.new("RGBA", (big, big), (0, 0, 0, 0))
+        g = ImageDraw.Draw(ground)
+        for r in range(big // 2, 0, -scale):
+            t = r / (big / 2)
+            k = 0.32 + 0.5 * (1 - t) ** 0.7
+            g.ellipse((big / 2 - r, big * 0.42 - r, big / 2 + r, big * 0.42 + r),
+                      fill=(int(tint[0] * k), int(tint[1] * k), int(tint[2] * k), 255))
+        disc.paste(ground, (0, 0), mask)
+        # A soft shadow under the figure, so it stands off its ground.
+        shadow = Image.new("RGBA", (big, big), (0, 0, 0, 0))
+        shadow.paste((8, 12, 18, 150), (0, 0), figure.split()[3])
+        shadow = shadow.filter(ImageFilter.GaussianBlur(5 * scale))
+        layered = Image.alpha_composite(disc, Image.new("RGBA", (big, big)))
+        layered.paste(shadow, (3 * scale, 4 * scale), Image.composite(shadow.split()[3], Image.new("L", (big, big)),
+                                                                      mask))
+        clipped = Image.new("RGBA", (big, big), (0, 0, 0, 0))
+        clipped.paste(figure, (0, 0), Image.composite(figure.split()[3], Image.new("L", (big, big)), mask))
+        layered = Image.alpha_composite(layered, clipped)
+        # The brass ring, with a dark line inside it.
+        ring = ImageDraw.Draw(layered)
+        ring.ellipse((inset, inset, big - inset, big - inset), outline=(20, 26, 32, 255), width=5 * scale)
+        ring.ellipse((inset - 3 * scale, inset - 3 * scale, big - inset + 3 * scale, big - inset + 3 * scale),
+                     outline=(232, 190, 104, 255), width=5 * scale)
+        ring.ellipse((inset + 2 * scale, inset + 2 * scale, big - inset - 2 * scale, big - inset - 2 * scale),
+                     outline=(255, 236, 190, 90), width=scale)
+        layered.resize((size, size), Image.LANCZOS).save(TEXTURES / f"portrait-{name}.png")
+
+
 def main():
     MODELS.mkdir(parents=True, exist_ok=True)
     for name, (build, palette, poses) in FIGURES.items():
@@ -1033,6 +1262,9 @@ def main():
         print(f"island {index}: {island['name']} -> island-{slug}.glb")
     textures()
     title_textures()
+    hud_textures()
+    route_textures()
+    portraits()
     print("wrote", len(list(MODELS.glob("*.glb"))), "models")
 
 

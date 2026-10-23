@@ -21,12 +21,12 @@
 /* An anchored element is placed by its middle, so each corner panel sits
    half its own size in from the margin. */
 .status {
-    width: 300px;
-    height: 112px;
-    x: 170px;
-    y: -76px;
+    width: 320px;
+    height: 128px;
+    x: 180px;
+    y: -84px;
     anchor: top_left;
-    padding: 14px;
+    padding: 16px 20px;
     direction: column;
     gap: 2px;
     align-items: start;
@@ -55,15 +55,38 @@
 }
 
 .hearth {
-    width: 250px;
-    height: 84px;
-    x: -145px;
-    y: -62px;
+    width: 300px;
+    height: 92px;
+    x: -170px;
+    y: -66px;
     anchor: top_right;
-    padding: 14px;
+    padding: 12px;
     direction: column;
     gap: 2px;
-    align-items: end;
+    align-items: center;
+}
+
+/* A HUD panel's framed back: out of the flow, filling its panel. */
+.frame {
+    position: absolute;
+    x: 0px;
+    y: 0px;
+    width: 100%;
+    height: 100%;
+}
+
+.hearth-lamps {
+    width: 100%;
+    height: 34px;
+    direction: row;
+    gap: 2px;
+    justify-content: center;
+    align-items: center;
+}
+
+.hearth-lamp {
+    width: 22px;
+    height: 30px;
 }
 
 .hearth-title {
@@ -73,7 +96,7 @@
     font-size: 20px;
     line-height: 24px;
     letter-spacing: 3px;
-    text-align: end;
+    text-align: center;
 }
 
 .hearth-pips {
@@ -86,12 +109,25 @@
 }
 
 .card {
-    width: 420px;
-    height: 220px;
-    x: 230px;
-    y: 130px;
+    width: 530px;
+    height: 230px;
+    x: 285px;
+    y: 135px;
     anchor: bottom_left;
-    padding: 16px;
+    padding: 20px 24px;
+    direction: row;
+    gap: 14px;
+    align-items: start;
+}
+
+.card-portrait {
+    width: 112px;
+    height: 112px;
+}
+
+.card-words {
+    width: 350px;
+    height: auto;
     direction: column;
     gap: 4px;
     align-items: start;
@@ -138,9 +174,9 @@
 }
 
 .actions {
-    width: 560px;
-    height: 60px;
-    x: -300px;
+    width: 600px;
+    height: 66px;
+    x: -320px;
     y: 50px;
     anchor: bottom_right;
     direction: row;
@@ -349,11 +385,20 @@
     justify-content: center;
 }
 
+.boon-face {
+    width: 13vh;
+    height: 13vh;
+}
+
+/* The mark lies over the face, for a card no warden's portrait fits. */
 .boon-mark {
+    position: absolute;
+    x: 0px;
+    y: 0px;
     width: 100%;
-    height: 8vh;
+    height: 100%;
     font-size: 7vh;
-    line-height: 8vh;
+    line-height: 13vh;
     text-align: center;
 }
 
@@ -386,13 +431,13 @@
 /* The muster's six wardens, three to a row, and the two roads at a fork:
    the same cards, shaped for more words. */
 .boons.heros {
-    height: 19vh;
+    height: 21vh;
     gap: 2vh;
 }
 
 .boon-card.hero-card {
-    width: 44vh;
-    height: 19vh;
+    width: 46vh;
+    height: 21vh;
 }
 
 .boon-words.hero-words {
@@ -400,10 +445,24 @@
     gap: 0.5vh;
 }
 
+.boon-face.hero-face {
+    width: 8vh;
+    height: 8vh;
+}
+
 .boon-mark.hero-mark {
-    height: 4.4vh;
     font-size: 3.8vh;
-    line-height: 4.4vh;
+    line-height: 8vh;
+}
+
+.boon-face.road-face {
+    width: 6vh;
+    height: 6vh;
+}
+
+.boon-mark.road-mark {
+    font-size: 4vh;
+    line-height: 6vh;
 }
 
 .boon-title.hero-title {
@@ -429,9 +488,54 @@
 }
 
 .screen-text.route-text {
-    width: 130vh;
-    font-size: 2.3vh;
-    line-height: 3.2vh;
+    height: 0px;
+}
+
+/* The road: a stop for each island, a column for each step. */
+.route-map {
+    width: 136vh;
+    max-width: 96vw;
+    height: 12vh;
+    direction: row;
+    gap: 0.6vh;
+    justify-content: center;
+    align-items: center;
+}
+
+.route-step {
+    width: 19vh;
+    height: 12vh;
+    direction: column;
+    gap: 0.8vh;
+    justify-content: center;
+    align-items: start;
+}
+
+.route-stop {
+    width: 100%;
+    height: 4.4vh;
+    direction: row;
+    gap: 0.6vh;
+    align-items: center;
+}
+
+.route-node {
+    width: 3.6vh;
+    height: 3.6vh;
+}
+
+.route-name {
+    width: 14.4vh;
+    height: 4.4vh;
+    font-size: 1.9vh;
+    line-height: 2.2vh;
+    text-align: start;
+    text-wrap: word;
+}
+
+.route-link {
+    width: 2vh;
+    height: 0.3vh;
 }
 
 .boons.roads {
@@ -547,6 +651,35 @@
     line-height: 3vh;
 }
 
+.plate-button.action {
+    width: 172px;
+    height: 54px;
+}
+
+.plate-button.action.end {
+    width: 214px;
+    height: 64px;
+}
+
+.plate-label.action {
+    font-size: 19px;
+    line-height: 24px;
+}
+
+.plate-label.action.end {
+    font-size: 23px;
+    line-height: 28px;
+}
+
+.chip-button.rotate {
+    width: 44px;
+    height: 44px;
+}
+
+.chip-button.rotate.top {
+    width: 60px;
+}
+
 .title-record {
     width: 100%;
     height: 3vh;
@@ -608,19 +741,24 @@
 /* --- A phone held upright -------------------------------------------------- */
 
 @media (orientation: portrait) {
-    .status { width: 46vw; height: 72px; x: 26vw; y: -40px; padding: 7px; gap: 0px; }
+    .status { width: 47vw; height: 120px; x: 26vw; y: -64px; padding: 28px 22px; gap: 0px; }
     .island-name { font-size: 19px; line-height: 23px; height: 23px; }
     .status-line { font-size: 12px; line-height: 17px; height: 17px; }
-    .hearth { width: 44vw; height: 62px; x: -25vw; y: -35px; padding: 7px; }
-    .hearth-title { font-size: 15px; line-height: 19px; height: 19px; }
-    .hearth-pips { font-size: 18px; line-height: 23px; height: 23px; }
-    .card { width: 94vw; height: 142px; x: 50vw; y: 116px; padding: 9px; gap: 2px; }
+    .hearth { width: 46vw; height: 120px; x: -25vw; y: -64px; padding: 28px 14px; }
+    .hearth-title { font-size: 14px; line-height: 18px; height: 18px; }
+    .hearth-lamps { height: 26px; gap: 0px; }
+    .hearth-lamp { width: 13px; height: 18px; }
+    .card { width: 94vw; height: 176px; x: 50vw; y: 132px; padding: 26px 26px; gap: 8px; }
+    .card-portrait { width: 64px; height: 64px; }
+    .card-words { width: 60vw; gap: 2px; }
     .unit-name { font-size: 20px; line-height: 24px; height: 24px; }
     .unit-stats, .skill-name { font-size: 15px; line-height: 19px; height: 19px; }
     .skill-text, .unit-hint, .preview { font-size: 12px; line-height: 16px; }
     .actions { width: 94vw; height: 48px; x: -50vw; y: 30px; gap: 6px; justify-content: center; }
-    .button.small { width: 28vw; height: 44px; }
-    .button.primary { width: 32vw; height: 46px; }
+    .plate-button.action { width: 29vw; height: 44px; }
+    .plate-button.action.end { width: 33vw; height: 48px; }
+    .plate-label.action { font-size: 14px; line-height: 18px; }
+    .plate-label.action.end { font-size: 17px; line-height: 21px; }
     .button-label { font-size: 15px; line-height: 19px; }
     .banner { width: 94vw; height: 96px; y: -150px; }
     .banner-title { font-size: 30px; line-height: 36px; height: 36px; }
@@ -649,7 +787,7 @@
 .button.rotate { width: 44px; height: 44px; }
 .button.rotate.top { width: 58px; }
 @media (orientation: portrait) {
-    .view-controls { x: -86px; y: -102px; }
+    .view-controls { x: -86px; y: -150px; }
     .banner { y: -186px; }
     .screen-kicker { height: 5vw; font-size: 3.6vw; line-height: 4.4vw; letter-spacing: 1vw; }
     .screen-title { height: 13vw; font-size: 11vw; line-height: 13vw; letter-spacing: 0.3vw; }
@@ -659,19 +797,28 @@
     .boons { width: 92vw; height: auto; direction: column; gap: 2vw; }
     .boon-card { width: 88vw; height: 20vw; }
     .boon-words { padding: 2vw; direction: row; gap: 3vw; }
-    .boon-mark { width: 9vw; height: 9vw; font-size: 7vw; line-height: 9vw; }
+    .boon-face { width: 13vw; height: 13vw; }
+    .boon-mark { font-size: 7vw; line-height: 13vw; }
     .boon-title { width: 26vw; height: 6vw; font-size: 4.4vw; line-height: 5.4vw; text-align: start; }
     .boon-text { width: 40vw; font-size: 3.2vw; line-height: 4.2vw; text-align: start; }
     .boon-key { width: 5vw; font-size: 3.2vw; }
     .boons.heros { width: 92vw; height: auto; direction: column; gap: 1.6vw; }
     .boon-card.hero-card { width: 88vw; height: 15vw; }
-    .boon-words.hero-words { padding: 1.6vw; direction: row; gap: 2.4vw; }
-    .boon-mark.hero-mark { width: 7vw; height: 7vw; font-size: 5.6vw; line-height: 7vw; }
+    .boon-words.hero-words { padding: 1.6vw 3vw; direction: row; gap: 2.4vw; }
+    .boon-face.hero-face { width: 10vw; height: 10vw; }
+    .boon-mark.hero-mark { font-size: 5.6vw; line-height: 10vw; }
+    .boon-face.road-face { width: 9vw; height: 9vw; }
+    .boon-mark.road-mark { font-size: 5vw; line-height: 9vw; }
     .boon-title.hero-title { width: 22vw; height: 5vw; font-size: 3.8vw; line-height: 4.8vw; text-align: start; }
     .boon-text.hero-text { width: 46vw; font-size: 2.7vw; line-height: 3.5vw; text-align: start; }
     .boon-key.hero-key { width: 8vw; height: 4vw; font-size: 2.6vw; line-height: 3.4vw; }
     .screen-title.muster-title { font-size: 8.4vw; letter-spacing: 0px; }
-    .screen-text.route-text { width: 90vw; font-size: 3.2vw; line-height: 4.4vw; }
+    .route-map { width: 96vw; height: 30vw; gap: 0.4vw; }
+    .route-step { width: 14.6vw; height: 30vw; gap: 1.6vw; align-items: center; }
+    .route-stop { height: 13vw; direction: column; gap: 0.6vw; align-items: center; }
+    .route-node { width: 5.4vw; height: 5.4vw; }
+    .route-name { width: 14.6vw; height: 7vw; font-size: 2.4vw; line-height: 2.8vw; text-align: center; }
+    .route-link { width: 1.4vw; height: 0.5vw; }
     .boons.roads { width: 92vw; height: auto; direction: column; gap: 2vw; }
     .boon-card.road-card { width: 88vw; height: 30vw; }
     .boon-text.road-text { width: 48vw; font-size: 2.9vw; line-height: 3.8vw; text-align: start; }

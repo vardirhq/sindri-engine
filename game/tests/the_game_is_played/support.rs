@@ -1,7 +1,7 @@
 //! A game of Causeway opened from its folder, and the hands to play it.
 
 use glam::Vec3;
-use sindri_core::{EntityId, SceneComponent};
+use sindri_core::{EntityId, SceneComponent, SceneEntityId};
 use sindri_platform::{InputEvent, Key, MouseButton};
 use sindri_runtime::ProjectRun;
 use sindri_scene::ModelComponent;
@@ -86,6 +86,16 @@ impl Game {
         assert_eq!(self.phase(), MUSTER, "the title hands over to the muster");
         self.tap_key(Key::Enter);
         self.until_players_turn();
+    }
+
+    /// The pixel at the middle of a screen element, as it was laid out.
+    pub fn centre_of(&self, id: &str) -> [f32; 2] {
+        let entity = self
+            .run
+            .world
+            .entity_for_source_id(&SceneEntityId::new(id).expect("an id"))
+            .expect("the element exists");
+        self.run.on_screen(entity).expect("the element is laid out")
     }
 
     pub fn tap_key(&mut self, key: Key) {
