@@ -10,6 +10,17 @@
   it for 3 and ices them over. The ice has its own cold light, snow on the
   wind, bergs and floes in the sea, and its own song.
 
+- Redesign the website and give every game and demo a page of its own at
+  `/play/<route>/`, with the game embedded, what it is, its controls and what
+  it proves. The game loads when Play is pressed and plays inline, or over the
+  whole window with **Full page**, which is on by default on a phone; Back
+  leaves full page. The landing page now shows the platformer, Scorchball,
+  Low Tide and Flappy, which it had never listed, and its game grids are built
+  from the site catalog so they stay in step with what is published. Its list
+  of what Sindri lacks is taken from the parity table rather than an old list
+  that still named lighting, glTF import and a language server. Every play
+  page has a poster captured from the project itself.
+
 - Dress Causeway's interface: the HUD's panels are framed in brass with
   corner brackets, the Hearth is a row of lanterns that go out as it is lost,
   and the turn's controls are plates that dim while they would do nothing.

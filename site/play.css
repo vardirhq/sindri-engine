@@ -1,0 +1,190 @@
+/* The play pages: one game embedded per page, inline or filling the window. */
+
+.play-head { padding-top: clamp(20px, 3vw, 36px); padding-bottom: 20px; display: flex; flex-direction: column; gap: 12px }
+.crumbs { display: flex; gap: 8px; font-size: 14px; color: var(--dim) }
+.crumbs a:hover { color: var(--text) }
+.play-title { display: flex; align-items: center; gap: 10px 16px; flex-wrap: wrap }
+.play-title h1 { font-size: clamp(32px, 5vw, 52px); line-height: 1.04 }
+.play-title .role { padding: 6px 10px; border: 1px solid currentColor; border-radius: 999px; opacity: .9 }
+.play-head .lede { max-width: 720px }
+
+/* ------------------------------------------------------------------ stage */
+
+.stage {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  /* Short enough that the toolbar under it stays on screen. */
+  max-height: calc(100vh - 330px);
+  max-height: calc(100dvh - 330px);
+  min-height: 300px;
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: #12161f;
+  border: 1px solid var(--line);
+  box-shadow: 0 40px 80px -40px rgba(0, 0, 0, .9);
+}
+.stage iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; display: block; background: #12161f }
+
+.poster { position: absolute; inset: 0; display: grid; place-items: center }
+.poster img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: saturate(1.05) }
+.poster::after { content: ""; position: absolute; inset: 0; background: radial-gradient(70% 70% at 50% 55%, rgba(11, 13, 17, .25), rgba(11, 13, 17, .78)) }
+.poster.blank {
+  background:
+    radial-gradient(60% 80% at 30% 20%, rgba(94, 200, 192, .18), transparent 70%),
+    radial-gradient(50% 70% at 80% 90%, rgba(242, 184, 75, .16), transparent 70%),
+    #12161f;
+}
+.poster.blank .poster-title { position: absolute; top: 24px; left: 28px; font: 700 clamp(28px, 6vw, 64px)/1 var(--display); color: rgba(236, 231, 220, .1); letter-spacing: -.03em }
+.launch { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: 14px; padding: 20px; text-align: center }
+.launch-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 26px 12px 12px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--gold);
+  color: #1a1406;
+  font: 600 18px/1 var(--sans);
+  cursor: pointer;
+  box-shadow: 0 16px 40px -10px rgba(242, 184, 75, .55);
+  transition: transform .15s, background .15s;
+}
+.launch-button:hover { background: #ffc964; transform: scale(1.03) }
+.launch-icon { width: 44px; height: 44px; border-radius: 50%; background: #1a1406 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M9 6.5l10 5.5-10 5.5z' fill='%23f2b84b'/%3E%3C/svg%3E") center / 24px no-repeat }
+.launch-note { margin: 0; font-size: 13.5px; color: rgba(236, 231, 220, .8); text-shadow: 0 1px 8px rgba(0, 0, 0, .8) }
+
+.stage-controls { display: none }
+
+.stage-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 20px;
+  flex-wrap: wrap;
+  padding: 14px 2px 0;
+}
+.stage-hint { margin: 0; font-size: 14px; color: var(--dim) }
+.stage-hint a { color: var(--gold) }
+@media (pointer: coarse) { .keys-hint { display: none } }
+.stage-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap }
+.tool {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 8px 14px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .03);
+  color: var(--text);
+  font: 500 14px/1 var(--sans);
+  cursor: pointer;
+}
+.tool:hover { border-color: var(--dim) }
+.tool svg { width: 16px; height: 16px }
+
+.switch { display: inline-flex; align-items: center; gap: 10px; min-height: 40px; padding: 0 6px; font-size: 14px; color: var(--muted); cursor: pointer; user-select: none }
+.switch input { position: absolute; opacity: 0; width: 1px; height: 1px }
+.switch .track { position: relative; width: 38px; height: 22px; border-radius: 999px; background: var(--line); transition: background .15s }
+.switch .track::after { content: ""; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%; background: var(--text); transition: transform .15s }
+.switch input:checked + .track { background: var(--gold) }
+.switch input:checked + .track::after { transform: translateX(16px); background: #1a1406 }
+.switch input:focus-visible + .track { outline: 2px solid var(--gold); outline-offset: 3px }
+
+/* -------------------------------------------------------------- full page */
+
+/* The game takes the whole window. Fixed to the layout viewport rather than
+   sized in vh, so a phone's collapsing toolbars never leave a gap or cut the
+   bottom of the game off. */
+.stage.full {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  width: auto;
+  height: auto;
+  max-height: none;
+  aspect-ratio: auto;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  background: #12161f;
+}
+html.is-full, html.is-full body { overflow: hidden; overscroll-behavior: none }
+.stage.full .stage-controls {
+  display: flex;
+  position: absolute;
+  z-index: 2;
+  top: max(10px, env(safe-area-inset-top));
+  right: max(10px, env(safe-area-inset-right));
+  gap: 6px;
+  opacity: .55;
+  transition: opacity .2s;
+}
+.stage.full .stage-controls:hover, .stage.full .stage-controls:focus-within { opacity: 1 }
+.stage-controls button {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, .18);
+  border-radius: 50%;
+  background: rgba(11, 13, 17, .6);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  color: #fff;
+  cursor: pointer;
+}
+.stage-controls button svg { width: 18px; height: 18px }
+.stage:not(.playing) .stage-controls [data-action="restart"] { display: none }
+
+/* ------------------------------------------------------------------- info */
+
+.play-info {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  gap: clamp(28px, 5vw, 64px);
+  padding-top: clamp(40px, 6vw, 72px);
+}
+.play-info h2 { font-size: 22px; margin: 0 0 14px }
+.about p { margin: 0 0 16px; color: var(--muted); line-height: 1.75; font-size: 16.5px }
+.about h2 + p { margin-top: 0 }
+.about .chips { margin-top: 2px }
+.about h2:not(:first-child) { margin-top: 34px }
+.about .note { padding: 12px 16px; border-left: 3px solid var(--tide); background: var(--panel); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; font-size: 15px }
+
+.facts { display: flex; flex-direction: column; gap: 22px }
+.controls { width: 100%; border-collapse: collapse; font-size: 14.5px }
+.controls th, .controls td { text-align: left; vertical-align: top; padding: 10px 0; border-bottom: 1px solid var(--line-soft) }
+.controls th { font-weight: 500; color: var(--text); padding-right: 16px; width: 50% }
+.controls td { color: var(--dim) }
+.controls kbd, .facts kbd { font: 500 12.5px var(--mono); color: var(--text) }
+.facts dl { margin: 0; display: grid; gap: 0; border: 1px solid var(--line-soft); border-radius: var(--radius-sm); overflow: hidden }
+.facts dl div { display: grid; grid-template-columns: 90px 1fr; gap: 12px; padding: 11px 14px; border-bottom: 1px solid var(--line-soft); background: var(--panel) }
+.facts dl div:last-child { border-bottom: 0 }
+.facts dt { color: var(--faint); font-size: 13.5px }
+.facts dd { margin: 0; font-size: 14px; color: var(--muted); min-width: 0; overflow-wrap: anywhere }
+.facts dd a { color: var(--gold) }
+.facts code { font: 13px var(--mono) }
+.open-in-editor { margin: 0; font-size: 14px; color: var(--dim); line-height: 1.6 }
+
+.more { padding-top: clamp(56px, 8vw, 96px) }
+.more h2 { font-size: clamp(24px, 3vw, 32px) }
+.more .cards { margin-top: 20px }
+
+@media (max-width: 860px) {
+  .play-info { grid-template-columns: 1fr }
+}
+
+@media (max-width: 700px) {
+  .stage { aspect-ratio: 4 / 3; border-radius: var(--radius-sm) }
+  .stage { max-height: none; min-height: 0 }
+  .stage-bar { flex-direction: column; align-items: stretch }
+  .stage-actions { justify-content: space-between; flex-wrap: nowrap; gap: 6px }
+  .stage-actions .tool { padding: 8px 12px; font-size: 13.5px }
+  .switch { padding: 0 }
+  .launch-button { font-size: 16.5px; padding-right: 22px }
+  .launch-icon { width: 40px; height: 40px }
+}
