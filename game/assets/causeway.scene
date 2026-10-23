@@ -7877,6 +7877,118 @@
       }
     },
     {
+      "id": "muster-spring",
+      "name": "MusterSpring",
+      "parent": "muster-column",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "plate-button",
+            "guide"
+          ]
+        },
+        "sindri.ui.button": {
+          "label": ""
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "anchor": "center",
+          "layer": 200,
+          "fill": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0.0,
+          "corner_radius": 0.0
+        },
+        "sindri.ui.box": {
+          "order": 8
+        }
+      }
+    },
+    {
+      "id": "muster-spring-label",
+      "name": "MusterSpring Label",
+      "parent": "muster-spring",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "plate-label",
+            "guide"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "",
+          "font": "fonts/AlegreyaSans-Bold.ttf",
+          "font_size": 0.034,
+          "line_height": 0.04148,
+          "anchor": "center",
+          "layer": 203,
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.02,
+              0.05,
+              0.6
+            ],
+            "softness": 0.003
+          },
+          "rich": true,
+          "bounds": [
+            0.0,
+            0.0
+          ]
+        },
+        "sindri.ui.box": {
+          "order": 1
+        }
+      }
+    },
+    {
+      "id": "muster-spring-plate",
+      "name": "MusterSpring Plate",
+      "parent": "muster-spring",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "plate"
+          ]
+        },
+        "sindri.ui.image": {
+          "texture": "textures/plate-ink.png",
+          "tint": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "anchor": "center",
+          "layer": 201
+        },
+        "sindri.ui.box": {
+          "order": 0
+        }
+      }
+    },
+    {
       "id": "muster-stats",
       "name": "MusterStats",
       "parent": "muster-column",

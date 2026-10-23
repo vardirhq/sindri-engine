@@ -656,14 +656,22 @@ shared fn host_kind(def: IslandDef) -> Kind {
     return Kind.Husk;
 }
 
-// A round's arrivals under an island's omen.
+// A round's arrivals under an island's omen, and in spring tides, when every
+// round brings one more.
 shared fn wave_under(def: IslandDef, round: number, omen: number) -> List<Kind> {
+    return wave_for(def, round, omen, false);
+}
+
+shared fn wave_for(def: IslandDef, round: number, omen: number, spring: bool) -> List<Kind> {
     var wave = wave_of(def, round);
     let last_wave = round - 1.0 >= def.waves.length - 1.0;
     if omen == OMEN_STILL && wave.length > 0.0 {
         wave.remove_at(wave.length - 1.0);
     }
     if omen == OMEN_HOST && !last_wave {
+        wave.push(host_kind(def));
+    }
+    if spring && !last_wave {
         wave.push(host_kind(def));
     }
     return wave;

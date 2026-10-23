@@ -1,5 +1,10 @@
 # Changelog
 
+- Let Causeway's crossings open things for the next: four wardens answer the
+  first muster, holding the Lighthouse calls the Harpooner, and making a
+  crossing calls the Shieldback and opens spring tides, a harder crossing
+  with one more Hollow every round and a smaller Hearth, chosen at the muster.
+
 - Give each of Causeway's islands a bonus objective, rolled with its omen and
   followed in the HUD: lose no house, send three Hollow into the sea or the
   lava, destroy six, lose no warden, or lose no more than one Hearth. Meeting

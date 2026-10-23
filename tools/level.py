@@ -636,6 +636,9 @@ def between_screen(e, id, name, button_label, cards=0, per_row=4, kind="boon"):
     if button_label:
         plate_button(e, id + "-button", name + "Button", button_label, column_id, "textures/plate-ember.png",
                      ("begin",), 200)
+    if id == "muster":
+        # Spring tides, once a crossing has opened them; the battle shows it.
+        plate_button(e, "muster-spring", "MusterSpring", "", column_id, "textures/plate-ink.png", ("guide",), 200)
 
 
 ROUTE_STEPS = 6

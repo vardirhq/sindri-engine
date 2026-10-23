@@ -85,6 +85,10 @@ script Battle {
     // to be chosen before going on.
     var omens: List<number> = [];
     var boons_left: number = 0.0;
+    // Spring tides: the harder crossing, opened by making one.
+    var spring: bool = false;
+    // What this crossing opened for the next, said on its last screen.
+    var opened: String = "";
     // Each island's bonus objective this crossing, and how the one in play is
     // going: what it has counted, whether it has failed, and the Hearth it
     // began with. Kept as they stood at the start of the turn too, for a
@@ -927,7 +931,7 @@ script Battle {
                 play(plan_all(board), After.Mark);
             }
             After.Mark => {
-                board.arrivals = wave_under(def, board.round, omen_on(island));
+                board.arrivals = wave_for(def, board.round, omen_on(island), spring);
                 board = mark_spawns(board, landing);
                 board.beats.clear();
                 begin_player_turn();
@@ -979,7 +983,12 @@ script Battle {
             let hero = Save.number("party_" + i, i);
             if hero >= 0.0 && hero < HERO_COUNT && !chosen.contains(hero) { chosen.push(hero); }
         }
+        var open: List<number> = [];
+        for hero in chosen { if hero_open(hero) { open.push(hero); } }
+        chosen = open;
         if chosen.length < 3.0 { chosen = [0.0, 1.0, 2.0]; }
+        spring = Save.flag("open_spring", false) && Save.flag("spring", false);
+        opened = "";
         show_muster();
         show_screen("Muster", true);
         print("Causeway muster ready");
@@ -989,14 +998,24 @@ script Battle {
         let screens = Screens.on(World.find("Screens"));
         for i in 0..HERO_COUNT {
             let kind = hero_kind(i);
-            screens.card("Muster", i, hero_mark(kind), kind_name(kind),
-                hero_blurb(kind) + "  [color=#9fb4bf]Health " + kind_hp(kind) + ", move " + kind_move(kind) + ".[/color]",
-                hero_color(kind));
+            var about = hero_blurb(kind) + "  [color=#9fb4bf]Health " + kind_hp(kind) + ", move " + kind_move(kind) + ".[/color]";
+            var title = kind_name(kind);
+            var color = hero_color(kind);
+            if !hero_open(i) {
+                about = "[color=#9fb4bf]" + hero_calling(i) + "[/color]";
+                title = "[color=#8fa3ad]" + title + "[/color]";
+                color = Color(0.45, 0.5, 0.55);
+            }
+            screens.card("Muster", i, hero_mark(kind), title, about, color);
             screens.taken("Muster", i, chosen.contains(i));
-            screens.face("Muster", i, i);
+            // A warden not yet called shows no face, only a mark.
+            if hero_open(i) { screens.face("Muster", i, i); } else { screens.face("Muster", i, -1.0); }
         }
         var line = chosen.length + " of 3 chosen";
         if chosen.length == 3.0 { line += ", ready to set out"; }
+        if Save.flag("open_spring", false) {
+            if spring { line += "  ·  [color=#ffcf7a]spring tides[/color] (S)"; } else { line += "  ·  calm tides (S)"; }
+        }
         screen_words("Muster", "Before the crossing", "Muster three wardens", "", line);
         screens.ready("Muster", chosen.length == 3.0);
     }
@@ -1004,6 +1023,10 @@ script Battle {
     // Takes a hero into the muster, or puts one back. Taking a fourth puts
     // back the first taken, so a keyboard can change its mind in one press.
     fn toggle_hero(hero: number) {
+        if !hero_open(hero) {
+            Audio.play("audio/bump.wav", 0.4);
+            return;
+        }
         if chosen.contains(hero) {
             chosen.remove_at(chosen.index_of(hero));
         } else {
@@ -1022,6 +1045,11 @@ script Battle {
         island = clamp(floor(Game.get("start_island", 0.0)), 0.0, ISLAND_COUNT - 1.0);
         hearth = starting_hearth;
         max_hearth = starting_hearth;
+        // Spring tides: one more Hollow every round, and a smaller Hearth.
+        if spring {
+            hearth -= 2.0;
+            max_hearth -= 2.0;
+        }
         extra_rewinds = 0.0;
         wardens = [];
         for hero in chosen { wardens.push(fresh(hero_kind(hero))); }
@@ -1045,13 +1073,34 @@ script Battle {
         begin_island();
     }
 
+    // Whether a warden answers the muster yet: four do from the start, and
+    // two are called by what a crossing does.
+    fn hero_open(hero: number) -> bool {
+        if hero == 4.0 { return Save.flag("open_harpooner", false); }
+        if hero == 5.0 { return Save.flag("open_shieldback", false); }
+        return true;
+    }
+
+    fn hero_calling(hero: number) -> String {
+        if hero == 4.0 { return "Not yet called. Hold the Lighthouse, and the Harpooner will hear of it."; }
+        return "Not yet called. Make a crossing, and the Shieldback will come.";
+    }
+
+    // Opens something for the crossings after this one, once.
+    fn open_for_next(key: String, news: String) {
+        if Save.flag(key, false) { return; }
+        Save.set_flag(key, true);
+        if opened != "" { opened += "  "; }
+        opened += news;
+    }
+
     // The heroes not in the crossing, in muster order.
     fn left_behind() -> List<number> {
         var left: List<number> = [];
         for i in 0..HERO_COUNT {
             var has = false;
             for w in wardens { if w.kind == hero_kind(i) { has = true; } }
-            if !has { left.push(i); }
+            if !has && hero_open(i) { left.push(i); }
         }
         return left;
     }
@@ -1612,6 +1661,9 @@ script Battle {
         show_threats(new_turn(board));
         for c in 0..(SIZE * SIZE) { set_mark(threat_marks, c, ""); }
         hearth = board.hearth;
+        if island == TITLE_ISLAND {
+            open_for_next("open_harpooner", "The Harpooner has heard, and will answer the next muster.");
+        }
         if omen_on(island) == OMEN_LIT {
             max_hearth += 1.0;
             hearth = min(hearth + 2.0, max_hearth);
@@ -1626,8 +1678,13 @@ script Battle {
             let made = Save.number("crossings", 0.0);
             var record = "Your first crossing.";
             if made > 1.0 { record = "Crossings made: " + made; }
-            screen_words("Crossed", "The crossing is made", "The lamp is lit",
-                "The causeway is under the sea behind you, and the beacon burns over open water.",
+            if spring { record += "  In spring tides."; }
+            open_for_next("open_shieldback", "The Shieldback will answer the next muster.");
+            open_for_next("open_spring", "Spring tides are open at the muster.");
+            var body = "The causeway is under the sea behind you, and the beacon burns over open water.";
+            if opened != "" { body += " " + opened; }
+            opened = "";
+            screen_words("Crossed", "The crossing is made", "The lamp is lit", body,
                 "Hearth " + hearth + " of " + max_hearth + "  ·  " + record);
             return;
         }
@@ -1639,6 +1696,10 @@ script Battle {
             why += " " + objective_name(objective_on(island), def) + ": one more boon.";
         }
         if omen_on(island) == OMEN_LIT { why += " The lit windows rekindle the Hearth."; }
+        if opened != "" {
+            why += " " + opened;
+            opened = "";
+        }
         if omen_on(island) == OMEN_HOST { why += " The host is beaten: choose two boons."; }
         if omen_on(island) == OMEN_WRECK { why += " The wreck holds an upgrade."; }
         var next = "next, " + island_def(roads[0]).name;
@@ -2366,6 +2427,19 @@ script Battle {
                     if pressed("Muster" + i) || Input.Keyboard.just_pressed("Digit" + (i + 1.0)) {
                         toggle_hero(i);
                     }
+                }
+                if Save.flag("open_spring", false) && (pressed("MusterSpring") || Input.Keyboard.just_pressed("S")) {
+                    spring = !spring;
+                    Save.set_flag("spring", spring);
+                    Audio.play("audio/select.wav", 0.4);
+                    show_muster();
+                }
+                if Save.flag("open_spring", false) {
+                    var label = "Calm tides";
+                    if spring { label = "Spring tides"; }
+                    fade_plate("MusterSpring", label, "fff4dc", 1.0);
+                } else {
+                    fade_plate("MusterSpring", "", "fff4dc", 0.0);
                 }
                 if chosen.length == 3.0 && (pressed("MusterButton") || Input.Keyboard.just_pressed("Enter")) {
                     set_out();
