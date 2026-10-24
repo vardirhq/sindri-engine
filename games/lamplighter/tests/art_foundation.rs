@@ -163,4 +163,12 @@ fn the_playable_level_uses_the_dusk_art() {
         })
         .count();
     assert_eq!(backdrop_sprites, 18, "six sprites for each parallax layer");
+    for entity in entities.iter().filter(|entity| {
+        let id = entity["id"].as_str().unwrap_or("");
+        id.starts_with("dusk-sky-")
+            || id.starts_with("dusk-hills-far-")
+            || id.starts_with("dusk-hills-near-")
+    }) {
+        assert_eq!(entity["name"], entity["id"], "the backdrop script finds each layer by name");
+    }
 }

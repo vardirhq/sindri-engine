@@ -98,7 +98,7 @@
     },
     {
       "id": "dusk-sky-0",
-      "name": "Dusk Sky 0",
+      "name": "dusk-sky-0",
       "transform_3d": {
         "position": [
           -42,
@@ -127,7 +127,7 @@
     },
     {
       "id": "dusk-sky-1",
-      "name": "Dusk Sky 1",
+      "name": "dusk-sky-1",
       "transform_3d": {
         "position": [
           -22,
@@ -156,7 +156,7 @@
     },
     {
       "id": "dusk-sky-2",
-      "name": "Dusk Sky 2",
+      "name": "dusk-sky-2",
       "transform_3d": {
         "position": [
           -2,
@@ -185,7 +185,7 @@
     },
     {
       "id": "dusk-sky-3",
-      "name": "Dusk Sky 3",
+      "name": "dusk-sky-3",
       "transform_3d": {
         "position": [
           18,
@@ -214,7 +214,7 @@
     },
     {
       "id": "dusk-sky-4",
-      "name": "Dusk Sky 4",
+      "name": "dusk-sky-4",
       "transform_3d": {
         "position": [
           38,
@@ -243,7 +243,7 @@
     },
     {
       "id": "dusk-sky-5",
-      "name": "Dusk Sky 5",
+      "name": "dusk-sky-5",
       "transform_3d": {
         "position": [
           58,
@@ -272,7 +272,7 @@
     },
     {
       "id": "dusk-hills-far-0",
-      "name": "Dusk Far hills 0",
+      "name": "dusk-hills-far-0",
       "transform_3d": {
         "position": [
           -42,
@@ -301,7 +301,7 @@
     },
     {
       "id": "dusk-hills-far-1",
-      "name": "Dusk Far hills 1",
+      "name": "dusk-hills-far-1",
       "transform_3d": {
         "position": [
           -22,
@@ -330,7 +330,7 @@
     },
     {
       "id": "dusk-hills-far-2",
-      "name": "Dusk Far hills 2",
+      "name": "dusk-hills-far-2",
       "transform_3d": {
         "position": [
           -2,
@@ -359,7 +359,7 @@
     },
     {
       "id": "dusk-hills-far-3",
-      "name": "Dusk Far hills 3",
+      "name": "dusk-hills-far-3",
       "transform_3d": {
         "position": [
           18,
@@ -388,7 +388,7 @@
     },
     {
       "id": "dusk-hills-far-4",
-      "name": "Dusk Far hills 4",
+      "name": "dusk-hills-far-4",
       "transform_3d": {
         "position": [
           38,
@@ -417,7 +417,7 @@
     },
     {
       "id": "dusk-hills-far-5",
-      "name": "Dusk Far hills 5",
+      "name": "dusk-hills-far-5",
       "transform_3d": {
         "position": [
           58,
@@ -446,7 +446,7 @@
     },
     {
       "id": "dusk-hills-near-0",
-      "name": "Dusk Near hills 0",
+      "name": "dusk-hills-near-0",
       "transform_3d": {
         "position": [
           -42,
@@ -475,7 +475,7 @@
     },
     {
       "id": "dusk-hills-near-1",
-      "name": "Dusk Near hills 1",
+      "name": "dusk-hills-near-1",
       "transform_3d": {
         "position": [
           -22,
@@ -504,7 +504,7 @@
     },
     {
       "id": "dusk-hills-near-2",
-      "name": "Dusk Near hills 2",
+      "name": "dusk-hills-near-2",
       "transform_3d": {
         "position": [
           -2,
@@ -533,7 +533,7 @@
     },
     {
       "id": "dusk-hills-near-3",
-      "name": "Dusk Near hills 3",
+      "name": "dusk-hills-near-3",
       "transform_3d": {
         "position": [
           18,
@@ -562,7 +562,7 @@
     },
     {
       "id": "dusk-hills-near-4",
-      "name": "Dusk Near hills 4",
+      "name": "dusk-hills-near-4",
       "transform_3d": {
         "position": [
           38,
@@ -591,7 +591,7 @@
     },
     {
       "id": "dusk-hills-near-5",
-      "name": "Dusk Near hills 5",
+      "name": "dusk-hills-near-5",
       "transform_3d": {
         "position": [
           58,
