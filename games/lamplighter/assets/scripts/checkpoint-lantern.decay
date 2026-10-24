@@ -21,7 +21,7 @@ script CheckpointLantern {
         }
     }
 
-    fn light() {
+    fn ignite() {
         if this.lit {
             return;
         }

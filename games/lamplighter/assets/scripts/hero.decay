@@ -220,7 +220,7 @@ script Hero {
                 Game.coins += 1.0;
                 Audio.play("audio/coin.wav", 0.45);
             } else if World.has_tag(other, "lantern") {
-                CheckpointLantern.on(other).light();
+                CheckpointLantern.on(other).ignite();
             } else if World.has_tag(other, "goal") {
                 // A goal can be touched again; it only cheers the first time.
                 if !Game.won {
