@@ -13,10 +13,18 @@ import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
 
 import { bake } from '../src/bake.ts';
-import { type FileModelSpec, type RawModel, meshFromRaw } from '../src/imported.ts';
+import { type FileModelSpec, type RawModel, describeMaterials, meshFromRaw } from '../src/imported.ts';
 import { boundsOf } from '../src/model.ts';
 import { RecipeError, parseRecipe } from '../src/recipe.ts';
 import { barrelParts, boxPart, buildGlb, crateParts } from './glb.ts';
+
+/** A box whose texture gave its top face one color and the rest another: `top` for the two top triangles. */
+function texturedBox(name: string, top: number[], rest: number[]) {
+  const part = boxPart(name, '#ffffff', [1, 1, 1], [0, 0.5, 0]);
+  // boxPart writes the +Y face third, so its triangles are 4 and 5.
+  const colors = Array.from({ length: 12 }, (_, t) => (t === 4 || t === 5 ? top : rest)).flat();
+  return { ...part, colors };
+}
 
 const MODELS = fileURLToPath(new URL('../fixtures/models/', import.meta.url));
 
@@ -31,6 +39,7 @@ function spec(overrides: Partial<FileModelSpec> = {}): FileModelSpec {
     scale: 1,
     rotationY: 0,
     offset: [0, 0, 0],
+    textureColors: 8,
     materials: {},
     ...overrides,
   };
@@ -100,6 +109,45 @@ test('materials are named by the file, shared by name and color, and overridable
   assert.deepEqual(painted.ramps.Metal, mesh.ramps.Metal);
 });
 
+test('a textured part is cut into a few colors, named for the material that gave them', () => {
+  const raw: RawModel = { parts: [texturedBox('Cloth', [200, 40, 40], [40, 40, 200])] };
+  const mesh = meshFromRaw(raw, spec(), FOOTPRINT);
+  assert.deepEqual(Object.keys(mesh.ramps), ['Cloth 1', 'Cloth 2'], 'ten blue triangles and two red: blue first');
+  assert.equal(mesh.materials.length, 2);
+  assert.equal(mesh.palette.length, 8);
+  assert.equal(mesh.triangleMaterial.filter((m) => m === 0).length, 10);
+
+  const one = meshFromRaw(raw, spec({ textureColors: 1 }), FOOTPRINT);
+  assert.deepEqual(Object.keys(one.ramps), ['Cloth'], 'one cluster keeps the material\'s own name');
+  assert.equal(one.materials.length, 1);
+
+  const painted = meshFromRaw(raw, spec({ materials: { 'Cloth 2': { color: '#00aa00' } } }), FOOTPRINT);
+  assert.notDeepEqual(painted.ramps['Cloth 2'], mesh.ramps['Cloth 2']);
+  assert.deepEqual(painted.ramps['Cloth 1'], mesh.ramps['Cloth 1']);
+});
+
+test('the colors of every textured part are cut together, and untextured parts are left alone', () => {
+  const raw: RawModel = {
+    parts: [
+      texturedBox('Body', [220, 180, 150], [220, 180, 150]),
+      texturedBox('Cloth', [60, 40, 20], [60, 40, 20]),
+      boxPart('Metal', '#6b7280', [1, 1, 1], [3, 0.5, 0]),
+    ],
+  };
+  const mesh = meshFromRaw(raw, spec({ textureColors: 2 }), FOOTPRINT);
+  assert.deepEqual(Object.keys(mesh.ramps).sort(), ['Body', 'Cloth', 'Metal']);
+  assert.equal(mesh.materials.length, 3);
+  const bounds = boundsOf(mesh);
+  assert.ok(bounds.max[0] - bounds.min[0] > 3, 'every part is in the mesh');
+});
+
+test('a part that was cut shares vertices only with itself', () => {
+  const raw: RawModel = { parts: [texturedBox('Cloth', [200, 40, 40], [40, 40, 200])] };
+  const mesh = meshFromRaw(raw, spec(), FOOTPRINT);
+  assert.equal(mesh.indices.length / 3, 12, 'no triangle was lost or doubled');
+  assert.ok(mesh.positions.length / 3 <= 24 + 4, 'only the vertices each color uses were copied');
+});
+
 test('a model with nothing to draw is an error that names its file', () => {
   assert.throws(() => meshFromRaw({ parts: [] }, spec(), FOOTPRINT), /models\/box\.glb has no triangles/);
 });
@@ -163,6 +211,9 @@ test('a recipe may not name a path outside the project or a format we do not rea
   refuse({ kind: 'file', file: 'a.glb', fill: 0 }, /fill/);
   refuse({ kind: 'file', file: 'a.glb', fill: 1.5 }, /fill/);
   refuse({ kind: 'file', file: 'a.glb', scale: -1 }, /scale/);
+  refuse({ kind: 'file', file: 'a.glb', texture_colors: 0 }, /texture_colors/);
+  refuse({ kind: 'file', file: 'a.glb', texture_colors: 2.5 }, /texture_colors/);
+  refuse({ kind: 'file', file: 'a.glb', texture_colors: 17 }, /texture_colors/);
   refuse({ kind: 'file', file: 'a.glb', parts: [] }, /unknown field "parts"/);
   refuse({ kind: 'mesh' }, /expected "primitives" or "file"/);
 });
@@ -178,4 +229,13 @@ test('the example recipes parse and name the files beside them', async () => {
     const recipe = parseRecipe(text, name);
     assert.equal((recipe.variants[0].model as FileModelSpec).file, `models/${name}.glb`);
   }
+});
+
+test('the materials a person is shown are the colors the bake will use', () => {
+  const textured: RawModel = { parts: [texturedBox('Cloth', [200, 40, 40], [40, 40, 200]), boxPart('Metal', '#6b7280', [1, 1, 1], [3, 0.5, 0])] };
+  const names = describeMaterials(textured, spec()).map((row) => row.name);
+  assert.deepEqual(names, Object.keys(meshFromRaw(textured, spec(), FOOTPRINT).ramps), 'the same names, in the same order');
+  assert.deepEqual(describeMaterials(textured, spec({ textureColors: 1 })).map((row) => row.name), ['Cloth', 'Metal']);
+  assert.deepEqual(describeMaterials(textured, spec())[0], { name: 'Cloth 1', color: '#2828c8' });
+  assert.equal(describeMaterials(textured, spec()), describeMaterials(textured, spec()), 'worked out once per model and count');
 });

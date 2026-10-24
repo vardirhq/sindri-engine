@@ -322,7 +322,7 @@ and project/custom-domain routes.
 
 Engine — · Editor — · Decay — · Proof ✅
 
-**Tested by:** [`tools/isometric-baker/test/bake.test.ts`](../../tools/isometric-baker/test/bake.test.ts), [`tools/isometric-baker/test/anchor.test.ts`](../../tools/isometric-baker/test/anchor.test.ts), [`tools/isometric-baker/test/grain.test.ts`](../../tools/isometric-baker/test/grain.test.ts), [`tools/isometric-baker/test/tile-overhang.test.ts`](../../tools/isometric-baker/test/tile-overhang.test.ts), [`tools/isometric-baker/test/web.test.ts`](../../tools/isometric-baker/test/web.test.ts), [`tools/isometric-baker/test/imported.test.ts`](../../tools/isometric-baker/test/imported.test.ts), [`tools/isometric-baker/test/models.test.ts`](../../tools/isometric-baker/test/models.test.ts)
+**Tested by:** [`tools/isometric-baker/test/bake.test.ts`](../../tools/isometric-baker/test/bake.test.ts), [`tools/isometric-baker/test/anchor.test.ts`](../../tools/isometric-baker/test/anchor.test.ts), [`tools/isometric-baker/test/grain.test.ts`](../../tools/isometric-baker/test/grain.test.ts), [`tools/isometric-baker/test/tile-overhang.test.ts`](../../tools/isometric-baker/test/tile-overhang.test.ts), [`tools/isometric-baker/test/web.test.ts`](../../tools/isometric-baker/test/web.test.ts), [`tools/isometric-baker/test/imported.test.ts`](../../tools/isometric-baker/test/imported.test.ts), [`tools/isometric-baker/test/models.test.ts`](../../tools/isometric-baker/test/models.test.ts), [`tools/isometric-baker/test/quantize.test.ts`](../../tools/isometric-baker/test/quantize.test.ts), [`tools/isometric-baker/test/unzip.test.ts`](../../tools/isometric-baker/test/unzip.test.ts)
 
 **Exercised in:** [`games/orbital-baked/assets/textures/detonation.isobake`](../../games/orbital-baked/assets/textures/detonation.isobake)
 
@@ -351,7 +351,10 @@ command line's pixel for pixel; a browser smoke test opens it in CI. The page
 also bakes Blender models: a recipe may name a `.glb`, `.gltf` or `.obj`
 (`"kind": "file"`), which Three.js reads into triangles that are fitted, centred
 on the footprint and banded like a hand-written model (`imported.test.ts`,
-`models.test.ts`). The command line cannot read model files yet.
+`models.test.ts`). A model that comes as several files opens whole, from a zip, a
+folder or the files chosen together, and a textured model's colors are cut to a
+few (`quantize.test.ts`, `unzip.test.ts`). The command line cannot read model
+files yet.
 
 Orbital Last Stand uses it for one thing: `textures/detonation.isobake` bakes a
 five-frame blast, top-down, as `variants` of one sheet, and

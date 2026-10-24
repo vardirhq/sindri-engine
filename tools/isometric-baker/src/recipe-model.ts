@@ -163,12 +163,17 @@ function readFileModel(source: Record<string, JsonValue>, path: string): FileMod
     'scale',
     'rotation_y',
     'offset',
+    'texture_colors',
     'materials',
   ]);
   const fill = optional(source, 'fill', path, asNumber) ?? 1;
   if (!(fill > 0) || fill > 1) fail(`${path}.fill`, `expected a fraction above zero and up to one, got ${fill}`);
   const scale = optional(source, 'scale', path, asNumber) ?? 1;
   positive(scale, `${path}.scale`);
+  const textureColors = optional(source, 'texture_colors', path, asNumber) ?? 8;
+  if (!Number.isInteger(textureColors) || textureColors < 1 || textureColors > 16) {
+    fail(`${path}.texture_colors`, `expected a whole number from 1 to 16, got ${textureColors}`);
+  }
 
   const materialSource = optional(source, 'materials', path, asObject) ?? {};
   const materials: Record<string, MaterialSpec> = {};
@@ -184,6 +189,7 @@ function readFileModel(source: Record<string, JsonValue>, path: string): FileMod
     scale,
     rotationY: optional(source, 'rotation_y', path, asNumber) ?? 0,
     offset: optional(source, 'offset', path, asVec3) ?? [0, 0, 0],
+    textureColors,
     materials,
   };
 }

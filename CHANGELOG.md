@@ -1,5 +1,16 @@
 # Changelog
 
+- Open models that come as several files in the Sprite Baker. A `.zip` of a
+  download (a `.gltf`, its `.bin` and a `textures/` folder), a dropped folder,
+  **Open folder…**, or a `.gltf` chosen together with its `.bin` now just opens.
+  A `.gltf` missing its `.bin` says which file to add, and the message stays on
+  screen: before, it was replaced a moment later by the previous asset's "Baked"
+  line, so a failed open looked like nothing had happened. Textures now give a
+  model its colors, which a model with only base-color textures did not have: each
+  triangle takes the texel under the middle of its UVs and the colors are cut to a
+  chosen few (`texture_colors`, 1 to 16, default 8), each recolorable by name. The
+  Model tab lists the colors the bake will use rather than the file's materials.
+
 - Bake Blender models in the Sprite Baker: drop a `.glb`, `.gltf` or `.obj` on
   the page (or open one) and it is read by Three.js into triangles, centred on
   its footprint, stood on the floor, shaded into the baker's four-shade palette

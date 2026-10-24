@@ -18,7 +18,9 @@ import { extname, join, normalize } from 'node:path';
 import assert from 'node:assert/strict';
 
 // Node strips the types of the test helpers, which build the model files used here.
-import { buildGlb, crateParts } from '../../tools/isometric-baker/test/glb.ts';
+import { buildGlb, buildGltf, crateParts, texturedCrateParts } from '../../tools/isometric-baker/test/glb.ts';
+import { encodePng } from '../../tools/isometric-baker/web/png.ts';
+import { zip } from '../../tools/isometric-baker/web/zip.ts';
 
 const [root, captures = 'target/baker-captures'] = process.argv.slice(2);
 if (!root) throw new Error('usage: baker.mjs <site-dir> [capture-dir]');
@@ -56,6 +58,29 @@ await writeFile(
     footprint: { width: 1, height: 1 },
     model: { kind: 'file', file: 'models/waiting.glb', auto_fit: true, fill: 0.9 },
   }),
+);
+// A Sketchfab-style download: a .gltf that points at scene.bin and a texture in textures/.
+// The texture is four pixels, two red and two blue, and the crate's top looks up the red.
+const sketch = join(scratch, 'sketchfab');
+const { gltf, bin } = buildGltf(texturedCrateParts(), { textured: true });
+const texture = encodePng({
+  width: 4,
+  height: 1,
+  data: Uint8ClampedArray.from([200, 40, 40, 255, 200, 40, 40, 255, 40, 40, 200, 255, 40, 40, 200, 255]),
+});
+await mkdir(join(sketch, 'textures'), { recursive: true });
+await writeFile(join(sketch, 'scene.gltf'), gltf);
+await writeFile(join(sketch, 'scene.bin'), bin);
+await writeFile(join(sketch, 'textures', 'body.png'), texture);
+const archive = join(scratch, 'blacksmith.zip');
+await writeFile(
+  archive,
+  zip([
+    { path: 'scene.gltf', contents: new TextEncoder().encode(gltf) },
+    { path: 'scene.bin', contents: bin },
+    { path: 'textures/body.png', contents: texture },
+    { path: 'license.txt', contents: new TextEncoder().encode('CC-BY-4.0') },
+  ]),
 );
 const wedge = 'v 0 0 0\nv 1 0 0\nv 0 0 1\nv 0 1 0\nf 1 2 3\nf 1 3 4\nf 1 4 2\nf 2 4 3\n';
 
@@ -201,6 +226,46 @@ try {
     await ok();
     await pane('assets');
 
+    // A .gltf on its own cannot work: it says what it is missing, and the message is not wiped by the old bake.
+    const countBefore = (await assetNames()).length;
+    await page.setInputFiles('#open', join(sketch, 'scene.gltf'));
+    await failed();
+    assert.match(await status(), /scene\.gltf needs scene\.bin/, `${name}: says which file to add`);
+    await page.waitForTimeout(500);
+    assert.match(await page.locator('#status').getAttribute('class'), /error/, `${name}: the message stays on screen`);
+    assert.equal((await assetNames()).length, countBefore, `${name}: nothing was added`);
+
+    // A zip of the whole download just opens: textures give the model its colors.
+    await page.setInputFiles('#open', archive);
+    await ok();
+    await pane('assets');
+    assert.equal(await page.locator('#assets .asset[aria-current=true] span').textContent(), 'scene', `${name}: the zip's model is open`);
+    assert.equal((await assetNames()).length, countBefore + 1, `${name}: one asset from the zip`);
+    await pane('inspector');
+    await tab('model');
+    const swatches = await page.locator('#materials .material input[type=color]').evaluateAll((nodes) => nodes.map((node) => node.value));
+    assert.deepEqual(swatches.sort(), ['#2828c8', '#c82828'], `${name}: the texture's red and blue became two colors`);
+    assert.deepEqual(
+      (await page.locator('#materials .material span').allTextContents()).sort(),
+      ['Body 1', 'Body 2'],
+      `${name}: named for the material they came from`,
+    );
+    await page.locator('[data-setting="texture_colors"]').fill('1');
+    await page.waitForFunction(() => /"texture_colors":\s*1\b/.test(document.querySelector('#recipe').value), null, { timeout: 5000 });
+    await ok();
+    assert.deepEqual(await page.locator('#materials .material span').allTextContents(), ['Body'], `${name}: one color, the material's own name`);
+
+    // The same folder, opened as a folder, and the .gltf with only its .bin chosen beside it.
+    await page.setInputFiles('#open-folder', sketch);
+    await ok();
+    await pane('assets');
+    assert.equal((await assetNames()).length, countBefore + 2, `${name}: a folder opens too`);
+    await page.setInputFiles('#open', [join(sketch, 'scene.gltf'), join(sketch, 'scene.bin')]);
+    await ok();
+    await pane('assets');
+    assert.equal((await assetNames()).length, countBefore + 3, `${name}: a .gltf and its .bin, chosen together`);
+
+    // A file that is neither a model nor a recipe is a message, and a folder's license file is not.
     // A recipe whose model has not arrived says so, and takes it when it does.
     await page.setInputFiles('#open', waitingRecipe);
     await failed();

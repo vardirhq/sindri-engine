@@ -31,9 +31,12 @@ and re-baking rewrites the generated files in place.
 The baker is also a page, titled **Sprite Baker**, at `/examples/isometric-baker/`
 on the site, laid out like IsoGame's Sprite Factory: a catalogue of assets, every
 direction drawn on its floor, and an inspector. Drop a Blender `.glb`, `.gltf` or
-`.obj` on it (or open one) and it becomes an asset, fitted to a tile, with the
-fit, turn, nudge, footprint, directions, each material's color, the render
-settings and the light as controls; a recipe that names a model file takes it
+`.obj` on it (or open one) and it becomes an asset, fitted to a tile. A model
+that comes as several files, which is most downloads, opens whole: drop the
+`.zip` it arrived in, or its folder (or **Open folder…**), or choose the `.gltf`
+together with its `.bin` and textures. The fit, turn, nudge, footprint,
+directions, the number of texture colors, each color, the render settings and the
+light are controls; a recipe that names a model file takes it
 from you by name. Download the PNG, sheet and prefab, or a zip of the three laid
 out like an asset root. The controls edit the recipe text, so it is always what
 Save writes.
@@ -399,22 +402,35 @@ baked by naming it instead of listing parts:
   "scale": 1,                   // extra uniform scale, after fitting
   "rotation_y": 0,              // degrees about +Y, for a file not facing +X
   "offset": [0, 0, 0],          // nudge in tile units, applied last
-  "materials": { "Wood": "#8a5a2b" }  // recolor a material by its name in the file
+  "texture_colors": 8,          // 1 to 16: how many colors the file's textures are cut to
+  "materials": { "Wood": "#8a5a2b" }  // recolor a material (or a texture color) by name
 }
 ```
 
-The file is read into triangles, each with a name and a base color, and from
-there it is baked exactly like a model built from primitives. It is centred on
+The file is read into triangles, each with a name and a color, and from there it
+is baked exactly like a model built from primitives. It is centred on
 its footprint, stood on the floor, and each material's base color becomes the
 same four-shade ramp a hand-written material gets, so an imported model shades
 like everything else. Smooth normals the file carries are kept, which is what
 terraces a barrel's curve into bands; a file without normals is flat shaded.
-Textures, vertex colors, lights, cameras and animation are not used, and a
+
+**Textures give a model its colors, a few at a time.** A material with a base-color
+texture has no single color, so each triangle takes the texel under the middle of
+its UVs (times the material's own color), and every triangle in the model is cut
+down to `texture_colors` colors by median cut, which is deterministic. Each color
+is a material named for the material that gave most of it (`Body`, or `Body 1`,
+`Body 2` when it gave several), so it can be recolored by that name. Eight is a
+palette of about thirty colors; one is a flat model in an average color. Normal
+and other maps, vertex colors, lights, cameras and animation are not used, and a
 skinned mesh is baked in its bind pose. The usual footprint check applies: a
 model that overhangs its footprint is refused, not shrunk.
 
 Reading the formats is the browser page's job (it uses Three.js; see
-[In the browser](#in-the-browser)). **The command line cannot read model files
+[In the browser](#in-the-browser)). A `.glb` is one file. A `.gltf` points at a
+`.bin` of geometry and usually some textures, so it is opened with them: choose
+them together, open the folder, drop the folder, or open the **`.zip`** a model
+site gave you, which the page reads itself. A `.gltf` missing its `.bin` says so
+by name; a missing texture only costs its colors. **The command line cannot read model files
 yet**, and a recipe naming one says so rather than baking nothing. Handing a
 bake the models is `bake(recipe, { models })`, where `models` maps each recipe's
 `file` to its triangles (`RawModel` in `src/imported.ts`).

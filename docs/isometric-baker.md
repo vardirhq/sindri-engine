@@ -57,10 +57,22 @@ first slider you touch). The layout follows IsoGame's Sprite Factory, which the
 baker was adapted from and which had an interactive page of its own.
 
 A model is dropped on the page or opened, read by Three.js into triangles, and
-baked by the same code as anything else; the page lists the file's materials so
-each can be recolored, and has controls for the fit, turn and nudge a model
-needs to stand on a tile. A recipe that names a model file takes it by name, so
-a model and its recipe can be opened together or one after the other.
+baked by the same code as anything else; the page lists the colors the model
+will have so each can be recolored, and has controls for the fit, turn and nudge
+a model needs to stand on a tile. A recipe that names a model file takes it by
+name, so a model and its recipe can be opened together or one after the other.
+
+Most downloaded models are several files, so the page opens them whole. A `.zip`
+is read in the page (`web/unzip.ts`, with the browser's own
+`DecompressionStream`: stored and deflated entries, no encryption or ZIP64, with
+bounds on what it will expand), and a dropped or chosen folder is walked; either
+way the `.gltf`, its `.bin` and its textures are found by name wherever they sat
+in it. A `.gltf` missing its `.bin` is refused with the file's name, and one
+missing only textures opens with those colors lost. A model's textures give it
+its colors: each triangle takes the texel under the middle of its UVs, and the
+model's colors are cut to `texture_colors` by median cut (`src/quantize.ts`,
+deterministic), so a model of a thousand-pixel texture has a palette of a few
+colors, each named for the material that gave most of it.
 
 It is not a second implementation. `tools/isometric-baker/web/build.mjs` copies
 the tool's own TypeScript into the site with the types stripped by Node's

@@ -15,6 +15,7 @@ import { zip } from './baker/zip.js';
 import { framePreview } from './context.js';
 import { setupControls, setupTabs } from './controls.js';
 import { extensionOf, isModelFile, readModelFile } from './models.js';
+import { unzip } from './baker/unzip.js';
 
 const $ = (id) => document.getElementById(id);
 const recipeBox = $('recipe');
@@ -106,7 +107,7 @@ function select(index, { show = true } = {}) {
   selected = index;
   recipeBox.value = assets[index].recipe;
   if (show) showPane('preview');
-  run();
+  return run();
 }
 
 function addAsset(asset) {
@@ -183,25 +184,65 @@ async function supplyModels(asset, recipe) {
 
 // ---- Opening files ---------------------------------------------------------
 
-async function openFiles(files) {
-  const list = [...files];
+/** Files a model may come with: its geometry, its textures, its materials. */
+const COMPANION_EXTENSIONS = ['bin', 'png', 'jpg', 'jpeg', 'webp', 'gif', 'bmp', 'mtl'];
+
+/** What a zip holds, as files named for where they were in it, minus the clutter archivers add. */
+async function unpack(file) {
+  const entries = await unzip(new Uint8Array(await file.arrayBuffer()));
+  return entries
+    .filter(({ path }) => !path.startsWith('__MACOSX/') && !leaf(path).startsWith('.'))
+    .map(({ path, contents }) => new File([contents], leaf(path)));
+}
+
+/** Every file chosen, with each zip replaced by the files in it. Says why one could not be opened. */
+async function expand(files) {
+  const out = [];
+  for (const file of files) {
+    if (extensionOf(file.name) !== 'zip') {
+      out.push(file);
+      continue;
+    }
+    try {
+      const inside = await unpack(file);
+      if (inside.length === 0) say(`${file.name} is empty`, 'error');
+      out.push(...inside);
+    } catch (error) {
+      say(`${file.name} could not be opened: ${error.message}`, 'error');
+    }
+  }
+  return out;
+}
+
+async function openFiles(chosen) {
+  const list = await expand([...chosen]);
   const recipes = list.filter((file) => ['isobake', 'json'].includes(extensionOf(file.name)));
   const models = list.filter((file) => isModelFile(file.name));
-  const rest = list.filter((file) => !recipes.includes(file) && !models.includes(file));
-  if (rest.length > 0) {
-    say(`${rest.map((file) => file.name).join(', ')}: not a model (.glb, .gltf, .obj) or a recipe (.isobake)`, 'error');
-    if (recipes.length + models.length === 0) return;
+  const companions = list.filter((file) => COMPANION_EXTENSIONS.includes(extensionOf(file.name)));
+  const rest = list.filter((file) => !recipes.includes(file) && !models.includes(file) && !companions.includes(file));
+  // A folder or a zip brings a license and a readme along; they only matter if nothing else came.
+  if (recipes.length + models.length === 0) {
+    if (companions.length > 0) {
+      const names = companions.map((file) => file.name).slice(0, 3).join(', ');
+      say(`${names}${companions.length > 3 ? '…' : ''}: textures and buffers are read with a model. Choose them together with the .gltf, or open its zip or folder.`, 'error');
+    } else if (rest.length > 0) {
+      say(`${rest.map((file) => file.name).join(', ')}: not a model (.glb, .gltf, .obj) or a recipe (.isobake)`, 'error');
+    }
+    return;
   }
 
   let target = selected;
+  let opened = false;
   for (const file of recipes) {
     target = addAsset({ name: file.name.replace(/\.[^.]+$/, ''), recipe: await file.text() });
+    opened = true;
   }
   let failed = null;
   for (const file of models) {
     let raw;
     try {
-      raw = await readModelFile(file);
+      say(`Reading ${file.name}…`, 'wait');
+      raw = await readModelFile(file, { companions });
     } catch (error) {
       failed = error.message;
       continue;
@@ -215,8 +256,14 @@ async function openFiles(files) {
     } else {
       target = addAsset({ name: file.name.replace(/\.[^.]+$/, ''), recipe: recipeForModel(file.name), models: { [`models/${file.name}`]: raw } });
     }
+    opened = true;
   }
-  select(target);
+  // Nothing opened: leave what is on screen alone, so the reason stays on screen too.
+  if (!opened) {
+    if (failed) say(failed, 'error');
+    return;
+  }
+  await select(target);
   if (failed) say(failed, 'error');
 }
 
@@ -225,6 +272,31 @@ $('open').addEventListener('change', async (event) => {
   event.target.value = '';
   await openFiles(files);
 });
+$('open-folder').addEventListener('change', async (event) => {
+  const files = [...event.target.files];
+  event.target.value = '';
+  await openFiles(files);
+});
+
+/** Every file under what was dropped, folders included. `entries` must be taken inside the drop event. */
+async function filesUnder(entries) {
+  const found = [];
+  const walk = async (entry) => {
+    if (found.length >= 2000) return;
+    if (entry.isFile) {
+      found.push(await new Promise((resolve, reject) => entry.file(resolve, reject)));
+      return;
+    }
+    const reader = entry.createReader();
+    for (;;) {
+      const batch = await new Promise((resolve, reject) => reader.readEntries(resolve, reject));
+      if (batch.length === 0) break;
+      for (const child of batch) await walk(child);
+    }
+  };
+  for (const entry of entries) await walk(entry);
+  return found;
+}
 
 let dragDepth = 0;
 const carriesFiles = (event) => [...(event.dataTransfer?.types ?? [])].includes('Files');
@@ -246,7 +318,10 @@ window.addEventListener('drop', (event) => {
   event.preventDefault();
   dragDepth = 0;
   $('drop').hidden = true;
-  openFiles(event.dataTransfer.files);
+  // The entries are only valid while the event is being handled; reading them is not.
+  const entries = [...(event.dataTransfer.items ?? [])].map((item) => item.webkitGetAsEntry?.()).filter(Boolean);
+  const loose = [...event.dataTransfer.files];
+  (entries.length > 0 ? filesUnder(entries) : Promise.resolve(loose)).then(openFiles);
 });
 
 // ---- Showing a bake --------------------------------------------------------
@@ -387,6 +462,10 @@ async function run() {
       fail(`This recipe needs the model file ${missing.map(leaf).join(', ')}. Drop it onto the page, or choose it with Open….`);
       return;
     }
+    // A model with tens of thousands of triangles takes a moment: say so before the page stops to do it.
+    say('Baking…', 'wait');
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    if (mine !== generation) return;
     const started = performance.now();
     result = bake(recipe, { models: asset.models });
     result.elapsed = Math.round(performance.now() - started);

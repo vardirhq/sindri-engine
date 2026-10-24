@@ -5,6 +5,8 @@
 // recipe's JSON and bakes again, so the text in the Recipe tab is always what
 // Save recipe will write. A recipe the baker refuses can still be mended here,
 // provided it is JSON.
+import { describeMaterials } from './baker/imported.js';
+
 const DEGREES = 180 / Math.PI;
 
 /** Where the light is, as the two angles a person thinks in. */
@@ -50,6 +52,7 @@ const READ = {
   directions: (r) => r.directions,
   facing: (r) => r.facing,
   auto_fit: (r) => fileModelOf(r)?.autoFit ?? false,
+  texture_colors: (r) => fileModelOf(r)?.textureColors ?? 8,
   fill: (r) => fileModelOf(r)?.fill ?? 1,
   scale: (r) => fileModelOf(r)?.scale ?? 1,
   rotation_y: (r) => Math.round(((fileModelOf(r)?.rotationY ?? 0) % 360 + 360) % 360),
@@ -70,6 +73,7 @@ const LABEL = {
   band2: two,
   footprint_w: (v) => `${v}`,
   footprint_h: (v) => `${v}`,
+  texture_colors: (v) => `${v}`,
   fill: (v) => `${Math.round(v * 100)}%`,
   scale: (v) => `${two(v)}×`,
   rotation_y: (v) => `${v}°`,
@@ -179,11 +183,9 @@ export function setupControls({ recipeBox, current, rerun }) {
   function syncMaterials(recipe, asset) {
     const file = fileModelOf(recipe);
     const raw = file && asset.models[file.file];
-    const rows = [];
-    for (const part of raw?.parts ?? []) {
-      if (!rows.some((row) => row.name === part.name)) rows.push({ name: part.name, original: part.color });
-    }
-    for (const row of rows) row.override = file.materials[row.name]?.color ?? null;
+    const rows = raw
+      ? describeMaterials(raw, file).map(({ name, color }) => ({ name, original: color, override: file.materials[name]?.color ?? null }))
+      : [];
     const signature = JSON.stringify(rows);
     if (signature === materialSignature) return;
     materialSignature = signature;

@@ -79,7 +79,7 @@ export async function build(outDir, { vendor: withVendor = true } = {}) {
     await compile(join(tool, 'src', file), join(out, 'baker', file.replace(/\.ts$/, '.js')));
   }
   // web/png.ts reaches back for `../src/image.ts`; in the output that sits beside it.
-  for (const file of ['png.ts', 'zip.ts']) {
+  for (const file of ['png.ts', 'zip.ts', 'unzip.ts']) {
     const source = await readFile(join(tool, 'web', file), 'utf8');
     const flat = source.replaceAll("'../src/", "'./");
     const stripped = stripTypeScriptTypes(flat, { mode: 'strip' });

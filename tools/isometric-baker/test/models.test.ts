@@ -16,11 +16,14 @@ import { test } from 'node:test';
 import { bake } from '../src/bake.ts';
 import { type RawModel } from '../src/imported.ts';
 import { parseRecipe } from '../src/recipe.ts';
-import { barrelParts, crateParts } from './glb.ts';
+import { barrelParts, buildGltf, crateParts } from './glb.ts';
 
 const MODELS = fileURLToPath(new URL('../fixtures/models/', import.meta.url));
 
-type Reader = (file: File) => Promise<RawModel>;
+type Reader = (file: File, options?: { companions?: File[] }) => Promise<RawModel>;
+
+// Three's file loader reports progress with an event that browsers have and Node does not.
+(globalThis as { ProgressEvent?: unknown }).ProgressEvent ??= class extends Event {};
 
 async function reader(): Promise<Reader | null> {
   try {
@@ -84,4 +87,23 @@ test('a file that is not a model says which file and why', async (t) => {
 
   await assert.rejects(read(new File(['not a model'], 'broken.glb')), /broken\.glb could not be read/);
   await assert.rejects(read(new File(['# nothing\n'], 'empty.obj')), /empty\.obj has no triangles/);
+});
+
+test('a .gltf is read with its .bin chosen beside it, wherever that was found', async (t) => {
+  const read = await reader();
+  if (!read) return t.skip('three is not installed: npm ci --prefix web');
+
+  const { gltf, bin } = buildGltf(crateParts());
+  const raw = await read(new File([gltf], 'scene.gltf'), { companions: [new File([bin as BlobPart], 'Scene.BIN')] });
+  assert.deepEqual(raw.parts.map((part) => [part.name, part.color]), crateParts().map((part) => [part.name, part.color]));
+  const xs = raw.parts.flatMap((part) => [...part.positions].filter((_, i) => i % 3 === 0));
+  assert.ok(Math.max(...xs) - Math.min(...xs) < 0.02, 'the node scale of 0.01 is applied: centimetres in the file, metres here');
+});
+
+test('a .gltf that is missing its .bin says exactly what to choose with it', async (t) => {
+  const read = await reader();
+  if (!read) return t.skip('three is not installed: npm ci --prefix web');
+
+  const { gltf } = buildGltf(crateParts());
+  await assert.rejects(read(new File([gltf], 'scene.gltf')), /scene\.gltf needs scene\.bin\..*Open folder.*\.glb/);
 });
