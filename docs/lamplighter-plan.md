@@ -139,10 +139,12 @@ Looked at, and what was found:
   pixels to an art pixel at 960 by 540 and 6 at 1920 by 1080. The camera has a
   `pixel_perfect` flag (`docs/2d-inventory.md`); whether it keeps the scale whole
   at window sizes that are not multiples is verified in stage 2 and, if it does
-  not, closed in the engine.
+  not, closed in the engine. *Found in stage 2:* it does not. A 1366 by 768
+  window gives uneven art pixels, so an integer-scale camera mode is a gap to
+  close in the engine, in its own pull request, with a `docs/parity.md` row.
 - **Still to verify**, none assumed: scene fades, drawn touch controls, browser
-  `Save` across reloads, respawn without a scene reload, and baked side-view
-  sheets as animation clips.
+  `Save` across reloads and respawn without a scene reload. Baked side-view
+  sheets as animation clips are verified: Wick's run plays in the renderer.
 
 ## Stages
 
@@ -159,7 +161,15 @@ documentation says what is now true.
    level, and prose that says "the platformer" meaning the genre.
 2. **Art foundation.** The style bible and palette, the autotiled tile sets and
    backgrounds for the first two biomes, Wick and the lantern baked and
-   animated, the font, and a screenshot test that opens the art.
+   animated, the font, and a screenshot test that opens the art. *Done:*
+   `art/dusk/build.py` draws the meadow and harbor tile sets (47-tile blob
+   terrains with normal maps), the water, sky and hill layers, decoration and
+   the lantern with its stepped glow, and bakes Wick from a recipe the script
+   writes; CI runs it again and fails on any drift. `tests/art_foundation.rs`
+   opens both art scenes and checks every picture, sprite and normal map they
+   name and that their ground is what its terrain paints. Wick's run clip was
+   seen playing in the real renderer. The font is the Inter already in
+   `assets/fonts`; a pixel face is a stage 3 decision, made with the title screen.
 3. **The shell.** Title, level select, pause, settings, saved progress and drawn
    touch controls, with level one behind it.
 4. **Level 1, end to end.** Lanterns, checkpoints, respawn, embers, the first

@@ -1,0 +1,18 @@
+{
+  "format_version": 1,
+  "anchor": "center",
+  "grid": {
+    "columns": 8,
+    "rows": 1,
+    "names": [
+      "tuft-0",
+      "tuft-1",
+      "tuft-2",
+      "flower-0",
+      "flower-1",
+      "pebbles-0",
+      "pebbles-1",
+      ""
+    ]
+  }
+}

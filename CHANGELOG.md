@@ -1,5 +1,15 @@
 # Changelog
 
+- Lamplighter's art foundation, the second stage of its plan
+  (`docs/lamplighter-plan.md`). `games/lamplighter/art/dusk/build.py` draws a
+  dusk palette's meadow and harbor tile sets as 47-tile `blob` terrains with
+  normal maps, water, sky and hill layers, decoration, the lantern with a
+  stepped glow, and bakes Wick from a recipe it writes with the Sprite Baker.
+  Two art scenes show it under the 2D lighting the game will use, a test opens
+  them, and CI re-runs the script and fails if the checked-in art moves. The
+  game itself is unchanged. The work found a gap: nothing keeps a pixel game's
+  scale to whole multiples of the window, recorded in `docs/parity.md`.
+
 - Move the platformer to `games/lamplighter`, the first stage of turning it into
   Lamplighter, a short real game (`docs/lamplighter-plan.md`). The crate, the
   Pages route (`/examples/lamplighter/`, `/play/lamplighter/`), the directory
