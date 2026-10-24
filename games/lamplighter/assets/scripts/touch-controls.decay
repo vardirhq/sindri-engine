@@ -31,10 +31,10 @@ script TouchControls {
         World.set_active(this.ring, Game.touch);
         World.set_active(this.knob, Game.touch);
         if Game.touch {
-            let at = this.anchor;
+            var at: Vec2 = this.anchor;
             if !this.drawing { at = Vec2(-0.75, -0.64); }
             this.ring.transform.position = Vec3(at.x, at.y, 0.0);
-            let push = Vec2(0.0, 0.0);
+            var push: Vec2 = Vec2(0.0, 0.0);
             if this.drawing { push = Vec2(Stick.x, -Stick.y) * KNOB_TRAVEL; }
             this.knob.transform.position = Vec3(at.x + push.x, at.y + push.y, 0.0);
         }
