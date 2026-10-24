@@ -3,144 +3,184 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#12161b" />
-    <meta name="description" content="Bake a 3D model recipe into ordinary Sindri sprites in your browser, then download the PNG, sheet and prefab. The Sindri Sprite Baker: isometric, top-down or side view." />
+    <meta name="theme-color" content="#1b1622" />
+    <meta name="description" content="Bake a 3D model into ordinary Sindri sprites in your browser: drop a Blender .glb or .obj, tune it, and download the PNG, sheet and prefab. The Sindri Sprite Baker." />
     <title>Sprite Baker · Sindri Engine</title>
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%2312161b'/%3E%3Cpath d='M8 2.5 13 5.5v5L8 13.5 3 10.5v-5z M3 5.5l5 3 5-3 M8 8.5v5' fill='none' stroke='%23e9a33a' stroke-width='1.2' stroke-linejoin='round'/%3E%3C/svg%3E" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%231b1622'/%3E%3Cpath d='M8 2.5 13 5.5v5L8 13.5 3 10.5v-5z M3 5.5l5 3 5-3 M8 8.5v5' fill='none' stroke='%23d9a441' stroke-width='1.2' stroke-linejoin='round'/%3E%3C/svg%3E" />
+    <!-- Three.js reads model files and nothing else; build.mjs copies the three files it uses. -->
+    <script type="importmap">
+      { "imports": { "three": "./vendor/three/three.module.min.js", "three/addons/": "./vendor/three/addons/" } }
+    </script>
     <style>
       :root {
         color-scheme: dark;
-        --bg: #0f1317; --panel: #151a20; --line: #262e37; --text: #dde2e7; --muted: #98a0a8;
-        --forge: #e9a33a; --danger: #ef6b5b; --ok: #6fbf7b;
-        --checker-a: #1b2128; --checker-b: #232a32;
+        --bg: #1b1622; --panel: #241d2e; --panel-2: #2d2439; --line: #3b3049;
+        --text: #e6dff0; --muted: #9d92ad; --accent: #d9a441; --danger: #ef6b5b; --ok: #6fbf7b;
+        --checker-a: #211a2a; --checker-b: #281f33;
+        --safe-bottom: env(safe-area-inset-bottom);
       }
       * { box-sizing: border-box; }
-      html, body { margin: 0; background: var(--bg); color: var(--text); }
-      body { font: 15px/1.5 Inter, ui-sans-serif, system-ui, sans-serif; min-height: 100dvh; }
-      header {
-        display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 16px;
-        padding: 14px 16px; border-bottom: 1px solid var(--line);
-        padding-left: max(16px, env(safe-area-inset-left)); padding-right: max(16px, env(safe-area-inset-right));
+      html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text); }
+      body {
+        font: 13px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        display: grid; grid-template-columns: 200px minmax(0, 1fr) 280px; height: 100dvh; overflow: hidden;
       }
-      h1 { margin: 0; font-size: 13px; letter-spacing: .08em; color: var(--forge); }
-      header p { margin: 0; color: var(--muted); font-size: 14px; }
-      main {
-        display: grid; gap: 16px;
-        grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr) 250px;
-        grid-template-areas: "recipe preview inspector";
-        align-items: start;
-        padding: 16px; padding-left: max(16px, env(safe-area-inset-left)); padding-right: max(16px, env(safe-area-inset-right));
-        padding-bottom: max(16px, env(safe-area-inset-bottom));
+      h1 { font-size: 13px; margin: 0 0 4px; letter-spacing: .08em; text-transform: uppercase; }
+      h2 { font-size: 11px; margin: 18px 0 6px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; font-weight: 600; }
+      h2:first-child { margin-top: 0; }
+      .pane { overflow-y: auto; padding: 16px; min-width: 0; padding-left: max(16px, env(safe-area-inset-left)); }
+      aside.pane { background: var(--panel); }
+      #catalogue { border-right: 1px solid var(--line); }
+      #inspector { border-left: 1px solid var(--line); padding-right: max(16px, env(safe-area-inset-right)); }
+      .stats { color: var(--muted); font-size: 11px; }
+      .hint { color: var(--muted); font-size: 11px; margin: 10px 0 0; }
+      code { font: inherit; color: var(--accent); }
+
+      button, select, .action, input[type=number] {
+        font: inherit; color: var(--text); background: var(--panel-2); border: 1px solid var(--line);
+        border-radius: 5px; padding: 6px 9px; min-height: 34px; cursor: pointer; text-decoration: none;
       }
-      #recipe-panel { grid-area: recipe; } #preview-panel { grid-area: preview; } #inspector { grid-area: inspector; }
-      @media (max-width: 1180px) {
-        main { grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); grid-template-areas: "recipe preview" "recipe inspector"; }
+      button:hover, select:hover, .action:hover { border-color: var(--accent); color: var(--accent); }
+      button:focus-visible, select:focus-visible, .action:focus-within, summary:focus-visible, textarea:focus-visible {
+        outline: 2px solid var(--accent); outline-offset: 1px;
       }
-      @media (max-width: 860px) {
-        main { grid-template-columns: minmax(0, 1fr); grid-template-areas: "recipe" "preview" "inspector"; }
-        textarea { height: 40dvh; min-height: 220px; }
+      button.primary { background: var(--accent); color: #1c1306; border-color: var(--accent); font-weight: 600; }
+      button.primary:hover { color: #1c1306; filter: brightness(1.1); }
+      button:disabled { opacity: .5; cursor: default; }
+      .action { display: block; width: 100%; text-align: center; margin-top: 8px; }
+      .wide { width: 100%; }
+
+      .asset {
+        display: block; width: 100%; text-align: left; padding: 7px 9px; margin-bottom: 3px; min-height: 44px;
+        background: transparent; border: 1px solid transparent; border-radius: 5px; color: var(--text);
       }
-      section { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 12px; min-width: 0; }
-      h2 { margin: 0 0 8px; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
-      .bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 8px; }
-      select, button, .button {
-        font: inherit; font-size: 14px; color: var(--text); background: #1d242c; border: 1px solid var(--line);
-        border-radius: 6px; padding: 6px 10px; min-height: 36px; cursor: pointer; text-decoration: none;
-        display: inline-flex; align-items: center;
-      }
-      button:hover, .button:hover, select:hover { border-color: var(--forge); }
-      button.primary, .button.primary { background: var(--forge); color: #1a1205; border-color: var(--forge); font-weight: 600; }
-      textarea {
-        width: 100%; height: min(62dvh, 640px); min-height: 280px; resize: vertical;
-        font: 13px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; color: var(--text);
-        background: #0f1317; border: 1px solid var(--line); border-radius: 6px; padding: 10px; tab-size: 2;
-      }
-      textarea:focus { outline: 2px solid var(--forge); outline-offset: -1px; }
-      #status { min-height: 1.5em; font-size: 14px; margin: 8px 0 0; }
+      .asset:hover { background: var(--panel-2); color: var(--text); border-color: transparent; }
+      .asset[aria-current='true'] { background: var(--panel-2); border-color: var(--accent); color: var(--accent); }
+      .asset small { display: block; color: var(--muted); font-size: 11px; }
+
+      .bar { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; margin-bottom: 10px; }
+      .bar label { display: flex; align-items: center; gap: 8px; color: var(--muted); }
+      .bar label output { color: var(--text); min-width: 2ch; font-variant-numeric: tabular-nums; }
+      .bar input[type=range] { width: 110px; }
+      #status { margin: 0 0 10px; min-height: 1.5em; }
       #status.error { color: var(--danger); white-space: pre-wrap; }
       #status.ok { color: var(--ok); }
-      .stage {
-        overflow: auto; border: 1px solid var(--line); border-radius: 6px; padding: 8px; text-align: center;
-        background: repeating-conic-gradient(var(--checker-a) 0 25%, var(--checker-b) 0 50%) 0 0 / 16px 16px;
-      }
+      #status.wait { color: var(--muted); }
+
+      .stage { overflow: auto; border: 1px solid var(--line); border-radius: 8px; padding: 10px; background:
+        repeating-conic-gradient(var(--checker-a) 0 25%, var(--checker-b) 0 50%) 0 0 / 16px 16px; }
       .stage.stale { opacity: .45; }
-      canvas { image-rendering: pixelated; max-width: none; display: block; }
-      .cards { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; text-align: left; }
-      .card { background: #1d242c; border: 1px solid var(--line); border-radius: 8px; padding: 8px; }
-      .card header { display: flex; justify-content: space-between; gap: 12px; color: var(--muted); font-size: 12px; padding-bottom: 6px; }
+      .cards { display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; }
+      .card { margin: 0; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 10px; }
+      .card header { display: flex; justify-content: space-between; gap: 14px; color: var(--muted); font-size: 11px; padding-bottom: 8px; }
       .card header b { color: var(--text); font-weight: 600; }
+      canvas { image-rendering: pixelated; display: block; max-width: none; }
       .card canvas { border-radius: 4px; }
-      details { margin-top: 10px; }
-      summary { cursor: pointer; color: var(--muted); font-size: 13px; }
+      .frames { color: var(--muted); font-size: 11px; margin: 10px 0 0; }
+      details { margin-top: 12px; }
+      summary { cursor: pointer; color: var(--muted); }
       details .stage { margin-top: 8px; }
+      dl { display: grid; grid-template-columns: max-content 1fr; gap: 2px 14px; margin: 12px 0; }
+      dt { color: var(--muted); } dd { margin: 0; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+      .swatches { display: flex; flex-wrap: wrap; gap: 3px; }
+      .swatches i { width: 18px; height: 18px; border-radius: 3px; border: 1px solid rgba(0,0,0,.4); display: block; }
+      .warn { color: var(--accent); margin: 4px 0; }
+      ul.plain { list-style: none; margin: 0; padding: 0; }
+      ul.plain li { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: center; padding: 6px 0; border-top: 1px solid var(--line); }
+      ul.plain li code { flex: 1 1 14em; overflow-wrap: anywhere; color: var(--text); }
+      ul.plain li span { color: var(--muted); font-variant-numeric: tabular-nums; }
+
+      [role=tablist].tabs { display: flex; gap: 4px; margin-bottom: 14px; border-bottom: 1px solid var(--line); }
+      .tabs button { background: none; border: 0; border-bottom: 2px solid transparent; border-radius: 0; color: var(--muted); padding: 6px 10px; min-height: 36px; }
+      .tabs button[aria-selected=true] { color: var(--accent); border-bottom-color: var(--accent); }
+      [role=tabpanel][hidden] { display: none; }
       fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
       fieldset:disabled { opacity: .5; }
-      h3 { margin: 14px 0 6px; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
-      h3:first-child { margin-top: 0; }
-      label.field { display: block; margin-bottom: 8px; color: var(--muted); font-size: 13px; }
-      label.field span { display: flex; justify-content: space-between; }
-      label.field output { color: var(--text); font-variant-numeric: tabular-nums; }
-      input[type=range] { width: 100%; accent-color: var(--forge); min-height: 28px; }
-      label.check { display: flex; gap: 8px; align-items: center; color: var(--muted); font-size: 14px; min-height: 32px; }
-      input[type=checkbox] { accent-color: var(--forge); width: 18px; height: 18px; }
-      input[type=color] { width: 100%; height: 32px; background: none; border: 1px solid var(--line); border-radius: 4px; padding: 2px; }
-      .bar label.check { margin: 0 4px; }
-      .bar label.zoom { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 14px; }
-      .bar label.zoom input { width: 110px; }
-      .bar label.zoom output { color: var(--text); min-width: 2ch; font-variant-numeric: tabular-nums; }
-      dl { display: grid; grid-template-columns: max-content 1fr; gap: 2px 14px; margin: 10px 0; font-size: 14px; }
-      dt { color: var(--muted); } dd { margin: 0; font-variant-numeric: tabular-nums; }
-      .swatches { display: flex; flex-wrap: wrap; gap: 4px; }
-      .swatches i { width: 18px; height: 18px; border-radius: 3px; border: 1px solid #0006; display: block; }
-      ul.plain { list-style: none; margin: 0; padding: 0; font-size: 14px; }
-      ul.plain li { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: center; padding: 6px 0; border-top: 1px solid var(--line); }
-      ul.plain li code { flex: 1 1 14em; overflow-wrap: anywhere; }
-      ul.plain li span { color: var(--muted); font-variant-numeric: tabular-nums; }
-      .warn { color: var(--forge); font-size: 14px; margin: 4px 0; }
-      .frames { color: var(--muted); font-size: 13px; margin: 8px 0 0; }
+      label.field { display: block; margin-bottom: 10px; color: var(--muted); font-size: 11px; }
+      label.field span { display: flex; justify-content: space-between; margin-bottom: 2px; }
+      label.field output { color: var(--text); font-weight: 600; font-variant-numeric: tabular-nums; }
+      input[type=range] { width: 100%; accent-color: var(--accent); min-height: 28px; margin: 0; }
+      label.check { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; color: var(--muted); min-height: 28px; }
+      input[type=checkbox] { accent-color: var(--accent); width: 18px; height: 18px; margin: 0; }
+      input[type=color] { width: 100%; height: 30px; background: none; border: 1px solid var(--line); border-radius: 4px; padding: 2px; }
+      .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+      select { width: 100%; }
+      #materials { display: grid; gap: 8px; }
+      .material { display: grid; grid-template-columns: 1fr 56px auto; gap: 8px; align-items: center; color: var(--text); }
+      .material span { overflow-wrap: anywhere; }
+      .material button { min-height: 30px; padding: 2px 8px; }
+      textarea {
+        width: 100%; height: min(60dvh, 560px); min-height: 240px; resize: vertical; tab-size: 2;
+        font: 12px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; color: var(--text);
+        background: #151019; border: 1px solid var(--line); border-radius: 6px; padding: 10px;
+      }
+      .note { color: var(--muted); font-size: 11px; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line); }
       .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
-      noscript { display: block; padding: 16px; }
+      #drop {
+        position: fixed; inset: 0; z-index: 10; display: grid; place-content: center; text-align: center;
+        background: rgba(27, 22, 34, .88); border: 3px dashed var(--accent); color: var(--accent); font-size: 16px; pointer-events: none;
+      }
+      #drop[hidden] { display: none; }
+      #panes { display: none; }
+      noscript { position: fixed; inset: 0; padding: 16px; background: var(--bg); z-index: 20; }
+
+      @media (max-width: 1180px) { body { grid-template-columns: 168px minmax(0, 1fr) 250px; } }
+      @media (max-width: 860px) {
+        body { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto; }
+        .pane { display: none; grid-row: 1; padding-right: max(16px, env(safe-area-inset-right)); border: 0; }
+        body[data-pane=assets] #catalogue, body[data-pane=preview] #preview, body[data-pane=inspector] #inspector { display: block; }
+        #panes {
+          display: grid; grid-template-columns: repeat(3, 1fr); grid-row: 2; background: var(--panel);
+          border-top: 1px solid var(--line); padding-bottom: var(--safe-bottom);
+        }
+        #panes button { border: 0; border-radius: 0; background: none; min-height: 52px; color: var(--muted); }
+        #panes button[aria-current=true] { color: var(--accent); box-shadow: inset 0 2px 0 var(--accent); }
+        .bar input[type=range] { width: 90px; }
+        textarea { height: 45dvh; }
+      }
     </style>
   </head>
-  <body>
-    <header>
-      <h1>SINDRI SPRITE BAKER</h1>
-      <p>Turn a model recipe into ordinary sprites, isometric, top-down or side view: a PNG, its <code>.sheet</code> and a prefab. Nothing leaves your browser.</p>
-    </header>
-    <noscript>The baker needs JavaScript.</noscript>
-    <main>
-      <section id="recipe-panel" aria-labelledby="recipe-title">
-        <h2 id="recipe-title">Recipe</h2>
-        <div class="bar">
-          <label class="sr-only" for="example">Start from an example</label>
-          <select id="example"></select>
-          <label class="button">Open…<input id="open" type="file" accept=".isobake,.json,application/json" hidden /></label>
-          <button id="save-recipe" type="button">Save recipe</button>
-        </div>
-        <label class="sr-only" for="recipe">Recipe JSON</label>
-        <textarea id="recipe" spellcheck="false" autocomplete="off" autocapitalize="off"></textarea>
-        <p id="status" role="status"></p>
-      </section>
-      <section id="preview-panel" aria-labelledby="preview-title">
-        <h2 id="preview-title">In context</h2>
-        <div class="bar">
-          <label class="zoom">Zoom <input id="zoom" type="range" min="1" max="8" step="1" value="3" /><output id="zoom-out">3×</output></label>
-          <label class="check"><input id="grid" type="checkbox" checked /> Floor</label>
-          <button id="download-all" class="primary" type="button" disabled>Download all (.zip)</button>
-        </div>
-        <div id="stage" class="stage"><div id="cards" class="cards"></div></div>
-        <p id="frames" class="frames"></p>
-        <details>
-          <summary>Packed sheet</summary>
-          <div class="stage"><canvas id="sheet" width="1" height="1" role="img" aria-label="The baked sprite sheet"></canvas></div>
-        </details>
-        <dl id="report"></dl>
-        <div id="warnings"></div>
-        <h2>Files</h2>
-        <ul id="files" class="plain"></ul>
-      </section>
-      <section id="inspector" aria-labelledby="inspector-title">
-        <h2 id="inspector-title">Render</h2>
+  <body data-pane="preview">
+    <noscript>The Sprite Baker needs JavaScript.</noscript>
+
+    <aside id="catalogue" class="pane" aria-label="Catalogue">
+      <h1>Sprite Baker</h1>
+      <div class="stats">3D &rarr; 2D sprites for Sindri</div>
+      <h2>Catalogue</h2>
+      <div id="assets"></div>
+      <label class="action">Open model or recipe…
+        <input id="open" type="file" multiple accept=".glb,.gltf,.obj,.isobake,.json" hidden />
+      </label>
+      <p class="hint">Or drop a Blender <code>.glb</code>, <code>.gltf</code> or <code>.obj</code> (or a <code>.isobake</code> recipe) anywhere on the page. Nothing leaves your browser.</p>
+    </aside>
+
+    <main id="preview" class="pane" aria-label="Preview">
+      <div class="bar">
+        <label>Zoom <input id="zoom" type="range" min="1" max="8" step="1" value="3" /><output id="zoom-out">3×</output></label>
+        <label><input id="grid" type="checkbox" checked /> Floor</label>
+        <button id="download-all" class="primary" type="button" disabled>Download all (.zip)</button>
+      </div>
+      <p id="status" role="status"></p>
+      <div id="stage" class="stage"><div id="cards" class="cards"></div></div>
+      <p id="frames" class="frames"></p>
+      <details>
+        <summary>Packed sheet</summary>
+        <div class="stage"><canvas id="sheet" width="1" height="1" role="img" aria-label="The baked sprite sheet"></canvas></div>
+      </details>
+      <dl id="report"></dl>
+      <div id="warnings"></div>
+      <h2>Files</h2>
+      <ul id="files" class="plain"></ul>
+    </main>
+
+    <aside id="inspector" class="pane" aria-label="Inspector">
+      <div role="tablist" class="tabs" aria-label="Inspector">
+        <button type="button" role="tab" id="tab-render" aria-controls="panel-render" aria-selected="true">Render</button>
+        <button type="button" role="tab" id="tab-model" aria-controls="panel-model" aria-selected="false">Model</button>
+        <button type="button" role="tab" id="tab-recipe" aria-controls="panel-recipe" aria-selected="false">Recipe</button>
+      </div>
+
+      <div role="tabpanel" id="panel-render" aria-labelledby="tab-render">
         <fieldset id="controls" disabled>
           <label class="field"><span>Supersample <output data-out="supersample"></output></span><input type="range" data-setting="supersample" min="1" max="8" step="1" /></label>
           <label class="field"><span>Alpha cutoff <output data-out="alpha_cutoff"></output></span><input type="range" data-setting="alpha_cutoff" min="1" max="255" step="1" /></label>
@@ -148,16 +188,62 @@
           <label class="check"><input type="checkbox" data-setting="palette_snap" /> Snap to palette</label>
           <label class="check"><input type="checkbox" data-setting="outline_enabled" /> Outline</label>
           <input type="color" data-setting="outline_color" aria-label="Outline color" />
-          <h3>Light</h3>
+          <h2>Light</h2>
           <label class="field"><span>Azimuth <output data-out="azimuth"></output></span><input type="range" data-setting="azimuth" min="0" max="360" step="1" /></label>
           <label class="field"><span>Elevation <output data-out="elevation"></output></span><input type="range" data-setting="elevation" min="5" max="89" step="1" /></label>
           <label class="field"><span>Band 1 <output data-out="band0"></output></span><input type="range" data-setting="band0" min="0" max="1" step="0.01" /></label>
           <label class="field"><span>Band 2 <output data-out="band1"></output></span><input type="range" data-setting="band1" min="0" max="1" step="0.01" /></label>
           <label class="field"><span>Band 3 <output data-out="band2"></output></span><input type="range" data-setting="band2" min="0" max="1" step="0.01" /></label>
         </fieldset>
-        <p class="frames">Sliders edit the recipe, so the text on the left is always what you will save.</p>
-      </section>
-    </main>
+      </div>
+
+      <div role="tabpanel" id="panel-model" aria-labelledby="tab-model" hidden>
+        <fieldset id="model-controls" disabled>
+          <h2>Placement</h2>
+          <div class="pair">
+            <label class="field"><span>Footprint W <output data-out="footprint_w"></output></span><input type="range" data-setting="footprint_w" min="1" max="4" step="1" /></label>
+            <label class="field"><span>Footprint H <output data-out="footprint_h"></output></span><input type="range" data-setting="footprint_h" min="1" max="4" step="1" /></label>
+          </div>
+          <label class="field"><span>Directions</span>
+            <select data-setting="directions" aria-label="Directions"><option>1</option><option>2</option><option>4</option><option>8</option></select>
+          </label>
+          <label class="field"><span>Facing</span>
+            <select data-setting="facing" aria-label="Facing">
+              <option>south</option><option>south-west</option><option>west</option><option>north-west</option>
+              <option>north</option><option>north-east</option><option>east</option><option>south-east</option>
+            </select>
+          </label>
+          <div id="file-controls" hidden>
+            <h2>Model file</h2>
+            <label class="check"><input type="checkbox" data-setting="auto_fit" /> Fit to footprint</label>
+            <label class="field"><span>Fill <output data-out="fill"></output></span><input type="range" data-setting="fill" min="0.1" max="1" step="0.05" /></label>
+            <label class="field"><span>Scale <output data-out="scale"></output></span><input type="range" data-setting="scale" min="0.1" max="4" step="0.05" /></label>
+            <label class="field"><span>Turn <output data-out="rotation_y"></output></span><input type="range" data-setting="rotation_y" min="0" max="355" step="5" /></label>
+            <label class="field"><span>Nudge X <output data-out="offset_x"></output></span><input type="range" data-setting="offset_x" min="-1" max="1" step="0.05" /></label>
+            <label class="field"><span>Nudge up <output data-out="offset_y"></output></span><input type="range" data-setting="offset_y" min="-1" max="1" step="0.05" /></label>
+            <label class="field"><span>Nudge Z <output data-out="offset_z"></output></span><input type="range" data-setting="offset_z" min="-1" max="1" step="0.05" /></label>
+            <h2>Materials</h2>
+            <div id="materials"></div>
+            <p class="hint">A file's materials give their base color. Each becomes a four-shade ramp, so a model shades like everything else. Textures and vertex colors are not used.</p>
+          </div>
+          <p id="primitive-note" class="hint" hidden>This recipe is built from primitives. Edit its parts in the Recipe tab.</p>
+        </fieldset>
+      </div>
+
+      <div role="tabpanel" id="panel-recipe" aria-labelledby="tab-recipe" hidden>
+        <label class="sr-only" for="recipe">Recipe JSON</label>
+        <textarea id="recipe" spellcheck="false" autocomplete="off" autocapitalize="off"></textarea>
+        <button id="save-recipe" class="action" type="button">Save recipe</button>
+        <p class="note">The sliders edit this text, so it is always what Save writes. The first slider you move reformats it.</p>
+      </div>
+    </aside>
+
+    <nav id="panes" aria-label="Panes">
+      <button type="button" data-show="assets">Assets</button>
+      <button type="button" data-show="preview" aria-current="true">Preview</button>
+      <button type="button" data-show="inspector">Inspector</button>
+    </nav>
+    <div id="drop" hidden>Drop a model or recipe to open it</div>
     <script type="module" src="./app.js"></script>
   </body>
 </html>

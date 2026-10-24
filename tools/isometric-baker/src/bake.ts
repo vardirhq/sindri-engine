@@ -8,6 +8,7 @@
 
 import { type BakedFrame, type Canvas, bakeFrames, measureCanvas, paletteFor } from './frames.ts';
 import { type Camera, createCamera, createFlatCamera } from './camera.ts';
+import { type ModelFiles, isFileModel, meshFromRaw } from './imported.ts';
 import { type BlockFace, type Mesh, blockFaceMesh, buildMesh } from './model.ts';
 import { encodePng } from './png.ts';
 import { uniqueColors } from './palette.ts';
@@ -112,9 +113,33 @@ function cameraFor(recipe: Recipe): Camera {
   return createFlatCamera(recipe.view, recipe.pixelsPerUnit ?? 0);
 }
 
-export function bake(recipe: Recipe): BakeResult {
+export interface BakeOptions {
+  /**
+   * The model files a recipe names, already read into triangles, by the `file`
+   * the recipe wrote. Reading a format is the caller's job: the browser page
+   * does it, and the command line cannot yet.
+   */
+  models?: ModelFiles;
+}
+
+/** The mesh a variant bakes, whether it was written in the recipe or read from a file. */
+function meshFor(recipe: Recipe, index: number, models: ModelFiles): Mesh {
+  const { model } = recipe.variants[index];
+  if (!isFileModel(model)) return buildMesh(model);
+  const raw = models[model.file];
+  if (!raw) {
+    throw new Error(
+      `the model file "${model.file}" was not provided. The browser page reads model files you ` +
+        'drop onto it; the command line cannot read them yet',
+    );
+  }
+  return meshFromRaw(raw, model, recipe.footprint);
+}
+
+export function bake(recipe: Recipe, options: BakeOptions = {}): BakeResult {
   const camera = cameraFor(recipe);
-  const meshes = recipe.variants.map((variant) => buildMesh(variant.model));
+  const models = options.models ?? {};
+  const meshes = recipe.variants.map((_, index) => meshFor(recipe, index, models));
   checkFootprint(meshes, recipe);
 
   const canvas = measureCanvas(

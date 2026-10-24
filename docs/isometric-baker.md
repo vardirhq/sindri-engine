@@ -35,11 +35,13 @@ game and browser export do not know it exists, and nothing they build calls it.
 
 ## The browser page
 
-The same bake runs in a page at `/examples/isometric-baker/`: a recipe on the
-left, the baked sheet on the right, and the PNG, `.sheet` and prefab to download
-singly or as a zip laid out like an asset root. It is for trying a recipe, or
-making a sprite for a project without Node installed, and it is listed in the
-directory as a tool. Its title there is **Sprite Baker**, because it bakes three
+The same bake runs in a page at `/examples/isometric-baker/`, laid out like
+IsoGame's Sprite Factory: a catalogue of assets on the left, each baked frame in
+the middle, and an inspector (Render, Model and Recipe tabs) on the right. On a
+phone the three are panes behind a bar along the bottom. The PNG, `.sheet` and
+prefab download singly or as a zip laid out like an asset root. It is for turning
+a model into sprites, or trying a recipe, without Node installed, and it is listed
+in the directory as a tool. Its title there is **Sprite Baker**, because it bakes three
 views and not only isometric; the tool, its folder and its route keep the
 older name (see the provenance key below).
 
@@ -53,6 +55,12 @@ over the recipe's `render` block; moving one rewrites the recipe text and bakes
 it again, so the text stays the one source of truth (and is reformatted by the
 first slider you touch). The layout follows IsoGame's Sprite Factory, which the
 baker was adapted from and which had an interactive page of its own.
+
+A model is dropped on the page or opened, read by Three.js into triangles, and
+baked by the same code as anything else; the page lists the file's materials so
+each can be recolored, and has controls for the fit, turn and nudge a model
+needs to stand on a tile. A recipe that names a model file takes it by name, so
+a model and its recipe can be opened together or one after the other.
 
 It is not a second implementation. `tools/isometric-baker/web/build.mjs` copies
 the tool's own TypeScript into the site with the types stripped by Node's
@@ -70,16 +78,29 @@ no `node_modules`, and the build needs only the Node the tool already requires.
 ## Dependency boundary
 
 The tool is Node and TypeScript, and it has **no dependencies at all** — no
-`node_modules`, no Vite, no Playwright, no Three.js. It renders with a software
-rasteriser of its own, so a bake needs nothing but a Node 22.18 or newer, which
-runs its TypeScript without a build step.
+`node_modules`, no Vite, no Playwright. It renders with a software rasteriser of
+its own, so a bake needs nothing but a Node 22.18 or newer, which runs its
+TypeScript without a build step.
 
 That boundary is deliberate and is the thing to defend in review. The moment the
 baker needs a package tree, it acquires a supply chain that
 `docs/dependency-policy.md` has no way to check, for output that is a PNG.
 
+The browser page is the one exception, and it is fenced in. Reading `.glb`,
+`.gltf` and `.obj` files is a job for a real loader, so the page uses Three.js
+for that and nothing else: its renderer is not used, because a GPU render would
+bring back the nondeterminism the CPU rasteriser exists to avoid. The package is
+pinned and locked in `tools/isometric-baker/web/`, which is the only place it is
+installed; `build.mjs` copies four of its files (the module, two loaders and a
+utility they import) and its licence into the site, with an import map, and
+bundles nothing. `src/` imports none of it. `docs/dependency-policy.md` records
+it. Moving model reading into the tool itself, so the command line can bake a
+model file, would mean writing a glTF and OBJ reader of its own; that is a
+separate change.
+
 CI runs the tool's tests and re-bakes its fixture in the `Isometric baker` job of
-`.github/workflows/ci.yml`. That job installs nothing. The Pages workflow builds
+`.github/workflows/ci.yml`. That job installs only the page's model reader, so
+the tests that read real model files run instead of skipping. The Pages workflow builds
 the page and opens it in a real browser (`scripts/browser/baker.mjs`).
 
 ## The compatibility problem it works around
@@ -215,9 +236,9 @@ directional frames, several named models on one sheet, uniform anchor-aligned
 frames packed with extruded gutters, deterministic PNG, `.sheet` and
 `.prefab` output, and a persistent `.isobake` recipe.
 
-Not baked, each its own change: model-file input (GLB/glTF/OBJ — refused
-explicitly rather than ignored), contact shadows, animation poses, layered
-character parts, and editor integration.
+Model files (`.glb`, `.gltf`, `.obj`) bake in the browser page; the command line
+cannot read them yet. Not baked, each its own change: contact shadows, animation
+poses, layered character parts, and editor integration.
 
 ## Views
 

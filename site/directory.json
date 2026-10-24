@@ -898,9 +898,12 @@
     "title": "Sprite Baker",
     "path": "examples/isometric-baker/",
     "source": "tools/isometric-baker",
-    "description": "Bake a 3D model recipe into ordinary Sindri sprites in the browser, in isometric, top-down or side view, then download the PNG, sheet and prefab.",
+    "description": "Drop in a Blender model (.glb, .gltf or .obj) or write a recipe, and bake it into ordinary Sindri sprites in the browser, in isometric, top-down or side view.",
     "tags": [
       "sprites",
+      "blender",
+      "glb",
+      "obj",
       "isometric",
       "top-down",
       "side view",
@@ -917,10 +920,11 @@
         "touch"
       ],
       "about": [
-        "Edit a recipe of boxes, cylinders and spheres and watch it bake into a sprite sheet, in isometric, top-down or side view, one to eight directions, banded shading and an outline. Download the PNG, its .sheet and the prefab, or all three as a zip laid out like a project's assets. The same pipeline runs offline from the command line, and the recipes it ships with are the ones the voxel lab and Orbital's mine blast were baked from."
+        "Drop in a model made in Blender (.glb, .gltf or .obj) and it is centred on a tile, shaded into the same four-shade palette as everything else, and baked in four directions, each drawn on the floor it will stand on. Fit it, turn it, recolor its materials and tune the light with the inspector, or write a recipe of boxes, cylinders and spheres by hand. Download the PNG, its .sheet and the prefab, or all three as a zip laid out like a project's assets. The same pipeline runs offline from the command line for recipes made of primitives."
       ],
       "proves": [
-        "Offline 3D-to-sprite baking",
+        "3D model to sprite baking",
+        "Blender model import",
         "Isometric, top-down and side views",
         "Sheet and prefab export"
       ],

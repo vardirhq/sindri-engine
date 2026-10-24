@@ -15,6 +15,21 @@ direction scheme are IsoGame's design, carried over with their reasoning intact.
 The rasteriser, the recipe document, the anchor-aligned frame layout and the
 Sindri sheet output are new here.
 
+Model files follow the same source. The placement rules for an imported model
+in `src/imported.ts` (turn, fit to the footprint, scale, centre on the footprint,
+stand on the floor, nudge, base color to a four-shade ramp, override by material
+name) are those of the Sprite Factory's `loaders.ts`; its use of Three.js's
+`GLTFLoader` and `OBJLoader` to read the files is kept in the browser page only
+(`web/models.js`).
+
+## Third-party code the page ships
+
+The page loads **three.js** (<https://threejs.org>, MIT, pinned in
+`web/package.json` and `web/package-lock.json`) to read `.glb`, `.gltf` and
+`.obj` files. `web/build.mjs` copies the module, its two loaders, one utility
+they import and its licence into the site's `vendor/three/`. The baker itself
+has no dependencies, and nothing is bundled.
+
 Nothing IsoGame-specific was carried across: its furniture categories, its
 sit/lay/use interaction spots, its stackability and collision model, and its
 character layer system all describe that game, and would be another game's

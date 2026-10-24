@@ -301,6 +301,11 @@ jobs:
           # Type stripping runs .ts directly, so the tool has no build step —
           # but it needs a Node new enough to do it without a flag.
           node-version: '22.18'
+      # The one install in this job is for the page, not the tool: Three.js,
+      # which reads model files there. Without it the tests that read real model
+      # files report themselves skipped rather than passing.
+      - name: Install the page's model reader
+        run: npm ci --ignore-scripts --prefix tools/isometric-baker/web
       - name: Test
         working-directory: tools/isometric-baker
         run: node --test test/*.test.ts
