@@ -111,6 +111,13 @@ This records which mature Sindri capabilities the flagship game demonstrates,
 which improvements belong in its refresh, and which forcing-function work must
 remain with Orbital Last Stand.
 
+## Lamplighter
+
+- [Lamplighter plan](lamplighter-plan.md)
+
+The platformer genre showcase, becoming a short real game: its premise, levels,
+art, the engine capabilities it leans on, and the stages of work.
+
 ## Orbital Last Stand
 
 Current implementation status is maintained in:

@@ -1,0 +1,175 @@
+# Lamplighter
+
+A plan for turning `games/platformer` from a showcase level into a short real
+game with a name. This document is the design and the order of work; it moves
+with the game, and a stage is checked off here when its acceptance criteria are
+met and its tests pass.
+
+## What it is, and what kind of project it is
+
+**Lamplighter** is a side-view platformer about a small courier, **Wick**, who
+walks a valley at dusk lighting its lanterns so the way home stays open, until
+the last beacon turns the night to dawn. Five to eight levels, a title and level
+select, saved progress, music and an ending.
+
+It is still **the platformer genre showcase**: the place the plain 2D path is
+proven (tilemap collision, scene gravity, the character controller, one-way
+planks, joints, springs and hinges, 2D lights, normal maps, particles, camera
+follow and bounds, scene changes, saves). What changes is the bar. The showcase
+rule in `AGENTS.md` was "a level and a few scripts, not a campaign", and that
+produced a level that proved features and was not a game anyone would choose to
+play. Causeway is held to the standard of a game somebody would choose; the 2D
+path should be too, because a showcase nobody wants to play does not showcase
+anything. `AGENTS.md` records this as the platformer's exception, and says why.
+
+Say which of these a change is, in its documentation: a capability the engine
+already had that Lamplighter now uses is proven here; a capability found by
+trying to make Lamplighter good is added generally, never shaped around it.
+
+## Why a remake, and what it keeps
+
+The current project has become a physics proving ground. It carries a crate, a
+hanging lantern, a trolley on a rail, a plank ferry, two windmills and springs,
+each with its own tests: 21 test files, and about 70 references from
+`docs/capabilities/*.toml`, of which about half are physics. That evidence is
+worth keeping, and it is held up by toys placed in one level for the sake of the
+test. Lamplighter keeps every mechanism and makes each one a **level piece**: a
+thing a level is built around and a player uses, with its tests moving to that
+level. The capability pages then point at something that is played.
+
+| Mechanism now | Becomes | Level | Tests that move with it |
+| --- | --- | --- | --- |
+| Hero, run, jump, drop-through | Wick | all | `character_gameplay`, `controller_terrain`, `one_way_platforms` |
+| Plank ferry | the harbor ferry | 2 | `moving_platform` |
+| Crate and wind | a crate to push onto a switch | 2, 3 | `forces_and_rotation`, `contact_impacts` |
+| Windmills | sails that turn into platforms | 3 | `hinge_motor`, `spawned_joints` |
+| Trolley on a rail | a cable car across a gorge | 4 | `slider_spring`, `joint_controls` |
+| Hanging lantern on a tether | swinging lamps to ride and cut | 5 | `distance_joints`, `saved_joints` |
+| Cave lights and occluders | the lantern caves | 6 | `cave_lights` |
+| Springs | bounce pads | 4, 7 | `physics_materials` |
+| Coins | embers (optional, one prefab) | all | `coins_are_one_prefab` |
+| Particles | sparks on lighting, dust on landing | all | `sparkle_and_dust` |
+| Tile normal maps | lit tiles | all | `studio_normal_map`, `painted_ground` |
+| Sliced panels | the HUD and menus | all | `sliced_panels` |
+| The run to the flag | each level's run to its beacon | 1 to 8 | `a_run_reaches_the_flag` |
+
+## The game
+
+**The loop.** Run to the lantern ahead and light it by touching it: a spark, a
+flare of 2D light, a note, and it is the checkpoint. The level's last lantern is
+a beacon; lighting it ends the level. Embers are optional and ask for a detour.
+Falling, water and the dark ("gloom" that creeps in at the edge of the light)
+send Wick back to the last lit lantern, with no lives and no punishment beyond
+the walk back. The valley darkens as the game goes on, so the lanterns matter
+more and the light you carry matters more.
+
+**Levels** (the order teaches one idea at a time, and the last combines them):
+
+1. **Dusk Road.** Run, jump, one-way planks, the first lantern. No hazards but a
+   gap. Teaches the hero.
+2. **The Ferry Landing.** Water gaps, the plank ferry, a crate to push onto a
+   switch that lowers the gate.
+3. **Windmill Ridge.** Sails turn on hinge motors and carry you up; wind pushes
+   the crate; time the jump from sail to sail.
+4. **The Cable Car.** A trolley on a rail across a gorge, springs to reach the
+   upper path, a spring-loaded lamp to light.
+5. **The Hanging Lamps.** Swing on tethered lamps; cut a cord to drop a bridge.
+6. **The Lantern Caves.** The dark is the hazard: lit areas are safe, 2D lights
+   and occluders carve the cave, gloom wisps keep to the shadows.
+7. **Storm Stair.** A climb that uses everything, under rain and a dimming sky.
+8. **The Dawn Beacon.** The last climb and the last lantern; lighting it plays a
+   sunrise across the whole valley and rolls into the ending.
+
+**The shell.** A title screen, a level select that shows which beacons are lit
+and the embers found, a pause menu, settings (volume buses, reduced motion),
+saved progress, drawn touch controls (the current README says they are not
+drawn), and credits. Scenes change with `Scene.go`; progress and settings are
+`Save` values.
+
+## How it looks
+
+A style bible comes first and every asset answers to it: a **dusk palette** of
+deep violet and teal shadows against one warm amber, so light is the only
+warmth on screen and a lit lantern reads from across a level. 16 pixel tiles,
+3 pixels of outline-free shading, three parallax layers per biome (sky, far
+hills, near trees or rock), and 2D lights doing the glow instead of painted
+halos. Biomes: road and meadow, harbor, ridge, gorge, caves, storm.
+
+- **Characters and props** are baked from models with the Sprite Baker in side
+  view, each animation frame a variant of one sheet so the palette cannot
+  shimmer between frames: Wick (idle, run, jump, fall, land, light), a gloom
+  wisp, lanterns, the ferry, windmill, trolley, crate, signs and houses. Recipes
+  are generated by a script so a limb's angle in frame 3 is one number, and the
+  baked sheets are checked in and re-baked by CI, as Orbital's blast is.
+- **Tiles, backgrounds, effects and UI art** are drawn by deterministic Python,
+  as `art/draw.py` does today but with autotiled edges and corners, per-biome
+  sets, normal maps, and layered backgrounds.
+- **Type** is a font already in the repository under an open licence, so the
+  title and HUD are Weave text and a project font, never an operating-system
+  lookup.
+- **Sound.** Effects and music are made in the Sound Lab and sent to the
+  project: a looping theme per biome as Ogg, effects as WAV, each `.sindrisfx`
+  or `.sindrisong` beside its output so it reopens.
+
+## What the engine already has, and what to verify
+
+Present, named in `docs/generated/decay-api.md`: `Scene`, `Save`, `Audio` with
+buses, `Camera` follow, bounds, shake and impact, `Sequence` timelines, `Effects`,
+`Animation`, `Tween`, `Ui`, `Action` rebinding, 2D lights, normal maps, particles
+and joints. Each stage verifies before it relies on one, and where a capability
+is missing it is added as a general one with a row in `docs/parity.md`. Likely
+candidates, none assumed:
+
+- parallax background layers driven by the camera;
+- fading between scenes;
+- drawing a virtual stick and a jump button for touch;
+- `Save` in the browser host, and across a page reload;
+- a checkpoint and respawn that does not reload the scene;
+- autotiling a painted tilemap from a set of edge and corner tiles;
+- baked side-view sprite sheets as animation clips.
+
+## Stages
+
+Each stage is one or more pull requests that leave `main` working: the project
+opens, its scripts compile, its scripted run reaches its goal, and the
+documentation says what is now true.
+
+0. **Plan.** This document, and the `AGENTS.md` amendment.
+1. **Move.** `games/platformer` becomes `games/lamplighter`, with the Pages route,
+   directory entry, capability references, CI and scripts updated, and nothing
+   else changed. Reviewed on its own because it touches the most files.
+2. **Art foundation.** The style bible and palette, the autotiled tile sets and
+   backgrounds for the first two biomes, Wick and the lantern baked and
+   animated, the font, and a screenshot test that opens the art.
+3. **The shell.** Title, level select, pause, settings, saved progress and drawn
+   touch controls, with level one behind it.
+4. **Level 1, end to end.** Lanterns, checkpoints, respawn, embers, the first
+   music and effects, and a scripted run. After this stage the game is playable
+   from the title to the first beacon and to the ending screen.
+5. **Levels 2 to 7**, one or two per pull request, each with its mechanism
+   rebuilt as a level piece and its tests moved. The capability pages are
+   updated as the tests move, not afterwards.
+6. **Level 8 and the ending.** The sunrise, credits, final music.
+7. **Polish and proof.** A scripted run of every level in one test, the browser
+   smoke, the screenshots and site entry, `docs/parity.md` and the capability
+   pages brought level with what is played.
+
+## Checks that hold throughout
+
+- Every level has a scripted run that plays it to its beacon, and one test
+  plays the whole game. A level that cannot be completed is a failing test.
+- `scripts/preflight.py` and the typed Decay preflight on every changed script;
+  no game rules in Rust; the project has no `src` beyond its test harness.
+- The sprite sheets and tile art are reproducible: re-running the art scripts
+  and the baker changes nothing, and CI says so.
+- A capability gap is closed in the engine, generally, in the stage that finds
+  it, with its parity row and tests.
+
+## Open questions
+
+- Whether Wick is a person, an animal or a spark. The first art pass decides,
+  and the answer only changes the models.
+- How hard the game should be. The plan assumes a gentle one: the point is the
+  light, not the death count.
+- Whether the browser host persists `Save` across reloads. If it does not, that
+  is the first gap, and it is closed in the engine.
