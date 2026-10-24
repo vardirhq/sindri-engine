@@ -1,5 +1,10 @@
 # Changelog
 
+- Lamplighter stage 4, Dusk Road: Wick lights checkpoint lanterns for
+  sparks, a 2D light flare and respawn, collects optional embers, and reaches a
+  beacon that saves the level. The level now loops the Tide Song and the
+  scripted run plays from the title through the beacon.
+
 - Add `Scene.restart(name)`: moves to a scene and starts it over. `Scene.go`
   finds a scene as it was left, which makes a pause screen a scene of its own,
   but a level begun again from a menu needs the opposite, so `restart` throws

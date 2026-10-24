@@ -8,4 +8,7 @@ state Game {
     var ground_clearance: number = 0.0;
     var crate_impacts: number = 0.0;
     var touch: bool = false;
+    var checkpoint_x: number = 2.5;
+    var checkpoint_y: number = 4.0;
+    var checkpoint_index: number = 0.0;
 }

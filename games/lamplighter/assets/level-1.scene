@@ -1,7 +1,7 @@
 {
   "format_version": 10,
   "metadata": {
-    "name": "Platformer"
+    "name": "Dusk Road"
   },
   "entities": [
     {
@@ -2369,73 +2369,148 @@
     },
     {
       "id": "flag",
-      "name": "Flag",
+      "name": "Beacon",
       "transform_3d": {
         "position": [
           60.5,
-          4.0,
+          3.55,
           0.1
         ],
         "rotation": [
-          0,
-          0,
-          0,
-          1
+          0.0,
+          0.0,
+          0.0,
+          1.0
         ],
         "scale": [
-          1,
-          2,
-          1
+          1.0,
+          1.0,
+          1.0
         ]
       },
       "components": {
         "sindri.sprite": {
-          "texture": "textures/flag.png#wave-0",
+          "texture": "textures/props.png#lantern-unlit",
           "layer": 3
         },
         "sindri.animation.sprite": {
           "clips": {
-            "wave": {
+            "unlit": {
               "frames": [
-                "wave-0",
-                "wave-1"
+                "lantern-unlit"
               ],
-              "seconds_per_frame": 0.3,
-              "looping": true
+              "seconds_per_frame": 0.1,
+              "looping": false
+            },
+            "lit": {
+              "frames": [
+                "lantern-lit"
+              ],
+              "seconds_per_frame": 0.1,
+              "looping": false
             }
           },
-          "playing": "wave",
+          "playing": "unlit",
           "speed": 1.0
         },
         "sindri.physics2d.collider": {
           "pieces": [
             {
               "shape": {
-                "shape": "box",
-                "half_extents": [
-                  0.4,
-                  1.0
-                ]
+                "shape": "circle",
+                "radius": 0.75
               },
               "offset": [
-                0,
-                0
+                0.0,
+                0.0
               ],
-              "rotation": 0,
+              "rotation": 0.0,
               "sensor": true,
               "layers": {
                 "memberships": 4,
                 "filter": 4294967295
               },
-              "friction": 0.5,
+              "friction": 0.0,
               "restitution": 0.0
             }
           ]
         },
         "sindri.tags": {
           "tags": [
+            "lantern",
             "goal"
           ]
+        },
+        "sindri.script": {
+          "source": "scripts/checkpoint-lantern.decay",
+          "script": "CheckpointLantern",
+          "properties": {
+            "checkpoint_x": 60.5,
+            "checkpoint_y": 3.5,
+            "index": 4.0,
+            "beacon": true
+          }
+        },
+        "sindri.light2d": {
+          "enabled": true,
+          "color": [
+            1.0,
+            0.72,
+            0.38,
+            1.0
+          ],
+          "intensity": 0.0,
+          "radius": 4.8,
+          "falloff": 1.4,
+          "height": 1.0,
+          "shadows": false,
+          "shadow_reach": 0.1
+        },
+        "sindri.particles": {
+          "playing": false,
+          "texture": "textures/particle.png",
+          "rate": 20.0,
+          "max": 32,
+          "lifetime": 0.55,
+          "lifetime_spread": 0.2,
+          "speed": 1.2,
+          "speed_spread": 0.5,
+          "direction": 90.0,
+          "spread": 360.0,
+          "shape": "circle",
+          "offset": [
+            0.0,
+            0.0
+          ],
+          "shape_size": [
+            0.3,
+            0.3
+          ],
+          "gravity": [
+            0.0,
+            0.0
+          ],
+          "drag": 0.5,
+          "size": 0.18,
+          "size_end": 0.04,
+          "colors": [
+            [
+              1.0,
+              0.68,
+              0.22,
+              1.0
+            ],
+            [
+              1.0,
+              0.9,
+              0.48,
+              0.0
+            ]
+          ],
+          "random_rotation": false,
+          "spin": 0.0,
+          "space": "local",
+          "layer": 4
         }
       }
     },
@@ -2473,7 +2548,7 @@
           "font_size": 0.04,
           "line_height": 0.048,
           "layer": 100,
-          "text": "Coins {}/{}",
+          "text": "Embers {}/{}",
           "shadow": {
             "offset": [
               0.0,
@@ -2530,7 +2605,7 @@
           "font_size": 0.08,
           "line_height": 0.096,
           "layer": 100,
-          "text": "You made it!",
+          "text": "Beacon lit!",
           "shadow": {
             "offset": [
               0.0,
@@ -3892,6 +3967,444 @@
           "layer": 99,
           "text": "▲",
           "bold": true
+        }
+      }
+    },
+    {
+      "id": "lantern-1",
+      "name": "lantern-1",
+      "transform_3d": {
+        "position": [
+          10.5,
+          3.55,
+          0.1
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/props.png#lantern-unlit",
+          "layer": 3
+        },
+        "sindri.animation.sprite": {
+          "clips": {
+            "unlit": {
+              "frames": [
+                "lantern-unlit"
+              ],
+              "seconds_per_frame": 0.1,
+              "looping": false
+            },
+            "lit": {
+              "frames": [
+                "lantern-lit"
+              ],
+              "seconds_per_frame": 0.1,
+              "looping": false
+            }
+          },
+          "playing": "unlit",
+          "speed": 1.0
+        },
+        "sindri.physics2d.collider": {
+          "pieces": [
+            {
+              "shape": {
+                "shape": "circle",
+                "radius": 0.75
+              },
+              "offset": [
+                0.0,
+                0.0
+              ],
+              "rotation": 0.0,
+              "sensor": true,
+              "layers": {
+                "memberships": 4,
+                "filter": 4294967295
+              },
+              "friction": 0.0,
+              "restitution": 0.0
+            }
+          ]
+        },
+        "sindri.tags": {
+          "tags": [
+            "lantern"
+          ]
+        },
+        "sindri.script": {
+          "source": "scripts/checkpoint-lantern.decay",
+          "script": "CheckpointLantern",
+          "properties": {
+            "checkpoint_x": 10.5,
+            "checkpoint_y": 3.5,
+            "index": 1.0,
+            "beacon": false
+          }
+        },
+        "sindri.light2d": {
+          "enabled": true,
+          "color": [
+            1.0,
+            0.72,
+            0.38,
+            1.0
+          ],
+          "intensity": 0.0,
+          "radius": 4.8,
+          "falloff": 1.4,
+          "height": 1.0,
+          "shadows": false,
+          "shadow_reach": 0.1
+        },
+        "sindri.particles": {
+          "playing": false,
+          "texture": "textures/particle.png",
+          "rate": 20.0,
+          "max": 32,
+          "lifetime": 0.55,
+          "lifetime_spread": 0.2,
+          "speed": 1.2,
+          "speed_spread": 0.5,
+          "direction": 90.0,
+          "spread": 360.0,
+          "shape": "circle",
+          "offset": [
+            0.0,
+            0.0
+          ],
+          "shape_size": [
+            0.3,
+            0.3
+          ],
+          "gravity": [
+            0.0,
+            0.0
+          ],
+          "drag": 0.5,
+          "size": 0.18,
+          "size_end": 0.04,
+          "colors": [
+            [
+              1.0,
+              0.68,
+              0.22,
+              1.0
+            ],
+            [
+              1.0,
+              0.9,
+              0.48,
+              0.0
+            ]
+          ],
+          "random_rotation": false,
+          "spin": 0.0,
+          "space": "local",
+          "layer": 4
+        }
+      }
+    },
+    {
+      "id": "lantern-2",
+      "name": "lantern-2",
+      "transform_3d": {
+        "position": [
+          23.5,
+          3.55,
+          0.1
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/props.png#lantern-unlit",
+          "layer": 3
+        },
+        "sindri.animation.sprite": {
+          "clips": {
+            "unlit": {
+              "frames": [
+                "lantern-unlit"
+              ],
+              "seconds_per_frame": 0.1,
+              "looping": false
+            },
+            "lit": {
+              "frames": [
+                "lantern-lit"
+              ],
+              "seconds_per_frame": 0.1,
+              "looping": false
+            }
+          },
+          "playing": "unlit",
+          "speed": 1.0
+        },
+        "sindri.physics2d.collider": {
+          "pieces": [
+            {
+              "shape": {
+                "shape": "circle",
+                "radius": 0.75
+              },
+              "offset": [
+                0.0,
+                0.0
+              ],
+              "rotation": 0.0,
+              "sensor": true,
+              "layers": {
+                "memberships": 4,
+                "filter": 4294967295
+              },
+              "friction": 0.0,
+              "restitution": 0.0
+            }
+          ]
+        },
+        "sindri.tags": {
+          "tags": [
+            "lantern"
+          ]
+        },
+        "sindri.script": {
+          "source": "scripts/checkpoint-lantern.decay",
+          "script": "CheckpointLantern",
+          "properties": {
+            "checkpoint_x": 23.5,
+            "checkpoint_y": 3.5,
+            "index": 2.0,
+            "beacon": false
+          }
+        },
+        "sindri.light2d": {
+          "enabled": true,
+          "color": [
+            1.0,
+            0.72,
+            0.38,
+            1.0
+          ],
+          "intensity": 0.0,
+          "radius": 4.8,
+          "falloff": 1.4,
+          "height": 1.0,
+          "shadows": false,
+          "shadow_reach": 0.1
+        },
+        "sindri.particles": {
+          "playing": false,
+          "texture": "textures/particle.png",
+          "rate": 20.0,
+          "max": 32,
+          "lifetime": 0.55,
+          "lifetime_spread": 0.2,
+          "speed": 1.2,
+          "speed_spread": 0.5,
+          "direction": 90.0,
+          "spread": 360.0,
+          "shape": "circle",
+          "offset": [
+            0.0,
+            0.0
+          ],
+          "shape_size": [
+            0.3,
+            0.3
+          ],
+          "gravity": [
+            0.0,
+            0.0
+          ],
+          "drag": 0.5,
+          "size": 0.18,
+          "size_end": 0.04,
+          "colors": [
+            [
+              1.0,
+              0.68,
+              0.22,
+              1.0
+            ],
+            [
+              1.0,
+              0.9,
+              0.48,
+              0.0
+            ]
+          ],
+          "random_rotation": false,
+          "spin": 0.0,
+          "space": "local",
+          "layer": 4
+        }
+      }
+    },
+    {
+      "id": "lantern-3",
+      "name": "lantern-3",
+      "transform_3d": {
+        "position": [
+          35.5,
+          3.55,
+          0.1
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/props.png#lantern-unlit",
+          "layer": 3
+        },
+        "sindri.animation.sprite": {
+          "clips": {
+            "unlit": {
+              "frames": [
+                "lantern-unlit"
+              ],
+              "seconds_per_frame": 0.1,
+              "looping": false
+            },
+            "lit": {
+              "frames": [
+                "lantern-lit"
+              ],
+              "seconds_per_frame": 0.1,
+              "looping": false
+            }
+          },
+          "playing": "unlit",
+          "speed": 1.0
+        },
+        "sindri.physics2d.collider": {
+          "pieces": [
+            {
+              "shape": {
+                "shape": "circle",
+                "radius": 0.75
+              },
+              "offset": [
+                0.0,
+                0.0
+              ],
+              "rotation": 0.0,
+              "sensor": true,
+              "layers": {
+                "memberships": 4,
+                "filter": 4294967295
+              },
+              "friction": 0.0,
+              "restitution": 0.0
+            }
+          ]
+        },
+        "sindri.tags": {
+          "tags": [
+            "lantern"
+          ]
+        },
+        "sindri.script": {
+          "source": "scripts/checkpoint-lantern.decay",
+          "script": "CheckpointLantern",
+          "properties": {
+            "checkpoint_x": 35.5,
+            "checkpoint_y": 3.5,
+            "index": 3.0,
+            "beacon": false
+          }
+        },
+        "sindri.light2d": {
+          "enabled": true,
+          "color": [
+            1.0,
+            0.72,
+            0.38,
+            1.0
+          ],
+          "intensity": 0.0,
+          "radius": 4.8,
+          "falloff": 1.4,
+          "height": 1.0,
+          "shadows": false,
+          "shadow_reach": 0.1
+        },
+        "sindri.particles": {
+          "playing": false,
+          "texture": "textures/particle.png",
+          "rate": 20.0,
+          "max": 32,
+          "lifetime": 0.55,
+          "lifetime_spread": 0.2,
+          "speed": 1.2,
+          "speed_spread": 0.5,
+          "direction": 90.0,
+          "spread": 360.0,
+          "shape": "circle",
+          "offset": [
+            0.0,
+            0.0
+          ],
+          "shape_size": [
+            0.3,
+            0.3
+          ],
+          "gravity": [
+            0.0,
+            0.0
+          ],
+          "drag": 0.5,
+          "size": 0.18,
+          "size_end": 0.04,
+          "colors": [
+            [
+              1.0,
+              0.68,
+              0.22,
+              1.0
+            ],
+            [
+              1.0,
+              0.9,
+              0.48,
+              0.0
+            ]
+          ],
+          "random_rotation": false,
+          "spin": 0.0,
+          "space": "local",
+          "layer": 4
         }
       }
     }

@@ -23,6 +23,7 @@ script Hud {
         // The volumes a person chose in the settings, heard from the first frame.
         Audio.set_volume("music", Save.number("volume_music", 1.0));
         Audio.set_volume("effects", Save.number("volume_effects", 1.0));
+        Audio.loop("audio/dusk-road.ogg", 0.35);
     }
 
     fn update(dt: number) {

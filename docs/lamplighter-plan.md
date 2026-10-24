@@ -82,9 +82,8 @@ more and the light you carry matters more.
 
 **The shell.** A title screen, a level select that shows which beacons are lit
 and the embers found, a pause menu, settings (volume buses, reduced motion),
-saved progress, drawn touch controls (the current README says they are not
-drawn), and credits. Scenes change with `Scene.go`; progress and settings are
-`Save` values.
+saved progress, drawn touch controls, and credits. Scenes change with
+`Scene.go`; progress and settings are `Save` values.
 
 ## How it looks
 
@@ -186,7 +185,10 @@ documentation says what is now true.
    holds a button and verifies Wick moves.
 4. **Level 1, end to end.** Lanterns, checkpoints, respawn, embers, the first
    music and effects, and a scripted run. After this stage the game is playable
-   from the title to the first beacon and to the ending screen.
+   from the title to the first beacon and back to the level select.
+   *In progress:* Dusk Road has checkpoint lanterns with sparks and 2D light,
+   checkpoint respawn, optional embers, a beacon finish, the first music loop,
+   and a scripted title-to-beacon run.
 5. **Levels 2 to 7**, one or two per pull request, each with its mechanism
    rebuilt as a level piece and its tests moved. The capability pages are
    updated as the tests move, not afterwards.
@@ -208,8 +210,6 @@ documentation says what is now true.
 
 ## Open questions
 
-- Whether Wick is a person, an animal or a spark. The first art pass decides,
-  and the answer only changes the models.
 - How hard the game should be. The plan assumes a gentle one: the point is the
   light, not the death count.
 - Whether the browser host persists `Save` across reloads. If it does not, that

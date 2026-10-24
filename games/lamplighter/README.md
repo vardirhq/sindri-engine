@@ -1,12 +1,13 @@
 # Lamplighter
 
-The platformer genre showcase, becoming a short real game: a courier lighting
-a valley's lanterns at dusk (see `docs/lamplighter-plan.md`). It was
-`games/platformer` until the plan's first stage moved it here; what follows is
-the level it still is, which the next stages replace a piece at a time.
+The platformer genre showcase, becoming a short real game: Wick, a courier,
+lights a valley's lanterns at dusk (see `docs/lamplighter-plan.md`). The title,
+level select, settings and pause shell are in place; Dusk Road is the first
+level being built around the former physics showcase.
 
-A small side-view platformer. Run and jump across a
-painted level, pick up the coins and reach the flag.
+A short side-view platformer. Guide Wick across Dusk Road, light its three
+checkpoint lanterns, gather optional embers, and touch the beacon at the end.
+Falling sends Wick back to the last lantern.
 
 Escape (or a pad's Start) pauses.
 
@@ -60,7 +61,7 @@ any that is built; **Settings** (`settings.scene`) sets the music and effects
 volumes in tenths and turns reduced motion on. Escape, a pad's Start button or
 the drawn **II** button pauses a level into `pause.scene`: the level is switched
 off behind it exactly as it was, and **Resume** switches it back on where it
-stopped. Reaching the flag saves the beacon, shows the banner, and returns to
+stopped. Lighting the beacon saves the level, shows the banner, and returns to
 the level select.
 
 Four scenes and one script file (`scripts/shell.decay`) are all the shell is;
@@ -76,21 +77,22 @@ There is no game code. The game is `assets/`:
 
 - `title.scene`, `levels.scene`, `settings.scene`, `pause.scene`: the shell,
   written by `art/dusk/shell.py`.
-- `level-1.scene`: the level, the hero, the coins, the flag and the HUD.
-- `prefabs/coin.prefab`: what a coin is — its spinning sprite, sensor and tag.
-  The scene places ten instances of it, each saying only where it stands, so
-  a change to the prefab is a change to every coin.
-- `scripts/hero.decay`: keyboard, controller and touch movement, jumping, coins,
-  the flag and falling off.
-- `scripts/hud.decay`: the coin count, the banner, the pause button, and what
-  reaching the flag saves.
+- `level-1.scene`: Dusk Road, its checkpoint lanterns and beacon, the embers,
+  the hero and the HUD.
+- `prefabs/coin.prefab`: what an ember is — its spinning sprite, sensor and tag.
+  The scene places ten optional embers this way, so a change to the prefab is a
+  change to each one.
+- `scripts/hero.decay`: keyboard, controller and touch movement, jumping,
+  embers, lantern contact and falling off.
+- `scripts/checkpoint-lantern.decay`: lantern lighting, checkpoint updates,
+  the light flare, sparks, and the end beacon.
+- `scripts/hud.decay`: the ember count, the beacon banner, the pause button,
+  music playback, and saved progress.
 - `scripts/shell.decay`: the title, the level select, the pause screen and the
   settings.
-- `audio/`: the jump, landing, coin and flag sounds, made in the Sindri Sound
-  Lab (`tools/sindri-chiptune`) and sent here by it. Each `.sindrisfx` beside
-  its WAV is the editable source: open it in the Lab, reshape it, send it back.
-  `sindri.toml` lists the four clips, because a script plays them by name and
-  no walk of the scene can see that.
+- `audio/`: the jump, landing, ember and beacon sounds, plus the Tide Song
+  loop. Sound Lab source files sit beside their exported audio; `sindri.toml`
+  lists every clip the scripts play by name.
 - `textures/`: pixel art drawn by `art/draw.py`, deterministic, so running it
   again changes nothing unless the drawing did. It draws `tiles_n.png` too,
   the tiles' normal map, from the same brick, plank and dirt layouts.

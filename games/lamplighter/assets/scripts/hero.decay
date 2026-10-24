@@ -1,4 +1,4 @@
-// The hero: runs, jumps, picks up coins and reaches the flag.
+// Wick runs, jumps, gathers embers, lights lanterns and reaches the beacon.
 // Its four sounds were made in the Sindri Sound Lab; each `audio/*.sindrisfx`
 // beside its WAV reopens there to be reshaped and sent back.
 //
@@ -44,6 +44,9 @@ script Hero {
         Game.coins_total = World.with_tag("coin").length;
         Game.won = false;
         Game.falls = 0.0;
+        Game.checkpoint_x = this.spawn_x;
+        Game.checkpoint_y = this.spawn_y;
+        Game.checkpoint_index = 0.0;
         Game.touch = false;
         this.touch_left = World.find("touch-left");
         this.touch_right = World.find("touch-right");
@@ -210,8 +213,10 @@ script Hero {
                 World.despawn(other);
                 Game.coins += 1.0;
                 Audio.play("audio/coin.wav", 0.45);
+            } else if World.has_tag(other, "lantern") {
+                CheckpointLantern.on(other).light();
             } else if World.has_tag(other, "goal") {
-                // The flag can be touched again; it only cheers the first time.
+                // A goal can be touched again; it only cheers the first time.
                 if !Game.won {
                     Audio.play("audio/goal.wav", 0.55);
                 }
@@ -221,8 +226,8 @@ script Hero {
     }
 
     fn respawn() {
-        this.transform.position.x = this.spawn_x;
-        this.transform.position.y = this.spawn_y;
+        this.transform.position.x = Game.checkpoint_x;
+        this.transform.position.y = Game.checkpoint_y;
         this.horizontal = 0.0;
         this.rise = 0.0;
         this.drop_left = 0.0;
