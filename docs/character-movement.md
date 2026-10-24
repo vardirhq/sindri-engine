@@ -429,7 +429,7 @@ and respawn. The dynamic crate retains CCD and contact-impulse proof.
 
 The CI browser job copies the shipped platformer with
 `scripts/browser/prepare-lamplighter.py`, exports it through `sindri-export`, then
-runs `scripts/browser/smoke.mjs` with `SINDRI_PLATFORMER_GOAL=1`,
+runs `scripts/browser/smoke.mjs` with `SINDRI_LAMPLIGHTER_GOAL=1`,
 `SINDRI_EXPECT_ASSETS=1` and `SINDRI_BASE_PATH=/examples/lamplighter/`.
 The copy adds only `tests/browser_goal.decay`, a read-only observer. The normal
 starting pose, terrain and gameplay scripts remain intact. The observer reports
