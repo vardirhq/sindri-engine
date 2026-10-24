@@ -20,7 +20,8 @@ import {
   rejectUnknown,
   required,
 } from './json.ts';
-import { type ModelPart, type ModelSpec } from './model.ts';
+import { type FileModelSpec, MODEL_EXTENSIONS, type AnyModelSpec } from './imported.ts';
+import { type ModelPart } from './model.ts';
 import { type GrainSpec, type MaterialSpec, type RampOptions } from './shading.ts';
 
 const RAMP_KEYS = ['lightness', 'saturation', 'hue'] as const;
@@ -139,18 +140,62 @@ function positive(value: number, path: string): number {
   return value;
 }
 
-export function readModel(value: JsonValue, path: string): ModelSpec {
-  const source = asObject(value, path);
-  rejectUnknown(source, path, ['kind', 'materials', 'parts']);
-
-  const kind = optional(source, 'kind', path, asString) ?? 'primitives';
-  if (kind !== 'primitives') {
-    fail(
-      `${path}.kind`,
-      `only "primitives" is baked today (got "${kind}"); model-file input is a ` +
-        'separate change, so a recipe naming one is refused rather than silently ignored',
-    );
+/** A path that names a model file: relative, inside the project, and a format we read. */
+function readModelPath(value: JsonValue, path: string): string {
+  const file = asString(value, path);
+  const parts = file.split(/[\\/]/);
+  if (file === '' || file.startsWith('/') || /^[a-zA-Z]:/.test(file) || parts.includes('..')) {
+    fail(path, `expected a relative path inside the project, got ${JSON.stringify(file)}`);
   }
+  const extension = file.slice(file.lastIndexOf('.') + 1).toLowerCase();
+  if (!(MODEL_EXTENSIONS as readonly string[]).includes(extension)) {
+    fail(path, `expected a ${MODEL_EXTENSIONS.map((e) => `.${e}`).join(', ')} file, got ${JSON.stringify(file)}`);
+  }
+  return file;
+}
+
+function readFileModel(source: Record<string, JsonValue>, path: string): FileModelSpec {
+  rejectUnknown(source, path, [
+    'kind',
+    'file',
+    'auto_fit',
+    'fill',
+    'scale',
+    'rotation_y',
+    'offset',
+    'materials',
+  ]);
+  const fill = optional(source, 'fill', path, asNumber) ?? 1;
+  if (!(fill > 0) || fill > 1) fail(`${path}.fill`, `expected a fraction above zero and up to one, got ${fill}`);
+  const scale = optional(source, 'scale', path, asNumber) ?? 1;
+  positive(scale, `${path}.scale`);
+
+  const materialSource = optional(source, 'materials', path, asObject) ?? {};
+  const materials: Record<string, MaterialSpec> = {};
+  for (const [name, entry] of Object.entries(materialSource)) {
+    materials[name] = readMaterial(entry, `${path}.materials.${name}`);
+  }
+
+  return {
+    kind: 'file',
+    file: required(source, 'file', path, readModelPath),
+    autoFit: optional(source, 'auto_fit', path, asBoolean) ?? false,
+    fill,
+    scale,
+    rotationY: optional(source, 'rotation_y', path, asNumber) ?? 0,
+    offset: optional(source, 'offset', path, asVec3) ?? [0, 0, 0],
+    materials,
+  };
+}
+
+export function readModel(value: JsonValue, path: string): AnyModelSpec {
+  const source = asObject(value, path);
+  const kind = optional(source, 'kind', path, asString) ?? 'primitives';
+  if (kind === 'file') return readFileModel(source, path);
+  if (kind !== 'primitives') {
+    fail(`${path}.kind`, `expected "primitives" or "file", got "${kind}"`);
+  }
+  rejectUnknown(source, path, ['kind', 'materials', 'parts']);
 
   const materialSource = optional(source, 'materials', path, asObject) ?? {};
   const materials: Record<string, MaterialSpec> = {};

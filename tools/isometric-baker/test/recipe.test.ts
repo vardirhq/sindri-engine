@@ -7,6 +7,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
 import { RecipeError, parseRecipe } from '../src/recipe.ts';
+import { type ModelSpec } from '../src/model.ts';
 
 const MINIMAL = {
   format_version: 1,
@@ -83,10 +84,18 @@ test('a footprint is whole tiles', () => {
   assert.throws(() => parse({ footprint: { width: 1.5, height: 1 } }), /whole tiles/);
 });
 
-test('a model source that is not baked yet says so instead of being skipped', () => {
+test('a model kind that does not exist names the ones that do', () => {
   assert.throws(
-    () => parse({ model: { kind: 'file', parts: [] } }),
-    /only "primitives" is baked today/,
+    () => parse({ model: { kind: 'voxels', parts: [] } }),
+    /expected "primitives" or "file", got "voxels"/,
+  );
+});
+
+test('a model made of files does not take primitive parts, nor the reverse', () => {
+  assert.throws(() => parse({ model: { kind: 'file', file: 'a.glb', parts: [] } }), /unknown field "parts"/);
+  assert.throws(
+    () => parse({ model: { kind: 'primitives', file: 'a.glb', materials: {}, parts: [] } }),
+    /unknown field "file"/,
   );
 });
 
@@ -107,7 +116,7 @@ test('a material may be named or written inline', () => {
       ],
     },
   });
-  const model = recipe.variants[0].model;
+  const model = recipe.variants[0].model as ModelSpec;
   assert.equal(model.materials.rock.unlit, true);
   assert.deepEqual(model.parts[1].material, {
     color: '#ff0000',

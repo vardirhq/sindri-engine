@@ -1,0 +1,10 @@
+{
+  "name": "@sindri/sprite-baker-page",
+  "private": true,
+  "type": "module",
+  "description": "What the Sprite Baker page needs beyond the baker itself: Three.js, to read .glb, .gltf and .obj files. The baker has no dependencies; only this page does, and `build.mjs` copies the three files it uses into the site.",
+  "license": "MIT OR Apache-2.0",
+  "dependencies": {
+    "three": "0.170.0"
+  }
+}

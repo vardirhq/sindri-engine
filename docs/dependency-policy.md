@@ -108,6 +108,20 @@ crate it lands in must, and that its licence is already on the allowlist. Shared
 versions belong in `[workspace.dependencies]`, referenced as
 `dep.workspace = true`.
 
+## The Sprite Baker page's model reader
+
+`tools/isometric-baker/web` is the one place in this repository that installs a
+JavaScript package for a shipped page: **three** (MIT), pinned to an exact
+version in `package.json` and locked in `package-lock.json`, installed with
+`npm ci --ignore-scripts`. The page uses it only to read `.glb`, `.gltf` and
+`.obj` files into triangles; its renderer is not used. `build.mjs` copies the
+module, two loaders, one utility they import and the licence into the published
+site, with an import map and no bundler, so what ships is what is pinned. The
+baker itself (`tools/isometric-baker/src`) has no dependencies, and nothing in
+the engine, editor or exports depends on the page. `deny.toml` covers crates, so
+this is held to account here and in review: a change to the pinned version,
+or to the files `build.mjs` copies, is a dependency change.
+
 ## Imported-model conversion
 
 The public `sindri` facade converts CPU `ModelAsset` values into renderer

@@ -21,18 +21,25 @@ import { parseRecipe } from '../src/recipe.ts';
 import { encodePng } from '../web/png.ts';
 import { zip } from '../web/zip.ts';
 import { EXAMPLES, build } from '../web/build.mjs';
+import { barrelParts, crateParts } from './glb.ts';
 
 const TOOL = fileURLToPath(new URL('../', import.meta.url));
 
+/** The model files the example recipes name, as the page's reader would hand them over. */
+const MODELS = {
+  'models/crate.glb': { parts: crateParts() },
+  'models/barrel.glb': { parts: barrelParts() },
+};
+
 test('a bake through the built page is the bake the tool does', async () => {
-  const out = await build(await mkdtemp(join(tmpdir(), 'baker-web-')));
+  const out = await build(await mkdtemp(join(tmpdir(), 'baker-web-')), { vendor: false });
   const web = await import(pathToFileURL(join(out, 'baker/bake.js')).href);
   const webRecipe = await import(pathToFileURL(join(out, 'baker/recipe.js')).href);
 
   for (const [path] of EXAMPLES) {
     const json = await readFile(join(TOOL, path), 'utf8');
-    const native = bake(parseRecipe(json, path));
-    const browser = web.bake(webRecipe.parseRecipe(json, path));
+    const native = bake(parseRecipe(json, path), { models: MODELS });
+    const browser = web.bake(webRecipe.parseRecipe(json, path), { models: MODELS });
 
     assert.deepEqual(
       browser.files.map((file: { path: string }) => file.path),
@@ -51,10 +58,15 @@ test('a bake through the built page is the bake the tool does', async () => {
 });
 
 test('the page offers every example it ships', async () => {
-  const out = await build(await mkdtemp(join(tmpdir(), 'baker-web-')));
+  const out = await build(await mkdtemp(join(tmpdir(), 'baker-web-')), { vendor: false });
   const listed = JSON.parse(await readFile(join(out, 'examples/index.json'), 'utf8')) as string[];
   assert.equal(listed.length, EXAMPLES.length);
   for (const name of listed) assert.ok((await readFile(join(out, 'examples', name), 'utf8')).includes('format_version'));
+  // Every model file an example names is served where the page will look for it.
+  for (const name of listed) {
+    const text = await readFile(join(out, 'examples', name), 'utf8');
+    for (const [, file] of text.matchAll(/"file":\s*"([^"]+)"/g)) await readFile(join(out, 'examples', file));
+  }
 });
 
 test('the browser PNG writer round-trips pixels and compresses a sheet', () => {

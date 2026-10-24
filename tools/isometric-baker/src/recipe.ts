@@ -30,7 +30,7 @@ import {
   rejectUnknown,
   required,
 } from './json.ts';
-import { type ModelSpec } from './model.ts';
+import { type AnyModelSpec } from './imported.ts';
 import { type PrefabRequest } from './prefab.ts';
 import { readModel } from './recipe-model.ts';
 import { type ShadingConfig, DEFAULT_SHADING } from './shading.ts';
@@ -41,7 +41,7 @@ export { RecipeError };
 /** One named model on a sheet. A lone model has no name of its own. */
 export interface ModelVariant {
   name: string | null;
-  model: ModelSpec;
+  model: AnyModelSpec;
 }
 
 /** How the baked model is split into sheet frames. */

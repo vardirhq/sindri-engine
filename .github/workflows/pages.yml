@@ -108,7 +108,8 @@ jobs:
         with:
           tool: wasm-pack@0.13.1
       # The baker's page is its TypeScript with the types stripped by Node
-      # itself, which needs a Node new enough to do it without a flag.
+      # itself, which needs a Node new enough to do it without a flag. Its model
+      # reader (Three.js, pinned in tools/isometric-baker/web) is installed with npm.
       - uses: actions/setup-node@v7
         with:
           node-version: '22.18'
@@ -218,6 +219,7 @@ jobs:
           mkdir -p target/pages/examples/sound-lab/pkg
           cp tools/sindri-chiptune/web/index.html target/pages/examples/sound-lab/index.html
           cp -R tools/sindri-chiptune/pkg/. target/pages/examples/sound-lab/pkg/
+          npm ci --ignore-scripts --prefix tools/isometric-baker/web
           node tools/isometric-baker/web/build.mjs target/pages/examples/isometric-baker
           python site/build_docs.py target/pages
           # A page per playable project, embedding its export, and the landing
@@ -279,6 +281,9 @@ jobs:
           test -f target/pages/examples/isometric-baker/index.html
           test -f target/pages/examples/isometric-baker/app.js
           test -f target/pages/examples/isometric-baker/baker/bake.js
+          test -f target/pages/examples/isometric-baker/vendor/three/three.module.min.js
+          test -f target/pages/examples/isometric-baker/vendor/three/addons/loaders/GLTFLoader.js
+          test -f target/pages/examples/isometric-baker/examples/models/crate.glb
           test -f target/pages/examples/isometric-baker/examples/standing-stone.isobake
           grep -q 'id="recipe"' target/pages/examples/isometric-baker/index.html
           grep -q '"kind": "prefab"' target/pages/examples/orbital-baked/assets/sindri.manifest

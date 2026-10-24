@@ -1,17 +1,20 @@
-// The baker's page: a recipe on the left, each baked frame in context in the
-// middle, and the render settings on the right.
+// The Sprite Baker page: a catalogue of assets on the left, each baked frame in
+// context in the middle, and the inspector on the right.
 //
 // Everything runs here. `baker/` is the tool's own TypeScript with its types
 // stripped (see build.mjs), so a bake in this page is the bake the command line
-// does, except for the PNG's compressed bytes: the pixels are identical.
+// does, except for the PNG's compressed bytes: the pixels are identical. A model
+// file is read into triangles by Three.js (models.js) and baked by that same code.
 //
-// The recipe text is the one source of truth. The sliders read from the recipe
-// the last bake parsed, and move a slider by rewriting that text and baking it
-// again, so what is on the left is always what Save recipe will write.
+// The recipe text is the one source of truth. Selecting an asset puts its recipe
+// in the editor; the inspector's controls read the recipe the last bake parsed
+// and move by rewriting that text (controls.js).
 import { bake } from './baker/bake.js';
 import { RecipeError, parseRecipe } from './baker/recipe.js';
 import { zip } from './baker/zip.js';
 import { framePreview } from './context.js';
+import { setupControls, setupTabs } from './controls.js';
+import { extensionOf, isModelFile, readModelFile } from './models.js';
 
 const $ = (id) => document.getElementById(id);
 const recipeBox = $('recipe');
@@ -20,11 +23,17 @@ const stage = $('stage');
 const canvas = $('sheet');
 const zoom = $('zoom');
 const grid = $('grid');
-const controls = $('controls');
 
+/** Every asset in the catalogue: `{ name, recipe, models, example }`. */
+const assets = [];
+let selected = 0;
 let latest = null;
 let latestRecipe = null;
 let timer = 0;
+let generation = 0;
+
+const leaf = (path) => path.slice(path.lastIndexOf('/') + 1);
+const typeOf = (path) => (path.endsWith('.png') ? 'image/png' : 'application/json');
 
 function say(message, kind = '') {
   status.textContent = message;
@@ -46,8 +55,201 @@ function download(name, bytes, type) {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-const typeOf = (path) => (path.endsWith('.png') ? 'image/png' : 'application/json');
-const leaf = (path) => path.slice(path.lastIndexOf('/') + 1);
+// ---- Panes (the phone shows one at a time) ---------------------------------
+
+function showPane(name) {
+  document.body.dataset.pane = name;
+  for (const button of document.querySelectorAll('#panes button')) {
+    if (button.dataset.show === name) button.setAttribute('aria-current', 'true');
+    else button.removeAttribute('aria-current');
+  }
+}
+
+for (const button of document.querySelectorAll('#panes button')) {
+  button.addEventListener('click', () => showPane(button.dataset.show));
+}
+
+// ---- The catalogue ---------------------------------------------------------
+
+/** What an asset is, for the catalogue, read from its recipe text when that parses. */
+function describe(asset) {
+  try {
+    const recipe = JSON.parse(asset.recipe);
+    const view = recipe.view ?? 'isometric';
+    const kind = recipe.model?.kind === 'file' ? 'model file' : recipe.variants ? `${recipe.variants.length} variants` : 'primitives';
+    return { name: recipe.id ?? asset.name, meta: `${view} · ${kind}` };
+  } catch {
+    return { name: asset.name, meta: 'not valid JSON' };
+  }
+}
+
+function drawCatalogue() {
+  $('assets').replaceChildren(
+    ...assets.map((asset, index) => {
+      const { name, meta } = describe(asset);
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'asset';
+      if (index === selected) button.setAttribute('aria-current', 'true');
+      const title = document.createElement('span');
+      title.textContent = name;
+      const small = document.createElement('small');
+      small.textContent = meta;
+      button.append(title, small);
+      button.addEventListener('click', () => select(index));
+      return button;
+    }),
+  );
+}
+
+function select(index, { show = true } = {}) {
+  selected = index;
+  recipeBox.value = assets[index].recipe;
+  if (show) showPane('preview');
+  run();
+}
+
+function addAsset(asset) {
+  assets.push({ models: {}, example: false, ...asset });
+  return assets.length - 1;
+}
+
+// ---- Model files -----------------------------------------------------------
+
+/** The model files a recipe's text names, whether or not it is valid yet. */
+function filesNamedBy(text) {
+  try {
+    const recipe = JSON.parse(text);
+    const models = [recipe.model, ...(recipe.variants ?? []).map((v) => v?.model)];
+    return models.filter((m) => m?.kind === 'file' && typeof m.file === 'string').map((m) => m.file);
+  } catch {
+    return [];
+  }
+}
+
+/** A starting recipe for a model: isometric, one tile, fitted to it, with a prefab. */
+function recipeForModel(fileName) {
+  const base = fileName.replace(/\.[^.]+$/, '');
+  const id = base.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'model';
+  const title = id.split('-').map((word) => word[0].toUpperCase() + word.slice(1)).join(' ');
+  return `${JSON.stringify(
+    {
+      format_version: 1,
+      id,
+      texture: `textures/${id}.png`,
+      tile: { width: 64, height: 32 },
+      tile_world: { width: 1.1, height: 0.55 },
+      facing: 'south',
+      directions: 4,
+      footprint: { width: 1, height: 1 },
+      prefab: { path: `prefabs/${id}.prefab`, name: title, recipe: `prefabs/${id}.isobake` },
+      render: {
+        supersample: 4,
+        padding: 2,
+        palette_snap: true,
+        alpha_cutoff: 128,
+        outline: { enabled: true, color: '#241d2b' },
+        shading: { light: [-0.3, 0.89, 0.35], thresholds: [0.25, 0.5, 0.8] },
+      },
+      model: { kind: 'file', file: `models/${fileName}`, auto_fit: true, fill: 0.9 },
+    },
+    null,
+    2,
+  )}\n`;
+}
+
+/** An example's model, fetched from beside its recipe. */
+async function fetchModel(file) {
+  const response = await fetch(`./examples/${file}`);
+  if (!response.ok) throw new Error(`could not load ${file}`);
+  return readModelFile(new File([await response.blob()], leaf(file)));
+}
+
+/** Read each file the recipe names that the asset does not have yet; returns what is still missing. */
+async function supplyModels(asset, recipe) {
+  const wanted = recipe.variants.flatMap((variant) => ('file' in variant.model ? [variant.model.file] : []));
+  const missing = [];
+  for (const file of new Set(wanted)) {
+    if (asset.models[file]) continue;
+    if (!asset.example) {
+      missing.push(file);
+      continue;
+    }
+    say(`Reading ${leaf(file)}…`, 'wait');
+    asset.models[file] = await fetchModel(file);
+  }
+  return missing;
+}
+
+// ---- Opening files ---------------------------------------------------------
+
+async function openFiles(files) {
+  const list = [...files];
+  const recipes = list.filter((file) => ['isobake', 'json'].includes(extensionOf(file.name)));
+  const models = list.filter((file) => isModelFile(file.name));
+  const rest = list.filter((file) => !recipes.includes(file) && !models.includes(file));
+  if (rest.length > 0) {
+    say(`${rest.map((file) => file.name).join(', ')}: not a model (.glb, .gltf, .obj) or a recipe (.isobake)`, 'error');
+    if (recipes.length + models.length === 0) return;
+  }
+
+  let target = selected;
+  for (const file of recipes) {
+    target = addAsset({ name: file.name.replace(/\.[^.]+$/, ''), recipe: await file.text() });
+  }
+  let failed = null;
+  for (const file of models) {
+    let raw;
+    try {
+      raw = await readModelFile(file);
+    } catch (error) {
+      failed = error.message;
+      continue;
+    }
+    // A model a recipe is waiting for goes to that recipe; any other becomes its own asset.
+    const waiting = filesNamedBy(assets[target].recipe).filter(
+      (named) => !assets[target].models[named] && leaf(named).toLowerCase() === file.name.toLowerCase(),
+    );
+    if (waiting.length > 0) {
+      for (const named of waiting) assets[target].models[named] = raw;
+    } else {
+      target = addAsset({ name: file.name.replace(/\.[^.]+$/, ''), recipe: recipeForModel(file.name), models: { [`models/${file.name}`]: raw } });
+    }
+  }
+  select(target);
+  if (failed) say(failed, 'error');
+}
+
+$('open').addEventListener('change', async (event) => {
+  const files = [...event.target.files];
+  event.target.value = '';
+  await openFiles(files);
+});
+
+let dragDepth = 0;
+const carriesFiles = (event) => [...(event.dataTransfer?.types ?? [])].includes('Files');
+window.addEventListener('dragenter', (event) => {
+  if (!carriesFiles(event)) return;
+  dragDepth++;
+  $('drop').hidden = false;
+});
+window.addEventListener('dragover', (event) => {
+  if (carriesFiles(event)) event.preventDefault();
+});
+window.addEventListener('dragleave', (event) => {
+  if (!carriesFiles(event)) return;
+  dragDepth = Math.max(0, dragDepth - 1);
+  if (dragDepth === 0) $('drop').hidden = true;
+});
+window.addEventListener('drop', (event) => {
+  if (!carriesFiles(event)) return;
+  event.preventDefault();
+  dragDepth = 0;
+  $('drop').hidden = true;
+  openFiles(event.dataTransfer.files);
+});
+
+// ---- Showing a bake --------------------------------------------------------
 
 function drawSheet(image) {
   canvas.width = image.width;
@@ -71,7 +273,6 @@ function drawCards() {
     ...latest.frames.map((frame, index) => {
       const card = document.createElement('figure');
       card.className = 'card';
-      card.style.margin = '0';
       const header = document.createElement('header');
       const name = document.createElement('b');
       name.textContent = latest.report.frames[index].direction;
@@ -143,143 +344,58 @@ function showFiles(files) {
   );
 }
 
-// ---- The render settings ---------------------------------------------------
-
-const DEGREES = 180 / Math.PI;
-
-/** Where the light is, as the two angles a person thinks in. */
-function lightAngles([x, y, z]) {
-  const length = Math.hypot(x, y, z) || 1;
-  return {
-    azimuth: Math.round(((Math.atan2(z, x) * DEGREES) + 360) % 360),
-    elevation: Math.round(Math.asin(y / length) * DEGREES),
-  };
-}
-
-function lightFrom(azimuth, elevation) {
-  const flat = Math.cos(elevation / DEGREES);
-  const round = (v) => Math.round(v * 1000) / 1000;
-  return [
-    round(flat * Math.cos(azimuth / DEGREES)),
-    round(Math.sin(elevation / DEGREES)),
-    round(flat * Math.sin(azimuth / DEGREES)),
-  ];
-}
-
-/** What each control shows, read from a recipe the baker has parsed. */
-const READ = {
-  supersample: (r) => r.render.supersample,
-  alpha_cutoff: (r) => r.render.alphaCutoff,
-  padding: (r) => r.render.padding,
-  palette_snap: (r) => r.render.paletteSnap,
-  outline_enabled: (r) => r.render.outline.enabled,
-  outline_color: (r) => r.render.outline.color,
-  azimuth: (r) => lightAngles(r.render.shading.light).azimuth,
-  elevation: (r) => lightAngles(r.render.shading.light).elevation,
-  band0: (r) => r.render.shading.thresholds[0],
-  band1: (r) => r.render.shading.thresholds[1],
-  band2: (r) => r.render.shading.thresholds[2],
-};
-
-const LABEL = {
-  supersample: (v) => `${v}×`,
-  alpha_cutoff: (v) => `${v}`,
-  padding: (v) => `${v}px`,
-  azimuth: (v) => `${v}°`,
-  elevation: (v) => `${v}°`,
-  band0: (v) => v.toFixed(2),
-  band1: (v) => v.toFixed(2),
-  band2: (v) => v.toFixed(2),
-};
-
-const inputs = Object.fromEntries(
-  [...controls.querySelectorAll('[data-setting]')].map((input) => [input.dataset.setting, input]),
-);
-
-/** Move the controls to match the recipe, leaving alone the one being dragged. */
-function syncControls(recipe) {
-  for (const [key, input] of Object.entries(inputs)) {
-    if (input === document.activeElement) continue;
-    const value = READ[key](recipe);
-    if (input.type === 'checkbox') input.checked = value;
-    else if (input.type === 'color') input.value = /^#[0-9a-f]{6}$/i.test(value) ? value : '#000000';
-    else input.value = value;
-    const out = controls.querySelector(`[data-out="${key}"]`);
-    if (out) out.textContent = LABEL[key](Number(value));
-  }
-}
-
-/** Write one setting into the recipe's text, then bake it again. */
-function change(key, value) {
-  let recipe;
-  try {
-    recipe = JSON.parse(recipeBox.value);
-  } catch {
-    return;
-  }
-  const render = (recipe.render ??= {});
-  // A shading block needs both its keys, so start it from what the bake is using.
-  const shading = () =>
-    (render.shading ??= {
-      light: [...latestRecipe.render.shading.light],
-      thresholds: [...latestRecipe.render.shading.thresholds],
-    });
-
-  if (key === 'supersample' || key === 'alpha_cutoff' || key === 'padding' || key === 'palette_snap') {
-    render[key] = value;
-  } else if (key === 'outline_enabled') {
-    (render.outline ??= {}).enabled = value;
-  } else if (key === 'outline_color') {
-    (render.outline ??= {}).color = value;
-  } else if (key === 'azimuth' || key === 'elevation') {
-    const now = lightAngles(shading().light);
-    const next = { ...now, [key]: value };
-    shading().light = lightFrom(next.azimuth, next.elevation);
-  } else {
-    // A band edge may not pass its neighbours: the baker requires them ascending.
-    const index = Number(key.slice(4));
-    const edges = shading().thresholds;
-    edges[index] = Math.min(Math.max(value, edges[index - 1] ?? 0), edges[index + 1] ?? 1);
-  }
-  recipeBox.value = `${JSON.stringify(recipe, null, 2)}\n`;
-  schedule(0);
-}
-
-for (const [key, input] of Object.entries(inputs)) {
-  input.addEventListener('input', () => {
-    const value = input.type === 'checkbox' ? input.checked : input.type === 'color' ? input.value : Number(input.value);
-    const out = controls.querySelector(`[data-out="${key}"]`);
-    if (out && LABEL[key]) out.textContent = LABEL[key](value);
-    change(key, value);
-  });
-}
-
 // ---- Baking ----------------------------------------------------------------
 
-function run() {
+const controls = setupControls({
+  recipeBox,
+  current: () => ({ recipe: latestRecipe, asset: assets[selected] }),
+  rerun: (delay) => schedule(delay),
+});
+setupTabs();
+
+function fail(message) {
+  stage.classList.add('stale');
+  $('download-all').disabled = true;
+  say(message, 'error');
+}
+
+async function run() {
   clearTimeout(timer);
-  // Sliders work on the text, so they need it to be JSON; a recipe the baker
-  // rejects for another reason can still be mended with them.
+  const mine = ++generation;
+  const asset = assets[selected];
+  asset.recipe = recipeBox.value;
+  drawCatalogue();
+
+  // The controls work on the text, so they need it to be JSON; a recipe the
+  // baker rejects for another reason can still be mended with them.
   try {
     JSON.parse(recipeBox.value);
-    controls.disabled = false;
+    controls.setEditable(true);
   } catch {
-    controls.disabled = true;
+    controls.setEditable(false);
   }
 
-  let result;
   let recipe;
-  const started = performance.now();
+  let result;
   try {
     recipe = parseRecipe(recipeBox.value, 'recipe');
-    result = bake(recipe);
+    const missing = await supplyModels(asset, recipe);
+    if (mine !== generation) return;
+    if (missing.length > 0) {
+      latestRecipe = recipe;
+      controls.sync(recipe, asset);
+      fail(`This recipe needs the model file ${missing.map(leaf).join(', ')}. Drop it onto the page, or choose it with Open….`);
+      return;
+    }
+    const started = performance.now();
+    result = bake(recipe, { models: asset.models });
+    result.elapsed = Math.round(performance.now() - started);
   } catch (error) {
-    stage.classList.add('stale');
-    $('download-all').disabled = true;
-    say(error instanceof RecipeError || error instanceof Error ? error.message : String(error), 'error');
+    if (mine !== generation) return;
+    fail(error instanceof RecipeError || error instanceof Error ? error.message : String(error));
     return;
   }
-  const elapsed = Math.round(performance.now() - started);
+
   latest = result;
   latestRecipe = recipe;
   stage.classList.remove('stale');
@@ -288,8 +404,8 @@ function run() {
   drawCards();
   showReport(result);
   showFiles(result.files);
-  syncControls(recipe);
-  say(`Baked ${result.frames.length} frames in ${elapsed} ms.`, 'ok');
+  controls.sync(recipe, asset);
+  say(`Baked ${result.frames.length} frames in ${result.elapsed} ms.`, 'ok');
 }
 
 function schedule(delay = 300) {
@@ -297,24 +413,9 @@ function schedule(delay = 300) {
   timer = setTimeout(run, delay);
 }
 
-async function load(name) {
-  const response = await fetch(`./examples/${name}`);
-  if (!response.ok) throw new Error(`could not load ${name}`);
-  recipeBox.value = await response.text();
-  run();
-}
-
 recipeBox.addEventListener('input', () => schedule());
 zoom.addEventListener('input', drawCards);
 grid.addEventListener('change', drawCards);
-$('example').addEventListener('change', (event) => load(event.target.value).catch((e) => say(String(e), 'error')));
-$('open').addEventListener('change', async (event) => {
-  const [file] = event.target.files;
-  if (!file) return;
-  recipeBox.value = await file.text();
-  event.target.value = '';
-  run();
-});
 $('save-recipe').addEventListener('click', () => {
   let name = 'recipe';
   try {
@@ -335,9 +436,11 @@ if (window.innerWidth < 700) zoom.value = '2';
 
 try {
   const names = await (await fetch('./examples/index.json')).json();
-  const select = $('example');
-  for (const name of names) select.append(new Option(name.replace(/\.isobake$/, ''), name));
-  await load(names[0]);
+  const texts = await Promise.all(names.map(async (name) => (await fetch(`./examples/${name}`)).text()));
+  names.forEach((name, index) =>
+    addAsset({ name: name.replace(/\.isobake$/, ''), recipe: texts[index], example: true }),
+  );
+  select(0, { show: false });
 } catch (error) {
   say(`Could not load the examples: ${error}`, 'error');
 }

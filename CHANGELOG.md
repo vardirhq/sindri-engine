@@ -1,5 +1,18 @@
 # Changelog
 
+- Bake Blender models in the Sprite Baker: drop a `.glb`, `.gltf` or `.obj` on
+  the page (or open one) and it is read by Three.js into triangles, centred on
+  its footprint, stood on the floor, shaded into the baker's four-shade palette
+  by each material's base color, and baked in four directions like any other
+  asset. A recipe may now name a model with `"kind": "file"`, with `auto_fit`,
+  `fill`, `scale`, `rotation_y`, `offset` and per-material color overrides; a
+  recipe waiting for its model says so and takes it when it is dropped. The page
+  follows IsoGame's Sprite Factory: a catalogue of assets, every direction on its
+  floor, and an inspector with Render, Model and Recipe tabs, and on a phone its
+  panes sit behind a bar along the bottom. The browser page now has one
+  dependency, Three.js, pinned in `tools/isometric-baker/web` and used only as the
+  loader; the baker has none, and the command line cannot read model files yet.
+
 - Put the isometric baker on the website as a tool called Sprite Baker, at
   `/examples/isometric-baker/`: edit a recipe, see the sheet it bakes, and
   download the PNG, `.sheet` and prefab, or all three as a zip. Each direction
