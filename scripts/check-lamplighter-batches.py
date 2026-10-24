@@ -5,12 +5,13 @@ import json
 import sys
 from pathlib import Path
 
-# The settled level has four non-sprite batches. Its mixed shape/glyph
-# payload is 2,656 bytes smaller than storing every instance as a sprite.
+# The settled level has six non-sprite batches: the four it had, and the pause
+# button's box and its "II". Its mixed shape/glyph payload is 2,816 bytes
+# smaller than storing every instance as a sprite.
 # Sprite counts vary with particle lifetime: standalone advances one fixed step
 # per draw, whereas the editor advances however many steps its clock owes.
-NON_SPRITE_BATCHES = 4
-NON_SPRITE_BYTE_SAVING = 2656
+NON_SPRITE_BATCHES = 6
+NON_SPRITE_BYTE_SAVING = 2816
 SPRITE_BYTES = 176
 
 for path in sys.argv[1:]:

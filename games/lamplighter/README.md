@@ -8,6 +8,8 @@ the level it still is, which the next stages replace a piece at a time.
 A small side-view platformer. Run and jump across a
 painted level, pick up the coins and reach the flag.
 
+Escape (or a pad's Start) pauses.
+
 K or the west controller button tosses the wooden crate when nearby. Wind
 pushes it along the ground; an off-centre kick makes it tumble. Its forces and
 rotation are driven in Decay, with physics writing the resulting pose back.
@@ -51,17 +53,41 @@ mobile controls. Visible on-screen affordances for the stick and jump action
 remain part of the mobile presentation work rather than being hidden behind a
 claim that two invisible fingers somehow constitute a finished mobile UI.
 
+## The shell
+
+The game starts on the title screen (`title.scene`). **Play** begins the level
+the player was last in, over; **Levels** (`levels.scene`) lists the eight
+levels, shows which beacons are lit and how many embers were found, and opens
+any that is built; **Settings** (`settings.scene`) sets the music and effects
+volumes in tenths and turns reduced motion on. Escape, a pad's Start button or
+the drawn **II** button pauses a level into `pause.scene`: the level is switched
+off behind it exactly as it was, and **Resume** switches it back on where it
+stopped. Reaching the flag saves the beacon, shows the banner, and returns to
+the level select.
+
+Four scenes and one script file (`scripts/shell.decay`) are all the shell is;
+`art/dusk/shell.py` writes the scenes. What a person has done is kept with
+`Save`, under plain names: `beacon_N`, `embers_N`, `level`, `volume_music`,
+`volume_effects`, `reduced_motion`, and `return` (the screen Settings goes back
+to). `tests/the_shell.rs` plays the route between the screens by pressing the
+buttons that are drawn.
+
 ## What it is made of
 
 There is no game code. The game is `assets/`:
 
-- `platformer.scene`: the level, the hero, the coins, the flag and the HUD.
+- `title.scene`, `levels.scene`, `settings.scene`, `pause.scene`: the shell,
+  written by `art/dusk/shell.py`.
+- `level-1.scene`: the level, the hero, the coins, the flag and the HUD.
 - `prefabs/coin.prefab`: what a coin is — its spinning sprite, sensor and tag.
   The scene places ten instances of it, each saying only where it stands, so
   a change to the prefab is a change to every coin.
 - `scripts/hero.decay`: keyboard, controller and touch movement, jumping, coins,
   the flag and falling off.
-- `scripts/hud.decay`: the coin count and the banner.
+- `scripts/hud.decay`: the coin count, the banner, the pause button, and what
+  reaching the flag saves.
+- `scripts/shell.decay`: the title, the level select, the pause screen and the
+  settings.
 - `audio/`: the jump, landing, coin and flag sounds, made in the Sindri Sound
   Lab (`tools/sindri-chiptune`) and sent here by it. Each `.sindrisfx` beside
   its WAV is the editable source: open it in the Lab, reshape it, send it back.
@@ -100,7 +126,7 @@ It uses, with no Rust of its own:
 
 ## Playing it
 
-Open `assets/platformer.scene` in the editor and press Play: the Scene view
+Open `assets/level-1.scene` in the editor and press Play: the Scene view
 opens in 2D, framed on the game's camera. It is also exported to the site at
 `examples/lamplighter/`.
 

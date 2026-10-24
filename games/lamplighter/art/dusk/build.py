@@ -22,6 +22,7 @@ from palette import ramp  # noqa: E402
 from preview import mask_at  # noqa: E402
 from normals import normal_map  # noqa: E402
 import props  # noqa: E402
+import shell  # noqa: E402
 import sky as S  # noqa: E402
 import wick  # noqa: E402
 
@@ -324,6 +325,7 @@ def main():
     (ASSETS / "art-test.scene").write_text(json.dumps(scene, indent=2) + "\n")
     harbor = build_scene(masks, bake_wick(), HARBOR, "quay", "Lamplighter harbor art test", decorate=False, floor_row=11, wick_x=4.0, lanterns=((2.0, True), (17.5, False)))
     (ASSETS / "art-harbor.scene").write_text(json.dumps(harbor, indent=2) + "\n")
+    shell.write_all(ASSETS)
     print(f"wrote {len(masks)} ground tiles, {len(props.DECOR)} decorations, the backdrop, Wick and art-test.scene")
 
 

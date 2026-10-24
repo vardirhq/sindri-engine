@@ -18,16 +18,39 @@ pub fn project() -> PathBuf {
     Path::new(env!("CARGO_MANIFEST_DIR")).to_path_buf()
 }
 
+/// The screen a run is played on, in pixels.
+const SCREEN: [f32; 2] = [960.0, 540.0];
+
+/// The scene the level tests play, and the level select opens first.
+pub const FIRST_LEVEL: &str = "level-1.scene";
+
 /// One run of the game: the project, played as a host plays it.
 pub struct Run(Box<ProjectRun>);
 
 impl Run {
-    /// Opens the project: every scene, script, prefab and profile in it.
+    /// Opens the project on its first level, the way a person arrives there
+    /// from the level select: every scene, script, prefab and profile in it.
     ///
     /// # Errors
     /// If the project will not read, will not parse, or will not load.
     pub fn open() -> Result<Self, String> {
-        ProjectRun::open(&project(), [960.0, 540.0]).map(|run| Self(Box::new(run)))
+        Self::open_scene(FIRST_LEVEL)
+    }
+
+    /// Opens the project as the shipped game starts, on its title screen.
+    ///
+    /// # Errors
+    /// As [`Self::open`].
+    pub fn open_title() -> Result<Self, String> {
+        ProjectRun::open(&project(), SCREEN).map(|run| Self(Box::new(run)))
+    }
+
+    /// Opens the project on one of its scenes, named as `Scene.go` names it.
+    ///
+    /// # Errors
+    /// As [`Self::open`], and a scene the project does not list.
+    pub fn open_scene(scene: &str) -> Result<Self, String> {
+        ProjectRun::open_scene(&project(), scene, SCREEN).map(|run| Self(Box::new(run)))
     }
 
     /// One fixed step, returning every failure it reported.

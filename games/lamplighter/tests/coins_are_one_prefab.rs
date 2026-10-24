@@ -11,7 +11,7 @@ use sindri_core::{SceneComponent, SceneDocument, TagsComponent};
 #[test]
 fn every_coin_is_an_instance_of_the_coin_prefab() {
     let text = std::fs::read_to_string(
-        std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("assets/platformer.scene"),
+        std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("assets/level-1.scene"),
     )
     .expect("the scene reads");
     let scene = SceneDocument::from_json(&text).expect("the scene parses");

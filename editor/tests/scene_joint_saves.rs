@@ -154,7 +154,7 @@ fn spawned_windmill() -> WindmillFixture {
 
     let assets =
         std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../games/lamplighter/assets");
-    let file = SceneFile::open(assets.join("platformer.scene")).unwrap();
+    let file = SceneFile::open(assets.join("level-1.scene")).unwrap();
     let mut extractor = SceneExtractor::new().unwrap();
     extractor.register::<ScriptComponent>("Script").unwrap();
     let registry = extractor.components();

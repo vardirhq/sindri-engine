@@ -1,0 +1,1158 @@
+{
+  "format_version": 10,
+  "metadata": {
+    "name": "Lamplighter levels"
+  },
+  "entities": [
+    {
+      "id": "camera",
+      "name": "Camera",
+      "transform_3d": {
+        "position": [
+          10.0,
+          5.625,
+          10.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1
+        ]
+      },
+      "components": {
+        "sindri.camera": {
+          "projection": "orthographic",
+          "vertical_size": 11.25,
+          "near": 0.1,
+          "far": 100.0,
+          "fit": "height"
+        }
+      }
+    },
+    {
+      "id": "environment",
+      "name": "Environment",
+      "components": {
+        "sindri.environment": {
+          "background": [
+            0.08,
+            0.07,
+            0.17,
+            1.0
+          ],
+          "shadows": {
+            "enabled": false,
+            "map_size": 1024,
+            "distance": 48.0,
+            "bias": 0.002
+          },
+          "lighting_2d": {
+            "enabled": true,
+            "ambient": [
+              0.36,
+              0.34,
+              0.55
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "sky",
+      "name": "sky",
+      "transform_3d": {
+        "position": [
+          10.0,
+          5.625,
+          -3.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          20.0,
+          11.25,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/sky.png",
+          "layer": -30,
+          "unlit": true
+        }
+      }
+    },
+    {
+      "id": "hills-far",
+      "name": "hills-far",
+      "transform_3d": {
+        "position": [
+          10.0,
+          5.625,
+          -2.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          20.0,
+          11.25,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/hills-far.png",
+          "layer": -20,
+          "unlit": true
+        }
+      }
+    },
+    {
+      "id": "hills-near",
+      "name": "hills-near",
+      "transform_3d": {
+        "position": [
+          10.0,
+          5.625,
+          -1.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          20.0,
+          11.25,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/hills-near.png",
+          "layer": -10,
+          "unlit": true
+        }
+      }
+    },
+    {
+      "id": "menu",
+      "name": "menu",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.0,
+          1.8,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.layout": {
+          "direction": "column",
+          "spacing": 0.02,
+          "justify": "center",
+          "align": "center"
+        }
+      }
+    },
+    {
+      "id": "heading",
+      "name": "heading",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.4,
+          0.10400000000000001,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.text": {
+          "anchor": "center",
+          "color": [
+            1.0,
+            0.76,
+            0.36,
+            1.0
+          ],
+          "font": "fonts/Inter.ttf",
+          "font_size": 0.08,
+          "line_height": 0.096,
+          "layer": 100,
+          "text": "Levels",
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.004
+            ],
+            "color": [
+              0.0,
+              0.0,
+              0.0,
+              0.55
+            ],
+            "softness": 0.003
+          },
+          "bold": true,
+          "line_align": "center"
+        }
+      },
+      "parent": "menu"
+    },
+    {
+      "id": "level-1",
+      "name": "level-1",
+      "parent": "menu",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.1,
+          0.085,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.09,
+            0.08,
+            0.2,
+            0.92
+          ],
+          "anchor": "center",
+          "layer": 90
+        },
+        "sindri.ui.button": {
+          "label": "1  Dusk Road",
+          "autofocus": false,
+          "disabled": false
+        },
+        "sindri.ui.layout": {
+          "direction": "row",
+          "spacing": 0.02,
+          "justify": "center",
+          "align": "center"
+        }
+      }
+    },
+    {
+      "id": "level-1-label",
+      "name": "level-1-label",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.9900000000000001,
+          0.068,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.text": {
+          "anchor": "center",
+          "color": [
+            0.96,
+            0.93,
+            0.84,
+            1.0
+          ],
+          "font": "fonts/Inter.ttf",
+          "font_size": 0.05,
+          "line_height": 0.06,
+          "layer": 95,
+          "text": "1  Dusk Road",
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.004
+            ],
+            "color": [
+              0.0,
+              0.0,
+              0.0,
+              0.55
+            ],
+            "softness": 0.003
+          },
+          "bold": true,
+          "line_align": "center"
+        }
+      },
+      "parent": "level-1"
+    },
+    {
+      "id": "level-2",
+      "name": "level-2",
+      "parent": "menu",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.1,
+          0.085,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.09,
+            0.08,
+            0.2,
+            0.92
+          ],
+          "anchor": "center",
+          "layer": 90
+        },
+        "sindri.ui.button": {
+          "label": "2  The Ferry Landing  -  soon",
+          "autofocus": false,
+          "disabled": true
+        },
+        "sindri.ui.layout": {
+          "direction": "row",
+          "spacing": 0.02,
+          "justify": "center",
+          "align": "center"
+        }
+      }
+    },
+    {
+      "id": "level-2-label",
+      "name": "level-2-label",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.9900000000000001,
+          0.068,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.text": {
+          "anchor": "center",
+          "color": [
+            0.62,
+            0.6,
+            0.78,
+            1.0
+          ],
+          "font": "fonts/Inter.ttf",
+          "font_size": 0.05,
+          "line_height": 0.06,
+          "layer": 95,
+          "text": "2  The Ferry Landing  -  soon",
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.004
+            ],
+            "color": [
+              0.0,
+              0.0,
+              0.0,
+              0.55
+            ],
+            "softness": 0.003
+          },
+          "bold": true,
+          "line_align": "center"
+        }
+      },
+      "parent": "level-2"
+    },
+    {
+      "id": "level-3",
+      "name": "level-3",
+      "parent": "menu",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.1,
+          0.085,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.09,
+            0.08,
+            0.2,
+            0.92
+          ],
+          "anchor": "center",
+          "layer": 90
+        },
+        "sindri.ui.button": {
+          "label": "3  Windmill Ridge  -  soon",
+          "autofocus": false,
+          "disabled": true
+        },
+        "sindri.ui.layout": {
+          "direction": "row",
+          "spacing": 0.02,
+          "justify": "center",
+          "align": "center"
+        }
+      }
+    },
+    {
+      "id": "level-3-label",
+      "name": "level-3-label",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.9900000000000001,
+          0.068,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.text": {
+          "anchor": "center",
+          "color": [
+            0.62,
+            0.6,
+            0.78,
+            1.0
+          ],
+          "font": "fonts/Inter.ttf",
+          "font_size": 0.05,
+          "line_height": 0.06,
+          "layer": 95,
+          "text": "3  Windmill Ridge  -  soon",
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.004
+            ],
+            "color": [
+              0.0,
+              0.0,
+              0.0,
+              0.55
+            ],
+            "softness": 0.003
+          },
+          "bold": true,
+          "line_align": "center"
+        }
+      },
+      "parent": "level-3"
+    },
+    {
+      "id": "level-4",
+      "name": "level-4",
+      "parent": "menu",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.1,
+          0.085,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.09,
+            0.08,
+            0.2,
+            0.92
+          ],
+          "anchor": "center",
+          "layer": 90
+        },
+        "sindri.ui.button": {
+          "label": "4  The Cable Car  -  soon",
+          "autofocus": false,
+          "disabled": true
+        },
+        "sindri.ui.layout": {
+          "direction": "row",
+          "spacing": 0.02,
+          "justify": "center",
+          "align": "center"
+        }
+      }
+    },
+    {
+      "id": "level-4-label",
+      "name": "level-4-label",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.9900000000000001,
+          0.068,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.text": {
+          "anchor": "center",
+          "color": [
+            0.62,
+            0.6,
+            0.78,
+            1.0
+          ],
+          "font": "fonts/Inter.ttf",
+          "font_size": 0.05,
+          "line_height": 0.06,
+          "layer": 95,
+          "text": "4  The Cable Car  -  soon",
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.004
+            ],
+            "color": [
+              0.0,
+              0.0,
+              0.0,
+              0.55
+            ],
+            "softness": 0.003
+          },
+          "bold": true,
+          "line_align": "center"
+        }
+      },
+      "parent": "level-4"
+    },
+    {
+      "id": "level-5",
+      "name": "level-5",
+      "parent": "menu",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.1,
+          0.085,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.09,
+            0.08,
+            0.2,
+            0.92
+          ],
+          "anchor": "center",
+          "layer": 90
+        },
+        "sindri.ui.button": {
+          "label": "5  The Hanging Lamps  -  soon",
+          "autofocus": false,
+          "disabled": true
+        },
+        "sindri.ui.layout": {
+          "direction": "row",
+          "spacing": 0.02,
+          "justify": "center",
+          "align": "center"
+        }
+      }
+    },
+    {
+      "id": "level-5-label",
+      "name": "level-5-label",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.9900000000000001,
+          0.068,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.text": {
+          "anchor": "center",
+          "color": [
+            0.62,
+            0.6,
+            0.78,
+            1.0
+          ],
+          "font": "fonts/Inter.ttf",
+          "font_size": 0.05,
+          "line_height": 0.06,
+          "layer": 95,
+          "text": "5  The Hanging Lamps  -  soon",
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.004
+            ],
+            "color": [
+              0.0,
+              0.0,
+              0.0,
+              0.55
+            ],
+            "softness": 0.003
+          },
+          "bold": true,
+          "line_align": "center"
+        }
+      },
+      "parent": "level-5"
+    },
+    {
+      "id": "level-6",
+      "name": "level-6",
+      "parent": "menu",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.1,
+          0.085,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.09,
+            0.08,
+            0.2,
+            0.92
+          ],
+          "anchor": "center",
+          "layer": 90
+        },
+        "sindri.ui.button": {
+          "label": "6  The Lantern Caves  -  soon",
+          "autofocus": false,
+          "disabled": true
+        },
+        "sindri.ui.layout": {
+          "direction": "row",
+          "spacing": 0.02,
+          "justify": "center",
+          "align": "center"
+        }
+      }
+    },
+    {
+      "id": "level-6-label",
+      "name": "level-6-label",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.9900000000000001,
+          0.068,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.text": {
+          "anchor": "center",
+          "color": [
+            0.62,
+            0.6,
+            0.78,
+            1.0
+          ],
+          "font": "fonts/Inter.ttf",
+          "font_size": 0.05,
+          "line_height": 0.06,
+          "layer": 95,
+          "text": "6  The Lantern Caves  -  soon",
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.004
+            ],
+            "color": [
+              0.0,
+              0.0,
+              0.0,
+              0.55
+            ],
+            "softness": 0.003
+          },
+          "bold": true,
+          "line_align": "center"
+        }
+      },
+      "parent": "level-6"
+    },
+    {
+      "id": "level-7",
+      "name": "level-7",
+      "parent": "menu",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.1,
+          0.085,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.09,
+            0.08,
+            0.2,
+            0.92
+          ],
+          "anchor": "center",
+          "layer": 90
+        },
+        "sindri.ui.button": {
+          "label": "7  Storm Stair  -  soon",
+          "autofocus": false,
+          "disabled": true
+        },
+        "sindri.ui.layout": {
+          "direction": "row",
+          "spacing": 0.02,
+          "justify": "center",
+          "align": "center"
+        }
+      }
+    },
+    {
+      "id": "level-7-label",
+      "name": "level-7-label",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.9900000000000001,
+          0.068,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.text": {
+          "anchor": "center",
+          "color": [
+            0.62,
+            0.6,
+            0.78,
+            1.0
+          ],
+          "font": "fonts/Inter.ttf",
+          "font_size": 0.05,
+          "line_height": 0.06,
+          "layer": 95,
+          "text": "7  Storm Stair  -  soon",
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.004
+            ],
+            "color": [
+              0.0,
+              0.0,
+              0.0,
+              0.55
+            ],
+            "softness": 0.003
+          },
+          "bold": true,
+          "line_align": "center"
+        }
+      },
+      "parent": "level-7"
+    },
+    {
+      "id": "level-8",
+      "name": "level-8",
+      "parent": "menu",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.1,
+          0.085,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.09,
+            0.08,
+            0.2,
+            0.92
+          ],
+          "anchor": "center",
+          "layer": 90
+        },
+        "sindri.ui.button": {
+          "label": "8  The Dawn Beacon  -  soon",
+          "autofocus": false,
+          "disabled": true
+        },
+        "sindri.ui.layout": {
+          "direction": "row",
+          "spacing": 0.02,
+          "justify": "center",
+          "align": "center"
+        }
+      }
+    },
+    {
+      "id": "level-8-label",
+      "name": "level-8-label",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.9900000000000001,
+          0.068,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.text": {
+          "anchor": "center",
+          "color": [
+            0.62,
+            0.6,
+            0.78,
+            1.0
+          ],
+          "font": "fonts/Inter.ttf",
+          "font_size": 0.05,
+          "line_height": 0.06,
+          "layer": 95,
+          "text": "8  The Dawn Beacon  -  soon",
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.004
+            ],
+            "color": [
+              0.0,
+              0.0,
+              0.0,
+              0.55
+            ],
+            "softness": 0.003
+          },
+          "bold": true,
+          "line_align": "center"
+        }
+      },
+      "parent": "level-8"
+    },
+    {
+      "id": "back",
+      "name": "back",
+      "parent": "menu",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.5,
+          0.085,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.09,
+            0.08,
+            0.2,
+            0.92
+          ],
+          "anchor": "center",
+          "layer": 90
+        },
+        "sindri.ui.button": {
+          "label": "Back",
+          "autofocus": false,
+          "disabled": false
+        },
+        "sindri.ui.layout": {
+          "direction": "row",
+          "spacing": 0.02,
+          "justify": "center",
+          "align": "center"
+        }
+      }
+    },
+    {
+      "id": "back-label",
+      "name": "back-label",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.45,
+          0.068,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.text": {
+          "anchor": "center",
+          "color": [
+            0.96,
+            0.93,
+            0.84,
+            1.0
+          ],
+          "font": "fonts/Inter.ttf",
+          "font_size": 0.05,
+          "line_height": 0.06,
+          "layer": 95,
+          "text": "Back",
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.004
+            ],
+            "color": [
+              0.0,
+              0.0,
+              0.0,
+              0.55
+            ],
+            "softness": 0.003
+          },
+          "bold": true,
+          "line_align": "center"
+        }
+      },
+      "parent": "back"
+    },
+    {
+      "id": "shell",
+      "name": "Shell",
+      "components": {
+        "sindri.script": {
+          "source": "scripts/shell.decay",
+          "script": "Levels",
+          "properties": {}
+        }
+      }
+    }
+  ]
+}

@@ -171,7 +171,6 @@
               "kind": "button",
               "bindings": [
                 "key.Escape",
-                "key.P",
                 "gamepad.start"
               ]
             }

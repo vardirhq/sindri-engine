@@ -1,5 +1,20 @@
 # Changelog
 
+- Add `Scene.restart(name)`: moves to a scene and starts it over. `Scene.go`
+  finds a scene as it was left, which makes a pause screen a scene of its own,
+  but a level begun again from a menu needs the opposite, so `restart` throws
+  the scene away first and loads it from its file, whether it is the scene being
+  played or one visited earlier. The editor's Scenes board draws its doors as it
+  does `Scene.go`'s, and `docs/scripting.md` says which to use when.
+
+- Lamplighter's shell, the third stage of its plan (`docs/lamplighter-plan.md`):
+  a title screen, a level select that shows which beacons are lit and the embers
+  found, settings (music and effects volume, reduced motion) and a pause screen,
+  each its own scene, with the old level now `level-1.scene` behind them. Escape,
+  a pad's Start button or a drawn button pauses a level without losing it;
+  reaching the flag saves the beacon and returns to the level select; what a
+  person did is kept with `Save`. The game now opens on its title screen.
+
 - Lamplighter's art foundation, the second stage of its plan
   (`docs/lamplighter-plan.md`). `games/lamplighter/art/dusk/build.py` draws a
   dusk palette's meadow and harbor tile sets as 47-tile `blob` terrains with
