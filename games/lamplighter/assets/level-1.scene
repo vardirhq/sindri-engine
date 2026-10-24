@@ -165,6 +165,14 @@
                 "key.K",
                 "gamepad.west"
               ]
+            },
+            {
+              "name": "pause",
+              "kind": "button",
+              "bindings": [
+                "key.Escape",
+                "gamepad.start"
+              ]
             }
           ]
         }
@@ -3551,6 +3559,99 @@
           "source": "scripts/ferry.decay",
           "script": "Ferry",
           "properties": {}
+        }
+      }
+    },
+    {
+      "id": "pause-button",
+      "name": "pause-button",
+      "transform_3d": {
+        "position": [
+          -0.03,
+          -0.03,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.09,
+          0.09,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.09,
+            0.08,
+            0.2,
+            0.8
+          ],
+          "anchor": "top_right",
+          "layer": 98
+        },
+        "sindri.ui.button": {
+          "label": "Pause",
+          "autofocus": false,
+          "disabled": false
+        }
+      }
+    },
+    {
+      "id": "pause-button-label",
+      "name": "pause-button-label",
+      "parent": "pause-button",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.text": {
+          "anchor": "center",
+          "color": [
+            0.96,
+            0.93,
+            0.84,
+            1.0
+          ],
+          "font": "fonts/Inter.ttf",
+          "font_size": 0.05,
+          "line_height": 0.06,
+          "layer": 99,
+          "text": "II",
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.003
+            ],
+            "color": [
+              0.0,
+              0.0,
+              0.0,
+              0.45
+            ],
+            "softness": 0.002
+          },
+          "bold": true
         }
       }
     }

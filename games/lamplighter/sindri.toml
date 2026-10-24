@@ -2,7 +2,13 @@ format_version = 1
 
 [project]
 name = "Lamplighter"
-main_scene = "assets/platformer.scene"
+main_scene = "assets/title.scene"
+scenes = [
+  "assets/levels.scene",
+  "assets/settings.scene",
+  "assets/pause.scene",
+  "assets/level-1.scene",
+]
 
 # The hero's sounds, made in the Sindri Sound Lab (`tools/sindri-chiptune`).
 # A script plays them by name, which no walk of the scene can see, so they are

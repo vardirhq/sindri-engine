@@ -142,9 +142,16 @@ Looked at, and what was found:
   not, closed in the engine. *Found in stage 2:* it does not. A 1366 by 768
   window gives uneven art pixels, so an integer-scale camera mode is a gap to
   close in the engine, in its own pull request, with a `docs/parity.md` row.
-- **Still to verify**, none assumed: scene fades, drawn touch controls, browser
-  `Save` across reloads and respawn without a scene reload. Baked side-view
-  sheets as animation clips are verified: Wick's run plays in the renderer.
+- **A pause is a scene.** The engine has no global pause or time scale, and none
+  is needed: a scene that is left is switched off rather than unloaded, so the
+  pause screen is a scene of its own and `Scene.go` back finds the level as it
+  was. What the engine did lack was the other half, starting a level over;
+  `Scene.restart(name)` was added for it, generally, with its own tests.
+- Browser `Save` across reloads is already proven by Orbital's browser test, and
+  respawn without a scene reload is `Hero.respawn()`, played by the scripted run.
+- **Still to verify**, none assumed: scene fades and drawn touch controls. Baked
+  side-view sheets as animation clips are verified: Wick's run plays in the
+  renderer.
 
 ## Stages
 
@@ -171,7 +178,11 @@ documentation says what is now true.
    seen playing in the real renderer. The font is the Inter already in
    `assets/fonts`; a pixel face is a stage 3 decision, made with the title screen.
 3. **The shell.** Title, level select, pause, settings, saved progress and drawn
-   touch controls, with level one behind it.
+   touch controls, with level one behind it. *Under way:* the title, levels,
+   settings and pause screens are scenes (`art/dusk/shell.py` writes them), the
+   old level is `level-1.scene` behind them, progress and settings are `Save`
+   values, and `tests/the_shell.rs` plays the route between them. Drawn touch
+   controls are the part still to do.
 4. **Level 1, end to end.** Lanterns, checkpoints, respawn, embers, the first
    music and effects, and a scripted run. After this stage the game is playable
    from the title to the first beacon and to the ending screen.

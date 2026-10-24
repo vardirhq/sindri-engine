@@ -381,11 +381,11 @@ pub(super) fn add_scene_surface(environment: &mut Environment) {
             *name,
             FunctionType {
                 params: match call {
-                    SceneCall::Go => vec![Type::String],
+                    SceneCall::Go | SceneCall::Restart => vec![Type::String],
                     SceneCall::Current => Vec::new(),
                 },
                 return_type: match call {
-                    SceneCall::Go => Type::Unit,
+                    SceneCall::Go | SceneCall::Restart => Type::Unit,
                     // Declared as text and answered as null before any
                     // scene has been entered, which is how `World.find`
                     // declares an entity it may not find.

@@ -1,9 +1,22 @@
-// The coin count, and the banner when the flag is reached.
+// The coin count, the banner when the flag is reached, and the way out: the
+// pause button, and what reaching the flag saves before it goes back to the
+// level select.
 script Hud {
+    // Which level this is. A later level sets its own number.
+    @export let level: number = 1.0;
+    // How long the banner is shown before the level select.
+    @export let linger: number = 2.5;
+
     var banner: Entity = null;
+    var won_for: number = 0.0;
+    var saved: bool = false;
 
     fn start() {
         this.banner = World.find("Banner");
+        Save.set_number("level", this.level);
+        // The volumes a person chose in the settings, heard from the first frame.
+        Audio.set_volume("music", Save.number("volume_music", 1.0));
+        Audio.set_volume("effects", Save.number("volume_effects", 1.0));
     }
 
     fn update(dt: number) {
@@ -16,6 +29,27 @@ script Hud {
         }
         if this.banner != null {
             World.set_active(this.banner, Game.won);
+        }
+        if !Game.won && (Action.pressed("pause") || Ui.is_pressed(World.find("pause-button"))) {
+            Scene.go("pause.scene");
+        }
+        if Game.won {
+            finish(dt);
+        }
+    }
+
+    // The beacon is lit: remember it and the embers found, then leave once the
+    // banner has been read.
+    fn finish(dt: number) {
+        if !this.saved {
+            this.saved = true;
+            let key = this.level.fixed(0);
+            Save.set_flag("beacon_" + key, true);
+            Save.set_number("embers_" + key, max(Save.number("embers_" + key, 0.0), Game.coins));
+        }
+        this.won_for += dt;
+        if this.won_for >= this.linger {
+            Scene.go("levels.scene");
         }
     }
 }

@@ -173,12 +173,18 @@ impl GridCall {
 pub(crate) enum SceneCall {
     /// Ask to move to a named scene, performed between frames.
     Go,
+    /// Ask to move to a named scene and start it over, performed between
+    /// frames: what the scene was is thrown away.
+    Restart,
     /// The scene being played, or `null` where the host names none.
     Current,
 }
 
-pub(crate) const SCENE_CALLS: &[(&str, SceneCall)] =
-    &[("go", SceneCall::Go), ("current", SceneCall::Current)];
+pub(crate) const SCENE_CALLS: &[(&str, SceneCall)] = &[
+    ("go", SceneCall::Go),
+    ("restart", SceneCall::Restart),
+    ("current", SceneCall::Current),
+];
 
 pub(crate) const GRID_CALLS: &[(&str, GridCall)] = &[
     ("position_x", GridCall::PositionX),

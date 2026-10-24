@@ -20,6 +20,9 @@ pub struct SceneChannel {
     pub playing: String,
     /// Which scene a script asked to move to, if any asked.
     pub wanted: Option<String>,
+    /// Whether the scene asked for is to be started over rather than found as
+    /// it was left.
+    pub fresh: bool,
 }
 
 impl SceneChannel {
@@ -29,6 +32,7 @@ impl SceneChannel {
         Self {
             playing: name.into(),
             wanted: None,
+            fresh: false,
         }
     }
 
@@ -37,14 +41,22 @@ impl SceneChannel {
         self.wanted.take()
     }
 
+    /// Whether the request just taken was to start the scene over. Read after
+    /// [`Self::take`], and cleared by it being read.
+    pub fn take_fresh(&mut self) -> bool {
+        std::mem::take(&mut self.fresh)
+    }
+
     /// Records that the move happened, so the next frame reads the new scene.
     pub fn now_playing(&mut self, name: impl Into<String>) {
         self.playing = name.into();
         self.wanted = None;
+        self.fresh = false;
     }
 }
 
-/// The scenes a script's source moves to: every `Scene.go("…")` it writes with
+/// The scenes a script's source moves to: every `Scene.go("…")` or
+/// `Scene.restart("…")` it writes with
 /// a literal name, in the order written, once each.
 ///
 /// Read from tokens rather than text, so a call in a comment is not a door and
@@ -69,7 +81,7 @@ pub fn scene_links(source: &str) -> Vec<String> {
             TokenKind::String(name),
         ) = (&scene.kind, &dot.kind, &go.kind, &open.kind, &name.kind)
             && scene == "Scene"
-            && go == "go"
+            && (go == "go" || go == "restart")
             && !links.contains(name)
         {
             links.push(name.clone());
@@ -92,9 +104,13 @@ mod tests {
                     Scene.go(Game.next);
                     Scene.go("hall.scene");
                     Scene.go( "yard.scene" );
+                    Scene.restart("cellar.scene");
                 }
             }
         "#;
-        assert_eq!(scene_links(source), ["hall.scene", "yard.scene"]);
+        assert_eq!(
+            scene_links(source),
+            ["hall.scene", "yard.scene", "cellar.scene"]
+        );
     }
 }

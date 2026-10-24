@@ -266,7 +266,12 @@ pub(super) const TYPES: &[TypeEntry] = &[
             call(
                 "go",
                 &["name"],
-                "Moves to another scene by name, at the end of this frame.",
+                "Moves to another scene by name, at the end of this frame. A scene you have left is switched off, not thrown away, so going back finds it as it was.",
+            ),
+            call(
+                "restart",
+                &["name"],
+                "Moves to a scene by name and starts it over, at the end of this frame: whatever it was is thrown away, so a level begins again rather than where it was left.",
             ),
         ],
     },

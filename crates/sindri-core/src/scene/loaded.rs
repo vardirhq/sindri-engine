@@ -306,4 +306,10 @@ pub enum SceneSwitchError {
         #[source]
         source: WorldError,
     },
+    #[error("scene '{scene}' could not be thrown away: {source}")]
+    Unload {
+        scene: String,
+        #[source]
+        source: WorldError,
+    },
 }

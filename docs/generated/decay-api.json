@@ -3964,9 +3964,21 @@
           "returns": "String"
         },
         {
-          "description": "Moves to another scene by name, at the end of this frame.",
+          "description": "Moves to another scene by name, at the end of this frame. A scene you have left is switched off, not thrown away, so going back finds it as it was.",
           "kind": "function",
           "name": "go",
+          "parameter_names": [
+            "name"
+          ],
+          "parameters": [
+            "String"
+          ],
+          "returns": "unit"
+        },
+        {
+          "description": "Moves to a scene by name and starts it over, at the end of this frame: whatever it was is thrown away, so a level begins again rather than where it was left.",
+          "kind": "function",
+          "name": "restart",
           "parameter_names": [
             "name"
           ],

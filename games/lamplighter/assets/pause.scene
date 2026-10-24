@@ -1,0 +1,653 @@
+{
+  "format_version": 10,
+  "metadata": {
+    "name": "Lamplighter pause"
+  },
+  "entities": [
+    {
+      "id": "camera",
+      "name": "Camera",
+      "transform_3d": {
+        "position": [
+          10.0,
+          5.625,
+          10.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1
+        ]
+      },
+      "components": {
+        "sindri.camera": {
+          "projection": "orthographic",
+          "vertical_size": 11.25,
+          "near": 0.1,
+          "far": 100.0,
+          "fit": "height"
+        }
+      }
+    },
+    {
+      "id": "environment",
+      "name": "Environment",
+      "components": {
+        "sindri.environment": {
+          "background": [
+            0.08,
+            0.07,
+            0.17,
+            1.0
+          ],
+          "shadows": {
+            "enabled": false,
+            "map_size": 1024,
+            "distance": 48.0,
+            "bias": 0.002
+          },
+          "lighting_2d": {
+            "enabled": true,
+            "ambient": [
+              0.36,
+              0.34,
+              0.55
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "sky",
+      "name": "sky",
+      "transform_3d": {
+        "position": [
+          10.0,
+          5.625,
+          -3.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          20.0,
+          11.25,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/sky.png",
+          "layer": -30,
+          "unlit": true
+        }
+      }
+    },
+    {
+      "id": "hills-far",
+      "name": "hills-far",
+      "transform_3d": {
+        "position": [
+          10.0,
+          5.625,
+          -2.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          20.0,
+          11.25,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/hills-far.png",
+          "layer": -20,
+          "unlit": true
+        }
+      }
+    },
+    {
+      "id": "hills-near",
+      "name": "hills-near",
+      "transform_3d": {
+        "position": [
+          10.0,
+          5.625,
+          -1.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          20.0,
+          11.25,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/hills-near.png",
+          "layer": -10,
+          "unlit": true
+        }
+      }
+    },
+    {
+      "id": "menu",
+      "name": "menu",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.0,
+          1.6,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.layout": {
+          "direction": "column",
+          "spacing": 0.035,
+          "justify": "center",
+          "align": "center"
+        }
+      }
+    },
+    {
+      "id": "heading",
+      "name": "heading",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.4,
+          0.13,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.text": {
+          "anchor": "center",
+          "color": [
+            1.0,
+            0.76,
+            0.36,
+            1.0
+          ],
+          "font": "fonts/Inter.ttf",
+          "font_size": 0.1,
+          "line_height": 0.12,
+          "layer": 100,
+          "text": "Paused",
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.004
+            ],
+            "color": [
+              0.0,
+              0.0,
+              0.0,
+              0.55
+            ],
+            "softness": 0.003
+          },
+          "bold": true,
+          "line_align": "center"
+        }
+      },
+      "parent": "menu"
+    },
+    {
+      "id": "resume",
+      "name": "resume",
+      "parent": "menu",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.62,
+          0.095,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.09,
+            0.08,
+            0.2,
+            0.92
+          ],
+          "anchor": "center",
+          "layer": 90
+        },
+        "sindri.ui.button": {
+          "label": "Resume",
+          "autofocus": false,
+          "disabled": false
+        },
+        "sindri.ui.layout": {
+          "direction": "row",
+          "spacing": 0.02,
+          "justify": "center",
+          "align": "center"
+        }
+      }
+    },
+    {
+      "id": "resume-label",
+      "name": "resume-label",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.558,
+          0.07600000000000001,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.text": {
+          "anchor": "center",
+          "color": [
+            0.96,
+            0.93,
+            0.84,
+            1.0
+          ],
+          "font": "fonts/Inter.ttf",
+          "font_size": 0.05,
+          "line_height": 0.06,
+          "layer": 95,
+          "text": "Resume",
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.004
+            ],
+            "color": [
+              0.0,
+              0.0,
+              0.0,
+              0.55
+            ],
+            "softness": 0.003
+          },
+          "bold": true,
+          "line_align": "center"
+        }
+      },
+      "parent": "resume"
+    },
+    {
+      "id": "levels",
+      "name": "levels",
+      "parent": "menu",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.62,
+          0.095,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.09,
+            0.08,
+            0.2,
+            0.92
+          ],
+          "anchor": "center",
+          "layer": 90
+        },
+        "sindri.ui.button": {
+          "label": "Levels",
+          "autofocus": false,
+          "disabled": false
+        },
+        "sindri.ui.layout": {
+          "direction": "row",
+          "spacing": 0.02,
+          "justify": "center",
+          "align": "center"
+        }
+      }
+    },
+    {
+      "id": "levels-label",
+      "name": "levels-label",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.558,
+          0.07600000000000001,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.text": {
+          "anchor": "center",
+          "color": [
+            0.96,
+            0.93,
+            0.84,
+            1.0
+          ],
+          "font": "fonts/Inter.ttf",
+          "font_size": 0.05,
+          "line_height": 0.06,
+          "layer": 95,
+          "text": "Levels",
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.004
+            ],
+            "color": [
+              0.0,
+              0.0,
+              0.0,
+              0.55
+            ],
+            "softness": 0.003
+          },
+          "bold": true,
+          "line_align": "center"
+        }
+      },
+      "parent": "levels"
+    },
+    {
+      "id": "settings",
+      "name": "settings",
+      "parent": "menu",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.62,
+          0.095,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.09,
+            0.08,
+            0.2,
+            0.92
+          ],
+          "anchor": "center",
+          "layer": 90
+        },
+        "sindri.ui.button": {
+          "label": "Settings",
+          "autofocus": false,
+          "disabled": false
+        },
+        "sindri.ui.layout": {
+          "direction": "row",
+          "spacing": 0.02,
+          "justify": "center",
+          "align": "center"
+        }
+      }
+    },
+    {
+      "id": "settings-label",
+      "name": "settings-label",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.558,
+          0.07600000000000001,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.text": {
+          "anchor": "center",
+          "color": [
+            0.96,
+            0.93,
+            0.84,
+            1.0
+          ],
+          "font": "fonts/Inter.ttf",
+          "font_size": 0.05,
+          "line_height": 0.06,
+          "layer": 95,
+          "text": "Settings",
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.004
+            ],
+            "color": [
+              0.0,
+              0.0,
+              0.0,
+              0.55
+            ],
+            "softness": 0.003
+          },
+          "bold": true,
+          "line_align": "center"
+        }
+      },
+      "parent": "settings"
+    },
+    {
+      "id": "title",
+      "name": "title",
+      "parent": "menu",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.62,
+          0.095,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.09,
+            0.08,
+            0.2,
+            0.92
+          ],
+          "anchor": "center",
+          "layer": 90
+        },
+        "sindri.ui.button": {
+          "label": "Title",
+          "autofocus": false,
+          "disabled": false
+        },
+        "sindri.ui.layout": {
+          "direction": "row",
+          "spacing": 0.02,
+          "justify": "center",
+          "align": "center"
+        }
+      }
+    },
+    {
+      "id": "title-label",
+      "name": "title-label",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.558,
+          0.07600000000000001,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.text": {
+          "anchor": "center",
+          "color": [
+            0.96,
+            0.93,
+            0.84,
+            1.0
+          ],
+          "font": "fonts/Inter.ttf",
+          "font_size": 0.05,
+          "line_height": 0.06,
+          "layer": 95,
+          "text": "Title",
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.004
+            ],
+            "color": [
+              0.0,
+              0.0,
+              0.0,
+              0.55
+            ],
+            "softness": 0.003
+          },
+          "bold": true,
+          "line_align": "center"
+        }
+      },
+      "parent": "title"
+    },
+    {
+      "id": "shell",
+      "name": "Shell",
+      "components": {
+        "sindri.script": {
+          "source": "scripts/shell.decay",
+          "script": "Pause",
+          "properties": {}
+        }
+      }
+    }
+  ]
+}

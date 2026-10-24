@@ -47,10 +47,13 @@ mod capture {
     #[cfg(test)]
     #[test]
     fn native_project_delivery_expands_prefabs_and_resolves_physics_profiles() {
+        use sindri_causeway::project::open_scene;
         use sindri_core::SceneEntityId;
 
         let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../games/lamplighter");
-        let mut opened = open(&root, [960.0, 540.0]).unwrap();
+        // The game opens on its title screen; the crate, prefabs and profiles
+        // this checks are the first level's.
+        let mut opened = open_scene(&root, "level-1.scene", [960.0, 540.0]).unwrap();
         opened.player.play(0.5).unwrap();
         let crate_id = SceneEntityId::new("wind-crate").unwrap();
         assert!(

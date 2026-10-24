@@ -1,0 +1,963 @@
+{
+  "format_version": 10,
+  "metadata": {
+    "name": "Lamplighter settings"
+  },
+  "entities": [
+    {
+      "id": "camera",
+      "name": "Camera",
+      "transform_3d": {
+        "position": [
+          10.0,
+          5.625,
+          10.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1
+        ]
+      },
+      "components": {
+        "sindri.camera": {
+          "projection": "orthographic",
+          "vertical_size": 11.25,
+          "near": 0.1,
+          "far": 100.0,
+          "fit": "height"
+        }
+      }
+    },
+    {
+      "id": "environment",
+      "name": "Environment",
+      "components": {
+        "sindri.environment": {
+          "background": [
+            0.08,
+            0.07,
+            0.17,
+            1.0
+          ],
+          "shadows": {
+            "enabled": false,
+            "map_size": 1024,
+            "distance": 48.0,
+            "bias": 0.002
+          },
+          "lighting_2d": {
+            "enabled": true,
+            "ambient": [
+              0.36,
+              0.34,
+              0.55
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "sky",
+      "name": "sky",
+      "transform_3d": {
+        "position": [
+          10.0,
+          5.625,
+          -3.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          20.0,
+          11.25,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/sky.png",
+          "layer": -30,
+          "unlit": true
+        }
+      }
+    },
+    {
+      "id": "hills-far",
+      "name": "hills-far",
+      "transform_3d": {
+        "position": [
+          10.0,
+          5.625,
+          -2.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          20.0,
+          11.25,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/hills-far.png",
+          "layer": -20,
+          "unlit": true
+        }
+      }
+    },
+    {
+      "id": "hills-near",
+      "name": "hills-near",
+      "transform_3d": {
+        "position": [
+          10.0,
+          5.625,
+          -1.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          20.0,
+          11.25,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/hills-near.png",
+          "layer": -10,
+          "unlit": true
+        }
+      }
+    },
+    {
+      "id": "menu",
+      "name": "menu",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.0,
+          1.6,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.layout": {
+          "direction": "column",
+          "spacing": 0.03,
+          "justify": "center",
+          "align": "center"
+        }
+      }
+    },
+    {
+      "id": "heading",
+      "name": "heading",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.4,
+          0.10400000000000001,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.text": {
+          "anchor": "center",
+          "color": [
+            1.0,
+            0.76,
+            0.36,
+            1.0
+          ],
+          "font": "fonts/Inter.ttf",
+          "font_size": 0.08,
+          "line_height": 0.096,
+          "layer": 100,
+          "text": "Settings",
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.004
+            ],
+            "color": [
+              0.0,
+              0.0,
+              0.0,
+              0.55
+            ],
+            "softness": 0.003
+          },
+          "bold": true,
+          "line_align": "center"
+        }
+      },
+      "parent": "menu"
+    },
+    {
+      "id": "music-value",
+      "name": "music-value",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.4,
+          0.065,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.text": {
+          "anchor": "center",
+          "color": [
+            0.96,
+            0.93,
+            0.84,
+            1.0
+          ],
+          "font": "fonts/Inter.ttf",
+          "font_size": 0.05,
+          "line_height": 0.06,
+          "layer": 100,
+          "text": "Music 100",
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.004
+            ],
+            "color": [
+              0.0,
+              0.0,
+              0.0,
+              0.55
+            ],
+            "softness": 0.003
+          },
+          "bold": true,
+          "line_align": "center"
+        }
+      },
+      "parent": "menu"
+    },
+    {
+      "id": "music-down",
+      "name": "music-down",
+      "parent": "menu",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.62,
+          0.095,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.09,
+            0.08,
+            0.2,
+            0.92
+          ],
+          "anchor": "center",
+          "layer": 90
+        },
+        "sindri.ui.button": {
+          "label": "Music down",
+          "autofocus": false,
+          "disabled": false
+        },
+        "sindri.ui.layout": {
+          "direction": "row",
+          "spacing": 0.02,
+          "justify": "center",
+          "align": "center"
+        }
+      }
+    },
+    {
+      "id": "music-down-label",
+      "name": "music-down-label",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.558,
+          0.07600000000000001,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.text": {
+          "anchor": "center",
+          "color": [
+            0.96,
+            0.93,
+            0.84,
+            1.0
+          ],
+          "font": "fonts/Inter.ttf",
+          "font_size": 0.05,
+          "line_height": 0.06,
+          "layer": 95,
+          "text": "Music down",
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.004
+            ],
+            "color": [
+              0.0,
+              0.0,
+              0.0,
+              0.55
+            ],
+            "softness": 0.003
+          },
+          "bold": true,
+          "line_align": "center"
+        }
+      },
+      "parent": "music-down"
+    },
+    {
+      "id": "music-up",
+      "name": "music-up",
+      "parent": "menu",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.62,
+          0.095,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.09,
+            0.08,
+            0.2,
+            0.92
+          ],
+          "anchor": "center",
+          "layer": 90
+        },
+        "sindri.ui.button": {
+          "label": "Music up",
+          "autofocus": false,
+          "disabled": false
+        },
+        "sindri.ui.layout": {
+          "direction": "row",
+          "spacing": 0.02,
+          "justify": "center",
+          "align": "center"
+        }
+      }
+    },
+    {
+      "id": "music-up-label",
+      "name": "music-up-label",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.558,
+          0.07600000000000001,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.text": {
+          "anchor": "center",
+          "color": [
+            0.96,
+            0.93,
+            0.84,
+            1.0
+          ],
+          "font": "fonts/Inter.ttf",
+          "font_size": 0.05,
+          "line_height": 0.06,
+          "layer": 95,
+          "text": "Music up",
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.004
+            ],
+            "color": [
+              0.0,
+              0.0,
+              0.0,
+              0.55
+            ],
+            "softness": 0.003
+          },
+          "bold": true,
+          "line_align": "center"
+        }
+      },
+      "parent": "music-up"
+    },
+    {
+      "id": "effects-value",
+      "name": "effects-value",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.4,
+          0.065,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.text": {
+          "anchor": "center",
+          "color": [
+            0.96,
+            0.93,
+            0.84,
+            1.0
+          ],
+          "font": "fonts/Inter.ttf",
+          "font_size": 0.05,
+          "line_height": 0.06,
+          "layer": 100,
+          "text": "Effects 100",
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.004
+            ],
+            "color": [
+              0.0,
+              0.0,
+              0.0,
+              0.55
+            ],
+            "softness": 0.003
+          },
+          "bold": true,
+          "line_align": "center"
+        }
+      },
+      "parent": "menu"
+    },
+    {
+      "id": "effects-down",
+      "name": "effects-down",
+      "parent": "menu",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.62,
+          0.095,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.09,
+            0.08,
+            0.2,
+            0.92
+          ],
+          "anchor": "center",
+          "layer": 90
+        },
+        "sindri.ui.button": {
+          "label": "Effects down",
+          "autofocus": false,
+          "disabled": false
+        },
+        "sindri.ui.layout": {
+          "direction": "row",
+          "spacing": 0.02,
+          "justify": "center",
+          "align": "center"
+        }
+      }
+    },
+    {
+      "id": "effects-down-label",
+      "name": "effects-down-label",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.558,
+          0.07600000000000001,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.text": {
+          "anchor": "center",
+          "color": [
+            0.96,
+            0.93,
+            0.84,
+            1.0
+          ],
+          "font": "fonts/Inter.ttf",
+          "font_size": 0.05,
+          "line_height": 0.06,
+          "layer": 95,
+          "text": "Effects down",
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.004
+            ],
+            "color": [
+              0.0,
+              0.0,
+              0.0,
+              0.55
+            ],
+            "softness": 0.003
+          },
+          "bold": true,
+          "line_align": "center"
+        }
+      },
+      "parent": "effects-down"
+    },
+    {
+      "id": "effects-up",
+      "name": "effects-up",
+      "parent": "menu",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.62,
+          0.095,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.09,
+            0.08,
+            0.2,
+            0.92
+          ],
+          "anchor": "center",
+          "layer": 90
+        },
+        "sindri.ui.button": {
+          "label": "Effects up",
+          "autofocus": false,
+          "disabled": false
+        },
+        "sindri.ui.layout": {
+          "direction": "row",
+          "spacing": 0.02,
+          "justify": "center",
+          "align": "center"
+        }
+      }
+    },
+    {
+      "id": "effects-up-label",
+      "name": "effects-up-label",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.558,
+          0.07600000000000001,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.text": {
+          "anchor": "center",
+          "color": [
+            0.96,
+            0.93,
+            0.84,
+            1.0
+          ],
+          "font": "fonts/Inter.ttf",
+          "font_size": 0.05,
+          "line_height": 0.06,
+          "layer": 95,
+          "text": "Effects up",
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.004
+            ],
+            "color": [
+              0.0,
+              0.0,
+              0.0,
+              0.55
+            ],
+            "softness": 0.003
+          },
+          "bold": true,
+          "line_align": "center"
+        }
+      },
+      "parent": "effects-up"
+    },
+    {
+      "id": "motion",
+      "name": "motion",
+      "parent": "menu",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.8,
+          0.095,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.09,
+            0.08,
+            0.2,
+            0.92
+          ],
+          "anchor": "center",
+          "layer": 90
+        },
+        "sindri.ui.button": {
+          "label": "Reduced motion: off",
+          "autofocus": false,
+          "disabled": false
+        },
+        "sindri.ui.layout": {
+          "direction": "row",
+          "spacing": 0.02,
+          "justify": "center",
+          "align": "center"
+        }
+      }
+    },
+    {
+      "id": "motion-label",
+      "name": "motion-label",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.7200000000000001,
+          0.07600000000000001,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.text": {
+          "anchor": "center",
+          "color": [
+            0.96,
+            0.93,
+            0.84,
+            1.0
+          ],
+          "font": "fonts/Inter.ttf",
+          "font_size": 0.05,
+          "line_height": 0.06,
+          "layer": 95,
+          "text": "Reduced motion: off",
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.004
+            ],
+            "color": [
+              0.0,
+              0.0,
+              0.0,
+              0.55
+            ],
+            "softness": 0.003
+          },
+          "bold": true,
+          "line_align": "center"
+        }
+      },
+      "parent": "motion"
+    },
+    {
+      "id": "back",
+      "name": "back",
+      "parent": "menu",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.5,
+          0.095,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.09,
+            0.08,
+            0.2,
+            0.92
+          ],
+          "anchor": "center",
+          "layer": 90
+        },
+        "sindri.ui.button": {
+          "label": "Back",
+          "autofocus": false,
+          "disabled": false
+        },
+        "sindri.ui.layout": {
+          "direction": "row",
+          "spacing": 0.02,
+          "justify": "center",
+          "align": "center"
+        }
+      }
+    },
+    {
+      "id": "back-label",
+      "name": "back-label",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.45,
+          0.07600000000000001,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.text": {
+          "anchor": "center",
+          "color": [
+            0.96,
+            0.93,
+            0.84,
+            1.0
+          ],
+          "font": "fonts/Inter.ttf",
+          "font_size": 0.05,
+          "line_height": 0.06,
+          "layer": 95,
+          "text": "Back",
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.004
+            ],
+            "color": [
+              0.0,
+              0.0,
+              0.0,
+              0.55
+            ],
+            "softness": 0.003
+          },
+          "bold": true,
+          "line_align": "center"
+        }
+      },
+      "parent": "back"
+    },
+    {
+      "id": "shell",
+      "name": "Shell",
+      "components": {
+        "sindri.script": {
+          "source": "scripts/shell.decay",
+          "script": "Settings",
+          "properties": {}
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,136 @@
+// The shell around the levels: the title, the level select, the pause screen
+// and the settings. Each screen is its own scene, and a scene that is left is
+// switched off rather than unloaded, so leaving a level for the pause screen
+// freezes it where it is and coming back finds it as it was.
+//
+// What a person has done is saved under plain names, so a later level only
+// adds names:
+//   beacon_N     the level's last lantern has been lit
+//   embers_N     the most embers found there
+//   level        the level they were last in
+//   volume_music, volume_effects    0 to 1, in steps of a tenth
+//   reduced_motion                  no shake, fewer flecks
+//   return       the screen Settings goes back to
+
+// Puts the saved volumes on the audio buses. Every screen does it as it opens,
+// so a value saved on any visit is the one heard on the next.
+fn apply_settings() {
+    Audio.set_volume("music", Save.number("volume_music", 1.0));
+    Audio.set_volume("effects", Save.number("volume_effects", 1.0));
+}
+
+// The scene a level number names.
+fn level_scene(number: number) -> String {
+    return "level-" + number.fixed(0) + ".scene";
+}
+
+// Where the game starts. Play takes a person to the level they got to, and
+// begins it over: only the pause screen puts a level back as it was.
+script Title {
+    fn start() {
+        apply_settings();
+        Save.set_text("return", "title.scene");
+    }
+
+    fn update(dt: number) {
+        if Ui.is_pressed(World.find("play")) {
+            Scene.restart(level_scene(Save.number("level", 1.0)));
+        }
+        if Ui.is_pressed(World.find("levels")) {
+            Save.set_text("return", "title.scene");
+            Scene.go("levels.scene");
+        }
+        if Ui.is_pressed(World.find("settings")) {
+            Save.set_text("return", "title.scene");
+            Scene.go("settings.scene");
+        }
+    }
+}
+
+// Which beacons are lit, and the way into each level.
+script Levels {
+    fn start() {
+        apply_settings();
+        var words = "1  Dusk Road";
+        if Save.flag("beacon_1", false) {
+            words = words + "  -  lit";
+        }
+        let embers = Save.number("embers_1", 0.0);
+        if embers > 0.0 {
+            words = words + "  -  " + embers.fixed(0) + " embers";
+        }
+        Ui.set_text(World.find("level-1-label"), words);
+    }
+
+    fn update(dt: number) {
+        if Ui.is_pressed(World.find("level-1")) {
+            Scene.restart(level_scene(1.0));
+        }
+        if Ui.is_pressed(World.find("back")) {
+            Scene.go(Save.text("return", "title.scene"));
+        }
+    }
+}
+
+// Volume in steps of a tenth, and the switch for reduced motion.
+script Settings {
+    fn start() {
+        apply_settings();
+        show();
+    }
+
+    fn update(dt: number) {
+        if Ui.is_pressed(World.find("music-down")) { step("volume_music", -0.1); }
+        if Ui.is_pressed(World.find("music-up")) { step("volume_music", 0.1); }
+        if Ui.is_pressed(World.find("effects-down")) { step("volume_effects", -0.1); }
+        if Ui.is_pressed(World.find("effects-up")) { step("volume_effects", 0.1); }
+        if Ui.is_pressed(World.find("motion")) {
+            Save.set_flag("reduced_motion", !Save.flag("reduced_motion", false));
+            show();
+        }
+        if Ui.is_pressed(World.find("back")) {
+            Scene.go(Save.text("return", "title.scene"));
+        }
+    }
+
+    fn step(key: String, amount: number) {
+        let next = max(0.0, min(1.0, Save.number(key, 1.0) + amount));
+        Save.set_number(key, round(next * 10.0) / 10.0);
+        apply_settings();
+        show();
+    }
+
+    fn show() {
+        Ui.set_text(World.find("music-value"), "Music " + (Save.number("volume_music", 1.0) * 100.0).fixed(0));
+        Ui.set_text(World.find("effects-value"), "Effects " + (Save.number("volume_effects", 1.0) * 100.0).fixed(0));
+        var motion = "Reduced motion: off";
+        if Save.flag("reduced_motion", false) {
+            motion = "Reduced motion: on";
+        }
+        Ui.set_text(World.find("motion-label"), motion);
+    }
+}
+
+// The pause screen: the level is switched off behind it, exactly as it was.
+script Pause {
+    fn start() {
+        apply_settings();
+    }
+
+    fn update(dt: number) {
+        if Ui.is_pressed(World.find("resume")) || Input.just_pressed("Escape") {
+            Scene.go(level_scene(Save.number("level", 1.0)));
+        }
+        if Ui.is_pressed(World.find("levels")) {
+            Save.set_text("return", "pause.scene");
+            Scene.go("levels.scene");
+        }
+        if Ui.is_pressed(World.find("settings")) {
+            Save.set_text("return", "pause.scene");
+            Scene.go("settings.scene");
+        }
+        if Ui.is_pressed(World.find("title")) {
+            Scene.go("title.scene");
+        }
+    }
+}

@@ -190,7 +190,29 @@ pub struct OpenedProject {
 /// `sindri_runtime::ProjectRun`'s run, with the fonts and images a drawing
 /// host adds.
 pub fn open(project: &Path, size: [f32; 2]) -> Result<OpenedProject, Box<dyn Error>> {
-    let mut run = ProjectRun::open(project, size)?;
+    open_on(project, None, size)
+}
+
+/// The same, started on another of the project's scenes, named as `Scene.go`
+/// names it: how a capture or a test reaches a level that sits behind a title
+/// screen without playing its way there.
+pub fn open_scene(
+    project: &Path,
+    scene: &str,
+    size: [f32; 2],
+) -> Result<OpenedProject, Box<dyn Error>> {
+    open_on(project, Some(scene), size)
+}
+
+fn open_on(
+    project: &Path,
+    entry: Option<&str>,
+    size: [f32; 2],
+) -> Result<OpenedProject, Box<dyn Error>> {
+    let mut run = match entry {
+        Some(scene) => ProjectRun::open_scene(project, scene, size)?,
+        None => ProjectRun::open(project, size)?,
+    };
     let assets = assets_root(project);
     // Every model the project holds, as the player binds them: a scene
     // reached later, or a prefab spawned later, draws without a load.

@@ -23,7 +23,7 @@ fn platformer() -> (PathBuf, PathBuf) {
             .replace("::", "-")
     ));
     copy(&source, &target);
-    let scene = target.join("platformer.scene");
+    let scene = target.join("level-1.scene");
     (target, scene)
 }
 
