@@ -139,7 +139,9 @@ Looked at, and what was found:
   pixels to an art pixel at 960 by 540 and 6 at 1920 by 1080. The camera has a
   `pixel_perfect` flag (`docs/2d-inventory.md`); whether it keeps the scale whole
   at window sizes that are not multiples is verified in stage 2 and, if it does
-  not, closed in the engine.
+  not, closed in the engine. *Found in stage 2:* it does not. A 1366 by 768
+  window gives uneven art pixels, so an integer-scale camera mode is a gap to
+  close in the engine, in its own pull request, with a `docs/parity.md` row.
 - **Still to verify**, none assumed: scene fades, drawn touch controls, browser
   `Save` across reloads, respawn without a scene reload, and baked side-view
   sheets as animation clips.
