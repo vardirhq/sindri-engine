@@ -201,3 +201,22 @@ fn settings_go_back_to_the_pause_screen_they_were_opened_from() {
     press(&mut run, "resume");
     assert_eq!(scene(&run), "level-1.scene");
 }
+
+#[test]
+fn drawn_touch_controls_move_the_hero() {
+    let mut run = Run::open().expect("the first level opens");
+    run.set_board("touch", 1.0);
+    step(&mut run, 3);
+
+    let hero = find(&run, "hero").expect("the hero");
+    let start = run.position(hero);
+    let button = find(&run, "touch-right").expect("the right touch button");
+    let [x, y] = run.on_screen(button).expect("the button is drawn in touch mode");
+    run.input.apply(InputEvent::PointerMoved { x, y });
+    step(&mut run, 1);
+    run.input.apply(InputEvent::ButtonPressed(MouseButton::Left));
+    step(&mut run, 60);
+
+    let end = run.position(hero);
+    assert!(end[0] > start[0] + 1.0, "held touch control moved Wick: {start:?} to {end:?}");
+}

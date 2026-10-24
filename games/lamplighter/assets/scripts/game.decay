@@ -7,4 +7,5 @@ state Game {
     var ground_found: bool = false;
     var ground_clearance: number = 0.0;
     var crate_impacts: number = 0.0;
+    var touch: bool = false;
 }

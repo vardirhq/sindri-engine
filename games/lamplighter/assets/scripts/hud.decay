@@ -8,11 +8,17 @@ script Hud {
     @export let linger: number = 2.5;
 
     var banner: Entity = null;
+    var touch_left: Entity = null;
+    var touch_right: Entity = null;
+    var touch_jump: Entity = null;
     var won_for: number = 0.0;
     var saved: bool = false;
 
     fn start() {
         this.banner = World.find("Banner");
+        this.touch_left = World.find("touch-left");
+        this.touch_right = World.find("touch-right");
+        this.touch_jump = World.find("touch-jump");
         Save.set_number("level", this.level);
         // The volumes a person chose in the settings, heard from the first frame.
         Audio.set_volume("music", Save.number("volume_music", 1.0));
@@ -30,6 +36,9 @@ script Hud {
         if this.banner != null {
             World.set_active(this.banner, Game.won);
         }
+        World.set_active(this.touch_left, Game.touch);
+        World.set_active(this.touch_right, Game.touch);
+        World.set_active(this.touch_jump, Game.touch);
         if !Game.won && (Action.pressed("pause") || Ui.is_pressed(World.find("pause-button"))) {
             Scene.go("pause.scene");
         }
