@@ -79,6 +79,26 @@ def draw_props():
     write_sheet(TEXTURES / "props.sheet", 2, ["lantern-unlit", "lantern-lit"])
 
 
+GLOW = 56  # pixels across the halo sprite
+
+
+def draw_glow():
+    """Concentric amber bands, each edge broken by a checkerboard, so it reads as pixels."""
+    image = blank(GLOW, GLOW)
+    bands = ((26, 0.10), (19, 0.17), (12, 0.26), (6, 0.38))
+    mid = (GLOW - 1) / 2
+    for y in range(GLOW):
+        for x in range(GLOW):
+            d = ((x - mid) ** 2 + (y - mid) ** 2) ** 0.5
+            alpha = 0.0
+            for radius, a in bands:
+                if d < radius - 1.5 or (d < radius and (x + y) % 2 == 0):
+                    alpha = a
+            if alpha:
+                image[y][x] = (255, 166, 62, round(alpha * 255))
+    png(TEXTURES / "glow.png", GLOW, GLOW, image)
+
+
 def draw_backdrop():
     sky = S.sky_layer(WIDTH, HEIGHT)
     S.stars(sky)
@@ -214,31 +234,15 @@ def build_scene(masks, sheet):
         )
         if lit:
             # A halo in the air: a light can only brighten what is drawn, so the glow is
-            # light itself, three additive rings stepping out from the flame.
-            for ring, (size, alpha) in enumerate(((3.6, 0.07), (2.2, 0.10), (1.1, 0.16))):
-                entities.append(
-                    {
-                        "id": f"lantern-glow-{ring}",
-                        "name": f"Lantern glow {ring}",
-                        "transform_3d": transform(x, float(floor_y) + 1.05, 0.3, size, size),
-                        "components": {
-                            "sindri.shape": {
-                                "kind": "ellipse",
-                                "count": 1.0,
-                                "fill": [1.0, 0.62, 0.24, alpha],
-                                "stroke": [0.0, 0.0, 0.0, 0.0],
-                                "stroke_width": 0.0,
-                                "corner_radius": 0.0,
-                                "dashes": 0.0,
-                                "dash_duty": 0.5,
-                                "sweep_start": 0.0,
-                                "sweep_turns": 1.0,
-                                "blend": "add",
-                                "layer": 4,
-                            }
-                        },
-                    }
-                )
+            # a stepped sprite of amber bands with a checker dither between them.
+            entities.append(
+                {
+                    "id": "lantern-glow",
+                    "name": "Lantern glow",
+                    "transform_3d": transform(x, float(floor_y) + 1.05, 0.3, GLOW / 16, GLOW / 16),
+                    "components": {"sindri.sprite": {"texture": "textures/glow.png", "layer": 4, "unlit": True}},
+                }
+            )
             entities.append(
                 {
                     "id": "lantern-light",
@@ -255,6 +259,7 @@ def main():
     masks = draw_ground()
     draw_decor()
     draw_props()
+    draw_glow()
     draw_backdrop()
     scene = build_scene(masks, bake_wick())
     (ASSETS / "art-test.scene").write_text(json.dumps(scene, indent=2) + "\n")

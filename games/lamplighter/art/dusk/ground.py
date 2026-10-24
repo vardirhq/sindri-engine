@@ -169,9 +169,12 @@ def shade(x, y, distance, nx, ny, mask):
             if distance < depth - 1:
                 return GRASS[2]
             return GRASS[0] if noise(x, y, 9) > 0.45 else GRASS[1]
-        if distance < depth + 2:
+        # Soil shows under a flat top only, not where the band turns up a wall.
+        if up < 0.6:
+            pass
+        elif distance < depth + 2:
             return SOIL[3] if (distance < depth + 1 and noise(x, y, 4) > 0.3) else SOIL[2]
-        if distance < depth + 3:
+        elif distance < depth + 3:
             return SOIL[1]
     if distance < 1:
         if ny > 0.5:

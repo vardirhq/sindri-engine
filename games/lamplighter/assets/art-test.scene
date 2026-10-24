@@ -918,8 +918,8 @@
       }
     },
     {
-      "id": "lantern-glow-0",
-      "name": "Lantern glow 0",
+      "id": "lantern-glow",
+      "name": "Lantern glow",
       "transform_3d": {
         "position": [
           9.0,
@@ -933,131 +933,16 @@
           1
         ],
         "scale": [
-          3.6,
-          3.6,
+          3.5,
+          3.5,
           1
         ]
       },
       "components": {
-        "sindri.shape": {
-          "kind": "ellipse",
-          "count": 1.0,
-          "fill": [
-            1.0,
-            0.62,
-            0.24,
-            0.07
-          ],
-          "stroke": [
-            0.0,
-            0.0,
-            0.0,
-            0.0
-          ],
-          "stroke_width": 0.0,
-          "corner_radius": 0.0,
-          "dashes": 0.0,
-          "dash_duty": 0.5,
-          "sweep_start": 0.0,
-          "sweep_turns": 1.0,
-          "blend": "add",
-          "layer": 4
-        }
-      }
-    },
-    {
-      "id": "lantern-glow-1",
-      "name": "Lantern glow 1",
-      "transform_3d": {
-        "position": [
-          9.0,
-          3.05,
-          0.3
-        ],
-        "rotation": [
-          0,
-          0,
-          0,
-          1
-        ],
-        "scale": [
-          2.2,
-          2.2,
-          1
-        ]
-      },
-      "components": {
-        "sindri.shape": {
-          "kind": "ellipse",
-          "count": 1.0,
-          "fill": [
-            1.0,
-            0.62,
-            0.24,
-            0.1
-          ],
-          "stroke": [
-            0.0,
-            0.0,
-            0.0,
-            0.0
-          ],
-          "stroke_width": 0.0,
-          "corner_radius": 0.0,
-          "dashes": 0.0,
-          "dash_duty": 0.5,
-          "sweep_start": 0.0,
-          "sweep_turns": 1.0,
-          "blend": "add",
-          "layer": 4
-        }
-      }
-    },
-    {
-      "id": "lantern-glow-2",
-      "name": "Lantern glow 2",
-      "transform_3d": {
-        "position": [
-          9.0,
-          3.05,
-          0.3
-        ],
-        "rotation": [
-          0,
-          0,
-          0,
-          1
-        ],
-        "scale": [
-          1.1,
-          1.1,
-          1
-        ]
-      },
-      "components": {
-        "sindri.shape": {
-          "kind": "ellipse",
-          "count": 1.0,
-          "fill": [
-            1.0,
-            0.62,
-            0.24,
-            0.16
-          ],
-          "stroke": [
-            0.0,
-            0.0,
-            0.0,
-            0.0
-          ],
-          "stroke_width": 0.0,
-          "corner_radius": 0.0,
-          "dashes": 0.0,
-          "dash_duty": 0.5,
-          "sweep_start": 0.0,
-          "sweep_turns": 1.0,
-          "blend": "add",
-          "layer": 4
+        "sindri.sprite": {
+          "texture": "textures/glow.png",
+          "layer": 4,
+          "unlit": true
         }
       }
     },
