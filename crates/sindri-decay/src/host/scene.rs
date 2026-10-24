@@ -24,7 +24,7 @@ impl WorldHost<'_> {
         args: &[Value],
     ) -> Result<Value, RuntimeError> {
         match call {
-            SceneCall::Go => {
+            SceneCall::Go | SceneCall::Restart => {
                 let Some(Value::String(name)) = args.first() else {
                     return Err(RuntimeError::Host(format!(
                         "{} names the scene to go to, as text",
@@ -44,6 +44,7 @@ impl WorldHost<'_> {
                 // depend on which script the pass reached first.
                 if requests.wanted.is_none() {
                     requests.wanted = Some(name.clone());
+                    requests.fresh = call == SceneCall::Restart;
                 }
                 Ok(Value::Unit)
             }

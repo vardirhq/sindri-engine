@@ -60,7 +60,7 @@ Four fields, and each is read by something today.
 
   The editor's **Scenes** panel is this list as a board: a card for the main
   scene and one for each scene here, in order, with the doors between them
-  drawn as arrows from the `Scene.go("…")` calls in the scripts each scene
+  drawn as arrows from the `Scene.go("…")` and `Scene.restart("…")` calls in the scripts each scene
   runs. Its **Add scene** menu, and a card's **Remove from project**, **Move
   earlier**/**later** and **Set as main scene**, write this field. Setting a
   listed scene as main puts the old main scene at the head of the list, so no

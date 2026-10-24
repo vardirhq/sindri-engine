@@ -1631,6 +1631,7 @@ looks like, the flat map answers.
 | --- | --- |
 | `Scene.current()` | `String` |
 | `Scene.go(name)` | nothing |
+| `Scene.restart(name)` | nothing |
 
 `Scene.go` records an intention; it does not move anything. The script asking is
 running *in* the scene being left, from a world the change would rearrange
@@ -1640,6 +1641,15 @@ underneath it, so the host performs the move between frames — the same shape a
 `Scene.current()` therefore answers the scene being played, never the one asked
 for. A script that read back its own request would see the move happen a frame
 before it did.
+
+A scene that is left is switched off, not thrown away, so `Scene.go` back into
+it finds it as it was left: the hero where it stopped, the coins still taken.
+That is a pause screen for free, as a scene of its own with the level behind it
+frozen. `Scene.restart(name)` is the other half: it moves the same way, but
+throws away whatever the scene was first and loads it from its file, so a level
+begins again whether it is the scene being played or one visited an hour ago.
+Going to a menu is `go`; starting a level from one is `restart`, and only the
+screen that pauses puts it back as it was.
 
 The first request in a frame is the one that counts. Two scripts asking is a
 conflict with no right answer, and taking the last would make a door beside a

@@ -114,7 +114,7 @@ place rather than leaving the project opening on nothing.
 
 ### Shows a project's scenes as a board
 
-The Scenes panel draws a card per scene with arrows for the `Scene.go` doors between them, and edits the manifest's scene list.
+The Scenes panel draws a card per scene with arrows for the `Scene.go` and `Scene.restart` doors between them, and edits the manifest's scene list.
 
 Engine — · Editor ✅ · Decay — · Proof ✅
 
@@ -133,8 +133,8 @@ The Scenes panel (a tab beside the Scene view, or beside the Game view in the
 docked preset, and in the View menu) has a card for the main scene and each
 scene in `[project] scenes`, with the last frame either view drew of it, or its
 entity count until it has been opened. Arrows are the doors between scenes:
-literal `Scene.go("…")` calls in the scripts a scene's entities and placed
-prefabs run. A door to a scene the project does not carry is marked on its
+literal `Scene.go("…")` and `Scene.restart("…")` calls in the scripts a scene's
+entities and placed prefabs run. A door to a scene the project does not carry is marked on its
 card, with a menu entry to add that scene when the file is in the project.
 Clicking a card opens its scene (asking first about unsaved work); **Add
 scene**, **Remove from project**, **Move earlier**/**later** and **Set as main

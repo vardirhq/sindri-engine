@@ -576,7 +576,8 @@ Saving progress between play sessions: numbers, text and true/false values store
 Scenes are a game's separate places or screens, such as a menu, a level or a shop. This asks which one is playing and moves to another.
 
 - `current()` → `String` — The name of the scene being played.
-- `go(name: String)` → `unit` — Moves to another scene by name, at the end of this frame.
+- `go(name: String)` → `unit` — Moves to another scene by name, at the end of this frame. A scene you have left is switched off, not thrown away, so going back finds it as it was.
+- `restart(name: String)` → `unit` — Moves to a scene by name and starts it over, at the end of this frame: whatever it was is thrown away, so a level begins again rather than where it was left.
 
 ### `SceneBloom`
 

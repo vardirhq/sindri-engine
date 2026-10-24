@@ -172,3 +172,47 @@ fn reading_the_scene_does_not_see_a_pending_request() {
     assert!(report.failures.is_empty(), "{report:#?}");
     assert_eq!(report.printed.len(), 1, "{report:#?}");
 }
+
+/// Going back to a scene finds it as it was left; starting one over does not.
+/// Both are requests, told apart by what the host is to do with the scene it
+/// finds, so a restart has to say it is one.
+#[test]
+fn a_restart_is_a_request_to_start_the_scene_over() {
+    let restarts = r#"
+        script Door {
+            fn update(dt: f32) { Scene.restart("house"); }
+        }
+    "#;
+    let mut scenes = SceneChannel::playing("farm");
+    let report = run(restarts, Some(&mut scenes));
+    assert!(report.failures.is_empty(), "{report:#?}");
+    assert_eq!(scenes.take(), Some("house".to_owned()));
+    assert!(scenes.take_fresh(), "it is to be started over");
+    assert!(!scenes.take_fresh(), "and reading that clears it");
+
+    let mut scenes = SceneChannel::playing("farm");
+    run(GOES, Some(&mut scenes));
+    assert_eq!(scenes.take(), Some("house".to_owned()));
+    assert!(!scenes.take_fresh(), "going somewhere is not starting over");
+}
+
+/// A restart that loses to an earlier request in the frame does not turn that
+/// request into a restart.
+#[test]
+fn a_restart_that_comes_second_does_not_make_the_first_request_fresh() {
+    let mut scenes = SceneChannel::playing("farm");
+    let report = run(
+        r#"
+        script Door {
+            fn update(dt: f32) {
+                Scene.go("house");
+                Scene.restart("barn");
+            }
+        }
+        "#,
+        Some(&mut scenes),
+    );
+    assert!(report.failures.is_empty(), "{report:#?}");
+    assert_eq!(scenes.take(), Some("house".to_owned()));
+    assert!(!scenes.take_fresh());
+}
