@@ -507,7 +507,8 @@
             46,
             46
           ],
-          "layer": 0
+          "layer": 0,
+          "normal_map": "textures/quay_n.png"
         },
         "sindri.light2d.occluder": {
           "enabled": true,

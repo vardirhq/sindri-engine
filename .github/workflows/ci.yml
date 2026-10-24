@@ -333,6 +333,15 @@ jobs:
           python3 tools/level.py
           python3 tools/check_causeway_art.py
 
+      # Lamplighter's tiles, backdrop, props and scenes are drawn by one script,
+      # and Wick is baked from a recipe it writes. Running it again must change
+      # nothing, or the checked-in art has drifted from its source.
+      - name: Check Lamplighter's art is still what its scripts make
+        run: |
+          python3 games/lamplighter/art/dusk/build.py
+          git status --porcelain --untracked-files=all -- games/lamplighter | tee drift.txt
+          test ! -s drift.txt
+
   clippy:
     name: Clippy
     needs: reuse

@@ -20,6 +20,7 @@ from ground import BIOMES, blob_masks, ground_cell  # noqa: E402
 from lib import CELL, blank, noise, paste, png  # noqa: E402
 from palette import ramp  # noqa: E402
 from preview import mask_at  # noqa: E402
+from normals import normal_map  # noqa: E402
 import props  # noqa: E402
 import sky as S  # noqa: E402
 import wick  # noqa: E402
@@ -46,6 +47,7 @@ def draw_ground(biome="meadow", name="ground"):
     for index, mask in enumerate(masks):
         paste(image, ground_cell(mask, BIOMES[biome]), (index % columns) * CELL, (index // columns) * CELL)
     png(TEXTURES / f"{name}.png", columns * CELL, rows * CELL, image)
+    png(TEXTURES / f"{name}_n.png", columns * CELL, rows * CELL, normal_map(image, CELL, 3.0, 2))
     names = [f"{name}-{m}" for m in masks]
     names += [""] * (columns * rows - len(names))
     write_sheet(
@@ -245,7 +247,7 @@ def build_scene(masks, sheet, level=LEVEL, name="ground", title="Lamplighter art
             "name": "Level",
             "transform_3d": transform(0, ROWS),
             "components": {
-                "sindri.tilemap": {"texture": f"textures/{name}.png", "palette": palette, "columns": COLUMNS, "rows": ROWS, "tiles": tiles, "layer": 0},
+                "sindri.tilemap": {"texture": f"textures/{name}.png", "palette": palette, "columns": COLUMNS, "rows": ROWS, "tiles": tiles, "layer": 0, "normal_map": f"textures/{name}_n.png"},
                 "sindri.light2d.occluder": {"enabled": True, "shape": "tilemap"},
             },
         },
