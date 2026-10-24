@@ -16,7 +16,7 @@ import sys
 HERE = pathlib.Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 
-from ground import blob_masks, ground_cell  # noqa: E402
+from ground import BIOMES, blob_masks, ground_cell  # noqa: E402
 from lib import CELL, blank, noise, paste, png  # noqa: E402
 from palette import ramp  # noqa: E402
 from preview import mask_at  # noqa: E402
@@ -38,23 +38,51 @@ def write_sheet(path, columns, names, cell_h=CELL, extra=None):
     path.write_text(json.dumps(sheet, indent=2) + "\n")
 
 
-def draw_ground():
+def draw_ground(biome="meadow", name="ground"):
     masks = blob_masks()
     columns = 8
     rows = -(-len(masks) // columns)
     image = blank(columns * CELL, rows * CELL)
     for index, mask in enumerate(masks):
-        paste(image, ground_cell(mask), (index % columns) * CELL, (index // columns) * CELL)
-    png(TEXTURES / "ground.png", columns * CELL, rows * CELL, image)
-    names = [f"ground-{m}" for m in masks]
+        paste(image, ground_cell(mask, BIOMES[biome]), (index % columns) * CELL, (index // columns) * CELL)
+    png(TEXTURES / f"{name}.png", columns * CELL, rows * CELL, image)
+    names = [f"{name}-{m}" for m in masks]
     names += [""] * (columns * rows - len(names))
     write_sheet(
-        TEXTURES / "ground.sheet",
+        TEXTURES / f"{name}.sheet",
         columns,
         names,
-        extra={"terrains": {"ground": {"kind": "blob", "sprites": [f"ground-{m}" for m in masks]}}},
+        extra={"terrains": {name: {"kind": "blob", "sprites": [f"{name}-{m}" for m in masks]}}},
     )
     return masks
+
+
+def draw_water():
+    """A surface tile with ripples that catch the sky, and a deep tile that fades to the dark.
+
+    Tiles are lit by the scene's ambient light, so the water is drawn lighter than it
+    should end up, and the reflections are the sky's own pinks.
+    """
+    water, sky = ramp("water"), ramp("sky")
+    image = blank(2 * CELL, CELL)
+    for y in range(CELL):
+        for x in range(CELL):
+            glint = noise(x // 2, y, 62) > 0.82 and y % 2 == 0
+            if y == 0:
+                surface = water[4]
+            elif y < 3:
+                surface = water[4] if noise(x, y, 61) > 0.55 else water[3]
+            elif y < 8:
+                surface = sky[6] if glint else water[3] if y < 5 else water[2]
+            else:
+                surface = water[2] if not glint else water[3]
+            image[y][x] = (*surface[:3], 255)
+            deep = water[2] if y < 5 else water[1]
+            if glint and y > 5:
+                deep = sky[5] if y < 10 else water[2]
+            image[y][CELL + x] = (*deep[:3], 255)
+    png(TEXTURES / "water.png", 2 * CELL, CELL, image)
+    write_sheet(TEXTURES / "water.sheet", 2, ["water-top", "water-deep"])
 
 
 def draw_decor():
@@ -143,32 +171,53 @@ LEVEL = [
 ]
 ROWS, COLUMNS = len(LEVEL), len(LEVEL[0])
 
+# The harbor: a quay on either side of a gap of water, `~`.
+HARBOR = [
+    "....................",
+    "....................",
+    "....................",
+    "....................",
+    "....................",
+    "....................",
+    "....................",
+    "....................",
+    "....................",
+    "....................",
+    "....................",
+    "######..........####",
+    "######~~~~~~~~~~####",
+    "######~~~~~~~~~~####",
+]
+
 
 def transform(x, y, z=0.0, sx=1.0, sy=1.0):
     return {"position": [x, y, z], "rotation": [0, 0, 0, 1], "scale": [sx, sy, 1]}
 
 
-def tile_scene(masks):
-    palette = [f"ground-{m}" for m in masks]
+def tile_scene(masks, level=LEVEL, name="ground", decorate=True):
+    rows, columns = len(level), len(level[0])
+    palette = [f"{name}-{m}" for m in masks]
     tiles = []
-    for r, line in enumerate(LEVEL):
+    for r, line in enumerate(level):
         for c, ch in enumerate(line):
-            tiles.append(palette.index(f"ground-{mask_at(LEVEL, r, c)}") if ch == "#" else None)
+            tiles.append(palette.index(f"{name}-{mask_at(level, r, c)}") if ch == "#" else None)
     decor_palette = props.DECOR_NAMES
-    decor = [None] * (ROWS * COLUMNS)
-    for r, line in enumerate(LEVEL):
+    decor = [None] * (rows * columns)
+    for r, line in enumerate(level if decorate else []):
         for c, ch in enumerate(line):
-            above_open = r > 0 and LEVEL[r - 1][c] != "#"
+            above_open = r > 0 and level[r - 1][c] != "#"
             if ch == "#" and above_open and noise(c, r, 41) > 0.45:
                 # Decoration sits in the open cell above the grass.
                 pick = int(noise(c, r, 42) * len(decor_palette))
-                decor[(r - 1) * COLUMNS + c] = pick
-    return palette, tiles, decor_palette, decor
+                decor[(r - 1) * columns + c] = pick
+    water = [("water-top" if r == 0 or level[r - 1][c] != "~" else "water-deep") if ch == "~" else None for r, line in enumerate(level) for c, ch in enumerate(line)]
+    return palette, tiles, decor_palette, decor, water
 
 
-def build_scene(masks, sheet):
-    palette, tiles, decor_palette, decor = tile_scene(masks)
-    floor_y = ROWS - 12  # the top of the first full row of ground, in world units
+def build_scene(masks, sheet, level=LEVEL, name="ground", title="Lamplighter art test", decorate=True, floor_row=12, wick_x=12.5, lanterns=((9.0, True), (14.5, False))):
+    ROWS, COLUMNS = len(level), len(level[0])
+    palette, tiles, decor_palette, decor, water = tile_scene(masks, level, name, decorate)
+    floor_y = ROWS - floor_row  # the top of the first full row of ground, in world units
     frame_w, frame_h = sheet["width"], sheet["height"]
     entities = [
         {
@@ -196,9 +245,15 @@ def build_scene(masks, sheet):
             "name": "Level",
             "transform_3d": transform(0, ROWS),
             "components": {
-                "sindri.tilemap": {"texture": "textures/ground.png", "palette": palette, "columns": COLUMNS, "rows": ROWS, "tiles": tiles, "layer": 0},
+                "sindri.tilemap": {"texture": f"textures/{name}.png", "palette": palette, "columns": COLUMNS, "rows": ROWS, "tiles": tiles, "layer": 0},
                 "sindri.light2d.occluder": {"enabled": True, "shape": "tilemap"},
             },
+        },
+        {
+            "id": "water",
+            "name": "Water",
+            "transform_3d": transform(0, ROWS),
+            "components": {"sindri.tilemap": {"texture": "textures/water.png", "palette": ["water-top", "water-deep"], "columns": COLUMNS, "rows": ROWS, "tiles": [None if t is None else ["water-top", "water-deep"].index(t) for t in water], "layer": -5}},
         },
         {
             "id": "decor",
@@ -209,7 +264,7 @@ def build_scene(masks, sheet):
         {
             "id": "wick",
             "name": "Wick",
-            "transform_3d": transform(12.5, float(floor_y), 0.5, frame_w / 16.0, frame_h / 16.0),
+            "transform_3d": transform(wick_x, float(floor_y), 0.5, frame_w / 16.0, frame_h / 16.0),
             "components": {
                 "sindri.sprite": {"texture": "textures/wick.png#idle-0", "layer": 5},
                 "sindri.animation.sprite": {
@@ -223,7 +278,7 @@ def build_scene(masks, sheet):
             },
         },
     ]
-    for i, (x, lit) in enumerate(((9.0, True), (14.5, False))):
+    for i, (x, lit) in enumerate(lanterns):
         entities.append(
             {
                 "id": f"lantern-{i}",
@@ -251,18 +306,22 @@ def build_scene(masks, sheet):
                     "components": {"sindri.light2d": {"enabled": True, "color": [1.0, 0.7, 0.34, 1.0], "intensity": 2.6, "radius": 8.0, "falloff": 1.3, "height": 1.0, "shadows": True, "shadow_reach": 0.3}},
                 }
             )
-    return {"format_version": 10, "metadata": {"name": "Lamplighter art test"}, "entities": entities}
+    return {"format_version": 10, "metadata": {"name": title}, "entities": entities}
 
 
 def main():
     TEXTURES.mkdir(parents=True, exist_ok=True)
     masks = draw_ground()
+    draw_ground("harbor", "quay")
+    draw_water()
     draw_decor()
     draw_props()
     draw_glow()
     draw_backdrop()
     scene = build_scene(masks, bake_wick())
     (ASSETS / "art-test.scene").write_text(json.dumps(scene, indent=2) + "\n")
+    harbor = build_scene(masks, bake_wick(), HARBOR, "quay", "Lamplighter harbor art test", decorate=False, floor_row=11, wick_x=4.0, lanterns=((2.0, True), (17.5, False)))
+    (ASSETS / "art-harbor.scene").write_text(json.dumps(harbor, indent=2) + "\n")
     print(f"wrote {len(masks)} ground tiles, {len(props.DECOR)} decorations, the backdrop, Wick and art-test.scene")
 
 

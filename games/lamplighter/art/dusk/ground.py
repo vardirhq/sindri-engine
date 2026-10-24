@@ -144,7 +144,8 @@ def rock_pixel(x, y, mask, lit):
     return ROCK[2]
 
 
-def ground_cell(mask):
+def ground_cell(mask, biome=None):
+    biome = biome or MEADOW
     shape = edges_of(mask)
     cell = blank(CELL, CELL)
     for y in range(CELL):
@@ -152,11 +153,11 @@ def ground_cell(mask):
             distance, nx, ny = shape(x, y)
             if distance < 0:
                 continue
-            cell[y][x] = shade(x, y, distance, nx, ny, mask)
+            cell[y][x] = biome(x, y, distance, nx, ny, mask)
     return cell
 
 
-def shade(x, y, distance, nx, ny, mask):
+def meadow(x, y, distance, nx, ny, mask):
     up = -ny
     # Grass wraps round a top and a little way down what leans toward it.
     if up > 0.25:
@@ -185,6 +186,50 @@ def shade(x, y, distance, nx, ny, mask):
             return ROCK[1]
         return ROCK[4] if nx < 0 else ROCK[2]
     return rock_pixel(x, y, mask, max(0.0, 1.0 - distance / 8.0) * max(0.0, up))
+
+
+MEADOW = meadow
+
+WATER = ramp("water")
+
+
+def quay(x, y, distance, nx, ny, mask):
+    """The harbor's ground: masonry under a pale capstone, wet at the foot."""
+    up = -ny
+    if up > 0.5 and distance < 3:
+        # A capstone course: lit on its top pixel, seamed every ten pixels.
+        if distance < 1:
+            return ROCK[5]
+        if (x + 3 * (mask & 1)) % 10 == 0:
+            return ROCK[2]
+        return ROCK[4] if distance < 2 else ROCK[3]
+    if up > 0.5 and distance < 4:
+        return ROCK[1]
+    if distance < 1:
+        if ny > 0.5:
+            return ROCK[0]
+        return ROCK[5] if nx < 0 else ROCK[1]
+    if distance < 2:
+        if ny > 0.5:
+            return ROCK[1]
+        return ROCK[4] if nx < 0 else ROCK[2]
+    # Masonry: courses eight pixels tall, joints staggered row on row.
+    course, row = divmod(y, 8)
+    if row == 7:
+        return ROCK[1]
+    if (x + 8 * (course % 2)) % 16 == 0:
+        return ROCK[1]
+    n = noise(x, y, 21)
+    if n > 0.93:
+        return ROCK[4]
+    if n < 0.05:
+        return WATER[0]
+    if row == 0:
+        return ROCK[3]
+    return ROCK[2] if n > 0.3 else ROCK[3]
+
+
+BIOMES = {"meadow": MEADOW, "harbor": quay}
 
 
 def draw_ground(columns=8):
