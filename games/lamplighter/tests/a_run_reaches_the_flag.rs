@@ -20,19 +20,24 @@ fn step(run: &mut Run) {
 /// Entities of a scene entered after the first carry the scene name as a prefix.
 fn find(run: &Run, id: &str) -> Option<EntityId> {
     let scene = run.session.scene().expect("a scene is playing");
-    run.entity(&format!("{scene}/{id}")).or_else(|| run.entity(id))
+    run.entity(&format!("{scene}/{id}"))
+        .or_else(|| run.entity(id))
 }
 
 /// Presses a drawn button as a player would.
 fn press(run: &mut Run, name: &str) {
     let entity = find(run, name).unwrap_or_else(|| panic!("{name} is in the current scene"));
-    let [x, y] = run.on_screen(entity).unwrap_or_else(|| panic!("{name} is drawn"));
+    let [x, y] = run
+        .on_screen(entity)
+        .unwrap_or_else(|| panic!("{name} is drawn"));
     run.input.apply(InputEvent::PointerMoved { x, y });
     step(run);
-    run.input.apply(InputEvent::ButtonPressed(MouseButton::Left));
+    run.input
+        .apply(InputEvent::ButtonPressed(MouseButton::Left));
     step(run);
     step(run);
-    run.input.apply(InputEvent::ButtonReleased(MouseButton::Left));
+    run.input
+        .apply(InputEvent::ButtonReleased(MouseButton::Left));
     step(run);
     step(run);
 }
@@ -134,8 +139,15 @@ fn a_player_running_and_jumping_reaches_the_beacon() {
                 assert!(lamplighter::project().join("assets").join(clip).is_file());
                 assert!(manifest.contains(&format!("\"{clip}\"")), "{clip} ships");
             }
-            assert!(lamplighter::project().join("assets/audio/dusk-road.ogg").is_file());
-            assert!(manifest.contains("\"audio/dusk-road.ogg\""), "the music ships");
+            assert!(
+                lamplighter::project()
+                    .join("assets/audio/dusk-road.ogg")
+                    .is_file()
+            );
+            assert!(
+                manifest.contains("\"audio/dusk-road.ogg\""),
+                "the music ships"
+            );
             eprintln!("reached the beacon after {:.1} s", f64::from(frame) / 60.0);
             for _ in 0..(60 * 3) {
                 step(&mut run);
@@ -186,7 +198,11 @@ fn a_lit_lantern_is_the_respawn_checkpoint() {
     let hero = run.entity("hero").expect("the hero");
     {
         let data = run.world.get_mut(hero).expect("the hero data");
-        let position = &mut data.transform_3d.as_mut().expect("the hero transform").position;
+        let position = &mut data
+            .transform_3d
+            .as_mut()
+            .expect("the hero transform")
+            .position;
         position[0] = 9.0;
         position[1] = 4.0;
     }
@@ -217,10 +233,16 @@ fn a_lit_lantern_is_the_respawn_checkpoint() {
     for _ in 0..90 {
         step(&mut run);
     }
-    assert!((run.board("falls") - 1.0).abs() < f32::EPSILON, "the fall was counted");
+    assert!(
+        (run.board("falls") - 1.0).abs() < f32::EPSILON,
+        "the fall was counted"
+    );
     let [x, y] = run.position(hero);
     assert!((x - 10.5).abs() < 0.05, "respawned at the lit lantern: {x}");
-    assert!((y - 3.5).abs() < 0.05, "stands safely at the checkpoint: {y}");
+    assert!(
+        (y - 3.5).abs() < 0.05,
+        "stands safely at the checkpoint: {y}"
+    );
 }
 
 /// The camera follows the hero along the level, and stays inside its bounds.
