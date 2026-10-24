@@ -76,9 +76,9 @@ written against the vector version it replaced.
 **The platformer is the first genre showcase, and the exception to "keep one
 small".** It is becoming **Lamplighter**: a short real game, five to eight
 levels with a title, level select, saved progress, music and an ending, about a
-courier lighting the lanterns of a valley at dusk, in `games/platformer` until
-its stage-one move to `games/lamplighter`. `docs/lamplighter-plan.md` is its
-plan and the order of work. It is where the plain 2D path is proven: tilemap
+courier lighting the lanterns of a valley at dusk, in `games/lamplighter`
+(`games/platformer` until the plan's first stage). `docs/lamplighter-plan.md` is
+its plan and the order of work. It is where the plain 2D path is proven: tilemap
 collision, scene gravity, collider authoring, the character controller,
 one-way planks, joints, springs and hinges as level pieces, 2D lights, camera
 follow and bounds, scene changes and saves. It is held to the standard of a game
@@ -128,7 +128,7 @@ These documents govern the work:
   before changing Decay scripts or their host APIs.
 - `docs/lamplighter-plan.md` — the platformer's plan as Lamplighter: the game,
   its levels, its art and the stages of work. Read it before changing
-  `games/platformer`.
+  `games/lamplighter`.
 - `docs/decay-lsp-modernization.md` — mandatory checklist for Decay language-server,
   editor tooling, batch preflight, structured diagnostics, and agent-tooling work.
 - `docs/capabilities.md` — detailed evidence for what actually works, generated

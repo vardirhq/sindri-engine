@@ -125,10 +125,10 @@
   },
   {
     "category": "games",
-    "title": "Platformer",
-    "path": "examples/platformer/",
-    "source": "games/platformer",
-    "description": "Run, jump and collect coins on the way to the flag.",
+    "title": "Lamplighter",
+    "path": "examples/lamplighter/",
+    "source": "games/lamplighter",
+    "description": "The platformer showcase, becoming a short real game: run, jump and collect coins on the way to the flag.",
     "tags": [
       "2d",
       "tilemap",
@@ -138,7 +138,7 @@
     ],
     "play": {
       "kind": "Genre showcase",
-      "shot": "platformer.png",
+      "shot": "lamplighter.png",
       "input": [
         "keyboard",
         "touch",
@@ -146,7 +146,7 @@
       ],
       "about": [
         "Run and jump across a painted level, pick up the coins and reach the flag. Along the way: a plank ferry, one-way planks, a crate the wind pushes, a lantern on a tether and windmills on powered hinges.",
-        "The platformer is where Sindri's plain 2D path is proven: tilemap collision, gravity, collider authoring, camera follow and the 2D Scene view. It is also the project to copy when you start a side-view game of your own."
+        "Lamplighter is the platformer genre showcase, becoming a short real game about a courier lighting a valley's lanterns at dusk (see docs/lamplighter-plan.md); today it is still the one painted level. It is where Sindri's plain 2D path is proven: tilemap collision, gravity, collider authoring, camera follow and the 2D Scene view. It is also the project to copy when you start a side-view game of your own."
       ],
       "proves": [
         "Tilemap collision and one-way platforms",

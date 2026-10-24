@@ -128,7 +128,7 @@ switched off with its entity's `set_active`.
 The platformer's cave: a stone roof and back wall, two hanging lanterns and a
 low wall torch, with the level's tiles normal-mapped. The sun casts the roof's
 shadow over the cave, the lanterns cast the pillar's, and the torch rakes the
-bricks. `games/platformer/tests/cave_lights.rs` checks the shadows,
+bricks. `games/lamplighter/tests/cave_lights.rs` checks the shadows,
 `crates/sindri-gpu/tests/sprite_lights.rs` reads the pixels back.
 
 Low Tide lights a voxel map (a genre showcase using a capability that existed;

@@ -53,9 +53,9 @@ tests = [
   "crates/sindri-scene/src/effects/emitter_tests.rs",
   "crates/sindri-scene/src/effects/particles.rs",
   "crates/sindri-decay/tests/a_script_drives_particles.rs",
-  "games/platformer/tests/sparkle_and_dust.rs",
+  "games/lamplighter/tests/sparkle_and_dust.rs",
 ]
-proof = ["games/platformer", "games/low-tide"]
+proof = ["games/lamplighter", "games/low-tide"]
 docs = ["docs/particles.md"]
 detail = """
 `sindri.particles` is an emitter that keeps throwing into the same pool while

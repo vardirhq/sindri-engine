@@ -153,7 +153,7 @@ fn spawned_windmill() -> WindmillFixture {
     use sindri_platform::{InputEvent, InputState, Key};
 
     let assets =
-        std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../games/platformer/assets");
+        std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../games/lamplighter/assets");
     let file = SceneFile::open(assets.join("platformer.scene")).unwrap();
     let mut extractor = SceneExtractor::new().unwrap();
     extractor.register::<ScriptComponent>("Script").unwrap();

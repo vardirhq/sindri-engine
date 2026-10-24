@@ -67,9 +67,9 @@ call rather than a second rendering path.
 
 Engine ✅ · Editor 🟡 · Decay ✅ · Proof ✅ — parity row *Particle system (emitters, curves, shapes)*
 
-**Tested by:** [`crates/sindri-scene/src/effects/emitter_tests.rs`](../../crates/sindri-scene/src/effects/emitter_tests.rs), [`crates/sindri-scene/src/effects/particles.rs`](../../crates/sindri-scene/src/effects/particles.rs), [`crates/sindri-decay/tests/a_script_drives_particles.rs`](../../crates/sindri-decay/tests/a_script_drives_particles.rs), [`games/platformer/tests/sparkle_and_dust.rs`](../../games/platformer/tests/sparkle_and_dust.rs)
+**Tested by:** [`crates/sindri-scene/src/effects/emitter_tests.rs`](../../crates/sindri-scene/src/effects/emitter_tests.rs), [`crates/sindri-scene/src/effects/particles.rs`](../../crates/sindri-scene/src/effects/particles.rs), [`crates/sindri-decay/tests/a_script_drives_particles.rs`](../../crates/sindri-decay/tests/a_script_drives_particles.rs), [`games/lamplighter/tests/sparkle_and_dust.rs`](../../games/lamplighter/tests/sparkle_and_dust.rs)
 
-**Exercised in:** [`games/platformer`](../../games/platformer), [`games/low-tide`](../../games/low-tide)
+**Exercised in:** [`games/lamplighter`](../../games/lamplighter), [`games/low-tide`](../../games/low-tide)
 
 **See:** [`docs/particles.md`](../../docs/particles.md)
 

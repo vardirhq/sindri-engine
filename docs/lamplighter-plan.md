@@ -117,16 +117,32 @@ Present, named in `docs/generated/decay-api.md`: `Scene`, `Save`, `Audio` with
 buses, `Camera` follow, bounds, shake and impact, `Sequence` timelines, `Effects`,
 `Animation`, `Tween`, `Ui`, `Action` rebinding, 2D lights, normal maps, particles
 and joints. Each stage verifies before it relies on one, and where a capability
-is missing it is added as a general one with a row in `docs/parity.md`. Likely
-candidates, none assumed:
+is missing it is added as a general one with a row in `docs/parity.md`.
 
-- parallax background layers driven by the camera;
-- fading between scenes;
-- drawing a virtual stick and a jump button for touch;
-- `Save` in the browser host, and across a page reload;
-- a checkpoint and respawn that does not reload the scene;
-- autotiling a painted tilemap from a set of edge and corner tiles;
-- baked side-view sprite sheets as animation clips.
+Looked at, and what was found:
+
+- **Autotiling exists** (`docs/terrains.md`): a sheet declares a terrain of kind
+  `edges` (16 sprites) or `blob` (47, with true inside corners), and the brush and
+  `Grid.set_terrain` pick the sprite from the neighbors. Its stated limits are one
+  terrain per cell, no transition between two terrains, and no random variants of
+  a pattern. Ground uses `blob`; the repetition the missing variants would hide is
+  broken up with decoration sprites placed by the level generator.
+- **Parallax has no authored system** (`docs/capabilities/runtime.toml`, and
+  `docs/2d-model.md` argues it is a consequence of depth under a perspective
+  camera, which a side-view pixel game does not want). Backgrounds are layers
+  that a small Decay script moves by a fraction of the camera's position. If that
+  proves clumsy across levels, a general layer component is added, with its row.
+- **The pixel grid is a decision.** The level was drawn at 16 pixels to a tile
+  under a camera showing 9 tiles over 540 pixels, which is 3.75 screen pixels to
+  each art pixel and soft. Lamplighter draws at **16 pixels to a tile on a 320 by
+  180 grid**: the camera shows 11.25 tiles by 20, which is exactly 3 screen
+  pixels to an art pixel at 960 by 540 and 6 at 1920 by 1080. The camera has a
+  `pixel_perfect` flag (`docs/2d-inventory.md`); whether it keeps the scale whole
+  at window sizes that are not multiples is verified in stage 2 and, if it does
+  not, closed in the engine.
+- **Still to verify**, none assumed: scene fades, drawn touch controls, browser
+  `Save` across reloads, respawn without a scene reload, and baked side-view
+  sheets as animation clips.
 
 ## Stages
 
@@ -134,10 +150,13 @@ Each stage is one or more pull requests that leave `main` working: the project
 opens, its scripts compile, its scripted run reaches its goal, and the
 documentation says what is now true.
 
-0. **Plan.** This document, and the `AGENTS.md` amendment.
-1. **Move.** `games/platformer` becomes `games/lamplighter`, with the Pages route,
-   directory entry, capability references, CI and scripts updated, and nothing
-   else changed. Reviewed on its own because it touches the most files.
+0. **Plan.** This document, and the `AGENTS.md` amendment. *Done.*
+1. **Move.** `games/platformer` becomes `games/lamplighter`, with the crate, the
+   Pages route, directory entry, capability references, CI and scripts renamed,
+   and nothing else changed. Reviewed on its own because it touches the most
+   files. *Done:* the one thing left under the old name is the scene file,
+   `assets/platformer.scene`, which stage 3 replaces with a scene per screen and
+   level, and prose that says "the platformer" meaning the genre.
 2. **Art foundation.** The style bible and palette, the autotiled tile sets and
    backgrounds for the first two biomes, Wick and the lantern baked and
    animated, the font, and a screenshot test that opens the art.

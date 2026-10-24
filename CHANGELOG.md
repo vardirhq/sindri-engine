@@ -1,5 +1,14 @@
 # Changelog
 
+- Move the platformer to `games/lamplighter`, the first stage of turning it into
+  Lamplighter, a short real game (`docs/lamplighter-plan.md`). The crate, the
+  Pages route (`/examples/lamplighter/`, `/play/lamplighter/`), the directory
+  entry and screenshot, the editor's welcome list, CI and the browser scripts
+  (`lamplighter-goal`, `prepare-lamplighter`, `check-lamplighter-batches`) are
+  renamed, and the capability pages point at the new path. Nothing about how it
+  plays changes. The scene file is still `assets/platformer.scene` until the
+  game's shell replaces it.
+
 - Open models that come as several files in the Sprite Baker. A `.zip` of a
   download (a `.gltf`, its `.bin` and a `textures/` folder), a dropped folder,
   **Open folder…**, or a `.gltf` chosen together with its `.bin` now just opens.

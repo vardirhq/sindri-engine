@@ -40,7 +40,7 @@ Engine ✅ · Editor ✅ · Decay ✅ · Proof ✅ — parity row *Orthogonal an
 
 **Tested by:** [`crates/sindri-grid/src/geometry/tests.rs`](../../crates/sindri-grid/src/geometry/tests.rs), [`crates/sindri-decay/tests/grid_position.rs`](../../crates/sindri-decay/tests/grid_position.rs)
 
-**Exercised in:** [`games/platformer`](../../games/platformer), [`games/low-tide`](../../games/low-tide)
+**Exercised in:** [`games/lamplighter`](../../games/lamplighter), [`games/low-tide`](../../games/low-tide)
 
 **See:** [`docs/grid.md`](../../docs/grid.md)
 
