@@ -66,9 +66,8 @@ script Hero {
             return;
         }
 
-        // What the player means, from the scene's input actions: `run` is
-        // A/D, the arrows, the stick or the d-pad, and `jump` Space, W, Up or
-        // South, whichever is being used. A finger steers and jumps besides.
+        // Keyboard and gamepad input comes from the scene's actions. Once
+        // touch is detected, the drawn buttons take over movement and jumping.
         var run: number = Action.axis("run");
         var touch_jump: bool = false;
         if Game.touch {

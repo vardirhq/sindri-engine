@@ -36,9 +36,9 @@ references its own root axle and rotor, and Decay reverses the motor.
 
 Arrow keys or A/D run; Space, W or Up jumps. A controller can use the left
 stick or D-pad and the south face button. Down/S or D-pad down drops through
-the raised one-way planks. On a touch screen, the left and right buttons steer and the jump button hops.
-Controls appear when touch input is detected. A tap is a hop and a held press
-a full jump; a jump pressed just before landing, or just after
+the raised one-way planks. On a touch screen, the left and right buttons steer
+and the jump button hops. Controls appear when touch input is detected. A tap
+is a hop and a held press a full jump; a jump pressed just before landing, or just after
 running off a ledge, still counts. Horizontal movement accelerates and
 decelerates rather than snapping between stopped and full speed, with
 deliberately lighter air control after committing to a jump. Two low stone steps
