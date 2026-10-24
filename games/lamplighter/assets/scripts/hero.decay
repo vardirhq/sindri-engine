@@ -36,6 +36,8 @@ script Hero {
     // 0 idle, 1 run, 2 jump, 3 fall: which clip is showing.
     var shown: number = 0.0;
     var touch_jump_button: Entity = null;
+    var touch_stick_checked: bool = false;
+    var touch_stick_allowed: bool = false;
 
     fn start() {
         Game.coins = 0.0;
@@ -52,6 +54,15 @@ script Hero {
     fn update(dt: number) {
         this.drop_left = max(0.0, this.drop_left - dt);
         if Touch.count > 0.0 { Game.touch = true; }
+        if !Stick.held {
+            this.touch_stick_checked = false;
+            this.touch_stick_allowed = false;
+        } else if !this.touch_stick_checked {
+            // Pointer positions are in screen units; Stick.anchor_x is raw
+            // pixels. Remember which side the stick began on before jump lands.
+            this.touch_stick_checked = true;
+            this.touch_stick_allowed = Pointer.overlay_x < 0.0;
+        }
         touch();
         probe_ground();
         if Game.won {
@@ -71,7 +82,7 @@ script Hero {
         var touch_jump: bool = false;
         if Game.touch {
             run = 0.0;
-            if Stick.held && Stick.anchor_x < 0.0 { run = Stick.x; }
+            if this.touch_stick_allowed { run = Stick.x; }
             touch_jump = Ui.is_held(this.touch_jump_button);
         } else if Stick.held && abs(Stick.x) > abs(run) {
             run = Stick.x;
