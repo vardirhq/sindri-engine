@@ -898,7 +898,7 @@
     "title": "Sprite Baker",
     "path": "examples/isometric-baker/",
     "source": "tools/isometric-baker",
-    "description": "Drop in a Blender model (.glb, .gltf or .obj) or write a recipe, and bake it into ordinary Sindri sprites in the browser, in isometric, top-down or side view.",
+    "description": "Drop in a Blender model (.glb, .gltf, .obj or a .zip of one) or write a recipe, and bake it into ordinary Sindri sprites in the browser, in isometric, top-down or side view.",
     "tags": [
       "sprites",
       "blender",
@@ -920,7 +920,7 @@
         "touch"
       ],
       "about": [
-        "Drop in a model made in Blender (.glb, .gltf or .obj) and it is centred on a tile, shaded into the same four-shade palette as everything else, and baked in four directions, each drawn on the floor it will stand on. Fit it, turn it, recolor its materials and tune the light with the inspector, or write a recipe of boxes, cylinders and spheres by hand. Download the PNG, its .sheet and the prefab, or all three as a zip laid out like a project's assets. The same pipeline runs offline from the command line for recipes made of primitives."
+        "Drop in a model made in Blender (a .glb, .gltf or .obj, or the .zip or folder it came in) and it is centred on a tile, shaded into the same four-shade palette as everything else, and baked in four directions, each drawn on the floor it will stand on. Fit it, turn it, recolor its materials and tune the light with the inspector, or write a recipe of boxes, cylinders and spheres by hand. Download the PNG, its .sheet and the prefab, or all three as a zip laid out like a project's assets. The same pipeline runs offline from the command line for recipes made of primitives."
       ],
       "proves": [
         "3D model to sprite baking",

@@ -28,7 +28,7 @@ More can be added; a new one says which kind it is and what it is for.
   genre: the platformer first, then top-down, shooter, puzzle and others. Each
   proves Sindri can make that kind of game, finds the gaps the genre hits, and
   is what a new user copies to start their own. Keep one small: a level and a
-  few scripts, not a campaign.
+  few scripts, not a campaign. The platformer is the one exception, below.
 - **Feature examples** (`examples/<feature>`) show one bigger feature on its
   own, such as the camera, audio, Weave, Decay, tilemaps, isometric or voxels,
   small enough to read in a few minutes.
@@ -73,11 +73,18 @@ A new gameplay capability is proven there first. It lives in
 `games/orbital-baked`; `docs/orbital-last-stand-plan.md` is its original plan,
 written against the vector version it replaced.
 
-**The platformer is the first genre showcase.** A side-view game with a
-painted, solid level, a hero who runs and jumps, coins and a flag, in
-`games/platformer`. It is where the plain 2D path is proven: tilemap
-collision, scene gravity, collider authoring, camera follow and the 2D Scene
-view, and it finds gaps by being a platformer rather than a recreation.
+**The platformer is the first genre showcase, and the exception to "keep one
+small".** It is becoming **Lamplighter**: a short real game, five to eight
+levels with a title, level select, saved progress, music and an ending, about a
+courier lighting the lanterns of a valley at dusk, in `games/platformer` until
+its stage-one move to `games/lamplighter`. `docs/lamplighter-plan.md` is its
+plan and the order of work. It is where the plain 2D path is proven: tilemap
+collision, scene gravity, collider authoring, the character controller,
+one-way planks, joints, springs and hinges as level pieces, 2D lights, camera
+follow and bounds, scene changes and saves. It is held to the standard of a game
+somebody would choose to play, as Causeway is for 3D, because a showcase nobody
+wants to play does not showcase anything; and it finds gaps by being a platformer
+rather than a recreation, which are closed generally.
 
 **Scorchball is the local-multiplayer genre showcase.** A top-down couch
 football game for two to four pads, in `games/scorchball`. It is where playing
@@ -119,6 +126,9 @@ These documents govern the work:
 - `docs/scripting.md` and `decay/LANGUAGE.md` — scripting contracts.
 - `docs/decay-agent-guide.md` — mandatory preflight and runtime-contract checklist
   before changing Decay scripts or their host APIs.
+- `docs/lamplighter-plan.md` — the platformer's plan as Lamplighter: the game,
+  its levels, its art and the stages of work. Read it before changing
+  `games/platformer`.
 - `docs/decay-lsp-modernization.md` — mandatory checklist for Decay language-server,
   editor tooling, batch preflight, structured diagnostics, and agent-tooling work.
 - `docs/capabilities.md` — detailed evidence for what actually works, generated

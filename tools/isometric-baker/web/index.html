@@ -149,9 +149,12 @@
       <h2>Catalogue</h2>
       <div id="assets"></div>
       <label class="action">Open model or recipe…
-        <input id="open" type="file" multiple accept=".glb,.gltf,.obj,.isobake,.json" hidden />
+        <input id="open" type="file" multiple accept=".glb,.gltf,.obj,.isobake,.json,.zip,.bin,.png,.jpg,.jpeg,.webp" hidden />
       </label>
-      <p class="hint">Or drop a Blender <code>.glb</code>, <code>.gltf</code> or <code>.obj</code> (or a <code>.isobake</code> recipe) anywhere on the page. Nothing leaves your browser.</p>
+      <label class="action">Open folder…
+        <input id="open-folder" type="file" webkitdirectory hidden />
+      </label>
+      <p class="hint">Or drop a Blender <code>.glb</code>, <code>.gltf</code> or <code>.obj</code>, a <code>.zip</code> of one with its <code>.bin</code> and textures, a whole folder, or a <code>.isobake</code> recipe, anywhere on the page. Nothing leaves your browser.</p>
     </aside>
 
     <main id="preview" class="pane" aria-label="Preview">
@@ -216,6 +219,7 @@
           <div id="file-controls" hidden>
             <h2>Model file</h2>
             <label class="check"><input type="checkbox" data-setting="auto_fit" /> Fit to footprint</label>
+            <label class="field"><span>Texture colors <output data-out="texture_colors"></output></span><input type="range" data-setting="texture_colors" min="1" max="16" step="1" /></label>
             <label class="field"><span>Fill <output data-out="fill"></output></span><input type="range" data-setting="fill" min="0.1" max="1" step="0.05" /></label>
             <label class="field"><span>Scale <output data-out="scale"></output></span><input type="range" data-setting="scale" min="0.1" max="4" step="0.05" /></label>
             <label class="field"><span>Turn <output data-out="rotation_y"></output></span><input type="range" data-setting="rotation_y" min="0" max="355" step="5" /></label>
@@ -224,7 +228,7 @@
             <label class="field"><span>Nudge Z <output data-out="offset_z"></output></span><input type="range" data-setting="offset_z" min="-1" max="1" step="0.05" /></label>
             <h2>Materials</h2>
             <div id="materials"></div>
-            <p class="hint">A file's materials give their base color. Each becomes a four-shade ramp, so a model shades like everything else. Textures and vertex colors are not used.</p>
+            <p class="hint">A model's colors are cut down to the number above, from its materials and the colors its textures give each triangle. Each becomes a four-shade ramp, so a model shades like everything else. Vertex colors and other maps are not used.</p>
           </div>
           <p id="primitive-note" class="hint" hidden>This recipe is built from primitives. Edit its parts in the Recipe tab.</p>
         </fieldset>

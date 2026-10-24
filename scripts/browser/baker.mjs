@@ -9,7 +9,7 @@
 // by Three.js and baked (GLB and OBJ), that a recipe waiting for its model says
 // so and takes it when it arrives, that a broken recipe is a message, that the
 // zip downloads, and that nothing scrolls sideways on a phone. The screenshots
-// are kept for a person to look at.
+// are kept for a person to look at. BAKER_DELAY_TIMERS=80 delays the page's timers to find races.
 import { chromium } from 'playwright';
 import { createServer } from 'node:http';
 import { mkdir, mkdtemp, readFile, writeFile } from 'node:fs/promises';
@@ -18,7 +18,9 @@ import { extname, join, normalize } from 'node:path';
 import assert from 'node:assert/strict';
 
 // Node strips the types of the test helpers, which build the model files used here.
-import { buildGlb, crateParts } from '../../tools/isometric-baker/test/glb.ts';
+import { buildGlb, buildGltf, crateParts, texturedCrateParts } from '../../tools/isometric-baker/test/glb.ts';
+import { encodePng } from '../../tools/isometric-baker/web/png.ts';
+import { zip } from '../../tools/isometric-baker/web/zip.ts';
 
 const [root, captures = 'target/baker-captures'] = process.argv.slice(2);
 if (!root) throw new Error('usage: baker.mjs <site-dir> [capture-dir]');
@@ -57,6 +59,29 @@ await writeFile(
     model: { kind: 'file', file: 'models/waiting.glb', auto_fit: true, fill: 0.9 },
   }),
 );
+// A Sketchfab-style download: a .gltf that points at scene.bin and a texture in textures/.
+// The texture is four pixels, two red and two blue, and the crate's top looks up the red.
+const sketch = join(scratch, 'sketchfab');
+const { gltf, bin } = buildGltf(texturedCrateParts(), { textured: true });
+const texture = encodePng({
+  width: 4,
+  height: 1,
+  data: Uint8ClampedArray.from([200, 40, 40, 255, 200, 40, 40, 255, 40, 40, 200, 255, 40, 40, 200, 255]),
+});
+await mkdir(join(sketch, 'textures'), { recursive: true });
+await writeFile(join(sketch, 'scene.gltf'), gltf);
+await writeFile(join(sketch, 'scene.bin'), bin);
+await writeFile(join(sketch, 'textures', 'body.png'), texture);
+const archive = join(scratch, 'blacksmith.zip');
+await writeFile(
+  archive,
+  zip([
+    { path: 'scene.gltf', contents: new TextEncoder().encode(gltf) },
+    { path: 'scene.bin', contents: bin },
+    { path: 'textures/body.png', contents: texture },
+    { path: 'license.txt', contents: new TextEncoder().encode('CC-BY-4.0') },
+  ]),
+);
 const wedge = 'v 0 0 0\nv 1 0 0\nv 0 0 1\nv 0 1 0\nf 1 2 3\nf 1 3 4\nf 1 4 2\nf 2 4 3\n';
 
 const sizes = [
@@ -71,6 +96,14 @@ try {
     const phone = name === 'phone';
     const context = await browser.newContext({ ...device, acceptDownloads: true });
     const page = await context.newPage();
+    // BAKER_DELAY_TIMERS=80 makes the page start work 80 ms late, which stretches the gap between an
+    // edit and the bake it causes: the race a fast runner can lose and a developer's machine does not.
+    if (process.env.BAKER_DELAY_TIMERS) {
+      await page.addInitScript((delay) => {
+        const later = window.setTimeout;
+        window.setTimeout = (fn, ms, ...rest) => later(fn, ms === 0 ? delay : ms, ...rest);
+      }, Number(process.env.BAKER_DELAY_TIMERS));
+    }
     const problems = [];
     page.on('pageerror', error => problems.push(String(error)));
     page.on('console', message => {
@@ -92,7 +125,21 @@ try {
       await pane('assets');
       const entry = typeof which === 'number' ? page.locator('#assets .asset').nth(which) : page.locator('#assets .asset', { hasText: which }).first();
       await entry.click();
+      await eventually(async () => assert.equal(await page.locator('#assets .asset[aria-current=true]').count(), 1), 'an asset is current');
       await ok();
+    };
+
+    // A bake finishes after the status line first says 'ok', so a result that depends on one is polled for.
+    const eventually = async (check, what) => {
+      const until = Date.now() + 10000;
+      for (;;) {
+        try {
+          return await check();
+        } catch (error) {
+          if (Date.now() > until) throw new assert.AssertionError({ message: `${name}: ${what} (${error.message.split('\n')[0]})` });
+          await page.waitForTimeout(100);
+        }
+      }
     };
 
     await page.goto(url);
@@ -172,7 +219,10 @@ try {
     await page.locator('#materials .material input[type=color]').first().fill('#336699');
     await page.waitForFunction(() => /"Wood":\s*"#336699"/.test(document.querySelector('#recipe').value), null, { timeout: 5000 });
     await ok();
-    assert.equal(await page.locator('#materials .material button').first().isDisabled(), false, `${name}: the override can be reset`);
+    await eventually(
+      async () => assert.equal(await page.locator('#materials .material button').first().isDisabled(), false),
+      'the override can be reset',
+    );
     await page.locator('#materials .material button').first().click();
     await page.waitForFunction(() => !/"Wood"/.test(document.querySelector('#recipe').value), null, { timeout: 5000 });
     await ok();
@@ -186,10 +236,14 @@ try {
     await page.setInputFiles('#open', glb);
     await ok();
     await pane('assets');
-    assert.equal((await assetNames()).length, before + 1, `${name}: the model joined the catalogue`);
-    assert.equal(await page.locator('#assets .asset[aria-current=true] span').textContent(), 'my-prop', `${name}: named for its file`);
-    assert.equal(await page.locator('#cards canvas').count(), 4, `${name}: baked in four directions`);
-    assert.equal(await page.locator('#files li').count(), 3, `${name}: a PNG, a sheet and a prefab`);
+    await eventually(async () => {
+      assert.equal((await assetNames()).length, before + 1);
+      assert.equal(await page.locator('#assets .asset[aria-current=true] span').textContent(), 'my-prop');
+    }, 'the model joined the catalogue, named for its file');
+    await eventually(async () => {
+      assert.equal(await page.locator('#cards canvas').count(), 4);
+      assert.equal(await page.locator('#files li').count(), 3);
+    }, 'it baked in four directions, with a PNG, a sheet and a prefab');
 
     // Dropping a file does the same, whatever its format: here an .obj.
     await page.evaluate((text) => {
@@ -201,6 +255,49 @@ try {
     await ok();
     await pane('assets');
 
+    // A .gltf on its own cannot work: it says what it is missing, and the message is not wiped by the old bake.
+    const countBefore = (await assetNames()).length;
+    await page.setInputFiles('#open', join(sketch, 'scene.gltf'));
+    await failed();
+    assert.match(await status(), /scene\.gltf needs scene\.bin/, `${name}: says which file to add`);
+    await page.waitForTimeout(500);
+    assert.match(await page.locator('#status').getAttribute('class'), /error/, `${name}: the message stays on screen`);
+    assert.equal((await assetNames()).length, countBefore, `${name}: nothing was added`);
+
+    // A zip of the whole download just opens: textures give the model its colors.
+    await page.setInputFiles('#open', archive);
+    await ok();
+    await pane('assets');
+    assert.equal(await page.locator('#assets .asset[aria-current=true] span').textContent(), 'scene', `${name}: the zip's model is open`);
+    assert.equal((await assetNames()).length, countBefore + 1, `${name}: one asset from the zip`);
+    await pane('inspector');
+    await tab('model');
+    const swatches = await page.locator('#materials .material input[type=color]').evaluateAll((nodes) => nodes.map((node) => node.value));
+    assert.deepEqual(swatches.sort(), ['#2828c8', '#c82828'], `${name}: the texture's red and blue became two colors`);
+    assert.deepEqual(
+      (await page.locator('#materials .material span').allTextContents()).sort(),
+      ['Body 1', 'Body 2'],
+      `${name}: named for the material they came from`,
+    );
+    await page.locator('[data-setting="texture_colors"]').fill('1');
+    await page.waitForFunction(() => /"texture_colors":\s*1\b/.test(document.querySelector('#recipe').value), null, { timeout: 5000 });
+    await ok();
+    await eventually(
+      async () => assert.deepEqual(await page.locator('#materials .material span').allTextContents(), ['Body']),
+      "one color, the material's own name",
+    );
+
+    // The same folder, opened as a folder, and the .gltf with only its .bin chosen beside it.
+    await page.setInputFiles('#open-folder', sketch);
+    await pane('assets');
+    await eventually(async () => assert.equal((await assetNames()).length, countBefore + 2), 'a folder opens too');
+    await ok();
+    await page.setInputFiles('#open', [join(sketch, 'scene.gltf'), join(sketch, 'scene.bin')]);
+    await pane('assets');
+    await eventually(async () => assert.equal((await assetNames()).length, countBefore + 3), 'a .gltf and its .bin, chosen together');
+    await ok();
+
+    // A file that is neither a model nor a recipe is a message, and a folder's license file is not.
     // A recipe whose model has not arrived says so, and takes it when it does.
     await page.setInputFiles('#open', waitingRecipe);
     await failed();
@@ -211,7 +308,7 @@ try {
     await page.setInputFiles('#open', waitingModel);
     await ok();
     await pane('assets');
-    assert.equal((await assetNames()).length, withRecipe, `${name}: the model went to the recipe that was waiting`);
+    await eventually(async () => assert.equal((await assetNames()).length, withRecipe), 'the model went to the recipe that was waiting');
 
     // A file that is neither a model nor a recipe is a message, not a crash.
     const notes = join(scratch, 'notes.txt');

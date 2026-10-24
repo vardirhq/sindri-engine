@@ -193,3 +193,93 @@ export function buildGlb(parts: RawPart[]): Uint8Array {
   }
   return out;
 }
+
+/** A part with a texture coordinate per vertex, for files whose color comes from an image. */
+export type UvPart = RawPart & { uvs?: number[] };
+
+/**
+ * A crate whose texture, not its material, holds the colors: the top face looks up
+ * the left of a four-pixel strip (red) and every other face the right (blue). It is
+ * 1.5 across at a node scale of 0.01, so in the file it is 150: centimetres, as a
+ * Sketchfab model is.
+ */
+export function texturedCrateParts(): UvPart[] {
+  const part = boxPart('Body', '#ffffff', [150, 140, 150], [0, 70, 0]) as UvPart;
+  // boxPart writes six faces of four vertices, +Y third.
+  part.uvs = Array.from({ length: 24 }, (_, vertex) => (Math.floor(vertex / 4) === 2 ? [0.1, 0.5] : [0.9, 0.5])).flat();
+  return [part];
+}
+
+export interface GltfFolder {
+  /** The `.gltf` text, which names `scene.bin` and, when textured, `textures/body.png`. */
+  gltf: string;
+  bin: Uint8Array;
+}
+
+/**
+ * The same model as a `.gltf` that points at its geometry in a separate `scene.bin`,
+ * the way a Sketchfab download is laid out. With `textured`, its material takes its
+ * color from `textures/body.png` (written by the caller) instead of from a factor.
+ */
+export function buildGltf(parts: UvPart[], { textured = false } = {}): GltfFolder {
+  const chunks: Uint8Array[] = [];
+  const bufferViews: object[] = [];
+  const accessors: object[] = [];
+  let length = 0;
+  const add = (bytes: Uint8Array, target: number): number => {
+    const padded = new Uint8Array(Math.ceil(bytes.length / 4) * 4);
+    padded.set(bytes);
+    bufferViews.push({ buffer: 0, byteOffset: length, byteLength: bytes.length, target });
+    chunks.push(padded);
+    length += padded.length;
+    return bufferViews.length - 1;
+  };
+  const accessor = (bytes: Uint8Array, target: number, componentType: number, count: number, type: string, extra = {}) => {
+    accessors.push({ bufferView: add(bytes, target), componentType, count, type, ...extra });
+    return accessors.length - 1;
+  };
+
+  const primitives = parts.map((part, material) => {
+    const positions = Float32Array.from(part.positions);
+    const lows = [0, 1, 2].map((axis) => Math.min(...positions.filter((_, i) => i % 3 === axis)));
+    const highs = [0, 1, 2].map((axis) => Math.max(...positions.filter((_, i) => i % 3 === axis)));
+    const attributes: Record<string, number> = {
+      POSITION: accessor(new Uint8Array(positions.buffer), 34962, 5126, positions.length / 3, 'VEC3', { min: lows, max: highs }),
+      NORMAL: accessor(new Uint8Array(Float32Array.from(part.normals ?? []).buffer), 34962, 5126, positions.length / 3, 'VEC3'),
+    };
+    if (part.uvs) {
+      attributes.TEXCOORD_0 = accessor(new Uint8Array(Float32Array.from(part.uvs).buffer), 34962, 5126, part.uvs.length / 2, 'VEC2');
+    }
+    const indices = accessor(new Uint8Array(Uint16Array.from(part.indices).buffer), 34963, 5123, part.indices.length, 'SCALAR');
+    return { attributes, indices, material };
+  });
+
+  const bin = new Uint8Array(length);
+  let at = 0;
+  for (const chunk of chunks) {
+    bin.set(chunk, at);
+    at += chunk.length;
+  }
+  const gltf = JSON.stringify(
+    {
+      asset: { version: '2.0', generator: 'sindri isometric baker test fixtures' },
+      scene: 0,
+      scenes: [{ nodes: [0] }],
+      nodes: [{ mesh: 0, matrix: [0.01, 0, 0, 0, 0, 0.01, 0, 0, 0, 0, 0.01, 0, 0, 0, 0, 1] }],
+      meshes: [{ primitives }],
+      materials: parts.map((part) => ({
+        name: part.name,
+        pbrMetallicRoughness: textured
+          ? { baseColorTexture: { index: 0 }, metallicFactor: 0 }
+          : { baseColorFactor: linear(part.color), metallicFactor: 0 },
+      })),
+      ...(textured ? { textures: [{ source: 0 }], images: [{ uri: 'textures/body.png' }] } : {}),
+      accessors,
+      bufferViews,
+      buffers: [{ byteLength: length, uri: 'scene.bin' }],
+    },
+    null,
+    2,
+  );
+  return { gltf, bin };
+}

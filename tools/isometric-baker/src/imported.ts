@@ -23,6 +23,7 @@
 import { type Footprint } from './frames.ts';
 import { type Mesh, type ModelSpec } from './model.ts';
 import { type BandedMaterial, type MaterialSpec, bandMaterial } from './shading.ts';
+import { quantizeColors } from './quantize.ts';
 import { IDENTITY, type Vec3, cross, normalize, rotationXYZ, sub, transform, vec } from './vec.ts';
 
 /** One run of triangles that share a material, in world space and Y up. */
@@ -37,6 +38,12 @@ export interface RawPart {
   normals?: ArrayLike<number>;
   /** Three vertex indices per triangle. */
   indices: ArrayLike<number>;
+  /**
+   * The color the file's texture gives each triangle, as three bytes (sRGB) per
+   * triangle, when the material has one. They are cut down to a few colors for
+   * the whole model (`textureColors`), and `color` is then only a fallback.
+   */
+  colors?: ArrayLike<number>;
 }
 
 export interface RawModel {
@@ -58,6 +65,11 @@ export interface FileModelSpec {
   rotationY: number;
   /** Nudge in tile units, applied last. */
   offset: Vec3;
+  /**
+   * How many colors the file's textures are cut down to, for the whole model.
+   * A model with no textures is unaffected.
+   */
+  textureColors: number;
   /** Replace a material's color (or whole ramp) by the name it has in the file. */
   materials: Record<string, MaterialSpec>;
 }
@@ -103,6 +115,102 @@ function unweld(part: RawPart): { positions: number[]; normals: number[]; indice
   return { positions, normals, indices };
 }
 
+interface Source {
+  positions: ArrayLike<number>;
+  normals: ArrayLike<number>;
+  indices: ArrayLike<number>;
+}
+
+/** Some of one part's triangles that are drawn with one material. */
+interface Group {
+  name: string;
+  color: string;
+  source: Source;
+  /** Which triangles, or null for all of them. */
+  triangles: number[] | null;
+}
+
+const hex = ([r, g, b]: number[]): string =>
+  `#${[r, g, b].map((value) => Math.round(value).toString(16).padStart(2, '0')).join('')}`;
+
+function sourceOf(part: RawPart): Source {
+  const welded = part.normals !== undefined && part.normals.length === part.positions.length;
+  return welded
+    ? { positions: part.positions, normals: part.normals as ArrayLike<number>, indices: part.indices }
+    : unweld(part);
+}
+
+/**
+ * The materials a model is drawn with, as groups of triangles.
+ *
+ * A part with no texture is one group in its own color. Parts with textures
+ * are cut into groups by color: every textured triangle in the model goes into
+ * one pool, the pool is cut down to `textureColors`, and each cluster is a
+ * material named for the material that contributed most of it, so a model keeps
+ * a small palette however many pixels its texture has. A cluster's name is the
+ * file's own when the material gave one cluster and has a number after it when
+ * it gave several.
+ */
+function groupsOf(raw: RawModel, spec: FileModelSpec): Group[] {
+  const sources = raw.parts.map(sourceOf);
+  const textured = raw.parts
+    .map((part, index) => ({ part, index }))
+    .filter(({ part, index }) => part.colors && part.colors.length === (sources[index].indices.length / 3) * 3);
+
+  const groups: Group[] = [];
+  const pool: number[] = [];
+  const owners: { part: number; triangle: number }[] = [];
+  for (const { part, index } of textured) {
+    const triangles = sources[index].indices.length / 3;
+    for (let t = 0; t < triangles; t++) {
+      pool.push(part.colors![t * 3], part.colors![t * 3 + 1], part.colors![t * 3 + 2]);
+      owners.push({ part: index, triangle: t });
+    }
+  }
+  const quantized = quantizeColors(pool, spec.textureColors);
+
+  const bins = new Map<number, Map<number, number[]>>();
+  owners.forEach(({ part, triangle }, at) => {
+    const cluster = quantized.assignment[at];
+    const byPart = bins.get(cluster) ?? new Map<number, number[]>();
+    byPart.set(part, [...(byPart.get(part) ?? []), triangle]);
+    bins.set(cluster, byPart);
+  });
+
+  const claimed = new Map<string, number>();
+  const clusterNames: string[] = [];
+  quantized.palette.forEach((_, cluster) => {
+    const byPart = bins.get(cluster) ?? new Map<number, number[]>();
+    let dominant = -1;
+    let most = -1;
+    for (const [part, triangles] of byPart) {
+      if (triangles.length > most) {
+        dominant = part;
+        most = triangles.length;
+      }
+    }
+    clusterNames.push(raw.parts[dominant]?.name ?? 'Texture');
+  });
+  const clusterCount = new Map<string, number>();
+  for (const name of clusterNames) clusterCount.set(name, (clusterCount.get(name) ?? 0) + 1);
+  quantized.palette.forEach((color, cluster) => {
+    const base = clusterNames[cluster];
+    const number = (claimed.get(base) ?? 0) + 1;
+    claimed.set(base, number);
+    const name = (clusterCount.get(base) ?? 1) > 1 ? `${base} ${number}` : base;
+    for (const [part, triangles] of bins.get(cluster) ?? []) {
+      groups.push({ name, color: hex(color), source: sources[part], triangles });
+    }
+  });
+
+  raw.parts.forEach((part, index) => {
+    if (!textured.some((entry) => entry.index === index)) {
+      groups.push({ name: part.name, color: part.color, source: sources[index], triangles: null });
+    }
+  });
+  return groups;
+}
+
 function gather(raw: RawModel, spec: FileModelSpec): Gathered {
   const out: Gathered = {
     positions: [],
@@ -116,35 +224,66 @@ function gather(raw: RawModel, spec: FileModelSpec): Gathered {
   const rotation = spec.rotationY ? rotationXYZ(vec(0, spec.rotationY, 0)) : IDENTITY;
   const cache = new Map<string, number>();
 
-  for (const part of raw.parts) {
-    const key = `${part.name}|${part.color.toLowerCase()}`;
+  for (const group of groupsOf(raw, spec)) {
+    const key = `${group.name}|${group.color.toLowerCase()}`;
     let material = cache.get(key);
     if (material === undefined) {
-      const banded = bandMaterial(spec.materials[part.name] ?? { color: part.color });
+      const banded = bandMaterial(spec.materials[group.name] ?? { color: group.color });
       material = out.materials.length;
       out.materials.push(banded);
       out.palette.push(...banded.ramp);
-      out.ramps[part.name || part.color] = banded.ramp;
+      out.ramps[group.name || group.color] = banded.ramp;
       cache.set(key, material);
     }
 
-    const welded = part.normals !== undefined && part.normals.length === part.positions.length;
-    const source = welded
-      ? { positions: part.positions, normals: part.normals as ArrayLike<number>, indices: part.indices }
-      : unweld(part);
-    const base = out.positions.length / 3;
-    for (let i = 0; i + 2 < source.positions.length; i += 3) {
-      const p = transform(rotation, vec(source.positions[i], source.positions[i + 1], source.positions[i + 2]));
-      const n = transform(rotation, vec(source.normals[i], source.normals[i + 1], source.normals[i + 2]));
-      out.positions.push(p[0], p[1], p[2]);
-      out.normals.push(n[0], n[1], n[2]);
-    }
-    for (let t = 0; t + 2 < source.indices.length; t += 3) {
-      out.indices.push(base + source.indices[t], base + source.indices[t + 1], base + source.indices[t + 2]);
+    const { source } = group;
+    const triangles =
+      group.triangles ?? Array.from({ length: Math.floor(source.indices.length / 3) }, (_, t) => t);
+    // Only the vertices these triangles use are copied, so a part cut into
+    // several colors does not carry its whole mesh into each.
+    const remap = new Map<number, number>();
+    for (const t of triangles) {
+      for (let corner = 0; corner < 3; corner++) {
+        const vertex = source.indices[t * 3 + corner];
+        let mapped = remap.get(vertex);
+        if (mapped === undefined) {
+          mapped = out.positions.length / 3;
+          remap.set(vertex, mapped);
+          const i = vertex * 3;
+          const p = transform(rotation, vec(source.positions[i], source.positions[i + 1], source.positions[i + 2]));
+          const n = transform(rotation, vec(source.normals[i], source.normals[i + 1], source.normals[i + 2]));
+          out.positions.push(p[0], p[1], p[2]);
+          out.normals.push(n[0], n[1], n[2]);
+        }
+        out.indices.push(mapped);
+      }
       out.triangleMaterial.push(material);
     }
   }
   return out;
+}
+
+const described = new WeakMap<RawModel, Map<number, { name: string; color: string }[]>>();
+
+/**
+ * The materials a bake of this model will have: each name a recipe can override
+ * and the color it starts as. For a textured model these are the clusters its
+ * colors were cut into, not the file's own materials, so a person is shown the
+ * colors the sprite will actually use.
+ */
+export function describeMaterials(raw: RawModel, spec: FileModelSpec): { name: string; color: string }[] {
+  const byCount = described.get(raw) ?? new Map<number, { name: string; color: string }[]>();
+  described.set(raw, byCount);
+  const cached = byCount.get(spec.textureColors);
+  if (cached) return cached;
+
+  const seen = new Map<string, { name: string; color: string }>();
+  for (const group of groupsOf(raw, spec)) {
+    if (!seen.has(group.name)) seen.set(group.name, { name: group.name, color: group.color });
+  }
+  const list = [...seen.values()];
+  byCount.set(spec.textureColors, list);
+  return list;
 }
 
 /**
