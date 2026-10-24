@@ -28,7 +28,7 @@ members = [
     "games/flappy",
     "games/low-tide",
     "games/orbital-baked",
-    "games/platformer",
+    "games/lamplighter",
     "games/scorchball",
     "games/weave-poc",
     "games/voxel-lab",

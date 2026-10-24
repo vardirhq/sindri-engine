@@ -258,8 +258,8 @@ fn plays_the_same(name: &str) {
 }
 
 #[test]
-fn the_platformer_plays_the_same_in_the_editor_and_the_build() {
-    plays_the_same("platformer");
+fn lamplighter_plays_the_same_in_the_editor_and_the_build() {
+    plays_the_same("lamplighter");
 }
 
 #[test]

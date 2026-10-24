@@ -168,7 +168,7 @@ jobs:
             "games/orbital-baked:orbital-baked" \
             "games/shapes-lab:shapes-lab" \
             "games/weave-poc:weave-poc" \
-            "games/platformer:platformer" \
+            "games/lamplighter:lamplighter" \
             "games/scorchball:scorchball" \
             "games/low-tide:low-tide"; do
             src="${project%%:*}"
@@ -263,7 +263,7 @@ jobs:
           CHECK
           test -f target/pages/docs/scripting/index.html
           test -f target/pages/docs/language/index.html
-          for route in physics ui spatial camera tween transform orbit character3d model-collision lighting3d daynight causeway flappy orbital-baked shapes-lab weave-poc platformer scorchball low-tide; do
+          for route in physics ui spatial camera tween transform orbit character3d model-collision lighting3d daynight causeway flappy orbital-baked shapes-lab weave-poc lamplighter scorchball low-tide; do
             test -f "target/pages/examples/$route/index.html"
             test -f "target/pages/examples/$route/assets/sindri.manifest"
             test -f "target/pages/examples/$route/pkg/sindri_player.js"
@@ -290,8 +290,8 @@ jobs:
           grep -q 'detonation.sheet' target/pages/examples/orbital-baked/assets/sindri.manifest
           grep -q '"kind": "script"' target/pages/examples/shapes-lab/assets/sindri.manifest
           grep -q '"demo.weave"' target/pages/examples/weave-poc/assets/sindri.manifest
-          grep -q 'hero.sheet' target/pages/examples/platformer/assets/sindri.manifest
-          grep -q 'prefabs/coin.prefab' target/pages/examples/platformer/assets/sindri.manifest
+          grep -q 'hero.sheet' target/pages/examples/lamplighter/assets/sindri.manifest
+          grep -q 'prefabs/coin.prefab' target/pages/examples/lamplighter/assets/sindri.manifest
           grep -q 'players.sheet' target/pages/examples/scorchball/assets/sindri.manifest
           grep -q 'player.prefab' target/pages/examples/scorchball/assets/sindri.manifest
           grep -q '"kind": "model"' target/pages/examples/model-collision/assets/sindri.manifest

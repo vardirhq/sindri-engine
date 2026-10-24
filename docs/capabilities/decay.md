@@ -64,7 +64,7 @@ Engine ✅ · Editor 🟡 · Decay ✅ · Proof ✅ — parity row *Typed host, 
 
 **Tested by:** [`crates/sindri-decay/src/surface/tests.rs`](../../crates/sindri-decay/src/surface/tests.rs), [`crates/sindri-decay/tests/documented_surface.rs`](../../crates/sindri-decay/tests/documented_surface.rs), [`crates/sindri-runtime/tests/a_session_steps_a_scene.rs`](../../crates/sindri-runtime/tests/a_session_steps_a_scene.rs), [`crates/sindri-decay/tests/spatial_transforms.rs`](../../crates/sindri-decay/tests/spatial_transforms.rs)
 
-**Exercised in:** [`games/orbital-baked`](../../games/orbital-baked), [`games/scorchball`](../../games/scorchball), [`games/platformer`](../../games/platformer), [`examples/transform`](../../examples/transform)
+**Exercised in:** [`games/orbital-baked`](../../games/orbital-baked), [`games/scorchball`](../../games/scorchball), [`games/lamplighter`](../../games/lamplighter), [`examples/transform`](../../examples/transform)
 
 **See:** [`docs/scripting.md`](../../docs/scripting.md), [`docs/generated/decay-api.md`](../../docs/generated/decay-api.md)
 
@@ -231,7 +231,7 @@ Engine 🟡 · Editor ✅ · Decay 🟡 · Proof 🟡 — parity row *Shared gam
 
 **Tested by:** [`crates/sindri-decay/tests/scripts_share_state.rs`](../../crates/sindri-decay/tests/scripts_share_state.rs), [`decay/crates/decay-semantic/src/tests/states.rs`](../../decay/crates/decay-semantic/src/tests/states.rs)
 
-**Exercised in:** [`games/scorchball`](../../games/scorchball), [`games/platformer`](../../games/platformer)
+**Exercised in:** [`games/scorchball`](../../games/scorchball), [`games/lamplighter`](../../games/lamplighter)
 
 <details markdown="1">
 <summary>Evidence</summary>

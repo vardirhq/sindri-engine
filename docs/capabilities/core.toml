@@ -98,9 +98,9 @@ parity = "Prefabs"
 tests = [
   "crates/sindri-core/src/prefab/tests.rs",
   "crates/sindri-core/src/world/tests/prefab_identity.rs",
-  "games/platformer/tests/coins_are_one_prefab.rs",
+  "games/lamplighter/tests/coins_are_one_prefab.rs",
 ]
-proof = ["games/platformer"]
+proof = ["games/lamplighter"]
 docs = ["docs/prefabs.md"]
 limits = ["An entity spawned at runtime is not linked to its prefab, by design; only a scene's instances are."]
 detail = """
@@ -121,7 +121,7 @@ summary = "Scenes place prefab instances with per-component overrides; prefabs n
 status = { engine = "yes", editor = "yes", decay = "yes", proof = "yes" }
 parity = "Nested prefabs"
 tests = ["crates/sindri-core/tests/prefab_instances.rs"]
-proof = ["games/platformer"]
+proof = ["games/lamplighter"]
 docs = ["docs/prefabs.md"]
 detail = """
 A scene places a prefab as an **instance**: an entity naming the prefab, with

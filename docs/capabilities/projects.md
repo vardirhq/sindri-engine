@@ -112,9 +112,9 @@ The first genre showcase: a painted, solid tilemap level, a controller-driven he
 
 Engine — · Editor — · Decay ✅ · Proof ✅
 
-**Tested by:** [`games/platformer/tests/a_run_reaches_the_flag.rs`](../../games/platformer/tests/a_run_reaches_the_flag.rs), [`games/platformer/tests/painted_ground.rs`](../../games/platformer/tests/painted_ground.rs), [`games/platformer/tests/character_gameplay.rs`](../../games/platformer/tests/character_gameplay.rs), [`scripts/browser/platformer-goal.mjs`](../../scripts/browser/platformer-goal.mjs)
+**Tested by:** [`games/lamplighter/tests/a_run_reaches_the_flag.rs`](../../games/lamplighter/tests/a_run_reaches_the_flag.rs), [`games/lamplighter/tests/painted_ground.rs`](../../games/lamplighter/tests/painted_ground.rs), [`games/lamplighter/tests/character_gameplay.rs`](../../games/lamplighter/tests/character_gameplay.rs), [`scripts/browser/lamplighter-goal.mjs`](../../scripts/browser/lamplighter-goal.mjs)
 
-**Exercised in:** [`games/platformer`](../../games/platformer)
+**Exercised in:** [`games/lamplighter`](../../games/lamplighter)
 
 **Limits:**
 

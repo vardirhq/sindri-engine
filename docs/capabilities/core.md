@@ -125,9 +125,9 @@ Single-root reusable entity definitions in the scene document shape, spawned who
 
 Engine ✅ · Editor ✅ · Decay ✅ · Proof ✅ — parity row *Prefabs*
 
-**Tested by:** [`crates/sindri-core/src/prefab/tests.rs`](../../crates/sindri-core/src/prefab/tests.rs), [`crates/sindri-core/src/world/tests/prefab_identity.rs`](../../crates/sindri-core/src/world/tests/prefab_identity.rs), [`games/platformer/tests/coins_are_one_prefab.rs`](../../games/platformer/tests/coins_are_one_prefab.rs)
+**Tested by:** [`crates/sindri-core/src/prefab/tests.rs`](../../crates/sindri-core/src/prefab/tests.rs), [`crates/sindri-core/src/world/tests/prefab_identity.rs`](../../crates/sindri-core/src/world/tests/prefab_identity.rs), [`games/lamplighter/tests/coins_are_one_prefab.rs`](../../games/lamplighter/tests/coins_are_one_prefab.rs)
 
-**Exercised in:** [`games/platformer`](../../games/platformer)
+**Exercised in:** [`games/lamplighter`](../../games/lamplighter)
 
 **See:** [`docs/prefabs.md`](../../docs/prefabs.md)
 
@@ -158,7 +158,7 @@ Engine ✅ · Editor ✅ · Decay ✅ · Proof ✅ — parity row *Nested prefab
 
 **Tested by:** [`crates/sindri-core/tests/prefab_instances.rs`](../../crates/sindri-core/tests/prefab_instances.rs)
 
-**Exercised in:** [`games/platformer`](../../games/platformer)
+**Exercised in:** [`games/lamplighter`](../../games/lamplighter)
 
 **See:** [`docs/prefabs.md`](../../docs/prefabs.md)
 

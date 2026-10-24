@@ -3,7 +3,7 @@
 //!
 //! ```bash
 //! cargo run -p sindri-causeway --bin project-benchmark -- \
-//!     games/platformer target/bench/platformer-standalone.json [frames] [settle]
+//!     games/lamplighter target/bench/platformer-standalone.json [frames] [settle]
 //! ```
 //!
 //! Each frame is one fixed step and one draw, offscreen at 1280×720: the same

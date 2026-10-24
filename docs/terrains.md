@@ -56,5 +56,5 @@ rule editor for arbitrary neighbor conditions.
 
 The platformer's level is painted with the `ground` terrain of
 `textures/tiles.sheet`: grass grows on every open top and the earth shows a rim
-at every gap. `games/platformer/tests/painted_ground.rs` repaints every ground
+at every gap. `games/lamplighter/tests/painted_ground.rs` repaints every ground
 cell and requires that nothing changes.
