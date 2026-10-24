@@ -216,9 +216,7 @@ fn the_touch_stick_and_jump_work_together() {
         .on_screen(stick)
         .expect("the stick is drawn in touch mode");
     let jump = find(&run, "touch-jump").expect("the right jump button");
-    let [jump_x, jump_y] = run
-        .on_screen(jump)
-        .expect("jump is drawn in touch mode");
+    let [jump_x, jump_y] = run.on_screen(jump).expect("jump is drawn in touch mode");
 
     // The first finger owns the virtual stick; the second holds jump without
     // taking steering away from it.
