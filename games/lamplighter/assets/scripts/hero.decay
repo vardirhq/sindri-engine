@@ -35,8 +35,6 @@ script Hero {
     var jump_held: bool = false;
     // 0 idle, 1 run, 2 jump, 3 fall: which clip is showing.
     var shown: number = 0.0;
-    var touch_left: Entity = null;
-    var touch_right: Entity = null;
     var touch_jump_button: Entity = null;
 
     fn start() {
@@ -48,8 +46,6 @@ script Hero {
         Game.checkpoint_y = this.spawn_y;
         Game.checkpoint_index = 0.0;
         Game.touch = false;
-        this.touch_left = World.find("touch-left");
-        this.touch_right = World.find("touch-right");
         this.touch_jump_button = World.find("touch-jump");
     }
 
@@ -70,13 +66,12 @@ script Hero {
         }
 
         // Keyboard and gamepad input comes from the scene's actions. Once
-        // touch is detected, the drawn buttons take over movement and jumping.
+        // touch is detected, the left stick and right jump button take over.
         var run: number = Action.axis("run");
         var touch_jump: bool = false;
         if Game.touch {
             run = 0.0;
-            if Ui.is_held(this.touch_left) { run -= 1.0; }
-            if Ui.is_held(this.touch_right) { run += 1.0; }
+            if Stick.held && Stick.anchor_x < 0.0 { run = Stick.x; }
             touch_jump = Ui.is_held(this.touch_jump_button);
         } else if Stick.held && abs(Stick.x) > abs(run) {
             run = Stick.x;
