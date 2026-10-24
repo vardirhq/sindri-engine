@@ -5,8 +5,9 @@ const KNOB_TRAVEL: number = 0.11;
 script TouchControls {
     var ring: Entity = null;
     var knob: Entity = null;
-    var home_x: number = -0.75;
-    var home_y: number = 0.24;
+    var drawing: bool = false;
+    var checked: bool = false;
+    var anchor: Vec2 = Vec2(-0.75, -0.64);
 
     fn start() {
         this.ring = World.find("touch-stick-ring");
@@ -16,20 +17,26 @@ script TouchControls {
     }
 
     fn update(dt: number) {
-        let steering = Game.touch && Stick.held && Stick.anchor_x < 0.0;
+        if Game.touch && Stick.held && !this.checked {
+            this.checked = true;
+            // Stick anchors are physical pixels. Pointer.overlay is the same
+            // press in screen units, which also places the artwork correctly.
+            this.drawing = Pointer.overlay_x < 0.0;
+            if this.drawing { this.anchor = Pointer.overlay; }
+        }
+        if !Stick.held {
+            this.checked = false;
+            this.drawing = false;
+        }
         World.set_active(this.ring, Game.touch);
         World.set_active(this.knob, Game.touch);
         if Game.touch {
-            let anchor_x = this.home_x;
-            let anchor_y = this.home_y;
-            if steering {
-                anchor_x = Stick.anchor_x;
-                anchor_y = Stick.anchor_y;
-            }
-            this.ring.transform.position = Vec3(anchor_x, anchor_y, 0.0);
+            let at = this.anchor;
+            if !this.drawing { at = Vec2(-0.75, -0.64); }
+            this.ring.transform.position = Vec3(at.x, at.y, 0.0);
             let push = Vec2(0.0, 0.0);
-            if steering { push = Vec2(Stick.x, -Stick.y) * KNOB_TRAVEL; }
-            this.knob.transform.position = Vec3(anchor_x + push.x, anchor_y + push.y, 0.0);
+            if this.drawing { push = Vec2(Stick.x, -Stick.y) * KNOB_TRAVEL; }
+            this.knob.transform.position = Vec3(at.x + push.x, at.y + push.y, 0.0);
         }
     }
 }
