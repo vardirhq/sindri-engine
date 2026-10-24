@@ -9,7 +9,7 @@
 // by Three.js and baked (GLB and OBJ), that a recipe waiting for its model says
 // so and takes it when it arrives, that a broken recipe is a message, that the
 // zip downloads, and that nothing scrolls sideways on a phone. The screenshots
-// are kept for a person to look at.
+// are kept for a person to look at. BAKER_DELAY_TIMERS=80 delays the page's timers to find races.
 import { chromium } from 'playwright';
 import { createServer } from 'node:http';
 import { mkdir, mkdtemp, readFile, writeFile } from 'node:fs/promises';
@@ -96,6 +96,14 @@ try {
     const phone = name === 'phone';
     const context = await browser.newContext({ ...device, acceptDownloads: true });
     const page = await context.newPage();
+    // BAKER_DELAY_TIMERS=80 makes the page start work 80 ms late, which stretches the gap between an
+    // edit and the bake it causes: the race a fast runner can lose and a developer's machine does not.
+    if (process.env.BAKER_DELAY_TIMERS) {
+      await page.addInitScript((delay) => {
+        const later = window.setTimeout;
+        window.setTimeout = (fn, ms, ...rest) => later(fn, ms === 0 ? delay : ms, ...rest);
+      }, Number(process.env.BAKER_DELAY_TIMERS));
+    }
     const problems = [];
     page.on('pageerror', error => problems.push(String(error)));
     page.on('console', message => {
@@ -117,7 +125,21 @@ try {
       await pane('assets');
       const entry = typeof which === 'number' ? page.locator('#assets .asset').nth(which) : page.locator('#assets .asset', { hasText: which }).first();
       await entry.click();
+      await eventually(async () => assert.equal(await page.locator('#assets .asset[aria-current=true]').count(), 1), 'an asset is current');
       await ok();
+    };
+
+    // A bake finishes after the status line first says 'ok', so a result that depends on one is polled for.
+    const eventually = async (check, what) => {
+      const until = Date.now() + 10000;
+      for (;;) {
+        try {
+          return await check();
+        } catch (error) {
+          if (Date.now() > until) throw new assert.AssertionError({ message: `${name}: ${what} (${error.message.split('\n')[0]})` });
+          await page.waitForTimeout(100);
+        }
+      }
     };
 
     await page.goto(url);
@@ -197,7 +219,10 @@ try {
     await page.locator('#materials .material input[type=color]').first().fill('#336699');
     await page.waitForFunction(() => /"Wood":\s*"#336699"/.test(document.querySelector('#recipe').value), null, { timeout: 5000 });
     await ok();
-    assert.equal(await page.locator('#materials .material button').first().isDisabled(), false, `${name}: the override can be reset`);
+    await eventually(
+      async () => assert.equal(await page.locator('#materials .material button').first().isDisabled(), false),
+      'the override can be reset',
+    );
     await page.locator('#materials .material button').first().click();
     await page.waitForFunction(() => !/"Wood"/.test(document.querySelector('#recipe').value), null, { timeout: 5000 });
     await ok();
@@ -211,10 +236,14 @@ try {
     await page.setInputFiles('#open', glb);
     await ok();
     await pane('assets');
-    assert.equal((await assetNames()).length, before + 1, `${name}: the model joined the catalogue`);
-    assert.equal(await page.locator('#assets .asset[aria-current=true] span').textContent(), 'my-prop', `${name}: named for its file`);
-    assert.equal(await page.locator('#cards canvas').count(), 4, `${name}: baked in four directions`);
-    assert.equal(await page.locator('#files li').count(), 3, `${name}: a PNG, a sheet and a prefab`);
+    await eventually(async () => {
+      assert.equal((await assetNames()).length, before + 1);
+      assert.equal(await page.locator('#assets .asset[aria-current=true] span').textContent(), 'my-prop');
+    }, 'the model joined the catalogue, named for its file');
+    await eventually(async () => {
+      assert.equal(await page.locator('#cards canvas').count(), 4);
+      assert.equal(await page.locator('#files li').count(), 3);
+    }, 'it baked in four directions, with a PNG, a sheet and a prefab');
 
     // Dropping a file does the same, whatever its format: here an .obj.
     await page.evaluate((text) => {
@@ -253,17 +282,20 @@ try {
     await page.locator('[data-setting="texture_colors"]').fill('1');
     await page.waitForFunction(() => /"texture_colors":\s*1\b/.test(document.querySelector('#recipe').value), null, { timeout: 5000 });
     await ok();
-    assert.deepEqual(await page.locator('#materials .material span').allTextContents(), ['Body'], `${name}: one color, the material's own name`);
+    await eventually(
+      async () => assert.deepEqual(await page.locator('#materials .material span').allTextContents(), ['Body']),
+      "one color, the material's own name",
+    );
 
     // The same folder, opened as a folder, and the .gltf with only its .bin chosen beside it.
     await page.setInputFiles('#open-folder', sketch);
-    await ok();
     await pane('assets');
-    assert.equal((await assetNames()).length, countBefore + 2, `${name}: a folder opens too`);
+    await eventually(async () => assert.equal((await assetNames()).length, countBefore + 2), 'a folder opens too');
+    await ok();
     await page.setInputFiles('#open', [join(sketch, 'scene.gltf'), join(sketch, 'scene.bin')]);
-    await ok();
     await pane('assets');
-    assert.equal((await assetNames()).length, countBefore + 3, `${name}: a .gltf and its .bin, chosen together`);
+    await eventually(async () => assert.equal((await assetNames()).length, countBefore + 3), 'a .gltf and its .bin, chosen together');
+    await ok();
 
     // A file that is neither a model nor a recipe is a message, and a folder's license file is not.
     // A recipe whose model has not arrived says so, and takes it when it does.
@@ -276,7 +308,7 @@ try {
     await page.setInputFiles('#open', waitingModel);
     await ok();
     await pane('assets');
-    assert.equal((await assetNames()).length, withRecipe, `${name}: the model went to the recipe that was waiting`);
+    await eventually(async () => assert.equal((await assetNames()).length, withRecipe), 'the model went to the recipe that was waiting');
 
     // A file that is neither a model nor a recipe is a message, not a crash.
     const notes = join(scratch, 'notes.txt');
