@@ -5,7 +5,7 @@
 //! places in the scene and one `prefabs/coin.prefab`, which is what makes a
 //! change to a coin a change to every coin.
 
-use platformer::Run;
+use lamplighter::Run;
 use sindri_core::{SceneComponent, SceneDocument, TagsComponent};
 
 #[test]

@@ -1,6 +1,6 @@
 //! Play the crate's real input-driven force and rotation controls.
 
-use platformer::Run;
+use lamplighter::Run;
 use sindri_platform::Key;
 
 #[test]

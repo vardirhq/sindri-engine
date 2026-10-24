@@ -1,7 +1,7 @@
 //! The HUD's frame and the signboard by the gap are one 24-pixel panel,
 //! sliced: each keeps a six-pixel wooden border at its own size.
 
-use platformer::Run;
+use lamplighter::Run;
 use sindri_core::SpriteSheetDocument;
 use sindri_render::{FrameCommand, TextureId, Viewport};
 use sindri_scene::{CameraView, TextureBindings};

@@ -1,5 +1,5 @@
 //! A powered rail carries a spring light; Decay controls both mechanisms.
-use platformer::Run;
+use lamplighter::Run;
 use sindri_platform::Key;
 #[test]
 fn trolley_reverses_inside_its_rail_and_spring_retuning_changes_light_height() {

@@ -225,7 +225,7 @@ mod tests {
         );
         let errors = ["Hero: no such field".to_owned()];
         let report = report_json(
-            "games/platformer",
+            "games/lamplighter",
             [1440.0, 1024.0],
             Some((3.0, 0)),
             &[],

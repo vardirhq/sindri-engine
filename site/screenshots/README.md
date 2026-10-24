@@ -80,7 +80,7 @@ done
 $C games/scorchball site/screenshots/scorchball.png 1440 900 wait:3
 $C examples/sequence site/screenshots/sequence.png 1440 900 wait:2.2
 $C examples/daynight site/screenshots/daynight.png 1440 900 wait:6.3
-$C games/platformer site/screenshots/platformer.png 1440 900 \
+$C games/lamplighter site/screenshots/platformer.png 1440 900 \
   hold:ArrowRight wait:1.4 release:ArrowRight wait:0.4
 convert site/screenshots/low-tide.png -resize 1200x750 -quality 82 site/screenshots/low-tide.jpg
 convert site/screenshots/voxel-lab.png -resize 1200x750 -quality 82 site/screenshots/voxel-lab.jpg

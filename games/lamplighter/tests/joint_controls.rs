@@ -1,5 +1,5 @@
 //! Decay changes tether length and releases/reconnects the lantern.
-use platformer::Run;
+use lamplighter::Run;
 use sindri_platform::Key;
 
 fn step(run: &mut Run, frames: usize) {

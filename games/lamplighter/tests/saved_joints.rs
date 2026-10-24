@@ -1,5 +1,5 @@
 //! A Decay-spawned nested windmill retains its physical endpoints after save/reopen.
-use platformer::Run;
+use lamplighter::Run;
 use sindri_core::World;
 use sindri_platform::Key;
 

@@ -1,8 +1,8 @@
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
-export function platformerState(evidence, text) {
-  const match = text.match(/Platformer state ([\d.]+) ([-\d.]+) ([-\d.]+) ([01]) (\d+) (\d+) ([01]) ([01])$/);
+export function lamplighterState(evidence, text) {
+  const match = text.match(/Lamplighter state ([\d.]+) ([-\d.]+) ([-\d.]+) ([01]) (\d+) (\d+) ([01]) ([01])$/);
   if (match) {
     const [time, x, y, grounded, coins, falls, won, jumpHeld] = match.slice(1).map(Number);
     evidence.latest = { time, x, y, grounded, coins, falls, won, jumpHeld };
@@ -12,14 +12,14 @@ export function platformerState(evidence, text) {
 // The native goal test's terrain rule, plus braking at the flag for variable
 // browser frame timing. Only keyboard events drive gameplay; the fixture's
 // observer copies completed state for assertions.
-export async function platformerGoal(page, root, evidence, problems) {
+export async function lamplighterGoal(page, root, evidence, problems) {
   const manifest = JSON.parse(await readFile(join(root, 'assets/sindri.manifest'), 'utf8'));
   const scene = JSON.parse(await readFile(join(root, 'assets', manifest.content_root, manifest.entry_scene), 'utf8'));
   const level = scene.entities.find(entity => entity.id === 'level');
   const tiles = level.components['sindri.tilemap'];
   const corner = level.transform_3d.position;
   const goal = scene.entities.find(entity => entity.components?.['sindri.tags']?.tags.includes('goal'));
-  if (!goal) throw new Error('platformer scene has no goal');
+  if (!goal) throw new Error('lamplighter scene has no goal');
   const goalX = goal.transform_3d.position[0];
   const groundAt = column => {
     if (column < 0 || column >= tiles.columns) return null;
@@ -41,10 +41,10 @@ export async function platformerGoal(page, root, evidence, problems) {
       const state = evidence.latest;
       if (!state || state.time === previousTime) continue;
       previousTime = state.time;
-      if (state.falls > 0) throw new Error(`platformer fell at x=${state.x}`);
+      if (state.falls > 0) throw new Error(`lamplighter fell at x=${state.x}`);
       if (state.won) {
-        if (state.coins < 3) throw new Error(`platformer goal reached with only ${state.coins} coins`);
-        console.log(`platformer goal: ${state.coins} coins, no falls, ${jumps} jumps, ${state.time}s simulated`);
+        if (state.coins < 3) throw new Error(`lamplighter goal reached with only ${state.coins} coins`);
+        console.log(`lamplighter goal: ${state.coins} coins, no falls, ${jumps} jumps, ${state.time}s simulated`);
         return;
       }
       // A jump can carry the hero above the flag sensor. Brake before its
@@ -52,7 +52,7 @@ export async function platformerGoal(page, root, evidence, problems) {
       if (!approachingGoal && state.x >= goalX - 0.5) {
         await page.keyboard.up('ArrowRight');
         approachingGoal = true;
-        console.log(`platformer brake: x=${state.x}, y=${state.y}, grounded=${state.grounded}`);
+        console.log(`lamplighter brake: x=${state.x}, y=${state.y}, grounded=${state.grounded}`);
       }
       if (jumpUntil !== null) {
         if (state.time < jumpUntil) continue;
@@ -79,10 +79,10 @@ export async function platformerGoal(page, root, evidence, problems) {
         await page.keyboard.down('Space');
         jumpUntil = state.time + 40 / 60;
         jumps += 1;
-        console.log(`platformer jump ${jumps}: x=${state.x}, coins=${state.coins}, time=${state.time}`);
+        console.log(`lamplighter jump ${jumps}: x=${state.x}, coins=${state.coins}, time=${state.time}`);
       }
     }
-    throw new Error(`platformer goal timed out: ${JSON.stringify(evidence.latest)}`);
+    throw new Error(`lamplighter goal timed out: ${JSON.stringify(evidence.latest)}`);
   } catch (error) {
     problems.push(error.message);
   } finally {

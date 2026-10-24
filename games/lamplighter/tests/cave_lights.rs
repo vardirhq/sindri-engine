@@ -5,7 +5,7 @@
 //! what is far from both is only the ambient dark. The lanterns cast shadows
 //! too, so the stone pillar between them shades the side facing away.
 
-use platformer::Run;
+use lamplighter::Run;
 use sindri_render::{Light2d, Lighting2d, Viewport};
 use sindri_scene::{CameraView, TextureBindings};
 

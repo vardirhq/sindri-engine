@@ -1,5 +1,5 @@
 //! Ride the authored ferry through the real Hero and Ferry scripts.
-use platformer::Run;
+use lamplighter::Run;
 use sindri_core::EntityId;
 use sindri_platform::Key;
 

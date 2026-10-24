@@ -2,7 +2,7 @@
 //! `textures/tiles.sheet`: every cell of it is the sprite the terrain picks for
 //! its neighbors, so repainting any of them changes nothing.
 
-use platformer::Run;
+use lamplighter::Run;
 use sindri_core::{SceneComponent, SpriteSheetDocument};
 use sindri_scene::{TilemapComponent, paint_terrain};
 

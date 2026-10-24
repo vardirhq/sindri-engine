@@ -1,5 +1,5 @@
 //! The game places and removes an authored joint mechanism through Decay.
-use platformer::Run;
+use lamplighter::Run;
 use sindri_core::EntityId;
 use sindri_platform::Key;
 

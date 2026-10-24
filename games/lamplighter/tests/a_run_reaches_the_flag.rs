@@ -4,7 +4,7 @@
 
 use std::collections::BTreeSet;
 
-use platformer::Run;
+use lamplighter::Run;
 use sindri_decay::AudioCommand;
 use sindri_platform::Key;
 use sindri_scene::TilemapComponent;
@@ -86,7 +86,7 @@ fn a_player_running_and_jumping_reaches_the_flag() {
             assert!(run.board("coins") >= 3.0, "and picked up coins on the way");
             // The sounds made in the Sound Lab: each one heard, and each one
             // a file the project ships rather than one only the editor finds.
-            let manifest = std::fs::read_to_string(platformer::project().join("sindri.toml"))
+            let manifest = std::fs::read_to_string(lamplighter::project().join("sindri.toml"))
                 .expect("the manifest");
             for clip in [
                 "audio/jump.wav",
@@ -95,7 +95,7 @@ fn a_player_running_and_jumping_reaches_the_flag() {
                 "audio/goal.wav",
             ] {
                 assert!(heard.contains(clip), "{clip} was played: {heard:?}");
-                assert!(platformer::project().join("assets").join(clip).is_file());
+                assert!(lamplighter::project().join("assets").join(clip).is_file());
                 assert!(manifest.contains(&format!("\"{clip}\"")), "{clip} ships");
             }
             eprintln!("reached the flag after {:.1} s", f64::from(frame) / 60.0);

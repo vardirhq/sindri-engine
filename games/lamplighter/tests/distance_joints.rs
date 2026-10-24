@@ -1,6 +1,6 @@
 //! The lantern swings through Decay forces while an authored tether holds it.
 
-use platformer::Run;
+use lamplighter::Run;
 
 #[test]
 fn wind_moves_the_lantern_without_escaping_its_authored_tether() {

@@ -3,10 +3,10 @@ import { mkdtemp, mkdir, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
-import { platformerGoal } from './platformer-goal.mjs';
+import { lamplighterGoal } from './lamplighter-goal.mjs';
 
 test('the browser player brakes over the flag and waits for an observed win', async t => {
-  const root = await mkdtemp(join(tmpdir(), 'sindri-platformer-player-'));
+  const root = await mkdtemp(join(tmpdir(), 'sindri-lamplighter-player-'));
   t.after(() => rm(root, { recursive: true, force: true }));
   await mkdir(join(root, 'assets/content'), { recursive: true });
   await writeFile(join(root, 'assets/sindri.manifest'), JSON.stringify({
@@ -41,7 +41,7 @@ test('the browser player brakes over the flag and waits for an observed win', as
       };
     },
   };
-  await platformerGoal(page, root, evidence, problems);
+  await lamplighterGoal(page, root, evidence, problems);
   assert.deepEqual(problems, []);
   assert.equal(frames, 3, 'being over the flag does not itself count as winning');
   assert.equal(held.size, 0, 'release all inputs after the run');

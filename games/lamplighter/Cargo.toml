@@ -1,6 +1,6 @@
 [package]
-name = "platformer"
-description = "The side-view platformer showcase, and the harness that plays it"
+name = "lamplighter"
+description = "Lamplighter, the side-view platformer showcase, and the harness that plays it"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true

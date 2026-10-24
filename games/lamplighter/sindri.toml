@@ -1,7 +1,7 @@
 format_version = 1
 
 [project]
-name = "Platformer"
+name = "Lamplighter"
 main_scene = "assets/platformer.scene"
 
 # The hero's sounds, made in the Sindri Sound Lab (`tools/sindri-chiptune`).

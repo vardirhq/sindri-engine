@@ -1,5 +1,5 @@
 //! Controller adoption preserves the hero's Decay movement policies.
-use platformer::Run;
+use lamplighter::Run;
 use sindri_platform::Key;
 
 const STEP: f32 = 1.0 / 60.0;

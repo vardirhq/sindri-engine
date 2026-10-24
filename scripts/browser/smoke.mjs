@@ -13,7 +13,7 @@ import { extname, join, normalize, resolve } from 'node:path';
 import { imageStatistics } from './png.mjs';
 import { physicsDemo } from './physics-demo.mjs';
 import { freshUiEvidence, uiDemo, uiDemoEvidence } from './ui-demo.mjs';
-import { platformerGoal, platformerState } from './platformer-goal.mjs';
+import { lamplighterGoal, lamplighterState } from './lamplighter-goal.mjs';
 
 const ROOT = resolve(process.argv[2] ?? 'examples/cube');
 const SHOT = process.argv[3];
@@ -159,7 +159,7 @@ let spatialChanges = 0;
 const inputEvidence = { boosts: 0, waiting: false, rebound: '' };
 const mixerSaid = [];
 const fetchedAssets = new Set();
-const platformerEvidence = { latest: null };
+const lamplighterEvidence = { latest: null };
 const voxelEvidence = { dropped: false, landed: false };
 // A shader that fails to compile is reported by the GPU implementation as a
 // console *warning*, not an error, and the page carries on and presents empty
@@ -168,7 +168,7 @@ const voxelEvidence = { dropped: false, landed: false };
 const GPU_REJECTION = /error while parsing wgsl|is invalid|must only be called/i;
 page.on('console', (message) => {
   const text = message.text();
-  if (process.env.SINDRI_PLATFORMER_GOAL === '1') platformerState(platformerEvidence, text);
+  if (process.env.SINDRI_LAMPLIGHTER_GOAL === '1') lamplighterState(lamplighterEvidence, text);
   uiDemoEvidence(uiEvidence, text);
   const playground = text.match(/Playground (.+)$/);
   if (playground) physicsEvidence.said.push(playground[1]);
@@ -271,8 +271,8 @@ const loadingStuck =
 // Then a moment to draw a frame or two into the canvas it just sized.
 await page.waitForTimeout(1500);
 
-if (process.env.SINDRI_PLATFORMER_GOAL === '1') {
-  await platformerGoal(page, ROOT, platformerEvidence, problems);
+if (process.env.SINDRI_LAMPLIGHTER_GOAL === '1') {
+  await lamplighterGoal(page, ROOT, lamplighterEvidence, problems);
 }
 
 if (process.env.SINDRI_VOXEL_LANDING === '1') {

@@ -1,6 +1,6 @@
 //! Shared wood actually controls the game's solved impacts.
 
-use platformer::Run;
+use lamplighter::Run;
 use sindri_core::ProfileDocument;
 
 #[test]

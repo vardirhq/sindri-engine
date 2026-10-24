@@ -93,7 +93,7 @@ tests = [
   "editor/src/native/tests/shortcuts.rs",
   "editor/tests/fixture_scene.rs",
 ]
-proof = ["games/platformer"]
+proof = ["games/lamplighter"]
 detail = """
 Opens a scene from a command-line argument or **File → Open scene**, saves it
 back canonically, reloads from disk, and discards changes — including a scene
@@ -404,7 +404,7 @@ summary = "A script's exported fields are drawn from its declaration, without ru
 status = { engine = "yes", editor = "yes", decay = "yes", proof = "yes" }
 parity = "`@export` properties discovered and authored"
 tests = ["editor/src/scripts/tests.rs"]
-proof = ["games/platformer", "games/orbital-baked"]
+proof = ["games/lamplighter", "games/orbital-baked"]
 detail = """
 The inspector draws the field's name, its type, and its default, without
 running anything. A field the scene has not set shows its default and says so,
@@ -543,7 +543,7 @@ tests = [
   "editor/src/native/tests/runtime.rs",
   "crates/sindri-platform/tests/game_loop.rs",
 ]
-proof = ["games/platformer", "games/scorchball", "games/low-tide", "games/orbital-baked"]
+proof = ["games/lamplighter", "games/scorchball", "games/low-tide", "games/orbital-baked"]
 detail = """
 Play runs **the session a shipped game runs**: `sindri_runtime::Session`, the
 one the browser host, `sindri-player` and every game's test harness step. The
@@ -818,7 +818,7 @@ tests = [
   "editor/src/preview/tests.rs",
   "editor/src/audition.rs",
 ]
-proof = ["games/platformer"]
+proof = ["games/lamplighter"]
 detail = """
 A Project dock lists the real contents of the directory the open scene lives
 in, with a list/grid toggle, a search that filters it, a refresh, and a double

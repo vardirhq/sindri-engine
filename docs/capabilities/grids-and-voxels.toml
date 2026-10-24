@@ -21,7 +21,7 @@ tests = [
   "crates/sindri-grid/src/geometry/tests.rs",
   "crates/sindri-decay/tests/grid_position.rs",
 ]
-proof = ["games/platformer", "games/low-tide"]
+proof = ["games/lamplighter", "games/low-tide"]
 docs = ["docs/grid.md"]
 detail = """
 `sindri-grid` provides renderer-independent signed cell coordinates,

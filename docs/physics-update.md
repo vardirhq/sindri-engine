@@ -73,7 +73,7 @@ surface-specific completeness. This checklist does not mark those surfaces done.
   a static platform's support side wakes sleeping riders.
 - Platformer input-driven plank ascent/landing/drop/landing and underside-sensor
   jump rejection passed alongside its existing run-to-flag/camera/clearance tests.
-- Real Chromium export/load smoke passed under `/examples/platformer/`: WebGPU
+- Real Chromium export/load smoke passed under `/examples/lamplighter/`: WebGPU
   configured, project assets fetched, Decay ran and visible planks rendered.
 - Full browser interaction, visual inspector and workspace verification remain
   in final integration. The next slice after this checkpoint was forces and rotation.
@@ -107,7 +107,7 @@ surface-specific completeness. This checklist does not mark those surfaces done.
 - Scene and catalogue tests/currentness/completeness passed; catalogue regenerated.
   All-feature WASM checks passed for physics, scene, Decay and platformer.
 - The rebuilt generic browser host loaded the platformer export in Chromium at
-  `/examples/platformer/`, configured WebGPU, fetched assets, ran Decay without
+  `/examples/lamplighter/`, configured WebGPU, fetched assets, ran Decay without
   runtime errors and drew the level. Full browser gameplay interaction and editor
   Play inspection remain in final integration. CI is green on `404b27ad`.
 - Next slice after this checkpoint: reusable physics material assets.
@@ -135,7 +135,7 @@ surface-specific completeness. This checklist does not mark those surfaces done.
   Warning-denied Clippy passed all six. Catalogue currentness/completeness passed
   11 tests; generated metadata was regenerated.
 - All-feature WASM checks passed physics, scene, export, game host and platformer.
-  A rebuilt Chromium export at `/examples/platformer/` fetched the material
+  A rebuilt Chromium export at `/examples/lamplighter/` fetched the material
   profile, configured WebGPU, ran scripts and drew the game without runtime
   errors. Native project delivery/play regression and Vulkan capture passed.
 - Visual editor interaction review, full browser gameplay and workspace checks
@@ -158,7 +158,7 @@ surface-specific completeness. This checklist does not mark those surfaces done.
   passed the lantern script with zero errors/reminders. Warning-denied Clippy
   passed those four crates; catalogue currentness/completeness passed 11 tests.
 - All-feature WASM checks passed physics, scene and platformer. The rebuilt
-  generic browser host loaded the export at `/examples/platformer/`, fetched
+  generic browser host loaded the export at `/examples/lamplighter/`, fetched
   assets, configured WebGPU and drew the swinging lantern without runtime errors.
   Native Vulkan capture passed and both captures were visually reviewed.
 - This is a foundation, not joint acceptance completion. Hinges, sliders, springs,
@@ -249,7 +249,7 @@ surface-specific completeness. This checklist does not mark those surfaces done.
   currentness/completeness passed 11 tests; all 1,082 Rust files pass the size gate.
 - All-target/all-feature WASM checks passed core, scene and platformer. The generic
   browser host was rebuilt; Chromium WebGPU loaded the export at
-  `/examples/platformer/`, fetched 24 assets and exercised placement, removal and
+  `/examples/lamplighter/`, fetched 24 assets and exercised placement, removal and
   replacement without runtime errors. Native Vulkan capture passed; both native
   and spawned-browser captures were visually reviewed.
 - Nested renamed-root aliases, exported placed-root aliases and saved-spawn
@@ -919,7 +919,7 @@ surface-specific completeness. This checklist does not mark those surfaces done.
   acceleration/braking and respawn. Both changed scripts passed typed preflight
   with zero errors/runtime-contract reminders. Warning-denied native checks,
   Clippy, all-target/all-feature WASM, formatting and file-size gates passed.
-- Real Chromium loaded the exported game under `/examples/platformer/`, fetched
+- Real Chromium loaded the exported game under `/examples/lamplighter/`, fetched
   25 assets, configured a 960×540 WebGPU canvas and drew the level. Keyboard
   right/jump captures show the hero moving and rising from the starting floor;
   no browser/script/GPU errors occurred. Native project capture also passed
@@ -1015,7 +1015,7 @@ surface-specific completeness. This checklist does not mark those surfaces done.
   terrain decisions and waits for an observed release between jumps.
 - Three fresh Chromium/WebGPU runs reached the flag with five coins, eight jumps
   and zero falls (11.533, 11.467 and 11.367 simulated seconds). Each fetched 27
-  assets under `/examples/platformer/`, configured a 960×540 canvas and passed
+  assets under `/examples/lamplighter/`, configured a 960×540 canvas and passed
   pixel/script/GPU checks. The final capture shows the win message and flag.
 - The permanent gate requires at least three coins and no falls within 90 wall
   seconds. It never writes game state or supplies browser-specific game rules.

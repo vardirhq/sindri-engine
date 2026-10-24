@@ -1,6 +1,11 @@
-# Platformer
+# Lamplighter
 
-The first genre showcase: a small side-view platformer. Run and jump across a
+The platformer genre showcase, becoming a short real game: a courier lighting
+a valley's lanterns at dusk (see `docs/lamplighter-plan.md`). It was
+`games/platformer` until the plan's first stage moved it here; what follows is
+the level it still is, which the next stages replace a piece at a time.
+
+A small side-view platformer. Run and jump across a
 painted level, pick up the coins and reach the flag.
 
 K or the west controller button tosses the wooden crate when nearby. Wind
@@ -97,7 +102,7 @@ It uses, with no Rust of its own:
 
 Open `assets/platformer.scene` in the editor and press Play: the Scene view
 opens in 2D, framed on the game's camera. It is also exported to the site at
-`examples/platformer/`.
+`examples/lamplighter/`.
 
 ## Checked, not just run
 

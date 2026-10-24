@@ -19,7 +19,7 @@ tests = [
   "crates/sindri-platform/src/input/state_tests.rs",
   "crates/sindri-decay/tests/input_gathers_every_way_in.rs",
 ]
-proof = ["games/platformer"]
+proof = ["games/lamplighter"]
 detail = """
 Keyboard, mouse, and touch input arrive as platform-independent events and
 accumulate into an `InputState` that answers held, pressed-this-frame, and
@@ -102,11 +102,11 @@ parity = "Action mapping (named actions, rebindable)"
 tests = [
   "crates/sindri-platform/src/input/action/map.rs",
   "crates/sindri-platform/src/input/action/state.rs",
-  "games/platformer/tests/a_run_reaches_the_flag.rs",
+  "games/lamplighter/tests/a_run_reaches_the_flag.rs",
   "game/tests/the_mixer_and_input_demos_work.rs",
   "games/orbital-baked/tests/the_complete_game.rs",
 ]
-proof = ["games/platformer", "examples/input", "games/orbital-baked"]
+proof = ["games/lamplighter", "examples/input", "games/orbital-baked"]
 limits = [
   "Actions are per scene, not per project or per player.",
   "No automatic binding persistence; a game can store and restore a binding with Save.text.",
@@ -199,9 +199,9 @@ parity = "Sound effect authoring (Sound Lab)"
 tests = [
   "tools/sindri-chiptune/src/lab/sfx/tests.rs",
   "tools/sindri-chiptune/src/lab/project.rs",
-  "games/platformer/tests/a_run_reaches_the_flag.rs",
+  "games/lamplighter/tests/a_run_reaches_the_flag.rs",
 ]
-proof = ["games/platformer"]
+proof = ["games/lamplighter"]
 docs = ["tools/sindri-chiptune/README.md"]
 detail = """
 `tools/sindri-chiptune` (the Sindri Sound Lab) has a Sound FX designer beside
@@ -219,7 +219,7 @@ Every parameter is a slider with a unit, a change replays the sound, and
 `Audio.play("audio/<name>.wav", 0.5);` to paste. Without that include line a
 clip a script plays is found by the editor and silently left out of an
 export. The same delivery runs headless:
-`sindri-chiptune sfx coin --seed 5 --project games/platformer --name coin`.
+`sindri-chiptune sfx coin --seed 5 --project games/lamplighter --name coin`.
 
 The platformer's hero plays four sounds made this way — jump, landing, coin
 and the flag — and its scripted run to the flag asserts it heard each one and

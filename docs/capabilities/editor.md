@@ -155,7 +155,7 @@ Engine — · Editor ✅ · Decay — · Proof ✅
 
 **Tested by:** [`editor/src/scene_file.rs`](../../editor/src/scene_file.rs), [`editor/src/native/tests/scene.rs`](../../editor/src/native/tests/scene.rs), [`editor/src/native/tests/shortcuts.rs`](../../editor/src/native/tests/shortcuts.rs), [`editor/tests/fixture_scene.rs`](../../editor/tests/fixture_scene.rs)
 
-**Exercised in:** [`games/platformer`](../../games/platformer)
+**Exercised in:** [`games/lamplighter`](../../games/lamplighter)
 
 <details markdown="1">
 <summary>Evidence</summary>
@@ -538,7 +538,7 @@ Engine ✅ · Editor ✅ · Decay ✅ · Proof ✅ — parity row *`@export` pro
 
 **Tested by:** [`editor/src/scripts/tests.rs`](../../editor/src/scripts/tests.rs)
 
-**Exercised in:** [`games/platformer`](../../games/platformer), [`games/orbital-baked`](../../games/orbital-baked)
+**Exercised in:** [`games/lamplighter`](../../games/lamplighter), [`games/orbital-baked`](../../games/orbital-baked)
 
 <details markdown="1">
 <summary>Evidence</summary>
@@ -710,7 +710,7 @@ Engine ✅ · Editor ✅ · Decay — · Proof ✅
 
 **Tested by:** [`editor/tests/play_matches_the_build.rs`](../../editor/tests/play_matches_the_build.rs), [`editor/src/native/tests/runtime.rs`](../../editor/src/native/tests/runtime.rs), [`crates/sindri-platform/tests/game_loop.rs`](../../crates/sindri-platform/tests/game_loop.rs)
 
-**Exercised in:** [`games/platformer`](../../games/platformer), [`games/scorchball`](../../games/scorchball), [`games/low-tide`](../../games/low-tide), [`games/orbital-baked`](../../games/orbital-baked)
+**Exercised in:** [`games/lamplighter`](../../games/lamplighter), [`games/scorchball`](../../games/scorchball), [`games/low-tide`](../../games/low-tide), [`games/orbital-baked`](../../games/orbital-baked)
 
 <details markdown="1">
 <summary>Evidence</summary>
@@ -1045,7 +1045,7 @@ Engine — · Editor ✅ · Decay — · Proof ✅ — parity row *Project brows
 
 **Tested by:** [`editor/src/native/tests/project_browser.rs`](../../editor/src/native/tests/project_browser.rs), [`editor/src/project/ops/tests.rs`](../../editor/src/project/ops/tests.rs), [`editor/src/preview/tests.rs`](../../editor/src/preview/tests.rs), [`editor/src/audition.rs`](../../editor/src/audition.rs)
 
-**Exercised in:** [`games/platformer`](../../games/platformer)
+**Exercised in:** [`games/lamplighter`](../../games/lamplighter)
 
 <details markdown="1">
 <summary>Evidence</summary>

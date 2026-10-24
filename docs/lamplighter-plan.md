@@ -134,10 +134,13 @@ Each stage is one or more pull requests that leave `main` working: the project
 opens, its scripts compile, its scripted run reaches its goal, and the
 documentation says what is now true.
 
-0. **Plan.** This document, and the `AGENTS.md` amendment.
-1. **Move.** `games/platformer` becomes `games/lamplighter`, with the Pages route,
-   directory entry, capability references, CI and scripts updated, and nothing
-   else changed. Reviewed on its own because it touches the most files.
+0. **Plan.** This document, and the `AGENTS.md` amendment. *Done.*
+1. **Move.** `games/platformer` becomes `games/lamplighter`, with the crate, the
+   Pages route, directory entry, capability references, CI and scripts renamed,
+   and nothing else changed. Reviewed on its own because it touches the most
+   files. *Done:* the one thing left under the old name is the scene file,
+   `assets/platformer.scene`, which stage 3 replaces with a scene per screen and
+   level, and prose that says "the platformer" meaning the genre.
 2. **Art foundation.** The style bible and palette, the autotiled tile sets and
    backgrounds for the first two biomes, Wick and the lantern baked and
    animated, the font, and a screenshot test that opens the art.

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Verify physical batch accounting while Platformer's transient sprites vary."""
+"""Verify physical batch accounting while Lamplighter's transient sprites vary."""
 
 import json
 import sys

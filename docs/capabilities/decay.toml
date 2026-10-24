@@ -22,7 +22,7 @@ summary = "`sindri.script` binds a source to an entity; paths are typed against 
 status = { engine = "yes", editor = "partial", decay = "yes", proof = "yes" }
 parity = "Typed host, compile / run / reload"
 tests = ["crates/sindri-decay/src/surface/tests.rs", "crates/sindri-decay/tests/documented_surface.rs", "crates/sindri-runtime/tests/a_session_steps_a_scene.rs", "crates/sindri-decay/tests/spatial_transforms.rs"]
-proof = ["games/orbital-baked", "games/scorchball", "games/platformer", "examples/transform"]
+proof = ["games/orbital-baked", "games/scorchball", "games/lamplighter", "examples/transform"]
 docs = ["docs/scripting.md", "docs/generated/decay-api.md"]
 limits = ["No script state migration across a reload: a changed file recompiles, and the running instance keeps whatever fields it had.", "There is no general dynamic component API; purpose-built typed paths cover each subsystem.", "Despawning is not undoable — no script write is; play mode restores from a snapshot."]
 detail = '''
@@ -172,7 +172,7 @@ tests = [
   "crates/sindri-decay/tests/scripts_share_state.rs",
   "decay/crates/decay-semantic/src/tests/states.rs",
 ]
-proof = ["games/scorchball", "games/platformer"]
+proof = ["games/scorchball", "games/lamplighter"]
 detail = """
 The board earns its place for facts that belong to the game rather than to an
 entity — the score, whether the game is won. A project can declare what goes on

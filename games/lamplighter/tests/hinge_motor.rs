@@ -1,6 +1,6 @@
 //! Decay reverses the windmill motor; the scene keeps its axle fixed.
 
-use platformer::Run;
+use lamplighter::Run;
 use sindri_platform::Key;
 
 #[test]

@@ -1,5 +1,5 @@
 //! Play the authored planks through the game's real Decay input path.
-use platformer::Run;
+use lamplighter::Run;
 use sindri_platform::Key;
 const STEP: f32 = 1.0 / 60.0;
 fn step(run: &mut Run) {

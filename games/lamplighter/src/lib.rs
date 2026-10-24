@@ -1,4 +1,4 @@
-//! Playing the platformer without a window.
+//! Playing Lamplighter without a window.
 //!
 //! There is no game code here. What the game does is in `assets/`, the scene
 //! and its Decay; this opens the project the way every host does, with the

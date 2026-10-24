@@ -7,7 +7,7 @@
 //! without this failing; when the art changes, opening the settings file in
 //! the studio and saving makes it again.
 
-use platformer::{Run, project};
+use lamplighter::{Run, project};
 use sindri_assets::normal_map::remake;
 
 #[test]

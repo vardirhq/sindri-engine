@@ -1,6 +1,6 @@
 //! The crate's landing flash is driven by real solved contact impulses.
 
-use platformer::Run;
+use lamplighter::Run;
 
 #[test]
 fn a_falling_crate_flashes_on_impact_and_the_flash_expires() {
