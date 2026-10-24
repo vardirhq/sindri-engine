@@ -180,9 +180,8 @@ documentation says what is now true.
    touch controls, with level one behind it. *Done:* the title, levels,
    settings and pause screens are scenes (`art/dusk/shell.py` writes them), the
    old level is `level-1.scene` behind them, progress and settings are `Save`
-   values, and `tests/the_shell.rs` plays the route between them. Drawn left,
-   right and jump controls appear after touch input; the scripted touch test
-   holds a button and verifies Wick moves.
+   values, and `tests/the_shell.rs` plays the route between them. On touch, the left side is a virtual stick and the right side jumps; the
+   scripted two-finger test verifies Wick moves and jumps at once.
 4. **Level 1, end to end.** Lanterns, checkpoints, respawn, embers, the first
    music and effects, and a scripted run. After this stage the game is playable
    from the title to the first beacon and back to the level select.

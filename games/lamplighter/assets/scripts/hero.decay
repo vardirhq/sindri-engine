@@ -86,6 +86,11 @@ script Hero {
             run = 0.0;
             if this.touch_stick_allowed { run = Stick.x; }
             touch_jump = Ui.is_held(this.touch_jump_button);
+            // Screen UI follows one primary pointer, so read the second finger
+            // directly while the first finger owns the movement stick.
+            if Touch.count > 1.0 && Touch.x(1.0) > Stick.anchor_x {
+                touch_jump = true;
+            }
         } else if Stick.held && abs(Stick.x) > abs(run) {
             run = Stick.x;
         }

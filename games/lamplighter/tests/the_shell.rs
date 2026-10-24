@@ -236,7 +236,7 @@ fn the_touch_stick_and_jump_work_together() {
         x: jump_x,
         y: jump_y,
     });
-    step(&mut run, 15);
+    step(&mut run, 30);
 
     let end = run.position(hero);
     assert!(

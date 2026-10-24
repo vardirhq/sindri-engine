@@ -895,7 +895,7 @@ requests, commit history, and subsystem documentation rather than this file.
 
 ### Added
 
-- Drawn left, right and jump controls for Lamplighter on touch screens.
+- A left virtual stick and a right jump control for Lamplighter touch screens, usable together with two fingers.
 
 - Add reusable `render_material` profiles for shared 3D factors and sidedness,
   with explicit local overrides, validated editor authoring, asynchronous loading
