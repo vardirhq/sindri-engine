@@ -5804,7 +5804,7 @@
       "transform_3d": {
         "position": [
           0,
-          0,
+          -0.5,
           0
         ],
         "rotation": [
