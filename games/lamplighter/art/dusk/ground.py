@@ -21,7 +21,7 @@ SOIL = ramp("soil")
 GRASS = ramp("grass")
 
 OUTER = 5.0  # radius of a rounded outer corner, in pixels
-INNER = 3.5  # radius of the notch at an inside corner
+INNER = 0.0  # radius of the notch at an inside corner
 
 N, NE, E, SE, S, SW, W, NW = 1, 2, 4, 8, 16, 32, 64, 128
 
