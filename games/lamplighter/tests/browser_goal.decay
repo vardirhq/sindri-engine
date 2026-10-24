@@ -14,6 +14,6 @@ script BrowserGoalObserver {
         if motion.grounded { grounded = 1.0; }
         if Game.won { won = 1.0; }
         if Action.held("jump") { jump_held = 1.0; }
-        print("Platformer state " + this.elapsed.fixed(3) + " " + p.x.fixed(3) + " " + p.y.fixed(3) + " " + grounded.fixed(0) + " " + Game.coins.fixed(0) + " " + Game.falls.fixed(0) + " " + won.fixed(0) + " " + jump_held.fixed(0));
+        print("Lamplighter state " + this.elapsed.fixed(3) + " " + p.x.fixed(3) + " " + p.y.fixed(3) + " " + grounded.fixed(0) + " " + Game.coins.fixed(0) + " " + Game.falls.fixed(0) + " " + won.fixed(0) + " " + jump_held.fixed(0));
     }
 }
