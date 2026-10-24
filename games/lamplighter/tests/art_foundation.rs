@@ -129,3 +129,38 @@ fn the_autotiled_ground_is_what_its_terrain_paints() {
         assert!(painted > 20, "{name}: {painted} ground cells");
     }
 }
+
+#[test]
+fn the_playable_level_uses_the_dusk_art() {
+    let level = scene("level-1.scene");
+    let ground = level["entities"]
+        .as_array()
+        .expect("entities")
+        .iter()
+        .find(|entity| entity["id"] == "level")
+        .expect("the playable ground");
+    let map = &ground["components"]["sindri.tilemap"];
+    assert_eq!(map["texture"], "textures/ground.png");
+    assert_eq!(map["normal_map"], "textures/ground_n.png");
+
+    let entities = level["entities"].as_array().expect("entities");
+    let wick = entities
+        .iter()
+        .find(|entity| entity["id"] == "wick-sprite")
+        .expect("Wick's visible sprite");
+    assert_eq!(wick["parent"], "hero");
+    assert_eq!(
+        wick["components"]["sindri.sprite"]["texture"],
+        "textures/wick.png#idle-0"
+    );
+
+    let backdrop_sprites = components(&level, "sindri.sprite")
+        .filter(|sprite| {
+            let texture = sprite["texture"].as_str().unwrap_or("");
+            texture == "textures/sky.png"
+                || texture == "textures/hills-far.png"
+                || texture == "textures/hills-near.png"
+        })
+        .count();
+    assert_eq!(backdrop_sprites, 18, "six sprites for each parallax layer");
+}

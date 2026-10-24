@@ -1,9 +1,8 @@
 //! The cave under the stone roof is lit by its two lanterns.
 //!
-//! Daylight comes from a sun high over the level that casts shadows, so the
-//! roof keeps it out of the cave; inside, what is near a lantern is warm and
-//! what is far from both is only the ambient dark. The lanterns cast shadows
-//! too, so the stone pillar between them shades the side facing away.
+//! A cool dusk fill casts shadows, so the cave roof keeps it out; inside, what
+//! is near a lantern is warm and what is far from both is only ambient dark.
+//! The lanterns cast shadows too, so the stone pillar shades the far side.
 
 use lamplighter::Run;
 use sindri_render::{Light2d, Lighting2d, Viewport};
@@ -42,7 +41,7 @@ fn brightness(color: [f32; 3]) -> f32 {
 }
 
 #[test]
-fn daylight_stays_outside_and_the_lanterns_light_the_cave() {
+fn dusk_stays_outside_and_the_lanterns_light_the_cave() {
     let mut run = Run::open().expect("the project opens");
     assert!(run.step(1.0 / 60.0).is_empty());
     let lit = lighting(&run);
@@ -55,16 +54,17 @@ fn daylight_stays_outside_and_the_lanterns_light_the_cave() {
         "the sun and both cave lanterns cast shadows"
     );
     let outdoors = lit.at([8.0, 3.5]);
-    let sun = only(&lit, |light| light.radius > 50.0);
-    let daylight_in_the_cave = sun.at([40.0, 3.5]);
+    let dusk_fill = only(&lit, |light| light.radius > 50.0);
+    let dusk_in_the_cave = dusk_fill.at([40.0, 3.5]);
     let beside_a_lantern = lit.at([37.5, 6.5]);
     assert!(
-        brightness(outdoors) > 0.9,
-        "daylight outdoors: {outdoors:?}"
+        brightness(outdoors) > brightness(lit.ambient) + 0.05
+            && brightness(outdoors) < 0.9,
+        "muted dusk outdoors: {outdoors:?}"
     );
     assert!(
-        daylight_in_the_cave.map(f32::to_bits) == sun.ambient.map(f32::to_bits),
-        "the roof keeps daylight out: {daylight_in_the_cave:?}"
+        dusk_in_the_cave.map(f32::to_bits) == dusk_fill.ambient.map(f32::to_bits),
+        "the roof keeps the dusk fill out: {dusk_in_the_cave:?}"
     );
     assert!(
         beside_a_lantern[0] > beside_a_lantern[2] + 0.2,

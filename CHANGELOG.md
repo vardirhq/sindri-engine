@@ -1,3 +1,5 @@
+- Put the dusk art in Lamplighter's playable Dusk Road: the meadow tiles and normal map, scattered decorations, parallax sky and hills, dusk lighting, and Wick's baked side-view sprite. The level keeps its existing collision layout while the old showcase mechanisms are moved into their planned levels.
+
 # Changelog
 
 - Lamplighter stage 4, Dusk Road: Wick lights checkpoint lanterns for

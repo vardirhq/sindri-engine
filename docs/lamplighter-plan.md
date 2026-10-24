@@ -188,7 +188,10 @@ documentation says what is now true.
    from the title to the first beacon and back to the level select.
    *In progress:* Dusk Road has checkpoint lanterns with sparks and 2D light,
    checkpoint respawn, optional embers, a beacon finish, the first music loop,
-   and a scripted title-to-beacon run.
+   and a scripted title-to-beacon run. The playable scene now uses the meadow's
+   dusk tiles and normal map, parallax sky and hills, decorations, and Wick's
+   baked side-view sprite; its existing terrain and mechanism tests stay intact
+   while later levels are built.
 5. **Levels 2 to 7**, one or two per pull request, each with its mechanism
    rebuilt as a level piece and its tests moved. The capability pages are
    updated as the tests move, not afterwards.

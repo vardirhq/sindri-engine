@@ -36,6 +36,7 @@ script Hero {
     // 0 idle, 1 run, 2 jump, 3 fall: which clip is showing.
     var shown: number = 0.0;
     var touch_jump_button: Entity = null;
+    var sprite_entity: Entity = null;
     var touch_stick_checked: bool = false;
     var touch_stick_allowed: bool = false;
 
@@ -49,6 +50,7 @@ script Hero {
         Game.checkpoint_index = 0.0;
         Game.touch = false;
         this.touch_jump_button = World.find("touch-jump");
+        this.sprite_entity = World.find("wick-sprite");
     }
 
     fn update(dt: number) {
@@ -258,13 +260,13 @@ script Hero {
             Effects.stop(this.entity);
         }
         if state == 0.0 {
-            Animation.play(this.entity, "idle");
+            Animation.play(this.sprite_entity, "idle");
         } else if state == 1.0 {
-            Animation.play(this.entity, "run");
+            Animation.play(this.sprite_entity, "run");
         } else if state == 2.0 {
-            Animation.play(this.entity, "jump");
+            Animation.play(this.sprite_entity, "jump");
         } else {
-            Animation.play(this.entity, "fall");
+            Animation.play(this.sprite_entity, "fall");
         }
     }
 }
