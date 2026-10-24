@@ -36,9 +36,9 @@ references its own root axle and rotor, and Decay reverses the motor.
 
 Arrow keys or A/D run; Space, W or Up jumps. A controller can use the left
 stick or D-pad and the south face button. Down/S or D-pad down drops through
-the raised one-way planks. On a touch screen, the first finger
-makes Sindri's virtual stick and a second finger jumps. A tap is a hop and a
-held press a full jump; a jump pressed just before landing, or just after
+the raised one-way planks. On a touch screen, the left and right buttons steer
+and the jump button hops. Controls appear when touch input is detected. A tap
+is a hop and a held press a full jump; a jump pressed just before landing, or just after
 running off a ledge, still counts. Horizontal movement accelerates and
 decelerates rather than snapping between stopped and full speed, with
 deliberately lighter air control after committing to a jump. Two low stone steps
@@ -48,10 +48,8 @@ continues building intended speed while collision clips the actual movement.
 A plank ferry crosses the first gap and returns. Jump aboard and stop running
 to ride it; jumping leaves its carry, and Down drops through it into the pit.
 
-The touch path is functional input, but the platformer does not yet draw its
-mobile controls. Visible on-screen affordances for the stick and jump action
-remain part of the mobile presentation work rather than being hidden behind a
-claim that two invisible fingers somehow constitute a finished mobile UI.
+Touch controls are drawn as left, right and jump buttons at the bottom corners
+of the screen. They appear after touch input is detected.
 
 ## The shell
 

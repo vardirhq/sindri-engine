@@ -3654,6 +3654,246 @@
           "bold": true
         }
       }
+    },
+    {
+      "id": "touch-left",
+      "name": "touch-left",
+      "transform_3d": {
+        "position": [
+          0.12,
+          0.13,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.105,
+          0.105,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.09,
+            0.08,
+            0.2,
+            0.78
+          ],
+          "anchor": "bottom_left",
+          "layer": 98
+        },
+        "sindri.ui.button": {
+          "label": "Left",
+          "autofocus": false,
+          "disabled": false
+        }
+      }
+    },
+    {
+      "id": "touch-left-label",
+      "name": "touch-left-label",
+      "parent": "touch-left",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.text": {
+          "anchor": "center",
+          "color": [
+            0.96,
+            0.93,
+            0.84,
+            1
+          ],
+          "font": "fonts/Inter.ttf",
+          "font_size": 0.07,
+          "line_height": 0.08,
+          "layer": 99,
+          "text": "◀",
+          "bold": true
+        }
+      }
+    },
+    {
+      "id": "touch-right",
+      "name": "touch-right",
+      "transform_3d": {
+        "position": [
+          0.25,
+          0.13,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.105,
+          0.105,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.09,
+            0.08,
+            0.2,
+            0.78
+          ],
+          "anchor": "bottom_left",
+          "layer": 98
+        },
+        "sindri.ui.button": {
+          "label": "Right",
+          "autofocus": false,
+          "disabled": false
+        }
+      }
+    },
+    {
+      "id": "touch-right-label",
+      "name": "touch-right-label",
+      "parent": "touch-right",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.text": {
+          "anchor": "center",
+          "color": [
+            0.96,
+            0.93,
+            0.84,
+            1
+          ],
+          "font": "fonts/Inter.ttf",
+          "font_size": 0.07,
+          "line_height": 0.08,
+          "layer": 99,
+          "text": "▶",
+          "bold": true
+        }
+      }
+    },
+    {
+      "id": "touch-jump",
+      "name": "touch-jump",
+      "transform_3d": {
+        "position": [
+          -0.13,
+          0.13,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.105,
+          0.105,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.09,
+            0.08,
+            0.2,
+            0.78
+          ],
+          "anchor": "bottom_right",
+          "layer": 98
+        },
+        "sindri.ui.button": {
+          "label": "Jump",
+          "autofocus": false,
+          "disabled": false
+        }
+      }
+    },
+    {
+      "id": "touch-jump-label",
+      "name": "touch-jump-label",
+      "parent": "touch-jump",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.text": {
+          "anchor": "center",
+          "color": [
+            0.96,
+            0.93,
+            0.84,
+            1
+          ],
+          "font": "fonts/Inter.ttf",
+          "font_size": 0.07,
+          "line_height": 0.08,
+          "layer": 99,
+          "text": "▲",
+          "bold": true
+        }
+      }
     }
   ]
 }

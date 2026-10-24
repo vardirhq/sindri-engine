@@ -7,8 +7,8 @@
 // a jump. Coyote time and a jump buffer keep jumps forgiving.
 // Down/S/d-pad down drops through one-way planks onto the painted floor.
 //
-// Keyboard, gamepad and touch all feed the same run/jump path. Touch uses
-// Sindri's virtual Stick for movement; a second finger is the jump button.
+// Keyboard and gamepad share the run/jump path. Touch screens use the drawn
+// controls so the actions remain visible and reachable.
 script Hero {
     @export let speed: number = 6.5;
     @export let acceleration: number = 120.0;
@@ -35,16 +35,24 @@ script Hero {
     var jump_held: bool = false;
     // 0 idle, 1 run, 2 jump, 3 fall: which clip is showing.
     var shown: number = 0.0;
+    var touch_left: Entity = null;
+    var touch_right: Entity = null;
+    var touch_jump_button: Entity = null;
 
     fn start() {
         Game.coins = 0.0;
         Game.coins_total = World.with_tag("coin").length;
         Game.won = false;
         Game.falls = 0.0;
+        Game.touch = false;
+        this.touch_left = World.find("touch-left");
+        this.touch_right = World.find("touch-right");
+        this.touch_jump_button = World.find("touch-jump");
     }
 
     fn update(dt: number) {
         this.drop_left = max(0.0, this.drop_left - dt);
+        if Touch.count > 0.0 { Game.touch = true; }
         touch();
         probe_ground();
         if Game.won {
@@ -58,14 +66,19 @@ script Hero {
             return;
         }
 
-        // What the player means, from the scene's input actions: `run` is
-        // A/D, the arrows, the stick or the d-pad, and `jump` Space, W, Up or
-        // South, whichever is being used. A finger steers and jumps besides.
+        // Keyboard and gamepad input comes from the scene's actions. Once
+        // touch is detected, the drawn buttons take over movement and jumping.
         var run: number = Action.axis("run");
-        if Stick.held && abs(Stick.x) > abs(run) { run = Stick.x; }
+        var touch_jump: bool = false;
+        if Game.touch {
+            run = 0.0;
+            if Ui.is_held(this.touch_left) { run -= 1.0; }
+            if Ui.is_held(this.touch_right) { run += 1.0; }
+            touch_jump = Ui.is_held(this.touch_jump_button);
+        } else if Stick.held && abs(Stick.x) > abs(run) {
+            run = Stick.x;
+        }
         run = max(-1.0, min(1.0, run));
-
-        let touch_jump = Touch.count > 1.0;
         let holding_jump = Action.held("jump") || touch_jump;
         let pressed_jump = Action.pressed("jump") || (touch_jump && !this.jump_held);
         if pressed_jump {

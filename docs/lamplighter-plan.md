@@ -178,11 +178,12 @@ documentation says what is now true.
    seen playing in the real renderer. The font is the Inter already in
    `assets/fonts`; a pixel face is a stage 3 decision, made with the title screen.
 3. **The shell.** Title, level select, pause, settings, saved progress and drawn
-   touch controls, with level one behind it. *Under way:* the title, levels,
+   touch controls, with level one behind it. *Done:* the title, levels,
    settings and pause screens are scenes (`art/dusk/shell.py` writes them), the
    old level is `level-1.scene` behind them, progress and settings are `Save`
-   values, and `tests/the_shell.rs` plays the route between them. Drawn touch
-   controls are the part still to do.
+   values, and `tests/the_shell.rs` plays the route between them. Drawn left,
+   right and jump controls appear after touch input; the scripted touch test
+   holds a button and verifies Wick moves.
 4. **Level 1, end to end.** Lanterns, checkpoints, respawn, embers, the first
    music and effects, and a scripted run. After this stage the game is playable
    from the title to the first beacon and to the ending screen.
