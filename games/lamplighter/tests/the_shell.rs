@@ -205,6 +205,7 @@ fn settings_go_back_to_the_pause_screen_they_were_opened_from() {
 #[test]
 fn drawn_touch_controls_move_the_hero() {
     let mut run = Run::open().expect("the first level opens");
+    step(&mut run, 3);
     run.set_board("touch", 1.0);
     step(&mut run, 3);
 
