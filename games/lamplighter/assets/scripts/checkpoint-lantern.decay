@@ -1,0 +1,46 @@
+// A roadside lamp is a checkpoint; the last one is the beacon.
+script CheckpointLantern {
+    @export let checkpoint_x: number = 2.5;
+    @export let checkpoint_y: number = 4.0;
+    @export let index: number = 0.0;
+    @export let beacon: bool = false;
+
+    var lit: bool = false;
+    var flash_left: number = 0.0;
+
+    fn start() {
+        this.light2d.intensity = 0.0;
+    }
+
+    fn update(dt: number) {
+        if this.flash_left > 0.0 {
+            this.flash_left = max(0.0, this.flash_left - dt);
+        }
+        if this.lit {
+            this.light2d.intensity = 1.1 + 2.9 * (this.flash_left / 0.8);
+        }
+    }
+
+    fn ignite() {
+        if this.lit {
+            return;
+        }
+        this.lit = true;
+        this.flash_left = 0.8;
+        Animation.play(this.entity, "lit");
+        Effects.emit(this.entity, 18.0);
+        if this.beacon {
+            Audio.play("audio/goal.wav", 0.55);
+        } else {
+            Audio.play("audio/coin.wav", 0.45);
+        }
+        if this.index > Game.checkpoint_index {
+            Game.checkpoint_x = this.checkpoint_x;
+            Game.checkpoint_y = this.checkpoint_y;
+            Game.checkpoint_index = this.index;
+        }
+        if this.beacon {
+            Game.won = true;
+        }
+    }
+}

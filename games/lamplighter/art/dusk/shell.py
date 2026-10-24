@@ -96,7 +96,20 @@ def scene(title, entities):
 def title_scene():
     entities = backdrop()
     entities.append(column("menu"))
-    entities.append({**text("title", "Lamplighter", 0.13, AMBER), "parent": "menu"})
+    entities.append({
+        "id": "logo",
+        "name": "logo",
+        "parent": "menu",
+        "transform_3d": transform(sx=0.82, sy=0.273),
+        "components": {
+            "sindri.ui.image": {
+                "anchor": "center",
+                "layer": 100,
+                "texture": "textures/lamplighter-logo.png",
+                "tint": [1.0, 1.0, 1.0, 1.0],
+            }
+        },
+    })
     entities.append({**text("tagline", "Keep the way home lit.", 0.045, DIM, bold=False), "parent": "menu"})
     for id, label in (("play", "Play"), ("levels", "Levels"), ("settings", "Settings")):
         entities.extend(button(id, label, "menu"))

@@ -1,12 +1,13 @@
 # Lamplighter
 
-The platformer genre showcase, becoming a short real game: a courier lighting
-a valley's lanterns at dusk (see `docs/lamplighter-plan.md`). It was
-`games/platformer` until the plan's first stage moved it here; what follows is
-the level it still is, which the next stages replace a piece at a time.
+The platformer genre showcase, becoming a short real game: Wick, a courier,
+lights a valley's lanterns at dusk (see `docs/lamplighter-plan.md`). The title,
+level select, settings and pause shell are in place; Dusk Road is the first
+level being built around the former physics showcase.
 
-A small side-view platformer. Run and jump across a
-painted level, pick up the coins and reach the flag.
+A short side-view platformer. Guide Wick across Dusk Road, light its three
+checkpoint lanterns, gather optional embers, and touch the beacon at the end.
+Falling sends Wick back to the last lantern.
 
 Escape (or a pad's Start) pauses.
 
@@ -36,8 +37,9 @@ references its own root axle and rotor, and Decay reverses the motor.
 
 Arrow keys or A/D run; Space, W or Up jumps. A controller can use the left
 stick or D-pad and the south face button. Down/S or D-pad down drops through
-the raised one-way planks. On a touch screen, the left and right buttons steer
-and the jump button hops. Controls appear when touch input is detected. A tap
+the raised one-way planks. On a touch screen, drag the virtual stick on the left side to steer and hold
+the jump button on the right. Both work at once. Controls appear when touch
+input is detected. A tap
 is a hop and a held press a full jump; a jump pressed just before landing, or just after
 running off a ledge, still counts. Horizontal movement accelerates and
 decelerates rather than snapping between stopped and full speed, with
@@ -48,8 +50,9 @@ continues building intended speed while collision clips the actual movement.
 A plank ferry crosses the first gap and returns. Jump aboard and stop running
 to ride it; jumping leaves its carry, and Down drops through it into the pit.
 
-Touch controls are drawn as left, right and jump buttons at the bottom corners
-of the screen. They appear after touch input is detected.
+Touch controls use a virtual stick on the left and a jump button on the right.
+The stick appears under the left thumb; hold it while pressing jump with a
+second finger. They appear after touch input is detected.
 
 ## The shell
 
@@ -60,7 +63,7 @@ any that is built; **Settings** (`settings.scene`) sets the music and effects
 volumes in tenths and turns reduced motion on. Escape, a pad's Start button or
 the drawn **II** button pauses a level into `pause.scene`: the level is switched
 off behind it exactly as it was, and **Resume** switches it back on where it
-stopped. Reaching the flag saves the beacon, shows the banner, and returns to
+stopped. Lighting the beacon saves the level, shows the banner, and returns to
 the level select.
 
 Four scenes and one script file (`scripts/shell.decay`) are all the shell is;
@@ -75,22 +78,24 @@ buttons that are drawn.
 There is no game code. The game is `assets/`:
 
 - `title.scene`, `levels.scene`, `settings.scene`, `pause.scene`: the shell,
-  written by `art/dusk/shell.py`.
-- `level-1.scene`: the level, the hero, the coins, the flag and the HUD.
-- `prefabs/coin.prefab`: what a coin is — its spinning sprite, sensor and tag.
-  The scene places ten instances of it, each saying only where it stands, so
-  a change to the prefab is a change to every coin.
-- `scripts/hero.decay`: keyboard, controller and touch movement, jumping, coins,
-  the flag and falling off.
-- `scripts/hud.decay`: the coin count, the banner, the pause button, and what
-  reaching the flag saves.
+  written by `art/dusk/shell.py`; the title uses the pixel-art wordmark in
+  `textures/lamplighter-logo.png`.
+- `level-1.scene`: Dusk Road, its checkpoint lanterns and beacon, the embers,
+  the hero and the HUD.
+- `prefabs/coin.prefab`: what an ember is — its spinning sprite, sensor and tag.
+  The scene places ten optional embers this way, so a change to the prefab is a
+  change to each one.
+- `scripts/hero.decay`: keyboard, controller and touch movement, jumping,
+  embers, lantern contact and falling off.
+- `scripts/checkpoint-lantern.decay`: lantern lighting, checkpoint updates,
+  the light flare, sparks, and the end beacon.
+- `scripts/hud.decay`: the ember count, the beacon banner, the pause button,
+  music playback, and saved progress.
 - `scripts/shell.decay`: the title, the level select, the pause screen and the
   settings.
-- `audio/`: the jump, landing, coin and flag sounds, made in the Sindri Sound
-  Lab (`tools/sindri-chiptune`) and sent here by it. Each `.sindrisfx` beside
-  its WAV is the editable source: open it in the Lab, reshape it, send it back.
-  `sindri.toml` lists the four clips, because a script plays them by name and
-  no walk of the scene can see that.
+- `audio/`: the jump, landing, ember and beacon sounds, plus the Tide Song
+  loop. Sound Lab source files sit beside their exported audio; `sindri.toml`
+  lists every clip the scripts play by name.
 - `textures/`: pixel art drawn by `art/draw.py`, deterministic, so running it
   again changes nothing unless the drawing did. It draws `tiles_n.png` too,
   the tiles' normal map, from the same brick, plank and dirt layouts.

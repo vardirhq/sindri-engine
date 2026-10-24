@@ -82,9 +82,8 @@ more and the light you carry matters more.
 
 **The shell.** A title screen, a level select that shows which beacons are lit
 and the embers found, a pause menu, settings (volume buses, reduced motion),
-saved progress, drawn touch controls (the current README says they are not
-drawn), and credits. Scenes change with `Scene.go`; progress and settings are
-`Save` values.
+saved progress, drawn touch controls, and credits. Scenes change with
+`Scene.go`; progress and settings are `Save` values.
 
 ## How it looks
 
@@ -104,9 +103,9 @@ halos. Biomes: road and meadow, harbor, ridge, gorge, caves, storm.
 - **Tiles, backgrounds, effects and UI art** are drawn by deterministic Python,
   as `art/draw.py` does today but with autotiled edges and corners, per-biome
   sets, normal maps, and layered backgrounds.
-- **Type** is a font already in the repository under an open licence, so the
-  title and HUD are Weave text and a project font, never an operating-system
-  lookup.
+- **Type** uses the supplied pixel-art wordmark on the title screen and Inter,
+  a font already in the repository, for menu and HUD text; fonts are project
+  assets, never operating-system lookups.
 - **Sound.** Effects and music are made in the Sound Lab and sent to the
   project: a looping theme per biome as Ogg, effects as WAV, each `.sindrisfx`
   or `.sindrisong` beside its output so it reopens.
@@ -181,12 +180,17 @@ documentation says what is now true.
    touch controls, with level one behind it. *Done:* the title, levels,
    settings and pause screens are scenes (`art/dusk/shell.py` writes them), the
    old level is `level-1.scene` behind them, progress and settings are `Save`
-   values, and `tests/the_shell.rs` plays the route between them. Drawn left,
-   right and jump controls appear after touch input; the scripted touch test
-   holds a button and verifies Wick moves.
+   values, and `tests/the_shell.rs` plays the route between them. On touch, the left side is a virtual stick and the right side jumps; the
+   scripted two-finger test verifies Wick moves and jumps at once.
 4. **Level 1, end to end.** Lanterns, checkpoints, respawn, embers, the first
    music and effects, and a scripted run. After this stage the game is playable
-   from the title to the first beacon and to the ending screen.
+   from the title to the first beacon and back to the level select.
+   *In progress:* Dusk Road has checkpoint lanterns with sparks and 2D light,
+   checkpoint respawn, optional embers, a beacon finish, the first music loop,
+   and a scripted title-to-beacon run. The playable scene now uses the meadow's
+   dusk tiles and normal map, parallax sky and hills, decorations, and Wick's
+   baked side-view sprite; its existing terrain and mechanism tests stay intact
+   while later levels are built.
 5. **Levels 2 to 7**, one or two per pull request, each with its mechanism
    rebuilt as a level piece and its tests moved. The capability pages are
    updated as the tests move, not afterwards.
@@ -208,8 +212,6 @@ documentation says what is now true.
 
 ## Open questions
 
-- Whether Wick is a person, an animal or a spark. The first art pass decides,
-  and the answer only changes the models.
 - How hard the game should be. The plan assumes a gentle one: the point is the
   light, not the death count.
 - Whether the browser host persists `Save` across reloads. If it does not, that

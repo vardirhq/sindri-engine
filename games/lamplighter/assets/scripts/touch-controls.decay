@@ -1,0 +1,42 @@
+// The left thumb steers with Sindri's virtual stick; a second finger can
+// hold the jump button on the right at the same time.
+const KNOB_TRAVEL: number = 0.11;
+
+script TouchControls {
+    var ring: Entity = null;
+    var knob: Entity = null;
+    var drawing: bool = false;
+    var checked: bool = false;
+    var anchor: Vec2 = Vec2(-0.75, -0.64);
+
+    fn start() {
+        this.ring = World.find("touch-stick-ring");
+        this.knob = World.find("touch-stick-knob");
+        World.set_active(this.ring, false);
+        World.set_active(this.knob, false);
+    }
+
+    fn update(dt: number) {
+        if Game.touch && Stick.held && !this.checked {
+            this.checked = true;
+            // Stick anchors are physical pixels. Pointer.overlay is the same
+            // press in screen units, which also places the artwork correctly.
+            this.drawing = Pointer.overlay_x < 0.0;
+            if this.drawing { this.anchor = Pointer.overlay; }
+        }
+        if !Stick.held {
+            this.checked = false;
+            this.drawing = false;
+        }
+        World.set_active(this.ring, Game.touch);
+        World.set_active(this.knob, Game.touch);
+        if Game.touch {
+            var at: Vec2 = this.anchor;
+            if !this.drawing { at = Vec2(-0.75, -0.64); }
+            this.ring.transform.position = Vec3(at.x, at.y, 0.0);
+            var push: Vec2 = Vec2(0.0, 0.0);
+            if this.drawing { push = Vec2(Stick.x, -Stick.y) * KNOB_TRAVEL; }
+            this.knob.transform.position = Vec3(at.x + push.x, at.y + push.y, 0.0);
+        }
+    }
+}

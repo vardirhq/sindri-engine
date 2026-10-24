@@ -70,6 +70,16 @@ fn the_game_opens_on_the_title_and_play_starts_the_first_level() {
     let mut run = Run::open_title().expect("the project opens");
     step(&mut run, 3);
     assert_eq!(scene(&run), "title.scene");
+    let logo = find(&run, "logo").expect("the title wordmark is present");
+    let texture =
+        &run.world.get(logo).expect("the logo exists").components["sindri.ui.image"]["texture"];
+    assert_eq!(texture, "textures/lamplighter-logo.png");
+    assert!(
+        std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("assets/textures/lamplighter-logo.png")
+            .is_file(),
+        "the title wordmark image is checked in"
+    );
     press(&mut run, "play");
     assert_eq!(scene(&run), "level-1.scene");
     assert!(find(&run, "hero").is_some(), "the hero is there");
@@ -203,27 +213,48 @@ fn settings_go_back_to_the_pause_screen_they_were_opened_from() {
 }
 
 #[test]
-fn drawn_touch_controls_move_the_hero() {
+fn the_touch_stick_and_jump_work_together() {
     let mut run = Run::open().expect("the first level opens");
-    step(&mut run, 3);
+    step(&mut run, 90);
     run.set_board("touch", 1.0);
-    step(&mut run, 3);
+    step(&mut run, 2);
 
     let hero = find(&run, "hero").expect("the hero");
     let start = run.position(hero);
-    let button = find(&run, "touch-right").expect("the right touch button");
-    let [x, y] = run
-        .on_screen(button)
-        .expect("the button is drawn in touch mode");
-    run.input.apply(InputEvent::PointerMoved { x, y });
+    let stick = find(&run, "touch-stick-ring").expect("the left virtual stick");
+    let [stick_x, stick_y] = run
+        .on_screen(stick)
+        .expect("the stick is drawn in touch mode");
+    let jump = find(&run, "touch-jump").expect("the right jump button");
+    let [jump_x, jump_y] = run.on_screen(jump).expect("jump is drawn in touch mode");
+
+    // The first finger owns the virtual stick; the second holds jump without
+    // taking steering away from it.
+    run.input.apply(InputEvent::TouchStarted {
+        id: 1,
+        x: stick_x,
+        y: stick_y,
+    });
     step(&mut run, 1);
-    run.input
-        .apply(InputEvent::ButtonPressed(MouseButton::Left));
-    step(&mut run, 60);
+    run.input.apply(InputEvent::TouchMoved {
+        id: 1,
+        x: stick_x + 240.0,
+        y: stick_y,
+    });
+    run.input.apply(InputEvent::TouchStarted {
+        id: 2,
+        x: jump_x,
+        y: jump_y,
+    });
+    step(&mut run, 30);
 
     let end = run.position(hero);
     assert!(
         end[0] > start[0] + 1.0,
-        "held touch control moved Wick: {start:?} to {end:?}"
+        "the left thumb moved Wick while the other thumb held jump: {start:?} to {end:?}"
+    );
+    assert!(
+        end[1] > start[1] + 1.0,
+        "the right thumb made Wick jump while steering: {start:?} to {end:?}"
     );
 }

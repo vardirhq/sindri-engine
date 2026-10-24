@@ -5,8 +5,9 @@
 use std::collections::BTreeSet;
 
 use lamplighter::Run;
+use sindri_core::EntityId;
 use sindri_decay::AudioCommand;
-use sindri_platform::Key;
+use sindri_platform::{InputEvent, Key, MouseButton};
 use sindri_scene::TilemapComponent;
 
 const STEP: f32 = 1.0 / 60.0;
@@ -16,18 +17,49 @@ fn step(run: &mut Run) {
     assert!(notes.is_empty(), "the game reported: {notes:?}");
 }
 
+/// Entities of a scene entered after the first carry the scene name as a prefix.
+fn find(run: &Run, id: &str) -> Option<EntityId> {
+    let scene = run.session.scene().expect("a scene is playing");
+    run.entity(&format!("{scene}/{id}"))
+        .or_else(|| run.entity(id))
+}
+
+/// Presses a drawn button as a player would.
+fn press(run: &mut Run, name: &str) {
+    let entity = find(run, name).unwrap_or_else(|| panic!("{name} is in the current scene"));
+    let [x, y] = run
+        .on_screen(entity)
+        .unwrap_or_else(|| panic!("{name} is drawn"));
+    run.input.apply(InputEvent::PointerMoved { x, y });
+    step(run);
+    run.input
+        .apply(InputEvent::ButtonPressed(MouseButton::Left));
+    step(run);
+    step(run);
+    run.input
+        .apply(InputEvent::ButtonReleased(MouseButton::Left));
+    step(run);
+    step(run);
+}
+
 /// Every clip the scripts asked to play since this was last asked.
-fn listen(run: &mut Run, heard: &mut BTreeSet<String>) {
+fn listen(run: &mut Run, heard: &mut BTreeSet<String>, music: &mut BTreeSet<String>) {
     for command in run.session.take_audio_commands() {
-        if let AudioCommand::Play { clip, .. } = command {
-            heard.insert(clip);
+        match command {
+            AudioCommand::Play { clip, .. } => {
+                heard.insert(clip);
+            }
+            AudioCommand::Loop { clip, .. } => {
+                music.insert(clip);
+            }
+            _ => {}
         }
     }
 }
 
 /// The level's tiles, read from the scene as a player would see them.
 fn level(run: &Run) -> (TilemapComponent, [f32; 2]) {
-    let entity = run.entity("level").expect("the level");
+    let entity = find(run, "level").expect("the level");
     let tilemap = run
         .components()
         .get::<TilemapComponent>(&run.world, entity)
@@ -71,21 +103,30 @@ fn the_hero_stands_on_the_painted_ground() {
 }
 
 #[test]
-fn a_player_running_and_jumping_reaches_the_flag() {
-    let mut run = Run::open().expect("the project opens");
-    let hero = run.entity("hero").expect("the hero");
+fn a_player_running_and_jumping_reaches_the_beacon() {
+    let mut run = Run::open_title().expect("the project opens");
+    for _ in 0..3 {
+        step(&mut run);
+    }
+    press(&mut run, "play");
+    let hero = find(&run, "hero").expect("the hero");
     let (tilemap, corner) = level(&run);
     run.key(Key::ArrowRight, true);
     let mut holding_jump = 0;
     let mut heard = BTreeSet::new();
+    let mut music = BTreeSet::new();
     for frame in 0..60 * 40 {
         step(&mut run);
-        listen(&mut run, &mut heard);
+        listen(&mut run, &mut heard, &mut music);
         if run.board("won") > 0.0 {
             assert!(run.board("falls") < 1.0, "it never fell");
             assert!(run.board("coins") >= 3.0, "and picked up coins on the way");
             // The sounds made in the Sound Lab: each one heard, and each one
             // a file the project ships rather than one only the editor finds.
+            assert!(
+                music.contains("audio/dusk-road.ogg"),
+                "Dusk Road music looped: {music:?}"
+            );
             let manifest = std::fs::read_to_string(lamplighter::project().join("sindri.toml"))
                 .expect("the manifest");
             for clip in [
@@ -98,7 +139,23 @@ fn a_player_running_and_jumping_reaches_the_flag() {
                 assert!(lamplighter::project().join("assets").join(clip).is_file());
                 assert!(manifest.contains(&format!("\"{clip}\"")), "{clip} ships");
             }
-            eprintln!("reached the flag after {:.1} s", f64::from(frame) / 60.0);
+            assert!(
+                lamplighter::project()
+                    .join("assets/audio/dusk-road.ogg")
+                    .is_file()
+            );
+            assert!(
+                manifest.contains("\"audio/dusk-road.ogg\""),
+                "the music ships"
+            );
+            eprintln!("reached the beacon after {:.1} s", f64::from(frame) / 60.0);
+            for _ in 0..(60 * 3) {
+                step(&mut run);
+                listen(&mut run, &mut heard, &mut music);
+            }
+            assert_eq!(run.session.scene(), Some("levels.scene"));
+            assert!(run.session.saves().flag("beacon_1", false));
+            assert!(run.session.saves().number("embers_1", 0.0) >= 3.0);
             return;
         }
         if holding_jump > 0 {
@@ -128,9 +185,63 @@ fn a_player_running_and_jumping_reaches_the_flag() {
         }
     }
     panic!(
-        "the flag was not reached; the hero is at {:?} with {} coins",
+        "the beacon was not reached; the hero is at {:?} with {} coins",
         run.position(hero),
         run.board("coins")
+    );
+}
+
+/// Lighting the first lamp stores a safe respawn point and keeps it after a fall.
+#[test]
+fn a_lit_lantern_is_the_respawn_checkpoint() {
+    let mut run = Run::open().expect("the level opens");
+    let hero = run.entity("hero").expect("the hero");
+    {
+        let data = run.world.get_mut(hero).expect("the hero data");
+        let position = &mut data
+            .transform_3d
+            .as_mut()
+            .expect("the hero transform")
+            .position;
+        position[0] = 9.0;
+        position[1] = 4.0;
+    }
+    for _ in 0..90 {
+        step(&mut run);
+    }
+
+    run.key(Key::ArrowRight, true);
+    let mut lit = false;
+    for _ in 0..180 {
+        step(&mut run);
+        if run.board("checkpoint_index") >= 1.0 {
+            lit = true;
+            break;
+        }
+    }
+    run.key(Key::ArrowRight, false);
+    assert!(lit, "Wick touched the first checkpoint lantern");
+    assert!((run.board("checkpoint_x") - 10.5).abs() < 0.01);
+
+    run.world
+        .get_mut(hero)
+        .expect("the hero data")
+        .transform_3d
+        .as_mut()
+        .expect("the hero transform")
+        .position = [15.0, -4.0, 0.5];
+    for _ in 0..90 {
+        step(&mut run);
+    }
+    assert!(
+        (run.board("falls") - 1.0).abs() < f32::EPSILON,
+        "the fall was counted"
+    );
+    let [x, y] = run.position(hero);
+    assert!((x - 10.5).abs() < 0.05, "respawned at the lit lantern: {x}");
+    assert!(
+        (y - 3.5).abs() < 0.05,
+        "stands safely at the checkpoint: {y}"
     );
 }
 

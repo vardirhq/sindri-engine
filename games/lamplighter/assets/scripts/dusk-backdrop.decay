@@ -1,0 +1,21 @@
+// The sky follows the camera; the hills follow it more slowly.
+script DuskBackdrop {
+    fn update(dt: number) {
+        let camera = World.find("Camera");
+        if camera == null { return; }
+        let camera_x = camera.transform.position.x;
+        position_row("dusk-sky", camera_x, 1.0);
+        position_row("dusk-hills-far", camera_x, 0.18);
+        position_row("dusk-hills-near", camera_x, 0.45);
+    }
+
+    fn position_row(prefix: String, camera_x: number, follow: number) {
+        let center = 8.0 + (camera_x - 8.0) * follow;
+        for i in 0..6 {
+            let layer = World.find(prefix + "-" + i.fixed(0));
+            if layer != null {
+                layer.transform.position.x = center + (i - 2.5) * 20.0;
+            }
+        }
+    }
+}
