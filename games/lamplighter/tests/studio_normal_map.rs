@@ -1,11 +1,6 @@
-//! The hero is lit through a normal map the editor's Normal Map Studio made.
-//!
-//! `textures/hero_n.png` was not drawn: the studio derived it from
-//! `hero.png`, cell by cell, and saved the settings it used beside it as
-//! `hero_n.normalmap`. Made again from those settings and today's art, it is
-//! the file the game ships, so the map can never drift from the sprite
-//! without this failing; when the art changes, opening the settings file in
-//! the studio and saving makes it again.
+//! The old hero sprite's normal map remains a checked Normal Map Studio
+//! artifact. Dusk Road now uses Wick's baked sprite and the meadow's generated
+//! ground normal map, both checked in the playable scene.
 
 use lamplighter::{Run, project};
 use sindri_assets::normal_map::remake;
@@ -23,9 +18,12 @@ fn the_heros_normal_map_is_the_one_its_settings_make() {
 }
 
 #[test]
-fn the_hero_names_the_studio_made_map() {
+fn the_playable_level_uses_wick_and_its_ground_normal_map() {
     let run = Run::open().expect("the project opens");
-    let hero = run.entity("hero").expect("the hero");
-    let sprite = &run.world.get(hero).expect("the hero exists").components["sindri.sprite"];
-    assert_eq!(sprite["normal_map"], "textures/hero_n.png");
+    let wick = run.entity("wick-sprite").expect("Wick's sprite");
+    let sprite = &run.world.get(wick).expect("Wick exists").components["sindri.sprite"];
+    assert_eq!(sprite["texture"], "textures/wick.png#idle-0");
+    let level = run.entity("level").expect("the ground");
+    let tilemap = &run.world.get(level).expect("the level exists").components["sindri.tilemap"];
+    assert_eq!(tilemap["normal_map"], "textures/ground_n.png");
 }

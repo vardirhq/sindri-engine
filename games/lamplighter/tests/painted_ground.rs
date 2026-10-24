@@ -1,5 +1,5 @@
 //! The level's ground is painted with the `ground` terrain from
-//! `textures/tiles.sheet`: every cell of it is the sprite the terrain picks for
+//! `textures/ground.sheet`: every cell of it is the sprite the terrain picks for
 //! its neighbors, so repainting any of them changes nothing.
 
 use lamplighter::Run;
@@ -10,7 +10,7 @@ use sindri_scene::{TilemapComponent, paint_terrain};
 fn every_ground_cell_is_what_the_terrain_would_paint() {
     let sheet = std::fs::read_to_string(concat!(
         env!("CARGO_MANIFEST_DIR"),
-        "/assets/textures/tiles.sheet"
+        "/assets/textures/ground.sheet"
     ))
     .expect("the tiles have a sheet");
     let sheet = SpriteSheetDocument::from_json(&sheet).expect("the sheet parses");
