@@ -181,8 +181,9 @@
       }
     },
     {
-      "id": "title",
-      "name": "title",
+      "id": "logo",
+      "name": "logo",
+      "parent": "menu",
       "transform_3d": {
         "position": [
           0.0,
@@ -196,43 +197,24 @@
           1
         ],
         "scale": [
-          1.4,
-          0.169,
+          0.82,
+          0.273,
           1
         ]
       },
       "components": {
-        "sindri.ui.text": {
+        "sindri.ui.image": {
           "anchor": "center",
-          "color": [
-            1.0,
-            0.76,
-            0.36,
-            1.0
-          ],
-          "font": "fonts/Inter.ttf",
-          "font_size": 0.13,
-          "line_height": 0.156,
           "layer": 100,
-          "text": "Lamplighter",
-          "shadow": {
-            "offset": [
-              0.0,
-              -0.004
-            ],
-            "color": [
-              0.0,
-              0.0,
-              0.0,
-              0.55
-            ],
-            "softness": 0.003
-          },
-          "bold": true,
-          "line_align": "center"
+          "texture": "textures/lamplighter-logo.png",
+          "tint": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
         }
-      },
-      "parent": "menu"
+      }
     },
     {
       "id": "tagline",

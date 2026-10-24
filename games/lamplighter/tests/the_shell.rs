@@ -70,6 +70,19 @@ fn the_game_opens_on_the_title_and_play_starts_the_first_level() {
     let mut run = Run::open_title().expect("the project opens");
     step(&mut run, 3);
     assert_eq!(scene(&run), "title.scene");
+    let logo = find(&run, "logo").expect("the title wordmark is present");
+    let texture = &run
+        .world
+        .get(logo)
+        .expect("the logo exists")
+        .components["sindri.ui.image"]["texture"];
+    assert_eq!(texture, "textures/lamplighter-logo.png");
+    assert!(
+        std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("assets/textures/lamplighter-logo.png")
+            .is_file(),
+        "the title wordmark image is checked in"
+    );
     press(&mut run, "play");
     assert_eq!(scene(&run), "level-1.scene");
     assert!(find(&run, "hero").is_some(), "the hero is there");

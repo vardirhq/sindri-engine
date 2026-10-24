@@ -78,7 +78,8 @@ buttons that are drawn.
 There is no game code. The game is `assets/`:
 
 - `title.scene`, `levels.scene`, `settings.scene`, `pause.scene`: the shell,
-  written by `art/dusk/shell.py`.
+  written by `art/dusk/shell.py`; the title uses the pixel-art wordmark in
+  `textures/lamplighter-logo.png`.
 - `level-1.scene`: Dusk Road, its checkpoint lanterns and beacon, the embers,
   the hero and the HUD.
 - `prefabs/coin.prefab`: what an ember is — its spinning sprite, sensor and tag.

@@ -103,9 +103,9 @@ halos. Biomes: road and meadow, harbor, ridge, gorge, caves, storm.
 - **Tiles, backgrounds, effects and UI art** are drawn by deterministic Python,
   as `art/draw.py` does today but with autotiled edges and corners, per-biome
   sets, normal maps, and layered backgrounds.
-- **Type** is a font already in the repository under an open licence, so the
-  title and HUD are Weave text and a project font, never an operating-system
-  lookup.
+- **Type** uses the supplied pixel-art wordmark on the title screen and Inter,
+  a font already in the repository, for menu and HUD text; fonts are project
+  assets, never operating-system lookups.
 - **Sound.** Effects and music are made in the Sound Lab and sent to the
   project: a looping theme per biome as Ogg, effects as WAV, each `.sindrisfx`
   or `.sindrisong` beside its output so it reopens.
