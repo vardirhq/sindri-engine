@@ -169,6 +169,9 @@ fn the_playable_level_uses_the_dusk_art() {
             || id.starts_with("dusk-hills-far-")
             || id.starts_with("dusk-hills-near-")
     }) {
-        assert_eq!(entity["name"], entity["id"], "the backdrop script finds each layer by name");
+        assert_eq!(
+            entity["name"], entity["id"],
+            "the backdrop script finds each layer by name"
+        );
     }
 }

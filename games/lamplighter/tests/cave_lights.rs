@@ -58,8 +58,7 @@ fn dusk_stays_outside_and_the_lanterns_light_the_cave() {
     let dusk_in_the_cave = dusk_fill.at([40.0, 3.5]);
     let beside_a_lantern = lit.at([37.5, 6.5]);
     assert!(
-        brightness(outdoors) > brightness(lit.ambient) + 0.05
-            && brightness(outdoors) < 0.9,
+        brightness(outdoors) > brightness(lit.ambient) + 0.05 && brightness(outdoors) < 0.9,
         "muted dusk outdoors: {outdoors:?}"
     );
     assert!(
