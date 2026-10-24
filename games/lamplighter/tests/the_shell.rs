@@ -71,11 +71,8 @@ fn the_game_opens_on_the_title_and_play_starts_the_first_level() {
     step(&mut run, 3);
     assert_eq!(scene(&run), "title.scene");
     let logo = find(&run, "logo").expect("the title wordmark is present");
-    let texture = &run
-        .world
-        .get(logo)
-        .expect("the logo exists")
-        .components["sindri.ui.image"]["texture"];
+    let texture =
+        &run.world.get(logo).expect("the logo exists").components["sindri.ui.image"]["texture"];
     assert_eq!(texture, "textures/lamplighter-logo.png");
     assert!(
         std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
