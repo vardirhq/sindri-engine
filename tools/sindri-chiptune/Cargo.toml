@@ -19,7 +19,7 @@ workspace = true
 # is already in the workspace graph through the editor or the browser player.
 [dependencies]
 eframe.workspace = true
-egui_material_icons = { version = "0.8", default-features = false, features = ["outline"] }
+egui_material_icons = { version = "0.9", default-features = false, features = ["outline"] }
 serde.workspace = true
 serde_json.workspace = true
 web-time.workspace = true
