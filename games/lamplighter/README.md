@@ -37,8 +37,9 @@ references its own root axle and rotor, and Decay reverses the motor.
 
 Arrow keys or A/D run; Space, W or Up jumps. A controller can use the left
 stick or D-pad and the south face button. Down/S or D-pad down drops through
-the raised one-way planks. On a touch screen, the left and right buttons steer
-and the jump button hops. Controls appear when touch input is detected. A tap
+the raised one-way planks. On a touch screen, drag the virtual stick on the left side to steer and hold
+the jump button on the right. Both work at once. Controls appear when touch
+input is detected. A tap
 is a hop and a held press a full jump; a jump pressed just before landing, or just after
 running off a ledge, still counts. Horizontal movement accelerates and
 decelerates rather than snapping between stopped and full speed, with
@@ -49,8 +50,9 @@ continues building intended speed while collision clips the actual movement.
 A plank ferry crosses the first gap and returns. Jump aboard and stop running
 to ride it; jumping leaves its carry, and Down drops through it into the pit.
 
-Touch controls are drawn as left, right and jump buttons at the bottom corners
-of the screen. They appear after touch input is detected.
+Touch controls use a virtual stick on the left and a jump button on the right.
+The stick appears under the left thumb; hold it while pressing jump with a
+second finger. They appear after touch input is detected.
 
 ## The shell
 
