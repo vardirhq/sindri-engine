@@ -93,7 +93,9 @@ impl ComposerApp {
                         egui::Button::new("Vary melody (V)")
                             .min_size(Vec2::new(ui.available_width(), 30.0)),
                     )
-                    .on_hover_text("Create an in-key variation while keeping the rhythm and ending.")
+                    .on_hover_text(
+                        "Create an in-key variation while keeping the rhythm and ending.",
+                    )
                     .clicked()
             {
                 self.vary_melody();

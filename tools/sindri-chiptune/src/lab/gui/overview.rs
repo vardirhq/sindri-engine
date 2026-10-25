@@ -25,10 +25,7 @@ impl ComposerApp {
         );
         for (section, name) in SECTIONS.iter().enumerate() {
             let band = Rect::from_min_max(
-                Pos2::new(
-                    x_of(section * BARS_PER_SECTION * STEPS, rect),
-                    rect.top(),
-                ),
+                Pos2::new(x_of(section * BARS_PER_SECTION * STEPS, rect), rect.top()),
                 Pos2::new(
                     x_of((section + 1) * BARS_PER_SECTION * STEPS, rect),
                     rect.bottom(),
