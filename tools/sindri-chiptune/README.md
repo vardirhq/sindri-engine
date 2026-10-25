@@ -76,7 +76,8 @@ edit, chords and drums that follow them, mixed in stereo.
    can be undone like other score edits.
 2. **Play** (Space), loop, jump back, or click the song overview to go to a
    section and seek. The oscilloscope and meter in the top bar show the live
-   output.
+   output. The named Bass, Arpeggio and Lead rows select the piano-roll voice;
+   each row also has its own generation lock and quick mute/solo controls.
 3. Edit Bass, Arpeggio or Lead in the piano roll: click to add, drag to move,
    right-click or Delete to remove, arrows to nudge (Shift+arrows by an
    octave). The other two voices are drawn faintly behind, and brightness is

@@ -218,6 +218,76 @@ fn workstation_draws_at_wide_and_compact_window_sizes() {
 }
 
 #[test]
+fn clicking_a_section_header_selects_that_section() {
+    let context = egui::Context::default();
+    theme::install(&context);
+    let mut app = ComposerApp::default();
+    let position = egui::pos2(312.0, 17.0);
+    let input = |events| egui::RawInput {
+        screen_rect: Some(egui::Rect::from_min_size(
+            egui::Pos2::ZERO,
+            egui::vec2(400.0, 100.0),
+        )),
+        events,
+        ..Default::default()
+    };
+    let button = |pressed| egui::Event::PointerButton {
+        pos: position,
+        button: egui::PointerButton::Primary,
+        pressed,
+        modifiers: egui::Modifiers::default(),
+    };
+    context
+        .run_ui(input(Vec::new()), |ui| app.section_headers(ui))
+        .drop_without_applying_deltas();
+    context
+        .run_ui(
+            input(vec![egui::Event::PointerMoved(position), button(true)]),
+            |ui| app.section_headers(ui),
+        )
+        .drop_without_applying_deltas();
+    context
+        .run_ui(input(vec![button(false)]), |ui| app.section_headers(ui))
+        .drop_without_applying_deltas();
+    assert_eq!(app.section, 2);
+}
+
+#[test]
+fn clicking_an_arrangement_track_selects_its_piano_roll() {
+    let context = egui::Context::default();
+    theme::install(&context);
+    let mut app = ComposerApp::default();
+    let position = egui::pos2(24.0, 12.0);
+    let input = |events| egui::RawInput {
+        screen_rect: Some(egui::Rect::from_min_size(
+            egui::Pos2::ZERO,
+            egui::vec2(400.0, 100.0),
+        )),
+        events,
+        ..Default::default()
+    };
+    let button = |pressed| egui::Event::PointerButton {
+        pos: position,
+        button: egui::PointerButton::Primary,
+        pressed,
+        modifiers: egui::Modifiers::default(),
+    };
+    context
+        .run_ui(input(Vec::new()), |ui| app.track_headers(ui))
+        .drop_without_applying_deltas();
+    context
+        .run_ui(
+            input(vec![egui::Event::PointerMoved(position), button(true)]),
+            |ui| app.track_headers(ui),
+        )
+        .drop_without_applying_deltas();
+    context
+        .run_ui(input(vec![button(false)]), |ui| app.track_headers(ui))
+        .drop_without_applying_deltas();
+    assert_eq!(app.edit_track, 0);
+}
+
+#[test]
 fn undo_and_redo_restore_imported_tempo_with_notes() {
     let mut app = ComposerApp::default();
     let before = app.settings.bpm;
