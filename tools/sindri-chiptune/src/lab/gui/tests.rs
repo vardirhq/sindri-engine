@@ -70,7 +70,10 @@ fn a_locked_track_cannot_be_regenerated() {
 fn regenerate_shortcut_replaces_the_selected_music_track() {
     let context = egui::Context::default();
     theme::install(&context);
-    let mut app = ComposerApp::default();
+    let mut app = ComposerApp {
+        edit_track: 2,
+        ..ComposerApp::default()
+    };
     let before = app.scores[0][2].clone();
     let input = egui::RawInput {
         screen_rect: Some(egui::Rect::from_min_size(
@@ -90,6 +93,57 @@ fn regenerate_shortcut_replaces_the_selected_music_track() {
         .run_ui(input, |ui| app.workspace(ui))
         .drop_without_applying_deltas();
     assert_ne!(app.scores[0][2], before);
+}
+
+#[test]
+fn vary_shortcut_changes_the_selected_lead() {
+    let context = egui::Context::default();
+    theme::install(&context);
+    let mut app = ComposerApp {
+        edit_track: 2,
+        ..ComposerApp::default()
+    };
+    let before = app.scores[0][2].clone();
+    let input = egui::RawInput {
+        screen_rect: Some(egui::Rect::from_min_size(
+            egui::Pos2::ZERO,
+            egui::vec2(1360.0, 820.0),
+        )),
+        events: vec![egui::Event::Key {
+            key: egui::Key::V,
+            physical_key: None,
+            pressed: true,
+            repeat: false,
+            modifiers: egui::Modifiers::default(),
+        }],
+        ..Default::default()
+    };
+    context
+        .run_ui(input, |ui| app.workspace(ui))
+        .drop_without_applying_deltas();
+    assert_ne!(app.scores[0][2], before);
+}
+
+#[test]
+fn varying_the_lead_is_undoable_and_leaves_other_tracks_alone() {
+    let mut app = ComposerApp::default();
+    let before = app.scores[0].clone();
+    app.vary_melody();
+    assert_ne!(app.scores[0][2], before[2]);
+    assert_eq!(app.scores[0][0], before[0]);
+    assert_eq!(app.scores[0][1], before[1]);
+    app.undo_edit();
+    assert_eq!(app.scores[0], before);
+}
+
+#[test]
+fn a_locked_lead_cannot_be_varied() {
+    let mut app = ComposerApp::default();
+    app.track_locks[0][2] = true;
+    let before = app.scores[0].clone();
+    app.vary_melody();
+    assert_eq!(app.scores[0], before);
+    assert!(app.status.contains("Unlock Lead"));
 }
 
 #[test]

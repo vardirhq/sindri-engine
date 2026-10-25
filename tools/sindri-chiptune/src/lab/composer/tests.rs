@@ -128,3 +128,53 @@ fn replacing_a_track_is_seeded_and_keeps_the_song_harmony() {
         }));
     }
 }
+
+#[test]
+fn melody_variation_changes_pitches_but_keeps_rhythm_key_and_resolution() {
+    let settings = Settings::default();
+    let original = compose(&settings)[2].clone();
+    let varied = super::vary_lead(&original, &settings, 13);
+    let repeated = super::vary_lead(&original, &settings, 13);
+    let another = super::vary_lead(&original, &settings, 14);
+    assert_ne!(varied, original);
+    assert_eq!(varied, repeated);
+    assert_ne!(varied, another);
+    assert_eq!(
+        varied
+            .iter()
+            .map(|note| (note.start, note.len, note.velocity))
+            .collect::<Vec<_>>(),
+        original
+            .iter()
+            .map(|note| (note.start, note.len, note.velocity))
+            .collect::<Vec<_>>()
+    );
+    assert_eq!(
+        varied.last().map(|note| note.pitch),
+        original.last().map(|note| note.pitch)
+    );
+    let scale = crate::lab::synth::scale(settings.mood);
+    assert!(
+        varied
+            .iter()
+            .all(|note| scale.contains(&(note.pitch - settings.key).rem_euclid(12)))
+    );
+}
+
+#[test]
+fn melody_variation_keeps_repeated_four_bar_phrases_coherent() {
+    let settings = Settings::default();
+    let original = compose(&settings)[2].clone();
+    let varied = super::vary_lead(&original, &settings, 21);
+    let phrase = |notes: &[Note], bar: usize| {
+        notes
+            .iter()
+            .filter(|note| note.start / 16 == bar)
+            .map(|note| (note.start % 16, note.len, note.pitch))
+            .collect::<Vec<_>>()
+    };
+    for bar in [8, 9, 10] {
+        assert_eq!(phrase(&varied, bar), phrase(&varied, bar + 4));
+        assert_eq!(phrase(&varied, bar), phrase(&varied, bar + 16));
+    }
+}

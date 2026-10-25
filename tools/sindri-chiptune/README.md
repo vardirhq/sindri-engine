@@ -71,6 +71,9 @@ edit, chords and drums that follow them, mixed in stereo.
    the existing `.sindrisong` format is unchanged. While any track is locked,
    Generate keeps the current seed, key and mood so replacement parts stay in
    the same harmonic context; unlock all tracks to apply new harmony settings.
+   On Lead, **Vary melody** (V) changes selected pitches in the current melody
+   while keeping its rhythm, repeated phrases, and resolving note. The variation
+   can be undone like other score edits.
 2. **Play** (Space), loop, jump back, or click the song overview to go to a
    section and seek. The oscilloscope and meter in the top bar show the live
    output.

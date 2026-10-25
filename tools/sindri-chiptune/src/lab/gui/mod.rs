@@ -197,6 +197,36 @@ impl ComposerApp {
             if candidate == 0 { "A" } else { "B" }
         );
     }
+
+    fn vary_melody(&mut self) {
+        let candidate = self.selected;
+        if self.edit_track != 2 {
+            self.status = "Select Lead to create a melody variation.".into();
+            return;
+        }
+        if self.track_locks[candidate][2] {
+            self.status = "Unlock Lead before creating a melody variation.".into();
+            return;
+        }
+        self.regeneration = self.regeneration.wrapping_add(1);
+        let settings = self.selected_settings();
+        let varied = crate::lab::composer::vary_lead(
+            &self.scores[candidate][2],
+            &settings,
+            self.regeneration,
+        );
+        if varied == self.scores[candidate][2] {
+            self.status = "Add more than one Lead note before creating a variation.".into();
+            return;
+        }
+        self.save_undo();
+        self.scores[candidate][2] = varied;
+        self.selected_note = None;
+        self.fit_pitch_range();
+        self.refresh_edited_audio();
+        self.status =
+            "Created a lead variation. Rhythm, phrasing, and the ending were kept.".into();
+    }
 }
 
 impl ComposerApp {

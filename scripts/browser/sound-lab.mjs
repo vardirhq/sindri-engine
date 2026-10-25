@@ -59,8 +59,13 @@ try {
     await page.goto(url + query);
     await page.waitForSelector('#loading', { state: 'detached', timeout: 60000 });
     await page.waitForTimeout(1500);
-    // R regenerates the selected music track, or creates a new SFX variation.
+    // V varies the selected lead; R regenerates the selected part or creates
+    // a new SFX variation.
     await page.locator('#sound-lab').click({ position: { x: 12, y: 12 } });
+    if (!name.endsWith('sfx')) {
+      await page.keyboard.press('v');
+      await page.waitForTimeout(250);
+    }
     await page.keyboard.press('r');
     await page.waitForTimeout(250);
     const shot = await page.screenshot({ path: join(captures, `sound-lab-${name}.png`) });
