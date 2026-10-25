@@ -7,9 +7,11 @@
 //! one riff all song, the arpeggio one figure per section, and the Return
 //! brings the theme back before a cadence ends it on the tonic.
 mod melody;
+mod variation;
 
 use super::{BARS, Mood, Note, Rng, Settings};
 use melody::Bar;
+pub(super) use variation::vary_lead;
 
 /// The rhythmic feel of a song: what the drums play and how the parts move.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]

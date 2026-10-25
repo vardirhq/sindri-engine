@@ -8,6 +8,10 @@ Total output lines: 1311
 
 # Changelog
 
+- In the Sound Lab, make a lead melody variation with **Vary melody** (V). It
+  keeps the rhythm, repeated phrases and resolving note; undo restores the
+  previous melody.
+
 - In the Sound Lab's music workstation, keep a bassline or other track with
   **Keep on Generate**, or replace just one part with **Regenerate track**.
   Regeneration keeps the song's harmony and the other tracks; the lock is

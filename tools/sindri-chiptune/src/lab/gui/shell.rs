@@ -123,7 +123,7 @@ impl ComposerApp {
             ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
                 let keys = match self.mode {
                     Mode::Music => {
-                        "Space play · Ctrl+Z/Y undo · Del delete · arrows nudge · Ctrl+S save"
+                        "Space play · R regenerate · V vary lead · Ctrl+Z/Y undo · Del delete · Ctrl+S save"
                     }
                     Mode::Sfx => "Space play · M mutate · R new variation · 1–8 pick a kind",
                 };
@@ -146,6 +146,7 @@ impl ComposerApp {
                 Key::S,
                 Key::M,
                 Key::R,
+                Key::V,
                 Key::Delete,
                 Key::Backspace,
                 Key::ArrowUp,
@@ -170,6 +171,7 @@ impl ComposerApp {
             match (self.mode, key) {
                 (Mode::Music, Key::Space) => self.toggle_play(),
                 (Mode::Music, Key::R) => self.regenerate_track(),
+                (Mode::Music, Key::V) => self.vary_melody(),
                 (Mode::Music, Key::Z) if command && shift => self.redo_edit(),
                 (Mode::Music, Key::Z) if command => self.undo_edit(),
                 (Mode::Music, Key::Y) if command => self.redo_edit(),
