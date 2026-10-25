@@ -187,21 +187,32 @@ fn workstation_draws_at_wide_and_compact_window_sizes() {
         egui::vec2(700.0, 360.0),
     ] {
         for mode in [Mode::Music, Mode::Sfx] {
-            let context = egui::Context::default();
-            theme::install(&context);
-            let mut app = ComposerApp {
-                mode,
-                ..ComposerApp::default()
+            let tabs = if mode == Mode::Music {
+                vec![InspectorTab::Song, InspectorTab::Track, InspectorTab::Mixer]
+            } else {
+                vec![InspectorTab::Track]
             };
-            let input = egui::RawInput {
-                screen_rect: Some(egui::Rect::from_min_size(egui::Pos2::ZERO, size)),
-                ..Default::default()
-            };
-            let mut output = context.run_ui(input, |ui| {
-                app.workspace(ui);
-            });
-            assert!(!output.shapes.is_empty(), "{mode:?} at {size:?}");
-            output.textures_delta.clear();
+            for inspector_tab in tabs {
+                let context = egui::Context::default();
+                theme::install(&context);
+                let mut app = ComposerApp {
+                    mode,
+                    inspector_tab,
+                    ..ComposerApp::default()
+                };
+                let input = egui::RawInput {
+                    screen_rect: Some(egui::Rect::from_min_size(egui::Pos2::ZERO, size)),
+                    ..Default::default()
+                };
+                let mut output = context.run_ui(input, |ui| {
+                    app.workspace(ui);
+                });
+                assert!(
+                    !output.shapes.is_empty(),
+                    "{mode:?} with {inspector_tab:?} at {size:?}"
+                );
+                output.textures_delta.clear();
+            }
         }
     }
 }

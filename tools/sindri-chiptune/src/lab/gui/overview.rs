@@ -4,6 +4,7 @@ use crate::lab::{BARS, STEPS, live::Command};
 use eframe::egui::{self, Pos2, Rect, RichText, Stroke, StrokeKind, Vec2};
 
 const SECTIONS: [&str; 4] = ["INTRO", "THEME", "RISE", "RETURN"];
+const BARS_PER_SECTION: usize = BARS / SECTIONS.len();
 
 fn x_of(step: usize, rect: Rect) -> f32 {
     rect.left()
@@ -19,13 +20,19 @@ impl ComposerApp {
         let painter = ui.painter_at(rect);
         theme::well(&painter, rect);
         let body = Rect::from_min_max(
-            rect.min + Vec2::new(0.0, 20.0),
+            rect.min + Vec2::new(0.0, 30.0),
             rect.max - Vec2::new(0.0, 4.0),
         );
         for (section, name) in SECTIONS.iter().enumerate() {
             let band = Rect::from_min_max(
-                Pos2::new(x_of(section * 128, rect), rect.top()),
-                Pos2::new(x_of((section + 1) * 128, rect), rect.bottom()),
+                Pos2::new(
+                    x_of(section * BARS_PER_SECTION * STEPS, rect),
+                    rect.top(),
+                ),
+                Pos2::new(
+                    x_of((section + 1) * BARS_PER_SECTION * STEPS, rect),
+                    rect.bottom(),
+                ),
             );
             let current = self.section == section;
             if current {
@@ -37,16 +44,25 @@ impl ComposerApp {
                     StrokeKind::Inside,
                 );
             }
+            let first_bar = section * BARS_PER_SECTION + 1;
+            let last_bar = first_bar + BARS_PER_SECTION - 1;
             painter.text(
-                band.left_top() + Vec2::new(8.0, 5.0),
-                egui::Align2::LEFT_TOP,
-                format!("{:02}  {name}", section + 1),
+                Pos2::new(band.center().x, rect.top() + 3.0),
+                egui::Align2::CENTER_TOP,
+                *name,
                 egui::FontId::proportional(10.5),
                 if current {
                     theme::FORGE_BRIGHT
                 } else {
                     theme::FAINT
                 },
+            );
+            painter.text(
+                Pos2::new(band.center().x, rect.top() + 15.0),
+                egui::Align2::CENTER_TOP,
+                format!("{first_bar}–{last_bar}"),
+                egui::FontId::monospace(9.0),
+                theme::MUTED,
             );
             if section > 0 {
                 painter.line_segment(
@@ -87,7 +103,7 @@ impl ComposerApp {
             // Display coordinates: a fraction of the 32-bar song.
             #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
             let bar = (at * 32.0) as usize;
-            self.section = bar / 8;
+            self.section = bar / BARS_PER_SECTION;
             if let Some(transport) = &self.transport {
                 let _ = transport.tx.send(Command::Seek(bar));
             }
