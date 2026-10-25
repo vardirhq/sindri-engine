@@ -119,9 +119,7 @@ impl ComposerApp {
                 if ui.add_sized(Vec2::new(width, 34.0), button).clicked() {
                     self.section = section;
                     if let Some(transport) = &self.transport {
-                        let _ = transport
-                            .tx
-                            .send(Command::Seek(section * BARS_PER_SECTION));
+                        let _ = transport.tx.send(Command::Seek(section * BARS_PER_SECTION));
                     }
                 }
             }
