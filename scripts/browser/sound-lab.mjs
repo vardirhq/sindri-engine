@@ -80,6 +80,20 @@ try {
       for (let i = 0; i < pixels.length; i += 4 * 97) colors.add(pixels[i] << 16 | pixels[i + 1] << 8 | pixels[i + 2]);
       return colors.size;
     }, [...shot]);
+    if (name === 'phone') {
+      // Keep generated-layer inspectors and the delivery menu in the visual
+      // evidence too. Native egui tests assert the five row selections directly.
+      const canvas = page.locator('#sound-lab');
+      await canvas.tap({ position: { x: 35, y: 300 } });
+      await page.waitForTimeout(200);
+      await page.screenshot({ path: join(captures, 'sound-lab-phone-chords.png') });
+      await canvas.tap({ position: { x: 35, y: 267 } });
+      await page.waitForTimeout(200);
+      await page.screenshot({ path: join(captures, 'sound-lab-phone-drums.png') });
+      await canvas.tap({ position: { x: 345, y: 706 } });
+      await page.waitForTimeout(200);
+      await page.screenshot({ path: join(captures, 'sound-lab-phone-file.png') });
+    }
     assert.ok(painted > 20, `${name}: the Lab painted ${painted} colours`);
     assert.deepEqual(problems, [], `${name}: the page reported errors`);
     console.log(`sound lab ${name}: drew ${painted} colours, no errors`);

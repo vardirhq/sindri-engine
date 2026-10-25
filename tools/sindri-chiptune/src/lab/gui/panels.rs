@@ -175,6 +175,10 @@ impl ComposerApp {
     }
 
     pub(super) fn transport_controls(&mut self, ui: &mut egui::Ui) {
+        if self.compact {
+            self.compact_transport(ui);
+            return;
+        }
         ui.horizontal_wrapped(|ui| {
             let playing = self.transport.is_some() && !self.paused;
             let play = theme::primary(theme::label(
@@ -244,6 +248,100 @@ impl ComposerApp {
         });
     }
 
+    fn compact_transport(&mut self, ui: &mut egui::Ui) {
+        ui.horizontal(|ui| {
+            ui.spacing_mut().item_spacing.x = 3.0;
+            ui.spacing_mut().button_padding.x = 4.0;
+            let playing = self.transport.is_some() && !self.paused;
+            let glyph = if playing {
+                icons::ICON_PAUSE
+            } else {
+                icons::ICON_PLAY_ARROW
+            };
+            if ui
+                .add(theme::primary(theme::label(glyph, "")).min_size(Vec2::new(36.0, 32.0)))
+                .clicked()
+            {
+                self.toggle_play();
+            }
+            if ui
+                .add_enabled(
+                    self.transport.is_some(),
+                    egui::Button::new(theme::label(icons::ICON_STOP, "")),
+                )
+                .clicked()
+            {
+                self.stop();
+            }
+            if ui
+                .button(theme::label(icons::ICON_SKIP_PREVIOUS, ""))
+                .clicked()
+                && let Some(transport) = &self.transport
+            {
+                let _ = transport.tx.send(Command::Seek(0));
+            }
+            if theme::toggle(
+                ui,
+                &mut self.looping,
+                &theme::label(icons::ICON_REPEAT, ""),
+                ACCENT,
+            ) && let Some(transport) = &self.transport
+            {
+                let _ = transport.tx.send(Command::Loop(self.looping));
+            }
+            if ui.small_button("−").clicked() {
+                self.settings.bpm = (self.settings.bpm - 1.0).max(60.0);
+            }
+            ui.add(
+                egui::DragValue::new(&mut self.settings.bpm)
+                    .range(60.0..=220.0)
+                    .max_decimals(0)
+                    .suffix(" BPM"),
+            );
+            if ui.small_button("+").clicked() {
+                self.settings.bpm = (self.settings.bpm + 1.0).min(220.0);
+            }
+            for candidate in 0..2 {
+                let seed = self
+                    .generated
+                    .seed
+                    .wrapping_add(u64::try_from(candidate).expect("candidate"));
+                let letter = if candidate == 0 { "A" } else { "B" };
+                let label = if seed < 1000 {
+                    format!("{letter}·{seed}")
+                } else {
+                    letter.into()
+                };
+                if ui
+                    .add_sized(
+                        Vec2::new(34.0, 30.0),
+                        egui::Button::new(RichText::new(label).size(11.0))
+                            .selected(self.selected == candidate),
+                    )
+                    .on_hover_text(format!("Candidate {letter} · seed {seed}"))
+                    .clicked()
+                {
+                    self.choose_candidate(candidate);
+                }
+            }
+            ui.menu_button(theme::label(icons::ICON_MORE_HORIZ, ""), |ui| {
+                ui.label(format!("Bar {:05.2} / 32", self.playhead_bar() + 1.0));
+                self.history_controls(ui);
+            });
+        });
+    }
+
+    fn choose_candidate(&mut self, candidate: usize) {
+        if self.selected != candidate {
+            self.selected = candidate;
+            self.focus_score_window();
+            self.selected_note = None;
+            if self.transport.is_some() {
+                self.start_live();
+            }
+        }
+    }
+
     /// The A/B candidate switch, then undo and redo.
     fn candidates_and_history(&mut self, ui: &mut egui::Ui) {
         for candidate in 0..2 {
@@ -252,15 +350,14 @@ impl ComposerApp {
                 .seed
                 .wrapping_add(u64::try_from(candidate).expect("candidate"));
             let text = format!("{} · {seed}", if candidate == 0 { "A" } else { "B" });
-            if theme::segment(ui, self.selected == candidate, text) && self.selected != candidate {
-                self.selected = candidate;
-                self.fit_pitch_range();
-                self.selected_note = None;
-                if self.transport.is_some() {
-                    self.start_live();
-                }
+            if theme::segment(ui, self.selected == candidate, text) {
+                self.choose_candidate(candidate);
             }
         }
+        self.history_controls(ui);
+    }
+
+    fn history_controls(&mut self, ui: &mut egui::Ui) {
         ui.add_space(10.0);
         if ui
             .add_enabled(

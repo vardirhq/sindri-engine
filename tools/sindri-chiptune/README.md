@@ -194,3 +194,17 @@ sizes in both modes, failing on any page error or an unpainted canvas.
 Not yet: hearing it through a real audio device in CI, music short enough to
 ship (a full stereo song is about 11 MB of WAV), an editable drum score or
 chord track, and an editor panel.
+
+### Arrangement and responsive controls
+
+The arrangement displays all five sounding layers: Bass, Arpeggio, Lead, Drums,
+and Chords. Each row selects its sound inspector and exposes mute and solo.
+The three melodic tracks also have generation locks. Drum patterns and chord
+voicings are read-only previews of the same generators used by playback; chords
+follow bass edits, and their preset and level remain independently adjustable.
+
+On phones the piano roll shows four bars at a time, with 1–4 / 5–8 page controls
+for each eight-bar section. Desktop shows the full section. Fit frames the
+visible notes, and the velocity strip reflects their current dynamics. The
+Song, Track, Mixer and File / Export controls sit in a resizable bottom sheet on phones and
+in the left inspector on desktop.
