@@ -427,3 +427,93 @@ fn phone_selection_prefers_a_populated_page_and_song_generation_works_from_drums
     app.generate();
     assert_ne!(app.scores, before);
 }
+
+#[test]
+fn generation_preserves_sounds_notes_and_participation_independently() {
+    let mut app = ComposerApp::default();
+    app.settings.rack.tracks[0].preset = crate::lab::instruments::Preset::Organ;
+    app.settings.rack.tracks[0].volume = 0.23;
+    app.settings.rack.arrangement.sections = [1, 3, 7, 31];
+    let before = app.scores[0][0].clone();
+    app.track_locks[0][0] = true;
+    app.sound_locks[0][0] = true;
+    app.arrangement_locks[0][1] = true;
+    app.settings.seed = 900;
+    app.generate();
+    assert_eq!(app.scores[0][0], before);
+    assert_eq!(
+        app.settings.rack.tracks[0].preset,
+        crate::lab::instruments::Preset::Organ
+    );
+    assert!((app.settings.rack.tracks[0].volume - 0.23).abs() < f32::EPSILON);
+    for section in 0..4 {
+        assert_eq!(
+            app.settings.rack.arrangement.active(section, 1),
+            [false, true, true, true][section]
+        );
+    }
+    let expected = crate::lab::ensemble::generate(&Settings {
+        seed: 900,
+        ..Settings::default()
+    });
+    assert_eq!(
+        app.settings.rack.tracks[2].preset,
+        expected.tracks[2].preset
+    );
+}
+
+#[test]
+fn candidates_keep_their_own_mixes_and_manual_generation_mode() {
+    let mut app = ComposerApp::default();
+    app.settings.rack.tracks[0].volume = 0.12;
+    app.choose_candidate(1);
+    app.settings.rack.tracks[0].volume = 0.89;
+    app.choose_candidate(0);
+    assert!((app.settings.rack.tracks[0].volume - 0.12).abs() < f32::EPSILON);
+    app.choose_candidate(1);
+    assert!((app.settings.rack.tracks[0].volume - 0.89).abs() < f32::EPSILON);
+    let rack = app.settings.rack.clone();
+    app.ensemble_options.sounds = false;
+    app.ensemble_options.arrangement = false;
+    app.settings.seed = 900;
+    app.generate();
+    app.choose_candidate(1);
+    assert_eq!(app.settings.rack, rack);
+}
+
+#[test]
+fn phrase_seeds_save_reopen_and_randomization_only_changes_the_draft() {
+    let mut app = ComposerApp::default();
+    let notes = app.scores.clone();
+    app.seed_input = "forest at dawn".into();
+    app.edit_seed();
+    assert!(app.seed_error.is_none());
+    assert_eq!(app.scores, notes);
+    app.generate();
+    let song = app.song_file();
+    assert_eq!(song.seed_text.as_deref(), Some("forest at dawn"));
+    let reopened = crate::lab::song::SongFile::from_json(&song.to_json()).unwrap();
+    app.load_song(reopened);
+    assert_eq!(app.seed_input, "forest at dawn");
+    let saved = app.song_file().to_json();
+    let old_seed = app.settings.seed;
+    app.randomize_seed();
+    assert_ne!(app.settings.seed, old_seed);
+    assert!(app.settings.seed_text.is_none());
+    assert_eq!(app.song_file().to_json(), saved);
+    assert_eq!(app.seed_input.parse::<u64>().unwrap(), app.settings.seed);
+    app.choose_candidate(1);
+    assert!(app.song_file().seed_text.is_none());
+}
+
+#[test]
+fn invalid_seed_input_keeps_the_last_valid_seed() {
+    let mut app = ComposerApp::default();
+    let seed = app.settings.seed;
+    for invalid in ["", "18446744073709551616"] {
+        app.seed_input = invalid.into();
+        app.edit_seed();
+        assert!(app.seed_error.is_some());
+        assert_eq!(app.settings.seed, seed);
+    }
+}

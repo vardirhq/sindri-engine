@@ -89,6 +89,8 @@ pub(super) struct Rack {
     /// How much room and echo the mix has, 0..1.
     #[serde(default = "default_space")]
     pub(super) space: f32,
+    #[serde(default)]
+    pub(super) arrangement: super::ensemble::Arrangement,
 }
 fn default_pad() -> TrackSound {
     TrackSound::new(Preset::Detuned, 0.5)
@@ -107,6 +109,7 @@ impl Default for Rack {
             ],
             pad: default_pad(),
             space: default_space(),
+            arrangement: super::ensemble::Arrangement::default(),
         }
     }
 }
@@ -119,6 +122,14 @@ impl Rack {
             &self.tracks[index]
         }
     }
+    pub(super) fn channel_mut(&mut self, index: usize) -> &mut TrackSound {
+        if index == 4 {
+            &mut self.pad
+        } else {
+            &mut self.tracks[index]
+        }
+    }
+
     pub(super) fn audible(&self, index: usize) -> bool {
         let any_solo = self
             .tracks

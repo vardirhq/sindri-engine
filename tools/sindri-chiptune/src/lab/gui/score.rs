@@ -178,6 +178,18 @@ impl ComposerApp {
                 }
             }
         });
+        if !self
+            .settings
+            .rack
+            .arrangement
+            .active(self.section, self.selected_layer)
+        {
+            ui.label(
+                RichText::new("Resting this section · enable it under Track > Plays in")
+                    .size(11.0)
+                    .color(theme::MUTED),
+            );
+        }
         self.note_inspector(ui);
         egui::ScrollArea::horizontal()
             .id_salt("piano-roll")

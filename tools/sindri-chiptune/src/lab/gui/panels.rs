@@ -75,22 +75,21 @@ impl ComposerApp {
                     );
                     ui.end_row();
                     ui.label(RichText::new("Seed").color(theme::MUTED));
-                    ui.horizontal(|ui| {
-                        ui.add(egui::DragValue::new(&mut self.settings.seed).speed(1));
-                        if ui
-                            .small_button(theme::label(icons::ICON_CASINO, ""))
-                            .on_hover_text("Next seed")
-                            .clicked()
-                        {
-                            self.settings.seed = self.settings.seed.wrapping_add(2);
-                        }
-                    });
+                    ui.vertical(|ui| self.seed_controls(ui));
                     ui.end_row();
                 });
+            ui.checkbox(&mut self.ensemble_options.sounds, "Seed instrument sounds");
+            ui.checkbox(
+                &mut self.ensemble_options.arrangement,
+                "Seed layer arrangement",
+            );
             ui.add_space(8.0);
             let generate = theme::primary(theme::label(icons::ICON_AUTO_AWESOME, "Generate A + B"))
                 .min_size(Vec2::new(ui.available_width(), 32.0));
-            if ui.add(generate).clicked() {
+            if ui
+                .add_enabled(self.seed_error.is_none(), generate)
+                .clicked()
+            {
                 self.generate();
             }
             ui.small("Mood, key, density and seed apply on Generate; the playing song never changes under you.");
@@ -331,9 +330,11 @@ impl ComposerApp {
         });
     }
 
-    fn choose_candidate(&mut self, candidate: usize) {
+    pub(super) fn choose_candidate(&mut self, candidate: usize) {
         if self.selected != candidate {
+            self.remember_rack();
             self.selected = candidate;
+            self.settings.rack = self.candidate_racks[candidate].clone();
             self.focus_score_window();
             self.selected_note = None;
             if self.transport.is_some() {

@@ -11,7 +11,9 @@ USAGE
   sindri-chiptune sfx <KIND> [OPTIONS]    Generate and render a sound effect
 
 SONG OPTIONS
-  --seed N  --mood M  --key 0-11  --bpm 60-220  --energy 0-1
+  --seed NUMBER_OR_PHRASE  --mood M  --key 0-11  --bpm 60-220  --energy 0-1
+  --random-seed                          Choose a fresh random numeric seed
+  --classic                              Use the original sounds and full-layer arrangement
   --open FILE.sindrisong                  Render a saved (and edited) song
   moods: mysterious, hopeful, tense, melancholic
 
@@ -79,13 +81,23 @@ fn music(args: Vec<String>) -> Result<(), Box<dyn Error>> {
     let mut settings = Settings::default();
     let mut out = Output::default();
     let mut opened: Option<SongFile> = None;
+    let mut classic = false;
     let mut args = args.into_iter();
     while let Some(arg) = args.next() {
         if output_flag(&arg, &mut args, &mut out)? {
             continue;
         }
         match arg.as_str() {
-            "--seed" => settings.seed = value(&mut args, &arg)?.parse()?,
+            "--classic" => classic = true,
+            "--seed" => {
+                let seed = super::seed::parse(&value(&mut args, &arg)?)?;
+                settings.seed = seed.value;
+                settings.seed_text = seed.text;
+            }
+            "--random-seed" => {
+                settings.seed = super::seed::random_different(settings.seed)?;
+                settings.seed_text = None;
+            }
             "--bpm" => settings.bpm = value(&mut args, &arg)?.parse()?,
             "--energy" => settings.energy = value(&mut args, &arg)?.parse()?,
             "--key" => settings.key = value(&mut args, &arg)?.parse()?,
@@ -104,7 +116,12 @@ fn music(args: Vec<String>) -> Result<(), Box<dyn Error>> {
     {
         return Err("bpm must be 60..220, energy 0..1, key 0..11".into());
     }
-    let song = opened.unwrap_or_else(|| SongFile::new(&settings, &compose_with(&settings)));
+    let song = opened.unwrap_or_else(|| {
+        if !classic {
+            settings.rack = super::ensemble::generate(&settings);
+        }
+        SongFile::new(&settings, &compose_with(&settings))
+    });
     let samples = render_samples(&song.settings(), &song.tracks);
     deliver(
         &out,

@@ -10,6 +10,7 @@ mod drums;
 mod dsp;
 mod fx;
 mod harmony;
+mod participation;
 mod patch;
 mod preview;
 pub(in crate::lab) use preview::generated_layers;
@@ -59,6 +60,7 @@ pub(in crate::lab) struct Engine {
     /// Splits off the top for a gentle high shelf, so the mix sparkles.
     shelf: [OnePole; 2],
     rack: Rack,
+    activity: [f64; 5],
     /// Samples rendered past the end when not looping.
     past_end: u64,
 }
@@ -106,6 +108,13 @@ impl Engine {
             limiter: Limiter::new(),
             floor: [OnePole::default(); 2],
             shelf: [OnePole::default(); 2],
+            activity: std::array::from_fn(|layer| {
+                if rack.arrangement.active(0, layer) {
+                    1.0
+                } else {
+                    0.0
+                }
+            }),
             rack,
             past_end: 0,
         };
@@ -229,10 +238,11 @@ impl Engine {
         if in_song {
             self.schedule();
         }
+        let activity = self.participation();
         let rack = &self.rack;
         let space = f64::from(rack.space).clamp(0.0, 1.0);
         let pump = if rack.audible(3) {
-            self.drums.pump
+            self.drums.pump * activity[3]
         } else {
             0.0
         };
@@ -245,8 +255,10 @@ impl Engine {
             if !rack.audible(i) {
                 continue;
             }
-            let level =
-                f64::from(rack.tracks[i].volume) * LEVELS[i] * if i == 0 { duck } else { 1.0 };
+            let level = f64::from(rack.tracks[i].volume)
+                * LEVELS[i]
+                * if i == 0 { duck } else { 1.0 }
+                * activity[i];
             let [pl, pr] = pan(PLACES[i]);
             let placed = [
                 voice[0] * level * pl * std::f64::consts::SQRT_2,
@@ -260,7 +272,7 @@ impl Engine {
         }
         let pad = self.pad.tick();
         if rack.audible(4) {
-            let level = f64::from(rack.pad.volume) * PAD_LEVEL * duck;
+            let level = f64::from(rack.pad.volume) * PAD_LEVEL * duck * activity[4];
             let widened = self.chorus.tick((pad[0] + pad[1]) * 0.5);
             for side in 0..2 {
                 let s = (pad[side] * 0.6 + widened[side] * 0.5) * level;
@@ -270,7 +282,7 @@ impl Engine {
         }
         let kit = self.drums.tick();
         if rack.audible(3) {
-            let level = f64::from(rack.tracks[3].volume) * KIT_LEVEL;
+            let level = f64::from(rack.tracks[3].volume) * KIT_LEVEL * activity[3];
             for side in 0..2 {
                 dry[side] += kit[side] * level;
                 room[side] += kit[side] * level * 0.08 * (0.4 + space);

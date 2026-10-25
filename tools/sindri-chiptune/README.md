@@ -208,3 +208,49 @@ for each eight-bar section. Desktop shows the full section. Fit frames the
 visible notes, and the velocity strip reflects their current dynamics. The
 Song, Track, Mixer and File / Export controls sit in a resizable bottom sheet on phones and
 in the left inspector on desktop.
+
+### Seeded ensembles and section participation
+
+New songs use ensemble generator version 1: the seed and mood choose one of
+three coordinated instrument palettes for that mood, and one of four section
+arrangements. Intro is sparse, Theme introduces the melody, Rise develops the
+ensemble, and Return thins it again. Some ensembles omit percussion or arpeggio
+throughout. Low density also removes arpeggio participation. These decisions use
+a separate random stream, so the existing note composer keeps its seeded output.
+
+The A and B candidates retain their own sounds and mixes. Generate changes
+unlocked instrument presets and section participation, preserving volume,
+octave, mute/solo, and Room & echo. Under Song, disable **Seed instrument sounds**
+or **Seed layer arrangement** to keep those choices entirely manual. Under
+Track, **Keep notes**, **Keep sound**, and **Keep arrangement** are independent.
+**Plays in** lets you switch each layer on or off in Intro, Theme, Rise, and
+Return. Arrangement rows display REST in inactive sections; the editable notes
+remain intact. Solo respects section participation. Layer transitions fade
+smoothly and existing room/echo tails can ring out.
+
+Songs save the actual presets and four section masks, rather than regenerating
+them on open. Older `.sindrisong` files default to the previous all-layers mix.
+The CLI's `--classic` flag retains the original presets and full-layer behavior
+for newly composed songs; `--open` always retains the saved mix. MIDI export
+clips the three melodic parts at section rests while the editable source keeps
+all notes. MIDI still carries note events rather than Sound Lab's custom synth
+patches or its generated percussion/chord layers.
+
+### Numbers, phrases, and random seeds
+
+Song seeds accept a 64-bit number or a phrase such as `forest at dawn`. Numeric
+values retain their existing meaning. Phrases use a fixed FNV-1a/64 UTF-8 hash
+(version 1), with outer whitespace trimmed; case and internal spacing matter.
+They are limited to 128 characters. The resolved number is shown beneath the
+phrase and retained with it in candidate A's saved source. Candidate B uses that
+number plus one and saves its exact numeric seed.
+
+The dice button chooses a fresh full-range 64-bit seed from the operating system
+or browser Crypto API, rather than advancing the previous number. It updates
+the draft; use Generate to replace the current song. In the CLI:
+
+```bash
+sindri-chiptune song --seed "forest at dawn" --source dawn.sindrisong
+sindri-chiptune song --random-seed --source surprise.sindrisong
+sindri-chiptune song --seed 42 --classic --output classic.wav
+```

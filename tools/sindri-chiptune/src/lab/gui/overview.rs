@@ -269,6 +269,28 @@ impl ComposerApp {
                 TRACK_COLORS[layer],
             );
         }
+        for section in 0..4 {
+            if !self.settings.rack.arrangement.active(section, layer) {
+                let band = Rect::from_min_max(
+                    Pos2::new(
+                        rect.left() + coordinate(section) / 4.0 * rect.width(),
+                        rect.top(),
+                    ),
+                    Pos2::new(
+                        rect.left() + coordinate(section + 1) / 4.0 * rect.width(),
+                        rect.bottom(),
+                    ),
+                );
+                painter.rect_filled(band.shrink(0.5), 1.0, theme::WELL);
+                painter.text(
+                    band.center(),
+                    egui::Align2::CENTER_CENTER,
+                    "REST",
+                    egui::FontId::proportional(9.0),
+                    theme::FAINT,
+                );
+            }
+        }
         if self.transport.is_some() {
             let x = rect.left() + self.playhead_bar() / 32.0 * rect.width();
             painter.line_segment(

@@ -8,6 +8,10 @@ Total output lines: 1311
 
 # Changelog
 
+- Seed Sound Lab instrument ensembles and per-section layer participation, with
+  independent note, sound, and arrangement locks; preserve existing song mixes
+  and add random seeds plus repeatable word/phrase seeds.
+
 - Rebuild the Sound Lab arrangement around five selectable layers, including
   generated drum and chord previews, with a navy and amber track inspector,
   a fitted piano roll, visible velocities, and four-bar phone paging.

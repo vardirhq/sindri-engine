@@ -10,6 +10,8 @@ pub(super) const FORMAT: u32 = 1;
 pub(super) struct SongFile {
     pub(super) format: u32,
     pub(super) seed: u64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub(super) seed_text: Option<String>,
     pub(super) bpm: f64,
     pub(super) key: i32,
     pub(super) energy: f64,
@@ -24,6 +26,7 @@ impl SongFile {
         Self {
             format: FORMAT,
             seed: settings.seed,
+            seed_text: settings.seed_text.clone(),
             bpm: settings.bpm,
             key: settings.key,
             energy: settings.energy,
@@ -37,6 +40,7 @@ impl SongFile {
     pub(super) fn settings(&self) -> Settings {
         Settings {
             seed: self.seed,
+            seed_text: self.seed_text.clone(),
             bpm: self.bpm,
             key: self.key,
             energy: self.energy,
@@ -52,6 +56,11 @@ impl SongFile {
 
     pub(super) fn from_json(text: &str) -> Result<Self, String> {
         let song: Self = serde_json::from_str(text).map_err(|e| e.to_string())?;
+        if let Some(text) = &song.seed_text
+            && super::seed::parse(text)?.value != song.seed
+        {
+            return Err("The saved seed phrase does not match its numeric seed.".into());
+        }
         if song.format != FORMAT {
             return Err(format!("unsupported .sindrisong format {}", song.format));
         }
@@ -68,6 +77,10 @@ impl SongFile {
             .any(|track| !(0.0..=1.0).contains(&track.volume) || !(-2..=2).contains(&track.octave))
         {
             return Err("a mixer level must be 0..1 and an octave shift -2..2".into());
+        }
+        song.rack.arrangement.validate()?;
+        if !(0.0..=1.0).contains(&song.rack.pad.volume) {
+            return Err("A chord level must be 0..1.".into());
         }
         midi::validate(&song.tracks)?;
         Ok(song)

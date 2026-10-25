@@ -66,7 +66,10 @@ impl ComposerApp {
         ui.add_space(8.0);
         match self.inspector_tab {
             InspectorTab::Song => self.controls(ui),
-            InspectorTab::Track => self.selected_track(ui),
+            InspectorTab::Track => {
+                self.selected_track(ui);
+                self.ensemble_controls(ui);
+            }
             InspectorTab::Mixer => self.instrument_rack(ui),
         }
     }
@@ -119,10 +122,7 @@ impl ComposerApp {
                         .range(-2..=2)
                         .speed(0.1),
                 );
-                ui.checkbox(
-                    &mut self.track_locks[self.selected][index],
-                    "Keep on generate",
-                );
+                ui.checkbox(&mut self.track_locks[self.selected][index], "Keep notes");
             });
             let locked = self.track_locks[self.selected][index];
             ui.add_space(5.0);

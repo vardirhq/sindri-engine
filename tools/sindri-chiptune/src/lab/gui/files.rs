@@ -103,8 +103,16 @@ impl ComposerApp {
     /// Puts a saved song in candidate A, with its own seed, key and mixer.
     pub(super) fn load_song(&mut self, song: SongFile) {
         let settings = song.settings();
+        self.seed_input = settings
+            .seed_text
+            .clone()
+            .unwrap_or_else(|| settings.seed.to_string());
+        self.seed_error = None;
         self.settings = settings.clone();
         self.generated = settings.clone();
+        self.candidate_racks = std::array::from_fn(|_| settings.rack.clone());
+        self.sound_locks = [[false; 5]; 2];
+        self.arrangement_locks = [[false; 5]; 2];
         self.scores = Self::candidates(&settings);
         self.scores[0] = song.tracks;
         self.track_locks = [[false; 3]; 2];
