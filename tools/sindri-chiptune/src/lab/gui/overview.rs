@@ -98,7 +98,7 @@ impl ComposerApp {
         );
     }
 
-    fn section_headers(&mut self, ui: &mut egui::Ui) {
+    pub(super) fn section_headers(&mut self, ui: &mut egui::Ui) {
         let gap = ui.spacing().item_spacing.x;
         let width = (ui.available_width() - gap * 3.0) / 4.0;
         ui.horizontal(|ui| {
