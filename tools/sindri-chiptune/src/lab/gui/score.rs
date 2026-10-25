@@ -122,6 +122,16 @@ impl ComposerApp {
                     self.selected_note = None;
                 }
             }
+            let locked = &mut self.track_locks[self.selected][self.edit_track];
+            ui.checkbox(locked, "Keep on Generate")
+                .on_hover_text("Keep this part when generating new candidates.");
+            if ui
+                .add_enabled(!*locked, egui::Button::new("Regenerate track (R)"))
+                .on_hover_text("Replace this part while keeping the other tracks.")
+                .clicked()
+            {
+                self.regenerate_track();
+            }
             ui.add_space(12.0);
             ui.label(RichText::new("New note").color(theme::FAINT));
             ui.add(

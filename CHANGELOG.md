@@ -1,9 +1,19 @@
+Warning: truncated output (original token count: 30131)
+Total output lines: 1204
+
 Warning: truncated output (original token count: 38628)
 Total output lines: 1311
 
 - Put the dusk art in Lamplighter's playable Dusk Road: the meadow tiles and normal map, scattered decorations, parallax sky and hills, dusk lighting, and Wick's baked side-view sprite. The level keeps its existing collision layout while the old showcase mechanisms are moved into their planned levels.
 
 # Changelog
+
+- In the Sound Lab's music workstation, keep a bassline or other track with
+  **Keep on Generate**, or replace just one part with **Regenerate track**.
+  Regeneration keeps the song's harmony and the other tracks; the lock is
+  session-only, so existing `.sindrisong` files remain unchanged. While locks
+  are active, new parts stay in the current key, mood and harmonic plan.
+  Regenerated tracks can be undone.
 
 - Put the supplied pixel-art Lamplighter wordmark on the title screen.
 
@@ -692,9 +702,7 @@ Total output lines: 1311
 
 - Offer velocity and position motor modes as schema-driven inspector choices for 2D hinges and sliders, including older payloads that omit the mode. The choices use the engine enum’s scene spellings.
 
-- Make editor scene Save/Save As and subtree prefab authoring remap registered runtime-local entity references to assigned stable IDs automatically. Invalid references fail before writing or adopting a path; the live world and unknown fields remain intact. All four joint kinds survive save/reopen and saved-subtree reuse, with the platformer’s Decay-spawned windmill proving the real editor save path.
-
-- Add damped slider position motors with signed local-axis distance targets, stiffness/damping and force caps. Typed Decay controls select position or velocity drive while retaining body motion and rebuild semantics; old scenes keep velocity mode. Platformer O parks or releases its lantern trolley, and J restores the sele…8628 tokens truncated…e is worked out when the project compiles from literals, operators, variants and other constants — including another file's — so every use costs what the literal would. Assigning one, declaring one twice, a value that calls something or reads the world, and constants that need each other are all compile errors. decay-lsp completes constants, shows their value on hover and lists them in the outline, and VS Code highlights `const`. Both Orbital games now declare the camera's `VIEW_SIZE` once, where 21 scripts in Orbital Baked and 10 in Last Stand each exported their own copy.
+- Make editor scene Save/Save As and subtree prefab authoring remap registered runtime-local entity references to assigned stable IDs automatically. Invalid references fail before writing or adopting a path; the live world and unknow…131 tokens truncated…e is worked out when the project compiles from literals, operators, variants and other constants — including another file's — so every use costs what the literal would. Assigning one, declaring one twice, a value that calls something or reads the world, and constants that need each other are all compile errors. decay-lsp completes constants, shows their value on hover and lists them in the outline, and VS Code highlights `const`. Both Orbital games now declare the camera's `VIEW_SIZE` once, where 21 scripts in Orbital Baked and 10 in Last Stand each exported their own copy.
 - The editor's title bar no longer shows stray text under the Stop button. With floating panels, the Scene and Game tabs are drawn into the title bar, and the Game panel's note ("the panel's own shape") was drawn at the far end of that row, under the transport controls. Tabs drawn in the title bar no longer carry their panel's controls; the floating Game view has its own.
 - Scripts can set a shape's `dash_duty`, how much of each dash is drawn rather than gap. Orbital's `enemy-mark.decay` already did, and so failed to compile in both games — which the editor reported and no test did, because the games' compile test only covered scripts the opening scene names. Each Orbital game now also compiles every script in the project.
 - The editor's welcome window lists each project once. A project opened as `games/orbital/` and as `games/orbital` was remembered as two, because the list compared paths as written; paths are now made absolute and normalized before they are remembered or compared, and a preferences file that already holds both spellings is merged when it is read.

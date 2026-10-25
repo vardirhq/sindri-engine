@@ -107,6 +107,7 @@ impl ComposerApp {
         self.generated = settings.clone();
         self.scores = Self::candidates(&settings);
         self.scores[0] = song.tracks;
+        self.track_locks = [[false; 3]; 2];
         self.selected = 0;
         self.selected_note = None;
         self.undo.clear();
@@ -123,6 +124,7 @@ impl ComposerApp {
             Ok((notes, bpm)) => {
                 self.save_undo();
                 self.scores[self.selected] = notes;
+                self.track_locks[self.selected] = [false; 3];
                 self.settings.bpm = bpm;
                 self.selected_note = None;
                 self.fit_pitch_range();
