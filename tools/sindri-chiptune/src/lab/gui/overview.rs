@@ -54,20 +54,21 @@ impl ComposerApp {
                     };
                     let sound = &mut self.settings.rack.tracks[track];
                     let locked = &mut self.track_locks[selected][track];
-                    let select = ui.horizontal(|ui| {
-                        let label = egui::Button::new(
-                            RichText::new(*name).color(color).strong().size(10.5),
-                        )
-                        .fill(fill)
-                        .stroke(Stroke::new(1.0, stroke))
-                        .min_size(Vec2::new(54.0, 20.0));
-                        let select = ui.add(label).clicked();
-                        theme::toggle(ui, locked, "Lock", theme::FORGE);
-                        theme::toggle(ui, &mut sound.muted, "M", theme::DANGER);
-                        theme::toggle(ui, &mut sound.solo, "S", theme::FORGE_BRIGHT);
-                        select
-                    })
-                    .inner;
+                    let select = ui
+                        .horizontal(|ui| {
+                            let label = egui::Button::new(
+                                RichText::new(*name).color(color).strong().size(10.5),
+                            )
+                            .fill(fill)
+                            .stroke(Stroke::new(1.0, stroke))
+                            .min_size(Vec2::new(54.0, 20.0));
+                            let select = ui.add(label).clicked();
+                            theme::toggle(ui, locked, "Lock", theme::FORGE);
+                            theme::toggle(ui, &mut sound.muted, "M", theme::DANGER);
+                            theme::toggle(ui, &mut sound.solo, "S", theme::FORGE_BRIGHT);
+                            select
+                        })
+                        .inner;
                     if select {
                         self.edit_track = track;
                         self.fit_pitch_range();
