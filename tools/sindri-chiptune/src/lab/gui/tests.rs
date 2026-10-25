@@ -223,30 +223,31 @@ fn clicking_a_section_header_selects_that_section() {
     theme::install(&context);
     let mut app = ComposerApp::default();
     let position = egui::pos2(312.0, 17.0);
-    let input = egui::RawInput {
+    let input = |events| egui::RawInput {
         screen_rect: Some(egui::Rect::from_min_size(
             egui::Pos2::ZERO,
             egui::vec2(400.0, 100.0),
         )),
-        events: vec![
-            egui::Event::PointerMoved(position),
-            egui::Event::PointerButton {
-                pos: position,
-                button: egui::PointerButton::Primary,
-                pressed: true,
-                modifiers: egui::Modifiers::default(),
-            },
-            egui::Event::PointerButton {
-                pos: position,
-                button: egui::PointerButton::Primary,
-                pressed: false,
-                modifiers: egui::Modifiers::default(),
-            },
-        ],
+        events,
         ..Default::default()
     };
+    let button = |pressed| egui::Event::PointerButton {
+        pos: position,
+        button: egui::PointerButton::Primary,
+        pressed,
+        modifiers: egui::Modifiers::default(),
+    };
     context
-        .run_ui(input, |ui| app.section_headers(ui))
+        .run_ui(input(Vec::new()), |ui| app.section_headers(ui))
+        .drop_without_applying_deltas();
+    context
+        .run_ui(
+            input(vec![egui::Event::PointerMoved(position), button(true)]),
+            |ui| app.section_headers(ui),
+        )
+        .drop_without_applying_deltas();
+    context
+        .run_ui(input(vec![button(false)]), |ui| app.section_headers(ui))
         .drop_without_applying_deltas();
     assert_eq!(app.section, 2);
 }
@@ -257,30 +258,31 @@ fn clicking_an_arrangement_track_selects_its_piano_roll() {
     theme::install(&context);
     let mut app = ComposerApp::default();
     let position = egui::pos2(24.0, 12.0);
-    let input = egui::RawInput {
+    let input = |events| egui::RawInput {
         screen_rect: Some(egui::Rect::from_min_size(
             egui::Pos2::ZERO,
             egui::vec2(400.0, 100.0),
         )),
-        events: vec![
-            egui::Event::PointerMoved(position),
-            egui::Event::PointerButton {
-                pos: position,
-                button: egui::PointerButton::Primary,
-                pressed: true,
-                modifiers: egui::Modifiers::default(),
-            },
-            egui::Event::PointerButton {
-                pos: position,
-                button: egui::PointerButton::Primary,
-                pressed: false,
-                modifiers: egui::Modifiers::default(),
-            },
-        ],
+        events,
         ..Default::default()
     };
+    let button = |pressed| egui::Event::PointerButton {
+        pos: position,
+        button: egui::PointerButton::Primary,
+        pressed,
+        modifiers: egui::Modifiers::default(),
+    };
     context
-        .run_ui(input, |ui| app.track_headers(ui))
+        .run_ui(input(Vec::new()), |ui| app.track_headers(ui))
+        .drop_without_applying_deltas();
+    context
+        .run_ui(
+            input(vec![egui::Event::PointerMoved(position), button(true)]),
+            |ui| app.track_headers(ui),
+        )
+        .drop_without_applying_deltas();
+    context
+        .run_ui(input(vec![button(false)]), |ui| app.track_headers(ui))
         .drop_without_applying_deltas();
     assert_eq!(app.edit_track, 0);
 }
