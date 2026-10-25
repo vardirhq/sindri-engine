@@ -1,6 +1,7 @@
 //! Standalone workstation: presentation is separate from composition and audio.
 mod editing;
 mod files;
+mod inspector;
 mod overview;
 mod panels;
 mod platform;
@@ -27,6 +28,14 @@ enum Mode {
     Music,
     Sfx,
 }
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum InspectorTab {
+    Song,
+    Track,
+    Mixer,
+}
+
 type Job = Receiver<Result<String, String>>;
 
 struct ScoreSnapshot {
@@ -39,6 +48,7 @@ struct ComposerApp {
     mode: Mode,
     /// A phone-width window: one scrolling column, bigger touch targets.
     compact: bool,
+    inspector_tab: InspectorTab,
     sfx: sfx_view::SfxState,
     project: Option<PathBuf>,
     song_path: Option<PathBuf>,
@@ -75,6 +85,7 @@ impl Default for ComposerApp {
         Self {
             mode: Mode::Music,
             compact: false,
+            inspector_tab: InspectorTab::Track,
             sfx: sfx_view::SfxState::default(),
             // Started inside a project, the tool delivers there without asking.
             #[cfg(not(target_arch = "wasm32"))]
@@ -284,35 +295,15 @@ impl ComposerApp {
                     .stroke(egui::Stroke::new(1.0, theme::LINE_SOFT)),
             )
             .show(ui, |ui| self.transport_controls(ui));
-        let wide = ui.available_width() >= 1100.0;
         egui::Panel::left("composer")
-            .default_size(262.0)
+            .default_size(292.0)
             .min_size(230.0)
             .resizable(true)
             .show(ui, |ui| {
                 egui::ScrollArea::vertical().show(ui, |ui| {
-                    ui.add_space(8.0);
-                    self.controls(ui);
-                    if !wide {
-                        ui.add_space(8.0);
-                        self.instrument_rack(ui);
-                    }
-                    ui.add_space(8.0);
-                    self.song_delivery(ui);
+                    self.inspector(ui);
                 });
             });
-        if wide {
-            egui::Panel::right("mixer")
-                .default_size(300.0)
-                .min_size(270.0)
-                .resizable(true)
-                .show(ui, |ui| {
-                    egui::ScrollArea::vertical().show(ui, |ui| {
-                        ui.add_space(8.0);
-                        self.instrument_rack(ui);
-                    });
-                });
-        }
         egui::CentralPanel::default().show(ui, |ui| {
             egui::ScrollArea::vertical().show(ui, |ui| {
                 self.score(ui);
@@ -326,13 +317,10 @@ impl ComposerApp {
     fn music_column(&mut self, ui: &mut egui::Ui) {
         ui.add_space(6.0);
         self.transport_controls(ui);
+        ui.add_space(6.0);
+        self.inspector(ui);
+        ui.add_space(8.0);
         self.score(ui);
-        ui.add_space(8.0);
-        self.controls(ui);
-        ui.add_space(8.0);
-        self.instrument_rack(ui);
-        ui.add_space(8.0);
-        self.song_delivery(ui);
         ui.add_space(12.0);
     }
 }
