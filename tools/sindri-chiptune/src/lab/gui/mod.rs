@@ -318,9 +318,9 @@ impl ComposerApp {
         ui.add_space(6.0);
         self.transport_controls(ui);
         ui.add_space(6.0);
-        self.inspector(ui);
-        ui.add_space(8.0);
         self.score(ui);
+        ui.add_space(8.0);
+        self.inspector(ui);
         ui.add_space(12.0);
     }
 }

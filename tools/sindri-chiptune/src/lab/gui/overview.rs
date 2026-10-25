@@ -15,15 +15,17 @@ fn x_of(step: usize, rect: Rect) -> f32 {
 
 impl ComposerApp {
     pub(super) fn overview(&mut self, ui: &mut egui::Ui) {
-        let size = Vec2::new(ui.available_width(), 92.0);
+        self.section_headers(ui);
+        ui.add_space(4.0);
+        let size = Vec2::new(ui.available_width(), 74.0);
         let (rect, response) = ui.allocate_exact_size(size, egui::Sense::click());
         let painter = ui.painter_at(rect);
         theme::well(&painter, rect);
         let body = Rect::from_min_max(
-            rect.min + Vec2::new(0.0, 30.0),
+            rect.min + Vec2::new(0.0, 4.0),
             rect.max - Vec2::new(0.0, 4.0),
         );
-        for (section, name) in SECTIONS.iter().enumerate() {
+        for section in 0..SECTIONS.len() {
             let band = Rect::from_min_max(
                 Pos2::new(x_of(section * BARS_PER_SECTION * STEPS, rect), rect.top()),
                 Pos2::new(
@@ -41,26 +43,6 @@ impl ComposerApp {
                     StrokeKind::Inside,
                 );
             }
-            let first_bar = section * BARS_PER_SECTION + 1;
-            let last_bar = first_bar + BARS_PER_SECTION - 1;
-            painter.text(
-                Pos2::new(band.center().x, rect.top() + 3.0),
-                egui::Align2::CENTER_TOP,
-                *name,
-                egui::FontId::proportional(10.5),
-                if current {
-                    theme::FORGE_BRIGHT
-                } else {
-                    theme::FAINT
-                },
-            );
-            painter.text(
-                Pos2::new(band.center().x, rect.top() + 15.0),
-                egui::Align2::CENTER_TOP,
-                format!("{first_bar}–{last_bar}"),
-                egui::FontId::monospace(9.0),
-                theme::MUTED,
-            );
             if section > 0 {
                 painter.line_segment(
                     [
@@ -114,6 +96,36 @@ impl ComposerApp {
             .size(10.5)
             .color(theme::FAINT),
         );
+    }
+
+    fn section_headers(&mut self, ui: &mut egui::Ui) {
+        let gap = ui.spacing().item_spacing.x;
+        let width = (ui.available_width() - gap * 3.0) / 4.0;
+        ui.horizontal(|ui| {
+            for (section, name) in SECTIONS.iter().enumerate() {
+                let first_bar = section * BARS_PER_SECTION + 1;
+                let last_bar = first_bar + BARS_PER_SECTION - 1;
+                let label = RichText::new(format!("{name}\n{first_bar}–{last_bar}"))
+                    .size(10.5)
+                    .strong();
+                let (fill, stroke) = if self.section == section {
+                    (theme::EMBER, theme::FORGE)
+                } else {
+                    (theme::WELL, theme::LINE_SOFT)
+                };
+                let button = egui::Button::new(label)
+                    .fill(fill)
+                    .stroke(Stroke::new(1.0, stroke));
+                if ui.add_sized(Vec2::new(width, 34.0), button).clicked() {
+                    self.section = section;
+                    if let Some(transport) = &self.transport {
+                        let _ = transport
+                            .tx
+                            .send(Command::Seek(section * BARS_PER_SECTION));
+                    }
+                }
+            }
+        });
     }
 
     /// Each voice's notes as marks in its own lane, scaled to that voice's range.

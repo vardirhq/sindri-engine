@@ -218,6 +218,40 @@ fn workstation_draws_at_wide_and_compact_window_sizes() {
 }
 
 #[test]
+fn clicking_a_section_header_selects_that_section() {
+    let context = egui::Context::default();
+    theme::install(&context);
+    let mut app = ComposerApp::default();
+    let position = egui::pos2(250.0, 17.0);
+    let input = egui::RawInput {
+        screen_rect: Some(egui::Rect::from_min_size(
+            egui::Pos2::ZERO,
+            egui::vec2(400.0, 100.0),
+        )),
+        events: vec![
+            egui::Event::PointerMoved(position),
+            egui::Event::PointerButton {
+                pos: position,
+                button: egui::PointerButton::Primary,
+                pressed: true,
+                modifiers: egui::Modifiers::default(),
+            },
+            egui::Event::PointerButton {
+                pos: position,
+                button: egui::PointerButton::Primary,
+                pressed: false,
+                modifiers: egui::Modifiers::default(),
+            },
+        ],
+        ..Default::default()
+    };
+    context
+        .run_ui(input, |ui| app.section_headers(ui))
+        .drop_without_applying_deltas();
+    assert_eq!(app.section, 2);
+}
+
+#[test]
 fn undo_and_redo_restore_imported_tempo_with_notes() {
     let mut app = ComposerApp::default();
     let before = app.settings.bpm;
