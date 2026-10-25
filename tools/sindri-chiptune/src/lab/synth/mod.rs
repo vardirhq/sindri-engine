@@ -11,6 +11,8 @@ mod dsp;
 mod fx;
 mod harmony;
 mod patch;
+mod preview;
+pub(in crate::lab) use preview::generated_layers;
 mod voice;
 
 use crate::lab::{BARS, Note, STEPS, Settings, instruments::Rack};

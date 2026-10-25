@@ -8,6 +8,10 @@ Total output lines: 1311
 
 # Changelog
 
+- Rebuild the Sound Lab arrangement around five selectable layers, including
+  generated drum and chord previews, with a navy and amber track inspector,
+  a fitted piano roll, visible velocities, and four-bar phone paging.
+
 - The Sound Lab arrangement now has named Bass, Arpeggio, and Lead rows with
   direct lock, mute, and solo controls. Section headers show their bar ranges,
   and mobile places the arrangement and piano roll before the inspector.

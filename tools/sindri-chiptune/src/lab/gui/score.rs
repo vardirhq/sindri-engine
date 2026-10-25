@@ -18,12 +18,20 @@ fn lanes(
     painter: &egui::Painter,
     rect: egui::Rect,
     grid: egui::Rect,
-    (base, begin): (i32, usize),
+    (base, begin, rows, steps): (i32, usize, usize, usize),
     hover: Option<egui::Pos2>,
 ) {
-    let row = grid.height() / 24.0;
-    let step = grid.width() / 128.0;
-    for pitch in base..base + 24 {
+    let row = grid.height() / display(rows);
+    let step = grid.width() / display(steps);
+    painter.rect_filled(
+        egui::Rect::from_min_max(
+            egui::pos2(rect.left(), grid.top()),
+            egui::pos2(grid.left(), grid.bottom()),
+        ),
+        0.0,
+        Color32::from_rgb(196, 202, 209),
+    );
+    for pitch in base..base + i32::try_from(rows).expect("pitch rows") {
         let y = grid.bottom() - f32::from(i16::try_from(pitch - base + 1).expect("pitch")) * row;
         let black = [1, 3, 6, 8, 10].contains(&pitch.rem_euclid(12));
         let band =
@@ -32,15 +40,22 @@ fn lanes(
             band,
             0.0,
             if black {
-                Color32::from_rgb(13, 16, 20)
+                Color32::from_rgb(8, 22, 32)
             } else {
-                Color32::from_rgb(18, 22, 27)
+                Color32::from_rgb(13, 29, 42)
             },
         );
         // The keyboard gutter: white and black keys, with every C named.
         let key = egui::Rect::from_min_size(
             egui::pos2(rect.left() + 2.0, y),
-            egui::vec2(KEYS_WIDTH - 4.0, row),
+            egui::vec2(
+                if black {
+                    KEYS_WIDTH * 0.63
+                } else {
+                    KEYS_WIDTH - 4.0
+                },
+                row,
+            ),
         );
         let lit = hover.is_some_and(|pos| band.y_range().contains(pos.y));
         let key_fill = match (black, lit) {
@@ -66,7 +81,7 @@ fn lanes(
             );
         }
     }
-    for tick in 0..=128 {
+    for tick in 0..=steps {
         let x = grid.left() + display(tick) * step;
         let (weight, shade) = match tick {
             t if t % 16 == 0 => (1.0, theme::LINE),
@@ -77,7 +92,7 @@ fn lanes(
             [egui::pos2(x, grid.top()), egui::pos2(x, grid.bottom())],
             egui::Stroke::new(weight, shade),
         );
-        if tick < 128 && tick % 16 == 0 {
+        if tick < steps && tick % 16 == 0 {
             painter.text(
                 egui::pos2(x + 5.0, rect.top() + 5.0),
                 egui::Align2::LEFT_TOP,
@@ -93,30 +108,74 @@ fn display(value: usize) -> f32 {
     f32::from(u16::try_from(value).expect("bounded score coordinate"))
 }
 
+fn paint_hover(
+    painter: &egui::Painter,
+    grid: egui::Rect,
+    hover: Option<egui::Pos2>,
+    step: f32,
+    row: f32,
+    color: Color32,
+) {
+    if let Some(pos) = hover {
+        let column = ((pos.x - grid.left()) / step).floor();
+        let cell = egui::Rect::from_min_size(
+            egui::pos2(
+                grid.left() + column * step,
+                grid.bottom() - ((grid.bottom() - pos.y) / row).ceil() * row,
+            ),
+            egui::vec2(step, row),
+        );
+        painter.rect_stroke(
+            cell,
+            1.0,
+            egui::Stroke::new(1.0, color.gamma_multiply(0.6)),
+            egui::StrokeKind::Inside,
+        );
+    }
+}
+
 impl ComposerApp {
     pub(super) fn score(&mut self, ui: &mut egui::Ui) {
-        ui.add_space(8.0);
         self.overview(ui);
-        ui.add_space(8.0);
+        ui.add_space(4.0);
         ui.horizontal_wrapped(|ui| {
-            ui.label(RichText::new("New note").color(theme::FAINT));
-            ui.add(
-                egui::DragValue::new(&mut self.note_length)
-                    .range(1..=16)
-                    .suffix(" steps"),
+            ui.label(
+                RichText::new(super::overview::LAYERS[self.selected_layer])
+                    .color(TRACK_COLORS[self.selected_layer])
+                    .strong(),
             );
-            ui.label(RichText::new("Window").color(theme::FAINT));
-            ui.add(
-                egui::DragValue::new(&mut self.roll_base)
-                    .range(0..=104)
-                    .prefix("from "),
-            );
+            if self.selected_layer < 3 {
+                ui.add(
+                    egui::DragValue::new(&mut self.note_length)
+                        .range(1..=16)
+                        .suffix(" steps"),
+                );
+            } else {
+                ui.label(RichText::new("Generated").color(theme::MUTED));
+            }
+            if !self.compact {
+                ui.add(
+                    egui::DragValue::new(&mut self.roll_base)
+                        .range(0..=104)
+                        .prefix("from "),
+                );
+            }
             if ui
                 .button("Fit")
                 .on_hover_text("Fit the window to this voice's notes")
                 .clicked()
             {
                 self.fit_pitch_range();
+            }
+            if self.compact {
+                if ui.small_button("1–4").clicked() {
+                    self.roll_page = 0;
+                    self.fit_pitch_range();
+                }
+                if ui.small_button("5–8").clicked() {
+                    self.roll_page = 1;
+                    self.fit_pitch_range();
+                }
             }
         });
         self.note_inspector(ui);
@@ -126,7 +185,9 @@ impl ComposerApp {
                 self.piano_roll(ui);
             });
         ui.label(
-            RichText::new(if self.compact {
+            RichText::new(if self.selected_layer >= 3 {
+                "Generated layer preview · select this layer to change its sound"
+            } else if self.compact {
                 "Tap to add · drag to move · long-press to delete · tap the ruler to seek"
             } else {
                 "Click to add · drag to move · right-click to delete · click the ruler to seek · snap 1/16"
@@ -136,16 +197,48 @@ impl ComposerApp {
         );
     }
 
+    /// Prefer a populated phone page on selection; explicit page buttons still allow empty bars.
+    pub(super) fn focus_score_window(&mut self) {
+        self.refresh_arrangement();
+        let begin = self.section * 128 + self.roll_page * 64;
+        if self.compact
+            && !self
+                .layer_notes(self.selected_layer)
+                .iter()
+                .any(|n| n.start < begin + 64 && n.start + n.len > begin)
+        {
+            let section_begin = self.section * 128;
+            if let Some(first) = self
+                .layer_notes(self.selected_layer)
+                .iter()
+                .find(|n| n.start < section_begin + 128 && n.start + n.len > section_begin)
+            {
+                self.roll_page = first.start.saturating_sub(section_begin) / 64;
+            }
+        }
+        self.fit_pitch_range();
+    }
+
     pub(super) fn fit_pitch_range(&mut self) {
-        let low = self.scores[self.selected][self.edit_track]
+        let begin = self.section * 128 + if self.compact { self.roll_page * 64 } else { 0 };
+        let steps = if self.compact { 64 } else { 128 };
+        let notes = self.layer_notes(self.selected_layer);
+        let visible: Vec<_> = notes
             .iter()
-            .map(|note| note.pitch)
-            .min()
-            .unwrap_or(48);
-        self.roll_base = (low - 3).clamp(0, 104);
+            .filter(|n| n.start < begin + steps && n.start + n.len > begin)
+            .collect();
+        let low = visible.iter().map(|n| n.pitch).min().unwrap_or(60);
+        let high = visible.iter().map(|n| n.pitch).max().unwrap_or(72);
+        self.roll_base = (low - 2).clamp(0, 104);
+        self.roll_span =
+            usize::try_from((high - self.roll_base + 3).clamp(12, 128 - self.roll_base))
+                .expect("pitch range");
     }
 
     fn note_inspector(&mut self, ui: &mut egui::Ui) {
+        if self.selected_layer >= 3 {
+            return;
+        }
         let Some(index) = self.selected_note else {
             return;
         };
@@ -193,30 +286,35 @@ impl ComposerApp {
     }
 
     fn piano_roll(&mut self, ui: &mut egui::Ui) {
-        let width = ui.available_width().max(720.0);
+        let width = ui.available_width();
+        let rows = self.roll_span;
+        let steps = if self.compact { 64 } else { 128 };
         let (rect, response) = ui.allocate_exact_size(
-            egui::vec2(width, if self.compact { 380.0 } else { 480.0 }),
+            egui::vec2(width, if self.compact { 172.0 } else { 380.0 }),
             egui::Sense::click_and_drag(),
         );
         let painter = ui.painter_at(rect);
-        let grid = egui::Rect::from_min_max(rect.min + egui::vec2(KEYS_WIDTH, 24.0), rect.max);
+        let grid = egui::Rect::from_min_max(
+            rect.min + egui::vec2(KEYS_WIDTH, 24.0),
+            rect.max - egui::vec2(0.0, 30.0),
+        );
         let base = self.roll_base;
-        let row = grid.height() / 24.0;
-        let step = grid.width() / 128.0;
-        let begin = self.section * 128;
+        let row = grid.height() / display(rows);
+        let step = grid.width() / display(steps);
+        let begin = self.section * 128 + if self.compact { self.roll_page * 64 } else { 0 };
         theme::well(&painter, rect);
         let hover = response.hover_pos().filter(|pos| grid.contains(*pos));
-        lanes(&painter, rect, grid, (base, begin), hover);
+        lanes(&painter, rect, grid, (base, begin, rows, steps), hover);
         let place = |note: &Note| -> Option<egui::Rect> {
             if note.start + note.len <= begin
-                || note.start >= begin + 128
-                || !(base..base + 24).contains(&note.pitch)
+                || note.start >= begin + steps
+                || !(base..base + i32::try_from(rows).expect("pitch rows")).contains(&note.pitch)
             {
                 return None;
             }
             let x = grid.left() + display(note.start.saturating_sub(begin)) * step;
             let w =
-                display((note.start + note.len).min(begin + 128) - note.start.max(begin)) * step;
+                display((note.start + note.len).min(begin + steps) - note.start.max(begin)) * step;
             let y = grid.bottom()
                 - f32::from(i16::try_from(note.pitch - base + 1).expect("pitch")) * row;
             Some(egui::Rect::from_min_size(
@@ -226,7 +324,7 @@ impl ComposerApp {
         };
         // The other two voices, faint, so a new note can be placed against them.
         for (track, notes) in self.scores[self.selected].iter().enumerate() {
-            if track == self.edit_track {
+            if self.selected_layer >= 3 || track == self.edit_track {
                 continue;
             }
             for note in notes {
@@ -240,14 +338,11 @@ impl ComposerApp {
                 }
             }
         }
-        let color = TRACK_COLORS[self.edit_track];
-        for (index, note) in self.scores[self.selected][self.edit_track]
-            .iter()
-            .enumerate()
-        {
+        let color = TRACK_COLORS[self.selected_layer];
+        for (index, note) in self.layer_notes(self.selected_layer).iter().enumerate() {
             let Some(r) = place(note) else { continue };
             let selected = self.selected_note == Some(index);
-            let level = 0.4 + 0.6 * f32::from(note.velocity) / 127.0;
+            let level = 0.85 + 0.15 * f32::from(note.velocity) / 127.0;
             if selected {
                 painter.rect_filled(r.expand(3.0), 4.0, color.gamma_multiply(0.25));
             }
@@ -266,24 +361,10 @@ impl ComposerApp {
                 );
             }
         }
-        if let Some(pos) = hover {
-            let column = ((pos.x - grid.left()) / step).floor();
-            let cell = egui::Rect::from_min_size(
-                egui::pos2(
-                    grid.left() + column * step,
-                    grid.bottom() - ((grid.bottom() - pos.y) / row).ceil() * row,
-                ),
-                egui::vec2(step, row),
-            );
-            painter.rect_stroke(
-                cell,
-                1.0,
-                egui::Stroke::new(1.0, color.gamma_multiply(0.6)),
-                egui::StrokeKind::Inside,
-            );
-        }
+        self.velocity_lane(&painter, rect, grid, (begin, steps));
+        paint_hover(&painter, grid, hover, step, row, color);
         let playhead = self.playhead_bar() * 16.0 - display(begin);
-        if self.transport.is_some() && (0.0..128.0).contains(&playhead) {
+        if self.transport.is_some() && (0.0..display(steps)).contains(&playhead) {
             let x = grid.left() + playhead * step;
             painter.line_segment(
                 [egui::pos2(x, rect.top()), egui::pos2(x, rect.bottom())],
@@ -291,7 +372,41 @@ impl ComposerApp {
             );
             painter.circle_filled(egui::pos2(x, rect.top() + 4.0), 4.0, ACCENT);
         }
-        self.roll_interaction(&response, grid, base, step, row, begin);
+        if self.selected_layer < 3 {
+            self.roll_interaction(&response, grid, base, step, row, begin);
+        }
+    }
+
+    fn velocity_lane(
+        &self,
+        painter: &egui::Painter,
+        rect: egui::Rect,
+        grid: egui::Rect,
+        (begin, steps): (usize, usize),
+    ) {
+        let step = grid.width() / display(steps);
+        let color = TRACK_COLORS[self.selected_layer];
+        painter.text(
+            egui::pos2(rect.left() + 4.0, grid.bottom() + 15.0),
+            egui::Align2::LEFT_CENTER,
+            "Vel",
+            egui::FontId::proportional(10.0),
+            theme::MUTED,
+        );
+        for note in self.layer_notes(self.selected_layer) {
+            if note.start >= begin && note.start < begin + steps {
+                let x = grid.left() + display(note.start - begin) * step;
+                let height = 23.0 * f32::from(note.velocity) / 127.0;
+                painter.rect_filled(
+                    egui::Rect::from_min_size(
+                        egui::pos2(x, rect.bottom() - height - 2.0),
+                        egui::vec2(2.0, height),
+                    ),
+                    0.0,
+                    color,
+                );
+            }
+        }
     }
 
     // Pointer coordinates are clamped to the finite piano-roll grid before snapping.
@@ -316,7 +431,10 @@ impl ComposerApp {
         } else {
             pos
         };
-        let slot = ((pos.x - grid.left()) / step).floor().clamp(0.0, 127.0) as usize + begin;
+        let slot = ((pos.x - grid.left()) / step)
+            .floor()
+            .clamp(0.0, (grid.width() / step - 1.0).max(0.0)) as usize
+            + begin;
         if pos.y < grid.top() {
             if response.clicked()
                 && let Some(transport) = &self.transport
@@ -328,7 +446,10 @@ impl ComposerApp {
         if !grid.contains(pos) {
             return;
         }
-        let pitch = base + ((grid.bottom() - pos.y) / row).floor().clamp(0.0, 23.0) as i32;
+        let pitch = base
+            + ((grid.bottom() - pos.y) / row)
+                .floor()
+                .clamp(0.0, (grid.height() / row - 1.0).max(0.0)) as i32;
         let hit = self.scores[self.selected][self.edit_track]
             .iter()
             .position(|n| n.pitch == pitch && (n.start..n.start + n.len).contains(&slot));

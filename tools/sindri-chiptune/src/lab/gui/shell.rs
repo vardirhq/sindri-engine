@@ -12,6 +12,14 @@ impl ComposerApp {
             ui.add_space(4.0);
             let glyph: &str = icons::ICON_GRAPHIC_EQ.into();
             ui.label(RichText::new(glyph).size(20.0).color(theme::FORGE));
+            if self.compact {
+                ui.label(
+                    RichText::new("SINDRI SOUND LAB")
+                        .size(11.0)
+                        .strong()
+                        .color(theme::TEXT),
+                );
+            }
             if !self.compact {
                 ui.label(
                     RichText::new("SINDRI")

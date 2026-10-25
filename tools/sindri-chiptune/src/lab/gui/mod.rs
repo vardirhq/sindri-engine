@@ -63,6 +63,10 @@ struct ComposerApp {
     selected: usize,
     section: usize,
     edit_track: usize,
+    selected_layer: usize,
+    arrangement: Option<overview::ArrangementPreview>,
+    roll_span: usize,
+    roll_page: usize,
     roll_base: i32,
     selected_note: Option<usize>,
     note_length: usize,
@@ -82,7 +86,7 @@ struct ComposerApp {
 impl Default for ComposerApp {
     fn default() -> Self {
         let settings = Settings::default();
-        Self {
+        let mut app = Self {
             mode: Mode::Music,
             compact: false,
             inspector_tab: InspectorTab::Track,
@@ -105,6 +109,10 @@ impl Default for ComposerApp {
             selected: 0,
             section: 0,
             edit_track: 2,
+            selected_layer: 2,
+            arrangement: None,
+            roll_span: 24,
+            roll_page: 0,
             roll_base: 48,
             selected_note: None,
             note_length: 2,
@@ -120,7 +128,10 @@ impl Default for ComposerApp {
             looping: true,
             paused: false,
             status: "Ready. Play a candidate, or switch to Sound FX for game effects.".into(),
-        }
+        };
+        app.refresh_arrangement();
+        app.fit_pitch_range();
+        app
     }
 }
 impl ComposerApp {
@@ -174,6 +185,7 @@ impl ComposerApp {
         self.selected_note = None;
         self.generated = generated;
         self.selected = 0;
+        self.focus_score_window();
         if self.transport.is_some() {
             self.start_live();
         }
@@ -187,6 +199,10 @@ impl ComposerApp {
     fn regenerate_track(&mut self) {
         let candidate = self.selected;
         let track = self.edit_track;
+        if self.selected_layer > 2 {
+            self.status = "Select Bass, Arpeggio or Lead to regenerate notes.".into();
+            return;
+        }
         if self.track_locks[candidate][track] {
             self.status = "Unlock this track before regenerating it.".into();
             return;
@@ -200,7 +216,7 @@ impl ComposerApp {
         self.scores[candidate][track] =
             crate::lab::composer::compose_track(&settings, track, self.regeneration);
         self.selected_note = None;
-        self.fit_pitch_range();
+        self.focus_score_window();
         self.refresh_edited_audio();
         self.status = format!(
             "Regenerated {} for candidate {}. The other tracks were kept.",
@@ -211,7 +227,7 @@ impl ComposerApp {
 
     fn vary_melody(&mut self) {
         let candidate = self.selected;
-        if self.edit_track != 2 {
+        if self.selected_layer != 2 {
             self.status = "Select Lead to create a melody variation.".into();
             return;
         }
@@ -242,15 +258,20 @@ impl ComposerApp {
 
 impl ComposerApp {
     fn workspace(&mut self, ui: &mut egui::Ui) {
+        let was_compact = self.compact;
         self.compact = ui.available_width() < COMPACT;
+        if self.compact != was_compact {
+            self.focus_score_window();
+        }
         if self.compact {
             // Fingers, not a pointer: taller rows and wider buttons.
             let spacing = &mut ui.style_mut().spacing;
-            spacing.interact_size.y = 34.0;
-            spacing.button_padding = egui::vec2(12.0, 7.0);
-            spacing.item_spacing = egui::vec2(8.0, 8.0);
+            spacing.interact_size.y = 30.0;
+            spacing.button_padding = egui::vec2(7.0, 5.0);
+            spacing.item_spacing = egui::vec2(8.0, 4.0);
             spacing.slider_width = 130.0;
         }
+        self.refresh_arrangement();
         self.poll(ui);
         self.shortcuts(ui);
         egui::Panel::top("brand")
@@ -274,12 +295,10 @@ impl ComposerApp {
         match (self.mode, self.compact) {
             (Mode::Music, false) => self.music_workspace(ui),
             (Mode::Sfx, false) => self.sfx_workspace(ui),
-            (mode, true) => {
+            (Mode::Music, true) => self.compact_music_workspace(ui),
+            (Mode::Sfx, true) => {
                 egui::CentralPanel::default().show(ui, |ui| {
-                    egui::ScrollArea::vertical().show(ui, |ui| match mode {
-                        Mode::Music => self.music_column(ui),
-                        Mode::Sfx => self.sfx_column(ui),
-                    });
+                    egui::ScrollArea::vertical().show(ui, |ui| self.sfx_column(ui));
                 });
             }
         }
@@ -296,7 +315,7 @@ impl ComposerApp {
             )
             .show(ui, |ui| self.transport_controls(ui));
         egui::Panel::left("composer")
-            .default_size(292.0)
+            .default_size(300.0)
             .min_size(230.0)
             .resizable(true)
             .show(ui, |ui| {
@@ -313,15 +332,34 @@ impl ComposerApp {
 }
 
 impl ComposerApp {
-    /// The music workstation as one column, in the order a phone is used.
-    fn music_column(&mut self, ui: &mut egui::Ui) {
-        ui.add_space(6.0);
-        self.transport_controls(ui);
-        ui.add_space(6.0);
-        self.score(ui);
-        ui.add_space(8.0);
-        self.inspector(ui);
-        ui.add_space(12.0);
+    /// A resizable bottom inspector keeps sound controls available while editing.
+    fn compact_music_workspace(&mut self, ui: &mut egui::Ui) {
+        egui::Panel::bottom("track-sheet")
+            .default_size(260.0)
+            .min_size(110.0)
+            .resizable(true)
+            .frame(
+                egui::Frame::new()
+                    .fill(theme::HEADER)
+                    .corner_radius(12)
+                    .inner_margin(egui::Margin::same(10)),
+            )
+            .show(ui, |ui| {
+                ui.spacing_mut().item_spacing.y = 4.0;
+                ui.spacing_mut().interact_size.y = 26.0;
+                ui.spacing_mut().button_padding.y = 3.0;
+                egui::ScrollArea::vertical()
+                    .id_salt("track-sheet-scroll")
+                    .show(ui, |ui| self.inspector(ui));
+            });
+        egui::CentralPanel::default().show(ui, |ui| {
+            egui::ScrollArea::vertical()
+                .id_salt("mobile-score-scroll")
+                .show(ui, |ui| {
+                    self.transport_controls(ui);
+                    self.score(ui);
+                });
+        });
     }
 }
 

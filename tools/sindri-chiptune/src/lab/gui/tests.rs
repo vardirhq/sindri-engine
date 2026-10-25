@@ -222,7 +222,7 @@ fn clicking_a_section_header_selects_that_section() {
     let context = egui::Context::default();
     theme::install(&context);
     let mut app = ComposerApp::default();
-    let position = egui::pos2(312.0, 17.0);
+    let position = egui::pos2(240.0, 17.0);
     let input = |events| egui::RawInput {
         screen_rect: Some(egui::Rect::from_min_size(
             egui::Pos2::ZERO,
@@ -257,34 +257,36 @@ fn clicking_an_arrangement_track_selects_its_piano_roll() {
     let context = egui::Context::default();
     theme::install(&context);
     let mut app = ComposerApp::default();
-    let position = egui::pos2(24.0, 12.0);
-    let input = |events| egui::RawInput {
-        screen_rect: Some(egui::Rect::from_min_size(
-            egui::Pos2::ZERO,
-            egui::vec2(400.0, 100.0),
-        )),
-        events,
-        ..Default::default()
-    };
-    let button = |pressed| egui::Event::PointerButton {
-        pos: position,
-        button: egui::PointerButton::Primary,
-        pressed,
-        modifiers: egui::Modifiers::default(),
-    };
-    context
-        .run_ui(input(Vec::new()), |ui| app.track_headers(ui))
-        .drop_without_applying_deltas();
-    context
-        .run_ui(
-            input(vec![egui::Event::PointerMoved(position), button(true)]),
-            |ui| app.track_headers(ui),
-        )
-        .drop_without_applying_deltas();
-    context
-        .run_ui(input(vec![button(false)]), |ui| app.track_headers(ui))
-        .drop_without_applying_deltas();
-    assert_eq!(app.edit_track, 0);
+    for layer in 0..5 {
+        let position = egui::pos2(24.0, 39.0 + 33.0 * f32::from(u8::try_from(layer).unwrap()));
+        let mut draw = |events| {
+            context
+                .run_ui(
+                    egui::RawInput {
+                        screen_rect: Some(egui::Rect::from_min_size(
+                            egui::Pos2::ZERO,
+                            egui::vec2(400.0, 260.0),
+                        )),
+                        events,
+                        ..Default::default()
+                    },
+                    |ui| app.track_headers(ui),
+                )
+                .drop_without_applying_deltas();
+        };
+        let button = |pressed| egui::Event::PointerButton {
+            pos: position,
+            button: egui::PointerButton::Primary,
+            pressed,
+            modifiers: egui::Modifiers::default(),
+        };
+        draw(Vec::new());
+        draw(vec![egui::Event::PointerMoved(position), button(true)]);
+        draw(vec![button(false)]);
+        assert_eq!(app.selected_layer, layer);
+        assert_eq!(app.edit_track, layer.min(2));
+        assert_eq!(app.inspector_tab, InspectorTab::Track);
+    }
 }
 
 #[test]
@@ -352,4 +354,76 @@ fn effect_history_keeps_recent_sounds_newest_first() {
         app.sfx.generate(crate::lab::sfx::Kind::Blip);
     }
     assert!(app.sfx.history.len() <= 14);
+}
+
+#[test]
+fn generated_layers_are_visible_and_cannot_regenerate_the_previous_melody() {
+    let mut app = ComposerApp::default();
+    let original = app.scores.clone();
+    for layer in [3, 4] {
+        app.select_layer(layer);
+        assert!(!app.layer_notes(layer).is_empty());
+        app.regenerate_track();
+        app.vary_melody();
+        assert_eq!(app.scores, original);
+        assert!(app.selected_note.is_none());
+    }
+}
+
+#[test]
+fn chord_preview_tracks_bass_edits_without_changing_the_song_file() {
+    let mut app = ComposerApp::default();
+    let original = app.song_file().to_json();
+    let before = app.layer_notes(4).to_vec();
+    app.refresh_arrangement();
+    assert_eq!(app.song_file().to_json(), original);
+    for note in &mut app.scores[0][0] {
+        note.pitch += 2;
+    }
+    app.refresh_arrangement();
+    assert_ne!(app.layer_notes(4), before);
+}
+
+#[test]
+fn fitted_roll_contains_the_visible_notes_on_both_phone_pages() {
+    let mut app = ComposerApp {
+        compact: true,
+        ..ComposerApp::default()
+    };
+    for layer in 0..5 {
+        for page in 0..2 {
+            app.roll_page = page;
+            app.select_layer(layer);
+            let begin = page * 64;
+            for note in app
+                .layer_notes(layer)
+                .iter()
+                .filter(|n| n.start < begin + 64 && n.start + n.len > begin)
+            {
+                assert!(note.pitch >= app.roll_base);
+                assert!(note.pitch < app.roll_base + i32::try_from(app.roll_span).unwrap());
+            }
+        }
+    }
+}
+
+#[test]
+fn phone_selection_prefers_a_populated_page_and_song_generation_works_from_drums() {
+    let mut app = ComposerApp {
+        compact: true,
+        ..ComposerApp::default()
+    };
+    app.scores[0][2] = vec![crate::lab::Note {
+        start: 80,
+        pitch: 64,
+        len: 4,
+        velocity: 90,
+    }];
+    app.select_layer(2);
+    assert_eq!(app.roll_page, 1);
+    app.select_layer(3);
+    let before = app.scores.clone();
+    app.settings.seed += 2;
+    app.generate();
+    assert_ne!(app.scores, before);
 }

@@ -10,16 +10,16 @@ use egui_material_icons::MaterialIcon;
 use std::sync::Arc;
 
 pub(super) const INK: Color32 = Color32::from_rgb(8, 10, 13);
-pub(super) const PANEL: Color32 = Color32::from_rgb(15, 19, 23);
-pub(super) const HEADER: Color32 = Color32::from_rgb(18, 22, 27);
-pub(super) const RAISED: Color32 = Color32::from_rgb(22, 27, 33);
-pub(super) const WELL: Color32 = Color32::from_rgb(11, 14, 18);
+pub(super) const PANEL: Color32 = Color32::from_rgb(8, 20, 29);
+pub(super) const HEADER: Color32 = Color32::from_rgb(12, 27, 38);
+pub(super) const RAISED: Color32 = Color32::from_rgb(15, 31, 43);
+pub(super) const WELL: Color32 = Color32::from_rgb(6, 18, 27);
 pub(super) const LINE: Color32 = Color32::from_rgb(37, 43, 50);
 pub(super) const LINE_SOFT: Color32 = Color32::from_rgb(27, 32, 38);
 pub(super) const TEXT: Color32 = Color32::from_rgb(232, 228, 220);
 pub(super) const MUTED: Color32 = Color32::from_rgb(152, 160, 168);
 pub(super) const FAINT: Color32 = Color32::from_rgb(104, 113, 122);
-pub(super) const FORGE: Color32 = Color32::from_rgb(233, 163, 58);
+pub(super) const FORGE: Color32 = Color32::from_rgb(255, 185, 32);
 pub(super) const FORGE_BRIGHT: Color32 = Color32::from_rgb(255, 190, 85);
 pub(super) const FORGE_DIM: Color32 = Color32::from_rgb(138, 98, 32);
 pub(super) const EMBER: Color32 = Color32::from_rgb(46, 34, 17);
@@ -28,11 +28,11 @@ pub(super) const SUCCESS: Color32 = Color32::from_rgb(121, 182, 138);
 
 /// Bass, arpeggio, lead, drums and chords, wherever a voice is named.
 pub(super) const VOICES: [Color32; 5] = [
-    Color32::from_rgb(110, 168, 230),
-    Color32::from_rgb(170, 140, 230),
-    Color32::from_rgb(96, 214, 170),
-    Color32::from_rgb(230, 150, 105),
-    Color32::from_rgb(226, 132, 170),
+    Color32::from_rgb(43, 176, 235),
+    Color32::from_rgb(54, 211, 139),
+    Color32::from_rgb(255, 185, 32),
+    Color32::from_rgb(245, 119, 126),
+    Color32::from_rgb(174, 111, 233),
 ];
 
 // Shared with the editor rather than copied, so the two cannot drift apart.
