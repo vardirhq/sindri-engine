@@ -5,6 +5,10 @@ use eframe::egui::{self, Pos2, Rect, RichText, Stroke, StrokeKind, Vec2};
 
 const SECTIONS: [&str; 4] = ["INTRO", "THEME", "RISE", "RETURN"];
 const BARS_PER_SECTION: usize = BARS / SECTIONS.len();
+const TRACKS: [&str; 3] = ["Bass", "Arpeggio", "Lead"];
+const TRACK_COLUMN_WIDTH: f32 = 158.0;
+const TRACK_ROW_HEIGHT: f32 = 24.0;
+const ARRANGEMENT_HEIGHT: f32 = TRACK_ROW_HEIGHT * 3.0;
 
 fn x_of(step: usize, rect: Rect) -> f32 {
     rect.left()
@@ -17,7 +21,65 @@ impl ComposerApp {
     pub(super) fn overview(&mut self, ui: &mut egui::Ui) {
         self.section_headers(ui);
         ui.add_space(4.0);
-        let size = Vec2::new(ui.available_width(), 74.0);
+        ui.horizontal(|ui| {
+            self.track_headers(ui);
+            ui.add_space(4.0);
+            self.overview_waveform(ui);
+        });
+        ui.add_space(2.0);
+        ui.label(
+            RichText::new(
+                "Drums are generated from mood and density and play under every section.",
+            )
+            .size(10.5)
+            .color(theme::FAINT),
+        );
+    }
+
+    pub(super) fn track_headers(&mut self, ui: &mut egui::Ui) {
+        let selected = self.selected;
+        let index = self.edit_track;
+        ui.allocate_ui_with_layout(
+            Vec2::new(TRACK_COLUMN_WIDTH, ARRANGEMENT_HEIGHT),
+            egui::Layout::top_down(egui::Align::Min),
+            |ui| {
+                ui.spacing_mut().item_spacing = Vec2::new(2.0, 2.0);
+                for (track, name) in TRACKS.iter().enumerate() {
+                    let color = TRACK_COLORS[track];
+                    let focused = index == track;
+                    let (fill, stroke) = if focused {
+                        (color.gamma_multiply(0.16), color)
+                    } else {
+                        (theme::WELL, theme::LINE_SOFT)
+                    };
+                    let sound = &mut self.settings.rack.tracks[track];
+                    let locked = &mut self.track_locks[selected][track];
+                    let select = ui.horizontal(|ui| {
+                        let label = egui::Button::new(
+                            RichText::new(*name).color(color).strong().size(10.5),
+                        )
+                        .fill(fill)
+                        .stroke(Stroke::new(1.0, stroke))
+                        .min_size(Vec2::new(54.0, 20.0));
+                        let select = ui.add(label).clicked();
+                        theme::toggle(ui, locked, "Lock", theme::FORGE);
+                        theme::toggle(ui, &mut sound.muted, "M", theme::DANGER);
+                        theme::toggle(ui, &mut sound.solo, "S", theme::FORGE_BRIGHT);
+                        select
+                    })
+                    .inner;
+                    if select {
+                        self.edit_track = track;
+                        self.fit_pitch_range();
+                        self.selected_note = None;
+                    }
+                }
+            },
+        );
+    }
+
+    fn overview_waveform(&mut self, ui: &mut egui::Ui) {
+        let size = Vec2::new(ui.available_width(), ARRANGEMENT_HEIGHT);
         let (rect, response) = ui.allocate_exact_size(size, egui::Sense::click());
         let painter = ui.painter_at(rect);
         theme::well(&painter, rect);
@@ -88,20 +150,13 @@ impl ComposerApp {
             }
         }
         response.on_hover_text("Click a section to edit it; while playing, click to jump there");
-        ui.add_space(2.0);
-        ui.label(
-            RichText::new(
-                "Drums are generated from mood and density and play under every section.",
-            )
-            .size(10.5)
-            .color(theme::FAINT),
-        );
     }
 
     pub(super) fn section_headers(&mut self, ui: &mut egui::Ui) {
         let gap = ui.spacing().item_spacing.x;
-        let width = (ui.available_width() - gap * 3.0) / 4.0;
+        let width = (ui.available_width() - TRACK_COLUMN_WIDTH - gap * 4.0) / 4.0;
         ui.horizontal(|ui| {
+            ui.add_space(TRACK_COLUMN_WIDTH);
             for (section, name) in SECTIONS.iter().enumerate() {
                 let first_bar = section * BARS_PER_SECTION + 1;
                 let last_bar = first_bar + BARS_PER_SECTION - 1;
@@ -131,7 +186,7 @@ impl ComposerApp {
         let lane = body.height() / 3.0;
         for (voice, notes) in self.scores[self.selected].iter().enumerate() {
             // Lead on top, bass at the bottom, as a score reads.
-            let top = body.top() + lane * f32::from(u8::try_from(2 - voice).expect("voice"));
+            let top = body.top() + lane * f32::from(u8::try_from(voice).expect("voice"));
             let (low, high) = notes
                 .iter()
                 .fold((127, 0), |(lo, hi), n| (n.pitch.min(lo), n.pitch.max(hi)));

@@ -99,30 +99,6 @@ impl ComposerApp {
         self.overview(ui);
         ui.add_space(8.0);
         ui.horizontal_wrapped(|ui| {
-            for (track, title) in ["Bass", "Arpeggio", "Lead"].iter().enumerate() {
-                let color = TRACK_COLORS[track];
-                let on = self.edit_track == track;
-                let text = RichText::new(*title)
-                    .color(if on { color } else { theme::MUTED })
-                    .strong();
-                let tab = egui::Button::new(text)
-                    .fill(if on {
-                        color.gamma_multiply(0.14)
-                    } else {
-                        theme::WELL
-                    })
-                    .stroke(egui::Stroke::new(
-                        1.0,
-                        if on { color } else { theme::LINE_SOFT },
-                    ))
-                    .min_size(egui::vec2(84.0, 26.0));
-                if ui.add(tab).clicked() {
-                    self.edit_track = track;
-                    self.fit_pitch_range();
-                    self.selected_note = None;
-                }
-            }
-            ui.add_space(12.0);
             ui.label(RichText::new("New note").color(theme::FAINT));
             ui.add(
                 egui::DragValue::new(&mut self.note_length)

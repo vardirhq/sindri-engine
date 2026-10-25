@@ -222,7 +222,7 @@ fn clicking_a_section_header_selects_that_section() {
     let context = egui::Context::default();
     theme::install(&context);
     let mut app = ComposerApp::default();
-    let position = egui::pos2(250.0, 17.0);
+    let position = egui::pos2(312.0, 17.0);
     let input = egui::RawInput {
         screen_rect: Some(egui::Rect::from_min_size(
             egui::Pos2::ZERO,
@@ -249,6 +249,40 @@ fn clicking_a_section_header_selects_that_section() {
         .run_ui(input, |ui| app.section_headers(ui))
         .drop_without_applying_deltas();
     assert_eq!(app.section, 2);
+}
+
+#[test]
+fn clicking_an_arrangement_track_selects_its_piano_roll() {
+    let context = egui::Context::default();
+    theme::install(&context);
+    let mut app = ComposerApp::default();
+    let position = egui::pos2(24.0, 12.0);
+    let input = egui::RawInput {
+        screen_rect: Some(egui::Rect::from_min_size(
+            egui::Pos2::ZERO,
+            egui::vec2(400.0, 100.0),
+        )),
+        events: vec![
+            egui::Event::PointerMoved(position),
+            egui::Event::PointerButton {
+                pos: position,
+                button: egui::PointerButton::Primary,
+                pressed: true,
+                modifiers: egui::Modifiers::default(),
+            },
+            egui::Event::PointerButton {
+                pos: position,
+                button: egui::PointerButton::Primary,
+                pressed: false,
+                modifiers: egui::Modifiers::default(),
+            },
+        ],
+        ..Default::default()
+    };
+    context
+        .run_ui(input, |ui| app.track_headers(ui))
+        .drop_without_applying_deltas();
+    assert_eq!(app.edit_track, 0);
 }
 
 #[test]
