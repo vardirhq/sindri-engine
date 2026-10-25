@@ -1,11 +1,11 @@
-// Opens the browser Sound Lab at desktop and phone sizes and checks it draws.
+// Opens the browser Sound Lab at desktop and phone sizes, interacts, and checks it draws.
 //
 //   node scripts/browser/sound-lab.mjs <site-dir> [capture-dir]
 //
 // <site-dir> holds index.html and pkg/ (the wasm-pack build). The Lab is one
 // egui canvas, so the check is that it starts without an error, removes its
-// loading note, and paints something other than its background at each size;
-// the screenshots are kept for a person to look at.
+// loading note, responds to R in each mode, and paints something other than
+// its background at each size; the screenshots are kept for a person to look at.
 import { chromium } from 'playwright';
 import { createServer } from 'node:http';
 import { mkdir, readFile } from 'node:fs/promises';
@@ -59,6 +59,10 @@ try {
     await page.goto(url + query);
     await page.waitForSelector('#loading', { state: 'detached', timeout: 60000 });
     await page.waitForTimeout(1500);
+    // R regenerates the selected music track, or creates a new SFX variation.
+    await page.locator('#sound-lab').click({ position: { x: 12, y: 12 } });
+    await page.keyboard.press('r');
+    await page.waitForTimeout(250);
     const shot = await page.screenshot({ path: join(captures, `sound-lab-${name}.png`) });
     // A frame of only the page background means egui never painted.
     const painted = await page.evaluate(async png => {

@@ -112,3 +112,19 @@ fn seeds_change_actual_melodic_pitches() {
     let b: Vec<_> = second[2].iter().map(|n| n.pitch).collect();
     assert_ne!(a, b);
 }
+
+#[test]
+fn replacing_a_track_is_seeded_and_keeps_the_song_harmony() {
+    for track in 0..3 {
+        let settings = Settings::default();
+        let first = super::compose_track(&settings, track, 7);
+        let repeated = super::compose_track(&settings, track, 7);
+        let varied = super::compose_track(&settings, track, 8);
+        assert_eq!(first, repeated, "track {track} must be deterministic");
+        assert_ne!(first, varied, "track {track} should vary");
+        assert!(first.iter().all(|note| {
+            crate::lab::synth::scale(settings.mood)
+                .contains(&(note.pitch - settings.key).rem_euclid(12))
+        }));
+    }
+}

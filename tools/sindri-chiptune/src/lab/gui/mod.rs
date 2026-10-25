@@ -47,6 +47,9 @@ struct ComposerApp {
     settings: Settings,
     generated: Settings,
     scores: [[Vec<Note>; 3]; 2],
+    /// Locks are per candidate and remain local to the current workstation session.
+    track_locks: [[bool; 3]; 2],
+    regeneration: u64,
     selected: usize,
     section: usize,
     edit_track: usize,
@@ -84,6 +87,8 @@ impl Default for ComposerApp {
             song_name: "theme".into(),
             song_snippet: None,
             scores: Self::candidates(&settings),
+            track_locks: [[false; 3]; 2],
+            regeneration: 0,
             generated: settings.clone(),
             settings,
             selected: 0,
@@ -125,14 +130,72 @@ impl ComposerApp {
     fn generate(&mut self) {
         self.undo.clear();
         self.redo.clear();
-        self.scores = Self::candidates(&self.settings);
+        let has_locks = self.track_locks.iter().flatten().any(|locked| *locked);
+        let mut generated = self.settings.clone();
+        if has_locks {
+            // A lock belongs to the current harmonic context. Keep seed, key
+            // and mood fixed while replacing only unlocked parts around it.
+            generated.seed = self.generated.seed;
+            generated.key = self.generated.key;
+            generated.mood = self.generated.mood;
+        }
+        let old_scores = self.scores.clone();
+        let mut scores = Self::candidates(&generated);
+        for candidate in 0..2 {
+            for track in 0..3 {
+                if self.track_locks[candidate][track] {
+                    scores[candidate][track].clone_from(&old_scores[candidate][track]);
+                } else if has_locks {
+                    let mut candidate_settings = generated.clone();
+                    candidate_settings.seed = candidate_settings
+                        .seed
+                        .wrapping_add(u64::try_from(candidate).expect("candidate"));
+                    self.regeneration = self.regeneration.wrapping_add(1);
+                    scores[candidate][track] = crate::lab::composer::compose_track(
+                        &candidate_settings,
+                        track,
+                        self.regeneration,
+                    );
+                }
+            }
+        }
+        self.scores = scores;
         self.selected_note = None;
-        self.generated = self.settings.clone();
+        self.generated = generated;
         self.selected = 0;
         if self.transport.is_some() {
             self.start_live();
         }
-        self.status = "Generated two new candidates. Select A or B to compare.".into();
+        self.status = if has_locks {
+            "Generated around the current harmony; locked tracks were kept. Unlock all tracks to apply a new seed, key, or mood.".into()
+        } else {
+            "Generated two new candidates. Select A or B to compare.".into()
+        };
+    }
+
+    fn regenerate_track(&mut self) {
+        let candidate = self.selected;
+        let track = self.edit_track;
+        if self.track_locks[candidate][track] {
+            self.status = "Unlock this track before regenerating it.".into();
+            return;
+        }
+        self.save_undo();
+        self.regeneration = self.regeneration.wrapping_add(1);
+        let mut settings = self.generated.clone();
+        settings.seed = settings
+            .seed
+            .wrapping_add(u64::try_from(candidate).expect("candidate"));
+        self.scores[candidate][track] =
+            crate::lab::composer::compose_track(&settings, track, self.regeneration);
+        self.selected_note = None;
+        self.fit_pitch_range();
+        self.refresh_edited_audio();
+        self.status = format!(
+            "Regenerated {} for candidate {}. The other tracks were kept.",
+            ["Bass", "Arpeggio", "Lead"][track],
+            if candidate == 0 { "A" } else { "B" }
+        );
     }
 }
 

@@ -263,9 +263,12 @@ fn riffs(groove: Groove) -> &'static [&'static [(usize, usize, Step)]] {
 struct Plan {
     style: Style,
     tonic: i32,
+    bass_octave: i32,
+    riff_index: usize,
     riff: &'static [(usize, usize, Step)],
     theme: Bar,
     rise: Bar,
+    close_index: usize,
     close: &'static [(usize, usize)],
     arp: usize,
 }
@@ -277,9 +280,11 @@ fn plan(settings: &Settings) -> Plan {
         usize::try_from(rng.range(u64::try_from(options).expect("few"))).expect("index")
     };
     let cadences = melody::cadences(style.groove);
-    let close = cadences[choose(cadences.len())];
+    let close_index = choose(cadences.len());
+    let close = cadences[close_index];
     let riffs = riffs(style.groove);
-    let riff = riffs[choose(riffs.len())];
+    let riff_index = choose(riffs.len());
+    let riff = riffs[riff_index];
     let arp = choose(4);
     let up = if choose(2) == 0 { 1 } else { -1 };
     let centre = i32::try_from(choose(3)).expect("small") + 2;
@@ -291,9 +296,12 @@ fn plan(settings: &Settings) -> Plan {
     Plan {
         style,
         tonic: 36 + settings.key,
+        bass_octave: 0,
+        riff_index,
         riff,
         theme,
         rise,
+        close_index,
         close,
         arp,
     }
@@ -365,7 +373,7 @@ fn bass(tracks: &mut [Vec<Note>; 3], plan: &Plan, bar: usize, power: f64) {
     if bar < 4 || bar == BARS - 1 {
         // The intro and the last bar hold the root.
         tracks[0].push(Note {
-            pitch: root,
+            pitch: root + plan.bass_octave,
             start: bar * 16,
             len: if bar == BARS - 1 { 12 } else { 16 },
             velocity: velocity(58.0 + power * 30.0),
@@ -393,7 +401,7 @@ fn bass(tracks: &mut [Vec<Note>; 3], plan: &Plan, bar: usize, power: f64) {
             Step::Octave | Step::Lead => root + 12,
         };
         tracks[0].push(Note {
-            pitch,
+            pitch: pitch + plan.bass_octave,
             start: bar * 16 + slot,
             len: length,
             velocity: velocity(50.0 + power * 38.0 + if slot == 0 { 10.0 } else { 0.0 }),
@@ -442,6 +450,58 @@ pub(super) fn compose(settings: &Settings) -> [Vec<Note>; 3] {
         lead(&mut tracks, &plan, bar, power);
     }
     tracks
+}
+
+/// Compose one replacement part against the same harmony as the current seed.
+/// `variation` changes only choices local to the requested part.
+pub(super) fn compose_track(settings: &Settings, track: usize, variation: u64) -> Vec<Note> {
+    let mut plan = plan(settings);
+    let mut rng = Rng::new(settings.seed ^ variation ^ 0x7c31_09e5_4a26_b8df);
+    let choose_other = |count: usize, current: usize| {
+        (current
+            + 1
+            + usize::try_from(variation % u64::try_from(count - 1).expect("multiple choices"))
+                .expect("bounded choice"))
+            % count
+    };
+
+    match track {
+        0 => {
+            let choices = riffs(plan.style.groove);
+            plan.riff_index = choose_other(choices.len(), plan.riff_index);
+            plan.riff = choices[plan.riff_index];
+            plan.bass_octave = match variation % 3 {
+                0 => -12,
+                1 => 0,
+                _ => 12,
+            };
+        }
+        1 => plan.arp = choose_other(4, plan.arp),
+        2 => {
+            let cadences = melody::cadences(plan.style.groove);
+            plan.close_index = choose_other(cadences.len(), plan.close_index);
+            plan.close = cadences[plan.close_index];
+            let up = if rng.range(2) == 0 { 1 } else { -1 };
+            let center = i32::try_from(rng.range(3)).expect("small") + 2;
+            let theme_rhythm = melody::rhythm(&mut rng, plan.style.groove);
+            let rise_rhythm = melody::rhythm(&mut rng, plan.style.groove);
+            plan.theme = melody::invent(&mut rng, &theme_rhythm, plan.style.verse[0], center, up);
+            plan.rise = melody::invent(&mut rng, &rise_rhythm, plan.style.lift[0], center + 1, -up);
+        }
+        _ => return Vec::new(),
+    }
+
+    let mut tracks: [Vec<Note>; 3] = std::array::from_fn(|_| Vec::new());
+    for bar in 0..BARS {
+        let power = intensity(bar, settings.energy);
+        match track {
+            0 => bass(&mut tracks, &plan, bar, power),
+            1 => accompaniment(&mut tracks, &plan, bar, power),
+            2 => lead(&mut tracks, &plan, bar, power),
+            _ => unreachable!(),
+        }
+    }
+    std::mem::take(&mut tracks[track])
 }
 
 #[cfg(test)]

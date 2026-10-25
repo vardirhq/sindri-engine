@@ -169,6 +169,7 @@ impl ComposerApp {
         for key in keys {
             match (self.mode, key) {
                 (Mode::Music, Key::Space) => self.toggle_play(),
+                (Mode::Music, Key::R) => self.regenerate_track(),
                 (Mode::Music, Key::Z) if command && shift => self.redo_edit(),
                 (Mode::Music, Key::Z) if command => self.undo_edit(),
                 (Mode::Music, Key::Y) if command => self.redo_edit(),

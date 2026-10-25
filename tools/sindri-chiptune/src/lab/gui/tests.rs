@@ -15,6 +15,84 @@ fn cached_candidates_do_not_change_when_draft_settings_change() {
 }
 
 #[test]
+fn generate_keeps_locked_tracks_for_each_candidate() {
+    let mut app = ComposerApp::default();
+    let bass_a = app.scores[0][0].clone();
+    let arp_b = app.scores[1][1].clone();
+    app.track_locks[0][0] = true;
+    app.track_locks[1][1] = true;
+    app.settings.seed = app.settings.seed.wrapping_add(81);
+    app.settings.key = 9;
+    app.settings.mood = crate::lab::Mood::Hopeful;
+    app.generate();
+    assert_eq!(app.scores[0][0], bass_a);
+    assert_eq!(app.scores[1][1], arp_b);
+    assert_eq!(app.generated.key, 2);
+    assert_eq!(app.generated.mood, crate::lab::Mood::Mysterious);
+    let scale = crate::lab::synth::scale(app.generated.mood);
+    assert!(
+        app.scores
+            .iter()
+            .flatten()
+            .flatten()
+            .all(|note| { scale.contains(&(note.pitch - app.generated.key).rem_euclid(12)) })
+    );
+    assert!(app.status.contains("locked tracks were kept"));
+}
+
+#[test]
+fn regenerating_one_track_keeps_the_rest_and_can_be_undone() {
+    let mut app = ComposerApp {
+        selected: 1,
+        edit_track: 2,
+        ..ComposerApp::default()
+    };
+    let before = app.scores[1].clone();
+    app.regenerate_track();
+    assert_ne!(app.scores[1][2], before[2]);
+    assert_eq!(app.scores[1][0], before[0]);
+    assert_eq!(app.scores[1][1], before[1]);
+    app.undo_edit();
+    assert_eq!(app.scores[1], before);
+}
+
+#[test]
+fn a_locked_track_cannot_be_regenerated() {
+    let mut app = ComposerApp::default();
+    app.track_locks[0][2] = true;
+    let before = app.scores[0].clone();
+    app.regenerate_track();
+    assert_eq!(app.scores[0], before);
+    assert!(app.status.contains("Unlock this track"));
+}
+
+#[test]
+fn regenerate_shortcut_replaces_the_selected_music_track() {
+    let context = egui::Context::default();
+    theme::install(&context);
+    let mut app = ComposerApp::default();
+    let before = app.scores[0][2].clone();
+    let input = egui::RawInput {
+        screen_rect: Some(egui::Rect::from_min_size(
+            egui::Pos2::ZERO,
+            egui::vec2(1360.0, 820.0),
+        )),
+        events: vec![egui::Event::Key {
+            key: egui::Key::R,
+            physical_key: None,
+            pressed: true,
+            repeat: false,
+            modifiers: egui::Modifiers::default(),
+        }],
+        ..Default::default()
+    };
+    context
+        .run_ui(input, |ui| app.workspace(ui))
+        .drop_without_applying_deltas();
+    assert_ne!(app.scores[0][2], before);
+}
+
+#[test]
 fn undo_and_redo_restore_the_edited_candidate() {
     let mut app = ComposerApp {
         selected: 1,
