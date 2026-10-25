@@ -7,6 +7,7 @@ const SECTIONS: [&str; 4] = ["INTRO", "THEME", "RISE", "RETURN"];
 const BARS_PER_SECTION: usize = BARS / SECTIONS.len();
 const TRACKS: [&str; 3] = ["Bass", "Arpeggio", "Lead"];
 const TRACK_COLUMN_WIDTH: f32 = 158.0;
+const TRACK_COLUMN_COMPACT: f32 = 132.0;
 const TRACK_ROW_HEIGHT: f32 = 24.0;
 const ARRANGEMENT_HEIGHT: f32 = TRACK_ROW_HEIGHT * 3.0;
 
@@ -39,13 +40,26 @@ impl ComposerApp {
     pub(super) fn track_headers(&mut self, ui: &mut egui::Ui) {
         let selected = self.selected;
         let index = self.edit_track;
+        let column_width = if self.compact {
+            TRACK_COLUMN_COMPACT
+        } else {
+            TRACK_COLUMN_WIDTH
+        };
         ui.allocate_ui_with_layout(
-            Vec2::new(TRACK_COLUMN_WIDTH, ARRANGEMENT_HEIGHT),
+            Vec2::new(column_width, ARRANGEMENT_HEIGHT),
             egui::Layout::top_down(egui::Align::Min),
             |ui| {
-                ui.spacing_mut().item_spacing = Vec2::new(2.0, 2.0);
+                ui.spacing_mut().item_spacing = Vec2::new(1.0, 2.0);
+                if self.compact {
+                    ui.spacing_mut().button_padding.x = 4.0;
+                }
                 for (track, name) in TRACKS.iter().enumerate() {
                     let color = TRACK_COLORS[track];
+                    let name = if self.compact && track == 1 {
+                        "Arp"
+                    } else {
+                        *name
+                    };
                     let focused = index == track;
                     let (fill, stroke) = if focused {
                         (color.gamma_multiply(0.16), color)
@@ -57,11 +71,14 @@ impl ComposerApp {
                     let select = ui
                         .horizontal(|ui| {
                             let label = egui::Button::new(
-                                RichText::new(*name).color(color).strong().size(10.5),
+                                RichText::new(name)
+                                    .color(color)
+                                    .strong()
+                                    .size(if self.compact { 9.5 } else { 10.5 }),
                             )
                             .fill(fill)
                             .stroke(Stroke::new(1.0, stroke))
-                            .min_size(Vec2::new(54.0, 20.0));
+                            .min_size(Vec2::new(if self.compact { 34.0 } else { 54.0 }, 20.0));
                             let select = ui.add(label).clicked();
                             theme::toggle(ui, locked, "Lock", theme::FORGE);
                             theme::toggle(ui, &mut sound.muted, "M", theme::DANGER);
@@ -154,15 +171,24 @@ impl ComposerApp {
     }
 
     pub(super) fn section_headers(&mut self, ui: &mut egui::Ui) {
-        let gap = ui.spacing().item_spacing.x;
-        let width = (ui.available_width() - TRACK_COLUMN_WIDTH - gap * 4.0) / 4.0;
+        let column_width = if self.compact {
+            TRACK_COLUMN_COMPACT
+        } else {
+            TRACK_COLUMN_WIDTH
+        };
         ui.horizontal(|ui| {
-            ui.add_space(TRACK_COLUMN_WIDTH);
+            if self.compact {
+                ui.spacing_mut().item_spacing.x = 3.0;
+                ui.spacing_mut().button_padding.x = 4.0;
+            }
+            let gap = ui.spacing().item_spacing.x;
+            let width = (ui.available_width() - column_width - gap * 4.0) / 4.0;
+            ui.add_space(column_width);
             for (section, name) in SECTIONS.iter().enumerate() {
                 let first_bar = section * BARS_PER_SECTION + 1;
                 let last_bar = first_bar + BARS_PER_SECTION - 1;
                 let label = RichText::new(format!("{name}\n{first_bar}–{last_bar}"))
-                    .size(10.5)
+                    .size(if self.compact { 9.0 } else { 10.5 })
                     .strong();
                 let (fill, stroke) = if self.section == section {
                     (theme::EMBER, theme::FORGE)
