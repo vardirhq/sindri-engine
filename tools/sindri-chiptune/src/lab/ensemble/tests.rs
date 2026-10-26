@@ -2,42 +2,38 @@ use super::*;
 use std::collections::BTreeSet;
 
 #[test]
-fn ensembles_are_seeded_diverse_and_leave_room_for_silence() {
-    let mut palettes = BTreeSet::new();
-    let mut plans = BTreeSet::new();
-    let mut omitted = false;
-    for seed in 0..64 {
-        let settings = Settings {
-            seed,
-            ..Settings::default()
-        };
-        let rack = generate(&settings);
-        assert_eq!(rack, generate(&settings));
-        rack.arrangement.validate().unwrap();
-        assert_eq!(rack.arrangement.version, VERSION);
-        assert!(rack.arrangement.sections.iter().all(|mask| *mask != 0));
-        assert!(rack.arrangement.active(1, 2) && rack.arrangement.active(2, 2));
-        assert!(rack.arrangement.sections[0].count_ones() <= 2);
-        assert!(
-            rack.arrangement.sections[2].count_ones() >= rack.arrangement.sections[1].count_ones()
-        );
-        palettes.insert(format!("{:?}", rack.tracks.map(|sound| sound.preset)));
-        plans.insert(rack.arrangement.sections);
-        omitted |=
-            (0..5).any(|layer| (0..4).all(|section| !rack.arrangement.active(section, layer)));
+fn seeded_palettes_preserve_every_layers_natural_phrases() {
+    for mood in [
+        Mood::Mysterious,
+        Mood::Hopeful,
+        Mood::Tense,
+        Mood::Melancholic,
+    ] {
+        let mut palettes = BTreeSet::new();
+        for energy in [0.05, 0.45, 1.0] {
+            for seed in 0..64 {
+                let settings = Settings {
+                    seed,
+                    energy,
+                    mood,
+                    ..Settings::default()
+                };
+                let rack = generate(&settings);
+                assert_eq!(rack, generate(&settings));
+                rack.arrangement.validate().unwrap();
+                assert_eq!(rack.arrangement.version, VERSION);
+                assert_eq!(rack.arrangement.sections, [31; 4]);
+                palettes.insert(format!("{:?}", rack.tracks.map(|sound| sound.preset)));
+            }
+        }
+        assert_eq!(palettes.len(), 3);
     }
-    assert_eq!(palettes.len(), 3);
-    assert_eq!(plans.len(), 4);
-    assert!(
-        omitted,
-        "some ensembles should omit a layer for the entire song"
-    );
 }
 
 #[test]
 fn version_one_seed_42_is_a_stable_reference() {
     let rack = generate(&Settings::default());
-    assert_eq!(rack.arrangement.sections, [16, 21, 21, 5]);
+    assert_eq!(rack.arrangement.sections, [31; 4]);
     assert_eq!(rack.channel(0).preset, Preset::WarmTriangle);
     assert_eq!(rack.channel(1).preset, Preset::Glass);
     assert_eq!(rack.channel(2).preset, Preset::HollowPulse);

@@ -308,10 +308,10 @@ Engine ❌ · Editor ❌ · Decay ❌ · Proof ❌ — parity row *Procedural mu
 <summary>Evidence</summary>
 
 Sound Lab composes and edits a deterministic 32-bar score. Ensemble version 1
-uses a separate seeded stream to choose coordinated instrument presets and four
-section masks. Some ensembles omit drums or arpeggio altogether. The masks are
-saved explicitly, while legacy sources without masks retain their full-layer
-mix. Smooth gain changes preserve effect tails, and MIDI clips melodic notes at
+uses a separate seeded stream to choose coordinated instrument presets. All layers
+are enabled in every section by default, preserving the note composer's natural
+phrases. Section rests are manual choices; masks are saved explicitly, while
+legacy sources without masks retain their full-layer mix. Smooth gain changes preserve effect tails, and MIDI clips melodic notes at
 section rests without altering the editable source.
 
 The workstation preserves notes, sound presets and layer participation

@@ -1,4 +1,4 @@
-//! Versioned ensemble choices: coordinated sounds and deliberate section rests.
+//! Seeded instrument palettes and explicit, manually editable section participation.
 use super::{
     Mood, Note, Rng, Settings,
     instruments::{Preset, Rack},
@@ -7,11 +7,6 @@ use serde::{Deserialize, Serialize};
 
 pub(super) const VERSION: u8 = 1;
 const ALL: u8 = 31;
-const BASS: u8 = 1;
-const ARP: u8 = 2;
-const LEAD: u8 = 4;
-const DRUMS: u8 = 8;
-const CHORDS: u8 = 16;
 
 /// Explicit masks keep a saved arrangement independent of future generator changes.
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -130,45 +125,11 @@ pub(super) fn generate(settings: &Settings) -> Rack {
     for (layer, preset) in palette.into_iter().enumerate() {
         rack.channel_mut(layer).preset = preset;
     }
-    let mut sections = match rng.range(4) {
-        0 => [
-            BASS | CHORDS,
-            BASS | LEAD | DRUMS | CHORDS,
-            ALL,
-            BASS | LEAD | CHORDS,
-        ],
-        1 => [
-            CHORDS,
-            BASS | LEAD | CHORDS,
-            BASS | LEAD | CHORDS,
-            BASS | LEAD,
-        ],
-        2 => [
-            BASS | ARP,
-            BASS | ARP | LEAD | DRUMS,
-            BASS | ARP | LEAD | DRUMS,
-            BASS | ARP | LEAD,
-        ],
-        _ => [
-            BASS,
-            BASS | LEAD,
-            BASS | LEAD
-                | if settings.mood == Mood::Tense {
-                    DRUMS
-                } else {
-                    CHORDS
-                },
-            BASS | LEAD,
-        ],
-    };
-    if settings.energy < 0.3 {
-        for section in &mut sections {
-            *section &= !ARP;
-        }
-    }
+    // The note composer already shapes phrases and entrances. Random section
+    // masks can cut through those phrases, so only manual edits introduce rests.
     rack.arrangement = Arrangement {
         version: VERSION,
-        sections,
+        sections: [ALL; 4],
     };
     rack
 }
