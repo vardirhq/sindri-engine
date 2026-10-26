@@ -52,12 +52,18 @@ parity = "Particle system (emitters, curves, shapes)"
 tests = [
   "crates/sindri-scene/src/effects/emitter_tests.rs",
   "crates/sindri-scene/src/effects/particles.rs",
+  "tools/sindri-particle-lab/src/preview.rs",
+  "editor/src/native/particle_lab.rs",
   "crates/sindri-decay/tests/a_script_drives_particles.rs",
   "games/lamplighter/tests/sparkle_and_dust.rs",
 ]
 proof = ["games/lamplighter", "games/low-tide"]
 docs = ["docs/particles.md"]
 detail = """
+Particle Lab exposes the emitter in the editor and browser with presets,
+a shared engine-simulation motion preview and JSON export. Its initial preview
+accepts a dropped preview texture, but does not reproduce scene lighting.
+
 `sindri.particles` is an emitter that keeps throwing into the same pool while
 it plays: a rate and a cap, lifetime, speed, direction and spread with
 variation, a point, circle, box or ring shape at an offset, gravity, drag, size

@@ -66,6 +66,7 @@ mod normal_studio;
 mod occlusion_view;
 mod overlay;
 mod palette_view;
+mod particle_lab;
 mod particle_preview;
 mod play_cursor;
 mod pointer;
@@ -303,6 +304,8 @@ struct EditorApp {
     /// The picture open in the Normal Map Studio. Beside the slicer, and
     /// exclusive with it in the inspector for the same reason.
     normal_studio: Option<crate::normal_studio::NormalStudio>,
+    particle_lab: Option<sindri_particle_lab::ParticleLab>,
+    particle_lab_target: Option<EntityId>,
     /// What the Normal map tab keeps between frames: its GPU stage above all.
     studio_canvas: normal_studio::StudioCanvas,
     /// The Timeline panel's playhead, choice and preview.

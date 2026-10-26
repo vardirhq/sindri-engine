@@ -23,6 +23,7 @@ sindri-platform = { path = "../crates/sindri-platform" }
 sindri-render = { path = "../crates/sindri-render" }
 sindri-runtime = { path = "../crates/sindri-runtime" }
 sindri-scene = { path = "../crates/sindri-scene" }
+sindri-particle-lab = { path = "../tools/sindri-particle-lab" }
 sindri-weave = { path = "../crates/sindri-weave" }
 weave = { path = "../weave/crates/weave" }
 serde.workspace = true

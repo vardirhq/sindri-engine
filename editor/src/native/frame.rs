@@ -78,6 +78,7 @@ impl eframe::App for EditorApp {
             self.lifecycle.state() == sindri_core::EngineState::Running,
         );
         self.frame(ui);
+        self.show_particle_lab(ui.ctx());
         self.drain_play_cursor(ui.ctx());
         self.drive_benchmark(ui.ctx());
         self.profiler.end(began.elapsed());

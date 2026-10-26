@@ -72,3 +72,19 @@ trails dust while it runs and puffs on a hard landing, switched by
 `scripts/hero.decay`. `games/lamplighter/tests/sparkle_and_dust.rs` checks both. Low Tide's treads throw
 dust and its engine smokes while the crawler drives, and a swimmer and a diver
 throw spray and bubbles (`games/low-tide/tests/the_basin_is_lit.rs`).
+
+## Particle Lab
+
+Particle Lab is an editor window and a browser tool. The preview advances the
+same `Effects2d` emitter simulation as a game, using the live values in the
+form. Six starter presets, a pause control, bursts, and background colors help
+with exploration. The browser copies or downloads a `sindri.particles`
+component as JSON and can reload pasted component JSON. In the editor, select an entity with a Particles component,
+open Particle Lab and use Apply to write a validated component in one undoable
+edit. A changed selection prevents accidentally applying to a different entity.
+
+The editor loads the selected emitter’s project texture when available. Drop an image onto the preview, or use the browser image picker, to preview another texture on rotating particles. Without an
+image, the preview uses circles. It does not reproduce scene lighting, so check
+the final look in the Scene view. A texture reference must name an image in the
+project; preset selection preserves the current reference. The emitter has the
+same limits as the rest of the engine, described above.

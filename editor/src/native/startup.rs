@@ -183,6 +183,8 @@ impl EditorApp {
             play_audio: crate::play_audio::PlayAudio::new(crate::play_audio::native()),
             sheet_camera: super::sprite_sheet_view::SheetCamera::default(),
             normal_studio: None,
+            particle_lab: None,
+            particle_lab_target: None,
             studio_canvas: super::normal_studio::StudioCanvas::default(),
             timeline: crate::timeline::TimelineState::default(),
             textured_revision: TexturedAt::default(),
