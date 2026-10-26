@@ -67,7 +67,7 @@ call rather than a second rendering path.
 
 Engine ✅ · Editor 🟡 · Decay ✅ · Proof ✅ — parity row *Particle system (emitters, curves, shapes)*
 
-**Tested by:** [`crates/sindri-scene/src/effects/emitter_tests.rs`](../../crates/sindri-scene/src/effects/emitter_tests.rs), [`crates/sindri-scene/src/effects/particles.rs`](../../crates/sindri-scene/src/effects/particles.rs), [`crates/sindri-decay/tests/a_script_drives_particles.rs`](../../crates/sindri-decay/tests/a_script_drives_particles.rs), [`games/lamplighter/tests/sparkle_and_dust.rs`](../../games/lamplighter/tests/sparkle_and_dust.rs)
+**Tested by:** [`crates/sindri-scene/src/effects/emitter_tests.rs`](../../crates/sindri-scene/src/effects/emitter_tests.rs), [`crates/sindri-scene/src/effects/particles.rs`](../../crates/sindri-scene/src/effects/particles.rs), [`tools/sindri-particle-lab/src/preview.rs`](../../tools/sindri-particle-lab/src/preview.rs), [`editor/src/native/particle_lab.rs`](../../editor/src/native/particle_lab.rs), [`crates/sindri-decay/tests/a_script_drives_particles.rs`](../../crates/sindri-decay/tests/a_script_drives_particles.rs), [`games/lamplighter/tests/sparkle_and_dust.rs`](../../games/lamplighter/tests/sparkle_and_dust.rs)
 
 **Exercised in:** [`games/lamplighter`](../../games/lamplighter), [`games/low-tide`](../../games/low-tide)
 
@@ -75,6 +75,10 @@ Engine ✅ · Editor 🟡 · Decay ✅ · Proof ✅ — parity row *Particle sys
 
 <details markdown="1">
 <summary>Evidence</summary>
+
+Particle Lab exposes the emitter in the editor and browser with presets,
+a shared engine-simulation motion preview and JSON export. Its initial preview
+accepts a dropped preview texture, but does not reproduce scene lighting.
 
 `sindri.particles` is an emitter that keeps throwing into the same pool while
 it plays: a rate and a cap, lifetime, speed, direction and spread with
