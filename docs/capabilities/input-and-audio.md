@@ -295,7 +295,7 @@ Available in the standalone Sound Lab, with no engine, editor panel, or Decay co
 
 Engine ❌ · Editor ❌ · Decay ❌ · Proof ❌ — parity row *Procedural music authoring / MIDI note editing*
 
-**Tested by:** [`tools/sindri-chiptune/src/lab/composer/tests.rs`](../../tools/sindri-chiptune/src/lab/composer/tests.rs), [`tools/sindri-chiptune/src/lab/ensemble/tests.rs`](../../tools/sindri-chiptune/src/lab/ensemble/tests.rs), [`tools/sindri-chiptune/src/lab/seed.rs`](../../tools/sindri-chiptune/src/lab/seed.rs), [`tools/sindri-chiptune/src/lab/synth/participation.rs`](../../tools/sindri-chiptune/src/lab/synth/participation.rs), [`tools/sindri-chiptune/src/lab/gui/tests.rs`](../../tools/sindri-chiptune/src/lab/gui/tests.rs)
+**Tested by:** [`tools/sindri-chiptune/src/lab/composer/tests.rs`](../../tools/sindri-chiptune/src/lab/composer/tests.rs), [`tools/sindri-chiptune/src/lab/ensemble/tests.rs`](../../tools/sindri-chiptune/src/lab/ensemble/tests.rs), [`tools/sindri-chiptune/src/lab/seed.rs`](../../tools/sindri-chiptune/src/lab/seed.rs), [`tools/sindri-chiptune/src/lab/synth/participation.rs`](../../tools/sindri-chiptune/src/lab/synth/participation.rs), [`tools/sindri-chiptune/src/lab/gui/tests.rs`](../../tools/sindri-chiptune/src/lab/gui/tests.rs), [`tools/sindri-chiptune/src/lab/gui/tools/tests.rs`](../../tools/sindri-chiptune/src/lab/gui/tools/tests.rs), [`tools/sindri-chiptune/src/lab/gui/tools/harmony.rs`](../../tools/sindri-chiptune/src/lab/gui/tools/harmony.rs), [`tools/sindri-chiptune/src/lab/phrases.rs`](../../tools/sindri-chiptune/src/lab/phrases.rs)
 
 **See:** [`tools/sindri-chiptune/README.md`](../../tools/sindri-chiptune/README.md)
 
@@ -321,6 +321,14 @@ phrases via fixed FNV-1a/64 hashing. Saved candidate A phrases are checked again
 their numeric seed; candidate B saves its exact incremented numeric seed. The
 random button uses OS entropy natively and browser Crypto on the web. The CLI
 also supports --random-seed and --classic, and --open preserves saved choices.
+
+The standalone workstation also regenerates a selected bar range without
+changing surrounding notes, auditions coordinated ensembles while preserving
+mixes and section choices, inspects selected notes against the written harmony,
+and stores up to 16 named snapshots with the song. Snapshot restore and sound
+changes use the same undo/redo history as score edits. Phrase replacements
+follow edited bass roots; harmony inspection describes written notes rather
+than diagnosing the rendered audio.
 
 These are standalone-tool capabilities. The parity row remains absent in the
 engine and editor until composition is available on those surfaces.

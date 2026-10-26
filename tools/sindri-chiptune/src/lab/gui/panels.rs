@@ -10,6 +10,12 @@ const KEYS: [&str; 12] = [
 
 impl ComposerApp {
     pub(super) fn controls(&mut self, ui: &mut egui::Ui) {
+        self.compose_controls(ui);
+        self.ensemble_audition_controls(ui);
+        self.snapshot_controls(ui);
+    }
+
+    fn compose_controls(&mut self, ui: &mut egui::Ui) {
         theme::card(ui, "COMPOSE", ACCENT, |ui| {
             ui.small("Shape the next song, then generate two candidates.");
             ui.add_space(4.0);
@@ -100,6 +106,7 @@ impl ComposerApp {
     }
 
     pub(super) fn instrument_rack(&mut self, ui: &mut egui::Ui) {
+        self.ensemble_audition_controls(ui);
         theme::card(ui, "MIXER", ACCENT, |ui| {
             ui.small("Sounds and levels change live; notes stay intact.");
             ui.horizontal(|ui| {

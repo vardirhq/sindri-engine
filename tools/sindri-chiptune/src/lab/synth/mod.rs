@@ -19,7 +19,7 @@ mod voice;
 use crate::lab::{BARS, Note, STEPS, Settings, instruments::Rack};
 use dsp::{OnePole, RATE, db, pan};
 use fx::{Chorus, Compressor, Echo, Limiter, Reverb};
-pub(in crate::lab) use harmony::scale;
+pub(in crate::lab) use harmony::{bass_at, scale};
 pub(in crate::lab) use patch::Role;
 use voice::{PadVoice, ToneVoice};
 

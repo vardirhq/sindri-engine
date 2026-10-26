@@ -317,6 +317,7 @@ impl ComposerApp {
         theme::well(&painter, rect);
         let hover = response.hover_pos().filter(|pos| grid.contains(*pos));
         lanes(&painter, rect, grid, (base, begin, rows, steps), hover);
+        self.paint_phrase_range(&painter, grid, begin, steps);
         let place = |note: &Note| -> Option<egui::Rect> {
             if note.start + note.len <= begin
                 || note.start >= begin + steps

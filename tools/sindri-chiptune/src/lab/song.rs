@@ -4,6 +4,14 @@ use serde::{Deserialize, Serialize};
 
 /// The `.sindrisong` document version this build writes and reads.
 pub(super) const FORMAT: u32 = 1;
+pub(super) const MAX_SNAPSHOTS: usize = 16;
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct NamedSnapshot {
+    pub(super) name: String,
+    pub(super) song: SongFile,
+}
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -19,6 +27,8 @@ pub(super) struct SongFile {
     pub(super) rack: Rack,
     /// Bass, arpeggio and lead, as edited; the percussion voice is generated.
     pub(super) tracks: [Vec<Note>; 3],
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub(super) snapshots: Vec<NamedSnapshot>,
 }
 
 impl SongFile {
@@ -33,6 +43,7 @@ impl SongFile {
             mood: settings.mood,
             rack: settings.rack.clone(),
             tracks: tracks.clone(),
+            snapshots: Vec::new(),
         }
     }
 
@@ -56,6 +67,25 @@ impl SongFile {
 
     pub(super) fn from_json(text: &str) -> Result<Self, String> {
         let song: Self = serde_json::from_str(text).map_err(|e| e.to_string())?;
+        song.validate()?;
+        if song.snapshots.len() > MAX_SNAPSHOTS {
+            return Err("A song can contain at most 16 snapshots.".into());
+        }
+        for snapshot in &song.snapshots {
+            if snapshot.name.trim().is_empty()
+                || snapshot.name.chars().count() > 64
+                || snapshot.name.chars().any(char::is_control)
+                || !snapshot.song.snapshots.is_empty()
+            {
+                return Err("A snapshot needs a short single-line name and cannot contain nested snapshots.".into());
+            }
+            snapshot.song.validate()?;
+        }
+        Ok(song)
+    }
+
+    fn validate(&self) -> Result<(), String> {
+        let song = self;
         if let Some(text) = &song.seed_text
             && super::seed::parse(text)?.value != song.seed
         {
@@ -83,7 +113,7 @@ impl SongFile {
             return Err("A chord level must be 0..1.".into());
         }
         midi::validate(&song.tracks)?;
-        Ok(song)
+        Ok(())
     }
 }
 
