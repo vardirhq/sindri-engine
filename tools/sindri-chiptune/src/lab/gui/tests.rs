@@ -452,6 +452,11 @@ fn generation_preserves_sounds_notes_and_participation_independently() {
             [false, true, true, true][section]
         );
     }
+    for layer in [0, 2, 3, 4] {
+        for section in 0..4 {
+            assert!(app.settings.rack.arrangement.active(section, layer));
+        }
+    }
     let expected = crate::lab::ensemble::generate(&Settings {
         seed: 900,
         ..Settings::default()
@@ -515,5 +520,27 @@ fn invalid_seed_input_keeps_the_last_valid_seed() {
         app.edit_seed();
         assert!(app.seed_error.is_some());
         assert_eq!(app.settings.seed, seed);
+    }
+}
+
+#[test]
+fn new_candidates_keep_all_layers_and_manual_sections_survive_when_requested() {
+    let mut app = ComposerApp::default();
+    for rack in &app.candidate_racks {
+        assert_eq!(rack.arrangement.sections, [31; 4]);
+    }
+    app.settings.rack.arrangement.sections = [16, 21, 21, 5];
+    let saved = app.song_file();
+    app.load_song(saved);
+    assert_eq!(app.settings.rack.arrangement.sections, [16, 21, 21, 5]);
+    app.ensemble_options.arrangement = false;
+    app.settings.seed = 900;
+    app.generate();
+    assert_eq!(app.settings.rack.arrangement.sections, [16, 21, 21, 5]);
+    app.ensemble_options.arrangement = true;
+    app.generate();
+    for candidate in 0..2 {
+        app.choose_candidate(candidate);
+        assert_eq!(app.settings.rack.arrangement.sections, [31; 4]);
     }
 }

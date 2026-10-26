@@ -211,18 +211,18 @@ in the left inspector on desktop.
 
 ### Seeded ensembles and section participation
 
-New songs use ensemble generator version 1: the seed and mood choose one of
-three coordinated instrument palettes for that mood, and one of four section
-arrangements. Intro is sparse, Theme introduces the melody, Rise develops the
-ensemble, and Return thins it again. Some ensembles omit percussion or arpeggio
-throughout. Low density also removes arpeggio participation. These decisions use
-a separate random stream, so the existing note composer keeps its seeded output.
+New songs use the seed and mood to choose one of three coordinated instrument
+palettes for that mood. All five layers remain enabled across every section,
+so the note composer's natural entrances and phrases are not cut off by random
+section masks. Sound choices use a separate random stream, so the existing
+note composer keeps its seeded output.
 
 The A and B candidates retain their own sounds and mixes. Generate changes
-unlocked instrument presets and section participation, preserving volume,
-octave, mute/solo, and Room & echo. Under Song, disable **Seed instrument sounds**
-or **Seed layer arrangement** to keep those choices entirely manual. Under
-Track, **Keep notes**, **Keep sound**, and **Keep arrangement** are independent.
+unlocked instrument presets, preserving volume, octave, mute/solo, and Room &
+echo. Under Song, disable **Seed instrument sounds** to keep sounds manual.
+**Reset layer sections** enables every section for unlocked layers on Generate;
+disable it to retain manual section choices. Under Track, **Keep notes**,
+**Keep sound**, and **Keep arrangement** are independent.
 **Plays in** lets you switch each layer on or off in Intro, Theme, Rise, and
 Return. Arrangement rows display REST in inactive sections; the editable notes
 remain intact. Solo respects section participation. Layer transitions fade

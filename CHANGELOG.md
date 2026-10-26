@@ -8,6 +8,9 @@ Total output lines: 1311
 
 # Changelog
 
+- Keep every Sound Lab layer enabled during seeded generation so section masks
+  do not cut off musical phrases; retain seeded sounds and manual section controls.
+
 - Seed Sound Lab instrument ensembles and per-section layer participation, with
   independent note, sound, and arrangement locks; preserve existing song mixes
   and add random seeds plus repeatable word/phrase seeds.

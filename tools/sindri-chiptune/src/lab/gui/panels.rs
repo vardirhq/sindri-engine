@@ -81,7 +81,10 @@ impl ComposerApp {
             ui.checkbox(&mut self.ensemble_options.sounds, "Seed instrument sounds");
             ui.checkbox(
                 &mut self.ensemble_options.arrangement,
-                "Seed layer arrangement",
+                "Reset layer sections",
+            )
+            .on_hover_text(
+                "Enable every section for unlocked layers on Generate. Section rests are manual choices.",
             );
             ui.add_space(8.0);
             let generate = theme::primary(theme::label(icons::ICON_AUTO_AWESOME, "Generate A + B"))
