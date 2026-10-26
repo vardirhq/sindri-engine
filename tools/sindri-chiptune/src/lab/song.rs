@@ -1,5 +1,5 @@
 //! `.sindrisong`: everything needed to reopen, re-edit and re-render one score.
-use super::{Mood, Note, Settings, instruments::Rack, midi};
+use super::{Generation, Mood, Note, Settings, instruments::Rack, midi};
 use serde::{Deserialize, Serialize};
 
 /// The `.sindrisong` document version this build writes and reads.
@@ -18,6 +18,8 @@ pub(super) struct NamedSnapshot {
 pub(super) struct SongFile {
     pub(super) format: u32,
     pub(super) seed: u64,
+    #[serde(default)]
+    pub(super) generation: Generation,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub(super) seed_text: Option<String>,
     pub(super) bpm: f64,
@@ -36,6 +38,7 @@ impl SongFile {
         Self {
             format: FORMAT,
             seed: settings.seed,
+            generation: settings.generation,
             seed_text: settings.seed_text.clone(),
             bpm: settings.bpm,
             key: settings.key,
@@ -51,6 +54,7 @@ impl SongFile {
     pub(super) fn settings(&self) -> Settings {
         Settings {
             seed: self.seed,
+            generation: self.generation,
             seed_text: self.seed_text.clone(),
             bpm: self.bpm,
             key: self.key,
@@ -121,6 +125,23 @@ impl SongFile {
 mod tests {
     use super::*;
     use crate::lab::compose_with;
+
+    #[test]
+    fn missing_generator_version_reopens_legacy_and_new_versions_round_trip() {
+        let settings = Settings::default();
+        let source = SongFile::new(&settings, &compose_with(&settings));
+        let mut json = serde_json::to_value(&source).unwrap();
+        json.as_object_mut().unwrap().remove("generation");
+        let old = SongFile::from_json(&json.to_string()).unwrap();
+        assert_eq!(old.settings().generation, Generation::Legacy);
+        assert_eq!(old.tracks, source.tracks);
+        assert_eq!(
+            SongFile::from_json(&source.to_json()).unwrap().generation,
+            Generation::Musical
+        );
+        json["generation"] = serde_json::json!("future");
+        assert!(SongFile::from_json(&json.to_string()).is_err());
+    }
 
     #[test]
     fn a_song_round_trips_with_its_edits_and_mixer() {

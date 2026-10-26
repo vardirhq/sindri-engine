@@ -295,7 +295,7 @@ Available in the standalone Sound Lab, with no engine, editor panel, or Decay co
 
 Engine ❌ · Editor ❌ · Decay ❌ · Proof ❌ — parity row *Procedural music authoring / MIDI note editing*
 
-**Tested by:** [`tools/sindri-chiptune/src/lab/composer/tests.rs`](../../tools/sindri-chiptune/src/lab/composer/tests.rs), [`tools/sindri-chiptune/src/lab/ensemble/tests.rs`](../../tools/sindri-chiptune/src/lab/ensemble/tests.rs), [`tools/sindri-chiptune/src/lab/seed.rs`](../../tools/sindri-chiptune/src/lab/seed.rs), [`tools/sindri-chiptune/src/lab/synth/participation.rs`](../../tools/sindri-chiptune/src/lab/synth/participation.rs), [`tools/sindri-chiptune/src/lab/gui/tests.rs`](../../tools/sindri-chiptune/src/lab/gui/tests.rs), [`tools/sindri-chiptune/src/lab/gui/tools/tests.rs`](../../tools/sindri-chiptune/src/lab/gui/tools/tests.rs), [`tools/sindri-chiptune/src/lab/gui/tools/harmony.rs`](../../tools/sindri-chiptune/src/lab/gui/tools/harmony.rs), [`tools/sindri-chiptune/src/lab/phrases.rs`](../../tools/sindri-chiptune/src/lab/phrases.rs), [`tools/sindri-chiptune/src/lab/development/tests.rs`](../../tools/sindri-chiptune/src/lab/development/tests.rs), [`tools/sindri-chiptune/src/lab/gui/development/tests.rs`](../../tools/sindri-chiptune/src/lab/gui/development/tests.rs)
+**Tested by:** [`tools/sindri-chiptune/src/lab/composer/tests.rs`](../../tools/sindri-chiptune/src/lab/composer/tests.rs), [`tools/sindri-chiptune/src/lab/composer/musical/tests.rs`](../../tools/sindri-chiptune/src/lab/composer/musical/tests.rs), [`tools/sindri-chiptune/src/lab/synth/harmony.rs`](../../tools/sindri-chiptune/src/lab/synth/harmony.rs), [`tools/sindri-chiptune/src/lab/song.rs`](../../tools/sindri-chiptune/src/lab/song.rs), [`tools/sindri-chiptune/src/lab/gui/seed.rs`](../../tools/sindri-chiptune/src/lab/gui/seed.rs), [`tools/sindri-chiptune/src/lab/ensemble/tests.rs`](../../tools/sindri-chiptune/src/lab/ensemble/tests.rs), [`tools/sindri-chiptune/src/lab/seed.rs`](../../tools/sindri-chiptune/src/lab/seed.rs), [`tools/sindri-chiptune/src/lab/synth/participation.rs`](../../tools/sindri-chiptune/src/lab/synth/participation.rs), [`tools/sindri-chiptune/src/lab/gui/tests.rs`](../../tools/sindri-chiptune/src/lab/gui/tests.rs), [`tools/sindri-chiptune/src/lab/gui/tools/tests.rs`](../../tools/sindri-chiptune/src/lab/gui/tools/tests.rs), [`tools/sindri-chiptune/src/lab/gui/tools/harmony.rs`](../../tools/sindri-chiptune/src/lab/gui/tools/harmony.rs), [`tools/sindri-chiptune/src/lab/phrases.rs`](../../tools/sindri-chiptune/src/lab/phrases.rs), [`tools/sindri-chiptune/src/lab/development/tests.rs`](../../tools/sindri-chiptune/src/lab/development/tests.rs), [`tools/sindri-chiptune/src/lab/gui/development/tests.rs`](../../tools/sindri-chiptune/src/lab/gui/development/tests.rs)
 
 **See:** [`tools/sindri-chiptune/README.md`](../../tools/sindri-chiptune/README.md)
 
@@ -306,6 +306,17 @@ Engine ❌ · Editor ❌ · Decay ❌ · Proof ❌ — parity row *Procedural mu
 
 <details markdown="1">
 <summary>Evidence</summary>
+
+New Sound Lab sessions use versioned Musical composition: a theme-derived Rise,
+modal eight-bar preparation/resolution, register-aware arpeggios that simplify
+under busy leads, and individual-voice chord inversion selection. Pad harmony
+follows bar roots instead of passing mid-bar bass tones. Preview and playback
+share the same deterministic voicing path. Saved sources and snapshots retain
+the composer version; missing fields select Legacy, which retains previous note
+and half-bar pad rules. The Song selector and CLI --generation legacy expose
+that path. Unknown versions are refused. Existing note locks preserve the
+composer version along with seed, key and mood. These rules have seed-sweep
+and compatibility tests, not a claim that music quality is objectively solved.
 
 Sound Lab composes and edits a deterministic 32-bar score. Ensemble version 1
 uses a separate seeded stream to choose coordinated instrument presets. All layers

@@ -354,11 +354,21 @@ impl Engine {
 
     fn change_chord(&mut self, step: usize) {
         let bar = step / 16;
-        let Some(root) = harmony::bass_at(&self.tracks[0], step, 8) else {
+        let modern = self.settings.generation == crate::lab::Generation::Musical;
+        if modern && !step.is_multiple_of(16) {
+            return;
+        }
+        let from = if modern { step / 16 * 16 } else { step };
+        let Some(root) = harmony::bass_at(&self.tracks[0], from, if modern { 16 } else { 8 })
+        else {
             return;
         };
         let s = &self.settings;
-        let chord = harmony::chord(root, s.key, s.mood, self.chord_centre);
+        let chord = if modern {
+            harmony::voiced_at(s, &self.tracks[0], step)
+        } else {
+            harmony::chord(root, s.key, s.mood, self.chord_centre)
+        };
         let centre: i32 = chord.iter().sum::<i32>() / i32::try_from(chord.len()).expect("chord");
         self.chord_centre = f64::from(centre).clamp(57.0, 67.0);
         let velocity = match bar / 8 {

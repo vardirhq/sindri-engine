@@ -28,11 +28,18 @@ pub(in crate::lab) fn generated_layers(settings: &Settings, bass: &[Note]) -> [V
                 velocity,
             });
         }
-        if step % 8 != 0 {
+        let modern = settings.generation == crate::lab::Generation::Musical;
+        let span = if modern { 16 } else { 8 };
+        if step % span != 0 {
             continue;
         }
-        if let Some(root) = harmony::bass_at(bass, step, 8) {
-            let voiced = harmony::chord(root, settings.key, settings.mood, centre);
+        let from = if modern { step / 16 * 16 } else { step };
+        if let Some(root) = harmony::bass_at(bass, from, if modern { 16 } else { 8 }) {
+            let voiced = if modern {
+                harmony::voiced_at(settings, bass, step)
+            } else {
+                harmony::chord(root, settings.key, settings.mood, centre)
+            };
             centre = f64::from(voiced.iter().sum::<i32>())
                 / f64::from(u16::try_from(voiced.len()).expect("chord tones"));
             centre = centre.clamp(57.0, 67.0);
@@ -43,7 +50,7 @@ pub(in crate::lab) fn generated_layers(settings: &Settings, bass: &[Note]) -> [V
             chords.extend(voiced.into_iter().map(|pitch| Note {
                 pitch,
                 start: step,
-                len: 8,
+                len: span,
                 velocity,
             }));
         } else if let Some(last_start) = chords.last().map(|note| note.start) {
@@ -53,7 +60,7 @@ pub(in crate::lab) fn generated_layers(settings: &Settings, bass: &[Note]) -> [V
                 .rev()
                 .take_while(|note| note.start == last_start)
             {
-                note.len += 8;
+                note.len += span;
             }
         }
     }

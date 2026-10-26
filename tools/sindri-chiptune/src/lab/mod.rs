@@ -28,6 +28,7 @@ mod wav;
 #[derive(Clone, Debug, PartialEq)]
 struct Settings {
     seed: u64,
+    generation: Generation,
     seed_text: Option<String>,
     bpm: f64,
     key: i32,
@@ -35,6 +36,14 @@ struct Settings {
     mood: Mood,
     output: PathBuf,
     rack: instruments::Rack,
+}
+/// Versioned composition and accompaniment rules; missing saved fields mean legacy.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+enum Generation {
+    #[default]
+    Legacy,
+    Musical,
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
@@ -48,6 +57,7 @@ impl Settings {
     fn default() -> Self {
         Self {
             seed: 42,
+            generation: Generation::Musical,
             seed_text: None,
             bpm: BPM,
             key: 2,
@@ -156,6 +166,7 @@ mod tests {
     fn different_seeds_change_melody_and_accompaniment() {
         let a = compose_with(&Settings {
             seed: 42,
+            generation: Generation::Musical,
             ..Settings::default()
         });
         let b = compose_with(&Settings {

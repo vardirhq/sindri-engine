@@ -1,12 +1,13 @@
 //! The composer: a song's harmony, phrases, bass riff and arpeggio, planned
 //! once and repeated with purpose.
 //!
-//! Coherence comes from deliberate repetition. Each section loops four chords,
-//! one a bar. The tune is a period: a four-bar question that ends open and a
+//! Coherence comes from deliberate repetition. Legacy loops four chords;
+//! Musical shapes those loops into eight-bar harmonic answers. The tune is a period: a four-bar question that ends open and a
 //! four-bar answer that comes home, both built from one motif. The bass plays
 //! one riff all song, the arpeggio one figure per section, and the Return
 //! brings the theme back before a cadence ends it on the tonic.
 mod melody;
+mod musical;
 mod variation;
 
 use super::{BARS, Mood, Note, Rng, Settings};
@@ -263,6 +264,7 @@ fn riffs(groove: Groove) -> &'static [&'static [(usize, usize, Step)]] {
 
 /// Everything decided once per song, so every bar can be written from it.
 struct Plan {
+    musical: bool,
     style: Style,
     tonic: i32,
     bass_octave: i32,
@@ -294,8 +296,13 @@ fn plan(settings: &Settings) -> Plan {
     let rise_rhythm = melody::rhythm(&mut rng, style.groove);
     let theme = melody::invent(&mut rng, &theme_rhythm, style.verse[0], centre, up);
     // The rise sits higher and moves the other way, so it answers the theme.
-    let rise = melody::invent(&mut rng, &rise_rhythm, style.lift[0], centre + 1, -up);
+    let rise = if settings.generation == super::Generation::Musical {
+        musical::develop(&theme)
+    } else {
+        melody::invent(&mut rng, &rise_rhythm, style.lift[0], centre + 1, -up)
+    };
     Plan {
+        musical: settings.generation == super::Generation::Musical,
         style,
         tonic: 36 + settings.key,
         bass_octave: 0,
@@ -311,8 +318,7 @@ fn plan(settings: &Settings) -> Plan {
 
 /// The melody's bar `bar` in scale degrees: motif, sequence, or cadence.
 fn tune(plan: &Plan, bar: usize) -> Option<Bar> {
-    let style = plan.style;
-    let chord = style.chord(bar);
+    let chord = musical::chord(plan, bar);
     if bar < 4 {
         return None;
     }
@@ -361,7 +367,11 @@ fn lead(tracks: &mut [Vec<Note>; 3], plan: &Plan, bar: usize, power: f64) {
         tracks[2].push(Note {
             pitch: plan.style.pitch(plan.tonic + 24, degree),
             start: bar * 16 + slot,
-            len: length,
+            len: if plan.musical && bar % 4 == 3 && slot + length == 16 {
+                length.saturating_sub(1).max(1)
+            } else {
+                length
+            },
             velocity: velocity(52.0 + power * 34.0 + accent + hint),
         });
     }
@@ -369,8 +379,8 @@ fn lead(tracks: &mut [Vec<Note>; 3], plan: &Plan, bar: usize, power: f64) {
 
 fn bass(tracks: &mut [Vec<Note>; 3], plan: &Plan, bar: usize, power: f64) {
     let style = plan.style;
-    let chord = style.chord(bar);
-    let next = style.chord((bar + 1) % BARS);
+    let chord = musical::chord(plan, bar);
+    let next = musical::chord(plan, (bar + 1) % BARS);
     let root = style.pitch(plan.tonic, chord);
     if bar < 4 || bar == BARS - 1 {
         // The intro and the last bar hold the root.
@@ -415,7 +425,7 @@ fn bass(tracks: &mut [Vec<Note>; 3], plan: &Plan, bar: usize, power: f64) {
 /// intro to a climbing run in the rise.
 fn accompaniment(tracks: &mut [Vec<Note>; 3], plan: &Plan, bar: usize, power: f64) {
     let style = plan.style;
-    let degree = style.chord(bar);
+    let degree = musical::chord(plan, bar);
     let figures: [&[i32]; 4] = [
         &[0, 2, 4, 2, 0, 4, 2, 4],
         &[0, 4, 2, 4, 7, 4, 2, 4],
@@ -428,13 +438,29 @@ fn accompaniment(tracks: &mut [Vec<Note>; 3], plan: &Plan, bar: usize, power: f6
         2 => (2, &[0, 2, 4, 7, 4, 2, 4, 7]),
         _ => (2, figures[plan.arp]),
     };
+    let gap = if plan.musical {
+        musical::accompaniment_gap(plan, bar, gap)
+    } else {
+        gap
+    };
     for slot in (0..16).step_by(gap) {
         if bar < 4 && slot % 8 != 0 || bar >= 30 && slot >= 8 {
             continue;
         }
         let offset = contour[(slot / gap) % contour.len()];
+        let pitch = if plan.musical {
+            musical::arp_pitch(
+                plan,
+                bar,
+                slot,
+                degree + offset,
+                tracks[1].last().map(|n| n.pitch),
+            )
+        } else {
+            style.pitch(plan.tonic + 12, degree + offset)
+        };
         tracks[1].push(Note {
-            pitch: style.pitch(plan.tonic + 12, degree + offset),
+            pitch,
             start: bar * 16 + slot,
             len: if gap == 1 { 1 } else { gap - 1 },
             velocity: velocity(26.0 + power * 34.0 + if slot % 4 == 0 { 10.0 } else { 0.0 }),
@@ -488,7 +514,11 @@ pub(super) fn compose_track(settings: &Settings, track: usize, variation: u64) -
             let theme_rhythm = melody::rhythm(&mut rng, plan.style.groove);
             let rise_rhythm = melody::rhythm(&mut rng, plan.style.groove);
             plan.theme = melody::invent(&mut rng, &theme_rhythm, plan.style.verse[0], center, up);
-            plan.rise = melody::invent(&mut rng, &rise_rhythm, plan.style.lift[0], center + 1, -up);
+            plan.rise = if plan.musical {
+                musical::develop(&plan.theme)
+            } else {
+                melody::invent(&mut rng, &rise_rhythm, plan.style.lift[0], center + 1, -up)
+            };
         }
         _ => return Vec::new(),
     }

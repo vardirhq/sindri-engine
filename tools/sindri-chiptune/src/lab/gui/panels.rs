@@ -11,6 +11,7 @@ const KEYS: [&str; 12] = [
 impl ComposerApp {
     pub(super) fn controls(&mut self, ui: &mut egui::Ui) {
         self.compose_controls(ui);
+        self.generation_controls(ui);
         self.ensemble_audition_controls(ui);
         self.snapshot_controls(ui);
         self.soundtrack_family_controls(ui);

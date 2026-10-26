@@ -72,8 +72,8 @@ pub(in crate::lab) fn develop_motif(
             if layer != 0
                 && options.follow_harmony
                 && let (Some(from), Some(to)) = (
-                    phrases::root_at(&tracks[0], note.start),
-                    phrases::root_at(&tracks[0], start),
+                    phrases::root_at(settings, &tracks[0], note.start),
+                    phrases::root_at(settings, &tracks[0], start),
                 )
             {
                 pitch = (pitch + (to - from + 6).rem_euclid(12) - 6).clamp(0, 127);

@@ -92,30 +92,46 @@ edit, chords and drums that follow them, mixed in stereo.
 
 ### Writing
 
-A song is written to repeat, so it sounds like one piece rather than a run of
-random bars. Each section loops four chords, one per bar, and the melody is a
-period: a one-bar motif built on chord tones at the strong beats, carried
-through the loop with stepwise voice-leading, ending each phrase on a cadence
-that asks a question (resting on the fifth) or answers it (home on the root).
-The theme comes back note for note in the return, the bass plays one riff for
-the whole song, and the drums keep one beat that repeats every bar, with a fill
-at the end of each phrase.
+New sessions use the **Musical** composer. Its Rise develops the main motif's
+rhythm and opening contour before turning the tail, so the contrast belongs to
+the same piece. Four-bar questions remain open; eight-bar answers prepare a
+modal cadence and reach the tonic, with a little breathing room at phrase ends.
+The Return brings back the theme. Bass, melody and arpeggio share that harmonic
+plan, including selective regeneration.
 
-Variety comes from what is chosen, per song, by the seed. Four moods set major,
-minor, Dorian or Phrygian harmony; each draws its verse and rise loops from its
-own library of progressions, and a groove from those that suit it: **Drift,
-Bounce, Drive, Ballad, Shuffle** (triplet swing) or **Half-time**. The groove
-picks the drum beat from its own set, the motif's rhythm (curated, or generated
-from the groove's onsets), the bass riff, cadence shapes, and the swing, which
-moves every part, not only the hats. The register, contour direction and
-arpeggio figure are drawn too, so two seeds of one mood can differ in beat,
-chords and tune.
+Four moods set major, natural minor, Dorian or Phrygian harmony. Seeds choose
+progression libraries, melodic cells, bass riffs and one of six grooves:
+**Drift, Bounce, Drive, Ballad, Shuffle** or **Half-time**. Cadences retain the
+mode's own colors rather than forcing a major dominant into every style.
 
-The arpeggio changes with the section: sparse in the intro, a seeded figure in
-the theme, a sixteenth-note run in the rise. The **chords** are read from the
-bass line at each downbeat, stacked in the song's scale (with sevenths in the
-darker moods) and voiced to move as little as possible, so they follow every
-bass edit.
+The arpeggio gives busy lead phrases more space and chooses nearby octaves
+below the sounding melody. Every layer remains enabled in every section by
+default; these are note-writing decisions, not random section cutoffs. Manual
+mixing, octave shifts and edited notes can still deliberately overlap registers.
+
+The Musical pad reads the bass root once per bar, so a passing fifth midway
+through a riff does not accidentally change the chord. Close-position inversions
+minimize movement of individual voices. Playback and the arrangement preview
+use the same history of bar roots; seeking does not choose another inversion.
+Chord tones remain diatonic, with sevenths in the darker moods.
+
+**Legacy** retains the previous note generator and half-bar pad behavior. Choose
+the composer under Song; the choice applies on Generate. Note locks keep the
+current seed, key, mood and composer version together. Songs and snapshots save
+`generation: "musical"` or `"legacy"`; older files without the field reopen as
+Legacy, preserving their notes and accompaniment behavior. Unknown versions are
+refused rather than silently played with different rules. The same seed and
+settings, including the composer version, remain deterministic. Earlier builds
+cannot read the new field.
+
+For the previous complete generation path in the CLI, use:
+
+```bash
+sindri-chiptune song --seed 42 --generation legacy --output legacy.wav
+```
+
+`--classic` independently selects the original instrument presets and full-layer
+mix; combine it with `--generation legacy` when both are wanted.
 
 ### Sound
 
@@ -214,8 +230,8 @@ in the left inspector on desktop.
 New songs use the seed and mood to choose one of three coordinated instrument
 palettes for that mood. All five layers remain enabled across every section,
 so the note composer's natural entrances and phrases are not cut off by random
-section masks. Sound choices use a separate random stream, so the existing
-note composer keeps its seeded output.
+section masks. Sound choices use a separate random stream, so palette changes do not consume
+the note composer's random stream.
 
 The A and B candidates retain their own sounds and mixes. Generate changes
 unlocked instrument presets, preserving volume, octave, mute/solo, and Room &

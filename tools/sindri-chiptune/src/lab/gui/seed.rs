@@ -5,6 +5,31 @@ use eframe::egui::{self, RichText};
 use egui_material_icons::icons;
 
 impl ComposerApp {
+    pub(super) fn generation_controls(&mut self, ui: &mut egui::Ui) {
+        use crate::lab::Generation;
+        ui.horizontal(|ui| {
+            ui.label("Composer");
+            egui::ComboBox::from_id_salt("generation-version")
+                .selected_text(match self.settings.generation {
+                    Generation::Legacy => "Legacy",
+                    Generation::Musical => "Musical",
+                })
+                .show_ui(ui, |ui| {
+                    ui.selectable_value(
+                        &mut self.settings.generation,
+                        Generation::Musical,
+                        "Musical",
+                    );
+                    ui.selectable_value(
+                        &mut self.settings.generation,
+                        Generation::Legacy,
+                        "Legacy",
+                    );
+                });
+        });
+        ui.small("Applies on Generate. Note locks keep the current composer version.");
+    }
+
     pub(super) fn edit_seed(&mut self) {
         match seed::parse(&self.seed_input) {
             Ok(seed) => {
@@ -56,5 +81,44 @@ impl ComposerApp {
                     .color(theme::MUTED),
             );
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::lab::{Generation, composer};
+
+    #[test]
+    fn composer_choice_is_a_draft_until_generate_and_survives_save_and_restore() {
+        let mut app = ComposerApp::default();
+        let original = app.scores.clone();
+        assert_eq!(app.selected_settings().generation, Generation::Musical);
+        app.settings.generation = Generation::Legacy;
+        assert_eq!(app.selected_settings().generation, Generation::Musical);
+        assert_eq!(app.scores, original);
+        app.generate();
+        assert_eq!(app.selected_settings().generation, Generation::Legacy);
+        assert_eq!(app.scores[0], composer::compose(&app.selected_settings()));
+        let song = app.song_file();
+        app.settings.generation = Generation::Musical;
+        app.generate();
+        app.load_song(song);
+        assert_eq!(app.selected_settings().generation, Generation::Legacy);
+        assert_eq!(app.settings.generation, Generation::Legacy);
+    }
+
+    #[test]
+    fn note_locks_keep_the_version_of_the_harmonic_context() {
+        let mut app = ComposerApp::default();
+        let bass = app.scores[0][0].clone();
+        app.track_locks[0][0] = true;
+        app.settings.generation = Generation::Legacy;
+        app.generate();
+        assert_eq!(app.selected_settings().generation, Generation::Musical);
+        assert_eq!(app.scores[0][0], bass);
+        app.track_locks[0][0] = false;
+        app.generate();
+        assert_eq!(app.selected_settings().generation, Generation::Legacy);
     }
 }

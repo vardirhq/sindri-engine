@@ -19,8 +19,8 @@ pub(super) fn regenerate(
         let baseline = composer::compose(settings);
         for note in &mut replacement {
             if let (Some(original), Some(edited)) = (
-                root_at(&baseline[0], note.start),
-                root_at(&tracks[0], note.start),
+                root_at(settings, &baseline[0], note.start),
+                root_at(settings, &tracks[0], note.start),
             ) {
                 // Follow edited bass harmony, using the nearest pitch-class shift.
                 let shift = (edited - original + 6).rem_euclid(12) - 6;
@@ -68,10 +68,15 @@ pub(super) fn replace_range(
     result
 }
 
-pub(super) fn root_at(bass: &[Note], step: usize) -> Option<i32> {
-    (0..=step / 8)
+pub(super) fn root_at(settings: &Settings, bass: &[Note], step: usize) -> Option<i32> {
+    let span = if settings.generation == super::Generation::Musical {
+        16
+    } else {
+        8
+    };
+    (0..=step / span)
         .rev()
-        .find_map(|cell| synth::bass_at(bass, cell * 8, 8))
+        .find_map(|cell| synth::bass_at(bass, cell * span, span))
 }
 
 #[cfg(test)]
