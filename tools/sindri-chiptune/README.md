@@ -261,6 +261,45 @@ patches or its generated percussion/chord layers.
   the previous pair of candidates and their settings. Snapshot names are unique
   in the workstation. Older sources without snapshots continue to load.
 
+### Develop motifs, dialogue, expression, and soundtrack families
+
+These are explicit editing actions. Opening a song or generating with the same
+settings continues to use the existing composer; no development action runs
+automatically. Musical edits bake into the ordinary notes and use Undo/Redo.
+
+Under Track, the development panels share the selected source-bar range:
+
+- **Develop a motif** copies the current melodic layer into a destination bar.
+  Repeat preserves the phrase; Scale sequence moves it by diatonic steps;
+  Invert contour mirrors its intervals around the first source note. A length
+  factor of 2 stretches onsets and durations. Optional bass adaptation follows
+  the destination harmony for Arpeggio and Lead. The destination is replaced,
+  outside notes remain intact, and an overlong result is rejected. Keep notes
+  locks block the edit. Bass edits also change the derived Chords layer.
+- **Call and response** rewrites Arpeggio and Lead into alternating one- or
+  two-bar phrases. Choose the caller and select complete pairs of phrases. The
+  responder answers a scale step lower, in its own register, and resolves to
+  the bass root. Bass, surrounding bars and section switches are retained.
+  Both melodic layers must be unlocked. These are actual note phrases and
+  rests; automatic section masking remains disabled.
+- **Performance expression** shapes accents, four-bar phrase dynamics, seeded
+  velocity variation, and articulation. Choose downbeats, backbeat, or
+  offbeats. Note length is a percentage of the current duration, quantized to
+  the existing sixteenth-note grid. Pitch and onset timing remain fixed;
+  crossing boundary notes stay untouched. Zero expression and 100% length is
+  neutral. Repeated edits can be undone rather than accumulated.
+
+Under Song, **Soundtrack family** creates three named snapshots: Exploration,
+Danger, and Victory. These keep the source rhythm and related melodic contours,
+adapting scale, tempo, dynamics, generated percussion feel and instrument
+palette. Victory resolves the last Bass and Lead notes to the tonic. Existing
+mix levels, tuning, mute/solo and manual section switches are retained. The
+current song and its locks are unchanged; the new versions are independent
+musical alternatives. Restore them under Named snapshots to audition, edit or
+export each one. Save the song to retain the family. Creating a family requires
+three free snapshot slots and a unique family name; it adds all three or none.
+These are separate authored cues, not an adaptive game playback API.
+
 ### Numbers, phrases, and random seeds
 
 Song seeds accept a 64-bit number or a phrase such as `forest at dawn`. Numeric

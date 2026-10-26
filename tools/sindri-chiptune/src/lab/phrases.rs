@@ -28,8 +28,17 @@ pub(super) fn regenerate(
             }
         }
     }
+    Ok(replace_range(&tracks[track], &replacement, range))
+}
+
+/// Keep the outside portions of crossing notes and replace only the chosen interval.
+pub(super) fn replace_range(
+    source: &[Note],
+    replacement: &[Note],
+    range: Range<usize>,
+) -> Vec<Note> {
     let mut result = Vec::new();
-    for note in &tracks[track] {
+    for note in source {
         if note.start < range.start {
             let end = (note.start + note.len).min(range.start);
             result.push(Note {
@@ -56,10 +65,10 @@ pub(super) fn regenerate(
         })
     }));
     result.sort_by_key(|note| note.start);
-    Ok(result)
+    result
 }
 
-fn root_at(bass: &[Note], step: usize) -> Option<i32> {
+pub(super) fn root_at(bass: &[Note], step: usize) -> Option<i32> {
     (0..=step / 8)
         .rev()
         .find_map(|cell| synth::bass_at(bass, cell * 8, 8))

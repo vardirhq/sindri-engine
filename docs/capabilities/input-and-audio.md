@@ -295,7 +295,7 @@ Available in the standalone Sound Lab, with no engine, editor panel, or Decay co
 
 Engine ❌ · Editor ❌ · Decay ❌ · Proof ❌ — parity row *Procedural music authoring / MIDI note editing*
 
-**Tested by:** [`tools/sindri-chiptune/src/lab/composer/tests.rs`](../../tools/sindri-chiptune/src/lab/composer/tests.rs), [`tools/sindri-chiptune/src/lab/ensemble/tests.rs`](../../tools/sindri-chiptune/src/lab/ensemble/tests.rs), [`tools/sindri-chiptune/src/lab/seed.rs`](../../tools/sindri-chiptune/src/lab/seed.rs), [`tools/sindri-chiptune/src/lab/synth/participation.rs`](../../tools/sindri-chiptune/src/lab/synth/participation.rs), [`tools/sindri-chiptune/src/lab/gui/tests.rs`](../../tools/sindri-chiptune/src/lab/gui/tests.rs), [`tools/sindri-chiptune/src/lab/gui/tools/tests.rs`](../../tools/sindri-chiptune/src/lab/gui/tools/tests.rs), [`tools/sindri-chiptune/src/lab/gui/tools/harmony.rs`](../../tools/sindri-chiptune/src/lab/gui/tools/harmony.rs), [`tools/sindri-chiptune/src/lab/phrases.rs`](../../tools/sindri-chiptune/src/lab/phrases.rs)
+**Tested by:** [`tools/sindri-chiptune/src/lab/composer/tests.rs`](../../tools/sindri-chiptune/src/lab/composer/tests.rs), [`tools/sindri-chiptune/src/lab/ensemble/tests.rs`](../../tools/sindri-chiptune/src/lab/ensemble/tests.rs), [`tools/sindri-chiptune/src/lab/seed.rs`](../../tools/sindri-chiptune/src/lab/seed.rs), [`tools/sindri-chiptune/src/lab/synth/participation.rs`](../../tools/sindri-chiptune/src/lab/synth/participation.rs), [`tools/sindri-chiptune/src/lab/gui/tests.rs`](../../tools/sindri-chiptune/src/lab/gui/tests.rs), [`tools/sindri-chiptune/src/lab/gui/tools/tests.rs`](../../tools/sindri-chiptune/src/lab/gui/tools/tests.rs), [`tools/sindri-chiptune/src/lab/gui/tools/harmony.rs`](../../tools/sindri-chiptune/src/lab/gui/tools/harmony.rs), [`tools/sindri-chiptune/src/lab/phrases.rs`](../../tools/sindri-chiptune/src/lab/phrases.rs), [`tools/sindri-chiptune/src/lab/development/tests.rs`](../../tools/sindri-chiptune/src/lab/development/tests.rs), [`tools/sindri-chiptune/src/lab/gui/development/tests.rs`](../../tools/sindri-chiptune/src/lab/gui/development/tests.rs)
 
 **See:** [`tools/sindri-chiptune/README.md`](../../tools/sindri-chiptune/README.md)
 
@@ -329,6 +329,16 @@ and stores up to 16 named snapshots with the song. Snapshot restore and sound
 changes use the same undo/redo history as score edits. Phrase replacements
 follow edited bass roots; harmony inspection describes written notes rather
 than diagnosing the rendered audio.
+
+Explicit musical development actions copy, sequence, invert or stretch motifs;
+arrange Arpeggio/Lead call-and-response pairs while preserving Bass; and shape
+seeded velocity, phrase dynamics and note lengths without moving onsets. Track
+locks and Undo/Redo protect edits. Source rhythm and melodic contours also seed
+related Exploration, Danger and Victory snapshots with adapted scales, tempo,
+dynamics and coordinated instruments. Family creation is atomic, uses existing
+snapshot persistence, and leaves the current candidates unchanged. Expression
+is quantized to the sixteenth-note grid; separate cues do not provide an
+adaptive music playback API.
 
 These are standalone-tool capabilities. The parity row remains absent in the
 engine and editor until composition is available on those surfaces.

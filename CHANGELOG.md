@@ -8,6 +8,9 @@ Total output lines: 1311
 
 # Changelog
 
+- Add explicit Sound Lab motif development, call-and-response arranging,
+  performance expression, and related Exploration/Danger/Victory snapshots.
+
 - Add Sound Lab bar-range regeneration, non-destructive ensemble auditioning,
   selected-note harmony inspection, and named snapshots saved with songs.
 

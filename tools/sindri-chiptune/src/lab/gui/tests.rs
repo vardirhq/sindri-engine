@@ -301,6 +301,7 @@ fn undo_and_redo_restore_imported_tempo_with_notes() {
     assert!((app.settings.bpm - 160.0).abs() < f64::EPSILON);
 }
 
+#[cfg(not(target_arch = "wasm32"))]
 #[test]
 fn send_delivers_the_current_effect_and_song_into_the_project() {
     let dir = tempfile::tempdir().expect("temp");
