@@ -82,7 +82,7 @@ impl Arrangement {
 }
 
 /// Each palette was chosen as an ensemble, rather than five unrelated presets.
-fn palettes(mood: Mood) -> [[Preset; 5]; 3] {
+pub(super) fn palettes(mood: Mood) -> [[Preset; 5]; 3] {
     use Preset::{
         Bell, BrightSquare, CrispNoise, DeepBass, Detuned, Glass, HollowPulse, IndustrialNoise,
         Organ, RubberBass, SawLead, SoftNoise, SoftPluck, SoftSquare, WarmTriangle,

@@ -15,7 +15,7 @@ pub(in crate::lab) fn scale(mood: Mood) -> [i32; 7] {
 /// the one sounding on its downbeat, or failing that the first to begin in it.
 /// Not the lowest: a riff that drops to the fifth below is still on the root's
 /// chord.
-pub(super) fn bass_at(bass: &[Note], from: usize, length: usize) -> Option<i32> {
+pub(in crate::lab) fn bass_at(bass: &[Note], from: usize, length: usize) -> Option<i32> {
     bass.iter()
         .find(|n| n.start <= from && n.start + n.len > from)
         .or_else(|| {

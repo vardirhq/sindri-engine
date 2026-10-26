@@ -8,6 +8,9 @@ Total output lines: 1311
 
 # Changelog
 
+- Add Sound Lab bar-range regeneration, non-destructive ensemble auditioning,
+  selected-note harmony inspection, and named snapshots saved with songs.
+
 - Keep every Sound Lab layer enabled during seeded generation so section masks
   do not cut off musical phrases; retain seeded sounds and manual section controls.
 

@@ -38,7 +38,9 @@ impl ComposerApp {
     }
 
     pub(super) fn song_file(&self) -> SongFile {
-        SongFile::new(&self.selected_settings(), &self.scores[self.selected])
+        let mut song = SongFile::new(&self.selected_settings(), &self.scores[self.selected]);
+        song.snapshots.clone_from(&self.tools.snapshots);
+        song
     }
 
     fn song_stem(&self) -> String {
@@ -101,7 +103,14 @@ impl ComposerApp {
     }
 
     /// Puts a saved song in candidate A, with its own seed, key and mixer.
-    pub(super) fn load_song(&mut self, song: SongFile) {
+    pub(super) fn load_song(&mut self, mut song: SongFile) {
+        self.tools.snapshots = std::mem::take(&mut song.snapshots);
+        self.apply_song(song);
+        self.undo.clear();
+        self.redo.clear();
+    }
+
+    pub(super) fn apply_song(&mut self, song: SongFile) {
         let settings = song.settings();
         self.seed_input = settings
             .seed_text
@@ -118,8 +127,6 @@ impl ComposerApp {
         self.track_locks = [[false; 3]; 2];
         self.selected = 0;
         self.selected_note = None;
-        self.undo.clear();
-        self.redo.clear();
         self.fit_pitch_range();
         if self.transport.is_some() {
             self.start_live();

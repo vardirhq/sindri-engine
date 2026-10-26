@@ -236,6 +236,31 @@ clips the three melodic parts at section rests while the editable source keeps
 all notes. MIDI still carries note events rather than Sound Lab's custom synth
 patches or its generated percussion/chord layers.
 
+### Develop an existing composition
+
+- **Regenerate selected bars** under Track replaces an inclusive range of bars
+  in Bass, Arpeggio, or Lead. **Visible bars** selects the current piano-roll
+  window, shown by an amber strip. Other note layers and notes outside the
+  range remain intact; crossing notes retain their outside portions. New
+  melodic phrases follow edited bass roots, and Bass edits also update the
+  derived Chords layer. Keep notes blocks regeneration. Undo restores the edit.
+- **Try another ensemble** under Song or Mixer cycles through the current
+  song mood's three coordinated palettes. Keep sound locks are respected.
+  Notes, section participation, tuning, levels, mute/solo and room settings
+  remain unchanged. Playback picks up new sounds live; Undo/Redo compares them.
+- **Inspect harmony** under Track describes the selected piano-roll note's
+  sounding pitch (including its octave setting), scale membership, chord tones
+  at its onset, and whether it crosses a chord boundary. It uses the same
+  derived chord preview as playback and labels silenced layers. It does not
+  declare dissonance an error or analyze audio, effect tails, or every
+  instrument's tuning/overtones.
+- **Named snapshots** under Song stores up to 16 named versions of the selected
+  candidate, including notes, sounds, section choices, seed, mood, key, density,
+  and tempo. Save the song to persist snapshots in its `.sindrisong` file.
+  Restore loads a snapshot into A and rebuilds B from its settings; Undo restores
+  the previous pair of candidates and their settings. Snapshot names are unique
+  in the workstation. Older sources without snapshots continue to load.
+
 ### Numbers, phrases, and random seeds
 
 Song seeds accept a 64-bit number or a phrase such as `forest at dawn`. Numeric

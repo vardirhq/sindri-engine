@@ -13,6 +13,7 @@ mod sfx_params;
 mod sfx_view;
 mod shell;
 mod theme;
+mod tools;
 mod transport;
 use crate::lab::live::Transport;
 use crate::lab::{Note, Settings, compose_with};
@@ -40,10 +41,23 @@ enum InspectorTab {
 
 type Job = Receiver<Result<String, String>>;
 
+#[derive(Clone, Copy)]
+enum UndoKind {
+    Notes,
+    Sounds,
+    Session,
+}
+
 struct ScoreSnapshot {
     candidate: usize,
-    notes: [Vec<Note>; 3],
-    bpm: f64,
+    kind: UndoKind,
+    scores: [[Vec<Note>; 3]; 2],
+    settings: Settings,
+    generated: Settings,
+    racks: [crate::lab::instruments::Rack; 2],
+    track_locks: [[bool; 3]; 2],
+    sound_locks: [[bool; 5]; 2],
+    arrangement_locks: [[bool; 5]; 2],
 }
 
 struct ComposerApp {
@@ -90,6 +104,7 @@ struct ComposerApp {
     looping: bool,
     paused: bool,
     status: String,
+    tools: tools::Tools,
 }
 impl Default for ComposerApp {
     fn default() -> Self {
@@ -144,6 +159,7 @@ impl Default for ComposerApp {
             looping: true,
             paused: false,
             status: "Ready. Play a candidate, or switch to Sound FX for game effects.".into(),
+            tools: tools::Tools::default(),
         };
         app.refresh_arrangement();
         app.fit_pitch_range();
