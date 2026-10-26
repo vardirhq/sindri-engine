@@ -579,7 +579,7 @@ The Normal map tab derives a sprite's normal map and previews it under the game'
 
 Engine ✅ · Editor ✅ · Decay — · Proof ✅
 
-**Tested by:** [`crates/sindri-assets/src/normal_map/tests.rs`](../../crates/sindri-assets/src/normal_map/tests.rs), [`editor/src/normal_studio/tests.rs`](../../editor/src/normal_studio/tests.rs), [`editor/src/native/normal_studio/scene/tests.rs`](../../editor/src/native/normal_studio/scene/tests.rs), [`games/lamplighter/tests/studio_normal_map.rs`](../../games/lamplighter/tests/studio_normal_map.rs)
+**Tested by:** [`crates/sindri-assets/src/normal_map/tests.rs`](../../crates/sindri-assets/src/normal_map/tests.rs), [`tools/normal-map-web/src/lib.rs`](../../tools/normal-map-web/src/lib.rs), [`editor/src/normal_studio/tests.rs`](../../editor/src/normal_studio/tests.rs), [`editor/src/native/normal_studio/scene/tests.rs`](../../editor/src/native/normal_studio/scene/tests.rs), [`games/lamplighter/tests/studio_normal_map.rs`](../../games/lamplighter/tests/studio_normal_map.rs)
 
 **Exercised in:** [`games/lamplighter`](../../games/lamplighter)
 
@@ -588,7 +588,9 @@ Engine ✅ · Editor ✅ · Decay — · Proof ✅
 <details markdown="1">
 <summary>Evidence</summary>
 
-The Normal map tab derives a sprite's `normal_map` from its brightness or a
+The responsive browser studio uses the same generation library and saves PNG
+and settings files; its lighting preview is approximate. The editor Normal map
+tab derives a sprite's `normal_map` from its brightness or a
 painted height map, keeping its size, alpha and pixel edges, with each sheet
 cell kept apart, and material presets as starting values. The preview is the
 game's own 2D lighting rather than an imitation: the studio's surface, light
