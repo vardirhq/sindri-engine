@@ -14,8 +14,8 @@ fn seeded_palettes_preserve_every_layers_natural_phrases() {
             for seed in 0..64 {
                 let settings = Settings {
                     seed,
-                    mood,
                     energy,
+                    mood,
                     ..Settings::default()
                 };
                 let rack = generate(&settings);
