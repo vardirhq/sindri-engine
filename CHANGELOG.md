@@ -2,6 +2,8 @@
 
 # Changelog
 
+- Add a responsive browser Normal Map Studio using the editor's shared generator.
+
 - Add Particle Lab to author Sindri particle emitters in the editor and browser,
   with engine-backed motion preview, presets, bursts, and JSON export.
 

@@ -1,0 +1,22 @@
+[package]
+name = "sindri-normal-map-web"
+description = "Browser access to Sindri's normal map generator"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish = false
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+sindri-assets = { path = "../../crates/sindri-assets" }
+sindri-core = { path = "../../crates/sindri-core" }
+serde_json.workspace = true
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+wasm-bindgen.workspace = true
+
+[lints]
+workspace = true
