@@ -9,6 +9,7 @@ const BPM: f64 = 118.0;
 #[cfg(not(target_arch = "wasm32"))]
 mod cli;
 mod composer;
+mod development;
 mod ensemble;
 mod gui;
 mod instruments;

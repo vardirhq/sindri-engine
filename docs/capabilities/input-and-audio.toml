@@ -367,6 +367,8 @@ tests = [
   "tools/sindri-chiptune/src/lab/gui/tools/tests.rs",
   "tools/sindri-chiptune/src/lab/gui/tools/harmony.rs",
   "tools/sindri-chiptune/src/lab/phrases.rs",
+  "tools/sindri-chiptune/src/lab/development/tests.rs",
+  "tools/sindri-chiptune/src/lab/gui/development/tests.rs",
 ]
 docs = ["tools/sindri-chiptune/README.md"]
 limits = ["Standalone authoring only; no in-engine or Decay composition API.", "MIDI exports the three monophonic note parts, not Sound Lab synth patches or the generated drum/chord layers."]
@@ -393,6 +395,16 @@ and stores up to 16 named snapshots with the song. Snapshot restore and sound
 changes use the same undo/redo history as score edits. Phrase replacements
 follow edited bass roots; harmony inspection describes written notes rather
 than diagnosing the rendered audio.
+
+Explicit musical development actions copy, sequence, invert or stretch motifs;
+arrange Arpeggio/Lead call-and-response pairs while preserving Bass; and shape
+seeded velocity, phrase dynamics and note lengths without moving onsets. Track
+locks and Undo/Redo protect edits. Source rhythm and melodic contours also seed
+related Exploration, Danger and Victory snapshots with adapted scales, tempo,
+dynamics and coordinated instruments. Family creation is atomic, uses existing
+snapshot persistence, and leaves the current candidates unchanged. Expression
+is quantized to the sixteenth-note grid; separate cues do not provide an
+adaptive music playback API.
 
 These are standalone-tool capabilities. The parity row remains absent in the
 engine and editor until composition is available on those surfaces.

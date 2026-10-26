@@ -152,7 +152,7 @@ pub(super) fn include_line(clip: &str) -> String {
     format!("[assets] include = [\"{clip}\"]")
 }
 
-#[cfg(test)]
+#[cfg(all(test, not(target_arch = "wasm32")))]
 mod tests {
     use super::*;
 

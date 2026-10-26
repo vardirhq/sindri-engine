@@ -1,4 +1,5 @@
 //! Standalone workstation: presentation is separate from composition and audio.
+mod development;
 mod editing;
 mod ensemble;
 mod files;
@@ -105,6 +106,7 @@ struct ComposerApp {
     paused: bool,
     status: String,
     tools: tools::Tools,
+    development: development::State,
 }
 impl Default for ComposerApp {
     fn default() -> Self {
@@ -160,6 +162,7 @@ impl Default for ComposerApp {
             paused: false,
             status: "Ready. Play a candidate, or switch to Sound FX for game effects.".into(),
             tools: tools::Tools::default(),
+            development: development::State::default(),
         };
         app.refresh_arrangement();
         app.fit_pitch_range();

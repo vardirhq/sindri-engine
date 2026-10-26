@@ -71,6 +71,7 @@ impl ComposerApp {
                 self.ensemble_controls(ui);
                 self.phrase_controls(ui);
                 self.harmony_controls(ui);
+                self.musical_development_controls(ui);
             }
             InspectorTab::Mixer => self.instrument_rack(ui),
         }
