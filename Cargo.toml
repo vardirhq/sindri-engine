@@ -21,6 +21,7 @@ members = [
     "tools/decay-lsp",
     "tools/sindri-capabilities",
     "tools/sindri-chiptune",
+    "tools/sindri-particle-lab",
     "examples/triangle",
     "examples/cube",
     "examples/camera",

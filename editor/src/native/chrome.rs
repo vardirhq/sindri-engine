@@ -174,6 +174,9 @@ impl EditorApp {
                     self.file_menu(ui);
                     self.edit_menu(ui);
                     self.view_menu(ui);
+                    if ui.button("Particle Lab").clicked() {
+                        self.open_particle_lab();
+                    }
                     // When the furniture floats, the centre's tabs live here
                     // rather than on a strip of their own. A row of tabs under
                     // this bar would be a second band of chrome across the top

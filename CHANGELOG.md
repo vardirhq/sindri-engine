@@ -2,6 +2,9 @@
 
 # Changelog
 
+- Add Particle Lab to author Sindri particle emitters in the editor and browser,
+  with engine-backed motion preview, presets, bursts, and JSON export.
+
 - Improve default Sound Lab generation with related Rise motifs, modal phrase
   cadences, coordinated arpeggios and smoother chord inversions. Save the
   composer version; older songs retain Legacy generation and accompaniment.

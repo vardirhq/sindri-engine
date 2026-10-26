@@ -863,6 +863,32 @@
   },
   {
     "category": "tools",
+    "title": "Particle Lab",
+    "path": "examples/particle-lab/",
+    "source": "tools/sindri-particle-lab",
+    "description": "Design and preview Sindri particle emitters.",
+    "tags": [
+      "particles",
+      "effects",
+      "tool"
+    ],
+    "play": {
+      "kind": "Tool",
+      "input": [
+        "mouse",
+        "touch"
+      ],
+      "about": [
+        "Tune a Sindri particle emitter and copy or download its component JSON. The editor can apply it to a selected emitter."
+      ],
+      "proves": [
+        "Particle emitter authoring"
+      ],
+      "controls": [["Mouse or touch", "Tune and preview the emitter"], ["Preview image", "Choose a particle texture"]]
+    }
+  },
+  {
+    "category": "tools",
     "title": "Sound Lab",
     "path": "examples/sound-lab/",
     "source": "tools/sindri-chiptune",

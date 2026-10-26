@@ -1,0 +1,29 @@
+[package]
+name = "sindri-particle-lab"
+description = "Particle authoring for Sindri editor and browser"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish = false
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[lints]
+workspace = true
+
+[dependencies]
+eframe.workspace = true
+image.workspace = true
+serde_json.workspace = true
+sindri-core = { path = "../../crates/sindri-core" }
+sindri-scene = { path = "../../crates/sindri-scene" }
+web-time.workspace = true
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+js-sys.workspace = true
+wasm-bindgen.workspace = true
+wasm-bindgen-futures.workspace = true
+console_error_panic_hook = "0.1"
+web-sys = { workspace = true, features = ["Window", "Document", "Element", "HtmlCanvasElement", "HtmlAnchorElement", "HtmlElement", "Blob", "Url", "console"] }
