@@ -1,5 +1,6 @@
 //! Standalone workstation: presentation is separate from composition and audio.
 mod editing;
+mod ensemble;
 mod files;
 mod inspector;
 mod overview;
@@ -7,6 +8,7 @@ mod panels;
 mod platform;
 mod scope;
 mod score;
+mod seed;
 mod sfx_params;
 mod sfx_view;
 mod shell;
@@ -55,7 +57,13 @@ struct ComposerApp {
     song_name: String,
     song_snippet: Option<String>,
     settings: Settings,
+    seed_input: String,
+    seed_error: Option<String>,
     generated: Settings,
+    candidate_racks: [crate::lab::instruments::Rack; 2],
+    sound_locks: [[bool; 5]; 2],
+    arrangement_locks: [[bool; 5]; 2],
+    ensemble_options: ensemble::Options,
     scores: [[Vec<Note>; 3]; 2],
     /// Locks are per candidate and remain local to the current workstation session.
     track_locks: [[bool; 3]; 2],
@@ -85,7 +93,9 @@ struct ComposerApp {
 }
 impl Default for ComposerApp {
     fn default() -> Self {
-        let settings = Settings::default();
+        let mut settings = Settings::default();
+        let candidate_racks = Self::ensemble_candidates(&settings);
+        settings.rack = candidate_racks[0].clone();
         let mut app = Self {
             mode: Mode::Music,
             compact: false,
@@ -105,6 +115,12 @@ impl Default for ComposerApp {
             track_locks: [[false; 3]; 2],
             regeneration: 0,
             generated: settings.clone(),
+            candidate_racks,
+            sound_locks: [[false; 5]; 2],
+            arrangement_locks: [[false; 5]; 2],
+            ensemble_options: ensemble::Options::default(),
+            seed_input: settings.seed.to_string(),
+            seed_error: None,
             settings,
             selected: 0,
             section: 0,
@@ -145,6 +161,9 @@ impl ComposerApp {
         settings.seed = settings
             .seed
             .wrapping_add(u64::try_from(self.selected).expect("candidate"));
+        if self.selected != 0 {
+            settings.seed_text = None;
+        }
         settings.rack = self.settings.rack.clone();
         settings.bpm = self.settings.bpm;
         settings
@@ -158,6 +177,7 @@ impl ComposerApp {
             // A lock belongs to the current harmonic context. Keep seed, key
             // and mood fixed while replacing only unlocked parts around it.
             generated.seed = self.generated.seed;
+            generated.seed_text.clone_from(&self.generated.seed_text);
             generated.key = self.generated.key;
             generated.mood = self.generated.mood;
         }
@@ -181,6 +201,8 @@ impl ComposerApp {
                 }
             }
         }
+        self.generate_ensembles();
+        generated.rack = self.settings.rack.clone();
         self.scores = scores;
         self.selected_note = None;
         self.generated = generated;
@@ -190,9 +212,9 @@ impl ComposerApp {
             self.start_live();
         }
         self.status = if has_locks {
-            "Generated around the current harmony; locked tracks were kept. Unlock all tracks to apply a new seed, key, or mood.".into()
+            "Generated around the current note harmony; locked tracks were kept. Unlocked sounds and arrangements use the requested seed.".into()
         } else {
-            "Generated two new candidates. Select A or B to compare.".into()
+            "Generated two candidates with their own ensembles. Select A or B to compare.".into()
         };
     }
 

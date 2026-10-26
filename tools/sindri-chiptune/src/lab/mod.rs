@@ -9,6 +9,7 @@ const BPM: f64 = 118.0;
 #[cfg(not(target_arch = "wasm32"))]
 mod cli;
 mod composer;
+mod ensemble;
 mod gui;
 mod instruments;
 mod live;
@@ -16,6 +17,7 @@ mod midi;
 #[cfg(not(target_arch = "wasm32"))]
 mod ogg;
 mod project;
+mod seed;
 mod sfx;
 mod song;
 mod synth;
@@ -24,6 +26,7 @@ mod wav;
 #[derive(Clone, Debug, PartialEq)]
 struct Settings {
     seed: u64,
+    seed_text: Option<String>,
     bpm: f64,
     key: i32,
     energy: f64,
@@ -43,6 +46,7 @@ impl Settings {
     fn default() -> Self {
         Self {
             seed: 42,
+            seed_text: None,
             bpm: BPM,
             key: 2,
             energy: 0.45,

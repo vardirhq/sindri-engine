@@ -20,7 +20,9 @@ impl ComposerApp {
     fn restore(&mut self, snapshot: ScoreSnapshot) {
         self.scores[snapshot.candidate] = snapshot.notes;
         self.settings.bpm = snapshot.bpm;
+        self.remember_rack();
         self.selected = snapshot.candidate;
+        self.settings.rack = self.candidate_racks[self.selected].clone();
         self.selected_note = None;
         self.fit_pitch_range();
         self.refresh_edited_audio();

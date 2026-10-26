@@ -66,6 +66,8 @@ pub(super) fn encode(
         ],
     );
     for (channel, notes) in tracks.iter().enumerate() {
+        let arranged = settings.rack.arrangement.arrange(channel, notes);
+        let notes = &arranged;
         let channel = u8::try_from(channel).expect("channel");
         let mut track = Vec::new();
         let mut last = 0;

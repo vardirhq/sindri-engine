@@ -20,6 +20,7 @@ Each entry links its tests and the projects that exercise it. Surface marks matc
 | [Sound effects made in the Sound Lab](#sound-lab) | — | ❌ | — | ✅ |
 | **Not yet** | | | | |
 | [`referenced_audio` gather](#referenced-audio) | ❌ | — | — | — |
+| [Procedural music authoring and MIDI note editing](#procedural-music-authoring) | ❌ | ❌ | ❌ | ❌ |
 | **3D foundation** | | | | |
 | [Mouse displacement for 3D look](#mouse-look-delta) | 🟡 | 🟡 | 🟡 | 🟡 |
 | [Pointer lock](#pointer-lock) | 🟡 | 🟡 | 🟡 | 🟡 |
@@ -285,6 +286,46 @@ Engine ❌ · Editor — · Decay — · Proof — — parity row *`referenced_a
 **Limits:**
 
 - The editor does not preview a scene's audio source in place.
+
+<a id="procedural-music-authoring"></a>
+
+### Procedural music authoring and MIDI note editing
+
+Available in the standalone Sound Lab, with no engine, editor panel, or Decay composition API.
+
+Engine ❌ · Editor ❌ · Decay ❌ · Proof ❌ — parity row *Procedural music authoring / MIDI note editing*
+
+**Tested by:** [`tools/sindri-chiptune/src/lab/composer/tests.rs`](../../tools/sindri-chiptune/src/lab/composer/tests.rs), [`tools/sindri-chiptune/src/lab/ensemble/tests.rs`](../../tools/sindri-chiptune/src/lab/ensemble/tests.rs), [`tools/sindri-chiptune/src/lab/seed.rs`](../../tools/sindri-chiptune/src/lab/seed.rs), [`tools/sindri-chiptune/src/lab/synth/participation.rs`](../../tools/sindri-chiptune/src/lab/synth/participation.rs), [`tools/sindri-chiptune/src/lab/gui/tests.rs`](../../tools/sindri-chiptune/src/lab/gui/tests.rs)
+
+**See:** [`tools/sindri-chiptune/README.md`](../../tools/sindri-chiptune/README.md)
+
+**Limits:**
+
+- Standalone authoring only; no in-engine or Decay composition API.
+- MIDI exports the three monophonic note parts, not Sound Lab synth patches or the generated drum/chord layers.
+
+<details markdown="1">
+<summary>Evidence</summary>
+
+Sound Lab composes and edits a deterministic 32-bar score. Ensemble version 1
+uses a separate seeded stream to choose coordinated instrument presets and four
+section masks. Some ensembles omit drums or arpeggio altogether. The masks are
+saved explicitly, while legacy sources without masks retain their full-layer
+mix. Smooth gain changes preserve effect tails, and MIDI clips melodic notes at
+section rests without altering the editable source.
+
+The workstation preserves notes, sound presets and layer participation
+independently. A/B candidates retain their own mixes; manual mixing and tuning
+survive generation. Song seeds accept the existing numeric values or UTF-8
+phrases via fixed FNV-1a/64 hashing. Saved candidate A phrases are checked against
+their numeric seed; candidate B saves its exact incremented numeric seed. The
+random button uses OS entropy natively and browser Crypto on the web. The CLI
+also supports --random-seed and --classic, and --open preserves saved choices.
+
+These are standalone-tool capabilities. The parity row remains absent in the
+engine and editor until composition is available on those surfaces.
+
+</details>
 
 ## 3D foundation
 

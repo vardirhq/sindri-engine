@@ -51,6 +51,14 @@ try {
     const { name, query = '', ...device } = size;
     const context = await browser.newContext(device);
     const page = await context.newPage();
+    await page.addInitScript(() => {
+      globalThis.__soundLabRandomCalls = 0;
+      const original = Crypto.prototype.getRandomValues;
+      Crypto.prototype.getRandomValues = function (array) {
+        globalThis.__soundLabRandomCalls++;
+        return original.call(this, array);
+      };
+    });
     const problems = [];
     page.on('pageerror', error => problems.push(String(error)));
     page.on('console', message => {
@@ -80,6 +88,27 @@ try {
       for (let i = 0; i < pixels.length; i += 4 * 97) colors.add(pixels[i] << 16 | pixels[i + 1] << 8 | pixels[i + 2]);
       return colors.size;
     }, [...shot]);
+    if (name === 'desktop') {
+      await page.locator('#sound-lab').click({ position: { x: 50, y: 150 } });
+      await page.waitForTimeout(200);
+      await page.screenshot({ path: join(captures, 'sound-lab-desktop-song.png') });
+      const canvas = page.locator('#sound-lab');
+      await canvas.click({ position: { x: 125, y: 442 } });
+      await page.keyboard.press('Control+A');
+      await page.keyboard.insertText('forest at dawn');
+      await page.waitForTimeout(250);
+      await page.screenshot({ path: join(captures, 'sound-lab-desktop-phrase-seed.png') });
+      const randomCalls = await page.evaluate(() => globalThis.__soundLabRandomCalls);
+      await canvas.click({ position: { x: 226, y: 442 } });
+      await page.waitForTimeout(250);
+      assert.ok(await page.evaluate(() => globalThis.__soundLabRandomCalls) > randomCalls,
+        'random seed button must call browser Crypto, rather than incrementing the old seed');
+      await page.screenshot({ path: join(captures, 'sound-lab-desktop-random-seed.png') });
+      await canvas.click({ position: { x: 150, y: 543 } });
+      await page.waitForTimeout(250);
+      await page.screenshot({ path: join(captures, 'sound-lab-desktop-random-ensemble.png') });
+
+    }
     if (name === 'phone') {
       // Keep generated-layer inspectors and the delivery menu in the visual
       // evidence too. Native egui tests assert the five row selections directly.
@@ -90,7 +119,7 @@ try {
       await canvas.tap({ position: { x: 35, y: 267 } });
       await page.waitForTimeout(200);
       await page.screenshot({ path: join(captures, 'sound-lab-phone-drums.png') });
-      await canvas.tap({ position: { x: 345, y: 706 } });
+      await canvas.tap({ position: { x: 345, y: 630 } });
       await page.waitForTimeout(200);
       await page.screenshot({ path: join(captures, 'sound-lab-phone-file.png') });
     }

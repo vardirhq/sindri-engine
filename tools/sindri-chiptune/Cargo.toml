@@ -25,6 +25,7 @@ serde_json.workspace = true
 web-time.workspace = true
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+getrandom.workspace = true
 rfd = { version = "0.17.2", default-features = false, features = ["xdg-portal"] }
 rodio = { version = "0.22.2", default-features = false, features = ["playback"] }
 toml_edit = "0.25"
@@ -39,6 +40,7 @@ js-sys.workspace = true
 wasm-bindgen.workspace = true
 wasm-bindgen-futures.workspace = true
 web-sys = { workspace = true, features = [
+  "Crypto",
   "AudioBuffer",
   "AudioBufferSourceNode",
   "AudioContext",
