@@ -125,6 +125,10 @@ jobs:
         env:
           WASM_OPT: ${{ github.event_name == 'pull_request' && '--no-opt' || '' }}
         run: wasm-pack build games/voxel-lab --target web --release --out-dir pkg $WASM_OPT
+      - name: Build Normal Map Studio
+        env:
+          WASM_OPT: ${{ github.event_name == 'pull_request' && '--no-opt' || '' }}
+        run: wasm-pack build tools/normal-map-web --target web --release --out-dir pkg $WASM_OPT
       - name: Build Particle Lab
         env:
           WASM_OPT: ${{ github.event_name == 'pull_request' && '--no-opt' || '' }}
@@ -220,6 +224,9 @@ jobs:
           mkdir -p target/pages/examples/voxel-lab/pkg
           cp games/voxel-lab/web/index.html target/pages/examples/voxel-lab/index.html
           cp -R games/voxel-lab/pkg/. target/pages/examples/voxel-lab/pkg/
+          mkdir -p target/pages/examples/normal-map-studio/pkg
+          cp tools/normal-map-web/web/* target/pages/examples/normal-map-studio/
+          cp -R tools/normal-map-web/pkg/. target/pages/examples/normal-map-studio/pkg/
           mkdir -p target/pages/examples/particle-lab/pkg
           cp tools/sindri-particle-lab/web/index.html target/pages/examples/particle-lab/index.html
           cp -R tools/sindri-particle-lab/pkg/. target/pages/examples/particle-lab/pkg/
@@ -261,7 +268,7 @@ jobs:
           base = os.environ.get("PAGES_BASE_PATH", "")
           for page in (root / "examples").glob("*/index.html"):
               # Standalone wasm-pack pages, not project exports: no <base>.
-              if page.parent.name in ("voxel-lab", "sound-lab", "isometric-baker", "particle-lab"):
+              if page.parent.name in ("voxel-lab", "sound-lab", "isometric-baker", "particle-lab", "normal-map-studio"):
                   continue
               expected = f'<base href="{base}/examples/{page.parent.name}/">'
               if expected not in page.read_text():
@@ -281,6 +288,8 @@ jobs:
           test -f target/pages/examples/voxel-lab/pkg/voxel_lab.js
           test -f target/pages/examples/voxel-lab/pkg/voxel_lab_bg.wasm
           grep -q 'voxel-stats' target/pages/examples/voxel-lab/index.html
+          test -f target/pages/examples/normal-map-studio/index.html
+          test -f target/pages/examples/normal-map-studio/pkg/sindri_normal_map_web_bg.wasm
           test -f target/pages/examples/particle-lab/index.html
           test -f target/pages/examples/particle-lab/pkg/sindri_particle_lab_bg.wasm
           test -f target/pages/examples/sound-lab/index.html
@@ -312,6 +321,7 @@ jobs:
           node scripts/browser/play.mjs target/pages target/directory-captures
           node scripts/browser/sound-lab.mjs target/pages/examples/sound-lab target/directory-captures
           node scripts/browser/particle-lab.mjs target/pages/examples/particle-lab target/directory-captures
+          node scripts/browser/normal-map-studio.mjs target/pages/examples/normal-map-studio
           node scripts/browser/baker.mjs target/pages/examples/isometric-baker target/directory-captures
       - name: Upload directory captures
         if: always()

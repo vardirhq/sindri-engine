@@ -22,6 +22,7 @@ members = [
     "tools/sindri-capabilities",
     "tools/sindri-chiptune",
     "tools/sindri-particle-lab",
+    "tools/normal-map-web",
     "examples/triangle",
     "examples/cube",
     "examples/camera",

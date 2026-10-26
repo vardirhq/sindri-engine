@@ -194,3 +194,17 @@ the two differ by design.
 - [x] Save, the settings sidecar, reopening it, and pointing sprites at it.
 - [x] Presets and polish; validated on Low Tide and platformer textures.
 - [x] A game drawing a studio-made map: the platformer's hero.
+
+## Browser tool
+
+Normal Map Studio is also available at `/examples/normal-map-studio/`. It
+uses the same `sindri-assets` generator as the editor, including height maps,
+presets, edge and green-axis settings, and optional `.sheet` cell boundaries.
+It downloads a PNG and the existing `.normalmap` settings format. Files are
+processed locally in a browser worker so map generation does not block the controls. Select the source and optional height image
+again when reopening settings; keep a sheet alongside the source for the editor.
+
+The mobile layout places the preview before the settings. The browser includes
+texture, normal-channel, lit, split and orbiting-plane views. The browser's
+lighting is an approximation; the editor's preview uses Sindri's actual renderer
+and remains the authoritative check for how a map looks in a game.

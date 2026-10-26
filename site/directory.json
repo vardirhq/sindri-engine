@@ -863,6 +863,39 @@
   },
   {
     "category": "tools",
+    "title": "Normal Map Studio",
+    "path": "examples/normal-map-studio/",
+    "source": "tools/normal-map-web",
+    "description": "Make normal maps from an image or height map, then preview and download them.",
+    "tags": [
+      "normal maps",
+      "lighting",
+      "textures",
+      "tool"
+    ],
+    "play": {
+      "kind": "Tool",
+      "input": [
+        "mouse",
+        "touch"
+      ],
+      "about": [
+        "Generate normal maps with the same generator as Sindri Editor. Preview, adjust and download your map."
+      ],
+      "proves": [
+        "Normal map generation",
+        "Texture preview"
+      ],
+      "controls": [
+        [
+          "Mouse or touch",
+          "Move the preview light"
+        ]
+      ]
+    }
+  },
+  {
+    "category": "tools",
     "title": "Particle Lab",
     "path": "examples/particle-lab/",
     "source": "tools/sindri-particle-lab",
@@ -884,7 +917,16 @@
       "proves": [
         "Particle emitter authoring"
       ],
-      "controls": [["Mouse or touch", "Tune and preview the emitter"], ["Preview image", "Choose a particle texture"]]
+      "controls": [
+        [
+          "Mouse or touch",
+          "Tune and preview the emitter"
+        ],
+        [
+          "Preview image",
+          "Choose a particle texture"
+        ]
+      ]
     }
   },
   {
