@@ -69,9 +69,151 @@ pub(super) fn chord(root: i32, key: i32, mood: Mood, around: f64) -> Vec<i32> {
     voiced
 }
 
+/// Reconstruct the modern pad's path from bar roots. Both preview and playback
+/// use this path, so seeking and looping cannot change a chord's inversion.
+/// A passing fifth or octave inside a bass riff does not replace its harmony.
+pub(super) fn voiced_at(settings: &crate::lab::Settings, bass: &[Note], step: usize) -> Vec<i32> {
+    let mut previous = Vec::new();
+    for bar in 0..=step.min(crate::lab::STEPS - 1) / 16 {
+        if let Some(root) = bass_at(bass, bar * 16, 16) {
+            previous = voice_lead(root, settings.key, settings.mood, &previous);
+        }
+    }
+    previous
+}
+
+/// Enumerate close-position inversions, minimizing actual individual voice
+/// movement rather than just the distance to a chord's average pitch.
+fn voice_lead(root: i32, key: i32, mood: Mood, previous: &[i32]) -> Vec<i32> {
+    let mut classes: Vec<i32> = chord(root, key, mood, 62.0)
+        .iter()
+        .map(|pitch| pitch.rem_euclid(12))
+        .collect();
+    classes.sort_unstable();
+    let mut candidates = Vec::new();
+    for inversion in 0..classes.len() {
+        for octave in 3..=5 {
+            let mut pitches = Vec::new();
+            for index in 0..classes.len() {
+                let mut pitch = classes[(inversion + index) % classes.len()] + octave * 12;
+                while pitches.last().is_some_and(|last| pitch <= *last) {
+                    pitch += 12;
+                }
+                pitches.push(pitch);
+            }
+            if pitches.iter().all(|pitch| (48..=76).contains(pitch)) {
+                candidates.push(pitches);
+            }
+        }
+    }
+    candidates
+        .into_iter()
+        .min_by_key(|pitches| {
+            let movement: i32 = pitches
+                .iter()
+                .enumerate()
+                .map(|(i, pitch)| previous.get(i).map_or(0, |old| (pitch - old).abs()))
+                .sum();
+            let center = pitches.iter().sum::<i32>() / i32::try_from(pitches.len()).expect("chord");
+            (movement, (center - 62).abs(), pitches.clone())
+        })
+        .expect("every triad or seventh has a close voicing in this range")
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn inversions_minimize_voice_motion_and_keep_chord_tones() {
+        for mood in [
+            Mood::Hopeful,
+            Mood::Melancholic,
+            Mood::Mysterious,
+            Mood::Tense,
+        ] {
+            for key in 0..12 {
+                let mut previous = Vec::new();
+                for degree in [0, 4, 5, 3, 1, 4, 0] {
+                    let root = 36 + key + scale(mood)[degree];
+                    let voiced = voice_lead(root, key, mood, &previous);
+                    let mut actual: Vec<_> = voiced.iter().map(|n| n % 12).collect();
+                    let mut expected: Vec<_> = chord(root, key, mood, 62.0)
+                        .iter()
+                        .map(|n| n % 12)
+                        .collect();
+                    actual.sort_unstable();
+                    expected.sort_unstable();
+                    assert_eq!(actual, expected);
+                    assert!(voiced.windows(2).all(|pair| pair[0] < pair[1]));
+                    assert!(voiced.iter().all(|n| (48..=76).contains(n)));
+                    // Check every admissible close inversion independently.
+                    let cost = |notes: &[i32]| {
+                        notes
+                            .iter()
+                            .zip(&previous)
+                            .map(|(a, b)| (a - b).abs())
+                            .sum::<i32>()
+                    };
+                    for bottom in 48..=76 {
+                        if !actual.contains(&(bottom % 12)) {
+                            continue;
+                        }
+                        let mut option: Vec<_> = (bottom..bottom + 12)
+                            .filter(|n| actual.contains(&(n % 12)))
+                            .collect();
+                        option.sort_unstable();
+                        if option.iter().all(|n| *n <= 76) {
+                            assert!(cost(&voiced) <= cost(&option));
+                        }
+                    }
+                    previous = voiced;
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn bar_harmony_ignores_passing_bass_notes_and_is_seek_independent() {
+        let settings = crate::lab::Settings::default();
+        let bass = [
+            Note {
+                pitch: 38,
+                start: 0,
+                len: 8,
+                velocity: 90,
+            },
+            Note {
+                pitch: 33,
+                start: 8,
+                len: 8,
+                velocity: 90,
+            },
+            Note {
+                pitch: 43,
+                start: 16,
+                len: 16,
+                velocity: 90,
+            },
+        ];
+        assert_eq!(
+            voiced_at(&settings, &bass, 0),
+            voiced_at(&settings, &bass, 8)
+        );
+        let [_, preview] = crate::lab::synth::generated_layers(&settings, &bass);
+        for step in [0, 8, 16, 24] {
+            let displayed: Vec<_> = preview
+                .iter()
+                .filter(|n| n.start <= step && n.start + n.len > step)
+                .map(|n| n.pitch)
+                .collect();
+            assert_eq!(displayed, voiced_at(&settings, &bass, step));
+        }
+        assert_eq!(
+            voiced_at(&settings, &bass, 16),
+            voiced_at(&settings, &bass, 24)
+        );
+    }
 
     #[test]
     fn chords_stay_in_key_and_move_smoothly() {

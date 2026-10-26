@@ -163,7 +163,12 @@ fn melody_variation_changes_pitches_but_keeps_rhythm_key_and_resolution() {
 
 #[test]
 fn melody_variation_keeps_repeated_four_bar_phrases_coherent() {
-    let settings = Settings::default();
+    // Legacy repeats its harmony every four bars; Musical deliberately gives
+    // the answer a different preparation and cadence.
+    let settings = Settings {
+        generation: crate::lab::Generation::Legacy,
+        ..Settings::default()
+    };
     let original = compose(&settings)[2].clone();
     let varied = super::vary_lead(&original, &settings, 21);
     let phrase = |notes: &[Note], bar: usize| {

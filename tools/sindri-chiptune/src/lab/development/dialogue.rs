@@ -41,8 +41,8 @@ pub(in crate::lab) fn arrange_dialogue(
             let role_shift = if responder == 1 { -12 } else { 12 };
             let mut pitch = shifted(note.pitch, settings, -1) + role_shift;
             if let (Some(from), Some(to)) = (
-                phrases::root_at(&tracks[0], note.start),
-                phrases::root_at(&tracks[0], when),
+                phrases::root_at(settings, &tracks[0], note.start),
+                phrases::root_at(settings, &tracks[0], when),
             ) {
                 pitch += (to - from + 6).rem_euclid(12) - 6;
             }
@@ -55,7 +55,7 @@ pub(in crate::lab) fn arrange_dialogue(
         if let Some(last) = answers
             .last_mut()
             .filter(|note| note.start >= start + length)
-            && let Some(root) = phrases::root_at(&tracks[0], last.start)
+            && let Some(root) = phrases::root_at(settings, &tracks[0], last.start)
         {
             last.pitch = nearest_class(last.pitch, root);
         }

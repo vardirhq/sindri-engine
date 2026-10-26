@@ -1,12 +1,10 @@
-Warning: truncated output (original token count: 30131)
-Total output lines: 1204
-
-Warning: truncated output (original token count: 38628)
-Total output lines: 1311
-
 - Put the dusk art in Lamplighter's playable Dusk Road: the meadow tiles and normal map, scattered decorations, parallax sky and hills, dusk lighting, and Wick's baked side-view sprite. The level keeps its existing collision layout while the old showcase mechanisms are moved into their planned levels.
 
 # Changelog
+
+- Improve default Sound Lab generation with related Rise motifs, modal phrase
+  cadences, coordinated arpeggios and smoother chord inversions. Save the
+  composer version; older songs retain Legacy generation and accompaniment.
 
 - Add explicit Sound Lab motif development, call-and-response arranging,
   performance expression, and related Exploration/Danger/Victory snapshots.

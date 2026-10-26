@@ -12,6 +12,7 @@ USAGE
 
 SONG OPTIONS
   --seed NUMBER_OR_PHRASE  --mood M  --key 0-11  --bpm 60-220  --energy 0-1
+  --generation musical|legacy             Choose composition rules (default musical)
   --random-seed                          Choose a fresh random numeric seed
   --classic                              Use the original sounds and full-layer arrangement
   --open FILE.sindrisong                  Render a saved (and edited) song
@@ -89,6 +90,13 @@ fn music(args: Vec<String>) -> Result<(), Box<dyn Error>> {
         }
         match arg.as_str() {
             "--classic" => classic = true,
+            "--generation" => {
+                settings.generation = match value(&mut args, &arg)?.as_str() {
+                    "musical" => super::Generation::Musical,
+                    "legacy" => super::Generation::Legacy,
+                    _ => return Err("generation must be musical or legacy".into()),
+                }
+            }
             "--seed" => {
                 let seed = super::seed::parse(&value(&mut args, &arg)?)?;
                 settings.seed = seed.value;

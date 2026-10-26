@@ -199,6 +199,7 @@ impl ComposerApp {
             generated.seed_text.clone_from(&self.generated.seed_text);
             generated.key = self.generated.key;
             generated.mood = self.generated.mood;
+            generated.generation = self.generated.generation;
         }
         let old_scores = self.scores.clone();
         let mut scores = Self::candidates(&generated);

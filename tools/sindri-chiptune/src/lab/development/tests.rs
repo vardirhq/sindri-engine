@@ -111,7 +111,7 @@ fn dialogue_trades_phrases_with_bass_and_outside_material_preserved() {
         }));
         let last = replies.last().unwrap();
         assert_eq!(
-            (last.pitch - crate::lab::phrases::root_at(&tracks[0], last.start).unwrap())
+            (last.pitch - crate::lab::phrases::root_at(&settings, &tracks[0], last.start).unwrap())
                 .rem_euclid(12),
             0
         );
