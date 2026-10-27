@@ -405,7 +405,7 @@ Sindri's strongest domain relative to the baseline.
 | **Formatter** | ❌ | ❌ | ❌ | — | **Absent** | — |
 | **Script and entity throughput at scale** | ❌ | ❌ | ❌ | ❌ | **Absent** | Rendering is benchmarked and the Profiler times each script, but nothing measures how many scripted entities a frame can run, natively or in the browser. Survivor-likes and colony or factory sims depend on this number |
 | **In-editor script editing** | — | ❌ | — | — | **Behind** | Scripts are created and previewed read-only; editing is external |
-| **Signals / event bus** | ❌ | ❌ | ❌ | ❌ | **Absent** | A general publish/subscribe event bus is absent. Scripts can communicate directly through typed references and queued messages; see Scripts reach each other by type |
+| **Signals / event bus** | 🟡 | 🟡 | 🟡 | ✅ | **Behind** | Typed Decay events broadcast to listeners and Scorchball uses them; typed references and queued messages also support direct communication. The scope and limitations of these events compared with a general event bus need an explicit audit; see Events (emit, handle anywhere). |
 | **Script unit tests** | ❌ | ❌ | ❌ | ❌ | **Absent** | No way to test a `.decay` file without running a game |
 
 ## Editor experience
