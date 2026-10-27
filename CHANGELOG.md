@@ -2,6 +2,9 @@
 
 # Changelog
 
+- Keep Lamplighter's 16:9 gameplay camera within Dusk Road's level edges while
+  following Wick.
+
 - Resolve camera follow targets in their scene or prefab scope, so Lamplighter's
   camera follows Wick after entering the level from the title screen. Inactive
   cameras and targets no longer advance follow behavior.
