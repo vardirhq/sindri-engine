@@ -10,6 +10,7 @@
 //! entity is, because carrying one of these components already says it.
 
 mod camera;
+mod camera_confine;
 mod camera_orbit;
 mod environment;
 mod environment_check;
@@ -33,7 +34,7 @@ mod world_text;
 
 pub use camera::{
     CameraBehaviorComponent, CameraBounds, CameraComponent, CameraFit, CameraFollow, CameraShake,
-    add_camera_trauma, update_camera_behaviors,
+    add_camera_trauma, update_camera_behaviors, update_camera_behaviors_with_viewport,
 };
 pub use camera_orbit::CameraOrbitComponent;
 pub use environment::{

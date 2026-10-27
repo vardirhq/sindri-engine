@@ -108,6 +108,33 @@ fn the_camera_follows_after_entering_the_level_from_the_title() {
 }
 
 #[test]
+fn wick_is_visible_when_the_level_opens_on_a_portrait_phone() {
+    let mut run = Run::open_title_in_viewport([390.0, 844.0]).expect("the project opens");
+    step(&mut run, 3);
+    press(&mut run, "play");
+    step(&mut run, 2);
+    let camera = find(&run, "camera").expect("the level camera");
+    let hero = find(&run, "hero").expect("the hero");
+    let camera_x = run.position(camera)[0];
+    let hero_x = run.position(hero)[0];
+    let half_width = 11.25 * 390.0 / 844.0 / 2.0;
+    assert!(
+        camera_x - half_width >= -0.001,
+        "camera extends past left edge"
+    );
+    assert!((camera_x - hero_x).abs() < half_width, "Wick is offscreen");
+    run.size = [960.0, 540.0];
+    step(&mut run, 2);
+    assert!(run.position(camera)[0] >= 10.0 - 0.001);
+    run.size = [390.0, 844.0];
+    step(&mut run, 1);
+    assert!(
+        (run.position(camera)[0] - run.position(hero)[0]).abs() < half_width,
+        "Wick is offscreen after rotating back to portrait"
+    );
+}
+
+#[test]
 fn the_title_reaches_the_levels_and_the_settings_and_back() {
     let mut run = Run::open_title().expect("the project opens");
     step(&mut run, 3);

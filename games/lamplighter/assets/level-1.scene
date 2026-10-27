@@ -9,7 +9,7 @@
       "name": "Camera",
       "transform_3d": {
         "position": [
-          10,
+          2.5,
           5.625,
           10
         ],
@@ -50,13 +50,14 @@
           },
           "confine": {
             "min": [
-              10,
-              5.625
+              0,
+              0
             ],
             "max": [
-              54,
-              8.375
-            ]
+              64,
+              14
+            ],
+            "contain_view": true
           },
           "shake": {
             "trauma": 0,
