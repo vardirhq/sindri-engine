@@ -22,7 +22,7 @@ fn the_playable_level_uses_wick_and_its_ground_normal_map() {
     let run = Run::open().expect("the project opens");
     let wick = run.entity("wick-sprite").expect("Wick's sprite");
     let sprite = &run.world.get(wick).expect("Wick exists").components["sindri.sprite"];
-    assert_eq!(sprite["texture"], "textures/wick.png#idle-0");
+    assert_eq!(sprite["texture"], "textures/wick-pixellab.png#idle");
     let level = run.entity("level").expect("the ground");
     let tilemap = &run.world.get(level).expect("the level exists").components["sindri.tilemap"];
     assert_eq!(tilemap["normal_map"], "textures/ground_n.png");
