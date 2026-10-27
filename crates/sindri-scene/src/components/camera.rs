@@ -306,6 +306,7 @@ fn apply_follow(
     // Where the target is in the world, so a camera can follow a child.
     let Some(target) = world
         .resolve_entity_reference(camera, follow.target.as_str())
+        .or_else(|| anonymous_camera_raw_target(world, camera, &follow.target))
         .filter(|entity| world.is_active(*entity))
         .and_then(|entity| world.world_transform(entity))
     else {
@@ -330,6 +331,31 @@ fn apply_follow(
         }
         position[axis] += step;
     }
+}
+
+// A camera made directly in a raw world may have no authored ID. Keep the
+// legacy raw-scene lookup for it without crossing an anonymous scene/prefab
+// root. Loaded and prefab cameras always use the scoped resolver above.
+fn anonymous_camera_raw_target(
+    world: &World,
+    camera: EntityId,
+    target: &SceneEntityId,
+) -> Option<EntityId> {
+    let owner = world.get(camera)?;
+    if owner.parent.is_some()
+        || owner.source_id.is_some()
+        || owner.scene_namespace.is_some()
+        || owner.prefab_identity.is_some()
+    {
+        return None;
+    }
+    let target = world.entity_for_source_id(target)?;
+    let mut root = target;
+    while let Some(parent) = world.get(root)?.parent {
+        root = parent;
+    }
+    let data = world.get(root)?;
+    (data.source_id.is_some() && data.scene_namespace.is_none()).then_some(target)
 }
 
 fn apply_confine(bounds: Option<CameraBounds>, position: &mut [f32; 3]) {
@@ -392,6 +418,23 @@ mod behavior_tests {
         update_camera_behaviors(&mut world, 1.0);
         let x = world.get(camera).unwrap().transform_3d.unwrap().position[0];
         assert!((x - 4.0).abs() < f32::EPSILON);
+    }
+
+    #[test]
+    fn anonymous_camera_cannot_follow_into_another_scene() {
+        let mut world = World::default();
+        let camera = world.spawn(entity([0.0, 0.0, 5.0]));
+        let root = world.spawn(EntityData {
+            scene_namespace: Some("level".to_owned()),
+            ..EntityData::default()
+        });
+        let target_id = SceneEntityId::new("level/target").unwrap();
+        let target = world.spawn(EntityData {
+            source_id: Some(target_id.clone()),
+            ..entity([8.0, 0.0, 0.0])
+        });
+        world.set_parent(target, Some(root)).unwrap();
+        assert_eq!(anonymous_camera_raw_target(&world, camera, &target_id), None);
     }
 
     #[test]
