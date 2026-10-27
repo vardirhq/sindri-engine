@@ -86,7 +86,11 @@ fn boundary(world: &World, mut entity: EntityId) -> Option<EntityId> {
     while let Some(parent) = world.get(entity)?.parent {
         entity = parent;
     }
-    world.get(entity)?.scene_namespace.is_some().then_some(entity)
+    world
+        .get(entity)?
+        .scene_namespace
+        .is_some()
+        .then_some(entity)
 }
 
 #[cfg(test)]
@@ -121,9 +125,6 @@ mod tests {
             ..EntityData::default()
         });
         world.set_parent(target, Some(root)).unwrap();
-        assert_eq!(
-            world.resolve_entity_reference(owner, "level/target"),
-            None
-        );
+        assert_eq!(world.resolve_entity_reference(owner, "level/target"), None);
     }
 }
