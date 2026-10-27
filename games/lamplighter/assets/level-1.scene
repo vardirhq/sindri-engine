@@ -1,6 +1,3 @@
-Warning: truncated output (original token count: 27611)
-Total output lines: 5895
-
 {
   "format_version": 10,
   "metadata": {
@@ -2754,7 +2751,575 @@ Total output lines: 5895
           0.8,
           0.8,
           1
-…2611 tokens truncated…1,
+        ]
+      },
+      "prefab": {
+        "source": "prefabs/coin.prefab"
+      }
+    },
+    {
+      "id": "coin-6",
+      "name": "Coin 6",
+      "transform_3d": {
+        "position": [
+          34.5,
+          6,
+          0.2
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.8,
+          0.8,
+          1
+        ]
+      },
+      "prefab": {
+        "source": "prefabs/coin.prefab"
+      }
+    },
+    {
+      "id": "coin-7",
+      "name": "Coin 7",
+      "transform_3d": {
+        "position": [
+          40.5,
+          7.5,
+          0.2
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.8,
+          0.8,
+          1
+        ]
+      },
+      "prefab": {
+        "source": "prefabs/coin.prefab"
+      }
+    },
+    {
+      "id": "coin-8",
+      "name": "Coin 8",
+      "transform_3d": {
+        "position": [
+          48,
+          7,
+          0.2
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.8,
+          0.8,
+          1
+        ]
+      },
+      "prefab": {
+        "source": "prefabs/coin.prefab"
+      }
+    },
+    {
+      "id": "coin-9",
+      "name": "Coin 9",
+      "transform_3d": {
+        "position": [
+          53.5,
+          7,
+          0.2
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.8,
+          0.8,
+          1
+        ]
+      },
+      "prefab": {
+        "source": "prefabs/coin.prefab"
+      }
+    },
+    {
+      "id": "coin-10",
+      "name": "Coin 10",
+      "transform_3d": {
+        "position": [
+          59.5,
+          4,
+          0.2
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.8,
+          0.8,
+          1
+        ]
+      },
+      "prefab": {
+        "source": "prefabs/coin.prefab"
+      }
+    },
+    {
+      "id": "flag",
+      "name": "Beacon",
+      "transform_3d": {
+        "position": [
+          60.5,
+          3.55,
+          0.1
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/props.png#lantern-unlit",
+          "layer": 3
+        },
+        "sindri.animation.sprite": {
+          "clips": {
+            "unlit": {
+              "frames": [
+                "lantern-unlit"
+              ],
+              "seconds_per_frame": 0.1,
+              "looping": false
+            },
+            "lit": {
+              "frames": [
+                "lantern-lit"
+              ],
+              "seconds_per_frame": 0.1,
+              "looping": false
+            }
+          },
+          "playing": "unlit",
+          "speed": 1
+        },
+        "sindri.physics2d.collider": {
+          "pieces": [
+            {
+              "shape": {
+                "shape": "circle",
+                "radius": 0.75
+              },
+              "offset": [
+                0,
+                0
+              ],
+              "rotation": 0,
+              "sensor": true,
+              "layers": {
+                "memberships": 4,
+                "filter": 4294967295
+              },
+              "friction": 0,
+              "restitution": 0
+            }
+          ]
+        },
+        "sindri.tags": {
+          "tags": [
+            "lantern",
+            "goal"
+          ]
+        },
+        "sindri.script": {
+          "source": "scripts/checkpoint-lantern.decay",
+          "script": "CheckpointLantern",
+          "properties": {
+            "checkpoint_x": 60.5,
+            "checkpoint_y": 3.5,
+            "index": 4,
+            "beacon": true
+          }
+        },
+        "sindri.light2d": {
+          "enabled": true,
+          "color": [
+            1,
+            0.72,
+            0.38,
+            1
+          ],
+          "intensity": 0,
+          "radius": 4.8,
+          "falloff": 1.4,
+          "height": 1,
+          "shadows": false,
+          "shadow_reach": 0.1
+        },
+        "sindri.particles": {
+          "playing": false,
+          "texture": "textures/particle.png",
+          "rate": 20,
+          "max": 32,
+          "lifetime": 0.55,
+          "lifetime_spread": 0.2,
+          "speed": 1.2,
+          "speed_spread": 0.5,
+          "direction": 90,
+          "spread": 360,
+          "shape": "circle",
+          "offset": [
+            0,
+            0
+          ],
+          "shape_size": [
+            0.3,
+            0.3
+          ],
+          "gravity": [
+            0,
+            0
+          ],
+          "drag": 0.5,
+          "size": 0.18,
+          "size_end": 0.04,
+          "colors": [
+            [
+              1,
+              0.68,
+              0.22,
+              1
+            ],
+            [
+              1,
+              0.9,
+              0.48,
+              0
+            ]
+          ],
+          "random_rotation": false,
+          "spin": 0,
+          "space": "local",
+          "layer": 4
+        }
+      }
+    },
+    {
+      "id": "hud",
+      "name": "HUD",
+      "transform_3d": {
+        "position": [
+          0.03,
+          -0.03,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.text": {
+          "anchor": "top_left",
+          "color": [
+            1,
+            0.95,
+            0.6,
+            1
+          ],
+          "font": "fonts/Inter.ttf",
+          "font_size": 0.04,
+          "line_height": 0.048,
+          "layer": 100,
+          "text": "Embers {}/{}",
+          "shadow": {
+            "offset": [
+              0,
+              -0.003
+            ],
+            "color": [
+              0,
+              0,
+              0,
+              0.45
+            ],
+            "softness": 0.002
+          },
+          "bold": true
+        },
+        "sindri.script": {
+          "source": "scripts/hud.decay",
+          "script": "Hud",
+          "properties": {}
+        }
+      }
+    },
+    {
+      "id": "banner",
+      "name": "Banner",
+      "transform_3d": {
+        "position": [
+          0,
+          0.05,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.text": {
+          "anchor": "center",
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "font": "fonts/Inter.ttf",
+          "font_size": 0.08,
+          "line_height": 0.096,
+          "layer": 100,
+          "text": "Beacon lit!",
+          "shadow": {
+            "offset": [
+              0,
+              -0.003
+            ],
+            "color": [
+              0,
+              0,
+              0,
+              0.45
+            ],
+            "softness": 0.002
+          },
+          "bold": true
+        }
+      },
+      "disabled": true
+    },
+    {
+      "id": "ground-clearance",
+      "name": "Ground clearance",
+      "transform_3d": {
+        "position": [
+          0.03,
+          -0.085,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.text": {
+          "anchor": "top_left",
+          "color": [
+            1,
+            0.95,
+            0.6,
+            1
+          ],
+          "font": "fonts/Inter.ttf",
+          "font_size": 0.025,
+          "line_height": 0.03,
+          "layer": 100,
+          "text": "Ground: measuring",
+          "shadow": {
+            "offset": [
+              0,
+              -0.003
+            ],
+            "color": [
+              0,
+              0,
+              0,
+              0.45
+            ],
+            "softness": 0.002
+          },
+          "bold": true
+        }
+      }
+    },
+    {
+      "id": "hud-panel",
+      "name": "HUD panel",
+      "transform_3d": {
+        "position": [
+          0.235,
+          -0.07,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.46,
+          0.13,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.image": {
+          "texture": "textures/panel.png",
+          "anchor": "top_left",
+          "tint": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "layer": 99,
+          "draw": "sliced",
+          "border_scale": 0.004
+        }
+      }
+    },
+    {
+      "id": "signpost",
+      "name": "Signpost",
+      "transform_3d": {
+        "position": [
+          17.6,
+          3.4,
+          -0.06
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.18,
+          0.8,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "rect",
+          "fill": [
+            0.36,
+            0.22,
+            0.11,
+            1
+          ],
+          "layer": -1
+        }
+      }
+    },
+    {
+      "id": "signboard",
+      "name": "Signboard",
+      "transform_3d": {
+        "position": [
+          17.6,
+          4.3,
+          -0.05
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          2.2,
+          1.1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/panel.png",
+          "layer": -1,
+          "draw": "sliced",
+          "border_scale": 0.0625
+        }
+      }
+    },
+    {
+      "id": "lantern-anchor",
+      "name": "Lantern hook",
+      "transform_3d": {
+        "position": [
+          12,
+          8,
+          0.4
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.15,
+          0.15,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "rect",
+          "fill": [
+            0.2,
+            0.15,
+            0.1,
             1
           ]
         },
