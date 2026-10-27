@@ -780,7 +780,7 @@ on what is *walkable*.
 
 ### Camera follow / confine / shake
 
-Orthographic 2D camera confinement can keep the view within level edges as the viewport changes.
+Orthographic 2D camera confinement keeps the view within level edges and can look ahead in portrait as the target moves.
 
 Engine ✅ · Editor 🟡 · Decay 🟡 · Proof ✅ — parity row *Camera follow / confine / shake*
 

@@ -65,6 +65,7 @@ pub fn set_camera_follow_target(world: &mut World, target: EntityId) -> bool {
                 dead_zone: [0.0; 2],
                 smoothing: 8.0,
                 max_speed: 0.0,
+                look_ahead: None,
             });
         }
         true
