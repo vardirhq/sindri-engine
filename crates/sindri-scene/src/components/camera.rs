@@ -203,6 +203,9 @@ pub fn add_camera_trauma(world: &mut World, amount: f32) -> bool {
     let cameras: Vec<_> = world
         .entities()
         .filter_map(|(entity, data)| {
+            if !world.is_active(entity) {
+                return None;
+            }
             (data.components.contains_key(CameraComponent::TYPE_NAME)
                 && data
                     .components
@@ -270,7 +273,7 @@ fn update_camera_behavior(
     let mut position = current.position;
     position[0] -= previous_shake[0];
     position[1] -= previous_shake[1];
-    apply_follow(world, behavior.follow.as_ref(), &mut position, dt);
+    apply_follow(world, entity, behavior.follow.as_ref(), &mut position, dt);
     apply_confine(behavior.confine, &mut position);
     advance_shake(&mut behavior.shake, dt);
     let shake = shake_offset(&behavior.shake);
@@ -290,13 +293,21 @@ fn update_camera_behavior(
     }
 }
 
-fn apply_follow(world: &World, follow: Option<&CameraFollow>, position: &mut [f32; 3], dt: f32) {
+fn apply_follow(
+    world: &World,
+    camera: EntityId,
+    follow: Option<&CameraFollow>,
+    position: &mut [f32; 3],
+    dt: f32,
+) {
     let Some(follow) = follow else {
         return;
     };
     // Where the target is in the world, so a camera can follow a child.
     let Some(target) = world
-        .entity_for_source_id(&follow.target)
+        .resolve_entity_reference(camera, follow.target.as_str())
+        .or_else(|| anonymous_camera_raw_target(world, camera, &follow.target))
+        .filter(|entity| world.is_active(*entity))
         .and_then(|entity| world.world_transform(entity))
     else {
         return;
@@ -320,6 +331,31 @@ fn apply_follow(world: &World, follow: Option<&CameraFollow>, position: &mut [f3
         }
         position[axis] += step;
     }
+}
+
+// A camera made directly in a raw world may have no authored ID. Keep the
+// legacy raw-scene lookup for it without crossing an anonymous scene/prefab
+// root. Loaded and prefab cameras always use the scoped resolver above.
+fn anonymous_camera_raw_target(
+    world: &World,
+    camera: EntityId,
+    target: &SceneEntityId,
+) -> Option<EntityId> {
+    let owner = world.get(camera)?;
+    if owner.parent.is_some()
+        || owner.source_id.is_some()
+        || owner.scene_namespace.is_some()
+        || owner.prefab_identity.is_some()
+    {
+        return None;
+    }
+    let target = world.entity_for_source_id(target)?;
+    let mut root = target;
+    while let Some(parent) = world.get(root)?.parent {
+        root = parent;
+    }
+    let data = world.get(root)?;
+    (data.source_id.is_some() && data.scene_namespace.is_none()).then_some(target)
 }
 
 fn apply_confine(bounds: Option<CameraBounds>, position: &mut [f32; 3]) {
@@ -382,6 +418,26 @@ mod behavior_tests {
         update_camera_behaviors(&mut world, 1.0);
         let x = world.get(camera).unwrap().transform_3d.unwrap().position[0];
         assert!((x - 4.0).abs() < f32::EPSILON);
+    }
+
+    #[test]
+    fn anonymous_camera_cannot_follow_into_another_scene() {
+        let mut world = World::default();
+        let camera = world.spawn(entity([0.0, 0.0, 5.0]));
+        let root = world.spawn(EntityData {
+            scene_namespace: Some("level".to_owned()),
+            ..EntityData::default()
+        });
+        let target_id = SceneEntityId::new("level/target").unwrap();
+        let target = world.spawn(EntityData {
+            source_id: Some(target_id.clone()),
+            ..entity([8.0, 0.0, 0.0])
+        });
+        world.set_parent(target, Some(root)).unwrap();
+        assert_eq!(
+            anonymous_camera_raw_target(&world, camera, &target_id),
+            None
+        );
     }
 
     #[test]

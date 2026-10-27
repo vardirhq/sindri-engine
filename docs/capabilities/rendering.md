@@ -43,7 +43,7 @@ Each entry links its tests and the projects that exercise it. Surface marks matc
 | **World presentation** | | | | |
 | [3D directional + ambient lighting](#environment-lighting) | 🟡 | 🟡 | 🟡 | 🟡 |
 | [Voxel ambient occlusion / contact depth](#voxel-ao) | 🟡 | 🟡 | ❌ | 🟡 |
-| [Post-processing stack](#post-processing) | 🟡 | 🟡 | ❌ | 🟡 |
+| [Post-processing stack](#post-processing) | 🟡 | 🟡 | ✅ | ✅ |
 | [Authored fog/AO/post stack in shipped project hosts](#project-host-fog-post) | ✅ | — | ✅ | ✅ |
 | **3D models** | | | | |
 | [glTF / model import](#glb-models) | 🟡 | ❌ | ❌ | ✅ |
@@ -791,7 +791,7 @@ Engine 🟡 · Editor 🟡 · Decay 🟡 · Proof 🟡 — parity row *3D direct
 
 **Limits:**
 
-- Shipped-host fog/post delivery, sky, environment profiles/volumes, weather, water, full material assets and cascaded shadows remain future slices.
+- Sky, environment profiles/volumes, weather, water, full material assets and cascaded shadows remain future slices; authored fog and post effects reach the shared project host.
 
 <details markdown="1">
 <summary>Evidence</summary>
@@ -848,15 +848,15 @@ Engine 🟡 · Editor 🟡 · Decay ❌ · Proof 🟡 — parity row *Voxel ambi
 
 Exposure, tone mapping, contrast, saturation, bloom and vignette in one ordered world post path; overlay/UI stays crisp.
 
-Engine 🟡 · Editor 🟡 · Decay ❌ · Proof 🟡 — parity row *Post-processing stack*
+Engine 🟡 · Editor 🟡 · Decay ✅ · Proof ✅ — parity row *Post-processing stack*
 
 **Tested by:** [`crates/sindri-render/src/bloom/mod.rs`](../../crates/sindri-render/src/bloom/mod.rs)
 
-**Exercised in:** [`games/voxel-lab`](../../games/voxel-lab)
+**Exercised in:** [`games/voxel-lab`](../../games/voxel-lab), [`game`](../../game)
 
 **Limits:**
 
-- Advanced cinematic effects remain future slices.
+- LUT grading and advanced cinematic effects remain future slices.
 
 <a id="project-host-fog-post"></a>
 

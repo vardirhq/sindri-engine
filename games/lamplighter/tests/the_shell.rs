@@ -86,6 +86,28 @@ fn the_game_opens_on_the_title_and_play_starts_the_first_level() {
 }
 
 #[test]
+fn the_camera_follows_after_entering_the_level_from_the_title() {
+    let mut run = Run::open_title().expect("the project opens");
+    step(&mut run, 3);
+    press(&mut run, "play");
+    let camera = find(&run, "camera").expect("the level camera");
+    let hero = find(&run, "hero").expect("the hero");
+    let initial = run.position(camera)[0];
+    run.key(Key::ArrowRight, true);
+    step(&mut run, 120);
+    let camera_x = run.position(camera)[0];
+    let hero_x = run.position(hero)[0];
+    assert!(
+        camera_x > initial + 1.0,
+        "camera did not follow: {initial} -> {camera_x}"
+    );
+    assert!(
+        (camera_x - hero_x).abs() < 2.0,
+        "camera {camera_x}, hero {hero_x}"
+    );
+}
+
+#[test]
 fn the_title_reaches_the_levels_and_the_settings_and_back() {
     let mut run = Run::open_title().expect("the project opens");
     step(&mut run, 3);
