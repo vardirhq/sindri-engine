@@ -434,7 +434,10 @@ mod behavior_tests {
             ..entity([8.0, 0.0, 0.0])
         });
         world.set_parent(target, Some(root)).unwrap();
-        assert_eq!(anonymous_camera_raw_target(&world, camera, &target_id), None);
+        assert_eq!(
+            anonymous_camera_raw_target(&world, camera, &target_id),
+            None
+        );
     }
 
     #[test]
