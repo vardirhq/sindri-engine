@@ -632,7 +632,7 @@ parity = "3D directional + ambient lighting"
 tests = ["crates/sindri-gpu/tests/sunlight_faces.rs", "crates/sindri-decay/tests/lights3d.rs"]
 proof = ["games/voxel-lab", "examples/lighting3d", "examples/daynight"]
 docs = ["docs/world-presentation-plan.md"]
-limits = ["Shipped-host fog/post delivery, sky, environment profiles/volumes, weather, water, full material assets and cascaded shadows remain future slices."]
+limits = ["Sky, environment profiles/volumes, weather, water, full material assets and cascaded shadows remain future slices; authored fog and post effects reach the shared project host."]
 detail = '''
 `sindri.environment` is authored scene state for background, ambient fill,
 directional shadows, voxel contact-depth ambient occlusion, and an ordered
@@ -679,11 +679,11 @@ id = "post-processing"
 group = "World presentation"
 title = "Post-processing stack"
 summary = "Exposure, tone mapping, contrast, saturation, bloom and vignette in one ordered world post path; overlay/UI stays crisp."
-status = { engine = "partial", editor = "partial", decay = "no", proof = "partial" }
+status = { engine = "partial", editor = "partial", decay = "yes", proof = "yes" }
 parity = "Post-processing stack"
 tests = ["crates/sindri-render/src/bloom/mod.rs"]
-proof = ["games/voxel-lab"]
-limits = ["Advanced cinematic effects remain future slices."]
+proof = ["games/voxel-lab", "game"]
+limits = ["LUT grading and advanced cinematic effects remain future slices."]
 
 [[capability]]
 id = "glb-models"
