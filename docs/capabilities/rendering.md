@@ -41,6 +41,7 @@ Each entry links its tests and the projects that exercise it. Surface marks matc
 | [Stackable tile volumes](#tile-volumes) | ✅ | 🟡 | 🟡 | ❌ |
 | [Navigation over tile volume surfaces](#tile-volume-navigation) | ✅ | — | ✅ | ❌ |
 | **World presentation** | | | | |
+| [Camera follow / confine / shake](#camera-view-bounds) | ✅ | 🟡 | 🟡 | ✅ |
 | [3D directional + ambient lighting](#environment-lighting) | 🟡 | 🟡 | 🟡 | 🟡 |
 | [Voxel ambient occlusion / contact depth](#voxel-ao) | 🟡 | 🟡 | ❌ | 🟡 |
 | [Post-processing stack](#post-processing) | 🟡 | 🟡 | ✅ | ✅ |
@@ -774,6 +775,24 @@ on what is *walkable*.
 </details>
 
 ## World presentation
+
+<a id="camera-view-bounds"></a>
+
+### Camera follow / confine / shake
+
+Orthographic 2D camera confinement can keep the view within level edges as the viewport changes.
+
+Engine ✅ · Editor 🟡 · Decay 🟡 · Proof ✅ — parity row *Camera follow / confine / shake*
+
+**Tested by:** [`crates/sindri-scene/src/components/camera_confine.rs`](../../crates/sindri-scene/src/components/camera_confine.rs), [`games/lamplighter/tests/the_shell.rs`](../../games/lamplighter/tests/the_shell.rs)
+
+**Exercised in:** [`games/lamplighter`](../../games/lamplighter)
+
+**See:** [`docs/cameras.md`](../../docs/cameras.md)
+
+**Limits:**
+
+- Viewport confinement assumes an unrotated, unscaled 2D camera and an untransformed scene root; shake can cross the bounds.
 
 <a id="environment-lighting"></a>
 
