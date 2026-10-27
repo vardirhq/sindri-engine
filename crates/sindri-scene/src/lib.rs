@@ -64,7 +64,7 @@ pub use characters3d::{Character3dComponent, CharacterMotions3d, CharacterReques
 pub use collider_scale3d::ColliderScaleError3d;
 pub use collision_outline::{CollisionShapes, collision_shapes};
 pub use components::{
-    BiomeDocument, CameraBehaviorComponent, CameraBounds, CameraComponent, CameraFit, CameraFollow,
+    BiomeDocument, CameraBehaviorComponent, CameraBounds, CameraComponent, CameraFit, CameraFollow, CameraLookAhead,
     CameraOrbitComponent, CameraShake, EnvironmentAmbientOcclusion, EnvironmentBloom,
     EnvironmentComponent, EnvironmentError, EnvironmentFog, EnvironmentPostProcess,
     EnvironmentShadows, EnvironmentToneMapping, GridNavigationComponent, GridOccupantComponent,

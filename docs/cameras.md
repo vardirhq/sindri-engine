@@ -47,6 +47,13 @@ This mode is for unrotated, unscaled 2D cameras whose scene root has no transfor
 camera shake can still move briefly outside the bounds. Callers outside the
 shared session must pass their viewport to `update_camera_behaviors_with_viewport`.
 
+An optional `follow.look_ahead` with a `fraction` from zero to 0.8 offsets the
+camera horizontally by that fraction of the view's half-width in portrait.
+It tracks target movement, holds direction while stationary, and requires 0.5
+world units of reverse travel to change an established direction. The offset
+eases toward its new value; in landscape it eases back to zero. Confinement
+still wins at level edges. Lamplighter opts in to show Wick more of the path.
+
 The behavior update is an engine operation rather than a render-extraction side
 effect. A host advances it once per gameplay frame with
 `update_camera_behaviors`; extracting the same world twice never advances or

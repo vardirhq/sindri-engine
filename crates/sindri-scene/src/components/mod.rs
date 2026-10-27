@@ -11,6 +11,7 @@
 
 mod camera;
 mod camera_confine;
+mod camera_look_ahead;
 mod camera_orbit;
 mod environment;
 mod environment_check;
@@ -33,7 +34,7 @@ mod voxel_world;
 mod world_text;
 
 pub use camera::{
-    CameraBehaviorComponent, CameraBounds, CameraComponent, CameraFit, CameraFollow, CameraShake,
+    CameraBehaviorComponent, CameraBounds, CameraComponent, CameraFit, CameraFollow, CameraLookAhead, CameraShake,
     add_camera_trauma, update_camera_behaviors, update_camera_behaviors_with_viewport,
 };
 pub use camera_orbit::CameraOrbitComponent;

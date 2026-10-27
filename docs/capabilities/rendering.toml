@@ -626,7 +626,7 @@ on what is *walkable*.
 id = "camera-view-bounds"
 group = "World presentation"
 title = "Camera follow / confine / shake"
-summary = "Orthographic 2D camera confinement can keep the view within level edges as the viewport changes."
+summary = "Orthographic 2D camera confinement keeps the view within level edges and can look ahead in portrait as the target moves."
 status = { engine = "yes", editor = "partial", decay = "partial", proof = "yes" }
 parity = "Camera follow / confine / shake"
 tests = ["crates/sindri-scene/src/components/camera_confine.rs", "games/lamplighter/tests/the_shell.rs"]

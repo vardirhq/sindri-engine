@@ -46,7 +46,10 @@
               1
             ],
             "smoothing": 6,
-            "max_speed": 30
+            "max_speed": 30,
+            "look_ahead": {
+              "fraction": 0.65
+            }
           },
           "confine": {
             "min": [

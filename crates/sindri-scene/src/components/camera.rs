@@ -130,6 +130,24 @@ pub struct CameraFollow {
     pub smoothing: f32,
     #[serde(default)]
     pub max_speed: f32,
+    /// Optional horizontal look-ahead, active in portrait viewports.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub look_ahead: Option<CameraLookAhead>,
+}
+
+/// Look ahead in the direction the followed target has traveled.
+#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+pub struct CameraLookAhead {
+    /// Fraction of the viewport's half-width to look ahead.
+    pub fraction: f32,
+    #[serde(default)]
+    pub(super) previous_x: Option<f32>,
+    #[serde(default)]
+    pub(super) travel: f32,
+    #[serde(default)]
+    pub(super) direction: f32,
+    #[serde(default)]
+    pub(super) offset: f32,
 }
 
 const fn default_follow_smoothing() -> f32 {
@@ -295,7 +313,7 @@ fn update_camera_behavior(
     let mut position = current.position;
     position[0] -= previous_shake[0];
     position[1] -= previous_shake[1];
-    apply_follow(world, entity, behavior.follow.as_ref(), &mut position, dt);
+    apply_follow(world, entity, behavior.follow.as_mut(), &mut position, dt, viewport);
     if behavior.confine.is_some_and(|bounds| bounds.contain_view)
         && let Some(follow) = &behavior.follow
         && let Some(half) = super::camera_confine::view_half_size(world, entity, viewport)
@@ -337,9 +355,10 @@ fn update_camera_behavior(
 fn apply_follow(
     world: &World,
     camera: EntityId,
-    follow: Option<&CameraFollow>,
+    follow: Option<&mut CameraFollow>,
     position: &mut [f32; 3],
     dt: f32,
+    viewport: Option<(f32, f32)>,
 ) {
     let Some(follow) = follow else {
         return;
@@ -353,8 +372,11 @@ fn apply_follow(
     else {
         return;
     };
+    let look_ahead = follow.look_ahead.as_mut().map_or(0.0, |look| {
+        super::camera_look_ahead::advance(world, camera, look, target.position[0], viewport, dt)
+    });
     let desired = [
-        target.position[0] + follow.offset[0],
+        target.position[0] + follow.offset[0] + look_ahead,
         target.position[1] + follow.offset[1],
         target.position[2] + follow.offset[2],
     ];
