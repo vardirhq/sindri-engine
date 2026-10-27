@@ -64,7 +64,10 @@ mod tests {
         assert!(look.offset > 1.5);
         let before = look.offset;
         advance(&world, camera, &mut look, 10.9, portrait, 0.1);
-        assert!(look.offset >= before - 0.01, "short reversals keep direction");
+        assert!(
+            look.offset >= before - 0.01,
+            "short reversals keep direction"
+        );
         for _ in 0..30 {
             advance(&world, camera, &mut look, 10.0, portrait, 0.1);
         }
@@ -108,15 +111,35 @@ mod tests {
         );
         let camera = world.spawn(data);
         super::super::update_camera_behaviors_with_viewport(&mut world, 0.1, Some((390.0, 844.0)));
-        world.get_mut(target).unwrap().transform_3d.as_mut().unwrap().position[0] = 21.0;
+        world
+            .get_mut(target)
+            .unwrap()
+            .transform_3d
+            .as_mut()
+            .unwrap()
+            .position[0] = 21.0;
         for _ in 0..40 {
-            super::super::update_camera_behaviors_with_viewport(&mut world, 0.1, Some((390.0, 844.0)));
+            super::super::update_camera_behaviors_with_viewport(
+                &mut world,
+                0.1,
+                Some((390.0, 844.0)),
+            );
         }
         let x = world.get(camera).unwrap().transform_3d.unwrap().position[0];
         assert!(x > 22.0, "portrait camera should look ahead: {x}");
-        world.get_mut(target).unwrap().transform_3d.as_mut().unwrap().position[0] = 63.0;
+        world
+            .get_mut(target)
+            .unwrap()
+            .transform_3d
+            .as_mut()
+            .unwrap()
+            .position[0] = 63.0;
         for _ in 0..40 {
-            super::super::update_camera_behaviors_with_viewport(&mut world, 0.1, Some((390.0, 844.0)));
+            super::super::update_camera_behaviors_with_viewport(
+                &mut world,
+                0.1,
+                Some((390.0, 844.0)),
+            );
         }
         let x = world.get(camera).unwrap().transform_3d.unwrap().position[0];
         assert!(x <= 64.0 - 11.25 * 390.0 / 844.0 / 2.0 + 0.001);

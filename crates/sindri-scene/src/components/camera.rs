@@ -313,7 +313,14 @@ fn update_camera_behavior(
     let mut position = current.position;
     position[0] -= previous_shake[0];
     position[1] -= previous_shake[1];
-    apply_follow(world, entity, behavior.follow.as_mut(), &mut position, dt, viewport);
+    apply_follow(
+        world,
+        entity,
+        behavior.follow.as_mut(),
+        &mut position,
+        dt,
+        viewport,
+    );
     if behavior.confine.is_some_and(|bounds| bounds.contain_view)
         && let Some(follow) = &behavior.follow
         && let Some(half) = super::camera_confine::view_half_size(world, entity, viewport)
