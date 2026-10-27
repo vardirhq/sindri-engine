@@ -1,0 +1,19 @@
+{
+  "format_version": 1,
+  "anchor": "bottom",
+  "grid": {
+    "columns": 9,
+    "rows": 1,
+    "names": [
+      "idle",
+      "walk-0",
+      "walk-1",
+      "walk-2",
+      "walk-3",
+      "walk-4",
+      "walk-5",
+      "walk-6",
+      "walk-7"
+    ]
+  }
+}

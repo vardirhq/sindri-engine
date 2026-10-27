@@ -5818,62 +5818,63 @@
           1
         ],
         "scale": [
-          2,
-          2,
+          1.5,
+          1.5,
           1
         ]
       },
       "components": {
         "sindri.sprite": {
-          "texture": "textures/wick.png#idle-0",
+          "texture": "textures/wick-pixellab.png#idle",
           "layer": 5
         },
         "sindri.animation.sprite": {
           "clips": {
             "idle": {
               "frames": [
-                "idle-0",
-                "idle-1"
+                "idle"
               ],
               "seconds_per_frame": 0.45,
               "looping": true
             },
             "run": {
               "frames": [
-                "run-0",
-                "run-1",
-                "run-2",
-                "run-3"
+                "walk-0",
+                "walk-1",
+                "walk-2",
+                "walk-3",
+                "walk-4",
+                "walk-5",
+                "walk-6",
+                "walk-7"
               ],
               "seconds_per_frame": 0.09,
               "looping": true
             },
             "jump": {
               "frames": [
-                "jump"
+                "idle"
               ],
               "seconds_per_frame": 0.1,
               "looping": false
             },
             "fall": {
               "frames": [
-                "fall"
+                "idle"
               ],
               "seconds_per_frame": 0.1,
               "looping": false
             },
             "land": {
               "frames": [
-                "land"
+                "idle"
               ],
               "seconds_per_frame": 0.1,
               "looping": false
             },
             "light": {
               "frames": [
-                "light-0",
-                "light-1",
-                "light-2"
+                "idle"
               ],
               "seconds_per_frame": 0.1,
               "looping": false

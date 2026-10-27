@@ -326,6 +326,7 @@ def main():
     harbor = build_scene(masks, bake_wick(), HARBOR, "quay", "Lamplighter harbor art test", decorate=False, floor_row=11, wick_x=4.0, lanterns=((2.0, True), (17.5, False)))
     (ASSETS / "art-harbor.scene").write_text(json.dumps(harbor, indent=2) + "\n")
     shell.write_all(ASSETS)
+    subprocess.run([sys.executable, str(HERE.parent / "pixellab" / "wick.py")], check=True)
     print(f"wrote {len(masks)} ground tiles, {len(props.DECOR)} decorations, the backdrop, Wick and art-test.scene")
 
 

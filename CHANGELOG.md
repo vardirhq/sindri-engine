@@ -2,6 +2,8 @@
 
 # Changelog
 
+- Try the PixelLab Wick sprite and walking animation in Lamplighter.
+
 - Give Lamplighter's portrait camera a smooth look ahead in Wick's travel
   direction, while keeping it inside the level bounds.
 

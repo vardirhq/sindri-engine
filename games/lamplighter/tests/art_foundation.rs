@@ -151,7 +151,7 @@ fn the_playable_level_uses_the_dusk_art() {
     assert_eq!(wick["parent"], "hero");
     assert_eq!(
         wick["components"]["sindri.sprite"]["texture"],
-        "textures/wick.png#idle-0"
+        "textures/wick-pixellab.png#idle"
     );
 
     let backdrop_sprites = components(&level, "sindri.sprite")
@@ -173,5 +173,34 @@ fn the_playable_level_uses_the_dusk_art() {
             entity["name"], entity["id"],
             "the backdrop script finds each layer by name"
         );
+    }
+}
+
+#[test]
+fn playable_wick_uses_a_foot_anchored_sheet_with_all_walk_frames() {
+    let texture = "textures/wick-pixellab.png";
+    assert_eq!(size_of(texture), (432, 48));
+    let sheet_json = std::fs::read_to_string(assets().join(texture).with_extension("sheet"))
+        .expect("Wick's sheet exists");
+    let metadata: Value = serde_json::from_str(&sheet_json).expect("valid sheet JSON");
+    assert_eq!(metadata["anchor"], "bottom");
+    let rects = sheet(texture).rects().expect("the sheet cuts");
+    assert!(rects.contains_key("idle"));
+    for i in 0..8 {
+        assert!(rects.contains_key(&format!("walk-{i}")));
+    }
+    let level = scene("level-1.scene");
+    let wick = level["entities"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|entity| entity["id"] == "wick-sprite")
+        .unwrap();
+    let frames = wick["components"]["sindri.animation.sprite"]["clips"]["run"]["frames"]
+        .as_array()
+        .expect("the walk clip has frames");
+    assert_eq!(frames.len(), 8);
+    for frame in frames {
+        assert!(rects.contains_key(frame.as_str().expect("a sprite name")));
     }
 }
