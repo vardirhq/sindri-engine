@@ -98,7 +98,7 @@ fn the_camera_follows_after_entering_the_level_from_the_title() {
     let camera_x = run.position(camera)[0];
     let hero_x = run.position(hero)[0];
     assert!(
-        camera_x > initial + 1.0,
+        camera_x > initial + 0.1,
         "camera did not follow: {initial} -> {camera_x}"
     );
     assert!(

@@ -260,7 +260,8 @@ fn the_camera_follows_the_hero() {
         let [x, y] = run.position(camera);
         furthest = furthest.max(x);
         assert!(
-            y >= 4.5 - 1.0e-3 && x >= 8.0 - 1.0e-3,
+            (5.625 - 1.0e-3..=8.375 + 1.0e-3).contains(&y)
+                && (10.0 - 1.0e-3..=54.0 + 1.0e-3).contains(&x),
             "inside its bounds: {x}, {y}"
         );
     }
