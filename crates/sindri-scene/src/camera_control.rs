@@ -144,7 +144,12 @@ pub fn set_camera_bounds(world: &mut World, min: [f32; 2], max: [f32; 2]) -> boo
         return false;
     }
     edit_behavior(world, |behavior| {
-        behavior.confine = Some(CameraBounds { min, max });
+        let contain_view = behavior.confine.is_some_and(|bounds| bounds.contain_view);
+        behavior.confine = Some(CameraBounds {
+            min,
+            max,
+            contain_view,
+        });
         true
     })
 }

@@ -35,6 +35,18 @@ update. Behavior order is follow, then confinement, then shake, so impact motion
 may briefly cross a confine edge without changing the camera's underlying
 follow position.
 
+An orthographic 2D camera can set `confine.contain_view` to `true` to interpret
+`min` and `max` as the edges of the level rather than limits for the camera's
+center. Each gameplay step insets those edges by half of the view at the
+current viewport aspect. When a view is larger than the level on an axis, the
+camera centers on that axis. Lamplighter uses this for portrait and landscape.
+When following, the camera keeps its target inside a small margin of the view
+even if resizing would otherwise leave the target offscreen, subject to the
+level bounds.
+This mode is for unrotated, unscaled 2D cameras whose scene root has no transform;
+camera shake can still move briefly outside the bounds. Callers outside the
+shared session must pass their viewport to `update_camera_behaviors_with_viewport`.
+
 The behavior update is an engine operation rather than a render-extraction side
 effect. A host advances it once per gameplay frame with
 `update_camera_behaviors`; extracting the same world twice never advances or

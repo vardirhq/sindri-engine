@@ -2,6 +2,10 @@
 
 # Changelog
 
+- Keep Lamplighter's camera framed inside Dusk Road at portrait and landscape
+  sizes, and start Wick in view on a phone. Camera confinement can account for
+  the current orthographic viewport instead of using fixed center limits.
+
 - Keep Lamplighter's 16:9 gameplay camera within Dusk Road's level edges while
   following Wick.
 

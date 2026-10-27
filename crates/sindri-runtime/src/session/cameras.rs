@@ -8,9 +8,10 @@ impl Session {
         &self,
         world: &mut World,
         delta_seconds: f32,
+        viewport: (f32, f32),
         problems: &mut Vec<String>,
     ) {
-        sindri_scene::update_camera_behaviors(world, delta_seconds);
+        sindri_scene::update_camera_behaviors_with_viewport(world, delta_seconds, Some(viewport));
         for (entity, problem) in
             sindri_scene::update_orbit_cameras(world, self.physics3d.world(), delta_seconds)
         {

@@ -95,7 +95,7 @@ fn describe_camera_behavior(
     )?;
     components.describe_optional::<CameraBehaviorComponent>(
         "confine",
-        serde_json::json!({ "min": [-10.0, -10.0], "max": [10.0, 10.0] }),
+        serde_json::json!({ "min": [-10.0, -10.0], "max": [10.0, 10.0], "contain_view": false }),
     )?;
     components.describe::<CameraBehaviorComponent>([
         ("follow.target", FieldMeaning::Entity),

@@ -42,7 +42,15 @@ impl Run {
     /// # Errors
     /// As [`Self::open`].
     pub fn open_title() -> Result<Self, String> {
-        ProjectRun::open(&project(), SCREEN).map(|run| Self(Box::new(run)))
+        Self::open_title_in_viewport(SCREEN)
+    }
+
+    /// Opens the title with the dimensions of the screen being tested.
+    ///
+    /// # Errors
+    /// As [`Self::open`].
+    pub fn open_title_in_viewport(viewport: [f32; 2]) -> Result<Self, String> {
+        ProjectRun::open(&project(), viewport).map(|run| Self(Box::new(run)))
     }
 
     /// Opens the project on one of its scenes, named as `Scene.go` names it.

@@ -408,7 +408,7 @@ impl Session {
         laps.lap(StepPhase::Animation);
         // After the scripts, so a camera following the player follows where
         // this step left it. The voxel world keeps its own window under it.
-        self.step_cameras(world, delta_seconds, &mut problems);
+        self.step_cameras(world, delta_seconds, viewport, &mut problems);
         laps.lap(StepPhase::Cameras);
         // After the scripts, because a walker's depth is a consequence of where
         // this step left it, and before anything draws. Props settle on the

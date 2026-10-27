@@ -140,6 +140,15 @@ const fn default_follow_smoothing() -> f32 {
 pub struct CameraBounds {
     pub min: [f32; 2],
     pub max: [f32; 2],
+    /// Interpret the rectangle as world edges, keeping the camera view inside.
+    #[serde(default, skip_serializing_if = "is_false")]
+    pub contain_view: bool,
+}
+
+// Serde's `skip_serializing_if` passes a reference to the field.
+#[allow(clippy::trivially_copy_pass_by_ref)]
+const fn is_false(value: &bool) -> bool {
+    !*value
 }
 
 #[derive(Clone, Copy, Debug, Deserialize, PartialEq, Serialize)]
@@ -235,12 +244,24 @@ pub fn add_camera_trauma(world: &mut World, amount: f32) -> bool {
 }
 
 pub fn update_camera_behaviors(world: &mut World, dt: f32) {
+    update_camera_behaviors_with_viewport(world, dt, None);
+}
+
+/// Advance camera behavior with the actual viewport size for view containment.
+pub fn update_camera_behaviors_with_viewport(
+    world: &mut World,
+    dt: f32,
+    viewport: Option<(f32, f32)>,
+) {
     if !dt.is_finite() || dt <= 0.0 {
         return;
     }
     let cameras: Vec<_> = world
         .entities()
         .filter_map(|(entity, data)| {
+            if !world.is_active(entity) {
+                return None;
+            }
             // A 3D orbit owns the pose; 2D follow, confinement and shake resume when removed.
             if data
                 .components
@@ -256,7 +277,7 @@ pub fn update_camera_behaviors(world: &mut World, dt: f32) {
         .collect();
 
     for (entity, mut behavior) in cameras {
-        update_camera_behavior(world, entity, &mut behavior, dt);
+        update_camera_behavior(world, entity, &mut behavior, dt, viewport);
     }
 }
 
@@ -265,6 +286,7 @@ fn update_camera_behavior(
     entity: EntityId,
     behavior: &mut CameraBehaviorComponent,
     dt: f32,
+    viewport: Option<(f32, f32)>,
 ) {
     let Some(current) = world.get(entity).and_then(|data| data.transform_3d) else {
         return;
@@ -274,7 +296,26 @@ fn update_camera_behavior(
     position[0] -= previous_shake[0];
     position[1] -= previous_shake[1];
     apply_follow(world, entity, behavior.follow.as_ref(), &mut position, dt);
-    apply_confine(behavior.confine, &mut position);
+    if behavior.confine.is_some_and(|bounds| bounds.contain_view)
+        && let Some(follow) = &behavior.follow
+        && let Some(half) = super::camera_confine::view_half_size(world, entity, viewport)
+        && let Some(target) = world
+            .resolve_entity_reference(entity, follow.target.as_str())
+            .filter(|target| world.is_active(*target))
+            .and_then(|target| world.world_transform(target))
+    {
+        for axis in 0..2 {
+            let visible = half[axis] * 0.9;
+            position[axis] = position[axis].clamp(
+                target.position[axis] - visible,
+                target.position[axis] + visible,
+            );
+        }
+    }
+    let bounds = behavior
+        .confine
+        .map(|bounds| super::camera_confine::effective_bounds(world, entity, bounds, viewport));
+    apply_confine(bounds, &mut position);
     advance_shake(&mut behavior.shake, dt);
     let shake = shake_offset(&behavior.shake);
     behavior.shake.offset = shake;

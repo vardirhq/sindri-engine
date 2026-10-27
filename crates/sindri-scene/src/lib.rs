@@ -79,7 +79,7 @@ pub use components::{
     VoxelBlock, VoxelEdit, VoxelGeneratorDocument, VoxelMapFlood, VoxelMaterialDocument, VoxelView,
     VoxelWorldComponent, add_camera_trauma, cell_to_local_in, default_sun_transform,
     environment_of, environments_in, light_direction, lights_in, sun_in, ui_text_template,
-    update_camera_behaviors,
+    update_camera_behaviors, update_camera_behaviors_with_viewport,
 };
 pub use components::{
     EnvironmentLighting2d, Light2dComponent, Light2dError, Light2dOccluderComponent, OccluderShape,

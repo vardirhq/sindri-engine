@@ -623,6 +623,18 @@ on what is *walkable*.
 """
 
 [[capability]]
+id = "camera-view-bounds"
+group = "World presentation"
+title = "Camera follow / confine / shake"
+summary = "Orthographic 2D camera confinement can keep the view within level edges as the viewport changes."
+status = { engine = "yes", editor = "partial", decay = "partial", proof = "yes" }
+parity = "Camera follow / confine / shake"
+tests = ["crates/sindri-scene/src/components/camera_confine.rs", "games/lamplighter/tests/the_shell.rs"]
+proof = ["games/lamplighter"]
+docs = ["docs/cameras.md"]
+limits = ["Viewport confinement assumes an unrotated, unscaled 2D camera and an untransformed scene root; shake can cross the bounds."]
+
+[[capability]]
 id = "environment-lighting"
 group = "World presentation"
 title = "3D directional + ambient lighting"
