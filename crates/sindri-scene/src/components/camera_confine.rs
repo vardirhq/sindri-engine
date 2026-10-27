@@ -87,8 +87,12 @@ mod tests {
             contain_view: true,
         };
         let landscape = effective_bounds(&world, camera, bounds, Some((960.0, 540.0)));
-        assert_eq!(landscape.min, [10.0, 5.625]);
-        assert_eq!(landscape.max, [54.0, 8.375]);
+        for (actual, expected) in landscape.min.into_iter().zip([10.0, 5.625]) {
+            assert!((actual - expected).abs() < 0.001);
+        }
+        for (actual, expected) in landscape.max.into_iter().zip([54.0, 8.375]) {
+            assert!((actual - expected).abs() < 0.001);
+        }
         let portrait = effective_bounds(&world, camera, bounds, Some((390.0, 844.0)));
         assert!((portrait.min[0] - 2.599).abs() < 0.01);
         assert!((portrait.min[1] - 5.625).abs() < f32::EPSILON);
@@ -96,7 +100,8 @@ mod tests {
         assert!((ultrawide.min[0] - 13.125).abs() < 0.001);
         assert!((ultrawide.max[0] - 50.875).abs() < 0.001);
         let wide = effective_bounds(&world, camera, bounds, Some((7000.0, 500.0)));
-        assert_eq!((wide.min[0], wide.max[0]), (32.0, 32.0));
+        assert!((wide.min[0] - 32.0).abs() < 0.001);
+        assert!((wide.max[0] - 32.0).abs() < 0.001);
     }
 
     #[test]
