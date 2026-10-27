@@ -81,10 +81,49 @@ impl World {
     }
 }
 
-/// Loaded scenes have an anonymous root; raw scenes share the unparented scope.
+/// Loaded scenes mark their root; raw and anonymous entities share the unparented scope.
 fn boundary(world: &World, mut entity: EntityId) -> Option<EntityId> {
     while let Some(parent) = world.get(entity)?.parent {
         entity = parent;
     }
-    world.get(entity)?.source_id.is_none().then_some(entity)
+    world.get(entity)?.scene_namespace.is_some().then_some(entity)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::EntityData;
+
+    #[test]
+    fn anonymous_owner_resolves_a_raw_scene_target() {
+        let mut world = World::default();
+        let owner = world.spawn(EntityData::default());
+        let target = world.spawn(EntityData {
+            source_id: Some(SceneEntityId::new("target").unwrap()),
+            ..EntityData::default()
+        });
+        assert_eq!(
+            world.resolve_entity_reference(owner, "target"),
+            Some(target)
+        );
+    }
+
+    #[test]
+    fn loaded_scene_roots_remain_separate_from_anonymous_entities() {
+        let mut world = World::default();
+        let owner = world.spawn(EntityData::default());
+        let root = world.spawn(EntityData {
+            scene_namespace: Some("level".to_owned()),
+            ..EntityData::default()
+        });
+        let target = world.spawn(EntityData {
+            source_id: Some(SceneEntityId::new("level/target").unwrap()),
+            ..EntityData::default()
+        });
+        world.set_parent(target, Some(root)).unwrap();
+        assert_eq!(
+            world.resolve_entity_reference(owner, "level/target"),
+            None
+        );
+    }
 }
