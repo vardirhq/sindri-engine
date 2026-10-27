@@ -2,6 +2,10 @@
 
 # Changelog
 
+- Resolve camera follow targets in their scene or prefab scope, so Lamplighter's
+  camera follows Wick after entering the level from the title screen. Inactive
+  cameras and targets no longer advance follow behavior.
+
 - Add a responsive browser Normal Map Studio using the editor's shared generator.
 
 - Add Particle Lab to author Sindri particle emitters in the editor and browser,

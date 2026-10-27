@@ -203,6 +203,9 @@ pub fn add_camera_trauma(world: &mut World, amount: f32) -> bool {
     let cameras: Vec<_> = world
         .entities()
         .filter_map(|(entity, data)| {
+            if !world.is_active(entity) {
+                return None;
+            }
             (data.components.contains_key(CameraComponent::TYPE_NAME)
                 && data
                     .components
@@ -270,7 +273,7 @@ fn update_camera_behavior(
     let mut position = current.position;
     position[0] -= previous_shake[0];
     position[1] -= previous_shake[1];
-    apply_follow(world, behavior.follow.as_ref(), &mut position, dt);
+    apply_follow(world, entity, behavior.follow.as_ref(), &mut position, dt);
     apply_confine(behavior.confine, &mut position);
     advance_shake(&mut behavior.shake, dt);
     let shake = shake_offset(&behavior.shake);
@@ -290,13 +293,20 @@ fn update_camera_behavior(
     }
 }
 
-fn apply_follow(world: &World, follow: Option<&CameraFollow>, position: &mut [f32; 3], dt: f32) {
+fn apply_follow(
+    world: &World,
+    camera: EntityId,
+    follow: Option<&CameraFollow>,
+    position: &mut [f32; 3],
+    dt: f32,
+) {
     let Some(follow) = follow else {
         return;
     };
     // Where the target is in the world, so a camera can follow a child.
     let Some(target) = world
-        .entity_for_source_id(&follow.target)
+        .resolve_entity_reference(camera, follow.target.as_str())
+        .filter(|entity| world.is_active(*entity))
         .and_then(|entity| world.world_transform(entity))
     else {
         return;

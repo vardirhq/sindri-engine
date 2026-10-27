@@ -27,6 +27,10 @@ The behavior calls below operate on the single authored `sindri.camera` that car
 
 The editor-authored values are the initial state. Runtime calls change the live camera behavior for the rest of play unless another script changes them again. Stopping play restores the authored scene in the normal editor lifecycle.
 
+Follow targets resolve in the camera's scene or prefab scope, including scenes
+entered through `Scene.go`. Inactive cameras do not advance, and an inactive
+target is not followed.
+
 ## Projection size
 
 | Call | Returns |
