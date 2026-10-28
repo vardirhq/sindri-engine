@@ -41,7 +41,13 @@ fn sindri_lit(input: SindriVertexOutput, rgb: vec3<f32>) -> vec3<f32> {
         let up = normalize(input.axes.zw);
         normal = normalize(vec3<f32>(right * local.x + up * local.y, local.z));
     }
-    return rgb * sindri_light_2d(input.world_position.xy, normal, use_normal);
+    var base = input.world_position.xy;
+    if input.flags.y > 0.5 {
+        // The quad's own coordinates run 0..1 down the picture, and its axes are
+        // the model's two columns, so the feet are the bottom middle.
+        base = base - (input.local_uv.x - 0.5) * input.axes.xy - (1.0 - input.local_uv.y) * input.axes.zw;
+    }
+    return rgb * sindri_light_2d_from(input.world_position.xy, base, normal, use_normal);
 }
 
 // The batch's mask, or anything when it has none.

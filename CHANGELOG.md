@@ -2,6 +2,10 @@
 
 # Changelog
 
+- A thing with `sindri.shadow2d` is now lit as something standing on the ground: the
+  question of whether a shadow covers it is asked where its feet are, not at each
+  pixel. The occluder round a tree's or boulder's base no longer darkens the side of
+  it that faces the light. `lit_from_base` on the component turns it off.
 - Lamplighter's trees, boulders, lamps, Wick and the gloom now throw shadows on the
   ground: a soft contact ellipse under each, and for trees and boulders their own
   silhouette laid away from the nearest lamps and Wick's lantern, so a boulder's

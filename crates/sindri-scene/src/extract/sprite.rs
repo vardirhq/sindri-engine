@@ -264,6 +264,7 @@ impl SceneExtractor {
                     order,
                     sprite: SpriteInstance::new(model, sprite.tint)
                         .lit(!sprite.unlit)
+                        .standing(casting.as_ref().is_some_and(|c| c.stands(entity)))
                         .with_color_transform(
                             sprite.color_transform.multiply,
                             sprite.color_transform.offset,

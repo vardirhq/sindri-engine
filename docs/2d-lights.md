@@ -160,6 +160,7 @@ two parts, either of which it may have:
 | `cast_opacity` | How dark a cast shadow is where a light reaches its full strength | `0.45` |
 | `height` | How tall the thing is, in world units, which sets how long it casts; zero takes the height its picture is drawn at | `0` |
 | `max_length` | The longest a cast shadow gets | `2.5` |
+| `lit_from_base` | Whether the thing itself is lit as something standing: whether a shadow covers it is asked at its feet, not at each pixel | `true` |
 
 The **contact shadow** is a feathered black ellipse drawn one layer below the
 thing's sprite, so it says the thing rests on the ground whatever lights are
@@ -183,7 +184,7 @@ thing is). Casting needs the environment's `lighting_2d` on.
 Limits: the cast shadow is the sprite's picture and not its real shape from above,
 so a tree casts the silhouette it shows, not its crown's outline; it falls on a
 flat ground at the object's own height, so it does not climb a wall or a step; and
-a thing's own face is not shaded by the light, only its ground.
+the ground in front of a thing is lit normally, and the thing itself is lit from its feet (`lit_from_base`), so the occluder round its base, which stops light reaching what is behind it, does not also darken the side facing the light. A lit-from-base thing is lit by every light in range that nothing else blocks, from whichever side, and the shadow it casts is what says which way the light is.
 
 ## In the editor
 

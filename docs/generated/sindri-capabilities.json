@@ -1916,6 +1916,7 @@
           0.4000000059604645
         ],
         "height": 0.0,
+        "lit_from_base": true,
         "max_length": 2.5
       },
       "display_name": "Shadow 2D",
@@ -1932,6 +1933,7 @@
           0.4000000059604645
         ],
         "height": 0.0,
+        "lit_from_base": true,
         "max_length": 2.5
       },
       "meanings": {

@@ -62,7 +62,7 @@ impl SceneExtractor {
     ) -> Result<Option<CastShadows>, SceneExtractError> {
         let mut things = BTreeMap::new();
         for (entity, shadow) in self.components.query::<Shadow2dComponent>(world)? {
-            if !world.is_active(entity) || !shadow.cast {
+            if !world.is_active(entity) {
                 continue;
             }
             match shadow.validate() {
@@ -188,6 +188,13 @@ impl SceneExtractor {
 }
 
 impl CastShadows {
+    /// Whether `entity` is lit from where it stands.
+    pub(super) fn stands(&self, entity: EntityId) -> bool {
+        self.things
+            .get(&entity)
+            .is_some_and(|shadow| shadow.lit_from_base)
+    }
+
     /// The silhouettes `entity` casts, if it casts any: its picture, `model`
     /// placing it and `rect` the part of `texture` it shows, laid away from each
     /// of the lights that reach its feet.
@@ -200,7 +207,7 @@ impl CastShadows {
         layer: i32,
         camera_view: Mat4,
     ) -> Vec<SpriteDraw> {
-        let Some(shadow) = self.things.get(&entity) else {
+        let Some(shadow) = self.things.get(&entity).filter(|shadow| shadow.cast) else {
             return Vec::new();
         };
         let (texture, rect) = picture;
