@@ -142,3 +142,17 @@ fn asking_without_lighting_says_so() {
         "{report:#?}"
     );
 }
+
+#[test]
+fn only_sources_that_name_the_lighting_ask_for_it() {
+    let mut sources = ScriptSources::new();
+    sources.insert("quiet.decay", "script Quiet { fn update(dt: f32) {} }");
+    assert!(!sources.asks_lighting());
+    sources.insert(
+        "asker.decay",
+        "script Asker { fn update(dt: f32) { Lighting.level(Vec2(0.0, 0.0)); } }",
+    );
+    assert!(sources.asks_lighting());
+    sources.remove("asker.decay");
+    assert!(!sources.asks_lighting(), "and it forgets when they go");
+}

@@ -286,6 +286,20 @@ impl Session {
             .then(|| [near.to_array(), direction.to_array()])
     }
 
+    /// The scene's lights and occluders for `Lighting.*`, gathered only when a
+    /// script asks, because it reads every light and occluder in the world, a
+    /// tilemap's solids included. `None` when none does, and when the scene has
+    /// no 2D lighting on, and then asking says so.
+    fn light_field(
+        &self,
+        world: &World,
+    ) -> Result<Option<sindri_scene::LightField2d>, sindri_scene::SceneExtractError> {
+        if !self.sources.asks_lighting() {
+            return Ok(None);
+        }
+        sindri_scene::LightField2d::gather(world, &self.components)
+    }
+
     /// One fixed step: physics, the screen UI, effects, the scripts, then
     /// what moves after them. Every host runs this, and only this, so a
     /// scene steps the same in each.
@@ -352,9 +366,7 @@ impl Session {
         } else {
             input
         };
-        // Gathered for scripts that ask `Lighting.*`; absent when the scene has
-        // no 2D lighting on, and then asking says so.
-        let lighting = sindri_scene::LightField2d::gather(world, &self.components)?;
+        let lighting = self.light_field(world)?;
         let (physics, events, requests, motions) = self.physics.for_scripts_with_characters();
         let (world3d, events3d, requests3d, motions3d) =
             self.physics3d.for_scripts_with_characters();

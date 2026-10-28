@@ -61,6 +61,9 @@ pub struct ScriptSources {
     /// declares it, for a script's program to link in. Forgotten with the
     /// project whenever a source changes.
     shared: OnceLock<SharedFunctions>,
+    /// Whether any script names `Lighting.`, worked out the first time it is
+    /// asked and forgotten whenever a source changes.
+    asks_lighting: OnceLock<bool>,
 }
 
 /// A revision no set of sources has had.
@@ -90,13 +93,26 @@ impl ScriptSources {
         self.revision = next_revision();
         self.project = OnceLock::new();
         self.shared = OnceLock::new();
+        self.asks_lighting = OnceLock::new();
     }
 
     pub fn remove(&mut self, id: &str) -> Option<String> {
         self.revision = next_revision();
         self.project = OnceLock::new();
         self.shared = OnceLock::new();
+        self.asks_lighting = OnceLock::new();
         self.sources.remove(id)
+    }
+
+    /// Whether any script calls `Lighting.*`, so a host can leave gathering the
+    /// scene's lights and occluders every step until one does.
+    #[must_use]
+    pub fn asks_lighting(&self) -> bool {
+        *self.asks_lighting.get_or_init(|| {
+            self.sources
+                .values()
+                .any(|source| source.contains("Lighting."))
+        })
     }
 
     /// Which version of the sources this is: different whenever a source
