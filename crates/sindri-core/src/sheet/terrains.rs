@@ -20,6 +20,7 @@ impl SpriteSheetDocument {
                     kind: match terrain.kind {
                         TerrainKind::Edges => "edges",
                         TerrainKind::Blob => "blob",
+                        TerrainKind::Corners => "corners",
                     },
                     found: terrain.sprites.len(),
                     wanted,

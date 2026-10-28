@@ -479,6 +479,11 @@ pub(super) const TYPES: &[TypeEntry] = &[
                 "Paints a terrain the map's sheet declares into a flat tile map's cell, choosing its tile and its neighbors' from which of them are the same terrain. `\"\"` empties the cell and redraws its neighbors.",
             ),
             call(
+                "set_terrain_corner",
+                &["grid", "column", "row", "terrain", "set"],
+                "Sets or clears one corner of a `corners` terrain on a flat tile map, and redraws the up to four tiles that meet there. A corner is named by the grid line crossing it, so a map of 3 by 2 tiles has corners 0 to 3 across and 0 to 2 down. `set` is `true` to make the corner the terrain, `false` to give it back to the ground.",
+            ),
+            call(
                 "set_tile",
                 &["grid", "column", "row", "index"],
                 "Changes a flat tile map's cell to one of its tiles, by number. A negative number empties the cell.",

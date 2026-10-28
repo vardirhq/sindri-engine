@@ -9,7 +9,7 @@
 use std::collections::BTreeMap;
 
 use serde_json::Value;
-use sindri_core::{AssetId, Neighbors, TerrainDocument, sheet_id_for};
+use sindri_core::{AssetId, Neighbors, TerrainDocument, TerrainKind, sheet_id_for};
 use thiserror::Error;
 
 use crate::TilemapComponent;
@@ -64,6 +64,10 @@ pub enum TerrainPaintError {
     Unknown(String),
     #[error("the tilemap holds the wrong number of cells; resize it first")]
     Cells,
+    #[error("terrain `{0}` is painted by corner, not by cell")]
+    ByCorner(String),
+    #[error("terrain `{0}` is painted by cell, not by corner")]
+    ByCell(String),
 }
 
 /// Paints `terrain` into a cell, or empties it with `None`, and redraws the
@@ -100,6 +104,9 @@ pub fn paint_terrain(
             let chosen = terrains
                 .get(name)
                 .ok_or_else(|| TerrainPaintError::Unknown(name.to_owned()))?;
+            if chosen.kind == TerrainKind::Corners {
+                return Err(TerrainPaintError::ByCorner(name.to_owned()));
+            }
             // Its own sprite is decided by its neighbors alone, so it is
             // written straight away rather than through a placeholder that
             // would leave a sprite in the palette nothing draws.
@@ -141,7 +148,7 @@ pub fn paint_terrain(
 }
 
 /// Which terrain a cell belongs to: the first that owns its sprite.
-fn terrain_at<'a>(
+pub(crate) fn terrain_at<'a>(
     map: &TilemapComponent,
     terrains: &'a BTreeMap<String, TerrainDocument>,
     column: i64,
@@ -208,7 +215,7 @@ fn pattern(
     })
 }
 
-fn palette_slot(palette: &mut Vec<String>, sprite: &str) -> u32 {
+pub(crate) fn palette_slot(palette: &mut Vec<String>, sprite: &str) -> u32 {
     let index = palette
         .iter()
         .position(|known| known == sprite)
@@ -219,7 +226,7 @@ fn palette_slot(palette: &mut Vec<String>, sprite: &str) -> u32 {
     u32::try_from(index).unwrap_or(u32::MAX)
 }
 
-fn cell_index(map: &TilemapComponent, column: u32, row: u32) -> usize {
+pub(crate) fn cell_index(map: &TilemapComponent, column: u32, row: u32) -> usize {
     row as usize * map.columns as usize + column as usize
 }
 

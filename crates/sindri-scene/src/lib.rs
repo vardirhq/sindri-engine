@@ -37,6 +37,7 @@ pub(crate) mod screen_ui;
 mod sequence;
 mod shape_gizmos;
 mod sprite_shaders;
+mod terrain_corners;
 mod terrain_paint;
 mod textures;
 mod tile_chunk;
@@ -144,6 +145,7 @@ pub use sprite_shaders::{
     SHADER_NAMING_COMPONENTS, SpriteShaderBindings, referenced_sprite_shaders,
     unresolved_sprite_shaders,
 };
+pub use terrain_corners::paint_corner;
 pub use terrain_paint::{TerrainBindings, TerrainPaintError, paint_terrain, terrain_bindings};
 pub use textures::{
     FONT_NAMING_COMPONENTS, PROCEDURAL_TEXTURES, ProceduralTexture, SheetBindError, SliceBorder,
