@@ -239,3 +239,57 @@ fn a_shadow_value_out_of_range_names_its_field() {
     // The contact pass is the first to read it, whether or not it casts.
     assert!(error.to_string().contains("cast_opacity"), "{error}");
 }
+
+/// How many of the sprites drawn are lit from where they stand.
+fn standing(frame: &PreparedFrame) -> usize {
+    frame
+        .passes()
+        .iter()
+        .filter_map(|pass| match &pass.command {
+            FrameCommand::SpriteBatch { instances, .. } => Some(instances),
+            _ => None,
+        })
+        .flatten()
+        .filter(|sprite| sprite.is_standing())
+        .count()
+}
+
+#[test]
+fn a_thing_with_a_shadow_is_lit_from_where_it_stands() {
+    let lit = |extra: &str, lighting: bool| {
+        extract(&format!(
+            "{}{}{}",
+            environment(lighting),
+            lamp(),
+            tree(extra)
+        ))
+    };
+    assert_eq!(standing(&lit("", true)), 1, "by default");
+    assert_eq!(
+        standing(&lit(r#""cast": true"#, true)),
+        1,
+        "its silhouette is not another sprite that stands"
+    );
+    assert_eq!(
+        standing(&lit(r#""lit_from_base": false"#, true)),
+        0,
+        "unless it opts out"
+    );
+    assert_eq!(
+        standing(&lit("", false)),
+        0,
+        "and with no lighting nothing is"
+    );
+}
+
+#[test]
+fn a_sprite_without_a_shadow_is_lit_pixel_by_pixel() {
+    let frame = extract(&format!(
+        "{}{}{}",
+        environment(true),
+        lamp(),
+        r#",
+        { "id": "rug", "components": { "sindri.sprite": { "texture": "a.png", "layer": 1 } } }"#
+    ));
+    assert_eq!(standing(&frame), 0);
+}

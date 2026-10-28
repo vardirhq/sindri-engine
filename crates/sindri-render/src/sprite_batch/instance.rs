@@ -59,8 +59,9 @@ pub struct SpriteInstance {
     color_offset: [f32; 4],
     corner_shade: [f32; 4],
     shader_params: [f32; 4],
-    /// x is 1 when the frame's 2D lights reach this sprite; the rest is kept
-    /// for per-instance switches still to come.
+    /// x is 1 when the frame's 2D lights reach this sprite and y is 1 when they
+    /// reach it from where it stands; the rest is kept for per-instance
+    /// switches still to come.
     flags: [f32; 4],
 }
 
@@ -151,6 +152,20 @@ impl SpriteInstance {
     pub const fn lit(mut self, lit: bool) -> Self {
         self.flags[0] = if lit { 1.0 } else { 0.0 };
         self
+    }
+
+    /// Lights this sprite as something standing on the ground: its shadows are
+    /// looked up where its feet are, not at each pixel, so a thing is not darkened
+    /// by the occluder round its own base on the side the light is.
+    #[must_use]
+    pub const fn standing(mut self, standing: bool) -> Self {
+        self.flags[1] = if standing { 1.0 } else { 0.0 };
+        self
+    }
+
+    /// Whether this sprite is lit from where it stands.
+    pub fn is_standing(self) -> bool {
+        self.flags[1] > 0.5
     }
 
     /// Whether 2D lights reach this sprite.

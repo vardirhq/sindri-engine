@@ -2,6 +2,10 @@
 
 # Changelog
 
+- A thing with `sindri.shadow2d` is now lit as something standing on the ground: the
+  question of whether a shadow covers it is asked where its feet are, not at each
+  pixel. The occluder round a tree's or boulder's base no longer darkens the side of
+  it that faces the light. `lit_from_base` on the component turns it off.
 - Add `Lighting.visible(from, to)` and `Lighting.level(point)` to Decay: ask the 2D
   lighting whether one world point sees another past the scene's occluders, and how
   bright a point is with every light and shadow applied. Built from every light and
