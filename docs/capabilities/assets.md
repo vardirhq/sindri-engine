@@ -118,7 +118,7 @@ Engine ✅ · Editor ✅ · Decay ✅ · Proof ✅ — parity row *Reusable data
 
 **Tested by:** [`crates/sindri-decay/tests/a_script_reads_a_profile.rs`](../../crates/sindri-decay/tests/a_script_reads_a_profile.rs)
 
-**Exercised in:** [`games/lamplighter`](../../games/lamplighter)
+**Exercised in:** [`games/platformer`](../../games/platformer)
 
 **See:** [`docs/profiles.md`](../../docs/profiles.md)
 
@@ -144,7 +144,7 @@ Engine ✅ · Editor 🟡 · Decay 🟡 · Proof ✅ — parity row *Hot reload*
 
 **Tested by:** [`crates/sindri-assets/src/loader/tests.rs`](../../crates/sindri-assets/src/loader/tests.rs)
 
-**Exercised in:** [`games/lamplighter`](../../games/lamplighter)
+**Exercised in:** [`games/platformer`](../../games/platformer)
 
 <details markdown="1">
 <summary>Evidence</summary>

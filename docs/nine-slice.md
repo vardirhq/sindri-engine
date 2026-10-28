@@ -62,4 +62,4 @@ since renamed is not written.
 
 The platformer's HUD frame and its signboard by the first gap are both
 `textures/panel.png`, a 24-pixel panel with a six-pixel frame, drawn at very
-different sizes. `games/lamplighter/tests/sliced_panels.rs` checks both slice.
+different sizes. `games/platformer/tests/sliced_panels.rs` checks both slice.

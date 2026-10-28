@@ -126,7 +126,7 @@ fn kinds_parse_from_their_file_names() {
 #[test]
 fn the_platformer_sounds_render_from_their_committed_sources() {
     let audio = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
-        .join("../../games/lamplighter/assets/audio");
+        .join("../../games/platformer/assets/audio");
     for name in ["jump", "coin", "land", "goal"] {
         let text =
             std::fs::read_to_string(audio.join(format!("{name}.sindrisfx"))).expect("the source");

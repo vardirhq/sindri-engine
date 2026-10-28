@@ -113,8 +113,8 @@ try {
   const context = await browser.newContext({ javaScriptEnabled: false });
   await context.route(fonts, request => request.abort());
   const page = await context.newPage();
-  await page.goto(`${base}/play/lamplighter/`);
-  assert.equal(await page.locator('noscript a[href="../../examples/lamplighter/"]').count(), 1);
+  await page.goto(`${base}/play/platformer/`);
+  assert.equal(await page.locator('noscript a[href="../../examples/platformer/"]').count(), 1);
   await context.close();
   console.log(`landing page and ${playable.length} play pages passed on desktop and phone`);
 } finally {

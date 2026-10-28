@@ -516,8 +516,8 @@ Playwright uses real keyboard events to reach the flag, requiring at least three
 coins and no falls. Repeated local runs collected five coins and eight jumps.
 The player waits for an observed jump release before the next press; releasing
 and pressing in one browser frame previously lost the action edge. Source:
-`scripts/browser/prepare-lamplighter.py`, `lamplighter-goal.mjs`, the smoke hook and
-`games/lamplighter/tests/browser_goal.decay`. See the browser proof section in
+`scripts/browser/prepare-platformer.py`, `platformer-goal.mjs`, the smoke hook and
+`games/platformer/tests/browser_goal.decay`. See the browser proof section in
 `docs/character-movement.md` for the CI reproduction.
 2D accelerated queries now cover rays, overlaps, shape casts and controller
 penetration/sweep/ground phases. Probe bounds expand for skin/contact prediction;

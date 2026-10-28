@@ -215,7 +215,7 @@ under a prefab's child by naming `coin-3/sparkle` as its parent.
 This is the one way a prefab changes a scene after it was placed: the scene
 holds the reference, so an edit to `coin.prefab` is an edit to every coin the
 next time the scene is opened, and at once in an editor that has it open.
-`games/lamplighter` places its ten coins this way.
+`games/platformer` places its ten coins this way.
 
 ### Overrides
 

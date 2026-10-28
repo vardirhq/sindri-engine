@@ -8,7 +8,7 @@ import sys
 GAMES = {
     'causeway': ('game/', 'sindri-causeway'),
     'flappy': ('games/flappy/', 'flappy'),
-    'lamplighter': ('games/lamplighter/', 'lamplighter'),
+    'platformer': ('games/platformer/', 'platformer'),
     'low-tide': ('games/low-tide/', 'low-tide'),
     'orbital-baked': ('games/orbital-baked/', 'orbital-baked'),
     'scorchball': ('games/scorchball/', 'scorchball'),

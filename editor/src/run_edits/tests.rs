@@ -13,7 +13,7 @@ const SCRIPT: &str = "sindri.script";
 
 /// The platformer's assets copied somewhere a test may save, and its scene.
 fn platformer() -> (PathBuf, PathBuf) {
-    let source = Path::new(env!("CARGO_MANIFEST_DIR")).join("../games/lamplighter/assets");
+    let source = Path::new(env!("CARGO_MANIFEST_DIR")).join("../games/platformer/assets");
     let target = std::env::temp_dir().join(format!(
         "sindri-run-edits-{}-{}",
         std::process::id(),

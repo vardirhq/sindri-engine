@@ -326,15 +326,15 @@ jobs:
           python3 tools/level.py
           python3 tools/check_causeway_art.py
 
-      # Lamplighter's tiles, backdrop, props and scenes are drawn by one script,
+      # The platformer's tiles, backdrop, props and scenes are drawn by one script,
       # and Wick is baked from a recipe it writes. Running it again must change
       # nothing, or the checked-in art has drifted from its source.
-      - name: Check Lamplighter's art is still what its scripts make
-        if: ${{ needs.scope.outputs.light != 'true' || needs.scope.outputs.game == 'lamplighter' }}
+      - name: Check the platformer's art is still what its scripts make
+        if: ${{ needs.scope.outputs.light != 'true' || needs.scope.outputs.game == 'platformer' }}
         run: |
           python3 -m pip install --disable-pip-version-check 'pillow==12.3.0'
-          python3 games/lamplighter/art/dusk/build.py
-          git status --porcelain --untracked-files=all -- games/lamplighter | tee drift.txt
+          python3 games/platformer/art/dusk/build.py
+          git status --porcelain --untracked-files=all -- games/platformer | tee drift.txt
           test ! -s drift.txt
 
   clippy:
@@ -571,10 +571,10 @@ jobs:
           python3 scripts/check-3d-benchmark.py target/render-artifacts/editor-benchmark3d.json target/render-artifacts/editor-benchmark3d-no-shadows.json --require-gpu-timing
           # The game opens on its title screen; the batch accounting is the
           # level's, so both hosts play a copy that opens on it.
-          python3 scripts/browser/prepare-lamplighter.py target/benchmark-lamplighter --without-observer
-          cargo run --package sindri-causeway --bin project-benchmark -- target/benchmark-lamplighter target/render-artifacts/lamplighter-batches.json 3 30
-          timeout 120s xvfb-run --auto-servernum --server-args="-screen 0 1600x1200x24" target/debug/sindri-editor target/benchmark-lamplighter --benchmark target/render-artifacts/editor-lamplighter-batches.json --frames 3 --settle 30
-          python3 scripts/check-lamplighter-batches.py target/render-artifacts/lamplighter-batches.json target/render-artifacts/editor-lamplighter-batches.json
+          python3 scripts/browser/prepare-platformer.py target/benchmark-platformer --without-observer
+          cargo run --package sindri-causeway --bin project-benchmark -- target/benchmark-platformer target/render-artifacts/platformer-batches.json 3 30
+          timeout 120s xvfb-run --auto-servernum --server-args="-screen 0 1600x1200x24" target/debug/sindri-editor target/benchmark-platformer --benchmark target/render-artifacts/editor-platformer-batches.json --frames 3 --settle 30
+          python3 scripts/check-platformer-batches.py target/render-artifacts/platformer-batches.json target/render-artifacts/editor-platformer-batches.json
       - name: Capture the companion game mid-run
         id: causeway_capture
         env:
@@ -634,8 +634,8 @@ jobs:
             target/render-artifacts/benchmark3d-no-shadows.json
             target/render-artifacts/editor-benchmark3d.json
             target/render-artifacts/editor-benchmark3d-no-shadows.json
-            target/render-artifacts/lamplighter-batches.json
-            target/render-artifacts/editor-lamplighter-batches.json
+            target/render-artifacts/platformer-batches.json
+            target/render-artifacts/editor-platformer-batches.json
             target/render-artifacts/causeway.png
             target/render-artifacts/orbital-spectacle-desktop.png
             target/render-artifacts/orbital-spectacle-phone.png
@@ -866,7 +866,7 @@ jobs:
             cp -R crates/sindri-player/pkg/. target/dist/$project/pkg/
           done
           # Keep the shipped gameplay/starting pose and add read-only telemetry
-          # for a real keyboard-driven run to Lamplighter's goal.
+          # for a real keyboard-driven run to the platformer's goal.
           # Voxel Lab with collision and a read-only observer that drops a
           # block onto its generated terrain, proving voxel collision in a
           # browser. `a_block_lands_on_voxel_lab` plays the same fixture natively.
@@ -940,10 +940,10 @@ jobs:
           cargo run --quiet --package sindri-export --bin sindri-export -- \
             examples/model-collision target/dist/model-collision --base /examples/model-collision/
           cp -R crates/sindri-player/pkg/. target/dist/model-collision/pkg/
-          python3 scripts/browser/prepare-lamplighter.py target/browser-lamplighter
+          python3 scripts/browser/prepare-platformer.py target/browser-platformer
           cargo run --quiet --package sindri-export --bin sindri-export -- \
-            target/browser-lamplighter target/dist/lamplighter-goal --base /examples/lamplighter/
-          cp -R crates/sindri-player/pkg/. target/dist/lamplighter-goal/pkg/
+            target/browser-platformer target/dist/platformer-goal --base /examples/platformer/
+          cp -R crates/sindri-player/pkg/. target/dist/platformer-goal/pkg/
       - name: Smoke the rendered games
         id: browser_smoke
         run: |
@@ -1096,9 +1096,9 @@ jobs:
             SINDRI_BASE_PATH=/examples/low-tide/ \
             SINDRI_VIEWPORT_WIDTH=390 SINDRI_VIEWPORT_HEIGHT=844 \
             node scripts/browser/smoke.mjs target/dist/low-tide target/render-artifacts/browser-low-tide-phone.png
-          SINDRI_EXPECT_ASSETS=1 SINDRI_LAMPLIGHTER_GOAL=1 \
-            SINDRI_BASE_PATH=/examples/lamplighter/ \
-            node scripts/browser/smoke.mjs target/dist/lamplighter-goal target/render-artifacts/browser-lamplighter-goal.png
+          SINDRI_EXPECT_ASSETS=1 SINDRI_PLATFORMER_GOAL=1 \
+            SINDRI_BASE_PATH=/examples/platformer/ \
+            node scripts/browser/smoke.mjs target/dist/platformer-goal target/render-artifacts/browser-platformer-goal.png
       - name: Smoke the startup failure paths
         id: browser_failures
         run: |

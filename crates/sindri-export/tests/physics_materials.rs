@@ -7,7 +7,7 @@ use sindri_export::ProjectExport;
 
 #[test]
 fn platformer_exports_the_profile_shared_by_its_crate_and_planks_once() {
-    let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../games/lamplighter");
+    let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../games/platformer");
     let export = ProjectExport::gather(&root).unwrap();
     let materials: Vec<_> = export
         .assets

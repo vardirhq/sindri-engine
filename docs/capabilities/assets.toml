@@ -94,7 +94,7 @@ summary = "Versioned `.profile` assets hold nested data that many script compone
 status = { engine = "yes", editor = "yes", decay = "yes", proof = "yes" }
 parity = "Reusable data profiles"
 tests = ["crates/sindri-decay/tests/a_script_reads_a_profile.rs"]
-proof = ["games/lamplighter"]
+proof = ["games/platformer"]
 docs = ["docs/profiles.md"]
 detail = """
 `ProfileDocument` is the reusable-data counterpart to a prefab: a versioned
@@ -113,7 +113,7 @@ summary = "On native, `AssetWatch` notices a changed file behind a loaded asset 
 status = { engine = "yes", editor = "partial", decay = "partial", proof = "yes" }
 parity = "Hot reload"
 tests = ["crates/sindri-assets/src/loader/tests.rs"]
-proof = ["games/lamplighter"]
+proof = ["games/platformer"]
 detail = """
 On native, `AssetWatch` notices when the file behind a loaded asset changes and
 `AssetLoader::reload` loads it again, by polling modification time and length
