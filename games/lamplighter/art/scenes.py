@@ -5,7 +5,9 @@ Deterministic, so CI can run it again and fail on any drift. Stage 1 draws with
 shapes; stage 2 replaces them with the Pixel Lab tileset and Wick's sprites.
 """
 import json
+import math
 import pathlib
+import random
 
 ASSETS = pathlib.Path(__file__).resolve().parent.parent / 'assets'
 Q = [0, 0, 0, 1]
@@ -114,13 +116,13 @@ def static_body():
             'lock_rotation': True, 'continuous_collision': False}
 
 
-def prop(ident, sprite, x, y, radius, centre, occluder):
+def prop(ident, sprite, x, y, radius, centre, occluder, flip=False):
     """A tree or a boulder: it stands on its position, stops Wick and stops light.
 
     The radius, the height of the collider's middle above the foot and the
     occluder's size are in world units; the entity is scaled up from 16 art
     pixels to a unit, so each is divided by that scale for the component."""
-    return entity(ident, ident, at(x, y, depth(y), 4, 4), **{
+    return entity(ident, ident, at(x, y, depth(y), -4 if flip else 4, 4), **{
         'sindri.sprite': {'texture': f'textures/objects.png#{sprite}', 'layer': 5},
         'sindri.physics2d.rigid_body': static_body(),
         'sindri.physics2d.collider': {'shape': {'shape': 'circle', 'radius': radius / 4}, 'offset': [0, centre / 4],
@@ -148,7 +150,7 @@ def lantern(ident, x, y, goal=False):
         'sindri.script': {'source': 'scripts/lantern.decay', 'script': 'Lantern',
                           'properties': {'light_name': ident + '-light'}}})
     flame = entity(ident + '-light', ident + '-light', at(x, y + 2.6, depth(y) + 0.01), **{
-        'sindri.light2d': {'enabled': True, 'color': [1.0, 0.72, 0.38, 1.0], 'intensity': 0.0, 'radius': 7.5,
+        'sindri.light2d': {'enabled': True, 'color': [1.0, 0.72, 0.38, 1.0], 'intensity': 0.0, 'radius': 9.0,
                            'falloff': 1.4, 'height': 1.0, 'shadows': True, 'shadow_reach': 0.35,
                            'shadow_source_radius': 0.3}})
     return [post, flame]
@@ -166,16 +168,17 @@ def clips():
     return out
 
 
-def gloom(ident, x, y):
+def gloom(ident, x, y, variant):
     """A creature of the dark: dim, slow to notice, and cut down by the sword."""
     body = {'kind': 'dynamic', 'pose': {'position': [0, 0], 'rotation': 0}, 'linear_velocity': [0, 0],
             'angular_velocity': 0, 'gravity_scale': 0, 'linear_damping': 7, 'angular_damping': 0,
             'lock_rotation': True, 'continuous_collision': True}
-    return entity(ident, ident, at(x, y, depth(y), 0.9, 0.9), **{
-        'sindri.shape': {'kind': 'ellipse', 'fill': [0.12, 0.08, 0.2, 1.0], 'layer': 5},
+    # The art is 32 pixels, two units; the entity is scaled up from a pixel to 1/16.
+    return entity(ident, ident, at(x, y, depth(y), 2, 2), **{
+        'sindri.sprite': {'texture': f'textures/gloom.png#gloom-{variant}', 'layer': 5},
         'sindri.tags': {'tags': ['gloom']},
         'sindri.physics2d.rigid_body': body,
-        'sindri.physics2d.collider': {'shape': {'shape': 'circle', 'radius': 0.5}, 'offset': [0, 0],
+        'sindri.physics2d.collider': {'shape': {'shape': 'circle', 'radius': 0.4 / 2}, 'offset': [0, 0.45 / 2],
                                       'rotation': 0, 'sensor': False,
                                       'layers': {'memberships': TARGET, 'filter': WALL | WICK | TARGET},
                                       'friction': 0, 'restitution': 0},
@@ -211,6 +214,8 @@ def wick():
 
 
 COLUMNS, ROWS = 52, 36
+# The lamps, in the order a person walks to them, and Wick's start, which the path joins.
+PATH = [(0, 0), (8, 0), (17, -3), (22, 8)]
 
 
 def ground():
@@ -230,10 +235,50 @@ TREES = [(-8, 9), (-14, 3), (-18, -7), (4, 10), (10, 11), (20, -9), (24, 3), (-3
 
 def scenery():
     """Boulders to walk around and a dead wood: what the carried light shadows."""
-    out = [prop(f'boulder-{n}', 'boulder', x, y, 0.9, 0.7, (1.8, 1.2))
+    # Which of the five trees and four boulders stands where is fixed by its
+    # number, and every other one is turned about, so a wood is not one tree.
+    out = [prop(f'boulder-{n}', f'boulder-{(n * 3) % 4}', x, y, 0.9, 0.7, (1.8, 1.2), flip=n % 2 == 0)
            for n, (x, y) in enumerate(BOULDERS, 1)]
-    out += [prop(f'tree-{n}', 'dead-tree', x, y, 0.6, 0.5, (1.2, 0.9))
+    out += [prop(f'tree-{n}', f'dead-tree-{(n * 2) % 5}', x, y, 0.6, 0.5, (1.2, 0.9), flip=n % 3 == 0)
             for n, (x, y) in enumerate(TREES, 1)]
+    return out
+
+
+def near_path(x, y, margin=0.0):
+    """Whether a point is on the dirt path `ground.decay` lays, or within `margin` of it.
+
+    The same numbers as the script (`width` 1.6, `plaza` 2.6, the lamps and the start),
+    so ground cover is never planted on the path. A change to one is a change to both."""
+    for (ax, ay), (bx, by) in zip(PATH, PATH[1:]):
+        dx, dy = bx - ax, by - ay
+        along = max(0.0, min(1.0, ((x - ax) * dx + (y - ay) * dy) / (dx * dx + dy * dy)))
+        if math.hypot(x - (ax + along * dx), y - (ay + along * dy)) <= 1.6 + margin:
+            return True
+    return any(math.hypot(x - px, y - py) <= 2.6 + margin for px, py in PATH)
+
+
+def ground_cover():
+    """Tufts, night flowers, mushrooms and pebbles over the grass, in a fixed scatter.
+
+    Clear of the path, of every tree, boulder, lamp and gloom, and of Wick's start."""
+    taken = ([(x, y, 1.6) for x, y in BOULDERS] + [(x, y, 1.8) for x, y in TREES]
+             + [(8, 0, 2.2), (17, -3, 2.2), (22, 8, 2.2), (6.5, 0, 1.5), (-5, 0, 1.5), (14, 5.5, 1.5)])
+    rng = random.Random(11)
+    kinds = ['tufts'] * 9 + ['flowers'] * 4 + ['pebbles'] * 4 + ['mushrooms'] * 2
+    out = []
+    while len(out) < 150:
+        x, y = round(rng.uniform(-25, 25), 2), round(rng.uniform(-17, 16), 2)
+        kind = rng.choice(kinds)
+        if near_path(x, y, 0.8) or any(math.hypot(x - tx, y - ty) < r for tx, ty, r in taken):
+            continue
+        components = {'sindri.sprite': {'texture': f'textures/decor.png#{kind}', 'layer': 3}}
+        if kind == 'mushrooms':
+            # They glow a little, in the cool color nothing else here is.
+            components['sindri.light2d'] = {'enabled': True, 'color': [0.45, 0.85, 1.0, 1.0], 'intensity': 0.7,
+                                            'radius': 2.8, 'falloff': 1.6, 'height': 0.6, 'shadows': False}
+        flip = -1 if rng.random() < 0.5 else 1
+        out.append(entity(f'cover-{len(out) + 1}', f'cover-{len(out) + 1}', at(x, y, depth(y) - 0.2, 1.5 * flip, 1.5),
+                          **components))
     return out
 
 
@@ -254,11 +299,12 @@ def field():
     stone = [0.02, 0.02, 0.04, 1.0]
     ents = [
         camera(0, 0, 'wick'),
-        environment([0.02, 0.02, 0.06]),
+        environment([0.05, 0.06, 0.12]),
         entity('physics', 'Physics', **{
             'sindri.physics2d.world': {'gravity': [0, 0], 'layers': ['wall', 'wick', 'lantern', 'target']},
             'sindri.input.actions': {'actions': actions}}),
         ground(),
+        *ground_cover(),
         wall('edge-north', 0, 18.5, 54, 1, stone),
         wall('edge-south', 0, -18.5, 54, 1, stone),
         wall('edge-west', -26.5, 0, 1, 38, stone),
@@ -266,7 +312,7 @@ def field():
         *scenery(),
         *lantern('lantern-1', 8, 0), *lantern('lantern-2', 17, -3), *lantern('lantern-3', 22, 8, goal=True),
         *wick(),
-        gloom('gloom-1', 6.5, 0.45), gloom('gloom-2', -5, 0.45), gloom('gloom-3', 14, 6),
+        gloom('gloom-1', 6.5, 0, 1), gloom('gloom-2', -5, 0, 3), gloom('gloom-3', 14, 5.5, 0),
         entity('hud', 'HUD', at(0.03, -0.03, 0), **{
             'sindri.ui.text': {'anchor': 'top_left', 'color': [1, 0.95, 0.6, 1], 'font': 'fonts/Inter.ttf',
                                'font_size': 0.04, 'line_height': 0.048, 'layer': 100,

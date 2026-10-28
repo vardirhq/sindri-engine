@@ -8,6 +8,13 @@
   all four directions at once, and `call --wait` on a request that starts several
   jobs keeps every job's response instead of the last. Its README records what the
   first real runs showed: costs, canvas sizes and the unreliable tileset labels.
+- Lamplighter's field gets real creatures and a lived-in ground: four Pixel Lab
+  gloom (a smoking blob, a hunched one, one trailed by motes, a low crouch) that
+  breathe and squash when struck, five dead trees and four boulders instead of one
+  of each, and a scatter of tufts, night flowers, pebbles and glowing mushrooms over
+  the grass, kept clear of the path and of everything solid. A sword blow now throws
+  a gloom along the direction it was struck, not away from a point, and the ambient
+  light is raised so the far trees read.
 - Add `games/lamplighter`, the top-down action-adventure, starting with a dark
   field: Wick walks with a carried lantern that lights and shadows the world,
   swings a sword at a gloom, and lights three lamp posts, the last of which opens
