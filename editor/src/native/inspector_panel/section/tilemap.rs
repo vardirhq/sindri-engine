@@ -98,6 +98,8 @@ fn terrain_palette(
         .palette
         .terrains()
         .iter()
+        // A corners terrain has no cell to paint with a brush yet.
+        .filter(|(_, terrain)| terrain.kind != sindri_core::TerrainKind::Corners)
         .map(|(name, terrain)| {
             let middle = terrain.sprite_for([true; 8]);
             let shown = sprites

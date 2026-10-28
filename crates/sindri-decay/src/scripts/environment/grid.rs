@@ -63,6 +63,13 @@ pub(crate) fn add_grid_surface(environment: &mut Environment) {
                         Type::Number,
                         Type::String,
                     ],
+                    GridCall::SetTerrainCorner => vec![
+                        Type::Named(ENTITY.to_owned()),
+                        Type::Number,
+                        Type::Number,
+                        Type::String,
+                        Type::Bool,
+                    ],
                     GridCall::SetBlock | GridCall::Tagged => vec![
                         Type::Named(ENTITY.to_owned()),
                         Type::Number,
@@ -82,6 +89,7 @@ pub(crate) fn add_grid_surface(environment: &mut Environment) {
                     GridCall::Place
                     | GridCall::SetTile
                     | GridCall::SetTerrain
+                    | GridCall::SetTerrainCorner
                     | GridCall::SetBlock
                     | GridCall::SetFlood => Type::Unit,
                     GridCall::CanReach

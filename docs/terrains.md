@@ -19,6 +19,7 @@ cell, and every neighbor whose picture depends on it, gets the right sprite.
 | Kind | Sprites | Indexed by |
 | --- | --- | --- |
 | `edges` | 16 | Which of the four sides are the same terrain: north 1, east 2, south 4, west 8 |
+| `corners` | 16 | Which of the tile's four corners are the terrain: north-west 8, north-east 4, south-west 2, south-east 1 (below) |
 | `blob` | 47 | All eight neighbors (north 1, north-east 2, east 4, south-east 8, south 16, south-west 32, west 64, north-west 128), a corner counting only when both sides beside it do; listed in ascending order of those masks |
 
 `edges` is enough for blocky ground. `blob` tells an inside corner from a
@@ -28,6 +29,30 @@ sprites, or a sprite the sheet does not cut, is refused when the sheet loads.
 A cell belongs to a terrain when its sprite is one of the terrain's. Past the
 map's edge counts as more of the same, so ground painted to the edge of a map
 carries on out of the picture rather than ending in a rim there.
+
+## Corners
+
+A `corners` terrain is the layout of a Wang or Tiled corner set: two terrains,
+such as grass and dirt, and one tile for each of the sixteen ways the four
+corners of a tile can be one or the other. Sprite 0, every corner the ground,
+is the plain ground tile, and belongs to the terrain like the others, so a map
+filled with it is a map of ground.
+
+What a corners tile draws is decided at its corners, not by its neighbors, so
+there is no cell to paint. A corner is a grid line's crossing: a map of 3 by 2
+tiles has corners 0 to 3 across and 0 to 2 down. Setting one rewrites the up to
+four tiles that meet there. Each reads the corners it already has from the
+sprite it shows, adds or removes this one, and draws the sprite for the result,
+so the map holds nothing but its tiles. An empty tile reads as having no
+corners and a tile showing any other sprite is left alone.
+
+| Call | Returns |
+| --- | --- |
+| `Grid.set_terrain_corner(map, column, row, terrain, set)` | nothing |
+
+`set` is `true` to make the corner the terrain and `false` to give it back to
+the ground. `Grid.set_terrain` on a corners terrain, and this call on any other
+kind, are errors that name the terrain.
 
 ## Painting
 
@@ -49,7 +74,9 @@ naming it.
 ## Limits
 
 One terrain per cell, with no transitions between two terrains (grass into sand)
-and no random variants of the same pattern. The patterns are fixed: there is no
+except through a `corners` terrain, whose two terrains are the ground and the
+terrain, and no random variants of the same pattern. The editor brush does not
+offer a corners terrain; paint it from Decay. The patterns are fixed: there is no
 rule editor for arbitrary neighbor conditions.
 
 ## Proof

@@ -7,10 +7,12 @@
 //! those sprites once, in the order of the neighbor patterns they answer, and
 //! a brush or a script paints "grass" and gets the right one.
 //!
-//! Two layouts are understood. `edges` is sixteen sprites, one for each
+//! Three layouts are understood. `edges` is sixteen sprites, one for each
 //! combination of the four sides: enough for blocky ground. `blob` is the
 //! forty-seven that also tell an inside corner from a filled one, for art
-//! whose corners show.
+//! whose corners show. `corners` is sixteen sprites chosen by the terrain at a
+//! tile's four corners rather than by its neighbors, the layout of a Wang or
+//! Tiled corner set and of what a tileset generator makes for two terrains.
 
 use serde::{Deserialize, Serialize};
 
@@ -27,16 +29,23 @@ pub enum TerrainKind {
     /// their masks: north 1, north-east 2, east 4, south-east 8, south 16,
     /// south-west 32, west 64, north-west 128.
     Blob,
+    /// Sixteen sprites, by which of a tile's four corners are the terrain:
+    /// north-west 8, north-east 4, south-west 2, south-east 1. Sprite 0, no
+    /// corner, is the ground the terrain lies on, and belongs to the terrain
+    /// like the rest. It is painted by corner, with `paint_corner`, not by
+    /// cell: a cell's sprite holds its corners, and painting one corner
+    /// rewrites the up to four tiles that meet there.
+    Corners,
 }
 
 impl TerrainKind {
-    pub const NAMES: [&'static str; 2] = ["edges", "blob"];
+    pub const NAMES: [&'static str; 3] = ["edges", "blob", "corners"];
 
     /// How many sprites a terrain of this kind lists.
     #[must_use]
     pub const fn sprites(self) -> usize {
         match self {
-            Self::Edges => 16,
+            Self::Edges | Self::Corners => 16,
             Self::Blob => 47,
         }
     }
@@ -64,8 +73,33 @@ impl TerrainDocument {
         let index = match self.kind {
             TerrainKind::Edges => usize::from(edge_mask(neighbors)),
             TerrainKind::Blob => blob_index(blob_mask(neighbors))?,
+            // Chosen by corners, never by neighbors: see `sprite_for_corners`.
+            TerrainKind::Corners => return None,
         };
         self.sprites.get(index).map(String::as_str)
+    }
+
+    /// The sprite of a corners terrain whose tile has these corners set, as a
+    /// number from 0 to 15, or `None` for another kind or a number past 15.
+    #[must_use]
+    pub fn sprite_for_corners(&self, corners: u8) -> Option<&str> {
+        if self.kind != TerrainKind::Corners {
+            return None;
+        }
+        self.sprites.get(usize::from(corners)).map(String::as_str)
+    }
+
+    /// Which corners of a corners terrain's tile are set, if `sprite` is one
+    /// of its sprites.
+    #[must_use]
+    pub fn corners_of(&self, sprite: &str) -> Option<u8> {
+        if self.kind != TerrainKind::Corners {
+            return None;
+        }
+        self.sprites
+            .iter()
+            .position(|own| own == sprite)
+            .and_then(|index| u8::try_from(index).ok())
     }
 
     /// Whether `sprite` is one of this terrain's, which is what makes a cell
@@ -121,6 +155,28 @@ pub fn blob_masks() -> Vec<u8> {
 #[cfg(test)]
 mod tests {
     use super::{TerrainDocument, TerrainKind, blob_mask, blob_masks, edge_mask};
+
+    #[test]
+    fn a_corners_terrain_is_chosen_by_corners_alone() {
+        let corners = TerrainDocument {
+            kind: TerrainKind::Corners,
+            sprites: (0..16).map(|mask| format!("c{mask}")).collect(),
+        };
+        assert_eq!(corners.sprite_for([true; 8]), None, "neighbors say nothing");
+        assert_eq!(corners.sprite_for_corners(0b1001), Some("c9"));
+        assert_eq!(corners.sprite_for_corners(16), None);
+        assert_eq!(corners.corners_of("c12"), Some(12));
+        assert_eq!(corners.corners_of("other"), None);
+        let edges = TerrainDocument {
+            kind: TerrainKind::Edges,
+            sprites: corners.sprites.clone(),
+        };
+        assert_eq!(
+            edges.corners_of("c3"),
+            None,
+            "only a corners terrain has corners"
+        );
+    }
 
     #[test]
     fn there_are_forty_seven_blob_masks() {
