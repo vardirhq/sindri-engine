@@ -28,7 +28,7 @@
       "components": {
         "sindri.camera": {
           "projection": "orthographic",
-          "vertical_size": 11.25,
+          "vertical_size": 16.875,
           "near": 0.1,
           "far": 100.0,
           "fit": "height"

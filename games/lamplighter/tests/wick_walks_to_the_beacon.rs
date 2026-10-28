@@ -108,3 +108,38 @@ fn a_run_lights_every_lantern_and_the_last_opens_the_way() {
     }
     assert!(run.board("won") > 0.0, "the last lantern opens the way");
 }
+
+/// The clip Wick's sprite is playing.
+fn clip(run: &Run) -> String {
+    let sprite = run.entity("wick-sprite").expect("Wick has a sprite");
+    let data = run.world.get(sprite).expect("it exists");
+    data.components["sindri.animation.sprite"]["playing"]
+        .as_str()
+        .expect("a clip")
+        .to_owned()
+}
+
+#[test]
+fn wick_faces_the_way_he_walks_and_stands_still_when_he_stops() {
+    let mut run = Run::open().expect("the project opens");
+    step(&mut run, 5);
+    assert_eq!(clip(&run), "idle-south", "Wick starts facing the viewer");
+
+    for (key, facing) in [
+        (Key::D, "east"),
+        (Key::W, "north"),
+        (Key::A, "west"),
+        (Key::S, "south"),
+    ] {
+        run.input.apply(InputEvent::KeyPressed(key));
+        step(&mut run, 20);
+        assert_eq!(clip(&run), format!("walk-{facing}"), "walking {facing}");
+        run.input.apply(InputEvent::KeyReleased(key));
+        step(&mut run, 20);
+        assert_eq!(
+            clip(&run),
+            format!("idle-{facing}"),
+            "standing, facing {facing}"
+        );
+    }
+}

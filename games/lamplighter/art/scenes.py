@@ -34,10 +34,10 @@ def write(name, title, entities):
 
 def camera(x=0.0, y=0.0, follow=None):
     components = {'sindri.camera': {
-        'projection': 'orthographic', 'vertical_size': 11.25, 'near': 0.1, 'far': 100.0, 'fit': 'height'}}
+        'projection': 'orthographic', 'vertical_size': 16.875, 'near': 0.1, 'far': 100.0, 'fit': 'height'}}
     if follow:
         components['sindri.camera.behavior'] = {
-            'follow': {'target': follow, 'offset': [0, 0, 0], 'dead_zone': [0.5, 0.5],
+            'follow': {'target': follow, 'offset': [0, 1.2, 0], 'dead_zone': [0.5, 0.5],
                        'smoothing': 8, 'max_speed': 30},
             'confine': {'min': [-24, -16], 'max': [24, 16], 'contain_view': True}}
     return entity('camera', 'Camera', at(x, y, 10.0), **components)
@@ -118,23 +118,42 @@ def lantern(ident, x, y, goal=False):
         'sindri.script': {'source': 'scripts/lantern.decay', 'script': 'Lantern', 'properties': {}}})
 
 
+def clips():
+    """One idle and one walk clip for each direction Wick faces."""
+    out = {}
+    for direction in ('south', 'west', 'north', 'east'):
+        out[f'idle-{direction}'] = {'frames': [f'idle-{direction}'], 'seconds_per_frame': 0.4, 'looping': True}
+        out[f'walk-{direction}'] = {'frames': [f'walk-{direction}-{n}' for n in range(8)],
+                                    'seconds_per_frame': 0.09, 'looping': True}
+    return out
+
+
 def wick():
+    """Wick stands where the entity is: the sprite grows up from the feet."""
     body = {'kind': 'dynamic', 'pose': {'position': [0, 0], 'rotation': 0}, 'linear_velocity': [0, 0],
             'angular_velocity': 0, 'gravity_scale': 0, 'linear_damping': 0, 'angular_damping': 0,
             'lock_rotation': True, 'continuous_collision': True}
     piece = lambda radius, sensor, mask: {
-        'shape': {'shape': 'circle', 'radius': radius}, 'offset': [0, 0], 'rotation': 0, 'sensor': sensor,
+        'shape': {'shape': 'circle', 'radius': radius}, 'offset': [0, 0.45], 'rotation': 0, 'sensor': sensor,
         'layers': {'memberships': WICK, 'filter': mask}, 'friction': 0, 'restitution': 0}
-    return entity('wick', 'Wick', at(0, 0, 0.5, 0.6, 0.8), **{
-        'sindri.shape': {'kind': 'ellipse', 'fill': [0.86, 0.78, 0.6, 1.0], 'layer': 4},
-        'sindri.tags': {'tags': ['wick']},
-        'sindri.physics2d.rigid_body': body,
-        'sindri.physics2d.collider': {'pieces': [piece(0.3, False, WALL), piece(0.45, True, ALL)]},
-        # The carried lantern: a light that goes where Wick goes.
-        'sindri.light2d': {'enabled': True, 'color': [1.0, 0.76, 0.42, 1.0], 'intensity': 1.3, 'radius': 6.0,
-                           'falloff': 1.5, 'height': 1.0, 'shadows': True, 'shadow_reach': 0.3,
-                           'shadow_source_radius': 0.3},
-        'sindri.script': {'source': 'scripts/wick.decay', 'script': 'Wick', 'properties': {}}})
+    return [
+        entity('wick', 'Wick', at(0, 0, 0.5), **{
+            'sindri.tags': {'tags': ['wick']},
+            'sindri.physics2d.rigid_body': body,
+            'sindri.physics2d.collider': {'pieces': [piece(0.4, False, WALL), piece(0.7, True, ALL)]},
+            'sindri.script': {'source': 'scripts/wick.decay', 'script': 'Wick', 'properties': {}}}),
+        # One pixel of the art is a sixteenth of a world unit.
+        entity('wick-sprite', 'wick-sprite', at(0, 0, 0, 2.5, 2.75), 'wick', **{
+            'sindri.sprite': {'texture': 'textures/wick.png#idle-south', 'layer': 5},
+            'sindri.animation.sprite': {'clips': clips(), 'playing': 'idle-south', 'speed': 1}}),
+        # The lantern's flame: a light a little above Wick's feet and out to one
+        # side, so what it lights and the shadows it casts start at the lantern.
+        entity('wick-light', 'wick-light', at(0, 1.6, 0.1), 'wick', **{
+            'sindri.light2d': {'enabled': True, 'color': [1.0, 0.76, 0.42, 1.0], 'intensity': 1.3,
+                               'radius': 8.0, 'falloff': 1.5, 'height': 1.0, 'shadows': True,
+                               'shadow_reach': 0.3, 'shadow_source_radius': 0.3},
+            'sindri.script': {'source': 'scripts/flame.decay', 'script': 'Flame', 'properties': {}}}),
+    ]
 
 
 COLUMNS, ROWS = 52, 36
@@ -180,7 +199,7 @@ def field():
         wall('stone-3', -6, -5, 1.5, 3, stone), wall('stone-4', 14, 5, 1.5, 1.5, stone),
         wall('stone-5', -10, 6, 2.5, 2, stone),
         lantern('lantern-1', 8, 0), lantern('lantern-2', 17, -3), lantern('lantern-3', 22, 8, goal=True),
-        wick(),
+        *wick(),
         entity('hud', 'HUD', at(0.03, -0.03, 0), **{
             'sindri.ui.text': {'anchor': 'top_left', 'color': [1, 0.95, 0.6, 1], 'font': 'fonts/Inter.ttf',
                                'font_size': 0.04, 'line_height': 0.048, 'layer': 100,

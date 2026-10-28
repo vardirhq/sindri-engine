@@ -1,0 +1,9 @@
+// The lantern's flame wavers a little, so the light is a flame and not a lamp.
+script Flame {
+    var age: number = 0.0;
+
+    fn update(dt: number) {
+        this.age += dt;
+        this.light2d.intensity = 1.3 + 0.08 * sin(this.age * 9.0) + 0.05 * sin(this.age * 23.0);
+    }
+}

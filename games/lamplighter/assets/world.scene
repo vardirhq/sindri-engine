@@ -28,7 +28,7 @@
       "components": {
         "sindri.camera": {
           "projection": "orthographic",
-          "vertical_size": 11.25,
+          "vertical_size": 16.875,
           "near": 0.1,
           "far": 100.0,
           "fit": "height"
@@ -38,7 +38,7 @@
             "target": "wick",
             "offset": [
               0,
-              0,
+              1.2,
               0
             ],
             "dead_zone": [
@@ -3085,22 +3085,12 @@
           1
         ],
         "scale": [
-          0.6,
-          0.8,
+          1.0,
+          1.0,
           1
         ]
       },
       "components": {
-        "sindri.shape": {
-          "kind": "ellipse",
-          "fill": [
-            0.86,
-            0.78,
-            0.6,
-            1.0
-          ],
-          "layer": 4
-        },
         "sindri.tags": {
           "tags": [
             "wick"
@@ -3131,11 +3121,11 @@
             {
               "shape": {
                 "shape": "circle",
-                "radius": 0.3
+                "radius": 0.4
               },
               "offset": [
                 0,
-                0
+                0.45
               ],
               "rotation": 0,
               "sensor": false,
@@ -3149,11 +3139,11 @@
             {
               "shape": {
                 "shape": "circle",
-                "radius": 0.45
+                "radius": 0.7
               },
               "offset": [
                 0,
-                0
+                0.45
               ],
               "rotation": 0,
               "sensor": true,
@@ -3166,6 +3156,155 @@
             }
           ]
         },
+        "sindri.script": {
+          "source": "scripts/wick.decay",
+          "script": "Wick",
+          "properties": {}
+        }
+      }
+    },
+    {
+      "id": "wick-sprite",
+      "name": "wick-sprite",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          2.5,
+          2.75,
+          1
+        ]
+      },
+      "parent": "wick",
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/wick.png#idle-south",
+          "layer": 5
+        },
+        "sindri.animation.sprite": {
+          "clips": {
+            "idle-south": {
+              "frames": [
+                "idle-south"
+              ],
+              "seconds_per_frame": 0.4,
+              "looping": true
+            },
+            "walk-south": {
+              "frames": [
+                "walk-south-0",
+                "walk-south-1",
+                "walk-south-2",
+                "walk-south-3",
+                "walk-south-4",
+                "walk-south-5",
+                "walk-south-6",
+                "walk-south-7"
+              ],
+              "seconds_per_frame": 0.09,
+              "looping": true
+            },
+            "idle-west": {
+              "frames": [
+                "idle-west"
+              ],
+              "seconds_per_frame": 0.4,
+              "looping": true
+            },
+            "walk-west": {
+              "frames": [
+                "walk-west-0",
+                "walk-west-1",
+                "walk-west-2",
+                "walk-west-3",
+                "walk-west-4",
+                "walk-west-5",
+                "walk-west-6",
+                "walk-west-7"
+              ],
+              "seconds_per_frame": 0.09,
+              "looping": true
+            },
+            "idle-north": {
+              "frames": [
+                "idle-north"
+              ],
+              "seconds_per_frame": 0.4,
+              "looping": true
+            },
+            "walk-north": {
+              "frames": [
+                "walk-north-0",
+                "walk-north-1",
+                "walk-north-2",
+                "walk-north-3",
+                "walk-north-4",
+                "walk-north-5",
+                "walk-north-6",
+                "walk-north-7"
+              ],
+              "seconds_per_frame": 0.09,
+              "looping": true
+            },
+            "idle-east": {
+              "frames": [
+                "idle-east"
+              ],
+              "seconds_per_frame": 0.4,
+              "looping": true
+            },
+            "walk-east": {
+              "frames": [
+                "walk-east-0",
+                "walk-east-1",
+                "walk-east-2",
+                "walk-east-3",
+                "walk-east-4",
+                "walk-east-5",
+                "walk-east-6",
+                "walk-east-7"
+              ],
+              "seconds_per_frame": 0.09,
+              "looping": true
+            }
+          },
+          "playing": "idle-south",
+          "speed": 1
+        }
+      }
+    },
+    {
+      "id": "wick-light",
+      "name": "wick-light",
+      "transform_3d": {
+        "position": [
+          0,
+          1.6,
+          0.1
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1
+        ]
+      },
+      "parent": "wick",
+      "components": {
         "sindri.light2d": {
           "enabled": true,
           "color": [
@@ -3175,7 +3314,7 @@
             1.0
           ],
           "intensity": 1.3,
-          "radius": 6.0,
+          "radius": 8.0,
           "falloff": 1.5,
           "height": 1.0,
           "shadows": true,
@@ -3183,8 +3322,8 @@
           "shadow_source_radius": 0.3
         },
         "sindri.script": {
-          "source": "scripts/wick.decay",
-          "script": "Wick",
+          "source": "scripts/flame.decay",
+          "script": "Flame",
           "properties": {}
         }
       }
