@@ -44,7 +44,10 @@ fn wick_carries_a_shadow_casting_light_into_a_dark_world() {
     let mut run = Run::open().expect("the project opens");
     assert!(run.step(1.0 / 60.0).is_empty());
     let lit = lighting(&run);
-    let held = lit.lights.iter().find(|light| (light.radius - 5.5).abs() < 0.01)
+    let held = lit
+        .lights
+        .iter()
+        .find(|light| (light.radius - 5.5).abs() < 0.01)
         .expect("Wick carries a lantern");
     assert!(held.shadow.is_some(), "Wick's lantern casts shadows");
     let hero = run.entity("hero").expect("Wick exists");
@@ -52,18 +55,30 @@ fn wick_carries_a_shadow_casting_light_into_a_dark_world() {
     assert!((held.position[0] - start[0]).abs() < 0.3);
     let nearby = lit.at([held.position[0], held.position[1] + 0.2]);
     let distant = lit.at([25.0, 5.0]);
-    assert!(brightness(nearby) > brightness(distant) + 0.2, "near {nearby:?}, far {distant:?}");
-    assert!(brightness(distant) < 0.05, "the unlit road is dark: {distant:?}");
+    assert!(
+        brightness(nearby) > brightness(distant) + 0.2,
+        "near {nearby:?}, far {distant:?}"
+    );
+    assert!(
+        brightness(distant) < 0.05,
+        "the unlit road is dark: {distant:?}"
+    );
     run.key(sindri_platform::Key::ArrowRight, true);
     for _ in 0..60 {
         assert!(run.step(1.0 / 60.0).is_empty());
     }
     let moved = run.position(hero);
     let moved_light = lighting(&run);
-    let held = moved_light.lights.iter().find(|light| (light.radius - 5.5).abs() < 0.01)
+    let held = moved_light
+        .lights
+        .iter()
+        .find(|light| (light.radius - 5.5).abs() < 0.01)
         .expect("the lantern is still active");
     assert!(moved[0] > start[0] + 1.0);
-    assert!((held.position[0] - moved[0]).abs() < 0.3, "the light follows Wick");
+    assert!(
+        (held.position[0] - moved[0]).abs() < 0.3,
+        "the light follows Wick"
+    );
 }
 
 #[test]
