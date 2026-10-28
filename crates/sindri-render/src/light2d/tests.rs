@@ -110,3 +110,36 @@ fn zero_area_preserves_one_point_shadow_map() {
             .all(|(a, b)| a.to_bits() == b.to_bits())
     );
 }
+
+#[test]
+fn soft_shadows_follow_moving_lights_and_occluders() {
+    let origin = [0.0, 0.0];
+    let point = [3.0, 0.0];
+    let visibility = |position, wall| {
+        let mut lamp = light(position);
+        lamp.radius = 8.0;
+        lamp.shadow = Some(Light2dShadow {
+            reach: 0.0,
+            source_radius: 0.5,
+            map: Arc::from(shadow_maps_2d(position, 8.0, 0.5, &[wall])),
+        });
+        Lighting2d {
+            ambient: [0.0; 3],
+            lights: vec![lamp],
+        }
+        .at(point)[0]
+    };
+    let wall = [[2.0, -2.0], [2.0, 2.0]];
+    assert!(
+        visibility(origin, wall) < 0.001,
+        "the wall blocks the light"
+    );
+    assert!(
+        visibility([4.0, 0.0], wall) > 0.1,
+        "moving the light clears the shadow"
+    );
+    assert!(
+        visibility(origin, [[4.0, -2.0], [4.0, 2.0]]) > 0.1,
+        "moving the wall clears the shadow"
+    );
+}
