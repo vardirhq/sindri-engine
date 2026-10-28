@@ -2983,7 +2983,8 @@
           "falloff": 1.4,
           "height": 1,
           "shadows": true,
-          "shadow_reach": 0.35
+          "shadow_reach": 0.35,
+          "shadow_source_radius": 0.4
         },
         "sindri.particles": {
           "playing": false,
@@ -4511,7 +4512,8 @@
           "falloff": 1.4,
           "height": 1,
           "shadows": true,
-          "shadow_reach": 0.35
+          "shadow_reach": 0.35,
+          "shadow_source_radius": 0.4
         },
         "sindri.particles": {
           "playing": false,
@@ -4657,7 +4659,8 @@
           "falloff": 1.4,
           "height": 1,
           "shadows": true,
-          "shadow_reach": 0.35
+          "shadow_reach": 0.35,
+          "shadow_source_radius": 0.4
         },
         "sindri.particles": {
           "playing": false,
@@ -4803,7 +4806,8 @@
           "falloff": 1.4,
           "height": 1,
           "shadows": true,
-          "shadow_reach": 0.35
+          "shadow_reach": 0.35,
+          "shadow_source_radius": 0.4
         },
         "sindri.particles": {
           "playing": false,
@@ -5932,7 +5936,8 @@
           "falloff": 1.3,
           "height": 1.5,
           "shadows": true,
-          "shadow_reach": 0.4
+          "shadow_reach": 0.4,
+          "shadow_source_radius": 0.4
         }
       }
     }

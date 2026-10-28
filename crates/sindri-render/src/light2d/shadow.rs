@@ -11,6 +11,78 @@ use std::f32::consts::{PI, TAU};
 /// Directions per light. 256 keeps a shadow's edge within a degree and a half.
 pub const SHADOW_BINS_2D: usize = 256;
 
+/// The center and four offsets used to approximate an area light.
+pub const SHADOW_SAMPLES_2D: usize = 5;
+
+/// Sample positions relative to the center and radius of a light source.
+pub const SHADOW_SAMPLE_OFFSETS_2D: [[f32; 2]; SHADOW_SAMPLES_2D] = [
+    [0.0, 0.0],
+    [-0.75, 0.0],
+    [0.75, 0.0],
+    [0.0, -0.75],
+    [0.0, 0.75],
+];
+
+/// Build one map for a point light, or five maps for an area light.
+#[must_use]
+pub fn shadow_maps_2d(
+    origin: [f32; 2],
+    radius: f32,
+    source_radius: f32,
+    edges: &[[[f32; 2]; 2]],
+) -> Vec<f32> {
+    let count = if source_radius > 0.0 {
+        SHADOW_SAMPLES_2D
+    } else {
+        1
+    };
+    let mut maps = Vec::with_capacity(SHADOW_BINS_2D * count);
+    for offset in SHADOW_SAMPLE_OFFSETS_2D.iter().take(count) {
+        let source = [
+            origin[0] + offset[0] * source_radius,
+            origin[1] + offset[1] * source_radius,
+        ];
+        // A displaced source can see an occluder just beyond the main radius.
+        maps.extend(shadow_map_2d(source, radius + source_radius, edges));
+    }
+    maps
+}
+
+/// Visibility uses the same area samples and three-bin filter as the shader.
+pub(super) fn visibility(origin: [f32; 2], point: [f32; 2], shadow: &super::Light2dShadow) -> f32 {
+    let count = if shadow.source_radius > 0.0 {
+        SHADOW_SAMPLES_2D
+    } else {
+        1
+    };
+    let mut visible = 0.0;
+    for (sample, offset) in SHADOW_SAMPLE_OFFSETS_2D.iter().take(count).enumerate() {
+        let away = [
+            point[0] - origin[0] - offset[0] * shadow.source_radius,
+            point[1] - origin[1] - offset[1] * shadow.source_radius,
+        ];
+        let distance = away[0].hypot(away[1]);
+        let center = bin_of(away);
+        for bin in [
+            (center + SHADOW_BINS_2D - 1) % SHADOW_BINS_2D,
+            center,
+            (center + 1) % SHADOW_BINS_2D,
+        ] {
+            let edge = shadow
+                .map
+                .get(sample * SHADOW_BINS_2D + bin)
+                .copied()
+                .unwrap_or(OPEN);
+            if distance <= edge + shadow.reach {
+                visible += 1.0;
+            }
+        }
+    }
+    #[allow(clippy::cast_precision_loss)]
+    let divisor = (count * 3) as f32;
+    visible / divisor
+}
+
 /// What a direction with nothing in it holds: further than any light reaches.
 const OPEN: f32 = 1.0e9;
 

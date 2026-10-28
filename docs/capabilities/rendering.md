@@ -561,7 +561,7 @@ and the UI is never lit. A sprite or tilemap may name a `normal_map` laid out
 like its texture; a light's `height` then decides how squarely it meets each
 texel, so a low light rakes across the relief. A light with `shadows` on is
 blocked by `sindri.light2d.occluder` boxes, polygons and the solid cells of a
-tilemap, through one-dimensional polar depth maps built on the CPU each frame.
+tilemap, through one-dimensional polar depth maps built on the CPU each frame. An optional five-sample area light produces approximate soft shadows; Lamplighter uses it for its lanterns.
 Decay writes a light's color, intensity, radius, falloff and height. The Scene
 view draws light radii and occluder outlines with handles. The platformer's
 cave is the proof. A voxel world viewed as a map is lit too, and its

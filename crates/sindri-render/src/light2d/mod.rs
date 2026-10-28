@@ -10,7 +10,7 @@ mod gpu;
 mod shadow;
 
 pub(crate) use gpu::Lights2dGpu;
-pub use shadow::{SHADOW_BINS_2D, shadow_map_2d};
+pub use shadow::{SHADOW_BINS_2D, SHADOW_SAMPLES_2D, shadow_map_2d, shadow_maps_2d};
 
 use std::sync::Arc;
 
@@ -43,7 +43,9 @@ pub struct Light2dShadow {
     /// How far past an occluding edge light still reaches, so the face of a
     /// wall the light falls on is lit rather than starting the dark.
     pub reach: f32,
-    /// [`SHADOW_BINS_2D`] distances from [`shadow_map_2d`].
+    /// Radius of the light-emitting area, in world units; zero is a point.
+    pub source_radius: f32,
+    /// One or five [`SHADOW_BINS_2D`]-wide maps from [`shadow_maps_2d`].
     pub map: Arc<[f32]>,
 }
 
@@ -71,10 +73,7 @@ impl Lighting2d {
             }
             let mut amount = (1.0 - distance / light.radius).max(0.0).powf(light.falloff);
             if let Some(shadow) = &light.shadow {
-                let bin = shadow::bin_of([-offset[0], -offset[1]]);
-                if distance > shadow.map[bin] + shadow.reach {
-                    amount = 0.0;
-                }
+                amount *= shadow::visibility(light.position, point, shadow);
             }
             for (channel, color) in total.iter_mut().zip(light.color) {
                 *channel += color * amount;

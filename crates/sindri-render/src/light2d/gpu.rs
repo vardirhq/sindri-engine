@@ -4,7 +4,7 @@
 //! renderer so every bind group made from it stays valid, and rewritten when
 //! the frame's lighting changes.
 
-use super::{Lighting2d, MAX_LIGHTS_2D, SHADOW_BINS_2D};
+use super::{Lighting2d, MAX_LIGHTS_2D, SHADOW_BINS_2D, SHADOW_SAMPLES_2D};
 
 #[repr(C)]
 #[derive(Clone, Copy, Debug, bytemuck::Pod, bytemuck::Zeroable)]
@@ -25,7 +25,7 @@ struct LightsUniform {
 #[allow(clippy::cast_possible_truncation)]
 const BINS: u32 = SHADOW_BINS_2D as u32;
 #[allow(clippy::cast_possible_truncation)]
-const ROWS: u32 = MAX_LIGHTS_2D as u32;
+const ROWS: u32 = (MAX_LIGHTS_2D * SHADOW_SAMPLES_2D) as u32;
 
 #[derive(Debug)]
 pub(crate) struct Lights2dGpu {
@@ -94,7 +94,7 @@ impl Lights2dGpu {
                 shadow: [0.0; 4],
             }; MAX_LIGHTS_2D],
         };
-        let mut rows = vec![0.0_f32; SHADOW_BINS_2D * MAX_LIGHTS_2D];
+        let mut rows = vec![0.0_f32; SHADOW_BINS_2D * MAX_LIGHTS_2D * SHADOW_SAMPLES_2D];
         if let Some(lighting) = lighting {
             let [r, g, b] = lighting.ambient;
             uniform.ambient = [r, g, b, 1.0];
@@ -115,12 +115,16 @@ impl Lights2dGpu {
                     shadow: [
                         f32::from(u8::from(light.shadow.is_some())),
                         light.shadow.as_ref().map_or(0.0, |shadow| shadow.reach),
-                        0.0,
+                        light
+                            .shadow
+                            .as_ref()
+                            .map_or(0.0, |shadow| shadow.source_radius),
                         0.0,
                     ],
                 };
                 if let Some(shadow) = &light.shadow {
-                    let row = &mut rows[index * SHADOW_BINS_2D..(index + 1) * SHADOW_BINS_2D];
+                    let row = &mut rows[index * SHADOW_BINS_2D * SHADOW_SAMPLES_2D
+                        ..(index + 1) * SHADOW_BINS_2D * SHADOW_SAMPLES_2D];
                     for (into, from) in row.iter_mut().zip(shadow.map.iter()) {
                         *into = *from;
                     }

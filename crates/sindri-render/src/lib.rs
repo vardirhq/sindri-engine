@@ -54,7 +54,8 @@ pub use glyph::{
     GlyphSlot, RASTER_EM,
 };
 pub use light2d::{
-    Light2d, Light2dShadow, Lighting2d, MAX_LIGHTS_2D, SHADOW_BINS_2D, shadow_map_2d,
+    Light2d, Light2dShadow, Lighting2d, MAX_LIGHTS_2D, SHADOW_BINS_2D, SHADOW_SAMPLES_2D,
+    shadow_map_2d, shadow_maps_2d,
 };
 pub use lighting::{
     LocalLight, MAX_LOCAL_LIGHTS, PointLight, PointLightError, SpotCone, WorldLighting,

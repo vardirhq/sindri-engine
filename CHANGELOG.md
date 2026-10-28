@@ -2,6 +2,9 @@
 
 # Changelog
 
+- Add optional area-sampled 2D shadows for Lamplighter lanterns, with matching
+  CPU visibility and GPU shading.
+
 - Darken Lamplighter around Wick’s carried lantern and lit road lanterns,
   and lower Wick’s sprite slightly to ground both feet.
 

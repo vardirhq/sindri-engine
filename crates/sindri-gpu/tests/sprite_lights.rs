@@ -11,7 +11,7 @@ use sindri_render::{
     ClearOperations, DepthTarget, Light2d, Light2dShadow, Lighting2d, OffscreenTarget,
     OrthographicCamera, ShapeBlend, ShapeInstance, ShapeRenderer, SpriteBatchDraw,
     SpriteBatchRenderer, SpriteBatchTarget, SpriteDepth, SpriteEnvironment, SpriteInstance,
-    Texture2D, TextureRegistry, encode_clear, shadow_map_2d,
+    Texture2D, TextureRegistry, encode_clear, shadow_map_2d, shadow_maps_2d,
 };
 
 /// Set wherever a software adapter is installed on purpose; see
@@ -212,6 +212,7 @@ fn a_wall_casts_a_shadow() {
     let walled = Light2d {
         shadow: Some(Light2dShadow {
             reach: 0.0,
+            source_radius: 0.0,
             map: Arc::from(shadow_map_2d([-0.25, 0.0], 0.6, &[wall])),
         }),
         ..reaching.clone()
@@ -223,6 +224,37 @@ fn a_wall_casts_a_shadow() {
     assert_eq!(
         behind[0], behind[1],
         "only ambient behind the wall: {behind:?}"
+    );
+}
+
+#[test]
+fn an_area_light_partly_lights_a_shadow_edge() {
+    let Some(gpu) = gpu() else {
+        return;
+    };
+    let origin = [-0.25, 0.0];
+    let wall = [[[0.0, -1.0], [0.0, 0.0]]];
+    let open_light = Light2d {
+        radius: 0.8,
+        ..red_light(None)
+    };
+    let area = Light2d {
+        shadow: Some(Light2dShadow {
+            reach: 0.0,
+            source_radius: 0.2,
+            map: Arc::from(shadow_maps_2d(origin, 0.8, 0.2, &wall)),
+        }),
+        ..open_light.clone()
+    };
+    let (_, open) = draw(&gpu, Some(dim(vec![open_light])), &LIT);
+    let (_, partial) = draw(&gpu, Some(dim(vec![area])), &LIT);
+    assert!(
+        u16::from(partial[0]) > u16::from(partial[1]) + 2,
+        "some light reaches the edge: {partial:?}"
+    );
+    assert!(
+        u16::from(partial[0]) + 2 < u16::from(open[0]),
+        "the wall blocks part of the light: {partial:?} vs {open:?}"
     );
 }
 
@@ -239,6 +271,7 @@ fn a_ledge_shades_what_is_beneath_it() {
         radius: 1.0,
         shadow: Some(Light2dShadow {
             reach: 0.0,
+            source_radius: 0.0,
             map: Arc::from(shadow_map_2d([-0.25, 0.3], 1.0, &[ledge])),
         }),
         ..red_light(None)

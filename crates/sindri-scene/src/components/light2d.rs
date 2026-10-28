@@ -53,6 +53,8 @@ pub struct Light2dComponent {
     /// How far past an occluding edge the light still reaches, so the face of
     /// a wall the light falls on is lit.
     pub shadow_reach: f32,
+    /// Size of the emitting area in world units. Zero keeps point shadows.
+    pub shadow_source_radius: f32,
 }
 
 impl SceneComponent for Light2dComponent {
@@ -70,6 +72,7 @@ impl Default for Light2dComponent {
             height: 1.0,
             shadows: false,
             shadow_reach: 0.1,
+            shadow_source_radius: 0.0,
         }
     }
 }
@@ -102,6 +105,7 @@ impl Light2dComponent {
             ("intensity", self.intensity),
             ("height", self.height),
             ("shadow_reach", self.shadow_reach),
+            ("shadow_source_radius", self.shadow_source_radius),
         ];
         for (name, value) in at_least_zero {
             if !value.is_finite() || value < 0.0 {
