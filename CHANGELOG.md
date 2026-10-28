@@ -2,6 +2,15 @@
 
 # Changelog
 
+- Lamplighter: dragging a finger down the screen now walks Wick down it, and a controller's
+  left stick up walks him up. Both read down as positive, as the screen does, and Wick
+  had taken positive as up.
+- Lamplighter's lamps stand on cobblestone pads (a second `corners` terrain from a
+  Pixel Lab tileset, laid from Decay with the plain ground made transparent so the
+  paving lies on the dirt), the beacon's wider than the rest. Trees and boulders
+  block light with an ellipse on their footprint instead of a box centered on their
+  foot, so they no longer throw a rectangle under themselves, and the lamps' and
+  Wick's light reach further past an edge so the face toward the light stays lit.
 - Add `sindri.shadow2d`, the shadow things cast on the ground. A soft contact
   ellipse under a sprite, and, with `cast` on, the sprite's own picture laid on the
   ground away from the two strongest 2D lights near it: longer for a taller thing

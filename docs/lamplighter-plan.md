@@ -186,6 +186,18 @@ What came back from the real service, which the client's mock did not show:
 - `target_palette` on a pro tileset made noise; the first and second tileset's greens
   differ, so a second terrain needs its greens recolored onto the first's ramp.
 
+- **Resolution.** The world is drawn at 16 pixels to the unit. A 32 pixel tileset was
+  blander than the 16 pixel one at the same size on screen, and a Wick generated at 64
+  pixels is a better character but would stand four tiles tall against the 16 pixel
+  ground; mixing pixel sizes is worse than either, so the density stays.
+- **Paving.** The lamps stand on pads of cobblestone, a second `corners` terrain on a
+  layer above the ground with the plain ground made transparent, painted from Decay.
+- **Shadows from props.** A box occluder at a prop's foot threw a rectangle under it
+  that did not match its shape, and the part of the sprite behind its own base was
+  darkened by it. Occluders are now ellipses on the footprint, and lighting a standing
+  object from its base, with a cast silhouette, is the engine's contact and cast
+  shadows step.
+
 ## Checks that hold throughout
 
 - Every area has a scripted run that plays it, and one test plays the first area

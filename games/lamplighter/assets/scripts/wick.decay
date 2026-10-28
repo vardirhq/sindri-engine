@@ -40,9 +40,15 @@ script Wick {
     fn update(dt: number) {
         var x: number = Action.axis("move_x");
         var y: number = Action.axis("move_y");
+        // A finger's stick and a controller's stick both read down as positive,
+        // as the screen does, and the world has up positive.
+        let pad_y = -Gamepad.axis(0, "left_y");
+        if abs(pad_y) > abs(y) {
+            y = pad_y;
+        }
         if Stick.held && abs(Stick.x) + abs(Stick.y) > abs(x) + abs(y) {
             x = Stick.x;
-            y = Stick.y;
+            y = -Stick.y;
         }
         // A diagonal is no faster than a straight walk.
         let length = sqrt(x * x + y * y);

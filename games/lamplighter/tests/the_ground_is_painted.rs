@@ -40,3 +40,41 @@ fn the_path_is_dirt_and_the_far_fields_stay_grass() {
         "the path has edges: {beside:?}"
     );
 }
+
+/// The sprite a cell of the paving layer draws, if any.
+fn paving(run: &Run, column: usize, row: usize) -> Option<String> {
+    let road = run.entity("road").expect("the world has a paving layer");
+    let data = run.world.get(road).expect("it exists");
+    let map = &data.components["sindri.tilemap"];
+    let columns = usize::try_from(map["columns"].as_u64().expect("columns")).expect("fits");
+    let tile = usize::try_from(map["tiles"][row * columns + column].as_u64()?).ok()?;
+    map["palette"][tile].as_str().map(str::to_owned)
+}
+
+#[test]
+fn each_lamp_stands_on_paving_and_the_far_fields_have_none() {
+    let mut run = Run::open().expect("the project opens");
+    for _ in 0..5 {
+        let notes = run.step(STEP);
+        assert!(notes.is_empty(), "the game reported: {notes:?}");
+    }
+    // The map's top-left is (-26, 18). The beacon lamp is at (22, 8), so the tile
+    // whose corners are all within its pad is column 47, row 9; the first lamp at
+    // (8, 0) has its own, at column 33, row 17.
+    assert_eq!(
+        paving(&run, 47, 9).as_deref(),
+        Some("road-15"),
+        "the beacon's pad"
+    );
+    assert_eq!(
+        paving(&run, 33, 17).as_deref(),
+        Some("road-15"),
+        "the first lamp's pad"
+    );
+    assert_eq!(paving(&run, 2, 2), None, "no paving in the far corner");
+    assert_eq!(
+        paving(&run, 26, 18),
+        None,
+        "none where Wick starts, which has no lamp"
+    );
+}

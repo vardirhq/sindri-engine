@@ -116,12 +116,20 @@ def static_body():
             'lock_rotation': True, 'continuous_collision': False}
 
 
+def footprint(rx, ry, centre, sides=10):
+    """A ring of points round a prop's footprint, in world units: what blocks light."""
+    return [[round(rx * math.cos(math.tau * n / sides), 3), round(centre + ry * math.sin(math.tau * n / sides), 3)]
+            for n in range(sides)]
+
+
 def prop(ident, sprite, x, y, radius, centre, occluder, flip=False):
     """A tree or a boulder: it stands on its position, stops Wick and stops light.
 
     The radius, the height of the collider's middle above the foot and the
-    occluder's size are in world units; the entity is scaled up from 16 art
-    pixels to a unit, so each is divided by that scale for the component."""
+    occluder (its two radii, then the height of its middle) are in world units; the
+    entity is scaled up from 16 art pixels to a unit, so each is divided by that
+    scale for the component. The occluder is the object's footprint, an ellipse
+    round its base, not a box: a box shadows a rectangle whatever the object is."""
     return entity(ident, ident, at(x, y, depth(y), -4 if flip else 4, 4), **{
         'sindri.sprite': {'texture': f'textures/objects.png#{sprite}', 'layer': 5},
         'sindri.physics2d.rigid_body': static_body(),
@@ -129,7 +137,8 @@ def prop(ident, sprite, x, y, radius, centre, occluder, flip=False):
                                       'rotation': 0, 'sensor': False,
                                       'layers': {'memberships': WALL, 'filter': ALL},
                                       'friction': 0, 'restitution': 0},
-        'sindri.light2d.occluder': {'shape': 'box', 'size': [occluder[0] / 4, occluder[1] / 4]}})
+        'sindri.light2d.occluder': {'shape': 'polygon',
+                                    'points': [[px / 4, py / 4] for px, py in footprint(*occluder)]}})
 
 
 def lantern(ident, x, y, goal=False):
@@ -151,7 +160,7 @@ def lantern(ident, x, y, goal=False):
                           'properties': {'light_name': ident + '-light'}}})
     flame = entity(ident + '-light', ident + '-light', at(x, y + 2.6, depth(y) + 0.01), **{
         'sindri.light2d': {'enabled': True, 'color': [1.0, 0.72, 0.38, 1.0], 'intensity': 0.0, 'radius': 9.0,
-                           'falloff': 1.4, 'height': 1.0, 'shadows': True, 'shadow_reach': 0.35,
+                           'falloff': 1.4, 'height': 1.0, 'shadows': True, 'shadow_reach': 0.6,
                            'shadow_source_radius': 0.3}})
     return [post, flame]
 
@@ -208,7 +217,7 @@ def wick():
         entity('wick-light', 'wick-light', at(0, 1.6, 0.1), 'wick', **{
             'sindri.light2d': {'enabled': True, 'color': [1.0, 0.76, 0.42, 1.0], 'intensity': 1.3,
                                'radius': 8.0, 'falloff': 1.5, 'height': 1.0, 'shadows': True,
-                               'shadow_reach': 0.3, 'shadow_source_radius': 0.3},
+                               'shadow_reach': 0.6, 'shadow_source_radius': 0.3},
             'sindri.script': {'source': 'scripts/flame.decay', 'script': 'Flame', 'properties': {}}}),
     ]
 
@@ -216,6 +225,14 @@ def wick():
 COLUMNS, ROWS = 52, 36
 # The lamps, in the order a person walks to them, and Wick's start, which the path joins.
 PATH = [(0, 0), (8, 0), (17, -3), (22, 8)]
+
+
+def road():
+    """The paving layer above the ground, empty until `ground.decay` lays pads of it."""
+    left, top = -COLUMNS // 2, ROWS // 2
+    return entity('road', 'road', at(left, top, -0.9), **{'sindri.tilemap': {
+        'texture': 'textures/road.png', 'palette': [], 'columns': COLUMNS, 'rows': ROWS,
+        'tiles': [None] * (COLUMNS * ROWS), 'layer': -9}})
 
 
 def ground():
@@ -237,9 +254,9 @@ def scenery():
     """Boulders to walk around and a dead wood: what the carried light shadows."""
     # Which of the five trees and four boulders stands where is fixed by its
     # number, and every other one is turned about, so a wood is not one tree.
-    out = [prop(f'boulder-{n}', f'boulder-{(n * 3) % 4}', x, y, 0.9, 0.7, (1.8, 1.2), flip=n % 2 == 0)
+    out = [prop(f'boulder-{n}', f'boulder-{(n * 3) % 4}', x, y, 0.9, 0.7, (0.85, 0.42, 0.45), flip=n % 2 == 0)
            for n, (x, y) in enumerate(BOULDERS, 1)]
-    out += [prop(f'tree-{n}', f'dead-tree-{(n * 2) % 5}', x, y, 0.6, 0.5, (1.2, 0.9), flip=n % 3 == 0)
+    out += [prop(f'tree-{n}', f'dead-tree-{(n * 2) % 5}', x, y, 0.6, 0.5, (0.3, 0.18, 0.2), flip=n % 3 == 0)
             for n, (x, y) in enumerate(TREES, 1)]
     return out
 
@@ -292,7 +309,6 @@ def field():
         {'name': 'move_y', 'kind': 'axis', 'bindings': [
             {'axis': {'negative': 'key.S', 'positive': 'key.W'}},
             {'axis': {'negative': 'key.ArrowDown', 'positive': 'key.ArrowUp'}},
-            'gamepad.axis.left_y',
             {'axis': {'negative': 'gamepad.dpad_down', 'positive': 'gamepad.dpad_up'}}]},
         {'name': 'attack', 'kind': 'button', 'bindings': ['key.J', 'key.Space', 'gamepad.west']},
         {'name': 'pause', 'kind': 'button', 'bindings': ['key.Escape', 'gamepad.start']}]
@@ -304,6 +320,7 @@ def field():
             'sindri.physics2d.world': {'gravity': [0, 0], 'layers': ['wall', 'wick', 'lantern', 'target']},
             'sindri.input.actions': {'actions': actions}}),
         ground(),
+        road(),
         *ground_cover(),
         wall('edge-north', 0, 18.5, 54, 1, stone),
         wall('edge-south', 0, -18.5, 54, 1, stone),
