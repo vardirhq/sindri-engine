@@ -2,6 +2,9 @@
 
 # Changelog
 
+- Darken Lamplighter around Wick’s carried lantern and lit road lanterns,
+  and lower Wick’s sprite slightly to ground both feet.
+
 - Try the PixelLab Wick sprite and walking animation in Lamplighter.
 
 - Give Lamplighter's portrait camera a smooth look ahead in Wick's travel

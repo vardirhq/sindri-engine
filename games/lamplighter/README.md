@@ -141,8 +141,9 @@ without falling, hearing the jump, landing, coin and flag sounds on the way,
 and checks the camera follows. `src/lib.rs` is the harness
 that plays it without a window, built from the same public pieces a host uses.
 
-`tests/cave_lights.rs` checks that the roof keeps the sun out of the cave,
-that the lanterns warm it, and that the pillar shades its far side from one.
+`tests/cave_lights.rs` checks that Wick carries a shadow-casting light through
+the dark, that the lantern follows Wick, and that the cave pillar shades its
+far side from a lantern.
 `tests/sparkle_and_dust.rs` checks the coins' sparkle and the hero's dust, and
 `tests/sliced_panels.rs` that the HUD frame and signboard are drawn sliced.
 `tests/painted_ground.rs` checks every ground cell is what the terrain paints.

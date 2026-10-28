@@ -83,9 +83,8 @@ game in this repository; Orbital's charger now proves it.
   collider's merged boxes.
 - [x] The Scene view outlines occluders; a box occluder's size and a light's
   radius drag by handle. Polygon points are edited in the inspector.
-- [x] Proof: the platformer gets a dark cave section lit by lanterns, with the
-  level casting shadows. A sun keeps daylight out under the roof, and a low
-  wall torch rakes normal-mapped bricks. Contract: `docs/2d-lights.md`.
+- [x] Proof: Lamplighter uses a carried lantern and lit lanterns in a dark
+  level; the cave pillar casts shadows. Contract: `docs/2d-lights.md`.
 
 ### 4. Particle system
 - [x] `sindri.particles`: a continuous emitter with rate, bursts (`Effects.emit`), lifetime,
