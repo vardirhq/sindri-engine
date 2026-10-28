@@ -8,6 +8,27 @@
   block light with an ellipse on their footprint instead of a box centered on their
   foot, so they no longer throw a rectangle under themselves, and the lamps' and
   Wick's light reach further past an edge so the face toward the light stays lit.
+- Add `sindri.shadow2d`, the shadow things cast on the ground. A soft contact
+  ellipse under a sprite, and, with `cast` on, the sprite's own picture laid on the
+  ground away from the two strongest 2D lights near it: longer for a taller thing
+  and a further or lower light, fainter where less light reaches its feet, and none
+  from a light the thing carries. Both are painted over the lit ground and block
+  nothing; a light is still blocked by an occluder. Needs `lighting_2d` on to cast.
+- 2D light shadows are now exact. A shadow-casting light no longer keeps a table of
+  256 distances by direction with a blur across three of them; it keeps the region it
+  sees as sorted angular intervals, each with the line of the nearest blocking edge,
+  so a shadow ends at the true angle of an edge's end at any distance and two walls
+  meeting cast a true corner. The shader finds a pixel's interval by binary search and
+  the CPU `Lighting2d::at` runs the same arithmetic; `sindri_render::sees` is the
+  new yes-or-no query. A point light's shadow edge is now hard, and the five-sample
+  area light is what softens it. `SHADOW_BINS_2D` is replaced by `SHADOW_INTERVALS_2D`
+  and `SHADOW_MAP_LEN_2D`.
+- The Pixel Lab client gains an `object` command (a map object, with the free
+  promotion of the candidates worth keeping and their export), `animate` moves to
+  the multi-direction endpoint with `--directions` so a walk or a slash is made for
+  all four directions at once, and `call --wait` on a request that starts several
+  jobs keeps every job's response instead of the last. Its README records what the
+  first real runs showed: costs, canvas sizes and the unreliable tileset labels.
 - Lamplighter's field gets real creatures and a lived-in ground: four Pixel Lab
   gloom (a smoking blob, a hunched one, one trailed by motes, a low crouch) that
   breathe and squash when struck, five dead trees and four boulders instead of one

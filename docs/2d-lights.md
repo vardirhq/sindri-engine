@@ -95,27 +95,78 @@ platformer's `hero_n.png` was made there.
 | `tilemap` | The solid cells of the tilemap on the same entity, merged into boxes exactly as `sindri.physics2d.tilemap_collider` merges them; that collider's `passable` sprites let light through too |
 
 All in the entity's own space, placed by its world transform. Each shadow
-casting light gets a one-dimensional polar depth map, built on the CPU from
-every occluder edge within its radius: for each of 256 directions, the distance
-to the nearest edge. A pixel further than that, past the light's
-`shadow_reach`, is in shadow; three neighbouring directions are averaged, which
-softens the edge by about a degree and a half. Built on the CPU because it is
-the same arithmetic on every host and testable without a GPU
-(`Lighting2d::at` answers what a point receives).
+casting light sees exactly what no occluder edge within its radius blocks. That
+region is described, round the light, as a sorted list of angular intervals: each
+runs from the direction of one edge's end to the next and holds the line of the
+one edge nearest the light across it (a unit normal and the line's distance from
+the light, so the distance along a ray is `d / (n . u)`). A point is in shadow when
+it lies past that edge by more than the light's `shadow_reach`. A shadow therefore
+ends at the true angle of an edge's end, at any distance, and two walls meeting
+cast a true corner; nothing is quantized to a table of directions.
 
-A positive `shadow_source_radius` uses five shadow maps from points across the
-light source, averaging their visibility to approximate an area-light penumbra.
-The CPU query and GPU renderer use the same samples and angular filter. It is
-a five-sample approximation, so bands and aliasing can remain; it is not a
-continuous area-light solution. It costs five map builds per shadowed light.
-Lamplighter uses it on Wick’s lantern and its roadside lamps.
+The intervals come from an angular sweep on the CPU, one per shadowed light, and
+the shader finds a pixel's interval by binary search and applies the same
+formula, so the arithmetic is the same on every host and testable without a GPU:
+`Lighting2d::at` answers what a point receives, and `sindri_render::sees` answers
+whether a source sees a point at all. One wall is three intervals; a source holds
+up to 256, enough for a level's few dozen merged boxes, and past that the narrowest
+slivers fold into their neighbors, so a crowd of tiny edges loses fine detail of
+shadow and never a whole edge.
 
-Limits: the maps are rebuilt every frame from every occluder, which is cheap
+A positive `shadow_source_radius` uses five sources from points across the light's
+emitting area, averaging their visibility to approximate an area-light penumbra.
+The CPU query and GPU renderer use the same samples. It is a five-sample
+approximation, so the penumbra is five steps, not a smooth ramp; it is not a
+continuous area-light solution. It costs five sweeps per shadowed light.
+Lamplighter uses it on Wick’s lantern and its roadside lamps. A point light's
+shadow edge is hard: that is the look, and the area samples are the softening.
+
+Limits: the intervals are rebuilt every frame from every occluder, which is cheap
 for a handful of lights and a level's few dozen merged boxes and is not meant
-for hundreds of shadow casting lights. A shadow's edge resolution is angular,
-so a light far from what it shadows draws a softer, coarser edge. Occluders
-block light only; they do not darken themselves beyond `shadow_reach`, which is
-why a sun's reach is set to the depth of the ground it lights.
+for hundreds of shadow casting lights. Occluders block light only; they do not
+darken themselves beyond `shadow_reach`, which is why a sun's reach is set to the
+depth of the ground it lights.
+
+## Shadows on the ground
+
+An occluder decides what a light cannot see through. It is not what a viewer
+looks at: that is the dark patch on the ground saying a tree stands there and
+which way the light is. `sindri.shadow2d` adds it to anything with a picture, in
+two parts, either of which it may have:
+
+| Field | Meaning | Default |
+| --- | --- | --- |
+| `contact_size` | Width and depth of a soft dark ellipse under the thing, in world units; zero in either leaves it out | `[1.0, 0.4]` |
+| `contact_offset` | Where its middle is, from the entity's position | `[0, 0]` |
+| `contact_opacity` | How dark it is at its middle | `0.35` |
+| `cast` | Whether the thing's own picture is also cast away from the lights | `false` |
+| `cast_opacity` | How dark a cast shadow is where a light reaches its full strength | `0.45` |
+| `height` | How tall the thing is, in world units, which sets how long it casts; zero takes the height its picture is drawn at | `0` |
+| `max_length` | The longest a cast shadow gets | `2.5` |
+
+The **contact shadow** is a feathered black ellipse drawn one layer below the
+thing's sprite, so it says the thing rests on the ground whatever lights are
+about. The **cast shadow** is the sprite's own picture, in black, laid on the
+ground: its feet stay where they are and its head is carried away from the light,
+so it is a card lying down and pointing away from it. It is `height * distance /
+light height` long (so a taller thing, and a light further from it or lower, cast
+longer) up to `max_length`, as wide as the picture, and as dark as the light that
+reaches its feet. Of the lights in reach the two strongest each cast one, so two
+lamps give a thing two shadows. A light that the thing carries, such as Wick's
+lantern, casts nothing from it. A cast shadow is always an area, whichever side
+the light is on, because it lies across the ground rather than standing in the
+picture's plane.
+
+Both are drawn over the lit ground and are not lit themselves, so they darken what
+light reaches and change nothing in the dark, and neither blocks light: that is the
+occluder's work, and a thing usually wants both, the occluder as a small ellipse on
+its footprint (a box centered on its foot shadows a rectangle under it whatever the
+thing is). Casting needs the environment's `lighting_2d` on.
+
+Limits: the cast shadow is the sprite's picture and not its real shape from above,
+so a tree casts the silhouette it shows, not its crown's outline; it falls on a
+flat ground at the object's own height, so it does not climb a wall or a step; and
+a thing's own face is not shaded by the light, only its ground.
 
 ## In the editor
 

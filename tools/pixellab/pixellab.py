@@ -287,9 +287,11 @@ def cmd_call(args):
     jobs = []
     if isinstance(response, dict):
         jobs = [response["background_job_id"]] if response.get("background_job_id") else list(response.get("background_job_ids") or [])
-    if args.wait:
-        for job in jobs:
-            response = {"job": wait_for_job(job), "request": response}
+    if args.wait and len(jobs) == 1:
+        response = {"job": wait_for_job(jobs[0]), "request": response}
+    elif args.wait and jobs:
+        # One job per direction or per object: keep every one, not the last.
+        response = {"jobs": [wait_for_job(job) for job in jobs], "request": response}
     if args.out:
         print("wrote", ", ".join(save_result(response, args.out, "response")), "in", args.out)
     else:
@@ -344,19 +346,56 @@ def cmd_character(args):
 
 
 def cmd_animate(args):
+    """Animates a character in every direction it has, or in the ones asked for.
+
+    This is `POST /characters/animations`, which makes one job per direction; the
+    older `/animate-character` makes only the south one. The animation is read
+    back from the character's ZIP, where the directions are named."""
     body = {
         "character_id": args.character,
         **({"animation_name": args.name} if args.name else {}),
         **({"action_description": args.description} if args.description else {}),
         **({"frame_count": args.frames} if args.frames else {}),
+        **({"directions": [d.strip() for d in args.directions.split(",")]} if args.directions else {}),
+        **({"seed": args.seed} if args.seed is not None else {}),
         **parse_pairs(args.set),
     }
-    started = send(args, "POST", "/animate-character", body)
+    started = send(args, "POST", "/characters/animations", body)
     if started is None:
         return
-    for job in started.get("background_job_ids") or []:
+    jobs = started.get("background_job_ids") or ([started["background_job_id"]] if started.get("background_job_id") else [])
+    print(f"{len(jobs)} job(s)", file=sys.stderr)
+    for job in jobs:
         wait_for_job(job)
     download_character(args.character, args.out)
+
+
+def cmd_object(args):
+    """A map object, such as a tree or a lamp post, and the candidates worth keeping.
+
+    One call makes sixteen candidates and costs ten generations; promoting a
+    candidate with `select-frames` is free, so `--keep 0,1,2` takes three of the
+    sixteen for nothing. Each is exported as its own folder, `object-N`."""
+    body = {
+        "description": args.description,
+        "view": args.view,
+        **({"size": args.size} if args.size else {}),
+        **parse_pairs(args.set),
+    }
+    started = send(args, "POST", "/create-1-direction-object", body)
+    if started is None:
+        print(f"POST {BASE}/objects/<id>/select-frames  indices {args.keep}")
+        return
+    object_id = started["object_id"]
+    print(f"object {object_id} (job {started.get('background_job_id')})", file=sys.stderr)
+    if started.get("background_job_id"):
+        wait_for_job(started["background_job_id"])
+    indices = [int(index) for index in args.keep.split(",")]
+    chosen = request("POST", f"/objects/{object_id}/select-frames", {"indices": indices})
+    for position, created in enumerate(chosen["created_object_ids"]):
+        payload = wait_for(lambda created=created: request("GET", f"/objects/{created}/spritesheet"), f"object {created}")
+        where = save_zip(payload, args.out, f"object-{position}")
+        print(f"wrote {where} (candidate {indices[position]})")
 
 
 def cmd_download(args):
@@ -416,6 +455,16 @@ def build_parser():
     sub.add_argument("--name", help="the animation's name, e.g. walk")
     sub.add_argument("--description", help="what the animation does")
     sub.add_argument("--frames", type=int)
+    sub.add_argument("--directions", help="e.g. south,west,north,east; every direction the character has when left out")
+    sub.add_argument("--seed", type=int)
+    sub.add_argument("--set", action="append", metavar="KEY=VALUE")
+    sub.add_argument("--out", required=True)
+
+    sub = command("object", cmd_object, "a map object (tree, lamp post, creature) and the candidates to keep")
+    sub.add_argument("--description", required=True)
+    sub.add_argument("--size", type=int, help="the object's size in pixels, e.g. 48")
+    sub.add_argument("--view", default="top-down", choices=["top-down", "sidescroller"])
+    sub.add_argument("--keep", default="0", help="which of the sixteen candidates to export, e.g. 0,1,2 (default 0); promoting is free")
     sub.add_argument("--set", action="append", metavar="KEY=VALUE")
     sub.add_argument("--out", required=True)
 

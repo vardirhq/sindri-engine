@@ -18,6 +18,7 @@ mod normals;
 mod passes;
 mod points;
 mod retained_meshes;
+mod shadows_2d;
 mod sprite_masks;
 mod sprite_shaders;
 mod sprites;

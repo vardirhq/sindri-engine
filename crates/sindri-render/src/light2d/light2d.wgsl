@@ -26,22 +26,23 @@ struct SindriLights2d {
 @group(0) @binding(3)
 var<uniform> sindri_lights_2d: SindriLights2d;
 
-// Five rows per light, one texel per direction: the distance from a source
-// sample to its nearest occluding edge. Point lights use only the first row.
+// Five rows per light, one texel per angular interval: where it starts (an angle
+// from -pi), the unit normal of the edge that blocks it, and that edge's line's
+// distance from the source, negative where nothing blocks. Point lights use only
+// the first row. See `shadow.rs`, which builds them and which this must agree with.
 @group(0) @binding(4)
 var sindri_shadow_map_2d: texture_2d<f32>;
-
-const SINDRI_TAU: f32 = 6.283185307179586;
 
 fn sindri_lighting_2d_on() -> bool {
     return sindri_lights_2d.ambient.w > 0.5;
 }
 
 // How much of light `index` reaches a point `distance` from it in direction
-// `away`, 0 to 1. Three neighbouring directions are averaged, which softens
-// a shadow's edge by one bin.
+// `away`, 0 to 1: the share of its samples with no blocking edge between them
+// and the point. Each finds the interval its direction falls in by binary
+// search and compares the point's distance with the edge's, exactly.
 fn sindri_shadow_2d(index: u32, world: vec2<f32>, origin: vec2<f32>, reach: f32, source_radius: f32) -> f32 {
-    let bins = i32(textureDimensions(sindri_shadow_map_2d).x);
+    let intervals = i32(textureDimensions(sindri_shadow_map_2d).x);
     let offsets = array<vec2<f32>, 5>(vec2<f32>(0.0, 0.0), vec2<f32>(-0.75, 0.0),
         vec2<f32>(0.75, 0.0), vec2<f32>(0.0, -0.75), vec2<f32>(0.0, 0.75));
     let count = select(1u, 5u, source_radius > 0.0);
@@ -49,15 +50,28 @@ fn sindri_shadow_2d(index: u32, world: vec2<f32>, origin: vec2<f32>, reach: f32,
     for (var sample = 0u; sample < count; sample++) {
         let away = world - (origin + offsets[sample] * source_radius);
         let distance = length(away);
-        let turn = (atan2(away.y, away.x) + SINDRI_TAU * 0.5) / SINDRI_TAU;
-        let center = clamp(i32(floor(turn * f32(bins))), 0, bins - 1);
-        for (var k = -1; k <= 1; k++) {
-            let bin = (center + k + bins) % bins;
-            let edge = textureLoad(sindri_shadow_map_2d, vec2<i32>(bin, i32(index * 5u + sample)), 0).r;
+        let angle = atan2(away.y, away.x);
+        let row = i32(index * 5u + sample);
+        var low = 0;
+        var high = intervals - 1;
+        while low < high {
+            let middle = (low + high + 1) / 2;
+            if textureLoad(sindri_shadow_map_2d, vec2<i32>(middle, row), 0).x <= angle {
+                low = middle;
+            } else {
+                high = middle - 1;
+            }
+        }
+        let interval = textureLoad(sindri_shadow_map_2d, vec2<i32>(low, row), 0);
+        if interval.w < 0.0 {
+            seen += 1.0;
+        } else {
+            let facing = dot(interval.yz, away) / max(distance, 1.0e-9);
+            let edge = interval.w / max(facing, 1.0e-6);
             seen += select(0.0, 1.0, distance <= edge + reach);
         }
     }
-    return seen / f32(count * 3u);
+    return seen / f32(count);
 }
 
 // The light reaching `world`: ambient plus every light. `normal` is used only
