@@ -27,8 +27,17 @@ script Wick {
     var swinging: bool = false;
     var swung_for: number = 0.0;
     var struck: bool = false;
+    // Thrown back by a pounce: for how long input is ignored, and how long a
+    // second one is forgiven.
+    var stagger: number = 0.0;
+    var grace: number = 0.0;
+    var lost_for: number = 0.0;
 
     fn start() {
+        Game.scorch = 0.0;
+        Game.scorched = 0.0;
+        Game.lost = false;
+        Game.moved = false;
         Game.lit = 0.0;
         Game.total = World.with_tag("lantern").length;
         Game.won = false;
@@ -38,6 +47,26 @@ script Wick {
     }
 
     fn update(dt: number) {
+        this.grace = max(0.0, this.grace - dt);
+        if Game.lost {
+            // The lantern is out: Wick stands in the dark a moment, then the field starts over.
+            Physics.set_velocity(this.entity, 0.0, 0.0);
+            this.lost_for += dt;
+            if this.lost_for >= 1.6 {
+                Scene.restart("world.scene");
+            }
+            return;
+        }
+        if this.stagger > 0.0 {
+            // Thrown back: the walk is not Wick's to steer, and eases to a stop.
+            this.stagger = max(0.0, this.stagger - dt);
+            this.vx -= this.vx * min(1.0, dt * 9.0);
+            this.vy -= this.vy * min(1.0, dt * 9.0);
+            Physics.set_velocity(this.entity, this.vx, this.vy);
+            this.transform.position.z = 0.5 - this.transform.world_position.y * 0.01;
+            show(false);
+            return;
+        }
         var x: number = Action.axis("move_x");
         var y: number = Action.axis("move_y");
         // A finger's stick and a controller's stick both read down as positive,
@@ -78,6 +107,9 @@ script Wick {
             this.facing_x = x;
             this.facing_y = y;
         }
+        if length > 0.1 {
+            Game.moved = true;
+        }
         let blend = min(1.0, dt * this.ease);
         this.vx += (x * pace * this.speed - this.vx) * blend;
         this.vy += (y * pace * this.speed - this.vy) * blend;
@@ -95,6 +127,25 @@ script Wick {
         }
         if Action.pressed("pause") && !Game.won {
             Scene.go("pause.scene");
+        }
+    }
+
+    // A gloom's pounce lands, from the direction given: Wick is thrown the way
+    // it was going, the lantern is scorched, and a few of them in a row put it
+    // out. A second pounce straight after the first is forgiven.
+    fn scorch(push_x: number, push_y: number) {
+        if this.grace > 0.0 || Game.won || Game.lost {
+            return;
+        }
+        this.grace = 1.4;
+        this.stagger = 0.3;
+        this.swinging = false;
+        this.vx = push_x * 8.0;
+        this.vy = push_y * 8.0;
+        Game.scorch = min(1.0, Game.scorch + 0.45);
+        Game.scorched += 1.0;
+        if Game.scorch >= 1.0 {
+            Game.lost = true;
         }
     }
 

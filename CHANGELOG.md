@@ -2,6 +2,13 @@
 
 # Changelog
 
+- Lamplighter's gloom now hunt. Using `Lighting.level`, each creeps through the dark
+  toward Wick, holds where a light begins, and from the edge winds up (low, wide and
+  shaking, with red sparks) and pounces; a pounce that lands throws Wick back and
+  scorches his lantern, which shrinks and gutters, and a few in a row put it out and
+  start the field over. One that misses is spent and open to the sword. They thin where
+  a light is strong and smoke violet motes. The field opens calm: they only hunt once Wick has first walked. `Game.truce` holds them still for tests.
+
 - A thing with `sindri.shadow2d` is now lit as something standing on the ground: the
   question of whether a shadow covers it is asked where its feet are, not at each
   pixel. The occluder round a tree's or boulder's base no longer darkens the side of

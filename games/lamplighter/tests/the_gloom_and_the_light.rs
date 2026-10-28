@@ -1,0 +1,165 @@
+//! The gloom keep to the dark and hunt: they creep toward Wick where little
+//! light reaches them, hold where a light begins, wind up and pounce from its edge,
+//! scorch his lantern when a pounce lands, and thin where a light is strong.
+
+use lamplighter::Run;
+use sindri_platform::{InputEvent, Key};
+
+const STEP: f32 = 1.0 / 60.0;
+
+fn step(run: &mut Run, frames: u32) {
+    for _ in 0..frames {
+        let notes = run.step(STEP);
+        assert!(notes.is_empty(), "the game reported: {notes:?}");
+    }
+}
+
+fn position(run: &Run, id: &str) -> [f32; 2] {
+    let entity = run.entity(id).unwrap_or_else(|| panic!("{id} exists"));
+    let at = run
+        .world
+        .get(entity)
+        .expect("it exists")
+        .transform_3d
+        .expect("it has a place")
+        .position;
+    [at[0], at[1]]
+}
+
+fn alpha(run: &Run, id: &str) -> f64 {
+    let entity = run.entity(id).unwrap_or_else(|| panic!("{id} exists"));
+    run.world.get(entity).expect("it exists").components["sindri.sprite"]["tint"][3]
+        .as_f64()
+        .expect("an alpha")
+}
+
+fn scale_x(run: &Run, id: &str) -> f32 {
+    let entity = run.entity(id).unwrap_or_else(|| panic!("{id} exists"));
+    run.world
+        .get(entity)
+        .expect("it exists")
+        .transform_3d
+        .expect("it has a place")
+        .scale[0]
+}
+
+/// How far Wick's lantern reaches, which a scorch shrinks.
+fn lantern_radius(run: &Run) -> f64 {
+    let light = run.entity("wick-light").expect("Wick carries a light");
+    run.world.get(light).expect("it exists").components["sindri.light2d"]["radius"]
+        .as_f64()
+        .expect("a radius")
+}
+
+/// Wick's first step, after which the gloom hunt; he is back where he started.
+fn first_step(run: &mut Run) {
+    run.input.apply(InputEvent::KeyPressed(Key::D));
+    step(run, 3);
+    run.input.apply(InputEvent::KeyReleased(Key::D));
+    run.input.apply(InputEvent::KeyPressed(Key::A));
+    step(run, 3);
+    run.input.apply(InputEvent::KeyReleased(Key::A));
+    step(run, 20);
+}
+
+/// Holds the walk key for `frames` frames.
+fn walk_east(run: &mut Run, frames: u32) {
+    run.input.apply(InputEvent::KeyPressed(Key::D));
+    step(run, frames);
+    run.input.apply(InputEvent::KeyReleased(Key::D));
+}
+
+#[test]
+fn a_gloom_creeps_through_the_dark_toward_wick() {
+    let mut run = Run::open().expect("the project opens");
+    step(&mut run, 5);
+    first_step(&mut run);
+    let start = position(&run, "gloom-1")[0];
+    step(&mut run, 60);
+    let early = position(&run, "gloom-1")[0];
+    assert!(
+        early < start - 0.3,
+        "it creeps in the dark: {start} to {early}"
+    );
+}
+
+#[test]
+fn a_gloom_winds_up_at_the_edge_of_the_light_and_a_pounce_scorches_the_lantern() {
+    let mut run = Run::open().expect("the project opens");
+    step(&mut run, 5);
+    first_step(&mut run);
+    let (mut crouched, mut scorched) = (false, false);
+    for _ in 0..600 {
+        step(&mut run, 1);
+        // The wind-up is low and wide: its scale across goes past the breathing.
+        crouched |= scale_x(&run, "gloom-1") > 2.3;
+        scorched |= lantern_radius(&run) < 7.5;
+    }
+    assert!(crouched, "it crouches before it pounces");
+    assert!(scorched, "and a pounce that lands shrinks Wick's light");
+}
+
+#[test]
+fn left_alone_in_the_dark_wicks_lantern_goes_out() {
+    let mut run = Run::open().expect("the project opens");
+    step(&mut run, 5);
+    first_step(&mut run);
+    let mut out = false;
+    for _ in 0..3000 {
+        step(&mut run, 1);
+        // Out, the lantern is a spark; the field starts over a moment later.
+        if lantern_radius(&run) < 3.0 {
+            out = true;
+            break;
+        }
+    }
+    assert!(out, "standing still, Wick is run down by the gloom");
+}
+
+#[test]
+fn a_gloom_far_off_does_not_notice_wick() {
+    let mut run = Run::open().expect("the project opens");
+    step(&mut run, 5);
+    let far = |run: &Run| {
+        let (gloom, wick) = (position(run, "gloom-3"), position(run, "wick"));
+        (gloom[0] - wick[0]).hypot(gloom[1] - wick[1])
+    };
+    let start = far(&run);
+    step(&mut run, 120);
+    assert!(
+        far(&run) > start - 1.0,
+        "it lurks where it is and does not stalk: {start} to {}",
+        far(&run)
+    );
+}
+
+#[test]
+fn a_gloom_in_a_strong_light_thins() {
+    let mut run = Run::open().expect("the project opens");
+    step(&mut run, 5);
+    // Wick walks up to it, so the lantern is on it.
+    for _ in 0..40 {
+        if position(&run, "gloom-1")[0] - position(&run, "wick")[0] < 2.0 {
+            break;
+        }
+        walk_east(&mut run, 6);
+    }
+    let mut thinnest: f64 = 1.0;
+    for _ in 0..200 {
+        step(&mut run, 1);
+        thinnest = thinnest.min(alpha(&run, "gloom-1"));
+    }
+    assert!(thinnest < 0.7, "lit by the lantern it thins: {thinnest}");
+}
+
+#[test]
+fn the_field_opens_calm_until_wick_first_moves() {
+    let mut run = Run::open().expect("the project opens");
+    step(&mut run, 5);
+    step(&mut run, 900);
+    assert!(
+        lantern_radius(&run) > 7.99,
+        "left standing at the start, nothing has hunted him: {}",
+        lantern_radius(&run)
+    );
+}
