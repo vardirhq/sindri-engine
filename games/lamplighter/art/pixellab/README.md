@@ -55,3 +55,23 @@ frames 56 by 56. `art/wick.py` puts every frame on one cell, aligned by the feet
 - **The labels `lower` and `upper` are not reliable between calls.** The first
   tileset's `lower` was the dirt although the prompt said grass; the stone road's
   `lower` was the stone, as prompted. Always check by color.
+
+## Used, with a change
+
+- **A paving tileset for the lamps' pads** (`road/`): `tileset --lower "worn grey
+  cobblestone paving, night" --upper "packed dirt path" --transition "dirt packed
+  between the stones" --tile-size 16 --seed 7`. The service made the ground between
+  the stones one flat color rather than our dirt, so `art/road.py` makes every pixel
+  of that color transparent and the paving lies on whatever is under it. Here the
+  textured cobblestones were labelled `upper`, so the stone is found by its pixels.
+
+## Resolution: 16 or 32 pixels
+
+A 32 pixel tileset and a Wick asked for at 64 pixels were generated beside the 16
+pixel ones and compared at the same size on screen. The 32 pixel tiles were *blander*
+(a soft noise for grass, one flat brown for dirt) where the 16 pixel set has leaf
+strokes and pebble marks, though its edges were a little smoother. The 64 pixel Wick
+was a better character by itself (a face, a belt, straps), but a 66 pixel figure
+against 16 pixel tiles is four tiles tall, and against 32 pixel tiles it needs the
+blander ground. So the world stays at 16 pixels to the unit, which is the one pixel
+size Wick, the ground, the trees and the lamps all share.

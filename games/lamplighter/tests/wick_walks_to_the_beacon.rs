@@ -143,3 +143,32 @@ fn wick_faces_the_way_he_walks_and_stands_still_when_he_stops() {
         );
     }
 }
+
+/// A finger dragged down the screen walks Wick down it, and up walks him up.
+#[test]
+fn a_finger_dragged_down_the_screen_walks_wick_south() {
+    for (drag, south) in [(120.0, true), (-120.0, false)] {
+        let mut run = Run::open().expect("the project opens");
+        step(&mut run, 5);
+        let start = position(&run, "wick");
+        run.input.apply(InputEvent::TouchStarted {
+            id: 1,
+            x: 200.0,
+            y: 400.0,
+        });
+        step(&mut run, 2);
+        run.input.apply(InputEvent::TouchMoved {
+            id: 1,
+            x: 200.0,
+            y: 400.0 + drag,
+        });
+        step(&mut run, 40);
+        let end = position(&run, "wick");
+        let moved = end[1] - start[1];
+        assert!(
+            if south { moved < -1.0 } else { moved > 1.0 },
+            "dragging {drag} moved Wick {moved} in y"
+        );
+        assert!((end[0] - start[0]).abs() < 0.3, "and only along the drag");
+    }
+}

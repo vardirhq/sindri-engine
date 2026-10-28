@@ -1,0 +1,49 @@
+{
+  "format_version": 1,
+  "anchor": "center",
+  "grid": {
+    "columns": 4,
+    "rows": 4,
+    "names": [
+      "road-0",
+      "road-1",
+      "road-2",
+      "road-3",
+      "road-4",
+      "road-5",
+      "road-6",
+      "road-7",
+      "road-8",
+      "road-9",
+      "road-10",
+      "road-11",
+      "road-12",
+      "road-13",
+      "road-14",
+      "road-15"
+    ]
+  },
+  "terrains": {
+    "stone": {
+      "kind": "corners",
+      "sprites": [
+        "road-0",
+        "road-1",
+        "road-2",
+        "road-3",
+        "road-4",
+        "road-5",
+        "road-6",
+        "road-7",
+        "road-8",
+        "road-9",
+        "road-10",
+        "road-11",
+        "road-12",
+        "road-13",
+        "road-14",
+        "road-15"
+      ]
+    }
+  }
+}
