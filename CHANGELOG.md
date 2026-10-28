@@ -2,6 +2,13 @@
 
 # Changelog
 
+- Add `games/lamplighter`, the top-down action-adventure, starting with a dark
+  field: Wick walks with a carried lantern that lights and shadows the world,
+  swings a sword at a gloom, and lights three lamp posts, the last of which opens
+  the way. The art is from Pixel Lab: a grass-to-dirt ground laid with the new
+  `corners` terrain, Wick's four-direction walk and slash, trees, boulders and
+  lamp posts. It is exported to the site at `examples/lamplighter/`, listed in the
+  editor's samples, and scoped as its own game in CI.
 - Add a `corners` terrain kind: sixteen sprites chosen by the terrain at a tile's
   four corners, the layout of a Wang or Tiled corner set and of what a tileset
   generator makes for two terrains. `Grid.set_terrain_corner(map, column, row,

@@ -137,7 +137,11 @@ documentation says what is now true.
 1. **Seed.** `games/lamplighter` as a new project with its crate, Pages route,
    directory entry and CI scope: a dark scene, Wick walking top-down on a placeholder
    floor with the camera following and a carried lantern light, and the title
-   and pause shell carried over from the platformer.
+   and pause shell carried over from the platformer. *Done, and went further:* the
+   field is a grass-and-dirt ground, Wick is the Pixel Lab character with a walk,
+   a sword and a gloom to swing it at, and lamp posts he lights, with trees and
+   boulders that shadow the carried light; `tests/` plays the walk, the sword, the
+   three lamps and the ground.
 2. **Art foundation.** The grass-to-dirt tileset and the village-and-woods tile
    sets, Wick's directional sprites and sword, trees, walls, buildings and
    lanterns, with normal maps, and a test that opens the art.
@@ -155,6 +159,23 @@ documentation says what is now true.
 7. **The story and polish.** The reason for the fading sun, the ending, the
    screenshots and site entry, and `docs/parity.md` and the capability pages
    brought level with what is played.
+
+## What the first Pixel Lab runs found
+
+What came back from the real service, which the client's mock did not show:
+
+- A tileset is sixteen corner-pattern tiles, saved in an order of its own; the
+  corner labels `lower` and `upper` were the opposite of the prompts (the `lower`
+  tiles were the dirt). A render caught it; `art/tiles.py` now asserts the colors.
+  This was the reason for the engine's `corners` terrain kind (`docs/terrains.md`).
+- A character asked for at 32 pixels came back at 48; its walk came back at 60, and
+  east frames at 56. The art script puts every frame on one cell by the feet.
+- A single `animate` call returns one direction. `POST /characters/animations`
+  takes all four, one job each; the character's ZIP export names them.
+- An object call costs ten generations and returns sixteen candidates as a review
+  object; promoting one is free. A character costs one, a walk four, a tileset one.
+- The sword's south row was regenerated and is clearly better; the same prompt made
+  the north row's blade nearly invisible, so that row keeps its first take.
 
 ## Checks that hold throughout
 

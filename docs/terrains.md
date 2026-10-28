@@ -81,6 +81,11 @@ rule editor for arbitrary neighbor conditions.
 
 ## Proof
 
+Lamplighter's ground is a `corners` terrain, the first grass-to-dirt tileset Pixel
+Lab generated: `assets/scripts/ground.decay` paints its dirt path corner by corner
+with `Grid.set_terrain_corner`, and `games/lamplighter/tests/the_ground_is_painted.rs`
+reads the tiles back.
+
 The platformer's level is painted with the `ground` terrain of
 `textures/tiles.sheet`: grass grows on every open top and the earth shows a rim
 at every gap. `games/platformer/tests/painted_ground.rs` repaints every ground
