@@ -9,7 +9,7 @@
 use std::sync::Arc;
 
 use glam::{Mat4, Vec3};
-use sindri_core::{EntityId, SceneComponent, World};
+use sindri_core::{ComponentSchemaRegistry, EntityId, SceneComponent, World};
 use sindri_render::{Light2d, Light2dShadow, Lighting2d, MAX_LIGHTS_2D, shadow_maps_2d};
 
 use super::camera::ResolvedCameras;
@@ -65,55 +65,18 @@ impl SceneExtractor {
 
     /// Every active, enabled light in the world, shadows not yet cast.
     fn lights_2d(&self, world: &World) -> Result<Vec<Light2d>, SceneExtractError> {
-        let mut lights = Vec::new();
-        for (entity, light) in self.components.query::<Light2dComponent>(world)? {
-            if !world.is_active(entity) || !light.enabled {
-                continue;
-            }
-            let light = match light.validate() {
-                Ok(light) => light,
-                Err(error) => {
-                    self.refuse(entity, Light2dComponent::TYPE_NAME, error)?;
-                    continue;
-                }
-            };
-            let position = world.world_transform(entity).unwrap_or_default().position;
-            lights.push(Light2d {
-                position: [position[0], position[1]],
-                height: light.height,
-                radius: light.radius,
-                falloff: light.falloff,
-                color: light.radiance(),
-                shadow: light.shadows.then(|| Light2dShadow {
-                    reach: light.shadow_reach,
-                    source_radius: light.shadow_source_radius,
-                    map: Arc::from([]),
-                }),
-            });
+        let (lights, refused) = gather_lights(&self.components, world)?;
+        for (entity, error) in refused {
+            self.refuse(entity, Light2dComponent::TYPE_NAME, error)?;
         }
         Ok(lights)
     }
 
     /// Every active occluder's edges, in world space.
     fn occluder_edges(&self, world: &World) -> Result<Vec<[[f32; 2]; 2]>, SceneExtractError> {
-        let mut edges = Vec::new();
-        for (entity, occluder) in self.components.query::<Light2dOccluderComponent>(world)? {
-            if !world.is_active(entity) || !occluder.enabled {
-                continue;
-            }
-            let local = match local_occluder_edges(world, entity, &occluder) {
-                Ok(local) => local,
-                Err(error) => {
-                    self.refuse(entity, Light2dOccluderComponent::TYPE_NAME, error)?;
-                    continue;
-                }
-            };
-            let matrix = transform_matrix(world.world_transform(entity).unwrap_or_default());
-            edges.extend(
-                local
-                    .into_iter()
-                    .map(|edge| edge.map(|point| placed(matrix, point))),
-            );
+        let (edges, refused) = gather_edges(&self.components, world)?;
+        for (entity, error) in refused {
+            self.refuse(entity, Light2dOccluderComponent::TYPE_NAME, error)?;
         }
         Ok(edges)
     }
@@ -133,6 +96,74 @@ impl SceneExtractor {
             Err(SceneExtractError::Light2d(error))
         }
     }
+}
+
+/// What was gathered, and the entities whose component could not be used.
+pub(crate) type Gathered<T> = (Vec<T>, Vec<(EntityId, Light2dError)>);
+
+/// Every active, enabled light, shadows not yet cast, and the lights that
+/// could not be used.
+pub(crate) fn gather_lights(
+    components: &ComponentSchemaRegistry,
+    world: &World,
+) -> Result<Gathered<Light2d>, SceneExtractError> {
+    let mut lights = Vec::new();
+    let mut refused = Vec::new();
+    for (entity, light) in components.query::<Light2dComponent>(world)? {
+        if !world.is_active(entity) || !light.enabled {
+            continue;
+        }
+        let light = match light.validate() {
+            Ok(light) => light,
+            Err(error) => {
+                refused.push((entity, error));
+                continue;
+            }
+        };
+        let position = world.world_transform(entity).unwrap_or_default().position;
+        lights.push(Light2d {
+            position: [position[0], position[1]],
+            height: light.height,
+            radius: light.radius,
+            falloff: light.falloff,
+            color: light.radiance(),
+            shadow: light.shadows.then(|| Light2dShadow {
+                reach: light.shadow_reach,
+                source_radius: light.shadow_source_radius,
+                map: Arc::from([]),
+            }),
+        });
+    }
+    Ok((lights, refused))
+}
+
+/// Every active occluder's edges, in world space, and the occluders that
+/// could not be used.
+pub(crate) fn gather_edges(
+    components: &ComponentSchemaRegistry,
+    world: &World,
+) -> Result<Gathered<[[f32; 2]; 2]>, SceneExtractError> {
+    let mut edges = Vec::new();
+    let mut refused = Vec::new();
+    for (entity, occluder) in components.query::<Light2dOccluderComponent>(world)? {
+        if !world.is_active(entity) || !occluder.enabled {
+            continue;
+        }
+        let local = match local_occluder_edges(world, entity, &occluder) {
+            Ok(local) => local,
+            Err(error) => {
+                refused.push((entity, error));
+                continue;
+            }
+        };
+        let matrix = transform_matrix(world.world_transform(entity).unwrap_or_default());
+        edges.extend(
+            local
+                .into_iter()
+                .map(|edge| edge.map(|point| placed(matrix, point))),
+        );
+    }
+    Ok((edges, refused))
 }
 
 fn placed(matrix: Mat4, [x, y]: [f32; 2]) -> [f32; 2] {

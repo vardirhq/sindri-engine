@@ -127,6 +127,23 @@ for hundreds of shadow casting lights. Occluders block light only; they do not
 darken themselves beyond `shadow_reach`, which is why a sun's reach is set to the
 depth of the ground it lights.
 
+## Asking the light from a script
+
+A game's rules cannot depend on the camera, so Decay asks a separate question of
+the same lights and occluders, all of them wherever the camera is:
+
+- `Lighting.visible(from, to)` is whether the straight line between two world
+  points crosses no occluder edge. Touching an edge's end, or standing on it, does
+  not block. This is line of sight.
+- `Lighting.level(point)` is how bright it is at a point: the luminance of the
+  ambient plus every light that reaches it, 0 in the dark and 1 for a white light at
+  full strength, more where lights overlap. A light with `shadows` on is blocked by
+  occluders; one with it off shines through them.
+
+Both treat a light as its centre, so a soft penumbra is a hard edge to a script.
+They fail in a scene with `lighting_2d` off rather than answering that everything
+is dark.
+
 ## Shadows on the ground
 
 An occluder decides what a light cannot see through. It is not what a viewer

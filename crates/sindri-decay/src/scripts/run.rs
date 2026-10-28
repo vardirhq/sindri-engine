@@ -70,6 +70,8 @@ pub(super) struct TickWorld<'a> {
     pub(super) sequences: Option<&'a mut sindri_scene::Sequences>,
     /// What a stacked volume's cells mean, when the host has loaded any.
     pub(super) tile_sets: Option<&'a sindri_scene::TileSetBindings>,
+    /// The lights and occluders a script may ask about.
+    pub(super) lighting: Option<&'a sindri_scene::LightField2d>,
 }
 
 /// Drops instance state and signals whose owners no longer survive the pass.
@@ -316,6 +318,7 @@ fn host_for<'b>(
                 motions: characters.motions,
             }),
     )
+    .with_lighting(at.lighting)
     .with_tweens(&mut *at.tweens)
     .with_actions(at.actions)
     .with_sequences(at.sequences.as_deref_mut())

@@ -2,6 +2,11 @@
 
 # Changelog
 
+- Add `Lighting.visible(from, to)` and `Lighting.level(point)` to Decay: ask the 2D
+  lighting whether one world point sees another past the scene's occluders, and how
+  bright a point is with every light and shadow applied. Built from every light and
+  occluder in the world, not only those near the camera, so a game rule can use it;
+  a scene with `lighting_2d` off says so.
 - Lamplighter: dragging a finger down the screen now walks Wick down it, and a controller's
   left stick up walks him up. Both read down as positive, as the screen does, and Wick
   had taken positive as up.
