@@ -14,3 +14,5 @@ Gaps change height every lap, the course speeds up as the score climbs, and the 
 ## Scope
 
 Keep this showcase deliberately small: one scene, a handful of scripts, simple engine-native visuals, and a deterministic harness test that plays through a gap and then crashes. It should be useful as a project somebody can copy when starting a one-button arcade game.
+
+A CI probe line that will not be merged.
