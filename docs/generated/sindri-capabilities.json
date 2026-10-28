@@ -654,6 +654,7 @@
         "intensity": 1.0,
         "radius": 4.0,
         "shadow_reach": 0.10000000149011612,
+        "shadow_source_radius": 0.0,
         "shadows": false
       },
       "display_name": "Light 2D",
@@ -670,6 +671,7 @@
         "intensity": 1.0,
         "radius": 4.0,
         "shadow_reach": 0.10000000149011612,
+        "shadow_source_radius": 0.0,
         "shadows": false
       },
       "meanings": {
@@ -697,6 +699,11 @@
           "min": 0.01
         },
         "shadow_reach": {
+          "kind": "range",
+          "max": null,
+          "min": 0.0
+        },
+        "shadow_source_radius": {
           "kind": "range",
           "max": null,
           "min": 0.0
