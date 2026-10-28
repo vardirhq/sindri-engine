@@ -82,9 +82,9 @@
           "lighting_2d": {
             "enabled": true,
             "ambient": [
-              0.02,
-              0.02,
-              0.06
+              0.05,
+              0.06,
+              0.12
             ]
           }
         }
@@ -2107,6 +2107,4430 @@
       }
     },
     {
+      "id": "cover-1",
+      "name": "cover-1",
+      "transform_3d": {
+        "position": [
+          -2.41,
+          11.22,
+          0.188
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          -1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#tufts",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-2",
+      "name": "cover-2",
+      "transform_3d": {
+        "position": [
+          0.6,
+          3.79,
+          0.262
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          -1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#tufts",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-3",
+      "name": "cover-3",
+      "transform_3d": {
+        "position": [
+          -9.83,
+          -14.01,
+          0.44
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#tufts",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-4",
+      "name": "cover-4",
+      "transform_3d": {
+        "position": [
+          -5.19,
+          -2.05,
+          0.32
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#tufts",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-5",
+      "name": "cover-5",
+      "transform_3d": {
+        "position": [
+          16.59,
+          -14.92,
+          0.449
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          -1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#tufts",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-6",
+      "name": "cover-6",
+      "transform_3d": {
+        "position": [
+          -12.9,
+          -16.01,
+          0.46
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          -1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#pebbles",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-7",
+      "name": "cover-7",
+      "transform_3d": {
+        "position": [
+          4.55,
+          -10.55,
+          0.40599999999999997
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#tufts",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-8",
+      "name": "cover-8",
+      "transform_3d": {
+        "position": [
+          -0.01,
+          4.86,
+          0.251
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#pebbles",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-9",
+      "name": "cover-9",
+      "transform_3d": {
+        "position": [
+          10.39,
+          -6.6,
+          0.36599999999999994
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#tufts",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-10",
+      "name": "cover-10",
+      "transform_3d": {
+        "position": [
+          -23.51,
+          1.58,
+          0.284
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          -1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#tufts",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-11",
+      "name": "cover-11",
+      "transform_3d": {
+        "position": [
+          17.37,
+          -16.98,
+          0.47000000000000003
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#tufts",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-12",
+      "name": "cover-12",
+      "transform_3d": {
+        "position": [
+          -22.38,
+          -4.61,
+          0.34600000000000003
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          -1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#flowers",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-13",
+      "name": "cover-13",
+      "transform_3d": {
+        "position": [
+          3.31,
+          -10.45,
+          0.40499999999999997
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          -1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#tufts",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-14",
+      "name": "cover-14",
+      "transform_3d": {
+        "position": [
+          -9.44,
+          -16.5,
+          0.465
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#pebbles",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-15",
+      "name": "cover-15",
+      "transform_3d": {
+        "position": [
+          -19.1,
+          -8.87,
+          0.38899999999999996
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          -1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#tufts",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-16",
+      "name": "cover-16",
+      "transform_3d": {
+        "position": [
+          -15.58,
+          -0.21,
+          0.302
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          -1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#tufts",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-17",
+      "name": "cover-17",
+      "transform_3d": {
+        "position": [
+          -24.98,
+          11.52,
+          0.185
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          -1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#mushrooms",
+          "layer": 3
+        },
+        "sindri.light2d": {
+          "enabled": true,
+          "color": [
+            0.45,
+            0.85,
+            1.0,
+            1.0
+          ],
+          "intensity": 0.7,
+          "radius": 2.8,
+          "falloff": 1.6,
+          "height": 0.6,
+          "shadows": false
+        }
+      }
+    },
+    {
+      "id": "cover-18",
+      "name": "cover-18",
+      "transform_3d": {
+        "position": [
+          -19.98,
+          15.65,
+          0.14399999999999996
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          -1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#tufts",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-19",
+      "name": "cover-19",
+      "transform_3d": {
+        "position": [
+          -24.52,
+          3.14,
+          0.26899999999999996
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          -1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#flowers",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-20",
+      "name": "cover-20",
+      "transform_3d": {
+        "position": [
+          -21.29,
+          -10.11,
+          0.40099999999999997
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          -1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#tufts",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-21",
+      "name": "cover-21",
+      "transform_3d": {
+        "position": [
+          -6.57,
+          3.53,
+          0.265
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#tufts",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-22",
+      "name": "cover-22",
+      "transform_3d": {
+        "position": [
+          -15.86,
+          -11.91,
+          0.419
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#tufts",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-23",
+      "name": "cover-23",
+      "transform_3d": {
+        "position": [
+          -12.53,
+          -10.74,
+          0.407
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          -1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#mushrooms",
+          "layer": 3
+        },
+        "sindri.light2d": {
+          "enabled": true,
+          "color": [
+            0.45,
+            0.85,
+            1.0,
+            1.0
+          ],
+          "intensity": 0.7,
+          "radius": 2.8,
+          "falloff": 1.6,
+          "height": 0.6,
+          "shadows": false
+        }
+      }
+    },
+    {
+      "id": "cover-24",
+      "name": "cover-24",
+      "transform_3d": {
+        "position": [
+          22.51,
+          12.11,
+          0.179
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          -1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#tufts",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-25",
+      "name": "cover-25",
+      "transform_3d": {
+        "position": [
+          -19.81,
+          -15.72,
+          0.457
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          -1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#tufts",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-26",
+      "name": "cover-26",
+      "transform_3d": {
+        "position": [
+          10.23,
+          -8.52,
+          0.38499999999999995
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          -1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#pebbles",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-27",
+      "name": "cover-27",
+      "transform_3d": {
+        "position": [
+          -16.23,
+          6.77,
+          0.23199999999999998
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          -1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#tufts",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-28",
+      "name": "cover-28",
+      "transform_3d": {
+        "position": [
+          -1.04,
+          4.57,
+          0.254
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          -1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#tufts",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-29",
+      "name": "cover-29",
+      "transform_3d": {
+        "position": [
+          -21.54,
+          -3.42,
+          0.334
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          -1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#tufts",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-30",
+      "name": "cover-30",
+      "transform_3d": {
+        "position": [
+          -16.19,
+          -4.83,
+          0.34800000000000003
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#mushrooms",
+          "layer": 3
+        },
+        "sindri.light2d": {
+          "enabled": true,
+          "color": [
+            0.45,
+            0.85,
+            1.0,
+            1.0
+          ],
+          "intensity": 0.7,
+          "radius": 2.8,
+          "falloff": 1.6,
+          "height": 0.6,
+          "shadows": false
+        }
+      }
+    },
+    {
+      "id": "cover-31",
+      "name": "cover-31",
+      "transform_3d": {
+        "position": [
+          4.22,
+          -12.37,
+          0.424
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#tufts",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-32",
+      "name": "cover-32",
+      "transform_3d": {
+        "position": [
+          -1.26,
+          -5.2,
+          0.35200000000000004
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#flowers",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-33",
+      "name": "cover-33",
+      "transform_3d": {
+        "position": [
+          -23.94,
+          3.99,
+          0.26
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          -1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#pebbles",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-34",
+      "name": "cover-34",
+      "transform_3d": {
+        "position": [
+          -9.45,
+          -12.49,
+          0.425
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          -1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#tufts",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-35",
+      "name": "cover-35",
+      "transform_3d": {
+        "position": [
+          2.3,
+          7.32,
+          0.22699999999999998
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#tufts",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-36",
+      "name": "cover-36",
+      "transform_3d": {
+        "position": [
+          20.75,
+          -5.39,
+          0.35400000000000004
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#pebbles",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-37",
+      "name": "cover-37",
+      "transform_3d": {
+        "position": [
+          -6.04,
+          -16.59,
+          0.466
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          -1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#tufts",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-38",
+      "name": "cover-38",
+      "transform_3d": {
+        "position": [
+          6.97,
+          15.78,
+          0.14200000000000002
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#pebbles",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-39",
+      "name": "cover-39",
+      "transform_3d": {
+        "position": [
+          -5.58,
+          7.26,
+          0.22699999999999998
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          -1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#mushrooms",
+          "layer": 3
+        },
+        "sindri.light2d": {
+          "enabled": true,
+          "color": [
+            0.45,
+            0.85,
+            1.0,
+            1.0
+          ],
+          "intensity": 0.7,
+          "radius": 2.8,
+          "falloff": 1.6,
+          "height": 0.6,
+          "shadows": false
+        }
+      }
+    },
+    {
+      "id": "cover-40",
+      "name": "cover-40",
+      "transform_3d": {
+        "position": [
+          12.51,
+          -16.02,
+          0.46
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          -1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#tufts",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-41",
+      "name": "cover-41",
+      "transform_3d": {
+        "position": [
+          -13.49,
+          6.05,
+          0.24
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#pebbles",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-42",
+      "name": "cover-42",
+      "transform_3d": {
+        "position": [
+          -6.6,
+          -12.27,
+          0.423
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#tufts",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-43",
+      "name": "cover-43",
+      "transform_3d": {
+        "position": [
+          12.69,
+          -5.7,
+          0.35700000000000004
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          -1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#pebbles",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-44",
+      "name": "cover-44",
+      "transform_3d": {
+        "position": [
+          -15.07,
+          -2.78,
+          0.328
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#tufts",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-45",
+      "name": "cover-45",
+      "transform_3d": {
+        "position": [
+          -5.78,
+          2.24,
+          0.27799999999999997
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          -1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#flowers",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-46",
+      "name": "cover-46",
+      "transform_3d": {
+        "position": [
+          10.56,
+          14.35,
+          0.15699999999999997
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#tufts",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-47",
+      "name": "cover-47",
+      "transform_3d": {
+        "position": [
+          -19.36,
+          -1.45,
+          0.314
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#tufts",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-48",
+      "name": "cover-48",
+      "transform_3d": {
+        "position": [
+          18.64,
+          -15.63,
+          0.456
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#tufts",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-49",
+      "name": "cover-49",
+      "transform_3d": {
+        "position": [
+          7.05,
+          -3.63,
+          0.336
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          -1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#tufts",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-50",
+      "name": "cover-50",
+      "transform_3d": {
+        "position": [
+          16.48,
+          -9.17,
+          0.39199999999999996
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#tufts",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-51",
+      "name": "cover-51",
+      "transform_3d": {
+        "position": [
+          24.2,
+          -13.19,
+          0.432
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#tufts",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-52",
+      "name": "cover-52",
+      "transform_3d": {
+        "position": [
+          7.75,
+          9.64,
+          0.20400000000000001
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#tufts",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-53",
+      "name": "cover-53",
+      "transform_3d": {
+        "position": [
+          -15.03,
+          -1.32,
+          0.313
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#tufts",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-54",
+      "name": "cover-54",
+      "transform_3d": {
+        "position": [
+          -16.05,
+          -8.01,
+          0.37999999999999995
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#flowers",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-55",
+      "name": "cover-55",
+      "transform_3d": {
+        "position": [
+          22.34,
+          -0.49,
+          0.305
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          -1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#tufts",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-56",
+      "name": "cover-56",
+      "transform_3d": {
+        "position": [
+          14.6,
+          12.91,
+          0.17099999999999999
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          -1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#tufts",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-57",
+      "name": "cover-57",
+      "transform_3d": {
+        "position": [
+          -2.32,
+          3.64,
+          0.264
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          -1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#tufts",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-58",
+      "name": "cover-58",
+      "transform_3d": {
+        "position": [
+          3.44,
+          12.02,
+          0.18
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          -1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#flowers",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-59",
+      "name": "cover-59",
+      "transform_3d": {
+        "position": [
+          7.57,
+          -10.24,
+          0.40199999999999997
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          -1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#tufts",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-60",
+      "name": "cover-60",
+      "transform_3d": {
+        "position": [
+          20.0,
+          15.36,
+          0.14599999999999996
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#flowers",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-61",
+      "name": "cover-61",
+      "transform_3d": {
+        "position": [
+          14.54,
+          -6.43,
+          0.36399999999999993
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          -1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#tufts",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-62",
+      "name": "cover-62",
+      "transform_3d": {
+        "position": [
+          -20.86,
+          -2.45,
+          0.324
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          -1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#mushrooms",
+          "layer": 3
+        },
+        "sindri.light2d": {
+          "enabled": true,
+          "color": [
+            0.45,
+            0.85,
+            1.0,
+            1.0
+          ],
+          "intensity": 0.7,
+          "radius": 2.8,
+          "falloff": 1.6,
+          "height": 0.6,
+          "shadows": false
+        }
+      }
+    },
+    {
+      "id": "cover-63",
+      "name": "cover-63",
+      "transform_3d": {
+        "position": [
+          -11.24,
+          13.35,
+          0.16599999999999998
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#tufts",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-64",
+      "name": "cover-64",
+      "transform_3d": {
+        "position": [
+          1.66,
+          5.66,
+          0.243
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          -1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#tufts",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-65",
+      "name": "cover-65",
+      "transform_3d": {
+        "position": [
+          17.0,
+          5.75,
+          0.243
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#pebbles",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-66",
+      "name": "cover-66",
+      "transform_3d": {
+        "position": [
+          9.45,
+          8.01,
+          0.21999999999999997
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#pebbles",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-67",
+      "name": "cover-67",
+      "transform_3d": {
+        "position": [
+          1.14,
+          10.84,
+          0.192
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          -1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#mushrooms",
+          "layer": 3
+        },
+        "sindri.light2d": {
+          "enabled": true,
+          "color": [
+            0.45,
+            0.85,
+            1.0,
+            1.0
+          ],
+          "intensity": 0.7,
+          "radius": 2.8,
+          "falloff": 1.6,
+          "height": 0.6,
+          "shadows": false
+        }
+      }
+    },
+    {
+      "id": "cover-68",
+      "name": "cover-68",
+      "transform_3d": {
+        "position": [
+          8.56,
+          14.51,
+          0.15499999999999997
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          -1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#tufts",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-69",
+      "name": "cover-69",
+      "transform_3d": {
+        "position": [
+          -17.94,
+          0.98,
+          0.29
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#tufts",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-70",
+      "name": "cover-70",
+      "transform_3d": {
+        "position": [
+          -14.95,
+          0.68,
+          0.293
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          -1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#pebbles",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-71",
+      "name": "cover-71",
+      "transform_3d": {
+        "position": [
+          0.8,
+          -3.78,
+          0.338
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          -1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#mushrooms",
+          "layer": 3
+        },
+        "sindri.light2d": {
+          "enabled": true,
+          "color": [
+            0.45,
+            0.85,
+            1.0,
+            1.0
+          ],
+          "intensity": 0.7,
+          "radius": 2.8,
+          "falloff": 1.6,
+          "height": 0.6,
+          "shadows": false
+        }
+      }
+    },
+    {
+      "id": "cover-72",
+      "name": "cover-72",
+      "transform_3d": {
+        "position": [
+          -20.34,
+          -11.5,
+          0.415
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          -1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#mushrooms",
+          "layer": 3
+        },
+        "sindri.light2d": {
+          "enabled": true,
+          "color": [
+            0.45,
+            0.85,
+            1.0,
+            1.0
+          ],
+          "intensity": 0.7,
+          "radius": 2.8,
+          "falloff": 1.6,
+          "height": 0.6,
+          "shadows": false
+        }
+      }
+    },
+    {
+      "id": "cover-73",
+      "name": "cover-73",
+      "transform_3d": {
+        "position": [
+          -8.02,
+          12.73,
+          0.173
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#pebbles",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-74",
+      "name": "cover-74",
+      "transform_3d": {
+        "position": [
+          -19.57,
+          -3.16,
+          0.332
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#tufts",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-75",
+      "name": "cover-75",
+      "transform_3d": {
+        "position": [
+          -18.53,
+          8.72,
+          0.21299999999999997
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          -1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#tufts",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-76",
+      "name": "cover-76",
+      "transform_3d": {
+        "position": [
+          -17.22,
+          -16.61,
+          0.466
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          -1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#flowers",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-77",
+      "name": "cover-77",
+      "transform_3d": {
+        "position": [
+          -7.23,
+          3.45,
+          0.266
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          -1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#tufts",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-78",
+      "name": "cover-78",
+      "transform_3d": {
+        "position": [
+          -23.84,
+          3.89,
+          0.261
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#pebbles",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-79",
+      "name": "cover-79",
+      "transform_3d": {
+        "position": [
+          1.91,
+          11.51,
+          0.185
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#mushrooms",
+          "layer": 3
+        },
+        "sindri.light2d": {
+          "enabled": true,
+          "color": [
+            0.45,
+            0.85,
+            1.0,
+            1.0
+          ],
+          "intensity": 0.7,
+          "radius": 2.8,
+          "falloff": 1.6,
+          "height": 0.6,
+          "shadows": false
+        }
+      }
+    },
+    {
+      "id": "cover-80",
+      "name": "cover-80",
+      "transform_3d": {
+        "position": [
+          1.48,
+          11.09,
+          0.189
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#mushrooms",
+          "layer": 3
+        },
+        "sindri.light2d": {
+          "enabled": true,
+          "color": [
+            0.45,
+            0.85,
+            1.0,
+            1.0
+          ],
+          "intensity": 0.7,
+          "radius": 2.8,
+          "falloff": 1.6,
+          "height": 0.6,
+          "shadows": false
+        }
+      }
+    },
+    {
+      "id": "cover-81",
+      "name": "cover-81",
+      "transform_3d": {
+        "position": [
+          -13.37,
+          7.45,
+          0.22499999999999998
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#flowers",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-82",
+      "name": "cover-82",
+      "transform_3d": {
+        "position": [
+          -9.21,
+          -6.61,
+          0.36599999999999994
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          -1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#tufts",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-83",
+      "name": "cover-83",
+      "transform_3d": {
+        "position": [
+          19.45,
+          -12.63,
+          0.426
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          -1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#tufts",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-84",
+      "name": "cover-84",
+      "transform_3d": {
+        "position": [
+          2.16,
+          6.26,
+          0.237
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          -1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#tufts",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-85",
+      "name": "cover-85",
+      "transform_3d": {
+        "position": [
+          9.26,
+          -16.41,
+          0.464
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#tufts",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-86",
+      "name": "cover-86",
+      "transform_3d": {
+        "position": [
+          -19.23,
+          -0.31,
+          0.303
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#flowers",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-87",
+      "name": "cover-87",
+      "transform_3d": {
+        "position": [
+          9.28,
+          -10.76,
+          0.408
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          -1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#tufts",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-88",
+      "name": "cover-88",
+      "transform_3d": {
+        "position": [
+          -23.78,
+          8.15,
+          0.21799999999999997
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#pebbles",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-89",
+      "name": "cover-89",
+      "transform_3d": {
+        "position": [
+          -0.94,
+          -10.74,
+          0.407
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          -1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#tufts",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-90",
+      "name": "cover-90",
+      "transform_3d": {
+        "position": [
+          17.01,
+          15.68,
+          0.14300000000000002
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#tufts",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-91",
+      "name": "cover-91",
+      "transform_3d": {
+        "position": [
+          -18.28,
+          5.47,
+          0.245
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#tufts",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-92",
+      "name": "cover-92",
+      "transform_3d": {
+        "position": [
+          -8.66,
+          -1.59,
+          0.316
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          -1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#pebbles",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-93",
+      "name": "cover-93",
+      "transform_3d": {
+        "position": [
+          -14.5,
+          -4.69,
+          0.34700000000000003
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#tufts",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-94",
+      "name": "cover-94",
+      "transform_3d": {
+        "position": [
+          -15.94,
+          -2.02,
+          0.32
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          -1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#flowers",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-95",
+      "name": "cover-95",
+      "transform_3d": {
+        "position": [
+          -15.24,
+          -11.55,
+          0.416
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#pebbles",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-96",
+      "name": "cover-96",
+      "transform_3d": {
+        "position": [
+          -8.82,
+          -14.2,
+          0.442
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#flowers",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-97",
+      "name": "cover-97",
+      "transform_3d": {
+        "position": [
+          15.24,
+          -8.48,
+          0.38499999999999995
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#tufts",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-98",
+      "name": "cover-98",
+      "transform_3d": {
+        "position": [
+          13.9,
+          9.88,
+          0.201
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          -1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#flowers",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-99",
+      "name": "cover-99",
+      "transform_3d": {
+        "position": [
+          -8.5,
+          0.78,
+          0.292
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#flowers",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-100",
+      "name": "cover-100",
+      "transform_3d": {
+        "position": [
+          -21.47,
+          -5.72,
+          0.35700000000000004
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          -1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#pebbles",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-101",
+      "name": "cover-101",
+      "transform_3d": {
+        "position": [
+          19.4,
+          15.69,
+          0.14300000000000002
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          -1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#tufts",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-102",
+      "name": "cover-102",
+      "transform_3d": {
+        "position": [
+          -14.2,
+          -3.6,
+          0.336
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#tufts",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-103",
+      "name": "cover-103",
+      "transform_3d": {
+        "position": [
+          -5.52,
+          16.0,
+          0.14
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#tufts",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-104",
+      "name": "cover-104",
+      "transform_3d": {
+        "position": [
+          13.09,
+          15.34,
+          0.14699999999999996
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          -1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#tufts",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-105",
+      "name": "cover-105",
+      "transform_3d": {
+        "position": [
+          -19.6,
+          -9.18,
+          0.39199999999999996
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          -1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#pebbles",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-106",
+      "name": "cover-106",
+      "transform_3d": {
+        "position": [
+          -22.48,
+          -10.55,
+          0.40599999999999997
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          -1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#flowers",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-107",
+      "name": "cover-107",
+      "transform_3d": {
+        "position": [
+          -12.07,
+          -7.9,
+          0.37899999999999995
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#flowers",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-108",
+      "name": "cover-108",
+      "transform_3d": {
+        "position": [
+          0.39,
+          14.92,
+          0.15099999999999997
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#mushrooms",
+          "layer": 3
+        },
+        "sindri.light2d": {
+          "enabled": true,
+          "color": [
+            0.45,
+            0.85,
+            1.0,
+            1.0
+          ],
+          "intensity": 0.7,
+          "radius": 2.8,
+          "falloff": 1.6,
+          "height": 0.6,
+          "shadows": false
+        }
+      }
+    },
+    {
+      "id": "cover-109",
+      "name": "cover-109",
+      "transform_3d": {
+        "position": [
+          -20.02,
+          -2.34,
+          0.323
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#tufts",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-110",
+      "name": "cover-110",
+      "transform_3d": {
+        "position": [
+          8.42,
+          14.53,
+          0.15499999999999997
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#flowers",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-111",
+      "name": "cover-111",
+      "transform_3d": {
+        "position": [
+          -17.0,
+          -1.43,
+          0.314
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#tufts",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-112",
+      "name": "cover-112",
+      "transform_3d": {
+        "position": [
+          2.1,
+          2.69,
+          0.27299999999999996
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#pebbles",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-113",
+      "name": "cover-113",
+      "transform_3d": {
+        "position": [
+          -6.72,
+          -7.57,
+          0.37599999999999995
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#tufts",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-114",
+      "name": "cover-114",
+      "transform_3d": {
+        "position": [
+          -23.66,
+          8.49,
+          0.21499999999999997
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          -1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#mushrooms",
+          "layer": 3
+        },
+        "sindri.light2d": {
+          "enabled": true,
+          "color": [
+            0.45,
+            0.85,
+            1.0,
+            1.0
+          ],
+          "intensity": 0.7,
+          "radius": 2.8,
+          "falloff": 1.6,
+          "height": 0.6,
+          "shadows": false
+        }
+      }
+    },
+    {
+      "id": "cover-115",
+      "name": "cover-115",
+      "transform_3d": {
+        "position": [
+          -17.17,
+          7.9,
+          0.22099999999999997
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          -1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#flowers",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-116",
+      "name": "cover-116",
+      "transform_3d": {
+        "position": [
+          -9.24,
+          -3.87,
+          0.339
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#mushrooms",
+          "layer": 3
+        },
+        "sindri.light2d": {
+          "enabled": true,
+          "color": [
+            0.45,
+            0.85,
+            1.0,
+            1.0
+          ],
+          "intensity": 0.7,
+          "radius": 2.8,
+          "falloff": 1.6,
+          "height": 0.6,
+          "shadows": false
+        }
+      }
+    },
+    {
+      "id": "cover-117",
+      "name": "cover-117",
+      "transform_3d": {
+        "position": [
+          22.22,
+          -14.57,
+          0.446
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          -1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#tufts",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-118",
+      "name": "cover-118",
+      "transform_3d": {
+        "position": [
+          -1.12,
+          15.11,
+          0.14899999999999997
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          -1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#tufts",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-119",
+      "name": "cover-119",
+      "transform_3d": {
+        "position": [
+          -17.78,
+          14.68,
+          0.15299999999999997
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#tufts",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-120",
+      "name": "cover-120",
+      "transform_3d": {
+        "position": [
+          -19.25,
+          3.6,
+          0.264
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          -1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#pebbles",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-121",
+      "name": "cover-121",
+      "transform_3d": {
+        "position": [
+          -18.78,
+          -2.39,
+          0.324
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          -1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#pebbles",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-122",
+      "name": "cover-122",
+      "transform_3d": {
+        "position": [
+          -11.89,
+          2.21,
+          0.27799999999999997
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          -1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#pebbles",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-123",
+      "name": "cover-123",
+      "transform_3d": {
+        "position": [
+          12.19,
+          9.9,
+          0.201
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#tufts",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-124",
+      "name": "cover-124",
+      "transform_3d": {
+        "position": [
+          11.71,
+          -9.13,
+          0.39099999999999996
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#tufts",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-125",
+      "name": "cover-125",
+      "transform_3d": {
+        "position": [
+          -9.57,
+          -0.26,
+          0.303
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          -1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#flowers",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-126",
+      "name": "cover-126",
+      "transform_3d": {
+        "position": [
+          5.49,
+          6.93,
+          0.23099999999999998
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          -1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#mushrooms",
+          "layer": 3
+        },
+        "sindri.light2d": {
+          "enabled": true,
+          "color": [
+            0.45,
+            0.85,
+            1.0,
+            1.0
+          ],
+          "intensity": 0.7,
+          "radius": 2.8,
+          "falloff": 1.6,
+          "height": 0.6,
+          "shadows": false
+        }
+      }
+    },
+    {
+      "id": "cover-127",
+      "name": "cover-127",
+      "transform_3d": {
+        "position": [
+          -11.07,
+          -9.1,
+          0.39099999999999996
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#tufts",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-128",
+      "name": "cover-128",
+      "transform_3d": {
+        "position": [
+          7.65,
+          -10.53,
+          0.40499999999999997
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#tufts",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-129",
+      "name": "cover-129",
+      "transform_3d": {
+        "position": [
+          -24.53,
+          -8.44,
+          0.38399999999999995
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#tufts",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-130",
+      "name": "cover-130",
+      "transform_3d": {
+        "position": [
+          -19.88,
+          0.87,
+          0.291
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#tufts",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-131",
+      "name": "cover-131",
+      "transform_3d": {
+        "position": [
+          20.64,
+          -11.69,
+          0.417
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#tufts",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-132",
+      "name": "cover-132",
+      "transform_3d": {
+        "position": [
+          -6.34,
+          -1.21,
+          0.312
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          -1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#tufts",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-133",
+      "name": "cover-133",
+      "transform_3d": {
+        "position": [
+          -2.78,
+          7.66,
+          0.22299999999999998
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#flowers",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-134",
+      "name": "cover-134",
+      "transform_3d": {
+        "position": [
+          -6.55,
+          4.57,
+          0.254
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          -1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#flowers",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-135",
+      "name": "cover-135",
+      "transform_3d": {
+        "position": [
+          12.95,
+          10.26,
+          0.197
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          -1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#tufts",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-136",
+      "name": "cover-136",
+      "transform_3d": {
+        "position": [
+          -6.54,
+          -13.8,
+          0.438
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          -1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#flowers",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-137",
+      "name": "cover-137",
+      "transform_3d": {
+        "position": [
+          -20.85,
+          1.62,
+          0.284
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#pebbles",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-138",
+      "name": "cover-138",
+      "transform_3d": {
+        "position": [
+          -1.82,
+          10.18,
+          0.198
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          -1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#tufts",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-139",
+      "name": "cover-139",
+      "transform_3d": {
+        "position": [
+          -14.34,
+          4.85,
+          0.252
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#tufts",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-140",
+      "name": "cover-140",
+      "transform_3d": {
+        "position": [
+          -0.26,
+          8.22,
+          0.21799999999999997
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          -1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#flowers",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-141",
+      "name": "cover-141",
+      "transform_3d": {
+        "position": [
+          -17.85,
+          -5.19,
+          0.35200000000000004
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          -1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#flowers",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-142",
+      "name": "cover-142",
+      "transform_3d": {
+        "position": [
+          -19.13,
+          6.41,
+          0.236
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#mushrooms",
+          "layer": 3
+        },
+        "sindri.light2d": {
+          "enabled": true,
+          "color": [
+            0.45,
+            0.85,
+            1.0,
+            1.0
+          ],
+          "intensity": 0.7,
+          "radius": 2.8,
+          "falloff": 1.6,
+          "height": 0.6,
+          "shadows": false
+        }
+      }
+    },
+    {
+      "id": "cover-143",
+      "name": "cover-143",
+      "transform_3d": {
+        "position": [
+          -3.1,
+          9.5,
+          0.20500000000000002
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          -1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#flowers",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-144",
+      "name": "cover-144",
+      "transform_3d": {
+        "position": [
+          -13.94,
+          14.94,
+          0.15099999999999997
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          -1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#pebbles",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-145",
+      "name": "cover-145",
+      "transform_3d": {
+        "position": [
+          11.94,
+          -4.85,
+          0.34800000000000003
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#flowers",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-146",
+      "name": "cover-146",
+      "transform_3d": {
+        "position": [
+          -20.51,
+          -2.01,
+          0.32
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#flowers",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-147",
+      "name": "cover-147",
+      "transform_3d": {
+        "position": [
+          -13.94,
+          -15.09,
+          0.451
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#tufts",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-148",
+      "name": "cover-148",
+      "transform_3d": {
+        "position": [
+          -21.8,
+          1.04,
+          0.29
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          -1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#mushrooms",
+          "layer": 3
+        },
+        "sindri.light2d": {
+          "enabled": true,
+          "color": [
+            0.45,
+            0.85,
+            1.0,
+            1.0
+          ],
+          "intensity": 0.7,
+          "radius": 2.8,
+          "falloff": 1.6,
+          "height": 0.6,
+          "shadows": false
+        }
+      }
+    },
+    {
+      "id": "cover-149",
+      "name": "cover-149",
+      "transform_3d": {
+        "position": [
+          -20.92,
+          7.32,
+          0.22699999999999998
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          -1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#flowers",
+          "layer": 3
+        }
+      }
+    },
+    {
+      "id": "cover-150",
+      "name": "cover-150",
+      "transform_3d": {
+        "position": [
+          6.71,
+          -12.25,
+          0.423
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          -1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#pebbles",
+          "layer": 3
+        }
+      }
+    },
+    {
       "id": "edge-north",
       "name": "edge-north",
       "transform_3d": {
@@ -2457,7 +6881,7 @@
       },
       "components": {
         "sindri.sprite": {
-          "texture": "textures/objects.png#boulder",
+          "texture": "textures/objects.png#boulder-3",
           "layer": 5
         },
         "sindri.physics2d.rigid_body": {
@@ -2523,14 +6947,14 @@
           1
         ],
         "scale": [
-          4,
+          -4,
           4,
           1
         ]
       },
       "components": {
         "sindri.sprite": {
-          "texture": "textures/objects.png#boulder",
+          "texture": "textures/objects.png#boulder-2",
           "layer": 5
         },
         "sindri.physics2d.rigid_body": {
@@ -2603,7 +7027,7 @@
       },
       "components": {
         "sindri.sprite": {
-          "texture": "textures/objects.png#boulder",
+          "texture": "textures/objects.png#boulder-1",
           "layer": 5
         },
         "sindri.physics2d.rigid_body": {
@@ -2669,14 +7093,14 @@
           1
         ],
         "scale": [
-          4,
+          -4,
           4,
           1
         ]
       },
       "components": {
         "sindri.sprite": {
-          "texture": "textures/objects.png#boulder",
+          "texture": "textures/objects.png#boulder-0",
           "layer": 5
         },
         "sindri.physics2d.rigid_body": {
@@ -2749,7 +7173,7 @@
       },
       "components": {
         "sindri.sprite": {
-          "texture": "textures/objects.png#boulder",
+          "texture": "textures/objects.png#boulder-3",
           "layer": 5
         },
         "sindri.physics2d.rigid_body": {
@@ -2822,7 +7246,7 @@
       },
       "components": {
         "sindri.sprite": {
-          "texture": "textures/objects.png#dead-tree",
+          "texture": "textures/objects.png#dead-tree-2",
           "layer": 5
         },
         "sindri.physics2d.rigid_body": {
@@ -2895,7 +7319,7 @@
       },
       "components": {
         "sindri.sprite": {
-          "texture": "textures/objects.png#dead-tree",
+          "texture": "textures/objects.png#dead-tree-4",
           "layer": 5
         },
         "sindri.physics2d.rigid_body": {
@@ -2961,14 +7385,14 @@
           1
         ],
         "scale": [
-          4,
+          -4,
           4,
           1
         ]
       },
       "components": {
         "sindri.sprite": {
-          "texture": "textures/objects.png#dead-tree",
+          "texture": "textures/objects.png#dead-tree-1",
           "layer": 5
         },
         "sindri.physics2d.rigid_body": {
@@ -3041,7 +7465,7 @@
       },
       "components": {
         "sindri.sprite": {
-          "texture": "textures/objects.png#dead-tree",
+          "texture": "textures/objects.png#dead-tree-3",
           "layer": 5
         },
         "sindri.physics2d.rigid_body": {
@@ -3114,7 +7538,7 @@
       },
       "components": {
         "sindri.sprite": {
-          "texture": "textures/objects.png#dead-tree",
+          "texture": "textures/objects.png#dead-tree-0",
           "layer": 5
         },
         "sindri.physics2d.rigid_body": {
@@ -3180,14 +7604,14 @@
           1
         ],
         "scale": [
-          4,
+          -4,
           4,
           1
         ]
       },
       "components": {
         "sindri.sprite": {
-          "texture": "textures/objects.png#dead-tree",
+          "texture": "textures/objects.png#dead-tree-2",
           "layer": 5
         },
         "sindri.physics2d.rigid_body": {
@@ -3260,7 +7684,7 @@
       },
       "components": {
         "sindri.sprite": {
-          "texture": "textures/objects.png#dead-tree",
+          "texture": "textures/objects.png#dead-tree-4",
           "layer": 5
         },
         "sindri.physics2d.rigid_body": {
@@ -3333,7 +7757,7 @@
       },
       "components": {
         "sindri.sprite": {
-          "texture": "textures/objects.png#dead-tree",
+          "texture": "textures/objects.png#dead-tree-1",
           "layer": 5
         },
         "sindri.physics2d.rigid_body": {
@@ -3399,14 +7823,14 @@
           1
         ],
         "scale": [
-          4,
+          -4,
           4,
           1
         ]
       },
       "components": {
         "sindri.sprite": {
-          "texture": "textures/objects.png#dead-tree",
+          "texture": "textures/objects.png#dead-tree-3",
           "layer": 5
         },
         "sindri.physics2d.rigid_body": {
@@ -3479,7 +7903,7 @@
       },
       "components": {
         "sindri.sprite": {
-          "texture": "textures/objects.png#dead-tree",
+          "texture": "textures/objects.png#dead-tree-0",
           "layer": 5
         },
         "sindri.physics2d.rigid_body": {
@@ -3552,7 +7976,7 @@
       },
       "components": {
         "sindri.sprite": {
-          "texture": "textures/objects.png#dead-tree",
+          "texture": "textures/objects.png#dead-tree-2",
           "layer": 5
         },
         "sindri.physics2d.rigid_body": {
@@ -3618,14 +8042,14 @@
           1
         ],
         "scale": [
-          4,
+          -4,
           4,
           1
         ]
       },
       "components": {
         "sindri.sprite": {
-          "texture": "textures/objects.png#dead-tree",
+          "texture": "textures/objects.png#dead-tree-4",
           "layer": 5
         },
         "sindri.physics2d.rigid_body": {
@@ -3698,7 +8122,7 @@
       },
       "components": {
         "sindri.sprite": {
-          "texture": "textures/objects.png#dead-tree",
+          "texture": "textures/objects.png#dead-tree-1",
           "layer": 5
         },
         "sindri.physics2d.rigid_body": {
@@ -3771,7 +8195,7 @@
       },
       "components": {
         "sindri.sprite": {
-          "texture": "textures/objects.png#dead-tree",
+          "texture": "textures/objects.png#dead-tree-3",
           "layer": 5
         },
         "sindri.physics2d.rigid_body": {
@@ -3837,14 +8261,14 @@
           1
         ],
         "scale": [
-          4,
+          -4,
           4,
           1
         ]
       },
       "components": {
         "sindri.sprite": {
-          "texture": "textures/objects.png#dead-tree",
+          "texture": "textures/objects.png#dead-tree-0",
           "layer": 5
         },
         "sindri.physics2d.rigid_body": {
@@ -4003,7 +8427,7 @@
             1.0
           ],
           "intensity": 0.0,
-          "radius": 7.5,
+          "radius": 9.0,
           "falloff": 1.4,
           "height": 1.0,
           "shadows": true,
@@ -4121,7 +8545,7 @@
             1.0
           ],
           "intensity": 0.0,
-          "radius": 7.5,
+          "radius": 9.0,
           "falloff": 1.4,
           "height": 1.0,
           "shadows": true,
@@ -4240,7 +8664,7 @@
             1.0
           ],
           "intensity": 0.0,
-          "radius": 7.5,
+          "radius": 9.0,
           "falloff": 1.4,
           "height": 1.0,
           "shadows": true,
@@ -4570,8 +8994,8 @@
       "transform_3d": {
         "position": [
           6.5,
-          0.45,
-          0.495
+          0,
+          0.5
         ],
         "rotation": [
           0,
@@ -4580,20 +9004,14 @@
           1
         ],
         "scale": [
-          0.9,
-          0.9,
+          2,
+          2,
           1
         ]
       },
       "components": {
-        "sindri.shape": {
-          "kind": "ellipse",
-          "fill": [
-            0.12,
-            0.08,
-            0.2,
-            1.0
-          ],
+        "sindri.sprite": {
+          "texture": "textures/gloom.png#gloom-1",
           "layer": 5
         },
         "sindri.tags": {
@@ -4624,11 +9042,11 @@
         "sindri.physics2d.collider": {
           "shape": {
             "shape": "circle",
-            "radius": 0.5
+            "radius": 0.2
           },
           "offset": [
             0,
-            0
+            0.225
           ],
           "rotation": 0,
           "sensor": false,
@@ -4652,8 +9070,8 @@
       "transform_3d": {
         "position": [
           -5,
-          0.45,
-          0.495
+          0,
+          0.5
         ],
         "rotation": [
           0,
@@ -4662,20 +9080,14 @@
           1
         ],
         "scale": [
-          0.9,
-          0.9,
+          2,
+          2,
           1
         ]
       },
       "components": {
-        "sindri.shape": {
-          "kind": "ellipse",
-          "fill": [
-            0.12,
-            0.08,
-            0.2,
-            1.0
-          ],
+        "sindri.sprite": {
+          "texture": "textures/gloom.png#gloom-3",
           "layer": 5
         },
         "sindri.tags": {
@@ -4706,11 +9118,11 @@
         "sindri.physics2d.collider": {
           "shape": {
             "shape": "circle",
-            "radius": 0.5
+            "radius": 0.2
           },
           "offset": [
             0,
-            0
+            0.225
           ],
           "rotation": 0,
           "sensor": false,
@@ -4734,8 +9146,8 @@
       "transform_3d": {
         "position": [
           14,
-          6,
-          0.44
+          5.5,
+          0.445
         ],
         "rotation": [
           0,
@@ -4744,20 +9156,14 @@
           1
         ],
         "scale": [
-          0.9,
-          0.9,
+          2,
+          2,
           1
         ]
       },
       "components": {
-        "sindri.shape": {
-          "kind": "ellipse",
-          "fill": [
-            0.12,
-            0.08,
-            0.2,
-            1.0
-          ],
+        "sindri.sprite": {
+          "texture": "textures/gloom.png#gloom-0",
           "layer": 5
         },
         "sindri.tags": {
@@ -4788,11 +9194,11 @@
         "sindri.physics2d.collider": {
           "shape": {
             "shape": "circle",
-            "radius": 0.5
+            "radius": 0.2
           },
           "offset": [
             0,
-            0
+            0.225
           ],
           "rotation": 0,
           "sensor": false,
