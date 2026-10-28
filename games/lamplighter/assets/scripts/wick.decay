@@ -76,6 +76,9 @@ script Wick {
         this.vx += (x * pace * this.speed - this.vx) * blend;
         this.vy += (y * pace * this.speed - this.vy) * blend;
         Physics.set_velocity(this.entity, this.vx, this.vy);
+        // Further down the screen is nearer, so Wick walks behind a tree and in
+        // front of the stone below it.
+        this.transform.position.z = 0.5 - this.transform.world_position.y * 0.01;
 
         show(length > 0.1);
 

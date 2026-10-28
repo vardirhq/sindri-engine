@@ -128,11 +128,35 @@
               "Idle/animations/walk-92bc2396/north/frame_007.png",
               "Idle/animations/walk-92bc2396/north/frame_008.png"
             ]
+          },
+          "slash2": {
+            "south": [
+              "Idle/animations/slash2/south/frame_000.png",
+              "Idle/animations/slash2/south/frame_001.png",
+              "Idle/animations/slash2/south/frame_002.png",
+              "Idle/animations/slash2/south/frame_003.png",
+              "Idle/animations/slash2/south/frame_004.png",
+              "Idle/animations/slash2/south/frame_005.png",
+              "Idle/animations/slash2/south/frame_006.png",
+              "Idle/animations/slash2/south/frame_007.png",
+              "Idle/animations/slash2/south/frame_008.png"
+            ],
+            "north": [
+              "Idle/animations/slash2/north/frame_000.png",
+              "Idle/animations/slash2/north/frame_001.png",
+              "Idle/animations/slash2/north/frame_002.png",
+              "Idle/animations/slash2/north/frame_003.png",
+              "Idle/animations/slash2/north/frame_004.png",
+              "Idle/animations/slash2/north/frame_005.png",
+              "Idle/animations/slash2/north/frame_006.png",
+              "Idle/animations/slash2/north/frame_007.png",
+              "Idle/animations/slash2/north/frame_008.png"
+            ]
           }
         }
       }
     }
   ],
   "export_version": "3.1",
-  "export_date": "2026-10-28T15:19:30.196175"
+  "export_date": "2026-10-28T15:54:34.732783"
 }

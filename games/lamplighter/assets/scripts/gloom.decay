@@ -15,6 +15,8 @@ script Gloom {
     }
 
     fn update(dt: number) {
+        // Drawn in front of what stands further up the screen, behind what is below.
+        this.transform.position.z = 0.5 - this.transform.world_position.y * 0.01;
         if this.flinch > 0.0 {
             this.flinch = max(0.0, this.flinch - dt);
             let squash = 1.0 + 0.35 * (this.flinch / this.flinch_for);

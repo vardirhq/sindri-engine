@@ -1,15 +1,24 @@
-// A lantern is dark until Wick touches it, then it flares and burns on. The
-// goal lantern is the last: lighting it opens the way.
+// A lamp post is dark until Wick touches it, then it swaps to its lit sprite and
+// the light up at the lantern flares and burns on. The goal lamp is the last:
+// lighting it opens the way.
 script Lantern {
+    // The name of the entity that carries this lamp's light, up at the lantern.
+    @export let light_name: String = "";
+
     var lit: bool = false;
     var flare: number = 0.0;
+    var light: Entity = null;
+
+    fn start() {
+        this.light = World.find(this.light_name);
+    }
 
     fn update(dt: number) {
         if !this.lit {
             return;
         }
         this.flare = max(0.0, this.flare - dt);
-        this.light2d.intensity = 1.1 + 2.4 * (this.flare / 0.8);
+        this.light.light2d.intensity = 1.1 + 2.4 * (this.flare / 0.8);
     }
 
     fn ignite() {
@@ -18,6 +27,7 @@ script Lantern {
         }
         this.lit = true;
         this.flare = 0.8;
+        Animation.play(this.entity, "lit");
         Game.lit += 1.0;
         if World.has_tag(this.entity, "goal") {
             Game.won = true;

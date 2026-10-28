@@ -103,19 +103,55 @@ def wall(ident, x, y, w, h, fill):
         'sindri.light2d.occluder': {'shape': 'box', 'size': [1, 1]}})
 
 
+def depth(y):
+    """Higher on the screen is further away, so it is drawn first."""
+    return round(0.5 - y * 0.01, 3)
+
+
+def static_body():
+    return {'kind': 'static', 'pose': {'position': [0, 0], 'rotation': 0}, 'linear_velocity': [0, 0],
+            'angular_velocity': 0, 'gravity_scale': 0, 'linear_damping': 0, 'angular_damping': 0,
+            'lock_rotation': True, 'continuous_collision': False}
+
+
+def prop(ident, sprite, x, y, radius, centre, occluder):
+    """A tree or a boulder: it stands on its position, stops Wick and stops light.
+
+    The radius, the height of the collider's middle above the foot and the
+    occluder's size are in world units; the entity is scaled up from 16 art
+    pixels to a unit, so each is divided by that scale for the component."""
+    return entity(ident, ident, at(x, y, depth(y), 4, 4), **{
+        'sindri.sprite': {'texture': f'textures/objects.png#{sprite}', 'layer': 5},
+        'sindri.physics2d.rigid_body': static_body(),
+        'sindri.physics2d.collider': {'shape': {'shape': 'circle', 'radius': radius / 4}, 'offset': [0, centre / 4],
+                                      'rotation': 0, 'sensor': False,
+                                      'layers': {'memberships': WALL, 'filter': ALL},
+                                      'friction': 0, 'restitution': 0},
+        'sindri.light2d.occluder': {'shape': 'box', 'size': [occluder[0] / 4, occluder[1] / 4]}})
+
+
 def lantern(ident, x, y, goal=False):
+    """A lamp post: dark until Wick touches it, then it swaps to its lit sprite and
+    its light, up at the lantern, flares."""
     tags = ['lantern', 'goal'] if goal else ['lantern']
-    return entity(ident, ident, at(x, y, 0.3, 0.5, 0.7), **{
-        'sindri.shape': {'kind': 'rect', 'fill': [0.32, 0.28, 0.22, 1.0], 'layer': 3},
+    post = entity(ident, ident, at(x, y, depth(y), 4, 4), **{
+        'sindri.sprite': {'texture': 'textures/objects.png#lamp-post-unlit', 'layer': 5},
+        'sindri.animation.sprite': {'clips': {
+            'unlit': {'frames': ['lamp-post-unlit'], 'seconds_per_frame': 0.1, 'looping': False},
+            'lit': {'frames': ['lamp-post-lit'], 'seconds_per_frame': 0.1, 'looping': False}},
+            'playing': 'unlit', 'speed': 1},
         'sindri.tags': {'tags': tags},
-        'sindri.physics2d.collider': {'shape': {'shape': 'circle', 'radius': 1.0}, 'offset': [0, 0],
+        'sindri.physics2d.collider': {'shape': {'shape': 'circle', 'radius': 1.3 / 4}, 'offset': [0, 0.6 / 4],
                                       'rotation': 0, 'sensor': True,
                                       'layers': {'memberships': LANTERN, 'filter': ALL},
                                       'friction': 0, 'restitution': 0},
-        'sindri.light2d': {'enabled': True, 'color': [1.0, 0.72, 0.38, 1.0], 'intensity': 0.0, 'radius': 6.5,
+        'sindri.script': {'source': 'scripts/lantern.decay', 'script': 'Lantern',
+                          'properties': {'light_name': ident + '-light'}}})
+    flame = entity(ident + '-light', ident + '-light', at(x, y + 2.6, depth(y) + 0.01), **{
+        'sindri.light2d': {'enabled': True, 'color': [1.0, 0.72, 0.38, 1.0], 'intensity': 0.0, 'radius': 7.5,
                            'falloff': 1.4, 'height': 1.0, 'shadows': True, 'shadow_reach': 0.35,
-                           'shadow_source_radius': 0.3},
-        'sindri.script': {'source': 'scripts/lantern.decay', 'script': 'Lantern', 'properties': {}}})
+                           'shadow_source_radius': 0.3}})
+    return [post, flame]
 
 
 def clips():
@@ -135,8 +171,8 @@ def gloom(ident, x, y):
     body = {'kind': 'dynamic', 'pose': {'position': [0, 0], 'rotation': 0}, 'linear_velocity': [0, 0],
             'angular_velocity': 0, 'gravity_scale': 0, 'linear_damping': 7, 'angular_damping': 0,
             'lock_rotation': True, 'continuous_collision': True}
-    return entity(ident, ident, at(x, y, 0.4, 0.9, 0.9), **{
-        'sindri.shape': {'kind': 'ellipse', 'fill': [0.12, 0.08, 0.2, 1.0], 'layer': 4},
+    return entity(ident, ident, at(x, y, depth(y), 0.9, 0.9), **{
+        'sindri.shape': {'kind': 'ellipse', 'fill': [0.12, 0.08, 0.2, 1.0], 'layer': 5},
         'sindri.tags': {'tags': ['gloom']},
         'sindri.physics2d.rigid_body': body,
         'sindri.physics2d.collider': {'shape': {'shape': 'circle', 'radius': 0.5}, 'offset': [0, 0],
@@ -155,7 +191,7 @@ def wick():
         'shape': {'shape': 'circle', 'radius': radius}, 'offset': [0, 0.45], 'rotation': 0, 'sensor': sensor,
         'layers': {'memberships': WICK, 'filter': mask}, 'friction': 0, 'restitution': 0}
     return [
-        entity('wick', 'Wick', at(0, 0, 0.5), **{
+        entity('wick', 'Wick', at(0, 0, depth(0)), **{
             'sindri.tags': {'tags': ['wick']},
             'sindri.physics2d.rigid_body': body,
             'sindri.physics2d.collider': {'pieces': [piece(0.4, False, WALL | TARGET), piece(0.7, True, ALL)]},
@@ -187,6 +223,20 @@ def ground():
         'sindri.script': {'source': 'scripts/ground.decay', 'script': 'Ground', 'properties': {}}})
 
 
+BOULDERS = [(5, 3), (9, -4), (-6, -5), (16, 3), (-10, 6)]
+TREES = [(-8, 9), (-14, 3), (-18, -7), (4, 10), (10, 11), (20, -9), (24, 3), (-3, -10), (0, -14),
+         (14, -12), (-21, 11), (-22, -13), (26, 12), (-12, -3), (12, 5)]
+
+
+def scenery():
+    """Boulders to walk around and a dead wood: what the carried light shadows."""
+    out = [prop(f'boulder-{n}', 'boulder', x, y, 0.9, 0.7, (1.8, 1.2))
+           for n, (x, y) in enumerate(BOULDERS, 1)]
+    out += [prop(f'tree-{n}', 'dead-tree', x, y, 0.6, 0.5, (1.2, 0.9))
+            for n, (x, y) in enumerate(TREES, 1)]
+    return out
+
+
 def field():
     actions = [
         {'name': 'move_x', 'kind': 'axis', 'bindings': [
@@ -201,7 +251,7 @@ def field():
             {'axis': {'negative': 'gamepad.dpad_down', 'positive': 'gamepad.dpad_up'}}]},
         {'name': 'attack', 'kind': 'button', 'bindings': ['key.J', 'key.Space', 'gamepad.west']},
         {'name': 'pause', 'kind': 'button', 'bindings': ['key.Escape', 'gamepad.start']}]
-    stone = [0.16, 0.15, 0.2, 1.0]
+    stone = [0.02, 0.02, 0.04, 1.0]
     ents = [
         camera(0, 0, 'wick'),
         environment([0.02, 0.02, 0.06]),
@@ -213,11 +263,8 @@ def field():
         wall('edge-south', 0, -18.5, 54, 1, stone),
         wall('edge-west', -26.5, 0, 1, 38, stone),
         wall('edge-east', 26.5, 0, 1, 38, stone),
-        # A few stones to walk around, to give the carried light something to shadow.
-        wall('stone-1', 5, 3, 2, 2, stone), wall('stone-2', 9, -4, 3, 1.5, stone),
-        wall('stone-3', -6, -5, 1.5, 3, stone), wall('stone-4', 14, 5, 1.5, 1.5, stone),
-        wall('stone-5', -10, 6, 2.5, 2, stone),
-        lantern('lantern-1', 8, 0), lantern('lantern-2', 17, -3), lantern('lantern-3', 22, 8, goal=True),
+        *scenery(),
+        *lantern('lantern-1', 8, 0), *lantern('lantern-2', 17, -3), *lantern('lantern-3', 22, 8, goal=True),
         *wick(),
         gloom('gloom-1', 6.5, 0.45), gloom('gloom-2', -5, 0.45), gloom('gloom-3', 14, 6),
         entity('hud', 'HUD', at(0.03, -0.03, 0), **{

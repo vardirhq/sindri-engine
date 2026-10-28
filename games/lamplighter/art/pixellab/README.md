@@ -21,3 +21,13 @@ scripts that build the project's sheets can be run again without the service.
 
 The canvases differ: rotations are 48 by 48, the walk is 60 by 60 and its east
 frames 56 by 56. `art/wick.py` puts every frame on one cell, aligned by the feet.
+
+- `objects/`: `POST /create-1-direction-object` with `view: top-down`, one call each:
+  "a gnarled dead tree with bare twisting branches, dark bark, night" (64),
+  "a mossy grey boulder, dark, night" (32) and "a tall iron lamp post with a
+  brass lantern at the top glowing warm amber with a bright flame" (48). Each call
+  costs **10 generations** and returns sixteen candidates as a *review* object; one
+  is promoted with `POST /objects/{id}/select-frames {"indices": [0]}`, which is
+  free, and exported with `GET /objects/{id}/spritesheet` (a ZIP). Frame 0 was
+  taken for all three. The unlit lamp post is not generated: `art/objects.py`
+  darkens the lit one's warm pixels, so the pair share a silhouette.
