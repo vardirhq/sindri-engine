@@ -2,6 +2,14 @@
 
 # Changelog
 
+- Add `tools/pixellab/pixellab.py`, a standard-library command-line client for the
+  Pixel Lab API: `balance`, `spec` (every endpoint, or one endpoint's fields, from
+  the API's own OpenAPI document), `tileset`, `character`, `animate`, `download`,
+  `job`, and `call` for anything else. It waits out the API's asynchronous jobs and
+  its "still being made" answers, retries rate limits, saves inline images as PNGs,
+  and takes the key from `PIXELLAB_API_KEY`. Tested against a local stand-in; the
+  first real generation run is the first check of the real responses.
+
 - Run focused checks and a phone-browser export for single-game pull requests.
 
 - Add optional area-sampled 2D shadows for Lamplighter lanterns, with matching
