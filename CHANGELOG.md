@@ -2,6 +2,12 @@
 
 # Changelog
 
+- The Pixel Lab client gains an `object` command (a map object, with the free
+  promotion of the candidates worth keeping and their export), `animate` moves to
+  the multi-direction endpoint with `--directions` so a walk or a slash is made for
+  all four directions at once, and `call --wait` on a request that starts several
+  jobs keeps every job's response instead of the last. Its README records what the
+  first real runs showed: costs, canvas sizes and the unreliable tileset labels.
 - Lamplighter's field gets real creatures and a lived-in ground: four Pixel Lab
   gloom (a smoking blob, a hunched one, one trailed by motes, a low crouch) that
   breathe and squash when struck, five dead trees and four boulders instead of one
