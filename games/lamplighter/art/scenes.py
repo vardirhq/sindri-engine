@@ -201,7 +201,28 @@ def gloom(ident, x, y, variant):
                                       'rotation': 0, 'sensor': False,
                                       'layers': {'memberships': TARGET, 'filter': WALL | WICK | TARGET},
                                       'friction': 0, 'restitution': 0},
-        'sindri.script': {'source': 'scripts/gloom.decay', 'script': 'Gloom', 'properties': {}}})
+        'sindri.script': {'source': 'scripts/gloom.decay', 'script': 'Gloom',
+                          'properties': {'surge_name': ident + '-surge'}}})
+
+
+def motes(rate, lifetime, speed, colors, size, size_end, **more):
+    """An emitter of soft motes; `more` sets any other field by name."""
+    return {'playing': True, 'texture': 'textures/mote.png', 'rate': rate, 'max': 80,
+            'lifetime': lifetime, 'lifetime_spread': 0.4, 'speed': speed, 'speed_spread': 0.5,
+            'direction': 90.0, 'spread': 70.0, 'shape': 'circle', 'offset': [0.0, 0.0],
+            'shape_size': [0.9, 0.9], 'gravity': [0.0, 0.25], 'drag': 0.6, 'size': size, 'size_end': size_end,
+            'colors': colors, 'random_rotation': True, 'spin': 0.0, 'space': 'world', 'layer': 6} | more
+
+
+def wisps(ident):
+    """What hangs about a gloom: a slow smoke that rises off it, and a surge of red-edged
+    motes that only burns while it is winding up or pouncing."""
+    smoke = entity(ident + '-smoke', ident + '-smoke', at(0, 0.45, 0), ident, **{'sindri.particles': motes(
+        7.0, 1.6, 0.35, [[0.24, 0.1, 0.4, 0.0], [0.3, 0.12, 0.48, 0.5], [0.1, 0.04, 0.2, 0.0]], 0.25, 0.7)})
+    surge = entity(ident + '-surge', ident + '-surge', at(0, 0.45, 0), ident, **{'sindri.particles': motes(
+        46.0, 0.7, 1.7, [[1.0, 0.35, 0.45, 0.0], [0.95, 0.3, 0.4, 0.8], [0.4, 0.08, 0.2, 0.0]], 0.2, 0.05,
+        playing=False, spread=360.0, drag=1.6, gravity=[0.0, 0.0])})
+    return [smoke, surge]
 
 
 def wick():
@@ -340,7 +361,8 @@ def field():
         *scenery(),
         *lantern('lantern-1', 8, 0), *lantern('lantern-2', 17, -3), *lantern('lantern-3', 22, 8, goal=True),
         *wick(),
-        gloom('gloom-1', 6.5, 0, 1), gloom('gloom-2', -5, 0, 3), gloom('gloom-3', 14, 5.5, 0),
+        gloom('gloom-1', 6.5, 0, 1), *wisps('gloom-1'), gloom('gloom-2', -5, 0, 3), *wisps('gloom-2'),
+        gloom('gloom-3', 14, 5.5, 0), *wisps('gloom-3'),
         entity('hud', 'HUD', at(0.03, -0.03, 0), **{
             'sindri.ui.text': {'anchor': 'top_left', 'color': [1, 0.95, 0.6, 1], 'font': 'fonts/Inter.ttf',
                                'font_size': 0.04, 'line_height': 0.048, 'layer': 100,

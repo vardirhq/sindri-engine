@@ -5,4 +5,10 @@ state Game {
     var won: bool = false;
     var gloom_hits: number = 0.0;
     var gloom_out: number = 0.0;
+    // How scorched Wick's lantern is, 0 to 1: a gloom's pounce adds to it, time takes it off.
+    var scorch: number = 0.0;
+    var scorched: number = 0.0;
+    var lost: bool = false;
+    // Above zero, the gloom lurk and never hunt: for testing the sword on one that holds still.
+    var truce: number = 0.0;
 }

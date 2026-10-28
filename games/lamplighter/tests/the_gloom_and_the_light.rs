@@ -1,5 +1,6 @@
-//! The gloom keep to the dark: they creep toward Wick where little light
-//! reaches them, and hold where a light does.
+//! The gloom keep to the dark and hunt: they creep toward Wick where little
+//! light reaches them, hold where a light begins, wind up and pounce from its edge,
+//! scorch his lantern when a pounce lands, and thin where a light is strong.
 
 use lamplighter::Run;
 use sindri_platform::{InputEvent, Key};
@@ -32,6 +33,24 @@ fn alpha(run: &Run, id: &str) -> f64 {
         .expect("an alpha")
 }
 
+fn scale_x(run: &Run, id: &str) -> f32 {
+    let entity = run.entity(id).unwrap_or_else(|| panic!("{id} exists"));
+    run.world
+        .get(entity)
+        .expect("it exists")
+        .transform_3d
+        .expect("it has a place")
+        .scale[0]
+}
+
+/// How far Wick's lantern reaches, which a scorch shrinks.
+fn lantern_radius(run: &Run) -> f64 {
+    let light = run.entity("wick-light").expect("Wick carries a light");
+    run.world.get(light).expect("it exists").components["sindri.light2d"]["radius"]
+        .as_f64()
+        .expect("a radius")
+}
+
 /// Holds the walk key for `frames` frames.
 fn walk_east(run: &mut Run, frames: u32) {
     run.input.apply(InputEvent::KeyPressed(Key::D));
@@ -40,7 +59,7 @@ fn walk_east(run: &mut Run, frames: u32) {
 }
 
 #[test]
-fn a_gloom_creeps_through_the_dark_and_holds_at_the_edge_of_the_light() {
+fn a_gloom_creeps_through_the_dark_toward_wick() {
     let mut run = Run::open().expect("the project opens");
     step(&mut run, 5);
     let start = position(&run, "gloom-1")[0];
@@ -50,27 +69,53 @@ fn a_gloom_creeps_through_the_dark_and_holds_at_the_edge_of_the_light() {
         early < start - 0.3,
         "it creeps in the dark: {start} to {early}"
     );
+}
 
-    step(&mut run, 600);
-    let settled = position(&run, "gloom-1")[0];
-    let wick = position(&run, "wick")[0];
-    assert!(
-        settled - wick > 3.0,
-        "but stops where Wick's light begins, not at him: {settled} against {wick}"
-    );
-    assert!(alpha(&run, "gloom-1") > 0.95, "and is solid there");
+#[test]
+fn a_gloom_winds_up_at_the_edge_of_the_light_and_a_pounce_scorches_the_lantern() {
+    let mut run = Run::open().expect("the project opens");
+    step(&mut run, 5);
+    let (mut crouched, mut scorched) = (false, false);
+    for _ in 0..600 {
+        step(&mut run, 1);
+        // The wind-up is low and wide: its scale across goes past the breathing.
+        crouched |= scale_x(&run, "gloom-1") > 2.3;
+        scorched |= lantern_radius(&run) < 7.5;
+    }
+    assert!(crouched, "it crouches before it pounces");
+    assert!(scorched, "and a pounce that lands shrinks Wick's light");
+}
+
+#[test]
+fn left_alone_in_the_dark_wicks_lantern_goes_out() {
+    let mut run = Run::open().expect("the project opens");
+    step(&mut run, 5);
+    let mut out = false;
+    for _ in 0..3000 {
+        step(&mut run, 1);
+        // Out, the lantern is a spark; the field starts over a moment later.
+        if lantern_radius(&run) < 3.0 {
+            out = true;
+            break;
+        }
+    }
+    assert!(out, "standing still, Wick is run down by the gloom");
 }
 
 #[test]
 fn a_gloom_far_off_does_not_notice_wick() {
     let mut run = Run::open().expect("the project opens");
     step(&mut run, 5);
-    let start = position(&run, "gloom-3");
-    step(&mut run, 300);
-    let now = position(&run, "gloom-3");
+    let far = |run: &Run| {
+        let (gloom, wick) = (position(run, "gloom-3"), position(run, "wick"));
+        (gloom[0] - wick[0]).hypot(gloom[1] - wick[1])
+    };
+    let start = far(&run);
+    step(&mut run, 120);
     assert!(
-        (now[0] - start[0]).abs() < 0.01 && (now[1] - start[1]).abs() < 0.01,
-        "it stays where it is: {start:?} to {now:?}"
+        far(&run) > start - 1.0,
+        "it lurks where it is and does not stalk: {start} to {}",
+        far(&run)
     );
 }
 
@@ -85,10 +130,10 @@ fn a_gloom_in_a_strong_light_thins() {
         }
         walk_east(&mut run, 6);
     }
-    step(&mut run, 40);
-    assert!(
-        alpha(&run, "gloom-1") < 0.7,
-        "lit by the lantern it is thin: {}",
-        alpha(&run, "gloom-1")
-    );
+    let mut thinnest: f64 = 1.0;
+    for _ in 0..200 {
+        step(&mut run, 1);
+        thinnest = thinnest.min(alpha(&run, "gloom-1"));
+    }
+    assert!(thinnest < 0.7, "lit by the lantern it thins: {thinnest}");
 }

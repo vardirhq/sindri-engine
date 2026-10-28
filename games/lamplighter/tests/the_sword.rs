@@ -51,6 +51,8 @@ fn walk_until_in_reach(run: &mut Run, target: &str) {
 /// Walks east until the first gloom blocks the way, then stops.
 fn up_to_the_gloom() -> Run {
     let mut run = Run::open().expect("the project opens");
+    // The gloom lurk and hold still, so the blade is tried on one that does.
+    run.set_board("truce", 1.0);
     step(&mut run, 5);
     tap(&mut run, Key::D, 70);
     step(&mut run, 30);

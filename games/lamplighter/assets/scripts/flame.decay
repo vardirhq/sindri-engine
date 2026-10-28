@@ -1,9 +1,24 @@
 // The lantern's flame wavers a little, so the light is a flame and not a lamp.
+// A gloom's pounce scorches it: it shrinks and gutters, and comes back as the
+// scorch wears off.
 script Flame {
+    // How fast a scorch wears off, per second.
+    @export let mend: number = 0.07;
+
     var age: number = 0.0;
 
     fn update(dt: number) {
         this.age += dt;
-        this.light2d.intensity = 1.3 + 0.08 * sin(this.age * 9.0) + 0.05 * sin(this.age * 23.0);
+        Game.scorch = max(0.0, Game.scorch - this.mend * dt);
+        let low = Game.scorch;
+        var wobble: number = 0.08 * sin(this.age * 9.0) + 0.05 * sin(this.age * 23.0);
+        // A scorched flame stutters.
+        wobble += low * 0.25 * sin(this.age * 31.0);
+        this.light2d.intensity = (1.3 + wobble) * (1.0 - 0.55 * low);
+        this.light2d.radius = 8.0 * (1.0 - 0.4 * low);
+        if Game.lost {
+            this.light2d.intensity = 0.12;
+            this.light2d.radius = 2.5;
+        }
     }
 }

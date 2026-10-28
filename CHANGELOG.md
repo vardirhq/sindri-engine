@@ -2,10 +2,13 @@
 
 # Changelog
 
-- Lamplighter's gloom now answer to the light, using `Lighting.level`: in the dark they
-  creep toward Wick, they hold where a light begins instead of walking into it, and
-  they thin where a light is strong, so the edge of Wick's lantern is a line the
-  dark will not cross on its own.
+- Lamplighter's gloom now hunt. Using `Lighting.level`, each creeps through the dark
+  toward Wick, holds where a light begins, and from the edge winds up (low, wide and
+  shaking, with red sparks) and pounces; a pounce that lands throws Wick back and
+  scorches his lantern, which shrinks and gutters, and a few in a row put it out and
+  start the field over. One that misses is spent and open to the sword. They thin where
+  a light is strong and smoke violet motes. `Game.truce` holds them still for tests.
+
 - Lamplighter's trees, boulders, lamps, Wick and the gloom now throw shadows on the
   ground: a soft contact ellipse under each, and for trees and boulders their own
   silhouette laid away from the nearest lamps and Wick's lantern, so a boulder's

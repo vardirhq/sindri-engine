@@ -1,7 +1,10 @@
-// A gloom: a patch of the dark that has learned to stand up. In the dark it
-// creeps toward Wick, and it holds at the edge of a light, thinning where the
-// light is strong. It takes a sword, flinches away from the blow, and goes out
-// on the third.
+// A gloom: a patch of the dark that has learned to stand up, and wants Wick's
+// light. It lurks where it was left, creeps through the dark toward him, holds
+// where a light begins (it will not walk into one), and from the edge of the
+// light winds up and pounces. A pounce that lands scorches his lantern; one that
+// misses leaves it wilted and open to the sword. In a strong light it thins.
+//
+// Its states: lurk, stalk, wind, lunge, recover.
 script Gloom {
     // How many blows put it out.
     @export let health: number = 3.0;
@@ -14,53 +17,162 @@ script Gloom {
     @export let bright: number = 0.6;
     @export let creep: number = 1.1;
     @export let notice: number = 11.0;
+    // How close to Wick it must be to wind up, how long the wind-up and the
+    // pounce take, how fast the pounce is, and how long it is spent after.
+    @export let pounce_range: number = 7.0;
+    @export let wind_for: number = 0.7;
+    @export let lunge_for: number = 0.45;
+    @export let lunge_speed: number = 10.0;
+    @export let recover_for: number = 1.1;
+    // How long it waits before it will wind up again.
+    @export let rest_for: number = 1.0;
+    // The emitter that burns while it winds up and pounces.
+    @export let surge_name: String = "";
 
     var flinch: number = 0.0;
     var left: number = 0.0;
     var age: number = 0.0;
     var shown: number = 1.0;
     var wick: Entity = null;
+    var surge: Entity = null;
+    var state: String = "lurk";
+    var in_state: number = 0.0;
+    var rest: number = 0.0;
+    var aim_x: number = 0.0;
+    var aim_y: number = 0.0;
+    var struck: bool = false;
 
     fn start() {
         this.left = this.health;
         this.wick = World.find("Wick");
+        this.surge = World.find(this.surge_name);
+        // Each one a little out of step with the rest.
+        this.age = this.transform.world_position.x * 0.7;
+    }
+
+    fn enter(next: String) {
+        this.state = next;
+        this.in_state = 0.0;
+        // The surge burns for the wind-up and the pounce, and goes out after.
+        if this.surge != null {
+            if next == "wind" || next == "lunge" {
+                Effects.play(this.surge);
+            } else {
+                Effects.stop(this.surge);
+            }
+        }
     }
 
     fn update(dt: number) {
         // Drawn in front of what stands further up the screen, behind what is below.
         this.transform.position.z = 0.5 - this.transform.world_position.y * 0.01;
-        // It breathes: a slow swell, each one a little out of step with the rest.
         this.age += dt;
-        var squash: number = 1.0 + 0.04 * sin(this.age * 2.6 + this.transform.world_position.x);
-        if this.flinch > 0.0 {
-            this.flinch = max(0.0, this.flinch - dt);
-            squash += 0.35 * (this.flinch / this.flinch_for);
-        }
-        this.transform.scale.x = 2.0 * squash;
-        this.transform.scale.y = 2.0 / squash;
+        this.in_state += dt;
+        this.rest = max(0.0, this.rest - dt);
+        this.flinch = max(0.0, this.flinch - dt);
 
-        // What the light does to it: thinned where it is strong, bold in the dark.
         let here = Vec2(this.transform.world_position.x, this.transform.world_position.y);
+        var to_x: number = 0.0;
+        var to_y: number = 0.0;
+        var apart: number = 99.0;
+        if this.wick != null && World.exists(this.wick) {
+            to_x = this.wick.transform.world_position.x - here.x;
+            to_y = this.wick.transform.world_position.y - here.y;
+            apart = sqrt(to_x * to_x + to_y * to_y);
+        }
         let level = Lighting.level(here);
+        let hunting = apart < this.notice && !Game.lost && !Game.won && Game.truce < 0.5;
+
+        var squash_x: number = 1.0 + 0.04 * sin(this.age * 2.6);
+        var squash_y: number = 1.0 / squash_x;
+
+        if this.state == "lurk" {
+            // It drifts a little where it is, until Wick is near enough to notice.
+            if this.flinch <= 0.0 && Game.truce < 0.5 {
+                Physics.set_velocity(this.entity, 0.25 * cos(this.age * 0.8), 0.18 * sin(this.age * 0.6));
+            }
+            if hunting {
+                enter("stalk");
+            }
+        } else if this.state == "stalk" {
+            // It creeps through the dark and holds where a light begins; from the
+            // edge, in range and rested, it winds up.
+            if !hunting {
+                enter("lurk");
+            } else if this.flinch <= 0.0 {
+                if level < this.dark && apart > 1.2 {
+                    Physics.set_velocity(this.entity, to_x / apart * this.creep, to_y / apart * this.creep);
+                }
+                // A crawl: it rocks as it goes.
+                squash_x = 1.0 + 0.1 * sin(this.age * 8.0);
+                squash_y = 1.0 - 0.1 * sin(this.age * 8.0);
+                if apart < this.pounce_range && this.rest <= 0.0 {
+                    enter("wind");
+                }
+            }
+        } else if this.state == "wind" {
+            // It crouches and shakes, which is the warning: it is low and wide.
+            Physics.set_velocity(this.entity, 0.0, 0.0);
+            let t = min(1.0, this.in_state / this.wind_for);
+            squash_x = 1.0 + 0.3 * t + 0.04 * sin(this.age * 55.0);
+            squash_y = 1.0 - 0.4 * t;
+            if apart > 0.5 {
+                this.aim_x = to_x / apart;
+                this.aim_y = to_y / apart;
+            }
+            if this.in_state >= this.wind_for {
+                this.struck = false;
+                enter("lunge");
+            }
+        } else if this.state == "lunge" {
+            // The pounce goes where Wick was when it left: he can step out of it.
+            Physics.set_velocity(this.entity, this.aim_x * this.lunge_speed, this.aim_y * this.lunge_speed);
+            squash_x = 1.35;
+            squash_y = 0.75;
+            if !this.struck && apart < 1.0 {
+                this.struck = true;
+                Wick.on(this.wick).scorch(this.aim_x, this.aim_y);
+            }
+            if this.in_state >= this.lunge_for {
+                if this.struck {
+                    // It has what it came for, and falls back.
+                    Physics.set_velocity(this.entity, -this.aim_x * 3.0, -this.aim_y * 3.0);
+                }
+                enter("recover");
+            }
+        } else if this.state == "recover" {
+            // Spent: it sags and is slow, which is when a blade finds it.
+            squash_x = 1.0 + 0.2 * (1.0 - min(1.0, this.in_state / this.recover_for));
+            squash_y = 1.0 - 0.3 * (1.0 - min(1.0, this.in_state / this.recover_for));
+            if this.in_state >= this.recover_for {
+                this.rest = this.rest_for;
+                enter("stalk");
+            }
+        }
+
+        if this.flinch > 0.0 {
+            squash_x += 0.35 * (this.flinch / this.flinch_for);
+            squash_y -= 0.2 * (this.flinch / this.flinch_for);
+        }
+        this.transform.scale.x = 2.0 * squash_x;
+        this.transform.scale.y = 2.0 * squash_y;
+
+        // Thinned where a light is strong, and flushed when it is about to pounce.
         var want: number = 1.0;
         if level > this.bright {
             want = 0.55;
         }
+        if this.state == "lunge" {
+            want = 1.0;
+        }
         this.shown += (want - this.shown) * min(1.0, dt * 4.0);
         this.sprite.tint = Color(1.0, 1.0, 1.0, this.shown);
-        if level < this.dark && this.flinch <= 0.0 && this.wick != null {
-            let to_x = this.wick.transform.world_position.x - here.x;
-            let to_y = this.wick.transform.world_position.y - here.y;
-            let apart = sqrt(to_x * to_x + to_y * to_y);
-            if apart < this.notice && apart > 1.2 {
-                Physics.set_velocity(this.entity, to_x / apart * this.creep, to_y / apart * this.creep);
-            }
-        }
     }
 
     // A blow in a direction (the way Wick faced as it landed): thrown along it,
     // not away from some point, so a gloom that is a little off to one side still
-    // goes straight back, and put out at the end of its health.
+    // goes straight back, and put out at the end of its health. A blow breaks a
+    // wind-up or a pounce.
     fn hurt(push_x: number, push_y: number) {
         this.left -= 1.0;
         Game.gloom_hits += 1.0;
@@ -70,6 +182,7 @@ script Gloom {
             return;
         }
         this.flinch = this.flinch_for;
+        enter("recover");
         Physics.set_velocity(this.entity, push_x * this.knockback, push_y * this.knockback);
     }
 }
