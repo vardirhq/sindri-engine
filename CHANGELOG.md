@@ -2,6 +2,14 @@
 
 # Changelog
 
+- Add `tools/pixellab/pixellab.py`, a standard-library command-line client for the
+  Pixel Lab API: `balance`, `spec` (every endpoint, or one endpoint's fields, from
+  the API's own OpenAPI document), `tileset`, `character`, `animate`, `download`,
+  `job`, and `call` for anything else. It waits out the API's asynchronous jobs and
+  its "still being made" answers, retries rate limits, saves inline images as PNGs,
+  and takes the key from `PIXELLAB_API_KEY`. Tested against a local stand-in; the
+  first real generation run is the first check of the real responses.
+
 - Lamplighter becomes a top-down action-adventure, and the platformer it was
   turning into goes back to `games/platformer` as the side-view genre showcase,
   with its Dusk Road level and the title, level select, settings, pause and
