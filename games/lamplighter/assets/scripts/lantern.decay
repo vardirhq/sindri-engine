@@ -1,0 +1,26 @@
+// A lantern is dark until Wick touches it, then it flares and burns on. The
+// goal lantern is the last: lighting it opens the way.
+script Lantern {
+    var lit: bool = false;
+    var flare: number = 0.0;
+
+    fn update(dt: number) {
+        if !this.lit {
+            return;
+        }
+        this.flare = max(0.0, this.flare - dt);
+        this.light2d.intensity = 1.1 + 2.4 * (this.flare / 0.8);
+    }
+
+    fn ignite() {
+        if this.lit {
+            return;
+        }
+        this.lit = true;
+        this.flare = 0.8;
+        Game.lit += 1.0;
+        if World.has_tag(this.entity, "goal") {
+            Game.won = true;
+        }
+    }
+}

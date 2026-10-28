@@ -1,0 +1,17 @@
+// The count of lanterns lit, and the way back to the title once the last is.
+script Hud {
+    // How long the last lantern burns before the title returns.
+    @export let linger: number = 3.0;
+
+    var won_for: number = 0.0;
+
+    fn update(dt: number) {
+        Ui.set_numbers(this.entity, Game.lit, Game.total);
+        if Game.won {
+            this.won_for += dt;
+            if this.won_for >= this.linger {
+                Scene.go("title.scene");
+            }
+        }
+    }
+}

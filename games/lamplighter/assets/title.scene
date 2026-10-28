@@ -1,0 +1,317 @@
+{
+  "format_version": 10,
+  "metadata": {
+    "name": "Lamplighter title"
+  },
+  "entities": [
+    {
+      "id": "camera",
+      "name": "Camera",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          10.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1
+        ]
+      },
+      "components": {
+        "sindri.camera": {
+          "projection": "orthographic",
+          "vertical_size": 11.25,
+          "near": 0.1,
+          "far": 100.0,
+          "fit": "height"
+        }
+      }
+    },
+    {
+      "id": "environment",
+      "name": "Environment",
+      "components": {
+        "sindri.environment": {
+          "background": [
+            0.02,
+            0.02,
+            0.05,
+            1.0
+          ],
+          "shadows": {
+            "enabled": false,
+            "map_size": 1024,
+            "distance": 48.0,
+            "bias": 0.002
+          },
+          "lighting_2d": {
+            "enabled": true,
+            "ambient": [
+              0.36,
+              0.34,
+              0.55
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "menu",
+      "name": "menu",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.0,
+          1.6,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.layout": {
+          "direction": "column",
+          "spacing": 0.035,
+          "justify": "center",
+          "align": "center"
+        }
+      }
+    },
+    {
+      "id": "heading",
+      "name": "heading",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.4,
+          0.14300000000000002,
+          1
+        ]
+      },
+      "parent": "menu",
+      "components": {
+        "sindri.ui.text": {
+          "anchor": "center",
+          "color": [
+            1.0,
+            0.82,
+            0.45,
+            1.0
+          ],
+          "font": "fonts/Inter.ttf",
+          "font_size": 0.11,
+          "line_height": 0.132,
+          "layer": 100,
+          "text": "Lamplighter",
+          "bold": true,
+          "line_align": "center",
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.004
+            ],
+            "color": [
+              0,
+              0,
+              0,
+              0.55
+            ],
+            "softness": 0.003
+          }
+        }
+      }
+    },
+    {
+      "id": "tagline",
+      "name": "tagline",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.4,
+          0.058499999999999996,
+          1
+        ]
+      },
+      "parent": "menu",
+      "components": {
+        "sindri.ui.text": {
+          "anchor": "center",
+          "color": [
+            0.62,
+            0.6,
+            0.78,
+            1.0
+          ],
+          "font": "fonts/Inter.ttf",
+          "font_size": 0.045,
+          "line_height": 0.054,
+          "layer": 100,
+          "text": "Keep the way home lit.",
+          "bold": false,
+          "line_align": "center",
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.004
+            ],
+            "color": [
+              0,
+              0,
+              0,
+              0.55
+            ],
+            "softness": 0.003
+          }
+        }
+      }
+    },
+    {
+      "id": "play",
+      "name": "play",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.62,
+          0.095,
+          1
+        ]
+      },
+      "parent": "menu",
+      "components": {
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.09,
+            0.08,
+            0.2,
+            0.92
+          ],
+          "anchor": "center",
+          "layer": 90
+        },
+        "sindri.ui.button": {
+          "label": "Play",
+          "autofocus": false,
+          "disabled": false
+        },
+        "sindri.ui.layout": {
+          "direction": "row",
+          "spacing": 0.02,
+          "justify": "center",
+          "align": "center"
+        }
+      }
+    },
+    {
+      "id": "play-label",
+      "name": "play-label",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.558,
+          0.076,
+          1
+        ]
+      },
+      "parent": "play",
+      "components": {
+        "sindri.ui.text": {
+          "anchor": "center",
+          "color": [
+            0.96,
+            0.93,
+            0.84,
+            1.0
+          ],
+          "font": "fonts/Inter.ttf",
+          "font_size": 0.05,
+          "line_height": 0.06,
+          "layer": 95,
+          "text": "Play",
+          "bold": true,
+          "line_align": "center",
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.004
+            ],
+            "color": [
+              0,
+              0,
+              0,
+              0.55
+            ],
+            "softness": 0.003
+          }
+        }
+      }
+    },
+    {
+      "id": "shell",
+      "name": "Shell",
+      "components": {
+        "sindri.script": {
+          "source": "scripts/shell.decay",
+          "script": "Title",
+          "properties": {}
+        }
+      }
+    }
+  ]
+}

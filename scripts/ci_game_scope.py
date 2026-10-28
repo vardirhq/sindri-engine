@@ -9,6 +9,7 @@ GAMES = {
     'causeway': ('game/', 'sindri-causeway'),
     'flappy': ('games/flappy/', 'flappy'),
     'platformer': ('games/platformer/', 'platformer'),
+    'lamplighter': ('games/lamplighter/', 'lamplighter'),
     'low-tide': ('games/low-tide/', 'low-tide'),
     'orbital-baked': ('games/orbital-baked/', 'orbital-baked'),
     'scorchball': ('games/scorchball/', 'scorchball'),

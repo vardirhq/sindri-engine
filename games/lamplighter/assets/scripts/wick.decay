@@ -1,0 +1,57 @@
+// Wick walks the dim fields in the four directions and the diagonals, at one
+// speed whichever way, easing into and out of a walk. The lantern Wick
+// carries is this entity's own light, so it lights whatever Wick walks past
+// and moves with Wick. Touching a lantern lights it.
+script Wick {
+    @export let speed: number = 5.0;
+    // How quickly the walk reaches the speed asked for, per second.
+    @export let ease: number = 14.0;
+
+    var vx: number = 0.0;
+    var vy: number = 0.0;
+    var facing_x: number = 0.0;
+    var facing_y: number = -1.0;
+    var flicker: number = 0.0;
+
+    fn start() {
+        Game.lit = 0.0;
+        Game.total = World.with_tag("lantern").length;
+        Game.won = false;
+    }
+
+    fn update(dt: number) {
+        var x: number = Action.axis("move_x");
+        var y: number = Action.axis("move_y");
+        if Stick.held && abs(Stick.x) + abs(Stick.y) > abs(x) + abs(y) {
+            x = Stick.x;
+            y = Stick.y;
+        }
+        // A diagonal is no faster than a straight walk.
+        let length = sqrt(x * x + y * y);
+        if length > 1.0 {
+            x = x / length;
+            y = y / length;
+        }
+        if length > 0.1 {
+            this.facing_x = x;
+            this.facing_y = y;
+        }
+        let blend = min(1.0, dt * this.ease);
+        this.vx += (x * this.speed - this.vx) * blend;
+        this.vy += (y * this.speed - this.vy) * blend;
+        Physics.set_velocity(this.entity, this.vx, this.vy);
+
+        // The flame wavers a little, so the light is a flame and not a lamp.
+        this.flicker += dt;
+        this.light2d.intensity = 1.3 + 0.08 * sin(this.flicker * 9.0) + 0.05 * sin(this.flicker * 23.0);
+
+        for other in Physics.sensor_entered() {
+            if World.exists(other) && World.has_tag(other, "lantern") {
+                Lantern.on(other).ignite();
+            }
+        }
+        if Action.pressed("pause") && !Game.won {
+            Scene.go("pause.scene");
+        }
+    }
+}
