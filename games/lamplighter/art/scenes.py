@@ -9,7 +9,7 @@ import pathlib
 
 ASSETS = pathlib.Path(__file__).resolve().parent.parent / 'assets'
 Q = [0, 0, 0, 1]
-WALL, WICK, LANTERN = 1, 2, 4
+WALL, WICK, LANTERN, TARGET = 1, 2, 4, 8
 ALL = 4294967295
 
 
@@ -119,13 +119,31 @@ def lantern(ident, x, y, goal=False):
 
 
 def clips():
-    """One idle and one walk clip for each direction Wick faces."""
+    """An idle, a walk and a slash clip for each direction Wick faces."""
     out = {}
     for direction in ('south', 'west', 'north', 'east'):
         out[f'idle-{direction}'] = {'frames': [f'idle-{direction}'], 'seconds_per_frame': 0.4, 'looping': True}
         out[f'walk-{direction}'] = {'frames': [f'walk-{direction}-{n}' for n in range(8)],
                                     'seconds_per_frame': 0.09, 'looping': True}
+        out[f'slash-{direction}'] = {'frames': [f'slash-{direction}-{n}' for n in range(8)],
+                                     'seconds_per_frame': 0.07, 'looping': False}
     return out
+
+
+def gloom(ident, x, y):
+    """A creature of the dark: dim, slow to notice, and cut down by the sword."""
+    body = {'kind': 'dynamic', 'pose': {'position': [0, 0], 'rotation': 0}, 'linear_velocity': [0, 0],
+            'angular_velocity': 0, 'gravity_scale': 0, 'linear_damping': 7, 'angular_damping': 0,
+            'lock_rotation': True, 'continuous_collision': True}
+    return entity(ident, ident, at(x, y, 0.4, 0.9, 0.9), **{
+        'sindri.shape': {'kind': 'ellipse', 'fill': [0.12, 0.08, 0.2, 1.0], 'layer': 4},
+        'sindri.tags': {'tags': ['gloom']},
+        'sindri.physics2d.rigid_body': body,
+        'sindri.physics2d.collider': {'shape': {'shape': 'circle', 'radius': 0.5}, 'offset': [0, 0],
+                                      'rotation': 0, 'sensor': False,
+                                      'layers': {'memberships': TARGET, 'filter': WALL | WICK | TARGET},
+                                      'friction': 0, 'restitution': 0},
+        'sindri.script': {'source': 'scripts/gloom.decay', 'script': 'Gloom', 'properties': {}}})
 
 
 def wick():
@@ -140,10 +158,10 @@ def wick():
         entity('wick', 'Wick', at(0, 0, 0.5), **{
             'sindri.tags': {'tags': ['wick']},
             'sindri.physics2d.rigid_body': body,
-            'sindri.physics2d.collider': {'pieces': [piece(0.4, False, WALL), piece(0.7, True, ALL)]},
+            'sindri.physics2d.collider': {'pieces': [piece(0.4, False, WALL | TARGET), piece(0.7, True, ALL)]},
             'sindri.script': {'source': 'scripts/wick.decay', 'script': 'Wick', 'properties': {}}}),
         # One pixel of the art is a sixteenth of a world unit.
-        entity('wick-sprite', 'wick-sprite', at(0, 0, 0, 2.5, 2.75), 'wick', **{
+        entity('wick-sprite', 'wick-sprite', at(0, 0, 0, 3.0, 2.75), 'wick', **{
             'sindri.sprite': {'texture': 'textures/wick.png#idle-south', 'layer': 5},
             'sindri.animation.sprite': {'clips': clips(), 'playing': 'idle-south', 'speed': 1}}),
         # The lantern's flame: a light a little above Wick's feet and out to one
@@ -181,13 +199,14 @@ def field():
             {'axis': {'negative': 'key.ArrowDown', 'positive': 'key.ArrowUp'}},
             'gamepad.axis.left_y',
             {'axis': {'negative': 'gamepad.dpad_down', 'positive': 'gamepad.dpad_up'}}]},
+        {'name': 'attack', 'kind': 'button', 'bindings': ['key.J', 'key.Space', 'gamepad.west']},
         {'name': 'pause', 'kind': 'button', 'bindings': ['key.Escape', 'gamepad.start']}]
     stone = [0.16, 0.15, 0.2, 1.0]
     ents = [
         camera(0, 0, 'wick'),
         environment([0.02, 0.02, 0.06]),
         entity('physics', 'Physics', **{
-            'sindri.physics2d.world': {'gravity': [0, 0], 'layers': ['wall', 'wick', 'lantern']},
+            'sindri.physics2d.world': {'gravity': [0, 0], 'layers': ['wall', 'wick', 'lantern', 'target']},
             'sindri.input.actions': {'actions': actions}}),
         ground(),
         wall('edge-north', 0, 18.5, 54, 1, stone),
@@ -200,6 +219,7 @@ def field():
         wall('stone-5', -10, 6, 2.5, 2, stone),
         lantern('lantern-1', 8, 0), lantern('lantern-2', 17, -3), lantern('lantern-3', 22, 8, goal=True),
         *wick(),
+        gloom('gloom-1', 6.5, 0.45), gloom('gloom-2', -5, 0.45), gloom('gloom-3', 14, 6),
         entity('hud', 'HUD', at(0.03, -0.03, 0), **{
             'sindri.ui.text': {'anchor': 'top_left', 'color': [1, 0.95, 0.6, 1], 'font': 'fonts/Inter.ttf',
                                'font_size': 0.04, 'line_height': 0.048, 'layer': 100,

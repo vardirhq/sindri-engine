@@ -12,7 +12,11 @@ scripts that build the project's sheets can be run again without the service.
   --view "low top-down" --seed 11` for the four rotations, then the walk from
   `POST /characters/animations` with `action_description` "walking steadily, legs
   stepping alternately, the lantern held at the same height the whole time", 8
-  frames, all four directions, seed 3. `character-id.txt` is the service's id for
+  frames, all four directions, seed 3. The sword's `slash` is the same call with
+  "swinging a short iron sword in a single wide horizontal slash with the free hand
+  while the other hand keeps the lantern raised and steady, feet planted, then
+  returning to a ready stance", 8 frames, seed 5. The south and north rows are the
+  weakest: the blade is faint in one and scattered in the other. `character-id.txt` is the service's id for
   Wick, which later animations (the sword) are made against.
 
 The canvases differ: rotations are 48 by 48, the walk is 60 by 60 and its east

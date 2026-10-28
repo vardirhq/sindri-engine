@@ -24,6 +24,52 @@
           "north": "Idle/rotations/north.png"
         },
         "animations": {
+          "slash": {
+            "south": [
+              "Idle/animations/slash/south/frame_000.png",
+              "Idle/animations/slash/south/frame_001.png",
+              "Idle/animations/slash/south/frame_002.png",
+              "Idle/animations/slash/south/frame_003.png",
+              "Idle/animations/slash/south/frame_004.png",
+              "Idle/animations/slash/south/frame_005.png",
+              "Idle/animations/slash/south/frame_006.png",
+              "Idle/animations/slash/south/frame_007.png",
+              "Idle/animations/slash/south/frame_008.png"
+            ],
+            "west": [
+              "Idle/animations/slash/west/frame_000.png",
+              "Idle/animations/slash/west/frame_001.png",
+              "Idle/animations/slash/west/frame_002.png",
+              "Idle/animations/slash/west/frame_003.png",
+              "Idle/animations/slash/west/frame_004.png",
+              "Idle/animations/slash/west/frame_005.png",
+              "Idle/animations/slash/west/frame_006.png",
+              "Idle/animations/slash/west/frame_007.png",
+              "Idle/animations/slash/west/frame_008.png"
+            ],
+            "east": [
+              "Idle/animations/slash/east/frame_000.png",
+              "Idle/animations/slash/east/frame_001.png",
+              "Idle/animations/slash/east/frame_002.png",
+              "Idle/animations/slash/east/frame_003.png",
+              "Idle/animations/slash/east/frame_004.png",
+              "Idle/animations/slash/east/frame_005.png",
+              "Idle/animations/slash/east/frame_006.png",
+              "Idle/animations/slash/east/frame_007.png",
+              "Idle/animations/slash/east/frame_008.png"
+            ],
+            "north": [
+              "Idle/animations/slash/north/frame_000.png",
+              "Idle/animations/slash/north/frame_001.png",
+              "Idle/animations/slash/north/frame_002.png",
+              "Idle/animations/slash/north/frame_003.png",
+              "Idle/animations/slash/north/frame_004.png",
+              "Idle/animations/slash/north/frame_005.png",
+              "Idle/animations/slash/north/frame_006.png",
+              "Idle/animations/slash/north/frame_007.png",
+              "Idle/animations/slash/north/frame_008.png"
+            ]
+          },
           "walk": {
             "south": [
               "Idle/animations/walk/south/frame_000.png",
@@ -88,5 +134,5 @@
     }
   ],
   "export_version": "3.1",
-  "export_date": "2026-10-28T15:13:17.325020"
+  "export_date": "2026-10-28T15:19:30.196175"
 }

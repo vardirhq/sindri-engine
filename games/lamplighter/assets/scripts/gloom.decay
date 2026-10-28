@@ -1,0 +1,43 @@
+// A gloom: a patch of the dark that has learned to stand up. It does nothing
+// yet but take a sword, flinch away from the blow, and go out on the third.
+script Gloom {
+    // How many blows put it out.
+    @export let health: number = 3.0;
+    // How hard a blow throws it back, and how long it stays squashed by one.
+    @export let knockback: number = 9.0;
+    @export let flinch_for: number = 0.12;
+
+    var flinch: number = 0.0;
+    var left: number = 0.0;
+
+    fn start() {
+        this.left = this.health;
+    }
+
+    fn update(dt: number) {
+        if this.flinch > 0.0 {
+            this.flinch = max(0.0, this.flinch - dt);
+            let squash = 1.0 + 0.35 * (this.flinch / this.flinch_for);
+            this.transform.scale.x = 0.9 * squash;
+            this.transform.scale.y = 0.9 / squash;
+        }
+    }
+
+    // A blow from a point in the world: thrown away from it, and put out at
+    // the end of its health.
+    fn hurt(from_x: number, from_y: number) {
+        this.left -= 1.0;
+        Game.gloom_hits += 1.0;
+        if this.left <= 0.0 {
+            Game.gloom_out += 1.0;
+            World.despawn(this.entity);
+            return;
+        }
+        this.flinch = this.flinch_for;
+        let p = this.transform.world_position;
+        var dx = p.x - from_x;
+        var dy = p.y - from_y;
+        let length = max(0.001, sqrt(dx * dx + dy * dy));
+        Physics.set_velocity(this.entity, dx / length * this.knockback, dy / length * this.knockback);
+    }
+}

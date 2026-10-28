@@ -2,7 +2,7 @@
 """Builds `textures/wick.png` and `wick.sheet` from the Pixel Lab character.
 
 Rows are the four directions (south, west, north, east); columns are the idle
-pose and the eight walk frames. Pixel Lab's canvases differ (rotations 48 square,
+pose, the eight walk frames and the eight of the sword's slash. Pixel Lab's canvases differ (rotations 48 square,
 the walk 60, its east frames 56), so each frame is put on one cell aligned by the
 feet and the middle of its canvas, where the generator keeps the body. Anchored
 at the bottom, the entity's position is where Wick stands.
@@ -19,7 +19,9 @@ SOURCE = HERE / 'pixellab' / 'wick'
 TEXTURES = HERE.parent / 'assets' / 'textures'
 DIRECTIONS = ['south', 'west', 'north', 'east']
 WALK = 8
-CELL = (40, 44)
+SLASH = 8
+# Wide enough for the blade, which reaches 24 pixels either side of the body.
+CELL = (48, 44)
 # Where the feet stand on a cell, and on each source canvas.
 FEET_ON_CELL = (CELL[0] // 2, CELL[1] - 3)
 FEET_ON_ROTATION = 41
@@ -37,11 +39,12 @@ def names():
     for direction in DIRECTIONS:
         out.append(f'idle-{direction}')
         out.extend(f'walk-{direction}-{frame}' for frame in range(WALK))
+        out.extend(f'slash-{direction}-{frame}' for frame in range(SLASH))
     return out
 
 
 def build():
-    columns = 1 + WALK
+    columns = 1 + WALK + SLASH
     sheet = Image.new('RGBA', (columns * CELL[0], len(DIRECTIONS) * CELL[1]))
     for row, direction in enumerate(DIRECTIONS):
         idle = Image.open(SOURCE / 'rotations' / f'{direction}.png').convert('RGBA')
@@ -49,6 +52,9 @@ def build():
         for frame in range(WALK):
             picture = Image.open(SOURCE / 'walk' / direction / f'frame_{frame + 1:03d}.png').convert('RGBA')
             place(sheet, picture, 1 + frame, row, FEET_ON_WALK)
+        for frame in range(SLASH):
+            picture = Image.open(SOURCE / 'slash' / direction / f'frame_{frame + 1:03d}.png').convert('RGBA')
+            place(sheet, picture, 1 + WALK + frame, row, FEET_ON_WALK)
     TEXTURES.mkdir(parents=True, exist_ok=True)
     sheet.save(TEXTURES / 'wick.png', optimize=True)
     (TEXTURES / 'wick.sheet').write_text(json.dumps(
