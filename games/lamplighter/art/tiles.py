@@ -8,6 +8,12 @@ them by that corner pattern so a tile is found from the corners it must meet:
 
     id = NW * 8 + NE * 4 + SW * 2 + SE      (1 for dirt, 0 for grass)
 
+The service labels a corner `lower` or `upper`. The `lower` tiles came back as the
+dirt and the `upper` ones as the grass, the other way round from the prompts, so
+dirt is the `lower` corner here: 56 of the 64 quadrants of the sixteen tiles show
+it (the other eight straddle a boundary), and `ground-0`, every corner grass, is
+the dark green tile.
+
 `assets/scripts/ground.decay` paints the dirt path onto that sheet's `dirt`
 corners terrain when the world opens. Needs Pillow; deterministic, so CI can run it again and fail on any drift.
 """
@@ -24,7 +30,14 @@ TILE = 16
 
 def corner_id(corners):
     bit = {'NW': 8, 'NE': 4, 'SW': 2, 'SE': 1}
-    return sum(value for name, value in bit.items() if corners[name] == 'upper')
+    return sum(value for name, value in bit.items() if corners[name] == 'lower')
+
+
+def mean_color(sheet, ident):
+    tile = sheet.crop(((ident % 4) * TILE, (ident // 4) * TILE, (ident % 4 + 1) * TILE, (ident // 4 + 1) * TILE))
+    pixels = [p for p in tile.convert('RGB').get_flattened_data()] if hasattr(tile, 'get_flattened_data') \
+        else list(tile.convert('RGB').getdata())
+    return [sum(p[k] for p in pixels) / len(pixels) for k in range(3)]
 
 
 def build():
@@ -38,6 +51,10 @@ def build():
         assert picture.size == (TILE, TILE), picture.size
         sheet.paste(picture, ((ident % 4) * TILE, (ident // 4) * TILE))
     assert seen == set(range(16)), f'the tileset is missing corner patterns: {sorted(set(range(16)) - seen)}'
+    # The service's corner labels disagreed with its own prompts once; look.
+    dirt, grass = mean_color(sheet, 15), mean_color(sheet, 0)
+    assert dirt[0] > dirt[1], f'ground-15 should be dirt, brown, not {dirt}'
+    assert grass[1] > grass[0], f'ground-0 should be grass, green, not {grass}'
     TEXTURES.mkdir(parents=True, exist_ok=True)
     sheet.save(TEXTURES / 'ground.png', optimize=True)
     names = [f'ground-{i}' for i in range(16)]

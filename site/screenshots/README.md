@@ -81,7 +81,7 @@ $C games/scorchball site/screenshots/scorchball.png 1440 900 wait:3
 $C examples/sequence site/screenshots/sequence.png 1440 900 wait:2.2
 $C examples/daynight site/screenshots/daynight.png 1440 900 wait:6.3
 $C games/lamplighter site/screenshots/lamplighter.png 1440 900 \
-  hold:d wait:1.2 release:d wait:0.4
+  click:play wait:1 hold:D wait:1.9 release:D wait:0.8
 $C games/platformer site/screenshots/platformer.png 1440 900 \
   hold:ArrowRight wait:1.4 release:ArrowRight wait:0.4
 convert site/screenshots/low-tide.png -resize 1200x750 -quality 82 site/screenshots/low-tide.jpg

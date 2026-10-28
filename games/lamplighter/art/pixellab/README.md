@@ -5,7 +5,10 @@ scripts that build the project's sheets can be run again without the service.
 
 - `tileset/`: `tileset --lower "dark mossy grass, night" --upper "packed dirt
   path" --transition "worn grass edge" --tile-size 16 --view "high top-down"
-  --seed 7`. Sixteen 16 by 16 tiles, each described by its four corners.
+  --seed 7`. Sixteen 16 by 16 tiles, each described by its four corners. The
+  response's `lower` corners are the **dirt** and its `upper` the **grass**, though
+  the prompts said the reverse, so `art/tiles.py` reads `lower` as dirt; a render
+  showed the path inverted before this was found.
 - `wick/`: `character --description "Wick, a small lamplighter courier in a worn
   hooded cloak and scarf, carrying a brass lantern on a pole, dark muted blue cloak
   with a warm amber lantern glow, young and determined" --size 32 --directions 4
