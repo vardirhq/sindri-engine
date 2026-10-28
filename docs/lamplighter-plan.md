@@ -194,9 +194,10 @@ What came back from the real service, which the client's mock did not show:
   layer above the ground with the plain ground made transparent, painted from Decay.
 - **Shadows from props.** A box occluder at a prop's foot threw a rectangle under it
   that did not match its shape, and the part of the sprite behind its own base was
-  darkened by it. Occluders are now ellipses on the footprint, and lighting a standing
-  object from its base, with a cast silhouette, is the engine's contact and cast
-  shadows step.
+  darkened by it. Occluders are now ellipses on the footprint, and the contact and cast
+  shadows (`sindri.shadow2d`) now sit on every prop, lamp, Wick and gloom. Lighting
+  a standing object from its base, so its lit side is not darkened by its own
+  occluder, is still to build.
 
 ## Checks that hold throughout
 
