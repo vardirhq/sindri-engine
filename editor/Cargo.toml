@@ -11,7 +11,7 @@ publish = false
 eframe.workspace = true
 winit.workspace = true
 sha2.workspace = true
-egui_material_icons = { version = "0.8", default-features = false, features = ["outline"] }
+egui_material_icons = { version = "0.9", default-features = false, features = ["outline"] }
 glam.workspace = true
 wgpu.workspace = true
 sindri = { path = "../crates/sindri" }
