@@ -8788,6 +8788,21 @@
           "texture": "textures/objects.png#boulder-3",
           "layer": 5
         },
+        "sindri.shadow2d": {
+          "contact_size": [
+            1.9800000000000002,
+            0.81
+          ],
+          "contact_offset": [
+            0,
+            0
+          ],
+          "contact_opacity": 0.35,
+          "cast": true,
+          "cast_opacity": 0.35,
+          "height": 0.0,
+          "max_length": 2.2
+        },
         "sindri.physics2d.rigid_body": {
           "kind": "static",
           "pose": {
@@ -8898,6 +8913,21 @@
         "sindri.sprite": {
           "texture": "textures/objects.png#boulder-2",
           "layer": 5
+        },
+        "sindri.shadow2d": {
+          "contact_size": [
+            1.9800000000000002,
+            0.81
+          ],
+          "contact_offset": [
+            0,
+            0
+          ],
+          "contact_opacity": 0.35,
+          "cast": true,
+          "cast_opacity": 0.35,
+          "height": 0.0,
+          "max_length": 2.2
         },
         "sindri.physics2d.rigid_body": {
           "kind": "static",
@@ -9010,6 +9040,21 @@
           "texture": "textures/objects.png#boulder-1",
           "layer": 5
         },
+        "sindri.shadow2d": {
+          "contact_size": [
+            1.9800000000000002,
+            0.81
+          ],
+          "contact_offset": [
+            0,
+            0
+          ],
+          "contact_opacity": 0.35,
+          "cast": true,
+          "cast_opacity": 0.35,
+          "height": 0.0,
+          "max_length": 2.2
+        },
         "sindri.physics2d.rigid_body": {
           "kind": "static",
           "pose": {
@@ -9120,6 +9165,21 @@
         "sindri.sprite": {
           "texture": "textures/objects.png#boulder-0",
           "layer": 5
+        },
+        "sindri.shadow2d": {
+          "contact_size": [
+            1.9800000000000002,
+            0.81
+          ],
+          "contact_offset": [
+            0,
+            0
+          ],
+          "contact_opacity": 0.35,
+          "cast": true,
+          "cast_opacity": 0.35,
+          "height": 0.0,
+          "max_length": 2.2
         },
         "sindri.physics2d.rigid_body": {
           "kind": "static",
@@ -9232,6 +9292,21 @@
           "texture": "textures/objects.png#boulder-3",
           "layer": 5
         },
+        "sindri.shadow2d": {
+          "contact_size": [
+            1.9800000000000002,
+            0.81
+          ],
+          "contact_offset": [
+            0,
+            0
+          ],
+          "contact_opacity": 0.35,
+          "cast": true,
+          "cast_opacity": 0.35,
+          "height": 0.0,
+          "max_length": 2.2
+        },
         "sindri.physics2d.rigid_body": {
           "kind": "static",
           "pose": {
@@ -9342,6 +9417,21 @@
         "sindri.sprite": {
           "texture": "textures/objects.png#dead-tree-2",
           "layer": 5
+        },
+        "sindri.shadow2d": {
+          "contact_size": [
+            1.32,
+            0.54
+          ],
+          "contact_offset": [
+            0,
+            0
+          ],
+          "contact_opacity": 0.35,
+          "cast": true,
+          "cast_opacity": 0.35,
+          "height": 0.0,
+          "max_length": 2.2
         },
         "sindri.physics2d.rigid_body": {
           "kind": "static",
@@ -9454,6 +9544,21 @@
           "texture": "textures/objects.png#dead-tree-4",
           "layer": 5
         },
+        "sindri.shadow2d": {
+          "contact_size": [
+            1.32,
+            0.54
+          ],
+          "contact_offset": [
+            0,
+            0
+          ],
+          "contact_opacity": 0.35,
+          "cast": true,
+          "cast_opacity": 0.35,
+          "height": 0.0,
+          "max_length": 2.2
+        },
         "sindri.physics2d.rigid_body": {
           "kind": "static",
           "pose": {
@@ -9564,6 +9669,21 @@
         "sindri.sprite": {
           "texture": "textures/objects.png#dead-tree-1",
           "layer": 5
+        },
+        "sindri.shadow2d": {
+          "contact_size": [
+            1.32,
+            0.54
+          ],
+          "contact_offset": [
+            0,
+            0
+          ],
+          "contact_opacity": 0.35,
+          "cast": true,
+          "cast_opacity": 0.35,
+          "height": 0.0,
+          "max_length": 2.2
         },
         "sindri.physics2d.rigid_body": {
           "kind": "static",
@@ -9676,6 +9796,21 @@
           "texture": "textures/objects.png#dead-tree-3",
           "layer": 5
         },
+        "sindri.shadow2d": {
+          "contact_size": [
+            1.32,
+            0.54
+          ],
+          "contact_offset": [
+            0,
+            0
+          ],
+          "contact_opacity": 0.35,
+          "cast": true,
+          "cast_opacity": 0.35,
+          "height": 0.0,
+          "max_length": 2.2
+        },
         "sindri.physics2d.rigid_body": {
           "kind": "static",
           "pose": {
@@ -9786,6 +9921,21 @@
         "sindri.sprite": {
           "texture": "textures/objects.png#dead-tree-0",
           "layer": 5
+        },
+        "sindri.shadow2d": {
+          "contact_size": [
+            1.32,
+            0.54
+          ],
+          "contact_offset": [
+            0,
+            0
+          ],
+          "contact_opacity": 0.35,
+          "cast": true,
+          "cast_opacity": 0.35,
+          "height": 0.0,
+          "max_length": 2.2
         },
         "sindri.physics2d.rigid_body": {
           "kind": "static",
@@ -9898,6 +10048,21 @@
           "texture": "textures/objects.png#dead-tree-2",
           "layer": 5
         },
+        "sindri.shadow2d": {
+          "contact_size": [
+            1.32,
+            0.54
+          ],
+          "contact_offset": [
+            0,
+            0
+          ],
+          "contact_opacity": 0.35,
+          "cast": true,
+          "cast_opacity": 0.35,
+          "height": 0.0,
+          "max_length": 2.2
+        },
         "sindri.physics2d.rigid_body": {
           "kind": "static",
           "pose": {
@@ -10008,6 +10173,21 @@
         "sindri.sprite": {
           "texture": "textures/objects.png#dead-tree-4",
           "layer": 5
+        },
+        "sindri.shadow2d": {
+          "contact_size": [
+            1.32,
+            0.54
+          ],
+          "contact_offset": [
+            0,
+            0
+          ],
+          "contact_opacity": 0.35,
+          "cast": true,
+          "cast_opacity": 0.35,
+          "height": 0.0,
+          "max_length": 2.2
         },
         "sindri.physics2d.rigid_body": {
           "kind": "static",
@@ -10120,6 +10300,21 @@
           "texture": "textures/objects.png#dead-tree-1",
           "layer": 5
         },
+        "sindri.shadow2d": {
+          "contact_size": [
+            1.32,
+            0.54
+          ],
+          "contact_offset": [
+            0,
+            0
+          ],
+          "contact_opacity": 0.35,
+          "cast": true,
+          "cast_opacity": 0.35,
+          "height": 0.0,
+          "max_length": 2.2
+        },
         "sindri.physics2d.rigid_body": {
           "kind": "static",
           "pose": {
@@ -10230,6 +10425,21 @@
         "sindri.sprite": {
           "texture": "textures/objects.png#dead-tree-3",
           "layer": 5
+        },
+        "sindri.shadow2d": {
+          "contact_size": [
+            1.32,
+            0.54
+          ],
+          "contact_offset": [
+            0,
+            0
+          ],
+          "contact_opacity": 0.35,
+          "cast": true,
+          "cast_opacity": 0.35,
+          "height": 0.0,
+          "max_length": 2.2
         },
         "sindri.physics2d.rigid_body": {
           "kind": "static",
@@ -10342,6 +10552,21 @@
           "texture": "textures/objects.png#dead-tree-0",
           "layer": 5
         },
+        "sindri.shadow2d": {
+          "contact_size": [
+            1.32,
+            0.54
+          ],
+          "contact_offset": [
+            0,
+            0
+          ],
+          "contact_opacity": 0.35,
+          "cast": true,
+          "cast_opacity": 0.35,
+          "height": 0.0,
+          "max_length": 2.2
+        },
         "sindri.physics2d.rigid_body": {
           "kind": "static",
           "pose": {
@@ -10452,6 +10677,21 @@
         "sindri.sprite": {
           "texture": "textures/objects.png#dead-tree-2",
           "layer": 5
+        },
+        "sindri.shadow2d": {
+          "contact_size": [
+            1.32,
+            0.54
+          ],
+          "contact_offset": [
+            0,
+            0
+          ],
+          "contact_opacity": 0.35,
+          "cast": true,
+          "cast_opacity": 0.35,
+          "height": 0.0,
+          "max_length": 2.2
         },
         "sindri.physics2d.rigid_body": {
           "kind": "static",
@@ -10564,6 +10804,21 @@
           "texture": "textures/objects.png#dead-tree-4",
           "layer": 5
         },
+        "sindri.shadow2d": {
+          "contact_size": [
+            1.32,
+            0.54
+          ],
+          "contact_offset": [
+            0,
+            0
+          ],
+          "contact_opacity": 0.35,
+          "cast": true,
+          "cast_opacity": 0.35,
+          "height": 0.0,
+          "max_length": 2.2
+        },
         "sindri.physics2d.rigid_body": {
           "kind": "static",
           "pose": {
@@ -10674,6 +10929,21 @@
         "sindri.sprite": {
           "texture": "textures/objects.png#dead-tree-1",
           "layer": 5
+        },
+        "sindri.shadow2d": {
+          "contact_size": [
+            1.32,
+            0.54
+          ],
+          "contact_offset": [
+            0,
+            0
+          ],
+          "contact_opacity": 0.35,
+          "cast": true,
+          "cast_opacity": 0.35,
+          "height": 0.0,
+          "max_length": 2.2
         },
         "sindri.physics2d.rigid_body": {
           "kind": "static",
@@ -10786,6 +11056,21 @@
           "texture": "textures/objects.png#dead-tree-3",
           "layer": 5
         },
+        "sindri.shadow2d": {
+          "contact_size": [
+            1.32,
+            0.54
+          ],
+          "contact_offset": [
+            0,
+            0
+          ],
+          "contact_opacity": 0.35,
+          "cast": true,
+          "cast_opacity": 0.35,
+          "height": 0.0,
+          "max_length": 2.2
+        },
         "sindri.physics2d.rigid_body": {
           "kind": "static",
           "pose": {
@@ -10896,6 +11181,21 @@
         "sindri.sprite": {
           "texture": "textures/objects.png#dead-tree-0",
           "layer": 5
+        },
+        "sindri.shadow2d": {
+          "contact_size": [
+            1.32,
+            0.54
+          ],
+          "contact_offset": [
+            0,
+            0
+          ],
+          "contact_opacity": 0.35,
+          "cast": true,
+          "cast_opacity": 0.35,
+          "height": 0.0,
+          "max_length": 2.2
         },
         "sindri.physics2d.rigid_body": {
           "kind": "static",
@@ -11033,6 +11333,21 @@
             "lantern"
           ]
         },
+        "sindri.shadow2d": {
+          "contact_size": [
+            1.2,
+            0.5
+          ],
+          "contact_offset": [
+            0,
+            0
+          ],
+          "contact_opacity": 0.35,
+          "cast": false,
+          "cast_opacity": 0.35,
+          "height": 0.0,
+          "max_length": 2.2
+        },
         "sindri.physics2d.collider": {
           "shape": {
             "shape": "circle",
@@ -11150,6 +11465,21 @@
           "tags": [
             "lantern"
           ]
+        },
+        "sindri.shadow2d": {
+          "contact_size": [
+            1.2,
+            0.5
+          ],
+          "contact_offset": [
+            0,
+            0
+          ],
+          "contact_opacity": 0.35,
+          "cast": false,
+          "cast_opacity": 0.35,
+          "height": 0.0,
+          "max_length": 2.2
         },
         "sindri.physics2d.collider": {
           "shape": {
@@ -11269,6 +11599,21 @@
             "lantern",
             "goal"
           ]
+        },
+        "sindri.shadow2d": {
+          "contact_size": [
+            1.2,
+            0.5
+          ],
+          "contact_offset": [
+            0,
+            0
+          ],
+          "contact_opacity": 0.35,
+          "cast": false,
+          "cast_opacity": 0.35,
+          "height": 0.0,
+          "max_length": 2.2
         },
         "sindri.physics2d.collider": {
           "shape": {
@@ -11457,6 +11802,21 @@
         "sindri.sprite": {
           "texture": "textures/wick.png#idle-south",
           "layer": 5
+        },
+        "sindri.shadow2d": {
+          "contact_size": [
+            0.9,
+            0.35
+          ],
+          "contact_offset": [
+            0,
+            0
+          ],
+          "contact_opacity": 0.35,
+          "cast": false,
+          "cast_opacity": 0.35,
+          "height": 0.0,
+          "max_length": 2.2
         },
         "sindri.animation.sprite": {
           "clips": {
@@ -11683,6 +12043,21 @@
             "gloom"
           ]
         },
+        "sindri.shadow2d": {
+          "contact_size": [
+            1.0,
+            0.4
+          ],
+          "contact_offset": [
+            0,
+            0
+          ],
+          "contact_opacity": 0.4,
+          "cast": false,
+          "cast_opacity": 0.35,
+          "height": 0.0,
+          "max_length": 2.2
+        },
         "sindri.physics2d.rigid_body": {
           "kind": "dynamic",
           "pose": {
@@ -11759,6 +12134,21 @@
             "gloom"
           ]
         },
+        "sindri.shadow2d": {
+          "contact_size": [
+            1.0,
+            0.4
+          ],
+          "contact_offset": [
+            0,
+            0
+          ],
+          "contact_opacity": 0.4,
+          "cast": false,
+          "cast_opacity": 0.35,
+          "height": 0.0,
+          "max_length": 2.2
+        },
         "sindri.physics2d.rigid_body": {
           "kind": "dynamic",
           "pose": {
@@ -11834,6 +12224,21 @@
           "tags": [
             "gloom"
           ]
+        },
+        "sindri.shadow2d": {
+          "contact_size": [
+            1.0,
+            0.4
+          ],
+          "contact_offset": [
+            0,
+            0
+          ],
+          "contact_opacity": 0.4,
+          "cast": false,
+          "cast_opacity": 0.35,
+          "height": 0.0,
+          "max_length": 2.2
         },
         "sindri.physics2d.rigid_body": {
           "kind": "dynamic",
