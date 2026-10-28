@@ -2,6 +2,10 @@
 
 # Changelog
 
+- Lamplighter's trees, boulders, lamps, Wick and the gloom now throw shadows on the
+  ground: a soft contact ellipse under each, and for trees and boulders their own
+  silhouette laid away from the nearest lamps and Wick's lantern, so a boulder's
+  shadow is the shape of a boulder and falls away from the light.
 - Add `Lighting.visible(from, to)` and `Lighting.level(point)` to Decay: ask the 2D
   lighting whether one world point sees another past the scene's occluders, and how
   bright a point is with every light and shadow applied. Built from every light and

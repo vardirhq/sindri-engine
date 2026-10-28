@@ -122,6 +122,13 @@ def footprint(rx, ry, centre, sides=10):
             for n in range(sides)]
 
 
+def shadow(width, depth_, cast=False, opacity=0.35, cast_opacity=0.35, height=0.0, longest=2.2):
+    """What a standing thing throws on the ground: an ellipse under its feet, and with
+    `cast` its own picture laid away from the lights. World units, not art pixels."""
+    return {'contact_size': [width, depth_], 'contact_offset': [0, 0], 'contact_opacity': opacity,
+            'cast': cast, 'cast_opacity': cast_opacity, 'height': height, 'max_length': longest}
+
+
 def prop(ident, sprite, x, y, radius, centre, occluder, flip=False):
     """A tree or a boulder: it stands on its position, stops Wick and stops light.
 
@@ -132,6 +139,7 @@ def prop(ident, sprite, x, y, radius, centre, occluder, flip=False):
     round its base, not a box: a box shadows a rectangle whatever the object is."""
     return entity(ident, ident, at(x, y, depth(y), -4 if flip else 4, 4), **{
         'sindri.sprite': {'texture': f'textures/objects.png#{sprite}', 'layer': 5},
+        'sindri.shadow2d': shadow(radius * 2.2, radius * 0.9, cast=True),
         'sindri.physics2d.rigid_body': static_body(),
         'sindri.physics2d.collider': {'shape': {'shape': 'circle', 'radius': radius / 4}, 'offset': [0, centre / 4],
                                       'rotation': 0, 'sensor': False,
@@ -152,6 +160,7 @@ def lantern(ident, x, y, goal=False):
             'lit': {'frames': ['lamp-post-lit'], 'seconds_per_frame': 0.1, 'looping': False}},
             'playing': 'unlit', 'speed': 1},
         'sindri.tags': {'tags': tags},
+        'sindri.shadow2d': shadow(1.2, 0.5),
         'sindri.physics2d.collider': {'shape': {'shape': 'circle', 'radius': 1.3 / 4}, 'offset': [0, 0.6 / 4],
                                       'rotation': 0, 'sensor': True,
                                       'layers': {'memberships': LANTERN, 'filter': ALL},
@@ -186,6 +195,7 @@ def gloom(ident, x, y, variant):
     return entity(ident, ident, at(x, y, depth(y), 2, 2), **{
         'sindri.sprite': {'texture': f'textures/gloom.png#gloom-{variant}', 'layer': 5},
         'sindri.tags': {'tags': ['gloom']},
+        'sindri.shadow2d': shadow(1.0, 0.4, opacity=0.4),
         'sindri.physics2d.rigid_body': body,
         'sindri.physics2d.collider': {'shape': {'shape': 'circle', 'radius': 0.4 / 2}, 'offset': [0, 0.45 / 2],
                                       'rotation': 0, 'sensor': False,
@@ -211,6 +221,7 @@ def wick():
         # One pixel of the art is a sixteenth of a world unit.
         entity('wick-sprite', 'wick-sprite', at(0, 0, 0, 3.0, 2.75), 'wick', **{
             'sindri.sprite': {'texture': 'textures/wick.png#idle-south', 'layer': 5},
+            'sindri.shadow2d': shadow(0.9, 0.35),
             'sindri.animation.sprite': {'clips': clips(), 'playing': 'idle-south', 'speed': 1}}),
         # The lantern's flame: a light a little above Wick's feet and out to one
         # side, so what it lights and the shadows it casts start at the lantern.
