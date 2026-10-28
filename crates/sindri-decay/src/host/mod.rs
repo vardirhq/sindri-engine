@@ -23,6 +23,7 @@ mod frame;
 mod gamepad;
 mod geometry;
 mod light;
+mod lighting;
 mod map;
 mod particles;
 mod peers;
@@ -124,6 +125,8 @@ pub struct WorldHost<'a> {
     /// The physics a script may read and drive, when the host runs any.
     physics: Option<crate::Physics2d<'a>>,
     pub(crate) physics3d: Option<crate::Physics3d<'a>>,
+    /// The scene's lights and occluders, when the host gathers them.
+    pub(crate) lighting: Option<&'a sindri_scene::LightField2d>,
     pub(crate) characters: Option<crate::Characters2d<'a>>,
     pub(crate) characters3d: Option<crate::Characters3d<'a>>,
     /// What the game remembers, when the host is keeping a save.

@@ -540,7 +540,7 @@ Ambient plus point lights, normal maps and exact visibility shadows from occlude
 
 Engine ✅ · Editor 🟡 · Decay ✅ · Proof ✅ — parity row *2D lights and shadows*
 
-**Tested by:** [`crates/sindri-render/src/light2d/tests.rs`](../../crates/sindri-render/src/light2d/tests.rs), [`crates/sindri-gpu/tests/sprite_lights.rs`](../../crates/sindri-gpu/tests/sprite_lights.rs), [`crates/sindri-scene/tests/extraction/lights_2d.rs`](../../crates/sindri-scene/tests/extraction/lights_2d.rs), [`crates/sindri-scene/tests/extraction/shadows_2d.rs`](../../crates/sindri-scene/tests/extraction/shadows_2d.rs), [`crates/sindri-scene/src/components/shadow2d.rs`](../../crates/sindri-scene/src/components/shadow2d.rs), [`games/platformer/tests/cave_lights.rs`](../../games/platformer/tests/cave_lights.rs), [`games/low-tide/tests/the_basin_is_lit.rs`](../../games/low-tide/tests/the_basin_is_lit.rs)
+**Tested by:** [`crates/sindri-render/src/light2d/tests.rs`](../../crates/sindri-render/src/light2d/tests.rs), [`crates/sindri-gpu/tests/sprite_lights.rs`](../../crates/sindri-gpu/tests/sprite_lights.rs), [`crates/sindri-scene/tests/extraction/lights_2d.rs`](../../crates/sindri-scene/tests/extraction/lights_2d.rs), [`crates/sindri-scene/tests/extraction/shadows_2d.rs`](../../crates/sindri-scene/tests/extraction/shadows_2d.rs), [`crates/sindri-scene/src/components/shadow2d.rs`](../../crates/sindri-scene/src/components/shadow2d.rs), [`crates/sindri-scene/src/light_field.rs`](../../crates/sindri-scene/src/light_field.rs), [`crates/sindri-decay/tests/a_script_asks_the_light.rs`](../../crates/sindri-decay/tests/a_script_asks_the_light.rs), [`games/platformer/tests/cave_lights.rs`](../../games/platformer/tests/cave_lights.rs), [`games/low-tide/tests/the_basin_is_lit.rs`](../../games/low-tide/tests/the_basin_is_lit.rs)
 
 **Exercised in:** [`games/platformer`](../../games/platformer), [`games/low-tide`](../../games/low-tide)
 
@@ -570,7 +570,9 @@ arithmetic. An optional five-sample area light produces approximate soft shadows
 feathered contact ellipse under a sprite, and its own picture laid on the ground
 away from each of the two strongest lights near it, as long as `height * distance /
 light height` up to `max_length` and as dark as the light that reaches its feet.
-Decay writes a light's color, intensity, radius, falloff and height. The Scene
+Decay writes a light's color, intensity, radius, falloff and height, and
+asks the lighting with `Lighting.visible(from, to)` for line of sight past the
+occluders and `Lighting.level(point)` for how bright a place is. The Scene
 view draws light radii and occluder outlines with handles. The platformer's
 cave is the proof. A voxel world viewed as a map is lit too, and its
 `normal_maps` name a normal map for each texture its squares draw from: Low

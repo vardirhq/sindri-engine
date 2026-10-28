@@ -28,7 +28,7 @@ mod widget_registry;
 mod world_text;
 pub(crate) use tile_volume::face_is_occluded;
 mod lighting;
-mod lighting_2d;
+pub(crate) mod lighting_2d;
 mod shadows_2d;
 mod tilemap;
 mod tolerance;

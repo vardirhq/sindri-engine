@@ -352,6 +352,9 @@ impl Session {
         } else {
             input
         };
+        // Gathered for scripts that ask `Lighting.*`; absent when the scene has
+        // no 2D lighting on, and then asking says so.
+        let lighting = sindri_scene::LightField2d::gather(world, &self.components)?;
         let (physics, events, requests, motions) = self.physics.for_scripts_with_characters();
         let (world3d, events3d, requests3d, motions3d) =
             self.physics3d.for_scripts_with_characters();
@@ -391,6 +394,9 @@ impl Session {
         // the error it gets.
         if !self.tile_sets.is_empty() {
             frame = frame.with_tile_sets(&self.tile_sets);
+        }
+        if let Some(lighting) = &lighting {
+            frame = frame.with_lighting(lighting);
         }
         // Only when this session is actually playing one of several scenes.
         // Handed over conditionally rather than always, so a host running a

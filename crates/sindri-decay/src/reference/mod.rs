@@ -18,6 +18,7 @@ mod character3d;
 mod environment;
 mod game;
 mod input;
+mod lighting;
 mod physics;
 mod physics3d;
 mod tween;
@@ -180,6 +181,7 @@ pub const TYPES: &[&[TypeEntry]] = &[
     input::TYPES,
     tween::TYPES,
     physics3d::TYPES,
+    lighting::TYPES,
     character3d::TYPES,
 ];
 

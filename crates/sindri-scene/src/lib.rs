@@ -20,6 +20,7 @@ pub(crate) mod effects;
 mod extract;
 mod generation;
 mod input_actions;
+mod light_field;
 mod model_collision3d;
 mod model_convex_collision3d;
 mod navigation;
@@ -97,6 +98,7 @@ pub use extract::{
     world_camera_of,
 };
 pub use input_actions::InputActionsComponent;
+pub use light_field::LightField2d;
 pub use model_collision3d::{
     ModelCollider3dComponent, ModelCollisionBindings3d, ModelCollisionGeometry3d,
 };

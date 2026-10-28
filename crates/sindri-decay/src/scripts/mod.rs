@@ -212,6 +212,7 @@ impl Scripts {
             animations,
             sequences,
             tile_sets,
+            lighting,
             delta_seconds,
         } = frame;
         let mut report = ScriptReport::default();
@@ -266,6 +267,7 @@ impl Scripts {
             animations,
             sequences,
             tile_sets,
+            lighting,
             started: BTreeSet::new(),
             spawned: Vec::new(),
             messages: Vec::new(),

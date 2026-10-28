@@ -103,6 +103,12 @@ pub struct ScriptFrame<'a> {
     /// tile name nothing can draw. What a cell holds is the tile set's answer,
     /// and a host without one has no business guessing it.
     pub tile_sets: Option<&'a sindri_scene::TileSetBindings>,
+    /// Every light and occluder in a scene with 2D lighting on.
+    ///
+    /// `None` for a host that gathers none, or a scene whose lighting is off,
+    /// and then `Lighting.*` says so rather than answering that everything is
+    /// in the dark.
+    pub lighting: Option<&'a sindri_scene::LightField2d>,
     pub delta_seconds: f32,
 }
 
@@ -132,8 +138,16 @@ impl<'a> ScriptFrame<'a> {
             animations: None,
             sequences: None,
             tile_sets: None,
+            lighting: None,
             delta_seconds,
         }
+    }
+
+    /// The same frame, with the scene's lights and occluders to ask about.
+    #[must_use]
+    pub fn with_lighting(mut self, lighting: &'a sindri_scene::LightField2d) -> Self {
+        self.lighting = Some(lighting);
+        self
     }
 
     /// The same frame, with the tile sets a volume's cells name.

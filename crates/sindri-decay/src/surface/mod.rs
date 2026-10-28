@@ -25,6 +25,7 @@ pub(crate) mod environment;
 mod gamepad;
 pub(crate) mod light;
 mod light2d;
+pub(crate) mod lighting;
 mod maths;
 mod member;
 pub(super) mod names;

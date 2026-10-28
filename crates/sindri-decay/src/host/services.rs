@@ -90,6 +90,7 @@ impl<'a> WorldHost<'a> {
             scenes,
             tile_sets,
             physics3d: None,
+            lighting: None,
             characters: None,
             characters3d: None,
             walkable: None,

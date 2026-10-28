@@ -3059,6 +3059,19 @@ back does not change what undo means.
 
 
 
+### Lighting
+
+A scene with `lighting_2d` on in its environment can be asked about its light.
+Every light and occluder in the world counts, wherever the camera is. A point is
+lit by a light when no occluder edge crosses the line between them, so a soft
+penumbra is a hard edge here, and a light that does not cast shadows shines through
+occluders. Asking in a scene with the lighting off is an error, not a quiet "dark".
+
+| Call | Return | Meaning |
+| --- | --- | --- |
+| `Lighting.visible(from, to)` | `bool` | Whether the line between two world points crosses no occluder edge |
+| `Lighting.level(point)` | `number` | How bright it is at a world point: 0 dark, 1 a white light at full strength |
+
 ### Gameplay tweens
 
 Gameplay tweening is a managed Decay API. Weave's UI animation surface remains

@@ -2,6 +2,11 @@
 
 # Changelog
 
+- Add `Lighting.visible(from, to)` and `Lighting.level(point)` to Decay: ask the 2D
+  lighting whether one world point sees another past the scene's occluders, and how
+  bright a point is with every light and shadow applied. Built from every light and
+  occluder in the world, not only those near the camera, so a game rule can use it;
+  a scene with `lighting_2d` off says so.
 - Add `sindri.shadow2d`, the shadow things cast on the ground. A soft contact
   ellipse under a sprite, and, with `cast` on, the sprite's own picture laid on the
   ground away from the two strongest 2D lights near it: longer for a taller thing

@@ -178,6 +178,13 @@ impl<'a> WorldHost<'a> {
         self
     }
 
+    /// Supplies the scene's lights and occluders for `Lighting.*`.
+    #[must_use]
+    pub fn with_lighting(mut self, lighting: Option<&'a sindri_scene::LightField2d>) -> Self {
+        self.inner.lighting = lighting;
+        self
+    }
+
     /// Supplies the scene's controller queue and cached results.
     #[must_use]
     pub fn with_characters(mut self, characters: Option<crate::Characters2d<'a>>) -> Self {

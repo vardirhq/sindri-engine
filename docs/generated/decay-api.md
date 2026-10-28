@@ -42,6 +42,7 @@ Names in scope without qualification. Decay has no imports, so each of these is 
 - `Gesture`: `Gesture` — What the player did with the mouse or a finger: a tap, a hold, a drag or a pinch. Works the same for both.
 - `Grid`: `Grid` — Grids of tiles, flat or stacked in layers like building blocks: what each cell holds, where objects stand on them, and paths across them.
 - `Input`: `Input` — Every way the player reaches the game, in one place. Start with `Input.Action`, which works the same whatever the player holds; `Input.Pointer`, `Input.Stick` and `Input.Gesture` for mouse and touch; `Input.Keyboard`, `Input.Touch` and `Input.Gamepad` for one device read directly. The calls directly on `Input` are the keyboard, kept for older scripts: prefer `Input.Keyboard`.
+- `Lighting`: `Lighting` — Asks the scene's 2D lighting about places in the world. Requires a scene whose environment has 2D lighting on, and fails otherwise. Every light and occluder in the world counts, wherever the camera is. A point is lit by a light when no occluder edge crosses the line between it and the light's centre, so a soft penumbra is a hard edge here, and a light that does not cast shadows shines through occluders.
 - `PI`: `number` — The number π (3.14159…): half a full turn when measuring angles in radians.
 - `Physics`: `Physics` — 2D physics: moving objects with speed and pushes, and finding out what this script's object bumped into.
 - `Physics3d`: `Physics3d` — Independent 3D physics controls, indexed queries and copied last-step events. Requires a 3D physics host. Controls require an active body. Before synchronization, valid authored 3D bodies with nonempty primitive colliders or convex-model references accept ordered setters/impulses. Convex asset geometry, scaled hull mass and pending controls validate at scene synchronization; replay uses actual compound mass. Unconsumed requests expire after successful synchronization. Authored motion fields are unchanged, so structural rebuilds restore authored settings.
@@ -396,6 +397,13 @@ A light in a 2D scene: it brightens sprites, tiles and shapes near it when the s
 - `height`: `number` — How high above the scene the light hangs. Only images with a normal map notice: low lights rake across their bumps, high ones light them evenly.
 - `intensity`: `number` — How bright the light is; 0 is off.
 - `radius`: `number` — How far the light reaches, in world units.
+
+### `Lighting`
+
+Asks the scene's 2D lighting about places in the world. Requires a scene whose environment has 2D lighting on, and fails otherwise. Every light and occluder in the world counts, wherever the camera is. A point is lit by a light when no occluder edge crosses the line between it and the light's centre, so a soft penumbra is a hard edge here, and a light that does not cast shadows shines through occluders.
+
+- `level(point: Vec2)` → `number` — How bright it is at a world point (Vec2): the luminance of the ambient plus every light reaching it, shadows applied. 0 is dark, 1 is a white light at full strength, and overlapping lights add past 1.
+- `visible(from: Vec2, to: Vec2)` → `bool` — Whether the straight line between two world points (Vec2) crosses no occluder edge: line of sight. Touching an edge's end or standing on it does not block.
 
 ### `NumberTween`
 
