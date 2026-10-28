@@ -2,15 +2,18 @@
 //!
 //! A frame carries at most [`MAX_LIGHTS_2D`] of them, uploaded once per frame
 //! to a uniform both the sprite and the shape pipelines read. A light that
-//! casts shadows carries a one-dimensional polar shadow map built on the CPU
-//! (see [`shadow_map_2d`]), so where a shadow falls is plain arithmetic a test
-//! can check without a GPU.
+//! casts shadows carries the exact region it sees, built on the CPU as angular
+//! intervals (see [`shadow_map_2d`]), so where a shadow falls is plain
+//! arithmetic a test can check without a GPU, and a script can ask it.
 
 mod gpu;
 mod shadow;
 
 pub(crate) use gpu::Lights2dGpu;
-pub use shadow::{SHADOW_BINS_2D, SHADOW_SAMPLES_2D, shadow_map_2d, shadow_maps_2d};
+pub use shadow::{
+    SHADOW_INTERVAL_FLOATS_2D, SHADOW_INTERVALS_2D, SHADOW_MAP_LEN_2D, SHADOW_SAMPLES_2D, sees,
+    shadow_map_2d, shadow_maps_2d,
+};
 
 use std::sync::Arc;
 
@@ -45,7 +48,7 @@ pub struct Light2dShadow {
     pub reach: f32,
     /// Radius of the light-emitting area, in world units; zero is a point.
     pub source_radius: f32,
-    /// One or five [`SHADOW_BINS_2D`]-wide maps from [`shadow_maps_2d`].
+    /// One or five [`SHADOW_MAP_LEN_2D`]-long maps from [`shadow_maps_2d`].
     pub map: Arc<[f32]>,
 }
 

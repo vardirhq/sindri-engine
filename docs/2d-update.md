@@ -76,7 +76,7 @@ game in this repository; Orbital's charger now proves it.
 ### 3. 2D shadows
 - [x] `sindri.light2d.occluder`: a box or polygon that blocks 2D light. A light
   with `shadows` on is blocked by every occluder in its radius.
-- [x] Shadows are a one-dimensional polar depth map per light, built on the CPU
+- [x] Shadows are, per light, a list of angular intervals each holding the line of the nearest blocking edge (first a one-dimensional polar depth map), built on the CPU
   from occluder edges and sampled in the sprite shader, so they are
   deterministic and testable without a GPU.
 - [x] A tilemap can cast shadows from its solid cells, through the tilemap

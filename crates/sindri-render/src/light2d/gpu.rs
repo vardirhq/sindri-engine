@@ -4,7 +4,10 @@
 //! renderer so every bind group made from it stays valid, and rewritten when
 //! the frame's lighting changes.
 
-use super::{Lighting2d, MAX_LIGHTS_2D, SHADOW_BINS_2D, SHADOW_SAMPLES_2D};
+use super::{
+    Lighting2d, MAX_LIGHTS_2D, SHADOW_INTERVAL_FLOATS_2D, SHADOW_INTERVALS_2D, SHADOW_MAP_LEN_2D,
+    SHADOW_SAMPLES_2D,
+};
 
 #[repr(C)]
 #[derive(Clone, Copy, Debug, bytemuck::Pod, bytemuck::Zeroable)]
@@ -23,7 +26,10 @@ struct LightsUniform {
 }
 
 #[allow(clippy::cast_possible_truncation)]
-const BINS: u32 = SHADOW_BINS_2D as u32;
+const INTERVALS: u32 = SHADOW_INTERVALS_2D as u32;
+/// Bytes in one texel: an interval's four floats.
+#[allow(clippy::cast_possible_truncation)]
+const TEXEL_BYTES: u32 = (SHADOW_INTERVAL_FLOATS_2D * 4) as u32;
 #[allow(clippy::cast_possible_truncation)]
 const ROWS: u32 = (MAX_LIGHTS_2D * SHADOW_SAMPLES_2D) as u32;
 
@@ -55,14 +61,14 @@ impl Lights2dGpu {
         let shadow = device.create_texture(&wgpu::TextureDescriptor {
             label: Some("Sindri 2D shadow maps"),
             size: wgpu::Extent3d {
-                width: BINS,
+                width: INTERVALS,
                 height: ROWS,
                 depth_or_array_layers: 1,
             },
             mip_level_count: 1,
             sample_count: 1,
             dimension: wgpu::TextureDimension::D2,
-            format: wgpu::TextureFormat::R32Float,
+            format: wgpu::TextureFormat::Rgba32Float,
             usage: wgpu::TextureUsages::TEXTURE_BINDING | wgpu::TextureUsages::COPY_DST,
             view_formats: &[],
         });
@@ -94,7 +100,7 @@ impl Lights2dGpu {
                 shadow: [0.0; 4],
             }; MAX_LIGHTS_2D],
         };
-        let mut rows = vec![0.0_f32; SHADOW_BINS_2D * MAX_LIGHTS_2D * SHADOW_SAMPLES_2D];
+        let mut rows = vec![0.0_f32; SHADOW_MAP_LEN_2D * MAX_LIGHTS_2D * SHADOW_SAMPLES_2D];
         if let Some(lighting) = lighting {
             let [r, g, b] = lighting.ambient;
             uniform.ambient = [r, g, b, 1.0];
@@ -123,8 +129,8 @@ impl Lights2dGpu {
                     ],
                 };
                 if let Some(shadow) = &light.shadow {
-                    let row = &mut rows[index * SHADOW_BINS_2D * SHADOW_SAMPLES_2D
-                        ..(index + 1) * SHADOW_BINS_2D * SHADOW_SAMPLES_2D];
+                    let row = &mut rows[index * SHADOW_MAP_LEN_2D * SHADOW_SAMPLES_2D
+                        ..(index + 1) * SHADOW_MAP_LEN_2D * SHADOW_SAMPLES_2D];
                     for (into, from) in row.iter_mut().zip(shadow.map.iter()) {
                         *into = *from;
                     }
@@ -142,11 +148,11 @@ impl Lights2dGpu {
             bytemuck::cast_slice(&rows),
             wgpu::TexelCopyBufferLayout {
                 offset: 0,
-                bytes_per_row: Some(BINS * 4),
+                bytes_per_row: Some(INTERVALS * TEXEL_BYTES),
                 rows_per_image: Some(ROWS),
             },
             wgpu::Extent3d {
-                width: BINS,
+                width: INTERVALS,
                 height: ROWS,
                 depth_or_array_layers: 1,
             },

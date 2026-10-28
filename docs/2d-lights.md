@@ -95,27 +95,37 @@ platformer's `hero_n.png` was made there.
 | `tilemap` | The solid cells of the tilemap on the same entity, merged into boxes exactly as `sindri.physics2d.tilemap_collider` merges them; that collider's `passable` sprites let light through too |
 
 All in the entity's own space, placed by its world transform. Each shadow
-casting light gets a one-dimensional polar depth map, built on the CPU from
-every occluder edge within its radius: for each of 256 directions, the distance
-to the nearest edge. A pixel further than that, past the light's
-`shadow_reach`, is in shadow; three neighbouring directions are averaged, which
-softens the edge by about a degree and a half. Built on the CPU because it is
-the same arithmetic on every host and testable without a GPU
-(`Lighting2d::at` answers what a point receives).
+casting light sees exactly what no occluder edge within its radius blocks. That
+region is described, round the light, as a sorted list of angular intervals: each
+runs from the direction of one edge's end to the next and holds the line of the
+one edge nearest the light across it (a unit normal and the line's distance from
+the light, so the distance along a ray is `d / (n . u)`). A point is in shadow when
+it lies past that edge by more than the light's `shadow_reach`. A shadow therefore
+ends at the true angle of an edge's end, at any distance, and two walls meeting
+cast a true corner; nothing is quantized to a table of directions.
 
-A positive `shadow_source_radius` uses five shadow maps from points across the
-light source, averaging their visibility to approximate an area-light penumbra.
-The CPU query and GPU renderer use the same samples and angular filter. It is
-a five-sample approximation, so bands and aliasing can remain; it is not a
-continuous area-light solution. It costs five map builds per shadowed light.
-Lamplighter uses it on Wick’s lantern and its roadside lamps.
+The intervals come from an angular sweep on the CPU, one per shadowed light, and
+the shader finds a pixel's interval by binary search and applies the same
+formula, so the arithmetic is the same on every host and testable without a GPU:
+`Lighting2d::at` answers what a point receives, and `sindri_render::sees` answers
+whether a source sees a point at all. One wall is three intervals; a source holds
+up to 256, enough for a level's few dozen merged boxes, and past that the narrowest
+slivers fold into their neighbors, so a crowd of tiny edges loses fine detail of
+shadow and never a whole edge.
 
-Limits: the maps are rebuilt every frame from every occluder, which is cheap
+A positive `shadow_source_radius` uses five sources from points across the light's
+emitting area, averaging their visibility to approximate an area-light penumbra.
+The CPU query and GPU renderer use the same samples. It is a five-sample
+approximation, so the penumbra is five steps, not a smooth ramp; it is not a
+continuous area-light solution. It costs five sweeps per shadowed light.
+Lamplighter uses it on Wick’s lantern and its roadside lamps. A point light's
+shadow edge is hard: that is the look, and the area samples are the softening.
+
+Limits: the intervals are rebuilt every frame from every occluder, which is cheap
 for a handful of lights and a level's few dozen merged boxes and is not meant
-for hundreds of shadow casting lights. A shadow's edge resolution is angular,
-so a light far from what it shadows draws a softer, coarser edge. Occluders
-block light only; they do not darken themselves beyond `shadow_reach`, which is
-why a sun's reach is set to the depth of the ground it lights.
+for hundreds of shadow casting lights. Occluders block light only; they do not
+darken themselves beyond `shadow_reach`, which is why a sun's reach is set to the
+depth of the ground it lights.
 
 ## In the editor
 

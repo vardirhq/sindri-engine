@@ -1,6 +1,7 @@
 use std::sync::Arc;
 
 use super::*;
+use crate::light2d::{SHADOW_INTERVAL_FLOATS_2D, SHADOW_INTERVALS_2D, SHADOW_MAP_LEN_2D, sees};
 
 fn near(actual: [f32; 3], expected: [f32; 3]) -> bool {
     actual
@@ -52,23 +53,116 @@ fn a_wall_shadows_what_is_behind_it_and_not_what_is_before_it() {
     assert!(lighting.at([3.0, 2.5])[0] > 0.0, "past the wall's end");
 }
 
+/// The intervals a map really uses: those before the padding.
+fn used(map: &[f32]) -> usize {
+    map.chunks(SHADOW_INTERVAL_FLOATS_2D)
+        .take_while(|interval| interval[0] < 1.0e8)
+        .count()
+}
+
+fn blocked(map: &[f32], point: [f32; 2]) -> bool {
+    !sees(map, point, 0.0)
+}
+
 #[test]
-fn the_map_holds_the_nearest_edge_each_way() {
+fn the_nearest_edge_each_way_is_the_one_that_blocks() {
     let map = shadow_map_2d(
         [0.0, 0.0],
         10.0,
         &[[[3.0, -5.0], [3.0, 5.0]], [[5.0, -5.0], [5.0, 5.0]]],
     );
-    let east = map[shadow::bin_of([1.0, 0.0])];
-    assert!((east - 3.0).abs() < 0.01, "{east}");
-    let west = map[shadow::bin_of([-1.0, 0.0])];
-    assert!(west > 100.0, "nothing west: {west}");
+    assert!(!blocked(&map, [2.9, 0.0]), "before the near wall");
+    assert!(blocked(&map, [3.1, 0.0]), "behind the near wall");
+    assert!(blocked(&map, [6.0, 0.0]), "and so behind the far one");
+    assert!(!blocked(&map, [-8.0, 0.0]), "nothing west");
+}
+
+/// The boundary of a shadow is where the edge's end is, not within a bin of it.
+#[test]
+fn a_shadow_ends_exactly_where_its_edge_does() {
+    let map = shadow_map_2d([0.0, 0.0], 8.0, &[[[2.0, -1.0], [2.0, 1.0]]]);
+    // The ray through the wall's top end, (2, 1), passes (4, 2).
+    assert!(blocked(&map, [4.0, 1.99]), "just under that ray is shadow");
+    assert!(!blocked(&map, [4.0, 2.01]), "just over it is light");
+    assert!(blocked(&map, [6.0, 2.98]), "and the same further out");
+    assert!(!blocked(&map, [6.0, 3.02]));
+    assert!(blocked(&map, [4.0, -1.99]), "and on the other side");
+    assert!(!blocked(&map, [4.0, -2.01]));
+}
+
+/// Three intervals describe one wall: open, blocked, open. The map holds no
+/// more than that, so it costs what the scene has, not a fixed table.
+#[test]
+fn one_wall_is_three_intervals() {
+    let map = shadow_map_2d([0.0, 0.0], 8.0, &[[[2.0, -1.0], [2.0, 1.0]]]);
+    assert_eq!(used(&map), 3);
+    assert_eq!(map.len(), SHADOW_MAP_LEN_2D);
+    assert!(map[3] < 0.0, "open before the wall");
+    assert!(map[SHADOW_INTERVAL_FLOATS_2D + 3] > 0.0, "the wall");
+    assert!(map[2 * SHADOW_INTERVAL_FLOATS_2D + 3] < 0.0, "open after");
+}
+
+/// A corner is a corner: two walls meeting shadow the wedge behind them and
+/// leave both sides of it lit.
+#[test]
+fn two_walls_meeting_cast_a_corner() {
+    let map = shadow_map_2d(
+        [0.0, 0.0],
+        10.0,
+        &[[[2.0, 2.0], [2.0, -2.0]], [[2.0, 2.0], [-2.0, 2.0]]],
+    );
+    assert!(blocked(&map, [4.0, 4.0]), "behind the corner");
+    assert!(blocked(&map, [4.0, 0.5]), "behind the east wall");
+    assert!(blocked(&map, [0.5, 4.0]), "behind the north wall");
+    assert!(!blocked(&map, [3.0, -4.0]), "past the east wall's far end");
+    assert!(!blocked(&map, [-4.0, 3.0]), "past the north wall's far end");
+    assert!(!blocked(&map, [1.5, 1.5]), "in front of the corner");
+}
+
+#[test]
+fn reach_lets_light_past_an_edge_a_little_way() {
+    let map = shadow_map_2d([0.0, 0.0], 8.0, &[[[2.0, -1.0], [2.0, 1.0]]]);
+    assert!(
+        sees(&map, [2.3, 0.0], 0.5),
+        "within reach of the wall's face"
+    );
+    assert!(!sees(&map, [2.3, 0.0], 0.0), "without reach it is dark");
+    assert!(!sees(&map, [3.0, 0.0], 0.5), "and well behind it still is");
+}
+
+#[test]
+fn a_light_standing_on_an_edge_line_is_not_confused() {
+    // The wall's line runs through the light: no ray crosses it, so it blocks nothing.
+    let map = shadow_map_2d([0.0, 0.0], 8.0, &[[[1.0, 0.0], [3.0, 0.0]]]);
+    assert_eq!(used(&map), 1);
+    assert!(map.iter().all(|value| value.is_finite()));
+}
+
+#[test]
+fn more_edges_than_intervals_still_block_the_wide_ones() {
+    // A ring of hundreds of tiny walls far out, and one wide wall near.
+    let mut edges = vec![[[2.0, -3.0], [2.0, 3.0]]];
+    for step in 0..600_u16 {
+        let angle = f32::from(step) / 600.0 * std::f32::consts::TAU;
+        let (a, b) = (angle, angle + 0.004);
+        edges.push([
+            [7.0 * a.cos(), 7.0 * a.sin()],
+            [7.0 * b.cos(), 7.0 * b.sin()],
+        ]);
+    }
+    let map = shadow_map_2d([0.0, 0.0], 9.0, &edges);
+    assert_eq!(map.len(), SHADOW_MAP_LEN_2D);
+    assert!(used(&map) <= SHADOW_INTERVALS_2D);
+    assert!(map.iter().all(|value| value.is_finite()));
+    assert!(blocked(&map, [3.0, 0.0]), "the wide wall still blocks");
+    assert!(!blocked(&map, [1.0, 0.0]));
 }
 
 #[test]
 fn edges_out_of_reach_are_ignored() {
     let map = shadow_map_2d([0.0, 0.0], 1.0, &[[[3.0, -1.0], [3.0, 1.0]]]);
-    assert!(map.iter().all(|distance| *distance > 100.0));
+    assert_eq!(used(&map), 1);
+    assert!(!blocked(&map, [0.9, 0.0]));
 }
 
 #[test]
@@ -102,6 +196,7 @@ fn zero_area_preserves_one_point_shadow_map() {
     let edges = [[[1.0, -1.0], [1.0, 1.0]]];
     let point = shadow_map_2d([0.0, 0.0], 4.0, &edges);
     let area = shadow_maps_2d([0.0, 0.0], 4.0, 0.0, &edges);
+    assert_eq!(point.len(), SHADOW_MAP_LEN_2D);
     assert_eq!(point.len(), area.len());
     assert!(
         point
