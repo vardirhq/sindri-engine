@@ -33,6 +33,21 @@ fn clip(run: &Run) -> String {
         .to_owned()
 }
 
+/// Walks east a few frames at a time until `target` is within a blade's reach.
+fn walk_until_in_reach(run: &mut Run, target: &str) {
+    for _ in 0..200 {
+        let (wick, gloom) = (position(run, "wick"), position(run, target));
+        let (Some(wick), Some(gloom)) = (wick, gloom) else {
+            return;
+        };
+        if gloom[0] - wick[0] < 1.4 {
+            return;
+        }
+        tap(run, Key::D, 3);
+    }
+    panic!("Wick never got within reach of {target}");
+}
+
 /// Walks east until the first gloom blocks the way, then stops.
 fn up_to_the_gloom() -> Run {
     let mut run = Run::open().expect("the project opens");
@@ -72,8 +87,9 @@ fn three_blows_put_out_the_gloom_ahead_and_leave_the_one_behind() {
     );
 
     for _ in 0..2 {
-        // The gloom was thrown away; walk up to it again before the next blow.
-        tap(&mut run, Key::D, 25);
+        // The gloom was thrown away; walk up to it again, as a player would,
+        // before the next blow.
+        walk_until_in_reach(&mut run, "gloom-1");
         step(&mut run, 20);
         tap(&mut run, Key::J, 2);
         step(&mut run, 40);

@@ -118,7 +118,7 @@ script Wick {
         let middle = Vec2(p.x + ahead_x * this.reach, p.y + 0.5 + ahead_y * this.reach);
         for hit in Physics.overlap_circle(middle, this.blade, Physics.layer("target"), false, this.entity) {
             if World.exists(hit) && World.has_tag(hit, "gloom") {
-                Gloom.on(hit).hurt(p.x, p.y + 0.5);
+                Gloom.on(hit).hurt(ahead_x, ahead_y);
             }
         }
     }
