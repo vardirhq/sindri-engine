@@ -26,7 +26,7 @@ impl WorldHost<'_> {
     ) -> Result<Value, RuntimeError> {
         let fail = |message: String| RuntimeError::Host(format!("{} {message}", path.dotted()));
         let map = self.entity_argument(path, args, 0, "the tilemap")?;
-        let mut cell = [0_u32; 2];
+        let mut at = [0_u32; 2];
         for (slot, which) in [(1, "a column"), (2, "a row")] {
             let value = number(
                 path,
@@ -38,7 +38,7 @@ impl WorldHost<'_> {
             }
             #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
             {
-                cell[slot - 1] = value as u32;
+                at[slot - 1] = value as u32;
             }
         }
         let corner = call == GridCall::SetTerrainCorner;
@@ -75,10 +75,10 @@ impl WorldHost<'_> {
                     "needs true to set the corner or false to clear it".to_owned(),
                 ));
             };
-            paint_corner(payload, &terrains, cell[0], cell[1], terrain, *set)
+            paint_corner(payload, &terrains, at[0], at[1], terrain, *set)
         } else {
             let wanted = (!terrain.is_empty()).then_some(terrain.as_str());
-            paint_terrain(payload, &terrains, cell[0], cell[1], wanted)
+            paint_terrain(payload, &terrains, at[0], at[1], wanted)
         }
         .map_err(|error| fail(error.to_string()))?;
         Ok(Value::Unit)
