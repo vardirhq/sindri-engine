@@ -10,7 +10,7 @@ use std::sync::Arc;
 
 use glam::{Mat4, Vec3};
 use sindri_core::{EntityId, SceneComponent, World};
-use sindri_render::{Light2d, Light2dShadow, Lighting2d, MAX_LIGHTS_2D, shadow_map_2d};
+use sindri_render::{Light2d, Light2dShadow, Lighting2d, MAX_LIGHTS_2D, shadow_maps_2d};
 
 use super::camera::ResolvedCameras;
 use super::{SceneExtractError, SceneExtractor, transform_matrix};
@@ -48,7 +48,12 @@ impl SceneExtractor {
             let edges = self.occluder_edges(world)?;
             for light in &mut lights {
                 if let Some(shadow) = &mut light.shadow {
-                    shadow.map = Arc::from(shadow_map_2d(light.position, light.radius, &edges));
+                    shadow.map = Arc::from(shadow_maps_2d(
+                        light.position,
+                        light.radius,
+                        shadow.source_radius,
+                        &edges,
+                    ));
                 }
             }
         }
@@ -81,6 +86,7 @@ impl SceneExtractor {
                 color: light.radiance(),
                 shadow: light.shadows.then(|| Light2dShadow {
                     reach: light.shadow_reach,
+                    source_radius: light.shadow_source_radius,
                     map: Arc::from([]),
                 }),
             });

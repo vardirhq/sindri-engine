@@ -91,6 +91,7 @@ pub(super) fn register_lights(
         ("falloff", at_least(0.01)),
         ("height", at_least(0.0)),
         ("shadow_reach", at_least(0.0)),
+        ("shadow_source_radius", at_least(0.0)),
     ])?;
     components.describe::<Light2dOccluderComponent>([
         ("shape", FieldMeaning::choice(OccluderShape::NAMES)),

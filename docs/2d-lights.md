@@ -37,6 +37,7 @@ content are never lit.
 | `height` | How far above the plane it sits, read only by normal-mapped art | `1` |
 | `shadows` | Whether occluders block it | `false` |
 | `shadow_reach` | How far past an occluding edge light still reaches, so the face of a wall the light falls on is lit | `0.1` |
+| `shadow_source_radius` | Emitting-area radius in world units; zero is a point light | `0` |
 
 It is its own component rather than a kind of `sindri.light`: a 3D light shades
 surfaces by the way they face, and a 2D light lights pictures, which face only
@@ -101,6 +102,13 @@ to the nearest edge. A pixel further than that, past the light's
 softens the edge by about a degree and a half. Built on the CPU because it is
 the same arithmetic on every host and testable without a GPU
 (`Lighting2d::at` answers what a point receives).
+
+A positive `shadow_source_radius` uses five shadow maps from points across the
+light source, averaging their visibility to approximate an area-light penumbra.
+The CPU query and GPU renderer use the same samples and angular filter. It is
+a five-sample approximation, so bands and aliasing can remain; it is not a
+continuous area-light solution. It costs five map builds per shadowed light.
+Lamplighter uses it on Wick’s lantern and its roadside lamps.
 
 Limits: the maps are rebuilt every frame from every occluder, which is cheap
 for a handful of lights and a level's few dozen merged boxes and is not meant

@@ -49,7 +49,13 @@ fn wick_carries_a_shadow_casting_light_into_a_dark_world() {
         .iter()
         .find(|light| (light.radius - 5.5).abs() < 0.01)
         .expect("Wick carries a lantern");
-    assert!(held.shadow.is_some(), "Wick's lantern casts shadows");
+    let shadow = held.shadow.as_ref().expect("Wick's lantern casts shadows");
+    assert!((shadow.source_radius - 0.4).abs() < 0.001);
+    assert_eq!(
+        shadow.map.len(),
+        sindri_render::SHADOW_BINS_2D * sindri_render::SHADOW_SAMPLES_2D,
+        "the carried lantern uses all area samples"
+    );
     let hero = run.entity("hero").expect("Wick exists");
     let start = run.position(hero);
     assert!((held.position[0] - start[0]).abs() < 0.3);
