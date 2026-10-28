@@ -127,6 +127,47 @@ for hundreds of shadow casting lights. Occluders block light only; they do not
 darken themselves beyond `shadow_reach`, which is why a sun's reach is set to the
 depth of the ground it lights.
 
+## Shadows on the ground
+
+An occluder decides what a light cannot see through. It is not what a viewer
+looks at: that is the dark patch on the ground saying a tree stands there and
+which way the light is. `sindri.shadow2d` adds it to anything with a picture, in
+two parts, either of which it may have:
+
+| Field | Meaning | Default |
+| --- | --- | --- |
+| `contact_size` | Width and depth of a soft dark ellipse under the thing, in world units; zero in either leaves it out | `[1.0, 0.4]` |
+| `contact_offset` | Where its middle is, from the entity's position | `[0, 0]` |
+| `contact_opacity` | How dark it is at its middle | `0.35` |
+| `cast` | Whether the thing's own picture is also cast away from the lights | `false` |
+| `cast_opacity` | How dark a cast shadow is where a light reaches its full strength | `0.45` |
+| `height` | How tall the thing is, in world units, which sets how long it casts; zero takes the height its picture is drawn at | `0` |
+| `max_length` | The longest a cast shadow gets | `2.5` |
+
+The **contact shadow** is a feathered black ellipse drawn one layer below the
+thing's sprite, so it says the thing rests on the ground whatever lights are
+about. The **cast shadow** is the sprite's own picture, in black, laid on the
+ground: its feet stay where they are and its head is carried away from the light,
+so it is a card lying down and pointing away from it. It is `height * distance /
+light height` long (so a taller thing, and a light further from it or lower, cast
+longer) up to `max_length`, as wide as the picture, and as dark as the light that
+reaches its feet. Of the lights in reach the two strongest each cast one, so two
+lamps give a thing two shadows. A light that the thing carries, such as Wick's
+lantern, casts nothing from it. A cast shadow is always an area, whichever side
+the light is on, because it lies across the ground rather than standing in the
+picture's plane.
+
+Both are drawn over the lit ground and are not lit themselves, so they darken what
+light reaches and change nothing in the dark, and neither blocks light: that is the
+occluder's work, and a thing usually wants both, the occluder as a small ellipse on
+its footprint (a box centered on its foot shadows a rectangle under it whatever the
+thing is). Casting needs the environment's `lighting_2d` on.
+
+Limits: the cast shadow is the sprite's picture and not its real shape from above,
+so a tree casts the silhouette it shows, not its crown's outline; it falls on a
+flat ground at the object's own height, so it does not climb a wall or a step; and
+a thing's own face is not shaded by the light, only its ground.
+
 ## In the editor
 
 Create offers Light 2D, and Add Component offers Light 2D and Light Occluder

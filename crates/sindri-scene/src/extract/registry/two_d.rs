@@ -3,8 +3,8 @@
 use sindri_core::{AssetKind, ComponentSchemaRegistry, FieldMeaning};
 
 use crate::components::{
-    Light2dComponent, Light2dOccluderComponent, OccluderShape, ShapeComponent, SpriteComponent,
-    UiShapeBlend, UiShapeComponent, UiShapeKind,
+    Light2dComponent, Light2dOccluderComponent, OccluderShape, Shadow2dComponent, ShapeComponent,
+    SpriteComponent, UiShapeBlend, UiShapeComponent, UiShapeKind,
 };
 
 use crate::effects::{EmissionShape, ParticleSpace, ParticlesComponent};
@@ -80,10 +80,21 @@ pub(super) fn register_lights(
         "Light Occluder 2D",
         serde_json::to_value(Light2dOccluderComponent::default()).expect("an occluder serializes"),
     )?;
+    components.register_with_default::<Shadow2dComponent>(
+        "Shadow 2D",
+        serde_json::to_value(Shadow2dComponent::default()).expect("a shadow serializes"),
+    )?;
     let at_least = |min: f64| FieldMeaning::Range {
         min,
         max: f64::INFINITY,
     };
+    let share = || FieldMeaning::Range { min: 0.0, max: 1.0 };
+    components.describe::<Shadow2dComponent>([
+        ("contact_opacity", share()),
+        ("cast_opacity", share()),
+        ("height", at_least(0.0)),
+        ("max_length", at_least(0.0)),
+    ])?;
     components.describe::<Light2dComponent>([
         ("color", FieldMeaning::Color),
         ("intensity", at_least(0.0)),
