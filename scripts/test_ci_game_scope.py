@@ -15,6 +15,7 @@ class ScopeTests(unittest.TestCase):
             ('game/assets/main.scene', 'causeway', 'sindri-causeway'),
             ('games/flappy/assets/main.scene', 'flappy', 'flappy'),
             ('games/platformer/assets/level-1.scene', 'platformer', 'platformer'),
+            ('games/lamplighter/assets/world.scene', 'lamplighter', 'lamplighter'),
             ('games/low-tide/assets/main.scene', 'low-tide', 'low-tide'),
             ('games/orbital-baked/assets/main.scene', 'orbital-baked', 'orbital-baked'),
             ('games/scorchball/assets/main.scene', 'scorchball', 'scorchball'),

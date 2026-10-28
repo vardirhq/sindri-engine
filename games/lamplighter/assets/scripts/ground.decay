@@ -1,0 +1,50 @@
+// The ground is grass until this paints a dirt path on it: from where Wick
+// starts, past each lantern, to the last. The path is laid corner by corner
+// on the sheet's `dirt` terrain, so a tile on its edge draws the corner
+// pattern the neighbouring corners call for. Painted once, as the world opens.
+script Ground {
+    // The world position of the map's top-left corner.
+    @export let left: number = -26.0;
+    @export let top: number = 18.0;
+    // How far from the walk between lanterns the path reaches, and around a lantern.
+    @export let width: number = 1.6;
+    @export let plaza: number = 2.6;
+
+    var path_x: List<number> = [0.0, 8.0, 17.0, 22.0];
+    var path_y: List<number> = [0.0, 0.0, -3.0, 8.0];
+
+    fn start() {
+        let map = this.entity;
+        let columns = Grid.columns(map);
+        let rows = Grid.rows(map);
+        for row in 0..rows + 1.0 {
+            for column in 0..columns + 1.0 {
+                if near_path(this.left + column, this.top - row) {
+                    Grid.set_terrain_corner(map, column, row, "dirt", true);
+                }
+            }
+        }
+    }
+
+    // Whether a world point is on the path or in a lantern's plaza.
+    fn near_path(x: number, y: number) -> bool {
+        for i in 0..this.path_x.length {
+            let ax = this.path_x[i];
+            let ay = this.path_y[i];
+            if sqrt((x - ax) * (x - ax) + (y - ay) * (y - ay)) <= this.plaza {
+                return true;
+            }
+            if i + 1.0 < this.path_x.length {
+                let dx = this.path_x[i + 1.0] - ax;
+                let dy = this.path_y[i + 1.0] - ay;
+                let along = max(0.0, min(1.0, ((x - ax) * dx + (y - ay) * dy) / (dx * dx + dy * dy)));
+                let px = ax + along * dx;
+                let py = ay + along * dy;
+                if sqrt((x - px) * (x - px) + (y - py) * (y - py)) <= this.width {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+}

@@ -182,6 +182,48 @@
   },
   {
     "category": "games",
+    "title": "Lamplighter",
+    "path": "examples/lamplighter/",
+    "source": "games/lamplighter",
+    "description": "A top-down adventure in a darkening world: walk with a lantern and light the way.",
+    "tags": [
+      "2d",
+      "lighting",
+      "camera",
+      "genre"
+    ],
+    "play": {
+      "kind": "Genre showcase",
+      "shot": "lamplighter.png",
+      "input": [
+        "keyboard",
+        "gamepad",
+        "touch"
+      ],
+      "about": [
+        "Wick walks a world the fading sun has left dark, carrying a lantern and lighting the lanterns along the way. This is the first stage of a top-down action-adventure with a sword and a lantern (see docs/lamplighter-plan.md).",
+        "Lamplighter is the top-down genre showcase. It proves the walk, the carried 2D light with shadows, and a camera that follows. There is no game code: it is scenes and Decay scripts."
+      ],
+      "proves": [
+        "A top-down walk with no gravity",
+        "A carried 2D light that casts shadows",
+        "Camera follow with bounds",
+        "Lanterns lit by touch"
+      ],
+      "controls": [
+        [
+          "WASD · arrows · left stick",
+          "Walk"
+        ],
+        [
+          "Esc · Start",
+          "Pause"
+        ]
+      ]
+    }
+  },
+  {
+    "category": "games",
     "title": "Scorchball",
     "path": "examples/scorchball/",
     "source": "games/scorchball",

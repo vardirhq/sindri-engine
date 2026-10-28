@@ -37,7 +37,7 @@ Each entry links its tests and the projects that exercise it. Surface marks matc
 | [Normal map studio](#normal-map-studio) | ✅ | ✅ | — | ✅ |
 | **Tilemaps and tile volumes** | | | | |
 | [Tilemaps (ortho + iso, overhang)](#tilemaps) | ✅ | ✅ | ✅ | ✅ |
-| [Autotiling / rule tiles](#autotiling) | ✅ | 🟡 | ✅ | 🟡 |
+| [Autotiling / rule tiles](#autotiling) | ✅ | 🟡 | ✅ | ✅ |
 | [Stackable tile volumes](#tile-volumes) | ✅ | 🟡 | 🟡 | ❌ |
 | [Navigation over tile volume surfaces](#tile-volume-navigation) | ✅ | — | ✅ | ❌ |
 | **World presentation** | | | | |
@@ -649,17 +649,17 @@ tile size, tint, render layer, and space.
 
 A sheet declares 16-edge, 47-blob or 16-corner terrains; painting one redraws every tile that depends on the cell or corner.
 
-Engine ✅ · Editor 🟡 · Decay ✅ · Proof 🟡 — parity row *Autotiling / rule tiles*
+Engine ✅ · Editor 🟡 · Decay ✅ · Proof ✅ — parity row *Autotiling / rule tiles*
 
-**Tested by:** [`crates/sindri-core/src/terrain.rs`](../../crates/sindri-core/src/terrain.rs), [`crates/sindri-scene/src/terrain_paint_tests.rs`](../../crates/sindri-scene/src/terrain_paint_tests.rs), [`crates/sindri-scene/src/terrain_corners_tests.rs`](../../crates/sindri-scene/src/terrain_corners_tests.rs), [`crates/sindri-decay/tests/a_script_paints_terrain.rs`](../../crates/sindri-decay/tests/a_script_paints_terrain.rs), [`crates/sindri-decay/tests/a_script_paints_corners.rs`](../../crates/sindri-decay/tests/a_script_paints_corners.rs)
+**Tested by:** [`crates/sindri-core/src/terrain.rs`](../../crates/sindri-core/src/terrain.rs), [`crates/sindri-scene/src/terrain_paint_tests.rs`](../../crates/sindri-scene/src/terrain_paint_tests.rs), [`crates/sindri-scene/src/terrain_corners_tests.rs`](../../crates/sindri-scene/src/terrain_corners_tests.rs), [`crates/sindri-decay/tests/a_script_paints_terrain.rs`](../../crates/sindri-decay/tests/a_script_paints_terrain.rs), [`crates/sindri-decay/tests/a_script_paints_corners.rs`](../../crates/sindri-decay/tests/a_script_paints_corners.rs), [`games/lamplighter/tests/the_ground_is_painted.rs`](../../games/lamplighter/tests/the_ground_is_painted.rs)
 
-**Exercised in:** [`games/platformer`](../../games/platformer)
+**Exercised in:** [`games/platformer`](../../games/platformer), [`games/lamplighter`](../../games/lamplighter)
 
 **See:** [`docs/terrains.md`](../../docs/terrains.md)
 
 **Limits:**
 
-- No game paints a corners terrain yet; the platformer proves edge and blob terrains.
+- Corners terrains are proven only by Lamplighter's one ground terrain; the platformer proves edge and blob terrains.
 - The editor brush does not offer a corners terrain.
 - No random variants, probabilities or custom rules, and no Tiled map import.
 
@@ -678,7 +678,8 @@ corner: `Grid.set_terrain_corner` sets or clears the corner at a grid line's
 crossing and rewrites the up to four tiles that meet there, each reading its
 own corners back from the sprite it already shows. This was found by trying to
 use the first tileset Pixel Lab generated for Lamplighter, which is laid out
-this way.
+this way. Lamplighter's ground is that tileset: `scripts/ground.decay` lays its
+dirt path corner by corner, and a test reads the tiles back.
 
 </details>
 

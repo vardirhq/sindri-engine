@@ -1,0 +1,9 @@
+format_version = 1
+
+[project]
+name = "Lamplighter"
+main_scene = "assets/title.scene"
+scenes = [
+  "assets/world.scene",
+  "assets/pause.scene",
+]

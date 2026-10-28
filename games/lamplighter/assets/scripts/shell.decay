@@ -1,0 +1,21 @@
+// The shell around the world: the title and the pause screen. Each is its own
+// scene, and a scene that is left is switched off rather than unloaded, so
+// pausing freezes the world where it is and resuming finds it as it was.
+script Title {
+    fn update(dt: number) {
+        if Ui.is_pressed(World.find("play")) {
+            Scene.restart("world.scene");
+        }
+    }
+}
+
+script Pause {
+    fn update(dt: number) {
+        if Ui.is_pressed(World.find("resume")) || Input.just_pressed("Escape") {
+            Scene.go("world.scene");
+        }
+        if Ui.is_pressed(World.find("title")) {
+            Scene.go("title.scene");
+        }
+    }
+}

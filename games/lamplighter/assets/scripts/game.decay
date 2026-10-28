@@ -1,0 +1,8 @@
+// What a run shares: the lanterns lit and whether the way is open.
+state Game {
+    var lit: number = 0.0;
+    var total: number = 0.0;
+    var won: bool = false;
+    var gloom_hits: number = 0.0;
+    var gloom_out: number = 0.0;
+}

@@ -1,0 +1,23 @@
+[package]
+name = "lamplighter"
+description = "The top-down action-adventure, and the harness that plays it"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish = false
+
+# No game code. The game is its scenes and its Decay, a project rather than a
+# crate. What lives here is the harness that plays it, assembled from the same
+# public pieces a host uses.
+[lib]
+path = "src/lib.rs"
+
+[dependencies]
+sindri-core = { path = "../../crates/sindri-core" }
+sindri-platform = { path = "../../crates/sindri-platform", default-features = false }
+sindri-runtime = { path = "../../crates/sindri-runtime" }
+sindri-scene = { path = "../../crates/sindri-scene" }
+
+[lints]
+workspace = true
