@@ -37,7 +37,7 @@ Engine ✅ · Editor ✅ · Decay ✅ · Proof ✅ — parity row *Keyboard, mou
 
 **Tested by:** [`crates/sindri-platform/src/input/state_tests.rs`](../../crates/sindri-platform/src/input/state_tests.rs), [`crates/sindri-decay/tests/input_gathers_every_way_in.rs`](../../crates/sindri-decay/tests/input_gathers_every_way_in.rs)
 
-**Exercised in:** [`games/lamplighter`](../../games/lamplighter)
+**Exercised in:** [`games/platformer`](../../games/platformer)
 
 <details markdown="1">
 <summary>Evidence</summary>
@@ -126,9 +126,9 @@ A scene declares named actions; scripts read them by name and rebind them while 
 
 Engine ✅ · Editor 🟡 · Decay ✅ · Proof ✅ — parity row *Action mapping (named actions, rebindable)*
 
-**Tested by:** [`crates/sindri-platform/src/input/action/map.rs`](../../crates/sindri-platform/src/input/action/map.rs), [`crates/sindri-platform/src/input/action/state.rs`](../../crates/sindri-platform/src/input/action/state.rs), [`games/lamplighter/tests/a_run_reaches_the_flag.rs`](../../games/lamplighter/tests/a_run_reaches_the_flag.rs), [`game/tests/the_mixer_and_input_demos_work.rs`](../../game/tests/the_mixer_and_input_demos_work.rs), [`games/orbital-baked/tests/the_complete_game.rs`](../../games/orbital-baked/tests/the_complete_game.rs)
+**Tested by:** [`crates/sindri-platform/src/input/action/map.rs`](../../crates/sindri-platform/src/input/action/map.rs), [`crates/sindri-platform/src/input/action/state.rs`](../../crates/sindri-platform/src/input/action/state.rs), [`games/platformer/tests/a_run_reaches_the_flag.rs`](../../games/platformer/tests/a_run_reaches_the_flag.rs), [`game/tests/the_mixer_and_input_demos_work.rs`](../../game/tests/the_mixer_and_input_demos_work.rs), [`games/orbital-baked/tests/the_complete_game.rs`](../../games/orbital-baked/tests/the_complete_game.rs)
 
-**Exercised in:** [`games/lamplighter`](../../games/lamplighter), [`examples/input`](../../examples/input), [`games/orbital-baked`](../../games/orbital-baked)
+**Exercised in:** [`games/platformer`](../../games/platformer), [`examples/input`](../../examples/input), [`games/orbital-baked`](../../games/orbital-baked)
 
 **Limits:**
 
@@ -232,9 +232,9 @@ A standalone tool designs seeded game sound effects and delivers each into a pro
 
 Engine — · Editor ❌ · Decay — · Proof ✅ — parity row *Sound effect authoring (Sound Lab)*
 
-**Tested by:** [`tools/sindri-chiptune/src/lab/sfx/tests.rs`](../../tools/sindri-chiptune/src/lab/sfx/tests.rs), [`tools/sindri-chiptune/src/lab/project.rs`](../../tools/sindri-chiptune/src/lab/project.rs), [`games/lamplighter/tests/a_run_reaches_the_flag.rs`](../../games/lamplighter/tests/a_run_reaches_the_flag.rs)
+**Tested by:** [`tools/sindri-chiptune/src/lab/sfx/tests.rs`](../../tools/sindri-chiptune/src/lab/sfx/tests.rs), [`tools/sindri-chiptune/src/lab/project.rs`](../../tools/sindri-chiptune/src/lab/project.rs), [`games/platformer/tests/a_run_reaches_the_flag.rs`](../../games/platformer/tests/a_run_reaches_the_flag.rs)
 
-**Exercised in:** [`games/lamplighter`](../../games/lamplighter)
+**Exercised in:** [`games/platformer`](../../games/platformer)
 
 **See:** [`tools/sindri-chiptune/README.md`](../../tools/sindri-chiptune/README.md)
 
@@ -256,7 +256,7 @@ Every parameter is a slider with a unit, a change replays the sound, and
 `Audio.play("audio/<name>.wav", 0.5);` to paste. Without that include line a
 clip a script plays is found by the editor and silently left out of an
 export. The same delivery runs headless:
-`sindri-chiptune sfx coin --seed 5 --project games/lamplighter --name coin`.
+`sindri-chiptune sfx coin --seed 5 --project games/platformer --name coin`.
 
 The platformer's hero plays four sounds made this way — jump, landing, coin
 and the flag — and its scripted run to the flag asserts it heard each one and

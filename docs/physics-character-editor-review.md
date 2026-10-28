@@ -1,7 +1,7 @@
 # Native Character 2D editor review
 
 Reviewed on 2026-10-07 at `da9a5328`, with a freshly built native editor,
-a scratch copy of `games/lamplighter` and an isolated X display. The shipped
+a scratch copy of `games/platformer` and an isolated X display. The shipped
 scene and scripts were not changed. This establishes the editor surface;
 browser goal proof and final physics integration remain open.
 

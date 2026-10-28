@@ -14,7 +14,7 @@ class ScopeTests(unittest.TestCase):
         for path, game, package in [
             ('game/assets/main.scene', 'causeway', 'sindri-causeway'),
             ('games/flappy/assets/main.scene', 'flappy', 'flappy'),
-            ('games/lamplighter/assets/level-1.scene', 'lamplighter', 'lamplighter'),
+            ('games/platformer/assets/level-1.scene', 'platformer', 'platformer'),
             ('games/low-tide/assets/main.scene', 'low-tide', 'low-tide'),
             ('games/orbital-baked/assets/main.scene', 'orbital-baked', 'orbital-baked'),
             ('games/scorchball/assets/main.scene', 'scorchball', 'scorchball'),
@@ -27,16 +27,16 @@ class ScopeTests(unittest.TestCase):
         self.assertEqual(classify(['tools/level.py', 'game/tests/run.rs']), ('causeway', 'sindri-causeway'))
 
     def test_shared_and_ambiguous_always_full(self):
-        for paths in [[], ['CHANGELOG.md'], ['games/lamplighter/assets/x', 'games/low-tide/assets/x'],
-                      ['games/lamplighter/assets/x', 'crates/sindri-render/src/lib.rs'],
-                      ['games/lamplighter/Cargo.toml'], ['games/lamplighter/build.rs'],
-                      ['games/lamplighter/assets/x', 'docs/parity.md'], ['games/unknown/assets/x'],
+        for paths in [[], ['CHANGELOG.md'], ['games/platformer/assets/x', 'games/low-tide/assets/x'],
+                      ['games/platformer/assets/x', 'crates/sindri-render/src/lib.rs'],
+                      ['games/platformer/Cargo.toml'], ['games/platformer/build.rs'],
+                      ['games/platformer/assets/x', 'docs/parity.md'], ['games/unknown/assets/x'],
                       ['games/shapes-lab/assets/x'], ['games/voxel-lab/src/lib.rs']]:
             with self.subTest(paths=paths):
                 self.assertIsNone(classify(paths))
 
     def test_rename_across_boundaries_is_full(self):
-        self.assertIsNone(classify(['games/lamplighter/assets/a', 'games/low-tide/assets/b']))
+        self.assertIsNone(classify(['games/platformer/assets/a', 'games/low-tide/assets/b']))
 
     def test_git_diff_rename_and_failed_base_are_conservative(self):
         script = Path(__file__).with_name('ci_game_scope.py').resolve()
@@ -45,7 +45,7 @@ class ScopeTests(unittest.TestCase):
             subprocess.run(['git', 'init', '-q'], cwd=root, check=True)
             subprocess.run(['git', 'config', 'user.email', 'ci@example.invalid'], cwd=root, check=True)
             subprocess.run(['git', 'config', 'user.name', 'CI test'], cwd=root, check=True)
-            old = root / 'games/lamplighter/assets/old.scene'
+            old = root / 'games/platformer/assets/old.scene'
             old.parent.mkdir(parents=True)
             old.write_text('scene')
             subprocess.run(['git', 'add', '.'], cwd=root, check=True)

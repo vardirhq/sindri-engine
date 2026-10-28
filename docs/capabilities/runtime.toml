@@ -55,9 +55,9 @@ tests = [
   "tools/sindri-particle-lab/src/preview.rs",
   "editor/src/native/particle_lab.rs",
   "crates/sindri-decay/tests/a_script_drives_particles.rs",
-  "games/lamplighter/tests/sparkle_and_dust.rs",
+  "games/platformer/tests/sparkle_and_dust.rs",
 ]
-proof = ["games/lamplighter", "games/low-tide"]
+proof = ["games/platformer", "games/low-tide"]
 docs = ["docs/particles.md"]
 detail = """
 Particle Lab exposes the emitter in the editor and browser with presets,

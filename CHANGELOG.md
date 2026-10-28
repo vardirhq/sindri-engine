@@ -2,6 +2,14 @@
 
 # Changelog
 
+- Lamplighter becomes a top-down action-adventure, and the platformer it was
+  turning into goes back to `games/platformer` as the side-view genre showcase,
+  with its Dusk Road level and the title, level select, settings, pause and
+  saved-progress shell it grew. Its crate, Pages route (`/examples/platformer/`),
+  directory entry, CI scope, browser scripts and capability references are named
+  for it again. `docs/lamplighter-plan.md` now plans the new game, which starts as
+  a new project in `games/lamplighter`; `AGENTS.md` says so.
+
 - Run focused checks and a phone-browser export for single-game pull requests.
 
 - Add optional area-sampled 2D shadows for Lamplighter lanterns, with matching

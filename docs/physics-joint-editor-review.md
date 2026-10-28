@@ -1,7 +1,7 @@
 # Native 2D joint editor review
 
 Reviewed on 2026-10-06 at `eb994996`, using a scratch copy of
-`games/lamplighter`, the native editor and an isolated X display. The shipped
+`games/platformer`, the native editor and an isolated X display. The shipped
 project was not changed. This completes the native visual review for the
 2D joint slice; it does not complete the remaining physics update tracks.
 

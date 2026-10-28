@@ -96,12 +96,12 @@ title = "The platformer"
 summary = "The first genre showcase: a painted, solid tilemap level, a controller-driven hero, ten coins and a flag, with no Rust of its own."
 status = { engine = "n/a", editor = "n/a", decay = "yes", proof = "yes" }
 tests = [
-  "games/lamplighter/tests/a_run_reaches_the_flag.rs",
-  "games/lamplighter/tests/painted_ground.rs",
-  "games/lamplighter/tests/character_gameplay.rs",
-  "scripts/browser/lamplighter-goal.mjs",
+  "games/platformer/tests/a_run_reaches_the_flag.rs",
+  "games/platformer/tests/painted_ground.rs",
+  "games/platformer/tests/character_gameplay.rs",
+  "scripts/browser/platformer-goal.mjs",
 ]
-proof = ["games/lamplighter"]
+proof = ["games/platformer"]
 limits = [
   "No enemies or hazards.",
   "No level after the first, no pause and no restart without Stop.",

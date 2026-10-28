@@ -191,7 +191,7 @@ The workspace currently requires Rust 1.95.
 
 ```bash
 cargo editor                      # the welcome window, optimised
-cargo editor games/lamplighter     # straight into a project
+cargo editor games/platformer     # straight into a project
 ```
 
 `cargo editor` is an alias for an optimised, incrementally built profile: the

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Times a project in the editor and in the standalone host, and compares them.
 
-    scripts/frame-benchmark.py run games/lamplighter [--profile P] [--frames N]
+    scripts/frame-benchmark.py run games/platformer [--profile P] [--frames N]
     scripts/frame-benchmark.py summarize target/bench/*.json
 
 `run` builds both benchmarks, plays the project in the editor (under

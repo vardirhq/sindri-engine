@@ -1,156 +1,130 @@
 # Lamplighter
 
-A plan for turning `games/platformer` from a showcase level into a short real
-game with a name. This document is the design and the order of work; it moves
-with the game, and a stage is checked off here when its acceptance criteria are
-met and its tests pass.
+A plan for **Lamplighter**, a top-down action-adventure in the spirit of the
+classic 2D Zelda games, about a wandering lamplighter bringing light to a world
+whose sun is fading. This document is the design and the order of work; it
+moves with the game, and a stage is checked off here when its acceptance
+criteria are met and its tests pass.
 
-## What it is, and what kind of project it is
+## What changed
 
-**Lamplighter** is a side-view platformer about a small courier, **Wick**, who
-walks a valley at dusk lighting its lanterns so the way home stays open, until
-the last beacon turns the night to dawn. Five to eight levels, a title and level
-select, saved progress, music and an ending.
-
-It is still **the platformer genre showcase**: the place the plain 2D path is
-proven (tilemap collision, scene gravity, the character controller, one-way
-planks, joints, springs and hinges, 2D lights, normal maps, particles, camera
-follow and bounds, scene changes, saves). What changes is the bar. The showcase
-rule in `AGENTS.md` was "a level and a few scripts, not a campaign", and that
-produced a level that proved features and was not a game anyone would choose to
-play. Causeway is held to the standard of a game somebody would choose; the 2D
-path should be too, because a showcase nobody wants to play does not showcase
-anything. `AGENTS.md` records this as the platformer's exception, and says why.
-
-Say which of these a change is, in its documentation: a capability the engine
-already had that Lamplighter now uses is proven here; a capability found by
-trying to make Lamplighter good is added generally, never shaped around it.
-
-## Why a remake, and what it keeps
-
-The current project has become a physics proving ground. It carries a crate, a
-hanging lantern, a trolley on a rail, a plank ferry, two windmills and springs,
-each with its own tests: 21 test files, and about 70 references from
-`docs/capabilities/*.toml`, of which about half are physics. That evidence is
-worth keeping, and it is held up by toys placed in one level for the sake of the
-test. Lamplighter keeps every mechanism and makes each one a **level piece**: a
-thing a level is built around and a player uses, with its tests moving to that
-level. The capability pages then point at something that is played.
-
-| Mechanism now | Becomes | Level | Tests that move with it |
-| --- | --- | --- | --- |
-| Hero, run, jump, drop-through | Wick | all | `character_gameplay`, `controller_terrain`, `one_way_platforms` |
-| Plank ferry | the harbor ferry | 2 | `moving_platform` |
-| Crate and wind | a crate to push onto a switch | 2, 3 | `forces_and_rotation`, `contact_impacts` |
-| Windmills | sails that turn into platforms | 3 | `hinge_motor`, `spawned_joints` |
-| Trolley on a rail | a cable car across a gorge | 4 | `slider_spring`, `joint_controls` |
-| Hanging lantern on a tether | swinging lamps to ride and cut | 5 | `distance_joints`, `saved_joints` |
-| Cave lights and occluders | the lantern caves | 6 | `cave_lights` |
-| Springs | bounce pads | 4, 7 | `physics_materials` |
-| Coins | embers (optional, one prefab) | all | `coins_are_one_prefab` |
-| Particles | sparks on lighting, dust on landing | all | `sparkle_and_dust` |
-| Tile normal maps | lit tiles | all | `studio_normal_map`, `painted_ground` |
-| Sliced panels | the HUD and menus | all | `sliced_panels` |
-| The run to the flag | each level's run to its beacon | 1 to 8 | `a_run_reaches_the_flag` |
+Lamplighter began as a plan to turn the platformer showcase into a short side-view
+game. That direction is retired. The platformer stays as it was, in
+`games/platformer` (its levels, its physics level pieces, its tests, and the title,
+level select, settings, pause and saved-progress shell built around it), as the
+proof of Sindri's plain 2D platformer path. **Lamplighter is a new project in
+`games/lamplighter`**, a top-down action-adventure. What the platformer work found
+carries over: the dusk palette, the autotiled-ground and baked-sprite art
+pipeline, `Scene.restart`, and the way a shell of scenes and `Save` values holds
+a game together.
 
 ## The game
 
-**The loop.** Run to the lantern ahead and light it by touching it: a spark, a
-flare of 2D light, a note, and it is the checkpoint. The level's last lantern is
-a beacon; lighting it ends the level. Embers are optional and ask for a detour.
-Falling, water and the dark ("gloom" that creeps in at the edge of the light)
-send Wick back to the last lit lantern, with no lives and no punishment beyond
-the walk back. The valley darkens as the game goes on, so the lanterns matter
-more and the light you carry matters more.
+The sun no longer gives enough light to reach much of the world. Settlements
+depend on lanterns and beacons to keep paths visible and give people somewhere
+safe. Beyond those pools of light the land is nearly pitch black. **Wick** is a
+wandering lamplighter, part adventurer and part wizard-like drifter, who carries
+a sword and a lantern between isolated villages, forests, caves and forgotten
+ruins, bringing light to places left in darkness.
 
-**Levels** (the order teaches one idea at a time, and the last combines them):
+The tone is mysterious and sometimes unsettling, but not without warmth: each
+lantern Wick lights is a small refuge, and each person helped makes the world a
+little less empty. Why the sun is fading is for the player to discover. One
+possible ending is bittersweet: the dying sun erupts in a last display of light
+and colour before it destroys the world, which gives the journey its meaning
+even if the world cannot be saved. The light Wick brings matters to the people
+living in it now.
 
-1. **Dusk Road.** Run, jump, one-way planks, the first lantern. No hazards but a
-   gap. Teaches the hero.
-2. **The Ferry Landing.** Water gaps, the plank ferry, a crate to push onto a
-   switch that lowers the gate.
-3. **Windmill Ridge.** Sails turn on hinge motors and carry you up; wind pushes
-   the crate; time the jump from sail to sail.
-4. **The Cable Car.** A trolley on a rail across a gorge, springs to reach the
-   upper path, a spring-loaded lamp to light.
-5. **The Hanging Lamps.** Swing on tethered lamps; cut a cord to drop a bridge.
-6. **The Lantern Caves.** The dark is the hazard: lit areas are safe, 2D lights
-   and occluders carve the cave, gloom wisps keep to the shadows.
-7. **Storm Stair.** A climb that uses everything, under rain and a dimming sky.
-8. **The Dawn Beacon.** The last climb and the last lantern; lighting it plays a
-   sunrise across the whole valley and rolls into the ending.
+### How it plays
 
-**The shell.** A title screen, a level select that shows which beacons are lit
-and the embers found, a pause menu, settings (volume buses, reduced motion),
-saved progress, drawn touch controls, and credits. Scenes change with
-`Scene.go`; progress and settings are `Save` values.
+Exploration, sword combat, puzzles and light-based abilities.
+
+- **Explore** an interconnected world of villages, woods, caves and ruins.
+  Darkness hides paths, enemies and secrets until they are lit.
+- **Fight** creatures with Wick's sword. Light may reveal enemies or change how
+  they behave.
+- **Bring light.** Carry a lantern, light fixed lanterns and restore larger
+  beacons. These make lasting pools of light and make an area easier to navigate.
+- **Solve puzzles** by using light to reveal clues, trigger mechanisms and reach
+  places that first seem inaccessible.
+- **Grow** by finding abilities that widen what the lantern can do and open
+  routes through places already explored.
+
+The sword and the lantern are complementary: Wick can defend himself, but light
+is the defining tool of the adventure.
+
+### Lantern abilities (open)
+
+Possibilities: a focused beam forward; a temporary flame left behind; light
+reflected around corners; revealing hidden markings, paths or objects. Which of
+these, and in what order they are found, is decided as the world is designed.
+
+### Open design choices
+
+- Whether Wick can **put down the carried lantern and pick it up again**. It
+  would make puzzles that need a light source left behind, but it changes
+  exploration and combat. Decided at stage 3, by playing both.
+- The cause of the fading sun, and whether the ending is the bittersweet one.
+- How hard it is. The working assumption is gentle: the point is the light.
+
+### The first area
+
+A dark village and the woods around it. Wick arrives to find the village beacon
+out and its remaining people sheltering indoors. With only the carried lantern,
+the player learns to move, explore, use the sword and light a fixed lantern.
+Restoring the beacon is the first goal. Lighting it reveals more of the village
+and the paths into the wider world: the first accomplishment is making a place
+safer, not defeating an enemy.
 
 ## How it looks
 
-A style bible comes first and every asset answers to it: a **dusk palette** of
-deep violet and teal shadows against one warm amber, so light is the only
-warmth on screen and a lit lantern reads from across a level. 16 pixel tiles,
-3 pixels of outline-free shading, three parallax layers per biome (sky, far
-hills, near trees or rock), and 2D lights doing the glow instead of painted
-halos. Biomes: road and meadow, harbor, ridge, gorge, caves, storm.
+Top-down pixel art with a slightly elevated view, as in the classic 2D Zelda
+games. The world is drawn in **readable, relatively neutral colours**; the 2D
+lighting system makes the darkness and the warm pools of lantern light, so a lit
+lantern is the one warm thing on screen. The pixel grid is 16 pixels to a tile on
+a 320 by 180 logical screen (camera `vertical_size` 11.25), which is exactly three
+screen pixels to an art pixel at 960 by 540.
 
-- **Characters and props** are baked from models with the Sprite Baker in side
-  view, each animation frame a variant of one sheet so the palette cannot
-  shimmer between frames: Wick (idle, run, jump, fall, land, light), a gloom
-  wisp, lanterns, the ferry, windmill, trolley, crate, signs and houses. Recipes
-  are generated by a script so a limb's angle in frame 3 is one number, and the
-  baked sheets are checked in and re-baked by CI, as Orbital's blast is.
-- **Tiles, backgrounds, effects and UI art** are drawn by deterministic Python,
-  as `art/draw.py` does today but with autotiled edges and corners, per-biome
-  sets, normal maps, and layered backgrounds.
-- **Type** uses the supplied pixel-art wordmark on the title screen and Inter,
-  a font already in the repository, for menu and HUD text; fonts are project
-  assets, never operating-system lookups.
-- **Sound.** Effects and music are made in the Sound Lab and sent to the
-  project: a looping theme per biome as Ogg, effects as WAV, each `.sindrisfx`
-  or `.sindrisong` beside its output so it reopens.
+- **Wick** keeps his existing look: a blue hood, a red scarf and a warm lantern.
+  The top-down version needs directional sprites (idle, walk, sword swing, hurt)
+  and the sword. Baked from a model with the Sprite Baker in top-down view with
+  each animation frame a variant of one sheet, or drawn, whichever reads better;
+  decided at stage 2.
+- **Environment art** begins with a grass-to-dirt tileset for the village
+  clearing and woodland paths (a `blob` terrain, as the platformer's ground is),
+  then trees, walls, buildings and lanterns. Drawn by deterministic scripts, with
+  normal maps read back from the tiles so light rakes across them.
+- **Type** is a font already in the repository under an open licence.
+- **Sound.** Effects and music are made in the Sound Lab and sent to the project,
+  each source beside its output so it reopens.
 
-## What the engine already has, and what to verify
+## What the engine has, and what to verify
 
-Present, named in `docs/generated/decay-api.md`: `Scene`, `Save`, `Audio` with
-buses, `Camera` follow, bounds, shake and impact, `Sequence` timelines, `Effects`,
-`Animation`, `Tween`, `Ui`, `Action` rebinding, 2D lights, normal maps, particles
-and joints. Each stage verifies before it relies on one, and where a capability
-is missing it is added as a general one with a row in `docs/parity.md`.
+Present: 2D lighting (ambient, `sindri.light2d`, occluders with shadows, additive
+halos, normal maps), `blob` terrains and the brush that paints them, baked
+top-down sprite sheets, sprite animation clips, the 2D character controller and
+physics queries, camera follow and bounds, `Scene.go` and `Scene.restart` (a
+scene left is switched off, so going back finds it as it was), `Save`, `Audio`
+buses, the Weave and screen-UI components. Each stage verifies before it relies
+on one, and a missing capability is added generally, with a row in
+`docs/parity.md`.
 
-Looked at, and what was found:
+To verify first, none assumed:
 
-- **Autotiling exists** (`docs/terrains.md`): a sheet declares a terrain of kind
-  `edges` (16 sprites) or `blob` (47, with true inside corners), and the brush and
-  `Grid.set_terrain` pick the sprite from the neighbors. Its stated limits are one
-  terrain per cell, no transition between two terrains, and no random variants of
-  a pattern. Ground uses `blob`; the repetition the missing variants would hide is
-  broken up with decoration sprites placed by the level generator.
-- **Parallax has no authored system** (`docs/capabilities/runtime.toml`, and
-  `docs/2d-model.md` argues it is a consequence of depth under a perspective
-  camera, which a side-view pixel game does not want). Backgrounds are layers
-  that a small Decay script moves by a fraction of the camera's position. If that
-  proves clumsy across levels, a general layer component is added, with its row.
-- **The pixel grid is a decision.** The level was drawn at 16 pixels to a tile
-  under a camera showing 9 tiles over 540 pixels, which is 3.75 screen pixels to
-  each art pixel and soft. Lamplighter draws at **16 pixels to a tile on a 320 by
-  180 grid**: the camera shows 11.25 tiles by 20, which is exactly 3 screen
-  pixels to an art pixel at 960 by 540 and 6 at 1920 by 1080. The camera has a
-  `pixel_perfect` flag (`docs/2d-inventory.md`); whether it keeps the scale whole
-  at window sizes that are not multiples is verified in stage 2 and, if it does
-  not, closed in the engine. *Found in stage 2:* it does not. A 1366 by 768
-  window gives uneven art pixels, so an integer-scale camera mode is a gap to
-  close in the engine, in its own pull request, with a `docs/parity.md` row.
-- **A pause is a scene.** The engine has no global pause or time scale, and none
-  is needed: a scene that is left is switched off rather than unloaded, so the
-  pause screen is a scene of its own and `Scene.go` back finds the level as it
-  was. What the engine did lack was the other half, starting a level over;
-  `Scene.restart(name)` was added for it, generally, with its own tests.
-- Browser `Save` across reloads is already proven by Orbital's browser test, and
-  respawn without a scene reload is `Hero.respawn()`, played by the scripted run.
-- **Still to verify**, none assumed: scene fades and drawn touch controls. Baked
-  side-view sheets as animation clips are verified: Wick's run plays in the
-  renderer.
+- **A top-down controller:** the 2D character controller and gravity set to zero,
+  with four- or eight-way movement, against tilemap and collider walls.
+- **Darkness as the mechanic:** a near-black ambient with a carried light that
+  follows Wick, and fixed lights that persist. How many lights a screen can hold.
+- **Light as a game rule:** asking whether an enemy or an object is currently lit
+  by a 2D light, so light can reveal enemies, change their behaviour and trigger
+  mechanisms. If the engine cannot answer that, it is the first gap, and it is
+  closed generally.
+- **Sword hits:** swing hitboxes through physics overlap queries, with knockback
+  and hurt states.
+- **A world of connected areas:** how areas are split into scenes, how Wick moves
+  between them and how what he has done in each persists.
+- **Integer-scale pixel camera:** a known gap (`docs/parity.md`): the engine does
+  not keep a pixel game's scale to whole multiples of the window.
 
 ## Stages
 
@@ -158,61 +132,37 @@ Each stage is one or more pull requests that leave `main` working: the project
 opens, its scripts compile, its scripted run reaches its goal, and the
 documentation says what is now true.
 
-0. **Plan.** This document, and the `AGENTS.md` amendment. *Done.*
-1. **Move.** `games/platformer` becomes `games/lamplighter`, with the crate, the
-   Pages route, directory entry, capability references, CI and scripts renamed,
-   and nothing else changed. Reviewed on its own because it touches the most
-   files. *Done:* the one thing left under the old name is the scene file,
-   `assets/platformer.scene`, which stage 3 replaces with a scene per screen and
-   level, and prose that says "the platformer" meaning the genre.
-2. **Art foundation.** The style bible and palette, the autotiled tile sets and
-   backgrounds for the first two biomes, Wick and the lantern baked and
-   animated, the font, and a screenshot test that opens the art. *Done:*
-   `art/dusk/build.py` draws the meadow and harbor tile sets (47-tile blob
-   terrains with normal maps), the water, sky and hill layers, decoration and
-   the lantern with its stepped glow, and bakes Wick from a recipe the script
-   writes; CI runs it again and fails on any drift. `tests/art_foundation.rs`
-   opens both art scenes and checks every picture, sprite and normal map they
-   name and that their ground is what its terrain paints. Wick's run clip was
-   seen playing in the real renderer. The font is the Inter already in
-   `assets/fonts`; a pixel face is a stage 3 decision, made with the title screen.
-3. **The shell.** Title, level select, pause, settings, saved progress and drawn
-   touch controls, with level one behind it. *Done:* the title, levels,
-   settings and pause screens are scenes (`art/dusk/shell.py` writes them), the
-   old level is `level-1.scene` behind them, progress and settings are `Save`
-   values, and `tests/the_shell.rs` plays the route between them. On touch, the left side is a virtual stick and the right side jumps; the
-   scripted two-finger test verifies Wick moves and jumps at once.
-4. **Level 1, end to end.** Lanterns, checkpoints, respawn, embers, the first
-   music and effects, and a scripted run. After this stage the game is playable
-   from the title to the first beacon and back to the level select.
-   *In progress:* Dusk Road has checkpoint lanterns with sparks and 2D light,
-   checkpoint respawn, optional embers, a beacon finish, the first music loop,
-   and a scripted title-to-beacon run. The playable scene now uses the meadow's
-   dusk tiles and normal map, parallax sky and hills, decorations, and Wick's
-   baked side-view sprite; its existing terrain and mechanism tests stay intact
-   while later levels are built.
-5. **Levels 2 to 7**, one or two per pull request, each with its mechanism
-   rebuilt as a level piece and its tests moved. The capability pages are
-   updated as the tests move, not afterwards.
-6. **Level 8 and the ending.** The sunrise, credits, final music.
-7. **Polish and proof.** A scripted run of every level in one test, the browser
-   smoke, the screenshots and site entry, `docs/parity.md` and the capability
-   pages brought level with what is played.
+0. **Direction.** This plan, the `AGENTS.md` amendment, and the platformer back in
+   `games/platformer`. *Done with this change.*
+1. **Seed.** `games/lamplighter` as a new project with its crate, Pages route,
+   directory entry and CI scope: a dark scene, Wick walking top-down on a placeholder
+   floor with the camera following and a carried lantern light, and the title
+   and pause shell carried over from the platformer.
+2. **Art foundation.** The grass-to-dirt tileset and the village-and-woods tile
+   sets, Wick's directional sprites and sword, trees, walls, buildings and
+   lanterns, with normal maps, and a test that opens the art.
+3. **Movement, lantern and light.** The top-down controller, the carried lantern,
+   fixed lanterns Wick lights by interacting (a lasting pool of light and a place
+   to return to), beacons, and the drop-and-pick-up-the-lantern decision.
+4. **Sword combat.** The swing, one or two creature kinds that react to light,
+   health, hurt, knockback, and defeat sending Wick back to the last lit lantern.
+5. **The first area, end to end.** The dark village and woods, villagers to speak
+   to, the beacon to restore, saved progress, the first music and effects, and a
+   scripted run that plays it through.
+6. **Abilities and the wider world.** The lantern abilities, the puzzles that use
+   them, and the villages, woods, caves and ruins joined into one world with routes
+   opened by what Wick has found.
+7. **The story and polish.** The reason for the fading sun, the ending, the
+   screenshots and site entry, and `docs/parity.md` and the capability pages
+   brought level with what is played.
 
 ## Checks that hold throughout
 
-- Every level has a scripted run that plays it to its beacon, and one test
-  plays the whole game. A level that cannot be completed is a failing test.
+- Every area has a scripted run that plays it, and one test plays the first area
+  from the title to its beacon. An area that cannot be completed is a failing test.
 - `scripts/preflight.py` and the typed Decay preflight on every changed script;
   no game rules in Rust; the project has no `src` beyond its test harness.
-- The sprite sheets and tile art are reproducible: re-running the art scripts
-  and the baker changes nothing, and CI says so.
-- A capability gap is closed in the engine, generally, in the stage that finds
-  it, with its parity row and tests.
-
-## Open questions
-
-- How hard the game should be. The plan assumes a gentle one: the point is the
-  light, not the death count.
-- Whether the browser host persists `Save` across reloads. If it does not, that
-  is the first gap, and it is closed in the engine.
+- The sprite sheets and tile art are reproducible: re-running the art scripts and
+  the baker changes nothing, and CI says so.
+- A capability gap is closed in the engine, generally, in the stage that finds it,
+  with its parity row and tests.

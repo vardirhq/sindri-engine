@@ -270,7 +270,7 @@ mod tests {
         let saved = r#"[
             {"path": "/games/orbital/", "name": "Orbital"},
             {"path": "/games/orbital", "name": "Orbital"},
-            {"path": "/games/lamplighter", "name": "Platformer"}
+            {"path": "/games/platformer", "name": "Platformer"}
         ]"#;
         let recent: RecentProjects = serde_json::from_str(saved).expect("the list reads");
         let paths: Vec<&str> = recent

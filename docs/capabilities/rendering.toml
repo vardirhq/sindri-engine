@@ -22,7 +22,7 @@ tests = [
   "crates/sindri-desktop/src/host/app.rs",
   "crates/sindri-platform/tests/game_loop.rs",
 ]
-proof = ["games/lamplighter", "games/orbital-baked"]
+proof = ["games/platformer", "games/orbital-baked"]
 docs = ["docs/platform-host.md"]
 detail = """
 `Game` receives `start`, `fixed_update`, `update`, and `stop`, each with a
@@ -47,7 +47,7 @@ summary = "The engine runs in Chromium over WebGPU with the same pictures and th
 status = { engine = "yes", editor = "n/a", decay = "n/a", proof = "yes" }
 parity = "Browser / WASM"
 tests = ["scripts/browser/smoke.mjs", "crates/sindri-export/tests/exports_a_project.rs"]
-proof = ["examples/cube", "games/lamplighter"]
+proof = ["examples/cube", "games/platformer"]
 docs = ["docs/browser.md"]
 detail = """
 The cube example draws the same picture in Chromium as it does natively, in
@@ -86,7 +86,7 @@ tests = [
   "crates/sindri-scene/tests/extraction/textures.rs",
   "crates/sindri-scene/tests/extraction/assets.rs",
 ]
-proof = ["games/lamplighter"]
+proof = ["games/platformer"]
 docs = ["docs/rendering-frame-pipeline.md", "docs/scene-extraction.md"]
 detail = """
 A frame goes through extraction, preparation, and rendering. Preparation
@@ -145,7 +145,7 @@ tests = [
   "crates/sindri-scene/tests/extraction/sprites.rs",
   "crates/sindri-core/src/sheet/tests.rs",
 ]
-proof = ["games/lamplighter", "games/orbital-baked"]
+proof = ["games/platformer", "games/orbital-baked"]
 detail = """
 Textured sprites carry tint, anchor, and layer. A sprite is either
 screen-anchored, which is the default and cannot be occluded by the world, or
@@ -285,9 +285,9 @@ status = { engine = "yes", editor = "yes", decay = "yes", proof = "yes" }
 parity = "Nine-slice sprites"
 tests = [
   "crates/sindri-scene/tests/extraction/nine_slice.rs",
-  "games/lamplighter/tests/sliced_panels.rs",
+  "games/platformer/tests/sliced_panels.rs",
 ]
-proof = ["games/lamplighter"]
+proof = ["games/platformer"]
 docs = ["docs/nine-slice.md"]
 detail = """
 A sprite or UI image drawn `sliced` keeps the border its sheet records, in
@@ -310,7 +310,7 @@ tests = [
   "crates/sindri-decay/tests/a_script_plays_a_clip.rs",
   "games/low-tide/tests/a_crawler_looks_alive.rs",
 ]
-proof = ["games/low-tide", "games/lamplighter"]
+proof = ["games/low-tide", "games/platformer"]
 detail = """
 `sindri.animation.sprite` holds clips of sprite names and which one plays,
 `SpriteAnimations` holds where each sprite has got to, and the cursor holds a
@@ -348,7 +348,7 @@ summary = "The Sprite sheet tab slices an image on the canvas, names cells, and 
 status = { engine = "n/a", editor = "yes", decay = "n/a", proof = "yes" }
 parity = "Clip authoring and preview"
 tests = ["editor/src/slicer/tests.rs"]
-proof = ["games/lamplighter"]
+proof = ["games/platformer"]
 detail = """
 Selecting a texture opens it in the Sprite sheet tab, a top-row tab beside the
 Scene and Game views, where the image fills the canvas pixel-sharp on a
@@ -413,10 +413,10 @@ tests = [
   "crates/sindri-render/src/light2d/tests.rs",
   "crates/sindri-gpu/tests/sprite_lights.rs",
   "crates/sindri-scene/tests/extraction/lights_2d.rs",
-  "games/lamplighter/tests/cave_lights.rs",
+  "games/platformer/tests/cave_lights.rs",
   "games/low-tide/tests/the_basin_is_lit.rs",
 ]
-proof = ["games/lamplighter", "games/low-tide"]
+proof = ["games/platformer", "games/low-tide"]
 docs = ["docs/2d-lights.md"]
 limits = ["A frame carries the 16 lights nearest the camera."]
 detail = """
@@ -449,9 +449,9 @@ tests = [
   "tools/normal-map-web/src/lib.rs",
   "editor/src/normal_studio/tests.rs",
   "editor/src/native/normal_studio/scene/tests.rs",
-  "games/lamplighter/tests/studio_normal_map.rs",
+  "games/platformer/tests/studio_normal_map.rs",
 ]
-proof = ["games/lamplighter"]
+proof = ["games/platformer"]
 docs = ["docs/normal-map-studio.md"]
 detail = """
 The responsive browser studio uses the same generation library and saves PNG
@@ -480,7 +480,7 @@ tests = [
   "crates/sindri-scene/tests/extraction/tilemap.rs",
   "editor/src/tilemap/tests.rs",
 ]
-proof = ["games/lamplighter", "games/low-tide"]
+proof = ["games/platformer", "games/low-tide"]
 limits = ["Screen-space tilemaps render and edit as data, but direct painting is limited to world space."]
 detail = """
 A tilemap is a grid of tiles drawn from one entity: `sindri.tilemap` carries
@@ -511,7 +511,7 @@ tests = [
   "crates/sindri-scene/src/terrain_paint_tests.rs",
   "crates/sindri-decay/tests/a_script_paints_terrain.rs",
 ]
-proof = ["games/lamplighter"]
+proof = ["games/platformer"]
 docs = ["docs/terrains.md"]
 detail = """
 A sheet can declare terrains: the sixteen `edges` or forty-seven `blob`
@@ -629,8 +629,8 @@ title = "Camera follow / confine / shake"
 summary = "Orthographic 2D camera confinement keeps the view within level edges and can look ahead in portrait as the target moves."
 status = { engine = "yes", editor = "partial", decay = "partial", proof = "yes" }
 parity = "Camera follow / confine / shake"
-tests = ["crates/sindri-scene/src/components/camera_confine.rs", "games/lamplighter/tests/the_shell.rs"]
-proof = ["games/lamplighter"]
+tests = ["crates/sindri-scene/src/components/camera_confine.rs", "games/platformer/tests/the_shell.rs"]
+proof = ["games/platformer"]
 docs = ["docs/cameras.md"]
 limits = ["Viewport confinement assumes an unrotated, unscaled 2D camera and an untransformed scene root; shake can cross the bounds."]
 

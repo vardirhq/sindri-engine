@@ -170,7 +170,7 @@ reason.
 ```sh
 sindri-chiptune sfx coin --seed 5 --output coin.wav --source coin.sindrisfx
 sindri-chiptune sfx --open coin.sindrisfx --output coin.wav
-sindri-chiptune sfx jump --seed 4 --project games/lamplighter --name jump
+sindri-chiptune sfx jump --seed 4 --project games/platformer --name jump
 sindri-chiptune song --seed 42 --mood hopeful --output theme.wav
 sindri-chiptune song --open theme.sindrisong --project my-game --name theme
 ```
@@ -181,7 +181,7 @@ option. Linux builds need ALSA headers.
 ## Proof
 
 The platformer's jump, landing, coin and flag sounds were made and sent with
-this tool (`games/lamplighter/assets/audio/`). Its scripted run to the flag
+this tool (`games/platformer/assets/audio/`). Its scripted run to the flag
 asserts it heard all four and that each is listed for export, and this crate's
 tests re-render every committed `.sindrisfx` and compare it with the WAV
 beside it.
@@ -192,7 +192,7 @@ beside it.
 cargo fmt --all --check
 cargo clippy -p sindri-chiptune --all-targets --all-features -- -D warnings
 cargo test -p sindri-chiptune --all-features
-cargo test -p lamplighter --test a_run_reaches_the_flag
+cargo test -p platformer --test a_run_reaches_the_flag
 cargo check -p sindri-chiptune --all-features --target wasm32-unknown-unknown
 ```
 
