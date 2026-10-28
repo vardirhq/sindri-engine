@@ -209,15 +209,3 @@ What came back from the real service, which the client's mock did not show:
   the baker changes nothing, and CI says so.
 - A capability gap is closed in the engine, generally, in the stage that finds it,
   with its parity row and tests.
-
-## The gloom
-
-A gloom lives in the dark and wants Wick's light. Its states are lurk, stalk, wind,
-lunge and recover (`scripts/gloom.decay`): it creeps toward Wick where the light is
-below `dark`, holds where a light begins, winds up from inside `pounce_range`, and
-pounces where Wick was. A landed pounce adds to `Game.scorch`, which `flame.decay`
-turns into a smaller, stuttering lantern and which wears off at `mend` a second;
-at 1 the lantern is out and `wick.decay` restarts the field. Smoke motes always rise
-off it and a red surge burns while it winds up and pounces (`art/mote.py`).
-Still to do: a third kind of gloom that is not afraid of the light, and a reason to
-leave a lit lantern alone (the beacon's light as a safe place).
