@@ -61,7 +61,11 @@ fn dim(lights: Vec<Light2d>) -> Lighting2d {
 
 /// What to draw over the whole frame.
 enum Subject {
-    Sprite { lit: bool, normal: Option<[u8; 4]> },
+    Sprite {
+        lit: bool,
+        normal: Option<[u8; 4]>,
+        standing: bool,
+    },
     Shape,
 }
 
@@ -103,7 +107,11 @@ fn draw(gpu: &GpuContext, lighting: Option<Lighting2d>, subject: &Subject) -> ([
     sprites.set_environment(&environment);
     shapes.set_environment(&environment);
     match subject {
-        Subject::Sprite { lit, normal } => {
+        Subject::Sprite {
+            lit,
+            normal,
+            standing,
+        } => {
             let normal_map = normal.map(|texel| {
                 textures.insert(
                     Texture2D::from_rgba8(&gpu.device, &gpu.queue, "normal", 1, 1, &texel)
@@ -127,7 +135,9 @@ fn draw(gpu: &GpuContext, lighting: Option<Lighting2d>, subject: &Subject) -> ([
                         shader: None,
                         view_projection,
                         depth: SpriteDepth::Ignore,
-                        instances: &[SpriteInstance::new(model, [1.0; 4]).lit(*lit)],
+                        instances: &[SpriteInstance::new(model, [1.0; 4])
+                            .lit(*lit)
+                            .standing(*standing)],
                     },
                 )
                 .expect("the batch fits");
@@ -167,6 +177,7 @@ fn draw(gpu: &GpuContext, lighting: Option<Lighting2d>, subject: &Subject) -> ([
 const LIT: Subject = Subject::Sprite {
     lit: true,
     normal: None,
+    standing: false,
 };
 
 #[test]
@@ -191,6 +202,7 @@ fn an_unlit_sprite_and_a_scene_without_lighting_keep_their_color() {
     let unlit = Subject::Sprite {
         lit: false,
         normal: None,
+        standing: false,
     };
     let (left, right) = draw(&gpu, Some(dim(vec![red_light(None)])), &unlit);
     assert_eq!((left, right), ([255; 4], [255; 4]));
@@ -224,6 +236,47 @@ fn a_wall_casts_a_shadow() {
     assert_eq!(
         behind[0], behind[1],
         "only ambient behind the wall: {behind:?}"
+    );
+}
+
+#[test]
+fn a_standing_sprite_is_shadowed_where_its_feet_are_not_at_each_pixel() {
+    let Some(gpu) = gpu() else {
+        return;
+    };
+    // The sprite covers the frame, two units tall, so its feet are at (0, -1).
+    // A wall at x = 0 from y = -0.5 up shadows the right half's middle for a
+    // light at (-0.25, 0), but not the line from that light to the feet.
+    let wall = [[0.0, -0.5], [0.0, 1.0]];
+    let lit_by = |light: Light2d| {
+        Some(dim(vec![Light2d {
+            radius: 0.6,
+            shadow: Some(Light2dShadow {
+                reach: 0.0,
+                source_radius: 0.0,
+                map: Arc::from(shadow_map_2d(light.position, 0.6, &[wall])),
+            }),
+            ..light
+        }]))
+    };
+    let on_the_ground = |standing: bool| Subject::Sprite {
+        lit: true,
+        normal: None,
+        standing,
+    };
+    let (_, pixel_by_pixel) = draw(&gpu, lit_by(red_light(None)), &on_the_ground(false));
+    let (near, from_the_feet) = draw(&gpu, lit_by(red_light(None)), &on_the_ground(true));
+    assert_eq!(
+        pixel_by_pixel[0], pixel_by_pixel[1],
+        "per pixel, the wall shadows it: {pixel_by_pixel:?}"
+    );
+    assert!(
+        from_the_feet[0] > pixel_by_pixel[0] + 20,
+        "from its feet the light reaches it: {from_the_feet:?} against {pixel_by_pixel:?}"
+    );
+    assert!(
+        near[0] > 240,
+        "and its near side is as lit as ever: {near:?}"
     );
 }
 
@@ -297,6 +350,7 @@ fn a_normal_map_turns_a_surface_toward_or_away_from_the_light() {
     let facing = |x: u8| Subject::Sprite {
         lit: true,
         normal: Some([x, 128, 255, 255]),
+        standing: false,
     };
     let (toward, _) = draw(&gpu, lighting.clone(), &facing(240));
     let (away, _) = draw(&gpu, lighting.clone(), &facing(16));

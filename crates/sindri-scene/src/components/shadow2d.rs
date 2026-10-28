@@ -13,6 +13,10 @@
 //!
 //! Neither blocks light and neither is lit: they are painted on top of the lit
 //! ground, so they darken what light reaches and change nothing in the dark.
+//!
+//! The thing itself is lit as something standing: a shadow is looked for at its
+//! feet, so the occluder round its base, which stops light behind the object,
+//! does not also darken the object's own side that faces the light.
 
 use serde::{Deserialize, Serialize};
 use sindri_core::SceneComponent;
@@ -38,6 +42,10 @@ pub struct Shadow2dComponent {
     pub height: f32,
     /// The longest a cast shadow gets, however low or far the light is.
     pub max_length: f32,
+    /// Whether the thing is lit as something standing on the ground: whether a
+    /// shadow covers it is asked where its feet are, not at each pixel, so the
+    /// occluder round its own base does not darken the side facing the light.
+    pub lit_from_base: bool,
 }
 
 impl SceneComponent for Shadow2dComponent {
@@ -54,6 +62,7 @@ impl Default for Shadow2dComponent {
             cast_opacity: 0.45,
             height: 0.0,
             max_length: 2.5,
+            lit_from_base: true,
         }
     }
 }

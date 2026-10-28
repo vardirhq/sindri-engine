@@ -78,6 +78,14 @@ fn sindri_shadow_2d(index: u32, world: vec2<f32>, origin: vec2<f32>, reach: f32,
 // when `use_normal` is set, so art without a normal map is lit by distance
 // alone.
 fn sindri_light_2d(world: vec2<f32>, normal: vec3<f32>, use_normal: bool) -> vec3<f32> {
+    return sindri_light_2d_from(world, world, normal, use_normal);
+}
+
+// The same, for something standing on the ground at `base`: how far each light
+// reaches is worked out at the pixel, which is what shades one end of it
+// brighter than the other, but whether a shadow covers it is asked at its feet,
+// so the occluder round its own base does not darken the side facing the light.
+fn sindri_light_2d_from(world: vec2<f32>, base: vec2<f32>, normal: vec3<f32>, use_normal: bool) -> vec3<f32> {
     var total = sindri_lights_2d.ambient.rgb;
     let count = u32(sindri_lights_2d.header.x);
     for (var i = 0u; i < count; i++) {
@@ -94,7 +102,7 @@ fn sindri_light_2d(world: vec2<f32>, normal: vec3<f32>, use_normal: bool) -> vec
             amount *= max(dot(normal, toward), 0.0);
         }
         if light.shadow.x > 0.5 {
-            amount *= sindri_shadow_2d(i, world, light.position.xy, light.shadow.y, light.shadow.z);
+            amount *= sindri_shadow_2d(i, base, light.position.xy, light.shadow.y, light.shadow.z);
         }
         total += light.color.rgb * amount;
     }
