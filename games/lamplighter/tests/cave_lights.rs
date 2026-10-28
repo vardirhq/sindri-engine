@@ -1,8 +1,7 @@
 //! The cave under the stone roof is lit by its two lanterns.
 //!
-//! A cool dusk fill casts shadows, so the cave roof keeps it out; inside, what
-//! is near a lantern is warm and what is far from both is only ambient dark.
-//! The lanterns cast shadows too, so the stone pillar shades the far side.
+//! Wick carries a light through a dark world, and the cave lanterns cast
+//! shadows so the stone pillar shades the far side.
 
 use lamplighter::Run;
 use sindri_render::{Light2d, Lighting2d, Viewport};
@@ -41,34 +40,30 @@ fn brightness(color: [f32; 3]) -> f32 {
 }
 
 #[test]
-fn dusk_stays_outside_and_the_lanterns_light_the_cave() {
+fn wick_carries_a_shadow_casting_light_into_a_dark_world() {
     let mut run = Run::open().expect("the project opens");
     assert!(run.step(1.0 / 60.0).is_empty());
     let lit = lighting(&run);
-    assert!(
-        lit.lights
-            .iter()
-            .filter(|light| light.shadow.is_some())
-            .count()
-            >= 3,
-        "the sun and both cave lanterns cast shadows"
-    );
-    let outdoors = lit.at([8.0, 3.5]);
-    let dusk_fill = only(&lit, |light| light.radius > 50.0);
-    let dusk_in_the_cave = dusk_fill.at([40.0, 3.5]);
-    let beside_a_lantern = lit.at([37.5, 6.5]);
-    assert!(
-        brightness(outdoors) > brightness(lit.ambient) + 0.05 && brightness(outdoors) < 0.9,
-        "muted dusk outdoors: {outdoors:?}"
-    );
-    assert!(
-        dusk_in_the_cave.map(f32::to_bits) == dusk_fill.ambient.map(f32::to_bits),
-        "the roof keeps the dusk fill out: {dusk_in_the_cave:?}"
-    );
-    assert!(
-        beside_a_lantern[0] > beside_a_lantern[2] + 0.2,
-        "warm beside a lantern: {beside_a_lantern:?}"
-    );
+    let held = lit.lights.iter().find(|light| (light.radius - 5.5).abs() < 0.01)
+        .expect("Wick carries a lantern");
+    assert!(held.shadow.is_some(), "Wick's lantern casts shadows");
+    let hero = run.entity("hero").expect("Wick exists");
+    let start = run.position(hero);
+    assert!((held.position[0] - start[0]).abs() < 0.3);
+    let nearby = lit.at([held.position[0], held.position[1] + 0.2]);
+    let distant = lit.at([25.0, 5.0]);
+    assert!(brightness(nearby) > brightness(distant) + 0.2, "near {nearby:?}, far {distant:?}");
+    assert!(brightness(distant) < 0.05, "the unlit road is dark: {distant:?}");
+    run.key(sindri_platform::Key::ArrowRight, true);
+    for _ in 0..60 {
+        assert!(run.step(1.0 / 60.0).is_empty());
+    }
+    let moved = run.position(hero);
+    let moved_light = lighting(&run);
+    let held = moved_light.lights.iter().find(|light| (light.radius - 5.5).abs() < 0.01)
+        .expect("the lantern is still active");
+    assert!(moved[0] > start[0] + 1.0);
+    assert!((held.position[0] - moved[0]).abs() < 0.3, "the light follows Wick");
 }
 
 #[test]
