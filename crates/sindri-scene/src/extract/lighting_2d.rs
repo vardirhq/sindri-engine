@@ -10,7 +10,9 @@ use std::sync::Arc;
 
 use glam::{Mat4, Vec3};
 use sindri_core::{ComponentSchemaRegistry, EntityId, SceneComponent, World};
-use sindri_render::{Light2d, Light2dShadow, Lighting2d, MAX_LIGHTS_2D, shadow_maps_2d};
+use sindri_render::{
+    Light2d, Light2dShadow, LightCone2d, Lighting2d, MAX_LIGHTS_2D, shadow_maps_2d,
+};
 
 use super::camera::ResolvedCameras;
 use super::{SceneExtractError, SceneExtractor, transform_matrix};
@@ -132,6 +134,9 @@ pub(crate) fn gather_lights(
                 source_radius: light.shadow_source_radius,
                 map: Arc::from([]),
             }),
+            cone: light
+                .cone()
+                .map(|(direction, angle, softness)| LightCone2d::new(direction, angle, softness)),
         });
     }
     Ok((lights, refused))

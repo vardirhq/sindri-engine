@@ -1,7 +1,9 @@
 use std::sync::Arc;
 
 use super::*;
-use crate::light2d::{SHADOW_INTERVAL_FLOATS_2D, SHADOW_INTERVALS_2D, SHADOW_MAP_LEN_2D, sees};
+use crate::light2d::{
+    LightCone2d, SHADOW_INTERVAL_FLOATS_2D, SHADOW_INTERVALS_2D, SHADOW_MAP_LEN_2D, sees,
+};
 
 fn near(actual: [f32; 3], expected: [f32; 3]) -> bool {
     actual
@@ -18,6 +20,7 @@ fn light(position: [f32; 2]) -> Light2d {
         falloff: 1.0,
         color: [1.0, 0.5, 0.25],
         shadow: None,
+        cone: None,
     }
 }
 
@@ -236,5 +239,61 @@ fn soft_shadows_follow_moving_lights_and_occluders() {
     assert!(
         visibility(origin, [[4.0, -2.0], [4.0, 2.0]]) > 0.1,
         "moving the wall clears the shadow"
+    );
+}
+
+#[test]
+fn a_spot_light_lights_its_cone_and_not_what_is_behind_it() {
+    let mut beam = light([0.0, 0.0]);
+    beam.cone = Some(LightCone2d::new(0.0, 60.0, 0.0));
+    let lighting = Lighting2d {
+        ambient: [0.0; 3],
+        lights: vec![beam],
+    };
+    assert!(lighting.at([2.0, 0.0])[0] > 0.4, "ahead of it");
+    assert!(
+        near(lighting.at([-2.0, 0.0]), [0.0; 3]),
+        "behind it nothing is lit"
+    );
+    assert!(
+        near(lighting.at([0.0, 2.0]), [0.0; 3]),
+        "square across it, outside a 60 degree beam"
+    );
+    // 20 degrees off the middle is inside a beam 30 degrees to a side.
+    let inside = [
+        2.0 * 20.0_f32.to_radians().cos(),
+        2.0 * 20.0_f32.to_radians().sin(),
+    ];
+    assert!(lighting.at(inside)[0] > 0.4, "inside the cone");
+    // 40 degrees is outside it.
+    let outside = [
+        2.0 * 40.0_f32.to_radians().cos(),
+        2.0 * 40.0_f32.to_radians().sin(),
+    ];
+    assert!(near(lighting.at(outside), [0.0; 3]), "outside the cone");
+}
+
+#[test]
+fn the_edge_of_a_soft_beam_fades_and_a_hard_one_does_not() {
+    let hard = LightCone2d::new(0.0, 60.0, 0.0);
+    let soft = LightCone2d::new(0.0, 60.0, 1.0);
+    let at = |degrees: f32| [degrees.to_radians().cos(), degrees.to_radians().sin()];
+    assert!(
+        (hard.factor(at(25.0)) - 1.0).abs() < 1.0e-3,
+        "inside a hard edge"
+    );
+    assert!(hard.factor(at(35.0)) < 1.0e-3, "outside it");
+    let (near_middle, near_edge) = (soft.factor(at(10.0)), soft.factor(at(25.0)));
+    assert!(
+        near_edge > 0.0 && near_edge < near_middle && near_middle < 1.0,
+        "a soft beam fades toward its edge: {near_middle}, {near_edge}"
+    );
+    assert!(
+        (soft.factor(at(0.0)) - 1.0).abs() < 1.0e-6,
+        "bright along the middle"
+    );
+    assert!(
+        (soft.factor([0.0, 0.0]) - 1.0).abs() < 1.0e-6,
+        "and at the light itself"
     );
 }

@@ -2,6 +2,10 @@
 
 # Changelog
 
+- Add spot lights to `sindri.light2d`: `cone_angle` (degrees across, 360 for a point
+  light), `cone_direction` and `cone_softness`. A beam is a multiplier on the light, so it
+  composes with falloff, shadows and normal maps. `Lighting.level` and the cast shadows
+  of `sindri.shadow2d` follow it, and a script can sweep it by writing `cone_direction`.
 - Lamplighter's gloom now hunt. Using `Lighting.level`, each creeps through the dark
   toward Wick, holds where a light begins, and from the edge winds up (low, wide and
   shaking, with red sparks) and pounces; a pounce that lands throws Wick back and

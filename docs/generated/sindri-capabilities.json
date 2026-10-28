@@ -648,6 +648,9 @@
           0.6000000238418579,
           1.0
         ],
+        "cone_angle": 360.0,
+        "cone_direction": 0.0,
+        "cone_softness": 0.30000001192092896,
         "enabled": true,
         "falloff": 1.5,
         "height": 1.0,
@@ -665,6 +668,9 @@
           0.6000000238418579,
           1.0
         ],
+        "cone_angle": 360.0,
+        "cone_direction": 0.0,
+        "cone_softness": 0.30000001192092896,
         "enabled": true,
         "falloff": 1.5,
         "height": 1.0,
@@ -677,6 +683,21 @@
       "meanings": {
         "color": {
           "kind": "color"
+        },
+        "cone_angle": {
+          "kind": "range",
+          "max": 360.0,
+          "min": 1.0
+        },
+        "cone_direction": {
+          "kind": "range",
+          "max": 360.0,
+          "min": -360.0
+        },
+        "cone_softness": {
+          "kind": "range",
+          "max": 1.0,
+          "min": 0.0
         },
         "falloff": {
           "kind": "range",
