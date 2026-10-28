@@ -51,6 +51,17 @@ fn lantern_radius(run: &Run) -> f64 {
         .expect("a radius")
 }
 
+/// Wick's first step, after which the gloom hunt; he is back where he started.
+fn first_step(run: &mut Run) {
+    run.input.apply(InputEvent::KeyPressed(Key::D));
+    step(run, 3);
+    run.input.apply(InputEvent::KeyReleased(Key::D));
+    run.input.apply(InputEvent::KeyPressed(Key::A));
+    step(run, 3);
+    run.input.apply(InputEvent::KeyReleased(Key::A));
+    step(run, 20);
+}
+
 /// Holds the walk key for `frames` frames.
 fn walk_east(run: &mut Run, frames: u32) {
     run.input.apply(InputEvent::KeyPressed(Key::D));
@@ -62,6 +73,7 @@ fn walk_east(run: &mut Run, frames: u32) {
 fn a_gloom_creeps_through_the_dark_toward_wick() {
     let mut run = Run::open().expect("the project opens");
     step(&mut run, 5);
+    first_step(&mut run);
     let start = position(&run, "gloom-1")[0];
     step(&mut run, 60);
     let early = position(&run, "gloom-1")[0];
@@ -75,6 +87,7 @@ fn a_gloom_creeps_through_the_dark_toward_wick() {
 fn a_gloom_winds_up_at_the_edge_of_the_light_and_a_pounce_scorches_the_lantern() {
     let mut run = Run::open().expect("the project opens");
     step(&mut run, 5);
+    first_step(&mut run);
     let (mut crouched, mut scorched) = (false, false);
     for _ in 0..600 {
         step(&mut run, 1);
@@ -90,6 +103,7 @@ fn a_gloom_winds_up_at_the_edge_of_the_light_and_a_pounce_scorches_the_lantern()
 fn left_alone_in_the_dark_wicks_lantern_goes_out() {
     let mut run = Run::open().expect("the project opens");
     step(&mut run, 5);
+    first_step(&mut run);
     let mut out = false;
     for _ in 0..3000 {
         step(&mut run, 1);
@@ -136,4 +150,16 @@ fn a_gloom_in_a_strong_light_thins() {
         thinnest = thinnest.min(alpha(&run, "gloom-1"));
     }
     assert!(thinnest < 0.7, "lit by the lantern it thins: {thinnest}");
+}
+
+#[test]
+fn the_field_opens_calm_until_wick_first_moves() {
+    let mut run = Run::open().expect("the project opens");
+    step(&mut run, 5);
+    step(&mut run, 900);
+    assert!(
+        lantern_radius(&run) > 7.99,
+        "left standing at the start, nothing has hunted him: {}",
+        lantern_radius(&run)
+    );
 }

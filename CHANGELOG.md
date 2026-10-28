@@ -7,7 +7,7 @@
   shaking, with red sparks) and pounces; a pounce that lands throws Wick back and
   scorches his lantern, which shrinks and gutters, and a few in a row put it out and
   start the field over. One that misses is spent and open to the sword. They thin where
-  a light is strong and smoke violet motes. `Game.truce` holds them still for tests.
+  a light is strong and smoke violet motes. The field opens calm: they only hunt once Wick has first walked. `Game.truce` holds them still for tests.
 
 - Lamplighter's trees, boulders, lamps, Wick and the gloom now throw shadows on the
   ground: a soft contact ellipse under each, and for trees and boulders their own

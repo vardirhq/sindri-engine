@@ -11,4 +11,6 @@ state Game {
     var lost: bool = false;
     // Above zero, the gloom lurk and never hunt: for testing the sword on one that holds still.
     var truce: number = 0.0;
+    // Set once Wick first walks: until then the gloom only lurk, so the field opens calm.
+    var moved: bool = false;
 }

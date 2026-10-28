@@ -81,7 +81,7 @@ script Gloom {
             apart = sqrt(to_x * to_x + to_y * to_y);
         }
         let level = Lighting.level(here);
-        let hunting = apart < this.notice && !Game.lost && !Game.won && Game.truce < 0.5;
+        let hunting = apart < this.notice && !Game.lost && !Game.won && Game.truce < 0.5 && Game.moved;
 
         var squash_x: number = 1.0 + 0.04 * sin(this.age * 2.6);
         var squash_y: number = 1.0 / squash_x;

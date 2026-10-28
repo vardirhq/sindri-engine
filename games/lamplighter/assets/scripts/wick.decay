@@ -37,6 +37,7 @@ script Wick {
         Game.scorch = 0.0;
         Game.scorched = 0.0;
         Game.lost = false;
+        Game.moved = false;
         Game.lit = 0.0;
         Game.total = World.with_tag("lantern").length;
         Game.won = false;
@@ -105,6 +106,9 @@ script Wick {
         } else if length > 0.1 {
             this.facing_x = x;
             this.facing_y = y;
+        }
+        if length > 0.1 {
+            Game.moved = true;
         }
         let blend = min(1.0, dt * this.ease);
         this.vx += (x * pace * this.speed - this.vx) * blend;
