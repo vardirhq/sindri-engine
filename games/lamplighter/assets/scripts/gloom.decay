@@ -1,18 +1,29 @@
-// A gloom: a patch of the dark that has learned to stand up. It does nothing
-// yet but take a sword, flinch away from the blow, and go out on the third.
+// A gloom: a patch of the dark that has learned to stand up. In the dark it
+// creeps toward Wick, and it holds at the edge of a light, thinning where the
+// light is strong. It takes a sword, flinches away from the blow, and goes out
+// on the third.
 script Gloom {
     // How many blows put it out.
     @export let health: number = 3.0;
     // How hard a blow throws it back, and how long it stays squashed by one.
     @export let knockback: number = 9.0;
     @export let flinch_for: number = 0.12;
+    // How little light it is bold in, how much light thins it, how fast it
+    // creeps through the dark, and how far off it notices Wick.
+    @export let dark: number = 0.2;
+    @export let bright: number = 0.6;
+    @export let creep: number = 1.1;
+    @export let notice: number = 11.0;
 
     var flinch: number = 0.0;
     var left: number = 0.0;
     var age: number = 0.0;
+    var shown: number = 1.0;
+    var wick: Entity = null;
 
     fn start() {
         this.left = this.health;
+        this.wick = World.find("Wick");
     }
 
     fn update(dt: number) {
@@ -27,6 +38,24 @@ script Gloom {
         }
         this.transform.scale.x = 2.0 * squash;
         this.transform.scale.y = 2.0 / squash;
+
+        // What the light does to it: thinned where it is strong, bold in the dark.
+        let here = Vec2(this.transform.world_position.x, this.transform.world_position.y);
+        let level = Lighting.level(here);
+        var want: number = 1.0;
+        if level > this.bright {
+            want = 0.55;
+        }
+        this.shown += (want - this.shown) * min(1.0, dt * 4.0);
+        this.sprite.tint = Color(1.0, 1.0, 1.0, this.shown);
+        if level < this.dark && this.flinch <= 0.0 && this.wick != null {
+            let to_x = this.wick.transform.world_position.x - here.x;
+            let to_y = this.wick.transform.world_position.y - here.y;
+            let apart = sqrt(to_x * to_x + to_y * to_y);
+            if apart < this.notice && apart > 1.2 {
+                Physics.set_velocity(this.entity, to_x / apart * this.creep, to_y / apart * this.creep);
+            }
+        }
     }
 
     // A blow in a direction (the way Wick faced as it landed): thrown along it,

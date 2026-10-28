@@ -193,7 +193,7 @@ def gloom(ident, x, y, variant):
             'lock_rotation': True, 'continuous_collision': True}
     # The art is 32 pixels, two units; the entity is scaled up from a pixel to 1/16.
     return entity(ident, ident, at(x, y, depth(y), 2, 2), **{
-        'sindri.sprite': {'texture': f'textures/gloom.png#gloom-{variant}', 'layer': 5},
+        'sindri.sprite': {'texture': f'textures/gloom.png#gloom-{variant}', 'layer': 5, 'tint': [1.0, 1.0, 1.0, 1.0]},
         'sindri.tags': {'tags': ['gloom']},
         'sindri.shadow2d': shadow(1.0, 0.4, opacity=0.4),
         'sindri.physics2d.rigid_body': body,

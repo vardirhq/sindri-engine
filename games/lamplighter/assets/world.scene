@@ -12036,7 +12036,13 @@
       "components": {
         "sindri.sprite": {
           "texture": "textures/gloom.png#gloom-1",
-          "layer": 5
+          "layer": 5,
+          "tint": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
         },
         "sindri.tags": {
           "tags": [
@@ -12127,7 +12133,13 @@
       "components": {
         "sindri.sprite": {
           "texture": "textures/gloom.png#gloom-3",
-          "layer": 5
+          "layer": 5,
+          "tint": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
         },
         "sindri.tags": {
           "tags": [
@@ -12218,7 +12230,13 @@
       "components": {
         "sindri.sprite": {
           "texture": "textures/gloom.png#gloom-0",
-          "layer": 5
+          "layer": 5,
+          "tint": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
         },
         "sindri.tags": {
           "tags": [
