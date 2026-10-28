@@ -2,6 +2,15 @@
 
 # Changelog
 
+- 2D light shadows are now exact. A shadow-casting light no longer keeps a table of
+  256 distances by direction with a blur across three of them; it keeps the region it
+  sees as sorted angular intervals, each with the line of the nearest blocking edge,
+  so a shadow ends at the true angle of an edge's end at any distance and two walls
+  meeting cast a true corner. The shader finds a pixel's interval by binary search and
+  the CPU `Lighting2d::at` runs the same arithmetic; `sindri_render::sees` is the
+  new yes-or-no query. A point light's shadow edge is now hard, and the five-sample
+  area light is what softens it. `SHADOW_BINS_2D` is replaced by `SHADOW_INTERVALS_2D`
+  and `SHADOW_MAP_LEN_2D`.
 - The Pixel Lab client gains an `object` command (a map object, with the free
   promotion of the candidates worth keeping and their export), `animate` moves to
   the multi-direction endpoint with `--directions` so a walk or a slash is made for

@@ -53,7 +53,7 @@ fn wick_carries_a_shadow_casting_light_into_a_dark_world() {
     assert!((shadow.source_radius - 0.4).abs() < 0.001);
     assert_eq!(
         shadow.map.len(),
-        sindri_render::SHADOW_BINS_2D * sindri_render::SHADOW_SAMPLES_2D,
+        sindri_render::SHADOW_MAP_LEN_2D * sindri_render::SHADOW_SAMPLES_2D,
         "the carried lantern uses all area samples"
     );
     let hero = run.entity("hero").expect("Wick exists");

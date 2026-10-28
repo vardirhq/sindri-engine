@@ -536,7 +536,7 @@ text are spans. Orbital's critical hits float their damage in bold gold.
 
 ### 2D lights and shadows
 
-Ambient plus point lights, normal maps and polar-depth shadows from occluders and tilemaps, for sprites, tiles and maps.
+Ambient plus point lights, normal maps and exact visibility shadows from occluders and tilemaps, for sprites, tiles and maps.
 
 Engine ✅ · Editor 🟡 · Decay ✅ · Proof ✅ — parity row *2D lights and shadows*
 
@@ -549,6 +549,7 @@ Engine ✅ · Editor 🟡 · Decay ✅ · Proof ✅ — parity row *2D lights an
 **Limits:**
 
 - A frame carries the 16 lights nearest the camera.
+- A source holds 256 angular intervals; past that the narrowest slivers of shadow fold into their neighbors.
 
 <details markdown="1">
 <summary>Evidence</summary>
@@ -561,7 +562,10 @@ and the UI is never lit. A sprite or tilemap may name a `normal_map` laid out
 like its texture; a light's `height` then decides how squarely it meets each
 texel, so a low light rakes across the relief. A light with `shadows` on is
 blocked by `sindri.light2d.occluder` boxes, polygons and the solid cells of a
-tilemap, through one-dimensional polar depth maps built on the CPU each frame. An optional five-sample area light produces approximate soft shadows; Lamplighter uses it for its lanterns.
+tilemap: the region it sees is built on the CPU each frame as sorted angular
+intervals, each holding the line of the nearest blocking edge, so a shadow ends at
+the exact angle of an edge's end and the shader and `Lighting2d::at` run the same
+arithmetic. An optional five-sample area light produces approximate soft shadows; Lamplighter uses it for its lanterns.
 Decay writes a light's color, intensity, radius, falloff and height. The Scene
 view draws light radii and occluder outlines with handles. The platformer's
 cave is the proof. A voxel world viewed as a map is lit too, and its
