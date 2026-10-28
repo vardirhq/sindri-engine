@@ -49,8 +49,8 @@ impl WorldHost<'_> {
         path: &Path,
         args: &[Value],
     ) -> Result<Value, RuntimeError> {
-        if call == GridCall::SetTerrain {
-            return self.terrain_call(path, args);
+        if matches!(call, GridCall::SetTerrain | GridCall::SetTerrainCorner) {
+            return self.terrain_call(call, path, args);
         }
         if matches!(call, GridCall::SetFlood | GridCall::Flooded) {
             return self.flood_call(call, path, args);
@@ -115,6 +115,7 @@ impl WorldHost<'_> {
             }
             GridCall::Block
             | GridCall::SetTerrain
+            | GridCall::SetTerrainCorner
             | GridCall::SetBlock
             | GridCall::Walkable
             | GridCall::Tagged

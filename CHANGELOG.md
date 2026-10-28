@@ -2,6 +2,20 @@
 
 # Changelog
 
+- Add a `corners` terrain kind: sixteen sprites chosen by the terrain at a tile's
+  four corners, the layout of a Wang or Tiled corner set and of what a tileset
+  generator makes for two terrains. `Grid.set_terrain_corner(map, column, row,
+  terrain, set)` sets or clears one corner and rewrites the up to four tiles that
+  meet there; `Grid.set_terrain` refuses a corners terrain and says so. The editor
+  brush does not offer corners terrains yet.
+- Add `tools/pixellab/pixellab.py`, a standard-library command-line client for the
+  Pixel Lab API: `balance`, `spec` (every endpoint, or one endpoint's fields, from
+  the API's own OpenAPI document), `tileset`, `character`, `animate`, `download`,
+  `job`, and `call` for anything else. It waits out the API's asynchronous jobs and
+  its "still being made" answers, retries rate limits, saves inline images as PNGs,
+  and takes the key from `PIXELLAB_API_KEY`. Tested against a local stand-in; the
+  first real generation run is the first check of the real responses.
+
 - Lamplighter becomes a top-down action-adventure, and the platformer it was
   turning into goes back to `games/platformer` as the side-view genre showcase,
   with its Dusk Road level and the title, level select, settings, pause and

@@ -1672,6 +1672,7 @@ what the map *holds* there.
 | `Grid.tile(map, column, row)` | `number` |
 | `Grid.set_tile(map, column, row, index)` | nothing |
 | `Grid.set_terrain(map, column, row, terrain)` | nothing |
+| `Grid.set_terrain_corner(map, column, row, terrain, set)` | nothing |
 | `Grid.columns(map)` | `number` |
 | `Grid.rows(map)` | `number` |
 
@@ -1687,7 +1688,12 @@ fail and name the component they would need rather than reporting that a tilemap
 the entity never had holds no tiles.
 
 `set_terrain` paints a terrain the map's sheet declares and redraws the cell's
-neighbors from the patterns they now make; `""` empties the cell. See
+neighbors from the patterns they now make; `""` empties the cell.
+`set_terrain_corner` is its counterpart for a `corners` terrain, which is chosen
+by the terrain at a tile's four corners rather than by neighbors: `column` and
+`row` name a grid line's crossing, from 0 to the map's columns and rows, and
+`set` makes the corner the terrain (`true`) or gives it back to the ground
+(`false`), rewriting the up to four tiles that meet there. See
 `docs/terrains.md`.
 
 ### Stacked cells
