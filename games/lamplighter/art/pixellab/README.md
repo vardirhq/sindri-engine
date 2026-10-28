@@ -75,3 +75,5 @@ was a better character by itself (a face, a belt, straps), but a 66 pixel figure
 against 16 pixel tiles is four tiles tall, and against 32 pixel tiles it needs the
 blander ground. So the world stays at 16 pixels to the unit, which is the one pixel
 size Wick, the ground, the trees and the lamps all share.
+
+This line is a CI probe and will not be merged.
