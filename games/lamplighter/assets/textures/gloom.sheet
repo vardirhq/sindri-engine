@@ -1,0 +1,14 @@
+{
+  "format_version": 1,
+  "anchor": "bottom",
+  "grid": {
+    "columns": 4,
+    "rows": 1,
+    "names": [
+      "gloom-0",
+      "gloom-1",
+      "gloom-2",
+      "gloom-3"
+    ]
+  }
+}
