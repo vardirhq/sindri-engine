@@ -86,10 +86,112 @@ jobs:
           if-no-files-found: error
           retention-days: 90
 
+  scope:
+    name: Classify site changes
+    runs-on: ubuntu-latest
+    outputs:
+      light: ${{ steps.scope.outputs.light }}
+      game: ${{ steps.scope.outputs.game }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 2
+      - name: Classify the diff
+        id: scope
+        run: |
+          if [[ "$GITHUB_EVENT_NAME" == pull_request ]]; then
+            python3 scripts/ci_game_scope.py HEAD^
+          else
+            printf 'light=false\ngame=\npackage=\n' >>"$GITHUB_OUTPUT"
+          fi
+
+  # A game-only PR still exports and renders its own project. The stable site
+  # and merge queue continue assembling and verifying the whole site.
+  game-build:
+    name: Export and render changed game
+    needs: scope
+    if: ${{ needs.scope.outputs.light == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@1.95.0
+        with:
+          targets: wasm32-unknown-unknown
+      - uses: Swatinem/rust-cache@v2
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: wasm-pack@0.13.1
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22.18'
+      - name: Install browser tooling
+        run: |
+          npm install --prefix scripts/browser
+          npx --prefix scripts/browser playwright install --with-deps chromium
+      - name: Build shared browser host
+        run: wasm-pack build crates/sindri-player --target web --out-dir pkg --no-opt
+      - name: Export changed game
+        env:
+          GAME: ${{ needs.scope.outputs.game }}
+        run: |
+          project="games/$GAME"
+          if [[ "$GAME" == causeway ]]; then project=game; fi
+          cargo run --quiet --package sindri-export --bin sindri-export -- \
+            "$project" target/game-preview --base "/examples/$GAME/" --build-id "${GITHUB_SHA:0:7}"
+          mkdir -p target/game-preview/pkg
+          cp -R crates/sindri-player/pkg/. target/game-preview/pkg/
+          test -f target/game-preview/assets/sindri.manifest
+      # The publisher requires these lab routes on every PR preview. Export
+      # them with the shared player without rebuilding or testing other games.
+      - name: Prepare the PR preview bundle
+        env:
+          GAME: ${{ needs.scope.outputs.game }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          project="games/$GAME"
+          if [[ "$GAME" == causeway ]]; then project=game; fi
+          for item in "examples/transform:transform" "examples/orbit:orbit" \
+            "examples/character3d:character3d" "examples/model-collision:model-collision" \
+            "$project:$GAME"; do
+            src="${item%%:*}"
+            route="${item##*:}"
+            cargo run --quiet --package sindri-export --bin sindri-export -- \
+              "$src" "target/wip-preview/$route" --base "/wip/$PR_NUMBER/$route/" \
+              --build-id "${GITHUB_SHA:0:7}"
+            mkdir -p "target/wip-preview/$route/pkg"
+            cp -R crates/sindri-player/pkg/. "target/wip-preview/$route/pkg/"
+          done
+          printf '<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><title>PR preview</title></head><body><h1>PR preview</h1><p><a href="./%s/">Open %s</a></p></body></html>\n' "$GAME" "$GAME" > target/wip-preview/index.html
+      - uses: actions/upload-artifact@v7
+        with:
+          name: 3d-labs-preview
+          path: target/wip-preview
+          retention-days: 14
+          if-no-files-found: error
+      - name: Render the changed game on a phone viewport
+        env:
+          GAME: ${{ needs.scope.outputs.game }}
+          SINDRI_VIEWPORT_WIDTH: 390
+          SINDRI_VIEWPORT_HEIGHT: 844
+          SINDRI_EXPECT_ASSETS: 1
+          SINDRI_EXPECT_ASSET_KINDS: scene,script
+        run: |
+          mkdir -p target/game-captures
+          SINDRI_BASE_PATH="/examples/$GAME/" \
+            node scripts/browser/smoke.mjs target/game-preview target/game-captures/game.png
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: game-preview-capture
+          path: target/game-captures
+          if-no-files-found: warn
+          retention-days: 14
+
   build:
     name: Build Sindri site
-    needs: promote
-    if: ${{ !cancelled() && needs.promote.outputs.promoted != 'true' }}
+    needs: [promote, scope]
+    if: ${{ !cancelled() && needs.promote.outputs.promoted != 'true' && needs.scope.outputs.light != 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7

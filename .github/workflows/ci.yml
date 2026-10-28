@@ -80,43 +80,31 @@ jobs:
             --repo-id "$GITHUB_REPOSITORY_ID" --tree "$(git rev-parse 'HEAD^{tree}')" \
             --changed "$changed"
 
-  # A pull request that only touches the companion game -- its scripts,
-  # assets, tests and the generators that write them -- cannot change what the
-  # engine, the editor or the browser host do, so it does not pay for the
-  # engine's whole workspace test run, the render captures or the browser run
-  # (about half an hour on a software GPU). It runs the game's own tests
-  # instead. Anything else in the diff, or any event other than a pull request,
-  # runs everything. The push to main after the merge is the full check: a
-  # light run leaves no verified record, so nothing there is skipped.
+  # Only a single known game with no shared or dependency changes gets the
+  # focused path. Main and merge queue always retain full integration coverage.
   scope:
     name: What changed
     runs-on: ubuntu-latest
     outputs:
       light: ${{ steps.scope.outputs.light }}
+      game: ${{ steps.scope.outputs.game }}
+      package: ${{ steps.scope.outputs.package }}
     steps:
       - uses: actions/checkout@v7
         with:
-          fetch-depth: 2
-      - name: Is the diff only the game
+          fetch-depth: ${{ github.event_name == 'workflow_dispatch' && 0 || 2 }}
+      - name: Classify the diff
         id: scope
         shell: bash
         run: |
-          light=false
           if [[ "$GITHUB_EVENT_NAME" == pull_request ]]; then
-            # The checkout is the merge of the head into main, so HEAD^ is the
-            # whole pull request's diff.
-            light=true
-            while IFS= read -r file; do
-              case "$file" in
-                game/assets/*|game/tests/*|game/sindri.toml|CHANGELOG.md) ;;
-                tools/causeway_art.py|tools/level.py|tools/check_causeway_art.py) ;;
-                docs/capabilities/projects.md|docs/capabilities/projects.toml) ;;
-                *) light=false; echo "Full run: $file"; break ;;
-              esac
-            done < <(git diff --name-only HEAD^ HEAD)
+            python3 scripts/ci_game_scope.py HEAD^
+          elif [[ "$GITHUB_EVENT_NAME" == workflow_dispatch && "$GITHUB_REF" != refs/heads/main ]]; then
+            base="$(git merge-base origin/main HEAD)" || base=invalid
+            python3 scripts/ci_game_scope.py "$base"
+          else
+            printf 'light=false\ngame=\npackage=\n' >>"$GITHUB_OUTPUT"
           fi
-          echo "light=$light" >>"$GITHUB_OUTPUT"
-          echo "Game-only pull request: $light" >>"$GITHUB_STEP_SUMMARY"
 
   # Nothing here compiles anything, so it reports in well under a minute. It
   # used to gate every compiling job, which saved their runners when a missing
@@ -168,8 +156,8 @@ jobs:
           rm -f "$output"
       - name: Test agent preflight discovery
         run: python3 -m unittest scripts/test_preflight.py
-      - name: Test CI result reuse
-        run: python3 -m unittest scripts/test_ci_reuse.py
+      - name: Test CI result reuse and game scope
+        run: python3 -m unittest scripts/test_ci_reuse.py scripts/test_ci_game_scope.py
       - name: Test site publisher verification
         run: python3 -m unittest discover -s site/tests
       - name: Check file sizes with structured diagnostics
@@ -291,7 +279,7 @@ jobs:
   # when the pipeline stops producing it.
   baker:
     name: Isometric baker
-    needs: reuse
+    needs: [reuse, scope]
     if: ${{ !cancelled() && needs.reuse.outputs.verified != 'true' }}
     runs-on: ubuntu-latest
     steps:
@@ -305,17 +293,21 @@ jobs:
       # which reads model files there. Without it the tests that read real model
       # files report themselves skipped rather than passing.
       - name: Install the page's model reader
+        if: ${{ needs.scope.outputs.light != 'true' }}
         run: npm ci --ignore-scripts --prefix tools/isometric-baker/web
       - name: Test
+        if: ${{ needs.scope.outputs.light != 'true' }}
         working-directory: tools/isometric-baker
         run: node --test test/*.test.ts
       - name: Check the fixture is still what its recipe bakes
+        if: ${{ needs.scope.outputs.light != 'true' }}
         working-directory: tools/isometric-baker
         run: node src/cli.ts fixtures/project/prefabs/standing-stone.isobake --out fixtures/project --check
       # Orbital draws itself with vector shapes now; its mine blast is the one
       # baked sheet left, and a recipe that stops producing what is checked in
       # would show up as art that quietly drifts from its source.
       - name: Check the baked variant's art is still what its recipes bake
+        if: ${{ needs.scope.outputs.light != 'true' || needs.scope.outputs.game == 'orbital-baked' }}
         working-directory: tools/isometric-baker
         run: |
           for recipe in ../../games/orbital-baked/assets/textures/*.isobake; do
@@ -327,6 +319,7 @@ jobs:
       # would show up as an island that no longer matches the heights its
       # rules read.
       - name: Check Causeway's art and scene are still what their scripts make
+        if: ${{ needs.scope.outputs.light != 'true' || needs.scope.outputs.game == 'causeway' }}
         run: |
           python3 -m pip install --disable-pip-version-check 'pillow==12.3.0'
           python3 tools/causeway_art.py
@@ -337,14 +330,16 @@ jobs:
       # and Wick is baked from a recipe it writes. Running it again must change
       # nothing, or the checked-in art has drifted from its source.
       - name: Check Lamplighter's art is still what its scripts make
+        if: ${{ needs.scope.outputs.light != 'true' || needs.scope.outputs.game == 'lamplighter' }}
         run: |
+          python3 -m pip install --disable-pip-version-check 'pillow==12.3.0'
           python3 games/lamplighter/art/dusk/build.py
           git status --porcelain --untracked-files=all -- games/lamplighter | tee drift.txt
           test ! -s drift.txt
 
   clippy:
     name: Clippy
-    needs: reuse
+    needs: [reuse, scope]
     if: ${{ !cancelled() && needs.reuse.outputs.verified != 'true' }}
     runs-on: ubuntu-latest
     outputs:
@@ -368,6 +363,8 @@ jobs:
           packages: libasound2-dev libudev-dev
       - name: Clippy with structured diagnostics
         id: clippy
+        env:
+          GAME_PACKAGE: ${{ needs.scope.outputs.package }}
         shell: bash
         run: |
           output="$(mktemp)"
@@ -375,7 +372,9 @@ jobs:
           # --keep-going: a crate that fails to compile would otherwise stop
           # Clippy before it reached the crates after it, hiding their lints
           # until the next push.
-          cargo clippy --workspace --all-targets --all-features --keep-going \
+          scope=(--workspace)
+          if [[ -n "$GAME_PACKAGE" ]]; then scope=(-p "$GAME_PACKAGE"); fi
+          cargo clippy "${scope[@]}" --all-targets --all-features --keep-going \
             --message-format=json >"$output"
           status=$?
           set -e
@@ -1224,10 +1223,11 @@ jobs:
           tool: cargo-nextest@0.9.143
       - name: Test the game
         env:
+          GAME_PACKAGE: ${{ needs.scope.outputs.package }}
           WGPU_BACKEND: vulkan
           SINDRI_REQUIRE_GPU: 1
           SINDRI_REQUIRE_GPU_TIMESTAMPS: 1
-        run: cargo nextest run --package sindri-causeway --all-features --no-fail-fast
+        run: cargo nextest run --package "$GAME_PACKAGE" --all-features --no-fail-fast
 
   # The record the reuse job looks for: an artifact named after the tree this
   # run tested, left only when every job passed. Runs from forks never leave
