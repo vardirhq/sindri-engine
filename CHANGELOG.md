@@ -2,6 +2,8 @@
 
 # Changelog
 
+- Run focused checks and a phone-browser export for single-game pull requests.
+
 - Add optional area-sampled 2D shadows for Lamplighter lanterns, with matching
   CPU visibility and GPU shading.
 
