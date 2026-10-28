@@ -149,7 +149,6 @@
                     "positive": "key.ArrowUp"
                   }
                 },
-                "gamepad.axis.left_y",
                 {
                   "axis": {
                     "negative": "gamepad.dpad_down",

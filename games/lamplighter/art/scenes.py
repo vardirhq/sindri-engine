@@ -309,7 +309,6 @@ def field():
         {'name': 'move_y', 'kind': 'axis', 'bindings': [
             {'axis': {'negative': 'key.S', 'positive': 'key.W'}},
             {'axis': {'negative': 'key.ArrowDown', 'positive': 'key.ArrowUp'}},
-            'gamepad.axis.left_y',
             {'axis': {'negative': 'gamepad.dpad_down', 'positive': 'gamepad.dpad_up'}}]},
         {'name': 'attack', 'kind': 'button', 'bindings': ['key.J', 'key.Space', 'gamepad.west']},
         {'name': 'pause', 'kind': 'button', 'bindings': ['key.Escape', 'gamepad.start']}]

@@ -2,6 +2,9 @@
 
 # Changelog
 
+- Lamplighter: dragging a finger down the screen now walks Wick down it, and a controller's
+  left stick up walks him up. Both read down as positive, as the screen does, and Wick
+  had taken positive as up.
 - Lamplighter's lamps stand on cobblestone pads (a second `corners` terrain from a
   Pixel Lab tileset, laid from Decay with the plain ground made transparent so the
   paving lies on the dirt), the beacon's wider than the rest. Trees and boulders
