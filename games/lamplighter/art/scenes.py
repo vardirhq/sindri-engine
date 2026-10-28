@@ -5,13 +5,9 @@ Deterministic, so CI can run it again and fail on any drift. Stage 1 draws with
 shapes; stage 2 replaces them with the Pixel Lab tileset and Wick's sprites.
 """
 import json
-import math
 import pathlib
-import sys
 
 ASSETS = pathlib.Path(__file__).resolve().parent.parent / 'assets'
-sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
-from tiles import corner_tile  # noqa: E402
 Q = [0, 0, 0, 1]
 WALL, WICK, LANTERN = 1, 2, 4
 ALL = 4294967295
@@ -142,33 +138,16 @@ def wick():
 
 
 COLUMNS, ROWS = 52, 36
-# The lanterns, in the order a person walks to them, and the dirt path between.
-PATH = [(0, 0), (8, 0), (17, -3), (22, 8)]
-
-
-def on_path(x, y):
-    """Whether a world point is within the path's width of the walk between lanterns."""
-    for (ax, ay), (bx, by) in zip(PATH, PATH[1:]):
-        dx, dy = bx - ax, by - ay
-        along = max(0.0, min(1.0, ((x - ax) * dx + (y - ay) * dy) / (dx * dx + dy * dy)))
-        if math.hypot(x - (ax + along * dx), y - (ay + along * dy)) <= 1.6:
-            return True
-    return any(math.hypot(x - lx, y - ly) <= 2.6 for lx, ly in PATH)
 
 
 def ground():
-    """Grass with a dirt path, laid from the tileset's corner patterns.
-
-    The tileset is dual-grid: a tile is chosen by the terrain at its four
-    corners, so the dirt is decided at the corners and each tile follows.
-    """
+    """Plain grass. `ground.decay` paints the dirt path onto it when the world opens."""
     left, top = -COLUMNS // 2, ROWS // 2
-    dirt = [[1 if on_path(left + i, top - j) else 0 for i in range(COLUMNS + 1)] for j in range(ROWS + 1)]
-    tiles = [corner_tile(dirt[r][c], dirt[r][c + 1], dirt[r + 1][c], dirt[r + 1][c + 1])
-             for r in range(ROWS) for c in range(COLUMNS)]
-    return entity('ground', 'Ground', at(left, top, -1.0), **{'sindri.tilemap': {
-        'texture': 'textures/ground.png', 'palette': [f'ground-{i}' for i in range(16)],
-        'columns': COLUMNS, 'rows': ROWS, 'tiles': tiles, 'layer': -10}})
+    return entity('ground', 'Ground', at(left, top, -1.0), **{
+        'sindri.tilemap': {
+            'texture': 'textures/ground.png', 'palette': [f'ground-{i}' for i in range(16)],
+            'columns': COLUMNS, 'rows': ROWS, 'tiles': [0] * (COLUMNS * ROWS), 'layer': -10},
+        'sindri.script': {'source': 'scripts/ground.decay', 'script': 'Ground', 'properties': {}}})
 
 
 def field():

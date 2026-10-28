@@ -8,8 +8,8 @@ them by that corner pattern so a tile is found from the corners it must meet:
 
     id = NW * 8 + NE * 4 + SW * 2 + SE      (1 for dirt, 0 for grass)
 
-`corner_tile` is what `scenes.py` uses to lay a tilemap from a grid of corners.
-Needs Pillow; deterministic, so CI can run it again and fail on any drift.
+`assets/scripts/ground.decay` paints the dirt path onto that sheet's `dirt`
+corners terrain when the world opens. Needs Pillow; deterministic, so CI can run it again and fail on any drift.
 """
 import json
 import pathlib
@@ -27,11 +27,6 @@ def corner_id(corners):
     return sum(value for name, value in bit.items() if corners[name] == 'upper')
 
 
-def corner_tile(nw, ne, sw, se):
-    """The palette index of the tile whose corners are these (1 is dirt)."""
-    return nw * 8 + ne * 4 + sw * 2 + se
-
-
 def build():
     doc = json.loads((SOURCE / 'tileset.json').read_text())
     sheet = Image.new('RGBA', (4 * TILE, 4 * TILE))
@@ -46,8 +41,11 @@ def build():
     TEXTURES.mkdir(parents=True, exist_ok=True)
     sheet.save(TEXTURES / 'ground.png', optimize=True)
     names = [f'ground-{i}' for i in range(16)]
+    # One `corners` terrain: the grass is the ground it lies on (sprite 0) and
+    # dirt is what `Grid.set_terrain_corner` sets, one corner at a time.
     (TEXTURES / 'ground.sheet').write_text(json.dumps(
-        {'format_version': 1, 'anchor': 'center', 'grid': {'columns': 4, 'rows': 4, 'names': names}},
+        {'format_version': 1, 'anchor': 'center', 'grid': {'columns': 4, 'rows': 4, 'names': names},
+         'terrains': {'dirt': {'kind': 'corners', 'sprites': names}}},
         indent=2) + '\n')
 
 
