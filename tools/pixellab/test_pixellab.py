@@ -95,6 +95,19 @@ class Fake(http.server.BaseHTTPRequestHandler):
             if count == 1:
                 return self.reply(423, b"", "text/plain")
             return self.reply(200, zipped(Fake.zip_files), "application/zip")
+        if (method, path) == ("POST", "/characters/animations"):
+            return self.reply(200, {"background_job_ids": ["job2", "job4"], "status": "processing"})
+        if (method, path) == ("GET", "/background-jobs/job4"):
+            return self.reply(200, {"id": "job4", "status": "completed", "created_at": "now", "last_response": {"direction": "west"}})
+        if (method, path) == ("POST", "/create-1-direction-object"):
+            return self.reply(200, {"background_job_id": "job3", "object_id": "ob1", "status": "queued", "n_frames": 16})
+        if (method, path) == ("GET", "/background-jobs/job3"):
+            return self.reply(200, {"id": "job3", "status": "completed", "created_at": "now", "last_response": {"frame_count": 16}})
+        if (method, path) == ("POST", "/objects/ob1/select-frames"):
+            made = [f"ob{n + 2}" for n, _ in enumerate(body["indices"])]
+            return self.reply(200, {"created_object_ids": made})
+        if method == "GET" and path.startswith("/objects/ob") and path.endswith("/spritesheet"):
+            return self.reply(200, zipped({"tree.png": b"png", "tree.json": b"{}"}), "application/zip")
         if (method, path) == ("POST", "/animate-character"):
             return self.reply(200, {"background_job_ids": ["job2"], "directions": ["south"], "status": "processing"})
         if (method, path) == ("GET", "/openapi.json"):
@@ -203,11 +216,60 @@ class ClientTests(unittest.TestCase):
         self.assertEqual((self.folder / "character" / "rotations" / "south.png").read_bytes(), b"png")
         self.assertEqual((self.folder / "character-id.txt").read_text().strip(), "ch1")
 
-    def test_animate_waits_for_every_job_then_downloads(self):
-        self.run_cli("animate", "--character", "ch1", "--name", "walk", "--description", "walking", "--frames", 6, "--out", self.folder)
-        sent = next(body for method, path, _, body in Fake.sent if path == "/animate-character")
-        self.assertEqual(sent, {"character_id": "ch1", "animation_name": "walk", "action_description": "walking", "frame_count": 6})
+    def test_animate_asks_for_every_direction_waits_for_each_job_then_downloads(self):
+        self.run_cli(
+            "animate", "--character", "ch1", "--name", "walk", "--description", "walking", "--frames", 6,
+            "--directions", "south, west", "--seed", 3, "--out", self.folder,
+        )
+        sent = next(body for method, path, _, body in Fake.sent if path == "/characters/animations")
+        self.assertEqual(
+            sent,
+            {
+                "character_id": "ch1", "animation_name": "walk", "action_description": "walking",
+                "frame_count": 6, "directions": ["south", "west"], "seed": 3,
+            },
+        )
+        self.assertEqual(Fake.seen[("GET", "/background-jobs/job4")], 1, "the second direction's job is waited for too")
         self.assertTrue((self.folder / "character.zip").is_file())
+
+    def test_animate_without_directions_leaves_it_to_the_service(self):
+        self.run_cli("animate", "--character", "ch1", "--out", self.folder)
+        sent = next(body for method, path, _, body in Fake.sent if path == "/characters/animations")
+        self.assertEqual(sent, {"character_id": "ch1"})
+
+    def test_call_wait_keeps_every_job_not_the_last(self):
+        self.run_cli("call", "POST", "/characters/animations", "--json", '{"character_id": "ch1"}', "--wait", "--out", self.folder)
+        saved = json.loads((self.folder / "response.json").read_text())
+        self.assertEqual([job["id"] for job in saved["jobs"]], ["job2", "job4"])
+        self.assertEqual(saved["jobs"][1]["last_response"], {"direction": "west"})
+
+    def test_call_wait_with_one_job_keeps_its_old_shape(self):
+        self.run_cli("call", "POST", "/create-1-direction-object", "--json", '{"description": "a"}', "--wait", "--out", self.folder)
+        saved = json.loads((self.folder / "response.json").read_text())
+        self.assertIn("job", saved)
+        self.assertNotIn("jobs", saved)
+
+    def test_an_object_promotes_the_candidates_asked_for_and_exports_each(self):
+        self.run_cli(
+            "object", "--description", "a dead tree", "--size", 64, "--keep", "0,3", "--out", self.folder
+        )
+        made = next(body for method, path, _, body in Fake.sent if path == "/create-1-direction-object")
+        self.assertEqual(made, {"description": "a dead tree", "view": "top-down", "size": 64})
+        chosen = next(body for method, path, _, body in Fake.sent if path == "/objects/ob1/select-frames")
+        self.assertEqual(chosen, {"indices": [0, 3]})
+        for position in (0, 1):
+            self.assertEqual((self.folder / f"object-{position}" / "tree.png").read_bytes(), b"png")
+
+    def test_an_object_keeps_only_the_first_candidate_by_default(self):
+        self.run_cli("object", "--description", "a boulder", "--out", self.folder)
+        chosen = next(body for method, path, _, body in Fake.sent if path == "/objects/ob1/select-frames")
+        self.assertEqual(chosen, {"indices": [0]})
+        self.assertFalse((self.folder / "object-1").exists())
+
+    def test_an_object_dry_run_sends_nothing(self):
+        out = self.run_cli("object", "--description", "a boulder", "--out", self.folder, "--dry-run")
+        self.assertIn("/create-1-direction-object", out)
+        self.assertEqual(Fake.sent, [])
 
     def test_a_failed_job_is_an_error_naming_why(self):
         with self.assertRaises(SystemExit) as raised:
