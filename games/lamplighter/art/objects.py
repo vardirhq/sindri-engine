@@ -3,7 +3,8 @@
 
 Each object is cropped to what it draws and set on a 64 pixel cell, centered and
 standing on the cell's bottom edge, so with the sheet anchored at the bottom an
-entity's position is the foot of the thing it shows. The unlit lamp post is the
+entity's position is the foot of the thing it shows. Trees and boulders come in several shapes, all candidates of the one call that
+made the first, so a wood is not one tree repeated. The unlit lamp post is the
 lit one with its warm pixels (the flame and the glow on the glass) dulled to the
 metal around them, so lighting a lamp changes its lantern and nothing else.
 
@@ -34,19 +35,20 @@ def unlit(picture):
     return out
 
 
+def variants(base):
+    """`base-0.png`, `base-1.png`, ... in order: the candidates promoted from one call."""
+    return [(path.stem, Image.open(path).convert('RGBA')) for path in sorted(SOURCE.glob(f'{base}-*.png'))]
+
+
 def sprites():
     lamp = Image.open(SOURCE / 'lamp-post.png').convert('RGBA')
-    return [
-        ('lamp-post-unlit', unlit(lamp)),
-        ('lamp-post-lit', lamp),
-        ('dead-tree', Image.open(SOURCE / 'dead-tree.png').convert('RGBA')),
-        ('boulder', Image.open(SOURCE / 'boulder.png').convert('RGBA')),
-    ]
+    return [('lamp-post-unlit', unlit(lamp)), ('lamp-post-lit', lamp)] + variants('dead-tree') + variants('boulder')
 
 
 def build():
     items = sprites()
-    sheet = Image.new('RGBA', (CELL * len(items), CELL))
+    columns = len(items)
+    sheet = Image.new('RGBA', (CELL * columns, CELL))
     for column, (_, picture) in enumerate(items):
         shown = picture.crop(picture.getbbox())
         assert shown.width <= CELL and shown.height <= CELL, shown.size
@@ -56,7 +58,7 @@ def build():
     sheet.save(TEXTURES / 'objects.png', optimize=True)
     (TEXTURES / 'objects.sheet').write_text(json.dumps(
         {'format_version': 1, 'anchor': 'bottom',
-         'grid': {'columns': len(items), 'rows': 1, 'names': [name for name, _ in items]}}, indent=2) + '\n')
+         'grid': {'columns': columns, 'rows': 1, 'names': [name for name, _ in items]}}, indent=2) + '\n')
 
 
 if __name__ == '__main__':

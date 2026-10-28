@@ -32,5 +32,26 @@ frames 56 by 56. `art/wick.py` puts every frame on one cell, aligned by the feet
   costs **10 generations** and returns sixteen candidates as a *review* object; one
   is promoted with `POST /objects/{id}/select-frames {"indices": [0]}`, which is
   free, and exported with `GET /objects/{id}/spritesheet` (a ZIP). Frame 0 was
-  taken for all three. The unlit lamp post is not generated: `art/objects.py`
+  taken for the lamp post; for the tree and boulder frames 0 to 4 and 0 to 3 are
+  all used, so a wood is five different trees and a field four boulders. The unlit lamp post is not generated: `art/objects.py`
   darkens the lit one's warm pixels, so the pair share a silhouette.
+
+## Tried and not used
+
+- **`target_palette` on a tileset.** The API takes up to 256 hex colors that every
+  pixel must use, on tilesets in `mode: pro` and on objects and animations. A 43
+  color palette built from the art already chosen turned a pro stone-road tileset
+  into dithered noise (dark blue stones, olive grass with yellow flecks), so it was
+  dropped. It also costs far more than a standard tileset.
+- **A second tileset for a stone road,** `--lower "worn grey cobblestone road"
+  --upper "dark mossy grass"`. It came back well, but its grass is a brighter green
+  than the first tileset's dark moss (9,73,33 against 23,33,19), so the two cannot
+  share a field. `upper_base_tile_id` with the first tileset's terrain id did not
+  reuse its grass. A deterministic recolor of its greens onto the first set's ramp
+  in the art script is the way to try next.
+- **A gloom as a four-direction character.** The character call defaulted to its
+  human "mannequin" body and ignored the description's shape, giving a shadow person
+  rather than a creature.
+- **The labels `lower` and `upper` are not reliable between calls.** The first
+  tileset's `lower` was the dirt although the prompt said grass; the stone road's
+  `lower` was the stone, as prompted. Always check by color.

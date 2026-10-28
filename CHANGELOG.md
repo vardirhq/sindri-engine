@@ -11,6 +11,13 @@
   new yes-or-no query. A point light's shadow edge is now hard, and the five-sample
   area light is what softens it. `SHADOW_BINS_2D` is replaced by `SHADOW_INTERVALS_2D`
   and `SHADOW_MAP_LEN_2D`.
+- Lamplighter's field gets real creatures and a lived-in ground: four Pixel Lab
+  gloom (a smoking blob, a hunched one, one trailed by motes, a low crouch) that
+  breathe and squash when struck, five dead trees and four boulders instead of one
+  of each, and a scatter of tufts, night flowers, pebbles and glowing mushrooms over
+  the grass, kept clear of the path and of everything solid. A sword blow now throws
+  a gloom along the direction it was struck, not away from a point, and the ambient
+  light is raised so the far trees read.
 - Add `games/lamplighter`, the top-down action-adventure, starting with a dark
   field: Wick walks with a carried lantern that lights and shadows the world,
   swings a sword at a gloom, and lights three lamp posts, the last of which opens
