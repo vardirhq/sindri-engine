@@ -1,7 +1,9 @@
 // The ground is grass until this paints a dirt path on it: from where Wick
 // starts, past each lantern, to the last. The path is laid corner by corner
 // on the sheet's `dirt` terrain, so a tile on its edge draws the corner
-// pattern the neighbouring corners call for. Painted once, as the world opens.
+// pattern the neighbouring corners call for. Each lamp then gets a pad of
+// paving on the `road` layer above, the beacon a wider one. Painted once, as
+// the world opens.
 script Ground {
     // The world position of the map's top-left corner.
     @export let left: number = -26.0;
@@ -9,6 +11,10 @@ script Ground {
     // How far from the walk between lanterns the path reaches, and around a lantern.
     @export let width: number = 1.6;
     @export let plaza: number = 2.6;
+
+    // How far the paving reaches from a lamp, and from the last, the beacon.
+    @export let pad: number = 1.5;
+    @export let beacon_pad: number = 2.3;
 
     var path_x: List<number> = [0.0, 8.0, 17.0, 22.0];
     var path_y: List<number> = [0.0, 0.0, -3.0, 8.0];
@@ -24,9 +30,38 @@ script Ground {
                 }
             }
         }
+        pave(World.find("road"), columns, rows);
     }
 
-    // Whether a world point is on the path or in a lantern's plaza.
+    // A pad of paving round each lamp; the first point on the path is where
+    // Wick starts, which has no lamp. Only the corners within a lamp's reach are
+    // visited, not the whole map, which is also what keeps the script inside the
+    // VM's budget for one call.
+    fn pave(road: Entity, columns: number, rows: number) {
+        for i in 1..this.path_x.length {
+            var reach: number = this.pad;
+            if i + 1.0 == this.path_x.length {
+                reach = this.beacon_pad;
+            }
+            let lx = this.path_x[i];
+            let ly = this.path_y[i];
+            let first_column = max(0.0, floor(lx - this.left - reach));
+            let last_column = min(columns, ceil(lx - this.left + reach));
+            let first_row = max(0.0, floor(this.top - ly - reach));
+            let last_row = min(rows, ceil(this.top - ly + reach));
+            for row in first_row..last_row + 1.0 {
+                for column in first_column..last_column + 1.0 {
+                    let dx = this.left + column - lx;
+                    let dy = this.top - row - ly;
+                    if sqrt(dx * dx + dy * dy) <= reach {
+                        Grid.set_terrain_corner(road, column, row, "stone", true);
+                    }
+                }
+            }
+        }
+    }
+
+        // Whether a world point is on the path or in a lantern's plaza.
     fn near_path(x: number, y: number) -> bool {
         for i in 0..this.path_x.length {
             let ax = this.path_x[i];

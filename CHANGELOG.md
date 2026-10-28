@@ -2,6 +2,12 @@
 
 # Changelog
 
+- Lamplighter's lamps stand on cobblestone pads (a second `corners` terrain from a
+  Pixel Lab tileset, laid from Decay with the plain ground made transparent so the
+  paving lies on the dirt), the beacon's wider than the rest. Trees and boulders
+  block light with an ellipse on their footprint instead of a box centered on their
+  foot, so they no longer throw a rectangle under themselves, and the lamps' and
+  Wick's light reach further past an edge so the face toward the light stays lit.
 - Lamplighter's field gets real creatures and a lived-in ground: four Pixel Lab
   gloom (a smoking blob, a hunched one, one trailed by motes, a low crouch) that
   breathe and squash when struck, five dead trees and four boulders instead of one
