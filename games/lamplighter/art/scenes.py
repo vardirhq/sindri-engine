@@ -114,13 +114,13 @@ def static_body():
             'lock_rotation': True, 'continuous_collision': False}
 
 
-def prop(ident, sprite, x, y, radius, centre, occluder):
+def prop(ident, sprite, x, y, radius, centre, occluder, flip=False):
     """A tree or a boulder: it stands on its position, stops Wick and stops light.
 
     The radius, the height of the collider's middle above the foot and the
     occluder's size are in world units; the entity is scaled up from 16 art
     pixels to a unit, so each is divided by that scale for the component."""
-    return entity(ident, ident, at(x, y, depth(y), 4, 4), **{
+    return entity(ident, ident, at(x, y, depth(y), -4 if flip else 4, 4), **{
         'sindri.sprite': {'texture': f'textures/objects.png#{sprite}', 'layer': 5},
         'sindri.physics2d.rigid_body': static_body(),
         'sindri.physics2d.collider': {'shape': {'shape': 'circle', 'radius': radius / 4}, 'offset': [0, centre / 4],
@@ -230,9 +230,11 @@ TREES = [(-8, 9), (-14, 3), (-18, -7), (4, 10), (10, 11), (20, -9), (24, 3), (-3
 
 def scenery():
     """Boulders to walk around and a dead wood: what the carried light shadows."""
-    out = [prop(f'boulder-{n}', 'boulder', x, y, 0.9, 0.7, (1.8, 1.2))
+    # Which of the five trees and four boulders stands where is fixed by its
+    # number, and every other one is turned about, so a wood is not one tree.
+    out = [prop(f'boulder-{n}', f'boulder-{(n * 3) % 4}', x, y, 0.9, 0.7, (1.8, 1.2), flip=n % 2 == 0)
            for n, (x, y) in enumerate(BOULDERS, 1)]
-    out += [prop(f'tree-{n}', 'dead-tree', x, y, 0.6, 0.5, (1.2, 0.9))
+    out += [prop(f'tree-{n}', f'dead-tree-{(n * 2) % 5}', x, y, 0.6, 0.5, (1.2, 0.9), flip=n % 3 == 0)
             for n, (x, y) in enumerate(TREES, 1)]
     return out
 

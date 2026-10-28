@@ -2,13 +2,20 @@
   "format_version": 1,
   "anchor": "bottom",
   "grid": {
-    "columns": 4,
+    "columns": 11,
     "rows": 1,
     "names": [
       "lamp-post-unlit",
       "lamp-post-lit",
-      "dead-tree",
-      "boulder"
+      "dead-tree-0",
+      "dead-tree-1",
+      "dead-tree-2",
+      "dead-tree-3",
+      "dead-tree-4",
+      "boulder-0",
+      "boulder-1",
+      "boulder-2",
+      "boulder-3"
     ]
   }
 }

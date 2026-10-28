@@ -2457,7 +2457,7 @@
       },
       "components": {
         "sindri.sprite": {
-          "texture": "textures/objects.png#boulder",
+          "texture": "textures/objects.png#boulder-3",
           "layer": 5
         },
         "sindri.physics2d.rigid_body": {
@@ -2523,14 +2523,14 @@
           1
         ],
         "scale": [
-          4,
+          -4,
           4,
           1
         ]
       },
       "components": {
         "sindri.sprite": {
-          "texture": "textures/objects.png#boulder",
+          "texture": "textures/objects.png#boulder-2",
           "layer": 5
         },
         "sindri.physics2d.rigid_body": {
@@ -2603,7 +2603,7 @@
       },
       "components": {
         "sindri.sprite": {
-          "texture": "textures/objects.png#boulder",
+          "texture": "textures/objects.png#boulder-1",
           "layer": 5
         },
         "sindri.physics2d.rigid_body": {
@@ -2669,14 +2669,14 @@
           1
         ],
         "scale": [
-          4,
+          -4,
           4,
           1
         ]
       },
       "components": {
         "sindri.sprite": {
-          "texture": "textures/objects.png#boulder",
+          "texture": "textures/objects.png#boulder-0",
           "layer": 5
         },
         "sindri.physics2d.rigid_body": {
@@ -2749,7 +2749,7 @@
       },
       "components": {
         "sindri.sprite": {
-          "texture": "textures/objects.png#boulder",
+          "texture": "textures/objects.png#boulder-3",
           "layer": 5
         },
         "sindri.physics2d.rigid_body": {
@@ -2822,7 +2822,7 @@
       },
       "components": {
         "sindri.sprite": {
-          "texture": "textures/objects.png#dead-tree",
+          "texture": "textures/objects.png#dead-tree-2",
           "layer": 5
         },
         "sindri.physics2d.rigid_body": {
@@ -2895,7 +2895,7 @@
       },
       "components": {
         "sindri.sprite": {
-          "texture": "textures/objects.png#dead-tree",
+          "texture": "textures/objects.png#dead-tree-4",
           "layer": 5
         },
         "sindri.physics2d.rigid_body": {
@@ -2961,14 +2961,14 @@
           1
         ],
         "scale": [
-          4,
+          -4,
           4,
           1
         ]
       },
       "components": {
         "sindri.sprite": {
-          "texture": "textures/objects.png#dead-tree",
+          "texture": "textures/objects.png#dead-tree-1",
           "layer": 5
         },
         "sindri.physics2d.rigid_body": {
@@ -3041,7 +3041,7 @@
       },
       "components": {
         "sindri.sprite": {
-          "texture": "textures/objects.png#dead-tree",
+          "texture": "textures/objects.png#dead-tree-3",
           "layer": 5
         },
         "sindri.physics2d.rigid_body": {
@@ -3114,7 +3114,7 @@
       },
       "components": {
         "sindri.sprite": {
-          "texture": "textures/objects.png#dead-tree",
+          "texture": "textures/objects.png#dead-tree-0",
           "layer": 5
         },
         "sindri.physics2d.rigid_body": {
@@ -3180,14 +3180,14 @@
           1
         ],
         "scale": [
-          4,
+          -4,
           4,
           1
         ]
       },
       "components": {
         "sindri.sprite": {
-          "texture": "textures/objects.png#dead-tree",
+          "texture": "textures/objects.png#dead-tree-2",
           "layer": 5
         },
         "sindri.physics2d.rigid_body": {
@@ -3260,7 +3260,7 @@
       },
       "components": {
         "sindri.sprite": {
-          "texture": "textures/objects.png#dead-tree",
+          "texture": "textures/objects.png#dead-tree-4",
           "layer": 5
         },
         "sindri.physics2d.rigid_body": {
@@ -3333,7 +3333,7 @@
       },
       "components": {
         "sindri.sprite": {
-          "texture": "textures/objects.png#dead-tree",
+          "texture": "textures/objects.png#dead-tree-1",
           "layer": 5
         },
         "sindri.physics2d.rigid_body": {
@@ -3399,14 +3399,14 @@
           1
         ],
         "scale": [
-          4,
+          -4,
           4,
           1
         ]
       },
       "components": {
         "sindri.sprite": {
-          "texture": "textures/objects.png#dead-tree",
+          "texture": "textures/objects.png#dead-tree-3",
           "layer": 5
         },
         "sindri.physics2d.rigid_body": {
@@ -3479,7 +3479,7 @@
       },
       "components": {
         "sindri.sprite": {
-          "texture": "textures/objects.png#dead-tree",
+          "texture": "textures/objects.png#dead-tree-0",
           "layer": 5
         },
         "sindri.physics2d.rigid_body": {
@@ -3552,7 +3552,7 @@
       },
       "components": {
         "sindri.sprite": {
-          "texture": "textures/objects.png#dead-tree",
+          "texture": "textures/objects.png#dead-tree-2",
           "layer": 5
         },
         "sindri.physics2d.rigid_body": {
@@ -3618,14 +3618,14 @@
           1
         ],
         "scale": [
-          4,
+          -4,
           4,
           1
         ]
       },
       "components": {
         "sindri.sprite": {
-          "texture": "textures/objects.png#dead-tree",
+          "texture": "textures/objects.png#dead-tree-4",
           "layer": 5
         },
         "sindri.physics2d.rigid_body": {
@@ -3698,7 +3698,7 @@
       },
       "components": {
         "sindri.sprite": {
-          "texture": "textures/objects.png#dead-tree",
+          "texture": "textures/objects.png#dead-tree-1",
           "layer": 5
         },
         "sindri.physics2d.rigid_body": {
@@ -3771,7 +3771,7 @@
       },
       "components": {
         "sindri.sprite": {
-          "texture": "textures/objects.png#dead-tree",
+          "texture": "textures/objects.png#dead-tree-3",
           "layer": 5
         },
         "sindri.physics2d.rigid_body": {
@@ -3837,14 +3837,14 @@
           1
         ],
         "scale": [
-          4,
+          -4,
           4,
           1
         ]
       },
       "components": {
         "sindri.sprite": {
-          "texture": "textures/objects.png#dead-tree",
+          "texture": "textures/objects.png#dead-tree-0",
           "layer": 5
         },
         "sindri.physics2d.rigid_body": {
