@@ -141,7 +141,9 @@ documentation says what is now true.
    field is a grass-and-dirt ground, Wick is the Pixel Lab character with a walk,
    a sword and a gloom to swing it at, and lamp posts he lights, with trees and
    boulders that shadow the carried light; `tests/` plays the walk, the sword, the
-   three lamps and the ground.
+   three lamps and the ground. The gloom are Pixel Lab creatures, the trees and
+   boulders come in several shapes, and glowing mushrooms, night flowers, tufts and
+   pebbles are scattered over the grass.
 2. **Art foundation.** The grass-to-dirt tileset and the village-and-woods tile
    sets, Wick's directional sprites and sword, trees, walls, buildings and
    lanterns, with normal maps, and a test that opens the art.
@@ -176,6 +178,13 @@ What came back from the real service, which the client's mock did not show:
   object; promoting one is free. A character costs one, a walk four, a tileset one.
 - The sword's south row was regenerated and is clearly better; the same prompt made
   the north row's blade nearly invisible, so that row keeps its first take.
+
+- A creature is better asked for as an object than a character: the character call
+  used its human body whatever the description said, while the object call gave
+  eight good gloom to choose from. Candidates of an object call are free to promote,
+  so a wood of five trees cost what one did.
+- `target_palette` on a pro tileset made noise; the first and second tileset's greens
+  differ, so a second terrain needs its greens recolored onto the first's ramp.
 
 ## Checks that hold throughout
 
