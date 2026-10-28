@@ -81,7 +81,7 @@ Engine ✅ · Editor 🟡 · Decay ✅ · Proof ✅ — parity row *Bodies, fixe
 
 **Tested by:** [`crates/sindri-decay/tests/a_script_drives_a_body.rs`](../../crates/sindri-decay/tests/a_script_drives_a_body.rs), [`crates/sindri-physics/tests/copies_go_on_as_the_original.rs`](../../crates/sindri-physics/tests/copies_go_on_as_the_original.rs)
 
-**Exercised in:** [`games/orbital-baked`](../../games/orbital-baked), [`games/lamplighter`](../../games/lamplighter)
+**Exercised in:** [`games/orbital-baked`](../../games/orbital-baked), [`games/platformer`](../../games/platformer)
 
 **See:** [`docs/physics.md`](../../docs/physics.md)
 
@@ -136,7 +136,7 @@ Engine ✅ · Editor ✅ · Decay ✅ · Proof ✅ — parity row *Named collisi
 
 **Tested by:** [`crates/sindri-decay/tests/a_script_names_its_layers.rs`](../../crates/sindri-decay/tests/a_script_names_its_layers.rs)
 
-**Exercised in:** [`games/lamplighter`](../../games/lamplighter), [`examples/physics`](../../examples/physics)
+**Exercised in:** [`games/platformer`](../../games/platformer), [`examples/physics`](../../examples/physics)
 
 **Limits:**
 
@@ -163,7 +163,7 @@ Engine ✅ · Editor ✅ · Decay — · Proof ✅ — parity row *Compound coll
 
 **Tested by:** [`editor/tests/inspector_field_meanings.rs`](../../editor/tests/inspector_field_meanings.rs)
 
-**Exercised in:** [`games/lamplighter`](../../games/lamplighter)
+**Exercised in:** [`games/platformer`](../../games/platformer)
 
 <details markdown="1">
 <summary>Evidence</summary>
@@ -182,9 +182,9 @@ Painted tiles become solid, merged into as few rectangles as cover them so nothi
 
 Engine ✅ · Editor 🟡 · Decay — · Proof ✅ — parity row *Tilemap collision*
 
-**Tested by:** [`crates/sindri-scene/src/tilemap_collision.rs`](../../crates/sindri-scene/src/tilemap_collision.rs), [`games/lamplighter/tests/painted_ground.rs`](../../games/lamplighter/tests/painted_ground.rs)
+**Tested by:** [`crates/sindri-scene/src/tilemap_collision.rs`](../../crates/sindri-scene/src/tilemap_collision.rs), [`games/platformer/tests/painted_ground.rs`](../../games/platformer/tests/painted_ground.rs)
 
-**Exercised in:** [`games/lamplighter`](../../games/lamplighter)
+**Exercised in:** [`games/platformer`](../../games/platformer)
 
 **Limits:**
 
@@ -213,7 +213,7 @@ Engine ✅ · Editor ✅ · Decay — · Proof ✅ — parity row *Scene gravity
 
 **Tested by:** [`crates/sindri-physics/tests/gravity_changes.rs`](../../crates/sindri-physics/tests/gravity_changes.rs), [`crates/sindri-decay/tests/a_script_turns_gravity.rs`](../../crates/sindri-decay/tests/a_script_turns_gravity.rs)
 
-**Exercised in:** [`games/lamplighter`](../../games/lamplighter), [`games/scorchball`](../../games/scorchball), [`examples/physics`](../../examples/physics)
+**Exercised in:** [`games/platformer`](../../games/platformer), [`games/scorchball`](../../games/scorchball), [`examples/physics`](../../examples/physics)
 
 **Limits:**
 
@@ -240,7 +240,7 @@ Engine ✅ · Editor — · Decay ✅ · Proof ✅ — parity row *Moving a body
 
 **Tested by:** [`crates/sindri-scene/src/physics_sync/tests.rs`](../../crates/sindri-scene/src/physics_sync/tests.rs)
 
-**Exercised in:** [`games/lamplighter`](../../games/lamplighter)
+**Exercised in:** [`games/platformer`](../../games/platformer)
 
 <details markdown="1">
 <summary>Evidence</summary>
@@ -268,9 +268,9 @@ Additive world force and torque, immediate and off-centre impulses, angular velo
 
 Engine 🟡 · Editor 🟡 · Decay 🟡 · Proof 🟡 — parity row *Forces and rotation (2D)*
 
-**Tested by:** [`crates/sindri-physics/tests/forces_and_rotation.rs`](../../crates/sindri-physics/tests/forces_and_rotation.rs), [`crates/sindri-decay/tests/forces_and_rotation.rs`](../../crates/sindri-decay/tests/forces_and_rotation.rs), [`games/lamplighter/tests/forces_and_rotation.rs`](../../games/lamplighter/tests/forces_and_rotation.rs)
+**Tested by:** [`crates/sindri-physics/tests/forces_and_rotation.rs`](../../crates/sindri-physics/tests/forces_and_rotation.rs), [`crates/sindri-decay/tests/forces_and_rotation.rs`](../../crates/sindri-decay/tests/forces_and_rotation.rs), [`games/platformer/tests/forces_and_rotation.rs`](../../games/platformer/tests/forces_and_rotation.rs)
 
-**Exercised in:** [`games/lamplighter`](../../games/lamplighter)
+**Exercised in:** [`games/platformer`](../../games/platformer)
 
 **See:** [`docs/physics.md`](../../docs/physics.md)
 
@@ -299,9 +299,9 @@ Copied solver contacts: other entity, world point, push normal, normal and frict
 
 Engine ✅ · Editor 🟡 · Decay ✅ · Proof ✅ — parity row *Solid contact snapshots (2D)*
 
-**Tested by:** [`crates/sindri-physics/tests/contacts.rs`](../../crates/sindri-physics/tests/contacts.rs), [`crates/sindri-decay/tests/contact_snapshots.rs`](../../crates/sindri-decay/tests/contact_snapshots.rs), [`games/lamplighter/tests/contact_impacts.rs`](../../games/lamplighter/tests/contact_impacts.rs)
+**Tested by:** [`crates/sindri-physics/tests/contacts.rs`](../../crates/sindri-physics/tests/contacts.rs), [`crates/sindri-decay/tests/contact_snapshots.rs`](../../crates/sindri-decay/tests/contact_snapshots.rs), [`games/platformer/tests/contact_impacts.rs`](../../games/platformer/tests/contact_impacts.rs)
 
-**Exercised in:** [`games/lamplighter`](../../games/lamplighter)
+**Exercised in:** [`games/platformer`](../../games/platformer)
 
 **Limits:**
 
@@ -336,9 +336,9 @@ A local support normal and contact cone on solid pieces, with timed drop-through
 
 Engine ✅ · Editor 🟡 · Decay ✅ · Proof ✅ — parity row *One-way platforms*
 
-**Tested by:** [`crates/sindri-physics/tests/one_way.rs`](../../crates/sindri-physics/tests/one_way.rs), [`crates/sindri-physics/tests/one_way_movement.rs`](../../crates/sindri-physics/tests/one_way_movement.rs), [`games/lamplighter/tests/one_way_platforms.rs`](../../games/lamplighter/tests/one_way_platforms.rs)
+**Tested by:** [`crates/sindri-physics/tests/one_way.rs`](../../crates/sindri-physics/tests/one_way.rs), [`crates/sindri-physics/tests/one_way_movement.rs`](../../crates/sindri-physics/tests/one_way_movement.rs), [`games/platformer/tests/one_way_platforms.rs`](../../games/platformer/tests/one_way_platforms.rs)
 
-**Exercised in:** [`games/lamplighter`](../../games/lamplighter)
+**Exercised in:** [`games/platformer`](../../games/platformer)
 
 **Limits:**
 
@@ -367,9 +367,9 @@ Reusable `physics_material` profile assets applied to every collider piece of an
 
 Engine ✅ · Editor 🟡 · Decay — · Proof ✅ — parity row *Physics materials as assets (2D)*
 
-**Tested by:** [`crates/sindri-scene/src/physics_material/tests.rs`](../../crates/sindri-scene/src/physics_material/tests.rs), [`crates/sindri-export/tests/physics_materials.rs`](../../crates/sindri-export/tests/physics_materials.rs), [`games/lamplighter/tests/physics_materials.rs`](../../games/lamplighter/tests/physics_materials.rs)
+**Tested by:** [`crates/sindri-scene/src/physics_material/tests.rs`](../../crates/sindri-scene/src/physics_material/tests.rs), [`crates/sindri-export/tests/physics_materials.rs`](../../crates/sindri-export/tests/physics_materials.rs), [`games/platformer/tests/physics_materials.rs`](../../games/platformer/tests/physics_materials.rs)
 
-**Exercised in:** [`games/lamplighter`](../../games/lamplighter)
+**Exercised in:** [`games/platformer`](../../games/platformer)
 
 **Limits:**
 
@@ -431,7 +431,7 @@ Engine ✅ · Editor 🟡 · Decay ✅ · Proof ✅ — parity row *Continuous c
 
 **Tested by:** [`crates/sindri-physics/tests/continuous_collision.rs`](../../crates/sindri-physics/tests/continuous_collision.rs), [`crates/sindri-decay/tests/continuous_collision.rs`](../../crates/sindri-decay/tests/continuous_collision.rs)
 
-**Exercised in:** [`games/lamplighter`](../../games/lamplighter)
+**Exercised in:** [`games/platformer`](../../games/platformer)
 
 **Limits:**
 
@@ -461,7 +461,7 @@ Engine ✅ · Editor — · Decay — · Proof ✅
 
 **Tested by:** [`crates/sindri-physics/tests/move_and_slide.rs`](../../crates/sindri-physics/tests/move_and_slide.rs), [`crates/sindri-physics/tests/ground_probe.rs`](../../crates/sindri-physics/tests/ground_probe.rs), [`crates/sindri-physics/tests/grounded_slide.rs`](../../crates/sindri-physics/tests/grounded_slide.rs), [`crates/sindri-physics/tests/slope_movement.rs`](../../crates/sindri-physics/tests/slope_movement.rs), [`crates/sindri-physics/tests/step_movement.rs`](../../crates/sindri-physics/tests/step_movement.rs), [`crates/sindri-physics/tests/platform_movement.rs`](../../crates/sindri-physics/tests/platform_movement.rs), [`crates/sindri-physics/tests/one_way_movement.rs`](../../crates/sindri-physics/tests/one_way_movement.rs)
 
-**Exercised in:** [`games/lamplighter`](../../games/lamplighter)
+**Exercised in:** [`games/platformer`](../../games/platformer)
 
 **See:** [`docs/character-movement.md`](../../docs/character-movement.md)
 
@@ -514,9 +514,9 @@ filtering; hosts own duration and cancellation.
 
 Engine ✅ · Editor ✅ · Decay ✅ · Proof ✅ — parity row *Character controller (2D)*
 
-**Tested by:** [`crates/sindri-scene/src/characters/tests.rs`](../../crates/sindri-scene/src/characters/tests.rs), [`crates/sindri-decay/tests/character_controllers.rs`](../../crates/sindri-decay/tests/character_controllers.rs), [`crates/sindri-decay/tests/character_controllers/motions.rs`](../../crates/sindri-decay/tests/character_controllers/motions.rs), [`crates/sindri-decay/tests/character_controllers/requests.rs`](../../crates/sindri-decay/tests/character_controllers/requests.rs), [`game/tests/the_character_controller_works.rs`](../../game/tests/the_character_controller_works.rs), [`games/lamplighter/tests/character_gameplay.rs`](../../games/lamplighter/tests/character_gameplay.rs), [`games/lamplighter/tests/controller_terrain.rs`](../../games/lamplighter/tests/controller_terrain.rs), [`games/lamplighter/tests/moving_platform.rs`](../../games/lamplighter/tests/moving_platform.rs), [`scripts/browser/lamplighter-goal.mjs`](../../scripts/browser/lamplighter-goal.mjs)
+**Tested by:** [`crates/sindri-scene/src/characters/tests.rs`](../../crates/sindri-scene/src/characters/tests.rs), [`crates/sindri-decay/tests/character_controllers.rs`](../../crates/sindri-decay/tests/character_controllers.rs), [`crates/sindri-decay/tests/character_controllers/motions.rs`](../../crates/sindri-decay/tests/character_controllers/motions.rs), [`crates/sindri-decay/tests/character_controllers/requests.rs`](../../crates/sindri-decay/tests/character_controllers/requests.rs), [`game/tests/the_character_controller_works.rs`](../../game/tests/the_character_controller_works.rs), [`games/platformer/tests/character_gameplay.rs`](../../games/platformer/tests/character_gameplay.rs), [`games/platformer/tests/controller_terrain.rs`](../../games/platformer/tests/controller_terrain.rs), [`games/platformer/tests/moving_platform.rs`](../../games/platformer/tests/moving_platform.rs), [`scripts/browser/platformer-goal.mjs`](../../scripts/browser/platformer-goal.mjs)
 
-**Exercised in:** [`games/lamplighter`](../../games/lamplighter)
+**Exercised in:** [`games/platformer`](../../games/platformer)
 
 **See:** [`docs/character-movement.md`](../../docs/character-movement.md), [`docs/physics-character-editor-review.md`](../../docs/physics-character-editor-review.md)
 
@@ -591,7 +591,7 @@ Engine ✅ · Editor — · Decay ✅ · Proof ✅ — parity row *2D closest-hi
 
 **Tested by:** [`crates/sindri-physics/tests/raycast.rs`](../../crates/sindri-physics/tests/raycast.rs), [`crates/sindri-decay/tests/a_script_casts_a_ray.rs`](../../crates/sindri-decay/tests/a_script_casts_a_ray.rs)
 
-**Exercised in:** [`games/lamplighter`](../../games/lamplighter), [`examples/physics`](../../examples/physics)
+**Exercised in:** [`games/platformer`](../../games/platformer), [`examples/physics`](../../examples/physics)
 
 **See:** [`docs/physics-playground.md`](../../docs/physics-playground.md)
 
@@ -650,7 +650,7 @@ Engine ✅ · Editor — · Decay ✅ · Proof ✅ — parity row *Accelerated 2
 
 **Tested by:** [`crates/sindri-physics/src/world2d/spatial/tests.rs`](../../crates/sindri-physics/src/world2d/spatial/tests.rs), [`crates/sindri-physics/src/world2d/spatial/tests/controllers.rs`](../../crates/sindri-physics/src/world2d/spatial/tests/controllers.rs)
 
-**Exercised in:** [`games/lamplighter`](../../games/lamplighter)
+**Exercised in:** [`games/platformer`](../../games/platformer)
 
 **Limits:**
 
@@ -678,9 +678,9 @@ Scene-authored distance, hinge, slider and spring joints, each owned by its own 
 
 Engine 🟡 · Editor 🟡 · Decay 🟡 · Proof ✅ — parity row *Joints and constraints*
 
-**Tested by:** [`crates/sindri-physics/tests/distance_joint.rs`](../../crates/sindri-physics/tests/distance_joint.rs), [`crates/sindri-physics/tests/hinges.rs`](../../crates/sindri-physics/tests/hinges.rs), [`crates/sindri-physics/tests/sliders.rs`](../../crates/sindri-physics/tests/sliders.rs), [`crates/sindri-physics/tests/springs.rs`](../../crates/sindri-physics/tests/springs.rs), [`crates/sindri-scene/src/physics_joints/tests.rs`](../../crates/sindri-scene/src/physics_joints/tests.rs), [`games/lamplighter/tests/distance_joints.rs`](../../games/lamplighter/tests/distance_joints.rs), [`games/lamplighter/tests/hinge_motor.rs`](../../games/lamplighter/tests/hinge_motor.rs), [`games/lamplighter/tests/slider_spring.rs`](../../games/lamplighter/tests/slider_spring.rs)
+**Tested by:** [`crates/sindri-physics/tests/distance_joint.rs`](../../crates/sindri-physics/tests/distance_joint.rs), [`crates/sindri-physics/tests/hinges.rs`](../../crates/sindri-physics/tests/hinges.rs), [`crates/sindri-physics/tests/sliders.rs`](../../crates/sindri-physics/tests/sliders.rs), [`crates/sindri-physics/tests/springs.rs`](../../crates/sindri-physics/tests/springs.rs), [`crates/sindri-scene/src/physics_joints/tests.rs`](../../crates/sindri-scene/src/physics_joints/tests.rs), [`games/platformer/tests/distance_joints.rs`](../../games/platformer/tests/distance_joints.rs), [`games/platformer/tests/hinge_motor.rs`](../../games/platformer/tests/hinge_motor.rs), [`games/platformer/tests/slider_spring.rs`](../../games/platformer/tests/slider_spring.rs)
 
-**Exercised in:** [`games/lamplighter`](../../games/lamplighter)
+**Exercised in:** [`games/platformer`](../../games/platformer)
 
 **See:** [`docs/physics-joint-editor-review.md`](../../docs/physics-joint-editor-review.md)
 
@@ -734,9 +734,9 @@ Scripts tune, enable, retarget, remove and create all four 2D joint kinds, valid
 
 Engine ✅ · Editor — · Decay ✅ · Proof ✅
 
-**Tested by:** [`crates/sindri-decay/tests/hinge_motor.rs`](../../crates/sindri-decay/tests/hinge_motor.rs), [`crates/sindri-decay/tests/linear_joint_controls.rs`](../../crates/sindri-decay/tests/linear_joint_controls.rs), [`crates/sindri-decay/tests/joint_state_controls.rs`](../../crates/sindri-decay/tests/joint_state_controls.rs), [`crates/sindri-decay/tests/joint_state_controls/endpoints.rs`](../../crates/sindri-decay/tests/joint_state_controls/endpoints.rs), [`crates/sindri-decay/tests/joint_state_controls/removal.rs`](../../crates/sindri-decay/tests/joint_state_controls/removal.rs), [`crates/sindri-decay/tests/joint_state_controls/creation.rs`](../../crates/sindri-decay/tests/joint_state_controls/creation.rs), [`crates/sindri-decay/tests/joint_state_controls/hinge_creation.rs`](../../crates/sindri-decay/tests/joint_state_controls/hinge_creation.rs), [`crates/sindri-decay/tests/joint_state_controls/spring_creation.rs`](../../crates/sindri-decay/tests/joint_state_controls/spring_creation.rs), [`crates/sindri-decay/tests/joint_state_controls/slider_creation.rs`](../../crates/sindri-decay/tests/joint_state_controls/slider_creation.rs), [`games/lamplighter/tests/joint_controls.rs`](../../games/lamplighter/tests/joint_controls.rs)
+**Tested by:** [`crates/sindri-decay/tests/hinge_motor.rs`](../../crates/sindri-decay/tests/hinge_motor.rs), [`crates/sindri-decay/tests/linear_joint_controls.rs`](../../crates/sindri-decay/tests/linear_joint_controls.rs), [`crates/sindri-decay/tests/joint_state_controls.rs`](../../crates/sindri-decay/tests/joint_state_controls.rs), [`crates/sindri-decay/tests/joint_state_controls/endpoints.rs`](../../crates/sindri-decay/tests/joint_state_controls/endpoints.rs), [`crates/sindri-decay/tests/joint_state_controls/removal.rs`](../../crates/sindri-decay/tests/joint_state_controls/removal.rs), [`crates/sindri-decay/tests/joint_state_controls/creation.rs`](../../crates/sindri-decay/tests/joint_state_controls/creation.rs), [`crates/sindri-decay/tests/joint_state_controls/hinge_creation.rs`](../../crates/sindri-decay/tests/joint_state_controls/hinge_creation.rs), [`crates/sindri-decay/tests/joint_state_controls/spring_creation.rs`](../../crates/sindri-decay/tests/joint_state_controls/spring_creation.rs), [`crates/sindri-decay/tests/joint_state_controls/slider_creation.rs`](../../crates/sindri-decay/tests/joint_state_controls/slider_creation.rs), [`games/platformer/tests/joint_controls.rs`](../../games/platformer/tests/joint_controls.rs)
 
-**Exercised in:** [`games/lamplighter`](../../games/lamplighter)
+**Exercised in:** [`games/platformer`](../../games/platformer)
 
 <details markdown="1">
 <summary>Evidence</summary>
@@ -786,7 +786,7 @@ Engine ✅ · Editor ✅ · Decay ✅ · Proof ✅
 
 **Tested by:** [`crates/sindri-decay/tests/joint_state_controls/hinge_position.rs`](../../crates/sindri-decay/tests/joint_state_controls/hinge_position.rs), [`crates/sindri-decay/tests/joint_state_controls/slider_position.rs`](../../crates/sindri-decay/tests/joint_state_controls/slider_position.rs), [`crates/sindri-scene/src/physics_joints/position_tests.rs`](../../crates/sindri-scene/src/physics_joints/position_tests.rs), [`crates/sindri-scene/src/physics_joints/slider_position_tests.rs`](../../crates/sindri-scene/src/physics_joints/slider_position_tests.rs)
 
-**Exercised in:** [`games/lamplighter`](../../games/lamplighter)
+**Exercised in:** [`games/platformer`](../../games/platformer)
 
 **See:** [`docs/physics-joint-editor-review.md`](../../docs/physics-joint-editor-review.md)
 
@@ -813,9 +813,9 @@ Joint endpoints inside prefabs resolve to their own instance, across spawning, p
 
 Engine 🟡 · Editor — · Decay 🟡 · Proof ✅ — parity row *Authored joint references in prefabs*
 
-**Tested by:** [`crates/sindri-scene/src/physics_joints/prefab_tests.rs`](../../crates/sindri-scene/src/physics_joints/prefab_tests.rs), [`crates/sindri-scene/src/physics_joints/placed_tests.rs`](../../crates/sindri-scene/src/physics_joints/placed_tests.rs), [`games/lamplighter/tests/spawned_joints.rs`](../../games/lamplighter/tests/spawned_joints.rs), [`editor/src/prefab/joint_tests.rs`](../../editor/src/prefab/joint_tests.rs)
+**Tested by:** [`crates/sindri-scene/src/physics_joints/prefab_tests.rs`](../../crates/sindri-scene/src/physics_joints/prefab_tests.rs), [`crates/sindri-scene/src/physics_joints/placed_tests.rs`](../../crates/sindri-scene/src/physics_joints/placed_tests.rs), [`games/platformer/tests/spawned_joints.rs`](../../games/platformer/tests/spawned_joints.rs), [`editor/src/prefab/joint_tests.rs`](../../editor/src/prefab/joint_tests.rs)
 
-**Exercised in:** [`games/lamplighter`](../../games/lamplighter)
+**Exercised in:** [`games/platformer`](../../games/platformer)
 
 **Limits:**
 
@@ -853,9 +853,9 @@ Saving a world remaps registered entity references to stable IDs, so spawned joi
 
 Engine ✅ · Editor ✅ · Decay — · Proof ✅ — parity row *Saved spawned-prefab reference remapping*
 
-**Tested by:** [`crates/sindri-core/tests/saved_prefab_references.rs`](../../crates/sindri-core/tests/saved_prefab_references.rs), [`crates/sindri-scene/src/physics_joints/saved_tests.rs`](../../crates/sindri-scene/src/physics_joints/saved_tests.rs), [`editor/tests/scene_joint_saves.rs`](../../editor/tests/scene_joint_saves.rs), [`games/lamplighter/tests/saved_joints.rs`](../../games/lamplighter/tests/saved_joints.rs)
+**Tested by:** [`crates/sindri-core/tests/saved_prefab_references.rs`](../../crates/sindri-core/tests/saved_prefab_references.rs), [`crates/sindri-scene/src/physics_joints/saved_tests.rs`](../../crates/sindri-scene/src/physics_joints/saved_tests.rs), [`editor/tests/scene_joint_saves.rs`](../../editor/tests/scene_joint_saves.rs), [`games/platformer/tests/saved_joints.rs`](../../games/platformer/tests/saved_joints.rs)
 
-**Exercised in:** [`games/lamplighter`](../../games/lamplighter)
+**Exercised in:** [`games/platformer`](../../games/platformer)
 
 **Limits:**
 

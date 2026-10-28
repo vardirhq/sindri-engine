@@ -176,7 +176,7 @@ reads it.
 
 The platformer's hero is lit through `textures/hero_n.png`, made in the
 studio from `hero.png` with the General preset and saved with
-`hero_n.normalmap`. `games/lamplighter/tests/studio_normal_map.rs` makes the
+`hero_n.normalmap`. `games/platformer/tests/studio_normal_map.rs` makes the
 map again from those settings and requires the shipped file, so the map cannot
 drift from the art unnoticed. The studio was also tried, without writing
 anything into the game, on copies of Low Tide's `terrain.png`, `ground.png`,

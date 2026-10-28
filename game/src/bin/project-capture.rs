@@ -50,7 +50,7 @@ mod capture {
         use sindri_causeway::project::open_scene;
         use sindri_core::SceneEntityId;
 
-        let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../games/lamplighter");
+        let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../games/platformer");
         // The game opens on its title screen; the crate, prefabs and profiles
         // this checks are the first level's.
         let mut opened = open_scene(&root, "level-1.scene", [960.0, 540.0]).unwrap();

@@ -28,7 +28,7 @@ More can be added; a new one says which kind it is and what it is for.
   genre: the platformer first, then top-down, shooter, puzzle and others. Each
   proves Sindri can make that kind of game, finds the gaps the genre hits, and
   is what a new user copies to start their own. Keep one small: a level and a
-  few scripts, not a campaign. The platformer is the one exception, below.
+  few scripts, not a campaign.
 - **Feature examples** (`examples/<feature>`) show one bigger feature on its
   own, such as the camera, audio, Weave, Decay, tilemaps, isometric or voxels,
   small enough to read in a few minutes.
@@ -73,18 +73,26 @@ A new gameplay capability is proven there first. It lives in
 `games/orbital-baked`; `docs/orbital-last-stand-plan.md` is its original plan,
 written against the vector version it replaced.
 
-**The platformer is the first genre showcase, and the exception to "keep one
-small".** It is becoming **Lamplighter**: a short real game, five to eight
-levels with a title, level select, saved progress, music and an ending, about a
-courier lighting the lanterns of a valley at dusk, in `games/lamplighter`
-(`games/platformer` until the plan's first stage). `docs/lamplighter-plan.md` is
-its plan and the order of work. It is where the plain 2D path is proven: tilemap
-collision, scene gravity, collider authoring, the character controller,
-one-way planks, joints, springs and hinges as level pieces, 2D lights, camera
-follow and bounds, scene changes and saves. It is held to the standard of a game
-somebody would choose to play, as Causeway is for 3D, because a showcase nobody
-wants to play does not showcase anything; and it finds gaps by being a platformer
-rather than a recreation, which are closed generally.
+**The platformer is the first genre showcase.** A side-view game in
+`games/platformer`: Wick lights lanterns along Dusk Road, with a title, level
+select, settings, pause and saved progress around it. It started as the game
+Lamplighter was going to be, before that became a top-down adventure, and it
+stays as the proof of the plain 2D platformer path: tilemap collision, scene
+gravity, collider authoring, the character controller, one-way planks, joints,
+springs and hinges as level pieces, 2D lights, camera follow and bounds, scene
+changes and saves. It is not growing into a campaign; it finds gaps by being a
+platformer rather than a recreation, which are closed generally.
+
+**Lamplighter is the top-down action-adventure, and a game rather than a
+showcase.** Wick, a wandering lamplighter with a sword and a lantern, brings
+light to a darkening world of villages, woods, caves and ruins, in the spirit
+of the classic 2D Zelda games, in `games/lamplighter`. `docs/lamplighter-plan.md`
+is its design and the order of work. It is where the top-down 2D path is proven
+at the scale of a real game: 2D lighting as the game's core mechanic, sword
+combat, light-based puzzles and abilities, an interconnected world and saves.
+Like Causeway it is held to the standard of a game somebody would choose to
+play, and gaps it finds are closed in the engine generally, never shaped around
+it.
 
 **Scorchball is the local-multiplayer genre showcase.** A top-down couch
 football game for two to four pads, in `games/scorchball`. It is where playing
@@ -126,8 +134,8 @@ These documents govern the work:
 - `docs/scripting.md` and `decay/LANGUAGE.md` — scripting contracts.
 - `docs/decay-agent-guide.md` — mandatory preflight and runtime-contract checklist
   before changing Decay scripts or their host APIs.
-- `docs/lamplighter-plan.md` — the platformer's plan as Lamplighter: the game,
-  its levels, its art and the stages of work. Read it before changing
+- `docs/lamplighter-plan.md` — Lamplighter, the top-down action-adventure: the
+  game, its world, its art and the stages of work. Read it before changing
   `games/lamplighter`.
 - `docs/decay-lsp-modernization.md` — mandatory checklist for Decay language-server,
   editor tooling, batch preflight, structured diagnostics, and agent-tooling work.

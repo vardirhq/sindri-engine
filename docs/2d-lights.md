@@ -135,7 +135,7 @@ switched off with its entity's `set_active`.
 
 Lamplighter uses a carried lantern in a dark level, with lit roadside lanterns
 and two hanging cave lanterns. The level tiles are normal-mapped, and the cave
-pillar casts a shadow from the lanterns. `games/lamplighter/tests/cave_lights.rs` checks the shadows,
+pillar casts a shadow from the lanterns. `games/platformer/tests/cave_lights.rs` checks the shadows,
 `crates/sindri-gpu/tests/sprite_lights.rs` reads the pixels back.
 
 Low Tide lights a voxel map (a genre showcase using a capability that existed;

@@ -41,7 +41,7 @@ tests = [
   "crates/sindri-decay/tests/a_script_drives_a_body.rs",
   "crates/sindri-physics/tests/copies_go_on_as_the_original.rs",
 ]
-proof = ["games/orbital-baked", "games/lamplighter"]
+proof = ["games/orbital-baked", "games/platformer"]
 docs = ["docs/physics.md"]
 detail = """
 `PhysicsWorld2d` owns fixed, dynamic, position-kinematic, and
@@ -83,7 +83,7 @@ summary = "A scene names its collision layers bit by bit; scripts and the inspec
 status = { engine = "yes", editor = "yes", decay = "yes", proof = "yes" }
 parity = "Named collision layers"
 tests = ["crates/sindri-decay/tests/a_script_names_its_layers.rs"]
-proof = ["games/lamplighter", "examples/physics"]
+proof = ["games/platformer", "examples/physics"]
 limits = ["Named per scene rather than in project settings; colliders still store masks."]
 detail = """
 A scene's `sindri.physics2d.world` names its collision layers bit by bit.
@@ -101,7 +101,7 @@ summary = "One body made of several collider pieces, each fully editable in the 
 status = { engine = "yes", editor = "yes", decay = "n/a", proof = "yes" }
 parity = "Compound colliders (several pieces, one body)"
 tests = ["editor/tests/inspector_field_meanings.rs"]
-proof = ["games/lamplighter"]
+proof = ["games/platformer"]
 detail = """
 The generic inspector exposes the body and collider payloads — a compound's
 pieces are added, removed, reordered, and edited down to each piece's shape.
@@ -117,9 +117,9 @@ status = { engine = "yes", editor = "partial", decay = "n/a", proof = "yes" }
 parity = "Tilemap collision"
 tests = [
   "crates/sindri-scene/src/tilemap_collision.rs",
-  "games/lamplighter/tests/painted_ground.rs",
+  "games/platformer/tests/painted_ground.rs",
 ]
-proof = ["games/lamplighter"]
+proof = ["games/platformer"]
 limits = [
   "An isometric map is refused by name.",
   "Passable sprites are typed as names rather than picked from the palette.",
@@ -144,7 +144,7 @@ tests = [
   "crates/sindri-physics/tests/gravity_changes.rs",
   "crates/sindri-decay/tests/a_script_turns_gravity.rs",
 ]
-proof = ["games/lamplighter", "games/scorchball", "examples/physics"]
+proof = ["games/platformer", "games/scorchball", "examples/physics"]
 limits = ["One vector; no per-area gravity."]
 detail = """
 `sindri.physics2d.world` carries the scene's gravity (straight down at 9.81 by
@@ -162,7 +162,7 @@ summary = "`ScenePhysics2d` keeps the simulation in step with the scene and writ
 status = { engine = "yes", editor = "n/a", decay = "yes", proof = "yes" }
 parity = "Moving a body by its transform"
 tests = ["crates/sindri-scene/src/physics_sync/tests.rs"]
-proof = ["games/lamplighter"]
+proof = ["games/platformer"]
 detail = """
 `ScenePhysics2d` builds the simulation from the scene components, keeps it in
 step as entities are spawned, switched off, and despawned — a body outliving
@@ -188,9 +188,9 @@ parity = "Forces and rotation (2D)"
 tests = [
   "crates/sindri-physics/tests/forces_and_rotation.rs",
   "crates/sindri-decay/tests/forces_and_rotation.rs",
-  "games/lamplighter/tests/forces_and_rotation.rs",
+  "games/platformer/tests/forces_and_rotation.rs",
 ]
-proof = ["games/lamplighter"]
+proof = ["games/platformer"]
 docs = ["docs/physics.md"]
 limits = ["Browser input and visual inspector review remain in final integration."]
 detail = """
@@ -213,9 +213,9 @@ parity = "Solid contact snapshots (2D)"
 tests = [
   "crates/sindri-physics/tests/contacts.rs",
   "crates/sindri-decay/tests/contact_snapshots.rs",
-  "games/lamplighter/tests/contact_impacts.rs",
+  "games/platformer/tests/contact_impacts.rs",
 ]
-proof = ["games/lamplighter"]
+proof = ["games/platformer"]
 limits = [
   "Sensors are excluded.",
   "Browser interaction and editor Play inspection remain in final integration.",
@@ -247,9 +247,9 @@ parity = "One-way platforms"
 tests = [
   "crates/sindri-physics/tests/one_way.rs",
   "crates/sindri-physics/tests/one_way_movement.rs",
-  "games/lamplighter/tests/one_way_platforms.rs",
+  "games/platformer/tests/one_way_platforms.rs",
 ]
-proof = ["games/lamplighter"]
+proof = ["games/platformer"]
 limits = [
   "Geometric queries still see both sides, so Decay grounding uses solved support contacts and descent rather than foot-sensor overlap.",
   "Visual inspector and full browser interaction remain in final integration.",
@@ -275,9 +275,9 @@ parity = "Physics materials as assets (2D)"
 tests = [
   "crates/sindri-scene/src/physics_material/tests.rs",
   "crates/sindri-export/tests/physics_materials.rs",
-  "games/lamplighter/tests/physics_materials.rs",
+  "games/platformer/tests/physics_materials.rs",
 ]
-proof = ["games/lamplighter"]
+proof = ["games/platformer"]
 limits = [
   "Visual inspector review and browser gameplay interaction remain in final physics integration.",
   "3D waits for its runtime.",
@@ -329,7 +329,7 @@ tests = [
   "crates/sindri-physics/tests/continuous_collision.rs",
   "crates/sindri-decay/tests/continuous_collision.rs",
 ]
-proof = ["games/lamplighter"]
+proof = ["games/platformer"]
 limits = [
   "Sensors stay discrete; bullet-versus-bullet sweeping is not guaranteed.",
   "Visual inspector and browser verification remain in final integration.",
@@ -361,7 +361,7 @@ tests = [
   "crates/sindri-physics/tests/platform_movement.rs",
   "crates/sindri-physics/tests/one_way_movement.rs",
 ]
-proof = ["games/lamplighter"]
+proof = ["games/platformer"]
 docs = ["docs/character-movement.md"]
 limits = [
   "Platform rotation follows a straight chord with fixed probe orientation; continuous arc and rotating-probe sweeps are absent.",
@@ -413,12 +413,12 @@ tests = [
   "crates/sindri-decay/tests/character_controllers/motions.rs",
   "crates/sindri-decay/tests/character_controllers/requests.rs",
   "game/tests/the_character_controller_works.rs",
-  "games/lamplighter/tests/character_gameplay.rs",
-  "games/lamplighter/tests/controller_terrain.rs",
-  "games/lamplighter/tests/moving_platform.rs",
-  "scripts/browser/lamplighter-goal.mjs",
+  "games/platformer/tests/character_gameplay.rs",
+  "games/platformer/tests/controller_terrain.rs",
+  "games/platformer/tests/moving_platform.rs",
+  "scripts/browser/platformer-goal.mjs",
 ]
-proof = ["games/lamplighter"]
+proof = ["games/platformer"]
 docs = ["docs/character-movement.md", "docs/physics-character-editor-review.md"]
 limits = [
   "Coyote time, jump buffering, gravity and velocity remain Decay gameplay policy.",
@@ -490,7 +490,7 @@ tests = [
   "crates/sindri-physics/tests/raycast.rs",
   "crates/sindri-decay/tests/a_script_casts_a_ray.rs",
 ]
-proof = ["games/lamplighter", "examples/physics"]
+proof = ["games/platformer", "examples/physics"]
 docs = ["docs/physics-playground.md"]
 detail = """
 Closest-hit 2D raycasts return Sindri `RayHit2d` snapshots (entity, world-space
@@ -542,7 +542,7 @@ tests = [
   "crates/sindri-physics/src/world2d/spatial/tests.rs",
   "crates/sindri-physics/src/world2d/spatial/tests/controllers.rs",
 ]
-proof = ["games/lamplighter"]
+proof = ["games/platformer"]
 limits = [
   "Dense or long queries can still visit every piece.",
   "Non-static pieces need a post-step refresh.",
@@ -572,11 +572,11 @@ tests = [
   "crates/sindri-physics/tests/sliders.rs",
   "crates/sindri-physics/tests/springs.rs",
   "crates/sindri-scene/src/physics_joints/tests.rs",
-  "games/lamplighter/tests/distance_joints.rs",
-  "games/lamplighter/tests/hinge_motor.rs",
-  "games/lamplighter/tests/slider_spring.rs",
+  "games/platformer/tests/distance_joints.rs",
+  "games/platformer/tests/hinge_motor.rs",
+  "games/platformer/tests/slider_spring.rs",
 ]
-proof = ["games/lamplighter"]
+proof = ["games/platformer"]
 docs = ["docs/physics-joint-editor-review.md"]
 limits = ["The 2D slice is complete; 3D joints are absent, which is why the family is 🟡."]
 detail = """
@@ -630,9 +630,9 @@ tests = [
   "crates/sindri-decay/tests/joint_state_controls/hinge_creation.rs",
   "crates/sindri-decay/tests/joint_state_controls/spring_creation.rs",
   "crates/sindri-decay/tests/joint_state_controls/slider_creation.rs",
-  "games/lamplighter/tests/joint_controls.rs",
+  "games/platformer/tests/joint_controls.rs",
 ]
-proof = ["games/lamplighter"]
+proof = ["games/platformer"]
 detail = """
 Typed `Physics.set_hinge_motor`, `Physics.set_slider_motor` and
 `Physics.set_spring` validate atomic runtime component edits for the next
@@ -680,7 +680,7 @@ tests = [
   "crates/sindri-scene/src/physics_joints/position_tests.rs",
   "crates/sindri-scene/src/physics_joints/slider_position_tests.rs",
 ]
-proof = ["games/lamplighter"]
+proof = ["games/platformer"]
 docs = ["docs/physics-joint-editor-review.md"]
 detail = """
 Old payloads default to velocity mode. Typed `Physics.set_hinge_position_motor`
@@ -704,10 +704,10 @@ parity = "Authored joint references in prefabs"
 tests = [
   "crates/sindri-scene/src/physics_joints/prefab_tests.rs",
   "crates/sindri-scene/src/physics_joints/placed_tests.rs",
-  "games/lamplighter/tests/spawned_joints.rs",
+  "games/platformer/tests/spawned_joints.rs",
   "editor/src/prefab/joint_tests.rs",
 ]
-proof = ["games/lamplighter"]
+proof = ["games/platformer"]
 limits = ["Flattened plain documents discard the alias metadata."]
 detail = """
 Runtime-spawned prefab references use a separate runtime identity, retaining
@@ -741,9 +741,9 @@ tests = [
   "crates/sindri-core/tests/saved_prefab_references.rs",
   "crates/sindri-scene/src/physics_joints/saved_tests.rs",
   "editor/tests/scene_joint_saves.rs",
-  "games/lamplighter/tests/saved_joints.rs",
+  "games/platformer/tests/saved_joints.rs",
 ]
-proof = ["games/lamplighter"]
+proof = ["games/platformer"]
 limits = [
   "Stable IDs remain a prerequisite.",
   "Save is unavailable during Play.",

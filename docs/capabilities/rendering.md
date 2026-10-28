@@ -78,7 +78,7 @@ Engine ✅ · Editor ✅ · Decay — · Proof ✅ — parity row *Native deskto
 
 **Tested by:** [`crates/sindri-desktop/src/host/app.rs`](../../crates/sindri-desktop/src/host/app.rs), [`crates/sindri-platform/tests/game_loop.rs`](../../crates/sindri-platform/tests/game_loop.rs)
 
-**Exercised in:** [`games/lamplighter`](../../games/lamplighter), [`games/orbital-baked`](../../games/orbital-baked)
+**Exercised in:** [`games/platformer`](../../games/platformer), [`games/orbital-baked`](../../games/orbital-baked)
 
 **See:** [`docs/platform-host.md`](../../docs/platform-host.md)
 
@@ -110,7 +110,7 @@ Engine ✅ · Editor — · Decay — · Proof ✅ — parity row *Browser / WAS
 
 **Tested by:** [`scripts/browser/smoke.mjs`](../../scripts/browser/smoke.mjs), [`crates/sindri-export/tests/exports_a_project.rs`](../../crates/sindri-export/tests/exports_a_project.rs)
 
-**Exercised in:** [`examples/cube`](../../examples/cube), [`games/lamplighter`](../../games/lamplighter)
+**Exercised in:** [`examples/cube`](../../examples/cube), [`games/platformer`](../../games/platformer)
 
 **See:** [`docs/browser.md`](../../docs/browser.md)
 
@@ -162,7 +162,7 @@ Engine ✅ · Editor ✅ · Decay — · Proof ✅
 
 **Tested by:** [`crates/sindri-render/src/frame.rs`](../../crates/sindri-render/src/frame.rs), [`crates/sindri-scene/tests/extraction/passes.rs`](../../crates/sindri-scene/tests/extraction/passes.rs), [`crates/sindri-scene/tests/extraction/textures.rs`](../../crates/sindri-scene/tests/extraction/textures.rs), [`crates/sindri-scene/tests/extraction/assets.rs`](../../crates/sindri-scene/tests/extraction/assets.rs)
 
-**Exercised in:** [`games/lamplighter`](../../games/lamplighter)
+**Exercised in:** [`games/platformer`](../../games/platformer)
 
 **See:** [`docs/rendering-frame-pipeline.md`](../../docs/rendering-frame-pipeline.md), [`docs/scene-extraction.md`](../../docs/scene-extraction.md)
 
@@ -225,7 +225,7 @@ Engine ✅ · Editor ✅ · Decay 🟡 · Proof ✅ — parity row *Sprites, she
 
 **Tested by:** [`crates/sindri-gpu/tests/sprite_batches_are_independent.rs`](../../crates/sindri-gpu/tests/sprite_batches_are_independent.rs), [`crates/sindri-gpu/tests/sprite_uv_rect.rs`](../../crates/sindri-gpu/tests/sprite_uv_rect.rs), [`crates/sindri-gpu/tests/world_sprites.rs`](../../crates/sindri-gpu/tests/world_sprites.rs), [`crates/sindri-gpu/tests/sprite_textures_follow_their_registry.rs`](../../crates/sindri-gpu/tests/sprite_textures_follow_their_registry.rs), [`crates/sindri-render/src/sprite_batch/tests.rs`](../../crates/sindri-render/src/sprite_batch/tests.rs), [`crates/sindri-scene/tests/extraction/sprites.rs`](../../crates/sindri-scene/tests/extraction/sprites.rs), [`crates/sindri-core/src/sheet/tests.rs`](../../crates/sindri-core/src/sheet/tests.rs)
 
-**Exercised in:** [`games/lamplighter`](../../games/lamplighter), [`games/orbital-baked`](../../games/orbital-baked)
+**Exercised in:** [`games/platformer`](../../games/platformer), [`games/orbital-baked`](../../games/orbital-baked)
 
 <details markdown="1">
 <summary>Evidence</summary>
@@ -388,9 +388,9 @@ A `sliced` sprite or UI image keeps its sheet-recorded border and stretches only
 
 Engine ✅ · Editor ✅ · Decay ✅ · Proof ✅ — parity row *Nine-slice sprites*
 
-**Tested by:** [`crates/sindri-scene/tests/extraction/nine_slice.rs`](../../crates/sindri-scene/tests/extraction/nine_slice.rs), [`games/lamplighter/tests/sliced_panels.rs`](../../games/lamplighter/tests/sliced_panels.rs)
+**Tested by:** [`crates/sindri-scene/tests/extraction/nine_slice.rs`](../../crates/sindri-scene/tests/extraction/nine_slice.rs), [`games/platformer/tests/sliced_panels.rs`](../../games/platformer/tests/sliced_panels.rs)
 
-**Exercised in:** [`games/lamplighter`](../../games/lamplighter)
+**Exercised in:** [`games/platformer`](../../games/platformer)
 
 **See:** [`docs/nine-slice.md`](../../docs/nine-slice.md)
 
@@ -417,7 +417,7 @@ Engine ✅ · Editor ✅ · Decay ✅ · Proof ✅ — parity row *Sprite frame 
 
 **Tested by:** [`crates/sindri-scene/src/animation/tests.rs`](../../crates/sindri-scene/src/animation/tests.rs), [`crates/sindri-scene/tests/extraction/animation.rs`](../../crates/sindri-scene/tests/extraction/animation.rs), [`crates/sindri-decay/tests/a_script_plays_a_clip.rs`](../../crates/sindri-decay/tests/a_script_plays_a_clip.rs), [`games/low-tide/tests/a_crawler_looks_alive.rs`](../../games/low-tide/tests/a_crawler_looks_alive.rs)
 
-**Exercised in:** [`games/low-tide`](../../games/low-tide), [`games/lamplighter`](../../games/lamplighter)
+**Exercised in:** [`games/low-tide`](../../games/low-tide), [`games/platformer`](../../games/platformer)
 
 <details markdown="1">
 <summary>Evidence</summary>
@@ -461,7 +461,7 @@ Engine — · Editor ✅ · Decay — · Proof ✅ — parity row *Clip authorin
 
 **Tested by:** [`editor/src/slicer/tests.rs`](../../editor/src/slicer/tests.rs)
 
-**Exercised in:** [`games/lamplighter`](../../games/lamplighter)
+**Exercised in:** [`games/platformer`](../../games/platformer)
 
 <details markdown="1">
 <summary>Evidence</summary>
@@ -540,9 +540,9 @@ Ambient plus point lights, normal maps and polar-depth shadows from occluders an
 
 Engine ✅ · Editor 🟡 · Decay ✅ · Proof ✅ — parity row *2D lights and shadows*
 
-**Tested by:** [`crates/sindri-render/src/light2d/tests.rs`](../../crates/sindri-render/src/light2d/tests.rs), [`crates/sindri-gpu/tests/sprite_lights.rs`](../../crates/sindri-gpu/tests/sprite_lights.rs), [`crates/sindri-scene/tests/extraction/lights_2d.rs`](../../crates/sindri-scene/tests/extraction/lights_2d.rs), [`games/lamplighter/tests/cave_lights.rs`](../../games/lamplighter/tests/cave_lights.rs), [`games/low-tide/tests/the_basin_is_lit.rs`](../../games/low-tide/tests/the_basin_is_lit.rs)
+**Tested by:** [`crates/sindri-render/src/light2d/tests.rs`](../../crates/sindri-render/src/light2d/tests.rs), [`crates/sindri-gpu/tests/sprite_lights.rs`](../../crates/sindri-gpu/tests/sprite_lights.rs), [`crates/sindri-scene/tests/extraction/lights_2d.rs`](../../crates/sindri-scene/tests/extraction/lights_2d.rs), [`games/platformer/tests/cave_lights.rs`](../../games/platformer/tests/cave_lights.rs), [`games/low-tide/tests/the_basin_is_lit.rs`](../../games/low-tide/tests/the_basin_is_lit.rs)
 
-**Exercised in:** [`games/lamplighter`](../../games/lamplighter), [`games/low-tide`](../../games/low-tide)
+**Exercised in:** [`games/platformer`](../../games/platformer), [`games/low-tide`](../../games/low-tide)
 
 **See:** [`docs/2d-lights.md`](../../docs/2d-lights.md)
 
@@ -580,9 +580,9 @@ The Normal map tab derives a sprite's normal map and previews it under the game'
 
 Engine ✅ · Editor ✅ · Decay — · Proof ✅
 
-**Tested by:** [`crates/sindri-assets/src/normal_map/tests.rs`](../../crates/sindri-assets/src/normal_map/tests.rs), [`tools/normal-map-web/src/lib.rs`](../../tools/normal-map-web/src/lib.rs), [`editor/src/normal_studio/tests.rs`](../../editor/src/normal_studio/tests.rs), [`editor/src/native/normal_studio/scene/tests.rs`](../../editor/src/native/normal_studio/scene/tests.rs), [`games/lamplighter/tests/studio_normal_map.rs`](../../games/lamplighter/tests/studio_normal_map.rs)
+**Tested by:** [`crates/sindri-assets/src/normal_map/tests.rs`](../../crates/sindri-assets/src/normal_map/tests.rs), [`tools/normal-map-web/src/lib.rs`](../../tools/normal-map-web/src/lib.rs), [`editor/src/normal_studio/tests.rs`](../../editor/src/normal_studio/tests.rs), [`editor/src/native/normal_studio/scene/tests.rs`](../../editor/src/native/normal_studio/scene/tests.rs), [`games/platformer/tests/studio_normal_map.rs`](../../games/platformer/tests/studio_normal_map.rs)
 
-**Exercised in:** [`games/lamplighter`](../../games/lamplighter)
+**Exercised in:** [`games/platformer`](../../games/platformer)
 
 **See:** [`docs/normal-map-studio.md`](../../docs/normal-map-studio.md)
 
@@ -617,7 +617,7 @@ Engine ✅ · Editor ✅ · Decay ✅ · Proof ✅ — parity row *Tilemaps (ort
 
 **Tested by:** [`crates/sindri-scene/tests/extraction/tilemap.rs`](../../crates/sindri-scene/tests/extraction/tilemap.rs), [`editor/src/tilemap/tests.rs`](../../editor/src/tilemap/tests.rs)
 
-**Exercised in:** [`games/lamplighter`](../../games/lamplighter), [`games/low-tide`](../../games/low-tide)
+**Exercised in:** [`games/platformer`](../../games/platformer), [`games/low-tide`](../../games/low-tide)
 
 **Limits:**
 
@@ -653,7 +653,7 @@ Engine ✅ · Editor ✅ · Decay ✅ · Proof ✅ — parity row *Autotiling / 
 
 **Tested by:** [`crates/sindri-core/src/terrain.rs`](../../crates/sindri-core/src/terrain.rs), [`crates/sindri-scene/src/terrain_paint_tests.rs`](../../crates/sindri-scene/src/terrain_paint_tests.rs), [`crates/sindri-decay/tests/a_script_paints_terrain.rs`](../../crates/sindri-decay/tests/a_script_paints_terrain.rs)
 
-**Exercised in:** [`games/lamplighter`](../../games/lamplighter)
+**Exercised in:** [`games/platformer`](../../games/platformer)
 
 **See:** [`docs/terrains.md`](../../docs/terrains.md)
 
@@ -784,9 +784,9 @@ Orthographic 2D camera confinement keeps the view within level edges and can loo
 
 Engine ✅ · Editor 🟡 · Decay 🟡 · Proof ✅ — parity row *Camera follow / confine / shake*
 
-**Tested by:** [`crates/sindri-scene/src/components/camera_confine.rs`](../../crates/sindri-scene/src/components/camera_confine.rs), [`games/lamplighter/tests/the_shell.rs`](../../games/lamplighter/tests/the_shell.rs)
+**Tested by:** [`crates/sindri-scene/src/components/camera_confine.rs`](../../crates/sindri-scene/src/components/camera_confine.rs), [`games/platformer/tests/the_shell.rs`](../../games/platformer/tests/the_shell.rs)
 
-**Exercised in:** [`games/lamplighter`](../../games/lamplighter)
+**Exercised in:** [`games/platformer`](../../games/platformer)
 
 **See:** [`docs/cameras.md`](../../docs/cameras.md)
 
