@@ -29,6 +29,7 @@ mod world_text;
 pub(crate) use tile_volume::face_is_occluded;
 mod lighting;
 mod lighting_2d;
+mod shadows_2d;
 mod tilemap;
 mod tolerance;
 mod ui;
@@ -164,6 +165,8 @@ pub enum SceneExtractError {
     InvalidShaderParams,
     #[error(transparent)]
     Light2d(#[from] crate::Light2dError),
+    #[error(transparent)]
+    Shadow2d(#[from] crate::Shadow2dError),
     #[error(transparent)]
     UvRect(#[from] UvRectError),
     #[error(transparent)]
@@ -362,6 +365,7 @@ impl SceneExtractor {
             &mut frame,
         )?;
         self.push_world_shapes(world, &cameras, &mut frame)?;
+        self.push_contact_shadows(world, &cameras, &mut frame)?;
         self.push_world_text(world, &cameras, &mut frame)?;
         self.push_shapes(world, &cameras, &hierarchy, &mut frame)?;
         self.push_text(world, &cameras, &hierarchy, &mut frame)?;
@@ -430,6 +434,7 @@ impl SceneExtractor {
             &mut frame,
         )?;
         self.push_world_shapes(world, &cameras, &mut frame)?;
+        self.push_contact_shadows(world, &cameras, &mut frame)?;
         self.push_world_text(world, &cameras, &mut frame)?;
         self.push_shapes(world, &cameras, &hierarchy, &mut frame)?;
         self.push_text(world, &cameras, &hierarchy, &mut frame)?;

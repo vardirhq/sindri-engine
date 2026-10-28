@@ -1904,6 +1904,65 @@
       "addable": true,
       "apply": {},
       "default_payload": {
+        "cast": false,
+        "cast_opacity": 0.44999998807907104,
+        "contact_offset": [
+          0.0,
+          0.0
+        ],
+        "contact_opacity": 0.3499999940395355,
+        "contact_size": [
+          1.0,
+          0.4000000059604645
+        ],
+        "height": 0.0,
+        "max_length": 2.5
+      },
+      "display_name": "Shadow 2D",
+      "fields": {
+        "cast": false,
+        "cast_opacity": 0.44999998807907104,
+        "contact_offset": [
+          0.0,
+          0.0
+        ],
+        "contact_opacity": 0.3499999940395355,
+        "contact_size": [
+          1.0,
+          0.4000000059604645
+        ],
+        "height": 0.0,
+        "max_length": 2.5
+      },
+      "meanings": {
+        "cast_opacity": {
+          "kind": "range",
+          "max": 1.0,
+          "min": 0.0
+        },
+        "contact_opacity": {
+          "kind": "range",
+          "max": 1.0,
+          "min": 0.0
+        },
+        "height": {
+          "kind": "range",
+          "max": null,
+          "min": 0.0
+        },
+        "max_length": {
+          "kind": "range",
+          "max": null,
+          "min": 0.0
+        }
+      },
+      "schema_version": 1,
+      "type_name": "sindri.shadow2d"
+    },
+    {
+      "addable": true,
+      "apply": {},
+      "default_payload": {
         "blend": "over",
         "corner_radius": 0.0,
         "count": 6.0,

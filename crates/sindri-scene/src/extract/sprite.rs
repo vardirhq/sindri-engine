@@ -189,6 +189,7 @@ impl SceneExtractor {
             ..
         } = drawing;
         let masks = self.sprite_masks(world, drawing)?;
+        let casting = self.cast_shadows(world)?;
         for (entity, sprite) in self.components.query::<SpriteComponent>(world)? {
             let reference = sprite.reference()?;
             // Inside a mask that is not there is nowhere; outside one is
@@ -242,6 +243,16 @@ impl SceneExtractor {
             let slicing = (sprite.draw == ImageDraw::Sliced)
                 .then(|| textures.slice_border(&reference))
                 .flatten();
+            if let Some(casting) = &casting {
+                batches.extend(casting.draws(
+                    world,
+                    entity,
+                    model,
+                    (texture, rect),
+                    sprite.layer,
+                    camera.view,
+                ));
+            }
             for (model, uv) in pieces(model, rect, slicing, sprite.border_scale) {
                 batches.push(SpriteDraw {
                     mask,

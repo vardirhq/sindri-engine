@@ -2,6 +2,12 @@
 
 # Changelog
 
+- Add `sindri.shadow2d`, the shadow things cast on the ground. A soft contact
+  ellipse under a sprite, and, with `cast` on, the sprite's own picture laid on the
+  ground away from the two strongest 2D lights near it: longer for a taller thing
+  and a further or lower light, fainter where less light reaches its feet, and none
+  from a light the thing carries. Both are painted over the lit ground and block
+  nothing; a light is still blocked by an occluder. Needs `lighting_2d` on to cast.
 - 2D light shadows are now exact. A shadow-casting light no longer keeps a table of
   256 distances by direction with a blur across three of them; it keeps the region it
   sees as sorted angular intervals, each with the line of the nearest blocking edge,
