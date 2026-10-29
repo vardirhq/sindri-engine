@@ -1,0 +1,20 @@
+{
+  "format_version": 1,
+  "anchor": "center",
+  "grid": {
+    "columns": 4,
+    "rows": 3,
+    "names": [
+      "grass-0",
+      "grass-1",
+      "grass-2",
+      "grass-3",
+      "grass-4",
+      "grass-5",
+      "dirt-0",
+      "dirt-1",
+      "stone-0",
+      "stone-1"
+    ]
+  }
+}

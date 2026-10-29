@@ -1,0 +1,334 @@
+{
+ "house-teal": [
+  104,
+  122
+ ],
+ "house-teal-unlit": [
+  104,
+  122
+ ],
+ "house-workshop": [
+  81,
+  123
+ ],
+ "house-workshop-unlit": [
+  81,
+  123
+ ],
+ "house-keeper": [
+  99,
+  96
+ ],
+ "house-keeper-unlit": [
+  99,
+  96
+ ],
+ "tree-oak": [
+  61,
+  79
+ ],
+ "tree-broad": [
+  44,
+  67
+ ],
+ "tree-tall": [
+  58,
+  89
+ ],
+ "tree-small-1": [
+  33,
+  50
+ ],
+ "tree-small-2": [
+  30,
+  40
+ ],
+ "tree-small-3": [
+  33,
+  41
+ ],
+ "tree-small-4": [
+  40,
+  51
+ ],
+ "stump": [
+  21,
+  22
+ ],
+ "log": [
+  40,
+  17
+ ],
+ "bush-1": [
+  30,
+  32
+ ],
+ "bush-2": [
+  33,
+  30
+ ],
+ "bush-3": [
+  21,
+  24
+ ],
+ "bush-flower": [
+  36,
+  36
+ ],
+ "bush-4": [
+  25,
+  38
+ ],
+ "bush-5": [
+  26,
+  40
+ ],
+ "bush-6": [
+  31,
+  31
+ ],
+ "bush-7": [
+  24,
+  29
+ ],
+ "bush-8": [
+  34,
+  27
+ ],
+ "flowers-1": [
+  16,
+  25
+ ],
+ "flowers-2": [
+  14,
+  19
+ ],
+ "flowers-3": [
+  16,
+  21
+ ],
+ "flowers-4": [
+  23,
+  16
+ ],
+ "flowers-5": [
+  15,
+  14
+ ],
+ "flowers-6": [
+  18,
+  17
+ ],
+ "flowers-7": [
+  15,
+  16
+ ],
+ "flowers-8": [
+  15,
+  20
+ ],
+ "flowers-9": [
+  20,
+  21
+ ],
+ "flowers-10": [
+  23,
+  17
+ ],
+ "flowers-11": [
+  23,
+  15
+ ],
+ "reeds": [
+  20,
+  44
+ ],
+ "fence-1": [
+  37,
+  20
+ ],
+ "fence-2": [
+  26,
+  19
+ ],
+ "fence-3": [
+  32,
+  19
+ ],
+ "fence-garden-1": [
+  37,
+  24
+ ],
+ "wall-low": [
+  47,
+  25
+ ],
+ "wall-post": [
+  12,
+  59
+ ],
+ "fence-garden-2": [
+  54,
+  24
+ ],
+ "gate-wood": [
+  37,
+  37
+ ],
+ "gate-stone": [
+  32,
+  27
+ ],
+ "wall-pier-1": [
+  20,
+  36
+ ],
+ "wall-pier-2": [
+  24,
+  37
+ ],
+ "well-roofed": [
+  41,
+  63
+ ],
+ "well-small": [
+  25,
+  36
+ ],
+ "lantern-hang": [
+  10,
+  24
+ ],
+ "lantern-small": [
+  9,
+  18
+ ],
+ "lamp-short-1": [
+  16,
+  56
+ ],
+ "lamp-short-1-unlit": [
+  16,
+  56
+ ],
+ "lamp-short-2": [
+  16,
+  57
+ ],
+ "lamp-short-2-unlit": [
+  16,
+  57
+ ],
+ "lamp-pole": [
+  16,
+  53
+ ],
+ "lamp-tall": [
+  18,
+  78
+ ],
+ "lamp-tall-unlit": [
+  18,
+  78
+ ],
+ "lamp-tall-2": [
+  18,
+  86
+ ],
+ "lamp-tall-2-unlit": [
+  18,
+  86
+ ],
+ "sign-herbs": [
+  58,
+  37
+ ],
+ "sign-ring": [
+  40,
+  42
+ ],
+ "sign-tools": [
+  35,
+  48
+ ],
+ "banner": [
+  26,
+  43
+ ],
+ "sign-arrows": [
+  32,
+  45
+ ],
+ "noticeboard": [
+  42,
+  30
+ ],
+ "barrel-1": [
+  21,
+  30
+ ],
+ "barrel-2": [
+  21,
+  28
+ ],
+ "crate": [
+  15,
+  27
+ ],
+ "woodpile": [
+  33,
+  29
+ ],
+ "table-big": [
+  53,
+  31
+ ],
+ "barrel-3": [
+  21,
+  19
+ ],
+ "cart": [
+  51,
+  31
+ ],
+ "sacks-1": [
+  21,
+  13
+ ],
+ "sack-pot": [
+  13,
+  35
+ ],
+ "bench": [
+  39,
+  23
+ ],
+ "pots": [
+  29,
+  25
+ ],
+ "sacks-2": [
+  21,
+  15
+ ],
+ "pot": [
+  14,
+  18
+ ],
+ "table-goods": [
+  46,
+  29
+ ],
+ "sack": [
+  13,
+  16
+ ],
+ "workbench": [
+  54,
+  32
+ ],
+ "cat": [
+  34,
+  19
+ ]
+}
