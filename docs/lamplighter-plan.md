@@ -209,3 +209,7 @@ What came back from the real service, which the client's mock did not show:
   the baker changes nothing, and CI says so.
 - A capability gap is closed in the engine, generally, in the stage that finds it,
   with its parity row and tests.
+
+The lantern is two lights on Wick (`wick-light` and `wick-halo`): a 140 degree beam
+that `wick.decay` turns toward where he faces, and a small round halo that keeps his
+heels from being black. Both are `Flame` scripts and are scorched together.

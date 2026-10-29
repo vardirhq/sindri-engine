@@ -244,13 +244,23 @@ def wick():
             'sindri.sprite': {'texture': 'textures/wick.png#idle-south', 'layer': 5},
             'sindri.shadow2d': shadow(0.9, 0.35),
             'sindri.animation.sprite': {'clips': clips(), 'playing': 'idle-south', 'speed': 1}}),
-        # The lantern's flame: a light a little above Wick's feet and out to one
-        # side, so what it lights and the shadows it casts start at the lantern.
+        # The lantern's flame, a little above Wick's feet and out to one side, so what it
+        # lights and the shadows it casts start at the lantern: a beam that `wick.decay`
+        # turns to the way he faces, so the dark is behind him, and a small round halo
+        # that keeps what is at his heels from being black.
         entity('wick-light', 'wick-light', at(0, 1.6, 0.1), 'wick', **{
-            'sindri.light2d': {'enabled': True, 'color': [1.0, 0.76, 0.42, 1.0], 'intensity': 1.3,
-                               'radius': 8.0, 'falloff': 1.5, 'height': 1.0, 'shadows': True,
+            'sindri.light2d': {'enabled': True, 'color': [1.0, 0.76, 0.42, 1.0], 'intensity': 1.5,
+                               'radius': 10.0, 'falloff': 1.3, 'height': 1.0, 'shadows': True,
+                               'shadow_reach': 0.6, 'shadow_source_radius': 0.3,
+                               'cone_angle': 140.0, 'cone_direction': -90.0, 'cone_softness': 0.4},
+            'sindri.script': {'source': 'scripts/flame.decay', 'script': 'Flame',
+                              'properties': {'base_intensity': 1.5, 'base_radius': 10.0}}}),
+        entity('wick-halo', 'wick-halo', at(0, 1.6, 0.1), 'wick', **{
+            'sindri.light2d': {'enabled': True, 'color': [1.0, 0.7, 0.4, 1.0], 'intensity': 0.9,
+                               'radius': 4.2, 'falloff': 1.6, 'height': 1.0, 'shadows': True,
                                'shadow_reach': 0.6, 'shadow_source_radius': 0.3},
-            'sindri.script': {'source': 'scripts/flame.decay', 'script': 'Flame', 'properties': {}}}),
+            'sindri.script': {'source': 'scripts/flame.decay', 'script': 'Flame',
+                              'properties': {'base_intensity': 0.9, 'base_radius': 4.2}}}),
     ]
 
 

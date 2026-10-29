@@ -136,6 +136,9 @@ fn a_gloom_far_off_does_not_notice_wick() {
 #[test]
 fn a_gloom_in_a_strong_light_thins() {
     let mut run = Run::open().expect("the project opens");
+    // It waits where it is, in front of the lantern's beam, rather than pouncing
+    // past him into the dark behind.
+    run.set_board("truce", 1.0);
     step(&mut run, 5);
     // Wick walks up to it, so the lantern is on it.
     for _ in 0..40 {
@@ -162,4 +165,30 @@ fn the_field_opens_calm_until_wick_first_moves() {
         "left standing at the start, nothing has hunted him: {}",
         lantern_radius(&run)
     );
+}
+
+/// Where the lantern's beam points, in degrees.
+fn beam_direction(run: &Run) -> f64 {
+    let light = run.entity("wick-light").expect("Wick carries a light");
+    run.world.get(light).expect("it exists").components["sindri.light2d"]["cone_direction"]
+        .as_f64()
+        .expect("a direction")
+}
+
+#[test]
+fn the_lanterns_beam_turns_to_the_way_wick_faces() {
+    let mut run = Run::open().expect("the project opens");
+    step(&mut run, 5);
+    let facing = |run: &mut Run, key: Key| {
+        run.input.apply(InputEvent::KeyPressed(key));
+        step(run, 30);
+        run.input.apply(InputEvent::KeyReleased(key));
+        step(run, 10);
+        beam_direction(run)
+    };
+    assert!((beam_direction(&run) + 90.0).abs() < 1.0, "south at first");
+    assert!(facing(&mut run, Key::D).abs() < 3.0, "east is 0 degrees");
+    assert!((facing(&mut run, Key::W) - 90.0).abs() < 3.0, "north is 90");
+    let west = facing(&mut run, Key::A);
+    assert!((west.abs() - 180.0).abs() < 3.0, "west is 180: {west}");
 }

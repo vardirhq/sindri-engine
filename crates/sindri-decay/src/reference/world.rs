@@ -248,11 +248,23 @@ pub(super) const TYPES: &[TypeEntry] = &[
     },
     TypeEntry {
         name: "Light2d",
-        text: "A light in a 2D scene: it brightens sprites, tiles and shapes near it when the scene's environment turns 2D lighting on. Switch one off with its object's `set_active`.",
+        text: "A light in a 2D scene: it brightens sprites, tiles and shapes near it when the scene's environment turns 2D lighting on, in every direction or, with a `cone_angle` below 360, in a beam. Switch one off with its object's `set_active`.",
         members: &[
             value(
                 "color",
                 "The light's color. Lowering `a` dims it, the way it fades a sprite.",
+            ),
+            value(
+                "cone_angle",
+                "How wide the beam is, in degrees across: 360 lights every way, less is a spot light that lights only a cone. Must stay above 0 and at most 360.",
+            ),
+            value(
+                "cone_direction",
+                "Where the beam points, in degrees: 0 is right and 90 is up. Write it each frame to sweep a beam.",
+            ),
+            value(
+                "cone_softness",
+                "How much of the beam's width fades out at its edge, 0 to 1: 0 is a hard edge, 1 is brightest only along the middle.",
             ),
             value(
                 "falloff",

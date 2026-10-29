@@ -2319,7 +2319,7 @@
       "name": "Light"
     },
     {
-      "description": "A light in a 2D scene: it brightens sprites, tiles and shapes near it when the scene's environment turns 2D lighting on. Switch one off with its object's `set_active`.",
+      "description": "A light in a 2D scene: it brightens sprites, tiles and shapes near it when the scene's environment turns 2D lighting on, in every direction or, with a `cone_angle` below 360, in a beam. Switch one off with its object's `set_active`.",
       "members": [
         {
           "description": "The light's color. Lowering `a` dims it, the way it fades a sprite.",
@@ -2327,6 +2327,27 @@
           "name": "color",
           "read_only": false,
           "type": "Color"
+        },
+        {
+          "description": "How wide the beam is, in degrees across: 360 lights every way, less is a spot light that lights only a cone. Must stay above 0 and at most 360.",
+          "kind": "value",
+          "name": "cone_angle",
+          "read_only": false,
+          "type": "number"
+        },
+        {
+          "description": "Where the beam points, in degrees: 0 is right and 90 is up. Write it each frame to sweep a beam.",
+          "kind": "value",
+          "name": "cone_direction",
+          "read_only": false,
+          "type": "number"
+        },
+        {
+          "description": "How much of the beam's width fades out at its edge, 0 to 1: 0 is a hard edge, 1 is brightest only along the middle.",
+          "kind": "value",
+          "name": "cone_softness",
+          "read_only": false,
+          "type": "number"
         },
         {
           "description": "How the light fades toward its edge: 1 fades evenly, higher numbers keep it bright near the middle and drop off sharply.",
