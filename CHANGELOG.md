@@ -2,6 +2,13 @@
 
 # Changelog
 
+- Lamplighter's gloom are slower, and light is what undoes them. A gloom caught in a strong
+  light, such as the beam of Wick's lantern swung onto it, stops where it is, drops a
+  wind-up it was in, and burns: its health drains for as long as the light is on it, and it
+  goes out if the light stays (a pounce already under way is not stopped). They also use
+  cover: behind a tree or boulder, out of Wick's line of sight, a gloom is faint and bold
+  and creeps on into the light, and waits to pounce until it is close. `Lighting.visible`
+  and `Lighting.level` decide both.
 - Add `sindri.sight2d`, what a viewer sees. On one entity it dims everything that entity
   cannot see in a straight line past the edges of `sindri.light2d.occluder`s, out to a
   `radius`, by `unseen`, so line of sight shows in the picture the way light does. It
