@@ -390,9 +390,12 @@ A directional, point or spot 3D light. Writes validate the whole candidate befor
 
 ### `Light2d`
 
-A light in a 2D scene: it brightens sprites, tiles and shapes near it when the scene's environment turns 2D lighting on. Switch one off with its object's `set_active`.
+A light in a 2D scene: it brightens sprites, tiles and shapes near it when the scene's environment turns 2D lighting on, in every direction or, with a `cone_angle` below 360, in a beam. Switch one off with its object's `set_active`.
 
 - `color`: `Color` — The light's color. Lowering `a` dims it, the way it fades a sprite.
+- `cone_angle`: `number` — How wide the beam is, in degrees across: 360 lights every way, less is a spot light that lights only a cone. Must stay above 0 and at most 360.
+- `cone_direction`: `number` — Where the beam points, in degrees: 0 is right and 90 is up. Write it each frame to sweep a beam.
+- `cone_softness`: `number` — How much of the beam's width fades out at its edge, 0 to 1: 0 is a hard edge, 1 is brightest only along the middle.
 - `falloff`: `number` — How the light fades toward its edge: 1 fades evenly, higher numbers keep it bright near the middle and drop off sharply.
 - `height`: `number` — How high above the scene the light hangs. Only images with a normal map notice: low lights rake across their bumps, high ones light them evenly.
 - `intensity`: `number` — How bright the light is; 0 is off.

@@ -2,6 +2,10 @@
 
 # Changelog
 
+- Lamplighter's lantern is a beam that points the way Wick faces, with a small round halo
+  at his feet, so what is ahead is lit and what is behind is dark, which is where the gloom
+  creep up. `cone_angle`, `cone_direction` and `cone_softness` are now scriptable on a
+  `Light2d` in Decay.
 - Add spot lights to `sindri.light2d`: `cone_angle` (degrees across, 360 for a point
   light), `cone_direction` and `cone_softness`. A beam is a multiplier on the light, so it
   composes with falloff, shadows and normal maps. `Lighting.level` and the cast shadows

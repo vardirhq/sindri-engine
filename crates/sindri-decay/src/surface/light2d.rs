@@ -1,5 +1,5 @@
 //! What a script reaches on a 2D light: its color, how bright and how far it
-//! reaches, how it fades, and how high it hangs. Switching one off is the
+//! reaches, how it fades, how high it hangs, and the beam of a spot light. Switching one off is the
 //! entity's own `set_active`, as for anything else in the world.
 
 use super::names::LIGHT_2D_COMPONENT;
@@ -31,6 +31,9 @@ const fn number(field: &'static str) -> Node {
             b"intensity" => &[Seg::Field("intensity")],
             b"radius" => &[Seg::Field("radius")],
             b"falloff" => &[Seg::Field("falloff")],
+            b"cone_angle" => &[Seg::Field("cone_angle")],
+            b"cone_direction" => &[Seg::Field("cone_direction")],
+            b"cone_softness" => &[Seg::Field("cone_softness")],
             _ => &[Seg::Field("height")],
         },
     })
@@ -42,4 +45,7 @@ pub(crate) const LIGHT_2D_MEMBERS: &[(&str, Node)] = &[
     ("radius", number("radius")),
     ("falloff", number("falloff")),
     ("height", number("height")),
+    ("cone_angle", number("cone_angle")),
+    ("cone_direction", number("cone_direction")),
+    ("cone_softness", number("cone_softness")),
 ];
