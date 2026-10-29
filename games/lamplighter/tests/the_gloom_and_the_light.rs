@@ -100,20 +100,40 @@ fn a_gloom_winds_up_at_the_edge_of_the_light_and_a_pounce_scorches_the_lantern()
 }
 
 #[test]
-fn left_alone_in_the_dark_wicks_lantern_goes_out() {
+fn left_alone_the_gloom_that_come_close_burn_out_in_his_light() {
     let mut run = Run::open().expect("the project opens");
     step(&mut run, 5);
     first_step(&mut run);
-    let mut out = false;
-    for _ in 0..3000 {
+    step(&mut run, 1500);
+    assert!(
+        run.board("gloom_out") >= 2.0,
+        "both that came for him went out in his light: {}",
+        run.board("gloom_out")
+    );
+    assert!(
+        lantern_radius(&run) > 9.9,
+        "and his lantern is whole: {}",
+        lantern_radius(&run)
+    );
+}
+
+#[test]
+fn a_lantern_that_is_put_out_starts_the_field_over() {
+    let mut run = Run::open().expect("the project opens");
+    step(&mut run, 5);
+    run.set_board("lost", 1.0);
+    step(&mut run, 20);
+    assert!(lantern_radius(&run) < 3.0, "out, the lantern is a spark");
+    // After a moment the field is rebuilt, and nothing is lost in it.
+    let mut again = false;
+    for _ in 0..300 {
         step(&mut run, 1);
-        // Out, the lantern is a spark; the field starts over a moment later.
-        if lantern_radius(&run) < 3.0 {
-            out = true;
+        if run.board("lost") < 0.5 {
+            again = true;
             break;
         }
     }
-    assert!(out, "standing still, Wick is run down by the gloom");
+    assert!(again, "the field starts again");
 }
 
 #[test]
@@ -191,4 +211,92 @@ fn the_lanterns_beam_turns_to_the_way_wick_faces() {
     assert!((facing(&mut run, Key::W) - 90.0).abs() < 3.0, "north is 90");
     let west = facing(&mut run, Key::A);
     assert!((west.abs() - 180.0).abs() < 3.0, "west is 180: {west}");
+}
+
+/// Puts an entity at a place, and stops it.
+fn place(run: &mut Run, id: &str, at: [f32; 2]) {
+    let entity = run.entity(id).unwrap_or_else(|| panic!("{id} exists"));
+    let data = run.world.get_mut(entity).expect("it exists");
+    let transform = data.transform_3d.as_mut().expect("it has a place");
+    transform.position[0] = at[0];
+    transform.position[1] = at[1];
+}
+
+/// Turns Wick to face a way, and puts him back at `at`.
+fn face_and_stand(run: &mut Run, key: Key, at: [f32; 2]) {
+    run.input.apply(InputEvent::KeyPressed(key));
+    step(run, 2);
+    run.input.apply(InputEvent::KeyReleased(key));
+    place(run, "wick", at);
+    step(run, 20);
+}
+
+fn gone(run: &Run, id: &str) -> bool {
+    run.entity(id).is_none()
+}
+
+#[test]
+fn a_gloom_in_the_beam_stops_and_burns_out() {
+    let mut run = Run::open().expect("the project opens");
+    step(&mut run, 5);
+    face_and_stand(&mut run, Key::D, [0.0, 0.0]);
+    place(&mut run, "gloom-1", [3.2, 0.0]);
+    step(&mut run, 40);
+    let held = position(&run, "gloom-1");
+    step(&mut run, 20);
+    let later = position(&run, "gloom-1");
+    assert!(
+        (later[0] - held[0]).abs() < 0.1 && (later[1] - held[1]).abs() < 0.1,
+        "the light holds it where it is: {held:?} then {later:?}"
+    );
+    assert!(!gone(&run, "gloom-1"), "not yet out");
+    step(&mut run, 150);
+    assert!(
+        gone(&run, "gloom-1"),
+        "kept in the light, it burns out and is gone"
+    );
+}
+
+#[test]
+fn a_gloom_the_light_has_turned_from_is_not_burned() {
+    let mut run = Run::open().expect("the project opens");
+    step(&mut run, 5);
+    face_and_stand(&mut run, Key::A, [0.0, 0.0]);
+    place(&mut run, "gloom-1", [3.2, 0.0]);
+    step(&mut run, 150);
+    assert!(
+        !gone(&run, "gloom-1") || run.board("gloom_out") < 0.5,
+        "with the beam pointed away it is not burned"
+    );
+}
+
+#[test]
+fn cover_makes_a_gloom_bold_where_an_exposed_one_holds_back() {
+    let mut run = Run::open().expect("the project opens");
+    step(&mut run, 5);
+    // Wick at the west of a boulder, looking east, so its far side is lit and
+    // out of his sight. One gloom is behind it, one is out in the open.
+    run.set_board("truce", 1.0);
+    face_and_stand(&mut run, Key::D, [1.0, 3.0]);
+    place(&mut run, "gloom-2", [7.2, 3.0]);
+    place(&mut run, "gloom-1", [7.2, 1.0]);
+    step(&mut run, 10);
+    // They hold still until the truce ends, so both start from the same footing.
+    run.set_board("truce", 0.0);
+    step(&mut run, 2);
+    let (hidden, open) = (position(&run, "gloom-2"), position(&run, "gloom-1"));
+    // Short enough that the one in the open is still winding up.
+    step(&mut run, 50);
+    let (hidden_now, open_now) = (position(&run, "gloom-2"), position(&run, "gloom-1"));
+    let gained = |from: [f32; 2], to: [f32; 2]| {
+        ((from[0] - 1.0).hypot(from[1] - 3.0)) - ((to[0] - 1.0).hypot(to[1] - 3.0))
+    };
+    assert!(
+        gained(hidden, hidden_now) > 0.4,
+        "behind cover it creeps on into the light: {hidden:?} to {hidden_now:?}"
+    );
+    assert!(
+        gained(open, open_now) < 0.2,
+        "in the open and lit it holds back: {open:?} to {open_now:?}"
+    );
 }
