@@ -288,7 +288,7 @@ An object in the game, such as a player, an enemy or a button. Scripts get these
 - `light`: `Light` — The object's 3D light, if it has one.
 - `light2d`: `Light2d` — The object's 2D light, if it has one.
 - `shape`: `Shape` — The object's drawn shape, if it has one.
-- `sight2d`: `Sight2d`
+- `sight2d`: `Sight2d` — The object's 2D viewer, if it has one.
 - `sprite`: `Sprite` — The object's image (sprite), if it has one.
 - `transform`: `Transform` — Where the object is, how it is turned and how big it is.
 - `ui_image`: `UiImage` — The object's on-screen interface image, if it has one.

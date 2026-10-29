@@ -1553,7 +1553,7 @@
           "type": "Shape"
         },
         {
-          "description": null,
+          "description": "The object's 2D viewer, if it has one.",
           "kind": "value",
           "name": "sight2d",
           "read_only": false,

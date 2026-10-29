@@ -104,6 +104,7 @@ pub(super) const TYPES: &[TypeEntry] = &[
             ),
             value("light", "The object's 3D light, if it has one."),
             value("light2d", "The object's 2D light, if it has one."),
+            value("sight2d", "The object's 2D viewer, if it has one."),
             value("shape", "The object's drawn shape, if it has one."),
             value("sprite", "The object's image (sprite), if it has one."),
             value("world_text", "The object's world text, if it has some."),
