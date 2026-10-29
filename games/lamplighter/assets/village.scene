@@ -7870,8 +7870,8 @@
       "name": "house-bakery-smoke",
       "transform_3d": {
         "position": [
-          12.8,
-          7.9,
+          10.4,
+          7.3,
           0.2
         ],
         "rotation": [
@@ -8227,8 +8227,8 @@
       "name": "house-child-house-smoke",
       "transform_3d": {
         "position": [
-          -9.6,
-          7.9,
+          -8.2,
+          8.0,
           0.2
         ],
         "rotation": [
@@ -8584,8 +8584,8 @@
       "name": "house-workshop-smoke",
       "transform_3d": {
         "position": [
-          12.7,
-          -4.6,
+          9.15,
+          -4.2,
           0.2
         ],
         "rotation": [
@@ -8941,8 +8941,8 @@
       "name": "house-keeper-smoke",
       "transform_3d": {
         "position": [
-          -8.6,
-          -5.5,
+          -12.2,
+          -4.1,
           0.2
         ],
         "rotation": [

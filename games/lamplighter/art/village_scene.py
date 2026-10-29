@@ -23,7 +23,7 @@ LEFT, TOP = -COLUMNS // 2, ROWS // 2
 CELL = 7.0          # a 112 pixel cell is seven world units across
 
 # Where each house's chimney is, from its foot, for the smoke.
-CHIMNEYS = {'bakery': (2.3, 4.9), 'child-house': (0.9, 4.9), 'keeper': (1.9, 3.5), 'workshop': (2.2, 4.4)}
+CHIMNEYS = {'bakery': (-0.1, 4.3), 'child-house': (2.3, 5.0), 'keeper': (-1.7, 4.9), 'workshop': (-1.35, 4.8)}
 HOUSES = [
     # name, sprite, x, y, lamp, villager, villager's place
     # The north houses face the main road, a few steps off; the south houses face a lane of their own.
