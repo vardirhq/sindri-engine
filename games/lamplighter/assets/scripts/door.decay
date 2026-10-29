@@ -42,6 +42,7 @@ script Door {
             if near { Ui.set_text(this.prompt, this.words); } else { Ui.set_text(this.prompt, ""); }
         }
         if near && Action.pressed("interact") {
+            Game.through = true;
             Scene.go(this.to);
         }
     }

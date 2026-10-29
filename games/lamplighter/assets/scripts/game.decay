@@ -15,4 +15,7 @@ state Game {
     var moved: bool = false;
     // How hard Wick has just been hit, 1 at the blow and fading: the red over the screen.
     var hit: number = 0.0;
+    // Set by a door as Wick goes through it: the scene he comes back to starts its scripts again,
+    // and this tells him that what the run has counted is to stay.
+    var through: bool = false;
 }

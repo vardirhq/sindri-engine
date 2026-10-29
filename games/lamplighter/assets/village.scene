@@ -13168,7 +13168,7 @@
       "transform_3d": {
         "position": [
           0,
-          0,
+          0.12,
           0
         ],
         "rotation": [
@@ -13185,7 +13185,7 @@
       },
       "components": {
         "sindri.ui.text": {
-          "anchor": "bottom_center",
+          "anchor": "bottom",
           "color": [
             1,
             0.95,

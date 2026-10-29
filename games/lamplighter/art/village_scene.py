@@ -117,8 +117,8 @@ def warmth():
 
 def doors():
     """Each house's door, which opens with its lamp, and the words that ask Wick to go in."""
-    out = [entity('door-prompt', 'door-prompt', at(0, 0, 0, 1.0, 1.0), **{'sindri.ui.text': {
-        'anchor': 'bottom_center', 'color': [1, 0.95, 0.6, 1], 'font': 'fonts/Inter.ttf', 'font_size': 0.04,
+    out = [entity('door-prompt', 'door-prompt', at(0, 0.12, 0, 1.0, 1.0), **{'sindri.ui.text': {
+        'anchor': 'bottom', 'color': [1, 0.95, 0.6, 1], 'font': 'fonts/Inter.ttf', 'font_size': 0.04,
         'line_height': 0.048, 'layer': 100, 'text': '', 'bold': True, 'line_align': 'center',
         'shadow': {'offset': [0, -0.003], 'color': [0, 0, 0, 0.45], 'softness': 0.002}}})]
     for name, _, hx, hy, lamp, *_ in HOUSES:

@@ -2,6 +2,10 @@
 
 # Changelog
 
+- Go inside the houses in Lamplighter. Once a house's lamp is lit, its door opens: stand at it and press
+  E (or Enter, or the gamepad's south button) to step into a room of its own, with Pixel Lab furniture,
+  a fire and a rug, and the same button at the doorway leads back out to the village as it was left.
+  The lamps lit stay counted while Wick is indoors.
 - Redraw the Lamplighter village in one palette. Houses, trees, bushes, lamps, the well, stalls and
   props are Pixel Lab pieces locked to a palette taken from a reference picture, the ground is graded
   into it, and the yards are fenced. Chimney smoke now rises from the chimneys, warm light pools sit

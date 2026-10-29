@@ -470,6 +470,8 @@ def main():
     write('world.scene', 'The Dim Fields', field())
     import village_scene  # the square beyond the fields, which borrows this file's pieces
     village_scene.main()
+    import interior_scene  # the room behind each house's door
+    interior_scene.main()
 
 
 if __name__ == '__main__':

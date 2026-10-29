@@ -6,5 +6,9 @@ main_scene = "assets/title.scene"
 scenes = [
   "assets/world.scene",
   "assets/village.scene",
+  "assets/interior-bakery.scene",
+  "assets/interior-child-house.scene",
+  "assets/interior-workshop.scene",
+  "assets/interior-keeper.scene",
   "assets/pause.scene",
 ]
