@@ -235,8 +235,8 @@ for a fifth of the shadow work. It only changes what is drawn: the lights a scri
 `Lighting.level` and `Lighting.visible` are the same either way, so a game plays the same.
 
 The browser player lowers it by itself. It smooths the length of the real frames and, when they
-stay over 25 ms (under 40 frames a second) for about a second and a half after the page has
-settled, switches to `Reduced` and stays there; a device that was struggling would only struggle
+stay over 25 ms (under 40 frames a second) for a second and a half of real time after the first
+three seconds, switches to `Reduced` and stays there; a device that was struggling would only struggle
 again, and a look that flickers between two settings is worse than either. A paused or hidden page
 says nothing of the device and is not counted. A host of its own sets the quality directly.
 

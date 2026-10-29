@@ -14,19 +14,23 @@ use sindri_scene::{LightingQuality, SceneExtractor};
 /// A frame longer than this, smoothed, is a device that is not keeping up: about 40 frames
 /// a second.
 const SLOW: f32 = 0.025;
-/// Frames ignored while the page loads and settles: first draws compile pipelines.
-const SETTLE: u32 = 180;
-/// How many frames in a row the smoothed length must stay over `SLOW`.
-const SUSTAIN: u32 = 90;
-/// A frame counted as no longer than this, so a tab switch or a hitch is not taken for the
-/// device's pace.
+/// Real seconds, and at least this many frames, ignored while the page loads and settles:
+/// first draws compile pipelines. Counted in time and not only in frames, because the
+/// devices that most need this draw a frame every few hundred milliseconds.
+const SETTLE_SECONDS: f32 = 3.0;
+const SETTLE_FRAMES: u32 = 12;
+/// How long, in real seconds, the smoothed length must stay over `SLOW`.
+const SUSTAIN_SECONDS: f32 = 1.5;
+/// A frame counted as no longer than this in the smoothing, so a tab switch or a hitch is not
+/// taken for the device's pace.
 const LONGEST: f32 = 0.1;
 
 #[derive(Debug, Default)]
 pub(crate) struct FrameBudget {
-    seen: u32,
+    frames: u32,
+    elapsed: f32,
     smoothed: f32,
-    over: u32,
+    over: f32,
     spent: bool,
 }
 
@@ -45,22 +49,24 @@ impl FrameBudget {
         if self.spent || !counts {
             return false;
         }
-        self.seen += 1;
-        if self.seen <= SETTLE {
+        let real = delta.as_secs_f32();
+        self.frames += 1;
+        self.elapsed += real;
+        if self.elapsed < SETTLE_SECONDS || self.frames < SETTLE_FRAMES {
             return false;
         }
-        let seconds = delta.as_secs_f32().min(LONGEST);
+        let seconds = real.min(LONGEST);
         self.smoothed = if self.smoothed == 0.0 {
             seconds
         } else {
-            self.smoothed.mul_add(0.95, seconds * 0.05)
+            self.smoothed.mul_add(0.9, seconds * 0.1)
         };
         if self.smoothed > SLOW {
-            self.over += 1;
+            self.over += real.min(LONGEST);
         } else {
-            self.over = 0;
+            self.over = 0.0;
         }
-        if self.over >= SUSTAIN {
+        if self.over >= SUSTAIN_SECONDS {
             self.spent = true;
             return true;
         }
@@ -90,9 +96,26 @@ mod tests {
     }
 
     #[test]
+    fn a_device_at_three_frames_a_second_is_lowered_within_seconds() {
+        let mut budget = FrameBudget::default();
+        let frames = (0..200).find(|_| budget.observe(Duration::from_millis(330), true));
+        assert!(
+            frames.is_some_and(|at| at < 40),
+            "caught after {frames:?} frames, about 13 s at that pace"
+        );
+    }
+
+    #[test]
     fn the_loading_frames_and_a_hitch_do_not_count() {
         let mut budget = FrameBudget::default();
-        assert!(!run(&mut budget, 150, 400), "the page is still settling");
+        assert!(
+            !budget.observe(Duration::from_millis(1500), true),
+            "a first draw"
+        );
+        assert!(
+            !budget.observe(Duration::from_millis(1400), true),
+            "pipelines"
+        );
         assert!(!run(&mut budget, 1000, 16));
         assert!(
             !budget.observe(Duration::from_secs(3), true),
