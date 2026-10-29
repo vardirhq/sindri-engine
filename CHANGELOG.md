@@ -6,6 +6,11 @@
   light), `cone_direction` and `cone_softness`. A beam is a multiplier on the light, so it
   composes with falloff, shadows and normal maps. `Lighting.level` and the cast shadows
   of `sindri.shadow2d` follow it, and a script can sweep it by writing `cone_direction`.
+- A plain `cargo build` or `cargo test` now builds with line tables instead of full
+  debug info, and dependencies with none, which CI already did through
+  `CARGO_PROFILE_*_DEBUG`. Backtraces keep their file and line; stepping through code in
+  a debugger needs `CARGO_PROFILE_DEV_DEBUG=2`. On one crate's tests that is 1.6 GB of
+  build output instead of 7.6 GB, and a third less time compiling.
 - Lamplighter's gloom now hunt. Using `Lighting.level`, each creeps through the dark
   toward Wick, holds where a light begins, and from the edge winds up (low, wide and
   shaking, with red sparks) and pounces; a pounce that lands throws Wick back and

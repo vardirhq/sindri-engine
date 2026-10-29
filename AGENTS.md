@@ -248,6 +248,16 @@ check that can reasonably be reproduced locally. When a check fails, inspect the
 whole affected path rather than patching only the first diagnostic and pushing
 again.
 
+### Keeping builds small
+
+A workspace this size writes tens of gigabytes if every test binary carries full
+debug info, which fills a cloud session's disk. The manifest therefore builds dev
+and test with line tables only (dependencies with none), the same as CI. If a
+disk fills anyway, delete `target/` rather than single files from it: cargo's
+fingerprints then agree with what is on disk. To step through code in a debugger,
+build with `CARGO_PROFILE_DEV_DEBUG=2` (or `CARGO_PROFILE_TEST_DEBUG=2`) for that
+one crate.
+
 ### Verify APIs before use
 
 Do not infer a Sindri or Decay API from conventions in another engine, language,

@@ -111,6 +111,7 @@ missing_panics_doc = "allow"
 # Decay VM rather than in the test harnesses themselves.
 [profile.test.package."*"]
 opt-level = 2
+debug = false
 
 # The workspace's own crates, at the lightest optimisation. The game suites
 # have since moved the arithmetic into Sindri itself -- voxel terrain, map
@@ -123,6 +124,13 @@ opt-level = 2
 # level, so a test sees the same arithmetic it did.
 [profile.test]
 opt-level = 1
+# Line tables, not full debug info: backtraces and panics keep their file and
+# line, which is what a test run reads. Full debug info made each test binary
+# several times the size, and with this workspace's dozens of integration tests
+# a plain `cargo test` filled a 25 GB disk. CI already builds this way through
+# `CARGO_PROFILE_*_DEBUG`; this makes a local build match it. Set
+# `CARGO_PROFILE_TEST_DEBUG=2` to step through a test in a debugger.
+debug = "line-tables-only"
 
 # The same, for every build. The editor run unoptimised was the larger part of
 # why a game played in it lagged while the browser build, which is release,
@@ -134,6 +142,13 @@ opt-level = 1
 # docs/editor-update.md.
 [profile.dev.package."*"]
 opt-level = 2
+# Dependencies are optimised and nobody steps into them, so they carry no debug
+# info at all, here and in the test build above.
+debug = false
+
+[profile.dev]
+# See [profile.test]: line tables for backtraces, not full debug info.
+debug = "line-tables-only"
 
 # Running the editor, rather than working on it: release optimisation with
 # incremental, finely split compilation so a rebuild after pulling stays
