@@ -24,8 +24,27 @@ HERE = pathlib.Path(__file__).resolve().parent
 SOURCE = HERE / 'pixellab' / 'village' / 'tiles'
 TEXTURES = HERE.parent / 'assets' / 'textures'
 TILE = 16
-SHEETS = [('dirt', 'village-ground', 'dirt', False), ('cobble', 'village-cobble', 'cobble', True),
-          ('soil', 'village-soil', 'soil', True), ('flag', 'village-flag', 'flag', True)]
+PALETTE = [tuple(int(c[i:i + 2], 16) for i in (1, 3, 5))
+           for c in json.loads((SOURCE.parent / 'palette.json').read_text())['colors']]
+DIM = 0.72
+SHEETS = [('dirt', 'village-ground', 'dirt', False, 0.25), ('cobble', 'village-cobble', 'cobble', True, 0.7),
+          ('soil', 'village-soil', 'soil', True, 0.3), ('flag', 'village-flag', 'flag', True, 0.7)]
+
+
+def grade(picture, desat):
+    """The ground in the village's palette (the one the houses and trees are drawn in), a little
+    darker than the tileset draws it so the lamps' pools carry it."""
+    out = picture.copy()
+    pixels = out.load()
+    for y in range(out.height):
+        for x in range(out.width):
+            r, g, b, a = pixels[x, y]
+            if a:
+                grey = (r * 0.3 + g * 0.59 + b * 0.11) * DIM
+                want = tuple(grey * desat + c * DIM * (1 - desat) for c in (r, g, b))
+                near = min(PALETTE, key=lambda c: sum((c[k] - want[k]) ** 2 for k in range(3)))
+                pixels[x, y] = (*near, a)
+    return out
 
 
 def mean(picture):
@@ -34,7 +53,7 @@ def mean(picture):
     return [sum(p[k] for p in pixels) / len(pixels) for k in range(3)]
 
 
-def build_one(source, name, terrain, overlay):
+def build_one(source, name, terrain, overlay, desat):
     doc = json.loads((SOURCE / source / 'tileset.json').read_text())
     tiles = [(tile['corners'], Image.open(SOURCE / source / tile['image']['saved']).convert('RGBA'))
              for tile in doc['tileset']['tiles']]
@@ -61,7 +80,7 @@ def build_one(source, name, terrain, overlay):
                 for x in range(TILE):
                     if pixels[x, y] in grass_colors:
                         pixels[x, y] = (0, 0, 0, 0)
-        sheet.paste(shown, ((ident % 4) * TILE, (ident // 4) * TILE))
+        sheet.paste(grade(shown, desat), ((ident % 4) * TILE, (ident // 4) * TILE))
     assert seen == set(range(16)), (source, sorted(set(range(16)) - seen))
     sheet.save(TEXTURES / f'{name}.png', optimize=True)
     names = [f'{name}-{i}' for i in range(16)]
@@ -72,8 +91,8 @@ def build_one(source, name, terrain, overlay):
 
 def build():
     TEXTURES.mkdir(parents=True, exist_ok=True)
-    for source, name, terrain, overlay in SHEETS:
-        build_one(source, name, terrain, overlay)
+    for source, name, terrain, overlay, desat in SHEETS:
+        build_one(source, name, terrain, overlay, desat)
 
 
 if __name__ == '__main__':
