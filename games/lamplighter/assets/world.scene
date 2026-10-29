@@ -12142,8 +12142,8 @@
           1
         ],
         "scale": [
-          2,
-          2,
+          2.0,
+          2.0,
           1
         ]
       },
@@ -12395,8 +12395,8 @@
           1
         ],
         "scale": [
-          2,
-          2,
+          2.0,
+          2.0,
           1
         ]
       },
@@ -12648,8 +12648,8 @@
           1
         ],
         "scale": [
-          2,
-          2,
+          2.0,
+          2.0,
           1
         ]
       },
@@ -12830,6 +12830,265 @@
         ]
       },
       "parent": "gloom-3",
+      "components": {
+        "sindri.particles": {
+          "playing": false,
+          "texture": "textures/mote.png",
+          "rate": 46.0,
+          "max": 80,
+          "lifetime": 0.7,
+          "lifetime_spread": 0.4,
+          "speed": 1.7,
+          "speed_spread": 0.5,
+          "direction": 90.0,
+          "spread": 360.0,
+          "shape": "circle",
+          "offset": [
+            0.0,
+            0.0
+          ],
+          "shape_size": [
+            0.9,
+            0.9
+          ],
+          "gravity": [
+            0.0,
+            0.0
+          ],
+          "drag": 1.6,
+          "size": 0.2,
+          "size_end": 0.05,
+          "colors": [
+            [
+              1.0,
+              0.35,
+              0.45,
+              0.0
+            ],
+            [
+              0.95,
+              0.3,
+              0.4,
+              0.8
+            ],
+            [
+              0.4,
+              0.08,
+              0.2,
+              0.0
+            ]
+          ],
+          "random_rotation": true,
+          "spin": 0.0,
+          "space": "world",
+          "layer": 6
+        }
+      }
+    },
+    {
+      "id": "brute-1",
+      "name": "brute-1",
+      "transform_3d": {
+        "position": [
+          19.5,
+          4.5,
+          0.455
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          2.7,
+          2.7,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/gloom.png#gloom-2",
+          "layer": 5,
+          "tint": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        "sindri.tags": {
+          "tags": [
+            "gloom"
+          ]
+        },
+        "sindri.shadow2d": {
+          "contact_size": [
+            1.0,
+            0.4
+          ],
+          "contact_offset": [
+            0,
+            0
+          ],
+          "contact_opacity": 0.4,
+          "cast": false,
+          "cast_opacity": 0.35,
+          "height": 0.0,
+          "max_length": 2.2
+        },
+        "sindri.physics2d.rigid_body": {
+          "kind": "dynamic",
+          "pose": {
+            "position": [
+              0,
+              0
+            ],
+            "rotation": 0
+          },
+          "linear_velocity": [
+            0,
+            0
+          ],
+          "angular_velocity": 0,
+          "gravity_scale": 0,
+          "linear_damping": 7,
+          "angular_damping": 0,
+          "lock_rotation": true,
+          "continuous_collision": true
+        },
+        "sindri.physics2d.collider": {
+          "shape": {
+            "shape": "circle",
+            "radius": 0.275
+          },
+          "offset": [
+            0,
+            0.225
+          ],
+          "rotation": 0,
+          "sensor": false,
+          "layers": {
+            "memberships": 8,
+            "filter": 11
+          },
+          "friction": 0,
+          "restitution": 0
+        },
+        "sindri.script": {
+          "source": "scripts/gloom.decay",
+          "script": "Gloom",
+          "properties": {
+            "surge_name": "brute-1-surge",
+            "fears_light": 0.0,
+            "size": 2.7,
+            "health": 5.0,
+            "creep": 1.0,
+            "wind_for": 1.1,
+            "knockback": 6.0
+          }
+        }
+      }
+    },
+    {
+      "id": "brute-1-smoke",
+      "name": "brute-1-smoke",
+      "transform_3d": {
+        "position": [
+          0,
+          0.45,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1
+        ]
+      },
+      "parent": "brute-1",
+      "components": {
+        "sindri.particles": {
+          "playing": true,
+          "texture": "textures/mote.png",
+          "rate": 7.0,
+          "max": 80,
+          "lifetime": 1.6,
+          "lifetime_spread": 0.4,
+          "speed": 0.35,
+          "speed_spread": 0.5,
+          "direction": 90.0,
+          "spread": 70.0,
+          "shape": "circle",
+          "offset": [
+            0.0,
+            0.0
+          ],
+          "shape_size": [
+            0.9,
+            0.9
+          ],
+          "gravity": [
+            0.0,
+            0.25
+          ],
+          "drag": 0.6,
+          "size": 0.25,
+          "size_end": 0.7,
+          "colors": [
+            [
+              0.24,
+              0.1,
+              0.4,
+              0.0
+            ],
+            [
+              0.3,
+              0.12,
+              0.48,
+              0.5
+            ],
+            [
+              0.1,
+              0.04,
+              0.2,
+              0.0
+            ]
+          ],
+          "random_rotation": true,
+          "spin": 0.0,
+          "space": "world",
+          "layer": 6
+        }
+      }
+    },
+    {
+      "id": "brute-1-surge",
+      "name": "brute-1-surge",
+      "transform_3d": {
+        "position": [
+          0,
+          0.45,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1
+        ]
+      },
+      "parent": "brute-1",
       "components": {
         "sindri.particles": {
           "playing": false,

@@ -186,23 +186,27 @@ def clips():
     return out
 
 
-def gloom(ident, x, y, variant):
-    """A creature of the dark: dim, slow to notice, and cut down by the sword."""
+def gloom(ident, x, y, variant, brute=False):
+    """A creature of the dark: dim, slow to notice, and cut down by the sword. A brute is
+    bigger and tougher, and light does not trouble it."""
     body = {'kind': 'dynamic', 'pose': {'position': [0, 0], 'rotation': 0}, 'linear_velocity': [0, 0],
             'angular_velocity': 0, 'gravity_scale': 0, 'linear_damping': 7, 'angular_damping': 0,
             'lock_rotation': True, 'continuous_collision': True}
     # The art is 32 pixels, two units; the entity is scaled up from a pixel to 1/16.
-    return entity(ident, ident, at(x, y, depth(y), 2, 2), **{
+    size = 2.7 if brute else 2.0
+    return entity(ident, ident, at(x, y, depth(y), size, size), **{
         'sindri.sprite': {'texture': f'textures/gloom.png#gloom-{variant}', 'layer': 5, 'tint': [1.0, 1.0, 1.0, 1.0]},
         'sindri.tags': {'tags': ['gloom']},
         'sindri.shadow2d': shadow(1.0, 0.4, opacity=0.4),
         'sindri.physics2d.rigid_body': body,
-        'sindri.physics2d.collider': {'shape': {'shape': 'circle', 'radius': 0.4 / 2}, 'offset': [0, 0.45 / 2],
+        'sindri.physics2d.collider': {'shape': {'shape': 'circle', 'radius': (0.55 if brute else 0.4) / 2}, 'offset': [0, 0.45 / 2],
                                       'rotation': 0, 'sensor': False,
                                       'layers': {'memberships': TARGET, 'filter': WALL | WICK | TARGET},
                                       'friction': 0, 'restitution': 0},
         'sindri.script': {'source': 'scripts/gloom.decay', 'script': 'Gloom',
-                          'properties': {'surge_name': ident + '-surge'}}})
+                          'properties': {'surge_name': ident + '-surge'}
+                          | ({'fears_light': 0.0, 'size': size, 'health': 5.0, 'creep': 1.0, 'wind_for': 1.1,
+                              'knockback': 6.0} if brute else {})}})
 
 
 def motes(rate, lifetime, speed, colors, size, size_end, **more):
@@ -332,7 +336,7 @@ def ground_cover():
 
     Clear of the path, of every tree, boulder, lamp and gloom, and of Wick's start."""
     taken = ([(x, y, 1.6) for x, y in BOULDERS] + [(x, y, 1.8) for x, y in TREES]
-             + [(8, 0, 2.2), (17, -3, 2.2), (22, 8, 2.2), (6.5, 0, 1.5), (-5, 0, 1.5), (14, 5.5, 1.5)])
+             + [(8, 0, 2.2), (17, -3, 2.2), (22, 8, 2.2), (6.5, 0, 1.5), (-5, 0, 1.5), (14, 5.5, 1.5), (19.5, 4.5, 1.8)])
     rng = random.Random(11)
     kinds = ['tufts'] * 9 + ['flowers'] * 4 + ['pebbles'] * 4 + ['mushrooms'] * 2
     out = []
@@ -384,6 +388,7 @@ def field():
         *wick(),
         gloom('gloom-1', 6.5, 0, 1), *wisps('gloom-1'), gloom('gloom-2', -5, 0, 3), *wisps('gloom-2'),
         gloom('gloom-3', 14, 5.5, 0), *wisps('gloom-3'),
+        gloom('brute-1', 19.5, 4.5, 2, brute=True), *wisps('brute-1'),
         entity('hud', 'HUD', at(0.03, -0.03, 0), **{
             'sindri.ui.text': {'anchor': 'top_left', 'color': [1, 0.95, 0.6, 1], 'font': 'fonts/Inter.ttf',
                                'font_size': 0.04, 'line_height': 0.048, 'layer': 100,
