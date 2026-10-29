@@ -125,6 +125,14 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: '22.18'
+      # The smoke launches Chromium with `--use-vulkan=swiftshader`. Without the
+      # Vulkan loader the browser still reports `navigator.gpu` and then hands
+      # wgpu a device whose limits are nonsense, so the first buffer it creates
+      # fails with "size (64) is too large for the implementation". The full
+      # CI browser job installs these for the same reason.
+      - uses: ./.github/actions/linux-deps
+        with:
+          packages: libvulkan1 mesa-vulkan-drivers
       - name: Install browser tooling
         run: |
           npm install --prefix scripts/browser
