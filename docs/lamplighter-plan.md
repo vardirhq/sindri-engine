@@ -85,7 +85,8 @@ lantern is the one warm thing on screen. The pixel grid is 16 pixels to a tile o
 a 320 by 180 logical screen (camera `vertical_size` 11.25), which is exactly three
 screen pixels to an art pixel at 960 by 540.
 
-- **Wick** keeps his existing look: a blue hood, a red scarf and a warm lantern.
+- **Wick** keeps his existing look: a blue hood and a red scarf, with a warm lantern
+  that is not part of his sprite (see below).
   The top-down version needs directional sprites (idle, walk, sword swing, hurt)
   and the sword. Baked from a model with the Sprite Baker in top-down view with
   each animation frame a variant of one sheet, or drawn, whichever reads better;
@@ -210,6 +211,16 @@ What came back from the real service, which the client's mock did not show:
 - A capability gap is closed in the engine, generally, in the stage that finds it,
   with its parity row and tests.
 
-The lantern is two lights on Wick (`wick-light` and `wick-halo`): a 140 degree beam
-that `wick.decay` turns toward where he faces, and a small round halo that keeps his
-heels from being black. Both are `Flame` scripts and are scorched together.
+The lantern is its own sprite (`wick-lantern`, drawn by `art/lantern.py`), not part of
+Wick's: his art has empty hands in all four directions, and `wick.decay` floats the
+lantern on a circle around his hands. It rides at his right hand a little ahead of where
+he faces, swings round him as he turns, drifts a little, and is drawn in front of him on
+the near half of its circle and behind him on the far half. Two lights hang from it
+(`wick-light` and `wick-halo`): a 140 degree beam that `wick.decay` turns toward where he
+faces, and a small round halo that keeps his heels from being black. Both are `Flame`
+scripts and are scorched together.
+
+The gloom keep to the dark and are undone by light: a gloom caught in a strong light
+stops and burns out, and uses cover (`Lighting.visible`) to creep on and ambush. The
+brute is the second kind, which light does not trouble: it is bigger, takes five blows,
+and only the sword puts it out (`fears_light` and `size` on `gloom.decay`).
