@@ -6,7 +6,7 @@
 
 use super::{
     Lighting2d, MAX_LIGHTS_2D, SHADOW_INTERVAL_FLOATS_2D, SHADOW_INTERVALS_2D, SHADOW_MAP_LEN_2D,
-    SHADOW_SAMPLES_2D,
+    SHADOW_SAMPLES_2D, Sight2d,
 };
 
 #[repr(C)]
@@ -59,6 +59,24 @@ enum Written {
     Nothing,
     Off,
     Lit(Lighting2d),
+}
+
+/// The viewer's place and shadow map, written after every light's.
+fn write_sight(uniform: &mut LightsUniform, rows: &mut [f32], sight: &Sight2d) {
+    uniform.sight = [
+        sight.position[0],
+        sight.position[1],
+        sight.radius,
+        sight.unseen,
+    ];
+    uniform.sight_edge = [1.0, sight.reach, 0.0, 0.0];
+    let row = MAX_LIGHTS_2D * SHADOW_SAMPLES_2D * SHADOW_MAP_LEN_2D;
+    for (into, from) in rows[row..row + SHADOW_MAP_LEN_2D]
+        .iter_mut()
+        .zip(sight.map.iter())
+    {
+        *into = *from;
+    }
 }
 
 impl Lights2dGpu {
@@ -123,20 +141,7 @@ impl Lights2dGpu {
             let count = lights.len() as f32;
             uniform.header[0] = count;
             if let Some(sight) = &lighting.sight {
-                uniform.sight = [
-                    sight.position[0],
-                    sight.position[1],
-                    sight.radius,
-                    sight.unseen,
-                ];
-                uniform.sight_edge = [1.0, sight.reach, 0.0, 0.0];
-                let row = MAX_LIGHTS_2D * SHADOW_SAMPLES_2D * SHADOW_MAP_LEN_2D;
-                for (into, from) in rows[row..row + SHADOW_MAP_LEN_2D]
-                    .iter_mut()
-                    .zip(sight.map.iter())
-                {
-                    *into = *from;
-                }
+                write_sight(&mut uniform, &mut rows, sight);
             }
             for (index, light) in lights.iter().enumerate() {
                 let [r, g, b] = light.color;
