@@ -296,6 +296,7 @@ the scene wrote it.
 | `this.light2d.color` | `Color` | yes | yes |
 | `this.light2d.color.{r,g,b,a}` | `number` | yes | yes |
 | `this.light2d.{intensity,radius,falloff,height,cone_angle,cone_direction,cone_softness}` | `number` | yes | yes |
+| `this.sight2d.{radius,unseen,reach}` | `number` | yes | yes |
 | `this.world_text.color` | `Color` | yes | yes |
 | `this.world_text.color.{r,g,b,a}` | `number` | yes | yes |
 | `this.world_text.{font_size,visible,layer}` | `number` | yes | yes |
@@ -409,6 +410,7 @@ table above lists, reaching the same numbers.
 | `this.entity.light2d.color` | `Color` | yes | yes |
 | `this.entity.light2d.color.{r,g,b,a}` | `number` | yes | yes |
 | `this.entity.light2d.{intensity,radius,falloff,height,cone_angle,cone_direction,cone_softness}` | `number` | yes | yes |
+| `this.entity.sight2d.{radius,unseen,reach}` | `number` | yes | yes |
 | `this.entity.ui_image.tint` | `Color` | yes | yes |
 | `this.entity.ui_image.tint.{r,g,b,a}` | `number` | yes | yes |
 | `this.entity.ui_image.layer` | `number` | yes | yes |

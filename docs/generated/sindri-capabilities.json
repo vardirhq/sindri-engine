@@ -2068,6 +2068,42 @@
       "addable": true,
       "apply": {},
       "default_payload": {
+        "enabled": true,
+        "radius": 0.0,
+        "reach": 0.30000001192092896,
+        "unseen": 0.30000001192092896
+      },
+      "display_name": "Sight 2D",
+      "fields": {
+        "enabled": true,
+        "radius": 0.0,
+        "reach": 0.30000001192092896,
+        "unseen": 0.30000001192092896
+      },
+      "meanings": {
+        "radius": {
+          "kind": "range",
+          "max": null,
+          "min": 0.0
+        },
+        "reach": {
+          "kind": "range",
+          "max": null,
+          "min": 0.0
+        },
+        "unseen": {
+          "kind": "range",
+          "max": 1.0,
+          "min": 0.0
+        }
+      },
+      "schema_version": 1,
+      "type_name": "sindri.sight2d"
+    },
+    {
+      "addable": true,
+      "apply": {},
+      "default_payload": {
         "billboard": false,
         "border_scale": 0.0625,
         "color_transform": {

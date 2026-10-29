@@ -22,6 +22,7 @@ What the entity a script runs on offers, beyond the script's own fields.
 - `light`: `Light` — The 3D light on this object: checked color, intensity, range, cone angles and independent enabled state.
 - `light2d`: `Light2d` — The 2D light on this script's object, if it has one: its color, brightness and reach.
 - `shape`: `Shape` — The drawn shape on this script's object, if it has one: its colors, outline and how much of it is drawn.
+- `sight2d`: `Sight2d` — The 2D viewer on this script's object, if it has one: how far it sees and how dim what it cannot see goes.
 - `sprite`: `Sprite` — The image (sprite) on this script's object, if it has one: its color and drawing order.
 - `transform`: `Transform` — Where this script's object is, how it is turned and how big it is. Change it to move the object.
 - `ui_image`: `UiImage` — The on-screen interface image on this script's object, if it has one: its color and drawing order.
@@ -287,6 +288,7 @@ An object in the game, such as a player, an enemy or a button. Scripts get these
 - `light`: `Light` — The object's 3D light, if it has one.
 - `light2d`: `Light2d` — The object's 2D light, if it has one.
 - `shape`: `Shape` — The object's drawn shape, if it has one.
+- `sight2d`: `Sight2d`
 - `sprite`: `Sprite` — The object's image (sprite), if it has one.
 - `transform`: `Transform` — Where the object is, how it is turned and how big it is.
 - `ui_image`: `UiImage` — The object's on-screen interface image, if it has one.
@@ -667,6 +669,14 @@ A shape drawn in the game world, such as a circle, polygon or ring, with an insi
 - `stroke_width`: `number` — How thick the outline is, as a fraction of the shape's size.
 - `sweep_start`: `number` — Where the outline starts, as a fraction of the way round from the top.
 - `sweep_turns`: `number` — How much of the outline is drawn, from 0 to 1. Setting it to 0.5 draws half a ring, which makes cooldown and charge meters.
+
+### `Sight2d`
+
+A viewer in a 2D scene: everything it cannot see in a straight line, past the edges of occluders, is dimmed when the scene's environment turns 2D lighting on. Lights are not changed; only what is out of sight.
+
+- `radius`: `number` — How far it sees, in world units, fading over the last quarter; 0 sees as far as there is.
+- `reach`: `number` — How far past an occluding edge it still sees, so the face of a wall it looks at is seen.
+- `unseen`: `number` — What lit content out of sight is multiplied by, 0 to 1: 1 changes nothing and 0 is black.
 
 ### `Sprite`
 

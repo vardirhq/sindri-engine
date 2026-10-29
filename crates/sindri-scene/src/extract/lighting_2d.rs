@@ -11,13 +11,14 @@ use std::sync::Arc;
 use glam::{Mat4, Vec3};
 use sindri_core::{ComponentSchemaRegistry, EntityId, SceneComponent, World};
 use sindri_render::{
-    Light2d, Light2dShadow, LightCone2d, Lighting2d, MAX_LIGHTS_2D, shadow_maps_2d,
+    Light2d, Light2dShadow, LightCone2d, Lighting2d, MAX_LIGHTS_2D, Sight2d, shadow_map_2d,
+    shadow_maps_2d,
 };
 
 use super::camera::ResolvedCameras;
 use super::{SceneExtractError, SceneExtractor, transform_matrix};
 use crate::{
-    Light2dComponent, Light2dError, Light2dOccluderComponent, OccluderShape,
+    Light2dComponent, Light2dError, Light2dOccluderComponent, OccluderShape, Sight2dComponent,
     TilemapCollider2dComponent, TilemapComponent, components::outline,
 };
 
@@ -46,8 +47,13 @@ impl SceneExtractor {
             near(a).total_cmp(&near(b))
         });
         lights.truncate(MAX_LIGHTS_2D);
+        let viewer = self.viewer_2d(world)?;
+        let edges = if viewer.is_some() || lights.iter().any(|light| light.shadow.is_some()) {
+            self.occluder_edges(world)?
+        } else {
+            Vec::new()
+        };
         if lights.iter().any(|light| light.shadow.is_some()) {
-            let edges = self.occluder_edges(world)?;
             for light in &mut lights {
                 if let Some(shadow) = &mut light.shadow {
                     shadow.map = Arc::from(shadow_maps_2d(
@@ -59,10 +65,49 @@ impl SceneExtractor {
                 }
             }
         }
+        let sight = viewer.map(|(position, viewer)| {
+            // A viewer that sees as far as there is still stops at what is nearer
+            // than a very long way.
+            let reaching = if viewer.radius > 0.0 {
+                viewer.radius
+            } else {
+                1.0e4
+            };
+            Sight2d {
+                position,
+                radius: viewer.radius,
+                unseen: viewer.unseen,
+                reach: viewer.reach,
+                map: Arc::from(shadow_map_2d(position, reaching, &edges)),
+            }
+        });
         Ok(Some(Lighting2d {
             ambient: environment.lighting_2d.ambient,
             lights,
+            sight,
         }))
+    }
+
+    /// Where the first enabled viewer in the world stands, and what it sees.
+    fn viewer_2d(
+        &self,
+        world: &World,
+    ) -> Result<Option<([f32; 2], Sight2dComponent)>, SceneExtractError> {
+        for (entity, viewer) in self.components.query::<Sight2dComponent>(world)? {
+            if !world.is_active(entity) || !viewer.enabled {
+                continue;
+            }
+            let viewer = match viewer.validate() {
+                Ok(viewer) => viewer,
+                Err(error) => {
+                    self.refuse(entity, Sight2dComponent::TYPE_NAME, error)?;
+                    continue;
+                }
+            };
+            let position = world.world_transform(entity).unwrap_or_default().position;
+            return Ok(Some(([position[0], position[1]], viewer)));
+        }
+        Ok(None)
     }
 
     /// Every active, enabled light in the world, shadows not yet cast.

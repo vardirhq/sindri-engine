@@ -139,6 +139,29 @@ for hundreds of shadow casting lights. Occluders block light only; they do not
 darken themselves beyond `shadow_reach`, which is why a sun's reach is set to the
 depth of the ground it lights.
 
+## What a viewer sees
+
+A light decides what is lit; `sindri.sight2d` decides what is seen. Put it on the
+entity whose eyes the player has, and everything it cannot see in a straight line,
+past the edges of occluders, is multiplied by `unseen` and so goes dim. It is dimmed
+and not hidden: the light itself does not change, and a lamp across the field still
+shows where it is. It is how a game says "you can see here" and "you cannot see
+behind that tree", in the way of Monaco, and it takes the same occluders as the
+shadows do.
+
+| Field | Meaning | Default |
+| --- | --- | --- |
+| `enabled` | Whether it is the viewer | `true` |
+| `radius` | How far it sees, fading over the last quarter; zero sees as far as there is | `0` |
+| `unseen` | What lit content out of sight is multiplied by, 0 to 1 (0 is black) | `0.3` |
+| `reach` | How far past an occluding edge it still sees, so the face of a wall it looks at is seen | `0.3` |
+
+Only the first enabled viewer in the scene counts, and nothing is dimmed unless the
+environment's `lighting_2d` is on. Occluders are found out to `radius`, or all the
+way when it is zero. A thing with `sindri.shadow2d` is seen from its feet, like a
+shadow on it, so a tree is not hidden behind its own trunk. In a scene that is
+already dark the dimming is slight: it shows most where the ambient is bright.
+
 ## Asking the light from a script
 
 A game's rules cannot depend on the camera, so Decay asks a separate question of

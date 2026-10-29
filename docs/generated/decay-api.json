@@ -439,6 +439,13 @@
       "type": "Shape"
     },
     {
+      "description": "The 2D viewer on this script's object, if it has one: how far it sees and how dim what it cannot see goes.",
+      "kind": "value",
+      "name": "sight2d",
+      "read_only": false,
+      "type": "Sight2d"
+    },
+    {
       "description": "The image (sprite) on this script's object, if it has one: its color and drawing order.",
       "kind": "value",
       "name": "sprite",
@@ -1544,6 +1551,13 @@
           "name": "shape",
           "read_only": false,
           "type": "Shape"
+        },
+        {
+          "description": null,
+          "kind": "value",
+          "name": "sight2d",
+          "read_only": false,
+          "type": "Sight2d"
         },
         {
           "description": "The object's image (sprite), if it has one.",
@@ -4451,6 +4465,33 @@
         }
       ],
       "name": "Shape"
+    },
+    {
+      "description": "A viewer in a 2D scene: everything it cannot see in a straight line, past the edges of occluders, is dimmed when the scene's environment turns 2D lighting on. Lights are not changed; only what is out of sight.",
+      "members": [
+        {
+          "description": "How far it sees, in world units, fading over the last quarter; 0 sees as far as there is.",
+          "kind": "value",
+          "name": "radius",
+          "read_only": false,
+          "type": "number"
+        },
+        {
+          "description": "How far past an occluding edge it still sees, so the face of a wall it looks at is seen.",
+          "kind": "value",
+          "name": "reach",
+          "read_only": false,
+          "type": "number"
+        },
+        {
+          "description": "What lit content out of sight is multiplied by, 0 to 1: 1 changes nothing and 0 is black.",
+          "kind": "value",
+          "name": "unseen",
+          "read_only": false,
+          "type": "number"
+        }
+      ],
+      "name": "Sight2d"
     },
     {
       "description": "A 2D image drawn in the game world, and how it is colored.",

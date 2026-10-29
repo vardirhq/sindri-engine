@@ -24,6 +24,11 @@ struct SindriLights2d {
     ambient: vec4<f32>,
     // x is how many lights are set.
     header: vec4<f32>,
+    // The viewer: x, y its place, z how far it sees (zero is as far as there is),
+    // w what lies outside its sight is multiplied by.
+    sight: vec4<f32>,
+    // x is 1 when there is a viewer, y how far past an occluding edge it sees.
+    sight_edge: vec4<f32>,
     lights: array<SindriLight2d, 16>,
 }
 
@@ -78,6 +83,23 @@ fn sindri_shadow_2d(index: u32, world: vec2<f32>, origin: vec2<f32>, reach: f32,
     return seen / f32(count);
 }
 
+// What a point is multiplied by for being out of the viewer's sight: 1 where it
+// is seen, the viewer's `unseen` where it is not. The viewer's shadow map is the
+// row after every light's. See `Sight2d::factor`, which this agrees with.
+fn sindri_sight_2d(world: vec2<f32>) -> f32 {
+    if sindri_lights_2d.sight_edge.x < 0.5 {
+        return 1.0;
+    }
+    let place = sindri_lights_2d.sight.xy;
+    let radius = sindri_lights_2d.sight.z;
+    let unseen = sindri_lights_2d.sight.w;
+    var seen = sindri_shadow_2d(16u, world, place, sindri_lights_2d.sight_edge.y, 0.0);
+    if radius > 0.0 {
+        seen *= 1.0 - smoothstep(radius * 0.75, radius, length(world - place));
+    }
+    return unseen + (1.0 - unseen) * seen;
+}
+
 // The light reaching `world`: ambient plus every light. `normal` is used only
 // when `use_normal` is set, so art without a normal map is lit by distance
 // alone.
@@ -115,5 +137,5 @@ fn sindri_light_2d_from(world: vec2<f32>, base: vec2<f32>, normal: vec3<f32>, us
         }
         total += light.color.rgb * amount;
     }
-    return total;
+    return total * sindri_sight_2d(base);
 }
