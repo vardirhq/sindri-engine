@@ -93,6 +93,27 @@ def standing(ident, sprite, x, y, block, occlude=True, flip=False, size=CELL, **
     return entity(ident, ident, at(x, y, depth(y), sx, size), **parts)
 
 
+DOORS = {'bakery': 1.6, 'child-house': -1.1, 'workshop': 0.0, 'keeper': 0.0}
+
+
+def glow(ident, x, y, radius, intensity, height=0.8, color=(1.0, 0.7, 0.36)):
+    """A warm pool that is always on: a porch lantern, a window, a stall's lamp."""
+    return entity(ident, ident, at(x, y, 0.1), **{
+        'sindri.light2d': {'enabled': True, 'color': [*color, 1.0], 'intensity': intensity, 'radius': radius,
+                           'falloff': 1.6, 'height': height, 'shadows': False}})
+
+
+def warmth():
+    """What keeps the square lived in while the lamps are out: a lantern by each door, a glow in each
+    house's windows, and light at the well, the stalls and the chapel."""
+    out = []
+    for name, _, hx, hy, *_ in HOUSES:
+        out += [glow(f'porch-{name}', hx + DOORS[name], hy - 0.5, 4.8, 2.4, 1.0)]
+    out += [glow('well-glow', 0.0, 1.3, 4.2, 0.8), glow('chapel-glow', 0.0, 12.6, 4.5, 0.7),
+            glow('stall-glow-1', -17.4, 3.2, 3.4, 0.7), glow('stall-glow-2', 17.4, 3.2, 3.4, 0.7)]
+    return out
+
+
 def smoke(ident, x, y):
     """Chimney smoke, started when its house opens."""
     return entity(ident, ident, at(x, y, 0.2), **{'sindri.particles': scenes.motes(
@@ -242,7 +263,7 @@ def village():
                         size=CELL, flame=2.4)
     for args in HOUSES:
         ents.append(villager(args[5], args[4], args[0], args[6]))
-    ents += scatter() + decor()
+    ents += warmth() + scatter() + decor()
     ents += [*wick(), *effects()]
     # Wick arrives on the road from the fields, at the west edge.
     for e in ents:
