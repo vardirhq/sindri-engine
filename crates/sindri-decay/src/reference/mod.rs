@@ -152,6 +152,10 @@ pub const THIS: &[Entry] = &[
         "The 2D light on this script's object, if it has one: its color, brightness and reach.",
     ),
     value(
+        "sight2d",
+        "The 2D viewer on this script's object, if it has one: how far it sees and how dim what it cannot see goes.",
+    ),
+    value(
         "shape",
         "The drawn shape on this script's object, if it has one: its colors, outline and how much of it is drawn.",
     ),

@@ -104,6 +104,7 @@ pub(super) const TYPES: &[TypeEntry] = &[
             ),
             value("light", "The object's 3D light, if it has one."),
             value("light2d", "The object's 2D light, if it has one."),
+            value("sight2d", "The object's 2D viewer, if it has one."),
             value("shape", "The object's drawn shape, if it has one."),
             value("sprite", "The object's image (sprite), if it has one."),
             value("world_text", "The object's world text, if it has some."),
@@ -276,6 +277,24 @@ pub(super) const TYPES: &[TypeEntry] = &[
             ),
             value("intensity", "How bright the light is; 0 is off."),
             value("radius", "How far the light reaches, in world units."),
+        ],
+    },
+    TypeEntry {
+        name: "Sight2d",
+        text: "A viewer in a 2D scene: everything it cannot see in a straight line, past the edges of occluders, is dimmed when the scene's environment turns 2D lighting on. Lights are not changed; only what is out of sight.",
+        members: &[
+            value(
+                "radius",
+                "How far it sees, in world units, fading over the last quarter; 0 sees as far as there is.",
+            ),
+            value(
+                "reach",
+                "How far past an occluding edge it still sees, so the face of a wall it looks at is seen.",
+            ),
+            value(
+                "unseen",
+                "What lit content out of sight is multiplied by, 0 to 1: 1 changes nothing and 0 is black.",
+            ),
         ],
     },
     TypeEntry {

@@ -55,7 +55,8 @@ pub use glyph::{
 };
 pub use light2d::{
     Light2d, Light2dShadow, LightCone2d, Lighting2d, MAX_LIGHTS_2D, SHADOW_INTERVAL_FLOATS_2D,
-    SHADOW_INTERVALS_2D, SHADOW_MAP_LEN_2D, SHADOW_SAMPLES_2D, sees, shadow_map_2d, shadow_maps_2d,
+    SHADOW_INTERVALS_2D, SHADOW_MAP_LEN_2D, SHADOW_SAMPLES_2D, Sight2d, sees, shadow_map_2d,
+    shadow_maps_2d,
 };
 pub use lighting::{
     LocalLight, MAX_LOCAL_LIGHTS, PointLight, PointLightError, SpotCone, WorldLighting,

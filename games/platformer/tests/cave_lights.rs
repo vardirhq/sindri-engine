@@ -26,6 +26,7 @@ fn lighting(run: &Run) -> Lighting2d {
 fn only(lit: &Lighting2d, keep: impl Fn(&Light2d) -> bool) -> Lighting2d {
     Lighting2d {
         ambient: lit.ambient,
+        sight: None,
         lights: lit
             .lights
             .iter()

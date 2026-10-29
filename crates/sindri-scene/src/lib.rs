@@ -85,7 +85,7 @@ pub use components::{
 };
 pub use components::{
     EnvironmentLighting2d, Light2dComponent, Light2dError, Light2dOccluderComponent, OccluderShape,
-    Shadow2dComponent, Shadow2dError,
+    Shadow2dComponent, Shadow2dError, Sight2dComponent,
 };
 pub use effects::{
     EffectBurstComponent, Effects2d, EmissionShape, Fleck, ParticleSpace, ParticlesComponent,

@@ -440,7 +440,8 @@ arithmetic. An optional five-sample area light produces approximate soft shadows
 feathered contact ellipse under a sprite, and its own picture laid on the ground
 away from each of the two strongest lights near it, as long as `height * distance /
 light height` up to `max_length` and as dark as the light that reaches its feet.
-A light with a `cone_angle` below 360 is a spot light: a beam `cone_direction`
+`sindri.sight2d` on one entity makes it the viewer: what it cannot see past an
+occluder is dimmed by `unseen`, out to its `radius`. A light with a `cone_angle` below 360 is a spot light: a beam `cone_direction`
 degrees round, fading at its edge by `cone_softness`. Decay writes a light's color,
 intensity, radius, falloff, height and beam, and
 asks the lighting with `Lighting.visible(from, to)` for line of sight past the

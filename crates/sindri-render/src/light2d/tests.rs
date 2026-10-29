@@ -28,6 +28,7 @@ fn light(position: [f32; 2]) -> Light2d {
 fn light_fades_with_distance_and_stops_at_its_radius() {
     let lighting = Lighting2d {
         ambient: [0.1; 3],
+        sight: None,
         lights: vec![light([0.0, 0.0])],
     };
     assert!(near(lighting.at([0.0, 0.0]), [1.1, 0.6, 0.35]));
@@ -48,6 +49,7 @@ fn a_wall_shadows_what_is_behind_it_and_not_what_is_before_it() {
     });
     let lighting = Lighting2d {
         ambient: [0.0; 3],
+        sight: None,
         lights: vec![shadowed],
     };
     assert!(lighting.at([1.5, 0.0])[0] > 0.0, "before the wall");
@@ -179,6 +181,7 @@ fn an_area_light_partially_illuminates_a_shadow_edge() {
     });
     let lit = Lighting2d {
         ambient: [0.0; 3],
+        sight: None,
         lights: vec![lamp],
     };
     let edge = lit.at([3.0, 1.5])[0];
@@ -223,6 +226,7 @@ fn soft_shadows_follow_moving_lights_and_occluders() {
         });
         Lighting2d {
             ambient: [0.0; 3],
+            sight: None,
             lights: vec![lamp],
         }
         .at(point)[0]
@@ -248,6 +252,7 @@ fn a_spot_light_lights_its_cone_and_not_what_is_behind_it() {
     beam.cone = Some(LightCone2d::new(0.0, 60.0, 0.0));
     let lighting = Lighting2d {
         ambient: [0.0; 3],
+        sight: None,
         lights: vec![beam],
     };
     assert!(lighting.at([2.0, 0.0])[0] > 0.4, "ahead of it");
@@ -295,5 +300,67 @@ fn the_edge_of_a_soft_beam_fades_and_a_hard_one_does_not() {
     assert!(
         (soft.factor([0.0, 0.0]) - 1.0).abs() < 1.0e-6,
         "and at the light itself"
+    );
+}
+
+fn viewer(radius: f32, unseen: f32, edges: &[[[f32; 2]; 2]]) -> Sight2d {
+    Sight2d {
+        position: [0.0, 0.0],
+        radius,
+        unseen,
+        reach: 0.0,
+        map: Arc::from(shadow_map_2d([0.0, 0.0], 100.0, edges)),
+    }
+}
+
+#[test]
+fn a_viewer_dims_what_a_wall_hides_and_nothing_else() {
+    let sight = viewer(0.0, 0.25, &[[[2.0, -1.0], [2.0, 1.0]]]);
+    assert!(
+        (sight.factor([1.0, 0.0]) - 1.0).abs() < 1.0e-6,
+        "before the wall"
+    );
+    assert!(
+        (sight.factor([4.0, 0.0]) - 0.25).abs() < 1.0e-6,
+        "behind it"
+    );
+    assert!(
+        (sight.factor([-4.0, 0.0]) - 1.0).abs() < 1.0e-6,
+        "the other way"
+    );
+    assert!(
+        (sight.factor([4.0, 3.0]) - 1.0).abs() < 1.0e-6,
+        "past its end"
+    );
+}
+
+#[test]
+fn a_viewer_with_a_radius_fades_out_at_its_edge() {
+    let sight = viewer(8.0, 0.2, &[]);
+    assert!(
+        (sight.factor([4.0, 0.0]) - 1.0).abs() < 1.0e-6,
+        "well inside"
+    );
+    let edge = sight.factor([7.0, 0.0]);
+    assert!(edge > 0.2 && edge < 1.0, "fading near the edge: {edge}");
+    assert!((sight.factor([9.0, 0.0]) - 0.2).abs() < 1.0e-6, "beyond it");
+}
+
+#[test]
+fn what_is_out_of_sight_is_dimmed_in_the_light_that_reaches_it() {
+    let lamp = Lighting2d {
+        ambient: [0.0; 3],
+        lights: vec![light([3.0, 0.0])],
+        sight: Some(viewer(0.0, 0.5, &[[[2.0, -1.0], [2.0, 1.0]]])),
+    };
+    let unseen = lamp.at([4.0, 0.0])[0];
+    let open = Lighting2d {
+        sight: None,
+        ..lamp.clone()
+    }
+    .at([4.0, 0.0])[0];
+    assert!(
+        open > 0.0 && (unseen - open * 0.5).abs() < 1.0e-5,
+        "{unseen} against {open}"
     );
 }

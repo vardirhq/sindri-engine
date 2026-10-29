@@ -22,6 +22,7 @@ mod material;
 mod mesh;
 mod model;
 mod shadow2d;
+mod sight2d;
 mod sprite;
 mod sprite_mask;
 mod tile_volume;
@@ -62,6 +63,7 @@ pub(crate) use mesh::SurfaceMesh;
 pub use mesh::{MeshComponent, MeshPrimitive};
 pub use model::ModelComponent;
 pub use shadow2d::{Shadow2dComponent, Shadow2dError};
+pub use sight2d::Sight2dComponent;
 pub use sprite::{ImageDraw, SpriteColorTransform, SpriteComponent};
 pub use sprite_mask::{MaskInteraction, SpriteMaskComponent};
 pub use tile_volume::{

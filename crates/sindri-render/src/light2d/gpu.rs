@@ -6,7 +6,7 @@
 
 use super::{
     Lighting2d, MAX_LIGHTS_2D, SHADOW_INTERVAL_FLOATS_2D, SHADOW_INTERVALS_2D, SHADOW_MAP_LEN_2D,
-    SHADOW_SAMPLES_2D,
+    SHADOW_SAMPLES_2D, Sight2d,
 };
 
 #[repr(C)]
@@ -25,6 +25,10 @@ struct LightUniform {
 struct LightsUniform {
     ambient: [f32; 4],
     header: [f32; 4],
+    /// The viewer's place, how far it sees and what lies outside its sight.
+    sight: [f32; 4],
+    /// x is 1 when there is a viewer, y how far past an edge it still sees.
+    sight_edge: [f32; 4],
     lights: [LightUniform; MAX_LIGHTS_2D],
 }
 
@@ -37,7 +41,8 @@ const INTERVALS: u32 = SHADOW_INTERVALS_2D as u32;
 #[allow(clippy::cast_possible_truncation)]
 const TEXEL_BYTES: u32 = (SHADOW_INTERVAL_FLOATS_2D * 4) as u32;
 #[allow(clippy::cast_possible_truncation)]
-const ROWS: u32 = (MAX_LIGHTS_2D * SHADOW_SAMPLES_2D) as u32;
+/// Five rows for each light, and one for the viewer's sight after them.
+const ROWS: u32 = (MAX_LIGHTS_2D * SHADOW_SAMPLES_2D + 1) as u32;
 
 #[derive(Debug)]
 pub(crate) struct Lights2dGpu {
@@ -54,6 +59,24 @@ enum Written {
     Nothing,
     Off,
     Lit(Lighting2d),
+}
+
+/// The viewer's place and shadow map, written after every light's.
+fn write_sight(uniform: &mut LightsUniform, rows: &mut [f32], sight: &Sight2d) {
+    uniform.sight = [
+        sight.position[0],
+        sight.position[1],
+        sight.radius,
+        sight.unseen,
+    ];
+    uniform.sight_edge = [1.0, sight.reach, 0.0, 0.0];
+    let row = MAX_LIGHTS_2D * SHADOW_SAMPLES_2D * SHADOW_MAP_LEN_2D;
+    for (into, from) in rows[row..row + SHADOW_MAP_LEN_2D]
+        .iter_mut()
+        .zip(sight.map.iter())
+    {
+        *into = *from;
+    }
 }
 
 impl Lights2dGpu {
@@ -100,6 +123,8 @@ impl Lights2dGpu {
         let mut uniform = LightsUniform {
             ambient: [1.0, 1.0, 1.0, 0.0],
             header: [0.0; 4],
+            sight: [0.0; 4],
+            sight_edge: [0.0; 4],
             lights: [LightUniform {
                 position: [0.0; 4],
                 color: [0.0; 4],
@@ -107,7 +132,7 @@ impl Lights2dGpu {
                 cone: OMNI,
             }; MAX_LIGHTS_2D],
         };
-        let mut rows = vec![0.0_f32; SHADOW_MAP_LEN_2D * MAX_LIGHTS_2D * SHADOW_SAMPLES_2D];
+        let mut rows = vec![0.0_f32; SHADOW_MAP_LEN_2D * (MAX_LIGHTS_2D * SHADOW_SAMPLES_2D + 1)];
         if let Some(lighting) = lighting {
             let [r, g, b] = lighting.ambient;
             uniform.ambient = [r, g, b, 1.0];
@@ -115,6 +140,9 @@ impl Lights2dGpu {
             #[allow(clippy::cast_precision_loss)]
             let count = lights.len() as f32;
             uniform.header[0] = count;
+            if let Some(sight) = &lighting.sight {
+                write_sight(&mut uniform, &mut rows, sight);
+            }
             for (index, light) in lights.iter().enumerate() {
                 let [r, g, b] = light.color;
                 uniform.lights[index] = LightUniform {

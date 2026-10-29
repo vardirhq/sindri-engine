@@ -2,6 +2,11 @@
 
 # Changelog
 
+- Add `sindri.sight2d`, what a viewer sees. On one entity it dims everything that entity
+  cannot see in a straight line past the edges of `sindri.light2d.occluder`s, out to a
+  `radius`, by `unseen`, so line of sight shows in the picture the way light does. It
+  takes the same occluders as shadows and uses the same exact visibility, one more
+  row in the shadow texture. `radius`, `unseen` and `reach` are scriptable in Decay.
 - Lamplighter's lantern is a beam that points the way Wick faces, with a small round halo
   at his feet, so what is ahead is lit and what is behind is dark, which is where the gloom
   creep up. `cone_angle`, `cone_direction` and `cone_softness` are now scriptable on a

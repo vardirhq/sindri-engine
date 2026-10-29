@@ -108,6 +108,42 @@ pub struct Lighting2d {
     pub ambient: [f32; 3],
     /// At most [`MAX_LIGHTS_2D`]; any more are ignored.
     pub lights: Vec<Light2d>,
+    /// What the viewer can see: everything outside it is dimmed.
+    pub sight: Option<Sight2d>,
+}
+
+/// What a viewer sees of the plane: the region no occluder hides, out to a
+/// radius. Lit content outside it is multiplied by `unseen`, so it is dimmed, not
+/// hidden, and the light itself is unchanged.
+#[derive(Clone, Debug, PartialEq)]
+pub struct Sight2d {
+    pub position: [f32; 2],
+    /// How far it sees, in world units; zero sees as far as the plane goes.
+    pub radius: f32,
+    /// What lit content outside sight is multiplied by, 0 to 1.
+    pub unseen: f32,
+    /// How far past an occluding edge it still sees, so the face of a wall it
+    /// looks at is seen.
+    pub reach: f32,
+    /// One [`SHADOW_MAP_LEN_2D`]-long map from [`shadow_map_2d`].
+    pub map: Arc<[f32]>,
+}
+
+impl Sight2d {
+    /// What `point` is multiplied by: 1 where it is seen, `unseen` where it is
+    /// not, and between over the last quarter of the radius. The shader runs the
+    /// same arithmetic.
+    #[must_use]
+    pub fn factor(&self, point: [f32; 2]) -> f32 {
+        let away = [point[0] - self.position[0], point[1] - self.position[1]];
+        let distance = away[0].hypot(away[1]);
+        let mut seen = f32::from(u8::from(sees(&self.map, away, self.reach)));
+        if self.radius > 0.0 {
+            let t = ((distance - self.radius * 0.75) / (self.radius * 0.25)).clamp(0.0, 1.0);
+            seen *= 1.0 - t * t * (3.0 - 2.0 * t);
+        }
+        self.unseen + (1.0 - self.unseen) * seen
+    }
 }
 
 impl Lighting2d {
@@ -133,6 +169,10 @@ impl Lighting2d {
             for (channel, color) in total.iter_mut().zip(light.color) {
                 *channel += color * amount;
             }
+        }
+        if let Some(sight) = &self.sight {
+            let seen = sight.factor(point);
+            total = total.map(|channel| channel * seen);
         }
         total
     }

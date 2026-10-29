@@ -102,6 +102,41 @@ fn a_cone_that_is_not_a_cone_is_refused_naming_its_field() {
     }
 }
 
+/// A viewer at the origin; the wall below is two units east of it.
+fn viewer(extra: &str) -> String {
+    format!(
+        r#",
+        {{ "id": "eyes", "components": {{ "sindri.sight2d": {{ "unseen": 0.25, "reach": 0.0 {extra} }} }} }}"#
+    )
+}
+
+#[test]
+fn a_viewer_dims_what_an_occluder_hides_from_it() {
+    let wall = r#",
+        { "id": "wall", "transform_3d": { "position": [2.0, 0.0, 0.0] },
+          "components": { "sindri.light2d.occluder": { "size": [0.5, 4.0] } } }"#;
+    let lit = lighting(&(environment(true) + &viewer("") + wall)).expect("lighting is on");
+    let sight = lit.sight.as_ref().expect("the viewer reaches the frame");
+    assert!((sight.unseen - 0.25).abs() < 1.0e-6);
+    assert!(
+        (lit.at([1.0, 0.0])[0] - 0.1).abs() < 1.0e-5,
+        "seen, so as lit as ambient"
+    );
+    assert!(
+        (lit.at([4.0, 0.0])[0] - 0.1 * 0.25).abs() < 1.0e-5,
+        "behind the wall it is a quarter as bright"
+    );
+    let none = lighting(&(environment(true) + wall)).expect("lighting is on");
+    assert!(none.sight.is_none(), "no viewer, no dimming");
+}
+
+#[test]
+fn a_viewer_that_cannot_be_used_is_refused_naming_its_field() {
+    let error = extract(&(environment(true) + &viewer(r#", "radius": -1.0"#)))
+        .expect_err("a negative radius is refused");
+    assert!(error.to_string().contains("radius"), "{error}");
+}
+
 #[test]
 fn a_switched_off_light_lights_nothing() {
     let lit = lighting(&(environment(true) + &light("lamp", 0.0, r#", "enabled": false"#)))

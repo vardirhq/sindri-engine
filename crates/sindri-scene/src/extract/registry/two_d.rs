@@ -4,7 +4,7 @@ use sindri_core::{AssetKind, ComponentSchemaRegistry, FieldMeaning};
 
 use crate::components::{
     Light2dComponent, Light2dOccluderComponent, OccluderShape, Shadow2dComponent, ShapeComponent,
-    SpriteComponent, UiShapeBlend, UiShapeComponent, UiShapeKind,
+    Sight2dComponent, SpriteComponent, UiShapeBlend, UiShapeComponent, UiShapeKind,
 };
 
 use crate::effects::{EmissionShape, ParticleSpace, ParticlesComponent};
@@ -84,11 +84,20 @@ pub(super) fn register_lights(
         "Shadow 2D",
         serde_json::to_value(Shadow2dComponent::default()).expect("a shadow serializes"),
     )?;
+    components.register_with_default::<Sight2dComponent>(
+        "Sight 2D",
+        serde_json::to_value(Sight2dComponent::default()).expect("a viewer serializes"),
+    )?;
     let at_least = |min: f64| FieldMeaning::Range {
         min,
         max: f64::INFINITY,
     };
     let share = || FieldMeaning::Range { min: 0.0, max: 1.0 };
+    components.describe::<Sight2dComponent>([
+        ("radius", at_least(0.0)),
+        ("unseen", share()),
+        ("reach", at_least(0.0)),
+    ])?;
     components.describe::<Shadow2dComponent>([
         ("contact_opacity", share()),
         ("cast_opacity", share()),

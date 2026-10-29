@@ -9,7 +9,7 @@ use glam::{Mat4, Vec3};
 use sindri_gpu::{GpuContext, GpuRequestOptions};
 use sindri_render::{
     ClearOperations, DepthTarget, Light2d, Light2dShadow, LightCone2d, Lighting2d, OffscreenTarget,
-    OrthographicCamera, ShapeBlend, ShapeInstance, ShapeRenderer, SpriteBatchDraw,
+    OrthographicCamera, ShapeBlend, ShapeInstance, ShapeRenderer, Sight2d, SpriteBatchDraw,
     SpriteBatchRenderer, SpriteBatchTarget, SpriteDepth, SpriteEnvironment, SpriteInstance,
     Texture2D, TextureRegistry, encode_clear, shadow_map_2d, shadow_maps_2d,
 };
@@ -56,6 +56,7 @@ fn red_light(shadow: Option<Light2dShadow>) -> Light2d {
 fn dim(lights: Vec<Light2d>) -> Lighting2d {
     Lighting2d {
         ambient: [0.2, 0.2, 0.2],
+        sight: None,
         lights,
     }
 }
@@ -300,6 +301,47 @@ fn a_spot_light_lights_only_the_way_it_points() {
     assert!(toward[0] > 60, "lit when it points at it: {toward:?}");
     assert_eq!(away[0], away[1], "only ambient behind the beam: {away:?}");
     assert!(toward[0] > away[0] + 20, "{toward:?} against {away:?}");
+}
+
+#[test]
+fn a_viewer_dims_what_a_wall_hides_from_it() {
+    let Some(gpu) = gpu() else {
+        return;
+    };
+    // The viewer stands at the left sample; a wall at x = 0 hides the right one.
+    let edges = |wall: bool| -> Vec<[[f32; 2]; 2]> {
+        if wall {
+            vec![[[0.0, -1.0], [0.0, 1.0]]]
+        } else {
+            Vec::new()
+        }
+    };
+    let sight = |wall: bool| Sight2d {
+        position: [-0.25, 0.0],
+        radius: 0.0,
+        unseen: 0.25,
+        reach: 0.0,
+        map: Arc::from(shadow_map_2d([-0.25, 0.0], 100.0, &edges(wall))),
+    };
+    let lit = |wall: bool| Lighting2d {
+        ambient: [0.4; 3],
+        lights: Vec::new(),
+        sight: Some(sight(wall)),
+    };
+    let (open_left, open_right) = draw(&gpu, Some(lit(false)), &LIT);
+    let (seen_left, hidden_right) = draw(&gpu, Some(lit(true)), &LIT);
+    assert_eq!(
+        open_left, seen_left,
+        "what it sees is as lit as without a wall"
+    );
+    assert_eq!(
+        open_left[0], open_right[0],
+        "with nothing in the way all is seen"
+    );
+    assert!(
+        u32::from(hidden_right[0]) * 3 < u32::from(open_right[0]) * 2,
+        "what the wall hides is dimmed: {hidden_right:?} against {open_right:?}"
+    );
 }
 
 #[test]
