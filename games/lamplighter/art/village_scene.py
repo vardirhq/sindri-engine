@@ -21,10 +21,11 @@ CELL = 7.0          # a 112 pixel cell is seven world units across
 # Each house: where its foot stands, the lamp that opens it, and where its villager waits.
 HOUSES = [
     # name, sprite, x, y, lamp, villager, villager's place
-    ('bakery', 'bakery', 10.5, 3.2, 'lantern-2', 'baker', (10.5, 1.7)),
-    ('child-house', 'child-house', -10.5, 3.2, 'lantern-1', 'child', (-10.5, 1.7)),
-    ('workshop', 'workshop', 10.5, -3.0, 'lantern-4', 'mender', (10.5, -4.6)),
-    ('keeper', 'keeper', -10.5, -3.0, 'lantern-3', 'elder', (-10.5, -4.6)),
+    # The north houses face the main road, a few steps off; the south houses face a lane of their own.
+    ('bakery', 'bakery', 10.5, 3.0, 'lantern-2', 'baker', (10.5, 1.4)),
+    ('child-house', 'child-house', -10.5, 3.0, 'lantern-1', 'child', (-10.5, 1.4)),
+    ('workshop', 'workshop', 10.5, -9.0, 'lantern-4', 'mender', (10.5, -10.6)),
+    ('keeper', 'keeper', -10.5, -9.0, 'lantern-3', 'elder', (-10.5, -10.6)),
 ]
 LAMPS = [(-3.5, 3.5), (3.5, 3.5), (-3.5, -3.5), (3.5, -3.5)]
 DIRECTIONS = ['south', 'west', 'north', 'east']
@@ -121,8 +122,8 @@ def village():
     for e in ents:
         if e.get('id') == 'wick':
             e['transform_3d']['position'][:2] = [-20.0, 0.0]
-    ents += [gloom('gloom-1', -14.0, -14.0, 1), *wisps('gloom-1'),
-             gloom('gloom-2', 14.0, 14.0, 3), *wisps('gloom-2')]
+    ents += [gloom('gloom-1', -17.0, -15.0, 1), *wisps('gloom-1'),
+             gloom('gloom-2', 17.0, 15.0, 3), *wisps('gloom-2')]
     ents += hud('title.scene')
     return ents
 

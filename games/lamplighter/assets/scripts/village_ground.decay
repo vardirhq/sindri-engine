@@ -1,17 +1,20 @@
 // The square's ground: grass, with a dirt road in from the west, across the square and out to
-// the east, and a way north to the chapel, laid corner by corner on the sheet's `dirt`
-// terrain as the Dim Fields' path is. Each lamp and the well then get a pad of paving on the
-// `road` layer above. Painted once, as the scene opens.
+// the east, a way north to the chapel and one south to a lane, and a path to each door, laid
+// corner by corner on the sheet's `dirt` terrain as the Dim Fields' path is. Each lamp and the
+// well then get a pad of paving on the `road` layer above. Painted once, as the scene opens.
 script VillageGround {
     // The world position of the map's top-left corner.
     @export let left: number = -23.0;
     @export let top: number = 19.0;
-    // Half the width of a road, and half the side of the square.
-    @export let half: number = 1.3;
-    @export let square: number = 6.0;
     // How far the paving reaches from a lamp, and from the well.
     @export let pad: number = 1.6;
     @export let well_pad: number = 3.0;
+
+    // The roads and paths as rectangles: left, right, bottom and top of each.
+    var rx0: List<number> = [-24.0, 5.0, -6.0, -1.3, -1.3, -15.0, 9.8, -11.2, 9.8, -11.2];
+    var rx1: List<number> = [-5.0, 24.0, 6.0, 1.3, 1.3, 15.0, 11.2, -9.8, 11.2, -9.8];
+    var ry0: List<number> = [-1.3, -1.3, -6.0, 0.0, -13.0, -12.8, 0.0, 0.0, -10.2, -10.2];
+    var ry1: List<number> = [1.3, 1.3, 6.0, 13.5, 0.0, -10.2, 3.2, 3.2, -8.8, -8.8];
 
     var lamp_x: List<number> = [-3.5, 3.5, -3.5, 3.5];
     var lamp_y: List<number> = [3.5, 3.5, -3.5, -3.5];
@@ -39,16 +42,15 @@ script VillageGround {
         }
     }
 
-    // On a road: the west road, the square, the north way or the east road.
+    // On a road: the west and east roads, the square, the north way to the chapel, the south way
+    // down to the lane the south houses face, the lane, or a path from a door to the road. The
+    // rectangles are in `village_scene.py` too (the houses stand at their ends): a change to
+    // one is a change to both.
     fn on_road(x: number, y: number) -> bool {
-        if abs(y) <= this.half && (x <= -this.square + 1.0 || x >= this.square - 1.0) {
-            return true;
-        }
-        if abs(x) <= this.square && abs(y) <= this.square {
-            return true;
-        }
-        if abs(x) <= this.half && y >= 0.0 && y <= 13.0 {
-            return true;
+        for i in 0..this.rx0.length {
+            if x >= this.rx0[i] && x <= this.rx1[i] && y >= this.ry0[i] && y <= this.ry1[i] {
+                return true;
+            }
         }
         return false;
     }
