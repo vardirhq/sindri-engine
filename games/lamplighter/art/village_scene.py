@@ -19,6 +19,8 @@ LEFT, TOP = -COLUMNS // 2, ROWS // 2
 CELL = 7.0          # a 112 pixel cell is seven world units across
 
 # Each house: where its foot stands, the lamp that opens it, and where its villager waits.
+# Where each house's chimney is, from its foot, for the smoke; None for a house without one.
+CHIMNEYS = {'bakery': (2.3, 4.9), 'child-house': (0.9, 4.9), 'keeper': (1.9, 3.5), 'workshop': (2.2, 4.4)}
 HOUSES = [
     # name, sprite, x, y, lamp, villager, villager's place
     # The north houses face the main road, a few steps off; the south houses face a lane of their own.
@@ -47,6 +49,20 @@ def standing(ident, sprite, x, y, rx, ry, centre, **more):
         **more})
 
 
+def smoke(ident, x, y):
+    """Chimney smoke, started when its house opens."""
+    return entity(ident, ident, at(x, y, 0.2), **{'sindri.particles': scenes.motes(
+        5.0, 3.0, 0.5, [[0.7, 0.7, 0.78, 0.0], [0.7, 0.7, 0.78, 0.5], [0.5, 0.5, 0.6, 0.0]], 0.3, 1.1,
+        playing=False, spread=25.0, shape_size=[0.2, 0.1], gravity=[0.25, 0.7], drag=0.3, layer=6)})
+
+
+def moths(ident, x, y):
+    """A few pale moths that flutter round a lamp, started when its house opens."""
+    return entity(ident, ident, at(x, y + 2.4, 0.2), **{'sindri.particles': scenes.motes(
+        3.0, 2.4, 0.9, [[1.0, 0.95, 0.8, 0.0], [1.0, 0.95, 0.8, 0.9], [1.0, 0.95, 0.8, 0.0]], 0.09, 0.07,
+        playing=False, spread=360.0, shape='circle', shape_size=[1.6, 1.0], gravity=[0.0, 0.0], drag=0.8, layer=7)})
+
+
 def house(name, sprite, x, y, lamp, villager, place):
     """A house in its two states, and the warm light inside it that comes on with its lamp."""
     ident = f'house-{name}'
@@ -55,11 +71,14 @@ def house(name, sprite, x, y, lamp, villager, place):
     body = standing(ident, f'{sprite}-unlit', x, y, 2.7, 1.1, 1.3, **{
         'sindri.animation.sprite': {'clips': clips, 'playing': 'unlit', 'speed': 1},
         'sindri.script': {'source': 'scripts/house.decay', 'script': 'House',
-                          'properties': {'lamp_name': lamp, 'glow_name': ident + '-glow'}}})
+                          'properties': {'lamp_name': lamp, 'glow_name': ident + '-glow',
+                                         'smoke_name': ident + '-smoke', 'moths_name': ident + '-moths'}}})
     glow = entity(ident + '-glow', ident + '-glow', at(x, y + 1.0, 0.1), **{
         'sindri.light2d': {'enabled': True, 'color': [1.0, 0.72, 0.38, 1.0], 'intensity': 0.0, 'radius': 5.5,
                            'falloff': 1.5, 'height': 1.0, 'shadows': False}})
-    return [body, glow]
+    dx, dy = CHIMNEYS[name]
+    lamp_at = LAMPS[int(lamp.split('-')[1]) - 1]
+    return [body, glow, smoke(ident + '-smoke', x + dx, y + dy), moths(ident + '-moths', *lamp_at)]
 
 
 def villager(person, lamp, home, place):

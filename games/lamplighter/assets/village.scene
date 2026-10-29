@@ -4258,7 +4258,9 @@
           "script": "House",
           "properties": {
             "lamp_name": "lantern-2",
-            "glow_name": "house-bakery-glow"
+            "glow_name": "house-bakery-glow",
+            "smoke_name": "house-bakery-smoke",
+            "moths_name": "house-bakery-moths"
           }
         }
       }
@@ -4298,6 +4300,158 @@
           "falloff": 1.5,
           "height": 1.0,
           "shadows": false
+        }
+      }
+    },
+    {
+      "id": "house-bakery-smoke",
+      "name": "house-bakery-smoke",
+      "transform_3d": {
+        "position": [
+          12.8,
+          7.9,
+          0.2
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1
+        ]
+      },
+      "components": {
+        "sindri.particles": {
+          "playing": false,
+          "texture": "textures/mote.png",
+          "rate": 5.0,
+          "max": 80,
+          "lifetime": 3.0,
+          "lifetime_spread": 0.4,
+          "speed": 0.5,
+          "speed_spread": 0.5,
+          "direction": 90.0,
+          "spread": 25.0,
+          "shape": "circle",
+          "offset": [
+            0.0,
+            0.0
+          ],
+          "shape_size": [
+            0.2,
+            0.1
+          ],
+          "gravity": [
+            0.25,
+            0.7
+          ],
+          "drag": 0.3,
+          "size": 0.3,
+          "size_end": 1.1,
+          "colors": [
+            [
+              0.7,
+              0.7,
+              0.78,
+              0.0
+            ],
+            [
+              0.7,
+              0.7,
+              0.78,
+              0.5
+            ],
+            [
+              0.5,
+              0.5,
+              0.6,
+              0.0
+            ]
+          ],
+          "random_rotation": true,
+          "spin": 0.0,
+          "space": "world",
+          "layer": 6
+        }
+      }
+    },
+    {
+      "id": "house-bakery-moths",
+      "name": "house-bakery-moths",
+      "transform_3d": {
+        "position": [
+          3.5,
+          5.9,
+          0.2
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1
+        ]
+      },
+      "components": {
+        "sindri.particles": {
+          "playing": false,
+          "texture": "textures/mote.png",
+          "rate": 3.0,
+          "max": 80,
+          "lifetime": 2.4,
+          "lifetime_spread": 0.4,
+          "speed": 0.9,
+          "speed_spread": 0.5,
+          "direction": 90.0,
+          "spread": 360.0,
+          "shape": "circle",
+          "offset": [
+            0.0,
+            0.0
+          ],
+          "shape_size": [
+            1.6,
+            1.0
+          ],
+          "gravity": [
+            0.0,
+            0.0
+          ],
+          "drag": 0.8,
+          "size": 0.09,
+          "size_end": 0.07,
+          "colors": [
+            [
+              1.0,
+              0.95,
+              0.8,
+              0.0
+            ],
+            [
+              1.0,
+              0.95,
+              0.8,
+              0.9
+            ],
+            [
+              1.0,
+              0.95,
+              0.8,
+              0.0
+            ]
+          ],
+          "random_rotation": true,
+          "spin": 0.0,
+          "space": "world",
+          "layer": 7
         }
       }
     },
@@ -4461,7 +4615,9 @@
           "script": "House",
           "properties": {
             "lamp_name": "lantern-1",
-            "glow_name": "house-child-house-glow"
+            "glow_name": "house-child-house-glow",
+            "smoke_name": "house-child-house-smoke",
+            "moths_name": "house-child-house-moths"
           }
         }
       }
@@ -4501,6 +4657,158 @@
           "falloff": 1.5,
           "height": 1.0,
           "shadows": false
+        }
+      }
+    },
+    {
+      "id": "house-child-house-smoke",
+      "name": "house-child-house-smoke",
+      "transform_3d": {
+        "position": [
+          -9.6,
+          7.9,
+          0.2
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1
+        ]
+      },
+      "components": {
+        "sindri.particles": {
+          "playing": false,
+          "texture": "textures/mote.png",
+          "rate": 5.0,
+          "max": 80,
+          "lifetime": 3.0,
+          "lifetime_spread": 0.4,
+          "speed": 0.5,
+          "speed_spread": 0.5,
+          "direction": 90.0,
+          "spread": 25.0,
+          "shape": "circle",
+          "offset": [
+            0.0,
+            0.0
+          ],
+          "shape_size": [
+            0.2,
+            0.1
+          ],
+          "gravity": [
+            0.25,
+            0.7
+          ],
+          "drag": 0.3,
+          "size": 0.3,
+          "size_end": 1.1,
+          "colors": [
+            [
+              0.7,
+              0.7,
+              0.78,
+              0.0
+            ],
+            [
+              0.7,
+              0.7,
+              0.78,
+              0.5
+            ],
+            [
+              0.5,
+              0.5,
+              0.6,
+              0.0
+            ]
+          ],
+          "random_rotation": true,
+          "spin": 0.0,
+          "space": "world",
+          "layer": 6
+        }
+      }
+    },
+    {
+      "id": "house-child-house-moths",
+      "name": "house-child-house-moths",
+      "transform_3d": {
+        "position": [
+          -3.5,
+          5.9,
+          0.2
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1
+        ]
+      },
+      "components": {
+        "sindri.particles": {
+          "playing": false,
+          "texture": "textures/mote.png",
+          "rate": 3.0,
+          "max": 80,
+          "lifetime": 2.4,
+          "lifetime_spread": 0.4,
+          "speed": 0.9,
+          "speed_spread": 0.5,
+          "direction": 90.0,
+          "spread": 360.0,
+          "shape": "circle",
+          "offset": [
+            0.0,
+            0.0
+          ],
+          "shape_size": [
+            1.6,
+            1.0
+          ],
+          "gravity": [
+            0.0,
+            0.0
+          ],
+          "drag": 0.8,
+          "size": 0.09,
+          "size_end": 0.07,
+          "colors": [
+            [
+              1.0,
+              0.95,
+              0.8,
+              0.0
+            ],
+            [
+              1.0,
+              0.95,
+              0.8,
+              0.9
+            ],
+            [
+              1.0,
+              0.95,
+              0.8,
+              0.0
+            ]
+          ],
+          "random_rotation": true,
+          "spin": 0.0,
+          "space": "world",
+          "layer": 7
         }
       }
     },
@@ -4664,7 +4972,9 @@
           "script": "House",
           "properties": {
             "lamp_name": "lantern-4",
-            "glow_name": "house-workshop-glow"
+            "glow_name": "house-workshop-glow",
+            "smoke_name": "house-workshop-smoke",
+            "moths_name": "house-workshop-moths"
           }
         }
       }
@@ -4704,6 +5014,158 @@
           "falloff": 1.5,
           "height": 1.0,
           "shadows": false
+        }
+      }
+    },
+    {
+      "id": "house-workshop-smoke",
+      "name": "house-workshop-smoke",
+      "transform_3d": {
+        "position": [
+          12.7,
+          -4.6,
+          0.2
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1
+        ]
+      },
+      "components": {
+        "sindri.particles": {
+          "playing": false,
+          "texture": "textures/mote.png",
+          "rate": 5.0,
+          "max": 80,
+          "lifetime": 3.0,
+          "lifetime_spread": 0.4,
+          "speed": 0.5,
+          "speed_spread": 0.5,
+          "direction": 90.0,
+          "spread": 25.0,
+          "shape": "circle",
+          "offset": [
+            0.0,
+            0.0
+          ],
+          "shape_size": [
+            0.2,
+            0.1
+          ],
+          "gravity": [
+            0.25,
+            0.7
+          ],
+          "drag": 0.3,
+          "size": 0.3,
+          "size_end": 1.1,
+          "colors": [
+            [
+              0.7,
+              0.7,
+              0.78,
+              0.0
+            ],
+            [
+              0.7,
+              0.7,
+              0.78,
+              0.5
+            ],
+            [
+              0.5,
+              0.5,
+              0.6,
+              0.0
+            ]
+          ],
+          "random_rotation": true,
+          "spin": 0.0,
+          "space": "world",
+          "layer": 6
+        }
+      }
+    },
+    {
+      "id": "house-workshop-moths",
+      "name": "house-workshop-moths",
+      "transform_3d": {
+        "position": [
+          3.5,
+          -1.1,
+          0.2
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1
+        ]
+      },
+      "components": {
+        "sindri.particles": {
+          "playing": false,
+          "texture": "textures/mote.png",
+          "rate": 3.0,
+          "max": 80,
+          "lifetime": 2.4,
+          "lifetime_spread": 0.4,
+          "speed": 0.9,
+          "speed_spread": 0.5,
+          "direction": 90.0,
+          "spread": 360.0,
+          "shape": "circle",
+          "offset": [
+            0.0,
+            0.0
+          ],
+          "shape_size": [
+            1.6,
+            1.0
+          ],
+          "gravity": [
+            0.0,
+            0.0
+          ],
+          "drag": 0.8,
+          "size": 0.09,
+          "size_end": 0.07,
+          "colors": [
+            [
+              1.0,
+              0.95,
+              0.8,
+              0.0
+            ],
+            [
+              1.0,
+              0.95,
+              0.8,
+              0.9
+            ],
+            [
+              1.0,
+              0.95,
+              0.8,
+              0.0
+            ]
+          ],
+          "random_rotation": true,
+          "spin": 0.0,
+          "space": "world",
+          "layer": 7
         }
       }
     },
@@ -4867,7 +5329,9 @@
           "script": "House",
           "properties": {
             "lamp_name": "lantern-3",
-            "glow_name": "house-keeper-glow"
+            "glow_name": "house-keeper-glow",
+            "smoke_name": "house-keeper-smoke",
+            "moths_name": "house-keeper-moths"
           }
         }
       }
@@ -4907,6 +5371,158 @@
           "falloff": 1.5,
           "height": 1.0,
           "shadows": false
+        }
+      }
+    },
+    {
+      "id": "house-keeper-smoke",
+      "name": "house-keeper-smoke",
+      "transform_3d": {
+        "position": [
+          -8.6,
+          -5.5,
+          0.2
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1
+        ]
+      },
+      "components": {
+        "sindri.particles": {
+          "playing": false,
+          "texture": "textures/mote.png",
+          "rate": 5.0,
+          "max": 80,
+          "lifetime": 3.0,
+          "lifetime_spread": 0.4,
+          "speed": 0.5,
+          "speed_spread": 0.5,
+          "direction": 90.0,
+          "spread": 25.0,
+          "shape": "circle",
+          "offset": [
+            0.0,
+            0.0
+          ],
+          "shape_size": [
+            0.2,
+            0.1
+          ],
+          "gravity": [
+            0.25,
+            0.7
+          ],
+          "drag": 0.3,
+          "size": 0.3,
+          "size_end": 1.1,
+          "colors": [
+            [
+              0.7,
+              0.7,
+              0.78,
+              0.0
+            ],
+            [
+              0.7,
+              0.7,
+              0.78,
+              0.5
+            ],
+            [
+              0.5,
+              0.5,
+              0.6,
+              0.0
+            ]
+          ],
+          "random_rotation": true,
+          "spin": 0.0,
+          "space": "world",
+          "layer": 6
+        }
+      }
+    },
+    {
+      "id": "house-keeper-moths",
+      "name": "house-keeper-moths",
+      "transform_3d": {
+        "position": [
+          -3.5,
+          -1.1,
+          0.2
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1
+        ]
+      },
+      "components": {
+        "sindri.particles": {
+          "playing": false,
+          "texture": "textures/mote.png",
+          "rate": 3.0,
+          "max": 80,
+          "lifetime": 2.4,
+          "lifetime_spread": 0.4,
+          "speed": 0.9,
+          "speed_spread": 0.5,
+          "direction": 90.0,
+          "spread": 360.0,
+          "shape": "circle",
+          "offset": [
+            0.0,
+            0.0
+          ],
+          "shape_size": [
+            1.6,
+            1.0
+          ],
+          "gravity": [
+            0.0,
+            0.0
+          ],
+          "drag": 0.8,
+          "size": 0.09,
+          "size_end": 0.07,
+          "colors": [
+            [
+              1.0,
+              0.95,
+              0.8,
+              0.0
+            ],
+            [
+              1.0,
+              0.95,
+              0.8,
+              0.9
+            ],
+            [
+              1.0,
+              0.95,
+              0.8,
+              0.0
+            ]
+          ],
+          "random_rotation": true,
+          "spin": 0.0,
+          "space": "world",
+          "layer": 7
         }
       }
     },
