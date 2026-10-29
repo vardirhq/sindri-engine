@@ -570,7 +570,9 @@ arithmetic. An optional five-sample area light produces approximate soft shadows
 feathered contact ellipse under a sprite, and its own picture laid on the ground
 away from each of the two strongest lights near it, as long as `height * distance /
 light height` up to `max_length` and as dark as the light that reaches its feet.
-Decay writes a light's color, intensity, radius, falloff and height, and
+A light with a `cone_angle` below 360 is a spot light: a beam `cone_direction`
+degrees round, fading at its edge by `cone_softness`. Decay writes a light's color,
+intensity, radius, falloff, height and beam, and
 asks the lighting with `Lighting.visible(from, to)` for line of sight past the
 occluders and `Lighting.level(point)` for how bright a place is. The Scene
 view draws light radii and occluder outlines with handles. The platformer's

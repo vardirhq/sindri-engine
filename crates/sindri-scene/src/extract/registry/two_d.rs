@@ -103,6 +103,21 @@ pub(super) fn register_lights(
         ("height", at_least(0.0)),
         ("shadow_reach", at_least(0.0)),
         ("shadow_source_radius", at_least(0.0)),
+        (
+            "cone_angle",
+            FieldMeaning::Range {
+                min: 1.0,
+                max: 360.0,
+            },
+        ),
+        (
+            "cone_direction",
+            FieldMeaning::Range {
+                min: -360.0,
+                max: 360.0,
+            },
+        ),
+        ("cone_softness", share()),
     ])?;
     components.describe::<Light2dOccluderComponent>([
         ("shape", FieldMeaning::choice(OccluderShape::NAMES)),

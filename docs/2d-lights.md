@@ -38,6 +38,9 @@ content are never lit.
 | `shadows` | Whether occluders block it | `false` |
 | `shadow_reach` | How far past an occluding edge light still reaches, so the face of a wall the light falls on is lit | `0.1` |
 | `shadow_source_radius` | Emitting-area radius in world units; zero is a point light | `0` |
+| `cone_angle` | How wide the beam is, in degrees across; 360 lights every way | `360` |
+| `cone_direction` | Where the beam points, in degrees: 0 is right and 90 is up | `0` |
+| `cone_softness` | How much of the cone's width fades out at its edge: 0 is hard, 1 is brightest only along the middle | `0.3` |
 
 It is its own component rather than a kind of `sindri.light`: a 3D light shades
 surfaces by the way they face, and a 2D light lights pictures, which face only
@@ -112,6 +115,15 @@ whether a source sees a point at all. One wall is three intervals; a source hold
 up to 256, enough for a level's few dozen merged boxes, and past that the narrowest
 slivers fold into their neighbors, so a crowd of tiny edges loses fine detail of
 shadow and never a whole edge.
+
+A `cone_angle` below 360 makes the light a spot light: it shines only inside a
+beam of that width pointed `cone_direction` degrees round from right, fading over
+the outer `cone_softness` of its width, and reaches `radius` along the beam. The
+beam is a multiplier on the light, so it composes with falloff, shadows, normal
+maps and a script that turns it: write `cone_direction` each frame to sweep it.
+`Lighting.level` and the cast shadows (`sindri.shadow2d`) honour the beam too, so a
+thing outside it is dark to a script and casts nothing from that light. A beam
+does not shorten the shadow map: occluders are still found all the way round.
 
 A positive `shadow_source_radius` uses five sources from points across the light's
 emitting area, averaging their visibility to approximate an area-light penumbra.

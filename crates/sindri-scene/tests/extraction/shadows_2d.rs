@@ -293,3 +293,30 @@ fn a_sprite_without_a_shadow_is_lit_pixel_by_pixel() {
     ));
     assert_eq!(standing(&frame), 0);
 }
+
+/// A lamp at the origin whose beam points `direction` degrees round and is 60 across.
+fn spot(direction: f32) -> String {
+    format!(
+        r#",
+        {{ "id": "lamp", "components": {{ "sindri.light2d": {{
+            "color": [1.0, 1.0, 1.0, 1.0], "intensity": 2.0, "radius": 8.0,
+            "falloff": 1.0, "height": 2.0,
+            "cone_angle": 60.0, "cone_direction": {direction}, "cone_softness": 0.0 }} }} }}"#
+    )
+}
+
+#[test]
+fn a_spot_light_casts_a_shadow_only_where_it_shines() {
+    let on = r#""contact_size": [0.0, 0.0], "cast": true"#;
+    // The tree stands east of the lamp.
+    assert_eq!(
+        sprites(&extract(&(environment(true) + &spot(0.0) + &tree(on)))).len(),
+        2,
+        "a beam on the tree casts its shadow"
+    );
+    assert_eq!(
+        sprites(&extract(&(environment(true) + &spot(180.0) + &tree(on)))).len(),
+        1,
+        "a beam pointed away casts none"
+    );
+}

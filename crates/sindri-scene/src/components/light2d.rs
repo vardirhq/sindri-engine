@@ -55,6 +55,14 @@ pub struct Light2dComponent {
     pub shadow_reach: f32,
     /// Size of the emitting area in world units. Zero keeps point shadows.
     pub shadow_source_radius: f32,
+    /// How wide the beam is, in degrees across. 360 lights every way, a point
+    /// light; less is a spot light, which lights only a cone.
+    pub cone_angle: f32,
+    /// Where the beam points, in degrees: 0 is right and 90 is up.
+    pub cone_direction: f32,
+    /// How much of the cone's width fades out at its edge, 0 to 1: 0 is a hard
+    /// edge and 1 a beam that is brightest only along its middle.
+    pub cone_softness: f32,
 }
 
 impl SceneComponent for Light2dComponent {
@@ -73,6 +81,9 @@ impl Default for Light2dComponent {
             shadows: false,
             shadow_reach: 0.1,
             shadow_source_radius: 0.0,
+            cone_angle: 360.0,
+            cone_direction: 0.0,
+            cone_softness: 0.3,
         }
     }
 }
@@ -112,12 +123,35 @@ impl Light2dComponent {
                 return Err(field(name, "must be a finite number of at least 0"));
             }
         }
+        if !self.cone_angle.is_finite() || self.cone_angle <= 0.0 || self.cone_angle > 360.0 {
+            return Err(field(
+                "cone_angle",
+                "must be a finite number above 0 and at most 360",
+            ));
+        }
+        if !self.cone_direction.is_finite() {
+            return Err(field("cone_direction", "must be a finite number"));
+        }
+        if !self.cone_softness.is_finite() || !(0.0..=1.0).contains(&self.cone_softness) {
+            return Err(field("cone_softness", "must be a number from 0 to 1"));
+        }
         for (name, value) in [("radius", self.radius), ("falloff", self.falloff)] {
             if !value.is_finite() || value <= 0.0 {
                 return Err(field(name, "must be a finite number above 0"));
             }
         }
         Ok(self)
+    }
+
+    /// The beam as (direction, angle, softness) in degrees and a share, or
+    /// `None` for a light that shines every way.
+    #[must_use]
+    pub fn cone(self) -> Option<(f32, f32, f32)> {
+        (self.cone_angle < 360.0).then_some((
+            self.cone_direction,
+            self.cone_angle,
+            self.cone_softness,
+        ))
     }
 
     /// The light's color in linear terms, scaled by intensity and alpha.

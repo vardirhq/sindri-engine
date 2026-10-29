@@ -2,6 +2,10 @@
 
 # Changelog
 
+- Add spot lights to `sindri.light2d`: `cone_angle` (degrees across, 360 for a point
+  light), `cone_direction` and `cone_softness`. A beam is a multiplier on the light, so it
+  composes with falloff, shadows and normal maps. `Lighting.level` and the cast shadows
+  of `sindri.shadow2d` follow it, and a script can sweep it by writing `cone_direction`.
 - A plain `cargo build` or `cargo test` now builds with line tables instead of full
   debug info, and dependencies with none, which CI already did through
   `CARGO_PROFILE_*_DEBUG`. Backtraces keep their file and line; stepping through code in

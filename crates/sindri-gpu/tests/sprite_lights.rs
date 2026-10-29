@@ -8,7 +8,7 @@ use std::sync::Arc;
 use glam::{Mat4, Vec3};
 use sindri_gpu::{GpuContext, GpuRequestOptions};
 use sindri_render::{
-    ClearOperations, DepthTarget, Light2d, Light2dShadow, Lighting2d, OffscreenTarget,
+    ClearOperations, DepthTarget, Light2d, Light2dShadow, LightCone2d, Lighting2d, OffscreenTarget,
     OrthographicCamera, ShapeBlend, ShapeInstance, ShapeRenderer, SpriteBatchDraw,
     SpriteBatchRenderer, SpriteBatchTarget, SpriteDepth, SpriteEnvironment, SpriteInstance,
     Texture2D, TextureRegistry, encode_clear, shadow_map_2d, shadow_maps_2d,
@@ -49,6 +49,7 @@ fn red_light(shadow: Option<Light2dShadow>) -> Light2d {
         falloff: 1.0,
         color: [1.0, 0.0, 0.0],
         shadow,
+        cone: None,
     }
 }
 
@@ -278,6 +279,27 @@ fn a_standing_sprite_is_shadowed_where_its_feet_are_not_at_each_pixel() {
         near[0] > 240,
         "and its near side is as lit as ever: {near:?}"
     );
+}
+
+#[test]
+fn a_spot_light_lights_only_the_way_it_points() {
+    let Some(gpu) = gpu() else {
+        return;
+    };
+    // The light is at the left sample; the right sample is half a unit away to
+    // its right, within reach. Pointed right it lights it; pointed left, not.
+    let beam = |direction: f32| {
+        Some(dim(vec![Light2d {
+            radius: 0.6,
+            cone: Some(LightCone2d::new(direction, 60.0, 0.0)),
+            ..red_light(None)
+        }]))
+    };
+    let (_, toward) = draw(&gpu, beam(0.0), &LIT);
+    let (_, away) = draw(&gpu, beam(180.0), &LIT);
+    assert!(toward[0] > 60, "lit when it points at it: {toward:?}");
+    assert_eq!(away[0], away[1], "only ambient behind the beam: {away:?}");
+    assert!(toward[0] > away[0] + 20, "{toward:?} against {away:?}");
 }
 
 #[test]

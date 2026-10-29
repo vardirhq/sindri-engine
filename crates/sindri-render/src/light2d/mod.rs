@@ -38,7 +38,56 @@ pub struct Light2d {
     /// Linear color, already multiplied by the light's intensity.
     pub color: [f32; 3],
     pub shadow: Option<Light2dShadow>,
+    /// The beam of a spot light; `None` lights every way.
+    pub cone: Option<LightCone2d>,
 }
+
+/// The beam of a spot light: where it points and how wide it is.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct LightCone2d {
+    /// The unit direction of the beam's middle.
+    pub direction: [f32; 2],
+    /// The cosine of the angle from the middle at which the light reaches
+    /// nothing.
+    pub cos_outer: f32,
+    /// The cosine of the angle inside which it is at full strength.
+    pub cos_inner: f32,
+}
+
+impl LightCone2d {
+    /// A beam `angle` degrees across pointing `direction` degrees round from
+    /// right, fading over the outer `softness` of its width.
+    #[must_use]
+    pub fn new(direction: f32, angle: f32, softness: f32) -> Self {
+        let (sin, cos) = direction.to_radians().sin_cos();
+        let half = (angle * 0.5).to_radians();
+        let cos_outer = half.cos();
+        let inner = half * (1.0 - softness.clamp(0.0, 1.0));
+        Self {
+            direction: [cos, sin],
+            cos_outer,
+            // Kept apart from the outer edge, so a hard edge is a very sharp
+            // fade and not a division by nothing.
+            cos_inner: inner.cos().max(cos_outer + CONE_EDGE_GAP),
+        }
+    }
+
+    /// How much of the beam reaches a point `away` from the light: 1 inside it,
+    /// 0 outside, a smooth fade between. The shader runs the same arithmetic.
+    #[must_use]
+    pub fn factor(&self, away: [f32; 2]) -> f32 {
+        let length = away[0].hypot(away[1]);
+        if length < 1.0e-6 {
+            return 1.0;
+        }
+        let cos = (away[0] * self.direction[0] + away[1] * self.direction[1]) / length;
+        let t = ((cos - self.cos_outer) / (self.cos_inner - self.cos_outer)).clamp(0.0, 1.0);
+        t * t * (3.0 - 2.0 * t)
+    }
+}
+
+/// The least the cosines of a cone's edges differ by.
+const CONE_EDGE_GAP: f32 = 1.0e-3;
 
 /// Where a light is blocked, by direction.
 #[derive(Clone, Debug, PartialEq)]
@@ -75,6 +124,9 @@ impl Lighting2d {
                 continue;
             }
             let mut amount = (1.0 - distance / light.radius).max(0.0).powf(light.falloff);
+            if let Some(cone) = &light.cone {
+                amount *= cone.factor([-offset[0], -offset[1]]);
+            }
             if let Some(shadow) = &light.shadow {
                 amount *= shadow::visibility(light.position, point, shadow);
             }

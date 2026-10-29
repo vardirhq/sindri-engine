@@ -75,6 +75,34 @@ fn a_light_carries_its_place_reach_and_color_times_intensity() {
 }
 
 #[test]
+fn a_spot_light_lights_only_its_cone() {
+    let beam = r#", "cone_angle": 60.0, "cone_direction": 90.0, "cone_softness": 0.0"#;
+    let lit = lighting(&(environment(true) + &light("lamp", 0.0, beam))).expect("lighting is on");
+    assert!(lit.lights[0].cone.is_some(), "the beam reaches the frame");
+    assert!(lit.at([0.0, 2.0])[0] > 0.1, "up the beam");
+    assert!(dark(lit.at([0.0, -2.0])), "behind it");
+    assert!(dark(lit.at([2.0, 0.0])), "square across it");
+    let round = lighting(&(environment(true) + &light("lamp", 0.0, ""))).expect("lighting is on");
+    assert!(
+        round.lights[0].cone.is_none(),
+        "a light with no cone shines every way"
+    );
+}
+
+#[test]
+fn a_cone_that_is_not_a_cone_is_refused_naming_its_field() {
+    for (extra, field) in [
+        (r#", "cone_angle": 0.0"#, "cone_angle"),
+        (r#", "cone_angle": 400.0"#, "cone_angle"),
+        (r#", "cone_softness": 1.5"#, "cone_softness"),
+    ] {
+        let error = extract(&(environment(true) + &light("lamp", 0.0, extra)))
+            .expect_err("a bad cone is refused");
+        assert!(error.to_string().contains(field), "{extra}: {error}");
+    }
+}
+
+#[test]
 fn a_switched_off_light_lights_nothing() {
     let lit = lighting(&(environment(true) + &light("lamp", 0.0, r#", "enabled": false"#)))
         .expect("lighting is on");

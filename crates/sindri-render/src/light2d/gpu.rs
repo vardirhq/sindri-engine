@@ -15,6 +15,9 @@ struct LightUniform {
     position: [f32; 4],
     color: [f32; 4],
     shadow: [f32; 4],
+    /// The beam: direction, then the cosines of its outer and inner edges; an
+    /// outer cosine below -1 lights every way.
+    cone: [f32; 4],
 }
 
 #[repr(C)]
@@ -24,6 +27,9 @@ struct LightsUniform {
     header: [f32; 4],
     lights: [LightUniform; MAX_LIGHTS_2D],
 }
+
+/// A light with no beam: its outer cosine is below any angle's.
+const OMNI: [f32; 4] = [0.0, 0.0, -2.0, -2.0];
 
 #[allow(clippy::cast_possible_truncation)]
 const INTERVALS: u32 = SHADOW_INTERVALS_2D as u32;
@@ -98,6 +104,7 @@ impl Lights2dGpu {
                 position: [0.0; 4],
                 color: [0.0; 4],
                 shadow: [0.0; 4],
+                cone: OMNI,
             }; MAX_LIGHTS_2D],
         };
         let mut rows = vec![0.0_f32; SHADOW_MAP_LEN_2D * MAX_LIGHTS_2D * SHADOW_SAMPLES_2D];
@@ -127,6 +134,14 @@ impl Lights2dGpu {
                             .map_or(0.0, |shadow| shadow.source_radius),
                         0.0,
                     ],
+                    cone: light.cone.map_or(OMNI, |cone| {
+                        [
+                            cone.direction[0],
+                            cone.direction[1],
+                            cone.cos_outer,
+                            cone.cos_inner,
+                        ]
+                    }),
                 };
                 if let Some(shadow) = &light.shadow {
                     let row = &mut rows[index * SHADOW_MAP_LEN_2D * SHADOW_SAMPLES_2D

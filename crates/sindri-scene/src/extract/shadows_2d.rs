@@ -15,8 +15,8 @@ use std::collections::BTreeMap;
 use glam::{Mat4, Vec2, Vec3, Vec4};
 use sindri_core::{EntityId, SceneComponent, World};
 use sindri_render::{
-    ExtractedFrame, FrameCamera, FrameCommand, FramePass, RenderLayer, RenderStage, Shape,
-    ShapeBlend, ShapeInstance, SpriteInstance, TextureId, TransparentOrder, UvRect,
+    ExtractedFrame, FrameCamera, FrameCommand, FramePass, LightCone2d, RenderLayer, RenderStage,
+    Shape, ShapeBlend, ShapeInstance, SpriteInstance, TextureId, TransparentOrder, UvRect,
 };
 
 use crate::{Light2dComponent, Shadow2dComponent, SpriteComponent};
@@ -45,6 +45,8 @@ struct Caster {
     falloff: f32,
     /// How bright it is at its middle, which is what scales how dark a shadow it makes.
     brightness: f32,
+    /// The beam of a spot light, outside which it casts nothing.
+    cone: Option<LightCone2d>,
 }
 
 /// What a frame needs to cast shadows: the things that cast them and the lights.
@@ -96,6 +98,9 @@ impl SceneExtractor {
                 radius: light.radius,
                 falloff: light.falloff,
                 brightness: 0.2126 * r + 0.7152 * g + 0.0722 * b,
+                cone: light.cone().map(|(direction, angle, softness)| {
+                    LightCone2d::new(direction, angle, softness)
+                }),
             });
         }
         Ok(Some(CastShadows { things, lights }))
@@ -226,8 +231,12 @@ impl CastShadows {
             .filter(|light| !is_part_of(world, light.entity, entity))
             .filter_map(|light| {
                 let reach = (light.position[0] - feet.x).hypot(light.position[1] - feet.y);
-                let strength =
-                    (1.0 - reach / light.radius).max(0.0).powf(light.falloff) * light.brightness;
+                let beam = light.cone.map_or(1.0, |cone| {
+                    cone.factor([feet.x - light.position[0], feet.y - light.position[1]])
+                });
+                let strength = (1.0 - reach / light.radius).max(0.0).powf(light.falloff)
+                    * light.brightness
+                    * beam;
                 (strength > FAINTEST).then_some((strength.min(1.0), light))
             })
             .collect();

@@ -13,6 +13,10 @@ struct SindriLight2d {
     // x is 1 when the light casts shadows, y how far past an occluding edge
     // light still reaches; z is the emitting area's radius.
     shadow: vec4<f32>,
+    // A spot light's beam: x, y the unit direction, z and w the cosines of the
+    // angle at which it fades out and the angle inside which it is full. z below
+    // -1 means no beam. See `LightCone2d::factor`, which this agrees with.
+    cone: vec4<f32>,
 }
 
 struct SindriLights2d {
@@ -97,6 +101,11 @@ fn sindri_light_2d_from(world: vec2<f32>, base: vec2<f32>, normal: vec3<f32>, us
             continue;
         }
         var amount = pow(max(1.0 - distance / radius, 0.0), light.color.w);
+        if light.cone.z > -1.5 && distance > 0.000001 {
+            let across = dot(-to_light / distance, light.cone.xy);
+            let t = clamp((across - light.cone.z) / (light.cone.w - light.cone.z), 0.0, 1.0);
+            amount *= t * t * (3.0 - 2.0 * t);
+        }
         if use_normal {
             let toward = normalize(vec3<f32>(to_light, light.position.z));
             amount *= max(dot(normal, toward), 0.0);

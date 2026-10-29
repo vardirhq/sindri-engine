@@ -70,7 +70,10 @@ impl LightField2d {
             if distance >= light.radius {
                 continue;
             }
-            let amount = (1.0 - distance / light.radius).max(0.0).powf(light.falloff);
+            let mut amount = (1.0 - distance / light.radius).max(0.0).powf(light.falloff);
+            if let Some(cone) = &light.cone {
+                amount *= cone.factor([point[0] - light.position[0], point[1] - light.position[1]]);
+            }
             if amount <= 0.0 || (light.shadow.is_some() && !self.visible(light.position, point)) {
                 continue;
             }
@@ -108,6 +111,7 @@ mod tests {
                 radius: 6.0,
                 falloff: 1.0,
                 color: [1.0; 3],
+                cone: None,
                 shadow: shadows.then(|| Light2dShadow {
                     reach: 0.0,
                     source_radius: 0.0,
@@ -125,6 +129,15 @@ mod tests {
         assert!(field.visible([0.0, 0.0], [1.5, 0.0]));
         assert!(field.visible([0.0, 0.0], [4.0, 3.0]), "past the edge's end");
         assert!(field.visible([2.0, 0.0], [4.0, 0.0]), "from on the edge");
+    }
+
+    #[test]
+    fn a_spot_light_levels_only_inside_its_beam() {
+        let mut field = field(false);
+        field.edges.clear();
+        field.lights[0].cone = Some(sindri_render::LightCone2d::new(0.0, 60.0, 0.0));
+        assert!(field.level([2.0, 0.0]) > 0.5, "ahead of it");
+        assert!(field.level([-2.0, 0.0]).abs() < 1.0e-6, "behind it");
     }
 
     #[test]
