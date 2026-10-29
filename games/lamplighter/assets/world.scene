@@ -58,6 +58,11 @@
               16
             ],
             "contain_view": true
+          },
+          "shake": {
+            "strength": 0.55,
+            "decay": 3.2,
+            "frequency": 42.0
           }
         }
       }
@@ -4501,8 +4506,85 @@
       }
     },
     {
-      "id": "cover-18",
-      "name": "cover-18",
+      "id": "cover-17-spores",
+      "name": "cover-17-spores",
+      "transform_3d": {
+        "position": [
+          0,
+          0.3,
+          0.001
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1
+        ]
+      },
+      "parent": "cover-17",
+      "components": {
+        "sindri.particles": {
+          "playing": true,
+          "texture": "textures/mote.png",
+          "rate": 3.5,
+          "max": 80,
+          "lifetime": 3.2,
+          "lifetime_spread": 0.4,
+          "speed": 0.25,
+          "speed_spread": 0.5,
+          "direction": 90.0,
+          "spread": 100.0,
+          "shape": "circle",
+          "offset": [
+            0.0,
+            0.0
+          ],
+          "shape_size": [
+            0.4,
+            0.2
+          ],
+          "gravity": [
+            0.0,
+            0.3
+          ],
+          "drag": 0.5,
+          "size": 0.17,
+          "size_end": 0.03,
+          "colors": [
+            [
+              0.5,
+              0.95,
+              1.0,
+              0.0
+            ],
+            [
+              0.5,
+              0.9,
+              1.0,
+              0.85
+            ],
+            [
+              0.4,
+              0.8,
+              1.0,
+              0.0
+            ]
+          ],
+          "random_rotation": true,
+          "spin": 0.0,
+          "space": "world",
+          "layer": 6
+        }
+      }
+    },
+    {
+      "id": "cover-19",
+      "name": "cover-19",
       "transform_3d": {
         "position": [
           -19.98,
@@ -4529,8 +4611,8 @@
       }
     },
     {
-      "id": "cover-19",
-      "name": "cover-19",
+      "id": "cover-20",
+      "name": "cover-20",
       "transform_3d": {
         "position": [
           -24.52,
@@ -4557,8 +4639,8 @@
       }
     },
     {
-      "id": "cover-20",
-      "name": "cover-20",
+      "id": "cover-21",
+      "name": "cover-21",
       "transform_3d": {
         "position": [
           -21.29,
@@ -4585,8 +4667,8 @@
       }
     },
     {
-      "id": "cover-21",
-      "name": "cover-21",
+      "id": "cover-22",
+      "name": "cover-22",
       "transform_3d": {
         "position": [
           -6.57,
@@ -4613,8 +4695,8 @@
       }
     },
     {
-      "id": "cover-22",
-      "name": "cover-22",
+      "id": "cover-23",
+      "name": "cover-23",
       "transform_3d": {
         "position": [
           -15.86,
@@ -4641,8 +4723,8 @@
       }
     },
     {
-      "id": "cover-23",
-      "name": "cover-23",
+      "id": "cover-24",
+      "name": "cover-24",
       "transform_3d": {
         "position": [
           -12.53,
@@ -4683,8 +4765,85 @@
       }
     },
     {
-      "id": "cover-24",
-      "name": "cover-24",
+      "id": "cover-24-spores",
+      "name": "cover-24-spores",
+      "transform_3d": {
+        "position": [
+          0,
+          0.3,
+          0.001
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1
+        ]
+      },
+      "parent": "cover-24",
+      "components": {
+        "sindri.particles": {
+          "playing": true,
+          "texture": "textures/mote.png",
+          "rate": 3.5,
+          "max": 80,
+          "lifetime": 3.2,
+          "lifetime_spread": 0.4,
+          "speed": 0.25,
+          "speed_spread": 0.5,
+          "direction": 90.0,
+          "spread": 100.0,
+          "shape": "circle",
+          "offset": [
+            0.0,
+            0.0
+          ],
+          "shape_size": [
+            0.4,
+            0.2
+          ],
+          "gravity": [
+            0.0,
+            0.3
+          ],
+          "drag": 0.5,
+          "size": 0.17,
+          "size_end": 0.03,
+          "colors": [
+            [
+              0.5,
+              0.95,
+              1.0,
+              0.0
+            ],
+            [
+              0.5,
+              0.9,
+              1.0,
+              0.85
+            ],
+            [
+              0.4,
+              0.8,
+              1.0,
+              0.0
+            ]
+          ],
+          "random_rotation": true,
+          "spin": 0.0,
+          "space": "world",
+          "layer": 6
+        }
+      }
+    },
+    {
+      "id": "cover-26",
+      "name": "cover-26",
       "transform_3d": {
         "position": [
           22.51,
@@ -4711,8 +4870,8 @@
       }
     },
     {
-      "id": "cover-25",
-      "name": "cover-25",
+      "id": "cover-27",
+      "name": "cover-27",
       "transform_3d": {
         "position": [
           -19.81,
@@ -4739,8 +4898,8 @@
       }
     },
     {
-      "id": "cover-26",
-      "name": "cover-26",
+      "id": "cover-28",
+      "name": "cover-28",
       "transform_3d": {
         "position": [
           10.23,
@@ -4767,8 +4926,8 @@
       }
     },
     {
-      "id": "cover-27",
-      "name": "cover-27",
+      "id": "cover-29",
+      "name": "cover-29",
       "transform_3d": {
         "position": [
           -16.23,
@@ -4795,8 +4954,8 @@
       }
     },
     {
-      "id": "cover-28",
-      "name": "cover-28",
+      "id": "cover-30",
+      "name": "cover-30",
       "transform_3d": {
         "position": [
           -1.04,
@@ -4823,8 +4982,8 @@
       }
     },
     {
-      "id": "cover-29",
-      "name": "cover-29",
+      "id": "cover-31",
+      "name": "cover-31",
       "transform_3d": {
         "position": [
           -21.54,
@@ -4851,8 +5010,8 @@
       }
     },
     {
-      "id": "cover-30",
-      "name": "cover-30",
+      "id": "cover-32",
+      "name": "cover-32",
       "transform_3d": {
         "position": [
           -16.19,
@@ -4893,8 +5052,85 @@
       }
     },
     {
-      "id": "cover-31",
-      "name": "cover-31",
+      "id": "cover-32-spores",
+      "name": "cover-32-spores",
+      "transform_3d": {
+        "position": [
+          0,
+          0.3,
+          0.001
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1
+        ]
+      },
+      "parent": "cover-32",
+      "components": {
+        "sindri.particles": {
+          "playing": true,
+          "texture": "textures/mote.png",
+          "rate": 3.5,
+          "max": 80,
+          "lifetime": 3.2,
+          "lifetime_spread": 0.4,
+          "speed": 0.25,
+          "speed_spread": 0.5,
+          "direction": 90.0,
+          "spread": 100.0,
+          "shape": "circle",
+          "offset": [
+            0.0,
+            0.0
+          ],
+          "shape_size": [
+            0.4,
+            0.2
+          ],
+          "gravity": [
+            0.0,
+            0.3
+          ],
+          "drag": 0.5,
+          "size": 0.17,
+          "size_end": 0.03,
+          "colors": [
+            [
+              0.5,
+              0.95,
+              1.0,
+              0.0
+            ],
+            [
+              0.5,
+              0.9,
+              1.0,
+              0.85
+            ],
+            [
+              0.4,
+              0.8,
+              1.0,
+              0.0
+            ]
+          ],
+          "random_rotation": true,
+          "spin": 0.0,
+          "space": "world",
+          "layer": 6
+        }
+      }
+    },
+    {
+      "id": "cover-34",
+      "name": "cover-34",
       "transform_3d": {
         "position": [
           4.22,
@@ -4921,8 +5157,8 @@
       }
     },
     {
-      "id": "cover-32",
-      "name": "cover-32",
+      "id": "cover-35",
+      "name": "cover-35",
       "transform_3d": {
         "position": [
           -1.26,
@@ -4949,8 +5185,8 @@
       }
     },
     {
-      "id": "cover-33",
-      "name": "cover-33",
+      "id": "cover-36",
+      "name": "cover-36",
       "transform_3d": {
         "position": [
           -23.94,
@@ -4977,8 +5213,8 @@
       }
     },
     {
-      "id": "cover-34",
-      "name": "cover-34",
+      "id": "cover-37",
+      "name": "cover-37",
       "transform_3d": {
         "position": [
           -9.45,
@@ -5005,8 +5241,8 @@
       }
     },
     {
-      "id": "cover-35",
-      "name": "cover-35",
+      "id": "cover-38",
+      "name": "cover-38",
       "transform_3d": {
         "position": [
           2.3,
@@ -5033,8 +5269,8 @@
       }
     },
     {
-      "id": "cover-36",
-      "name": "cover-36",
+      "id": "cover-39",
+      "name": "cover-39",
       "transform_3d": {
         "position": [
           20.75,
@@ -5061,8 +5297,8 @@
       }
     },
     {
-      "id": "cover-37",
-      "name": "cover-37",
+      "id": "cover-40",
+      "name": "cover-40",
       "transform_3d": {
         "position": [
           -6.04,
@@ -5089,8 +5325,8 @@
       }
     },
     {
-      "id": "cover-38",
-      "name": "cover-38",
+      "id": "cover-41",
+      "name": "cover-41",
       "transform_3d": {
         "position": [
           6.97,
@@ -5117,8 +5353,8 @@
       }
     },
     {
-      "id": "cover-39",
-      "name": "cover-39",
+      "id": "cover-42",
+      "name": "cover-42",
       "transform_3d": {
         "position": [
           -5.58,
@@ -5159,8 +5395,85 @@
       }
     },
     {
-      "id": "cover-40",
-      "name": "cover-40",
+      "id": "cover-42-spores",
+      "name": "cover-42-spores",
+      "transform_3d": {
+        "position": [
+          0,
+          0.3,
+          0.001
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1
+        ]
+      },
+      "parent": "cover-42",
+      "components": {
+        "sindri.particles": {
+          "playing": true,
+          "texture": "textures/mote.png",
+          "rate": 3.5,
+          "max": 80,
+          "lifetime": 3.2,
+          "lifetime_spread": 0.4,
+          "speed": 0.25,
+          "speed_spread": 0.5,
+          "direction": 90.0,
+          "spread": 100.0,
+          "shape": "circle",
+          "offset": [
+            0.0,
+            0.0
+          ],
+          "shape_size": [
+            0.4,
+            0.2
+          ],
+          "gravity": [
+            0.0,
+            0.3
+          ],
+          "drag": 0.5,
+          "size": 0.17,
+          "size_end": 0.03,
+          "colors": [
+            [
+              0.5,
+              0.95,
+              1.0,
+              0.0
+            ],
+            [
+              0.5,
+              0.9,
+              1.0,
+              0.85
+            ],
+            [
+              0.4,
+              0.8,
+              1.0,
+              0.0
+            ]
+          ],
+          "random_rotation": true,
+          "spin": 0.0,
+          "space": "world",
+          "layer": 6
+        }
+      }
+    },
+    {
+      "id": "cover-44",
+      "name": "cover-44",
       "transform_3d": {
         "position": [
           12.51,
@@ -5187,8 +5500,8 @@
       }
     },
     {
-      "id": "cover-41",
-      "name": "cover-41",
+      "id": "cover-45",
+      "name": "cover-45",
       "transform_3d": {
         "position": [
           -13.49,
@@ -5215,8 +5528,8 @@
       }
     },
     {
-      "id": "cover-42",
-      "name": "cover-42",
+      "id": "cover-46",
+      "name": "cover-46",
       "transform_3d": {
         "position": [
           -6.6,
@@ -5243,8 +5556,8 @@
       }
     },
     {
-      "id": "cover-43",
-      "name": "cover-43",
+      "id": "cover-47",
+      "name": "cover-47",
       "transform_3d": {
         "position": [
           12.69,
@@ -5271,8 +5584,8 @@
       }
     },
     {
-      "id": "cover-44",
-      "name": "cover-44",
+      "id": "cover-48",
+      "name": "cover-48",
       "transform_3d": {
         "position": [
           -15.07,
@@ -5299,8 +5612,8 @@
       }
     },
     {
-      "id": "cover-45",
-      "name": "cover-45",
+      "id": "cover-49",
+      "name": "cover-49",
       "transform_3d": {
         "position": [
           -5.78,
@@ -5327,8 +5640,8 @@
       }
     },
     {
-      "id": "cover-46",
-      "name": "cover-46",
+      "id": "cover-50",
+      "name": "cover-50",
       "transform_3d": {
         "position": [
           10.56,
@@ -5355,8 +5668,8 @@
       }
     },
     {
-      "id": "cover-47",
-      "name": "cover-47",
+      "id": "cover-51",
+      "name": "cover-51",
       "transform_3d": {
         "position": [
           -19.36,
@@ -5383,8 +5696,8 @@
       }
     },
     {
-      "id": "cover-48",
-      "name": "cover-48",
+      "id": "cover-52",
+      "name": "cover-52",
       "transform_3d": {
         "position": [
           18.64,
@@ -5411,8 +5724,8 @@
       }
     },
     {
-      "id": "cover-49",
-      "name": "cover-49",
+      "id": "cover-53",
+      "name": "cover-53",
       "transform_3d": {
         "position": [
           7.05,
@@ -5439,8 +5752,8 @@
       }
     },
     {
-      "id": "cover-50",
-      "name": "cover-50",
+      "id": "cover-54",
+      "name": "cover-54",
       "transform_3d": {
         "position": [
           16.48,
@@ -5467,8 +5780,8 @@
       }
     },
     {
-      "id": "cover-51",
-      "name": "cover-51",
+      "id": "cover-55",
+      "name": "cover-55",
       "transform_3d": {
         "position": [
           24.2,
@@ -5495,8 +5808,8 @@
       }
     },
     {
-      "id": "cover-52",
-      "name": "cover-52",
+      "id": "cover-56",
+      "name": "cover-56",
       "transform_3d": {
         "position": [
           7.75,
@@ -5523,8 +5836,8 @@
       }
     },
     {
-      "id": "cover-53",
-      "name": "cover-53",
+      "id": "cover-57",
+      "name": "cover-57",
       "transform_3d": {
         "position": [
           -15.03,
@@ -5551,8 +5864,8 @@
       }
     },
     {
-      "id": "cover-54",
-      "name": "cover-54",
+      "id": "cover-58",
+      "name": "cover-58",
       "transform_3d": {
         "position": [
           -16.05,
@@ -5579,8 +5892,8 @@
       }
     },
     {
-      "id": "cover-55",
-      "name": "cover-55",
+      "id": "cover-59",
+      "name": "cover-59",
       "transform_3d": {
         "position": [
           22.34,
@@ -5607,8 +5920,8 @@
       }
     },
     {
-      "id": "cover-56",
-      "name": "cover-56",
+      "id": "cover-60",
+      "name": "cover-60",
       "transform_3d": {
         "position": [
           14.6,
@@ -5635,8 +5948,8 @@
       }
     },
     {
-      "id": "cover-57",
-      "name": "cover-57",
+      "id": "cover-61",
+      "name": "cover-61",
       "transform_3d": {
         "position": [
           -2.32,
@@ -5663,8 +5976,8 @@
       }
     },
     {
-      "id": "cover-58",
-      "name": "cover-58",
+      "id": "cover-62",
+      "name": "cover-62",
       "transform_3d": {
         "position": [
           3.44,
@@ -5691,8 +6004,8 @@
       }
     },
     {
-      "id": "cover-59",
-      "name": "cover-59",
+      "id": "cover-63",
+      "name": "cover-63",
       "transform_3d": {
         "position": [
           7.57,
@@ -5719,8 +6032,8 @@
       }
     },
     {
-      "id": "cover-60",
-      "name": "cover-60",
+      "id": "cover-64",
+      "name": "cover-64",
       "transform_3d": {
         "position": [
           20.0,
@@ -5747,8 +6060,8 @@
       }
     },
     {
-      "id": "cover-61",
-      "name": "cover-61",
+      "id": "cover-65",
+      "name": "cover-65",
       "transform_3d": {
         "position": [
           14.54,
@@ -5775,8 +6088,8 @@
       }
     },
     {
-      "id": "cover-62",
-      "name": "cover-62",
+      "id": "cover-66",
+      "name": "cover-66",
       "transform_3d": {
         "position": [
           -20.86,
@@ -5817,8 +6130,85 @@
       }
     },
     {
-      "id": "cover-63",
-      "name": "cover-63",
+      "id": "cover-66-spores",
+      "name": "cover-66-spores",
+      "transform_3d": {
+        "position": [
+          0,
+          0.3,
+          0.001
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1
+        ]
+      },
+      "parent": "cover-66",
+      "components": {
+        "sindri.particles": {
+          "playing": true,
+          "texture": "textures/mote.png",
+          "rate": 3.5,
+          "max": 80,
+          "lifetime": 3.2,
+          "lifetime_spread": 0.4,
+          "speed": 0.25,
+          "speed_spread": 0.5,
+          "direction": 90.0,
+          "spread": 100.0,
+          "shape": "circle",
+          "offset": [
+            0.0,
+            0.0
+          ],
+          "shape_size": [
+            0.4,
+            0.2
+          ],
+          "gravity": [
+            0.0,
+            0.3
+          ],
+          "drag": 0.5,
+          "size": 0.17,
+          "size_end": 0.03,
+          "colors": [
+            [
+              0.5,
+              0.95,
+              1.0,
+              0.0
+            ],
+            [
+              0.5,
+              0.9,
+              1.0,
+              0.85
+            ],
+            [
+              0.4,
+              0.8,
+              1.0,
+              0.0
+            ]
+          ],
+          "random_rotation": true,
+          "spin": 0.0,
+          "space": "world",
+          "layer": 6
+        }
+      }
+    },
+    {
+      "id": "cover-68",
+      "name": "cover-68",
       "transform_3d": {
         "position": [
           -11.24,
@@ -5845,8 +6235,8 @@
       }
     },
     {
-      "id": "cover-64",
-      "name": "cover-64",
+      "id": "cover-69",
+      "name": "cover-69",
       "transform_3d": {
         "position": [
           1.66,
@@ -5873,8 +6263,8 @@
       }
     },
     {
-      "id": "cover-65",
-      "name": "cover-65",
+      "id": "cover-70",
+      "name": "cover-70",
       "transform_3d": {
         "position": [
           17.0,
@@ -5901,8 +6291,8 @@
       }
     },
     {
-      "id": "cover-66",
-      "name": "cover-66",
+      "id": "cover-71",
+      "name": "cover-71",
       "transform_3d": {
         "position": [
           9.45,
@@ -5929,8 +6319,8 @@
       }
     },
     {
-      "id": "cover-67",
-      "name": "cover-67",
+      "id": "cover-72",
+      "name": "cover-72",
       "transform_3d": {
         "position": [
           1.14,
@@ -5971,8 +6361,85 @@
       }
     },
     {
-      "id": "cover-68",
-      "name": "cover-68",
+      "id": "cover-72-spores",
+      "name": "cover-72-spores",
+      "transform_3d": {
+        "position": [
+          0,
+          0.3,
+          0.001
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1
+        ]
+      },
+      "parent": "cover-72",
+      "components": {
+        "sindri.particles": {
+          "playing": true,
+          "texture": "textures/mote.png",
+          "rate": 3.5,
+          "max": 80,
+          "lifetime": 3.2,
+          "lifetime_spread": 0.4,
+          "speed": 0.25,
+          "speed_spread": 0.5,
+          "direction": 90.0,
+          "spread": 100.0,
+          "shape": "circle",
+          "offset": [
+            0.0,
+            0.0
+          ],
+          "shape_size": [
+            0.4,
+            0.2
+          ],
+          "gravity": [
+            0.0,
+            0.3
+          ],
+          "drag": 0.5,
+          "size": 0.17,
+          "size_end": 0.03,
+          "colors": [
+            [
+              0.5,
+              0.95,
+              1.0,
+              0.0
+            ],
+            [
+              0.5,
+              0.9,
+              1.0,
+              0.85
+            ],
+            [
+              0.4,
+              0.8,
+              1.0,
+              0.0
+            ]
+          ],
+          "random_rotation": true,
+          "spin": 0.0,
+          "space": "world",
+          "layer": 6
+        }
+      }
+    },
+    {
+      "id": "cover-74",
+      "name": "cover-74",
       "transform_3d": {
         "position": [
           8.56,
@@ -5999,8 +6466,8 @@
       }
     },
     {
-      "id": "cover-69",
-      "name": "cover-69",
+      "id": "cover-75",
+      "name": "cover-75",
       "transform_3d": {
         "position": [
           -17.94,
@@ -6027,8 +6494,8 @@
       }
     },
     {
-      "id": "cover-70",
-      "name": "cover-70",
+      "id": "cover-76",
+      "name": "cover-76",
       "transform_3d": {
         "position": [
           -14.95,
@@ -6055,8 +6522,8 @@
       }
     },
     {
-      "id": "cover-71",
-      "name": "cover-71",
+      "id": "cover-77",
+      "name": "cover-77",
       "transform_3d": {
         "position": [
           0.8,
@@ -6097,8 +6564,85 @@
       }
     },
     {
-      "id": "cover-72",
-      "name": "cover-72",
+      "id": "cover-77-spores",
+      "name": "cover-77-spores",
+      "transform_3d": {
+        "position": [
+          0,
+          0.3,
+          0.001
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1
+        ]
+      },
+      "parent": "cover-77",
+      "components": {
+        "sindri.particles": {
+          "playing": true,
+          "texture": "textures/mote.png",
+          "rate": 3.5,
+          "max": 80,
+          "lifetime": 3.2,
+          "lifetime_spread": 0.4,
+          "speed": 0.25,
+          "speed_spread": 0.5,
+          "direction": 90.0,
+          "spread": 100.0,
+          "shape": "circle",
+          "offset": [
+            0.0,
+            0.0
+          ],
+          "shape_size": [
+            0.4,
+            0.2
+          ],
+          "gravity": [
+            0.0,
+            0.3
+          ],
+          "drag": 0.5,
+          "size": 0.17,
+          "size_end": 0.03,
+          "colors": [
+            [
+              0.5,
+              0.95,
+              1.0,
+              0.0
+            ],
+            [
+              0.5,
+              0.9,
+              1.0,
+              0.85
+            ],
+            [
+              0.4,
+              0.8,
+              1.0,
+              0.0
+            ]
+          ],
+          "random_rotation": true,
+          "spin": 0.0,
+          "space": "world",
+          "layer": 6
+        }
+      }
+    },
+    {
+      "id": "cover-79",
+      "name": "cover-79",
       "transform_3d": {
         "position": [
           -20.34,
@@ -6139,8 +6683,85 @@
       }
     },
     {
-      "id": "cover-73",
-      "name": "cover-73",
+      "id": "cover-79-spores",
+      "name": "cover-79-spores",
+      "transform_3d": {
+        "position": [
+          0,
+          0.3,
+          0.001
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1
+        ]
+      },
+      "parent": "cover-79",
+      "components": {
+        "sindri.particles": {
+          "playing": true,
+          "texture": "textures/mote.png",
+          "rate": 3.5,
+          "max": 80,
+          "lifetime": 3.2,
+          "lifetime_spread": 0.4,
+          "speed": 0.25,
+          "speed_spread": 0.5,
+          "direction": 90.0,
+          "spread": 100.0,
+          "shape": "circle",
+          "offset": [
+            0.0,
+            0.0
+          ],
+          "shape_size": [
+            0.4,
+            0.2
+          ],
+          "gravity": [
+            0.0,
+            0.3
+          ],
+          "drag": 0.5,
+          "size": 0.17,
+          "size_end": 0.03,
+          "colors": [
+            [
+              0.5,
+              0.95,
+              1.0,
+              0.0
+            ],
+            [
+              0.5,
+              0.9,
+              1.0,
+              0.85
+            ],
+            [
+              0.4,
+              0.8,
+              1.0,
+              0.0
+            ]
+          ],
+          "random_rotation": true,
+          "spin": 0.0,
+          "space": "world",
+          "layer": 6
+        }
+      }
+    },
+    {
+      "id": "cover-81",
+      "name": "cover-81",
       "transform_3d": {
         "position": [
           -8.02,
@@ -6167,8 +6788,8 @@
       }
     },
     {
-      "id": "cover-74",
-      "name": "cover-74",
+      "id": "cover-82",
+      "name": "cover-82",
       "transform_3d": {
         "position": [
           -19.57,
@@ -6195,8 +6816,8 @@
       }
     },
     {
-      "id": "cover-75",
-      "name": "cover-75",
+      "id": "cover-83",
+      "name": "cover-83",
       "transform_3d": {
         "position": [
           -18.53,
@@ -6223,8 +6844,8 @@
       }
     },
     {
-      "id": "cover-76",
-      "name": "cover-76",
+      "id": "cover-84",
+      "name": "cover-84",
       "transform_3d": {
         "position": [
           -17.22,
@@ -6251,8 +6872,8 @@
       }
     },
     {
-      "id": "cover-77",
-      "name": "cover-77",
+      "id": "cover-85",
+      "name": "cover-85",
       "transform_3d": {
         "position": [
           -7.23,
@@ -6279,8 +6900,8 @@
       }
     },
     {
-      "id": "cover-78",
-      "name": "cover-78",
+      "id": "cover-86",
+      "name": "cover-86",
       "transform_3d": {
         "position": [
           -23.84,
@@ -6307,8 +6928,8 @@
       }
     },
     {
-      "id": "cover-79",
-      "name": "cover-79",
+      "id": "cover-87",
+      "name": "cover-87",
       "transform_3d": {
         "position": [
           1.91,
@@ -6349,8 +6970,85 @@
       }
     },
     {
-      "id": "cover-80",
-      "name": "cover-80",
+      "id": "cover-87-spores",
+      "name": "cover-87-spores",
+      "transform_3d": {
+        "position": [
+          0,
+          0.3,
+          0.001
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1
+        ]
+      },
+      "parent": "cover-87",
+      "components": {
+        "sindri.particles": {
+          "playing": true,
+          "texture": "textures/mote.png",
+          "rate": 3.5,
+          "max": 80,
+          "lifetime": 3.2,
+          "lifetime_spread": 0.4,
+          "speed": 0.25,
+          "speed_spread": 0.5,
+          "direction": 90.0,
+          "spread": 100.0,
+          "shape": "circle",
+          "offset": [
+            0.0,
+            0.0
+          ],
+          "shape_size": [
+            0.4,
+            0.2
+          ],
+          "gravity": [
+            0.0,
+            0.3
+          ],
+          "drag": 0.5,
+          "size": 0.17,
+          "size_end": 0.03,
+          "colors": [
+            [
+              0.5,
+              0.95,
+              1.0,
+              0.0
+            ],
+            [
+              0.5,
+              0.9,
+              1.0,
+              0.85
+            ],
+            [
+              0.4,
+              0.8,
+              1.0,
+              0.0
+            ]
+          ],
+          "random_rotation": true,
+          "spin": 0.0,
+          "space": "world",
+          "layer": 6
+        }
+      }
+    },
+    {
+      "id": "cover-89",
+      "name": "cover-89",
       "transform_3d": {
         "position": [
           1.48,
@@ -6391,8 +7089,85 @@
       }
     },
     {
-      "id": "cover-81",
-      "name": "cover-81",
+      "id": "cover-89-spores",
+      "name": "cover-89-spores",
+      "transform_3d": {
+        "position": [
+          0,
+          0.3,
+          0.001
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1
+        ]
+      },
+      "parent": "cover-89",
+      "components": {
+        "sindri.particles": {
+          "playing": true,
+          "texture": "textures/mote.png",
+          "rate": 3.5,
+          "max": 80,
+          "lifetime": 3.2,
+          "lifetime_spread": 0.4,
+          "speed": 0.25,
+          "speed_spread": 0.5,
+          "direction": 90.0,
+          "spread": 100.0,
+          "shape": "circle",
+          "offset": [
+            0.0,
+            0.0
+          ],
+          "shape_size": [
+            0.4,
+            0.2
+          ],
+          "gravity": [
+            0.0,
+            0.3
+          ],
+          "drag": 0.5,
+          "size": 0.17,
+          "size_end": 0.03,
+          "colors": [
+            [
+              0.5,
+              0.95,
+              1.0,
+              0.0
+            ],
+            [
+              0.5,
+              0.9,
+              1.0,
+              0.85
+            ],
+            [
+              0.4,
+              0.8,
+              1.0,
+              0.0
+            ]
+          ],
+          "random_rotation": true,
+          "spin": 0.0,
+          "space": "world",
+          "layer": 6
+        }
+      }
+    },
+    {
+      "id": "cover-91",
+      "name": "cover-91",
       "transform_3d": {
         "position": [
           -13.37,
@@ -6419,8 +7194,8 @@
       }
     },
     {
-      "id": "cover-82",
-      "name": "cover-82",
+      "id": "cover-92",
+      "name": "cover-92",
       "transform_3d": {
         "position": [
           -9.21,
@@ -6447,8 +7222,8 @@
       }
     },
     {
-      "id": "cover-83",
-      "name": "cover-83",
+      "id": "cover-93",
+      "name": "cover-93",
       "transform_3d": {
         "position": [
           19.45,
@@ -6475,8 +7250,8 @@
       }
     },
     {
-      "id": "cover-84",
-      "name": "cover-84",
+      "id": "cover-94",
+      "name": "cover-94",
       "transform_3d": {
         "position": [
           2.16,
@@ -6503,8 +7278,8 @@
       }
     },
     {
-      "id": "cover-85",
-      "name": "cover-85",
+      "id": "cover-95",
+      "name": "cover-95",
       "transform_3d": {
         "position": [
           9.26,
@@ -6531,8 +7306,8 @@
       }
     },
     {
-      "id": "cover-86",
-      "name": "cover-86",
+      "id": "cover-96",
+      "name": "cover-96",
       "transform_3d": {
         "position": [
           -19.23,
@@ -6559,8 +7334,8 @@
       }
     },
     {
-      "id": "cover-87",
-      "name": "cover-87",
+      "id": "cover-97",
+      "name": "cover-97",
       "transform_3d": {
         "position": [
           9.28,
@@ -6587,8 +7362,8 @@
       }
     },
     {
-      "id": "cover-88",
-      "name": "cover-88",
+      "id": "cover-98",
+      "name": "cover-98",
       "transform_3d": {
         "position": [
           -23.78,
@@ -6615,8 +7390,8 @@
       }
     },
     {
-      "id": "cover-89",
-      "name": "cover-89",
+      "id": "cover-99",
+      "name": "cover-99",
       "transform_3d": {
         "position": [
           -0.94,
@@ -6643,8 +7418,8 @@
       }
     },
     {
-      "id": "cover-90",
-      "name": "cover-90",
+      "id": "cover-100",
+      "name": "cover-100",
       "transform_3d": {
         "position": [
           17.01,
@@ -6671,8 +7446,8 @@
       }
     },
     {
-      "id": "cover-91",
-      "name": "cover-91",
+      "id": "cover-101",
+      "name": "cover-101",
       "transform_3d": {
         "position": [
           -18.28,
@@ -6699,8 +7474,8 @@
       }
     },
     {
-      "id": "cover-92",
-      "name": "cover-92",
+      "id": "cover-102",
+      "name": "cover-102",
       "transform_3d": {
         "position": [
           -8.66,
@@ -6727,8 +7502,8 @@
       }
     },
     {
-      "id": "cover-93",
-      "name": "cover-93",
+      "id": "cover-103",
+      "name": "cover-103",
       "transform_3d": {
         "position": [
           -14.5,
@@ -6755,8 +7530,8 @@
       }
     },
     {
-      "id": "cover-94",
-      "name": "cover-94",
+      "id": "cover-104",
+      "name": "cover-104",
       "transform_3d": {
         "position": [
           -15.94,
@@ -6783,8 +7558,8 @@
       }
     },
     {
-      "id": "cover-95",
-      "name": "cover-95",
+      "id": "cover-105",
+      "name": "cover-105",
       "transform_3d": {
         "position": [
           -15.24,
@@ -6811,8 +7586,8 @@
       }
     },
     {
-      "id": "cover-96",
-      "name": "cover-96",
+      "id": "cover-106",
+      "name": "cover-106",
       "transform_3d": {
         "position": [
           -8.82,
@@ -6839,8 +7614,8 @@
       }
     },
     {
-      "id": "cover-97",
-      "name": "cover-97",
+      "id": "cover-107",
+      "name": "cover-107",
       "transform_3d": {
         "position": [
           15.24,
@@ -6867,8 +7642,8 @@
       }
     },
     {
-      "id": "cover-98",
-      "name": "cover-98",
+      "id": "cover-108",
+      "name": "cover-108",
       "transform_3d": {
         "position": [
           13.9,
@@ -6895,8 +7670,8 @@
       }
     },
     {
-      "id": "cover-99",
-      "name": "cover-99",
+      "id": "cover-109",
+      "name": "cover-109",
       "transform_3d": {
         "position": [
           -8.5,
@@ -6923,8 +7698,8 @@
       }
     },
     {
-      "id": "cover-100",
-      "name": "cover-100",
+      "id": "cover-110",
+      "name": "cover-110",
       "transform_3d": {
         "position": [
           -21.47,
@@ -6951,8 +7726,8 @@
       }
     },
     {
-      "id": "cover-101",
-      "name": "cover-101",
+      "id": "cover-111",
+      "name": "cover-111",
       "transform_3d": {
         "position": [
           19.4,
@@ -6979,8 +7754,8 @@
       }
     },
     {
-      "id": "cover-102",
-      "name": "cover-102",
+      "id": "cover-112",
+      "name": "cover-112",
       "transform_3d": {
         "position": [
           -14.2,
@@ -7007,8 +7782,8 @@
       }
     },
     {
-      "id": "cover-103",
-      "name": "cover-103",
+      "id": "cover-113",
+      "name": "cover-113",
       "transform_3d": {
         "position": [
           -5.52,
@@ -7035,8 +7810,8 @@
       }
     },
     {
-      "id": "cover-104",
-      "name": "cover-104",
+      "id": "cover-114",
+      "name": "cover-114",
       "transform_3d": {
         "position": [
           13.09,
@@ -7063,8 +7838,8 @@
       }
     },
     {
-      "id": "cover-105",
-      "name": "cover-105",
+      "id": "cover-115",
+      "name": "cover-115",
       "transform_3d": {
         "position": [
           -19.6,
@@ -7091,8 +7866,8 @@
       }
     },
     {
-      "id": "cover-106",
-      "name": "cover-106",
+      "id": "cover-116",
+      "name": "cover-116",
       "transform_3d": {
         "position": [
           -22.48,
@@ -7119,8 +7894,8 @@
       }
     },
     {
-      "id": "cover-107",
-      "name": "cover-107",
+      "id": "cover-117",
+      "name": "cover-117",
       "transform_3d": {
         "position": [
           -12.07,
@@ -7147,8 +7922,8 @@
       }
     },
     {
-      "id": "cover-108",
-      "name": "cover-108",
+      "id": "cover-118",
+      "name": "cover-118",
       "transform_3d": {
         "position": [
           0.39,
@@ -7189,8 +7964,85 @@
       }
     },
     {
-      "id": "cover-109",
-      "name": "cover-109",
+      "id": "cover-118-spores",
+      "name": "cover-118-spores",
+      "transform_3d": {
+        "position": [
+          0,
+          0.3,
+          0.001
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1
+        ]
+      },
+      "parent": "cover-118",
+      "components": {
+        "sindri.particles": {
+          "playing": true,
+          "texture": "textures/mote.png",
+          "rate": 3.5,
+          "max": 80,
+          "lifetime": 3.2,
+          "lifetime_spread": 0.4,
+          "speed": 0.25,
+          "speed_spread": 0.5,
+          "direction": 90.0,
+          "spread": 100.0,
+          "shape": "circle",
+          "offset": [
+            0.0,
+            0.0
+          ],
+          "shape_size": [
+            0.4,
+            0.2
+          ],
+          "gravity": [
+            0.0,
+            0.3
+          ],
+          "drag": 0.5,
+          "size": 0.17,
+          "size_end": 0.03,
+          "colors": [
+            [
+              0.5,
+              0.95,
+              1.0,
+              0.0
+            ],
+            [
+              0.5,
+              0.9,
+              1.0,
+              0.85
+            ],
+            [
+              0.4,
+              0.8,
+              1.0,
+              0.0
+            ]
+          ],
+          "random_rotation": true,
+          "spin": 0.0,
+          "space": "world",
+          "layer": 6
+        }
+      }
+    },
+    {
+      "id": "cover-120",
+      "name": "cover-120",
       "transform_3d": {
         "position": [
           -20.02,
@@ -7217,8 +8069,8 @@
       }
     },
     {
-      "id": "cover-110",
-      "name": "cover-110",
+      "id": "cover-121",
+      "name": "cover-121",
       "transform_3d": {
         "position": [
           8.42,
@@ -7245,8 +8097,8 @@
       }
     },
     {
-      "id": "cover-111",
-      "name": "cover-111",
+      "id": "cover-122",
+      "name": "cover-122",
       "transform_3d": {
         "position": [
           -17.0,
@@ -7273,8 +8125,8 @@
       }
     },
     {
-      "id": "cover-112",
-      "name": "cover-112",
+      "id": "cover-123",
+      "name": "cover-123",
       "transform_3d": {
         "position": [
           2.1,
@@ -7301,8 +8153,8 @@
       }
     },
     {
-      "id": "cover-113",
-      "name": "cover-113",
+      "id": "cover-124",
+      "name": "cover-124",
       "transform_3d": {
         "position": [
           -6.72,
@@ -7329,8 +8181,8 @@
       }
     },
     {
-      "id": "cover-114",
-      "name": "cover-114",
+      "id": "cover-125",
+      "name": "cover-125",
       "transform_3d": {
         "position": [
           -23.66,
@@ -7371,8 +8223,85 @@
       }
     },
     {
-      "id": "cover-115",
-      "name": "cover-115",
+      "id": "cover-125-spores",
+      "name": "cover-125-spores",
+      "transform_3d": {
+        "position": [
+          0,
+          0.3,
+          0.001
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1
+        ]
+      },
+      "parent": "cover-125",
+      "components": {
+        "sindri.particles": {
+          "playing": true,
+          "texture": "textures/mote.png",
+          "rate": 3.5,
+          "max": 80,
+          "lifetime": 3.2,
+          "lifetime_spread": 0.4,
+          "speed": 0.25,
+          "speed_spread": 0.5,
+          "direction": 90.0,
+          "spread": 100.0,
+          "shape": "circle",
+          "offset": [
+            0.0,
+            0.0
+          ],
+          "shape_size": [
+            0.4,
+            0.2
+          ],
+          "gravity": [
+            0.0,
+            0.3
+          ],
+          "drag": 0.5,
+          "size": 0.17,
+          "size_end": 0.03,
+          "colors": [
+            [
+              0.5,
+              0.95,
+              1.0,
+              0.0
+            ],
+            [
+              0.5,
+              0.9,
+              1.0,
+              0.85
+            ],
+            [
+              0.4,
+              0.8,
+              1.0,
+              0.0
+            ]
+          ],
+          "random_rotation": true,
+          "spin": 0.0,
+          "space": "world",
+          "layer": 6
+        }
+      }
+    },
+    {
+      "id": "cover-127",
+      "name": "cover-127",
       "transform_3d": {
         "position": [
           -17.17,
@@ -7399,8 +8328,8 @@
       }
     },
     {
-      "id": "cover-116",
-      "name": "cover-116",
+      "id": "cover-128",
+      "name": "cover-128",
       "transform_3d": {
         "position": [
           -9.24,
@@ -7441,8 +8370,85 @@
       }
     },
     {
-      "id": "cover-117",
-      "name": "cover-117",
+      "id": "cover-128-spores",
+      "name": "cover-128-spores",
+      "transform_3d": {
+        "position": [
+          0,
+          0.3,
+          0.001
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1
+        ]
+      },
+      "parent": "cover-128",
+      "components": {
+        "sindri.particles": {
+          "playing": true,
+          "texture": "textures/mote.png",
+          "rate": 3.5,
+          "max": 80,
+          "lifetime": 3.2,
+          "lifetime_spread": 0.4,
+          "speed": 0.25,
+          "speed_spread": 0.5,
+          "direction": 90.0,
+          "spread": 100.0,
+          "shape": "circle",
+          "offset": [
+            0.0,
+            0.0
+          ],
+          "shape_size": [
+            0.4,
+            0.2
+          ],
+          "gravity": [
+            0.0,
+            0.3
+          ],
+          "drag": 0.5,
+          "size": 0.17,
+          "size_end": 0.03,
+          "colors": [
+            [
+              0.5,
+              0.95,
+              1.0,
+              0.0
+            ],
+            [
+              0.5,
+              0.9,
+              1.0,
+              0.85
+            ],
+            [
+              0.4,
+              0.8,
+              1.0,
+              0.0
+            ]
+          ],
+          "random_rotation": true,
+          "spin": 0.0,
+          "space": "world",
+          "layer": 6
+        }
+      }
+    },
+    {
+      "id": "cover-130",
+      "name": "cover-130",
       "transform_3d": {
         "position": [
           22.22,
@@ -7469,8 +8475,8 @@
       }
     },
     {
-      "id": "cover-118",
-      "name": "cover-118",
+      "id": "cover-131",
+      "name": "cover-131",
       "transform_3d": {
         "position": [
           -1.12,
@@ -7497,8 +8503,8 @@
       }
     },
     {
-      "id": "cover-119",
-      "name": "cover-119",
+      "id": "cover-132",
+      "name": "cover-132",
       "transform_3d": {
         "position": [
           -17.78,
@@ -7525,8 +8531,8 @@
       }
     },
     {
-      "id": "cover-120",
-      "name": "cover-120",
+      "id": "cover-133",
+      "name": "cover-133",
       "transform_3d": {
         "position": [
           -19.25,
@@ -7553,8 +8559,8 @@
       }
     },
     {
-      "id": "cover-121",
-      "name": "cover-121",
+      "id": "cover-134",
+      "name": "cover-134",
       "transform_3d": {
         "position": [
           -18.78,
@@ -7581,8 +8587,8 @@
       }
     },
     {
-      "id": "cover-122",
-      "name": "cover-122",
+      "id": "cover-135",
+      "name": "cover-135",
       "transform_3d": {
         "position": [
           -11.89,
@@ -7609,8 +8615,8 @@
       }
     },
     {
-      "id": "cover-123",
-      "name": "cover-123",
+      "id": "cover-136",
+      "name": "cover-136",
       "transform_3d": {
         "position": [
           12.19,
@@ -7637,8 +8643,8 @@
       }
     },
     {
-      "id": "cover-124",
-      "name": "cover-124",
+      "id": "cover-137",
+      "name": "cover-137",
       "transform_3d": {
         "position": [
           11.71,
@@ -7665,8 +8671,8 @@
       }
     },
     {
-      "id": "cover-125",
-      "name": "cover-125",
+      "id": "cover-138",
+      "name": "cover-138",
       "transform_3d": {
         "position": [
           -9.57,
@@ -7693,8 +8699,8 @@
       }
     },
     {
-      "id": "cover-126",
-      "name": "cover-126",
+      "id": "cover-139",
+      "name": "cover-139",
       "transform_3d": {
         "position": [
           5.49,
@@ -7735,8 +8741,85 @@
       }
     },
     {
-      "id": "cover-127",
-      "name": "cover-127",
+      "id": "cover-139-spores",
+      "name": "cover-139-spores",
+      "transform_3d": {
+        "position": [
+          0,
+          0.3,
+          0.001
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1
+        ]
+      },
+      "parent": "cover-139",
+      "components": {
+        "sindri.particles": {
+          "playing": true,
+          "texture": "textures/mote.png",
+          "rate": 3.5,
+          "max": 80,
+          "lifetime": 3.2,
+          "lifetime_spread": 0.4,
+          "speed": 0.25,
+          "speed_spread": 0.5,
+          "direction": 90.0,
+          "spread": 100.0,
+          "shape": "circle",
+          "offset": [
+            0.0,
+            0.0
+          ],
+          "shape_size": [
+            0.4,
+            0.2
+          ],
+          "gravity": [
+            0.0,
+            0.3
+          ],
+          "drag": 0.5,
+          "size": 0.17,
+          "size_end": 0.03,
+          "colors": [
+            [
+              0.5,
+              0.95,
+              1.0,
+              0.0
+            ],
+            [
+              0.5,
+              0.9,
+              1.0,
+              0.85
+            ],
+            [
+              0.4,
+              0.8,
+              1.0,
+              0.0
+            ]
+          ],
+          "random_rotation": true,
+          "spin": 0.0,
+          "space": "world",
+          "layer": 6
+        }
+      }
+    },
+    {
+      "id": "cover-141",
+      "name": "cover-141",
       "transform_3d": {
         "position": [
           -11.07,
@@ -7763,8 +8846,8 @@
       }
     },
     {
-      "id": "cover-128",
-      "name": "cover-128",
+      "id": "cover-142",
+      "name": "cover-142",
       "transform_3d": {
         "position": [
           7.65,
@@ -7791,8 +8874,8 @@
       }
     },
     {
-      "id": "cover-129",
-      "name": "cover-129",
+      "id": "cover-143",
+      "name": "cover-143",
       "transform_3d": {
         "position": [
           -24.53,
@@ -7819,8 +8902,8 @@
       }
     },
     {
-      "id": "cover-130",
-      "name": "cover-130",
+      "id": "cover-144",
+      "name": "cover-144",
       "transform_3d": {
         "position": [
           -19.88,
@@ -7847,8 +8930,8 @@
       }
     },
     {
-      "id": "cover-131",
-      "name": "cover-131",
+      "id": "cover-145",
+      "name": "cover-145",
       "transform_3d": {
         "position": [
           20.64,
@@ -7875,8 +8958,8 @@
       }
     },
     {
-      "id": "cover-132",
-      "name": "cover-132",
+      "id": "cover-146",
+      "name": "cover-146",
       "transform_3d": {
         "position": [
           -6.34,
@@ -7903,8 +8986,8 @@
       }
     },
     {
-      "id": "cover-133",
-      "name": "cover-133",
+      "id": "cover-147",
+      "name": "cover-147",
       "transform_3d": {
         "position": [
           -2.78,
@@ -7931,8 +9014,8 @@
       }
     },
     {
-      "id": "cover-134",
-      "name": "cover-134",
+      "id": "cover-148",
+      "name": "cover-148",
       "transform_3d": {
         "position": [
           -6.55,
@@ -7959,8 +9042,8 @@
       }
     },
     {
-      "id": "cover-135",
-      "name": "cover-135",
+      "id": "cover-149",
+      "name": "cover-149",
       "transform_3d": {
         "position": [
           12.95,
@@ -7987,8 +9070,8 @@
       }
     },
     {
-      "id": "cover-136",
-      "name": "cover-136",
+      "id": "cover-150",
+      "name": "cover-150",
       "transform_3d": {
         "position": [
           -6.54,
@@ -8010,426 +9093,6 @@
       "components": {
         "sindri.sprite": {
           "texture": "textures/decor.png#flowers",
-          "layer": 3
-        }
-      }
-    },
-    {
-      "id": "cover-137",
-      "name": "cover-137",
-      "transform_3d": {
-        "position": [
-          -20.85,
-          1.62,
-          0.284
-        ],
-        "rotation": [
-          0,
-          0,
-          0,
-          1
-        ],
-        "scale": [
-          1.5,
-          1.5,
-          1
-        ]
-      },
-      "components": {
-        "sindri.sprite": {
-          "texture": "textures/decor.png#pebbles",
-          "layer": 3
-        }
-      }
-    },
-    {
-      "id": "cover-138",
-      "name": "cover-138",
-      "transform_3d": {
-        "position": [
-          -1.82,
-          10.18,
-          0.198
-        ],
-        "rotation": [
-          0,
-          0,
-          0,
-          1
-        ],
-        "scale": [
-          -1.5,
-          1.5,
-          1
-        ]
-      },
-      "components": {
-        "sindri.sprite": {
-          "texture": "textures/decor.png#tufts",
-          "layer": 3
-        }
-      }
-    },
-    {
-      "id": "cover-139",
-      "name": "cover-139",
-      "transform_3d": {
-        "position": [
-          -14.34,
-          4.85,
-          0.252
-        ],
-        "rotation": [
-          0,
-          0,
-          0,
-          1
-        ],
-        "scale": [
-          1.5,
-          1.5,
-          1
-        ]
-      },
-      "components": {
-        "sindri.sprite": {
-          "texture": "textures/decor.png#tufts",
-          "layer": 3
-        }
-      }
-    },
-    {
-      "id": "cover-140",
-      "name": "cover-140",
-      "transform_3d": {
-        "position": [
-          -0.26,
-          8.22,
-          0.21799999999999997
-        ],
-        "rotation": [
-          0,
-          0,
-          0,
-          1
-        ],
-        "scale": [
-          -1.5,
-          1.5,
-          1
-        ]
-      },
-      "components": {
-        "sindri.sprite": {
-          "texture": "textures/decor.png#flowers",
-          "layer": 3
-        }
-      }
-    },
-    {
-      "id": "cover-141",
-      "name": "cover-141",
-      "transform_3d": {
-        "position": [
-          -17.85,
-          -5.19,
-          0.35200000000000004
-        ],
-        "rotation": [
-          0,
-          0,
-          0,
-          1
-        ],
-        "scale": [
-          -1.5,
-          1.5,
-          1
-        ]
-      },
-      "components": {
-        "sindri.sprite": {
-          "texture": "textures/decor.png#flowers",
-          "layer": 3
-        }
-      }
-    },
-    {
-      "id": "cover-142",
-      "name": "cover-142",
-      "transform_3d": {
-        "position": [
-          -19.13,
-          6.41,
-          0.236
-        ],
-        "rotation": [
-          0,
-          0,
-          0,
-          1
-        ],
-        "scale": [
-          1.5,
-          1.5,
-          1
-        ]
-      },
-      "components": {
-        "sindri.sprite": {
-          "texture": "textures/decor.png#mushrooms",
-          "layer": 3
-        },
-        "sindri.light2d": {
-          "enabled": true,
-          "color": [
-            0.45,
-            0.85,
-            1.0,
-            1.0
-          ],
-          "intensity": 0.7,
-          "radius": 2.8,
-          "falloff": 1.6,
-          "height": 0.6,
-          "shadows": false
-        }
-      }
-    },
-    {
-      "id": "cover-143",
-      "name": "cover-143",
-      "transform_3d": {
-        "position": [
-          -3.1,
-          9.5,
-          0.20500000000000002
-        ],
-        "rotation": [
-          0,
-          0,
-          0,
-          1
-        ],
-        "scale": [
-          -1.5,
-          1.5,
-          1
-        ]
-      },
-      "components": {
-        "sindri.sprite": {
-          "texture": "textures/decor.png#flowers",
-          "layer": 3
-        }
-      }
-    },
-    {
-      "id": "cover-144",
-      "name": "cover-144",
-      "transform_3d": {
-        "position": [
-          -13.94,
-          14.94,
-          0.15099999999999997
-        ],
-        "rotation": [
-          0,
-          0,
-          0,
-          1
-        ],
-        "scale": [
-          -1.5,
-          1.5,
-          1
-        ]
-      },
-      "components": {
-        "sindri.sprite": {
-          "texture": "textures/decor.png#pebbles",
-          "layer": 3
-        }
-      }
-    },
-    {
-      "id": "cover-145",
-      "name": "cover-145",
-      "transform_3d": {
-        "position": [
-          11.94,
-          -4.85,
-          0.34800000000000003
-        ],
-        "rotation": [
-          0,
-          0,
-          0,
-          1
-        ],
-        "scale": [
-          1.5,
-          1.5,
-          1
-        ]
-      },
-      "components": {
-        "sindri.sprite": {
-          "texture": "textures/decor.png#flowers",
-          "layer": 3
-        }
-      }
-    },
-    {
-      "id": "cover-146",
-      "name": "cover-146",
-      "transform_3d": {
-        "position": [
-          -20.51,
-          -2.01,
-          0.32
-        ],
-        "rotation": [
-          0,
-          0,
-          0,
-          1
-        ],
-        "scale": [
-          1.5,
-          1.5,
-          1
-        ]
-      },
-      "components": {
-        "sindri.sprite": {
-          "texture": "textures/decor.png#flowers",
-          "layer": 3
-        }
-      }
-    },
-    {
-      "id": "cover-147",
-      "name": "cover-147",
-      "transform_3d": {
-        "position": [
-          -13.94,
-          -15.09,
-          0.451
-        ],
-        "rotation": [
-          0,
-          0,
-          0,
-          1
-        ],
-        "scale": [
-          1.5,
-          1.5,
-          1
-        ]
-      },
-      "components": {
-        "sindri.sprite": {
-          "texture": "textures/decor.png#tufts",
-          "layer": 3
-        }
-      }
-    },
-    {
-      "id": "cover-148",
-      "name": "cover-148",
-      "transform_3d": {
-        "position": [
-          -21.8,
-          1.04,
-          0.29
-        ],
-        "rotation": [
-          0,
-          0,
-          0,
-          1
-        ],
-        "scale": [
-          -1.5,
-          1.5,
-          1
-        ]
-      },
-      "components": {
-        "sindri.sprite": {
-          "texture": "textures/decor.png#mushrooms",
-          "layer": 3
-        },
-        "sindri.light2d": {
-          "enabled": true,
-          "color": [
-            0.45,
-            0.85,
-            1.0,
-            1.0
-          ],
-          "intensity": 0.7,
-          "radius": 2.8,
-          "falloff": 1.6,
-          "height": 0.6,
-          "shadows": false
-        }
-      }
-    },
-    {
-      "id": "cover-149",
-      "name": "cover-149",
-      "transform_3d": {
-        "position": [
-          -20.92,
-          7.32,
-          0.22699999999999998
-        ],
-        "rotation": [
-          0,
-          0,
-          0,
-          1
-        ],
-        "scale": [
-          -1.5,
-          1.5,
-          1
-        ]
-      },
-      "components": {
-        "sindri.sprite": {
-          "texture": "textures/decor.png#flowers",
-          "layer": 3
-        }
-      }
-    },
-    {
-      "id": "cover-150",
-      "name": "cover-150",
-      "transform_3d": {
-        "position": [
-          6.71,
-          -12.25,
-          0.423
-        ],
-        "rotation": [
-          0,
-          0,
-          0,
-          1
-        ],
-        "scale": [
-          -1.5,
-          1.5,
-          1
-        ]
-      },
-      "components": {
-        "sindri.sprite": {
-          "texture": "textures/decor.png#pebbles",
           "layer": 3
         }
       }
@@ -11801,7 +12464,13 @@
       "components": {
         "sindri.sprite": {
           "texture": "textures/wick.png#idle-south",
-          "layer": 5
+          "layer": 5,
+          "tint": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
         },
         "sindri.shadow2d": {
           "contact_size": [
@@ -12026,6 +12695,160 @@
       }
     },
     {
+      "id": "wick-embers",
+      "name": "wick-embers",
+      "transform_3d": {
+        "position": [
+          0,
+          0.05,
+          0.001
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1
+        ]
+      },
+      "parent": "wick-lantern",
+      "components": {
+        "sindri.particles": {
+          "playing": true,
+          "texture": "textures/mote.png",
+          "rate": 16.0,
+          "max": 80,
+          "lifetime": 1.3,
+          "lifetime_spread": 0.4,
+          "speed": 0.6,
+          "speed_spread": 0.5,
+          "direction": 90.0,
+          "spread": 60.0,
+          "shape": "circle",
+          "offset": [
+            0.0,
+            0.0
+          ],
+          "shape_size": [
+            0.25,
+            0.1
+          ],
+          "gravity": [
+            0.0,
+            0.9
+          ],
+          "drag": 0.4,
+          "size": 0.2,
+          "size_end": 0.03,
+          "colors": [
+            [
+              1.0,
+              0.8,
+              0.4,
+              0.0
+            ],
+            [
+              1.0,
+              0.65,
+              0.22,
+              1.0
+            ],
+            [
+              0.9,
+              0.3,
+              0.08,
+              0.0
+            ]
+          ],
+          "random_rotation": true,
+          "spin": 0.0,
+          "space": "world",
+          "layer": 6
+        }
+      }
+    },
+    {
+      "id": "wick-glow",
+      "name": "wick-glow",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          -0.001
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1
+        ]
+      },
+      "parent": "wick-lantern",
+      "components": {
+        "sindri.particles": {
+          "playing": true,
+          "texture": "textures/mote.png",
+          "rate": 2.5,
+          "max": 80,
+          "lifetime": 1.4,
+          "lifetime_spread": 0.4,
+          "speed": 0.0,
+          "speed_spread": 0.5,
+          "direction": 90.0,
+          "spread": 360.0,
+          "shape": "circle",
+          "offset": [
+            0.0,
+            0.0
+          ],
+          "shape_size": [
+            0.1,
+            0.1
+          ],
+          "gravity": [
+            0.0,
+            0.0
+          ],
+          "drag": 1.0,
+          "size": 1.4,
+          "size_end": 2.4,
+          "colors": [
+            [
+              1.0,
+              0.7,
+              0.3,
+              0.0
+            ],
+            [
+              1.0,
+              0.7,
+              0.3,
+              0.36
+            ],
+            [
+              1.0,
+              0.6,
+              0.25,
+              0.0
+            ]
+          ],
+          "random_rotation": true,
+          "spin": 0.0,
+          "space": "world",
+          "layer": 4
+        }
+      }
+    },
+    {
       "id": "wick-light",
       "name": "wick-light",
       "transform_3d": {
@@ -12123,6 +12946,170 @@
             "base_intensity": 1.1,
             "base_radius": 4.6
           }
+        }
+      }
+    },
+    {
+      "id": "fx-hurt",
+      "name": "fx-hurt",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1
+        ]
+      },
+      "components": {
+        "sindri.effect.burst": {
+          "texture": "textures/mote.png",
+          "count": 24,
+          "speed": 6.5,
+          "spread": 0.6,
+          "lifetime": 0.55,
+          "size": 0.28,
+          "tint": [
+            1.0,
+            0.5,
+            0.18,
+            1.0
+          ],
+          "fade": true,
+          "drag": 0.06,
+          "layer": 7
+        }
+      }
+    },
+    {
+      "id": "fx-gloom-hit",
+      "name": "fx-gloom-hit",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1
+        ]
+      },
+      "components": {
+        "sindri.effect.burst": {
+          "texture": "textures/mote.png",
+          "count": 12,
+          "speed": 4.5,
+          "spread": 0.6,
+          "lifetime": 0.4,
+          "size": 0.24,
+          "tint": [
+            0.62,
+            0.3,
+            0.95,
+            1.0
+          ],
+          "fade": true,
+          "drag": 0.06,
+          "layer": 7
+        }
+      }
+    },
+    {
+      "id": "fx-gloom-out",
+      "name": "fx-gloom-out",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1
+        ]
+      },
+      "components": {
+        "sindri.effect.burst": {
+          "texture": "textures/mote.png",
+          "count": 30,
+          "speed": 5.5,
+          "spread": 0.8,
+          "lifetime": 0.8,
+          "size": 0.32,
+          "tint": [
+            0.5,
+            0.22,
+            0.85,
+            1.0
+          ],
+          "fade": true,
+          "drag": 0.06,
+          "layer": 7
+        }
+      }
+    },
+    {
+      "id": "fx-spark",
+      "name": "fx-spark",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1
+        ]
+      },
+      "components": {
+        "sindri.effect.burst": {
+          "texture": "textures/mote.png",
+          "count": 34,
+          "speed": 5.0,
+          "spread": 0.7,
+          "lifetime": 0.7,
+          "size": 0.24,
+          "tint": [
+            1.0,
+            0.82,
+            0.42,
+            1.0
+          ],
+          "fade": true,
+          "drag": 0.06,
+          "layer": 7
         }
       }
     },
@@ -13198,6 +14185,115 @@
           "source": "scripts/hud.decay",
           "script": "Hud",
           "properties": {}
+        }
+      }
+    },
+    {
+      "id": "hud-lantern-back",
+      "name": "hud-lantern-back",
+      "transform_3d": {
+        "position": [
+          0.0,
+          -0.105,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.45,
+          0.02,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.image": {
+          "anchor": "top_left",
+          "layer": 98,
+          "texture": "textures/white.png",
+          "tint": [
+            0.03,
+            0.03,
+            0.05,
+            0.75
+          ]
+        }
+      }
+    },
+    {
+      "id": "hud-lantern-fill",
+      "name": "hud-lantern-fill",
+      "transform_3d": {
+        "position": [
+          0.0,
+          -0.105,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.45,
+          0.02,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.image": {
+          "anchor": "top_left",
+          "layer": 99,
+          "texture": "textures/white.png",
+          "tint": [
+            1.0,
+            0.78,
+            0.4,
+            1.0
+          ],
+          "fill": {
+            "amount": 1.0,
+            "from": "left"
+          }
+        }
+      }
+    },
+    {
+      "id": "hud-flash",
+      "name": "hud-flash",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          3.0,
+          5.0,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.image": {
+          "anchor": "bottom_left",
+          "layer": 120,
+          "texture": "textures/white.png",
+          "tint": [
+            0.9,
+            0.1,
+            0.05,
+            0.0
+          ]
         }
       }
     }

@@ -62,6 +62,9 @@ script Gloom {
     var shown: number = 1.0;
     var wick: Entity = null;
     var surge: Entity = null;
+    var hit_burst: Entity = null;
+    var out_burst: Entity = null;
+    var struck_for: number = 0.0;
     var state: String = "lurk";
     var in_state: number = 0.0;
     var rest: number = 0.0;
@@ -74,6 +77,8 @@ script Gloom {
         this.left = this.health;
         this.wick = World.find("Wick");
         this.surge = World.find(this.surge_name);
+        this.hit_burst = World.find("fx-gloom-hit");
+        this.out_burst = World.find("fx-gloom-out");
         // Each one a little out of step with the rest.
         this.age = this.transform.world_position.x * 0.7;
     }
@@ -98,6 +103,7 @@ script Gloom {
         this.in_state += dt;
         this.rest = max(0.0, this.rest - dt);
         this.flinch = max(0.0, this.flinch - dt);
+        this.struck_for = max(0.0, this.struck_for - dt);
 
         let here = Vec2(this.transform.world_position.x, this.transform.world_position.y);
         var to_x: number = 0.0;
@@ -268,12 +274,16 @@ script Gloom {
             want = 1.0;
         }
         this.shown += (want - this.shown) * min(1.0, dt * 4.0);
-        this.sprite.tint = Color(1.0, 1.0, 1.0, this.shown);
+        // A blow lights it up white for a moment.
+        let flare = this.struck_for / 0.12;
+        this.sprite.tint = Color(1.0 + flare, 1.0 + flare, 1.0 + flare, this.shown);
     }
 
     // It is gone: a blow or the light has used up its health.
     fn put_out() {
         Game.gloom_out += 1.0;
+        Effects.burst_at(this.out_burst, this.transform.world_position.x, this.transform.world_position.y + 0.5);
+        Camera.add_trauma(0.3);
         World.despawn(this.entity);
     }
 
@@ -284,6 +294,8 @@ script Gloom {
     fn hurt(push_x: number, push_y: number) {
         this.left -= 1.0;
         Game.gloom_hits += 1.0;
+        this.struck_for = 0.12;
+        Effects.burst_at(this.hit_burst, this.transform.world_position.x, this.transform.world_position.y + 0.5);
         if this.left <= 0.0 {
             put_out();
             return;

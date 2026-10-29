@@ -2,6 +2,13 @@
 
 # Changelog
 
+- Add game feel to Lamplighter. A gloom's pounce that lands shakes the camera hard, throws a
+  spray of embers off Wick, flashes the screen red and Wick himself, shoves him back harder,
+  and leaves him blinking while he cannot be hurt again. A blade that lands shakes the camera
+  a little, and a gloom struck lights up white and sheds purple flecks, with a bigger burst
+  when it goes out. A lamp Wick lights throws sparks and a small shake. The lantern has a bar
+  on the HUD that empties with each scorch and goes red as it runs low. The lantern itself
+  gives off embers and a faint swelling glow, and the glowing mushrooms shed spores.
 - Add the safe pool to Lamplighter: a lamp post Wick has lit shelters everything within five
   units of it. The gloom, brute included, do not hunt Wick while he stands in a pool, and a
   gloom that is in one is driven out of it and cannot wind up there, so a lit lamp is

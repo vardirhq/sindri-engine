@@ -38,6 +38,7 @@ script Wick {
     var beam: Entity = null;
     var lantern: Entity = null;
     var lantern_art: Entity = null;
+    var hurt_burst: Entity = null;
     var aim: number = -90.0;
     var orbit: number = 210.0;
     var age: number = 0.0;
@@ -65,6 +66,8 @@ script Wick {
         this.beam = World.find("wick-light");
         this.lantern = World.find("wick-lantern");
         this.lantern_art = World.find("wick-lantern-sprite");
+        this.hurt_burst = World.find("fx-hurt");
+        Game.hit = 0.0;
     }
 
     fn update(dt: number) {
@@ -73,6 +76,7 @@ script Wick {
         this.age += dt;
         turn_the_beam(dt);
         float_the_lantern(dt);
+        show_the_hit();
         if Game.lost {
             // The lantern is out: Wick stands in the dark a moment, then the field starts over.
             Physics.set_velocity(this.entity, 0.0, 0.0);
@@ -189,6 +193,20 @@ script Wick {
         this.lantern_art.sprite.tint = Color(glow, glow, glow, 1.0);
     }
 
+    // After a pounce lands Wick flashes red and then blinks while the grace lasts, so it
+    // reads that he cannot be hurt again for a moment.
+    fn show_the_hit() {
+        var red: number = 1.0;
+        var alpha: number = 1.0;
+        if this.grace > 0.0 {
+            red = 1.0 - 0.6 * min(1.0, max(0.0, this.grace - 1.1) / 0.3);
+            if this.grace < 1.1 && sin(this.age * 38.0) > 0.0 {
+                alpha = 0.45;
+            }
+        }
+        this.sprite.sprite.tint = Color(1.0, red, red, alpha);
+    }
+
     // A gloom's pounce lands, from the direction given: Wick is thrown the way
     // it was going, the lantern is scorched, and a few of them in a row put it
     // out. A second pounce straight after the first is forgiven.
@@ -197,10 +215,13 @@ script Wick {
             return;
         }
         this.grace = 1.4;
-        this.stagger = 0.3;
+        this.stagger = 0.38;
         this.swinging = false;
-        this.vx = push_x * 8.0;
-        this.vy = push_y * 8.0;
+        this.vx = push_x * 12.0;
+        this.vy = push_y * 12.0;
+        Game.hit = 1.0;
+        Camera.add_trauma(0.75);
+        Effects.burst_at(this.hurt_burst, this.transform.world_position.x, this.transform.world_position.y + 0.8);
         Game.scorch = min(1.0, Game.scorch + 0.45);
         Game.scorched += 1.0;
         if Game.scorch >= 1.0 {
@@ -235,6 +256,8 @@ script Wick {
         for hit in Physics.overlap_circle(middle, this.blade, Physics.layer("target"), false, this.entity) {
             if World.exists(hit) && World.has_tag(hit, "gloom") {
                 Gloom.on(hit).hurt(ahead_x, ahead_y);
+                // The blade landing is felt: a small shake.
+                Camera.add_trauma(0.22);
             }
         }
     }

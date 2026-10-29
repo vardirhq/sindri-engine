@@ -9,9 +9,11 @@ script Lantern {
     var lit: bool = false;
     var flare: number = 0.0;
     var light: Entity = null;
+    var sparks: Entity = null;
 
     fn start() {
         this.light = World.find(this.light_name);
+        this.sparks = World.find("fx-spark");
     }
 
     fn update(dt: number) {
@@ -29,6 +31,9 @@ script Lantern {
         this.lit = true;
         this.flare = 0.8;
         Animation.play(this.entity, "lit");
+        // Sparks off the flame, and a small shake: it caught.
+        Effects.burst_at(this.sparks, this.transform.world_position.x, this.transform.world_position.y + 2.6);
+        Camera.add_trauma(0.18);
         Game.lit += 1.0;
         if World.has_tag(this.entity, "goal") {
             Game.won = true;
