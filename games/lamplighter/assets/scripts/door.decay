@@ -1,0 +1,48 @@
+// A door Wick can go through. Stand at it and press the interact button: the scene it leads to
+// opens, and the one left is switched off as it was, so a house is as the village left it. A
+// door with a lamp stays shut until that lamp is lit (the houses open with their lamps).
+script Door {
+    // The scene it leads to, the lamp that opens it ("" for a door that is always open), and how near
+    // Wick must stand.
+    @export let to: String = "";
+    @export let lamp_name: String = "";
+    @export let radius: number = 1.0;
+    // The label that asks, and the words on it.
+    @export let prompt_name: String = "door-prompt";
+    @export let words: String = "E   Go in";
+
+    var lamp: Entity = null;
+    var wick: Entity = null;
+    var prompt: Entity = null;
+    var asking: bool = false;
+    var age: number = 0.0;
+
+    fn start() {
+        if this.lamp_name != "" { this.lamp = World.find(this.lamp_name); }
+        this.wick = World.find("Wick");
+        this.prompt = World.find(this.prompt_name);
+    }
+
+    fn update(dt: number) {
+        // The lamps start on the first frame, so a door waits a moment to ask one.
+        this.age += dt;
+        var open: bool = this.age > 0.1;
+        if open && this.lamp != null {
+            let post = Lantern.on(this.lamp);
+            open = post != null && post.lit;
+        }
+        var near: bool = false;
+        if open && this.wick != null && World.exists(this.wick) {
+            let dx = this.wick.transform.world_position.x - this.transform.world_position.x;
+            let dy = this.wick.transform.world_position.y - this.transform.world_position.y;
+            near = sqrt(dx * dx + dy * dy) < this.radius;
+        }
+        if near != this.asking && this.prompt != null {
+            this.asking = near;
+            if near { Ui.set_text(this.prompt, this.words); } else { Ui.set_text(this.prompt, ""); }
+        }
+        if near && Action.pressed("interact") {
+            Scene.go(this.to);
+        }
+    }
+}

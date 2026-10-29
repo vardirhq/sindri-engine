@@ -34,14 +34,14 @@ def write(name, title, entities):
     (ASSETS / name).write_text(json.dumps(doc, indent=2) + '\n')
 
 
-def camera(x=0.0, y=0.0, follow=None):
+def camera(x=0.0, y=0.0, follow=None, size=16.875, confine=((-24, -16), (24, 16))):
     components = {'sindri.camera': {
-        'projection': 'orthographic', 'vertical_size': 16.875, 'near': 0.1, 'far': 100.0, 'fit': 'height'}}
+        'projection': 'orthographic', 'vertical_size': size, 'near': 0.1, 'far': 100.0, 'fit': 'height'}}
     if follow:
         components['sindri.camera.behavior'] = {
             'follow': {'target': follow, 'offset': [0, 1.2, 0], 'dead_zone': [0.5, 0.5],
                        'smoothing': 8, 'max_speed': 30},
-            'confine': {'min': [-24, -16], 'max': [24, 16], 'contain_view': True},
+            'confine': {'min': list(confine[0]), 'max': list(confine[1]), 'contain_view': True},
             # A hit on Wick shakes the camera hard and a blow landed shakes it a little.
             'shake': {'strength': 0.55, 'decay': 3.2, 'frequency': 42.0}}
     return entity('camera', 'Camera', at(x, y, 10.0), **components)
@@ -262,7 +262,7 @@ def meter(ident, parent, x, y, w, h, tint, layer, fill=None):
     return entity(ident, ident, at(x, y, 0, w, h), parent, **{'sindri.ui.image': image})
 
 
-def wick():
+def wick(fresh=True):
     """Wick stands where the entity is: the sprite grows up from the feet."""
     body = {'kind': 'dynamic', 'pose': {'position': [0, 0], 'rotation': 0}, 'linear_velocity': [0, 0],
             'angular_velocity': 0, 'gravity_scale': 0, 'linear_damping': 0, 'angular_damping': 0,
@@ -275,7 +275,8 @@ def wick():
             'sindri.tags': {'tags': ['wick']},
             'sindri.physics2d.rigid_body': body,
             'sindri.physics2d.collider': {'pieces': [piece(0.4, False, WALL | TARGET), piece(0.7, True, ALL)]},
-            'sindri.script': {'source': 'scripts/wick.decay', 'script': 'Wick', 'properties': {}}}),
+            'sindri.script': {'source': 'scripts/wick.decay', 'script': 'Wick',
+                             'properties': {} if fresh else {'fresh': False}}}),
         # One pixel of the art is a sixteenth of a world unit.
         entity('wick-sprite', 'wick-sprite', at(0, 0, 0, 3.0, 2.75), 'wick', **{
             'sindri.sprite': {'texture': 'textures/wick.png#idle-south', 'layer': 5, 'tint': [1.0, 1.0, 1.0, 1.0]},
@@ -409,6 +410,7 @@ def input_actions():
             {'axis': {'negative': 'key.ArrowDown', 'positive': 'key.ArrowUp'}},
             {'axis': {'negative': 'gamepad.dpad_down', 'positive': 'gamepad.dpad_up'}}]},
         {'name': 'attack', 'kind': 'button', 'bindings': ['key.J', 'key.Space', 'gamepad.west']},
+        {'name': 'interact', 'kind': 'button', 'bindings': ['key.E', 'key.Enter', 'gamepad.south']},
         {'name': 'pause', 'kind': 'button', 'bindings': ['key.Escape', 'gamepad.start']}]
 
 

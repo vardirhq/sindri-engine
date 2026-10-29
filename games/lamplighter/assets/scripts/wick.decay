@@ -29,6 +29,8 @@ script Wick {
     @export let orbit_tilt: number = 0.38;
     @export let orbit_swing: number = 6.0;
     @export let orbit_lead: number = 60.0;
+    // False in a room Wick walks into from the village: what the run has counted stays as it is.
+    @export let fresh: bool = true;
 
     var vx: number = 0.0;
     var vy: number = 0.0;
@@ -53,15 +55,17 @@ script Wick {
     var lost_for: number = 0.0;
 
     fn start() {
-        Game.scorch = 0.0;
-        Game.scorched = 0.0;
-        Game.lost = false;
-        Game.moved = false;
-        Game.lit = 0.0;
-        Game.total = World.with_tag("lantern").length;
-        Game.won = false;
-        Game.gloom_hits = 0.0;
-        Game.gloom_out = 0.0;
+        if this.fresh {
+            Game.scorch = 0.0;
+            Game.scorched = 0.0;
+            Game.lost = false;
+            Game.moved = false;
+            Game.lit = 0.0;
+            Game.total = World.with_tag("lantern").length;
+            Game.won = false;
+            Game.gloom_hits = 0.0;
+            Game.gloom_out = 0.0;
+        }
         this.sprite = World.find("wick-sprite");
         this.beam = World.find("wick-light");
         this.lantern = World.find("wick-lantern");
