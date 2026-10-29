@@ -172,6 +172,15 @@
               ]
             },
             {
+              "name": "interact",
+              "kind": "button",
+              "bindings": [
+                "key.E",
+                "key.Enter",
+                "gamepad.south"
+              ]
+            },
+            {
               "name": "pause",
               "kind": "button",
               "bindings": [

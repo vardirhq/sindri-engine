@@ -73,12 +73,12 @@ GLOOM_AT = [(-21.0, -6.5), (17.0, 15.0)]
 POND = (-17.0, -15.6)      # the pond's middle; the dock runs into it from the road side
 
 
-def standing(ident, sprite, x, y, block, occlude=True, flip=False, size=CELL, **more):
+def standing(ident, sprite, x, y, block, occlude=True, flip=False, size=CELL, sheet='textures/village.png', **more):
     """A thing of the village that stands on its position, and if `block` (its footprint's two
     radii and the height of its middle, in world units) stops Wick and light."""
     sx = -size if flip else size
     parts = {
-        'sindri.sprite': {'texture': f'textures/village.png#{sprite}', 'layer': 5},
+        'sindri.sprite': {'texture': f'{sheet}#{sprite}', 'layer': 5},
         'sindri.shadow2d': shadow((block[0] if block else 0.8) * 2.0, (block[1] if block else 0.3) * 1.2, cast=True),
         **more}
     if block:
@@ -112,6 +112,19 @@ def warmth():
         out += [glow(f'porch-{name}', hx + DOORS[name], hy - 0.5, 4.8, 2.4, 1.0)]
     out += [glow('well-glow', 0.0, 1.3, 4.2, 0.8), glow('chapel-glow', 0.0, 12.6, 4.5, 0.7),
             glow('stall-glow-1', -17.4, 3.2, 3.4, 0.7), glow('stall-glow-2', 17.4, 3.2, 3.4, 0.7)]
+    return out
+
+
+def doors():
+    """Each house's door, which opens with its lamp, and the words that ask Wick to go in."""
+    out = [entity('door-prompt', 'door-prompt', at(0, 0.12, 0, 1.0, 1.0), **{'sindri.ui.text': {
+        'anchor': 'bottom', 'color': [1, 0.95, 0.6, 1], 'font': 'fonts/Inter.ttf', 'font_size': 0.04,
+        'line_height': 0.048, 'layer': 100, 'text': '', 'bold': True, 'line_align': 'center',
+        'shadow': {'offset': [0, -0.003], 'color': [0, 0, 0, 0.45], 'softness': 0.002}}})]
+    for name, _, hx, hy, lamp, *_ in HOUSES:
+        out.append(entity(f'door-{name}', f'door-{name}', at(hx + DOORS[name], hy + 0.2, 0.1), **{
+            'sindri.script': {'source': 'scripts/door.decay', 'script': 'Door',
+                              'properties': {'to': f'interior-{name}.scene', 'lamp_name': lamp, 'radius': 1.3}}}))
     return out
 
 
@@ -285,7 +298,7 @@ def village():
                         size=CELL, flame=2.4)
     for args in HOUSES:
         ents.append(villager(args[5], args[4], args[0], args[6]))
-    ents += pond() + warmth() + scatter() + decor()
+    ents += doors() + pond() + warmth() + scatter() + decor()
     ents += [*wick(), *effects()]
     # Wick arrives on the road from the fields, at the west edge.
     for e in ents:

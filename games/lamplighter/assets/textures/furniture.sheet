@@ -1,0 +1,22 @@
+{
+  "format_version": 1,
+  "anchor": "bottom",
+  "grid": {
+    "columns": 12,
+    "rows": 1,
+    "names": [
+      "anvil",
+      "armchair",
+      "bed",
+      "chest",
+      "cradle",
+      "cupboard",
+      "hearth",
+      "oven",
+      "rug",
+      "shelf",
+      "shelf-2",
+      "table"
+    ]
+  }
+}
