@@ -1,0 +1,49 @@
+{
+  "format_version": 1,
+  "anchor": "center",
+  "grid": {
+    "columns": 4,
+    "rows": 4,
+    "names": [
+      "village-cobble-0",
+      "village-cobble-1",
+      "village-cobble-2",
+      "village-cobble-3",
+      "village-cobble-4",
+      "village-cobble-5",
+      "village-cobble-6",
+      "village-cobble-7",
+      "village-cobble-8",
+      "village-cobble-9",
+      "village-cobble-10",
+      "village-cobble-11",
+      "village-cobble-12",
+      "village-cobble-13",
+      "village-cobble-14",
+      "village-cobble-15"
+    ]
+  },
+  "terrains": {
+    "cobble": {
+      "kind": "corners",
+      "sprites": [
+        "village-cobble-0",
+        "village-cobble-1",
+        "village-cobble-2",
+        "village-cobble-3",
+        "village-cobble-4",
+        "village-cobble-5",
+        "village-cobble-6",
+        "village-cobble-7",
+        "village-cobble-8",
+        "village-cobble-9",
+        "village-cobble-10",
+        "village-cobble-11",
+        "village-cobble-12",
+        "village-cobble-13",
+        "village-cobble-14",
+        "village-cobble-15"
+      ]
+    }
+  }
+}

@@ -2,6 +2,13 @@
 
 # Changelog
 
+- Dress the Lamplighter village. The houses, lamp posts, well, stalls, gardens and the rest are
+  new Pixel Lab art generated in the style of a reference picture, with dark mossy roofs and
+  warm windows, and each house still opens when its lamp is lit. The ground is four layers of
+  new tilesets: lush grass and earth roads, mossy cobblestones over the square, flagstones round
+  the lamps and at each doorstep, and tilled soil. Trees and bushes crowd in from the edge of the
+  map, and the village has a market, a notice board, a bench, a cart, a laundry line, a woodpile,
+  crates and barrels, flower beds, a graveyard by the chapel and a scarecrow in the garden.
 - Add the village to Lamplighter: the lamplit square beyond the Dim Fields, which the last
   fields lamp now leads to. Four lamps stand round a well, and each opens one house: its
   windows light, the warm light inside it comes up, and its villager (the baker, the child, the

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Builds the village's two sheets from the Pixel Lab art: `textures/village.png` (the
+"""Builds the village's sheets from the Pixel Lab art: `textures/village.png` (the
 buildings, the well and the signpost) and `textures/villagers.png` (the four villagers
 in the four directions), each with its `.sheet`.
 
@@ -23,7 +23,7 @@ SOURCE = HERE / 'pixellab' / 'village'
 TEXTURES = HERE.parent / 'assets' / 'textures'
 CELL = 112
 HOUSES = ['bakery', 'child-house', 'workshop', 'keeper', 'chapel']
-FURNITURE = ['well', 'signpost']
+PROPS = sorted(path.stem for path in (SOURCE / 'props').glob('*.png'))
 PEOPLE = ['baker', 'child', 'mender', 'elder']
 DIRECTIONS = ['south', 'west', 'north', 'east']
 PERSON_CELL = (48, 44)
@@ -31,24 +31,29 @@ FEET_ON_ROTATION = 41
 
 
 def unlit(picture):
-    """The house with its lights out: the warm pixels dulled, the rest a little darker."""
+    """The house with its lights out: the warm pixels dulled, the rest a touch darker."""
     out = objects.unlit(picture)
     pixels = out.load()
     for y in range(out.height):
         for x in range(out.width):
             r, g, b, a = pixels[x, y]
             if a:
-                pixels[x, y] = (r * 4 // 5, g * 4 // 5, b * 4 // 5, a)
+                pixels[x, y] = (r * 9 // 10, g * 9 // 10, b * 9 // 10, a)
     return out
 
 
 def sprites():
+    """Every house twice, lit and unlit, the lamp too, then each prop once."""
     out = []
     for name in HOUSES:
         picture = Image.open(SOURCE / 'buildings' / f'{name}.png').convert('RGBA')
         out += [(f'{name}-unlit', unlit(picture)), (f'{name}-lit', picture)]
-    for name in FURNITURE:
-        out.append((name, Image.open(SOURCE / 'buildings' / f'{name}.png').convert('RGBA')))
+    for name in PROPS:
+        picture = Image.open(SOURCE / 'props' / f'{name}.png').convert('RGBA')
+        if name == 'lamp':
+            out += [('lamp-unlit', unlit(picture)), ('lamp-lit', picture)]
+        else:
+            out.append((name, picture))
     return out
 
 

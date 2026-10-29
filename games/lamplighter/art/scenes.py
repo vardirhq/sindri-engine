@@ -151,29 +151,31 @@ def prop(ident, sprite, x, y, radius, centre, occluder, flip=False):
                                     'points': [[px / 4, py / 4] for px, py in footprint(*occluder)]}})
 
 
-def lantern(ident, x, y, goal=False):
+def lantern(ident, x, y, goal=False, sheet='textures/objects.png', unlit='lamp-post-unlit', lit='lamp-post-lit',
+            size=4, flame=2.6):
     """A lamp post: dark until Wick touches it, then it swaps to its lit sprite and
-    its light, up at the lantern, flares."""
+    its light, up at the lantern, flares. `size` is how many world units a cell of its sheet
+    covers, and `flame` how high above its foot the lantern hangs."""
     tags = ['lantern', 'goal'] if goal else ['lantern']
-    post = entity(ident, ident, at(x, y, depth(y), 4, 4), **{
-        'sindri.sprite': {'texture': 'textures/objects.png#lamp-post-unlit', 'layer': 5},
+    post = entity(ident, ident, at(x, y, depth(y), size, size), **{
+        'sindri.sprite': {'texture': f'{sheet}#{unlit}', 'layer': 5},
         'sindri.animation.sprite': {'clips': {
-            'unlit': {'frames': ['lamp-post-unlit'], 'seconds_per_frame': 0.1, 'looping': False},
-            'lit': {'frames': ['lamp-post-lit'], 'seconds_per_frame': 0.1, 'looping': False}},
+            'unlit': {'frames': [unlit], 'seconds_per_frame': 0.1, 'looping': False},
+            'lit': {'frames': [lit], 'seconds_per_frame': 0.1, 'looping': False}},
             'playing': 'unlit', 'speed': 1},
         'sindri.tags': {'tags': tags},
         'sindri.shadow2d': shadow(1.2, 0.5),
-        'sindri.physics2d.collider': {'shape': {'shape': 'circle', 'radius': 1.3 / 4}, 'offset': [0, 0.6 / 4],
+        'sindri.physics2d.collider': {'shape': {'shape': 'circle', 'radius': 1.3 / size}, 'offset': [0, 0.6 / size],
                                       'rotation': 0, 'sensor': True,
                                       'layers': {'memberships': LANTERN, 'filter': ALL},
                                       'friction': 0, 'restitution': 0},
         'sindri.script': {'source': 'scripts/lantern.decay', 'script': 'Lantern',
                           'properties': {'light_name': ident + '-light'}}})
-    flame = entity(ident + '-light', ident + '-light', at(x, y + 2.6, depth(y) + 0.01), **{
+    light = entity(ident + '-light', ident + '-light', at(x, y + flame, depth(y) + 0.01), **{
         'sindri.light2d': {'enabled': True, 'color': [1.0, 0.72, 0.38, 1.0], 'intensity': 0.0, 'radius': 9.0,
                            'falloff': 1.4, 'height': 1.0, 'shadows': True, 'shadow_reach': 0.6,
                            'shadow_source_radius': 0.3}})
-    return [post, flame]
+    return [post, light]
 
 
 def clips():

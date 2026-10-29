@@ -2,7 +2,7 @@
   "format_version": 1,
   "anchor": "bottom",
   "grid": {
-    "columns": 12,
+    "columns": 39,
     "rows": 1,
     "names": [
       "bakery-unlit",
@@ -15,8 +15,35 @@
       "keeper-lit",
       "chapel-unlit",
       "chapel-lit",
+      "barrels",
+      "bench",
+      "bush-1",
+      "bush-2",
+      "bush-3",
+      "bush-4",
+      "cart",
+      "crates",
+      "fence",
+      "flowers-purple",
+      "flowers-purple-2",
+      "flowers-soil",
+      "flowers-white",
+      "garden-cabbage",
+      "garden-cabbage-2",
+      "graves",
+      "lamp-unlit",
+      "lamp-lit",
+      "laundry",
+      "notice",
+      "oak-1",
+      "oak-2",
+      "scarecrow",
+      "stall-blue",
+      "stall-red",
+      "tree-1",
+      "tree-2",
       "well",
-      "signpost"
+      "woodpile"
     ]
   }
 }
