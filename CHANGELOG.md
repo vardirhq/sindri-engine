@@ -2,6 +2,13 @@
 
 # Changelog
 
+- Redesign Wick's lantern in Lamplighter. It was part of his sprite, held on a pole in the
+  south and north art and low in the hand in the east and west, so it was never the same
+  lantern. Wick is now drawn with empty hands (new Pixel Lab art, all four directions, walk and
+  slash) and the lantern is its own sprite that floats about him: it circles him as he turns,
+  rides at his right hand a little ahead of where he faces, and is drawn in front of him on the
+  near half of its circle and behind him on the far half. Its light is the flame on it, so the
+  beam and the shadows it casts now start at the lantern.
 - Fix the "Export and render changed game" check, which failed for every game-only pull
   request. Its browser smoke runs Chromium on SwiftShader Vulkan, but the job never
   installed the Vulkan loader the full CI browser job installs, so wgpu got a device with
