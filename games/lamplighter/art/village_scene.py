@@ -72,10 +72,10 @@ BY_HAND = [
 GLOOM_AT = [(-17.0, -15.0), (17.0, 15.0)]
 
 
-def standing(ident, sprite, x, y, block, occlude=True, flip=False, **more):
+def standing(ident, sprite, x, y, block, occlude=True, flip=False, size=CELL, **more):
     """A thing of the village that stands on its position, and if `block` (its footprint's two
     radii and the height of its middle, in world units) stops Wick and light."""
-    sx = -CELL if flip else CELL
+    sx = -size if flip else size
     parts = {
         'sindri.sprite': {'texture': f'textures/village.png#{sprite}', 'layer': 5},
         'sindri.shadow2d': shadow((block[0] if block else 0.8) * 2.0, (block[1] if block else 0.3) * 1.2, cast=True),
@@ -90,7 +90,7 @@ def standing(ident, sprite, x, y, block, occlude=True, flip=False, **more):
         if occlude:
             parts['sindri.light2d.occluder'] = {
                 'shape': 'polygon', 'points': [[px / CELL, py / CELL] for px, py in footprint(rx, ry, centre, 12)]}
-    return entity(ident, ident, at(x, y, depth(y), sx, CELL), **parts)
+    return entity(ident, ident, at(x, y, depth(y), sx, size), **parts)
 
 
 def smoke(ident, x, y):
@@ -191,7 +191,7 @@ def decor():
     rng = random.Random(13)
     taken = ([(x, y, 4.0) for _, _, x, y, *_ in HOUSES] + [(x, y, 1.6) for _, _, x, y, _ in BY_HAND]
              + [(x, y, 1.6) for x, y in LAMPS])
-    kinds = ['tufts'] * 9 + ['flowers'] * 5 + ['pebbles'] * 3 + ['mushrooms'] * 2
+    kinds = ['tufts'] * 2 + ['flowers'] * 5 + ['pebbles'] * 3 + ['mushrooms'] * 2
     out = []
     while len(out) < 170:
         x, y = round(rng.uniform(-22.5, 22.5), 2), round(rng.uniform(-18.5, 18.0), 2)
@@ -233,6 +233,10 @@ def village():
         ents += house(*args)
     for ident, sprite, x, y, block in BY_HAND:
         ents.append(standing(ident, sprite, x, y, block))
+    for name, _, hx, hy, *_ in HOUSES:
+        # A low fence across each yard's front, with a gap for the path to the door.
+        for n, dx in enumerate((-4.6, -2.9, 2.9, 4.6)):
+            ents.append(standing(f'fence-{name}-{n}', 'fence', hx + dx, hy - 1.7, None, size=4.4))
     for n, (x, y) in enumerate(LAMPS, 1):
         ents += lantern(f'lantern-{n}', x, y, sheet='textures/village.png', unlit='lamp-unlit', lit='lamp-lit',
                         size=CELL, flame=2.4)
