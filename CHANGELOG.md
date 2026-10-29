@@ -2,6 +2,10 @@
 
 # Changelog
 
+- Fix the "Export and render changed game" check, which failed for every game-only pull
+  request. Its browser smoke runs Chromium on SwiftShader Vulkan, but the job never
+  installed the Vulkan loader the full CI browser job installs, so wgpu got a device with
+  unusable limits and panicked creating its first 64-byte buffer.
 - Lamplighter's gloom are slower, and light is what undoes them. A gloom caught in a strong
   light, such as the beam of Wick's lantern swung onto it, stops where it is, drops a
   wind-up it was in, and burns: its health drains for as long as the light is on it, and it
