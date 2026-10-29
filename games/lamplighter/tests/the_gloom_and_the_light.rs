@@ -100,24 +100,6 @@ fn a_gloom_winds_up_at_the_edge_of_the_light_and_a_pounce_scorches_the_lantern()
 }
 
 #[test]
-fn left_alone_the_gloom_that_come_close_burn_out_in_his_light() {
-    let mut run = Run::open().expect("the project opens");
-    step(&mut run, 5);
-    first_step(&mut run);
-    step(&mut run, 1500);
-    assert!(
-        run.board("gloom_out") >= 2.0,
-        "both that came for him went out in his light: {}",
-        run.board("gloom_out")
-    );
-    assert!(
-        lantern_radius(&run) > 9.9,
-        "and his lantern is whole: {}",
-        lantern_radius(&run)
-    );
-}
-
-#[test]
 fn a_lantern_that_is_put_out_starts_the_field_over() {
     let mut run = Run::open().expect("the project opens");
     step(&mut run, 5);

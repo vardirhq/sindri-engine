@@ -11967,13 +11967,13 @@
       }
     },
     {
-      "id": "wick-light",
-      "name": "wick-light",
+      "id": "wick-lantern",
+      "name": "wick-lantern",
       "transform_3d": {
         "position": [
-          0,
-          1.6,
-          0.1
+          -0.736,
+          0.76,
+          0.003
         ],
         "rotation": [
           0,
@@ -11988,6 +11988,65 @@
         ]
       },
       "parent": "wick",
+      "components": {}
+    },
+    {
+      "id": "wick-lantern-sprite",
+      "name": "wick-lantern-sprite",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.6,
+          0.8,
+          1
+        ]
+      },
+      "parent": "wick-lantern",
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/lantern.png",
+          "layer": 5,
+          "tint": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        }
+      }
+    },
+    {
+      "id": "wick-light",
+      "name": "wick-light",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0.1
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1
+        ]
+      },
+      "parent": "wick-lantern",
       "components": {
         "sindri.light2d": {
           "enabled": true,
@@ -12024,7 +12083,7 @@
       "transform_3d": {
         "position": [
           0,
-          1.6,
+          0,
           0.1
         ],
         "rotation": [
@@ -12039,7 +12098,7 @@
           1
         ]
       },
-      "parent": "wick",
+      "parent": "wick-lantern",
       "components": {
         "sindri.light2d": {
           "enabled": true,
@@ -12049,8 +12108,8 @@
             0.4,
             1.0
           ],
-          "intensity": 0.9,
-          "radius": 4.2,
+          "intensity": 1.1,
+          "radius": 4.6,
           "falloff": 1.6,
           "height": 1.0,
           "shadows": true,
@@ -12061,8 +12120,8 @@
           "source": "scripts/flame.decay",
           "script": "Flame",
           "properties": {
-            "base_intensity": 0.9,
-            "base_radius": 4.2
+            "base_intensity": 1.1,
+            "base_radius": 4.6
           }
         }
       }

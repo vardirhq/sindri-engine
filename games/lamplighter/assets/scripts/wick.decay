@@ -1,7 +1,8 @@
 // Wick walks the dim fields in the four directions and the diagonals, at one
 // speed whichever way, easing into and out of a walk, and faces the way the
-// walk is mostly going. The lantern Wick carries is the light on a child
-// entity, which moves with Wick; touching a lantern lights it.
+// walk is mostly going. The lantern is not in his sprite: it floats about him,
+// circling as he turns and drawn in front of him or behind as it goes round, with
+// the lantern's light on it; touching a lamp post lights it.
 //
 // The sword is the attack button: a slash that takes `swing` seconds, slows
 // Wick to a crawl, and lands once, at `strike_at`, on whatever stands in the
@@ -21,6 +22,13 @@ script Wick {
     // beam turns to where he faces.
     @export let mend: number = 0.07;
     @export let turn: number = 9.0;
+    // The circle the lantern travels, around the height of Wick's hands: how far out
+    // it floats, how much of the circle the screen's tilt shows, how fast it swings
+    // round to where it wants to be, and how far ahead of his right hand it sits.
+    @export let orbit_out: number = 0.85;
+    @export let orbit_tilt: number = 0.38;
+    @export let orbit_swing: number = 6.0;
+    @export let orbit_lead: number = 60.0;
 
     var vx: number = 0.0;
     var vy: number = 0.0;
@@ -28,7 +36,11 @@ script Wick {
     var facing_y: number = -1.0;
     var sprite: Entity = null;
     var beam: Entity = null;
+    var lantern: Entity = null;
+    var lantern_art: Entity = null;
     var aim: number = -90.0;
+    var orbit: number = 210.0;
+    var age: number = 0.0;
     var clip: String = "";
     var swinging: bool = false;
     var swung_for: number = 0.0;
@@ -51,12 +63,16 @@ script Wick {
         Game.gloom_out = 0.0;
         this.sprite = World.find("wick-sprite");
         this.beam = World.find("wick-light");
+        this.lantern = World.find("wick-lantern");
+        this.lantern_art = World.find("wick-lantern-sprite");
     }
 
     fn update(dt: number) {
         this.grace = max(0.0, this.grace - dt);
         Game.scorch = max(0.0, Game.scorch - this.mend * dt);
+        this.age += dt;
         turn_the_beam(dt);
+        float_the_lantern(dt);
         if Game.lost {
             // The lantern is out: Wick stands in the dark a moment, then the field starts over.
             Physics.set_velocity(this.entity, 0.0, 0.0);
@@ -147,6 +163,30 @@ script Wick {
         if gap < -180.0 { gap += 360.0; }
         this.aim += gap * min(1.0, dt * this.turn);
         this.beam.light2d.cone_direction = this.aim;
+    }
+
+    // The lantern circles Wick, riding at his right hand a little ahead of where he
+    // faces, so it swings round him when he turns, and drifts a little on its own. It
+    // is nearer the camera, and so drawn in front of him, on the near half of the
+    // circle and behind him on the far half.
+    fn float_the_lantern(dt: number) {
+        let want = this.aim - this.orbit_lead + 12.0 * sin(this.age * 1.3);
+        var gap: number = want - this.orbit;
+        if gap > 180.0 { gap -= 360.0; }
+        if gap < -180.0 { gap += 360.0; }
+        this.orbit += gap * min(1.0, dt * this.orbit_swing);
+        let round = this.orbit * 3.14159265 / 180.0;
+        let near = sin(round);
+        this.lantern.transform.position.x = this.orbit_out * cos(round);
+        this.lantern.transform.position.y = 0.95 + this.orbit_tilt * near + 0.05 * sin(this.age * 3.0);
+        if near < 0.1 {
+            this.lantern.transform.position.z = 0.003;
+        } else {
+            this.lantern.transform.position.z = -0.003;
+        }
+        // A scorched lantern burns dull.
+        let glow = 1.0 - 0.45 * Game.scorch;
+        this.lantern_art.sprite.tint = Color(glow, glow, glow, 1.0);
     }
 
     // A gloom's pounce lands, from the direction given: Wick is thrown the way

@@ -229,6 +229,12 @@ def wisps(ident):
     return [smoke, surge]
 
 
+# Where the lantern starts, out to Wick's lower left as he faces the camera: the middle of
+# the circle it travels (up 0.95, the height of his hands), 0.85 out and 0.38 round it, at
+# 210 degrees. `wick.decay` carries it on from there.
+LANTERN_START = (-0.736, 0.76, 0.003)
+
+
 def wick():
     """Wick stands where the entity is: the sprite grows up from the feet."""
     body = {'kind': 'dynamic', 'pose': {'position': [0, 0], 'rotation': 0}, 'linear_velocity': [0, 0],
@@ -248,23 +254,28 @@ def wick():
             'sindri.sprite': {'texture': 'textures/wick.png#idle-south', 'layer': 5},
             'sindri.shadow2d': shadow(0.9, 0.35),
             'sindri.animation.sprite': {'clips': clips(), 'playing': 'idle-south', 'speed': 1}}),
-        # The lantern's flame, a little above Wick's feet and out to one side, so what it
-        # lights and the shadows it casts start at the lantern: a beam that `wick.decay`
-        # turns to the way he faces, so the dark is behind him, and a small round halo
-        # that keeps what is at his heels from being black.
-        entity('wick-light', 'wick-light', at(0, 1.6, 0.1), 'wick', **{
+        # The lantern is not part of Wick's sprite. It floats about him on its own, circling
+        # him as he turns (`wick.decay` steers it, and puts it in front of him or behind),
+        # and the light is its flame, so what it lights and the shadows it casts start at the
+        # lantern: a beam turned to the way he faces, so the dark is behind him, and a small
+        # round halo that keeps what is at his heels from being black. The lantern entity
+        # only places; the drawing, at a size, and the lights hang from it.
+        entity('wick-lantern', 'wick-lantern', at(*LANTERN_START), 'wick'),
+        entity('wick-lantern-sprite', 'wick-lantern-sprite', at(0, 0, 0, 0.6, 0.8), 'wick-lantern', **{
+            'sindri.sprite': {'texture': 'textures/lantern.png', 'layer': 5, 'tint': [1.0, 1.0, 1.0, 1.0]}}),
+        entity('wick-light', 'wick-light', at(0, 0, 0.1), 'wick-lantern', **{
             'sindri.light2d': {'enabled': True, 'color': [1.0, 0.76, 0.42, 1.0], 'intensity': 1.5,
                                'radius': 10.0, 'falloff': 1.3, 'height': 1.0, 'shadows': True,
                                'shadow_reach': 0.6, 'shadow_source_radius': 0.3,
                                'cone_angle': 140.0, 'cone_direction': -90.0, 'cone_softness': 0.4},
             'sindri.script': {'source': 'scripts/flame.decay', 'script': 'Flame',
                               'properties': {'base_intensity': 1.5, 'base_radius': 10.0}}}),
-        entity('wick-halo', 'wick-halo', at(0, 1.6, 0.1), 'wick', **{
-            'sindri.light2d': {'enabled': True, 'color': [1.0, 0.7, 0.4, 1.0], 'intensity': 0.9,
-                               'radius': 4.2, 'falloff': 1.6, 'height': 1.0, 'shadows': True,
+        entity('wick-halo', 'wick-halo', at(0, 0, 0.1), 'wick-lantern', **{
+            'sindri.light2d': {'enabled': True, 'color': [1.0, 0.7, 0.4, 1.0], 'intensity': 1.1,
+                               'radius': 4.6, 'falloff': 1.6, 'height': 1.0, 'shadows': True,
                                'shadow_reach': 0.6, 'shadow_source_radius': 0.3},
             'sindri.script': {'source': 'scripts/flame.decay', 'script': 'Flame',
-                              'properties': {'base_intensity': 0.9, 'base_radius': 4.2}}}),
+                              'properties': {'base_intensity': 1.1, 'base_radius': 4.6}}}),
     ]
 
 

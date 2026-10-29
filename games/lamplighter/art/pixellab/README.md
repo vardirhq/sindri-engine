@@ -10,17 +10,20 @@ scripts that build the project's sheets can be run again without the service.
   the prompts said the reverse, so `art/tiles.py` reads `lower` as dirt; a render
   showed the path inverted before this was found.
 - `wick/`: `character --description "Wick, a small lamplighter courier in a worn
-  hooded cloak and scarf, carrying a brass lantern on a pole, dark muted blue cloak
-  with a warm amber lantern glow, young and determined" --size 32 --directions 4
-  --view "low top-down" --seed 11` for the four rotations, then the walk from
-  `POST /characters/animations` with `action_description` "walking steadily, legs
-  stepping alternately, the lantern held at the same height the whole time", 8
-  frames, all four directions, seed 3. The sword's `slash` is the same call with
-  "swinging a short iron sword in a single wide horizontal slash with the free hand
-  while the other hand keeps the lantern raised and steady, feet planted, then
-  returning to a ready stance", 8 frames, seed 5. The south and north rows are the
-  weakest: the blade is faint in one and scattered in the other. `character-id.txt` is the service's id for
-  Wick, which later animations (the sword) are made against.
+  hooded cloak and scarf, dark muted blue cloak, empty hands held loosely at his
+  sides, carrying nothing, no lantern, no pole, no staff, young and determined"
+  --size 32 --directions 4 --view "low top-down" --seed 11` for the four rotations,
+  then the walk from `animate` with "walking steadily, legs stepping alternately,
+  arms swinging a little at the sides", 8 frames, `--directions
+  south,west,north,east` (left out, it makes the south one only), seed 3. The sword's
+  `slash` is the same call with "swinging a short iron sword in a single wide
+  horizontal slash with one hand, the other arm at his side, feet planted, then
+  returning to a ready stance", 8 frames, seed 5. The animations come back as nine
+  frames numbered from 0; the first is dropped and the rest kept as `frame_001` to
+  `frame_008`. Wick has no lantern in any of it: the first version carried one on a pole
+  in the south and north art and low in the hand in the east and west, so it was
+  never the same lantern. It is a separate sprite (`art/lantern.py`) that floats about
+  him. `character-id.txt` is the service's id for Wick.
 
 The canvases differ: rotations are 48 by 48, the walk is 60 by 60 and its east
 frames 56 by 56. `art/wick.py` puts every frame on one cell, aligned by the feet.

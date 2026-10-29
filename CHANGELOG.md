@@ -2,6 +2,13 @@
 
 # Changelog
 
+- Redesign Wick's lantern in Lamplighter. It was part of his sprite, held on a pole in the
+  south and north art and low in the hand in the east and west, so it was never the same
+  lantern. Wick is now drawn with empty hands (new Pixel Lab art, all four directions, walk and
+  slash) and the lantern is its own sprite that floats about him: it circles him as he turns,
+  rides at his right hand a little ahead of where he faces, and is drawn in front of him on the
+  near half of its circle and behind him on the far half. Its light is the flame on it, so the
+  beam and the shadows it casts now start at the lantern.
 - Add the brute to Lamplighter, a second kind of gloom that light does not trouble. It is
   bigger, takes five blows to a gloom's three, and walks on through a lantern's glow at the
   same pace as in the dark, so the beam that burns out an ordinary gloom leaves it whole and
