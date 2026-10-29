@@ -26,6 +26,7 @@ use weave::Viewport as WeaveViewport;
 
 #[cfg(target_arch = "wasm32")]
 use crate::browser::BrowserProjectLoader;
+use crate::budget::FrameBudget;
 use crate::error::PlayerError;
 use crate::project::ProjectAssets;
 use sindri_runtime::{Session, scene_extractor};
@@ -71,6 +72,7 @@ pub(crate) struct Player {
     paused_for_page: bool,
     /// How long the scene has played, which is the clock sprite shaders read.
     seconds: f32,
+    budget: FrameBudget,
 }
 
 impl Player {
@@ -292,6 +294,7 @@ impl DesktopApp for Player {
             platform_suspended: false,
             paused_for_page: false,
             seconds: 0.0,
+            budget: FrameBudget::default(),
         })
     }
 
@@ -338,6 +341,8 @@ impl DesktopApp for Player {
         // a pause on Orbital, or Back in a menu, froze the game on a phone.
         let engine = self.engine.as_mut().expect("checked above");
         engine.advance(delta)?;
+        let counts = !self.paused_for_page && self.page_visible;
+        self.budget.keep_up(&mut self.scene, delta, counts);
         if !self.paused_for_page {
             self.seconds += delta.as_secs_f32();
         }

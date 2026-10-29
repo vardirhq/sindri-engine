@@ -22,6 +22,22 @@ use crate::{
     TilemapCollider2dComponent, TilemapComponent, components::outline,
 };
 
+/// How much a frame's 2D lighting costs to draw.
+///
+/// `Full` is what a scene asks for. `Reduced` is for hardware that cannot keep up: the frame
+/// carries the [`REDUCED_LIGHTS_2D`] lights nearest the camera, and a light with an emitting
+/// area casts the shadow of a point instead of five, which is a fifth of the shadow work on
+/// the CPU and in every lit pixel. Shadows stay where they are; only their penumbra goes.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub enum LightingQuality {
+    #[default]
+    Full,
+    Reduced,
+}
+
+/// The most lights a `Reduced` frame carries.
+pub const REDUCED_LIGHTS_2D: usize = 8;
+
 impl SceneExtractor {
     /// The frame's 2D lighting, or `None` when the environment has it off.
     pub(super) fn lighting_2d(
@@ -47,6 +63,14 @@ impl SceneExtractor {
             near(a).total_cmp(&near(b))
         });
         lights.truncate(MAX_LIGHTS_2D);
+        if self.lighting_quality == LightingQuality::Reduced {
+            lights.truncate(REDUCED_LIGHTS_2D);
+            for light in &mut lights {
+                if let Some(shadow) = &mut light.shadow {
+                    shadow.source_radius = 0.0;
+                }
+            }
+        }
         let viewer = self.viewer_2d(world)?;
         let edges = if viewer.is_some() || lights.iter().any(|light| light.shadow.is_some()) {
             self.occluder_edges(world)?

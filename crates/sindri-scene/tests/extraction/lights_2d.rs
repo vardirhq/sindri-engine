@@ -1,7 +1,9 @@
 //! The 2D lights a frame carries, the shadows they cast, and what they light.
 
 use sindri_render::{FrameCommand, Lighting2d, PreparedFrame, TextureId};
-use sindri_scene::{CameraView, SceneExtractError, SceneExtractor, TextureBindings};
+use sindri_scene::{
+    CameraView, LightingQuality, SceneExtractError, SceneExtractor, TextureBindings,
+};
 
 use crate::support::{VIEWPORT, scene, world_from};
 
@@ -190,6 +192,58 @@ fn a_frame_carries_the_lights_nearest_the_camera_and_no_more() {
         [3.0_f32, 0.0].map(f32::to_bits),
         "the camera's own first"
     );
+}
+
+fn reduced(entities: &str) -> Lighting2d {
+    let mut bindings = TextureBindings::new();
+    bindings.bind("a.png", TextureId::new(1));
+    let mut extractor = SceneExtractor::new().unwrap();
+    extractor.set_lighting_quality(LightingQuality::Reduced);
+    extractor
+        .extract(
+            &world_from(&scene(entities)),
+            VIEWPORT,
+            CameraView::default(),
+            &bindings,
+        )
+        .expect("the scene extracts")
+        .sprite_environment()
+        .lighting
+        .clone()
+        .expect("lighting is on")
+}
+
+#[test]
+fn a_reduced_frame_carries_fewer_lights_and_casts_each_shadow_from_a_point() {
+    let wall = r#",
+        { "id": "wall", "transform_3d": { "position": [2.0, 0.0, 0.0] },
+          "components": { "sindri.light2d.occluder": { "shape": "box", "size": [0.5, 2.0] } } }"#;
+    let mut entities = environment(true) + wall;
+    for index in 0..12 {
+        #[allow(clippy::cast_precision_loss)]
+        let x = index as f32 * 0.1;
+        entities += &light(
+            &format!("lamp-{index}"),
+            x,
+            r#", "shadows": true, "shadow_source_radius": 0.5"#,
+        );
+    }
+    let full = lighting(&entities).expect("lighting is on");
+    assert_eq!(full.lights.len(), 12);
+    let area = full.lights[0].shadow.as_ref().expect("it casts shadows");
+    assert_eq!(
+        area.map.len(),
+        5 * sindri_render::SHADOW_MAP_LEN_2D,
+        "five samples for a light with an area"
+    );
+
+    let low = reduced(&entities);
+    assert_eq!(low.lights.len(), 8, "the nearest eight");
+    for light in &low.lights {
+        let shadow = light.shadow.as_ref().expect("still shadowed");
+        assert_eq!(shadow.source_radius.to_bits(), 0.0_f32.to_bits());
+        assert_eq!(shadow.map.len(), sindri_render::SHADOW_MAP_LEN_2D);
+    }
 }
 
 #[test]

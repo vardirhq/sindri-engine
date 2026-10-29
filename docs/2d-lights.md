@@ -221,6 +221,25 @@ so a tree casts the silhouette it shows, not its crown's outline; it falls on a
 flat ground at the object's own height, so it does not climb a wall or a step; and
 the ground in front of a thing is lit normally, and the thing itself is lit from its feet (`lit_from_base`), so the occluder round its base, which stops light reaching what is behind it, does not also darken the side facing the light. A lit-from-base thing is lit by every light in range that nothing else blocks, from whichever side, and the shadow it casts is what says which way the light is.
 
+## Slow hardware
+
+Soft shadows are the expensive part of 2D lighting: a light with a `shadow_source_radius` builds five
+shadow maps on the CPU and searches all five for every lit pixel on the GPU. On a desktop that is
+cheap; on a phone it is most of a frame (Lamplighter's village, with four such lamps and a lantern
+among a hundred and fifty occluders, spent about three quarters of its GPU time on them).
+
+`SceneExtractor::set_lighting_quality` takes a `LightingQuality`. `Full` is what the scene asks
+for. `Reduced` keeps the `REDUCED_LIGHTS_2D` (8) lights nearest the camera and casts each shadow
+from a point, so the same shadows fall in the same places with a hard edge instead of a soft one,
+for a fifth of the shadow work. It only changes what is drawn: the lights a script asks about with
+`Lighting.level` and `Lighting.visible` are the same either way, so a game plays the same.
+
+The browser player lowers it by itself. It smooths the length of the real frames and, when they
+stay over 25 ms (under 40 frames a second) for about a second and a half after the page has
+settled, switches to `Reduced` and stays there; a device that was struggling would only struggle
+again, and a look that flickers between two settings is worse than either. A paused or hidden page
+says nothing of the device and is not counted. A host of its own sets the quality directly.
+
 ## In the editor
 
 Create offers Light 2D, and Add Component offers Light 2D and Light Occluder
