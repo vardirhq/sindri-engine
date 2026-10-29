@@ -1,6 +1,7 @@
 // A lamp post is dark until Wick touches it, then it swaps to its lit sprite and
 // the light up at the lantern flares and burns on. The goal lamp is the last:
-// lighting it opens the way.
+// lighting it opens the way. A lit lamp is also a safe pool: the gloom will not hunt
+// Wick while he stands in it, and are driven out of it (`gloom.decay` reads `lit`).
 script Lantern {
     // The name of the entity that carries this lamp's light, up at the lantern.
     @export let light_name: String = "";

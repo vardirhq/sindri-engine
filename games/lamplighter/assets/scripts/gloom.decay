@@ -18,6 +18,10 @@
 // light does not burn it or thin it; only the sword puts it out. `fears_light` and
 // `size` are what set the two apart.
 //
+// A lit lamp post is a safe pool, `pool` units wide round it: a gloom will not hunt Wick
+// while he stands in one, and one that is in one is driven out of it, brute or not,
+// and cannot wind up there.
+//
 // Its states: lurk, stalk, wind, lunge, recover.
 script Gloom {
     // How many blows put it out.
@@ -44,6 +48,9 @@ script Gloom {
     @export let fears_light: number = 1.0;
     // How big it is drawn, in units.
     @export let size: number = 2.0;
+    // How far a lit lamp's safe pool reaches, and how fast it drives a gloom out of it.
+    @export let pool: number = 5.0;
+    @export let driven: number = 2.6;
     // How long it waits before it will wind up again.
     @export let rest_for: number = 1.0;
     // The emitter that burns while it winds up and pounces.
@@ -108,7 +115,34 @@ script Gloom {
             let eyes = Vec2(this.wick.transform.world_position.x, this.wick.transform.world_position.y + 0.5);
             covered = !Lighting.visible(eyes, Vec2(here.x, here.y + 0.4));
         }
-        let hunting = apart < this.notice && !Game.lost && !Game.won && Game.truce < 0.5 && Game.moved;
+        // Wick in the pool of a lit lamp, or this gloom in one, and which way is out of it.
+        var sheltered: bool = false;
+        var inside: bool = false;
+        var out_x: number = 0.0;
+        var out_y: number = 0.0;
+        for lamp in World.with_tag("lantern") {
+            let post = Lantern.on(lamp);
+            if post != null && post.lit {
+                let lamp_x = lamp.transform.world_position.x;
+                let lamp_y = lamp.transform.world_position.y;
+                let from_x = here.x - lamp_x;
+                let from_y = here.y - lamp_y;
+                let gap = sqrt(from_x * from_x + from_y * from_y);
+                if gap < this.pool {
+                    inside = true;
+                    out_x = from_x / max(gap, 0.01);
+                    out_y = from_y / max(gap, 0.01);
+                }
+                if this.wick != null && World.exists(this.wick) {
+                    let wx = this.wick.transform.world_position.x - lamp_x;
+                    let wy = this.wick.transform.world_position.y - lamp_y;
+                    if sqrt(wx * wx + wy * wy) < this.pool {
+                        sheltered = true;
+                    }
+                }
+            }
+        }
+        let hunting = apart < this.notice && !Game.lost && !Game.won && Game.truce < 0.5 && Game.moved && !sheltered;
 
         var squash_x: number = 1.0 + 0.04 * sin(this.age * 2.6);
         var squash_y: number = 1.0 / squash_x;
@@ -139,6 +173,12 @@ script Gloom {
 
         if caught {
             // Held where it is.
+        } else if inside && Game.truce < 0.5 && this.state != "lunge" {
+            // Driven out of a lit lamp's pool, and no wind-up while it is in one.
+            Physics.set_velocity(this.entity, out_x * this.driven, out_y * this.driven);
+            if this.state == "wind" {
+                enter("recover");
+            }
         } else if this.state == "lurk" {
             // It drifts a little where it is, until Wick is near enough to notice.
             if this.flinch <= 0.0 && Game.truce < 0.5 {
