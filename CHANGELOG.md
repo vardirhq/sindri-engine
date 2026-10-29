@@ -2,6 +2,10 @@
 
 # Changelog
 
+- Add the brute to Lamplighter, a second kind of gloom that light does not trouble. It is
+  bigger, takes five blows to a gloom's three, and walks on through a lantern's glow at the
+  same pace as in the dark, so the beam that burns out an ordinary gloom leaves it whole and
+  only the sword puts it out. One waits in the east field beyond the second lamp.
 - Fix the "Export and render changed game" check, which failed for every game-only pull
   request. Its browser smoke runs Chromium on SwiftShader Vulkan, but the job never
   installed the Vulkan loader the full CI browser job installs, so wgpu got a device with
