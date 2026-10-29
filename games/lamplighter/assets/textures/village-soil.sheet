@@ -1,0 +1,49 @@
+{
+  "format_version": 1,
+  "anchor": "center",
+  "grid": {
+    "columns": 4,
+    "rows": 4,
+    "names": [
+      "village-soil-0",
+      "village-soil-1",
+      "village-soil-2",
+      "village-soil-3",
+      "village-soil-4",
+      "village-soil-5",
+      "village-soil-6",
+      "village-soil-7",
+      "village-soil-8",
+      "village-soil-9",
+      "village-soil-10",
+      "village-soil-11",
+      "village-soil-12",
+      "village-soil-13",
+      "village-soil-14",
+      "village-soil-15"
+    ]
+  },
+  "terrains": {
+    "soil": {
+      "kind": "corners",
+      "sprites": [
+        "village-soil-0",
+        "village-soil-1",
+        "village-soil-2",
+        "village-soil-3",
+        "village-soil-4",
+        "village-soil-5",
+        "village-soil-6",
+        "village-soil-7",
+        "village-soil-8",
+        "village-soil-9",
+        "village-soil-10",
+        "village-soil-11",
+        "village-soil-12",
+        "village-soil-13",
+        "village-soil-14",
+        "village-soil-15"
+      ]
+    }
+  }
+}

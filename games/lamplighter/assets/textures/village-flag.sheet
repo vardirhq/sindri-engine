@@ -1,0 +1,49 @@
+{
+  "format_version": 1,
+  "anchor": "center",
+  "grid": {
+    "columns": 4,
+    "rows": 4,
+    "names": [
+      "village-flag-0",
+      "village-flag-1",
+      "village-flag-2",
+      "village-flag-3",
+      "village-flag-4",
+      "village-flag-5",
+      "village-flag-6",
+      "village-flag-7",
+      "village-flag-8",
+      "village-flag-9",
+      "village-flag-10",
+      "village-flag-11",
+      "village-flag-12",
+      "village-flag-13",
+      "village-flag-14",
+      "village-flag-15"
+    ]
+  },
+  "terrains": {
+    "flag": {
+      "kind": "corners",
+      "sprites": [
+        "village-flag-0",
+        "village-flag-1",
+        "village-flag-2",
+        "village-flag-3",
+        "village-flag-4",
+        "village-flag-5",
+        "village-flag-6",
+        "village-flag-7",
+        "village-flag-8",
+        "village-flag-9",
+        "village-flag-10",
+        "village-flag-11",
+        "village-flag-12",
+        "village-flag-13",
+        "village-flag-14",
+        "village-flag-15"
+      ]
+    }
+  }
+}

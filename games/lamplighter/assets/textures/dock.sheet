@@ -1,0 +1,11 @@
+{
+  "format_version": 1,
+  "anchor": "bottom",
+  "grid": {
+    "columns": 1,
+    "rows": 1,
+    "names": [
+      "dock"
+    ]
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "format_version": 1,
+  "anchor": "center",
+  "grid": {
+    "columns": 4,
+    "rows": 4,
+    "names": [
+      "village-ground-0",
+      "village-ground-1",
+      "village-ground-2",
+      "village-ground-3",
+      "village-ground-4",
+      "village-ground-5",
+      "village-ground-6",
+      "village-ground-7",
+      "village-ground-8",
+      "village-ground-9",
+      "village-ground-10",
+      "village-ground-11",
+      "village-ground-12",
+      "village-ground-13",
+      "village-ground-14",
+      "village-ground-15"
+    ]
+  },
+  "terrains": {
+    "dirt": {
+      "kind": "corners",
+      "sprites": [
+        "village-ground-0",
+        "village-ground-1",
+        "village-ground-2",
+        "village-ground-3",
+        "village-ground-4",
+        "village-ground-5",
+        "village-ground-6",
+        "village-ground-7",
+        "village-ground-8",
+        "village-ground-9",
+        "village-ground-10",
+        "village-ground-11",
+        "village-ground-12",
+        "village-ground-13",
+        "village-ground-14",
+        "village-ground-15"
+      ]
+    }
+  }
+}
