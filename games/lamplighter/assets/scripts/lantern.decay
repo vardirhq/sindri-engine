@@ -35,7 +35,7 @@ script Lantern {
         Effects.burst_at(this.sparks, this.transform.world_position.x, this.transform.world_position.y + 2.6);
         Camera.add_trauma(0.18);
         Game.lit += 1.0;
-        if World.has_tag(this.entity, "goal") {
+        if World.has_tag(this.entity, "goal") || Game.lit >= Game.total {
             Game.won = true;
         }
     }

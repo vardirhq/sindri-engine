@@ -1,0 +1,22 @@
+{
+  "format_version": 1,
+  "anchor": "bottom",
+  "grid": {
+    "columns": 12,
+    "rows": 1,
+    "names": [
+      "bakery-unlit",
+      "bakery-lit",
+      "child-house-unlit",
+      "child-house-lit",
+      "workshop-unlit",
+      "workshop-lit",
+      "keeper-unlit",
+      "keeper-lit",
+      "chapel-unlit",
+      "chapel-lit",
+      "well",
+      "signpost"
+    ]
+  }
+}

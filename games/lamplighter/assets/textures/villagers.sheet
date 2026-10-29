@@ -1,0 +1,26 @@
+{
+  "format_version": 1,
+  "anchor": "bottom",
+  "grid": {
+    "columns": 4,
+    "rows": 4,
+    "names": [
+      "baker-south",
+      "baker-west",
+      "baker-north",
+      "baker-east",
+      "child-south",
+      "child-west",
+      "child-north",
+      "child-east",
+      "mender-south",
+      "mender-west",
+      "mender-north",
+      "mender-east",
+      "elder-south",
+      "elder-west",
+      "elder-north",
+      "elder-east"
+    ]
+  }
+}

@@ -2,6 +2,13 @@
 
 # Changelog
 
+- Add the village to Lamplighter: the lamplit square beyond the Dim Fields, which the last
+  fields lamp now leads to. Four lamps stand round a well, and each opens one house: its
+  windows light, the warm light inside it comes up, and its villager (the baker, the child, the
+  mender, the keeper) steps out and turns to face Wick as he passes. The houses, the chapel,
+  the well and the signpost are new Pixel Lab art in a top-down, roof-from-above style, and so
+  are the villagers. The gloom keep to the dark beyond the lamps, whose pools are safe. Lighting
+  all four lamps finishes the village.
 - Add game feel to Lamplighter. A gloom's pounce that lands shakes the camera hard, throws a
   spray of embers off Wick, flashes the screen red and Wick himself, shoves him back harder,
   and leaves him blinking while he cannot be hurt again. A blade that lands shakes the camera

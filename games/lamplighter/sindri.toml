@@ -5,5 +5,6 @@ name = "Lamplighter"
 main_scene = "assets/title.scene"
 scenes = [
   "assets/world.scene",
+  "assets/village.scene",
   "assets/pause.scene",
 ]
