@@ -2,7 +2,7 @@
   "format_version": 1,
   "anchor": "bottom",
   "grid": {
-    "columns": 39,
+    "columns": 41,
     "rows": 1,
     "names": [
       "bakery-unlit",
@@ -37,6 +37,8 @@
       "notice",
       "oak-1",
       "oak-2",
+      "oak-3",
+      "oak-4",
       "scarecrow",
       "stall-blue",
       "stall-red",
