@@ -288,6 +288,13 @@ def wick():
         entity('wick-lantern', 'wick-lantern', at(*LANTERN_START), 'wick'),
         entity('wick-lantern-sprite', 'wick-lantern-sprite', at(0, 0, 0, 0.6, 0.8), 'wick-lantern', **{
             'sindri.sprite': {'texture': 'textures/lantern.png', 'layer': 5, 'tint': [1.0, 1.0, 1.0, 1.0]}}),
+        # Embers that lift off the flame, and a faint glow that swells and fades round it.
+        entity('wick-embers', 'wick-embers', at(0, 0.05, 0.001), 'wick-lantern', **{'sindri.particles': motes(
+            16.0, 1.3, 0.6, [[1.0, 0.8, 0.4, 0.0], [1.0, 0.65, 0.22, 1.0], [0.9, 0.3, 0.08, 0.0]], 0.2, 0.03,
+            spread=60.0, shape_size=[0.25, 0.1], gravity=[0.0, 0.9], drag=0.4, layer=6)}),
+        entity('wick-glow', 'wick-glow', at(0, 0, -0.001), 'wick-lantern', **{'sindri.particles': motes(
+            2.5, 1.4, 0.0, [[1.0, 0.7, 0.3, 0.0], [1.0, 0.7, 0.3, 0.36], [1.0, 0.6, 0.25, 0.0]], 1.4, 2.4,
+            spread=360.0, shape_size=[0.1, 0.1], gravity=[0.0, 0.0], drag=1.0, layer=4)}),
         entity('wick-light', 'wick-light', at(0, 0, 0.1), 'wick-lantern', **{
             'sindri.light2d': {'enabled': True, 'color': [1.0, 0.76, 0.42, 1.0], 'intensity': 1.5,
                                'radius': 10.0, 'falloff': 1.3, 'height': 1.0, 'shadows': True,
@@ -376,8 +383,15 @@ def ground_cover():
             components['sindri.light2d'] = {'enabled': True, 'color': [0.45, 0.85, 1.0, 1.0], 'intensity': 0.7,
                                             'radius': 2.8, 'falloff': 1.6, 'height': 0.6, 'shadows': False}
         flip = -1 if rng.random() < 0.5 else 1
-        out.append(entity(f'cover-{len(out) + 1}', f'cover-{len(out) + 1}', at(x, y, depth(y) - 0.2, 1.5 * flip, 1.5),
-                          **components))
+        ident = f'cover-{len(out) + 1}'
+        out.append(entity(ident, ident, at(x, y, depth(y) - 0.2, 1.5 * flip, 1.5), **components))
+        if kind == 'mushrooms':
+            # Spores drift up off them, in the same cool light.
+            out.append(entity(ident + '-spores', ident + '-spores', at(0, 0.3, 0.001), ident, **{
+                'sindri.particles': motes(3.5, 3.2, 0.25, [[0.5, 0.95, 1.0, 0.0], [0.5, 0.9, 1.0, 0.85],
+                                                           [0.4, 0.8, 1.0, 0.0]], 0.17, 0.03,
+                                          spread=100.0, shape_size=[0.4, 0.2], gravity=[0.0, 0.3], drag=0.5,
+                                          layer=6)}))
     return out
 
 
@@ -423,10 +437,10 @@ def field():
             'sindri.script': {'source': 'scripts/hud.decay', 'script': 'Hud', 'properties': {}}}),
         # How much of the lantern is left: it empties when a gloom's pounce lands and fills as
         # the scorch wears off, and goes red as it runs low.
-        meter('hud-lantern-back', 'hud', 0.0, -0.07, 0.34, 0.024, [0.03, 0.03, 0.05, 0.75], 98),
-        meter('hud-lantern-fill', 'hud', 0.0, -0.07, 0.34, 0.024, [1.0, 0.78, 0.4, 1.0], 99, fill=1.0),
+        meter('hud-lantern-back', None, 0.0, -0.105, 0.45, 0.02, [0.03, 0.03, 0.05, 0.75], 98),
+        meter('hud-lantern-fill', None, 0.0, -0.105, 0.45, 0.02, [1.0, 0.78, 0.4, 1.0], 99, fill=1.0),
         # The red that comes over the screen for a moment when Wick is hit.
-        entity('hud-flash', 'hud-flash', at(0, 0, 0, 1.0, 1.0), **{'sindri.ui.image': {
+        entity('hud-flash', 'hud-flash', at(0, 0, 0, 3.0, 5.0), **{'sindri.ui.image': {
             'anchor': 'bottom_left', 'layer': 120, 'texture': 'textures/white.png', 'tint': [0.9, 0.1, 0.05, 0.0]}}),
     ]
     return ents
