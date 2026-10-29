@@ -2,6 +2,11 @@
 
 # Changelog
 
+- Add the safe pool to Lamplighter: a lamp post Wick has lit shelters everything within five
+  units of it. The gloom, brute included, do not hunt Wick while he stands in a pool, and a
+  gloom that is in one is driven out of it and cannot wind up there, so a lit lamp is
+  somewhere to stop and breathe, not only a step toward the goal. `gloom.decay` reads the
+  lamps' `lit` and takes a `pool` radius.
 - Redesign Wick's lantern in Lamplighter. It was part of his sprite, held on a pole in the
   south and north art and low in the hand in the east and west, so it was never the same
   lantern. Wick is now drawn with empty hands (new Pixel Lab art, all four directions, walk and
