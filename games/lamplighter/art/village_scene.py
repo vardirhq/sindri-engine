@@ -203,21 +203,22 @@ def scatter():
     """Trees and bushes, thicker towards the edge of the map, clear of the roads, the houses, what
     is placed by hand, Wick's way in and where the gloom start; and small things on the grass."""
     rng = random.Random(7)
-    taken = ([(x, y, 4.2) for _, _, x, y, *_ in HOUSES] + [(x, y, 2.0) for _, _, x, y, _ in BY_HAND]
+    taken = ([(x, y, 5.6) for _, _, x, y, *_ in HOUSES] + [(x, y, 2.0) for _, _, x, y, _ in BY_HAND]
              + [(x, y, 3.5) for x, y in GLOOM_AT] + [(-20.0, 0.0, 3.0), (*POND, 6.5)] + [(x, y, 2.0) for x, y in LAMPS])
-    kinds = [('oak-1', (0.45, 0.3, 0.3)), ('oak-2', (0.4, 0.25, 0.25)), ('tree-1', (0.3, 0.2, 0.2)),
+    kinds = [('oak-1', (0.45, 0.3, 0.3)), ('oak-2', (0.45, 0.3, 0.3)), ('oak-3', (0.45, 0.3, 0.3)),
+             ('oak-4', (0.45, 0.3, 0.3)), ('tree-1', (0.3, 0.2, 0.2)),
              ('tree-2', (0.3, 0.2, 0.2)), ('bush-1', (0.55, 0.35, 0.35)), ('bush-2', (0.55, 0.35, 0.35)),
              ('bush-3', (0.55, 0.35, 0.35)), ('bush-4', (0.55, 0.35, 0.35))]
     placed = []
     out = []
     tries = 0
-    while len(placed) < 110 and tries < 6000:
+    while len(placed) < 135 and tries < 6000:
         tries += 1
         x, y = rng.uniform(-22.4, 22.4), rng.uniform(-18.4, 18.0)
         edge = max(abs(x) / 23.0, abs(y) / 19.0)
         if rng.random() > edge ** 2.2 + 0.04:
             continue
-        if not clear_of_roads(x, y, 1.1) or any(math.hypot(x - tx, y - ty) < r for tx, ty, r in taken):
+        if not clear_of_roads(x, y, 2.3) or any(math.hypot(x - tx, y - ty) < r for tx, ty, r in taken):
             continue
         if any(math.hypot(x - px, y - py) < 1.5 for px, py in placed):
             continue

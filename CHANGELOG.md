@@ -2,6 +2,11 @@
 
 # Changelog
 
+- Redraw the Lamplighter village in one palette. Houses, trees, bushes, lamps, the well, stalls and
+  props are Pixel Lab pieces locked to a palette taken from a reference picture, the ground is graded
+  into it, and the yards are fenced. Chimney smoke now rises from the chimneys, warm light pools sit
+  at each door, the well, the stalls and the chapel, a pond with a dock fills the south-west corner,
+  and big oak canopies crowd the edge of the map.
 - Dress the Lamplighter village. The houses, lamp posts, well, stalls, gardens and the rest are
   new Pixel Lab art generated in the style of a reference picture, with dark mossy roofs and
   warm windows, and each house still opens when its lamp is lit. The ground is four layers of
