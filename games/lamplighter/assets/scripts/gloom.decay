@@ -128,7 +128,7 @@ script Gloom {
         var out_y: number = 0.0;
         for lamp in World.with_tag("lantern") {
             let post = Lantern.on(lamp);
-            if post != null && post.lit {
+            if post != null && this.age > 0.1 && post.lit {
                 let lamp_x = lamp.transform.world_position.x;
                 let lamp_y = lamp.transform.world_position.y;
                 let from_x = here.x - lamp_x;

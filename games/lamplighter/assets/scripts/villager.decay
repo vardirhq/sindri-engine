@@ -1,0 +1,51 @@
+// A villager. They stay out of sight until their lamp is lit, then fade in at their door and
+// stand there, turning to face Wick when he comes near.
+script Villager {
+    // The lamp that brings this villager out.
+    @export let lamp_name: String = "";
+    // How near Wick must be for them to turn to him, and how long they take to appear.
+    @export let notice: number = 5.0;
+    @export let appear_for: number = 1.2;
+
+    var lamp: Entity = null;
+    var wick: Entity = null;
+    var out: bool = false;
+    var shown: number = 0.0;
+    var facing: String = "south";
+    var age: number = 0.0;
+
+    fn start() {
+        this.lamp = World.find(this.lamp_name);
+        this.wick = World.find("Wick");
+    }
+
+    fn update(dt: number) {
+        // The lamps start on the first frame, so a villager waits a moment to ask one.
+        this.age += dt;
+        let post = Lantern.on(this.lamp);
+        if !this.out && this.age > 0.1 && post != null && post.lit {
+            this.out = true;
+        }
+        if !this.out {
+            return;
+        }
+        this.shown = min(1.0, this.shown + dt / this.appear_for);
+        this.sprite.tint = Color(1.0, 1.0, 1.0, this.shown);
+        if this.wick != null && World.exists(this.wick) {
+            let dx = this.wick.transform.world_position.x - this.transform.world_position.x;
+            let dy = this.wick.transform.world_position.y - this.transform.world_position.y;
+            var want: String = "south";
+            if sqrt(dx * dx + dy * dy) < this.notice {
+                if abs(dx) >= abs(dy) {
+                    if dx > 0.0 { want = "east"; } else { want = "west"; }
+                } else {
+                    if dy > 0.0 { want = "north"; } else { want = "south"; }
+                }
+            }
+            if want != this.facing {
+                this.facing = want;
+                Animation.play(this.entity, want);
+            }
+        }
+    }
+}

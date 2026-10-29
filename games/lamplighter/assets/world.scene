@@ -14184,7 +14184,9 @@
         "sindri.script": {
           "source": "scripts/hud.decay",
           "script": "Hud",
-          "properties": {}
+          "properties": {
+            "next_scene": "village.scene"
+          }
         }
       }
     },

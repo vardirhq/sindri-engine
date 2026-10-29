@@ -1,0 +1,70 @@
+// The square's ground: grass, with a dirt road in from the west, across the square and out to
+// the east, and a way north to the chapel, laid corner by corner on the sheet's `dirt`
+// terrain as the Dim Fields' path is. Each lamp and the well then get a pad of paving on the
+// `road` layer above. Painted once, as the scene opens.
+script VillageGround {
+    // The world position of the map's top-left corner.
+    @export let left: number = -23.0;
+    @export let top: number = 19.0;
+    // Half the width of a road, and half the side of the square.
+    @export let half: number = 1.3;
+    @export let square: number = 6.0;
+    // How far the paving reaches from a lamp, and from the well.
+    @export let pad: number = 1.6;
+    @export let well_pad: number = 3.0;
+
+    var lamp_x: List<number> = [-3.5, 3.5, -3.5, 3.5];
+    var lamp_y: List<number> = [3.5, 3.5, -3.5, -3.5];
+
+    fn start() {
+        let map = this.entity;
+        let columns = Grid.columns(map);
+        let rows = Grid.rows(map);
+        for row in 0..rows + 1.0 {
+            for column in 0..columns + 1.0 {
+                if on_road(this.left + column, this.top - row) {
+                    Grid.set_terrain_corner(map, column, row, "dirt", true);
+                }
+            }
+        }
+        let road = World.find("road");
+        for row in 0..rows + 1.0 {
+            for column in 0..columns + 1.0 {
+                let x = this.left + column;
+                let y = this.top - row;
+                if paved(x, y) {
+                    Grid.set_terrain_corner(road, column, row, "stone", true);
+                }
+            }
+        }
+    }
+
+    // On a road: the west road, the square, the north way or the east road.
+    fn on_road(x: number, y: number) -> bool {
+        if abs(y) <= this.half && (x <= -this.square + 1.0 || x >= this.square - 1.0) {
+            return true;
+        }
+        if abs(x) <= this.square && abs(y) <= this.square {
+            return true;
+        }
+        if abs(x) <= this.half && y >= 0.0 && y <= 13.0 {
+            return true;
+        }
+        return false;
+    }
+
+    // Paved round the well and each lamp.
+    fn paved(x: number, y: number) -> bool {
+        if sqrt(x * x + (y - 0.4) * (y - 0.4)) <= this.well_pad {
+            return true;
+        }
+        for i in 0..this.lamp_x.length {
+            let dx = x - this.lamp_x[i];
+            let dy = y - this.lamp_y[i];
+            if sqrt(dx * dx + dy * dy) <= this.pad {
+                return true;
+            }
+        }
+        return false;
+    }
+}

@@ -1,0 +1,36 @@
+// A house of the village. It stands dark, its windows unlit, until its lamp is lit; then it
+// swaps to its lit picture, the warm light inside it comes up, and a few sparks and a small
+// shake mark it. Its villager (`villager.decay`) comes out on the same lamp.
+script House {
+    // The lamp that opens this house, and the light inside it.
+    @export let lamp_name: String = "";
+    @export let glow_name: String = "";
+    // How bright the light inside comes up, and how fast.
+    @export let glow_to: number = 1.0;
+    @export let glow_rate: number = 1.2;
+
+    var lamp: Entity = null;
+    var glow: Entity = null;
+    var open: bool = false;
+    var warmth: number = 0.0;
+    var age: number = 0.0;
+
+    fn start() {
+        this.lamp = World.find(this.lamp_name);
+        this.glow = World.find(this.glow_name);
+    }
+
+    fn update(dt: number) {
+        // The lamps start on the first frame, so a house waits a moment to ask one.
+        this.age += dt;
+        let post = Lantern.on(this.lamp);
+        if !this.open && this.age > 0.1 && post != null && post.lit {
+            this.open = true;
+            Animation.play(this.entity, "lit");
+        }
+        if this.open {
+            this.warmth = min(1.0, this.warmth + this.glow_rate * dt);
+            this.glow.light2d.intensity = this.glow_to * this.warmth;
+        }
+    }
+}

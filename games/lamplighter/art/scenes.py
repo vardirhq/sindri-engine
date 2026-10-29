@@ -395,8 +395,8 @@ def ground_cover():
     return out
 
 
-def field():
-    actions = [
+def input_actions():
+    return [
         {'name': 'move_x', 'kind': 'axis', 'bindings': [
             {'axis': {'negative': 'key.A', 'positive': 'key.D'}},
             {'axis': {'negative': 'key.ArrowLeft', 'positive': 'key.ArrowRight'}},
@@ -408,6 +408,30 @@ def field():
             {'axis': {'negative': 'gamepad.dpad_down', 'positive': 'gamepad.dpad_up'}}]},
         {'name': 'attack', 'kind': 'button', 'bindings': ['key.J', 'key.Space', 'gamepad.west']},
         {'name': 'pause', 'kind': 'button', 'bindings': ['key.Escape', 'gamepad.start']}]
+
+
+def hud(next_scene):
+    """The lantern count, the lantern's bar and the red flash a hit leaves; `next_scene` is
+    where the last lamp's glow leads."""
+    return [
+        entity('hud', 'HUD', at(0.03, -0.03, 0), **{
+            'sindri.ui.text': {'anchor': 'top_left', 'color': [1, 0.95, 0.6, 1], 'font': 'fonts/Inter.ttf',
+                               'font_size': 0.04, 'line_height': 0.048, 'layer': 100,
+                               'text': 'Lanterns {}/{}', 'bold': True,
+                               'shadow': {'offset': [0, -0.003], 'color': [0, 0, 0, 0.45], 'softness': 0.002}},
+            'sindri.script': {'source': 'scripts/hud.decay', 'script': 'Hud', 'properties': {'next_scene': next_scene}}}),
+        # How much of the lantern is left: it empties when a gloom's pounce lands and fills as
+        # the scorch wears off, and goes red as it runs low.
+        meter('hud-lantern-back', None, 0.0, -0.105, 0.45, 0.02, [0.03, 0.03, 0.05, 0.75], 98),
+        meter('hud-lantern-fill', None, 0.0, -0.105, 0.45, 0.02, [1.0, 0.78, 0.4, 1.0], 99, fill=1.0),
+        # The red that comes over the screen for a moment when Wick is hit.
+        entity('hud-flash', 'hud-flash', at(0, 0, 0, 3.0, 5.0), **{'sindri.ui.image': {
+            'anchor': 'bottom_left', 'layer': 120, 'texture': 'textures/white.png', 'tint': [0.9, 0.1, 0.05, 0.0]}}),
+    ]
+
+
+def field():
+    actions = input_actions()
     stone = [0.02, 0.02, 0.04, 1.0]
     ents = [
         camera(0, 0, 'wick'),
@@ -429,19 +453,7 @@ def field():
         gloom('gloom-1', 6.5, 0, 1), *wisps('gloom-1'), gloom('gloom-2', -5, 0, 3), *wisps('gloom-2'),
         gloom('gloom-3', 14, 5.5, 0), *wisps('gloom-3'),
         gloom('brute-1', 19.5, 4.5, 2, brute=True), *wisps('brute-1'),
-        entity('hud', 'HUD', at(0.03, -0.03, 0), **{
-            'sindri.ui.text': {'anchor': 'top_left', 'color': [1, 0.95, 0.6, 1], 'font': 'fonts/Inter.ttf',
-                               'font_size': 0.04, 'line_height': 0.048, 'layer': 100,
-                               'text': 'Lanterns {}/{}', 'bold': True,
-                               'shadow': {'offset': [0, -0.003], 'color': [0, 0, 0, 0.45], 'softness': 0.002}},
-            'sindri.script': {'source': 'scripts/hud.decay', 'script': 'Hud', 'properties': {}}}),
-        # How much of the lantern is left: it empties when a gloom's pounce lands and fills as
-        # the scorch wears off, and goes red as it runs low.
-        meter('hud-lantern-back', None, 0.0, -0.105, 0.45, 0.02, [0.03, 0.03, 0.05, 0.75], 98),
-        meter('hud-lantern-fill', None, 0.0, -0.105, 0.45, 0.02, [1.0, 0.78, 0.4, 1.0], 99, fill=1.0),
-        # The red that comes over the screen for a moment when Wick is hit.
-        entity('hud-flash', 'hud-flash', at(0, 0, 0, 3.0, 5.0), **{'sindri.ui.image': {
-            'anchor': 'bottom_left', 'layer': 120, 'texture': 'textures/white.png', 'tint': [0.9, 0.1, 0.05, 0.0]}}),
+        *hud('village.scene'),
     ]
     return ents
 
@@ -452,6 +464,8 @@ def main():
     write('pause.scene', 'Lamplighter pause', menu(
         'Pause', 'Paused', 'The light waits for you.', [('resume', 'Resume'), ('title', 'Title')]))
     write('world.scene', 'The Dim Fields', field())
+    import village_scene  # the square beyond the fields, which borrows this file's pieces
+    village_scene.main()
 
 
 if __name__ == '__main__':
