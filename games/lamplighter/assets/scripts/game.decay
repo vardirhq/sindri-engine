@@ -13,4 +13,6 @@ state Game {
     var truce: number = 0.0;
     // Set once Wick first walks: until then the gloom only lurk, so the field opens calm.
     var moved: bool = false;
+    // How hard Wick has just been hit, 1 at the blow and fading: the red over the screen.
+    var hit: number = 0.0;
 }

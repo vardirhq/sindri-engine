@@ -58,6 +58,11 @@
               16
             ],
             "contain_view": true
+          },
+          "shake": {
+            "strength": 0.55,
+            "decay": 3.2,
+            "frequency": 42.0
           }
         }
       }
@@ -11801,7 +11806,13 @@
       "components": {
         "sindri.sprite": {
           "texture": "textures/wick.png#idle-south",
-          "layer": 5
+          "layer": 5,
+          "tint": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
         },
         "sindri.shadow2d": {
           "contact_size": [
@@ -12123,6 +12134,170 @@
             "base_intensity": 1.1,
             "base_radius": 4.6
           }
+        }
+      }
+    },
+    {
+      "id": "fx-hurt",
+      "name": "fx-hurt",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1
+        ]
+      },
+      "components": {
+        "sindri.effect.burst": {
+          "texture": "textures/mote.png",
+          "count": 24,
+          "speed": 6.5,
+          "spread": 0.6,
+          "lifetime": 0.55,
+          "size": 0.28,
+          "tint": [
+            1.0,
+            0.5,
+            0.18,
+            1.0
+          ],
+          "fade": true,
+          "drag": 0.06,
+          "layer": 7
+        }
+      }
+    },
+    {
+      "id": "fx-gloom-hit",
+      "name": "fx-gloom-hit",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1
+        ]
+      },
+      "components": {
+        "sindri.effect.burst": {
+          "texture": "textures/mote.png",
+          "count": 12,
+          "speed": 4.5,
+          "spread": 0.6,
+          "lifetime": 0.4,
+          "size": 0.24,
+          "tint": [
+            0.62,
+            0.3,
+            0.95,
+            1.0
+          ],
+          "fade": true,
+          "drag": 0.06,
+          "layer": 7
+        }
+      }
+    },
+    {
+      "id": "fx-gloom-out",
+      "name": "fx-gloom-out",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1
+        ]
+      },
+      "components": {
+        "sindri.effect.burst": {
+          "texture": "textures/mote.png",
+          "count": 30,
+          "speed": 5.5,
+          "spread": 0.8,
+          "lifetime": 0.8,
+          "size": 0.32,
+          "tint": [
+            0.5,
+            0.22,
+            0.85,
+            1.0
+          ],
+          "fade": true,
+          "drag": 0.06,
+          "layer": 7
+        }
+      }
+    },
+    {
+      "id": "fx-spark",
+      "name": "fx-spark",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1
+        ]
+      },
+      "components": {
+        "sindri.effect.burst": {
+          "texture": "textures/mote.png",
+          "count": 34,
+          "speed": 5.0,
+          "spread": 0.7,
+          "lifetime": 0.7,
+          "size": 0.24,
+          "tint": [
+            1.0,
+            0.82,
+            0.42,
+            1.0
+          ],
+          "fade": true,
+          "drag": 0.06,
+          "layer": 7
         }
       }
     },
@@ -13198,6 +13373,117 @@
           "source": "scripts/hud.decay",
           "script": "Hud",
           "properties": {}
+        }
+      }
+    },
+    {
+      "id": "hud-lantern-back",
+      "name": "hud-lantern-back",
+      "transform_3d": {
+        "position": [
+          0.0,
+          -0.07,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.34,
+          0.024,
+          1
+        ]
+      },
+      "parent": "hud",
+      "components": {
+        "sindri.ui.image": {
+          "anchor": "top_left",
+          "layer": 98,
+          "texture": "textures/white.png",
+          "tint": [
+            0.03,
+            0.03,
+            0.05,
+            0.75
+          ]
+        }
+      }
+    },
+    {
+      "id": "hud-lantern-fill",
+      "name": "hud-lantern-fill",
+      "transform_3d": {
+        "position": [
+          0.0,
+          -0.07,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.34,
+          0.024,
+          1
+        ]
+      },
+      "parent": "hud",
+      "components": {
+        "sindri.ui.image": {
+          "anchor": "top_left",
+          "layer": 99,
+          "texture": "textures/white.png",
+          "tint": [
+            1.0,
+            0.78,
+            0.4,
+            1.0
+          ],
+          "fill": {
+            "amount": 1.0,
+            "from": "left"
+          }
+        }
+      }
+    },
+    {
+      "id": "hud-flash",
+      "name": "hud-flash",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.image": {
+          "anchor": "bottom_left",
+          "layer": 120,
+          "texture": "textures/white.png",
+          "tint": [
+            0.9,
+            0.1,
+            0.05,
+            0.0
+          ]
         }
       }
     }

@@ -4,9 +4,23 @@ script Hud {
     @export let linger: number = 3.0;
 
     var won_for: number = 0.0;
+    var fill: Entity = null;
+    var flash: Entity = null;
+
+    fn start() {
+        this.fill = World.find("hud-lantern-fill");
+        this.flash = World.find("hud-flash");
+    }
 
     fn update(dt: number) {
         Ui.set_numbers(this.entity, Game.lit, Game.total);
+        // The lantern's bar, amber and going red as it runs low, and the red over the
+        // screen that a hit leaves and takes back.
+        let left = 1.0 - Game.scorch;
+        Ui.set_fill(this.fill, left);
+        this.fill.ui_image.tint = Color(1.0, 0.2 + 0.58 * left, 0.1 + 0.3 * left, 1.0);
+        Game.hit = max(0.0, Game.hit - dt * 2.2);
+        this.flash.ui_image.tint = Color(0.9, 0.1, 0.05, 0.4 * Game.hit);
         if Game.won {
             this.won_for += dt;
             if this.won_for >= this.linger {

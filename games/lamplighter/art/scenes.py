@@ -41,7 +41,9 @@ def camera(x=0.0, y=0.0, follow=None):
         components['sindri.camera.behavior'] = {
             'follow': {'target': follow, 'offset': [0, 1.2, 0], 'dead_zone': [0.5, 0.5],
                        'smoothing': 8, 'max_speed': 30},
-            'confine': {'min': [-24, -16], 'max': [24, 16], 'contain_view': True}}
+            'confine': {'min': [-24, -16], 'max': [24, 16], 'contain_view': True},
+            # A hit on Wick shakes the camera hard and a blow landed shakes it a little.
+            'shake': {'strength': 0.55, 'decay': 3.2, 'frequency': 42.0}}
     return entity('camera', 'Camera', at(x, y, 10.0), **components)
 
 
@@ -235,6 +237,29 @@ def wisps(ident):
 LANTERN_START = (-0.736, 0.76, 0.003)
 
 
+def burst(ident, count, speed, size, tint, lifetime=0.5, spread=0.6, drag=0.06):
+    """A throw of flecks a script fires where something was hit or went out."""
+    return entity(ident, ident, at(0, 0, 0), **{'sindri.effect.burst': {
+        'texture': 'textures/mote.png', 'count': count, 'speed': speed, 'spread': spread, 'lifetime': lifetime,
+        'size': size, 'tint': tint, 'fade': True, 'drag': drag, 'layer': 7}})
+
+
+def effects():
+    """The bursts the scripts fire: Wick hurt, a gloom struck, a gloom put out, a lamp lit."""
+    return [burst('fx-hurt', 24, 6.5, 0.28, [1.0, 0.5, 0.18, 1.0], lifetime=0.55),
+            burst('fx-gloom-hit', 12, 4.5, 0.24, [0.62, 0.3, 0.95, 1.0], lifetime=0.4),
+            burst('fx-gloom-out', 30, 5.5, 0.32, [0.5, 0.22, 0.85, 1.0], lifetime=0.8, spread=0.8),
+            burst('fx-spark', 34, 5.0, 0.24, [1.0, 0.82, 0.42, 1.0], lifetime=0.7, spread=0.7)]
+
+
+def meter(ident, parent, x, y, w, h, tint, layer, fill=None):
+    """A bar on the HUD: a tinted white square, drawn in part when it has a fill."""
+    image = {'anchor': 'top_left', 'layer': layer, 'texture': 'textures/white.png', 'tint': tint}
+    if fill is not None:
+        image['fill'] = {'amount': fill, 'from': 'left'}
+    return entity(ident, ident, at(x, y, 0, w, h), parent, **{'sindri.ui.image': image})
+
+
 def wick():
     """Wick stands where the entity is: the sprite grows up from the feet."""
     body = {'kind': 'dynamic', 'pose': {'position': [0, 0], 'rotation': 0}, 'linear_velocity': [0, 0],
@@ -251,7 +276,7 @@ def wick():
             'sindri.script': {'source': 'scripts/wick.decay', 'script': 'Wick', 'properties': {}}}),
         # One pixel of the art is a sixteenth of a world unit.
         entity('wick-sprite', 'wick-sprite', at(0, 0, 0, 3.0, 2.75), 'wick', **{
-            'sindri.sprite': {'texture': 'textures/wick.png#idle-south', 'layer': 5},
+            'sindri.sprite': {'texture': 'textures/wick.png#idle-south', 'layer': 5, 'tint': [1.0, 1.0, 1.0, 1.0]},
             'sindri.shadow2d': shadow(0.9, 0.35),
             'sindri.animation.sprite': {'clips': clips(), 'playing': 'idle-south', 'speed': 1}}),
         # The lantern is not part of Wick's sprite. It floats about him on its own, circling
@@ -386,6 +411,7 @@ def field():
         *scenery(),
         *lantern('lantern-1', 8, 0), *lantern('lantern-2', 17, -3), *lantern('lantern-3', 22, 8, goal=True),
         *wick(),
+        *effects(),
         gloom('gloom-1', 6.5, 0, 1), *wisps('gloom-1'), gloom('gloom-2', -5, 0, 3), *wisps('gloom-2'),
         gloom('gloom-3', 14, 5.5, 0), *wisps('gloom-3'),
         gloom('brute-1', 19.5, 4.5, 2, brute=True), *wisps('brute-1'),
@@ -395,6 +421,13 @@ def field():
                                'text': 'Lanterns {}/{}', 'bold': True,
                                'shadow': {'offset': [0, -0.003], 'color': [0, 0, 0, 0.45], 'softness': 0.002}},
             'sindri.script': {'source': 'scripts/hud.decay', 'script': 'Hud', 'properties': {}}}),
+        # How much of the lantern is left: it empties when a gloom's pounce lands and fills as
+        # the scorch wears off, and goes red as it runs low.
+        meter('hud-lantern-back', 'hud', 0.0, -0.07, 0.34, 0.024, [0.03, 0.03, 0.05, 0.75], 98),
+        meter('hud-lantern-fill', 'hud', 0.0, -0.07, 0.34, 0.024, [1.0, 0.78, 0.4, 1.0], 99, fill=1.0),
+        # The red that comes over the screen for a moment when Wick is hit.
+        entity('hud-flash', 'hud-flash', at(0, 0, 0, 1.0, 1.0), **{'sindri.ui.image': {
+            'anchor': 'bottom_left', 'layer': 120, 'texture': 'textures/white.png', 'tint': [0.9, 0.1, 0.05, 0.0]}}),
     ]
     return ents
 
