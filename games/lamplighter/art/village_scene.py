@@ -69,7 +69,8 @@ BY_HAND = [
     ('flowers-6', 'flowers-purple', -4.0, 8.2, None),
     ('flowers-7', 'flowers-purple-2', -4.2, -8.6, None),
 ]
-GLOOM_AT = [(-17.0, -15.0), (17.0, 15.0)]
+GLOOM_AT = [(-21.0, -6.5), (17.0, 15.0)]
+POND = (-17.0, -15.6)      # the pond's middle; the dock runs into it from the road side
 
 
 def standing(ident, sprite, x, y, block, occlude=True, flip=False, size=CELL, **more):
@@ -112,6 +113,26 @@ def warmth():
     out += [glow('well-glow', 0.0, 1.3, 4.2, 0.8), glow('chapel-glow', 0.0, 12.6, 4.5, 0.7),
             glow('stall-glow-1', -17.4, 3.2, 3.4, 0.7), glow('stall-glow-2', 17.4, 3.2, 3.4, 0.7)]
     return out
+
+
+def pond():
+    """The pond at the south-west corner, with a dock running out into it and a lantern at the end.
+    The stones round it stop Wick, except along the dock."""
+    px, py = POND
+    parts = []
+    parts.append(entity('pond', 'pond', at(px, py, -0.5, 9.0, 6.5), **{
+        'sindri.sprite': {'texture': 'textures/pond.png#pond', 'layer': -5}}))
+    for n, (lo, hi) in enumerate(((px - 3.6, px - 0.9), (px + 0.9, px + 3.6))):
+        parts.append(entity(f'pond-edge-{n}', f'pond-edge-{n}', at((lo + hi) / 2, py, 0.0), **{
+            'sindri.physics2d.rigid_body': static_body(),
+            'sindri.physics2d.collider': {
+                'shape': {'shape': 'box', 'half_extents': [(hi - lo) / 2, 2.1]}, 'offset': [0, 0], 'rotation': 0,
+                'sensor': False, 'layers': {'memberships': WALL, 'filter': ALL}, 'friction': 0, 'restitution': 0}}))
+    # The dock hangs from the road bank (the sprite is drawn lantern end up, so it is flipped).
+    parts.append(entity('dock', 'dock', at(px, py + 3.2, depth(py) + 0.05, 1.5, -4.0), **{
+        'sindri.sprite': {'texture': 'textures/dock.png#dock', 'layer': 2}}))
+    parts.append(glow('dock-glow', px + 0.6, py - 0.9, 5.0, 1.6, 0.9))
+    return parts
 
 
 def smoke(ident, x, y):
@@ -183,7 +204,7 @@ def scatter():
     is placed by hand, Wick's way in and where the gloom start; and small things on the grass."""
     rng = random.Random(7)
     taken = ([(x, y, 4.2) for _, _, x, y, *_ in HOUSES] + [(x, y, 2.0) for _, _, x, y, _ in BY_HAND]
-             + [(x, y, 3.5) for x, y in GLOOM_AT] + [(-20.0, 0.0, 3.0)] + [(x, y, 2.0) for x, y in LAMPS])
+             + [(x, y, 3.5) for x, y in GLOOM_AT] + [(-20.0, 0.0, 3.0), (*POND, 6.5)] + [(x, y, 2.0) for x, y in LAMPS])
     kinds = [('oak-1', (0.45, 0.3, 0.3)), ('oak-2', (0.4, 0.25, 0.25)), ('tree-1', (0.3, 0.2, 0.2)),
              ('tree-2', (0.3, 0.2, 0.2)), ('bush-1', (0.55, 0.35, 0.35)), ('bush-2', (0.55, 0.35, 0.35)),
              ('bush-3', (0.55, 0.35, 0.35)), ('bush-4', (0.55, 0.35, 0.35))]
@@ -211,7 +232,7 @@ def decor():
     """Tufts, night flowers, pebbles and glowing mushrooms over the grass, as in the fields."""
     rng = random.Random(13)
     taken = ([(x, y, 4.0) for _, _, x, y, *_ in HOUSES] + [(x, y, 1.6) for _, _, x, y, _ in BY_HAND]
-             + [(x, y, 1.6) for x, y in LAMPS])
+             + [(x, y, 1.6) for x, y in LAMPS] + [(*POND, 6.0)])
     kinds = ['tufts'] * 2 + ['flowers'] * 5 + ['pebbles'] * 3 + ['mushrooms'] * 2
     out = []
     while len(out) < 170:
@@ -263,7 +284,7 @@ def village():
                         size=CELL, flame=2.4)
     for args in HOUSES:
         ents.append(villager(args[5], args[4], args[0], args[6]))
-    ents += warmth() + scatter() + decor()
+    ents += pond() + warmth() + scatter() + decor()
     ents += [*wick(), *effects()]
     # Wick arrives on the road from the fields, at the west edge.
     for e in ents:
