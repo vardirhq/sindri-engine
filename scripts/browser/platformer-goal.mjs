@@ -33,7 +33,11 @@ export async function platformerGoal(page, root, evidence, problems) {
   let previousTime = -1;
   let jumps = 0;
   let approachingGoal = false;
-  const deadline = Date.now() + 90000;
+  // Real time, not game time: a software renderer draws this lit level at a few frames a second, and
+  // the run needs about ten seconds of the game. It took the whole of the old ninety seconds to get
+  // from a start to the last jump, so the limit is what a slow runner needs with room to spare. A run
+  // that wins returns at once, so only a run that cannot win pays for the length of it.
+  const deadline = Date.now() + 240000;
   await page.keyboard.down('ArrowRight');
   try {
     while (Date.now() < deadline) {

@@ -92,10 +92,10 @@ pub use effects::{
     ParticlesError,
 };
 pub use extract::{
-    CameraView, ExtractProblem, OverlayPlacement, OverlayView, SceneExtractError, SceneExtractor,
-    SceneRuntime, UiCanvas, ViewCamera, VoxelGround, VoxelWorldHit, WorldProjection,
-    overlay_for_viewport, overlay_in_scene, pan_for_drag, referenced_models, voxel_space,
-    world_camera_of,
+    CameraView, ExtractProblem, LightingQuality, OverlayPlacement, OverlayView, SceneExtractError,
+    SceneExtractor, SceneRuntime, UiCanvas, ViewCamera, VoxelGround, VoxelWorldHit,
+    WorldProjection, overlay_for_viewport, overlay_in_scene, pan_for_drag, referenced_models,
+    voxel_space, world_camera_of,
 };
 pub use input_actions::InputActionsComponent;
 pub use light_field::LightField2d;

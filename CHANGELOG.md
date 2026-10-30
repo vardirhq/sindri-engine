@@ -2,6 +2,12 @@
 
 # Changelog
 
+- Make 2D lighting lighter on slow hardware. `SceneExtractor::set_lighting_quality` takes a
+  `LightingQuality`: `Reduced` keeps the eight lights nearest the camera and casts shadows from a
+  point rather than five samples, which is a fifth of the shadow work. The browser player watches
+  its real frame times and switches to it when a device stays under about 40 frames a second, so a
+  phone that stuttered through Lamplighter's village now gets a lighter version of the same
+  lighting while a desktop keeps the soft shadows. Lights a script queries are unchanged.
 - Go inside the houses in Lamplighter. Once a house's lamp is lit, its door opens: stand at it and press
   E (or Enter, or the gamepad's south button) to step into a room of its own, with Pixel Lab furniture,
   a fire and a rug, and the same button at the doorway leads back out to the village as it was left.

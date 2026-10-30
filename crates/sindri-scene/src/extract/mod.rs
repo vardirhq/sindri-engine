@@ -29,6 +29,7 @@ mod world_text;
 pub(crate) use tile_volume::face_is_occluded;
 mod lighting;
 pub(crate) mod lighting_2d;
+pub use lighting_2d::LightingQuality;
 mod shadows_2d;
 mod tilemap;
 mod tolerance;
@@ -121,6 +122,8 @@ pub struct SceneExtractor {
     /// The last valid environment, and the entity that held it, for a
     /// tolerant frame to fall back on.
     last_environment: RefCell<Option<(EntityId, crate::EnvironmentComponent)>>,
+    /// How much a frame's 2D lighting costs: see [`LightingQuality`].
+    lighting_quality: LightingQuality,
 }
 
 fn transform_matrix(transform: Transform3D) -> Mat4 {
@@ -241,7 +244,20 @@ impl SceneExtractor {
             tolerant: false,
             problems: RefCell::default(),
             last_environment: RefCell::default(),
+            lighting_quality: LightingQuality::Full,
         })
+    }
+
+    /// Chooses how much a frame's 2D lighting costs. A host that finds its frames slow
+    /// lowers it; what the world's lights *are* (and what a script asks of them) does not change.
+    pub const fn set_lighting_quality(&mut self, quality: LightingQuality) {
+        self.lighting_quality = quality;
+    }
+
+    /// How much a frame's 2D lighting costs now.
+    #[must_use]
+    pub const fn lighting_quality(&self) -> LightingQuality {
+        self.lighting_quality
     }
 
     pub const fn components(&self) -> &ComponentSchemaRegistry {
