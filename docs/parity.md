@@ -524,6 +524,7 @@ file.
 | Versioned `sindri.toml`, validation | ✅ | 🟡 | — | ✅ | **Par** | — |
 | **Native packaging (installer, icon, splash)** | ❌ | ❌ | — | ❌ | **Absent** | A desktop build cannot be shipped to a player as-is |
 | **Mobile targets** | ❌ | ❌ | — | ❌ | **Absent** | Touch input exists; a build does not |
+| **Editor on Android (Sindri Mobile)** | ❌ | ❌ | — | ❌ | **Absent** | Direction in `mobile/README.md`, progress in `mobile/first-slice.md`. A Compose app in `mobile/android` builds an APK whose Rust library (`mobile/native`) opens a project and draws a scene through the engine, but it has not been run on a device. Opening and drawing are tested headlessly by `mobile/native/tests/shows_lamplighter.rs`, and the shared authoring seams by `editor/tests/mobile_first_slice.rs`. Touch pan, pinch, selection, moving and field edits with undo are tested headlessly by `mobile/native/tests/edits_by_touch.rs`; no saving or Play on the phone |
 | **Console targets** | ❌ | ❌ | — | ❌ | **Won't** | Not a realistic target and should not pretend to be |
 
 ## Diagnostics

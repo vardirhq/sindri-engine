@@ -12,6 +12,8 @@ targets = [
     { triple = "x86_64-pc-windows-msvc" },
     { triple = "aarch64-apple-darwin" },
     { triple = "wasm32-unknown-unknown" },
+    # The Android app's native library (`mobile/native`), for the arm64 phones it targets.
+    { triple = "aarch64-linux-android" },
 ]
 all-features = true
 

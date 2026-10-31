@@ -18,7 +18,7 @@ use sindri_core::AssetId;
 use sindri_decay::{PrefabSources, ProfileSources, ScriptSources};
 
 use crate::error::PlayerError;
-use crate::project::ProjectAssets;
+use sindri_runtime::ProjectAssets;
 
 pub(crate) struct BrowserProjectLoader {
     phase: Option<LoadPhase>,

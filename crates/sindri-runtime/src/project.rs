@@ -22,7 +22,12 @@ use sindri_scene::{SceneExtractor, TileSetBindings, UiTextSizes};
 
 use crate::{Session, StepReport};
 
+mod assets;
+#[cfg(not(target_arch = "wasm32"))]
+mod directory;
 mod profiles;
+
+pub use assets::ProjectAssets;
 
 /// One fixed step at the rate every host runs gameplay.
 pub const STEP: f32 = 1.0 / 60.0;
