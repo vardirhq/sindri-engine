@@ -88,7 +88,7 @@ title = "Opens, saves, makes and forks scenes"
 summary = "Open, save canonically, reload, discard, New scene and Save as, keeping unknown components through a save."
 status = { engine = "n/a", editor = "yes", decay = "n/a", proof = "yes" }
 tests = [
-  "editor/src/scene_file.rs",
+  "crates/sindri-authoring/src/scene_file.rs",
   "editor/src/native/tests/scene.rs",
   "editor/src/native/tests/shortcuts.rs",
   "editor/tests/fixture_scene.rs",

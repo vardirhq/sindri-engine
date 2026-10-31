@@ -1,0 +1,23 @@
+[package]
+name = "sindri-authoring"
+description = "Authoring a Sindri scene on disk: opening, migrating and saving scene and prefab files, shared by every editor host"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+# Depends on the independently versioned Weave workspace through sindri-runtime.
+publish = false
+
+[dependencies]
+serde_json.workspace = true
+sindri-core = { path = "../sindri-core" }
+sindri-runtime = { path = "../sindri-runtime" }
+sindri-scene = { path = "../sindri-scene" }
+thiserror.workspace = true
+
+[dev-dependencies]
+tempfile = "3"
+
+[lints]
+workspace = true

@@ -3,6 +3,7 @@ members = [
     "editor",
     "crates/sindri",
     "crates/sindri-assets",
+    "crates/sindri-authoring",
     "crates/sindri-core",
     "crates/sindri-decay",
     "crates/sindri-diagnostics",

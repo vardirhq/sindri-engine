@@ -75,8 +75,10 @@ pub mod project;
 /// The editor-only camera used by the Scene view.
 #[cfg(not(target_arch = "wasm32"))]
 pub mod scene_camera;
+/// Opening and saving the scene the editor has open. Shared with Sindri
+/// Mobile, so it lives in `sindri-authoring`.
 #[cfg(not(target_arch = "wasm32"))]
-pub mod scene_file;
+pub use sindri_authoring::scene_file;
 /// Which of a scene's two spaces an entity belongs to.
 #[cfg(not(target_arch = "wasm32"))]
 pub mod space;

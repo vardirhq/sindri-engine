@@ -18,11 +18,13 @@
 //! the world that hands out the handles the real one is about to.
 
 mod apply;
-pub mod document;
-mod library;
-pub mod missing;
 mod subtree;
 mod sync;
+
+// Reading the prefabs a scene places, and opening one as a document, are what
+// opening and saving a scene needs, so they live in `sindri-authoring` with
+// the scene file. Placing and syncing instances stay here.
+pub use sindri_authoring::prefab::{ScenePrefabs, document, load, missing};
 
 use std::path::{Path, PathBuf};
 
@@ -32,7 +34,6 @@ use sindri_core::{
 };
 
 pub use apply::applied;
-pub use library::ScenePrefabs;
 pub use subtree::subtree_prefab;
 pub use sync::{reconcile, spawn_instance};
 
@@ -45,26 +46,6 @@ pub fn is_a_prefab(path: &Path) -> bool {
     path.file_name()
         .and_then(|name| name.to_str())
         .is_some_and(|name| name.ends_with(PREFAB_SUFFIX))
-}
-
-/// Reads a prefab from disk, or says why it cannot be used.
-///
-/// Validated here rather than at instantiation, so a prefab with two roots is
-/// refused while it is still an asset somebody chose and not a half-built
-/// subtree in their scene.
-pub fn load(path: &Path) -> Result<PrefabDocument, String> {
-    let name = path
-        .file_name()
-        .and_then(|name| name.to_str())
-        .unwrap_or("this file");
-    let json = std::fs::read_to_string(path)
-        .map_err(|error| format!("{name} could not be read: {error}"))?;
-    let document = PrefabDocument::from_json(&json)
-        .map_err(|error| format!("{name} is not valid: {error}"))?;
-    document
-        .validate()
-        .map_err(|error| format!("{name} cannot be instantiated: {error}"))?;
-    Ok(document)
 }
 
 /// The prefab the browser is pointing at, and whether it is being placed.
