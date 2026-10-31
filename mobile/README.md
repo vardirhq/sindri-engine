@@ -24,7 +24,7 @@ Preserve what makes it compelling:
 - Portrait and landscape work on real devices; tablets and external keyboard, mouse, or stylus are useful additions, not prerequisites.
 - Accessibility, readable text, sufficient contrast, usable touch targets, system insets, keyboard handling, and screen-reader semantics are part of the design.
 
-Use the prototype as an acceptance reference: retain its assets and interaction intent, document its states and gestures, and compare implementation captures with it on actual phones. Exercise dense scenes and long names, not just curated sample content. The prototype itself is an external reference supplied during exploration, not yet a tracked repository artifact; preserve or recreate it in a suitable reviewable form before relying on it as an implementation test.
+Use the prototype as an acceptance reference: retain its assets and interaction intent, document its states and gestures, and compare implementation captures with it on actual phones. Exercise dense scenes and long names, not just curated sample content. The prototype is tracked in [`prototype/`](prototype/index.html). Open `mobile/prototype/index.html` in a browser at a phone-sized viewport; it loads Lamplighter's textures directly from `games/lamplighter/assets/textures/` rather than keeping copies. It needs network access for its React, Babel, and Google Fonts dependencies. `prototype/support.js` is the generated runtime from the design tool that exported the prototype: do not edit it by hand. Treat the prototype as a design reference. It is not part of the engine, editor, or build, and passing through it does not test any implementation.
 
 ## Full creation journey
 
@@ -72,7 +72,7 @@ One engine and project model, with device-appropriate authoring surfaces:
 - Adapt Android lifecycle, graphics surfaces, input, audio, file access, and app state behind platform-specific boundaries. A shared crate alone does not establish Android support.
 - Maintain capability evidence per platform. A feature earns parity only when it is implemented and exercised on that surface.
 
-The desktop editor uses Rust, egui, winit, and wgpu, with the engine viewport and editor sharing a graphics device. A touch-specific Rust/egui interface could reuse more of that stack. A Kotlin/Jetpack Compose shell around the Rust editor and engine could offer Android-native controls while embedding a real Sindri viewport, but adds a bridge and graphics integration. Compose plus Rust is the initial candidate, not an approved or proven technical decision. Compare both through a small real-device spike before committing: validate GPU surface ownership, lifecycle, input, text and IME behavior, accessibility, performance, build complexity, and the fidelity of prototype-style sheets and gestures.
+The desktop editor uses Rust, egui, winit, and wgpu, with the engine viewport and editor sharing a graphics device. A touch-specific Rust/egui interface could reuse more of that stack. A Kotlin/Jetpack Compose shell around the Rust editor and engine could offer Android-native controls while embedding a real Sindri viewport, but adds a bridge and graphics integration. **Decided (2026-10-31):** Compose plus Rust, on a Pixel 8 reference device, with Android 10 (API 29) as the minimum. The app is in `android/` and its native half, the `sindri-mobile` crate, is in `native/`. GPU surface ownership, lifecycle, input, text and IME behavior, accessibility, performance and build complexity still have to be proven on the device; [first-slice.md](first-slice.md) tracks that.
 
 Android storage is another explicit platform boundary. A selected document tree need not behave like an ordinary filesystem path. Evaluate app-owned projects with import/export and direct document-provider access, including permission persistence, provider failures, backups, conflict handling, and recovery from interruption. Never silently overwrite a changed external project. Cloud sync is optional future work and needs its own conflict design.
 
@@ -80,7 +80,7 @@ Game export also needs a separate feasibility investigation: toolchain size and 
 
 ## Proposed first technical slice
 
-Prove the design and architecture together on a real Android phone:
+Prove the design and architecture together on a real Android phone. Progress, evidence, and blocking decisions are tracked in [first-slice.md](first-slice.md).
 
 1. Open a real Sindri project and display a scene using the real engine renderer.
 2. Select and move an entity with touch; edit one schema-validated property in a prototype-style inspector.
@@ -94,6 +94,8 @@ Follow with vertical slices that lead to the complete 2D game journey: assets an
 
 **Established product direction**
 
+- The Android app is Kotlin and Jetpack Compose around the Rust engine; the Pixel 8 is the reference device and API 29 the minimum.
+- For the first slice, projects are app-owned copies in the app's private storage.
 - Android is a standalone, start-to-finish game creation environment.
 - The mobile design follows the supplied prototype's canvas-first, touch-first approach.
 - Projects and engine systems are shared with desktop; visual Decay uses connected execution and typed value nodes.
@@ -101,7 +103,7 @@ Follow with vertical slices that lead to the complete 2D game journey: assets an
 
 **To prove or decide**
 
-- UI toolkit and Android host, graphics integration, minimum supported Android version and device profile.
+- Graphics integration and device behavior of the chosen Compose plus Rust host, proven on the Pixel 8.
 - Exact visual graph representation, compilation, diagnostics, debugging, migrations, and relationship to handwritten Decay.
 - Project storage, safe transfer and recovery, and optional synchronization.
 - First distributable export target and where its toolchain runs.

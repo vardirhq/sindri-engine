@@ -619,7 +619,7 @@ Meshes, sprites, tile cells, cameras, UI and text are hit-tested from their own 
 
 Engine — · Editor ✅ · Decay — · Proof —
 
-**Tested by:** [`editor/src/picking/tests.rs`](../../editor/src/picking/tests.rs), [`editor/src/occlusion/tests.rs`](../../editor/src/occlusion/tests.rs)
+**Tested by:** [`crates/sindri-scene/src/picking/tests.rs`](../../crates/sindri-scene/src/picking/tests.rs), [`editor/src/occlusion/tests.rs`](../../editor/src/occlusion/tests.rs)
 
 <details markdown="1">
 <summary>Evidence</summary>

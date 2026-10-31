@@ -28,7 +28,7 @@ use weave::Viewport as WeaveViewport;
 use crate::browser::BrowserProjectLoader;
 use crate::budget::FrameBudget;
 use crate::error::PlayerError;
-use crate::project::ProjectAssets;
+use sindri_runtime::ProjectAssets;
 use sindri_runtime::{Session, scene_extractor};
 
 /// The sound device a platform plays through.
@@ -512,7 +512,8 @@ impl Source {
                 PlayerError::Project("usage: sindri-player <project directory>".to_owned())
             })?,
         };
-        let project = crate::directory::read(std::path::Path::new(&directory))?;
+        let project =
+            ProjectAssets::read(std::path::Path::new(&directory)).map_err(PlayerError::Project)?;
         Ok(Self::Ready(Box::new(project)))
     }
 

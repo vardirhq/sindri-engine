@@ -1,12 +1,15 @@
-//! Reading a project from its directory: the player's source natively.
+//! Reading a project from its directory: the native player's source, and an
+//! authoring host's.
 //!
 //! Everything under `assets/` and every scene `sindri.toml` names, decoded
-//! the way the browser loader decodes what it fetches, so the two sources
-//! hand the player the same thing.
+//! the way the browser loader decodes what it fetches, so every source hands
+//! its host the same thing.
 
 use std::collections::BTreeMap;
 use std::path::Path;
 
+use super::ProjectAssets;
+use super::{assets_root, files_under, manifest};
 use sindri_assets::{
     AssetBytes, AssetDecoder, AudioAssetDecoder, FontAssetDecoder, ModelAssetDecoder,
     TextureAssetDecoder,
@@ -16,23 +19,19 @@ use sindri_core::{
     SpriteSheetDocument, TileSetDocument,
 };
 use sindri_decay::{PrefabSources, ProfileSources, ScriptSources};
-use sindri_runtime::project::{assets_root, files_under, manifest};
-
-use crate::error::PlayerError;
-use crate::project::ProjectAssets;
 
 /// The sound files a project may hold, by the suffix its asset ID ends with.
 const AUDIO_SUFFIXES: [&str; 3] = [".ogg", ".wav", ".mp3"];
 
-fn text(id: &str, bytes: Vec<u8>) -> Result<String, PlayerError> {
-    String::from_utf8(bytes).map_err(|error| PlayerError::Project(format!("{id}: {error}")))
+fn text(id: &str, bytes: Vec<u8>) -> Result<String, String> {
+    String::from_utf8(bytes).map_err(|error| format!("{id}: {error}"))
 }
 
-fn named<E: std::fmt::Display>(id: &str) -> impl FnOnce(E) -> PlayerError + '_ {
-    move |error| PlayerError::Project(format!("{id}: {error}"))
+fn named<E: std::fmt::Display>(id: &str) -> impl FnOnce(E) -> String + '_ {
+    move |error| format!("{id}: {error}")
 }
 
-fn asset_id(id: &str) -> Result<AssetId, PlayerError> {
+fn asset_id(id: &str) -> Result<AssetId, String> {
     AssetId::new(id.to_owned()).map_err(named(id))
 }
 
@@ -41,14 +40,16 @@ fn decoded<D: AssetDecoder>(
     assets: &Path,
     suffixes: &[&str],
     decoder: &D,
-) -> Result<Vec<(AssetId, D::Asset)>, PlayerError> {
+) -> Result<Vec<(AssetId, D::Asset)>, String> {
     let mut found = Vec::new();
     for suffix in suffixes {
         for (id, bytes) in files_under(assets, suffix) {
             let asset = asset_id(&id)?;
             found.push((
                 asset.clone(),
-                decoder.decode(AssetBytes::new(asset, bytes))?,
+                decoder
+                    .decode(AssetBytes::new(asset, bytes))
+                    .map_err(named(&id))?,
             ));
         }
     }
@@ -59,10 +60,10 @@ fn decoded<D: AssetDecoder>(
 ///
 /// # Errors
 /// A manifest, scene, script or asset that will not read or decode, named.
-pub(crate) fn read(project: &Path) -> Result<ProjectAssets, PlayerError> {
+pub(super) fn read(project: &Path) -> Result<ProjectAssets, String> {
     let assets = assets_root(project);
-    let (entry, sheet_ids, others) = manifest(project).map_err(PlayerError::Project)?;
-    let read_scene = |path: &Path| -> Result<SceneDocument, PlayerError> {
+    let (entry, sheet_ids, others) = manifest(project)?;
+    let read_scene = |path: &Path| -> Result<SceneDocument, String> {
         let shown = path.display().to_string();
         let json = std::fs::read_to_string(path).map_err(named(&shown))?;
         SceneDocument::from_json(&json).map_err(named(&shown))
@@ -72,7 +73,7 @@ pub(crate) fn read(project: &Path) -> Result<ProjectAssets, PlayerError> {
         let name = Path::new(&path)
             .file_name()
             .and_then(|name| name.to_str())
-            .ok_or_else(|| PlayerError::Project(format!("{path}: not a scene file")))?
+            .ok_or_else(|| format!("{path}: not a scene file"))?
             .to_owned();
         scenes.push((name, read_scene(&project.join(&path))?));
     }
@@ -122,10 +123,9 @@ pub(crate) fn read(project: &Path) -> Result<ProjectAssets, PlayerError> {
     }
     let mut stylesheets = Vec::new();
     for id in sheet_ids {
-        stylesheets.push(
-            weave::compose(&id, &weave_sources)
-                .map_err(|error| PlayerError::Weave(error.to_string()))?,
-        );
+        stylesheets.push(weave::compose(&id, &weave_sources).map_err(|error| {
+            format!("the project's presentation could not be composed: {error}")
+        })?);
     }
     count +=
         models.len() + textures.len() + fonts.len() + audio.len() + sheets.len() + tile_sets.len();

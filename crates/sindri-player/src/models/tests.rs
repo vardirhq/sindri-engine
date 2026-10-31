@@ -183,7 +183,7 @@ fn model_collision_project_opens_compiles_blocks_and_walks_to_its_goal() {
 
     let path =
         std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../examples/model-collision");
-    let project = crate::directory::read(&path).unwrap();
+    let project = crate::ProjectAssets::read(&path).unwrap();
     let mut scene = sindri_runtime::scene_extractor().unwrap();
     let refs = references(&project.scenes, &project.prefabs, scene.components()).unwrap();
     let mut world = World::default();
@@ -246,7 +246,7 @@ fn native_directory_loads_uppercase_glb_extensions_without_changing_asset_ids() 
         include_bytes!("../../../sindri-assets/tests/fixtures/models/static-model.glb"),
     )
     .unwrap();
-    let project = crate::directory::read(&root).unwrap();
+    let project = crate::ProjectAssets::read(&root).unwrap();
     assert_eq!(project.models.len(), 1);
     assert_eq!(project.models[0].0.as_str(), "models/LEVEL.GLB");
     let mut scene = sindri_runtime::scene_extractor().unwrap();

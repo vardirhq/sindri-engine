@@ -21,8 +21,9 @@ cargo deny check licenses # or one at a time
 `Cargo.lock` is not committed, which means a clean clone resolves fresh and there
 is no lockfile diff to review a dependency change against. `deny.toml` is
 therefore the only durable statement of what the tree may contain. It is checked
-across the four targets this project actually builds for — Linux, Windows, macOS,
-and `wasm32-unknown-unknown` — rather than every target `wgpu` and `winit`
+across the five targets this project actually builds for — Linux, Windows, macOS,
+`wasm32-unknown-unknown`, and `aarch64-linux-android` for the Android app's
+native library — rather than every target `wgpu` and `winit`
 support, because flagging a platform Sindri never compiles is noise.
 
 ## Licences

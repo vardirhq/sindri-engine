@@ -170,6 +170,7 @@ sindri-decay      -> core + grid + physics + platform + scene + decay language c
 sindri-runtime    -> assets + core + decay + platform + scene + weave
 sindri-player     -> assets + core + decay + desktop + platform + render + runtime + scene
 editor            -> assets + core + decay + physics + platform + render + runtime + scene
+sindri-mobile     -> assets + core + gpu + render + runtime + scene (+ jni/ndk on Android)
 sindri-causeway   -> consumer of the engine; nothing depends on it
 games/*, examples/* -> consumers of the engine; nothing depends on them
 ```
@@ -193,6 +194,12 @@ Important constraints:
   nothing about any one game; a game crate that needs a native build of its
   own, as Causeway does, is a consumer of it, never the other way round.
 - Engine crates never depend on the editor or the companion game.
+- `sindri-mobile` (`mobile/native`) is the native half of the Android app and,
+  like the editor, an application: nothing depends on it. It is the one crate
+  that denies rather than forbids unsafe code, because a JNI bridge cannot be
+  written without it. Only its `android` module may carry
+  `#[allow(unsafe_code)]`, item by item, each with a `SAFETY` comment; the
+  platform-neutral part follows the workspace rule.
 - `decay/` is a separate Cargo workspace and may not depend on `sindri-*` crates.
   `sindri-decay` is the one-way bridge into the language.
 - Create a new crate only at a proven platform or dependency boundary.
@@ -485,7 +492,8 @@ pull request that fixes it.
 
 - Rust 1.95.0, edition 2024, resolver 3. Do not raise the MSRV casually.
 - Use American English throughout the repository, including code identifiers, public APIs, serialized/schema fields, diagnostics, comments, and documentation. Prefer `color`, `behavior`, `center`, and similar spellings; do not introduce British-English variants such as `colour`, `behaviour`, or `centre`.
-- Workspace forbids unsafe code.
+- Workspace forbids unsafe code. The single exception is the JNI bridge in
+  `mobile/native/src/android/`; see the dependency boundaries above.
 - Prefer fixing Clippy pedantic warnings over adding `#[allow]`; justify any new
   allowance in a comment.
 - Shared dependency versions live in `[workspace.dependencies]`.

@@ -1,16 +1,18 @@
-//! CPU-side picking for renderable entities in the Scene viewport.
+//! CPU-side picking for renderable entities in an authoring viewport.
 //!
 //! Picking uses the exact view-projection matrix used to draw the frame and
-//! the same local geometry as the renderers. It deliberately remains an editor
-//! concern: selecting an entity must not add IDs or readback buffers to a game
-//! frame.
+//! the same local geometry as the renderers. It is an authoring concern, used
+//! by the desktop editor's Scene view and Sindri Mobile's canvas, and stays a
+//! pure CPU query: selecting an entity must not add IDs or readback buffers to
+//! a game frame. It lives here, beside voxel block picking, because both
+//! authoring hosts need it and neither may depend on the other.
 
-use glam::{Mat4, Quat, Vec3};
-use sindri_core::{ComponentRegistryError, ComponentSchemaRegistry, EntityId, Transform3D, World};
-use sindri_scene::{
+use crate::{
     MeshComponent, MeshPrimitive, OverlayPlacement, OverlayView, SpriteComponent, TilemapComponent,
     UiHierarchy, UiImageComponent,
 };
+use glam::{Mat4, Quat, Vec3};
+use sindri_core::{ComponentRegistryError, ComponentSchemaRegistry, EntityId, Transform3D, World};
 
 #[derive(Clone, Copy, Debug)]
 struct Hit {

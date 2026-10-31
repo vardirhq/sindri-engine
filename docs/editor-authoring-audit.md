@@ -453,7 +453,7 @@ rather than a threshold — anything above it is visible, however faintly, and a
 faint thing is still something someone aimed at.
 
 Picking covers meshes, world sprites, and filled tilemap cells
-(`editor/src/picking.rs:24`), plus authored cameras through their overlay
+(`crates/sindri-scene/src/picking.rs`, formerly `editor/src/picking.rs`), plus authored cameras through their overlay
 markers. It did not cover UI images, UI text, or entities with no drawable
 component. Twelve of Gather's twenty-two entities are UI: none of them could be
 clicked in the view that draws them.

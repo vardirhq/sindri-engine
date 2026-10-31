@@ -467,7 +467,7 @@ group = "Scene view"
 title = "Everything the Scene view draws can be clicked"
 summary = "Meshes, sprites, tile cells, cameras, UI and text are hit-tested from their own geometry through the exact rendered camera."
 status = { engine = "n/a", editor = "yes", decay = "n/a", proof = "n/a" }
-tests = ["editor/src/picking/tests.rs", "editor/src/occlusion/tests.rs"]
+tests = ["crates/sindri-scene/src/picking/tests.rs", "editor/src/occlusion/tests.rs"]
 detail = """
 Meshes, world sprites, filled tilemap cells, authored cameras and UI images are
 hit-tested from their own geometry; a string's box is measured by the text
