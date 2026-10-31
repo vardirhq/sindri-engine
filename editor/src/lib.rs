@@ -47,12 +47,13 @@ pub mod input;
 pub mod inspector;
 #[cfg(not(target_arch = "wasm32"))]
 pub mod native;
-/// Selecting rendered entities through the Scene viewport.
 /// One field that finds anything: panels, entities, files, and verbs.
 #[cfg(not(target_arch = "wasm32"))]
 pub mod palette;
+/// Selecting rendered entities through the Scene viewport. Shared with
+/// Sindri Mobile, so it lives in `sindri-scene`.
 #[cfg(not(target_arch = "wasm32"))]
-pub mod picking;
+pub use sindri_scene::picking;
 /// What a scene sounds like while it plays in the editor.
 #[cfg(not(target_arch = "wasm32"))]
 pub mod play_audio;

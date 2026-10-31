@@ -2,9 +2,9 @@
 
 use std::collections::BTreeMap;
 
+use crate::SceneExtractor;
 use serde_json::{Value, json};
 use sindri_core::EntityData;
-use sindri_scene::SceneExtractor;
 
 use super::*;
 
@@ -198,7 +198,7 @@ fn only_a_filled_tilemap_cell_selects_the_map() {
 #[test]
 fn an_anchored_ui_image_is_picked_where_it_is_drawn() {
     let extractor = SceneExtractor::new().unwrap();
-    let (overlay, placement) = sindri_scene::overlay_for_viewport(1.0).unwrap();
+    let (overlay, placement) = crate::overlay_for_viewport(1.0).unwrap();
     let mut world = World::default();
     // Top centre, nudged down by a fifth of the overlay's half-height.
     let banner = spawn(
@@ -235,7 +235,7 @@ fn an_anchored_ui_image_is_picked_where_it_is_drawn() {
 #[test]
 fn the_higher_ui_layer_wins_where_two_overlap() {
     let extractor = SceneExtractor::new().unwrap();
-    let (overlay, placement) = sindri_scene::overlay_for_viewport(1.0).unwrap();
+    let (overlay, placement) = crate::overlay_for_viewport(1.0).unwrap();
     let mut world = World::default();
     let ui_image = |layer: i32| json!({ "texture": "procedural:checkerboard", "anchor": "center", "layer": layer });
     spawn(
@@ -271,7 +271,7 @@ fn the_higher_ui_layer_wins_where_two_overlap() {
 #[test]
 fn a_string_is_picked_from_the_box_it_was_measured_to_fill() {
     let extractor = SceneExtractor::new().unwrap();
-    let (overlay, placement) = sindri_scene::overlay_for_viewport(1.0).unwrap();
+    let (overlay, placement) = crate::overlay_for_viewport(1.0).unwrap();
     let mut world = World::default();
     let title = spawn(
         &mut world,
@@ -307,7 +307,7 @@ fn a_string_is_picked_from_the_box_it_was_measured_to_fill() {
 #[test]
 fn a_string_with_no_measured_box_is_not_picked() {
     let extractor = SceneExtractor::new().unwrap();
-    let (overlay, placement) = sindri_scene::overlay_for_viewport(1.0).unwrap();
+    let (overlay, placement) = crate::overlay_for_viewport(1.0).unwrap();
     let mut world = World::default();
     spawn(
         &mut world,
@@ -335,7 +335,7 @@ fn a_string_with_no_measured_box_is_not_picked() {
 #[test]
 fn a_higher_layer_wins_between_a_string_and_an_image() {
     let extractor = SceneExtractor::new().unwrap();
-    let (overlay, placement) = sindri_scene::overlay_for_viewport(1.0).unwrap();
+    let (overlay, placement) = crate::overlay_for_viewport(1.0).unwrap();
     let mut world = World::default();
     let plate = spawn(
         &mut world,
@@ -382,7 +382,7 @@ fn a_higher_layer_wins_between_a_string_and_an_image() {
 #[test]
 fn an_invisible_element_is_not_clicked() {
     let extractor = SceneExtractor::new().unwrap();
-    let (overlay, placement) = sindri_scene::overlay_for_viewport(1.0).unwrap();
+    let (overlay, placement) = crate::overlay_for_viewport(1.0).unwrap();
     let mut world = World::default();
     spawn(
         &mut world,

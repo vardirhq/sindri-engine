@@ -162,6 +162,7 @@ pub use voxel_collision3d::{
     SceneVoxelCollision3d, VoxelCollisionBudget3d, VoxelCollisionError3d, VoxelCollisionReport3d,
     VoxelCollisionSection3d, VoxelCollisionSettings3d, VoxelCollisionWorld3d,
 };
+pub mod picking;
 pub mod voxel;
 pub use voxel::{VoxelError, VoxelFace, VoxelHit, cube_faces, face_quad, pick};
 pub use voxel_render::{
