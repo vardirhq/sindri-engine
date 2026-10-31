@@ -1,6 +1,7 @@
 package dev.sindri.mobile
 
 import android.view.Surface
+import org.json.JSONArray
 
 /**
  * The calls into `libsindri_mobile.so`, the `sindri-mobile` crate.
@@ -29,6 +30,17 @@ object NativeBridge {
     /** Draws one frame, when there is a surface and a scene. */
     @JvmStatic external fun draw(): String?
 
-    /** One line describing the scene and the GPU drawing it. */
-    @JvmStatic external fun status(): String
+    /**
+     * Runs an editing command with a JSON array of [arguments]: `tap`, `press`,
+     * `drag` (x, y in surface pixels), `release`, `zoom` (factor, focus x, y),
+     * `deselect`, `undo`, `redo`, and `setField` (component type, field, value).
+     */
+    @JvmStatic external fun call(command: String, arguments: String): String?
+
+    /** The overlay's state as JSON: status, inspector, marker, undo and redo labels. */
+    @JvmStatic external fun state(): String
+
+    /** [call] with its arguments written as a JSON array. */
+    fun command(command: String, vararg arguments: Any?): String? =
+        call(command, JSONArray(arguments.toList()).toString())
 }

@@ -178,7 +178,8 @@ impl SceneRenderer {
         self.bloom.resize(device, width, height);
     }
 
-    /// Draws `world` into `view`, through the scene's own camera.
+    /// Draws `world` into `view`, through `camera`: the scene's own with
+    /// [`CameraView::default`], or a [`crate::Canvas`] view.
     ///
     /// # Errors
     /// A component that will not extract, or a frame that will not encode.
@@ -189,6 +190,7 @@ impl SceneRenderer {
         view: &wgpu::TextureView,
         extractor: &SceneExtractor,
         world: &World,
+        camera: CameraView,
     ) -> Result<(), String> {
         let post_process = self
             .cubes
@@ -198,7 +200,7 @@ impl SceneRenderer {
             .extract_animated(
                 world,
                 Viewport::new(self.size[0], self.size[1]),
-                CameraView::default(),
+                camera,
                 &self.bindings,
                 SceneRuntime::default()
                     .with_tile_sets(&self.tile_sets)

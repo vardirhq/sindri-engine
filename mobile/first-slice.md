@@ -1,7 +1,7 @@
 # Sindri Mobile: first technical slice
 
-Status: step 1 is built and waiting to be tried on the reference phone. Nothing
-has run on Android yet. The slice is defined in
+Status: steps 1 and 2 are built and waiting to be tried on the reference
+phone. Nothing has run on Android yet. The slice is defined in
 [the mobile direction](README.md#proposed-first-technical-slice). This file
 tracks what has been proven, what has not, and what is still open. Update it in
 the same change as the work it describes.
@@ -24,7 +24,7 @@ published identity is chosen. Release builds are signed with the debug key.
 | Slice step | Headless, shared seams | Android build | On the Pixel 8 |
 | --- | --- | --- | --- |
 | 1. Open a real project and display a scene with the real renderer | ✅ Lamplighter's `world.scene` opens as an authored world and draws offscreen at 1080×2400 through `SceneRenderer` | ✅ The APK builds, bundles Lamplighter, and links `libsindri_mobile.so` for arm64 | ❌ Not yet tried |
-| 2. Select and move an entity with touch; edit one schema-checked property | 🟡 A drag is merged into one undo step, and an invalid value is refused before it reaches the world or history. No touch input or inspector UI yet | ❌ | ❌ |
+| 2. Select and move an entity with touch; edit one schema-checked property | ✅ `Editing` pans, pinches, picks through the engine's own camera matrix, moves the selection in one undo step per drag, and edits component fields with schema validation and undo | ✅ Tap, drag and pinch on the `SurfaceView`; a selection marker; undo and redo in the top bar; an inspector sheet with number steppers, typed values and switches | ❌ Not yet tried |
 | 3. Undo, redo, save, restart, reopen; open the result on desktop | 🟡 Undo returns to the file and redo returns to the edit. The saved scene reopens through the desktop path and the build path | ❌ | ❌ |
 | 4. Start and stop a real `Session`; touch input; the scene returns to its state | 🟡 A build-style run starts from the saved edit and leaves the authoring world and the file unchanged. Running from unsaved edits and the keep/discard review of Play edits are not covered | ❌ | ❌ |
 | 5. Background/resume, surface recreation, keyboard/insets, interrupted save; device notes | — | 🟡 The surface is released and rebuilt on the existing device. Unexercised | ❌ |
@@ -37,30 +37,39 @@ tested: off the device. Only the last column says anything about a phone.
 ```text
 mobile/android  Kotlin + Compose app
   MainActivity        Forge-styled top bar and status line over the canvas
-  SceneSurface        SurfaceView: hands its Surface to Rust, draws per vsync
+  SceneSurface        SurfaceView: hands its Surface to Rust, draws per vsync,
+                      turns tap, drag and pinch into editing commands
+  InspectorSheet      the selection's numbers and switches, over the canvas
+  EditorState         the overlay's state, read from the host as JSON
   BundledProjects     copies projects/lamplighter out of the APK on first launch
-  NativeBridge        external funs: open, attach, resize, detach, draw, status
+  NativeBridge        external funs: open, attach, resize, detach, draw,
+                      call (every editing command), state
         |  JNI (main thread only)
 mobile/native   sindri-mobile crate, libsindri_mobile.so
   android/            JNI exports, Surface -> ANativeWindow -> wgpu surface
   OpenedScene         ProjectAssets::read + World::from_scene_with (no Session)
+  Editing             selection, CommandHistory, touch press/drag/release
+  Canvas              flat viewer camera the touch pans and pinches
   SceneRenderer       textures, sheets, tile sets, fonts; extract + encode frame
         |
-engine crates   sindri-runtime (ProjectAssets), sindri-scene, sindri-render,
-                sindri-gpu (GpuContext, WindowSurface)
+engine crates   sindri-runtime (ProjectAssets), sindri-scene (picking),
+                sindri-render, sindri-gpu (GpuContext, WindowSurface)
 ```
 
 The project reader the native player used is now `sindri_runtime::ProjectAssets`,
-so the player and the phone find and decode a project's assets the same way.
+and entity picking the desktop Scene view used is now `sindri_scene::picking`,
+so the player, the desktop editor and the phone share them rather than copying.
 
 ### The unsafe exception
 
 The workspace forbids unsafe code, and a JNI bridge cannot be written without it:
 every function Java calls is exported unmangled, and a `Surface` becomes a
 native window only through an unsafe NDK call. `sindri-mobile` therefore denies
-unsafe code instead of forbidding it. The seven items that need it, all in
+unsafe code instead of forbidding it. The eight items that need it, all in
 `mobile/native/src/android/`, each carry an `#[allow(unsafe_code)]` and a reason.
-`AGENTS.md` records the exception.
+`AGENTS.md` records the exception. Every editing command crosses the bridge
+through one `call(command, arguments)` export, so adding a gesture adds no unsafe
+code.
 
 ## Build and try it
 
@@ -86,6 +95,18 @@ faster to compile and much slower to run.
 5. Note the time from launch to the first frame. The project is opened on the
    main thread, and a long open risks an "app not responding" dialog.
 
+### What to check on the Pixel 8 for step 2
+
+1. Dragging empty ground pans the field; pinching zooms about the fingers.
+2. Tapping Wick or a lamp marks it with a ring and opens its inspector; tapping
+   empty ground or ✕ closes it.
+3. Dragging the marked entity moves it under the finger. Undo returns it in one
+   step, and redo moves it again.
+4. In a lamp's light, stepping `intensity` brightens it on screen. Typing a value
+   and pressing Done applies it, with the keyboard not covering the field.
+5. Dragging something that was not selected first pans instead of moving it.
+6. TalkBack reads the canvas, the undo and redo buttons, and each field.
+
 ## Evidence
 
 ### Headless tests
@@ -93,6 +114,11 @@ faster to compile and much slower to run.
 - `editor/tests/mobile_first_slice.rs` covers steps 2 to 4 on a copy of Lamplighter
   through `SceneFile`, `CommandHistory`, `WorldCommand`,
   `ComponentSchemaRegistry::validate_payload` and `ProjectRun`.
+- `mobile/native/tests/edits_by_touch.rs` covers step 2 on Lamplighter's field: the
+  canvas opens where the scene camera looks, a tap where the canvas says an entity
+  is picks that entity after panning and pinching, a drag on the selection moves
+  it in one undo step while a drag elsewhere pans, pinching keeps the point under
+  the fingers, and a field edit is validated, shown and undone.
 - `mobile/native/tests/shows_lamplighter.rs` opens Lamplighter's scenes through
   `OpenedScene` and draws `world.scene` at the Pixel 8's resolution. The draw needs
   a GPU adapter. It skips without one unless `SINDRI_REQUIRE_GPU` is set; it was
@@ -109,13 +135,16 @@ SINDRI_REQUIRE_GPU=1 cargo test -p sindri-mobile
 | --- | --- |
 | `cargo clippy -p sindri-mobile --target aarch64-linux-android -- -D warnings` | Clean |
 | `./gradlew assembleRelease` | Builds a 35 MB APK: minSdk 29, targetSdk 35, arm64-v8a only, Vulkan 1.1 required |
-| `libsindri_mobile.so` | Exports the six `Java_dev_sindri_mobile_NativeBridge_*` functions; needs only `libandroid`, `libdl`, `libm`, `libc` |
+| `libsindri_mobile.so` | Exports the seven `Java_dev_sindri_mobile_NativeBridge_*` functions; needs only `libandroid`, `libdl`, `libm`, `libc` |
 | `cargo check -p sindri-editor --target aarch64-linux-android` | Fails: winit needs an activity type. The mobile app does not use the editor crate, so this no longer blocks anything |
 
 ## Known limits of step 1
 
-- **View only.** The scene is drawn through its own camera. There is no pan, zoom,
-  selection or editing on the phone yet.
+- **Fields.** The inspector edits a component's top-level numbers and switches.
+  Text, vectors, colors, enums and references are not shown yet, and a field
+  authored as a whole number steps by whole numbers.
+- **Picking.** Taps pick what is drawn in the world; screen UI is not picked yet.
+- **No saving.** Edits live until the app is closed (step 3).
 - **Main-thread open.** The native host lives on the UI thread, because the
   surface's rebuild closure in `sindri-gpu` is not `Send`. Opening a large project
   there may stall the UI.
@@ -142,10 +171,8 @@ Already shared: `CommandHistory`, `WorldCommand`, schema validation, `Session`,
 
 ## Next
 
-1. Install the APK on the Pixel 8 and record the step 1 checks above, with the
-   time to first frame, in the device column.
-2. Step 2: pan and zoom the canvas with touch, select by tap through the engine's
-   picking, drag to move through `CommandHistory`, and show one schema-checked
-   field in a Compose bottom sheet.
-3. Step 3: move `SceneFile`'s open and save out of the editor crate so the phone
-   and desktop save through one implementation.
+1. Install the APK on the Pixel 8 and record the step 1 and step 2 checks above,
+   with the time to first frame, in the device column.
+2. Step 3: move `SceneFile`'s open and save out of the editor crate so the phone
+   and desktop save through one implementation, then save, restart and reopen on
+   the phone.

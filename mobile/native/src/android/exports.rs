@@ -130,15 +130,33 @@ pub extern "system" fn Java_dev_sindri_mobile_NativeBridge_draw<'local>(
     guarded(&mut env, |_, host| host.draw())
 }
 
-/// `fun status(): String`
+/// `fun call(command: String, arguments: String): String?`, where `arguments`
+/// is a JSON array; see `Host::call` for the commands.
 #[allow(unsafe_code)]
 #[unsafe(no_mangle)]
-pub extern "system" fn Java_dev_sindri_mobile_NativeBridge_status<'local>(
+pub extern "system" fn Java_dev_sindri_mobile_NativeBridge_call<'local>(
+    mut env: JNIEnv<'local>,
+    _class: JClass<'local>,
+    command: JString<'local>,
+    arguments: JString<'local>,
+) -> jstring {
+    guarded(&mut env, |env, host| {
+        let command = string(env, &command)?;
+        let arguments = string(env, &arguments)?;
+        host.call(&command, &arguments)
+    })
+}
+
+/// `fun state(): String`, a JSON object; see `Host::state`.
+#[allow(unsafe_code)]
+#[unsafe(no_mangle)]
+pub extern "system" fn Java_dev_sindri_mobile_NativeBridge_state<'local>(
     env: JNIEnv<'local>,
     _class: JClass<'local>,
 ) -> jstring {
-    let status = catch_unwind(|| HOST.with(|host| host.borrow().status()))
-        .unwrap_or_else(|_| "the native host panicked".to_owned());
-    env.new_string(status)
+    let state = catch_unwind(|| HOST.with(|host| host.borrow().state())).unwrap_or_else(|_| {
+        serde_json::json!({ "status": "the native host panicked" }).to_string()
+    });
+    env.new_string(state)
         .map_or(std::ptr::null_mut(), JString::into_raw)
 }

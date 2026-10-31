@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.windowInsetsPadding
@@ -26,7 +28,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -52,34 +56,36 @@ class MainActivity : ComponentActivity() {
 }
 
 /**
- * The canvas-first editor screen, as far as the first slice goes: the scene
- * fills the screen, and a calm top bar and status line sit over it, clear of
- * the system bars.
+ * The canvas-first editor screen: the scene fills the screen, a calm top bar
+ * with undo and redo sits over it, the selection is marked where it stands,
+ * and its inspector rises from the bottom only while something is selected.
  */
 @Composable
 private fun SceneScreen() {
     val context = LocalContext.current
-    var status by remember { mutableStateOf("Opening $PROJECT_TITLE…") }
+    var state by remember { mutableStateOf(EditorState(status = "Opening $PROJECT_TITLE…")) }
     var error by remember { mutableStateOf<String?>(null) }
     var surface by remember { mutableStateOf<SceneSurface?>(null) }
+    val refresh = { state = EditorState.read(NativeBridge.state()) }
+    val run = { result: String? ->
+        error = result
+        refresh()
+    }
 
     LaunchedEffect(Unit) {
         val project = withContext(Dispatchers.IO) {
             runCatching { BundledProjects.install(context, PROJECT) }
         }
         project.fold(
-            onSuccess = { directory ->
-                // On the main thread, where the native host lives.
-                error = NativeBridge.open(directory.path, SCENE)
-                status = NativeBridge.status()
-            },
+            // On the main thread, where the native host lives.
+            onSuccess = { directory -> run(NativeBridge.open(directory.path, SCENE)) },
             onFailure = { failure -> error = "Could not install $PROJECT_TITLE: ${failure.message}" },
         )
     }
 
     LifecycleResumeEffect(surface) {
         surface?.running = true
-        status = NativeBridge.status()
+        refresh()
         onPauseOrDispose { surface?.running = false }
     }
 
@@ -89,38 +95,67 @@ private fun SceneScreen() {
                 .fillMaxSize()
                 .semantics { contentDescription = "Scene view of $SCENE" },
             factory = { viewContext ->
-                SceneSurface(viewContext) { message ->
-                    error = message
-                }.also { created ->
+                SceneSurface(
+                    viewContext,
+                    onError = { message -> error = message },
+                    onChanged = { refresh() },
+                ).also { created ->
                     created.running = true
                     surface = created
                 }
             },
         )
+        state.marker?.let { (x, y) -> SelectionMarker(x, y) }
         Column(
             Modifier
                 .fillMaxSize()
                 .windowInsetsPadding(WindowInsets.safeDrawing)
+                .imePadding()
                 .padding(12.dp),
             verticalArrangement = Arrangement.SpaceBetween,
         ) {
-            TopBar()
+            TopBar(
+                undo = state.undo,
+                redo = state.redo,
+                onUndo = { run(NativeBridge.command("undo")) },
+                onRedo = { run(NativeBridge.command("redo")) },
+            )
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 error?.let { ErrorCard(it) }
-                StatusLine(status)
+                val inspector = state.inspector
+                if (inspector != null) {
+                    InspectorSheet(
+                        inspector,
+                        onSet = { type, field, value -> run(NativeBridge.command("setField", type, field, value)) },
+                        onClose = { run(NativeBridge.command("deselect")) },
+                    )
+                } else {
+                    StatusLine(state.status)
+                }
             }
         }
     }
 }
 
+/** A ring where the selection's origin is, drawn over the canvas in surface pixels. */
 @Composable
-private fun TopBar() {
+private fun SelectionMarker(x: Float, y: Float) {
+    Canvas(Modifier.fillMaxSize()) {
+        val center = Offset(x, y)
+        drawCircle(Color.Black.copy(alpha = 0.5f), radius = 30f, center = center, style = Stroke(width = 9f))
+        drawCircle(Forge.MetalBright, radius = 30f, center = center, style = Stroke(width = 5f))
+        drawCircle(Forge.MetalBright, radius = 5f, center = center)
+    }
+}
+
+@Composable
+private fun TopBar(undo: String?, redo: String?, onUndo: () -> Unit, onRedo: () -> Unit) {
     Row(
         Modifier
             .fillMaxWidth()
             .background(Forge.Panel, RoundedCornerShape(14.dp))
             .border(1.dp, Forge.Line, RoundedCornerShape(14.dp))
-            .padding(horizontal = 14.dp, vertical = 10.dp),
+            .padding(horizontal = 14.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
@@ -129,22 +164,22 @@ private fun TopBar() {
             Text(PROJECT_TITLE, color = Forge.Text, fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
             Text(SCENE, color = Forge.TextMuted, fontSize = 12.sp)
         }
-        Chip("View only")
+        HistoryButton("↶", undo?.let { "Undo $it" } ?: "Nothing to undo", undo != null, onUndo)
+        HistoryButton("↷", redo?.let { "Redo $it" } ?: "Nothing to redo", redo != null, onRedo)
     }
 }
 
 @Composable
-private fun Chip(label: String) {
-    Text(
-        label,
-        color = Forge.MetalBright,
-        fontSize = 12.sp,
-        fontWeight = FontWeight.Medium,
-        modifier = Modifier
-            .background(Forge.MetalDeep, RoundedCornerShape(999.dp))
-            .border(1.dp, Forge.Metal.copy(alpha = 0.4f), RoundedCornerShape(999.dp))
-            .padding(horizontal = 10.dp, vertical = 4.dp),
-    )
+private fun HistoryButton(label: String, description: String, enabled: Boolean, onClick: () -> Unit) {
+    Box(Modifier.semantics { contentDescription = description }) {
+        if (enabled) {
+            RoundButton(label, description, onClick)
+        } else {
+            Box(Modifier.padding(0.dp), contentAlignment = Alignment.Center) {
+                Text(label, color = Forge.TextFaint, fontSize = 18.sp, modifier = Modifier.padding(12.dp))
+            }
+        }
+    }
 }
 
 @Composable

@@ -103,6 +103,7 @@ fn the_field_draws_at_phone_resolution() {
             target.view(),
             &opened.extractor,
             &opened.world,
+            sindri_scene::CameraView::default(),
         )
         .expect("the frame draws");
     let mut encoder = gpu

@@ -1,9 +1,9 @@
 //! The bridge the Android app calls: `dev.sindri.mobile.NativeBridge`.
 //!
 //! The app owns the activity, its Compose UI and the `SurfaceView` the scene is
-//! drawn into; this owns the GPU and the scene. Java calls in on the UI thread
-//! and only there, so one mutex-guarded [`Host`] holds everything, and no call
-//! waits on another thread.
+//! drawn into; this owns the GPU, the scene and its edits. Java calls in on the
+//! UI thread and only there, so one thread-local [`Host`] holds everything, and
+//! no call waits on another thread.
 //!
 //! Every export returns `null` when it succeeded and a message when it did not,
 //! which the app shows rather than this crate deciding how to fail. A panic is
@@ -11,13 +11,16 @@
 //! JVM would abort the process.
 
 mod exports;
+mod touch;
 mod window;
 
 use std::path::PathBuf;
 
 use sindri_gpu::{GpuContext, GpuRequestOptions, WindowSurface};
 
-use crate::{OpenedScene, SceneRenderer};
+use sindri_runtime::ProjectAssets;
+
+use crate::{Editing, OpenedScene, SceneRenderer};
 use window::AndroidWindow;
 
 /// Everything the app has opened and is drawing into.
@@ -27,6 +30,8 @@ struct Host {
     /// renderer can be rebuilt if a new surface wants a different format.
     source: Option<(PathBuf, String)>,
     opened: Option<OpenedScene>,
+    /// The selection, history and view over the opened scene.
+    editing: Option<Editing>,
     /// Whether a renderer has already taken the opened scene's textures.
     installed: bool,
     instance: Option<wgpu::Instance>,
@@ -40,6 +45,7 @@ struct Host {
 impl Host {
     fn open(&mut self, project: PathBuf, scene: String) -> Result<(), String> {
         let opened = OpenedScene::open(&project, &scene)?;
+        self.editing = Some(Editing::new(&opened.world, &opened.extractor)?);
         self.opened = Some(opened);
         self.installed = false;
         self.source = Some((project, scene));
@@ -110,8 +116,9 @@ impl Host {
 
     /// Makes a renderer for the current surface and scene, once both exist.
     ///
-    /// The project is read again when the renderer is rebuilt, because
-    /// installing takes the decoded textures out of it.
+    /// The project's assets are read again when the renderer is rebuilt,
+    /// because installing takes the decoded textures out of them. The world is
+    /// kept, so a rebuild never loses an edit.
     fn prepare_renderer(&mut self) -> Result<(), String> {
         if self.renderer.is_some() {
             return Ok(());
@@ -119,15 +126,15 @@ impl Host {
         let (Some(gpu), Some(surface)) = (&self.gpu, &self.surface) else {
             return Ok(());
         };
-        if self.installed
-            && let Some((project, scene)) = &self.source
-        {
-            self.opened = Some(OpenedScene::open(project, scene)?);
-            self.installed = false;
-        }
         let Some(opened) = &mut self.opened else {
             return Ok(());
         };
+        if self.installed
+            && let Some((project, _)) = &self.source
+        {
+            opened.assets = ProjectAssets::read(project)?;
+            self.installed = false;
+        }
         let mut renderer = SceneRenderer::new(
             &gpu.device,
             &gpu.queue,
@@ -148,11 +155,12 @@ impl Host {
 
     /// Draws one frame, if there is a surface and a scene to draw.
     fn draw(&mut self) -> Result<(), String> {
-        let (Some(gpu), Some(surface), Some(renderer), Some(opened)) = (
+        let (Some(gpu), Some(surface), Some(renderer), Some(opened), Some(editing)) = (
             &self.gpu,
             &mut self.surface,
             &mut self.renderer,
             &self.opened,
+            &self.editing,
         ) else {
             return Ok(());
         };
@@ -172,6 +180,7 @@ impl Host {
             &view,
             &opened.extractor,
             &opened.world,
+            editing.canvas.view(),
         )?;
         gpu.queue.present(frame);
         Ok(())
