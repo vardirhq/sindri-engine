@@ -1,0 +1,118 @@
+# Sindri Mobile: product and technical direction
+
+Status: product direction and proposals, not an implementation or a claim of Android support.
+
+## The idea
+
+Sindri Mobile is a native Android game editor for making a complete game on a phone or tablet: create a project, build a world, author gameplay, test, debug, and export a playable game without a computer. It is part of Sindri, not a separate engine or a remote control for the desktop editor. Offline creation is the intended baseline; services must not be required to edit or play a local project.
+
+Desktop and mobile work on compatible Sindri projects and share engine systems. Their interfaces are adapted to their devices. Starting on Android and continuing on desktop, or the reverse, should be possible without conversion into a separate mobile format or losing data the other editor does not understand.
+
+The first complete creator journey should target a small 2D game. This is a first milestone, not a permanent restriction on 3D or on the engine's capabilities. Supporting existing projects and approaching desktop capability parity are continuing goals, measured per feature rather than assumed from shared dependencies.
+
+## The experience
+
+The interactive Sindri Mobile prototype is the visual and interaction reference. It uses Lamplighter's real art and the desktop editor's Forge palette and icon vocabulary to explore a canvas-first editor. It demonstrates workflows; its simulated behavior is not evidence that those capabilities are implemented.
+
+Preserve what makes it compelling:
+
+- The world is the focus. The interface is calm and makes room for creation.
+- Contextual tools, bottom sheets, and clear selection surfaces reveal the next useful action without covering the canvas permanently.
+- Controls are designed for touch, not miniature desktop panels; common tasks require neither a mouse nor a keyboard.
+- Create, play, pause, inspect, and return to editing form one fast, understandable loop.
+- Forge colors, typography, spacing, icons, and interaction states form a consistent design system, adapted to mobile rather than replaced with generic controls.
+- Portrait and landscape work on real devices; tablets and external keyboard, mouse, or stylus are useful additions, not prerequisites.
+- Accessibility, readable text, sufficient contrast, usable touch targets, system insets, keyboard handling, and screen-reader semantics are part of the design.
+
+Use the prototype as an acceptance reference: retain its assets and interaction intent, document its states and gestures, and compare implementation captures with it on actual phones. Exercise dense scenes and long names, not just curated sample content. The prototype itself is an external reference supplied during exploration, not yet a tracked repository artifact; preserve or recreate it in a suitable reviewable form before relying on it as an implementation test.
+
+## Full creation journey
+
+A creator should be able to:
+
+1. Install and open the app, create a project from a blank starting point or a template, and find their recent projects.
+2. Import and organize assets, preview them, slice sprites and animations, create prefabs, and use appropriate creation tools as they become available.
+3. Create and navigate scenes; paint tilemaps; place, select, transform, and inspect objects; configure cameras, components, lighting, physics, audio, and UI.
+4. Author gameplay with visual Decay, using variables, events, functions, branches, and reusable logic; use text Decay where appropriate.
+5. Play the actual game on the device, pause and inspect it, diagnose errors, and keep or discard edits made during Play through the same semantics as desktop.
+6. Save and reopen safely, undo and redo meaningful changes, and transfer or synchronize a project without silent data loss.
+7. Export and share a playable game. Browser builds and Android packages are both candidates; the first supported export target and on-device versus remote build requirements remain to be established. Editing and playing a game on Android, exporting a web game, and building a distributable Android game are distinct capabilities.
+
+A first complete 2D game should exercise this journey end to end, including a title and UI, interaction, sound, multiple scenes, saving progress, and a shareable build. Define concrete acceptance criteria and supported device profiles before implementation.
+
+## Visual Decay
+
+Visual scripting is a first-class way to write Decay, not a separate, lesser gameplay language. The desired model resembles Blueprint-style graphs:
+
+- Execution wires show the order in which events and actions run.
+- Separate, typed value wires carry numbers, booleans, text, entity references, and other supported Decay values.
+- Nodes represent real Decay constructs and registered Sindri host APIs. Events, branches, variables, functions, loops, and reusable graph sections are part of the intended scope.
+- Invalid connections and missing references produce actionable diagnostics; compatible choices are easy to discover.
+- During Play, users should be able to follow execution and inspect values without leaving the graph, subject to implementation and performance validation.
+
+For example, an interaction event flows to a branch. A value connection supplies whether Wick has enough light. The true path lights a lantern and opens a bridge; the false path displays a message. This is illustrative behavior, not a claim that these specific Decay calls exist.
+
+Touch interaction is a product requirement: tap a socket to search for and connect compatible nodes; allow dragging as an alternative; provide pan, zoom, fit-to-graph, navigation between events, and collapsible named groups. Avoid making fine wire dragging mandatory. A simple contextual When/Then flow may offer a shortcut into the same underlying graph, so it can grow into a full graph without being rewritten.
+
+### Representation and code
+
+Proposed starting direction: save a versioned graph asset and compile it to Decay using the actual language and host contracts. Keep graph layout separate from executable semantics where practical. Show generated source for inspection; do not claim arbitrary graph-to-text-to-graph round trips. Handwritten Decay must coexist with visual scripts, and unsupported code must never be silently rewritten or discarded.
+
+This representation is a proposal, not a settled format. Before committing to it, investigate Decay's parser, AST, compiler, diagnostics, source mapping, language-server tooling, script loading, and export pipeline. Prove how generated code maps errors and runtime observations back to nodes; how graphs are versioned and migrated; how stable IDs and entity references work; how changes are validated; and how desktop and Android preserve unknown graph data. If safe bidirectional editing proves feasible, it can be added deliberately.
+
+Visual scripts must run through the same Decay and runtime path as text scripts. Do not invent syntax or host calls: verify against current definitions and checked scripts. Gameplay-specific logic belongs in Decay, not bespoke Rust game implementations.
+
+## Architecture direction
+
+One engine and project model, with device-appropriate authoring surfaces:
+
+- Reuse Sindri's scene and project formats, component schemas and validation, assets, rendering, physics, Decay host, and `sindri-runtime::Session`.
+- Route editor changes through the same checked, undoable commands and preserve the existing Play, stop, and run-edit semantics. Do not maintain a second world model or duplicate fixed-step gameplay.
+- Incrementally separate reusable authoring logic from desktop UI where current code couples them. Establish a real dependency boundary before adding a crate; engine crates do not depend on an editor.
+- Adapt Android lifecycle, graphics surfaces, input, audio, file access, and app state behind platform-specific boundaries. A shared crate alone does not establish Android support.
+- Maintain capability evidence per platform. A feature earns parity only when it is implemented and exercised on that surface.
+
+The desktop editor uses Rust, egui, winit, and wgpu, with the engine viewport and editor sharing a graphics device. A touch-specific Rust/egui interface could reuse more of that stack. A Kotlin/Jetpack Compose shell around the Rust editor and engine could offer Android-native controls while embedding a real Sindri viewport, but adds a bridge and graphics integration. Compose plus Rust is the initial candidate, not an approved or proven technical decision. Compare both through a small real-device spike before committing: validate GPU surface ownership, lifecycle, input, text and IME behavior, accessibility, performance, build complexity, and the fidelity of prototype-style sheets and gestures.
+
+Android storage is another explicit platform boundary. A selected document tree need not behave like an ordinary filesystem path. Evaluate app-owned projects with import/export and direct document-provider access, including permission persistence, provider failures, backups, conflict handling, and recovery from interruption. Never silently overwrite a changed external project. Cloud sync is optional future work and needs its own conflict design.
+
+Game export also needs a separate feasibility investigation: toolchain size and availability, on-device versus remote builds, signing and keys for Android packages, web asset packaging, offline requirements, and safe sharing. No export target is promised by this document.
+
+## Proposed first technical slice
+
+Prove the design and architecture together on a real Android phone:
+
+1. Open a real Sindri project and display a scene using the real engine renderer.
+2. Select and move an entity with touch; edit one schema-validated property in a prototype-style inspector.
+3. Undo and redo, save, restart the app, and reopen the project. Open the resulting project on desktop and verify the same data.
+4. Start and stop a real `Session`, exercise touch input, and check that the scene returns to the expected state.
+5. Exercise background/resume, graphics surface recreation, keyboard/insets, and an interrupted save; record device, performance, and limitations.
+
+Follow with vertical slices that lead to the complete 2D game journey: assets and prefabs, tilemaps, a minimal real visual Decay graph, debugging, UI and sound, scene transitions and saving, then a proven export path. Ordering is provisional: findings from the first slice and export feasibility may change it.
+
+## Decisions and open questions
+
+**Established product direction**
+
+- Android is a standalone, start-to-finish game creation environment.
+- The mobile design follows the supplied prototype's canvas-first, touch-first approach.
+- Projects and engine systems are shared with desktop; visual Decay uses connected execution and typed value nodes.
+- A complete small 2D game is the first end-to-end target, with broader capability to follow.
+
+**To prove or decide**
+
+- UI toolkit and Android host, graphics integration, minimum supported Android version and device profile.
+- Exact visual graph representation, compilation, diagnostics, debugging, migrations, and relationship to handwritten Decay.
+- Project storage, safe transfer and recovery, and optional synchronization.
+- First distributable export target and where its toolchain runs.
+- Scope, interaction design, and accessibility of the first complete 2D creation journey.
+- Which desktop capabilities need shared authoring extraction or Android-specific replacements; track real gaps rather than claiming blanket parity.
+
+## Related repository documents
+
+- [Editor direction](../docs/editor-direction.md) and [editor architecture](../docs/editor-architecture.md)
+- [Project format](../docs/project-format.md) and [component schema registry](../docs/component-schema-registry.md)
+- [Decay direction](../docs/decay-direction.md), [language](../decay/LANGUAGE.md), and [language-server modernization](../docs/decay-lsp-modernization.md)
+- [Capability parity](../docs/parity.md), [editor capabilities](../docs/capabilities/editor.md), and [feasibility](../docs/FEASIBILITY.md)
+
+The existing feasibility document excludes native mobile from the first release. This overview proposes a later mobile product direction; it does not silently change that release gate or claim the Android platform is already supported.
