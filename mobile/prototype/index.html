@@ -1,0 +1,1353 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,300..500,0..1,0&amp;display=swap" rel="stylesheet">
+<style>
+html,body{margin:0;background:#050608;color:#E8E4DC;font-family:Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased;overflow:hidden;overscroll-behavior:none}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+a{color:#E9A33A;text-decoration:none}
+a:hover{color:#FFBE55}
+button{font-family:inherit;color:inherit}
+input{font-family:inherit}
+::-webkit-scrollbar{width:0;height:0}
+</style>
+</helmet>
+<div style="position:fixed;inset:0;display:flex;background:#050608;overflow:hidden">
+
+  <sc-if value="{{ showRail }}" hint-placeholder-val="{{ false }}">
+    <aside style="{{ railStyle }}">
+      <div style="display:flex;align-items:flex-start;gap:8px">
+        <div style="flex:1;display:flex;flex-direction:column;gap:6px">
+          <div style="font-size:12px;color:#E9A33A;font-weight:600;letter-spacing:.04em">SINDRI · MOBILE EDITOR PROTOTYPE</div>
+          <div style="font-size:24px;font-weight:600;letter-spacing:-.01em;line-height:1.2">Journeys</div>
+        </div>
+        <sc-if value="{{ isNarrow }}" hint-placeholder-val="{{ false }}">
+          <button onClick="{{ closeJourneys }}" style="width:48px;height:48px;border:0;background:none;cursor:pointer;color:#98A0A8;margin:-8px -8px 0 0"><span style="font-family:'Material Symbols Outlined';font-size:24px">close</span></button>
+        </sc-if>
+      </div>
+      <div style="font-size:13px;color:#98A0A8;line-height:1.5;text-wrap:pretty">Each journey sets the editor up for one workflow. Steps tick off as you do them.</div>
+      <a href="Sindri%20Mobile%20Exploration.dc.html" style="font-size:13px;font-weight:500;display:flex;align-items:center;gap:4px">Read the exploration<span style="font-family:'Material Symbols Outlined';font-size:16px">arrow_forward</span></a>
+      <sc-for list="{{ journeys }}" as="j" hint-placeholder-count="5">
+        <div style="{{ j.cardStyle }}">
+          <div style="display:flex;align-items:center;gap:10px">
+            <div style="{{ j.badgeStyle }}">{{ j.letter }}</div>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:14px;font-weight:600">{{ j.title }}</div>
+              <div style="font-size:12px;color:#68717A">{{ j.progress }}</div>
+            </div>
+            <button onClick="{{ j.start }}" style="height:40px;padding:0 14px;border-radius:10px;border:1px solid #252B32;background:#161B21;font-size:13px;font-weight:600;cursor:pointer">{{ j.cta }}</button>
+          </div>
+          <sc-if value="{{ j.open }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid #1B2026">
+              <sc-for list="{{ j.steps }}" as="s" hint-placeholder-count="4">
+                <div style="display:flex;gap:8px;align-items:flex-start;font-size:13px;line-height:1.4">
+                  <span style="{{ s.iconStyle }}">{{ s.icon }}</span>
+                  <span style="{{ s.textStyle }}">{{ s.text }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+        </div>
+      </sc-for>
+      <div style="border:1px solid #1B2026;border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:8px">
+        <div style="font-size:12px;font-weight:600;color:#98A0A8">Gestures</div>
+        <div style="display:grid;grid-template-columns:auto 1fr;gap:6px 12px;font-size:12px;color:#98A0A8;line-height:1.4">
+          <span style="color:#E8E4DC">Tap</span><span>select; tap again for properties</span>
+          <span style="color:#E8E4DC">Drag an object</span><span>move it, with anything else selected</span>
+          <span style="color:#E8E4DC">Drag the ground</span><span>look around</span>
+          <span style="color:#E8E4DC">Hold the ground</span><span>add something at that spot</span>
+          <span style="color:#E8E4DC">Pinch</span><span>zoom (mouse wheel on desktop)</span>
+          <span style="color:#E8E4DC">Two fingers</span><span>move the view while painting</span>
+          <span style="color:#E8E4DC">In play</span><span>drag anywhere to walk Wick, or WASD</span>
+        </div>
+      </div>
+    </aside>
+  </sc-if>
+
+  <div ref="{{ screenRef }}" style="{{ appStyle }}">
+
+    <sc-if value="{{ isDash }}" hint-placeholder-val="{{ true }}">
+      <div style="position:absolute;inset:0;display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0px);background:#080A0D">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 8px 6px 22px">
+          <div style="display:flex;align-items:center;gap:10px">
+            <div style="width:11px;height:11px;border-radius:2px;background:#E9A33A;transform:rotate(45deg)"></div>
+            <span style="font-size:21px;font-weight:600;letter-spacing:-.01em">Sindri</span>
+          </div>
+          <div style="display:flex">
+            <sc-if value="{{ isNarrow }}" hint-placeholder-val="{{ true }}">
+              <button onClick="{{ openJourneys }}" style="height:48px;padding:0 12px;border:0;background:none;cursor:pointer;color:#E9A33A;display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600"><span style="font-family:'Material Symbols Outlined';font-size:22px">route</span>Journeys</button>
+            </sc-if>
+            <button onClick="{{ soon }}" style="width:48px;height:48px;border:0;background:none;cursor:pointer;color:#98A0A8"><span style="font-family:'Material Symbols Outlined';font-size:24px">settings</span></button>
+          </div>
+        </div>
+        <div style="flex:1;overflow:auto;padding:8px 16px 130px;display:flex;flex-direction:column;gap:22px">
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div style="font-size:13px;color:#68717A;font-weight:500;padding-left:4px">Your games</div>
+            <sc-if value="{{ created }}" hint-placeholder-val="{{ false }}">
+              <button onClick="{{ openCreated }}" style="display:flex;gap:14px;align-items:center;padding:10px;border-radius:16px;border:1px solid #1B2026;background:#0F1317;text-align:left;cursor:pointer">
+                <div style="width:72px;height:72px;border-radius:10px;overflow:hidden;position:relative;background-image:url(../../games/lamplighter/assets/textures/ground.png);background-size:64px 64px;image-rendering:pixelated;flex-shrink:0">
+                  <div style="position:absolute;left:12px;top:14px;width:48px;height:44px;background-image:url(../../games/lamplighter/assets/textures/wick.png);background-size:816px 176px;image-rendering:pixelated"></div>
+                </div>
+                <div style="flex:1;min-width:0">
+                  <div style="font-size:16px;font-weight:600">{{ projName }}</div>
+                  <div style="font-size:13px;color:#98A0A8;margin-top:2px">world.scene · just now</div>
+                </div>
+                <span style="font-family:'Material Symbols Outlined';font-size:22px;color:#68717A;padding-right:6px">chevron_right</span>
+              </button>
+            </sc-if>
+            <button onClick="{{ openLantern }}" style="display:flex;flex-direction:column;border-radius:18px;border:1px solid #1B2026;background:#0F1317;text-align:left;cursor:pointer;padding:0;overflow:hidden">
+              <div style="position:relative;height:190px;width:100%;background-image:url(../../games/lamplighter/assets/textures/ground.png);background-size:128px 128px;image-rendering:pixelated;overflow:hidden">
+                <div style="position:absolute;left:-10px;top:-6px;width:168px;height:168px;background-image:url(../../games/lamplighter/assets/textures/village.png);background-size:6888px 168px;background-position:-168px 0;image-rendering:pixelated"></div>
+                <div style="position:absolute;left:150px;top:44px;width:128px;height:128px;background-image:url(../../games/lamplighter/assets/textures/objects.png);background-size:1408px 128px;background-position:-128px 0;image-rendering:pixelated"></div>
+                <div style="position:absolute;left:220px;top:96px;width:96px;height:88px;background-image:url(../../games/lamplighter/assets/textures/wick.png);background-size:1632px 352px;image-rendering:pixelated"></div>
+              </div>
+              <div style="display:flex;align-items:center;gap:12px;padding:14px 16px">
+                <div style="flex:1;min-width:0">
+                  <div style="font-size:17px;font-weight:600">Lantern Crossing</div>
+                  <div style="font-size:13px;color:#98A0A8;margin-top:3px">world.scene · 2 scenes · edited yesterday</div>
+                </div>
+                <div style="height:44px;padding:0 16px;border-radius:12px;background:#2E2211;border:1px solid #8A6220;color:#FFBE55;font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px"><span style="font-family:'Material Symbols Outlined';font-size:20px">play_arrow</span>Continue</div>
+              </div>
+            </button>
+          </div>
+          <div style="display:flex;flex-direction:column">
+            <div style="font-size:13px;color:#68717A;font-weight:500;padding:0 4px 6px">Samples to learn from</div>
+            <sc-for list="{{ samples }}" as="s" hint-placeholder-count="5">
+              <button onClick="{{ sampleTap }}" style="display:flex;gap:14px;align-items:center;padding:10px 6px;border:0;border-bottom:1px solid #1B2026;background:none;text-align:left;cursor:pointer">
+                <div style="width:44px;height:44px;border-radius:12px;background:#161B21;display:flex;align-items:center;justify-content:center;color:#98A0A8;flex-shrink:0"><span style="font-family:'Material Symbols Outlined';font-size:22px">{{ s.icon }}</span></div>
+                <div style="flex:1;min-width:0">
+                  <div style="font-size:15px;font-weight:500">{{ s.name }}</div>
+                  <div style="font-size:13px;color:#68717A;margin-top:2px">{{ s.summary }}</div>
+                </div>
+              </button>
+            </sc-for>
+          </div>
+        </div>
+        <div style="position:absolute;left:0;right:0;bottom:0;padding:22px 16px calc(env(safe-area-inset-bottom,0px) + 20px);background:linear-gradient(rgba(8,10,13,0),#080A0D 40%);display:flex;gap:10px">
+          <button onClick="{{ newGame }}" style="flex:1;height:58px;border-radius:18px;border:0;background:#E9A33A;color:#1A1206;font-size:16px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer"><span style="font-family:'Material Symbols Outlined';font-size:24px">add</span>New game</button>
+          <button onClick="{{ soon }}" style="width:58px;height:58px;border-radius:18px;border:1px solid #252B32;background:#161B21;cursor:pointer;color:#98A0A8"><span style="font-family:'Material Symbols Outlined';font-size:24px">folder_open</span></button>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isNew }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;inset:0;display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0px);background:#080A0D">
+        <div style="display:flex;align-items:center;gap:4px;padding:6px 12px">
+          <button onClick="{{ newBack }}" style="width:48px;height:48px;border:0;background:none;cursor:pointer"><span style="font-family:'Material Symbols Outlined';font-size:24px">arrow_back</span></button>
+          <div style="flex:1;font-size:17px;font-weight:600">New game</div>
+          <div style="font-size:13px;color:#68717A;padding-right:12px">{{ newStepText }}</div>
+        </div>
+        <sc-if value="{{ newStep0 }}" hint-placeholder-val="{{ true }}">
+          <div style="flex:1;overflow:auto;padding:8px 16px 32px;display:flex;flex-direction:column;gap:12px">
+            <div style="padding:4px 6px 6px">
+              <div style="font-size:24px;font-weight:600;letter-spacing:-.01em">What are you making?</div>
+              <div style="font-size:14px;color:#98A0A8;margin-top:6px">Everything here can change later.</div>
+            </div>
+            <sc-for list="{{ templates }}" as="t" hint-placeholder-count="4">
+              <button onClick="{{ t.pick }}" style="{{ t.style }}">
+                <div style="{{ t.thumb }}"><span style="font-family:'Material Symbols Outlined';font-size:30px;color:#98A0A8">{{ t.icon }}</span></div>
+                <div style="flex:1;min-width:0;text-align:left">
+                  <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span style="font-size:16px;font-weight:600">{{ t.name }}</span><span style="{{ t.tagStyle }}">{{ t.tag }}</span></div>
+                  <div style="font-size:13px;color:#98A0A8;margin-top:4px;line-height:1.4;text-wrap:pretty">{{ t.desc }}</div>
+                </div>
+              </button>
+            </sc-for>
+          </div>
+        </sc-if>
+        <sc-if value="{{ newStep1 }}" hint-placeholder-val="{{ false }}">
+          <div style="flex:1;overflow:auto;padding:8px 22px calc(env(safe-area-inset-bottom,0px) + 24px);display:flex;flex-direction:column;gap:22px">
+            <div>
+              <div style="font-size:24px;font-weight:600;letter-spacing:-.01em">Name it</div>
+              <div style="font-size:14px;color:#98A0A8;margin-top:6px">It becomes the folder and the name in sindri.toml.</div>
+            </div>
+            <input value="{{ projName }}" onChange="{{ onName }}" style="height:58px;border-radius:14px;border:1px solid #8A6220;background:#0B0E12;color:#E8E4DC;font-size:18px;padding:0 16px;outline:none">
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <div style="font-size:13px;color:#68717A;font-weight:500">The game plays</div>
+              <div style="display:flex;gap:6px;padding:4px;border-radius:14px;background:#0B0E12;border:1px solid #1B2026">
+                <sc-for list="{{ orientOpts }}" as="o" hint-placeholder-count="2">
+                  <button onClick="{{ o.pick }}" style="{{ o.style }}"><span style="font-family:'Material Symbols Outlined';font-size:20px">{{ o.icon }}</span>{{ o.label }}</button>
+                </sc-for>
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <div style="font-size:13px;color:#68717A;font-weight:500">You start with</div>
+              <div style="display:flex;flex-direction:column;gap:10px;font-size:14px;color:#98A0A8">
+                <div style="display:flex;gap:10px;align-items:center"><span style="font-family:'Material Symbols Outlined';font-size:20px;color:#79B68A">check</span>world.scene, with a camera that follows Wick</div>
+                <div style="display:flex;gap:10px;align-items:center"><span style="font-family:'Material Symbols Outlined';font-size:20px;color:#79B68A">check</span>Wick, who walks and carries a lantern</div>
+                <div style="display:flex;gap:10px;align-items:center"><span style="font-family:'Material Symbols Outlined';font-size:20px;color:#79B68A">check</span>A grass and path tileset, ready to paint</div>
+              </div>
+            </div>
+            <div style="flex:1"></div>
+            <button onClick="{{ create }}" style="height:58px;border-radius:18px;border:0;background:#E9A33A;color:#1A1206;font-size:16px;font-weight:600;cursor:pointer;flex-shrink:0">Create game</button>
+          </div>
+        </sc-if>
+        <sc-if value="{{ newStep2 }}" hint-placeholder-val="{{ false }}">
+          <div style="flex:1;display:flex;flex-direction:column;justify-content:center;padding:0 40px;gap:14px">
+            <sc-for list="{{ createLines }}" as="l" hint-placeholder-count="3">
+              <div style="display:flex;gap:10px;align-items:center;font-size:14px;color:#98A0A8"><span style="{{ l.iconStyle }}">{{ l.icon }}</span>{{ l.text }}</div>
+            </sc-for>
+          </div>
+        </sc-if>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isEditor }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;inset:0;overflow:hidden;background:#06070A">
+        <div onPointerDown="{{ vpDown }}" onWheel="{{ vpWheel }}" style="position:absolute;inset:0;touch-action:none;overflow:hidden">
+          <div style="{{ worldStyle }}">
+            <canvas ref="{{ canvasRef }}" width="512" height="1152" style="{{ canvasStyle }}"></canvas>
+            <sc-if value="{{ showGrid }}" hint-placeholder-val="{{ false }}">
+              <div style="position:absolute;left:0;top:0;width:512px;height:1152px;pointer-events:none;background-image:linear-gradient(rgba(232,228,220,.09) 1px,transparent 1px),linear-gradient(90deg,rgba(232,228,220,.09) 1px,transparent 1px);background-size:32px 32px"></div>
+            </sc-if>
+            <svg width="512" height="1152" style="position:absolute;left:0;top:0;pointer-events:none;overflow:visible">
+              <sc-for list="{{ wires }}" as="w" hint-placeholder-count="0">
+                <line x1="{{ w.x1 }}" y1="{{ w.y1 }}" x2="{{ w.x2 }}" y2="{{ w.y2 }}" stroke="#FFBE55" stroke-width="2" stroke-dasharray="6 5" stroke-linecap="round"></line>
+                <circle cx="{{ w.x2 }}" cy="{{ w.y2 }}" r="4" fill="#FFBE55"></circle>
+              </sc-for>
+            </svg>
+            <sc-for list="{{ trails }}" as="d" hint-placeholder-count="0">
+              <div style="{{ d.style }}"></div>
+            </sc-for>
+            <sc-for list="{{ sprites }}" as="s" hint-placeholder-count="0">
+              <div style="{{ s.style }}"></div>
+            </sc-for>
+            <sc-for list="{{ markers }}" as="m" hint-placeholder-count="0">
+              <div style="{{ m.style }}"><span style="font-family:'Material Symbols Outlined';font-size:18px">{{ m.icon }}</span></div>
+            </sc-for>
+            <sc-for list="{{ rings }}" as="r" hint-placeholder-count="0">
+              <div style="{{ r.style }}"></div>
+            </sc-for>
+            <sc-for list="{{ wireLabels }}" as="w" hint-placeholder-count="0">
+              <div style="{{ w.style }}">{{ w.text }}</div>
+            </sc-for>
+            <sc-if value="{{ hasHandles }}" hint-placeholder-val="{{ false }}">
+              <div style="{{ hnd.ring }}"></div>
+              <div style="{{ hnd.stem }}"></div>
+              <div onPointerDown="{{ rotDown }}" style="{{ hnd.rot }}"><span style="{{ hnd.iconStyle }}">rotate_right</span></div>
+              <div onPointerDown="{{ sclDown }}" style="{{ hnd.scl }}"><span style="{{ hnd.iconStyle }}">open_in_full</span></div>
+            </sc-if>
+            <sc-if value="{{ hasBrush }}" hint-placeholder-val="{{ false }}">
+              <div style="{{ brushStyle }}"></div>
+            </sc-if>
+          </div>
+          <div style="{{ lightStyle }}"></div>
+          <sc-if value="{{ hasJoy }}" hint-placeholder-val="{{ false }}">
+            <div style="{{ joyBase }}"></div>
+            <div style="{{ joyKnob }}"></div>
+          </sc-if>
+        </div>
+
+        <sc-if value="{{ showEditChrome }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;left:10px;top:calc(env(safe-area-inset-top,0px) + 10px);display:flex;align-items:center;height:52px;border-radius:18px;background:rgba(11,14,18,.886);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(37,43,50,.8)">
+            <button onClick="{{ goDash }}" style="width:46px;height:52px;border:0;background:none;cursor:pointer;color:#98A0A8"><span style="font-family:'Material Symbols Outlined';font-size:22px">home</span></button>
+            <div style="width:1px;height:24px;background:#252B32"></div>
+            <button onClick="{{ openScenes }}" style="height:52px;border:0;background:none;cursor:pointer;display:flex;align-items:center;gap:4px;padding:0 8px 0 12px;text-align:left">
+              <div>
+                <div style="font-size:11px;color:#68717A;line-height:1.2;white-space:nowrap">{{ projectTitle }}</div>
+                <div style="font-size:14px;font-weight:600;line-height:1.3">world.scene</div>
+              </div>
+              <span style="font-family:'Material Symbols Outlined';font-size:20px;color:#68717A">expand_more</span>
+            </button>
+          </div>
+          <div style="position:absolute;right:10px;top:calc(env(safe-area-inset-top,0px) + 10px);display:flex;align-items:center;height:52px;border-radius:18px;background:rgba(11,14,18,.886);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(37,43,50,.8)">
+            <button onClick="{{ undoAct }}" style="{{ undoStyle }}"><span style="font-family:'Material Symbols Outlined';font-size:22px">undo</span></button>
+            <button onClick="{{ redoAct }}" style="{{ redoStyle }}"><span style="font-family:'Material Symbols Outlined';font-size:22px">redo</span></button>
+            <button onClick="{{ toggleMore }}" style="width:44px;height:52px;border:0;background:none;cursor:pointer;color:#98A0A8"><span style="font-family:'Material Symbols Outlined';font-size:22px">more_vert</span></button>
+          </div>
+          <sc-if value="{{ moreOpen }}" hint-placeholder-val="{{ false }}">
+            <div style="position:absolute;right:10px;top:calc(env(safe-area-inset-top,0px) + 70px);width:250px;border-radius:16px;background:#1A1F26;border:1px solid #252B32;box-shadow:0 16px 40px rgba(0,0,0,.5);padding:6px;z-index:40">
+              <sc-for list="{{ moreItems }}" as="m" hint-placeholder-count="4">
+                <button onClick="{{ m.click }}" style="width:100%;height:48px;border:0;background:none;display:flex;align-items:center;gap:12px;padding:0 12px;border-radius:10px;cursor:pointer;font-size:14px">
+                  <span style="font-family:'Material Symbols Outlined';font-size:20px;color:#98A0A8">{{ m.icon }}</span>
+                  <span style="flex:1;text-align:left">{{ m.label }}</span>
+                  <span style="{{ m.stateStyle }}">{{ m.state }}</span>
+                </button>
+              </sc-for>
+            </div>
+          </sc-if>
+        </sc-if>
+
+        <sc-if value="{{ hasCoach }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;left:10px;right:10px;top:calc(env(safe-area-inset-top,0px) + 72px);display:flex;gap:10px;align-items:flex-start;padding:12px 8px 12px 14px;border-radius:14px;background:#1A1F26;border:1px solid #8A6220;box-shadow:0 12px 30px rgba(0,0,0,.45);z-index:20;pointer-events:auto">
+            <span style="font-family:'Material Symbols Outlined';font-size:20px;color:#E9A33A;margin-top:1px">lightbulb</span>
+            <div style="flex:1;font-size:14px;line-height:1.45;text-wrap:pretty">{{ coach }}</div>
+            <button onClick="{{ closeCoach }}" style="width:36px;height:36px;border:0;background:none;cursor:pointer;color:#68717A;margin:-8px 0"><span style="font-family:'Material Symbols Outlined';font-size:18px">close</span></button>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isPicking }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;left:10px;right:10px;top:calc(env(safe-area-inset-top,0px) + 10px);display:flex;align-items:center;gap:10px;padding:8px 8px 8px 16px;min-height:56px;border-radius:18px;background:#2E2211;border:1px solid #E9A33A;z-index:25">
+            <span style="font-family:'Material Symbols Outlined';font-size:22px;color:#FFBE55">ads_click</span>
+            <div style="flex:1;font-size:14px;font-weight:500">{{ pickText }}</div>
+            <button onClick="{{ cancelPick }}" style="height:40px;padding:0 14px;border-radius:12px;border:1px solid #8A6220;background:none;cursor:pointer;font-size:13px;font-weight:600">Cancel</button>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ showSelChip }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0px) + 98px);display:flex;justify-content:center;pointer-events:none">
+            <button onClick="{{ openInspector }}" style="pointer-events:auto;height:42px;max-width:calc(100% - 24px);padding:0 8px 0 14px;border-radius:21px;border:1px solid #8A6220;background:rgba(46,34,17,.96);display:flex;align-items:center;gap:8px;cursor:pointer;white-space:nowrap">
+              <span style="font-family:'Material Symbols Outlined';font-size:18px;color:#FFBE55">{{ selIcon }}</span>
+              <span style="font-size:14px;font-weight:600;overflow:hidden;text-overflow:ellipsis">{{ selName }}</span>
+              <span style="font-size:12px;color:#98A0A8">{{ selSub }}</span>
+              <span style="font-family:'Material Symbols Outlined';font-size:20px;color:#98A0A8">keyboard_arrow_up</span>
+            </button>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ showLens }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;left:10px;right:86px;bottom:calc(env(safe-area-inset-bottom,0px) + 18px);height:68px;border-radius:22px;background:rgba(11,14,18,.886);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(37,43,50,.8);display:flex;align-items:center;justify-content:space-around;padding:0 2px">
+            <sc-for list="{{ lensItems }}" as="it" hint-placeholder-count="5">
+              <button onClick="{{ it.click }}" style="{{ it.style }}">
+                <span style="font-family:'Material Symbols Outlined';font-size:24px">{{ it.icon }}</span>
+                <span style="font-size:10.5px;font-weight:500;white-space:nowrap">{{ it.label }}</span>
+              </button>
+            </sc-for>
+          </div>
+          <button onClick="{{ play }}" style="position:absolute;right:10px;bottom:calc(env(safe-area-inset-bottom,0px) + 18px);width:68px;height:68px;border-radius:24px;border:0;background:#E9A33A;color:#1A1206;cursor:pointer;box-shadow:0 10px 24px rgba(233,163,58,.25)"><span style="font-family:'Material Symbols Outlined';font-size:34px;font-variation-settings:'FILL' 1">play_arrow</span></button>
+        </sc-if>
+
+        <sc-if value="{{ showPaintBar }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;left:10px;right:10px;bottom:calc(env(safe-area-inset-bottom,0px) + 96px);display:flex;justify-content:center">
+            <div style="display:flex;align-items:center;gap:4px;height:48px;padding:0 6px;border-radius:16px;background:rgba(11,14,18,.886);border:1px solid rgba(37,43,50,.8)">
+              <span style="font-size:12px;color:#98A0A8;padding:0 6px">Size</span>
+              <sc-for list="{{ sizeOpts }}" as="o" hint-placeholder-count="3">
+                <button onClick="{{ o.pick }}" style="{{ o.style }}">{{ o.label }}</button>
+              </sc-for>
+              <div style="width:1px;height:22px;background:#252B32;margin:0 4px"></div>
+              <button onClick="{{ togglePan }}" style="{{ panStyle }}"><span style="font-family:'Material Symbols Outlined';font-size:20px">pan_tool</span>Move</button>
+            </div>
+          </div>
+          <div style="position:absolute;left:10px;right:86px;bottom:calc(env(safe-area-inset-bottom,0px) + 18px);height:68px;border-radius:22px;background:rgba(11,14,18,.886);border:1px solid rgba(37,43,50,.8);display:flex;align-items:center;justify-content:space-around;padding:0 2px">
+            <sc-for list="{{ brushes }}" as="b" hint-placeholder-count="4">
+              <button onClick="{{ b.pick }}" style="{{ b.style }}">
+                <div style="{{ b.swatch }}"></div>
+                <span style="font-size:10.5px;font-weight:500">{{ b.label }}</span>
+              </button>
+            </sc-for>
+          </div>
+          <button onClick="{{ donePaint }}" style="position:absolute;right:10px;bottom:calc(env(safe-area-inset-bottom,0px) + 18px);width:68px;height:68px;border-radius:24px;border:1px solid #8A6220;background:#2E2211;color:#FFBE55;cursor:pointer"><span style="font-family:'Material Symbols Outlined';font-size:30px">check</span></button>
+        </sc-if>
+
+        <sc-if value="{{ showPlayChrome }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;left:10px;top:calc(env(safe-area-inset-top,0px) + 10px);display:flex;align-items:center;gap:2px;height:52px;padding:0 4px;border-radius:18px;background:rgba(11,14,18,.75);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(37,43,50,.6)">
+            <button onClick="{{ stop }}" style="width:48px;height:44px;border:0;background:none;cursor:pointer;color:#E8E4DC"><span style="font-family:'Material Symbols Outlined';font-size:24px;font-variation-settings:'FILL' 1">stop</span></button>
+            <button onClick="{{ pauseToggle }}" style="width:48px;height:44px;border:0;background:none;cursor:pointer;color:#E8E4DC"><span style="font-family:'Material Symbols Outlined';font-size:24px;font-variation-settings:'FILL' 1">{{ pauseIcon }}</span></button>
+            <div style="font-size:13px;color:#98A0A8;padding:0 10px 0 4px;font-variant-numeric:tabular-nums">{{ playLabel }}</div>
+          </div>
+          <sc-if value="{{ hasRunEdits }}" hint-placeholder-val="{{ false }}">
+            <div style="position:absolute;right:10px;top:calc(env(safe-area-inset-top,0px) + 14px);height:44px;padding:0 14px;border-radius:16px;background:#2E2211;border:1px solid #8A6220;display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:#FFBE55"><span style="font-family:'Material Symbols Outlined';font-size:18px">edit</span>{{ runEditText }}</div>
+          </sc-if>
+          <sc-if value="{{ showPlayHint }}" hint-placeholder-val="{{ false }}">
+            <div style="position:absolute;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0px) + 40px);display:flex;justify-content:center;pointer-events:none">
+              <div style="padding:10px 16px;border-radius:14px;background:rgba(11,14,18,.8);font-size:13px;color:#98A0A8">Drag anywhere to walk · pause to tune</div>
+            </div>
+          </sc-if>
+        </sc-if>
+
+        <sc-if value="{{ isFrozen }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;left:0;right:0;bottom:0;padding:16px 16px calc(env(safe-area-inset-bottom,0px) + 22px);background:#0F1317;border-radius:22px 22px 0 0;border-top:1px solid #252B32;display:flex;flex-direction:column;gap:12px;z-index:28">
+            <div>
+              <div style="font-size:15px;font-weight:600">Paused · {{ scrubLabel }}</div>
+              <div style="font-size:12px;color:#68717A;margin-top:2px">Drag back through the last {{ recordedLabel }}. Tap anything to tune it.</div>
+            </div>
+            <div onPointerDown="{{ scrubDown }}" style="position:relative;height:44px;cursor:pointer;touch-action:none">
+              <div style="position:absolute;left:0;right:0;top:20px;height:4px;border-radius:2px;background:#252B32"></div>
+              <div style="{{ scrubFill }}"></div>
+              <sc-for list="{{ scrubMarks }}" as="m" hint-placeholder-count="0">
+                <div style="{{ m.style }}"></div>
+              </sc-for>
+              <div style="{{ scrubKnob }}"></div>
+            </div>
+            <div style="display:flex;gap:8px">
+              <button onClick="{{ stepBack }}" style="width:52px;height:52px;border-radius:16px;border:1px solid #252B32;background:#161B21;cursor:pointer"><span style="font-family:'Material Symbols Outlined';font-size:22px">fast_rewind</span></button>
+              <button onClick="{{ stepOnce }}" style="width:52px;height:52px;border-radius:16px;border:1px solid #252B32;background:#161B21;cursor:pointer"><span style="font-family:'Material Symbols Outlined';font-size:22px">skip_next</span></button>
+              <button onClick="{{ resume }}" style="flex:1;height:52px;border-radius:16px;border:0;background:#E9A33A;color:#1A1206;font-size:15px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px"><span style="font-family:'Material Symbols Outlined';font-size:24px;font-variation-settings:'FILL' 1">play_arrow</span>{{ resumeLabel }}</button>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isInspector }}" hint-placeholder-val="{{ false }}">
+          <div style="{{ inspSheetStyle }}">
+            <button onClick="{{ toggleDetent }}" style="height:24px;border:0;background:none;cursor:pointer;display:flex;justify-content:center;align-items:center;width:100%;flex-shrink:0"><div style="width:40px;height:4px;border-radius:2px;background:#3A424C"></div></button>
+            <sc-if value="{{ tuneMode }}" hint-placeholder-val="{{ false }}">
+              <div style="margin:0 16px 10px;padding:10px 12px;border-radius:12px;background:#2E2211;border:1px solid #8A6220;font-size:13px;line-height:1.4">Live: changes apply to this run now. At Stop you choose which to keep.</div>
+            </sc-if>
+            <div style="display:flex;align-items:center;gap:12px;padding:0 6px 12px 16px">
+              <div style="width:44px;height:44px;border-radius:12px;background:#161B21;display:flex;align-items:center;justify-content:center;color:#E9A33A;flex-shrink:0"><span style="font-family:'Material Symbols Outlined';font-size:24px">{{ insp.icon }}</span></div>
+              <div style="flex:1;min-width:0">
+                <div style="font-size:17px;font-weight:600">{{ insp.name }}</div>
+                <div style="font-size:12px;color:#68717A;margin-top:2px">{{ insp.sub }}</div>
+              </div>
+              <button onClick="{{ insp.toggleActive }}" style="{{ insp.activeStyle }}"><div style="{{ insp.activeKnob }}"></div></button>
+              <button onClick="{{ closeSheet }}" style="width:44px;height:44px;border:0;background:none;cursor:pointer;color:#68717A"><span style="font-family:'Material Symbols Outlined';font-size:22px">close</span></button>
+            </div>
+            <div style="flex:1;overflow:auto;padding:0 12px calc(env(safe-area-inset-bottom,0px) + 28px);display:flex;flex-direction:column;gap:10px">
+              <sc-for list="{{ insp.sections }}" as="sec" hint-placeholder-count="3">
+                <div style="border-radius:16px;background:#12161B;border:1px solid #1B2026;padding:4px 14px 10px">
+                  <div style="display:flex;align-items:center;gap:8px;height:38px">
+                    <span style="font-family:'Material Symbols Outlined';font-size:18px;color:#98A0A8">{{ sec.icon }}</span>
+                    <span style="font-size:13px;font-weight:600;flex:1">{{ sec.title }}</span>
+                    <span style="font-size:11px;color:#68717A">{{ sec.note }}</span>
+                  </div>
+                  <sc-for list="{{ sec.rows }}" as="row" hint-placeholder-count="2">
+                    <sc-if value="{{ row.isSlider }}" hint-placeholder-val="{{ false }}">
+                      <div style="display:flex;flex-direction:column;gap:2px;padding:4px 0">
+                        <div style="display:flex;justify-content:space-between;font-size:13px"><span style="color:#98A0A8">{{ row.label }}</span><span style="font-variant-numeric:tabular-nums;font-weight:500">{{ row.valText }}</span></div>
+                        <div onPointerDown="{{ row.down }}" style="position:relative;height:36px;cursor:pointer;touch-action:none">
+                          <div style="position:absolute;left:0;right:0;top:16px;height:4px;border-radius:2px;background:#252B32"></div>
+                          <div style="{{ row.fill }}"></div>
+                          <div style="{{ row.knob }}"></div>
+                        </div>
+                      </div>
+                    </sc-if>
+                    <sc-if value="{{ row.isStepper }}" hint-placeholder-val="{{ false }}">
+                      <div style="display:flex;align-items:center;gap:10px;padding:5px 0">
+                        <span style="{{ row.axisStyle }}">{{ row.axis }}</span>
+                        <span style="font-size:13px;color:#98A0A8;flex:1">{{ row.label }}</span>
+                        <div style="display:flex;align-items:center">
+                          <button onClick="{{ row.minus }}" style="width:44px;height:40px;border-radius:12px 0 0 12px;border:1px solid #252B32;background:#161B21;cursor:pointer"><span style="font-family:'Material Symbols Outlined';font-size:20px">remove</span></button>
+                          <div style="width:60px;height:40px;border-top:1px solid #252B32;border-bottom:1px solid #252B32;background:#0B0E12;display:flex;align-items:center;justify-content:center;font-size:14px;font-variant-numeric:tabular-nums">{{ row.valText }}</div>
+                          <button onClick="{{ row.plus }}" style="width:44px;height:40px;border-radius:0 12px 12px 0;border:1px solid #252B32;background:#161B21;cursor:pointer"><span style="font-family:'Material Symbols Outlined';font-size:20px">add</span></button>
+                        </div>
+                      </div>
+                    </sc-if>
+                    <sc-if value="{{ row.isToggle }}" hint-placeholder-val="{{ false }}">
+                      <button onClick="{{ row.toggle }}" style="width:100%;display:flex;align-items:center;justify-content:space-between;height:46px;border:0;background:none;cursor:pointer;padding:0">
+                        <span style="font-size:13px;color:#98A0A8;text-align:left">{{ row.label }}</span>
+                        <div style="{{ row.trackStyle }}"><div style="{{ row.knobStyle }}"></div></div>
+                      </button>
+                    </sc-if>
+                    <sc-if value="{{ row.isSegment }}" hint-placeholder-val="{{ false }}">
+                      <div style="display:flex;align-items:center;gap:10px;padding:5px 0">
+                        <span style="font-size:13px;color:#98A0A8;flex:1">{{ row.label }}</span>
+                        <div style="display:flex;padding:3px;border-radius:12px;background:#0B0E12;border:1px solid #1B2026">
+                          <sc-for list="{{ row.opts }}" as="o" hint-placeholder-count="2">
+                            <button onClick="{{ o.pick }}" style="{{ o.style }}">{{ o.label }}</button>
+                          </sc-for>
+                        </div>
+                      </div>
+                    </sc-if>
+                    <sc-if value="{{ row.isSwatch }}" hint-placeholder-val="{{ false }}">
+                      <div style="display:flex;align-items:center;gap:10px;padding:6px 0">
+                        <span style="font-size:13px;color:#98A0A8;flex:1">{{ row.label }}</span>
+                        <sc-for list="{{ row.opts }}" as="o" hint-placeholder-count="3">
+                          <button onClick="{{ o.pick }}" style="{{ o.style }}"></button>
+                        </sc-for>
+                      </div>
+                    </sc-if>
+                    <sc-if value="{{ row.isSprite }}" hint-placeholder-val="{{ false }}">
+                      <div style="display:flex;align-items:center;gap:12px;padding:6px 0">
+                        <div style="width:56px;height:56px;border-radius:12px;background:#0B0E12;border:1px solid #1B2026;overflow:hidden;display:flex;align-items:flex-end;justify-content:center;flex-shrink:0"><div style="{{ row.thumb }}"></div></div>
+                        <div style="flex:1;min-width:0">
+                          <div style="font-size:14px;font-weight:500;font-family:'JetBrains Mono',monospace">{{ row.sheet }}</div>
+                          <div style="font-size:12px;color:#68717A;margin-top:2px">{{ row.cellText }}</div>
+                        </div>
+                        <button onClick="{{ openAssets }}" style="height:40px;padding:0 12px;border-radius:12px;border:1px solid #252B32;background:#161B21;cursor:pointer;font-size:13px">Swap</button>
+                      </div>
+                    </sc-if>
+                    <sc-if value="{{ row.isBehaviour }}" hint-placeholder-val="{{ false }}">
+                      <button onClick="{{ openBehaviour }}" style="width:100%;display:flex;align-items:center;gap:12px;padding:8px 0 6px;border:0;background:none;cursor:pointer;text-align:left">
+                        <div style="flex:1;font-size:14px;line-height:1.45;text-wrap:pretty">{{ row.text }}</div>
+                        <span style="font-family:'Material Symbols Outlined';font-size:22px;color:#E9A33A">chevron_right</span>
+                      </button>
+                    </sc-if>
+                    <sc-if value="{{ row.isFacts }}" hint-placeholder-val="{{ false }}">
+                      <div style="display:grid;grid-template-columns:auto 1fr;gap:8px 14px;padding:6px 0 4px;font-size:13px">
+                        <sc-for list="{{ row.items }}" as="f" hint-placeholder-count="3">
+                          <span style="color:#68717A">{{ f.k }}</span><span style="color:#98A0A8;font-family:'JetBrains Mono',monospace;font-size:12px;text-align:right;word-break:break-all">{{ f.v }}</span>
+                        </sc-for>
+                      </div>
+                    </sc-if>
+                    <sc-if value="{{ row.isMore }}" hint-placeholder-val="{{ false }}">
+                      <button onClick="{{ row.toggle }}" style="width:100%;height:40px;border:0;background:none;cursor:pointer;display:flex;align-items:center;gap:6px;padding:0;font-size:13px;color:#E9A33A"><span style="font-family:'Material Symbols Outlined';font-size:18px">{{ row.icon }}</span>{{ row.label }}</button>
+                    </sc-if>
+                  </sc-for>
+                </div>
+              </sc-for>
+              <sc-if value="{{ insp.showAdd }}" hint-placeholder-val="{{ false }}">
+                <button onClick="{{ toggleAddComp }}" style="height:52px;border-radius:16px;border:1px dashed #3A424C;background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;font-size:14px;color:#98A0A8;flex-shrink:0"><span style="font-family:'Material Symbols Outlined';font-size:20px">add</span>Add a component</button>
+                <sc-if value="{{ addCompOpen }}" hint-placeholder-val="{{ false }}">
+                  <div style="border-radius:16px;background:#12161B;border:1px solid #1B2026;padding:8px 14px 14px;display:flex;flex-direction:column;gap:6px">
+                    <sc-for list="{{ compGroups }}" as="g" hint-placeholder-count="4">
+                      <div>
+                        <div style="font-size:11px;color:#68717A;font-weight:600;margin:8px 0 6px">{{ g.name }}</div>
+                        <div style="display:flex;flex-wrap:wrap;gap:6px">
+                          <sc-for list="{{ g.items }}" as="c" hint-placeholder-count="3">
+                            <button onClick="{{ c.click }}" style="{{ c.style }}"><span style="font-family:'Material Symbols Outlined';font-size:16px">{{ c.icon }}</span>{{ c.label }}</button>
+                          </sc-for>
+                        </div>
+                      </div>
+                    </sc-for>
+                  </div>
+                </sc-if>
+              </sc-if>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isBehaviour }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;left:0;right:0;bottom:0;top:calc(env(safe-area-inset-top,0px) + 56px);background:#0F1317;border-radius:22px 22px 0 0;border-top:1px solid #252B32;box-shadow:0 -12px 40px rgba(0,0,0,.5);display:flex;flex-direction:column;z-index:30">
+            <div style="height:20px;display:flex;justify-content:center;align-items:center;flex-shrink:0"><div style="width:40px;height:4px;border-radius:2px;background:#3A424C"></div></div>
+            <div style="display:flex;align-items:center;gap:8px;padding:0 8px 10px 6px">
+              <button onClick="{{ openInspector }}" style="width:44px;height:44px;border:0;background:none;cursor:pointer"><span style="font-family:'Material Symbols Outlined';font-size:22px">arrow_back</span></button>
+              <div style="flex:1;min-width:0">
+                <div style="font-size:17px;font-weight:600">Behaviour</div>
+                <div style="font-size:12px;color:#68717A;margin-top:1px">{{ beh.sub }}</div>
+              </div>
+              <div style="display:flex;padding:3px;border-radius:12px;background:#0B0E12;border:1px solid #1B2026">
+                <sc-for list="{{ behTabs }}" as="o" hint-placeholder-count="2">
+                  <button onClick="{{ o.pick }}" style="{{ o.style }}">{{ o.label }}</button>
+                </sc-for>
+              </div>
+            </div>
+            <sc-if value="{{ behBlocks }}" hint-placeholder-val="{{ true }}">
+              <div style="flex:1;overflow:auto;padding:0 12px calc(env(safe-area-inset-bottom,0px) + 36px);display:flex;flex-direction:column;gap:12px">
+                <sc-if value="{{ beh.hasTemplates }}" hint-placeholder-val="{{ true }}">
+                  <div>
+                    <div style="font-size:12px;color:#68717A;font-weight:500;margin:2px 4px 8px">Start from</div>
+                    <div style="display:flex;gap:8px;overflow-x:auto;padding-bottom:2px">
+                      <sc-for list="{{ beh.templates }}" as="t" hint-placeholder-count="2">
+                        <button onClick="{{ t.apply }}" style="{{ t.style }}">
+                          <span style="font-family:'Material Symbols Outlined';font-size:22px;color:#E9A33A">{{ t.icon }}</span>
+                          <span style="font-size:13px;font-weight:600;text-align:left">{{ t.label }}</span>
+                          <span style="font-size:11px;color:#68717A;text-align:left;line-height:1.35">{{ t.desc }}</span>
+                        </button>
+                      </sc-for>
+                    </div>
+                  </div>
+                </sc-if>
+                <sc-for list="{{ beh.incoming }}" as="inc" hint-placeholder-count="0">
+                  <div style="border-radius:16px;border:1px solid #1B2026;background:#12161B;padding:14px;display:flex;flex-direction:column;gap:10px">
+                    <div style="font-size:11px;color:#68717A;font-weight:700;letter-spacing:.04em">OPENED BY</div>
+                    <div style="font-size:14px;line-height:1.45">{{ inc.text }}</div>
+                    <button onClick="{{ inc.go }}" style="align-self:flex-start;height:40px;padding:0 14px;border-radius:12px;border:1px solid #252B32;background:#161B21;cursor:pointer;font-size:13px;display:flex;align-items:center;gap:6px"><span style="font-family:'Material Symbols Outlined';font-size:18px">arrow_outward</span>Edit on {{ inc.name }}</button>
+                  </div>
+                </sc-for>
+                <sc-for list="{{ beh.rules }}" as="r" hint-placeholder-count="1">
+                  <div style="border-radius:18px;border:1px solid #252B32;background:#12161B;overflow:hidden;flex-shrink:0">
+                    <div style="display:flex;align-items:center;gap:8px;padding:10px 4px 10px 12px;background:#161B21;border-bottom:1px solid #1B2026">
+                      <span style="font-size:11px;font-weight:700;color:#E9A33A;width:38px">WHEN</span>
+                      <button onClick="{{ r.cycleWhen }}" style="flex:1;min-width:0;min-height:44px;border-radius:12px;border:1px solid #8A6220;background:#2E2211;display:flex;align-items:center;gap:8px;padding:0 10px;cursor:pointer;text-align:left">
+                        <span style="font-family:'Material Symbols Outlined';font-size:20px;color:#FFBE55">{{ r.whenIcon }}</span>
+                        <span style="flex:1;font-size:14px;font-weight:500">{{ r.whenText }}</span>
+                        <span style="font-family:'Material Symbols Outlined';font-size:18px;color:#8A6220">swap_vert</span>
+                      </button>
+                      <button onClick="{{ r.remove }}" style="width:40px;height:44px;border:0;background:none;cursor:pointer;color:#68717A"><span style="font-family:'Material Symbols Outlined';font-size:20px">delete</span></button>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:8px;padding:12px 4px 12px 12px">
+                      <sc-for list="{{ r.actions }}" as="a" hint-placeholder-count="2">
+                        <div style="display:flex;align-items:center;gap:8px">
+                          <span style="font-size:11px;font-weight:700;color:#68717A;width:38px">{{ a.lead }}</span>
+                          <div style="flex:1;min-width:0;min-height:44px;border-radius:12px;border:1px solid #252B32;background:#0B0E12;display:flex;align-items:center;gap:8px;padding:4px 6px 4px 10px">
+                            <span style="font-family:'Material Symbols Outlined';font-size:20px;color:#98A0A8">{{ a.icon }}</span>
+                            <span style="flex:1;font-size:14px">{{ a.text }}</span>
+                            <sc-if value="{{ a.hasTarget }}" hint-placeholder-val="{{ false }}">
+                              <button onClick="{{ a.pick }}" style="{{ a.targetStyle }}"><span style="font-family:'Material Symbols Outlined';font-size:16px">ads_click</span>{{ a.targetName }}</button>
+                            </sc-if>
+                            <sc-if value="{{ a.hasValue }}" hint-placeholder-val="{{ false }}">
+                              <span style="height:32px;padding:0 10px;border-radius:9px;background:#161B21;display:flex;align-items:center;font-size:13px;color:#98A0A8;white-space:nowrap">{{ a.value }}</span>
+                            </sc-if>
+                          </div>
+                          <button onClick="{{ a.remove }}" style="width:36px;height:44px;border:0;background:none;cursor:pointer;color:#68717A"><span style="font-family:'Material Symbols Outlined';font-size:18px">close</span></button>
+                        </div>
+                      </sc-for>
+                      <div style="display:flex;align-items:center;gap:8px">
+                        <span style="width:38px"></span>
+                        <button onClick="{{ r.toggleAdd }}" style="flex:1;height:44px;border-radius:12px;border:1px dashed #3A424C;background:none;cursor:pointer;display:flex;align-items:center;gap:8px;padding:0 12px;font-size:14px;color:#98A0A8"><span style="font-family:'Material Symbols Outlined';font-size:20px">add</span>Then…</button>
+                        <span style="width:36px"></span>
+                      </div>
+                      <sc-if value="{{ r.addOpen }}" hint-placeholder-val="{{ false }}">
+                        <div style="display:flex;flex-wrap:wrap;gap:6px;padding:4px 4px 0 46px">
+                          <sc-for list="{{ r.addOptions }}" as="o" hint-placeholder-count="4">
+                            <button onClick="{{ o.click }}" style="{{ o.style }}"><span style="font-family:'Material Symbols Outlined';font-size:18px">{{ o.icon }}</span>{{ o.label }}</button>
+                          </sc-for>
+                        </div>
+                      </sc-if>
+                    </div>
+                  </div>
+                </sc-for>
+                <sc-if value="{{ beh.empty }}" hint-placeholder-val="{{ false }}">
+                  <div style="padding:22px 14px;border-radius:16px;border:1px dashed #252B32;text-align:center;font-size:14px;color:#98A0A8;line-height:1.5;text-wrap:pretty">{{ beh.emptyText }}</div>
+                </sc-if>
+                <sc-if value="{{ beh.canAddRule }}" hint-placeholder-val="{{ false }}">
+                  <button onClick="{{ addRule }}" style="height:52px;border-radius:16px;border:1px solid #252B32;background:#161B21;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;font-size:14px;font-weight:500;flex-shrink:0"><span style="font-family:'Material Symbols Outlined';font-size:20px">add</span>New rule</button>
+                </sc-if>
+              </div>
+            </sc-if>
+            <sc-if value="{{ behCode }}" hint-placeholder-val="{{ false }}">
+              <div style="flex:1;overflow:auto;padding:0 12px calc(env(safe-area-inset-bottom,0px) + 36px);display:flex;flex-direction:column;gap:10px">
+                <div style="display:flex;align-items:center;gap:8px;padding:0 4px;font-size:12px;color:#98A0A8">
+                  <span style="font-family:'Material Symbols Outlined';font-size:18px;color:#79B68A">check_circle</span>
+                  <span style="flex:1;font-family:'JetBrains Mono',monospace">{{ beh.codeFile }}</span>
+                  <span style="color:#68717A">decay-lsp: no errors</span>
+                </div>
+                <div style="border-radius:14px;background:#0B0E12;border:1px solid #1B2026;padding:12px 0;overflow-x:auto;flex-shrink:0">
+                  <sc-for list="{{ beh.code }}" as="ln" hint-placeholder-count="12">
+                    <div style="display:flex;font-family:'JetBrains Mono',monospace;font-size:11.5px;line-height:1.7;white-space:pre">
+                      <span style="width:32px;text-align:right;padding-right:12px;color:#3A424C;flex-shrink:0">{{ ln.n }}</span>
+                      <span style="padding-right:14px"><sc-for list="{{ ln.toks }}" as="tk" hint-placeholder-count="3"><span style="{{ tk.style }}">{{ tk.t }}</span></sc-for></span>
+                    </div>
+                  </sc-for>
+                </div>
+                <div style="font-size:12px;color:#68717A;line-height:1.5;padding:0 4px;text-wrap:pretty">{{ beh.codeNote }}</div>
+                <button onClick="{{ editAsCode }}" style="height:48px;border-radius:14px;border:1px solid #252B32;background:#161B21;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;font-size:14px;flex-shrink:0"><span style="font-family:'Material Symbols Outlined';font-size:20px">code</span>Edit as code</button>
+              </div>
+            </sc-if>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isAdd }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;left:0;right:0;bottom:0;height:min(520px,80%);background:#0F1317;border-radius:22px 22px 0 0;border-top:1px solid #252B32;box-shadow:0 -12px 40px rgba(0,0,0,.5);display:flex;flex-direction:column;z-index:30">
+            <div style="height:20px;display:flex;justify-content:center;align-items:center;flex-shrink:0"><div style="width:40px;height:4px;border-radius:2px;background:#3A424C"></div></div>
+            <div style="display:flex;align-items:center;padding:0 6px 8px 18px">
+              <div style="flex:1">
+                <div style="font-size:17px;font-weight:600">Add to world.scene</div>
+                <div style="font-size:12px;color:#68717A;margin-top:2px">{{ addSub }}</div>
+              </div>
+              <button onClick="{{ closeSheet }}" style="width:44px;height:44px;border:0;background:none;cursor:pointer;color:#68717A"><span style="font-family:'Material Symbols Outlined';font-size:22px">close</span></button>
+            </div>
+            <div style="flex:1;overflow:auto;padding:0 14px calc(env(safe-area-inset-bottom,0px) + 28px);display:flex;flex-direction:column;gap:12px">
+              <div style="font-size:12px;color:#68717A;font-weight:500;margin-left:4px">This project's prefabs</div>
+              <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px">
+                <sc-for list="{{ prefabTiles }}" as="p" hint-placeholder-count="8">
+                  <div onPointerDown="{{ p.down }}" style="{{ p.style }}">
+                    <div style="width:64px;height:64px;overflow:hidden;display:flex;align-items:flex-end;justify-content:center;pointer-events:none"><div style="{{ p.thumb }}"></div></div>
+                    <span style="font-size:11.5px;color:#98A0A8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;pointer-events:none">{{ p.label }}</span>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="font-size:12px;color:#68717A;font-weight:500;margin:4px 0 0 4px">Basics</div>
+              <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px">
+                <sc-for list="{{ basics }}" as="b" hint-placeholder-count="4">
+                  <button onClick="{{ b.click }}" style="{{ b.style }}">
+                    <span style="font-family:'Material Symbols Outlined';font-size:20px">{{ b.icon }}</span>
+                    <span style="display:flex;flex-direction:column;align-items:flex-start;min-width:0"><span style="font-size:13px;font-weight:500">{{ b.label }}</span><span style="font-size:11px;color:#68717A;text-align:left;line-height:1.3">{{ b.note }}</span></span>
+                  </button>
+                </sc-for>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isAssets }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;left:0;right:0;bottom:0;height:min(580px,84%);background:#0F1317;border-radius:22px 22px 0 0;border-top:1px solid #252B32;box-shadow:0 -12px 40px rgba(0,0,0,.5);display:flex;flex-direction:column;z-index:30">
+            <div style="height:20px;display:flex;justify-content:center;align-items:center;flex-shrink:0"><div style="width:40px;height:4px;border-radius:2px;background:#3A424C"></div></div>
+            <div style="display:flex;align-items:center;gap:6px;padding:0 6px 10px 18px">
+              <div style="flex:1;font-size:17px;font-weight:600">Assets</div>
+              <button onClick="{{ openImport }}" style="height:40px;padding:0 14px;border-radius:12px;border:1px solid #8A6220;background:#2E2211;color:#FFBE55;cursor:pointer;display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600"><span style="font-family:'Material Symbols Outlined';font-size:18px">download</span>Import</button>
+              <button onClick="{{ closeSheet }}" style="width:44px;height:44px;border:0;background:none;cursor:pointer;color:#68717A"><span style="font-family:'Material Symbols Outlined';font-size:22px">close</span></button>
+            </div>
+            <div style="display:flex;gap:6px;padding:0 14px 12px;overflow-x:auto;flex-shrink:0">
+              <sc-for list="{{ assetTabs }}" as="t" hint-placeholder-count="5">
+                <button onClick="{{ t.pick }}" style="{{ t.style }}">{{ t.label }}</button>
+              </sc-for>
+            </div>
+            <sc-if value="{{ assetBanner }}" hint-placeholder-val="{{ false }}">
+              <div style="margin:0 14px 12px;padding:10px 12px;border-radius:12px;background:#2E2211;border:1px solid #8A6220;font-size:13px;line-height:1.4;display:flex;gap:8px;align-items:center"><span style="font-family:'Material Symbols Outlined';font-size:20px;color:#FFBE55">swipe_up</span>Drag Gloom up into the world to place it.</div>
+            </sc-if>
+            <div style="flex:1;overflow:auto;padding:0 14px calc(env(safe-area-inset-bottom,0px) + 28px)">
+              <sc-if value="{{ assetGridMode }}" hint-placeholder-val="{{ true }}">
+                <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px">
+                  <sc-for list="{{ assetItems }}" as="a" hint-placeholder-count="6">
+                    <div onPointerDown="{{ a.down }}" style="{{ a.style }}">
+                      <div style="width:84px;height:72px;overflow:hidden;display:flex;align-items:flex-end;justify-content:center;pointer-events:none"><div style="{{ a.thumb }}"></div></div>
+                      <div style="font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;pointer-events:none">{{ a.label }}</div>
+                      <div style="font-size:11px;color:#68717A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;pointer-events:none">{{ a.sub }}</div>
+                    </div>
+                  </sc-for>
+                </div>
+              </sc-if>
+              <sc-if value="{{ assetListMode }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;flex-direction:column">
+                  <sc-for list="{{ assetItems }}" as="a" hint-placeholder-count="4">
+                    <button onClick="{{ a.click }}" style="display:flex;align-items:center;gap:12px;min-height:60px;border:0;border-bottom:1px solid #1B2026;background:none;cursor:pointer;text-align:left;padding:0 4px">
+                      <span style="font-family:'Material Symbols Outlined';font-size:22px;color:#98A0A8">{{ a.icon }}</span>
+                      <span style="flex:1;min-width:0"><span style="display:block;font-size:14px;font-family:'JetBrains Mono',monospace">{{ a.label }}</span><span style="display:block;font-size:12px;color:#68717A;margin-top:2px">{{ a.sub }}</span></span>
+                    </button>
+                  </sc-for>
+                </div>
+              </sc-if>
+              <sc-if value="{{ assetEmpty }}" hint-placeholder-val="{{ false }}">
+                <div style="padding:40px 20px;text-align:center;display:flex;flex-direction:column;gap:10px;align-items:center">
+                  <span style="font-family:'Material Symbols Outlined';font-size:32px;color:#3A424C">volume_up</span>
+                  <div style="font-size:14px;color:#98A0A8;line-height:1.5">No sounds in this project yet. Import a .wav or .ogg from your phone.</div>
+                </div>
+              </sc-if>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isImport }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;left:0;right:0;bottom:0;height:min(540px,82%);background:#0F1317;border-radius:22px 22px 0 0;border-top:1px solid #252B32;box-shadow:0 -12px 40px rgba(0,0,0,.5);display:flex;flex-direction:column;z-index:31">
+            <div style="height:20px;display:flex;justify-content:center;align-items:center;flex-shrink:0"><div style="width:40px;height:4px;border-radius:2px;background:#3A424C"></div></div>
+            <div style="display:flex;align-items:center;gap:6px;padding:0 8px 8px 6px">
+              <button onClick="{{ openAssets }}" style="width:44px;height:44px;border:0;background:none;cursor:pointer"><span style="font-family:'Material Symbols Outlined';font-size:22px">arrow_back</span></button>
+              <div style="flex:1;font-size:17px;font-weight:600">Import</div>
+            </div>
+            <div style="flex:1;overflow:auto;padding:0 14px calc(env(safe-area-inset-bottom,0px) + 28px);display:flex;flex-direction:column;gap:14px">
+              <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px">
+                <sc-for list="{{ importSources }}" as="s" hint-placeholder-count="4">
+                  <button onClick="{{ s.click }}" style="{{ s.style }}"><span style="font-family:'Material Symbols Outlined';font-size:24px">{{ s.icon }}</span><span style="font-size:12px">{{ s.label }}</span></button>
+                </sc-for>
+              </div>
+              <div style="font-size:12px;color:#68717A;font-weight:500;margin:4px 0 0 4px">Downloads</div>
+              <div style="display:flex;flex-direction:column">
+                <sc-for list="{{ importFiles }}" as="f" hint-placeholder-count="3">
+                  <button onClick="{{ f.click }}" style="{{ f.style }}">
+                    <div style="width:52px;height:52px;border-radius:10px;background:#0B0E12;border:1px solid #1B2026;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0"><div style="{{ f.thumb }}"></div></div>
+                    <span style="flex:1;min-width:0;text-align:left"><span style="display:block;font-size:14px;font-family:'JetBrains Mono',monospace">{{ f.name }}</span><span style="display:block;font-size:12px;color:#68717A;margin-top:3px">{{ f.sub }}</span></span>
+                  </button>
+                </sc-for>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isSlicer }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;left:0;right:0;bottom:0;top:calc(env(safe-area-inset-top,0px) + 40px);background:#0F1317;border-radius:22px 22px 0 0;border-top:1px solid #252B32;box-shadow:0 -12px 40px rgba(0,0,0,.5);display:flex;flex-direction:column;z-index:32">
+            <div style="height:20px;display:flex;justify-content:center;align-items:center;flex-shrink:0"><div style="width:40px;height:4px;border-radius:2px;background:#3A424C"></div></div>
+            <div style="display:flex;align-items:center;gap:6px;padding:0 8px 8px 6px">
+              <button onClick="{{ openImport }}" style="width:44px;height:44px;border:0;background:none;cursor:pointer"><span style="font-family:'Material Symbols Outlined';font-size:22px">arrow_back</span></button>
+              <div style="flex:1;min-width:0">
+                <div style="font-size:17px;font-weight:600;font-family:'JetBrains Mono',monospace">gloom.png</div>
+                <div style="font-size:12px;color:#68717A;margin-top:1px">128 × 32 · copied to assets/textures/</div>
+              </div>
+            </div>
+            <div style="flex:1;overflow:auto;padding:0 16px 20px;display:flex;flex-direction:column;gap:14px">
+              <div style="border-radius:16px;border:1px solid #1B2026;padding:18px 0;display:flex;justify-content:center;background-color:#0B0E12;background-image:linear-gradient(45deg,#12161B 25%,transparent 25%,transparent 75%,#12161B 75%),linear-gradient(45deg,#12161B 25%,transparent 25%,transparent 75%,#12161B 75%);background-size:16px 16px;background-position:0 0,8px 8px;flex-shrink:0">
+                <div style="position:relative;width:320px;height:80px;max-width:100%;background-image:url(../../games/lamplighter/assets/textures/gloom.png);background-size:320px 80px;image-rendering:pixelated">
+                  <sc-for list="{{ sliceCells }}" as="c" hint-placeholder-count="4">
+                    <button onClick="{{ c.toggle }}" style="{{ c.style }}"><span style="{{ c.badgeStyle }}">{{ c.badge }}</span></button>
+                  </sc-for>
+                </div>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:12px;background:#161B21;font-size:13px;color:#98A0A8;line-height:1.4"><span style="font-family:'Material Symbols Outlined';font-size:18px;color:#79B68A">auto_awesome</span><span style="flex:1">{{ sliceDetect }}</span></div>
+              <div style="display:flex;gap:10px">
+                <sc-for list="{{ sliceSteppers }}" as="s" hint-placeholder-count="2">
+                  <div style="flex:1;display:flex;flex-direction:column;gap:6px">
+                    <span style="font-size:12px;color:#68717A">{{ s.label }}</span>
+                    <div style="display:flex;align-items:center">
+                      <button onClick="{{ s.minus }}" style="width:44px;height:44px;border-radius:12px 0 0 12px;border:1px solid #252B32;background:#161B21;cursor:pointer"><span style="font-family:'Material Symbols Outlined';font-size:20px">remove</span></button>
+                      <div style="flex:1;height:44px;border-top:1px solid #252B32;border-bottom:1px solid #252B32;background:#0B0E12;display:flex;align-items:center;justify-content:center;font-size:15px">{{ s.val }}</div>
+                      <button onClick="{{ s.plus }}" style="width:44px;height:44px;border-radius:0 12px 12px 0;border:1px solid #252B32;background:#161B21;cursor:pointer"><span style="font-family:'Material Symbols Outlined';font-size:20px">add</span></button>
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="border-radius:16px;background:#12161B;border:1px solid #1B2026;padding:14px;display:flex;gap:14px;align-items:center">
+                <div style="width:96px;height:96px;border-radius:12px;background:#0B0E12;display:flex;align-items:center;justify-content:center;flex-shrink:0"><div style="{{ slicePreview }}"></div></div>
+                <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px">
+                  <div style="font-size:12px;color:#68717A">Clip</div>
+                  <div style="font-size:16px;font-weight:600;font-family:'JetBrains Mono',monospace">breathe</div>
+                  <div style="font-size:12px;color:#98A0A8">{{ sliceClipText }}</div>
+                </div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:2px">
+                <div style="display:flex;justify-content:space-between;font-size:13px"><span style="color:#98A0A8">Speed</span><span style="font-weight:500">{{ sliceFpsText }}</span></div>
+                <div onPointerDown="{{ fpsDown }}" style="position:relative;height:36px;cursor:pointer;touch-action:none">
+                  <div style="position:absolute;left:0;right:0;top:16px;height:4px;border-radius:2px;background:#252B32"></div>
+                  <div style="{{ fpsFill }}"></div>
+                  <div style="{{ fpsKnob }}"></div>
+                </div>
+              </div>
+              <button onClick="{{ toggleLoop }}" style="display:flex;align-items:center;justify-content:space-between;height:44px;border:0;background:none;cursor:pointer;padding:0">
+                <span style="font-size:13px;color:#98A0A8">Loop</span>
+                <div style="{{ loopTrack }}"><div style="{{ loopKnob }}"></div></div>
+              </button>
+            </div>
+            <div style="padding:12px 16px calc(env(safe-area-inset-bottom,0px) + 20px);border-top:1px solid #1B2026">
+              <button onClick="{{ finishSlice }}" style="width:100%;height:56px;border-radius:16px;border:0;background:#E9A33A;color:#1A1206;font-size:15px;font-weight:600;cursor:pointer">Make Gloom prefab</button>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isScenes }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;left:0;right:0;bottom:0;height:min(520px,80%);background:#0F1317;border-radius:22px 22px 0 0;border-top:1px solid #252B32;box-shadow:0 -12px 40px rgba(0,0,0,.5);display:flex;flex-direction:column;z-index:30">
+            <div style="height:20px;display:flex;justify-content:center;align-items:center;flex-shrink:0"><div style="width:40px;height:4px;border-radius:2px;background:#3A424C"></div></div>
+            <div style="display:flex;align-items:center;padding:0 6px 10px 18px">
+              <div style="flex:1;font-size:17px;font-weight:600">Scenes</div>
+              <button onClick="{{ closeSheet }}" style="width:44px;height:44px;border:0;background:none;cursor:pointer;color:#68717A"><span style="font-family:'Material Symbols Outlined';font-size:22px">close</span></button>
+            </div>
+            <div style="flex:1;overflow:auto;padding:0 14px calc(env(safe-area-inset-bottom,0px) + 28px);display:flex;flex-direction:column;gap:12px">
+              <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px">
+                <sc-for list="{{ sceneCards }}" as="s" hint-placeholder-count="3">
+                  <button onClick="{{ s.click }}" style="{{ s.style }}">
+                    <div style="{{ s.thumb }}"><span style="{{ s.thumbTextStyle }}">{{ s.thumbText }}</span></div>
+                    <div style="display:flex;align-items:center;gap:6px;padding:10px 12px 12px">
+                      <span style="{{ s.mainStyle }}">home</span>
+                      <span style="font-size:13px;font-weight:500;font-family:'JetBrains Mono',monospace;flex:1;text-align:left">{{ s.name }}</span>
+                    </div>
+                  </button>
+                </sc-for>
+              </div>
+              <div style="font-size:12px;color:#68717A;font-weight:500;margin:6px 0 0 4px">Doors between scenes</div>
+              <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:14px;background:#12161B;border:1px solid #1B2026;font-size:13px">
+                <span style="font-family:'JetBrains Mono',monospace">title</span>
+                <span style="font-family:'Material Symbols Outlined';font-size:18px;color:#E9A33A">arrow_forward</span>
+                <span style="font-family:'JetBrains Mono',monospace">world</span>
+                <span style="flex:1;text-align:right;color:#68717A">Scene.go in shell.decay</span>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isLayers }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;left:0;right:0;bottom:0;height:min(600px,86%);background:#0F1317;border-radius:22px 22px 0 0;border-top:1px solid #252B32;box-shadow:0 -12px 40px rgba(0,0,0,.5);display:flex;flex-direction:column;z-index:30">
+            <div style="height:20px;display:flex;justify-content:center;align-items:center;flex-shrink:0"><div style="width:40px;height:4px;border-radius:2px;background:#3A424C"></div></div>
+            <div style="display:flex;align-items:center;gap:8px;padding:0 6px 10px 18px">
+              <div style="flex:1;font-size:17px;font-weight:600">Layers</div>
+              <div style="display:flex;padding:3px;border-radius:12px;background:#0B0E12;border:1px solid #1B2026">
+                <sc-for list="{{ layerTabs }}" as="o" hint-placeholder-count="2">
+                  <button onClick="{{ o.pick }}" style="{{ o.style }}">{{ o.label }}</button>
+                </sc-for>
+              </div>
+              <button onClick="{{ closeSheet }}" style="width:44px;height:44px;border:0;background:none;cursor:pointer;color:#68717A"><span style="font-family:'Material Symbols Outlined';font-size:22px">close</span></button>
+            </div>
+            <div style="flex:1;overflow:auto;padding:0 10px calc(env(safe-area-inset-bottom,0px) + 28px)">
+              <sc-if value="{{ layersMode }}" hint-placeholder-val="{{ true }}">
+                <sc-for list="{{ layerRows }}" as="r" hint-placeholder-count="4">
+                  <div style="display:flex;align-items:center;gap:12px;min-height:60px;padding:0 4px 0 8px;border-bottom:1px solid #1B2026">
+                    <span style="font-family:'Material Symbols Outlined';font-size:22px;color:#98A0A8">{{ r.icon }}</span>
+                    <div style="flex:1;min-width:0">
+                      <div style="font-size:14px;font-weight:500">{{ r.name }}</div>
+                      <div style="font-size:12px;color:#68717A;margin-top:2px">{{ r.sub }}</div>
+                    </div>
+                    <button onClick="{{ r.toggle }}" style="{{ r.eyeStyle }}"><span style="font-family:'Material Symbols Outlined';font-size:22px">{{ r.eyeIcon }}</span></button>
+                  </div>
+                </sc-for>
+              </sc-if>
+              <sc-if value="{{ objectsMode }}" hint-placeholder-val="{{ false }}">
+                <sc-for list="{{ treeRows }}" as="r" hint-placeholder-count="6">
+                  <button onClick="{{ r.click }}" style="{{ r.style }}">
+                    <span style="{{ r.indentStyle }}"></span>
+                    <span style="{{ r.chevStyle }}">{{ r.chev }}</span>
+                    <span style="font-family:'Material Symbols Outlined';font-size:20px;color:#98A0A8">{{ r.icon }}</span>
+                    <span style="flex:1;font-size:14px;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.name }}</span>
+                    <span style="font-size:12px;color:#68717A;padding-right:8px">{{ r.sub }}</span>
+                  </button>
+                </sc-for>
+              </sc-if>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isReview }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;left:0;right:0;bottom:0;background:#0F1317;border-radius:22px 22px 0 0;border-top:1px solid #252B32;box-shadow:0 -12px 40px rgba(0,0,0,.5);display:flex;flex-direction:column;z-index:33;padding-bottom:calc(env(safe-area-inset-bottom,0px) + 20px)">
+            <div style="height:20px;display:flex;justify-content:center;align-items:center"><div style="width:40px;height:4px;border-radius:2px;background:#3A424C"></div></div>
+            <div style="padding:0 18px 12px">
+              <div style="font-size:17px;font-weight:600">Keep what you changed?</div>
+              <div style="font-size:13px;color:#98A0A8;margin-top:4px;line-height:1.45">The scene is back as it was when you pressed Play. These are the edits you made while it ran.</div>
+            </div>
+            <div style="padding:0 14px;display:flex;flex-direction:column;gap:8px">
+              <sc-for list="{{ reviewRows }}" as="r" hint-placeholder-count="1">
+                <button onClick="{{ r.toggle }}" style="display:flex;align-items:center;gap:12px;min-height:64px;padding:0 14px;border-radius:14px;border:1px solid #1B2026;background:#12161B;cursor:pointer;text-align:left">
+                  <div style="flex:1;min-width:0">
+                    <div style="font-size:14px;font-weight:500">{{ r.name }} · {{ r.label }}</div>
+                    <div style="font-size:13px;color:#98A0A8;margin-top:3px;font-variant-numeric:tabular-nums">{{ r.from }} → <span style="color:#FFBE55">{{ r.to }}</span></div>
+                  </div>
+                  <div style="{{ r.trackStyle }}"><div style="{{ r.knobStyle }}"></div></div>
+                </button>
+              </sc-for>
+            </div>
+            <div style="display:flex;gap:8px;padding:16px 14px 0">
+              <button onClick="{{ discardEdits }}" style="height:54px;padding:0 18px;border-radius:16px;border:1px solid #252B32;background:#161B21;cursor:pointer;font-size:14px;font-weight:500">Discard all</button>
+              <button onClick="{{ keepEdits }}" style="flex:1;height:54px;border-radius:16px;border:0;background:#E9A33A;color:#1A1206;font-size:15px;font-weight:600;cursor:pointer">{{ keepText }}</button>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ hasToast }}" hint-placeholder-val="{{ false }}">
+          <div style="{{ toastWrap }}">
+            <div style="display:flex;align-items:center;gap:10px;min-height:46px;padding:8px 8px 8px 16px;border-radius:16px;background:#1A1F26;border:1px solid #252B32;box-shadow:0 12px 30px rgba(0,0,0,.5);font-size:14px;max-width:100%;pointer-events:auto">
+              <span style="flex:1;line-height:1.4">{{ toastText }}</span>
+              <sc-if value="{{ hasToastUndo }}" hint-placeholder-val="{{ false }}">
+                <button onClick="{{ toastUndo }}" style="height:34px;padding:0 12px;border-radius:10px;border:0;background:#2E2211;color:#FFBE55;font-size:13px;font-weight:600;cursor:pointer">Undo</button>
+              </sc-if>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ ghostShow }}" hint-placeholder-val="{{ false }}">
+          <div style="{{ ghostStyle }}"></div>
+        </sc-if>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ showJourneyFab }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;left:0;right:0;top:calc(env(safe-area-inset-top,0px) + 70px);display:flex;justify-content:center;pointer-events:none;z-index:15">
+        <button onClick="{{ openJourneys }}" style="pointer-events:auto;height:34px;padding:0 12px;border-radius:17px;border:1px solid #252B32;background:rgba(11,14,18,.886);font-size:12px;color:#98A0A8;cursor:pointer;display:flex;align-items:center;gap:6px"><span style="font-family:'Material Symbols Outlined';font-size:16px;color:#E9A33A">route</span>{{ journeyFabText }}</button>
+      </div>
+    </sc-if>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const T=32,COLS=16,ROWS=36,WW=COLS*T,WH=ROWS*T;
+const TX='../../games/lamplighter/assets/textures/';
+const SHEETS={
+  wick:{src:TX+'wick.png',w:816,h:176,cw:48,ch:44,file:'wick.png'},
+  objects:{src:TX+'objects.png',w:704,h:64,cw:64,ch:64,file:'objects.png'},
+  village:{src:TX+'village.png',w:4592,h:112,cw:112,ch:112,file:'village.png'},
+  gloom:{src:TX+'gloom.png',w:128,h:32,cw:32,ch:32,file:'gloom.png'},
+  dock:{src:TX+'dock.png',w:24,h:64,cw:24,ch:64,file:'dock.png'},
+};
+const PF={
+  wick:{name:'Wick',sheet:'wick',cell:0,scale:2,icon:'directions_walk',kind:'wick',hit:[.2,.75],tz:1.6,props:{speed:3.4,lantern:4}},
+  lamp:{name:'Lamp post',sheet:'objects',cell:0,lit:1,scale:2,icon:'emoji_objects',kind:'lamp',hit:[.17,.95],props:{radius:4.5,intensity:1.2,color:'warm',reach:1.2,sensor:true}},
+  bridge:{name:'Bridge',sheet:'dock',cell:0,scale:2.4,icon:'view_day',kind:'bridge',hit:[.5,1],props:{openTime:1.2,starts:'closed'}},
+  house:{name:'House',sheet:'village',cell:0,lit:1,scale:1.5,icon:'cottage',hit:[.42,.8]},
+  cottage:{name:'Cottage',sheet:'village',cell:2,lit:3,scale:1.5,icon:'cottage',hit:[.42,.75]},
+  oak:{name:'Oak',sheet:'village',cell:31,scale:1.5,icon:'park',hit:[.4,.92]},
+  oak2:{name:'Old oak',sheet:'village',cell:30,scale:1.5,icon:'park',hit:[.4,.92]},
+  bush:{name:'Bush',sheet:'village',cell:13,scale:1.5,icon:'grass',hit:[.18,.3],tz:2.2},
+  flowers:{name:'Flowers',sheet:'village',cell:14,scale:1.5,icon:'local_florist',hit:[.18,.3],tz:2.2},
+  dead:{name:'Dead tree',sheet:'objects',cell:3,scale:2,icon:'forest',hit:[.3,.9]},
+  rock:{name:'Rock',sheet:'objects',cell:8,scale:1.5,icon:'landslide',hit:[.3,.45],tz:1.4},
+  well:{name:'Well',sheet:'village',cell:39,scale:1.5,icon:'water_drop',hit:[.22,.55],tz:1.6},
+  gloom:{name:'Gloom',sheet:'gloom',cell:0,scale:2,icon:'blur_on',kind:'gloom',hit:[.38,.8],anim:true,props:{speed:2.4,sight:9}},
+  light:{name:'Light 2D',marker:true,icon:'sunny',kind:'light',props:{radius:3,intensity:1,color:'warm'}},
+  empty:{name:'Empty',marker:true,icon:'deployed_code'},
+};
+const LABELS={speed:'Speed',sight:'Sight',radius:'Light radius',intensity:'Intensity',lantern:'Lantern radius',openTime:'Open time',reach:'Reach',x:'Position X',y:'Position Y',rot:'Rotation',scale:'Scale'};
+const LIGHTC={warm:[255,214,150],cool:[170,200,255],ember:[255,150,90]};
+const clone=o=>JSON.parse(JSON.stringify(o));
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const grid=(r,c,v)=>Array.from({length:r},()=>Array(c).fill(v));
+const IC="'Material Symbols Outlined'";
+let UID=100;
+function mk(prefab,x,y,over){const p=PF[prefab];return Object.assign({id:prefab+'-'+(UID++),prefab,name:p.name,x,y,scale:p.scale||1,rot:0,flip:false,active:true,props:clone(p.props||{}),rules:[],extra:[]},over||{});}
+function starterLevel(){
+  const land=grid(ROWS,COLS,false);
+  for(let r=20;r<36;r++)for(let c=1;c<15;c++)land[r][c]=true;
+  [[20,1],[20,2],[21,1],[20,14],[35,1],[35,14]].forEach(([r,c])=>land[r][c]=false);
+  const corners=grid(ROWS+1,COLS+1,0);
+  return {land,corners,ents:[mk('wick',256,1060,{id:'wick'}),mk('bush',100,760),mk('bush',420,830),mk('oak',420,1110),mk('flowers',150,990)]};
+}
+function fullLevel(withRules,withGloom){
+  const land=grid(ROWS,COLS,false);
+  for(let r=0;r<16;r++)for(let c=0;c<16;c++)land[r][c]=true;
+  for(let r=20;r<36;r++)for(let c=0;c<16;c++)land[r][c]=true;
+  [[15,0],[15,1],[14,0],[15,14],[15,15],[20,0],[21,0],[20,15]].forEach(([r,c])=>land[r][c]=false);
+  const corners=grid(ROWS+1,COLS+1,0);
+  for(let r=0;r<=16;r++)corners[r][8]=1;
+  for(let r=20;r<=36;r++)corners[r][8]=1;
+  for(let r=21;r<=23;r++)for(let c=8;c<=11;c++)corners[r][c]=1;
+  for(let r=9;r<=11;r++)for(let c=5;c<=8;c++)corners[r][c]=1;
+  const lamp=mk('lamp',330,712,{id:'lamp'});
+  if(withRules)lamp.rules=[{id:'r1',when:'touch',actions:[{type:'light'},{type:'shake'},{type:'open',target:'bridge'}]}];
+  const ents=[mk('wick',256,1080,{id:'wick'}),lamp,mk('bridge',256,656,{id:'bridge'}),
+    mk('house',170,330,{id:'house'}),mk('cottage',395,250),mk('oak2',55,175),mk('oak',470,470),mk('oak',40,470),mk('well',330,400),mk('bush',300,470),mk('bush',150,130),mk('flowers',470,130),
+    mk('dead',60,840),mk('dead',470,1010),mk('rock',150,690),mk('rock',430,676),mk('bush',110,1110),mk('flowers',430,1125),mk('dead',475,770)];
+  if(withGloom)ents.push(mk('gloom',420,830,{id:'gloom'}));
+  return {land,corners,ents};
+}
+const JOURNEYS=[
+  {k:'A',title:'Create a new game',steps:[['a1','Tap New game'],['a2','Pick Top-down adventure'],['a3','Name it and create'],['a4','Tap Wick to select him']]},
+  {k:'B',title:'Build a level',steps:[['b1','Paint → Path, then draw a path'],['b2','Land brush: grow the island north'],['b3','Add → drag a Lamp post into the world'],['b4','Scale or turn it with its handles'],['b5','Properties: change its light radius'],['b6','Press Play']]},
+  {k:'C',title:'Add gameplay',steps:[['c1','Tap the lamp post by the gap'],['c2','Behaviour → Lights when touched'],['c3','Then… → Open, and tap the bridge'],['c4','Play: walk Wick to the lamp']]},
+  {k:'D',title:'Work with assets',steps:[['d1','Assets → Import → gloom.png'],['d2','Check the frames, set the clip speed'],['d3','Make the prefab, drag Gloom into the world']]},
+  {k:'E',title:'Test and iterate',steps:[['e1','Play: the gloom catches Wick'],['e2','Pause, tap the gloom, lower its speed'],['e3','Resume and light the lamp'],['e4','Stop and keep the change']]},
+];
+const NEXT={a4:'Drag Wick to move him. Tap him again for his properties.',b1:'Pick Land and paint across the dark gap to the north.',b2:'Tap ✓, then Add, and drag a Lamp post up into the world.',b3:'Drag the round handles to scale or turn it.',b4:'Tap the name chip above the bar to open its properties.',b5:'Press ▶ to try it.',c1:'Tap Behaviour in the bar below.',c2:'Tap Then…, choose Open, then tap the bridge in the world.',c3:'Press ▶ and walk Wick to the lamp.',c4:'The lamp lit and the bridge opened. That rule is Decay underneath: see the Code tab.',d1:'Tap a frame to leave it out of the clip, or change the speed.',d2:'Tap Make Gloom prefab.',d3:'Gloom is in the scene. Press ▶: it hunts Wick in the dark.',e1:'Tap ❚❚, then tap the gloom to tune it.',e2:'Tap Resume and get Wick to the lamp.',e3:'Press ■ to stop.',e4:'Kept. The gloom’s speed is now part of the scene, as one undo step.'};
+const START_COACH={B:'Tap Paint, pick Path and draw with one finger. Two fingers move the view.',C:'Tap the lamp post next to the gap.',D:'Open Assets and tap Import.',E:'Press ▶ and walk Wick up to the lamp.'};
+const KW=new Set(['script','fn','let','var','if','else','return','on','emit','event','true','false','null','while']);
+const TY=new Set(['number','bool','String','Entity']);
+function toks(line){const out=[];const re=/(\/\/.*$)|("[^"]*")|(@export)|(\b\d+(?:\.\d+)?\b)|([A-Za-z_][A-Za-z0-9_]*)|(\s+)|(.)/g;let m;while((m=re.exec(line))){let c='#E8E4DC';if(m[1])c='#68717A';else if(m[2])c='#79B68A';else if(m[3])c='#E9A33A';else if(m[4])c='#E9C13A';else if(m[5]){if(KW.has(m[5]))c='#E9A33A';else if(TY.has(m[5]))c='#5B90D6';else if(/^[A-Z]/.test(m[5]))c='#D9C29A';}out.push({t:m[0],style:{color:c}});}return out;}
+const pascal=s=>s.replace(/[^A-Za-z0-9 ]/g,'').split(' ').map(w=>w?w[0].toUpperCase()+w.slice(1):'').join('');
+const snake=s=>s.toLowerCase().replace(/[^a-z0-9]+/g,'_');
+const seg=(on)=>({height:34,padding:'0 12px',borderRadius:9,border:0,cursor:'pointer',fontSize:13,fontWeight:600,background:on?'#2E2211':'transparent',color:on?'#FFBE55':'#98A0A8'});
+const track=(on)=>({width:46,height:28,borderRadius:14,background:on?'#E9A33A':'#252B32',position:'relative',flexShrink:0,transition:'background .15s'});
+const knob=(on)=>({position:'absolute',top:3,left:on?21:3,width:22,height:22,borderRadius:11,background:on?'#1A1206':'#98A0A8',transition:'left .15s'});
+
+class Component extends DCLogic {
+  screenRef=React.createRef(); canvasRef=React.createRef();
+  undoS=[]; redoS=[]; ptrs=new Map(); keys={}; drag=null; joy=null; sim=null; cache={};
+  state=Object.assign({screen:'dashboard',newStep:0,orient:'portrait',projName:'Night Market',created:false,createIdx:0,project:'Lantern Crossing',
+    terrainV:1,cam:{x:0,y:560},zoom:1,sel:[],multi:false,tool:null,brush:'path',brushSize:2,panLock:false,brushAt:null,
+    sheet:null,detent:'half',assetTab:'prefabs',imported:false,slice:{cols:4,rows:1,frames:[0,1,2,3],fps:6,loop:true},highlight:null,placeAt:null,
+    picking:null,mode:'edit',tick:0,runEdits:[],scrub:1,toast:null,coach:null,journey:null,done:{},lightPreview:false,snap:true,grid:false,
+    behTab:'blocks',addOpen:null,expandFacts:false,addCompOpen:false,moreOpen:false,layerTab:'layers',hide:{},
+    vw:400,vh:800,wide:false,journeysOpen:false,ghost:null,ft:0,scenes:['world.scene','title.scene']},fullLevel(true,false));
+
+  componentDidMount(){
+    this.img=new Image();this.img.onload=()=>this.drawTerrain();this.img.src=TX+'ground.png';
+    this.measure();this.onResize=()=>this.measure();window.addEventListener('resize',this.onResize);
+    if(window.ResizeObserver&&this.screenRef.current){this.ro=new ResizeObserver(()=>this.measure());this.ro.observe(this.screenRef.current);}
+    this.mv=e=>this.onMove(e);this.upH=e=>this.onUp(e);
+    window.addEventListener('pointermove',this.mv);window.addEventListener('pointerup',this.upH);window.addEventListener('pointercancel',this.upH);
+    const map={ArrowLeft:'left',a:'left',A:'left',ArrowRight:'right',d:'right',D:'right',ArrowUp:'upk',w:'upk',W:'upk',ArrowDown:'down',s:'down',S:'down',e:'interact',E:'interact'};
+    this.kd=e=>{if(e.target&&e.target.tagName==='INPUT')return;const k=map[e.key];if(k&&this.state.mode!=='edit'){this.keys[k]=true;e.preventDefault();}if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'){e.preventDefault();e.shiftKey?this.redo():this.undo();}};
+    this.ku=e=>{const k=map[e.key];if(k)this.keys[k]=false;};
+    window.addEventListener('keydown',this.kd);window.addEventListener('keyup',this.ku);
+    this.iv=setInterval(()=>{const s=this.state;if(s.screen==='editor'&&s.mode==='edit'&&(s.sheet==='slicer'||s.ents.some(e=>PF[e.prefab].anim)))this.setState({ft:Date.now()});},110);
+    this.raf=requestAnimationFrame(this.loop);this.last=performance.now();
+  }
+  componentWillUnmount(){window.removeEventListener('resize',this.onResize);window.removeEventListener('pointermove',this.mv);window.removeEventListener('pointerup',this.upH);window.removeEventListener('pointercancel',this.upH);window.removeEventListener('keydown',this.kd);window.removeEventListener('keyup',this.ku);clearInterval(this.iv);if(this.ro)this.ro.disconnect();cancelAnimationFrame(this.raf);}
+  componentDidUpdate(pp,ps){const cv=this.canvasRef.current;if(cv&&(cv!==this.lastCv||ps.terrainV!==this.state.terrainV)){this.lastCv=cv;this.drawTerrain();}}
+  measure(){const el=this.screenRef.current;const wide=window.innerWidth>=900;let w=el?el.getBoundingClientRect().width:window.innerWidth,h=el?el.getBoundingClientRect().height:window.innerHeight;if(wide)w=Math.min(430,window.innerWidth-340);const s=this.state;if(Math.abs(w-s.vw)<1&&Math.abs(h-s.vh)<1&&wide===s.wide)return;const recenter=s.screen==='editor'&&s.mode==='edit'&&Math.abs(w-s.vw)>1;this.setState({vw:w||400,vh:h||800,wide,cam:recenter?{x:s.cam.x+(s.vw-w)/2/s.zoom,y:s.cam.y}:s.cam});}
+
+  drawTerrain(){const cv=this.canvasRef.current,img=this.img;if(!cv||!img||!img.complete||!img.naturalWidth)return;const x=cv.getContext('2d');x.imageSmoothingEnabled=false;x.clearRect(0,0,WW,WH);const {land,corners}=this.state;
+    for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){if(!land[r][c])continue;const i=corners[r][c]*8+corners[r][c+1]*4+corners[r+1][c]*2+corners[r+1][c+1];x.drawImage(img,(i%4)*16,Math.floor(i/4)*16,16,16,c*T,r*T,T,T);}
+    for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){if(!land[r][c])continue;if(r+1>=ROWS||!land[r+1][c]){x.fillStyle='#2a2016';x.fillRect(c*T,(r+1)*T,T,12);x.fillStyle='#15100b';x.fillRect(c*T,(r+1)*T+12,T,8);}if(c>0&&!land[r][c-1]){x.fillStyle='rgba(0,0,0,.35)';x.fillRect(c*T,r*T,3,T);}if(c<COLS-1&&!land[r][c+1]){x.fillStyle='rgba(0,0,0,.35)';x.fillRect(c*T+T-3,r*T,3,T);}}}
+
+  toast(text,undo){clearTimeout(this.tt);this.setState({toast:{text,undo:!!undo}});this.tt=setTimeout(()=>this.setState({toast:null}),2600);}
+  mark(id){if(this.state.done[id])return;const j=this.state.journey;const inJ=j&&id[0]===j.toLowerCase();this.setState(s=>({done:{...s.done,[id]:true},coach:inJ&&NEXT[id]?NEXT[id]:s.coach}));}
+  snap(){const s=this.state;return clone({ents:s.ents,land:s.land,corners:s.corners});}
+  pushUndo(){this.undoS.push(this.snap());if(this.undoS.length>80)this.undoS.shift();this.redoS=[];}
+  restore(o){this.setState(s=>({ents:o.ents,land:o.land,corners:o.corners,terrainV:s.terrainV+1,sel:s.sel.filter(id=>o.ents.some(e=>e.id===id))}));}
+  undo(){if(this.state.mode!=='edit'||!this.undoS.length)return;this.redoS.push(this.snap());this.restore(this.undoS.pop());this.toast('Undone');}
+  redo(){if(this.state.mode!=='edit'||!this.redoS.length)return;this.undoS.push(this.snap());this.restore(this.redoS.pop());this.toast('Redone');}
+
+  loadLevel(name,lv,extra){this.stopSim();this.undoS=[];this.redoS=[];this.setState(s=>Object.assign({screen:'editor',project:name,ents:lv.ents,land:lv.land,corners:lv.corners,terrainV:s.terrainV+1,sel:[],sheet:null,tool:null,mode:'edit',picking:null,multi:false,moreOpen:false,zoom:1,cam:{x:(WW-s.vw)/2,y:560}},extra||{}));}
+  leave(){const s=this.state;if(s.screen==='editor')this.cache[s.project]=this.snap();}
+  startJourney(k){this.leave();const steps=JOURNEYS.find(j=>j.k===k).steps.map(x=>x[0]);const done={...this.state.done};steps.forEach(id=>delete done[id]);
+    const base={journey:k,done,journeysOpen:false,coach:START_COACH[k]||null,imported:k==='E'};
+    if(k==='A'){this.stopSim();this.setState({...base,screen:'dashboard',newStep:0});return;}
+    if(k==='B'){this.loadLevel(this.state.projName,starterLevel(),{...base,created:true,cam:{x:(WW-this.state.vw)/2,y:620}});return;}
+    if(k==='C'){this.loadLevel('Lantern Crossing',fullLevel(false,false),{...base,cam:{x:(WW-this.state.vw)/2,y:420}});return;}
+    if(k==='D'){this.loadLevel('Lantern Crossing',fullLevel(true,false),{...base,cam:{x:(WW-this.state.vw)/2,y:560}});return;}
+    if(k==='E'){this.loadLevel('Lantern Crossing',fullLevel(true,true),{...base,cam:{x:(WW-this.state.vw)/2,y:560}});}}
+
+  byId(id){return this.state.ents.find(e=>e.id===id);}
+  bounds(e){const p=PF[e.prefab];if(p.marker)return {l:e.x-22,r:e.x+22,t:e.y-44,b:e.y,w:44,h:44};const s=SHEETS[p.sheet];const w=s.cw*e.scale,h=s.ch*e.scale;const f=p.hit||[.36,.9];return {l:e.x-w*f[0],r:e.x+w*f[0],t:e.y-h*f[1],b:e.y+4,w,h};}
+  visible(e){return e.active&&!this.state.hide.objects;}
+  hit(wx,wy){const list=this.state.ents.filter(e=>this.visible(e)).sort((a,b)=>b.y-a.y);for(const e of list){const b=this.bounds(e);if(wx>=b.l&&wx<=b.r&&wy>=b.t&&wy<=b.b)return e.id;}return null;}
+  hitPlay(w){const s=this.sim;for(const e of this.state.ents){let x=e.x,y=e.y;if(e.prefab==='wick'){x=s.wick.x;y=s.wick.y;}else if(s.g[e.id]){x=s.g[e.id].x;y=s.g[e.id].y;}const b=this.bounds({...e,x,y});if(w.x>=b.l&&w.x<=b.r&&w.y>=b.t&&w.y<=b.b)return e.id;}return null;}
+  camNow(){return this.state.mode==='edit'||!this.sim?this.state.cam:this.sim.cam;}
+  toScreen(ev){const r=this.screenRef.current.getBoundingClientRect();return {x:ev.clientX-r.left,y:ev.clientY-r.top};}
+  toWorld(p){const c=this.camNow(),z=this.state.mode==='edit'?this.state.zoom:1;return {x:p.x/z+c.x,y:p.y/z+c.y};}
+  clampCam(c,z){z=z||this.state.zoom;const vw=this.state.vw/z,vh=this.state.vh/z;return {x:clamp(c.x,-120,WW-vw+120),y:clamp(c.y,-200,WH-vh+260)};}
+  frame(e,sheetOpen){const z=this.state.zoom;const b=this.bounds(e);const vh=this.state.vh/z;this.setState({cam:this.clampCam({x:e.x-this.state.vw/z/2,y:e.y-b.h*.5-(sheetOpen?vh*.22:vh*.45)})});}
+
+  setField(id,key,val){const st=this.state;const old=this.byId(id);if(!old)return;const tk=['x','y','rot','scale'].includes(key);const from=tk?old[key]:old.props[key];if(from===val)return;
+    const ents=st.ents.map(e=>{if(e.id!==id)return e;const n={...e,props:{...e.props}};if(tk)n[key]=val;else n.props[key]=val;return n;});
+    const upd={ents};
+    if(st.mode!=='edit'){const i=st.runEdits.findIndex(r=>r.id===id&&r.key===key);upd.runEdits=i>=0?st.runEdits.map((r,j)=>j===i?{...r,to:val}:r):[...st.runEdits,{id,key,from,to:val,keep:true,name:old.name,label:LABELS[key]||key}];
+      if(key==='speed'&&PF[old.prefab].kind==='gloom'){const orig=(this.snapshot.find(e=>e.id===id)||{props:{}}).props.speed;if(val<orig-.3)setTimeout(()=>this.mark('e2'),0);}}
+    this.setState(upd);if(key==='radius'&&st.mode==='edit')this.mark('b5');}
+  updEnt(id,fn){this.setState(s=>({ents:s.ents.map(e=>e.id===id?fn(clone(e)):e)}));}
+
+  trackDrag(ev,fn){ev.stopPropagation();ev.preventDefault();const el=ev.currentTarget;const r=el.getBoundingClientRect();const f=cx=>clamp((cx-r.left)/r.width,0,1);fn(f(ev.clientX));const mv=e=>fn(f(e.clientX));const up=()=>{window.removeEventListener('pointermove',mv);window.removeEventListener('pointerup',up);window.removeEventListener('pointercancel',up);};window.addEventListener('pointermove',mv);window.addEventListener('pointerup',up);window.addEventListener('pointercancel',up);}
+  sliderDown(ev,id,key,min,max,step){if(this.state.mode==='edit')this.pushUndo();this.trackDrag(ev,f=>{let v=min+f*(max-min);v=Math.round(v/step)*step;this.setField(id,key,+v.toFixed(3));});}
+
+  paintAt(w){const st=this.state,b=st.brush,rad=st.brushSize-1;
+    if(b==='path'||b==='grass'){const cr=Math.round(w.y/T),cc=Math.round(w.x/T);const key='c'+cr+','+cc+b;if(this.lastPaint===key)return;this.lastPaint=key;const v=b==='path'?1:0;const corners=st.corners.map(r=>r.slice());for(let dr=-rad;dr<=rad;dr++)for(let dc=-rad;dc<=rad;dc++){if(dr*dr+dc*dc>rad*rad+.6)continue;const r=cr+dr,c=cc+dc;if(r>=0&&r<=ROWS&&c>=0&&c<=COLS)corners[r][c]=v;}this.setState(s=>({corners,terrainV:s.terrainV+1}));if(b==='path')this.mark('b1');}
+    else{const r0=Math.floor(w.y/T),c0=Math.floor(w.x/T);const key='l'+r0+','+c0+b;if(this.lastPaint===key)return;this.lastPaint=key;const v=b==='land';const land=st.land.map(r=>r.slice());let north=false;for(let dr=-rad;dr<=rad;dr++)for(let dc=-rad;dc<=rad;dc++){if(dr*dr+dc*dc>rad*rad+.6)continue;const r=r0+dr,c=c0+dc;if(r>=0&&r<ROWS&&c>=0&&c<COLS){land[r][c]=v;if(v&&r<19)north=true;}}this.setState(s=>({land,terrainV:s.terrainV+1}));if(north)this.mark('b2');}}
+
+  vpDown=(ev)=>{const st=this.state;const p=this.toScreen(ev);this.ptrs.set(ev.pointerId,p);
+    if(this.ptrs.size===2&&st.mode==='edit'){clearTimeout(this.longT);const [a,b]=[...this.ptrs.values()];this.pinch={d:Math.hypot(a.x-b.x,a.y-b.y)||1,mx:(a.x+b.x)/2,my:(a.y+b.y)/2,zoom:st.zoom,cam:{...st.cam}};this.drag=null;this.setState({brushAt:null});return;}
+    if(this.ptrs.size>1)return;
+    if(st.moreOpen)this.setState({moreOpen:false});
+    const w=this.toWorld(p);const D={kind:'empty',sx:p.x,sy:p.y,moved:false,cam:{...st.cam}};
+    if(st.mode==='play'){D.kind='joy';this.joy={ox:p.x,oy:p.y,dx:0,dy:0};}
+    else if(st.mode==='frozen'){D.kind='frozen';D.hit=this.hitPlay(w);}
+    else if(st.picking){D.kind='pick';D.hit=this.hit(w.x,w.y);}
+    else if(st.tool==='paint'&&!st.panLock){this.pushUndo();D.kind='paint';this.lastPaint=null;this.paintAt(w);this.setState({brushAt:w});}
+    else if(st.tool!=='paint'){const h=this.hit(w.x,w.y);if(h){D.kind='ent';D.hit=h;}else{this.longT=setTimeout(()=>{if(this.drag===D&&!D.moved){D.kind='none';this.setState({sheet:'add',placeAt:w,sel:[],multi:false});if(navigator.vibrate)navigator.vibrate(12);}},520);}}
+    this.drag=D;};
+  vpWheel=(ev)=>{if(this.state.mode!=='edit')return;const st=this.state;const p=this.toScreen(ev);const z=clamp(st.zoom*(ev.deltaY<0?1.1:1/1.1),.5,2);const wx=p.x/st.zoom+st.cam.x,wy=p.y/st.zoom+st.cam.y;this.setState({zoom:z,cam:this.clampCam({x:wx-p.x/z,y:wy-p.y/z},z)});};
+  rotDown=(ev)=>this.handleDown(ev,'rot');
+  sclDown=(ev)=>this.handleDown(ev,'scl');
+  handleDown(ev,kind){ev.stopPropagation();const st=this.state;const e=this.byId(st.sel[0]);if(!e)return;const p=this.toScreen(ev);this.ptrs.set(ev.pointerId,p);this.pushUndo();const w=this.toWorld(p);this.drag={kind,id:e.id,sx:p.x,sy:p.y,moved:true,s0:e.scale,d0:Math.max(8,Math.hypot(w.x-e.x,w.y-e.y))};}
+  tileDown(kind,key){return (ev)=>{ev.preventDefault();const p=this.toScreen(ev);this.ptrs.set(ev.pointerId,p);this.drag={kind:'place',what:kind,key,sx:p.x,sy:p.y,moved:false};};}
+
+  onMove(ev){if(!this.ptrs.has(ev.pointerId))return;const st=this.state;const p=this.toScreen(ev);this.ptrs.set(ev.pointerId,p);
+    if(this.pinch&&this.ptrs.size>=2){const [a,b]=[...this.ptrs.values()];const d=Math.hypot(a.x-b.x,a.y-b.y);const z=clamp(this.pinch.zoom*d/this.pinch.d,.5,2);const mx=(a.x+b.x)/2,my=(a.y+b.y)/2;const P=this.pinch;const wx=P.mx/P.zoom+P.cam.x,wy=P.my/P.zoom+P.cam.y;this.setState({zoom:z,cam:this.clampCam({x:wx-mx/z,y:wy-my/z},z)});return;}
+    const D=this.drag;if(!D)return;const dx=p.x-D.sx,dy=p.y-D.sy,z=st.zoom;
+    if(!D.moved&&Math.hypot(dx,dy)>7){D.moved=true;clearTimeout(this.longT);}
+    if(D.kind==='joy'){const l=Math.hypot(dx,dy),m=Math.min(l,52)/(l||1);this.joy={ox:D.sx,oy:D.sy,dx:dx*m,dy:dy*m};return;}
+    if(D.kind==='empty'&&D.moved){this.setState({cam:this.clampCam({x:D.cam.x-dx/z,y:D.cam.y-dy/z})});return;}
+    if(D.kind==='paint'){const w=this.toWorld(p);this.paintAt(w);this.setState({brushAt:w});return;}
+    if(D.kind==='ent'&&D.moved){if(!D.started){D.started=true;let sel=st.sel;if(!sel.includes(D.hit))sel=st.multi?[...sel,D.hit]:[D.hit];this.pushUndo();D.orig={};st.ents.forEach(e=>{if(sel.includes(e.id))D.orig[e.id]=[e.x,e.y];});this.setState({sel});this.onSelect(D.hit);}
+      this.setState(s=>({ents:s.ents.map(e=>{const o=D.orig[e.id];if(!o)return e;let x=o[0]+dx/z,y=o[1]+dy/z;if(s.snap){x=Math.round(x/8)*8;y=Math.round(y/8)*8;}return {...e,x,y};})}));return;}
+    if(D.kind==='rot'||D.kind==='scl'){const e=this.byId(D.id);if(!e)return;const w=this.toWorld(p);
+      if(D.kind==='rot'){const b=this.bounds(e);let a=Math.atan2(w.x-e.x,-(w.y-(e.y-b.h*.45)))*180/Math.PI;if(st.snap)a=Math.round(a/15)*15;this.updEnt(e.id,n=>{n.rot=Math.round(a);return n;});}
+      else{let s=D.s0*Math.hypot(w.x-e.x,w.y-e.y)/D.d0;s=clamp(s,.5,5);s=st.snap?Math.round(s*10)/10:+s.toFixed(2);this.updEnt(e.id,n=>{n.scale=s;return n;});}
+      this.mark('b4');return;}
+    if(D.kind==='place'){if(D.moved&&!st.ghost&&D.what==='prefab'&&dy<-6){this.setState({ghost:{key:D.key,x:p.x,y:p.y},sheet:null});}else if(st.ghost)this.setState({ghost:{...st.ghost,x:p.x,y:p.y}});}}
+
+  onUp(ev){if(!this.ptrs.has(ev.pointerId))return;this.ptrs.delete(ev.pointerId);const st=this.state;
+    if(this.pinch){if(this.ptrs.size<2)this.pinch=null;this.drag=null;return;}
+    const D=this.drag;this.drag=null;clearTimeout(this.longT);if(!D)return;const p=this.toScreen(ev);
+    if(D.kind==='joy'){this.joy=null;return;}
+    if(D.kind==='paint'){this.setState({brushAt:null});return;}
+    if(D.kind==='ent'&&!D.moved){const id=D.hit;if(st.multi){const sel=st.sel.includes(id)?st.sel.filter(x=>x!==id):[...st.sel,id];this.setState({sel});}else if(st.sel.length===1&&st.sel[0]===id&&st.sheet!=='inspector'){this.openInspector();}else{this.setState({sel:[id],sheet:st.sheet==='inspector'?'inspector':null,addCompOpen:false,expandFacts:false});this.onSelect(id);}return;}
+    if(D.kind==='empty'&&!D.moved){if(st.sel.length||st.sheet)this.setState({sel:[],multi:false,sheet:['inspector','behaviour','add','assets','layers','scenes'].includes(st.sheet)?null:st.sheet});return;}
+    if(D.kind==='pick'&&!D.moved){if(D.hit)this.completePick(D.hit);return;}
+    if(D.kind==='frozen'&&!D.moved){if(D.hit)this.setState({sel:[D.hit],sheet:'inspector',detent:'half'});else this.setState({sel:[],sheet:null});return;}
+    if(D.kind==='place'){
+      if(D.what==='prefab'){if(st.ghost){const w=this.toWorld(p);const s=SHEETS[PF[D.key].sheet];const h=s?s.ch*PF[D.key].scale:40;this.setState({ghost:null});if(p.y>0&&p.y<st.vh)this.placePrefab(D.key,w.x,w.y+h*.35);}else if(!D.moved){const c=st.placeAt||this.toWorld({x:st.vw/2,y:st.vh*.42});this.placePrefab(D.key,c.x,c.y);}}
+      else if(!D.moved)this.assetTap(D.what,D.key);}}
+
+  onSelect(id){const e=this.byId(id);if(!e)return;const j=this.state.journey;if(e.prefab==='wick'&&j==='A')this.mark('a4');if(PF[e.prefab].kind==='lamp'&&j==='C')this.mark('c1');}
+  placePrefab(key,x,y){this.pushUndo();const p=PF[key];const e=mk(key,Math.round(x),Math.round(y));if(key==='light')e.name='Light 2D';const n=this.state.ents.filter(o=>o.prefab===key).length;if(n)e.name=p.name+' '+(n+1);
+    this.setState(s=>({ents:[...s.ents,e],sel:[e.id],sheet:null,placeAt:null,highlight:null,tool:null}));this.toast('Added '+e.name);if(key==='lamp')this.mark('b3');if(key==='gloom')this.mark('d3');}
+  assetTap(what,key){if(what==='sheet'){if(key==='gloom'){this.setState({sheet:'slicer'});return;}this.toast(SHEETS[key].file+': slicing opens here, as the desktop slicer does');}
+    else if(what==='tiles'){this.setState({sheet:null,tool:'paint',brush:'path',sel:[]});this.toast('Painting with '+key);}}
+
+  play=()=>{const st=this.state;if(st.mode!=='edit')return;const w=st.ents.find(e=>e.prefab==='wick'&&e.active);if(!w){this.toast('Add Wick first: the camera follows him');return;}
+    this.snapshot=clone(st.ents);this.editCam={...st.cam};this.editZoom=st.zoom;const bridge={},g={};
+    st.ents.forEach(e=>{const k=PF[e.prefab].kind;if(k==='bridge')bridge[e.id]={p:e.props.starts==='open'?1:0,opening:false};if(k==='gloom'&&e.active)g[e.id]={x:e.x,y:e.y,sx:e.x,sy:e.y};});
+    this.sim={t:0,wick:{x:w.x,y:w.y,sx:w.x,sy:w.y,dir:0,moving:false},lit:{},fired:{},hidden:{},bridge,g,started:false,trauma:0,hist:[],events:[],crossed:false,cam:{x:w.x-st.vw/2,y:w.y-st.vh*.55}};
+    this.joy=null;this.keys={};this.mark('b6');this.setState({mode:'play',sheet:null,tool:null,sel:[],multi:false,moreOpen:false,runEdits:[],picking:null,coach:st.journey==='E'||st.journey==='C'?st.coach:null});};
+  stopSim(){this.sim=null;this.joy=null;}
+  loop=(now)=>{const dt=Math.min(1/30,(now-this.last)/1000);this.last=now;if(this.sim&&this.state.mode==='play'){this.stepSim(dt);this.setState({tick:this.sim.t});}this.raf=requestAnimationFrame(this.loop);};
+  walk(x,y){if(x<6||x>WW-6||y<6||y>WH-2)return false;const r=Math.floor((y-4)/T),c=Math.floor(x/T);if(this.state.land[r]&&this.state.land[r][c])return true;
+    for(const e of this.state.ents){if(PF[e.prefab].kind!=='bridge'||!e.active)continue;const b=this.sim.bridge[e.id];if(!b||b.p<.98)continue;if(Math.abs(x-e.x)<e.scale*24*.42&&y<=e.y+4&&y>=e.y-64*e.scale)return true;}return false;}
+  litAt(x,y){for(const l of this.state.ents){if(PF[l.prefab].kind==='lamp'&&this.sim.lit[l.id]&&Math.hypot(x-l.x,y-(l.y-30))<l.props.radius*T*.75)return l;}return null;}
+  fire(e,r){const s=this.sim;s.fired[r.id]=true;const j=this.state.journey;
+    r.actions.forEach(a=>{if(a.type==='light'){s.lit[e.id]=true;s.events.push({i:s.hist.length,type:'lit'});if(j==='C')this.mark('c4');if(j==='E'&&this.state.done.e2)this.mark('e3');}
+      if(a.type==='shake')s.trauma=.55;
+      if(a.type==='open'&&a.target){if(s.bridge[a.target])s.bridge[a.target].opening=true;}
+      if(a.type==='hide')s.hidden[e.id]=true;
+      if(a.type==='scene')this.toast('Scene.go("title.scene") — the prototype stays in world.scene');});
+    if(r.actions.some(a=>a.type==='light'))this.toast(e.name+' is lit');}
+  stepSim(dt){const s=this.sim,st=this.state;if(!s)return;s.t+=dt;const W=s.wick;const wickE=st.ents.find(e=>e.prefab==='wick');
+    let vx=0,vy=0;if(this.joy){vx=this.joy.dx/44;vy=this.joy.dy/44;}const k=this.keys;if(k.left)vx-=1;if(k.right)vx+=1;if(k.upk)vy-=1;if(k.down)vy+=1;const len=Math.hypot(vx,vy);if(len>1){vx/=len;vy/=len;}
+    W.moving=len>.15;if(W.moving){s.started=true;const sp=wickE.props.speed*T;if(Math.abs(vx)>Math.abs(vy))W.dir=vx<0?1:3;else W.dir=vy<0?2:0;const nx=W.x+vx*sp*dt,ny=W.y+vy*sp*dt;if(this.walk(nx,ny)){W.x=nx;W.y=ny;}else if(this.walk(nx,W.y))W.x=nx;else if(this.walk(W.x,ny))W.y=ny;}
+    st.ents.forEach(e=>{if(!e.active||!e.rules||!e.rules.length)return;e.rules.forEach(r=>{if(s.fired[r.id])return;const d=Math.hypot(W.x-e.x,W.y-e.y);const reach=(e.props.reach||1.2)*T;let go=false;if(r.when==='touch')go=d<reach;else if(r.when==='interact')go=d<reach*1.6&&k.interact;else if(r.when==='start')go=true;if(go)this.fire(e,r);});});
+    for(const id in s.bridge){const b=s.bridge[id];const e=st.ents.find(x=>x.id===id);if(b.opening&&e)b.p=Math.min(1,b.p+dt/Math.max(.1,e.props.openTime));}
+    st.ents.forEach(e=>{const G=s.g[e.id];if(!G||!s.started)return;const dx=W.x-G.x,dy=W.y-G.y,d=Math.hypot(dx,dy)||1;const sp=e.props.speed*T;let mx=0,my=0;const L=this.litAt(G.x,G.y);
+      if(L){mx=G.x-L.x;my=G.y-(L.y-30);}else if(d<e.props.sight*T&&!this.litAt(W.x,W.y)){mx=dx/d;my=dy/d;}
+      const ml=Math.hypot(mx,my);if(ml>0){const nx=G.x+mx/ml*sp*dt,ny=G.y+my/ml*sp*dt;if(this.walk(nx,ny)&&(L||!this.litAt(nx,ny))){G.x=nx;G.y=ny;}}
+      if(d<24&&!this.litAt(W.x,W.y)){s.events.push({i:s.hist.length,type:'caught'});W.x=W.sx;W.y=W.sy;for(const gid in s.g){s.g[gid].x=s.g[gid].sx;s.g[gid].y=s.g[gid].sy;}s.started=false;s.trauma=.4;this.toast('The gloom caught Wick. He starts again.');if(st.journey==='E')this.mark('e1');}});
+    if(!s.crossed&&W.y<16*T-8){s.crossed=true;this.toast('Wick crossed the bridge');}
+    s.hist.push({t:s.t,w:[W.x,W.y,W.dir],g:Object.fromEntries(Object.entries(s.g).map(([id,v])=>[id,[v.x,v.y]])),lit:{...s.lit},b:Object.fromEntries(Object.entries(s.bridge).map(([id,v])=>[id,[v.p,v.opening]])),st:s.started});
+    if(s.hist.length>900){s.hist.shift();s.events=s.events.map(e=>({...e,i:e.i-1})).filter(e=>e.i>=0);}
+    const tx=W.x-st.vw/2,ty=W.y-st.vh*.55;s.cam={x:s.cam.x+(tx-s.cam.x)*Math.min(1,dt*6),y:s.cam.y+(ty-s.cam.y)*Math.min(1,dt*6)};s.trauma=Math.max(0,s.trauma-dt*1.4);}
+  applyHist(i){const s=this.sim,h=s.hist[i];if(!h)return;s.wick.x=h.w[0];s.wick.y=h.w[1];s.wick.dir=h.w[2];s.wick.moving=false;for(const id in h.g){if(s.g[id]){s.g[id].x=h.g[id][0];s.g[id].y=h.g[id][1];}}s.lit={...h.lit};for(const id in h.b){if(s.bridge[id]){s.bridge[id].p=h.b[id][0];s.bridge[id].opening=h.b[id][1];}}s.t=h.t;s.started=h.st;s.cam={x:s.wick.x-this.state.vw/2,y:s.wick.y-this.state.vh*.55};}
+  pauseToggle=()=>{if(this.state.mode==='play'){this.joy=null;this.setState({mode:'frozen',scrub:1});}else this.resume();};
+  resume=()=>{const s=this.sim;if(!s)return;const n=s.hist.length;if(n){const i=Math.round(this.state.scrub*(n-1));s.hist=s.hist.slice(0,i+1);s.events=s.events.filter(e=>e.i<=i);s.fired={};this.state.ents.forEach(e=>(e.rules||[]).forEach(r=>{if(r.actions.some(a=>a.type==='light')&&s.lit[e.id])s.fired[r.id]=true;}));}this.last=performance.now();this.setState({mode:'play',sheet:null,sel:[],scrub:1});};
+  scrubDown=(ev)=>{const s=this.sim;if(!s||!s.hist.length)return;this.trackDrag(ev,f=>{this.applyHist(Math.round(f*(s.hist.length-1)));this.setState({scrub:f,tick:s.t});});};
+  stepOnce=()=>{if(!this.sim)return;this.resumeTrim();this.stepSim(1/60);this.setState({scrub:1,tick:this.sim.t});};
+  stepBack=()=>{const s=this.sim;if(!s||!s.hist.length)return;const f=Math.max(0,this.state.scrub-60/Math.max(1,s.hist.length));this.applyHist(Math.round(f*(s.hist.length-1)));this.setState({scrub:f,tick:s.t});};
+  resumeTrim(){const s=this.sim,n=s.hist.length;if(!n)return;const i=Math.round(this.state.scrub*(n-1));s.hist=s.hist.slice(0,i+1);}
+  stop=()=>{if(this.state.mode==='edit')return;const edits=this.state.runEdits;this.stopSim();this.setState({mode:'edit',ents:this.snapshot,cam:this.editCam,zoom:this.editZoom,sel:[],sheet:edits.length?'review':null});if(this.state.journey==='E'&&this.state.done.e3&&!edits.length)this.mark('e4');};
+  keepEdits=()=>{const kept=this.state.runEdits.filter(r=>r.keep);this.pushUndo();this.setState(s=>({ents:s.ents.map(e=>{const mine=kept.filter(r=>r.id===e.id);if(!mine.length)return e;const n=clone(e);mine.forEach(r=>{if(['x','y','rot','scale'].includes(r.key))n[r.key]=r.to;else n.props[r.key]=r.to;});return n;}),runEdits:[],sheet:null}));this.toast('Kept '+kept.length+' change'+(kept.length===1?'':'s'),true);if(kept.some(r=>r.key==='speed'))this.mark('e4');};
+
+  openInspector=()=>{const st=this.state;if(!st.sel.length)return;this.setState({sheet:'inspector',detent:'half',addCompOpen:false});if(st.mode==='edit')this.frame(this.byId(st.sel[st.sel.length-1]),true);};
+  applyTemplate(e,key){const j=this.state.journey;if(key==='openedBy'){this.setState({picking:{mode:'lampFor',bridge:e.id},sheet:null});return;}
+    this.pushUndo();const keepOpen=(e.rules||[]).flatMap(r=>r.actions).filter(a=>a.type==='open');const rid='r'+(UID++);let rules;
+    if(key==='touch')rules=[{id:rid,when:'touch',actions:[{type:'light'},{type:'shake'},...keepOpen]}];
+    if(key==='interact')rules=[{id:rid,when:'interact',actions:[{type:'light'},{type:'shake'},...keepOpen]}];
+    if(key==='collect')rules=[{id:rid,when:'touch',actions:[{type:'score'},{type:'hide'}]}];
+    if(key==='door')rules=[{id:rid,when:'interact',actions:[{type:'scene'}]}];
+    this.updEnt(e.id,n=>{n.rules=rules;return n;});if(key==='touch'&&PF[e.prefab].kind==='lamp'&&j==='C')this.mark('c2');}
+  completePick(id){const pk=this.state.picking;const t=this.byId(id);
+    if(pk.mode==='target'){if(id===pk.ent){this.toast('Pick something other than '+t.name);return;}this.pushUndo();this.updEnt(pk.ent,n=>{const r=n.rules.find(r=>r.id===pk.rule);if(r)r.actions[pk.idx].target=id;return n;});this.setState({picking:null,sel:[pk.ent],sheet:'behaviour',behTab:'blocks'});this.toast(this.byId(pk.ent).name+' now opens '+t.name);if(PF[t.prefab].kind==='bridge')this.mark('c3');return;}
+    if(pk.mode==='lampFor'){if(PF[t.prefab].kind!=='lamp'){this.toast('Tap a lamp post');return;}this.pushUndo();this.updEnt(id,n=>{if(!n.rules.length)n.rules=[{id:'r'+(UID++),when:'touch',actions:[{type:'light'},{type:'shake'}]}];const r=n.rules[0];if(!r.actions.some(a=>a.type==='open'&&a.target===pk.bridge))r.actions.push({type:'open',target:pk.bridge});return n;});this.setState({picking:null,sel:[pk.bridge],sheet:'behaviour'});this.toast(t.name+' now opens the bridge');this.mark('c3');}}
+  inspector(e,tune){const p=PF[e.prefab],id=e.id,S=[];
+    const sl=(key,label,min,max,step,fmt,val)=>{const v=val!==undefined?val:(['x','y','rot','scale'].includes(key)?e[key]:e.props[key]);const pct=clamp((v-min)/(max-min),0,1)*100;return {isSlider:true,label,valText:fmt(v),fill:{position:'absolute',left:0,top:16,height:4,borderRadius:2,background:'#E9A33A',width:pct+'%'},knob:{position:'absolute',top:6,left:'calc('+pct+'% - 12px)',width:24,height:24,borderRadius:12,background:'#E8E4DC',boxShadow:'0 2px 6px rgba(0,0,0,.5)'},down:(ev)=>this.sliderDown(ev,id,key,min,max,step)};};
+    const stp=(key,label,axis,color,step)=>({isStepper:true,label,axis,axisStyle:{width:22,height:22,borderRadius:6,background:color+'33',color,fontSize:12,fontWeight:700,display:'flex',alignItems:'center',justifyContent:'center'},valText:String(Math.round(e[key]/T*10)/10),minus:()=>{this.pushUndo();this.setField(id,key,e[key]-step);},plus:()=>{this.pushUndo();this.setField(id,key,e[key]+step);}});
+    const tg=(key,label,on,fn)=>({isToggle:true,label,trackStyle:track(on),knobStyle:knob(on),toggle:fn||(()=>{this.pushUndo();this.setField(id,key,!on);})});
+    const sg=(label,opts,cur,fn)=>({isSegment:true,label,opts:opts.map(o=>({label:o[1],style:seg(cur===o[0]),pick:()=>fn(o[0])}))});
+    const sw=(key,label)=>({isSwatch:true,label,opts:Object.keys(LIGHTC).map(k=>({style:{width:34,height:34,borderRadius:17,cursor:'pointer',background:'rgb('+LIGHTC[k].join(',')+')',border:e.props[key]===k?'3px solid #E8E4DC':'3px solid #12161B',boxShadow:e.props[key]===k?'0 0 0 1px #E9A33A':'none'},pick:()=>{this.pushUndo();this.setField(id,key,k);}}))});
+    const tiles=v=>v.toFixed(1)+' tiles';
+    if(!tune&&!p.marker)S.push({title:'Place',icon:'open_with',note:'in tiles',rows:[stp('x','Across','X','#D6605C',8),stp('y','Down','Y','#7FB069',8),sl('rot','Turn',-180,180,this.state.snap?15:1,v=>Math.round(v)+'°'),sl('scale','Size',.5,5,.1,v=>v.toFixed(1)+'×')]});
+    if(p.kind==='wick')S.push({title:'Wick',icon:'code',note:'wick.decay',rows:[sl('speed','Walk speed',1,6,.1,v=>v.toFixed(1)+' tiles/s'),sl('lantern','Lantern reach',1,8,.5,tiles)]});
+    if(p.kind==='lamp'||p.kind==='light')S.push({title:'Light 2D',icon:'sunny',note:p.kind==='lamp'?'when lit':'',rows:[sl('radius','Radius',1,8,.5,tiles),sl('intensity','Brightness',0,3,.1,v=>v.toFixed(1)),sw('color','Colour')]});
+    if(p.kind==='gloom')S.push({title:'Gloom',icon:'code',note:'gloom.decay',rows:[sl('speed','Speed',0,4,.1,v=>v.toFixed(1)+' tiles/s'),sl('sight','Notices Wick within',2,12,.5,tiles)]});
+    if(p.kind==='bridge')S.push({title:'Bridge',icon:'code',note:'bridge.decay',rows:[sl('openTime','Opens over',.2,4,.1,v=>v.toFixed(1)+' s'),...(tune?[]:[sg('At the start',[['closed','Closed'],['open','Open']],e.props.starts,v=>{this.pushUndo();this.setField(id,'starts',v);})])]});
+    if(!tune&&!p.marker){const s=SHEETS[p.sheet];const k=Math.min(52/s.cw,52/s.ch);S.push({title:'Sprite',icon:'image',note:'',rows:[{isSprite:true,sheet:s.file,cellText:s.cw+' × '+s.ch+(p.anim?' · clip “breathe”, '+this.state.slice.frames.length+' frames':' · sprite '+p.cell),thumb:{width:s.cw*k,height:s.ch*k,backgroundImage:'url('+s.src+')',backgroundSize:s.w*k+'px '+s.h*k+'px',backgroundPosition:-p.cell*s.cw*k+'px 0',imageRendering:'pixelated'}},tg('flip','Mirror',e.flip,()=>{this.pushUndo();this.updEnt(id,n=>{n.flip=!n.flip;return n;});})]});}
+    if(!tune&&p.kind==='lamp')S.push({title:'Collider 2D',icon:'crop_square',note:'',rows:[sg('Shape',[['circle','Circle'],['box','Box']],e.props.collider||'circle',v=>{this.pushUndo();this.setField(id,'collider',v);}),tg('sensor','Sensor (doesn’t block)',e.props.sensor),sl('reach','Touch reach',.5,3,.1,tiles)]});
+    (e.extra||[]).forEach(x=>{if(tune)return;if(x==='Rigid body 2D')S.push({title:x,icon:'bolt',note:'',rows:[sg('Kind',[['dynamic','Dynamic'],['kinematic','Kinematic'],['static','Static']],e.props.body||'static',v=>{this.pushUndo();this.setField(id,'body',v);})]});else S.push({title:x,icon:'extension',note:'schema defaults',rows:[{isFacts:true,items:[{k:'Fields',v:'registry defaults'},{k:'Edit',v:'drag in the world'}]}]});});
+    if(!tune&&!p.marker){const txt=this.behSummary(e);S.push({title:'Behaviour',icon:'conversion_path',note:'',rows:[{isBehaviour:true,text:txt}]});}
+    if(!tune){const rows=[{isMore:true,icon:this.state.expandFacts?'expand_less':'expand_more',label:this.state.expandFacts?'Hide details':'Show all details',toggle:()=>this.setState(s=>({expandFacts:!s.expandFacts}))}];if(this.state.expandFacts)rows.push({isFacts:true,items:[{k:'Stable ID',v:e.id},{k:'Prefab',v:'prefabs/'+snake(p.name)+'.prefab'},{k:'Space',v:'World'},{k:'Z lock',v:'on'},{k:'Draw order',v:'by y, layer 0'},{k:'Position',v:Math.round(e.x)+', '+Math.round(e.y)+' px'}]});S.push({title:'Details',icon:'info',note:'',rows});}
+    return {icon:p.icon,name:e.name,sub:tune?'Live in this run':(p.marker?'Object':'Prefab · '+p.name),sections:S,showAdd:!tune,toggleActive:()=>{if(tune)return;this.pushUndo();this.updEnt(id,n=>{n.active=!n.active;return n;});},activeStyle:{...track(e.active),border:0,cursor:'pointer',marginRight:4},activeKnob:knob(e.active)};}
+  behSummary(e){const p=PF[e.prefab];if(p.kind==='gloom')return 'Hunts Wick in the dark and keeps out of lamplight. Runs gloom.decay.';if(p.kind==='wick')return 'Walks with the stick or WASD, carries the lantern. Runs wick.decay.';
+    const inc=this.state.ents.filter(o=>(o.rules||[]).some(r=>r.actions.some(a=>a.type==='open'&&a.target===e.id)));if(p.kind==='bridge')return inc.length?'Opens when '+inc.map(o=>o.name).join(', ')+' is lit.':'Nothing opens it yet. Tap to connect a lamp.';
+    if(!e.rules.length)return 'Does nothing yet. Tap to give it a behaviour.';return e.rules.map(r=>this.whenText(r.when)+', '+r.actions.map(a=>this.actText(a).toLowerCase()).join(', ')).join('. ')+'.';}
+  whenText(w){return {touch:'When Wick touches this',interact:'When Wick presses Interact nearby',start:'When the scene starts'}[w];}
+  actText(a){const t=a.target&&this.byId(a.target);return {light:'Light this lamp',shake:'Shake the camera',open:'Open '+(t?t.name:'…'),hide:'Hide this',score:'Add 1 to Game.score',scene:'Go to title.scene'}[a.type];}
+  genCode(e){const p=PF[e.prefab];const L=[];let file,note;
+    if(p.kind==='gloom'){file='assets/scripts/gloom.decay';note='Written as code in Lamplighter. Only its @export fields become controls in the inspector; the field names here are illustrative.';L.push('script Gloom {','    // How fast it creeps, in tiles a second.','    @export let speed: number = '+e.props.speed.toFixed(1)+';','    // How near Wick must be before it notices.','    @export let sight: number = '+e.props.sight.toFixed(1)+';','','    // … the hunt, the wind-up and the pounce','}');return {file,note,L};}
+    if(p.kind==='wick'){file='assets/scripts/wick.decay';note='Written as code. The editor reads its @export fields without running it.';L.push('script Wick {','    @export let speed: number = '+e.props.speed.toFixed(1)+';','    @export let lantern: number = '+e.props.lantern.toFixed(1)+';','','    // … movement, facing and the lantern','}');return {file,note,L};}
+    if(p.kind==='bridge'){file='assets/scripts/bridge.decay';note='Generated from the bridge’s behaviour. LampLit is a project event declared in events.decay.';L.push('// events.decay: event LampLit(target: Entity);','script Bridge {','    @export let open_time: number = '+e.props.openTime.toFixed(1)+';','    var opening: bool = '+(e.props.starts==='open')+';','    var t: number = 0.0;','','    on LampLit(target) {','        if target == this.entity {','            this.opening = true;','        }','    }','','    fn update(dt: number) {','        if !this.opening { return; }','        this.t = min(1.0, this.t + dt / this.open_time);','        this.transform.scale.y = this.t * '+e.scale+';','    }','}');return {file,note,L};}
+    const name=pascal(e.name)||'Thing';file='assets/scripts/'+snake(e.name)+'.decay';note='Generated from '+e.rules.length+' rule'+(e.rules.length===1?'':'s')+'. Edit as code and the blocks become read-only for this script, so the two never disagree.';
+    const opens=e.rules.flatMap(r=>r.actions).filter(a=>a.type==='open'&&a.target);
+    L.push('script '+name+' {');opens.forEach((a,i)=>L.push('    @export let opens'+(i?i+1:'')+': String = "'+this.byId(a.target).name+'";'));L.push('    @export let reach: number = '+(e.props.reach||1.2).toFixed(1)+';','    var done: bool = false;','    var wick: Entity = null;','','    fn start() {','        this.wick = World.find("Wick");');
+    const body=(acts,ind)=>{let oi=0;acts.forEach(a=>{if(a.type==='light')L.push(ind+'Animation.play(this.entity, "lit");');if(a.type==='shake')L.push(ind+'Camera.add_trauma(0.18);');if(a.type==='open'&&a.target){L.push(ind+'emit LampLit(World.find(this.opens'+(oi?oi+1:'')+'));');oi++;}if(a.type==='score')L.push(ind+'Game.score += 1.0;');if(a.type==='hide')L.push(ind+'this.sprite.tint.a = 0.0;');if(a.type==='scene')L.push(ind+'Scene.go("title.scene");');});};
+    e.rules.filter(r=>r.when==='start').forEach(r=>body(r.actions,'        '));L.push('    }','');
+    const live=e.rules.filter(r=>r.when!=='start');if(live.length){L.push('    fn update(dt: number) {','        if this.done { return; }','        let dx = this.wick.transform.world_position.x - this.transform.world_position.x;','        let dy = this.wick.transform.world_position.y - this.transform.world_position.y;','        let near = sqrt(dx * dx + dy * dy) < this.reach;');live.forEach(r=>{L.push('        if near'+(r.when==='interact'?' && Action.pressed("interact")':'')+' {','            this.done = true;');body(r.actions,'            ');L.push('        }');});L.push('    }');}
+    L.push('}');return {file,note,L};}
+  beh(e){const p=PF[e.prefab];const j=this.state.journey;let templates=[];
+    if(p.kind==='lamp')templates=[['touch','touch_app','Lights when touched','Wick walks into it'],['interact','front_hand','Lights on Interact','Wick presses a button nearby']];
+    else if(p.kind==='bridge')templates=[['openedBy','link','Opens when a lamp is lit','Tap the lamp in the world']];
+    else if(!['gloom','wick'].includes(p.kind))templates=[['collect','star','Collectible','Disappears and adds to the score'],['door','door_front','Door to a scene','Interact to go to another scene']];
+    const tpls=templates.map(t=>{const on=e.rules.length&&((t[0]==='touch'&&e.rules[0].when==='touch')||(t[0]==='interact'&&e.rules[0].when==='interact'));return {icon:t[1],label:t[2],desc:t[3],apply:()=>this.applyTemplate(e,t[0]),style:{flexShrink:0,width:170,minHeight:96,padding:'12px',borderRadius:14,border:on?'1px solid #E9A33A':'1px solid #252B32',background:on?'#2E2211':'#12161B',cursor:'pointer',display:'flex',flexDirection:'column',gap:4,alignItems:'flex-start'}};});
+    const incoming=this.state.ents.filter(o=>o.id!==e.id&&(o.rules||[]).some(r=>r.actions.some(a=>a.type==='open'&&a.target===e.id))).map(o=>({name:o.name,text:'When Wick touches '+o.name+', it lights and opens this.',go:()=>this.setState({sel:[o.id],sheet:'behaviour'})}));
+    const rules=(e.rules||[]).map(r=>{const isOpen=this.state.addOpen===r.id;return {whenText:this.whenText(r.when),whenIcon:{touch:'touch_app',interact:'front_hand',start:'play_circle'}[r.when],
+      cycleWhen:()=>{this.pushUndo();this.updEnt(e.id,n=>{const rr=n.rules.find(x=>x.id===r.id);rr.when={touch:'interact',interact:'start',start:'touch'}[rr.when];return n;});},
+      remove:()=>{this.pushUndo();this.updEnt(e.id,n=>{n.rules=n.rules.filter(x=>x.id!==r.id);return n;});},
+      toggleAdd:()=>this.setState({addOpen:isOpen?null:r.id}),addOpen:isOpen,
+      addOptions:[['light','emoji_objects','Light this'],['open','door_open','Open…'],['shake','vibration','Shake camera'],['hide','visibility_off','Hide this'],['score','add_circle','Add to score'],['scene','logout','Go to scene'],['sound','volume_up','Play a sound']].map(o=>({icon:o[1],label:o[2],style:{height:40,padding:'0 12px',borderRadius:12,border:'1px solid #252B32',background:'#161B21',cursor:'pointer',display:'flex',alignItems:'center',gap:6,fontSize:13,opacity:o[0]==='sound'?.45:1},click:()=>{if(o[0]==='sound'){this.toast('No sounds in this project yet. Import one in Assets.');return;}this.pushUndo();let idx=0;this.updEnt(e.id,n=>{const rr=n.rules.find(x=>x.id===r.id);rr.actions.push(o[0]==='open'?{type:'open',target:null}:{type:o[0]});idx=rr.actions.length-1;return n;});this.setState({addOpen:null});if(o[0]==='open')setTimeout(()=>this.setState({picking:{mode:'target',ent:e.id,rule:r.id,idx},sheet:null}),0);}})),
+      actions:r.actions.map((a,i)=>{const t=a.target&&this.byId(a.target);return {lead:i?'AND':'DO',icon:{light:'emoji_objects',shake:'vibration',open:'door_open',hide:'visibility_off',score:'add_circle',scene:'logout'}[a.type],text:a.type==='open'?'Open':this.actText(a),hasTarget:a.type==='open',targetName:t?t.name:'Choose',targetStyle:{height:34,padding:'0 10px',borderRadius:10,border:t?'1px solid #8A6220':'1px dashed #E9A33A',background:t?'#2E2211':'transparent',color:'#FFBE55',cursor:'pointer',display:'flex',alignItems:'center',gap:4,fontSize:13,fontWeight:600,whiteSpace:'nowrap'},pick:()=>this.setState({picking:{mode:'target',ent:e.id,rule:r.id,idx:i},sheet:null}),hasValue:a.type==='shake',value:'0.18',remove:()=>{this.pushUndo();this.updEnt(e.id,n=>{n.rules.find(x=>x.id===r.id).actions.splice(i,1);return n;});}};})};});
+    const fixed=['gloom','wick'].includes(p.kind);const g=this.genCode(e);
+    return {sub:e.name+(fixed?' · written in Decay':''),hasTemplates:tpls.length>0,templates:tpls,incoming,rules,empty:!rules.length&&!incoming.length,emptyText:fixed?this.behSummary(e)+' Its exported fields are in Properties; the script is in the Code tab.':(p.kind==='bridge'?'Pick “Opens when a lamp is lit”, then tap the lamp.':'Pick a starting point above, or make a rule from scratch.'),canAddRule:!fixed&&p.kind!=='bridge',codeFile:g.file,codeNote:g.note,code:g.L.map((l,i)=>({n:i+1,toks:toks(l)}))};}
+
+  spriteStyle(e,o){const p=PF[e.prefab],s=SHEETS[p.sheet];const sc=e.scale,w=s.cw*sc,h=s.ch*sc;
+    return {position:'absolute',left:o.x-w/2,top:o.y-h,width:w,height:h,backgroundImage:'url('+s.src+')',backgroundSize:s.w*sc+'px '+s.h*sc+'px',backgroundPosition:-(o.col||0)*s.cw*sc+'px '+-(o.row||0)*s.ch*sc+'px',backgroundRepeat:'no-repeat',imageRendering:'pixelated',transformOrigin:'50% 100%',transform:'rotate('+e.rot+'deg) scaleX('+(e.flip?-1:1)+') scaleY('+(o.sy===undefined?1:o.sy)+')',opacity:o.op===undefined?1:o.op,filter:o.sel?'drop-shadow(1.5px 0 0 #FFBE55) drop-shadow(-1.5px 0 0 #FFBE55) drop-shadow(0 1.5px 0 #FFBE55) drop-shadow(0 -1.5px 0 #FFBE55)':(o.pick?'drop-shadow(0 0 6px #E9A33A)':'none'),pointerEvents:'none'};}
+  thumbFor(key,B){const p=PF[key],s=SHEETS[p.sheet];if(!s)return {width:B*.6,height:B*.6,borderRadius:B,background:'#161B21',border:'1px dashed #3A424C'};const k=Math.min(B/s.cw,B/s.ch)*(p.tz||1);return {width:B,height:B,flexShrink:0,backgroundImage:'url('+s.src+')',backgroundRepeat:'no-repeat',backgroundSize:s.w*k+'px '+s.h*k+'px',backgroundPosition:(-p.cell*s.cw*k+(B-s.cw*k)/2)+'px '+(B-s.ch*k)+'px',imageRendering:'pixelated'};}
+
+  renderVals(){const st=this.state,sim=this.sim,playing=st.mode!=='edit'&&!!sim,z=playing?1:st.zoom,cam=this.camNow(),now=st.ft||Date.now();
+    const narrow=!st.wide;const selE=st.sel.length?this.byId(st.sel[st.sel.length-1]):null;const editing=st.screen==='editor'&&st.mode==='edit';
+    const J=JOURNEYS.map(j=>{const n=j.steps.filter(s=>st.done[s[0]]).length;const open=st.journey===j.k;return {letter:j.k,title:j.title,progress:n+' of '+j.steps.length+' done',open,cta:open?'Restart':'Start',start:()=>this.startJourney(j.k),
+      cardStyle:{borderRadius:14,padding:14,background:open?'#12161B':'#0B0E12',border:open?'1px solid #8A6220':'1px solid #1B2026'},badgeStyle:{width:32,height:32,borderRadius:9,display:'flex',alignItems:'center',justifyContent:'center',fontSize:14,fontWeight:700,background:open?'#E9A33A':'#161B21',color:open?'#1A1206':'#98A0A8',flexShrink:0},
+      steps:j.steps.map(s=>{const d=!!st.done[s[0]];return {text:s[1],icon:d?'check_circle':'radio_button_unchecked',iconStyle:{fontFamily:IC,fontSize:18,color:d?'#79B68A':'#3A424C',flexShrink:0},textStyle:{color:d?'#68717A':'#E8E4DC',textDecoration:d?'line-through':'none'}};})};});
+    const v={journeys:J,isNarrow:narrow,showRail:st.wide||st.journeysOpen,
+      railStyle:st.wide?{width:340,flexShrink:0,height:'100%',overflow:'auto',padding:'24px 20px',display:'flex',flexDirection:'column',gap:14,borderRight:'1px solid #1B2026'}:{position:'absolute',inset:0,zIndex:100,background:'#080A0D',overflow:'auto',padding:'calc(env(safe-area-inset-top,0px) + 18px) 18px calc(env(safe-area-inset-bottom,0px) + 28px)',display:'flex',flexDirection:'column',gap:14},
+      closeJourneys:()=>this.setState({journeysOpen:false}),openJourneys:()=>this.setState({journeysOpen:true,moreOpen:false}),
+      appStyle:st.wide?{position:'relative',width:430,flexShrink:0,height:'100%',margin:'0 auto',overflow:'hidden',borderLeft:'1px solid #1B2026',borderRight:'1px solid #1B2026'}:{position:'relative',flex:1,height:'100%',overflow:'hidden'},
+      showJourneyFab:narrow&&!!st.journey&&st.screen==='editor'&&st.mode==='edit'&&!st.sheet&&!st.coach&&!st.picking&&!st.moreOpen,journeyFabText:st.journey?'Journey '+st.journey+' · '+J.find(j=>j.letter===st.journey).progress:'',
+      screenRef:this.screenRef,canvasRef:this.canvasRef,soon:()=>this.toast('Not part of this prototype'),
+      isDash:st.screen==='dashboard',isNew:st.screen==='new',isEditor:st.screen==='editor',created:st.created,projName:st.projName,
+      openCreated:()=>{this.leave();this.loadLevel(st.projName,this.cache[st.projName]||starterLevel());},openLantern:()=>{this.leave();this.loadLevel('Lantern Crossing',this.cache['Lantern Crossing']||fullLevel(true,st.imported));},
+      samples:[['Lamplighter','Top-down lantern adventure','emoji_objects'],['Platformer','The 2D platformer','directions_run'],['Scorchball','Couch football, 2-4 players','sports_soccer'],['Low Tide','Top-down moving-home game','sailing'],['Orbital Last Stand','Arena action, baked 3D sprites','public'],['Flappy','One-button arcade','flutter_dash']].map(s=>({name:s[0],summary:s[1],icon:s[2]})),
+      sampleTap:()=>this.toast('Samples open read-only. Not part of this prototype.'),
+      newGame:()=>{this.setState({screen:'new',newStep:0});this.mark('a1');},newBack:()=>this.setState(st.newStep>0&&st.newStep<2?{newStep:st.newStep-1}:{screen:'dashboard'}),
+      newStepText:st.newStep<2?(st.newStep+1)+' of 2':'',newStep0:st.newStep===0,newStep1:st.newStep===1,newStep2:st.newStep===2,
+      templates:[['topdown','Top-down adventure','Walk around a tile world. Starts with Wick, a camera and a grass tileset.','','directions_walk'],['platformer','Side-on platformer','Run and jump with gravity and 2D physics.','Not in prototype','directions_run'],['empty2d','Empty 2D','A camera and nothing else.','Not in prototype','crop_free'],['empty3d','Empty 3D','Meshes, lights and GLB models. Touch editing for 3D comes later.','Limited','view_in_ar']].map((t,i)=>({name:t[1],desc:t[2],tag:t[3],icon:i?t[4]:'',
+        tagStyle:{fontSize:11,fontWeight:600,padding:t[3]?'2px 8px':0,borderRadius:6,background:'#161B21',color:'#68717A'},
+        thumb:i?{width:76,height:76,borderRadius:12,background:'#161B21',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}:{width:76,height:76,borderRadius:12,flexShrink:0,display:'flex',alignItems:'center',justifyContent:'center',backgroundImage:'url('+TX+'wick.png), url('+TX+'ground.png)',backgroundSize:'1224px 264px, 64px 64px',backgroundPosition:'2px 6px, 0 0',backgroundRepeat:'no-repeat, repeat',imageRendering:'pixelated'},
+        style:{display:'flex',gap:14,alignItems:'center',padding:12,borderRadius:18,border:i?'1px solid #1B2026':'1px solid #8A6220',background:i?'#0B0E12':'#12161B',cursor:'pointer',opacity:i?.7:1},
+        pick:()=>{if(i){this.toast('This prototype follows the top-down path');return;}this.setState({newStep:1});this.mark('a2');}})),
+      onName:(ev)=>this.setState({projName:ev.target.value}),
+      orientOpts:[['portrait','Portrait','stay_current_portrait'],['landscape','Landscape','stay_current_landscape']].map(o=>({label:o[1],icon:o[2],pick:()=>this.setState({orient:o[0]}),style:{flex:1,height:48,borderRadius:10,border:0,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',gap:8,fontSize:14,fontWeight:500,background:st.orient===o[0]?'#2E2211':'transparent',color:st.orient===o[0]?'#FFBE55':'#98A0A8'}})),
+      create:()=>{const name=(st.projName||'').trim()||'Untitled';this.setState({newStep:2,createIdx:0,projName:name});let i=0;const tick=()=>{i++;this.setState({createIdx:i});if(i<4)setTimeout(tick,380);else setTimeout(()=>{this.mark('a3');this.loadLevel(name,starterLevel(),{created:true,coach:'This is world.scene. Tap Wick to select him; drag the ground to look around.',cam:{x:(WW-st.vw)/2,y:620}});},350);};setTimeout(tick,300);},
+      createLines:['Writing sindri.toml','Making world.scene with a camera','Adding Wick and the ground tileset','Opening the scene'].map((t,i)=>({text:t,icon:i<st.createIdx?'check_circle':(i===st.createIdx?'progress_activity':'radio_button_unchecked'),iconStyle:{fontFamily:IC,fontSize:20,color:i<st.createIdx?'#79B68A':(i===st.createIdx?'#E9A33A':'#3A424C')}})),
+    };
+    if(st.screen!=='editor')return Object.assign(v,{isPicking:false});
+    v.worldStyle={position:'absolute',left:0,top:0,width:WW,height:WH,transformOrigin:'0 0',transform:'translate('+(-cam.x*z+(playing&&sim.trauma?(Math.random()-.5)*sim.trauma*sim.trauma*18:0))+'px,'+(-cam.y*z+(playing&&sim.trauma?(Math.random()-.5)*sim.trauma*sim.trauma*18:0))+'px) scale('+z+')'};
+    v.canvasStyle={position:'absolute',left:0,top:0,width:WW,height:WH,imageRendering:'pixelated',display:st.hide.ground?'none':'block'};
+    v.showGrid=editing&&(st.grid||st.tool==='paint');
+    const sl=st.slice,fr=sl.frames.length?sl.frames:[0];const gFrame=fr[Math.floor((playing?sim.t*1000:now)/1000*sl.fps)%fr.length];
+    const sprites=[],markers=[],pickIds=st.picking?st.ents.filter(e=>st.picking.mode==='lampFor'?PF[e.prefab].kind==='lamp':e.id!==st.picking.ent).map(e=>e.id):[];
+    const list=st.ents.filter(e=>this.visible(e)&&!(playing&&sim.hidden[e.id])).map(e=>{const p=PF[e.prefab];let x=e.x,y=e.y,col=p.cell,row=0,sy=1,op=1;
+      if(playing){if(e.prefab==='wick'){x=sim.wick.x;y=sim.wick.y;row=sim.wick.dir;col=sim.wick.moving?1+Math.floor(sim.t*10)%8:0;}if(sim.g[e.id]){x=sim.g[e.id].x;y=sim.g[e.id].y;}if(p.kind==='lamp'&&sim.lit[e.id])col=p.lit;if(p.kind==='bridge'){sy=sim.bridge[e.id]?sim.bridge[e.id].p:1;}}
+      else if(p.kind==='bridge'&&e.props.starts==='closed')op=.5;
+      if(p.anim)col=gFrame;return {e,p,x,y,col,row,sy,op};}).sort((a,b)=>a.y-b.y);
+    list.forEach(o=>{const isSel=(!playing||st.mode==='frozen')&&st.sel.includes(o.e.id);if(o.p.marker)markers.push({icon:o.p.icon,style:{position:'absolute',left:o.x-20,top:o.y-40,width:40,height:40,borderRadius:20,display:'flex',alignItems:'center',justifyContent:'center',background:isSel?'#2E2211':'rgba(11,14,18,.8)',border:isSel?'2px solid #FFBE55':'1px dashed #68717A',color:'#E9A33A',pointerEvents:'none'}});else if(o.sy>0.01)sprites.push({style:this.spriteStyle(o.e,{x:o.x,y:o.y,col:o.col,row:o.row,sy:o.sy,op:o.op,sel:isSel,pick:pickIds.includes(o.e.id)})});});
+    v.sprites=sprites;v.markers=markers;
+    const rings=[];if(editing){st.sel.slice(0,-1).forEach(id=>{const e=this.byId(id);if(!e)return;const b=this.bounds(e);rings.push({style:{position:'absolute',left:b.l-4,top:b.t-4,width:b.r-b.l+8,height:b.b-b.t+8,border:'1.5px dashed #E9A33A',borderRadius:8,pointerEvents:'none'}});});
+      pickIds.forEach(id=>{const e=this.byId(id);const b=this.bounds(e);rings.push({style:{position:'absolute',left:b.l-6,top:b.t-6,width:b.r-b.l+12,height:b.b-b.t+12,border:'2px solid rgba(233,163,58,.7)',borderRadius:10,pointerEvents:'none',boxShadow:'0 0 0 4px rgba(233,163,58,.12)'}});});
+      if(st.ents.some(e=>PF[e.prefab].kind==='bridge')&&st.sel.length===1&&PF[(this.byId(st.sel[0])||{prefab:'empty'}).prefab].kind==='bridge'){} }
+    v.rings=rings;
+    const wires=[],wl=[];if(editing){st.ents.forEach(e=>(e.rules||[]).forEach(r=>r.actions.forEach(a=>{if(a.type!=='open'||!a.target)return;const t=this.byId(a.target);if(!t)return;const show=st.sel.includes(e.id)||st.sel.includes(t.id)||st.sheet==='behaviour'||st.picking;if(!show)return;const b1=this.bounds(e),b2=this.bounds(t);const x1=e.x,y1=e.y-b1.h*.62,x2=t.x,y2=t.y-b2.h*.5;wires.push({x1,y1,x2,y2});wl.push({text:'lights → opens',style:{position:'absolute',left:(x1+x2)/2-48,top:(y1+y2)/2-12,width:96,height:24,borderRadius:12,background:'#2E2211',border:'1px solid #8A6220',color:'#FFBE55',fontSize:11,fontWeight:600,display:'flex',alignItems:'center',justifyContent:'center',pointerEvents:'none'}});})));}
+    v.wires=wires;v.wireLabels=wl;
+    const trails=[];if(st.mode==='frozen'&&sim){const n=sim.hist.length,cur=Math.round(st.scrub*(n-1));for(let i=0;i<=cur;i+=6){const h=sim.hist[i];trails.push({style:{position:'absolute',left:h.w[0]-2,top:h.w[1]-2,width:4,height:4,borderRadius:2,background:'rgba(232,228,220,.55)',pointerEvents:'none'}});for(const id in h.g)trails.push({style:{position:'absolute',left:h.g[id][0]-2.5,top:h.g[id][1]-2.5,width:5,height:5,borderRadius:3,background:'rgba(255,138,148,.7)',pointerEvents:'none'}});}sim.events.filter(ev=>ev.i<=cur&&ev.type==='caught').forEach(ev=>{const h=sim.hist[Math.max(0,ev.i-1)];if(h)trails.push({style:{position:'absolute',left:h.w[0]-14,top:h.w[1]-14,width:28,height:28,borderRadius:14,border:'2px solid #D85A3A',pointerEvents:'none'}});});}
+    v.trails=trails;
+    v.hasHandles=editing&&!st.tool&&!st.picking&&st.sel.length===1&&!!selE&&!PF[selE.prefab].marker;
+    if(v.hasHandles){const b=this.bounds(selE),hs=34/z;const top=b.t-30/z;v.hnd={ring:{position:'absolute',left:selE.x-12/z,top:selE.y-5/z,width:24/z,height:10/z,borderRadius:'50%',border:(1.5/z)+'px solid #FFBE55',pointerEvents:'none'},stem:{position:'absolute',left:selE.x-.75/z,top:top+hs/2,width:1.5/z,height:Math.max(0,b.t-top-hs/2),background:'#FFBE55',pointerEvents:'none'},
+      rot:{position:'absolute',left:selE.x-hs/2,top:top-hs/2,width:hs,height:hs,borderRadius:hs,background:'#E9A33A',color:'#1A1206',display:'flex',alignItems:'center',justifyContent:'center',cursor:'grab',touchAction:'none',boxShadow:'0 2px 8px rgba(0,0,0,.5)'},
+      scl:{position:'absolute',left:b.r+6/z-hs/2,top:b.b-hs/2,width:hs,height:hs,borderRadius:hs,background:'#E8E4DC',color:'#1A1206',display:'flex',alignItems:'center',justifyContent:'center',cursor:'nwse-resize',touchAction:'none',boxShadow:'0 2px 8px rgba(0,0,0,.5)'},iconStyle:{fontFamily:IC,fontSize:18/z,pointerEvents:'none'}};}else v.hnd={};
+    v.rotDown=this.rotDown;v.sclDown=this.sclDown;
+    v.hasBrush=editing&&st.tool==='paint'&&!!st.brushAt;if(v.hasBrush){const r=st.brush==='land'||st.brush==='erase'?(st.brushSize-.5)*T:Math.max(.5,st.brushSize-1)*T+8;v.brushStyle={position:'absolute',left:st.brushAt.x-r,top:st.brushAt.y-r,width:r*2,height:r*2,borderRadius:'50%',border:'2px solid #FFBE55',background:'rgba(233,163,58,.12)',pointerEvents:'none'};}
+    const lights=[];const showLight=playing||st.lightPreview;
+    if(showLight){const wk=st.ents.find(e=>e.prefab==='wick');if(wk){const x=playing?sim.wick.x:wk.x,y=playing?sim.wick.y:wk.y;lights.push([x,y-30,wk.props.lantern*T,LIGHTC.warm]);}st.ents.forEach(e=>{const p=PF[e.prefab];if(!e.active)return;if(p.kind==='lamp'&&(playing?sim.lit[e.id]:st.lightPreview))lights.push([e.x,e.y-e.scale*52,e.props.radius*T*(e.props.intensity/1.2*.4+.6),LIGHTC[e.props.color]||LIGHTC.warm]);if(p.kind==='light')lights.push([e.x,e.y-20,e.props.radius*T,LIGHTC[e.props.color]||LIGHTC.warm]);});}
+    v.lightStyle=showLight?{position:'absolute',inset:0,pointerEvents:'none',mixBlendMode:'multiply',backgroundImage:[...lights.map(l=>{const sx=(l[0]-cam.x)*z,sy=(l[1]-cam.y)*z,r=l[2]*z;return 'radial-gradient(circle at '+sx+'px '+sy+'px, rgb('+l[3].join(',')+') 0px, rgba('+l[3].join(',')+',.8) '+r*.35+'px, rgba(40,44,60,0) '+r+'px)';}),'linear-gradient(#262a3c,#262a3c)'].join(','),backgroundBlendMode:'lighten'}:{display:'none'};
+    v.hasJoy=st.mode==='play'&&!!this.joy;if(v.hasJoy){const j=this.joy;v.joyBase={position:'absolute',left:j.ox-56,top:j.oy-56,width:112,height:112,borderRadius:56,border:'2px solid rgba(232,228,220,.25)',background:'rgba(11,14,18,.25)',pointerEvents:'none'};v.joyKnob={position:'absolute',left:j.ox+j.dx-26,top:j.oy+j.dy-26,width:52,height:52,borderRadius:26,background:'rgba(232,228,220,.7)',pointerEvents:'none'};}
+    v.vpDown=this.vpDown;v.vpWheel=this.vpWheel;
+    v.showEditChrome=editing&&!st.picking&&!['behaviour','slicer'].includes(st.sheet);v.projectTitle=st.project;
+    v.goDash=()=>{this.leave();this.setState({screen:'dashboard',sel:[],sheet:null,tool:null});};v.openScenes=()=>this.setState({sheet:'scenes',sel:[],moreOpen:false});
+    const ub=(on)=>({width:44,height:52,border:0,background:'none',cursor:on?'pointer':'default',color:on?'#E8E4DC':'#3A424C'});
+    v.undoAct=()=>this.undo();v.redoAct=()=>this.redo();v.undoStyle=ub(this.undoS.length>0);v.redoStyle=ub(this.redoS.length>0);v.toggleMore=()=>this.setState({moreOpen:!st.moreOpen});v.moreOpen=st.moreOpen;
+    const mi=(icon,label,on,fn)=>({icon,label,state:on===null?'':(on?'On':'Off'),stateStyle:{fontSize:12,fontWeight:600,color:on?'#FFBE55':'#68717A'},click:()=>{fn();}});
+    v.moreItems=[mi('grid_4x4','Snap to grid',st.snap,()=>this.setState({snap:!st.snap})),mi('lightbulb','Lighting preview',st.lightPreview,()=>this.setState({lightPreview:!st.lightPreview})),mi('grid_on','Show tile grid',st.grid,()=>this.setState({grid:!st.grid})),mi('center_focus_strong','Frame everything',null,()=>this.setState({zoom:Math.min(1,st.vw/WW),cam:{x:0,y:0},moreOpen:false})),...(narrow?[mi('route','Journeys',null,()=>this.setState({journeysOpen:true,moreOpen:false}))]:[])];
+    v.hasCoach=!!st.coach&&st.screen==='editor'&&!['behaviour','slicer','review'].includes(st.sheet)&&!st.picking&&!st.moreOpen&&st.mode!=='frozen';v.coach=st.coach;v.closeCoach=()=>this.setState({coach:null});
+    v.isPicking=!!st.picking;v.pickText=st.picking?(st.picking.mode==='lampFor'?'Tap the lamp that opens this bridge':'Tap what '+((this.byId(st.picking.ent)||{}).name||'it')+' should open'):'';v.cancelPick=()=>this.setState({picking:null,sheet:'behaviour'});
+    v.showSelChip=editing&&!st.tool&&!st.sheet&&!st.picking&&st.sel.length>0;
+    if(selE){v.selIcon=st.sel.length>1?'select_all':PF[selE.prefab].icon;v.selName=st.sel.length>1?st.sel.length+' selected':selE.name;v.selSub=st.sel.length>1?(st.multi?'tap to add more':''):'Properties';}
+    v.openInspector=this.openInspector;v.showLens=editing&&!st.tool&&!['inspector','behaviour','slicer','review'].includes(st.sheet)&&!st.picking;
+    const li=(icon,label,click,on,danger)=>({icon,label,click,style:{width:54,height:58,borderRadius:16,border:0,cursor:'pointer',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:3,background:on?'#2E2211':'transparent',color:danger?'#FF8A94':(on?'#FFBE55':'#E8E4DC')}});
+    v.lensItems=st.sel.length?[li('tune','Properties',this.openInspector),li('conversion_path','Behaviour',()=>{this.setState({sheet:'behaviour',behTab:'blocks'});}),li('content_copy','Duplicate',()=>this.duplicate()),st.sel.length>1?li('folder_special','Group',()=>this.group()):li('library_add','Select more',()=>this.setState({multi:!st.multi}),st.multi),li('delete','Delete',()=>this.del(),false,true)]
+      :[li('add_circle','Add',()=>this.setState({sheet:st.sheet==='add'?null:'add',placeAt:null}),st.sheet==='add'),li('brush','Paint',()=>this.setState({tool:'paint',sheet:null,sel:[]})),li('photo_library','Assets',()=>this.setState({sheet:st.sheet==='assets'?null:'assets'}),st.sheet==='assets'),li('layers','Layers',()=>this.setState({sheet:st.sheet==='layers'?null:'layers'}),st.sheet==='layers'),li('view_quilt','Scenes',()=>this.setState({sheet:st.sheet==='scenes'?null:'scenes'}),st.sheet==='scenes')];
+    v.play=this.play;
+    v.showPaintBar=editing&&st.tool==='paint';
+    v.sizeOpts=[[1,'S'],[2,'M'],[3,'L']].map(o=>({label:o[1],pick:()=>this.setState({brushSize:o[0]}),style:{width:40,height:36,borderRadius:10,border:0,cursor:'pointer',fontSize:13,fontWeight:600,background:st.brushSize===o[0]?'#2E2211':'transparent',color:st.brushSize===o[0]?'#FFBE55':'#98A0A8'}}));
+    v.togglePan=()=>this.setState({panLock:!st.panLock});v.panStyle={height:36,padding:'0 10px',borderRadius:10,border:0,cursor:'pointer',display:'flex',alignItems:'center',gap:6,fontSize:13,fontWeight:500,background:st.panLock?'#2E2211':'transparent',color:st.panLock?'#FFBE55':'#98A0A8'};
+    const tile=(i)=>({width:30,height:30,borderRadius:8,backgroundImage:'url('+TX+'ground.png)',backgroundSize:'120px 120px',backgroundPosition:-(i%4)*30+'px '+-Math.floor(i/4)*30+'px',imageRendering:'pixelated'});
+    v.brushes=[['path','Path',tile(15)],['grass','Grass',tile(0)],['land','Land',{...tile(0),boxShadow:'inset 0 -6px 0 #2a2016'}],['erase','Erase',{width:30,height:30,borderRadius:8,background:'#06070A',border:'1px dashed #3A424C'}]].map(b=>({label:b[1],swatch:b[2],pick:()=>this.setState({brush:b[0]}),style:{width:60,height:58,borderRadius:16,border:0,cursor:'pointer',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:4,background:st.brush===b[0]?'#2E2211':'transparent',color:st.brush===b[0]?'#FFBE55':'#E8E4DC',outline:st.brush===b[0]?'1px solid #8A6220':'none'}}));
+    v.donePaint=()=>{this.setState({tool:null,brushAt:null});};
+    v.showPlayChrome=st.mode==='play';v.stop=this.stop;v.pauseToggle=this.pauseToggle;v.pauseIcon='pause';
+    v.playLabel=sim?(Math.floor(sim.t/60)+':'+String(Math.floor(sim.t%60)).padStart(2,'0')):'';v.hasRunEdits=st.runEdits.length>0;v.runEditText=st.runEdits.length+' live edit'+(st.runEdits.length===1?'':'s');v.showPlayHint=st.mode==='play'&&sim&&sim.t<4&&!this.joy;
+    v.isFrozen=st.mode==='frozen'&&st.sheet!=='inspector';
+    if(sim){const n=sim.hist.length,secs=n?sim.hist[n-1].t-sim.hist[0].t:0,f=st.scrub;v.scrubLabel=(sim.t).toFixed(1)+' s';v.recordedLabel=secs.toFixed(0)+' s';v.scrubFill={position:'absolute',left:0,top:20,height:4,borderRadius:2,background:'#E9A33A',width:f*100+'%'};v.scrubKnob={position:'absolute',top:8,left:'calc('+f*100+'% - 14px)',width:28,height:28,borderRadius:14,background:'#E8E4DC',boxShadow:'0 2px 6px rgba(0,0,0,.5)',pointerEvents:'none'};v.scrubMarks=sim.events.map(ev=>({style:{position:'absolute',top:12,left:'calc('+(n>1?ev.i/(n-1)*100:0)+'% - 2px)',width:4,height:20,borderRadius:2,background:ev.type==='caught'?'#D85A3A':'#FFBE55',pointerEvents:'none'}}));v.resumeLabel=f<.999?'Play on from here':'Resume';}
+    v.scrubDown=this.scrubDown;v.stepOnce=this.stepOnce;v.stepBack=this.stepBack;v.resume=this.resume;
+    v.isInspector=st.sheet==='inspector'&&!!selE;v.tuneMode=st.mode!=='edit';
+    v.inspSheetStyle={position:'absolute',left:0,right:0,bottom:0,height:st.detent==='full'?'calc(100% - env(safe-area-inset-top,0px) - 56px)':'min(58%,520px)',background:'#0F1317',borderRadius:'22px 22px 0 0',borderTop:'1px solid #252B32',boxShadow:'0 -12px 40px rgba(0,0,0,.5)',display:'flex',flexDirection:'column',zIndex:30,transition:'height .2s ease'};
+    v.toggleDetent=()=>this.setState({detent:st.detent==='full'?'half':'full'});
+    v.insp=selE?this.inspector(selE,st.mode!=='edit'):{sections:[]};v.closeSheet=()=>this.setState({sheet:null,placeAt:null,addCompOpen:false});
+    v.openAssets=()=>this.setState({sheet:'assets'});v.openBehaviour=()=>this.setState({sheet:'behaviour',behTab:'blocks'});v.toggleAddComp=()=>this.setState({addCompOpen:!st.addCompOpen});v.addCompOpen=st.addCompOpen;
+    const has=n=>selE&&(selE.extra||[]).includes(n);
+    v.compGroups=[['Rendering',[['Sprite animation','animation'],['Effect','auto_awesome'],['Light 2D','sunny']]],['Physics',[['Rigid body 2D','bolt'],['Collider 2D','crop_square'],['Joint','link']]],['Behaviour',[['Script','code'],['Sequence','view_timeline']]],['Grid',[['Grid occupant','grid_4x4']]],['UI',[['Text','title','UI components go on objects in the Screen layer']]]].map(g=>({name:g[0],items:g[1].map(c=>({label:c[0],icon:c[1],style:{height:36,padding:'0 10px',borderRadius:10,border:'1px solid #252B32',background:has(c[0])?'#2E2211':'#161B21',cursor:'pointer',display:'flex',alignItems:'center',gap:6,fontSize:12.5,opacity:c[2]?.45:1,color:has(c[0])?'#FFBE55':'#E8E4DC'},click:()=>{if(c[2]){this.toast(c[2]);return;}if(!selE||has(c[0]))return;this.pushUndo();this.updEnt(selE.id,n=>{n.extra=[...(n.extra||[]),c[0]];return n;});this.toast('Added '+c[0]);}}))}));
+    v.isBehaviour=st.sheet==='behaviour'&&!!selE;v.beh=selE?this.beh(selE):{templates:[],rules:[],incoming:[],code:[]};
+    v.behTabs=[['blocks','Blocks'],['code','Code']].map(o=>({label:o[1],style:seg(st.behTab===o[0]),pick:()=>this.setState({behTab:o[0]})}));v.behBlocks=st.behTab==='blocks';v.behCode=st.behTab==='code';
+    v.addRule=()=>{if(!selE)return;this.pushUndo();const rid='r'+(UID++);this.updEnt(selE.id,n=>{n.rules=[...n.rules,{id:rid,when:'touch',actions:[]}];return n;});this.setState({addOpen:rid});};
+    v.editAsCode=()=>this.toast('Opens the script in the code editor. The blocks then show it read-only.');
+    v.isAdd=st.sheet==='add';v.addSub=st.placeAt?'Tap to place where you held, or drag it anywhere':'Tap to place in view, or drag up into the world';
+    const prefabKeys=['lamp','bridge','house','cottage','oak','oak2','bush','flowers','dead','rock','well',...(st.imported?['gloom']:[]),'wick'];
+    v.prefabTiles=prefabKeys.map(k=>({label:PF[k].name,thumb:this.thumbFor(k,60),down:this.tileDown('prefab',k),style:{borderRadius:14,background:st.highlight===k?'#2E2211':'#12161B',border:st.highlight===k?'1px solid #E9A33A':'1px solid #1B2026',padding:'8px 4px 8px',display:'flex',flexDirection:'column',alignItems:'center',gap:4,cursor:'grab',touchAction:'none',minWidth:0}}));
+    v.basics=[['light','sunny','Light 2D','A glow, no sprite'],['empty','deployed_code','Empty','A parent or a marker'],[null,'camera_alt','Camera','The scene already has a world camera'],[null,'title','Text','Goes on the Screen layer']].map(b=>({icon:b[1],label:b[2],note:b[3],style:{minHeight:56,padding:'8px 12px',borderRadius:14,border:'1px solid #1B2026',background:'#12161B',cursor:'pointer',display:'flex',alignItems:'center',gap:10,opacity:b[0]?1:.45,textAlign:'left'},click:()=>{if(!b[0]){this.toast(b[3]);return;}const c=st.placeAt||this.toWorld({x:st.vw/2,y:st.vh*.42});this.placePrefab(b[0],c.x,c.y);}}));
+    v.isAssets=st.sheet==='assets';v.openImport=()=>this.setState({sheet:'import'});
+    v.assetTabs=[['prefabs','Prefabs'],['sprites','Sprites'],['tiles','Tiles'],['scripts','Scripts'],['audio','Audio']].map(t=>({label:t[1],pick:()=>this.setState({assetTab:t[0]}),style:{height:36,padding:'0 14px',borderRadius:18,border:st.assetTab===t[0]?'1px solid #8A6220':'1px solid #252B32',background:st.assetTab===t[0]?'#2E2211':'transparent',color:st.assetTab===t[0]?'#FFBE55':'#98A0A8',fontSize:13,fontWeight:600,cursor:'pointer',flexShrink:0}}));
+    v.assetBanner=st.highlight==='gloom'&&st.assetTab==='prefabs';
+    const card=(hl)=>({borderRadius:14,background:hl?'#2E2211':'#12161B',border:hl?'1px solid #E9A33A':'1px solid #1B2026',padding:'10px 8px',display:'flex',flexDirection:'column',alignItems:'center',gap:3,cursor:'grab',touchAction:'none',minWidth:0});
+    const sheetThumb=(k)=>{const s=SHEETS[k];const kk=Math.min(84/s.w,72/s.h);return {width:s.w*kk,height:s.h*kk,backgroundImage:'url('+s.src+')',backgroundSize:'100% 100%',imageRendering:'pixelated'};};
+    let items=[];const tab=st.assetTab;
+    if(tab==='prefabs')items=prefabKeys.map(k=>({label:PF[k].name,sub:'prefabs/'+snake(PF[k].name)+'.prefab',thumb:this.thumbFor(k,72),down:this.tileDown('prefab',k),style:card(st.highlight===k)}));
+    if(tab==='sprites')items=[['wick','68 frames, 4 ways'],['objects','11 sprites'],['village','41 sprites'],['dock','1 sprite'],...(st.imported?[['gloom','clip “breathe”']]:[])].map(s=>({label:SHEETS[s[0]].file,sub:s[1],thumb:sheetThumb(s[0]),down:this.tileDown('sheet',s[0]),style:card(false)}));
+    if(tab==='tiles')items=[['ground.png','Wang · 16 tiles'],['road.png','Wang · 16 tiles'],['village-cobble.png','Wang · 16 tiles']].map(t=>({label:t[0],sub:t[1],thumb:{width:64,height:64,backgroundImage:'url('+TX+t[0]+')',backgroundSize:'64px 64px',imageRendering:'pixelated'},down:this.tileDown('tiles',t[0]),style:card(false)}));
+    if(tab==='scripts'){items=[['lantern.decay','Lamps in Lamplighter'],['door.decay','Doors that wait for a lamp'],['flame.decay','The lantern’s flicker'],['gloom.decay','The gloom’s hunt'],['wick.decay','Wick’s movement']].map(s=>({label:s[0],sub:s[1],icon:'code',click:()=>this.toast(s[0]+' opens in the code editor')}));st.ents.filter(e=>(e.rules||[]).length).forEach(e=>items.unshift({label:snake(e.name)+'.decay',sub:'Made from '+e.name+'’s behaviour',icon:'conversion_path',click:()=>this.setState({sel:[e.id],sheet:'behaviour',behTab:'code'})}));}
+    v.assetItems=items;v.assetGridMode=['prefabs','sprites','tiles'].includes(tab);v.assetListMode=tab==='scripts';v.assetEmpty=tab==='audio';
+    v.isImport=st.sheet==='import';
+    v.importSources=[['folder','Files'],['photo_library','Photos'],['photo_camera','Camera'],['link','Link']].map((s,i)=>({icon:s[0],label:s[1],style:{height:76,borderRadius:14,border:i?'1px solid #1B2026':'1px solid #8A6220',background:i?'#12161B':'#2E2211',color:i?'#98A0A8':'#FFBE55',cursor:'pointer',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:6},click:()=>{if(i)this.toast('Copied into assets/textures/, like a desktop import');}}));
+    const fileRow=(dis)=>({display:'flex',alignItems:'center',gap:12,minHeight:68,border:0,borderBottom:'1px solid #1B2026',background:'none',cursor:'pointer',padding:'0 4px',opacity:dis?.45:1});
+    v.importFiles=[{name:'gloom.png',sub:'128 × 32 · 3 KB',thumb:{width:48,height:12,backgroundImage:'url('+TX+'gloom.png)',backgroundSize:'48px 12px',imageRendering:'pixelated'},click:()=>{this.setState({sheet:'slicer'});this.mark('d1');}},{name:'villagers.png',sub:'192 × 176 · 9 KB',thumb:{width:44,height:40,backgroundImage:'url('+TX+'villagers.png)',backgroundSize:'44px 40px',imageRendering:'pixelated'},click:()=>this.toast('This prototype walks through gloom.png')},{name:'wick-run.gif',sub:'GIF isn’t a supported texture yet',dis:true,thumb:{width:30,height:30,borderRadius:6,background:'#161B21'},click:()=>this.toast('GIF import would need new pipeline work')}].map(f=>({...f,style:fileRow(f.dis)}));
+    v.isSlicer=st.sheet==='slicer';const cw=320/sl.cols,ch=80/sl.rows;
+    v.sliceCells=Array.from({length:sl.cols*sl.rows},(_,i)=>{const k=sl.frames.indexOf(i);return {badge:k>=0?String(k+1):'',toggle:()=>{const f=k>=0?sl.frames.filter(x=>x!==i):[...sl.frames,i].sort((a,b)=>a-b);this.setState({slice:{...sl,frames:f}});this.mark('d2');},style:{position:'absolute',left:(i%sl.cols)*cw,top:Math.floor(i/sl.cols)*ch,width:cw,height:ch,border:'1px solid '+(k>=0?'#E9A33A':'rgba(152,160,168,.35)'),background:k>=0?'rgba(233,163,58,.08)':'rgba(6,7,10,.55)',cursor:'pointer',padding:0},badgeStyle:{position:'absolute',left:3,top:3,minWidth:18,height:18,borderRadius:9,background:k>=0?'#E9A33A':'transparent',color:'#1A1206',fontSize:11,fontWeight:700,display:'flex',alignItems:'center',justifyContent:'center'}};});
+    v.sliceDetect=sl.cols===4&&sl.rows===1?'Found 4 frames of 32 × 32 from the transparent gaps':sl.cols+' × '+sl.rows+' grid · '+(128/sl.cols).toFixed(0)+' × '+(32/sl.rows).toFixed(0)+' px cells';
+    const ss=(label,key,min,max)=>({label,val:sl[key],minus:()=>{const n=Math.max(min,sl[key]-1);this.setState({slice:{...sl,[key]:n,frames:Array.from({length:(key==='cols'?n:sl.cols)*(key==='rows'?n:sl.rows)},(_,i)=>i)}});},plus:()=>{const n=Math.min(max,sl[key]+1);this.setState({slice:{...sl,[key]:n,frames:Array.from({length:(key==='cols'?n:sl.cols)*(key==='rows'?n:sl.rows)},(_,i)=>i)}});}});
+    v.sliceSteppers=[ss('Columns','cols',1,8),ss('Rows','rows',1,4)];
+    {const fw=128/sl.cols,fh=32/sl.rows,k=Math.min(80/fw,80/fh);const f=fr[Math.floor(now/1000*sl.fps)%fr.length];v.slicePreview={width:fw*k,height:fh*k,backgroundImage:'url('+TX+'gloom.png)',backgroundSize:128*k+'px '+32*k+'px',backgroundPosition:-(f%sl.cols)*fw*k+'px '+-Math.floor(f/sl.cols)*fh*k+'px',imageRendering:'pixelated'};}
+    v.sliceClipText=sl.frames.length+' frame'+(sl.frames.length===1?'':'s')+' · '+(sl.loop?'loops':'plays once');v.sliceFpsText=sl.fps+' frames/s';
+    {const pct=(sl.fps-1)/15*100;v.fpsFill={position:'absolute',left:0,top:16,height:4,borderRadius:2,background:'#E9A33A',width:pct+'%'};v.fpsKnob={position:'absolute',top:6,left:'calc('+pct+'% - 12px)',width:24,height:24,borderRadius:12,background:'#E8E4DC'};}
+    v.fpsDown=(ev)=>this.trackDrag(ev,f=>{this.setState(s=>({slice:{...s.slice,fps:Math.round(1+f*15)}}));this.mark('d2');});
+    v.toggleLoop=()=>this.setState({slice:{...sl,loop:!sl.loop}});v.loopTrack=track(sl.loop);v.loopKnob=knob(sl.loop);
+    v.finishSlice=()=>{if(!sl.frames.length){this.toast('Keep at least one frame');return;}this.setState({imported:true,highlight:'gloom',sheet:'assets',assetTab:'prefabs'});this.toast('Gloom prefab made from gloom.png');this.mark('d2');if(st.journey==='D')this.setState({coach:null});};
+    v.isScenes=st.sheet==='scenes';
+    v.sceneCards=[...st.scenes.map((n,i)=>({name:n,main:i===1,thumbText:i===1?'Lantern Crossing':'',thumb:i===0?{height:96,backgroundImage:'url('+TX+'ground.png)',backgroundSize:'64px 64px',imageRendering:'pixelated'}:{height:96,background:'#0B0E12',display:'flex',alignItems:'center',justifyContent:'center'},click:()=>{if(i===0)this.setState({sheet:null});else this.toast(n+(i===1?' is the title screen. UI editing is a separate mode, not in this prototype.':' is empty'));},style:{borderRadius:14,border:i===0?'1px solid #E9A33A':'1px solid #1B2026',background:'#12161B',padding:0,overflow:'hidden',cursor:'pointer',display:'flex',flexDirection:'column'}})),{name:'New scene',main:false,thumbText:'+',thumb:{height:96,display:'flex',alignItems:'center',justifyContent:'center'},click:()=>{const n='scene-'+(st.scenes.length+1)+'.scene';this.setState({scenes:[...st.scenes,n]});this.toast('Made '+n+' and added it to sindri.toml');},style:{borderRadius:14,border:'1px dashed #3A424C',background:'transparent',padding:0,overflow:'hidden',cursor:'pointer',display:'flex',flexDirection:'column'}}].map(c=>({...c,mainStyle:{fontFamily:IC,fontSize:16,color:'#E9A33A',display:c.main?'inline':'none'},thumbTextStyle:{fontSize:c.thumbText==='+'?28:13,fontWeight:600,color:c.thumbText==='+'?'#68717A':'#E8E4DC'}}));
+    v.isLayers=st.sheet==='layers';v.layerTabs=[['layers','Layers'],['objects','Objects']].map(o=>({label:o[1],style:seg(st.layerTab===o[0]),pick:()=>this.setState({layerTab:o[0]})}));v.layersMode=st.layerTab==='layers';v.objectsMode=st.layerTab==='objects';
+    const eye=(k)=>({icon:'',eyeIcon:st.hide[k]?'visibility_off':'visibility',eyeStyle:{width:48,height:48,border:0,background:'none',cursor:'pointer',color:st.hide[k]?'#3A424C':'#98A0A8'},toggle:()=>this.setState({hide:{...st.hide,[k]:!st.hide[k]}})});
+    v.layerRows=[{...eye('ground'),icon:'grid_view',name:'Ground',sub:'Tilemap · ground.png · 16 × 36'},{...eye('objects'),icon:'deployed_code',name:'Objects',sub:st.ents.length+' objects, sorted by height'},{...eye('lights'),icon:'sunny',name:'Lights',sub:st.ents.filter(e=>['lamp','light','wick'].includes(PF[e.prefab].kind)).length+' lights · shown in play'},{icon:'web_asset',name:'Screen UI',sub:'The HUD · edited in UI mode',eyeIcon:'lock',eyeStyle:{width:48,height:48,border:0,background:'none',color:'#3A424C'},toggle:()=>this.toast('UI mode is a later step')}];
+    const fam=e=>{if(e.group)return e.group;const k=e.prefab;if(['house','cottage','well'].includes(k))return 'Village';if(['oak','oak2','bush','flowers','dead','rock'].includes(k))return 'Scenery';return null;};
+    const rows=[];const row=(depth,icon,name,sub,click,sel,chev)=>rows.push({icon,name,sub,click,chev:chev||'',chevStyle:{fontFamily:IC,fontSize:18,color:'#68717A',width:18},indentStyle:{width:depth*18,flexShrink:0},style:{width:'100%',display:'flex',alignItems:'center',gap:8,minHeight:52,border:0,borderRadius:12,background:sel?'#2E2211':'none',color:sel?'#FFBE55':'#E8E4DC',cursor:'pointer',padding:'0 6px'}});
+    const pickRow=e=>()=>{this.setState({sel:[e.id],sheet:null});this.frame(e,false);this.onSelect(e.id);};
+    row(0,'account_tree','World','',()=>{},false,'expand_more');
+    st.ents.filter(e=>!fam(e)).forEach(e=>{row(1,PF[e.prefab].icon,e.name,e.active?'':'off',pickRow(e),st.sel.includes(e.id));if(e.prefab==='wick')row(2,'sunny','Lantern light','child',pickRow(e),false);});
+    [...new Set(st.ents.map(fam).filter(Boolean))].forEach(g=>{const m=st.ents.filter(e=>fam(e)===g);const open=st.collapsed&&st.collapsed[g]===false;row(1,'folder',g,m.length+'',()=>this.setState({collapsed:{...st.collapsed,[g]:!open?false:true}}),false,open?'expand_more':'chevron_right');if(open)m.forEach(e=>row(2,PF[e.prefab].icon,e.name,'',pickRow(e),st.sel.includes(e.id)));});
+    v.treeRows=rows;
+    v.isReview=st.sheet==='review';v.reviewRows=st.runEdits.map((r,i)=>({name:r.name,label:r.label,from:typeof r.from==='number'?r.from.toFixed(1):String(r.from),to:typeof r.to==='number'?r.to.toFixed(1):String(r.to),trackStyle:track(r.keep),knobStyle:knob(r.keep),toggle:()=>this.setState({runEdits:st.runEdits.map((x,j)=>j===i?{...x,keep:!x.keep}:x)})}));
+    const kc=st.runEdits.filter(r=>r.keep).length;v.keepText=kc?'Keep '+kc:'Keep none';v.keepEdits=this.keepEdits;v.discardEdits=()=>this.setState({runEdits:[],sheet:null});
+    v.hasToast=!!st.toast;v.toastText=st.toast?st.toast.text:'';v.hasToastUndo=!!(st.toast&&st.toast.undo);v.toastUndo=()=>{this.undo();};
+    v.toastWrap={position:'absolute',left:12,right:12,bottom:st.sheet?'auto':'calc(env(safe-area-inset-bottom,0px) + 150px)',top:st.sheet?'calc(env(safe-area-inset-top,0px) + 12px)':'auto',display:'flex',justifyContent:'center',zIndex:60,pointerEvents:'none'};
+    v.ghostShow=!!st.ghost;if(st.ghost){const p=PF[st.ghost.key],s=SHEETS[p.sheet];if(s){const w=s.cw*p.scale*st.zoom,h=s.ch*p.scale*st.zoom;v.ghostStyle={position:'absolute',left:st.ghost.x-w/2,top:st.ghost.y+h*.35-h,width:w,height:h,backgroundImage:'url('+s.src+')',backgroundSize:s.w*p.scale*st.zoom+'px '+s.h*p.scale*st.zoom+'px',backgroundPosition:-p.cell*s.cw*p.scale*st.zoom+'px 0',imageRendering:'pixelated',opacity:.85,pointerEvents:'none',zIndex:70,filter:'drop-shadow(0 8px 10px rgba(0,0,0,.5))'};}else v.ghostStyle={display:'none'};}
+    return v;}
+
+  duplicate(){const st=this.state;this.pushUndo();const copies=st.ents.filter(e=>st.sel.includes(e.id)).map(e=>({...clone(e),id:e.prefab+'-'+(UID++),name:e.name+' copy',x:e.x+24,y:e.y+24,rules:clone(e.rules).map(r=>({...r,id:'r'+(UID++)}))}));this.setState({ents:[...st.ents,...copies],sel:copies.map(c=>c.id)});this.toast('Duplicated '+copies.length,true);}
+  del(){const st=this.state;if(st.sel.includes('wick')&&st.sel.length===1){}this.pushUndo();const n=st.sel.length;this.setState({ents:st.ents.filter(e=>!st.sel.includes(e.id)),sel:[],multi:false,sheet:null});this.toast('Deleted '+n,true);}
+  group(){const st=this.state;this.pushUndo();const g='Group '+(UID++%100);this.setState({ents:st.ents.map(e=>st.sel.includes(e.id)?{...e,group:g}:e),multi:false,collapsed:{...st.collapsed,[g]:false}});this.toast(st.sel.length+' objects grouped as '+g+'. See Layers → Objects.',true);}
+}
+
+</script>
+</body>
+</html>

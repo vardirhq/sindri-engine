@@ -24,7 +24,7 @@ Preserve what makes it compelling:
 - Portrait and landscape work on real devices; tablets and external keyboard, mouse, or stylus are useful additions, not prerequisites.
 - Accessibility, readable text, sufficient contrast, usable touch targets, system insets, keyboard handling, and screen-reader semantics are part of the design.
 
-Use the prototype as an acceptance reference: retain its assets and interaction intent, document its states and gestures, and compare implementation captures with it on actual phones. Exercise dense scenes and long names, not just curated sample content. The prototype itself is an external reference supplied during exploration, not yet a tracked repository artifact; preserve or recreate it in a suitable reviewable form before relying on it as an implementation test.
+Use the prototype as an acceptance reference: retain its assets and interaction intent, document its states and gestures, and compare implementation captures with it on actual phones. Exercise dense scenes and long names, not just curated sample content. The prototype is tracked in [`prototype/`](prototype/index.html). Open `mobile/prototype/index.html` in a browser at a phone-sized viewport; it loads Lamplighter's textures directly from `games/lamplighter/assets/textures/` rather than keeping copies. It needs network access for its React, Babel, and Google Fonts dependencies. `prototype/support.js` is the generated runtime from the design tool that exported the prototype: do not edit it by hand. Treat the prototype as a design reference. It is not part of the engine, editor, or build, and passing through it does not test any implementation.
 
 ## Full creation journey
 
