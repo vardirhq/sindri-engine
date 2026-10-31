@@ -15,16 +15,13 @@
 mod browser;
 mod budget;
 mod builtins;
-#[cfg(not(target_arch = "wasm32"))]
-mod directory;
 mod error;
 mod models;
 mod player;
-mod project;
 
 pub use builtins::bind_builtin_textures;
 pub use error::PlayerError;
-pub use project::ProjectAssets;
+pub use sindri_runtime::ProjectAssets;
 
 use sindri_desktop::WindowConfig;
 

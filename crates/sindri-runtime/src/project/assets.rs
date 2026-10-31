@@ -1,5 +1,10 @@
-//! Everything a project is, loaded: what both of the player's sources fill
-//! and what it installs.
+//! Everything a project is, loaded: what a host's source fills and what the
+//! host installs.
+//!
+//! The browser player fills it from what it fetched. Natively it is read from
+//! a project's directory, by the player and by an authoring host that has to
+//! draw a project's scenes, so both find and decode an asset by one set of
+//! rules.
 
 use std::collections::BTreeMap;
 
@@ -30,4 +35,15 @@ pub struct ProjectAssets {
     /// Checked when the host binds it, not here.
     pub shaders: Vec<(String, String)>,
     pub asset_count: usize,
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+impl ProjectAssets {
+    /// Reads and decodes the project in the directory `project`.
+    ///
+    /// # Errors
+    /// A manifest, scene, script or asset that will not read or decode, named.
+    pub fn read(project: &std::path::Path) -> Result<Self, String> {
+        super::directory::read(project)
+    }
 }
