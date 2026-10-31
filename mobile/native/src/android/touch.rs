@@ -66,6 +66,14 @@ impl Host {
         editing.redo(&mut opened.world)
     }
 
+    /// Writes the scene back to its file, through the same code as desktop.
+    pub(super) fn save(&mut self) -> Result<(), String> {
+        let (opened, editing) = self.editing()?;
+        opened.save()?;
+        editing.saved();
+        Ok(())
+    }
+
     /// Sets a field to the value the inspector sends, such as `1.25` or `true`.
     pub(super) fn set_field(
         &mut self,
@@ -87,14 +95,15 @@ impl Host {
     /// line, the inspector (or `null`), and where to draw the selection marker.
     pub(super) fn state(&self) -> String {
         let size = self.size();
-        let (inspector, marker, undo, redo) = match (&self.opened, &self.editing) {
+        let (inspector, marker, undo, redo, unsaved) = match (&self.opened, &self.editing) {
             (Some(opened), Some(editing)) => (
                 editing.inspector(&opened.world, &opened.extractor),
                 editing.selection_pixel(&opened.world, size),
                 editing.history.undo_label(),
                 editing.history.redo_label(),
+                editing.unsaved(),
             ),
-            _ => (Value::Null, None, None, None),
+            _ => (Value::Null, None, None, None, false),
         };
         json!({
             "status": self.status(),
@@ -102,6 +111,7 @@ impl Host {
             "marker": marker,
             "undo": undo,
             "redo": redo,
+            "unsaved": unsaved,
         })
         .to_string()
     }
@@ -136,6 +146,7 @@ impl Host {
                 self.editing()?.1.selected = None;
                 Ok(())
             }
+            "save" => self.save(),
             "undo" => self.undo(),
             "redo" => self.redo(),
             "setField" => {

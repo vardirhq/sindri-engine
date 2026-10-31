@@ -30,6 +30,8 @@ data class EditorState(
     val marker: Pair<Float, Float>? = null,
     val undo: String? = null,
     val redo: String? = null,
+    /** Whether the scene holds edits its file does not. */
+    val unsaved: Boolean = false,
 ) {
     companion object {
         fun read(json: String): EditorState {
@@ -42,6 +44,7 @@ data class EditorState(
                 },
                 undo = root.optStringOrNull("undo"),
                 redo = root.optStringOrNull("redo"),
+                unsaved = root.optBoolean("unsaved"),
             )
         }
 

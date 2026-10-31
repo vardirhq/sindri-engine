@@ -33,6 +33,10 @@ pub struct Editing {
     pub selected: Option<EntityId>,
     pub canvas: Canvas,
     touch: Option<Touch>,
+    /// The history revision the file was last agreed with: opened at, or saved
+    /// at. Compared rather than flagged, as desktop does, so undoing back to
+    /// the saved state reads as saved again.
+    saved_revision: u64,
 }
 
 impl Editing {
@@ -46,7 +50,18 @@ impl Editing {
             selected: None,
             canvas: Canvas::framing(world, extractor)?,
             touch: None,
+            saved_revision: 0,
         })
+    }
+
+    /// Whether the world holds edits its file does not.
+    pub fn unsaved(&self) -> bool {
+        self.history.revision() != self.saved_revision
+    }
+
+    /// The world was just written to its file.
+    pub fn saved(&mut self) {
+        self.saved_revision = self.history.revision();
     }
 
     /// The entity drawn topmost under `pixel`, through the frame's own camera.

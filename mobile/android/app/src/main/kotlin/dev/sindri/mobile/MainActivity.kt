@@ -117,8 +117,10 @@ private fun SceneScreen() {
             TopBar(
                 undo = state.undo,
                 redo = state.redo,
+                unsaved = state.unsaved,
                 onUndo = { run(NativeBridge.command("undo")) },
                 onRedo = { run(NativeBridge.command("redo")) },
+                onSave = { run(NativeBridge.command("save")) },
             )
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 error?.let { ErrorCard(it) }
@@ -149,7 +151,14 @@ private fun SelectionMarker(x: Float, y: Float) {
 }
 
 @Composable
-private fun TopBar(undo: String?, redo: String?, onUndo: () -> Unit, onRedo: () -> Unit) {
+private fun TopBar(
+    undo: String?,
+    redo: String?,
+    unsaved: Boolean,
+    onUndo: () -> Unit,
+    onRedo: () -> Unit,
+    onSave: () -> Unit,
+) {
     Row(
         Modifier
             .fillMaxWidth()
@@ -162,10 +171,15 @@ private fun TopBar(undo: String?, redo: String?, onUndo: () -> Unit, onRedo: () 
         Text("◆", color = Forge.Metal, fontSize = 14.sp)
         Column(Modifier.weight(1f)) {
             Text(PROJECT_TITLE, color = Forge.Text, fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
-            Text(SCENE, color = Forge.TextMuted, fontSize = 12.sp)
+            Text(
+                if (unsaved) "$SCENE · unsaved" else SCENE,
+                color = if (unsaved) Forge.MetalBright else Forge.TextMuted,
+                fontSize = 12.sp,
+            )
         }
         HistoryButton("↶", undo?.let { "Undo $it" } ?: "Nothing to undo", undo != null, onUndo)
         HistoryButton("↷", redo?.let { "Redo $it" } ?: "Nothing to redo", redo != null, onRedo)
+        HistoryButton("⤓", if (unsaved) "Save $SCENE" else "Saved", unsaved, onSave)
     }
 }
 
