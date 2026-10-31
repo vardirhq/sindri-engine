@@ -18,6 +18,7 @@ members = [
     "crates/sindri-scene",
     "crates/sindri-weave",
     "crates/sindri-voxel",
+    "mobile/native",
     "tools/decay-lsp",
     "tools/sindri-capabilities",
     "tools/sindri-chiptune",

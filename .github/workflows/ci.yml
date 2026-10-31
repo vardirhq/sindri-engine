@@ -727,6 +727,68 @@ jobs:
             echo "failure=$(cat failure.json)" >>"$GITHUB_OUTPUT"
           fi
 
+  # The Android app: the `sindri-mobile` crate linked for arm64 with the pinned
+  # NDK, and the Compose app around it. Nothing here runs on a phone; the APK
+  # is uploaded so one can be installed on the reference Pixel 8, and what
+  # that showed is recorded in `mobile/first-slice.md`.
+  android:
+    name: Android app
+    needs: [reuse, scope]
+    if: ${{ !cancelled() && needs.reuse.outputs.verified != 'true' && needs.scope.outputs.light != 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    outputs:
+      failure: ${{ steps.failure.outputs.failure }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@1.95.0
+        with:
+          targets: aarch64-linux-android
+          components: clippy
+      - uses: Swatinem/rust-cache@v2
+        with:
+          save-if: ${{ github.ref == 'refs/heads/main' }}
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "17"
+      # The runner image carries the Android SDK; the NDK is the version the
+      # app's build pins, so the library links the same way everywhere.
+      - name: Install the pinned NDK
+        run: |
+          ndk="$(sed -n 's/^val ndkVersionPinned = "\(.*\)"$/\1/p' mobile/android/app/build.gradle.kts)"
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses >/dev/null || true
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "ndk;$ndk" "platforms;android-36"
+      - name: Clippy for Android
+        id: android_clippy
+        run: cargo clippy --package sindri-mobile --target aarch64-linux-android -- -D warnings
+      - name: Build the app
+        id: android_build
+        working-directory: mobile/android
+        run: ./gradlew --no-daemon assembleRelease
+      - uses: actions/upload-artifact@v7
+        with:
+          name: sindri-mobile-apk
+          path: mobile/android/app/build/outputs/apk/release/app-release.apk
+          retention-days: 14
+
+      - name: Capture job failure
+        id: failure
+        if: ${{ failure() }}
+        shell: bash
+        run: |
+          failed_step="Android app"
+          [[ "${{ steps.android_clippy.outcome }}" == "failure" ]] && failed_step="Clippy for Android"
+          [[ "${{ steps.android_build.outcome }}" == "failure" ]] && failed_step="Build the app"
+          {
+            echo "Android app"
+            echo "failed: $failed_step"
+          } | cargo run --quiet --package sindri-diagnostics --bin sindri-diagnostics -- \
+            check-result >failure.json || true
+          if [[ -s failure.json ]]; then
+            echo "failure=$(cat failure.json)" >>"$GITHUB_OUTPUT"
+          fi
+
   # Compiling for wasm32 says nothing about whether the engine runs. The game
   # makes this gate stricter still: its static site includes the actual project
   # asset tree plus a manifest generated from those exact bytes, and the browser
@@ -1234,12 +1296,13 @@ jobs:
   # one, and the reuse job would not trust one from a fork anyway.
   record:
     name: Record the verified tree
-    needs: [reuse, scope, quick, decay_preflight, baker, clippy, test, wasm, browser, game_tests]
+    needs: [reuse, scope, quick, decay_preflight, baker, clippy, test, wasm, android, browser, game_tests]
     if: >-
       ${{ !cancelled() && needs.reuse.outputs.verified != 'true'
       && needs.quick.result == 'success' && needs.decay_preflight.result == 'success'
       && needs.baker.result == 'success' && needs.clippy.result == 'success'
       && needs.test.result == 'success' && needs.wasm.result == 'success'
+      && needs.android.result == 'success'
       && needs.browser.result == 'success' && needs.scope.outputs.light != 'true'
       && (github.event_name != 'pull_request'
           || github.event.pull_request.head.repo.full_name == github.repository) }}
@@ -1260,8 +1323,8 @@ jobs:
 
   diagnostics_summary:
     name: CI failure summary
-    if: ${{ always() && (needs.quick.result == 'failure' || needs.decay_preflight.result == 'failure' || needs.clippy.result == 'failure' || needs.test.result == 'failure' || needs.wasm.result == 'failure' || needs.browser.result == 'failure' || needs.game_tests.result == 'failure') }}
-    needs: [quick, decay_preflight, clippy, test, wasm, browser, game_tests]
+    if: ${{ always() && (needs.quick.result == 'failure' || needs.decay_preflight.result == 'failure' || needs.clippy.result == 'failure' || needs.test.result == 'failure' || needs.wasm.result == 'failure' || needs.android.result == 'failure' || needs.browser.result == 'failure' || needs.game_tests.result == 'failure') }}
+    needs: [quick, decay_preflight, clippy, test, wasm, android, browser, game_tests]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -1273,6 +1336,7 @@ jobs:
           CLIPPY_FAILURE: ${{ needs.clippy.outputs.failure }}
           TEST_FAILURE: ${{ needs.test.outputs.failure }}
           WASM_FAILURE: ${{ needs.wasm.outputs.failure }}
+          ANDROID_FAILURE: ${{ needs.android.outputs.failure }}
           BROWSER_FAILURE: ${{ needs.browser.outputs.failure }}
         shell: bash
         run: |
@@ -1282,6 +1346,7 @@ jobs:
           [[ -n "$CLIPPY_FAILURE" ]] && failures+=("$CLIPPY_FAILURE")
           [[ -n "$TEST_FAILURE" ]] && failures+=("$TEST_FAILURE")
           [[ -n "$WASM_FAILURE" ]] && failures+=("$WASM_FAILURE")
+          [[ -n "$ANDROID_FAILURE" ]] && failures+=("$ANDROID_FAILURE")
           [[ -n "$BROWSER_FAILURE" ]] && failures+=("$BROWSER_FAILURE")
           if [[ ${#failures[@]} -eq 0 ]]; then
             echo "A watched CI job failed before a structured fingerprint could be emitted." >>"$GITHUB_STEP_SUMMARY"

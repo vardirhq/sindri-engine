@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Forge background behind the first frame, so launch does not flash white. -->
+    <style name="Theme.Sindri" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/forge_background</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+    </style>
+    <color name="forge_background">#050608</color>
+</resources>
