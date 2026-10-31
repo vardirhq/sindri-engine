@@ -80,7 +80,7 @@ Game export also needs a separate feasibility investigation: toolchain size and 
 
 ## Proposed first technical slice
 
-Prove the design and architecture together on a real Android phone:
+Prove the design and architecture together on a real Android phone. Progress, evidence, and blocking decisions are tracked in [first-slice.md](first-slice.md).
 
 1. Open a real Sindri project and display a scene using the real engine renderer.
 2. Select and move an entity with touch; edit one schema-validated property in a prototype-style inspector.
