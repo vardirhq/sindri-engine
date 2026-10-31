@@ -697,7 +697,7 @@ jobs:
       # the wasm-bindgen the workspace resolves.
       - uses: taiki-e/install-action@v2
         with:
-          tool: wasm-bindgen-cli@0.2.128
+          tool: wasm-bindgen-cli@0.2.130
       - name: Check browser workspace
         id: wasm_check
         run: cargo check --workspace --all-features --keep-going --target wasm32-unknown-unknown
