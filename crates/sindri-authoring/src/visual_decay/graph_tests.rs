@@ -137,6 +137,18 @@ fn every_script_makes_a_graph_with_unique_keys_and_no_loose_wires() {
                 "{}: two nodes laid out in one place",
                 path.display()
             );
+            let down = super::graph_flowing(&blocks(&source), &source, Flow::Down);
+            let corners_down: BTreeSet<(u32, u32)> = down
+                .nodes
+                .iter()
+                .map(|node| (node.at[0].to_bits(), node.at[1].to_bits()))
+                .collect();
+            assert_eq!(
+                corners_down.len(),
+                down.nodes.len(),
+                "{}: two nodes laid out in one place, top to bottom",
+                path.display()
+            );
             seen += 1;
         }
     }
@@ -178,7 +190,7 @@ fn a_stored_position_finds_its_node_by_place_or_by_text_and_is_kept_out_of_the_s
     let mut layout = Layout::read(None).expect("an empty layout");
     let mut graph = lamp();
     let shake = node(&graph, "Lamp.update/0.0/1").clone();
-    layout.moved(&shake, [900.0, 40.0]);
+    layout.moved(&shake, Flow::Right, [900.0, 40.0]);
     layout.place(&mut graph);
     assert_eq!(
         node(&graph, "Lamp.update/0.0/1").at.map(f32::to_bits),
@@ -246,4 +258,51 @@ fn simple_math_stays_on_its_pin_as_a_formula_and_calls_stay_nodes() {
         4,
         "values, event, set, max: no node per operator"
     );
+}
+
+#[test]
+fn top_to_bottom_reads_as_code_with_branches_indented_and_values_to_the_left() {
+    let graph = graph_flowing(&blocks(LAMP), LAMP, Flow::Down);
+    assert_eq!(graph.flow, "down");
+    let event = node(&graph, "Lamp.update");
+    let branch = node(&graph, "Lamp.update/0");
+    let inside = node(&graph, "Lamp.update/0.0/0");
+    let shake = node(&graph, "Lamp.update/0.0/1");
+    let after = node(&graph, "Lamp.update/1");
+    assert!(
+        (branch.at[0] - event.at[0]).abs() < f32::EPSILON,
+        "a chain is one column"
+    );
+    assert!(
+        event.at[1] < branch.at[1]
+            && branch.at[1] < inside.at[1]
+            && inside.at[1] < shake.at[1]
+            && shake.at[1] < after.at[1],
+        "in code order, downward"
+    );
+    assert!(inside.at[0] > branch.at[0], "a branch's steps are indented");
+    assert!(
+        (after.at[0] - branch.at[0]).abs() < f32::EPSILON,
+        "Next comes back out"
+    );
+    let condition = node(&graph, "Lamp.update/0:if");
+    assert!(
+        condition.at[0] + layout::WIDTH < branch.at[0],
+        "values stand left of their step"
+    );
+    let near = node(&graph, "Lamp.update/0:if:b");
+    assert!(
+        (near.at[0] - condition.at[0]).abs() < f32::EPSILON,
+        "and their own values stack in the same column"
+    );
+
+    // Positions dragged one way are not used the other.
+    let mut layout = Layout::read(None).expect("a layout");
+    layout.moved(branch, Flow::Down, [5.0, 6.0]);
+    let mut right = lamp();
+    layout.place(&mut right);
+    assert!(!node(&right, "Lamp.update/0").placed);
+    let mut down = graph_flowing(&blocks(LAMP), LAMP, Flow::Down);
+    layout.place(&mut down);
+    assert!(node(&down, "Lamp.update/0").placed);
 }

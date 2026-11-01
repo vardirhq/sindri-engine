@@ -255,7 +255,7 @@ private fun only(graph: DecayGraph, handler: String?): DecayGraph {
     if (handler == null) return graph
     val nodes = graph.nodes.filter { it.key == handler || it.key.startsWith("$handler/") || it.key.startsWith("$handler:") }
     val keys = nodes.mapTo(HashSet()) { it.key }
-    return DecayGraph(nodes, graph.wires.filter { it.from in keys && it.to in keys })
+    return DecayGraph(nodes, graph.wires.filter { it.from in keys && it.to in keys }, graph.flow)
 }
 
 /** The pan (in points) and zoom that show every node. */
@@ -275,6 +275,9 @@ private const val READABLE = 0.55f
 
 /** Room left at the top of the canvas for the handler tabs, in points. */
 private const val TABS = 56f
+
+/** Where execution enters a step from above, top to bottom: over its header's arrow. */
+private const val FLOW_IN = 16f
 
 /** The shared layout's measures, in points. */
 private const val NODE_WIDTH = 240f
@@ -308,12 +311,28 @@ private fun Wires(graph: DecayGraph, place: (DecayNode) -> Offset) {
         graph.wires.forEach { wire ->
             val from = byKey[wire.from] ?: return@forEach
             val to = byKey[wire.to] ?: return@forEach
-            val start = outPin(from, place(from), wire.out) * density
-            val end = (if (wire.flow) Offset(place(to).x, place(to).y + HEADER / 2) else inPin(to, place(to), wire.into)) * density
-            val bend = maxOf(40f * density, (end.x - start.x) / 2)
+            val down = wire.flow && graph.flow == "down"
+            // A step with one way on hands execution straight down from its foot.
+            val straight = down && from.outputs.size == 1
+            val start = (if (straight) Offset(place(from).x + FLOW_IN, place(from).y + nodeHeight(from)) else outPin(from, place(from), wire.out)) * density
+            val end = when {
+                // Top to bottom, execution comes in at the top of the next step.
+                down -> Offset(place(to).x + FLOW_IN, place(to).y)
+                wire.flow -> Offset(place(to).x, place(to).y + HEADER / 2)
+                else -> inPin(to, place(to), wire.into)
+            } * density
             val path = Path().apply {
                 moveTo(start.x, start.y)
-                cubicTo(start.x + bend, start.y, end.x - bend, end.y, end.x, end.y)
+                if (straight) {
+                    lineTo(end.x, end.y)
+                } else if (down) {
+                    // Out of a labelled output to the right, round, and down into the top.
+                    val drop = maxOf(30f * density, (end.y - start.y) / 2)
+                    cubicTo(start.x + 36f * density, start.y, end.x, end.y - drop, end.x, end.y)
+                } else {
+                    val bend = maxOf(40f * density, (end.x - start.x) / 2)
+                    cubicTo(start.x + bend, start.y, end.x - bend, end.y, end.x, end.y)
+                }
             }
             drawPath(path, if (wire.flow) Forge.Text.copy(alpha = 0.8f) else Forge.Info, style = Stroke(width = (if (wire.flow) 2.5f else 2f) * density))
         }

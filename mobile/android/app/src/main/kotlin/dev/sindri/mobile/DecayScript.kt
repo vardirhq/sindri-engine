@@ -54,6 +54,7 @@ data class DecayScript(
             wires = json.optJSONArray("wires").objects().map { wire ->
                 DecayWire(wire.optString("from"), wire.optString("out"), wire.optString("to"), wire.optString("into"), wire.optBoolean("flow"))
             },
+            flow = json.optString("flow", "right"),
         )
 
         private fun container(json: JSONObject) = DecayContainer(
@@ -125,8 +126,12 @@ data class DecayScript(
     }
 }
 
-/** A script as Blueprint-style nodes: event, statement and value nodes, and the wires between them. */
-data class DecayGraph(val nodes: List<DecayNode>, val wires: List<DecayWire>)
+/**
+ * A script as Blueprint-style nodes: event, statement and value nodes, and the
+ * wires between them. [flow] is which way execution runs: `down`, as the
+ * phone lays it out, or `right`.
+ */
+data class DecayGraph(val nodes: List<DecayNode>, val wires: List<DecayWire>, val flow: String = "right")
 
 /**
  * One node, at [x], [y] in points on the canvas. [kind] is `event`,

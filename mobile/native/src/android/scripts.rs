@@ -10,7 +10,7 @@ use std::path::PathBuf;
 
 use serde_json::{Value, json};
 use sindri_authoring::visual_decay::layout::LAYOUT_SUFFIX;
-use sindri_authoring::visual_decay::{self, Layout, ScriptEdit, Shape, Template};
+use sindri_authoring::visual_decay::{self, Flow, Layout, ScriptEdit, Shape, Template};
 
 use super::Host;
 
@@ -32,7 +32,12 @@ impl OpenScript {
     }
 
     fn graph(&self) -> visual_decay::Graph {
-        let mut graph = visual_decay::graph(&visual_decay::blocks(&self.source), &self.source);
+        // Top to bottom, as code reads: a phone is held upright.
+        let mut graph = visual_decay::graph_flowing(
+            &visual_decay::blocks(&self.source),
+            &self.source,
+            Flow::Down,
+        );
         self.layout.place(&mut graph);
         graph
     }
@@ -151,7 +156,7 @@ impl Host {
             .iter()
             .find(|node| node.key == key)
             .ok_or_else(|| format!("the script has no node {key} now"))?;
-        script.layout.moved(node, at);
+        script.layout.moved(node, Flow::Down, at);
         let path = script.layout_path();
         std::fs::write(&path, script.layout.to_json()?)
             .map_err(|error| format!("{}{LAYOUT_SUFFIX}: {error}", script.name))

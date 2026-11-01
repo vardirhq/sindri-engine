@@ -31,8 +31,8 @@ mod structure;
 use serde::Serialize;
 
 pub use edit::{ScriptEdit, change, edit};
-pub use graph::{Graph, Node, Pin, Wire, graph};
-pub use layout::Layout;
+pub use graph::{Graph, Node, Pin, Wire, graph, graph_flowing};
+pub use layout::{Flow, Layout};
 pub use project::blocks;
 pub use structure::{Shape, Template, palette};
 

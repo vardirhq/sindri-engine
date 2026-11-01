@@ -18,7 +18,7 @@ fn the_lamp_script_fixture_is_what_the_phone_reads() {
         std::fs::read_to_string(root.join("games/lamplighter/assets/scripts/lantern.decay"))
             .expect("the lamp post's script reads");
     let blocks = visual_decay::blocks(&source);
-    let graph = visual_decay::graph(&blocks, &source);
+    let graph = visual_decay::graph_flowing(&blocks, &source, visual_decay::Flow::Down);
     // As `script()` answers it on the phone, with no layout stored.
     let mut json = serde_json::to_string_pretty(&serde_json::json!({
         "name": "scripts/lantern.decay",

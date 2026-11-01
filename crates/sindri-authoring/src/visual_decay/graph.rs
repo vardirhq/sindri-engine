@@ -17,12 +17,15 @@
 
 use serde::Serialize;
 
+use super::layout::Flow;
 use super::{Block, Slot, Span, VisualScript};
 
 #[derive(Clone, Debug, PartialEq, Serialize)]
 pub struct Graph {
     pub nodes: Vec<Node>,
     pub wires: Vec<Wire>,
+    /// Which way execution runs: `right` or `down` ([`super::layout::Flow`]).
+    pub flow: &'static str,
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize)]
@@ -72,15 +75,23 @@ pub struct Wire {
     pub flow: bool,
 }
 
-/// `script` as a graph, laid out (positions from [`super::layout`] are laid
-/// over it by the caller). `source` is the script's text, for fingerprints.
+/// `script` as a graph, laid out left to right (positions from
+/// [`super::layout`] are laid over it by the caller). `source` is the
+/// script's text, for fingerprints.
 #[must_use]
 pub fn graph(script: &VisualScript, source: &str) -> Graph {
+    graph_flowing(script, source, Flow::Right)
+}
+
+/// [`graph`], laid out with execution running `flow`.
+#[must_use]
+pub fn graph_flowing(script: &VisualScript, source: &str, flow: Flow) -> Graph {
     let mut builder = Builder {
         source,
         graph: Graph {
             nodes: Vec::new(),
             wires: Vec::new(),
+            flow: flow.name(),
         },
     };
     for container in &script.containers {
@@ -132,7 +143,7 @@ pub fn graph(script: &VisualScript, source: &str) -> Graph {
             builder.chain(&handler.body, &key, (&key, ""));
         }
     }
-    super::layout::arrange(&mut builder.graph);
+    super::layout::arrange(&mut builder.graph, flow);
     builder.graph
 }
 
