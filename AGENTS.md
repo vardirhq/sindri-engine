@@ -171,7 +171,7 @@ sindri-runtime    -> assets + core + decay + platform + scene + weave
 sindri-player     -> assets + core + decay + desktop + platform + render + runtime + scene
 sindri-authoring  -> core + runtime + scene
 editor            -> assets + authoring + core + decay + physics + platform + render + runtime + scene
-sindri-mobile     -> assets + authoring + core + gpu + render + runtime + scene (+ jni/ndk on Android)
+sindri-mobile     -> assets + authoring + core + gpu + platform + render + runtime + scene (+ jni/ndk on Android)
 sindri-causeway   -> consumer of the engine; nothing depends on it
 games/*, examples/* -> consumers of the engine; nothing depends on them
 ```

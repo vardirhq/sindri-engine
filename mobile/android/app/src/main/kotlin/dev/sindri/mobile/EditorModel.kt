@@ -60,7 +60,17 @@ enum class Brush(val label: String) { Path("Path"), Grass("Grass"), Land("Land")
 
 data class PaintUi(val brush: Brush = Brush.Path, val size: Int = 2, val moveView: Boolean = false)
 
-data class PlayUi(val clock: String = "0:00", val runEdits: List<RunEdit> = emptyList(), val scrub: Float = 1f, val recorded: String = "")
+data class PlayUi(
+    val clock: String = "0:00",
+    val runEdits: List<RunEdit> = emptyList(),
+    val scrub: Float = 1f,
+    val recorded: String = "",
+    /** The stick under the thumb, while one is down. */
+    val stick: StickUi? = null,
+)
+
+/** The design's stick, in dp: the ring where the thumb landed, and the knob under it. */
+data class StickUi(val anchorX: Float, val anchorY: Float, val knobX: Float, val knobY: Float)
 
 /** A value changed while the game ran, offered for keeping at Stop. */
 data class RunEdit(val name: String, val label: String, val from: String, val to: String, val keep: Boolean)

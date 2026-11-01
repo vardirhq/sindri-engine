@@ -63,7 +63,7 @@ Fonts are bundled under their own licences in `mobile/android/licenses/`.
 | `19-selected`, `24-multi` | `EditorScreen` | ✅ | The engine draws the selection with the prototype's bright-metal edge round its own shape; the ring at its feet and the turn and scale handles turn and scale it in one undo step each. The chip names it. Duplicate, Select more, Group and Delete are not wired, so `24-multi` is not reached |
 | `20`, `21` Inspector | `InspectorSheet`, `InspectorPresenter` | ✅ | The engine's selection in the design's sections: Place (across and up in tiles, turn, size), Light 2D (radius, brightness, colour swatches, shadows), Sprite (its real thumbnail, mirror, draw layer), Collider 2D (shape, sensor, reach or size), Body, Shadow; other components plainly after them; Behaviour names the script; Details lists the rest. Every row is a checked, undoable, saved edit, and a slider drag is one step. Swapping a sprite and adding a component are not wired. `20e`/`21e` draw it beside the prototype's |
 | `22`, `23` Behaviour | `BehaviourSheet` | ✅ | Opens for the selection with no rules; blocks are not wired to Decay |
-| `25-play`, `26-frozen`, `26b-frozen-tune` | `PlayChrome` | ✅ | The chrome appears; the game does not run yet (slice step 4) |
+| `25-play`, `26-frozen`, `26b-frozen-tune` | `PlayChrome` | ✅ | ▶ runs the real game in place of the canvas: Stop, Pause, Step one frame and the clock work, and dragging anywhere shows the design's stick (`25b-play-stick`) and walks the player. Tapping something while paused to tune it, and Step back, are not wired |
 | `27-review` | `EditorSheets` | ✅ | Nothing produces run edits yet |
 | `28-coach` | `EditorScreen` | ✅ | Nothing shows tips yet |
 
@@ -111,7 +111,6 @@ The prototype names five, and they are the acceptance path for functionality:
 
 1. Run the app on the Pixel 8 and walk each screen against the prototype; fix
    what feels wrong before wiring more.
-2. Play from the editor through the shared session (slice step 4), with pause,
-   live tuning and the Review sheet.
+2. Live tuning while paused, and the Review sheet at Stop.
 3. The journeys above, one at a time: placing prefabs, painting, Behaviour
    blocks that write Decay, importing and slicing.

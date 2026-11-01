@@ -57,6 +57,19 @@ data class Inspector(
     fun component(type: String): Component? = components.firstOrNull { it.type == type }
 }
 
+/**
+ * A game running from the editor: its clock, whether it is paused, and the
+ * stick (where the finger landed and where its knob is, and how far it
+ * reaches), in surface pixels.
+ */
+data class PlayState(
+    val seconds: Double,
+    val paused: Boolean,
+    val anchor: Pair<Float, Float>? = null,
+    val knob: Pair<Float, Float>? = null,
+    val reach: Float = 0f,
+)
+
 /** What the native host reports through `state()`, which [EditorController] turns into the design's [EditorUi]. */
 data class EditorState(
     val status: String = "",
@@ -71,6 +84,10 @@ data class EditorState(
     val unsaved: Boolean = false,
     /** Whether the canvas shows the scene's 2D lighting. */
     val lighting: Boolean = false,
+    /** The game running from the editor, or null in the editor. */
+    val play: PlayState? = null,
+    /** Why the last game stopped by itself, until the app clears it. */
+    val playError: String? = null,
 ) {
     companion object {
         fun read(json: String): EditorState {
@@ -86,6 +103,18 @@ data class EditorState(
                 redo = root.optStringOrNull("redo"),
                 unsaved = root.optBoolean("unsaved"),
                 lighting = root.optBoolean("lighting"),
+                play = root.optJSONObject("play")?.let { play ->
+                    val stick = play.optJSONObject("stick")
+                    fun point(name: String) = stick?.optJSONArray(name)?.let { it.getDouble(0).toFloat() to it.getDouble(1).toFloat() }
+                    PlayState(
+                        seconds = play.optDouble("seconds", 0.0),
+                        paused = play.optBoolean("paused"),
+                        anchor = point("anchor"),
+                        knob = point("knob"),
+                        reach = play.optDouble("reach", 0.0).toFloat(),
+                    )
+                },
+                playError = root.optStringOrNull("playError"),
             )
         }
 

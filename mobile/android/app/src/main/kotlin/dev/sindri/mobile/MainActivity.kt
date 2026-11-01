@@ -113,6 +113,14 @@ private fun EditorRoute(controller: EditorController, onHome: () -> Unit) {
         surface?.running = true
         onPauseOrDispose { surface?.running = false }
     }
+    // While a game runs, its clock and whether it is still running are read
+    // a few times a second; the frames themselves are the surface's.
+    LaunchedEffect(controller.ui.mode) {
+        while (controller.ui.mode != PlayMode.Edit) {
+            delay(250)
+            controller.refresh()
+        }
+    }
     LaunchedEffect(controller.ui.toast) {
         if (controller.ui.toast != null) {
             delay(2600)

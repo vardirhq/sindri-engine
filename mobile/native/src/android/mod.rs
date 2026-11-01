@@ -11,6 +11,7 @@
 //! JVM would abort the process.
 
 mod exports;
+mod playing;
 mod touch;
 mod window;
 
@@ -20,7 +21,7 @@ use sindri_gpu::{GpuContext, GpuRequestOptions, WindowSurface};
 
 use sindri_runtime::ProjectAssets;
 
-use crate::{Editing, OpenedScene, SceneRenderer};
+use crate::{Editing, OpenedScene, Playing, SceneRenderer};
 use window::AndroidWindow;
 
 /// Everything the app has opened and is drawing into.
@@ -40,9 +41,18 @@ struct Host {
     gpu: Option<GpuContext>,
     surface: Option<WindowSurface>,
     renderer: Option<SceneRenderer>,
-    /// How wide the selection's outline is, in surface pixels: the design's
-    /// one and a half points at the screen's density, which the app sends.
-    outline_width: f32,
+    /// Screen pixels per dp, which the app sends: what the design's sizes
+    /// (the outline's width, the stick's reach) are measured in.
+    density: f32,
+    /// The game running from the editor, while Play is on.
+    playing: Option<Playing>,
+    /// Where the finger that drives the stick landed, in surface pixels, and
+    /// where it is now.
+    stick: Option<([f32; 2], [f32; 2])>,
+    /// When the last frame was drawn, which a run is advanced from.
+    last_frame: Option<std::time::Instant>,
+    /// Why the last run stopped by itself, until the app has seen it.
+    play_error: Option<String>,
 }
 
 impl Host {
@@ -158,7 +168,12 @@ impl Host {
 
     /// Draws one frame, if there is a surface and a scene to draw.
     fn draw(&mut self) -> Result<(), String> {
-        let outline = self.outline_width;
+        let now = std::time::Instant::now();
+        let elapsed = self
+            .last_frame
+            .replace(now)
+            .map_or(0.0, |last| now.duration_since(last).as_secs_f32());
+        let outline = self.outline_width();
         let (Some(gpu), Some(surface), Some(renderer), Some(opened), Some(editing)) = (
             &self.gpu,
             &mut self.surface,
@@ -178,6 +193,19 @@ impl Host {
             format: Some(surface.format()),
             ..Default::default()
         });
+        if let Some(playing) = &mut self.playing {
+            // A run that fails stops, and says why; the editor carries on.
+            let ran = playing
+                .advance(elapsed)
+                .and_then(|()| playing.draw(renderer, &gpu.device, &gpu.queue, &view));
+            gpu.queue.present(frame);
+            if let Err(error) = ran {
+                self.playing = None;
+                self.stick = None;
+                self.play_error = Some(format!("The game stopped: {error}"));
+            }
+            return Ok(());
+        }
         #[allow(clippy::cast_precision_loss)] // A screen is far below 2^24 pixels.
         let size = [surface.width() as f32, surface.height() as f32];
         let view_camera = editing.canvas.view();
@@ -193,6 +221,12 @@ impl Host {
         )?;
         gpu.queue.present(frame);
         Ok(())
+    }
+
+    /// The selection outline's width in surface pixels: the design's one and
+    /// a half points.
+    fn outline_width(&self) -> f32 {
+        1.5 * self.density
     }
 
     /// One line for the app's status bar.

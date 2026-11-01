@@ -56,7 +56,7 @@ class EditorController(
      */
     fun opened(density: Float) {
         this.density = density
-        native.command("outlineWidth", OUTLINE_DP * density)
+        native.command("density", density)
         native.command("lighting", settings.lightingPreview)
         refresh()
     }
@@ -80,7 +80,16 @@ class EditorController(
         val inspector = state.inspector
         val selection = inspector?.let { SelectionUi(InspectorPresenter.iconFor(it), it.name, "Properties") }
         settings = settings.copy(lightingPreview = state.lighting)
+        val play = state.play
+        val stoppedItself = play == null && ui.mode != PlayMode.Edit
+        if (stoppedItself) {
+            // The game failed and the host stopped it: say why, and clear it.
+            error = state.playError ?: "The game stopped."
+            native.command("stop")
+        }
         ui = ui.copy(
+            mode = if (stoppedItself) PlayMode.Edit else ui.mode,
+            play = if (play == null) PlayUi() else ui.play.copy(clock = clock(play.seconds), stick = stick(play)),
             canUndo = state.undo != null,
             canRedo = state.redo != null,
             unsaved = state.unsaved,
@@ -108,10 +117,19 @@ class EditorController(
             EditorEvent.FrameAll -> notWired("Frame everything")
             EditorEvent.OpenScenes -> toggle(EditorSheet.Scenes(SampleEditor.scenes, listOf("title" to "world")))
             is EditorEvent.Tool -> tool(event.tool)
-            EditorEvent.Play -> ui = ui.copy(mode = PlayMode.Play, sheet = null, menu = null, toast = ToastUi("Play runs the real game in slice step 4."))
-            EditorEvent.Stop -> ui = ui.copy(mode = PlayMode.Edit, sheet = null)
-            EditorEvent.PauseOrResume -> ui = ui.copy(mode = if (ui.mode == PlayMode.Play) PlayMode.Paused else PlayMode.Play, sheet = null)
-            EditorEvent.StepBack, EditorEvent.StepOnce -> notWired("Stepping")
+            EditorEvent.Play -> play()
+            EditorEvent.Stop -> stop()
+            EditorEvent.PauseOrResume -> {
+                val pausing = ui.mode == PlayMode.Play
+                error = native.command("pause", pausing)
+                ui = ui.copy(mode = if (pausing) PlayMode.Paused else PlayMode.Play, sheet = null)
+                refresh()
+            }
+            EditorEvent.StepOnce -> {
+                error = native.command("stepOnce")
+                refresh()
+            }
+            EditorEvent.StepBack -> notWired("Stepping back")
             EditorEvent.CloseSheet -> ui = ui.copy(sheet = null)
             EditorEvent.ToggleDetent -> (ui.sheet as? EditorSheet.Inspector)?.let { ui = ui.copy(sheet = it.copy(full = !it.full)) }
             EditorEvent.OpenInspector -> openInspector()
@@ -161,6 +179,46 @@ class EditorController(
             MenuItem.TileGrid -> ui = ui.copy(menu = settings, toast = ToastUi("The tile grid is not drawn yet."))
             MenuItem.Snap -> ui = ui.copy(menu = settings)
         }
+    }
+
+    /**
+     * Plays the scene for real. The game is opened from the project's files,
+     * which hold every edit because each is saved as it is made; one that
+     * failed to save is saved first, and if it still will not, Play says so
+     * rather than run something older than what is on screen.
+     */
+    private fun play() {
+        if (native.state().unsaved) {
+            native.command("save")?.let { failed ->
+                ui = ui.copy(toast = ToastUi("Play needs the scene saved first: $failed"))
+                return
+            }
+        }
+        val failed = native.command("play")
+        if (failed != null) {
+            ui = ui.copy(toast = ToastUi("The game would not start: $failed"))
+            return
+        }
+        ui = ui.copy(mode = PlayMode.Play, sheet = null, menu = null, painting = null)
+        refresh()
+    }
+
+    /** Stops the game. The scene is as it was when Play was pressed: the game never touched it. */
+    private fun stop() {
+        error = native.command("stop")
+        ui = ui.copy(mode = PlayMode.Edit, sheet = null, play = PlayUi())
+        refresh()
+    }
+
+    private fun clock(seconds: Double): String {
+        val whole = seconds.toLong().coerceAtLeast(0)
+        return "${whole / 60}:${(whole % 60).toString().padStart(2, '0')}"
+    }
+
+    private fun stick(play: PlayState): StickUi? {
+        val (anchorX, anchorY) = play.anchor ?: return null
+        val (knobX, knobY) = play.knob ?: return null
+        return StickUi(anchorX / density, anchorY / density, knobX / density, knobY / density)
     }
 
     /** The host's selection origin and bounds, in the design's dp. */
@@ -263,7 +321,7 @@ class EditorController(
             ui.menu != null -> ui = ui.copy(menu = null)
             ui.sheet != null -> ui = ui.copy(sheet = null)
             ui.painting != null -> ui = ui.copy(painting = null)
-            ui.mode != PlayMode.Edit -> ui = ui.copy(mode = PlayMode.Edit)
+            ui.mode != PlayMode.Edit -> stop()
             ui.selection != null -> {
                 error = native.command("deselect")
                 refresh()
@@ -275,10 +333,5 @@ class EditorController(
 
     fun dismissToast() {
         ui = ui.copy(toast = null)
-    }
-
-    private companion object {
-        /** How wide the engine draws the selection's outline: the design's 1.5 px edge, at one pixel per dp. */
-        const val OUTLINE_DP = 1.5f
     }
 }

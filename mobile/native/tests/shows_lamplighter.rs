@@ -218,3 +218,48 @@ fn the_selection_is_drawn_with_a_metal_edge_lit_or_not() {
         );
     }
 }
+
+#[test]
+fn a_running_game_draws_through_the_same_renderer() {
+    let Some(mut drawing) = Drawing::new() else {
+        return;
+    };
+    let mut playing =
+        sindri_mobile::Playing::start(&lamplighter(), "world.scene", [1080.0, 2400.0])
+            .expect("the game starts");
+    for _ in 0..30 {
+        playing.advance(1.0 / 60.0).expect("the game steps");
+    }
+    playing
+        .draw(
+            &mut drawing.renderer,
+            &drawing.gpu.device,
+            &drawing.gpu.queue,
+            drawing.target.view(),
+        )
+        .expect("the game draws");
+    let mut encoder = drawing
+        .gpu
+        .device
+        .create_command_encoder(&wgpu::CommandEncoderDescriptor::default());
+    let readback = drawing
+        .target
+        .copy_to_buffer(&drawing.gpu.device, &mut encoder)
+        .expect("the target copies back");
+    drawing.gpu.queue.submit([encoder.finish()]);
+    let pixels = readback
+        .read_rgba8(&drawing.gpu.device)
+        .expect("the frame reads");
+    let mut colors: Vec<[u8; 3]> = pixels
+        .chunks_exact(4)
+        .step_by(97)
+        .map(|pixel| [pixel[0], pixel[1], pixel[2]])
+        .collect();
+    colors.sort_unstable();
+    colors.dedup();
+    assert!(
+        colors.len() > 100,
+        "the running field draws as a picture: {} colors",
+        colors.len()
+    );
+}

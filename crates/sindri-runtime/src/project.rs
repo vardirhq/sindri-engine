@@ -328,6 +328,25 @@ impl ProjectRun {
         if !self.session.is_styled() {
             return Ok(());
         }
+        self.draw_with(|_, _, _| Ok(((), UiTextSizes::new())))
+    }
+
+    /// What a host does around a real draw: the world is styled in place for
+    /// the frame, handed to `draw` with the run's extractor (which carries the
+    /// project's render materials) and the session (whose animations and
+    /// flecks it draws), the screen is laid out as drawn — with the text sizes
+    /// `draw` measured, so a click meets an element at the size it was drawn —
+    /// and the styling is undone, whether or not `draw` succeeded.
+    ///
+    /// The player does this inline around its renderer; a host that keeps its
+    /// own renderer, such as Sindri Mobile's, does it here.
+    ///
+    /// # Errors
+    /// A stylesheet that will not apply, or whatever `draw` reports.
+    pub fn draw_with<R>(
+        &mut self,
+        draw: impl FnOnce(&SceneExtractor, &World, &Session) -> Result<(R, UiTextSizes), String>,
+    ) -> Result<R, String> {
         let view = weave::Viewport {
             width: self.size[0],
             height: self.size[1],
@@ -336,14 +355,16 @@ impl ProjectRun {
             .session
             .style(&mut self.world, view)
             .map_err(|error| error.to_string())?;
-        let laid_out = self
-            .session
-            .record_drawn(&self.world, view, UiTextSizes::new())
-            .map_err(|error| error.to_string());
+        let drawn = draw(&self.scene, &self.world, &self.session).and_then(|(drawn, sizes)| {
+            self.session
+                .record_drawn(&self.world, view, sizes)
+                .map_err(|error| error.to_string())?;
+            Ok(drawn)
+        });
         if let Some(undo) = undo {
             undo.undo(&mut self.world);
         }
-        laid_out
+        drawn
     }
 
     /// Holds or lets go of a key, as the window would.

@@ -26,18 +26,30 @@ impl Host {
     }
 
     pub(super) fn tap(&mut self, pixel: [f32; 2]) -> Result<(), String> {
+        if let Some(playing) = &mut self.playing {
+            playing.tap();
+            return Ok(());
+        }
         let size = self.size();
         let (opened, editing) = self.editing()?;
         editing.tap(&opened.world, &opened.extractor, pixel, size)
     }
 
     pub(super) fn press(&mut self, pixel: [f32; 2]) -> Result<(), String> {
+        if self.playing.is_some() {
+            self.stick = Some((pixel, pixel));
+            return Ok(());
+        }
         let size = self.size();
         let (opened, editing) = self.editing()?;
         editing.press(&opened.world, &opened.extractor, pixel, size)
     }
 
     pub(super) fn drag(&mut self, pixel: [f32; 2]) -> Result<(), String> {
+        if self.playing.is_some() {
+            self.push_stick(pixel);
+            return Ok(());
+        }
         let size = self.size();
         let (opened, editing) = self.editing()?;
         editing.drag(&mut opened.world, pixel, size)
@@ -55,12 +67,21 @@ impl Host {
     }
 
     pub(super) fn release(&mut self) -> Result<(), String> {
+        if let Some(playing) = &mut self.playing {
+            self.stick = None;
+            playing.stick(None);
+            return Ok(());
+        }
         let (_, editing) = self.editing()?;
         editing.release();
         Ok(())
     }
 
     pub(super) fn zoom(&mut self, factor: f32, focus: [f32; 2]) -> Result<(), String> {
+        // A game is seen through its own camera, which a pinch does not move.
+        if self.playing.is_some() {
+            return Ok(());
+        }
         let size = self.size();
         let (_, editing) = self.editing()?;
         editing.canvas.zoom(factor, focus, size);
@@ -139,6 +160,8 @@ impl Host {
             "undo": undo,
             "redo": redo,
             "unsaved": unsaved,
+            "play": self.play_state(),
+            "playError": self.play_error,
             "lighting": self.editing.as_ref().is_some_and(|editing| editing.lighting_preview),
         })
         .to_string()
@@ -189,10 +212,20 @@ impl Host {
                 let snap = arguments.get(3).and_then(Value::as_bool).unwrap_or(false);
                 self.take_handle(handle, [number(1)?, number(2)?], snap)
             }
-            "outlineWidth" => {
-                self.outline_width = number(0)?.max(0.0);
+            "density" => {
+                self.density = number(0)?.max(0.0);
                 Ok(())
             }
+            "play" => self.play(),
+            "stop" => {
+                self.stop();
+                Ok(())
+            }
+            "pause" => {
+                let paused = arguments.first().and_then(Value::as_bool).unwrap_or(true);
+                self.pause(paused)
+            }
+            "stepOnce" => self.step_once(),
             "save" => self.save(),
             "undo" => self.undo(),
             "redo" => self.redo(),

@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -36,6 +37,7 @@ import androidx.compose.ui.unit.sp
 /** While the game runs: stop, pause and the clock, and how many edits were made. */
 @Composable
 fun BoxScope.PlayChrome(play: PlayUi, onEvent: (EditorEvent) -> Unit) {
+    play.stick?.let { Stick(it) }
     Box(Modifier.fillMaxSize().statusBarsPadding()) {
         Row(
             Modifier
@@ -159,4 +161,28 @@ private fun SquareButton(icon: Sym, description: String, onClick: () -> Unit) {
             .semantics { contentDescription = description },
         contentAlignment = Alignment.Center,
     ) { Symbol(icon, 22.sp, Forge.Text) }
+}
+
+/**
+ * The design's stick, drawn where the thumb landed: a faint ring 112 across
+ * and a 52 knob under the finger. The game reads it as held keys; this only
+ * shows the player where they are pushing.
+ */
+@Composable
+private fun Stick(stick: StickUi) {
+    Box(
+        Modifier
+            .offset((stick.anchorX - 56).dp, (stick.anchorY - 56).dp)
+            .size(112.dp)
+            .clip(CircleShape)
+            .background(Color(0x400B0E12))
+            .border(2.dp, Color(0x40E8E4DC), CircleShape),
+    )
+    Box(
+        Modifier
+            .offset((stick.knobX - 26).dp, (stick.knobY - 26).dp)
+            .size(52.dp)
+            .clip(CircleShape)
+            .background(Color(0xB3E8E4DC)),
+    )
 }

@@ -31,6 +31,8 @@ mod inspector;
 mod opened;
 #[cfg(not(target_arch = "wasm32"))]
 mod outline;
+#[cfg(not(target_arch = "wasm32"))]
+mod play;
 mod renderer;
 
 #[cfg(target_os = "android")]
@@ -43,4 +45,6 @@ pub use editing::{Editing, Handle};
 pub use edits::Place;
 #[cfg(not(target_arch = "wasm32"))]
 pub use opened::OpenedScene;
-pub use renderer::SceneRenderer;
+#[cfg(not(target_arch = "wasm32"))]
+pub use play::Playing;
+pub use renderer::{SceneRenderer, Shot};

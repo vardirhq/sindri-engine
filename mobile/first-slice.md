@@ -29,7 +29,7 @@ published identity is chosen. Release builds are signed with the debug key.
 | 1. Open a real project and display a scene with the real renderer | ✅ Lamplighter's `world.scene` opens as an authored world and draws offscreen at 1080×2400 through `SceneRenderer` | ✅ The APK builds, bundles Lamplighter, and links `libsindri_mobile.so` for arm64 | 🟡 Runs on the Pixel 8; details to record |
 | 2. Select and move an entity with touch; edit one schema-checked property | ✅ `Editing` pans, pinches, picks through the engine's own camera matrix, outlines the selection round its own shape, moves, turns and scales it in one undo step per drag, and edits component fields with schema validation and undo | ✅ Tap, drag and pinch on the `SurfaceView`; the design's outline, ring and turn and scale handles on the selection; undo and redo in the top bar; the design's inspector sections (Place, Light 2D, Sprite, Collider 2D …) with sliders, swatches and switches | 🟡 Runs on the Pixel 8; details to record |
 | 3. Undo, redo, save, restart, reopen; open the result on desktop | ✅ The phone opens and saves through `sindri-authoring`, the desktop editor's own code. A touch edit, undone and redone, saves, reopens after a restart, reads back through desktop's open path, and plays in a build; an unchanged second save writes identical bytes; a failed save keeps the edit unsaved | ✅ Every edit is saved as it is made, a drag when the finger lifts (the design has no Save button); the project lives in app-specific external storage, so `adb pull` can fetch it; an app update no longer replaces it | ❌ Not yet tried |
-| 4. Start and stop a real `Session`; touch input; the scene returns to its state | 🟡 A build-style run starts from the saved edit and leaves the authoring world and the file unchanged. Running from unsaved edits and the keep/discard review of Play edits are not covered | ❌ | ❌ |
+| 4. Start and stop a real `Session`; touch input; the scene returns to its state | ✅ `Playing` runs the project's real `Session` through `ProjectRun`, from the saved files (every edit is saved as it is made, and Play saves a failed one first): a saved move is where the game starts, the stick walks Wick, Pause holds the clock and Step moves one frame, the run draws through the editor's renderer with its animations, and the editor's world is never the game's. The keep/discard review of Play edits is not covered | ✅ Play, Pause, Step, Stop and the clock; drag anywhere for the design's stick (held as W/A/S/D), tap for interact; a game that fails stops and says why; Back stops it | ❌ Not yet tried |
 | 5. Background/resume, surface recreation, keyboard/insets, interrupted save; device notes | — | 🟡 The surface is released and rebuilt on the existing device. Unexercised | ❌ |
 
 ✅ in the first two columns means built and tested where those columns are
@@ -126,6 +126,20 @@ faster to compile and much slower to run.
 8. TalkBack reads the canvas, the handles, the undo and redo buttons, and each
    field.
 
+### What to check on the Pixel 8 for step 4
+
+1. Move Wick in the editor, then press ▶. The game starts with Wick where he was
+   put, lit as the game is, through its own camera; the clock counts.
+2. Drag anywhere: a ring appears under the thumb and Wick walks the way it is
+   pushed, diagonals included; let go and he stops. Walking into a lamp lights
+   it as on desktop.
+3. ❚❚ pauses: the game holds and the clock stops. ⏭ moves one frame. Resume
+   carries on.
+4. ■ (or Back) stops. The editor shows the scene exactly as before Play, with
+   nothing the game did kept.
+5. Leave the app while playing and come back: the game carries on from where
+   it was, without running fast to catch up.
+
 ### What to check on the Pixel 8 for step 3
 
 Reinstall over the step 1–2 app; the project is installed afresh in its new
@@ -208,8 +222,16 @@ SINDRI_REQUIRE_GPU=1 cargo test -p sindri-mobile
 - **Duplicated drawing code.** `SceneRenderer` repeats the native player's texture
   binding and frame encoding, which are tied to its desktop host. Extract a
   shared version once the mobile host's needs are settled.
-- **No models, audio or stylesheets.** 3D models are not bound, nothing plays
-  sound, and screen UI is drawn unstyled.
+- **No models or audio.** 3D models are not bound and nothing plays sound, in
+  the editor or a game. A game's screen UI is styled; the editor's is not.
+- **Play is portrait and keyboard-shaped.** A game is opened at the screen's
+  size when Play is pressed and not re-laid out if the phone turns. Touch
+  reaches it as held movement keys (W/A/S/D) and the interact key (E), which is
+  what Lamplighter reads; a game bound only to other keys, or to the pointer,
+  is not playable yet. Game saves are not kept between runs.
+- **No live tuning or run edits.** Pausing holds the game, but tapping
+  something to tune it (the design's `26-frozen`) and the Review sheet at Stop
+  are not wired, and Step back is not.
 - **One project.** The app opens the bundled Lamplighter and nothing else; there
   is no project list, import or export yet.
 
@@ -217,8 +239,8 @@ SINDRI_REQUIRE_GPU=1 cargo test -p sindri-mobile
 
 Lives in the desktop editor crate, which the app cannot depend on:
 
-- `scripts::SceneScripts`, `weave_styles::ProjectStyles` and `play_session::start`
-  (Play from unsaved edits). Needed for step 4.
+- `play_session::start` (Play from unsaved edits). The phone does not need it:
+  it saves every edit, so it plays the saved project through `ProjectRun`.
 - The run-edit review of changes made during Play.
 
 Already shared: `CommandHistory`, `WorldCommand`, schema validation, `Session`,
@@ -229,8 +251,6 @@ Already shared: `CommandHistory`, `WorldCommand`, schema validation, `Session`,
 
 1. Record what "kinda works" means on the Pixel 8: run the step 1–3 checks above
    and fix what fails before adding more.
-2. Step 4: Play on the phone from the edited world, through the shared session,
-   and back to editing as desktop does. That needs `SceneScripts`, stylesheets
-   and `play_session::start` moved out of the editor crate the way `SceneFile` was.
+2. Run the step 4 checks on the Pixel 8.
 3. Step 5: atomic saves, keeping unsaved edits across Android ending the app, and
    the surface, keyboard and inset behavior on the device.

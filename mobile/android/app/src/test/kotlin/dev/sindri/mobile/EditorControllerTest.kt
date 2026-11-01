@@ -18,24 +18,29 @@ class EditorControllerTest {
         var state = EditorState()
         var lighting = false
 
+        var playing: PlayState? = null
+
         override fun command(command: String, vararg arguments: Any?): String? {
             commands += listOf(command, *arguments)
             when (command) {
                 "lighting" -> lighting = arguments[0] as Boolean
                 "save" -> state = state.copy(unsaved = false)
+                "play" -> playing = PlayState(seconds = 0.0, paused = false)
+                "stop" -> playing = null
+                "pause" -> playing = playing?.copy(paused = arguments[0] as Boolean)
             }
             return null
         }
 
-        override fun state() = state.copy(lighting = lighting)
+        override fun state() = state.copy(lighting = lighting, play = playing)
     }
 
     private val host = Host()
     private val controller = EditorController(host).also { it.opened(density = 2f) }
 
     @Test
-    fun opening_tells_the_host_the_outline_width_and_that_lighting_preview_is_off() {
-        assertTrue(listOf("outlineWidth", 3f) in host.commands)
+    fun opening_tells_the_host_the_density_and_that_lighting_preview_is_off() {
+        assertTrue(listOf("density", 2f) in host.commands)
         assertTrue(listOf("lighting", false) in host.commands)
         assertFalse(host.lighting)
     }
@@ -107,5 +112,38 @@ class EditorControllerTest {
         assertNull("then the selection is let go", controller.ui.selection)
 
         assertFalse("then Back leaves the editor", controller.back())
+    }
+
+    @Test
+    fun play_saves_first_runs_pauses_and_stop_returns_to_editing() {
+        host.state = EditorState(unsaved = true)
+        controller.on(EditorEvent.Play) {}
+        val saved = host.commands.indexOf(listOf("save"))
+        assertTrue("an unsaved edit is saved before the game opens", saved in 0 until host.commands.indexOf(listOf("play")))
+        assertEquals(PlayMode.Play, controller.ui.mode)
+
+        host.playing = host.playing?.copy(seconds = 75.4, anchor = 200f to 400f, knob = 260f to 400f)
+        controller.refresh()
+        assertEquals("1:15", controller.ui.play.clock)
+        assertEquals(StickUi(100f, 200f, 130f, 200f), controller.ui.play.stick)
+
+        controller.on(EditorEvent.PauseOrResume) {}
+        assertEquals(listOf("pause", true), host.commands.last())
+        assertEquals(PlayMode.Paused, controller.ui.mode)
+
+        controller.on(EditorEvent.Stop) {}
+        assertEquals(PlayMode.Edit, controller.ui.mode)
+        assertNull(host.playing)
+    }
+
+    @Test
+    fun a_game_that_stops_itself_returns_to_editing_and_says_why() {
+        controller.on(EditorEvent.Play) {}
+        host.playing = null
+        host.state = host.state.copy(playError = "The game stopped: a solver failed")
+        controller.refresh()
+        assertEquals(PlayMode.Edit, controller.ui.mode)
+        assertEquals("The game stopped: a solver failed", controller.ui.toast?.text)
+        assertEquals(listOf("stop"), host.commands.last())
     }
 }

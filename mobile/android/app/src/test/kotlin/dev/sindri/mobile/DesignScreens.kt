@@ -115,6 +115,12 @@ class DesignScreens {
 
     @Test fun play() = editor("25-play", base.copy(mode = PlayMode.Play, play = PlayUi(clock = "0:12")))
 
+    /** A thumb down and pushed right and a little up: the stick the game reads as held keys. */
+    @Test fun playStick() = editor(
+        "25b-play-stick",
+        base.copy(mode = PlayMode.Play, play = PlayUi(clock = "0:12", stick = StickUi(anchorX = 206f, anchorY = 700f, knobX = 250f, knobY = 680f))),
+    )
+
     @Test fun paused() = editor("26-frozen", base.copy(mode = PlayMode.Paused, play = PlayUi(clock = "0:12", scrub = 0.8f, recorded = "12 s")))
 
     @Test fun pausedTune() = editor("26b-frozen-tune", lamp.copy(mode = PlayMode.Paused, sheet = EditorSheet.Inspector(SampleEditor.lampInspector(live = true), live = true)))

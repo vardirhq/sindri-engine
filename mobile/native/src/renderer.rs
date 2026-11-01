@@ -16,7 +16,8 @@ use sindri_render::{
 };
 use sindri_runtime::ProjectAssets;
 use sindri_scene::{
-    CameraView, SceneExtractor, SceneRuntime, TextureBindings, TileSetBindings, measure_ui_text,
+    CameraView, Effects2d, SceneExtractor, SceneRuntime, SpriteAnimations, TextureBindings,
+    TileSetBindings, UiTextSizes, measure_ui_text,
 };
 
 fn text<E: std::fmt::Display>(error: E) -> String {
@@ -190,7 +191,7 @@ impl SceneRenderer {
 
     /// Draws `world` into `view`, through `camera`: the scene's own with
     /// [`CameraView::default`], or a [`crate::Canvas`] view, lit or not as
-    /// [`Self::set_lit`] last said.
+    /// [`Self::set_lit`] last said. Nothing is animated: the editor's view.
     ///
     /// # Errors
     /// A component that will not extract, or a frame that will not encode.
@@ -203,20 +204,64 @@ impl SceneRenderer {
         world: &World,
         camera: CameraView,
     ) -> Result<(), String> {
+        self.draw_shot(
+            device,
+            queue,
+            view,
+            Shot {
+                extractor,
+                world,
+                camera,
+                animations: None,
+                effects: None,
+                seconds: 0.0,
+            },
+        )
+        .map(|_| ())
+    }
+
+    /// Draws a [`Shot`], and returns the screen text as it was measured, which
+    /// a running session lays its screen out with.
+    ///
+    /// # Errors
+    /// A component that will not extract, or a frame that will not encode.
+    pub fn draw_shot(
+        &mut self,
+        device: &wgpu::Device,
+        queue: &wgpu::Queue,
+        view: &wgpu::TextureView,
+        shot: Shot<'_>,
+    ) -> Result<UiTextSizes, String> {
+        let Shot {
+            extractor,
+            world,
+            camera,
+            animations,
+            effects,
+            seconds,
+        } = shot;
         let post_process = self
             .cubes
             .configure(device, extractor.world_settings(world).map_err(text)?);
         let sizes = measure_ui_text(world, extractor.components(), &mut self.text).map_err(text)?;
+        let mut runtime = SceneRuntime::default()
+            .with_tile_sets(&self.tile_sets)
+            .with_text_sizes(&sizes)
+            .with_seconds(seconds)
+            .with_unlit(!self.lit);
+        if let Some(animations) = animations {
+            runtime = runtime.with_animations(animations);
+        }
+        if let Some(effects) = effects {
+            runtime = runtime.with_effects(effects);
+        }
         let prepared = extractor
             .extract_animated(
                 world,
                 Viewport::new(self.size[0], self.size[1]),
                 camera,
                 &self.bindings,
-                SceneRuntime::default()
-                    .with_tile_sets(&self.tile_sets)
-                    .with_text_sizes(&sizes)
-                    .with_unlit(!self.lit),
+                runtime,
             )
             .map_err(text)?;
         let mut encoder = device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
@@ -253,6 +298,23 @@ impl SceneRenderer {
                 .map_err(text)?;
         }
         queue.submit([encoder.finish()]);
-        Ok(())
+        Ok(sizes)
     }
+}
+
+/// What one frame draws: a world, through a camera, as far into its
+/// animations and flecks as a running session has got.
+#[derive(Clone, Copy)]
+pub struct Shot<'a> {
+    /// The schemas the world is read with.
+    pub extractor: &'a SceneExtractor,
+    pub world: &'a World,
+    pub camera: CameraView,
+    /// Where each animated sprite has got to; `None` shows every sprite at
+    /// its authored rect.
+    pub animations: Option<&'a SpriteAnimations>,
+    /// The live flecks, while a game runs.
+    pub effects: Option<&'a Effects2d>,
+    /// How long the scene has been running.
+    pub seconds: f32,
 }
