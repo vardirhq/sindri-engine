@@ -199,6 +199,8 @@ sealed interface EditorEvent {
     data object HandleReleased : EditorEvent
     /** A number, text or switch slot of the open script given a new value. */
     data class ScriptSlot(val slot: DecaySlot, val value: Any) : EditorEvent
+    /** A node of the open script dragged to [x], [y] on the canvas, in points. */
+    data class MoveNode(val key: String, val x: Float, val y: Float) : EditorEvent
 }
 
 enum class MenuItem { Snap, LightingPreview, TileGrid }

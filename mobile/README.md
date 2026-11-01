@@ -75,12 +75,20 @@ How it works, in `sindri_authoring::visual_decay`:
   the slot it changed, then the result is parsed and refused if it no longer
   reads. Every other byte, comments and formatting included, stays as it was.
   A script with syntax errors is fixed as text before its blocks edit.
-- Graph layout is not stored. The blocks follow the code's own order and
-  nesting, which is what makes them the same thing as the script.
+- The same reading is drawn as Blueprint-style nodes (`visual_decay::graph`):
+  handlers are event nodes, statements a chain joined by execution wires,
+  and calls and operators value nodes wired into pins. Literals sit on their
+  pins.
+- Node positions are the one thing a script does not hold. They live beside
+  it in `<script>.layout`, never in it (`visual_decay::layout`). A stored
+  position finds its node by its place in the code and by a fingerprint of
+  its text, so moving code on desktop keeps nodes where they were left. A
+  node nobody placed is laid out from the code. Fields a newer editor wrote
+  are kept, and a newer file is not overwritten.
 
-Blueprint-style wiring, placing new nodes, and following execution during Play
-build on this. Each new kind of edit is a span edit checked the same way. The
-round trip is tested on every script in the repository.
+Wiring and placing new nodes, and following execution during Play, build on
+this. Each new kind of edit is a span edit checked the same way. The round
+trip is tested on every script in the repository.
 
 ## Architecture direction
 

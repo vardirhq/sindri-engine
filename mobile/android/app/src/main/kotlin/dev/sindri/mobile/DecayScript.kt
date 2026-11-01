@@ -15,6 +15,8 @@ data class DecayScript(
     val containers: List<DecayContainer>,
     /** What the parser could not read; with any, blocks are not edited. */
     val problems: List<String> = emptyList(),
+    /** The same reading as a node graph, placed, for the canvas. */
+    val graph: DecayGraph = DecayGraph(emptyList(), emptyList()),
 ) {
     companion object {
         /** The native host's `script()` answer, or null for `null`. */
@@ -27,8 +29,28 @@ data class DecayScript(
                 source = root.optString("source"),
                 containers = blocks.optJSONArray("containers").objects().map(::container),
                 problems = blocks.optJSONArray("problems").objects().map { "Line ${it.optInt("line")}: ${it.optString("message")}" },
+                graph = root.optJSONObject("graph")?.let(::graph) ?: DecayGraph(emptyList(), emptyList()),
             )
         }
+
+        private fun graph(json: JSONObject) = DecayGraph(
+            nodes = json.optJSONArray("nodes").objects().map { node ->
+                val at = node.optJSONArray("at")
+                DecayNode(
+                    key = node.optString("key"),
+                    kind = node.optString("kind"),
+                    title = node.optString("title"),
+                    note = node.optStringOrNull("note"),
+                    inputs = node.optJSONArray("inputs").objects().map { pin -> DecayPin(pin.optString("name"), pin.optJSONObject("value")?.let(::slot)) },
+                    outputs = node.optJSONArray("outputs").strings(),
+                    x = at?.optDouble(0)?.toFloat() ?: 0f,
+                    y = at?.optDouble(1)?.toFloat() ?: 0f,
+                )
+            },
+            wires = json.optJSONArray("wires").objects().map { wire ->
+                DecayWire(wire.optString("from"), wire.optString("out"), wire.optString("to"), wire.optString("into"), wire.optBoolean("flow"))
+            },
+        )
 
         private fun container(json: JSONObject) = DecayContainer(
             kind = json.optString("kind"),
@@ -98,6 +120,34 @@ data class DecayScript(
         private fun JSONObject.optStringOrNull(key: String): String? = if (!has(key) || isNull(key)) null else optString(key)
     }
 }
+
+/** A script as Blueprint-style nodes: event, statement and value nodes, and the wires between them. */
+data class DecayGraph(val nodes: List<DecayNode>, val wires: List<DecayWire>)
+
+/**
+ * One node, at [x], [y] in points on the canvas. [kind] is `event`,
+ * `function`, `values`, `statement` or `value`. A statement takes execution
+ * in; a value node gives one result out.
+ */
+data class DecayNode(
+    val key: String,
+    val kind: String,
+    val title: String,
+    val note: String?,
+    val inputs: List<DecayPin>,
+    val outputs: List<String>,
+    val x: Float,
+    val y: Float,
+) {
+    val takesFlow get() = kind == "statement"
+    val givesValue get() = kind == "value"
+}
+
+/** An input pin: what it holds on the pin, or null where a wire feeds it. */
+data class DecayPin(val name: String, val value: DecaySlot?)
+
+/** Execution from [from]'s [out] to [to], or a value from [from] into [to]'s [into] pin. */
+data class DecayWire(val from: String, val out: String, val to: String, val into: String, val flow: Boolean)
 
 data class DecayContainer(val kind: String, val name: String, val fields: List<DecayField>, val handlers: List<DecayHandler>)
 

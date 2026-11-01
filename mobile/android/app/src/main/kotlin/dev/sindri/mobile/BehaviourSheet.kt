@@ -33,25 +33,32 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 /**
- * Behaviour: rules made of When → Do → And blocks, which are Decay underneath.
- * The Code tab shows the script the blocks write, read-only, so the two never
- * disagree. The prototype's `sheet: 'behaviour'`.
+ * Behaviour: for a selection with a script, that script as Decay nodes
+ * ([DecayCanvas]) and as code, which are one file; without one, the design's
+ * When → Do → And rule cards. The prototype's `sheet: 'behaviour'`.
  */
 @Composable
 fun BoxScope.BehaviourSheet(sheet: EditorSheet.Behaviour, onEvent: (EditorEvent) -> Unit) = SheetFrame(SheetHeight.Below(56.dp)) {
     val behaviour = sheet.behaviour
     SheetHeader("Behaviour", behaviour.subject, onBack = { onEvent(EditorEvent.OpenInspector) }) {
-        Segmented(listOf("Blocks", "Code"), if (sheet.code) 1 else 0, { onEvent(if (it == 1) EditorEvent.BehaviourCode else EditorEvent.BehaviourBlocks) })
+        Segmented(listOf(if (behaviour.decay != null) "Nodes" else "Blocks", "Code"), if (sheet.code) 1 else 0, { onEvent(if (it == 1) EditorEvent.BehaviourCode else EditorEvent.BehaviourBlocks) })
     }
-    if (sheet.code) CodeView(behaviour, onEvent) else BlocksView(behaviour, onEvent)
+    val script = behaviour.decay
+    when {
+        sheet.code -> CodeView(behaviour, onEvent)
+        script != null -> Box(Modifier.weight(1f).fillMaxWidth()) {
+            DecayCanvas(
+                script,
+                onEdit = { slot, value -> onEvent(EditorEvent.ScriptSlot(slot, value)) },
+                onMove = { key, x, y -> onEvent(EditorEvent.MoveNode(key, x, y)) },
+            )
+        }
+        else -> BlocksView(behaviour, onEvent)
+    }
 }
 
 @Composable
 private fun androidx.compose.foundation.layout.ColumnScope.BlocksView(behaviour: BehaviourUi, onEvent: (EditorEvent) -> Unit) = SheetBody(horizontal = 12.dp) {
-    behaviour.decay?.let { script ->
-        DecayScriptView(script) { slot, value -> onEvent(EditorEvent.ScriptSlot(slot, value)) }
-        return@SheetBody
-    }
     if (behaviour.templates.isNotEmpty()) {
         Column {
             Text("Start from", style = ForgeType.text(12.sp, FontWeight.Medium, Forge.TextFaint), modifier = Modifier.padding(start = 4.dp, end = 4.dp, top = 2.dp, bottom = 8.dp))

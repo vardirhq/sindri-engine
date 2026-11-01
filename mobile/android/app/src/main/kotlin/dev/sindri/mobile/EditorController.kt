@@ -160,6 +160,7 @@ class EditorController(
             }
             EditorEvent.HandleReleased -> nativeEdit("release")
             is EditorEvent.ScriptSlot -> scriptSlot(event)
+            is EditorEvent.MoveNode -> moveNode(event)
             else -> notWired(null)
         }
     }
@@ -283,7 +284,7 @@ class EditorController(
                 rules = emptyList(),
                 codeFile = script.name,
                 code = script.source.lines(),
-                codeNote = "The blocks are this file: a change in one is a change in the other.",
+                codeNote = "The nodes are this file: a change in one is a change in the other.",
                 decay = script,
             )
         } else {
@@ -299,6 +300,16 @@ class EditorController(
                 codeNote = "Adding a script from blocks is not wired yet.",
             )
         }
+
+    /** A node dragged: where it was left is kept beside the script, and the graph read again. */
+    private fun moveNode(event: EditorEvent.MoveNode) {
+        val sheet = ui.sheet as? EditorSheet.Behaviour ?: return
+        native.command("moveNode", event.key, event.x, event.y)?.let { failed ->
+            ui = ui.copy(toast = ToastUi(failed))
+        }
+        val script = native.script() ?: return
+        ui = ui.copy(sheet = sheet.copy(behaviour = behaviourUi(sheet.behaviour.subject, script)))
+    }
 
     /** A block's slot edited: the script file changes in that one place, and is read again. */
     private fun scriptSlot(event: EditorEvent.ScriptSlot) {

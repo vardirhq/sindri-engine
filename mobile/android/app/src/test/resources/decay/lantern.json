@@ -1,0 +1,1925 @@
+{
+  "blocks": {
+    "containers": [
+      {
+        "fields": [
+          {
+            "exported": true,
+            "mutable": false,
+            "name": "light_name",
+            "note": "The name of the entity that carries this lamp's light, up at the lantern.",
+            "span": [
+              442,
+              470
+            ],
+            "type": "String",
+            "value": {
+              "kind": "text",
+              "span": [
+                467,
+                469
+              ],
+              "value": ""
+            }
+          },
+          {
+            "exported": false,
+            "mutable": true,
+            "name": "lit",
+            "note": null,
+            "span": [
+              476,
+              498
+            ],
+            "type": "bool",
+            "value": {
+              "kind": "bool",
+              "span": [
+                492,
+                497
+              ],
+              "value": false
+            }
+          },
+          {
+            "exported": false,
+            "mutable": true,
+            "name": "flare",
+            "note": null,
+            "span": [
+              503,
+              527
+            ],
+            "type": "number",
+            "value": {
+              "kind": "number",
+              "span": [
+                523,
+                526
+              ],
+              "value": 0.0
+            }
+          },
+          {
+            "exported": false,
+            "mutable": true,
+            "name": "light",
+            "note": null,
+            "span": [
+              532,
+              557
+            ],
+            "type": "Entity",
+            "value": {
+              "kind": "null",
+              "span": [
+                552,
+                556
+              ]
+            }
+          },
+          {
+            "exported": false,
+            "mutable": true,
+            "name": "sparks",
+            "note": null,
+            "span": [
+              562,
+              588
+            ],
+            "type": "Entity",
+            "value": {
+              "kind": "null",
+              "span": [
+                583,
+                587
+              ]
+            }
+          }
+        ],
+        "handlers": [
+          {
+            "body": [
+              {
+                "kind": "set",
+                "span": [
+                  615,
+                  656
+                ],
+                "target": {
+                  "kind": "name",
+                  "path": "this.light",
+                  "span": [
+                    615,
+                    625
+                  ]
+                },
+                "value": {
+                  "args": [
+                    {
+                      "kind": "name",
+                      "path": "this.light_name",
+                      "span": [
+                        639,
+                        654
+                      ]
+                    }
+                  ],
+                  "callee": "World.find",
+                  "kind": "call",
+                  "span": [
+                    628,
+                    655
+                  ]
+                }
+              },
+              {
+                "kind": "set",
+                "span": [
+                  665,
+                  702
+                ],
+                "target": {
+                  "kind": "name",
+                  "path": "this.sparks",
+                  "span": [
+                    665,
+                    676
+                  ]
+                },
+                "value": {
+                  "args": [
+                    {
+                      "kind": "text",
+                      "span": [
+                        690,
+                        700
+                      ],
+                      "value": "fx-spark"
+                    }
+                  ],
+                  "callee": "World.find",
+                  "kind": "call",
+                  "span": [
+                    679,
+                    701
+                  ]
+                }
+              }
+            ],
+            "label": "When it starts",
+            "name": "start",
+            "note": null,
+            "params": [],
+            "role": "event",
+            "span": [
+              594,
+              708
+            ]
+          },
+          {
+            "body": [
+              {
+                "condition": {
+                  "kind": "unary",
+                  "op": "!",
+                  "operand": {
+                    "kind": "name",
+                    "path": "this.lit",
+                    "span": [
+                      750,
+                      758
+                    ]
+                  },
+                  "span": [
+                    749,
+                    758
+                  ]
+                },
+                "kind": "if",
+                "otherwise": null,
+                "span": [
+                  746,
+                  790
+                ],
+                "then": [
+                  {
+                    "kind": "return",
+                    "span": [
+                      773,
+                      780
+                    ],
+                    "value": null
+                  }
+                ]
+              },
+              {
+                "kind": "set",
+                "span": [
+                  799,
+                  838
+                ],
+                "target": {
+                  "kind": "name",
+                  "path": "this.flare",
+                  "span": [
+                    799,
+                    809
+                  ]
+                },
+                "value": {
+                  "args": [
+                    {
+                      "kind": "number",
+                      "span": [
+                        816,
+                        819
+                      ],
+                      "value": 0.0
+                    },
+                    {
+                      "kind": "op",
+                      "left": {
+                        "kind": "name",
+                        "path": "this.flare",
+                        "span": [
+                          821,
+                          831
+                        ]
+                      },
+                      "op": "-",
+                      "right": {
+                        "kind": "name",
+                        "path": "dt",
+                        "span": [
+                          834,
+                          836
+                        ]
+                      },
+                      "span": [
+                        821,
+                        836
+                      ]
+                    }
+                  ],
+                  "callee": "max",
+                  "kind": "call",
+                  "span": [
+                    812,
+                    837
+                  ]
+                }
+              },
+              {
+                "kind": "set",
+                "span": [
+                  847,
+                  909
+                ],
+                "target": {
+                  "kind": "name",
+                  "path": "this.light.light2d.intensity",
+                  "span": [
+                    847,
+                    875
+                  ]
+                },
+                "value": {
+                  "kind": "op",
+                  "left": {
+                    "kind": "number",
+                    "span": [
+                      878,
+                      881
+                    ],
+                    "value": 1.1
+                  },
+                  "op": "+",
+                  "right": {
+                    "kind": "op",
+                    "left": {
+                      "kind": "number",
+                      "span": [
+                        884,
+                        887
+                      ],
+                      "value": 2.4
+                    },
+                    "op": "*",
+                    "right": {
+                      "kind": "op",
+                      "left": {
+                        "kind": "name",
+                        "path": "this.flare",
+                        "span": [
+                          891,
+                          901
+                        ]
+                      },
+                      "op": "/",
+                      "right": {
+                        "kind": "number",
+                        "span": [
+                          904,
+                          907
+                        ],
+                        "value": 0.8
+                      },
+                      "span": [
+                        890,
+                        908
+                      ]
+                    },
+                    "span": [
+                      884,
+                      908
+                    ]
+                  },
+                  "span": [
+                    878,
+                    908
+                  ]
+                }
+              }
+            ],
+            "label": "Every frame",
+            "name": "update",
+            "note": null,
+            "params": [
+              "dt"
+            ],
+            "role": "event",
+            "span": [
+              714,
+              915
+            ]
+          },
+          {
+            "body": [
+              {
+                "condition": {
+                  "kind": "name",
+                  "path": "this.lit",
+                  "span": [
+                    946,
+                    954
+                  ]
+                },
+                "kind": "if",
+                "otherwise": null,
+                "span": [
+                  943,
+                  986
+                ],
+                "then": [
+                  {
+                    "kind": "return",
+                    "span": [
+                      969,
+                      976
+                    ],
+                    "value": null
+                  }
+                ]
+              },
+              {
+                "kind": "set",
+                "span": [
+                  995,
+                  1011
+                ],
+                "target": {
+                  "kind": "name",
+                  "path": "this.lit",
+                  "span": [
+                    995,
+                    1003
+                  ]
+                },
+                "value": {
+                  "kind": "bool",
+                  "span": [
+                    1006,
+                    1010
+                  ],
+                  "value": true
+                }
+              },
+              {
+                "kind": "set",
+                "span": [
+                  1020,
+                  1037
+                ],
+                "target": {
+                  "kind": "name",
+                  "path": "this.flare",
+                  "span": [
+                    1020,
+                    1030
+                  ]
+                },
+                "value": {
+                  "kind": "number",
+                  "span": [
+                    1033,
+                    1036
+                  ],
+                  "value": 0.8
+                }
+              },
+              {
+                "call": {
+                  "args": [
+                    {
+                      "kind": "name",
+                      "path": "this.entity",
+                      "span": [
+                        1061,
+                        1072
+                      ]
+                    },
+                    {
+                      "kind": "text",
+                      "span": [
+                        1074,
+                        1079
+                      ],
+                      "value": "lit"
+                    }
+                  ],
+                  "callee": "Animation.play",
+                  "kind": "call",
+                  "span": [
+                    1046,
+                    1080
+                  ]
+                },
+                "kind": "do",
+                "span": [
+                  1046,
+                  1081
+                ]
+              },
+              {
+                "kind": "comment",
+                "span": [
+                  1090,
+                  1144
+                ],
+                "text": "Sparks off the flame, and a small shake: it caught."
+              },
+              {
+                "call": {
+                  "args": [
+                    {
+                      "kind": "name",
+                      "path": "this.sparks",
+                      "span": [
+                        1170,
+                        1181
+                      ]
+                    },
+                    {
+                      "kind": "name",
+                      "path": "this.transform.world_position.x",
+                      "span": [
+                        1183,
+                        1214
+                      ]
+                    },
+                    {
+                      "kind": "op",
+                      "left": {
+                        "kind": "name",
+                        "path": "this.transform.world_position.y",
+                        "span": [
+                          1216,
+                          1247
+                        ]
+                      },
+                      "op": "+",
+                      "right": {
+                        "kind": "number",
+                        "span": [
+                          1250,
+                          1253
+                        ],
+                        "value": 2.6
+                      },
+                      "span": [
+                        1216,
+                        1253
+                      ]
+                    }
+                  ],
+                  "callee": "Effects.burst_at",
+                  "kind": "call",
+                  "span": [
+                    1153,
+                    1254
+                  ]
+                },
+                "kind": "do",
+                "span": [
+                  1153,
+                  1255
+                ]
+              },
+              {
+                "call": {
+                  "args": [
+                    {
+                      "kind": "number",
+                      "span": [
+                        1282,
+                        1286
+                      ],
+                      "value": 0.18
+                    }
+                  ],
+                  "callee": "Camera.add_trauma",
+                  "kind": "call",
+                  "span": [
+                    1264,
+                    1287
+                  ]
+                },
+                "kind": "do",
+                "span": [
+                  1264,
+                  1288
+                ]
+              },
+              {
+                "kind": "change",
+                "op": "+=",
+                "span": [
+                  1297,
+                  1313
+                ],
+                "target": {
+                  "kind": "name",
+                  "path": "Game.lit",
+                  "span": [
+                    1297,
+                    1305
+                  ]
+                },
+                "value": {
+                  "kind": "number",
+                  "span": [
+                    1309,
+                    1312
+                  ],
+                  "value": 1.0
+                }
+              },
+              {
+                "condition": {
+                  "kind": "op",
+                  "left": {
+                    "args": [
+                      {
+                        "kind": "name",
+                        "path": "this.entity",
+                        "span": [
+                          1339,
+                          1350
+                        ]
+                      },
+                      {
+                        "kind": "text",
+                        "span": [
+                          1352,
+                          1358
+                        ],
+                        "value": "goal"
+                      }
+                    ],
+                    "callee": "World.has_tag",
+                    "kind": "call",
+                    "span": [
+                      1325,
+                      1359
+                    ]
+                  },
+                  "op": "||",
+                  "right": {
+                    "kind": "op",
+                    "left": {
+                      "kind": "name",
+                      "path": "Game.lit",
+                      "span": [
+                        1363,
+                        1371
+                      ]
+                    },
+                    "op": ">=",
+                    "right": {
+                      "kind": "name",
+                      "path": "Game.total",
+                      "span": [
+                        1375,
+                        1385
+                      ]
+                    },
+                    "span": [
+                      1363,
+                      1385
+                    ]
+                  },
+                  "span": [
+                    1325,
+                    1385
+                  ]
+                },
+                "kind": "if",
+                "otherwise": null,
+                "span": [
+                  1322,
+                  1426
+                ],
+                "then": [
+                  {
+                    "kind": "set",
+                    "span": [
+                      1400,
+                      1416
+                    ],
+                    "target": {
+                      "kind": "name",
+                      "path": "Game.won",
+                      "span": [
+                        1400,
+                        1408
+                      ]
+                    },
+                    "value": {
+                      "kind": "bool",
+                      "span": [
+                        1411,
+                        1415
+                      ],
+                      "value": true
+                    }
+                  }
+                ]
+              }
+            ],
+            "label": "ignite",
+            "name": "ignite",
+            "note": null,
+            "params": [],
+            "role": "function",
+            "span": [
+              921,
+              1432
+            ]
+          }
+        ],
+        "kind": "script",
+        "name": "Lantern",
+        "span": [
+          332,
+          1434
+        ]
+      }
+    ],
+    "problems": []
+  },
+  "graph": {
+    "nodes": [
+      {
+        "at": [
+          0.0,
+          0.0
+        ],
+        "inputs": [
+          {
+            "name": "light_name",
+            "value": {
+              "kind": "text",
+              "span": [
+                467,
+                469
+              ],
+              "value": ""
+            }
+          },
+          {
+            "name": "lit",
+            "value": {
+              "kind": "bool",
+              "span": [
+                492,
+                497
+              ],
+              "value": false
+            }
+          },
+          {
+            "name": "flare",
+            "value": {
+              "kind": "number",
+              "span": [
+                523,
+                526
+              ],
+              "value": 0.0
+            }
+          },
+          {
+            "name": "light",
+            "value": {
+              "kind": "null",
+              "span": [
+                552,
+                556
+              ]
+            }
+          },
+          {
+            "name": "sparks",
+            "value": {
+              "kind": "null",
+              "span": [
+                583,
+                587
+              ]
+            }
+          }
+        ],
+        "key": "Lantern.values",
+        "kind": "values",
+        "note": null,
+        "outputs": [],
+        "placed": false,
+        "print": "21277bcf1a4d67fb",
+        "span": [
+          332,
+          1434
+        ],
+        "title": "Lantern keeps"
+      },
+      {
+        "at": [
+          0.0,
+          300.0
+        ],
+        "inputs": [],
+        "key": "Lantern.start",
+        "kind": "event",
+        "note": null,
+        "outputs": [
+          ""
+        ],
+        "placed": false,
+        "print": "3ffd579b23ce3fe1",
+        "span": [
+          594,
+          708
+        ],
+        "title": "When it starts"
+      },
+      {
+        "at": [
+          310.0,
+          368.0
+        ],
+        "inputs": [
+          {
+            "name": "1",
+            "value": {
+              "kind": "name",
+              "path": "this.light_name",
+              "span": [
+                639,
+                654
+              ]
+            }
+          }
+        ],
+        "key": "Lantern.start/0:to",
+        "kind": "value",
+        "note": null,
+        "outputs": [],
+        "placed": false,
+        "print": "a0b822b4e5e8421b",
+        "span": [
+          628,
+          655
+        ],
+        "title": "World.find"
+      },
+      {
+        "at": [
+          598.0,
+          300.0
+        ],
+        "inputs": [
+          {
+            "name": "to",
+            "value": null
+          }
+        ],
+        "key": "Lantern.start/0",
+        "kind": "statement",
+        "note": null,
+        "outputs": [
+          ""
+        ],
+        "placed": false,
+        "print": "664b8908c1b54e6f",
+        "span": [
+          615,
+          656
+        ],
+        "title": "Set this.light"
+      },
+      {
+        "at": [
+          908.0,
+          368.0
+        ],
+        "inputs": [
+          {
+            "name": "1",
+            "value": {
+              "kind": "text",
+              "span": [
+                690,
+                700
+              ],
+              "value": "fx-spark"
+            }
+          }
+        ],
+        "key": "Lantern.start/1:to",
+        "kind": "value",
+        "note": null,
+        "outputs": [],
+        "placed": false,
+        "print": "78fda7adb83284dd",
+        "span": [
+          679,
+          701
+        ],
+        "title": "World.find"
+      },
+      {
+        "at": [
+          1196.0,
+          300.0
+        ],
+        "inputs": [
+          {
+            "name": "to",
+            "value": null
+          }
+        ],
+        "key": "Lantern.start/1",
+        "kind": "statement",
+        "note": null,
+        "outputs": [
+          ""
+        ],
+        "placed": false,
+        "print": "3ab154771e138347",
+        "span": [
+          665,
+          702
+        ],
+        "title": "Set this.sparks"
+      },
+      {
+        "at": [
+          0.0,
+          500.0
+        ],
+        "inputs": [],
+        "key": "Lantern.update",
+        "kind": "event",
+        "note": null,
+        "outputs": [
+          ""
+        ],
+        "placed": false,
+        "print": "dd07dff487d7ecb2",
+        "span": [
+          714,
+          915
+        ],
+        "title": "Every frame (dt)"
+      },
+      {
+        "at": [
+          310.0,
+          568.0
+        ],
+        "inputs": [
+          {
+            "name": "",
+            "value": {
+              "kind": "name",
+              "path": "this.lit",
+              "span": [
+                750,
+                758
+              ]
+            }
+          }
+        ],
+        "key": "Lantern.update/0:if",
+        "kind": "value",
+        "note": null,
+        "outputs": [],
+        "placed": false,
+        "print": "cabcae4da12950c7",
+        "span": [
+          749,
+          758
+        ],
+        "title": "not"
+      },
+      {
+        "at": [
+          598.0,
+          500.0
+        ],
+        "inputs": [
+          {
+            "name": "if",
+            "value": null
+          }
+        ],
+        "key": "Lantern.update/0",
+        "kind": "statement",
+        "note": null,
+        "outputs": [
+          "True",
+          "False",
+          "Next"
+        ],
+        "placed": false,
+        "print": "45ee82175f4e5f7d",
+        "span": [
+          746,
+          790
+        ],
+        "title": "Branch"
+      },
+      {
+        "at": [
+          753.0,
+          740.0
+        ],
+        "inputs": [],
+        "key": "Lantern.update/0.0/0",
+        "kind": "statement",
+        "note": null,
+        "outputs": [],
+        "placed": false,
+        "print": "8f0d9df748daa0ec",
+        "span": [
+          773,
+          780
+        ],
+        "title": "Give back"
+      },
+      {
+        "at": [
+          908.0,
+          604.0
+        ],
+        "inputs": [
+          {
+            "name": "a",
+            "value": {
+              "kind": "name",
+              "path": "this.flare",
+              "span": [
+                821,
+                831
+              ]
+            }
+          },
+          {
+            "name": "b",
+            "value": {
+              "kind": "name",
+              "path": "dt",
+              "span": [
+                834,
+                836
+              ]
+            }
+          }
+        ],
+        "key": "Lantern.update/1:to:2",
+        "kind": "value",
+        "note": null,
+        "outputs": [],
+        "placed": false,
+        "print": "102e059491330f16",
+        "span": [
+          821,
+          836
+        ],
+        "title": "-"
+      },
+      {
+        "at": [
+          1196.0,
+          568.0
+        ],
+        "inputs": [
+          {
+            "name": "1",
+            "value": {
+              "kind": "number",
+              "span": [
+                816,
+                819
+              ],
+              "value": 0.0
+            }
+          },
+          {
+            "name": "2",
+            "value": null
+          }
+        ],
+        "key": "Lantern.update/1:to",
+        "kind": "value",
+        "note": null,
+        "outputs": [],
+        "placed": false,
+        "print": "66b5e786f178c4b1",
+        "span": [
+          812,
+          837
+        ],
+        "title": "max"
+      },
+      {
+        "at": [
+          1484.0,
+          500.0
+        ],
+        "inputs": [
+          {
+            "name": "to",
+            "value": null
+          }
+        ],
+        "key": "Lantern.update/1",
+        "kind": "statement",
+        "note": null,
+        "outputs": [
+          ""
+        ],
+        "placed": false,
+        "print": "8852248074b28a77",
+        "span": [
+          799,
+          838
+        ],
+        "title": "Set this.flare"
+      },
+      {
+        "at": [
+          1794.0,
+          640.0
+        ],
+        "inputs": [
+          {
+            "name": "a",
+            "value": {
+              "kind": "name",
+              "path": "this.flare",
+              "span": [
+                891,
+                901
+              ]
+            }
+          },
+          {
+            "name": "b",
+            "value": {
+              "kind": "number",
+              "span": [
+                904,
+                907
+              ],
+              "value": 0.8
+            }
+          }
+        ],
+        "key": "Lantern.update/2:to:b:b",
+        "kind": "value",
+        "note": null,
+        "outputs": [],
+        "placed": false,
+        "print": "a197d6e73b306f1b",
+        "span": [
+          890,
+          908
+        ],
+        "title": "/"
+      },
+      {
+        "at": [
+          2082.0,
+          604.0
+        ],
+        "inputs": [
+          {
+            "name": "a",
+            "value": {
+              "kind": "number",
+              "span": [
+                884,
+                887
+              ],
+              "value": 2.4
+            }
+          },
+          {
+            "name": "b",
+            "value": null
+          }
+        ],
+        "key": "Lantern.update/2:to:b",
+        "kind": "value",
+        "note": null,
+        "outputs": [],
+        "placed": false,
+        "print": "632fcf0124166bed",
+        "span": [
+          884,
+          908
+        ],
+        "title": "*"
+      },
+      {
+        "at": [
+          2370.0,
+          568.0
+        ],
+        "inputs": [
+          {
+            "name": "a",
+            "value": {
+              "kind": "number",
+              "span": [
+                878,
+                881
+              ],
+              "value": 1.1
+            }
+          },
+          {
+            "name": "b",
+            "value": null
+          }
+        ],
+        "key": "Lantern.update/2:to",
+        "kind": "value",
+        "note": null,
+        "outputs": [],
+        "placed": false,
+        "print": "5d8e0199873d324a",
+        "span": [
+          878,
+          908
+        ],
+        "title": "+"
+      },
+      {
+        "at": [
+          2658.0,
+          500.0
+        ],
+        "inputs": [
+          {
+            "name": "to",
+            "value": null
+          }
+        ],
+        "key": "Lantern.update/2",
+        "kind": "statement",
+        "note": null,
+        "outputs": [
+          ""
+        ],
+        "placed": false,
+        "print": "e1a543e7cfdc8efd",
+        "span": [
+          847,
+          909
+        ],
+        "title": "Set this.light.light2d.intensity"
+      },
+      {
+        "at": [
+          0.0,
+          912.0
+        ],
+        "inputs": [],
+        "key": "Lantern.ignite",
+        "kind": "function",
+        "note": null,
+        "outputs": [
+          ""
+        ],
+        "placed": false,
+        "print": "37b604c86be8b245",
+        "span": [
+          921,
+          1432
+        ],
+        "title": "ignite"
+      },
+      {
+        "at": [
+          310.0,
+          912.0
+        ],
+        "inputs": [
+          {
+            "name": "if",
+            "value": {
+              "kind": "name",
+              "path": "this.lit",
+              "span": [
+                946,
+                954
+              ]
+            }
+          }
+        ],
+        "key": "Lantern.ignite/0",
+        "kind": "statement",
+        "note": null,
+        "outputs": [
+          "True",
+          "False",
+          "Next"
+        ],
+        "placed": false,
+        "print": "9c8334993534dd64",
+        "span": [
+          943,
+          986
+        ],
+        "title": "Branch"
+      },
+      {
+        "at": [
+          465.0,
+          1260.0
+        ],
+        "inputs": [],
+        "key": "Lantern.ignite/0.0/0",
+        "kind": "statement",
+        "note": null,
+        "outputs": [],
+        "placed": false,
+        "print": "8f0d9df748daa0ec",
+        "span": [
+          969,
+          976
+        ],
+        "title": "Give back"
+      },
+      {
+        "at": [
+          620.0,
+          912.0
+        ],
+        "inputs": [
+          {
+            "name": "to",
+            "value": {
+              "kind": "bool",
+              "span": [
+                1006,
+                1010
+              ],
+              "value": true
+            }
+          }
+        ],
+        "key": "Lantern.ignite/1",
+        "kind": "statement",
+        "note": null,
+        "outputs": [
+          ""
+        ],
+        "placed": false,
+        "print": "a3a769f871adf48e",
+        "span": [
+          995,
+          1011
+        ],
+        "title": "Set this.lit"
+      },
+      {
+        "at": [
+          930.0,
+          912.0
+        ],
+        "inputs": [
+          {
+            "name": "to",
+            "value": {
+              "kind": "number",
+              "span": [
+                1033,
+                1036
+              ],
+              "value": 0.8
+            }
+          }
+        ],
+        "key": "Lantern.ignite/2",
+        "kind": "statement",
+        "note": null,
+        "outputs": [
+          ""
+        ],
+        "placed": false,
+        "print": "82264362f4c5d5ad",
+        "span": [
+          1020,
+          1037
+        ],
+        "title": "Set this.flare"
+      },
+      {
+        "at": [
+          1240.0,
+          912.0
+        ],
+        "inputs": [
+          {
+            "name": "1",
+            "value": {
+              "kind": "name",
+              "path": "this.entity",
+              "span": [
+                1061,
+                1072
+              ]
+            }
+          },
+          {
+            "name": "2",
+            "value": {
+              "kind": "text",
+              "span": [
+                1074,
+                1079
+              ],
+              "value": "lit"
+            }
+          }
+        ],
+        "key": "Lantern.ignite/3",
+        "kind": "statement",
+        "note": null,
+        "outputs": [
+          ""
+        ],
+        "placed": false,
+        "print": "e37fa2c0a1190401",
+        "span": [
+          1046,
+          1081
+        ],
+        "title": "Animation.play"
+      },
+      {
+        "at": [
+          1550.0,
+          980.0
+        ],
+        "inputs": [
+          {
+            "name": "a",
+            "value": {
+              "kind": "name",
+              "path": "this.transform.world_position.y",
+              "span": [
+                1216,
+                1247
+              ]
+            }
+          },
+          {
+            "name": "b",
+            "value": {
+              "kind": "number",
+              "span": [
+                1250,
+                1253
+              ],
+              "value": 2.6
+            }
+          }
+        ],
+        "key": "Lantern.ignite/4:3",
+        "kind": "value",
+        "note": null,
+        "outputs": [],
+        "placed": false,
+        "print": "920a35cc91d199cd",
+        "span": [
+          1216,
+          1253
+        ],
+        "title": "+"
+      },
+      {
+        "at": [
+          1838.0,
+          912.0
+        ],
+        "inputs": [
+          {
+            "name": "1",
+            "value": {
+              "kind": "name",
+              "path": "this.sparks",
+              "span": [
+                1170,
+                1181
+              ]
+            }
+          },
+          {
+            "name": "2",
+            "value": {
+              "kind": "name",
+              "path": "this.transform.world_position.x",
+              "span": [
+                1183,
+                1214
+              ]
+            }
+          },
+          {
+            "name": "3",
+            "value": null
+          }
+        ],
+        "key": "Lantern.ignite/4",
+        "kind": "statement",
+        "note": "Sparks off the flame, and a small shake: it caught.",
+        "outputs": [
+          ""
+        ],
+        "placed": false,
+        "print": "ef33771c31a1c05d",
+        "span": [
+          1153,
+          1255
+        ],
+        "title": "Effects.burst_at"
+      },
+      {
+        "at": [
+          2148.0,
+          912.0
+        ],
+        "inputs": [
+          {
+            "name": "1",
+            "value": {
+              "kind": "number",
+              "span": [
+                1282,
+                1286
+              ],
+              "value": 0.18
+            }
+          }
+        ],
+        "key": "Lantern.ignite/5",
+        "kind": "statement",
+        "note": null,
+        "outputs": [
+          ""
+        ],
+        "placed": false,
+        "print": "5095871c356cffb5",
+        "span": [
+          1264,
+          1288
+        ],
+        "title": "Camera.add_trauma"
+      },
+      {
+        "at": [
+          2458.0,
+          912.0
+        ],
+        "inputs": [
+          {
+            "name": "by",
+            "value": {
+              "kind": "number",
+              "span": [
+                1309,
+                1312
+              ],
+              "value": 1.0
+            }
+          }
+        ],
+        "key": "Lantern.ignite/6",
+        "kind": "statement",
+        "note": null,
+        "outputs": [
+          ""
+        ],
+        "placed": false,
+        "print": "40bd16f900151916",
+        "span": [
+          1297,
+          1313
+        ],
+        "title": "Add to Game.lit"
+      },
+      {
+        "at": [
+          2768.0,
+          1016.0
+        ],
+        "inputs": [
+          {
+            "name": "1",
+            "value": {
+              "kind": "name",
+              "path": "this.entity",
+              "span": [
+                1339,
+                1350
+              ]
+            }
+          },
+          {
+            "name": "2",
+            "value": {
+              "kind": "text",
+              "span": [
+                1352,
+                1358
+              ],
+              "value": "goal"
+            }
+          }
+        ],
+        "key": "Lantern.ignite/7:if:a",
+        "kind": "value",
+        "note": null,
+        "outputs": [],
+        "placed": false,
+        "print": "f006570c62e88283",
+        "span": [
+          1325,
+          1359
+        ],
+        "title": "World.has_tag"
+      },
+      {
+        "at": [
+          2768.0,
+          1152.0
+        ],
+        "inputs": [
+          {
+            "name": "a",
+            "value": {
+              "kind": "name",
+              "path": "Game.lit",
+              "span": [
+                1363,
+                1371
+              ]
+            }
+          },
+          {
+            "name": "b",
+            "value": {
+              "kind": "name",
+              "path": "Game.total",
+              "span": [
+                1375,
+                1385
+              ]
+            }
+          }
+        ],
+        "key": "Lantern.ignite/7:if:b",
+        "kind": "value",
+        "note": null,
+        "outputs": [],
+        "placed": false,
+        "print": "a6a0ffdc4d8a934b",
+        "span": [
+          1363,
+          1385
+        ],
+        "title": ">="
+      },
+      {
+        "at": [
+          3056.0,
+          980.0
+        ],
+        "inputs": [
+          {
+            "name": "a",
+            "value": null
+          },
+          {
+            "name": "b",
+            "value": null
+          }
+        ],
+        "key": "Lantern.ignite/7:if",
+        "kind": "value",
+        "note": null,
+        "outputs": [],
+        "placed": false,
+        "print": "f29fc8245ccfa949",
+        "span": [
+          1325,
+          1385
+        ],
+        "title": "||"
+      },
+      {
+        "at": [
+          3344.0,
+          912.0
+        ],
+        "inputs": [
+          {
+            "name": "if",
+            "value": null
+          }
+        ],
+        "key": "Lantern.ignite/7",
+        "kind": "statement",
+        "note": null,
+        "outputs": [
+          "True",
+          "False",
+          "Next"
+        ],
+        "placed": false,
+        "print": "5ea614ab64b016b0",
+        "span": [
+          1322,
+          1426
+        ],
+        "title": "Branch"
+      },
+      {
+        "at": [
+          3499.0,
+          1384.0
+        ],
+        "inputs": [
+          {
+            "name": "to",
+            "value": {
+              "kind": "bool",
+              "span": [
+                1411,
+                1415
+              ],
+              "value": true
+            }
+          }
+        ],
+        "key": "Lantern.ignite/7.0/0",
+        "kind": "statement",
+        "note": null,
+        "outputs": [
+          ""
+        ],
+        "placed": false,
+        "print": "4938a42a13fc8dd9",
+        "span": [
+          1400,
+          1416
+        ],
+        "title": "Set Game.won"
+      }
+    ],
+    "wires": [
+      {
+        "flow": false,
+        "from": "Lantern.start/0:to",
+        "into": "to",
+        "out": "",
+        "to": "Lantern.start/0"
+      },
+      {
+        "flow": true,
+        "from": "Lantern.start",
+        "into": "",
+        "out": "",
+        "to": "Lantern.start/0"
+      },
+      {
+        "flow": false,
+        "from": "Lantern.start/1:to",
+        "into": "to",
+        "out": "",
+        "to": "Lantern.start/1"
+      },
+      {
+        "flow": true,
+        "from": "Lantern.start/0",
+        "into": "",
+        "out": "",
+        "to": "Lantern.start/1"
+      },
+      {
+        "flow": false,
+        "from": "Lantern.update/0:if",
+        "into": "if",
+        "out": "",
+        "to": "Lantern.update/0"
+      },
+      {
+        "flow": true,
+        "from": "Lantern.update/0",
+        "into": "",
+        "out": "True",
+        "to": "Lantern.update/0.0/0"
+      },
+      {
+        "flow": true,
+        "from": "Lantern.update",
+        "into": "",
+        "out": "",
+        "to": "Lantern.update/0"
+      },
+      {
+        "flow": false,
+        "from": "Lantern.update/1:to:2",
+        "into": "2",
+        "out": "",
+        "to": "Lantern.update/1:to"
+      },
+      {
+        "flow": false,
+        "from": "Lantern.update/1:to",
+        "into": "to",
+        "out": "",
+        "to": "Lantern.update/1"
+      },
+      {
+        "flow": true,
+        "from": "Lantern.update/0",
+        "into": "",
+        "out": "Next",
+        "to": "Lantern.update/1"
+      },
+      {
+        "flow": false,
+        "from": "Lantern.update/2:to:b:b",
+        "into": "b",
+        "out": "",
+        "to": "Lantern.update/2:to:b"
+      },
+      {
+        "flow": false,
+        "from": "Lantern.update/2:to:b",
+        "into": "b",
+        "out": "",
+        "to": "Lantern.update/2:to"
+      },
+      {
+        "flow": false,
+        "from": "Lantern.update/2:to",
+        "into": "to",
+        "out": "",
+        "to": "Lantern.update/2"
+      },
+      {
+        "flow": true,
+        "from": "Lantern.update/1",
+        "into": "",
+        "out": "",
+        "to": "Lantern.update/2"
+      },
+      {
+        "flow": true,
+        "from": "Lantern.ignite/0",
+        "into": "",
+        "out": "True",
+        "to": "Lantern.ignite/0.0/0"
+      },
+      {
+        "flow": true,
+        "from": "Lantern.ignite",
+        "into": "",
+        "out": "",
+        "to": "Lantern.ignite/0"
+      },
+      {
+        "flow": true,
+        "from": "Lantern.ignite/0",
+        "into": "",
+        "out": "Next",
+        "to": "Lantern.ignite/1"
+      },
+      {
+        "flow": true,
+        "from": "Lantern.ignite/1",
+        "into": "",
+        "out": "",
+        "to": "Lantern.ignite/2"
+      },
+      {
+        "flow": true,
+        "from": "Lantern.ignite/2",
+        "into": "",
+        "out": "",
+        "to": "Lantern.ignite/3"
+      },
+      {
+        "flow": false,
+        "from": "Lantern.ignite/4:3",
+        "into": "3",
+        "out": "",
+        "to": "Lantern.ignite/4"
+      },
+      {
+        "flow": true,
+        "from": "Lantern.ignite/3",
+        "into": "",
+        "out": "",
+        "to": "Lantern.ignite/4"
+      },
+      {
+        "flow": true,
+        "from": "Lantern.ignite/4",
+        "into": "",
+        "out": "",
+        "to": "Lantern.ignite/5"
+      },
+      {
+        "flow": true,
+        "from": "Lantern.ignite/5",
+        "into": "",
+        "out": "",
+        "to": "Lantern.ignite/6"
+      },
+      {
+        "flow": false,
+        "from": "Lantern.ignite/7:if:a",
+        "into": "a",
+        "out": "",
+        "to": "Lantern.ignite/7:if"
+      },
+      {
+        "flow": false,
+        "from": "Lantern.ignite/7:if:b",
+        "into": "b",
+        "out": "",
+        "to": "Lantern.ignite/7:if"
+      },
+      {
+        "flow": false,
+        "from": "Lantern.ignite/7:if",
+        "into": "if",
+        "out": "",
+        "to": "Lantern.ignite/7"
+      },
+      {
+        "flow": true,
+        "from": "Lantern.ignite/7",
+        "into": "",
+        "out": "True",
+        "to": "Lantern.ignite/7.0/0"
+      },
+      {
+        "flow": true,
+        "from": "Lantern.ignite/6",
+        "into": "",
+        "out": "",
+        "to": "Lantern.ignite/7"
+      }
+    ]
+  },
+  "name": "scripts/lantern.decay",
+  "source": "// A lamp post is dark until Wick touches it, then it swaps to its lit sprite and\n// the light up at the lantern flares and burns on. The goal lamp is the last:\n// lighting it opens the way. A lit lamp is also a safe pool: the gloom will not hunt\n// Wick while he stands in it, and are driven out of it (`gloom.decay` reads `lit`).\nscript Lantern {\n    // The name of the entity that carries this lamp's light, up at the lantern.\n    @export let light_name: String = \"\";\n\n    var lit: bool = false;\n    var flare: number = 0.0;\n    var light: Entity = null;\n    var sparks: Entity = null;\n\n    fn start() {\n        this.light = World.find(this.light_name);\n        this.sparks = World.find(\"fx-spark\");\n    }\n\n    fn update(dt: number) {\n        if !this.lit {\n            return;\n        }\n        this.flare = max(0.0, this.flare - dt);\n        this.light.light2d.intensity = 1.1 + 2.4 * (this.flare / 0.8);\n    }\n\n    fn ignite() {\n        if this.lit {\n            return;\n        }\n        this.lit = true;\n        this.flare = 0.8;\n        Animation.play(this.entity, \"lit\");\n        // Sparks off the flame, and a small shake: it caught.\n        Effects.burst_at(this.sparks, this.transform.world_position.x, this.transform.world_position.y + 2.6);\n        Camera.add_trauma(0.18);\n        Game.lit += 1.0;\n        if World.has_tag(this.entity, \"goal\") || Game.lit >= Game.total {\n            Game.won = true;\n        }\n    }\n}\n"
+}

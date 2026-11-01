@@ -227,6 +227,7 @@ impl Host {
             }
             "stepOnce" => self.step_once(),
             "openScript" => self.open_script(text(0)?),
+            "moveNode" => self.move_node(text(0)?, [number(1)?, number(2)?]),
             "closeScript" => {
                 self.close_script();
                 Ok(())

@@ -165,5 +165,9 @@ class EditorControllerTest {
 
         controller.on(EditorEvent.ScriptSlot(DecaySlot.Number(1.5, 40 to 43), 2.0)) {}
         assertEquals(listOf("editScript", "number", 40, 43, 2.0), host.commands.last())
+
+        controller.on(EditorEvent.MoveNode("Lamp.update/0", 320f, 96f)) {}
+        assertEquals(listOf("moveNode", "Lamp.update/0", 320f, 96f), host.commands.last())
+        assertTrue("the sheet stays open on the script", controller.ui.sheet is EditorSheet.Behaviour)
     }
 }

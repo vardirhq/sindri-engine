@@ -1,14 +1,16 @@
-//! A script opened from the Behaviour sheet, as Decay blocks.
+//! A script opened from the Behaviour sheet, as Decay nodes.
 //!
-//! The `.decay` file is the script; the blocks are how the phone shows it
+//! The `.decay` file is the script; the node graph is how the phone shows it
 //! (`sindri_authoring::visual_decay`). An edit replaces the text of the one
 //! slot it changed and is written straight back to the file, so the script
-//! reads on desktop exactly as it would had it been typed there.
+//! reads on desktop exactly as it would had it been typed there. Where nodes
+//! were dragged is kept beside it, in `<script>.layout`, never in it.
 
 use std::path::PathBuf;
 
 use serde_json::{Value, json};
-use sindri_authoring::visual_decay::{self, ScriptEdit};
+use sindri_authoring::visual_decay::layout::LAYOUT_SUFFIX;
+use sindri_authoring::visual_decay::{self, Layout, ScriptEdit};
 
 use super::Host;
 
@@ -18,6 +20,22 @@ pub(super) struct OpenScript {
     name: String,
     path: PathBuf,
     source: String,
+    /// Where its nodes were dragged, from beside it.
+    layout: Layout,
+}
+
+impl OpenScript {
+    fn layout_path(&self) -> PathBuf {
+        let mut name = self.path.clone().into_os_string();
+        name.push(LAYOUT_SUFFIX);
+        PathBuf::from(name)
+    }
+
+    fn graph(&self) -> visual_decay::Graph {
+        let mut graph = visual_decay::graph(&visual_decay::blocks(&self.source), &self.source);
+        self.layout.place(&mut graph);
+        graph
+    }
 }
 
 impl Host {
@@ -30,11 +48,15 @@ impl Host {
         }
         let path = sindri_runtime::project::assets_root(project).join(name);
         let source = std::fs::read_to_string(&path).map_err(|error| format!("{name}: {error}"))?;
-        self.script = Some(OpenScript {
+        let mut script = OpenScript {
             name: name.to_owned(),
             path,
             source,
-        });
+            layout: Layout::default(),
+        };
+        let stored = std::fs::read_to_string(script.layout_path()).ok();
+        script.layout = Layout::read(stored.as_deref())?;
+        self.script = Some(script);
         Ok(())
     }
 
@@ -73,8 +95,24 @@ impl Host {
         Ok(())
     }
 
+    /// A node of the open script was dragged to `at`: kept in its layout file.
+    pub(super) fn move_node(&mut self, key: &str, at: [f32; 2]) -> Result<(), String> {
+        let script = self.script.as_mut().ok_or("no script is open")?;
+        let graph = script.graph();
+        let node = graph
+            .nodes
+            .iter()
+            .find(|node| node.key == key)
+            .ok_or_else(|| format!("the script has no node {key} now"))?;
+        script.layout.moved(node, at);
+        let path = script.layout_path();
+        std::fs::write(&path, script.layout.to_json()?)
+            .map_err(|error| format!("{}{LAYOUT_SUFFIX}: {error}", script.name))
+    }
+
     /// The open script for the Behaviour sheet, as JSON: its `name`, its
-    /// `source` for the Code view, and its `blocks`; `null` with none open.
+    /// `source` for the Code view, its `blocks` and its node `graph`, placed;
+    /// `null` with none open.
     pub(super) fn script(&self) -> String {
         self.script.as_ref().map_or_else(
             || "null".to_owned(),
@@ -83,6 +121,7 @@ impl Host {
                     "name": script.name,
                     "source": script.source,
                     "blocks": visual_decay::blocks(&script.source),
+                    "graph": script.graph(),
                 })
                 .to_string()
             },

@@ -105,15 +105,18 @@ class DesignScreens {
         lamp.copy(sheet = EditorSheet.Inspector(InspectorPresenter.present(EngineSamples.lamp, "world.scene", "projects/lamplighter/assets/", details = false).ui, full = true)),
     )
 
-    /** A real script as Decay blocks, in the Behaviour sheet. */
-    @Test fun behaviourDecay() = editor(
-        "22d-behaviour-decay",
+    /** The lamp post's real script as Decay nodes, read by the phone's own code (`mobile/native/tests/decay_fixture.rs`). */
+    @Test fun behaviourNodes() = editor(
+        "22d-behaviour-nodes",
         lamp.copy(
             sheet = EditorSheet.Behaviour(
-                BehaviourUi("Lamp post", emptyList(), emptyList(), "scripts/lamp.decay", listOf("script Lamp {"), "", decay = EngineSamples.lampScript),
+                BehaviourUi("Lamp post", emptyList(), emptyList(), "scripts/lantern.decay", emptyList(), "", decay = lantern()),
             ),
         ),
     )
+
+    private fun lantern(): DecayScript =
+        checkNotNull(DecayScript.read(checkNotNull(javaClass.getResource("/decay/lantern.json")).readText()))
 
     @Test fun inspectorFull() = editor("21-inspector-full", lamp.copy(sheet = EditorSheet.Inspector(SampleEditor.lampInspector(), full = true)))
 

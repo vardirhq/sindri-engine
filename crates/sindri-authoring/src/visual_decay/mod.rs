@@ -12,17 +12,26 @@
 //! desktop opens as blocks on the phone, and a script edited as blocks on the
 //! phone reads on desktop exactly as it would have if typed there.
 //!
+//! The same reading is drawn as a node graph ([`graph`]), Blueprint style:
+//! event nodes, execution wires between statement nodes, value nodes wired
+//! into pins. Where nodes sit is the one thing a script does not hold, so it
+//! is kept beside it ([`layout`]), never in it.
+//!
 //! What has no block of its own yet is shown as a code block holding its exact
 //! source, so nothing is ever hidden or lost; comments between statements
 //! are shown as comment blocks.
 
 mod edit;
+mod graph;
+pub mod layout;
 mod project;
 mod slots;
 
 use serde::Serialize;
 
 pub use edit::{ScriptEdit, edit};
+pub use graph::{Graph, Node, Pin, Wire, graph};
+pub use layout::Layout;
 pub use project::blocks;
 
 /// Where something is in the script: its first byte and the byte after it.
@@ -242,5 +251,7 @@ impl Slot {
     }
 }
 
+#[cfg(test)]
+mod graph_tests;
 #[cfg(test)]
 mod tests;
