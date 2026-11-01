@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
@@ -180,8 +179,11 @@ private fun outPin(node: DecayNode, at: Offset, name: String): Offset =
 @Composable
 private fun Wires(graph: DecayGraph, place: (DecayNode) -> Offset) {
     val byKey = remember(graph) { graph.nodes.associateBy { it.key } }
-    val far = graph.nodes.maxOfOrNull { maxOf(it.x, it.y) }?.plus(2000f) ?: 2000f
-    Canvas(Modifier.requiredSize(far.dp)) {
+    // A point-sized canvas that draws past its edges, which nothing clips. One
+    // sized to the graph cannot be laid out: a long script's graph is tens of
+    // thousands of pixels across at a phone's density, past what layout can
+    // measure, and sizing to it crashed the sheet.
+    Canvas(Modifier.size(1.dp)) {
         graph.wires.forEach { wire ->
             val from = byKey[wire.from] ?: return@forEach
             val to = byKey[wire.to] ?: return@forEach
