@@ -4,6 +4,7 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.compose")
+    id("io.github.takahirom.roborazzi")
 }
 
 // The repository root, where the Cargo workspace and the sample games live.
@@ -49,6 +50,24 @@ android {
 
     buildFeatures { compose = true }
 
+    // The design is checked on the JVM: Robolectric draws each screen and
+    // Roborazzi writes it out, so it can be set beside the prototype's capture
+    // of the same state without a phone. See `mobile/design.md`.
+    testOptions {
+        unitTests.isIncludeAndroidResources = true
+        unitTests.all { test ->
+            // Robolectric fetches Android's runtime itself, outside Gradle, and
+            // a rate-limited mirror then fails the run. Gradle fetches it here
+            // instead, with its retries and cache, and Robolectric reads it offline.
+            test.dependsOn(robolectricRuntime)
+            test.systemProperty("robolectric.offline", "true")
+            test.systemProperty(
+                "robolectric.dependency.dir",
+                layout.buildDirectory.dir("robolectric").get().asFile.path,
+            )
+        }
+    }
+
     sourceSets {
         getByName("main") {
             jniLibs.srcDir(layout.buildDirectory.dir("rustJniLibs"))
@@ -77,6 +96,24 @@ dependencies {
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.foundation:foundation")
     implementation("androidx.compose.material3:material3")
+
+    testImplementation(composeBom)
+    testImplementation("junit:junit:4.13.2")
+    testImplementation("org.robolectric:robolectric:4.17")
+    testImplementation("androidx.compose.ui:ui-test-junit4")
+    testImplementation("io.github.takahirom.roborazzi:roborazzi:1.77.0")
+    testImplementation("io.github.takahirom.roborazzi:roborazzi-compose:1.77.0")
+    debugImplementation("androidx.compose.ui:ui-test-manifest")
+}
+
+// The Android runtime Robolectric draws the design screenshots with, for SDK 35.
+val robolectricAndroid: Configuration by configurations.creating
+dependencies {
+    robolectricAndroid("org.robolectric:android-all-instrumented:15-robolectric-13954326-i7")
+}
+val robolectricRuntime by tasks.registering(Sync::class) {
+    from(robolectricAndroid)
+    into(layout.buildDirectory.dir("robolectric"))
 }
 
 // The sample project the slice opens, copied into the APK's assets under

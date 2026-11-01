@@ -84,6 +84,82 @@ pub fn pick_world(
     Ok(transparent.or(nearest_mesh).map(|hit| hit.entity))
 }
 
+/// Where an entity covers the viewport: left, top, right and bottom, each a
+/// fraction across it, in the units [`pick_world`] takes a point in.
+///
+/// The same local geometry a pick hits — the sprite quad, the unit cube, the
+/// tilemap's cells — so an outline drawn from it encloses exactly what a tap
+/// on it would select. `None` for an entity with none of them, one switched
+/// off, or one that does not reach the viewport.
+pub fn world_bounds(
+    world: &World,
+    components: &ComponentSchemaRegistry,
+    view_projection: Mat4,
+    entity: EntityId,
+) -> Result<Option<[f32; 4]>, ComponentRegistryError> {
+    let corners: Vec<Vec3> = if let Some(map) = components.get::<TilemapComponent>(world, entity)? {
+        if map.grid_bounds().is_err() {
+            return Ok(None);
+        }
+        let [width, height] = map.tile_size;
+        let last = [map.columns.saturating_sub(1), map.rows.saturating_sub(1)];
+        [[0, 0], [last[0], 0], [0, last[1]], last]
+            .into_iter()
+            .flat_map(|[column, row]| {
+                let [x, y] = map.tile_to_local(column, row);
+                [[-0.5, -0.5], [0.5, -0.5], [-0.5, 0.5], [0.5, 0.5]]
+                    .map(|[dx, dy]| Vec3::new(x + dx * width, y + dy * height, 0.0))
+            })
+            .collect()
+    } else if components
+        .get::<SpriteComponent>(world, entity)?
+        .is_some_and(|sprite| is_drawn(sprite.tint))
+    {
+        [[-0.5, -0.5], [0.5, -0.5], [-0.5, 0.5], [0.5, 0.5]]
+            .map(|[x, y]| Vec3::new(x, y, 0.0))
+            .to_vec()
+    } else if components
+        .get::<MeshComponent>(world, entity)?
+        .is_some_and(|mesh| mesh.primitive == MeshPrimitive::Cube)
+    {
+        (0..8)
+            .map(|corner| {
+                let at = |bit: u32| if corner & bit == 0 { -0.5 } else { 0.5 };
+                Vec3::new(at(1), at(2), at(4))
+            })
+            .collect()
+    } else {
+        return Ok(None);
+    };
+    let model = view_projection * transform_matrix(transform_of(world, entity));
+    let mut bounds = [
+        f32::INFINITY,
+        f32::INFINITY,
+        f32::NEG_INFINITY,
+        f32::NEG_INFINITY,
+    ];
+    for corner in corners {
+        let clip = model * corner.extend(1.0);
+        if clip.w <= f32::EPSILON {
+            return Ok(None);
+        }
+        let x = (clip.x / clip.w + 1.0) * 0.5;
+        let y = (1.0 - clip.y / clip.w) * 0.5;
+        bounds = [
+            bounds[0].min(x),
+            bounds[1].min(y),
+            bounds[2].max(x),
+            bounds[3].max(y),
+        ];
+    }
+    let reaches = bounds.iter().all(|edge| edge.is_finite())
+        && bounds[2] >= 0.0
+        && bounds[0] <= 1.0
+        && bounds[3] >= 0.0
+        && bounds[1] <= 1.0;
+    Ok(reaches.then_some(bounds))
+}
+
 /// Selects the topmost UI element under a normalized viewport point.
 ///
 /// A pass of its own, because UI is not in the world. It is laid out against

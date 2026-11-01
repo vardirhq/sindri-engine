@@ -18,8 +18,11 @@ crate-type = ["cdylib", "rlib"]
 glam.workspace = true
 serde_json.workspace = true
 sindri-assets = { path = "../../crates/sindri-assets" }
+sindri-authoring = { path = "../../crates/sindri-authoring" }
 sindri-core = { path = "../../crates/sindri-core" }
 sindri-gpu = { path = "../../crates/sindri-gpu" }
+# Only for the key names a run is given input by.
+sindri-platform = { path = "../../crates/sindri-platform", default-features = false }
 sindri-render = { path = "../../crates/sindri-render" }
 sindri-runtime = { path = "../../crates/sindri-runtime" }
 sindri-scene = { path = "../../crates/sindri-scene" }
@@ -49,4 +52,5 @@ missing_errors_doc = "allow"
 missing_panics_doc = "allow"
 
 [dev-dependencies]
+tempfile = "3"
 pollster.workspace = true

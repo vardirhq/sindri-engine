@@ -153,7 +153,7 @@ Open, save canonically, reload, discard, New scene and Save as, keeping unknown 
 
 Engine — · Editor ✅ · Decay — · Proof ✅
 
-**Tested by:** [`editor/src/scene_file.rs`](../../editor/src/scene_file.rs), [`editor/src/native/tests/scene.rs`](../../editor/src/native/tests/scene.rs), [`editor/src/native/tests/shortcuts.rs`](../../editor/src/native/tests/shortcuts.rs), [`editor/tests/fixture_scene.rs`](../../editor/tests/fixture_scene.rs)
+**Tested by:** [`crates/sindri-authoring/src/scene_file.rs`](../../crates/sindri-authoring/src/scene_file.rs), [`editor/src/native/tests/scene.rs`](../../editor/src/native/tests/scene.rs), [`editor/src/native/tests/shortcuts.rs`](../../editor/src/native/tests/shortcuts.rs), [`editor/tests/fixture_scene.rs`](../../editor/tests/fixture_scene.rs)
 
 **Exercised in:** [`games/platformer`](../../games/platformer)
 

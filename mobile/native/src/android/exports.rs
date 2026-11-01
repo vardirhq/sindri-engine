@@ -160,3 +160,16 @@ pub extern "system" fn Java_dev_sindri_mobile_NativeBridge_state<'local>(
     env.new_string(state)
         .map_or(std::ptr::null_mut(), JString::into_raw)
 }
+
+/// `fun script(): String`, a JSON object or `null`; see `Host::script`.
+#[allow(unsafe_code)]
+#[unsafe(no_mangle)]
+pub extern "system" fn Java_dev_sindri_mobile_NativeBridge_script<'local>(
+    env: JNIEnv<'local>,
+    _class: JClass<'local>,
+) -> jstring {
+    let script = catch_unwind(|| HOST.with(|host| host.borrow().script()))
+        .unwrap_or_else(|_| "null".to_owned());
+    env.new_string(script)
+        .map_or(std::ptr::null_mut(), JString::into_raw)
+}

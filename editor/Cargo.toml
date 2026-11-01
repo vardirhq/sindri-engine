@@ -16,6 +16,7 @@ glam.workspace = true
 wgpu.workspace = true
 sindri = { path = "../crates/sindri" }
 sindri-assets = { path = "../crates/sindri-assets" }
+sindri-authoring = { path = "../crates/sindri-authoring" }
 sindri-core = { path = "../crates/sindri-core" }
 sindri-decay = { path = "../crates/sindri-decay" }
 sindri-grid = { path = "../crates/sindri-grid" }

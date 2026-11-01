@@ -3,7 +3,7 @@
 use std::path::{Path, PathBuf};
 
 use eframe::egui::{self};
-use sindri_core::{AssetKind, FieldMeaning, SceneDocument, UnknownComponentPolicy, World};
+use sindri_core::{AssetKind, FieldMeaning, SceneDocument, World};
 use sindri_decay::ScriptComponent;
 use sindri_scene::{SceneExtractor, SpriteAnimations};
 
@@ -90,36 +90,7 @@ pub fn scene_extractor() -> SceneExtractor {
     scene
 }
 
-/// Builds a runtime world from a document the editor has opened.
-///
-/// `Preserve` rather than `Reject`: a scene may carry components this build has
-/// never heard of, and the format exists to keep them through a load, an edit,
-/// and a save. Rejecting them is how the editor came to refuse — and from the
-/// command line, crash on — any project that defined a component of its own.
-///
-/// Each instance is made from its prefab, and the components checked are what
-/// the instances expanded to: a prefab's components are as much the scene's as
-/// the ones written in it.
-pub fn load_world(extractor: &SceneExtractor, file: &SceneFile) -> Result<World, String> {
-    let expanded = file
-        .document()
-        .expanded(file.prefabs())
-        .map_err(|error| error.to_string())?;
-    extractor
-        .validate(&expanded, UnknownComponentPolicy::Preserve)
-        .map_err(|error| error.to_string())?;
-    Ok(World::from_scene_with(file.document(), file.prefabs())
-        .map_err(|error| error.to_string())?
-        .world)
-}
-
-/// [`load_world`] for a document with no file behind it, and so no prefabs.
-pub fn load_document(
-    extractor: &SceneExtractor,
-    document: &SceneDocument,
-) -> Result<World, String> {
-    load_world(extractor, &SceneFile::detached(document.clone()))
-}
+pub use sindri_authoring::{load_document, load_world};
 
 impl EditorApp {
     /// Writes the world back to the file it came from.

@@ -6,7 +6,7 @@
 use serde_json::{Value, json};
 
 use super::Host;
-use crate::{Editing, OpenedScene};
+use crate::{Editing, Handle, OpenedScene, Place};
 
 impl Host {
     /// The surface's size in pixels, which every touch is measured against.
@@ -26,30 +26,62 @@ impl Host {
     }
 
     pub(super) fn tap(&mut self, pixel: [f32; 2]) -> Result<(), String> {
+        if let Some(playing) = &mut self.playing {
+            playing.tap();
+            return Ok(());
+        }
         let size = self.size();
         let (opened, editing) = self.editing()?;
         editing.tap(&opened.world, &opened.extractor, pixel, size)
     }
 
     pub(super) fn press(&mut self, pixel: [f32; 2]) -> Result<(), String> {
+        if self.playing.is_some() {
+            self.stick = Some((pixel, pixel));
+            return Ok(());
+        }
         let size = self.size();
         let (opened, editing) = self.editing()?;
         editing.press(&opened.world, &opened.extractor, pixel, size)
     }
 
     pub(super) fn drag(&mut self, pixel: [f32; 2]) -> Result<(), String> {
+        if self.playing.is_some() {
+            self.push_stick(pixel);
+            return Ok(());
+        }
         let size = self.size();
         let (opened, editing) = self.editing()?;
         editing.drag(&mut opened.world, pixel, size)
     }
 
+    pub(super) fn take_handle(
+        &mut self,
+        handle: Handle,
+        pixel: [f32; 2],
+        snap: bool,
+    ) -> Result<(), String> {
+        let size = self.size();
+        let (opened, editing) = self.editing()?;
+        editing.take_handle(&opened.world, &opened.extractor, handle, pixel, size, snap)
+    }
+
     pub(super) fn release(&mut self) -> Result<(), String> {
+        if let Some(playing) = &mut self.playing {
+            self.stick = None;
+            playing.stick(None);
+            return Ok(());
+        }
         let (_, editing) = self.editing()?;
         editing.release();
         Ok(())
     }
 
     pub(super) fn zoom(&mut self, factor: f32, focus: [f32; 2]) -> Result<(), String> {
+        // A game is seen through its own camera, which a pinch does not move.
+        if self.playing.is_some() {
+            return Ok(());
+        }
         let size = self.size();
         let (_, editing) = self.editing()?;
         editing.canvas.zoom(factor, focus, size);
@@ -66,42 +98,71 @@ impl Host {
         editing.redo(&mut opened.world)
     }
 
-    /// Sets a field to the value the inspector sends, such as `1.25` or `true`.
+    /// Writes the scene back to its file, through the same code as desktop.
+    pub(super) fn save(&mut self) -> Result<(), String> {
+        let (opened, editing) = self.editing()?;
+        opened.save()?;
+        editing.saved();
+        Ok(())
+    }
+
+    /// Sets a field, by its path, to the value the inspector sends, such as
+    /// `1.25` or `true`; `merging` while a slider is being dragged.
     pub(super) fn set_field(
         &mut self,
         type_name: &str,
-        field: &str,
+        path: &str,
         value: Value,
+        merging: bool,
     ) -> Result<(), String> {
         let (opened, editing) = self.editing()?;
         editing.set_field(
             &mut opened.world,
             &opened.extractor,
             type_name,
-            field,
+            path,
             value,
+            merging,
         )
     }
 
+    pub(super) fn set_place(&mut self, place: Place, merging: bool) -> Result<(), String> {
+        let (opened, editing) = self.editing()?;
+        editing.set_place(&mut opened.world, place, merging)
+    }
+
     /// Everything the app's overlay draws from, as one JSON object: the status
-    /// line, the inspector (or `null`), and where to draw the selection marker.
+    /// line, the inspector (or `null`), where the selection's origin is and the
+    /// box it covers (for its handles), the undo state and the lighting preview.
     pub(super) fn state(&self) -> String {
         let size = self.size();
-        let (inspector, marker, undo, redo) = match (&self.opened, &self.editing) {
+        let (inspector, origin, bounds, undo, redo, unsaved) = match (&self.opened, &self.editing) {
             (Some(opened), Some(editing)) => (
-                editing.inspector(&opened.world, &opened.extractor),
+                editing.inspector(&opened.world, &opened.extractor, &opened.assets.sheets),
                 editing.selection_pixel(&opened.world, size),
+                // An outline that cannot be placed is left off rather than
+                // failing the whole state; the pick that selected it worked.
+                editing
+                    .selection_bounds(&opened.world, &opened.extractor, size)
+                    .ok()
+                    .flatten(),
                 editing.history.undo_label(),
                 editing.history.redo_label(),
+                editing.unsaved(),
             ),
-            _ => (Value::Null, None, None, None),
+            _ => (Value::Null, None, None, None, None, false),
         };
         json!({
             "status": self.status(),
             "inspector": inspector,
-            "marker": marker,
+            "origin": origin,
+            "bounds": bounds,
             "undo": undo,
             "redo": redo,
+            "unsaved": unsaved,
+            "play": self.play_state(),
+            "playError": self.play_error,
+            "lighting": self.editing.as_ref().is_some_and(|editing| editing.lighting_preview),
         })
         .to_string()
     }
@@ -136,6 +197,53 @@ impl Host {
                 self.editing()?.1.selected = None;
                 Ok(())
             }
+            "lighting" => {
+                let on = arguments
+                    .first()
+                    .and_then(Value::as_bool)
+                    .ok_or_else(|| format!("{command}: argument 0 is not a switch"))?;
+                self.editing()?.1.lighting_preview = on;
+                Ok(())
+            }
+            "handle" => {
+                let handle = Handle::named(text(0)?).ok_or_else(|| {
+                    format!("{command}: no handle named {}", text(0).unwrap_or(""))
+                })?;
+                let snap = arguments.get(3).and_then(Value::as_bool).unwrap_or(false);
+                self.take_handle(handle, [number(1)?, number(2)?], snap)
+            }
+            "density" => {
+                self.density = number(0)?.max(0.0);
+                Ok(())
+            }
+            "play" => self.play(),
+            "stop" => {
+                self.stop();
+                Ok(())
+            }
+            "pause" => {
+                let paused = arguments.first().and_then(Value::as_bool).unwrap_or(true);
+                self.pause(paused)
+            }
+            "stepOnce" => self.step_once(),
+            "openScript" => self.open_script(text(0)?),
+            "moveNode" => self.move_node(text(0)?, [number(1)?, number(2)?]),
+            "closeScript" => {
+                self.close_script();
+                Ok(())
+            }
+            "editScript" => {
+                let at = |index: usize| -> Result<usize, String> {
+                    arguments
+                        .get(index)
+                        .and_then(Value::as_u64)
+                        .and_then(|value| usize::try_from(value).ok())
+                        .ok_or_else(|| format!("{command}: argument {index} is not a position"))
+                };
+                let value = arguments.get(3).cloned().unwrap_or(Value::Null);
+                self.edit_script(text(0)?, [at(1)?, at(2)?], &value)
+            }
+            "save" => self.save(),
             "undo" => self.undo(),
             "redo" => self.redo(),
             "setField" => {
@@ -143,7 +251,20 @@ impl Host {
                     .get(2)
                     .cloned()
                     .ok_or_else(|| format!("{command}: no value"))?;
-                self.set_field(text(0)?, text(1)?, value)
+                let merging = arguments.get(3).and_then(Value::as_bool).unwrap_or(false);
+                self.set_field(text(0)?, text(1)?, value, merging)
+            }
+            "setPlace" => {
+                let value = arguments.get(1).cloned().unwrap_or(Value::Null);
+                let place = Place::named(text(0)?, &value).ok_or_else(|| {
+                    format!("{command}: no place {} of {value}", text(0).unwrap_or(""))
+                })?;
+                let merging = arguments.get(2).and_then(Value::as_bool).unwrap_or(false);
+                self.set_place(place, merging)
+            }
+            "settle" => {
+                self.editing()?.1.settle();
+                Ok(())
             }
             other => Err(format!("unknown command {other}")),
         }

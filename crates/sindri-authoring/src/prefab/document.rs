@@ -1,4 +1,4 @@
-//! A prefab opened as the editor's document, rather than placed in one.
+//! A prefab opened as an editor's document, rather than placed in one.
 //!
 //! A prefab is a scene fragment with one root, so the editor edits it the way
 //! it edits a scene: the same world, hierarchy, inspector and gizmos. Two
@@ -13,8 +13,6 @@ use sindri_core::{
     PREFAB_FORMAT_VERSION, PREFAB_SUFFIX, PrefabDocument, SCENE_FORMAT_VERSION, SceneDocument,
 };
 
-use crate::project::Project;
-
 /// Whether `path` names a prefab.
 #[must_use]
 pub fn is_prefab_path(path: &Path) -> bool {
@@ -28,20 +26,33 @@ pub fn is_prefab_path(path: &Path) -> bool {
 /// The folder of its project's main scene, which is where every scene that
 /// could place it resolves too. Without a project, the nearest folder above it
 /// that holds a scene; and failing that its own.
+///
+/// The main scene is found the way a build finds it, through
+/// [`sindri_runtime::project::manifest`], so a prefab resolves its assets where
+/// the shipped game will.
 #[must_use]
 pub fn asset_root_for(prefab: &Path) -> PathBuf {
     let own = prefab.parent().unwrap_or(prefab).to_path_buf();
-    if let Some(root) = crate::project::manifest::root_for(prefab)
-        && let Ok(project) = Project::open(&root)
-        && let Some(scene) = project.main_scene()
-        && let Some(folder) = scene.parent()
-        && prefab.starts_with(folder)
+    if let Some(folder) = main_scene_folder(prefab)
+        && prefab.starts_with(&folder)
     {
-        return folder.to_path_buf();
+        return folder;
     }
     own.ancestors()
         .find(|folder| holds_a_scene(folder))
         .map_or(own.clone(), Path::to_path_buf)
+}
+
+/// The folder of the main scene of the project `path` is in, if it is in one.
+fn main_scene_folder(path: &Path) -> Option<PathBuf> {
+    let start = if path.is_dir() { path } else { path.parent()? };
+    let root = start
+        .ancestors()
+        .find(|ancestor| ancestor.join("sindri.toml").is_file())?;
+    let (scene, _, _) = sindri_runtime::project::manifest(root).ok()?;
+    let main = sindri_runtime::project::assets_root(root).join(scene);
+    main.is_file()
+        .then(|| main.parent().map(Path::to_path_buf))?
 }
 
 fn holds_a_scene(folder: &Path) -> bool {

@@ -2,7 +2,7 @@
 
 use sindri_render::{FrameCommand, Lighting2d, PreparedFrame, TextureId};
 use sindri_scene::{
-    CameraView, LightingQuality, SceneExtractError, SceneExtractor, TextureBindings,
+    CameraView, LightingQuality, SceneExtractError, SceneExtractor, SceneRuntime, TextureBindings,
 };
 
 use crate::support::{VIEWPORT, scene, world_from};
@@ -56,6 +56,29 @@ fn nothing_is_lit_unless_the_environment_turns_2d_lighting_on() {
         lighting(&(environment(false) + &light("lamp", 0.0, ""))),
         None
     );
+}
+
+#[test]
+fn an_unlit_view_leaves_a_lit_scene_at_its_own_colours() {
+    let entities = environment(true) + &light("lamp", 0.0, "");
+    let world = world_from(&scene(&entities));
+    let extractor = SceneExtractor::new().unwrap();
+    let frame = |unlit: bool| {
+        extractor
+            .extract_animated(
+                &world,
+                VIEWPORT,
+                CameraView::default(),
+                &TextureBindings::new(),
+                SceneRuntime::default().with_unlit(unlit),
+            )
+            .expect("the scene extracts")
+            .sprite_environment()
+            .lighting
+            .clone()
+    };
+    assert!(frame(false).is_some(), "the scene is lit as authored");
+    assert_eq!(frame(true), None, "and drawn plain with the preview off");
 }
 
 #[test]

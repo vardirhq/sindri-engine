@@ -24,7 +24,7 @@ Preserve what makes it compelling:
 - Portrait and landscape work on real devices; tablets and external keyboard, mouse, or stylus are useful additions, not prerequisites.
 - Accessibility, readable text, sufficient contrast, usable touch targets, system insets, keyboard handling, and screen-reader semantics are part of the design.
 
-Use the prototype as an acceptance reference: retain its assets and interaction intent, document its states and gestures, and compare implementation captures with it on actual phones. Exercise dense scenes and long names, not just curated sample content. The prototype is tracked in [`prototype/`](prototype/index.html). Open `mobile/prototype/index.html` in a browser at a phone-sized viewport; it loads Lamplighter's textures directly from `games/lamplighter/assets/textures/` rather than keeping copies. It needs network access for its React, Babel, and Google Fonts dependencies. `prototype/support.js` is the generated runtime from the design tool that exported the prototype: do not edit it by hand. Treat the prototype as a design reference. It is not part of the engine, editor, or build, and passing through it does not test any implementation.
+The app is built to this design first and given functionality second; [design.md](design.md) tracks each screen against the prototype and what is wired. Use the prototype as an acceptance reference: retain its assets and interaction intent, document its states and gestures, and compare implementation captures with it on actual phones. Exercise dense scenes and long names, not just curated sample content. The prototype is tracked in [`prototype/`](prototype/index.html). Open `mobile/prototype/index.html` in a browser at a phone-sized viewport; it loads Lamplighter's textures directly from `games/lamplighter/assets/textures/` rather than keeping copies. It needs network access for its React, Babel, and Google Fonts dependencies. `prototype/support.js` is the generated runtime from the design tool that exported the prototype: do not edit it by hand. Treat the prototype as a design reference. It is not part of the engine, editor, or build, and passing through it does not test any implementation.
 
 ## Full creation journey
 
@@ -56,11 +56,48 @@ Touch interaction is a product requirement: tap a socket to search for and conne
 
 ### Representation and code
 
-Proposed starting direction: save a versioned graph asset and compile it to Decay using the actual language and host contracts. Keep graph layout separate from executable semantics where practical. Show generated source for inspection; do not claim arbitrary graph-to-text-to-graph round trips. Handwritten Decay must coexist with visual scripts, and unsupported code must never be silently rewritten or discarded.
+**Decided (2026-11-01): visual scripting is Decay, but visual.** The `.decay` file
+is the only thing stored. There is no graph asset beside it and nothing is
+converted: the blocks are how an editor shows a script, and a block edit is a
+change to that script's text. A script written by hand on desktop opens as
+blocks on the phone, and one edited as blocks reads on desktop exactly as if it
+had been typed there.
 
-This representation is a proposal, not a settled format. Before committing to it, investigate Decay's parser, AST, compiler, diagnostics, source mapping, language-server tooling, script loading, and export pipeline. Prove how generated code maps errors and runtime observations back to nodes; how graphs are versioned and migrated; how stable IDs and entity references work; how changes are validated; and how desktop and Android preserve unknown graph data. If safe bidirectional editing proves feasible, it can be added deliberately.
+This replaces the earlier proposal of a versioned graph asset compiled to Decay.
+How it works, in `sindri_authoring::visual_decay`:
 
-Visual scripts must run through the same Decay and runtime path as text scripts. Do not invent syntax or host calls: verify against current definitions and checked scripts. Gameplay-specific logic belongs in Decay, not bespoke Rust game implementations.
+- Blocks are read through Decay's own parser (`decay-syntax`). Handlers are
+  "When …" blocks, with the lifecycle taken from `sindri_decay::LIFECYCLE`.
+  Statements are blocks, and expressions sit in slots. Comments between
+  statements, and above values and handlers, are shown. Anything with no block
+  shape yet is shown as its exact source, so nothing is hidden.
+- Every node carries its span in the file. An edit replaces exactly the text of
+  the slot it changed, then the result is parsed and refused if it no longer
+  reads. Every other byte, comments and formatting included, stays as it was.
+  A script with syntax errors is fixed as text before its blocks edit.
+- The same reading is drawn as Blueprint-style nodes (`visual_decay::graph`):
+  handlers are event nodes, statements a chain joined by execution wires,
+  and calls and operators value nodes wired into pins. Literals sit on their
+  pins.
+- Node positions are the one thing a script does not hold. They live beside
+  it in `<script>.layout`, never in it (`visual_decay::layout`). A stored
+  position finds its node by its place in the code and by a fingerprint of
+  its text, so moving code on desktop keeps nodes where they were left. A
+  node nobody placed is laid out from the code. Fields a newer editor wrote
+  are kept, and a newer file is not overwritten.
+
+- Structure changes from a node's menu (`visual_decay::change`): delete,
+  move, add after or first inside. Whole lines are cut, swapped or added at
+  the code's own indentation, with a statement's comment travelling with it.
+  The result must parse and must not add a problem the checker
+  (`decay-semantic`, against the project's scripts and the engine's API)
+  finds.
+
+The look follows Unreal's Blueprints (execution and value wires, Branch with
+True and False). The interaction follows Unity's Visual Scripting (flow and
+value ports), and a searchable finder for engine calls is next. Wiring values
+between nodes and following execution during Play build on this. Each new kind of edit is a span edit checked the same way. The round
+trip is tested on every script in the repository.
 
 ## Architecture direction
 

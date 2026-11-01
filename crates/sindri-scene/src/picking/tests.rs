@@ -424,3 +424,48 @@ fn an_invisible_element_is_not_clicked() {
         None
     );
 }
+
+#[test]
+fn bounds_enclose_the_sprite_quad_a_pick_hits() {
+    let extractor = SceneExtractor::new().unwrap();
+    let mut world = World::default();
+    let sprite = spawn(
+        &mut world,
+        Transform3D {
+            position: [0.5, 0.0, 0.5],
+            scale: [0.5, 1.0, 1.0],
+            ..Transform3D::default()
+        },
+        "sindri.sprite",
+        sprite(0),
+    );
+
+    let bounds = world_bounds(&world, extractor.components(), Mat4::IDENTITY, sprite)
+        .unwrap()
+        .unwrap();
+    // Clip x spans 0.25..0.75 and y -0.5..0.5, so a quarter of the viewport
+    // wide from just past the middle, and half of it tall about the middle.
+    let expected = [0.625, 0.25, 0.875, 0.75];
+    for (edge, want) in bounds.iter().zip(expected) {
+        assert!((edge - want).abs() < 1e-5, "{bounds:?}");
+    }
+    let inside = [(bounds[0] + bounds[2]) * 0.5, (bounds[1] + bounds[3]) * 0.5];
+    assert_eq!(
+        pick_world(&world, extractor.components(), Mat4::IDENTITY, inside).unwrap(),
+        Some(sprite)
+    );
+}
+
+#[test]
+fn bounds_are_none_for_an_entity_with_nothing_drawn() {
+    let extractor = SceneExtractor::new().unwrap();
+    let mut world = World::default();
+    let empty = world.spawn(EntityData {
+        transform_3d: Some(Transform3D::default()),
+        ..EntityData::default()
+    });
+    assert_eq!(
+        world_bounds(&world, extractor.components(), Mat4::IDENTITY, empty).unwrap(),
+        None
+    );
+}

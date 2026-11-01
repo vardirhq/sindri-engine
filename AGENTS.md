@@ -169,8 +169,9 @@ sindri-scene      -> sindri-core + sindri-grid + sindri-render + sindri-physics 
 sindri-decay      -> core + grid + physics + platform + scene + decay language crates
 sindri-runtime    -> assets + core + decay + platform + scene + weave
 sindri-player     -> assets + core + decay + desktop + platform + render + runtime + scene
-editor            -> assets + core + decay + physics + platform + render + runtime + scene
-sindri-mobile     -> assets + core + gpu + render + runtime + scene (+ jni/ndk on Android)
+sindri-authoring  -> core + decay + runtime + scene (+ decay-syntax, decay-semantic)
+editor            -> assets + authoring + core + decay + physics + platform + render + runtime + scene
+sindri-mobile     -> assets + authoring + core + gpu + platform + render + runtime + scene (+ jni/ndk on Android)
 sindri-causeway   -> consumer of the engine; nothing depends on it
 games/*, examples/* -> consumers of the engine; nothing depends on them
 ```
@@ -194,6 +195,10 @@ Important constraints:
   nothing about any one game; a game crate that needs a native build of its
   own, as Causeway does, is a consumer of it, never the other way round.
 - Engine crates never depend on the editor or the companion game.
+- `sindri-authoring` is the file side of authoring that every editor host
+  shares: opening, migrating and saving scene and prefab files, and building
+  the authored world. It has no interface. What an editor draws and how it
+  edits stay in that editor; a save made by one host must open in another.
 - `sindri-mobile` (`mobile/native`) is the native half of the Android app and,
   like the editor, an application: nothing depends on it. It is the one crate
   that denies rather than forbids unsafe code, because a JNI bridge cannot be
