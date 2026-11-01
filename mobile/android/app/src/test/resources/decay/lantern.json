@@ -915,42 +915,19 @@
       {
         "at": [
           310.0,
-          568.0
-        ],
-        "inputs": [
-          {
-            "name": "",
-            "value": {
-              "kind": "name",
-              "path": "this.lit",
-              "span": [
-                750,
-                758
-              ]
-            }
-          }
-        ],
-        "key": "Lantern.update/0:if",
-        "kind": "value",
-        "note": null,
-        "outputs": [],
-        "placed": false,
-        "print": "cabcae4da12950c7",
-        "span": [
-          749,
-          758
-        ],
-        "title": "not"
-      },
-      {
-        "at": [
-          598.0,
           500.0
         ],
         "inputs": [
           {
             "name": "if",
-            "value": null
+            "value": {
+              "kind": "code",
+              "source": "!this.lit",
+              "span": [
+                749,
+                758
+              ]
+            }
           }
         ],
         "key": "Lantern.update/0",
@@ -971,8 +948,8 @@
       },
       {
         "at": [
-          753.0,
-          740.0
+          465.0,
+          688.0
         ],
         "inputs": [],
         "key": "Lantern.update/0.0/0",
@@ -989,48 +966,7 @@
       },
       {
         "at": [
-          908.0,
-          604.0
-        ],
-        "inputs": [
-          {
-            "name": "a",
-            "value": {
-              "kind": "name",
-              "path": "this.flare",
-              "span": [
-                821,
-                831
-              ]
-            }
-          },
-          {
-            "name": "b",
-            "value": {
-              "kind": "name",
-              "path": "dt",
-              "span": [
-                834,
-                836
-              ]
-            }
-          }
-        ],
-        "key": "Lantern.update/1:to:2",
-        "kind": "value",
-        "note": null,
-        "outputs": [],
-        "placed": false,
-        "print": "102e059491330f16",
-        "span": [
-          821,
-          836
-        ],
-        "title": "-"
-      },
-      {
-        "at": [
-          1196.0,
+          620.0,
           568.0
         ],
         "inputs": [
@@ -1047,7 +983,14 @@
           },
           {
             "name": "2",
-            "value": null
+            "value": {
+              "kind": "code",
+              "source": "this.flare - dt",
+              "span": [
+                821,
+                836
+              ]
+            }
           }
         ],
         "key": "Lantern.update/1:to",
@@ -1064,7 +1007,7 @@
       },
       {
         "at": [
-          1484.0,
+          908.0,
           500.0
         ],
         "inputs": [
@@ -1089,122 +1032,20 @@
       },
       {
         "at": [
-          1794.0,
-          640.0
-        ],
-        "inputs": [
-          {
-            "name": "a",
-            "value": {
-              "kind": "name",
-              "path": "this.flare",
-              "span": [
-                891,
-                901
-              ]
-            }
-          },
-          {
-            "name": "b",
-            "value": {
-              "kind": "number",
-              "span": [
-                904,
-                907
-              ],
-              "value": 0.8
-            }
-          }
-        ],
-        "key": "Lantern.update/2:to:b:b",
-        "kind": "value",
-        "note": null,
-        "outputs": [],
-        "placed": false,
-        "print": "a197d6e73b306f1b",
-        "span": [
-          890,
-          908
-        ],
-        "title": "/"
-      },
-      {
-        "at": [
-          2082.0,
-          604.0
-        ],
-        "inputs": [
-          {
-            "name": "a",
-            "value": {
-              "kind": "number",
-              "span": [
-                884,
-                887
-              ],
-              "value": 2.4
-            }
-          },
-          {
-            "name": "b",
-            "value": null
-          }
-        ],
-        "key": "Lantern.update/2:to:b",
-        "kind": "value",
-        "note": null,
-        "outputs": [],
-        "placed": false,
-        "print": "632fcf0124166bed",
-        "span": [
-          884,
-          908
-        ],
-        "title": "*"
-      },
-      {
-        "at": [
-          2370.0,
-          568.0
-        ],
-        "inputs": [
-          {
-            "name": "a",
-            "value": {
-              "kind": "number",
-              "span": [
-                878,
-                881
-              ],
-              "value": 1.1
-            }
-          },
-          {
-            "name": "b",
-            "value": null
-          }
-        ],
-        "key": "Lantern.update/2:to",
-        "kind": "value",
-        "note": null,
-        "outputs": [],
-        "placed": false,
-        "print": "5d8e0199873d324a",
-        "span": [
-          878,
-          908
-        ],
-        "title": "+"
-      },
-      {
-        "at": [
-          2658.0,
+          1218.0,
           500.0
         ],
         "inputs": [
           {
             "name": "to",
-            "value": null
+            "value": {
+              "kind": "code",
+              "source": "1.1 + 2.4 * (this.flare / 0.8)",
+              "span": [
+                878,
+                908
+              ]
+            }
           }
         ],
         "key": "Lantern.update/2",
@@ -1224,7 +1065,7 @@
       {
         "at": [
           0.0,
-          912.0
+          860.0
         ],
         "inputs": [],
         "key": "Lantern.ignite",
@@ -1244,7 +1085,7 @@
       {
         "at": [
           310.0,
-          912.0
+          860.0
         ],
         "inputs": [
           {
@@ -1278,7 +1119,7 @@
       {
         "at": [
           465.0,
-          1260.0
+          1072.0
         ],
         "inputs": [],
         "key": "Lantern.ignite/0.0/0",
@@ -1296,7 +1137,7 @@
       {
         "at": [
           620.0,
-          912.0
+          860.0
         ],
         "inputs": [
           {
@@ -1328,7 +1169,7 @@
       {
         "at": [
           930.0,
-          912.0
+          860.0
         ],
         "inputs": [
           {
@@ -1360,7 +1201,7 @@
       {
         "at": [
           1240.0,
-          912.0
+          860.0
         ],
         "inputs": [
           {
@@ -1403,48 +1244,7 @@
       {
         "at": [
           1550.0,
-          980.0
-        ],
-        "inputs": [
-          {
-            "name": "a",
-            "value": {
-              "kind": "name",
-              "path": "this.transform.world_position.y",
-              "span": [
-                1216,
-                1247
-              ]
-            }
-          },
-          {
-            "name": "b",
-            "value": {
-              "kind": "number",
-              "span": [
-                1250,
-                1253
-              ],
-              "value": 2.6
-            }
-          }
-        ],
-        "key": "Lantern.ignite/4:3",
-        "kind": "value",
-        "note": null,
-        "outputs": [],
-        "placed": false,
-        "print": "920a35cc91d199cd",
-        "span": [
-          1216,
-          1253
-        ],
-        "title": "+"
-      },
-      {
-        "at": [
-          1838.0,
-          912.0
+          860.0
         ],
         "inputs": [
           {
@@ -1471,7 +1271,14 @@
           },
           {
             "name": "3",
-            "value": null
+            "value": {
+              "kind": "code",
+              "source": "this.transform.world_position.y + 2.6",
+              "span": [
+                1216,
+                1253
+              ]
+            }
           }
         ],
         "key": "Lantern.ignite/4",
@@ -1490,8 +1297,8 @@
       },
       {
         "at": [
-          2148.0,
-          912.0
+          1860.0,
+          860.0
         ],
         "inputs": [
           {
@@ -1522,8 +1329,8 @@
       },
       {
         "at": [
-          2458.0,
-          912.0
+          2170.0,
+          860.0
         ],
         "inputs": [
           {
@@ -1554,8 +1361,8 @@
       },
       {
         "at": [
-          2768.0,
-          1016.0
+          2480.0,
+          964.0
         ],
         "inputs": [
           {
@@ -1596,57 +1403,23 @@
       {
         "at": [
           2768.0,
-          1152.0
+          928.0
         ],
         "inputs": [
           {
             "name": "a",
-            "value": {
-              "kind": "name",
-              "path": "Game.lit",
-              "span": [
-                1363,
-                1371
-              ]
-            }
+            "value": null
           },
           {
             "name": "b",
             "value": {
-              "kind": "name",
-              "path": "Game.total",
+              "kind": "code",
+              "source": "Game.lit >= Game.total",
               "span": [
-                1375,
+                1363,
                 1385
               ]
             }
-          }
-        ],
-        "key": "Lantern.ignite/7:if:b",
-        "kind": "value",
-        "note": null,
-        "outputs": [],
-        "placed": false,
-        "print": "a6a0ffdc4d8a934b",
-        "span": [
-          1363,
-          1385
-        ],
-        "title": ">="
-      },
-      {
-        "at": [
-          3056.0,
-          980.0
-        ],
-        "inputs": [
-          {
-            "name": "a",
-            "value": null
-          },
-          {
-            "name": "b",
-            "value": null
           }
         ],
         "key": "Lantern.ignite/7:if",
@@ -1663,8 +1436,8 @@
       },
       {
         "at": [
-          3344.0,
-          912.0
+          3056.0,
+          860.0
         ],
         "inputs": [
           {
@@ -1690,8 +1463,8 @@
       },
       {
         "at": [
-          3499.0,
-          1384.0
+          3211.0,
+          1196.0
         ],
         "inputs": [
           {
@@ -1751,13 +1524,6 @@
         "to": "Lantern.start/1"
       },
       {
-        "flow": false,
-        "from": "Lantern.update/0:if",
-        "into": "if",
-        "out": "",
-        "to": "Lantern.update/0"
-      },
-      {
         "flow": true,
         "from": "Lantern.update/0",
         "into": "",
@@ -1773,13 +1539,6 @@
       },
       {
         "flow": false,
-        "from": "Lantern.update/1:to:2",
-        "into": "2",
-        "out": "",
-        "to": "Lantern.update/1:to"
-      },
-      {
-        "flow": false,
         "from": "Lantern.update/1:to",
         "into": "to",
         "out": "",
@@ -1791,27 +1550,6 @@
         "into": "",
         "out": "Next",
         "to": "Lantern.update/1"
-      },
-      {
-        "flow": false,
-        "from": "Lantern.update/2:to:b:b",
-        "into": "b",
-        "out": "",
-        "to": "Lantern.update/2:to:b"
-      },
-      {
-        "flow": false,
-        "from": "Lantern.update/2:to:b",
-        "into": "b",
-        "out": "",
-        "to": "Lantern.update/2:to"
-      },
-      {
-        "flow": false,
-        "from": "Lantern.update/2:to",
-        "into": "to",
-        "out": "",
-        "to": "Lantern.update/2"
       },
       {
         "flow": true,
@@ -1856,13 +1594,6 @@
         "to": "Lantern.ignite/3"
       },
       {
-        "flow": false,
-        "from": "Lantern.ignite/4:3",
-        "into": "3",
-        "out": "",
-        "to": "Lantern.ignite/4"
-      },
-      {
         "flow": true,
         "from": "Lantern.ignite/3",
         "into": "",
@@ -1887,13 +1618,6 @@
         "flow": false,
         "from": "Lantern.ignite/7:if:a",
         "into": "a",
-        "out": "",
-        "to": "Lantern.ignite/7:if"
-      },
-      {
-        "flow": false,
-        "from": "Lantern.ignite/7:if:b",
-        "into": "b",
         "out": "",
         "to": "Lantern.ignite/7:if"
       },

@@ -4,7 +4,8 @@
 //! The graph is another view of the same reading as the blocks, not a second
 //! model: each handler is an event node, its statements a chain of nodes
 //! joined by execution wires, and each call or operator a value node wired
-//! into the pin it feeds. Numbers, text and switches stay on their pins,
+//! into the pin it feeds; simple arithmetic over names and literals stays on
+//! its pin as a formula. Numbers, text and switches stay on their pins,
 //! edited in place through [`super::edit`] as the blocks are, and names show
 //! on their pins. Compound statements branch: an If has True, False and Next,
 //! a loop Body and Next, a Match one output per arm and Next.
@@ -225,6 +226,23 @@ impl Builder<'_> {
             if name.is_empty() { "value" } else { name }
         );
         match value {
+            // Arithmetic and logic over names and literals reads best as the
+            // formula it is, on the pin, as Unreal's Math Expression node
+            // does: `this.grace - dt`, not three nodes. Most of a long
+            // script's value nodes were exactly these.
+            Slot::Op { span, .. } | Slot::Unary { span, .. } if formula(value) => {
+                node.inputs.push(Pin {
+                    name: name.to_owned(),
+                    value: Some(Slot::Code {
+                        source: self
+                            .source
+                            .get(span[0]..span[1])
+                            .unwrap_or_default()
+                            .to_owned(),
+                        span: *span,
+                    }),
+                });
+            }
             Slot::Call { .. } | Slot::Op { .. } | Slot::Unary { .. } => {
                 self.value(value, &key);
                 node.inputs.push(Pin {
@@ -433,6 +451,21 @@ fn shape<'a>(block: &'a Block, source: &str, span: Span) -> Shape<'a> {
                 },
             )],
         ),
+    }
+}
+
+/// Whether `slot` is arithmetic or logic over names and literals only, with
+/// no call inside: what is shown as a formula on its pin.
+fn formula(slot: &Slot) -> bool {
+    match slot {
+        Slot::Op { left, right, .. } => formula(left) && formula(right),
+        Slot::Unary { operand, .. } => formula(operand),
+        Slot::Number { .. }
+        | Slot::Text { .. }
+        | Slot::Bool { .. }
+        | Slot::Null { .. }
+        | Slot::Name { .. } => true,
+        Slot::Call { .. } | Slot::Code { .. } => false,
     }
 }
 

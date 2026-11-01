@@ -35,17 +35,18 @@ class DecayCanvasTest {
             nodes = listOf(
                 node("Gloom.update", 0f, 0f, kind = "event"),
                 node("Gloom.update/0", 310f, 0f),
-                node("Gloom.hunt/40", 26000f, 14000f),
+                node("Gloom.update/40", 26000f, 14000f),
             ),
             wires = listOf(
                 DecayWire("Gloom.update", "", "Gloom.update/0", "", flow = true),
-                DecayWire("Gloom.update/0", "", "Gloom.hunt/40", "", flow = true),
+                DecayWire("Gloom.update/0", "", "Gloom.update/40", "", flow = true),
             ),
         )
         compose.setContent {
             ForgeTheme { DecayCanvas(DecayScript("scripts/gloom.decay", "", emptyList(), graph = graph), onEdit = { _, _ -> }, onMove = { _, _, _ -> }) }
         }
         compose.onNodeWithContentDescription("Gloom.update, drag to move, tap for its menu").assertExists()
+        compose.onNodeWithContentDescription("Gloom.update/40, drag to move, tap for its menu").assertExists()
     }
 
     @Test
@@ -69,5 +70,27 @@ class DecayCanvasTest {
         header.performTouchInput { click() }
         compose.onNodeWithText("Delete").performClick()
         assertEquals(Triple("delete", 40 to 56, null), changes.last())
+    }
+
+    @Test
+    fun one_handler_shows_at_a_time_and_its_tab_switches() {
+        val graph = DecayGraph(
+            nodes = listOf(
+                node("Lamp.start", 0f, 0f, kind = "event"),
+                node("Lamp.start/0", 310f, 0f),
+                node("Lamp.update", 0f, 300f, kind = "event"),
+                node("Lamp.update/0", 310f, 300f),
+                node("Lamp.update/0:to", 40f, 360f, kind = "value"),
+            ),
+            wires = listOf(DecayWire("Lamp.update/0:to", "", "Lamp.update/0", "to", flow = false)),
+        )
+        compose.setContent {
+            ForgeTheme { DecayCanvas(DecayScript("scripts/lamp.decay", "", emptyList(), graph = graph), onEdit = { _, _ -> }, onMove = { _, _, _ -> }) }
+        }
+        compose.onNodeWithContentDescription("Lamp.start/0, drag to move, tap for its menu").assertExists()
+        compose.onNodeWithContentDescription("Lamp.update/0, drag to move, tap for its menu").assertDoesNotExist()
+        compose.onNodeWithText("Lamp.update").performClick()
+        compose.onNodeWithContentDescription("Lamp.update/0, drag to move, tap for its menu").assertExists()
+        compose.onNodeWithContentDescription("Lamp.start/0, drag to move, tap for its menu").assertDoesNotExist()
     }
 }

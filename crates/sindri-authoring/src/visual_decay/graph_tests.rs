@@ -227,3 +227,23 @@ fn what_a_newer_editor_wrote_is_kept_and_a_newer_file_is_not_overwritten() {
     );
     assert!(Layout::read(Some(r#"{ "format_version": 2, "nodes": {} }"#)).is_err());
 }
+
+#[test]
+fn simple_math_stays_on_its_pin_as_a_formula_and_calls_stay_nodes() {
+    let source = "script S {\n    var grace: number = 0.0;\n    fn update(dt: number) {\n        this.grace = max(0.0, this.grace - dt * 2.0);\n    }\n}\n";
+    let graph = graph(&blocks(source), source);
+    let set = node(&graph, "S.update/0");
+    assert!(set.inputs[0].value.is_none(), "the call is wired in");
+    let max = node(&graph, "S.update/0:to");
+    assert_eq!(max.title, "max");
+    assert!(
+        matches!(&max.inputs[1].value, Some(Slot::Code { source, .. }) if source == "this.grace - dt * 2.0"),
+        "{:?}",
+        max.inputs[1]
+    );
+    assert_eq!(
+        graph.nodes.len(),
+        4,
+        "values, event, set, max: no node per operator"
+    );
+}

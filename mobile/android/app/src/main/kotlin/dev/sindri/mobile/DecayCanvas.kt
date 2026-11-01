@@ -2,6 +2,7 @@ package dev.sindri.mobile
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.heightIn
@@ -71,12 +72,18 @@ fun DecayCanvas(
     onMove: (key: String, x: Float, y: Float) -> Unit,
     onChange: (kind: String, span: Pair<Int, Int>, value: Any?) -> Unit = { _, _, _ -> },
 ) {
-    val graph = script.graph
+    // One handler at a time, as an event graph is in Blueprints: its tab,
+    // then its nodes. The Values node has a tab of its own.
+    val handlers = script.graph.nodes.filter { it.kind in listOf("event", "function", "values") }
+    var shown by remember { mutableStateOf<String?>(null) }
+    val current = shown?.takeIf { key -> handlers.any { it.key == key } }
+        ?: (handlers.firstOrNull { it.kind == "event" } ?: handlers.firstOrNull())?.key
+    val graph = remember(script.graph, current) { only(script.graph, current) }
     val editable = script.problems.isEmpty()
     var pan by remember { mutableStateOf(Offset(24f, 24f)) }
     var zoom by remember { mutableStateOf(0.8f) }
-    // The first view shows the whole graph, unless that would make it too small to read.
-    var framed by remember { mutableStateOf(false) }
+    // A handler's first view shows all of it, unless that would make it too small to read.
+    var framed by remember(current) { mutableStateOf(false) }
     // Where nodes are while a finger drags them, ahead of the host.
     val dragged = remember(graph) { mutableStateMapOf<String, Offset>() }
     var editing by remember { mutableStateOf<DecaySlot?>(null) }
@@ -107,9 +114,15 @@ fun DecayCanvas(
         val (wide, tall) = maxWidth.value to maxHeight.value
         if (!framed) {
             framed = true
-            val (fitPan, fitZoom) = fit(graph.nodes.map { Offset(it.x, it.y) to it }, wide, tall)
-            zoom = fitZoom.coerceAtLeast(0.55f)
-            pan = if (fitZoom >= 0.55f) fitPan * density else Offset(16f, 16f) * density
+            val placed = graph.nodes.map { Offset(it.x, it.y) to it }
+            val (fitPan, fitZoom) = fit(placed, wide, tall)
+            zoom = fitZoom.coerceAtLeast(READABLE)
+            // Too big to read whole: start at its top left, where the handler begins.
+            pan = if (fitZoom >= READABLE || placed.isEmpty()) {
+                fitPan * density
+            } else {
+                Offset(16f - placed.minOf { it.first.x } * READABLE, TABS - nodesTop(placed) * READABLE) * density
+            }
         }
         Box(
             Modifier
@@ -140,6 +153,28 @@ fun DecayCanvas(
                 pan = fitPan * density
                 zoom = fitZoom
             }, Modifier.size(44.dp).clip(CircleShape).background(Forge.Raised), iconSize = 22.sp, color = Forge.Text)
+        }
+        if (handlers.size > 1) {
+            Row(
+                Modifier.align(Alignment.TopStart).fillMaxWidth().horizontalScroll(rememberScrollState()).padding(8.dp),
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+                handlers.forEach { handler ->
+                    val on = handler.key == current
+                    val label = if (handler.kind == "values") "Values" else handler.title
+                    Text(
+                        label,
+                        style = ForgeType.text(12.sp, FontWeight.SemiBold, if (on) Forge.MetalBright else Forge.TextMuted),
+                        maxLines = 1,
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(if (on) Forge.MetalDeep else Forge.Raised)
+                            .border(1.dp, if (on) Forge.MetalLine else Forge.Line, RoundedCornerShape(10.dp))
+                            .clickable { shown = handler.key }
+                            .padding(horizontal = 10.dp, vertical = 7.dp),
+                    )
+                }
+            }
         }
         if (!editable) {
             Text(
@@ -215,16 +250,31 @@ private fun MenuRow(label: String, danger: Boolean = false, onClick: () -> Unit)
     )
 }
 
+/** The part of [graph] that belongs to the handler keyed [handler]: it, its statements and their values. */
+private fun only(graph: DecayGraph, handler: String?): DecayGraph {
+    if (handler == null) return graph
+    val nodes = graph.nodes.filter { it.key == handler || it.key.startsWith("$handler/") || it.key.startsWith("$handler:") }
+    val keys = nodes.mapTo(HashSet()) { it.key }
+    return DecayGraph(nodes, graph.wires.filter { it.from in keys && it.to in keys })
+}
+
 /** The pan (in points) and zoom that show every node. */
-private fun fit(nodes: List<Pair<Offset, DecayNode>>, width: Float, height: Float): Pair<Offset, Float> {
-    if (nodes.isEmpty()) return Offset(24f, 24f) to 1f
+private fun fit(nodes: List<Pair<Offset, DecayNode>>, width: Float, height: Float, top: Float = TABS): Pair<Offset, Float> {
+    if (nodes.isEmpty()) return Offset(24f, top) to 1f
     val left = nodes.minOf { it.first.x }
-    val top = nodes.minOf { it.first.y }
     val right = nodes.maxOf { it.first.x + NODE_WIDTH }
     val bottom = nodes.maxOf { it.first.y + nodeHeight(it.second) }
-    val zoom = minOf((width - 32f) / (right - left), (height - 32f) / (bottom - top)).coerceIn(0.3f, 1.2f)
-    return Offset(16f - left * zoom, 16f - top * zoom) to zoom
+    val zoom = minOf((width - 32f) / (right - left), (height - top - 16f) / (bottom - nodesTop(nodes))).coerceIn(0.3f, 1.2f)
+    return Offset(16f - left * zoom, top - nodesTop(nodes) * zoom) to zoom
 }
+
+private fun nodesTop(nodes: List<Pair<Offset, DecayNode>>) = nodes.minOf { it.first.y }
+
+/** The smallest zoom a graph opens at: below it, node text is too small to read. */
+private const val READABLE = 0.55f
+
+/** Room left at the top of the canvas for the handler tabs, in points. */
+private const val TABS = 56f
 
 /** The shared layout's measures, in points. */
 private const val NODE_WIDTH = 240f
