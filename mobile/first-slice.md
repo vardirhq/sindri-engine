@@ -27,7 +27,7 @@ published identity is chosen. Release builds are signed with the debug key.
 | Slice step | Headless, shared seams | Android build | On the Pixel 8 |
 | --- | --- | --- | --- |
 | 1. Open a real project and display a scene with the real renderer | ✅ Lamplighter's `world.scene` opens as an authored world and draws offscreen at 1080×2400 through `SceneRenderer` | ✅ The APK builds, bundles Lamplighter, and links `libsindri_mobile.so` for arm64 | 🟡 Runs on the Pixel 8; details to record |
-| 2. Select and move an entity with touch; edit one schema-checked property | ✅ `Editing` pans, pinches, picks through the engine's own camera matrix, outlines the selection round its own shape, moves, turns and scales it in one undo step per drag, and edits component fields with schema validation and undo | ✅ Tap, drag and pinch on the `SurfaceView`; the design's outline, ring and turn and scale handles on the selection; undo and redo in the top bar; the inspector sheet's steppers and switches | 🟡 Runs on the Pixel 8; details to record |
+| 2. Select and move an entity with touch; edit one schema-checked property | ✅ `Editing` pans, pinches, picks through the engine's own camera matrix, outlines the selection round its own shape, moves, turns and scales it in one undo step per drag, and edits component fields with schema validation and undo | ✅ Tap, drag and pinch on the `SurfaceView`; the design's outline, ring and turn and scale handles on the selection; undo and redo in the top bar; the design's inspector sections (Place, Light 2D, Sprite, Collider 2D …) with sliders, swatches and switches | 🟡 Runs on the Pixel 8; details to record |
 | 3. Undo, redo, save, restart, reopen; open the result on desktop | ✅ The phone opens and saves through `sindri-authoring`, the desktop editor's own code. A touch edit, undone and redone, saves, reopens after a restart, reads back through desktop's open path, and plays in a build; an unchanged second save writes identical bytes; a failed save keeps the edit unsaved | ✅ Every edit is saved as it is made, a drag when the finger lifts (the design has no Save button); the project lives in app-specific external storage, so `adb pull` can fetch it; an app update no longer replaces it | ❌ Not yet tried |
 | 4. Start and stop a real `Session`; touch input; the scene returns to its state | 🟡 A build-style run starts from the saved edit and leaves the authoring world and the file unchanged. Running from unsaved edits and the keep/discard review of Play edits are not covered | ❌ | ❌ |
 | 5. Background/resume, surface recreation, keyboard/insets, interrupted save; device notes | — | 🟡 The surface is released and rebuilt on the existing device. Unexercised | ❌ |
@@ -117,8 +117,10 @@ faster to compile and much slower to run.
 5. With Lighting preview off (the default) the night field shows in its own
    colours; turned on in the ⋮ menu, it is dark and lit by its lamps. The menu
    remembers the setting when closed and reopened.
-6. With Lighting preview on, stepping a lamp's `intensity` in its inspector
-   brightens it on screen.
+6. With Lighting preview on, dragging a lamp's Radius or Brightness slider in
+   its inspector changes its light as the finger moves, and undo takes the
+   whole drag back in one step. A colour swatch recolours it; Turn, Size and
+   Mirror in Place and Sprite change it on the canvas.
 7. Dragging something that was not selected first pans instead of moving it.
 8. TalkBack reads the canvas, the handles, the undo and redo buttons, and each
    field.

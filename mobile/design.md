@@ -61,7 +61,7 @@ Fonts are bundled under their own licences in `mobile/android/licenses/`.
 | `17-layers`, `17b-layers-objects` | `EditorSheets` | ✅ | Sample content |
 | `18-scenes` | `EditorSheets` | ✅ | Sample content |
 | `19-selected`, `24-multi` | `EditorScreen` | ✅ | The engine draws the selection with the prototype's bright-metal edge round its own shape; the ring at its feet and the turn and scale handles turn and scale it in one undo step each. The chip names it. Duplicate, Select more, Group and Delete are not wired, so `24-multi` is not reached |
-| `20`, `21` Inspector | `InspectorSheet` | ✅ | For the engine's selection: its position, and each component's numbers (steppers) and switches, edited through checked, undoable commands |
+| `20`, `21` Inspector | `InspectorSheet`, `InspectorPresenter` | ✅ | The engine's selection in the design's sections: Place (across and up in tiles, turn, size), Light 2D (radius, brightness, colour swatches, shadows), Sprite (its real thumbnail, mirror, draw layer), Collider 2D (shape, sensor, reach or size), Body, Shadow; other components plainly after them; Behaviour names the script; Details lists the rest. Every row is a checked, undoable, saved edit, and a slider drag is one step. Swapping a sprite and adding a component are not wired. `20e`/`21e` draw it beside the prototype's |
 | `22`, `23` Behaviour | `BehaviourSheet` | ✅ | Opens for the selection with no rules; blocks are not wired to Decay |
 | `25-play`, `26-frozen`, `26b-frozen-tune` | `PlayChrome` | ✅ | The chrome appears; the game does not run yet (slice step 4) |
 | `27-review` | `EditorSheets` | ✅ | Nothing produces run edits yet |
@@ -78,18 +78,20 @@ answers with a short "not wired yet" toast rather than pretending.
 - **No Save button, and none needed.** The prototype has none, so the app saves
   every engine edit as it is made. `•` after the scene name marks a change not
   yet written, which is only seen if a save fails.
-- **The inspector shows engine components plainly.** The prototype's inspector is
-  curated: friendly section names, sliders with sensible ranges and units, light
-  colour swatches. For the engine's own objects the app shows each component's
-  fields as steppers and switches until a presentation layer maps components to
-  the curated rows. The sample lamp post shows the curated version.
+- **Place counts Up, not Down.** The prototype's Place has *Down*, as a web
+  page measures. The engine's y grows upward, and the desktop editor shows it
+  that way, so the phone shows *Up* with the engine's own number rather than one
+  that disagrees with every other tool.
+- **Components the design does not cover are shown plainly.** The presenter
+  gives the design's sections to light, sprite, collider, body, shadow,
+  occluder and script; anything else (a camera, particles) follows as its own
+  section of steppers, sliders (where the engine bounds the field), switches
+  and short choices, so nothing the engine holds is hidden.
 - **The outline is drawn by the engine, the handles by the app.** The edge
   round the selection's shape is part of the canvas's frame (copies of its
   sprite in one flat colour, in a scratch world only the canvas draws), so it
   follows the art exactly. A tilemap or cube has no outline yet, only its
   handles.
-- **Place is read-only for now.** Across and Down show the position; moving is by
-  dragging until stepping by number is wired.
 
 ## The journeys the design serves
 
@@ -109,9 +111,7 @@ The prototype names five, and they are the acceptance path for functionality:
 
 1. Run the app on the Pixel 8 and walk each screen against the prototype; fix
    what feels wrong before wiring more.
-2. A presentation layer that maps engine components to the curated inspector
-   rows (Place in tiles, Light 2D, Sprite, Collider), with sliders and ranges.
-3. Play from the editor through the shared session (slice step 4), with pause,
+2. Play from the editor through the shared session (slice step 4), with pause,
    live tuning and the Review sheet.
-4. The journeys above, one at a time: placing prefabs, painting, Behaviour
+3. The journeys above, one at a time: placing prefabs, painting, Behaviour
    blocks that write Decay, importing and slicing.

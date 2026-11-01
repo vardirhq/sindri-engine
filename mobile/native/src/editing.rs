@@ -6,7 +6,6 @@
 //! merged into one undo step, and a field edit is validated against the
 //! component's schema before it is applied.
 
-use serde_json::{Value, json};
 use sindri_core::{CommandBuffer, CommandHistory, EntityId, Transform3D, World, WorldCommand};
 use sindri_scene::SceneExtractor;
 use sindri_scene::picking::{pick_world, world_bounds};
@@ -337,52 +336,6 @@ impl Editing {
             .unwrap_or(world)
     }
 
-    /// Sets one top-level field of the selected entity's component, refusing a
-    /// value the component's schema would not decode.
-    ///
-    /// # Errors
-    /// Nothing selected, a component it does not carry, a value the schema
-    /// refuses, or a command the world refuses — each in words for the app.
-    pub fn set_field(
-        &mut self,
-        world: &mut World,
-        extractor: &SceneExtractor,
-        type_name: &str,
-        field: &str,
-        value: Value,
-    ) -> Result<(), String> {
-        let entity = self.selected.ok_or("nothing is selected")?;
-        let mut payload = world
-            .get(entity)
-            .and_then(|data| data.components.get(type_name))
-            .cloned()
-            .ok_or_else(|| format!("the selection has no {type_name}"))?;
-        let object = payload
-            .as_object_mut()
-            .ok_or_else(|| format!("{type_name} has no fields to set"))?;
-        object.insert(field.to_owned(), value);
-        extractor
-            .components()
-            .validate_payload(type_name, &payload)
-            .map_err(|error| format!("{field} cannot hold that value: {error}"))?;
-        let label = extractor
-            .components()
-            .metadata(type_name)
-            .map_or(type_name, |metadata| metadata.display_name.as_str());
-        let mut buffer = CommandBuffer::new();
-        buffer.push(WorldCommand::SetComponent {
-            entity,
-            type_name: type_name.to_owned(),
-            payload,
-        });
-        self.history
-            .apply(
-                buffer.into_transaction(format!("Edit {label} {field}")),
-                world,
-            )
-            .map_err(|error| error.to_string())
-    }
-
     /// Undoes the last step, if there is one.
     ///
     /// # Errors
@@ -405,62 +358,6 @@ impl Editing {
             .redo(world)
             .map(|_| ())
             .map_err(|error| error.to_string())
-    }
-
-    /// What the app's inspector sheet shows, as JSON: the selection's name and
-    /// position, and each component's top-level numbers and switches, which are
-    /// the fields the first slice edits. `null` when nothing is selected.
-    pub fn inspector(&self, world: &World, extractor: &SceneExtractor) -> Value {
-        let Some(entity) = self.selected else {
-            return Value::Null;
-        };
-        let Some(data) = world.get(entity) else {
-            return Value::Null;
-        };
-        let registry = extractor.components();
-        let components: Vec<Value> = data
-            .components
-            .iter()
-            .filter_map(|(type_name, payload)| {
-                let object = payload.as_object()?;
-                let order = registry.field_order(type_name);
-                let mut names: Vec<&String> = object
-                    .iter()
-                    .filter(|(_, value)| value.is_number() || value.is_boolean())
-                    .map(|(name, _)| name)
-                    .collect();
-                // The registry's order where it has one, so a component reads
-                // the same way here as in the desktop inspector.
-                names.sort_by_key(|name| {
-                    order
-                        .iter()
-                        .position(|known| *known == name.as_str())
-                        .unwrap_or(usize::MAX)
-                });
-                let fields: Vec<Value> = names
-                    .into_iter()
-                    .map(|name| json!({ "name": name, "value": object[name] }))
-                    .collect();
-                let display = registry
-                    .metadata(type_name)
-                    .map_or(type_name.as_str(), |metadata| {
-                        metadata.display_name.as_str()
-                    });
-                Some(json!({ "type": type_name, "display": display, "fields": fields }))
-            })
-            .collect();
-        let name = data
-            .name
-            .clone()
-            .or_else(|| data.source_id.as_ref().map(|id| id.as_str().to_owned()))
-            .unwrap_or_else(|| format!("{entity:?}"));
-        json!({
-            "name": name,
-            "position": data.transform_3d.map(|transform| transform.position),
-            "components": components,
-            "undo": self.history.undo_label(),
-            "redo": self.history.redo_label(),
-        })
     }
 
     /// Where the selection's origin is on screen, in pixels, for the app to

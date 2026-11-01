@@ -33,7 +33,10 @@ object NativeBridge {
     /**
      * Runs an editing command with a JSON array of [arguments]: `tap`, `press`,
      * `drag` (x, y in surface pixels), `release`, `zoom` (factor, focus x, y),
-     * `deselect`, `undo`, `redo`, and `setField` (component type, field, value).
+     * `deselect`, `undo`, `redo`, `save`, `handle`, `lighting`, `outlineWidth`,
+     * `setField` (component type, field path, value, merging), `setPlace`
+     * (what, value, merging) and `settle`. `sindri-mobile`'s `android/touch.rs`
+     * is the list.
      */
     @JvmStatic external fun call(command: String, arguments: String): String?
 

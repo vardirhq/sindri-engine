@@ -772,11 +772,12 @@ jobs:
           path: mobile/android/app/build/outputs/apk/release/app-release.apk
           retention-days: 14
       # How the app's controller drives the native host, against a recording
-      # stand-in: the menu's switches, the selection's handles, saving.
+      # stand-in (the menu's switches, the selection's handles, saving), and
+      # how the inspector presents engine components and what its rows write.
       - name: Test the app
         id: android_test
         working-directory: mobile/android
-        run: ./gradlew --no-daemon :app:testDebugUnitTest --tests 'dev.sindri.mobile.EditorControllerTest'
+        run: ./gradlew --no-daemon :app:testDebugUnitTest --tests 'dev.sindri.mobile.EditorControllerTest' --tests 'dev.sindri.mobile.InspectorPresenterTest'
       # Every designed screen, drawn on the JVM at the prototype's viewport, to
       # set beside the prototype's own captures (mobile/design.md).
       - name: Draw the design screens

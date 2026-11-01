@@ -24,6 +24,10 @@ mod canvas;
 #[cfg(not(target_arch = "wasm32"))]
 mod editing;
 #[cfg(not(target_arch = "wasm32"))]
+mod edits;
+#[cfg(not(target_arch = "wasm32"))]
+mod inspector;
+#[cfg(not(target_arch = "wasm32"))]
 mod opened;
 #[cfg(not(target_arch = "wasm32"))]
 mod outline;
@@ -35,6 +39,8 @@ mod android;
 pub use canvas::Canvas;
 #[cfg(not(target_arch = "wasm32"))]
 pub use editing::{Editing, Handle};
+#[cfg(not(target_arch = "wasm32"))]
+pub use edits::Place;
 #[cfg(not(target_arch = "wasm32"))]
 pub use opened::OpenedScene;
 pub use renderer::SceneRenderer;

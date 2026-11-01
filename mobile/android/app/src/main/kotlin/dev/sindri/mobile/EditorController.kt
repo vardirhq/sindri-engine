@@ -3,20 +3,23 @@ package dev.sindri.mobile
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.graphics.Color
-import java.util.Locale
 
 /**
  * Turns editor events into [EditorUi], and the native host's state into what
  * the design shows.
  *
  * What the engine does is the engine's: the scene, picking, moving, field
- * edits, undo and redo, and saving, which happens after every change as the
+ * edits (presented the design's way by [InspectorPresenter]), undo and redo,
+ * and saving, which happens after every change as the
  * prototype implies (it has no Save button). Everything else is the design's
  * sample content until it is wired, and says so with a toast where acting on
  * it would otherwise pretend. `mobile/design.md` lists which is which.
  */
-class EditorController(private val native: Native) {
+class EditorController(
+    private val native: Native,
+    /** Where the open project's assets are among the app's own, for sprite thumbnails. */
+    private val assetRoot: String = "projects/lamplighter/assets/",
+) {
     /** The native calls the controller needs, so the design tests can run without the library. */
     interface Native {
         fun command(command: String, vararg arguments: Any?): String?
@@ -39,6 +42,12 @@ class EditorController(private val native: Native) {
 
     /** Screen pixels per dp, which turns the host's pixels into the design's dp. */
     private var density = 1f
+
+    /** The inspector as last presented, with what each of its rows edits. */
+    private var presented: InspectorPresenter.Presented? = null
+
+    /** Whether the inspector's Details section is open. */
+    private var details = false
 
     /**
      * A scene was opened on the host: tells it what the design draws at this
@@ -69,7 +78,7 @@ class EditorController(private val native: Native) {
     fun refresh() {
         state = native.state()
         val inspector = state.inspector
-        val selection = inspector?.let { SelectionUi(iconFor(it), it.name, "Properties") }
+        val selection = inspector?.let { SelectionUi(InspectorPresenter.iconFor(it), it.name, "Properties") }
         settings = settings.copy(lightingPreview = state.lighting)
         ui = ui.copy(
             canUndo = state.undo != null,
@@ -184,6 +193,10 @@ class EditorController(private val native: Native) {
         ui = ui.copy(sheet = EditorSheet.Inspector(inspectorUi(inspector)), menu = null)
     }
 
+    /** The engine's selection as the design's inspector, remembering what each row edits. */
+    private fun inspectorUi(inspector: Inspector): InspectorUi =
+        InspectorPresenter.present(inspector, ui.sceneName, assetRoot, details).also { presented = it }.ui
+
     private fun openBehaviour() {
         val inspector = state.inspector ?: return
         ui = ui.copy(
@@ -203,22 +216,27 @@ class EditorController(private val native: Native) {
         )
     }
 
+    /**
+     * A change to an inspector row, made through what the presenter bound the
+     * row to. A slider's values are applied as the finger moves and merged
+     * into one step, which is saved when it lifts; anything else is one step,
+     * saved at once.
+     */
     private fun inspectorRow(event: EditorEvent.InspectorRow) {
-        val component = state.inspector?.components?.firstOrNull { it.display == event.section } ?: return notWired(event.row)
-        val field = component.fields.firstOrNull { it.name == event.row } ?: return notWired(event.row)
-        val value: Any = when (val change = event.change) {
-            RowChange.Minus -> step(field, -1)
-            RowChange.Plus -> step(field, +1)
-            is RowChange.Switch -> change.on
-            else -> return notWired(event.row)
+        val binding = presented?.binding(event.section, event.row) ?: return notWired(event.row)
+        when {
+            binding is RowBinding.ToggleDetails -> {
+                details = !details
+                refresh()
+            }
+            binding is RowBinding.NotWired -> notWired(binding.what)
+            event.change == RowChange.Settled -> nativeEdit("settle")
+            event.change is RowChange.To -> binding.edit(event.change)?.let { edit ->
+                error = native.command(edit.command, *edit.arguments.toTypedArray())
+                refresh()
+            }
+            else -> binding.edit(event.change)?.let { edit -> nativeEdit(edit.command, *edit.arguments.toTypedArray()) } ?: notWired(event.row)
         }
-        nativeEdit("setField", component.type, field.name, value)
-    }
-
-    private fun step(field: Field, direction: Int): Any {
-        val current = (field.value as Number).toDouble()
-        val next = current + direction * field.step
-        return if (field.isWhole) Math.round(next) else Math.round(next * 1000.0) / 1000.0
     }
 
     /** Runs an edit on the engine and saves it, as the design has no Save button. */
@@ -237,47 +255,6 @@ class EditorController(private val native: Native) {
     fun dismissToast() {
         ui = ui.copy(toast = null)
     }
-
-    private fun iconFor(inspector: Inspector): Sym {
-        val types = inspector.components.map { it.type }
-        return when {
-            "sindri.light2d" in types -> Sym.emoji_objects
-            "sindri.camera" in types -> Sym.camera_alt
-            "sindri.tilemap" in types -> Sym.grid_view
-            "sindri.physics2d.rigid_body" in types -> Sym.directions_walk
-            "sindri.sprite" in types -> Sym.image
-            else -> Sym.deployed_code
-        }
-    }
-
-    /** The engine's components as the design's sections: numbers step, switches toggle. */
-    private fun inspectorUi(inspector: Inspector): InspectorUi {
-        val place = inspector.position?.let { position ->
-            SectionUi(
-                Sym.open_with, "Place", "drag to move",
-                listOf(
-                    RowUi.Stepper("Across", "X", Color(0xFFD6605C), format(position[0])),
-                    RowUi.Stepper("Down", "Y", Color(0xFF7FB069), format(position[1])),
-                ),
-            )
-        }
-        val components = inspector.components.filter { it.fields.isNotEmpty() }.map { component ->
-            SectionUi(
-                Sym.extension, component.display, component.type,
-                component.fields.map { field ->
-                    if (field.isSwitch) {
-                        RowUi.Toggle(field.name, field.value as Boolean)
-                    } else {
-                        RowUi.Stepper(field.name, "", Forge.TextFaint, format((field.value as Number).toDouble()))
-                    }
-                },
-            )
-        }
-        return InspectorUi(iconFor(inspector), inspector.name, "In ${ui.sceneName}", active = true, sections = listOfNotNull(place) + components, canAddComponent = false)
-    }
-
-    private fun format(value: Double): String =
-        if (value == Math.rint(value)) value.toLong().toString() else String.format(Locale.ROOT, "%.2f", value).trimEnd('0').trimEnd('.')
 
     private companion object {
         /** How wide the engine draws the selection's outline: the design's 1.5 px edge, at one pixel per dp. */

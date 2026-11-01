@@ -94,6 +94,17 @@ class DesignScreens {
 
     @Test fun inspectorHalf() = editor("20-inspector-half", lamp.copy(sheet = EditorSheet.Inspector(SampleEditor.lampInspector())))
 
+    /** The engine's lamp as the presenter shows it, to set beside `20-inspector-half`. */
+    @Test fun inspectorEngine() = editor(
+        "20e-inspector-engine",
+        lamp.copy(sheet = EditorSheet.Inspector(InspectorPresenter.present(EngineSamples.lamp, "world.scene", "projects/lamplighter/assets/", details = false).ui)),
+    )
+
+    @Test fun inspectorEngineFull() = editor(
+        "21e-inspector-engine-full",
+        lamp.copy(sheet = EditorSheet.Inspector(InspectorPresenter.present(EngineSamples.lamp, "world.scene", "projects/lamplighter/assets/", details = false).ui, full = true)),
+    )
+
     @Test fun inspectorFull() = editor("21-inspector-full", lamp.copy(sheet = EditorSheet.Inspector(SampleEditor.lampInspector(), full = true)))
 
     @Test fun behaviourBlocks() = editor("22-behaviour-blocks", lamp.copy(sheet = EditorSheet.Behaviour(SampleEditor.lampBehaviour)))

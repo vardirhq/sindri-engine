@@ -30,16 +30,48 @@ enum class Sheet(val file: String, val cellWidth: Int, val cellHeight: Int) {
     GroundTile("ground.png", 16, 16),
 }
 
-/** Decoded sheets, kept for the life of the process: they are small and reused. */
+/**
+ * Part of an image in a bundled project: its path among the app's assets and
+ * the part of it to draw, as fractions of the image (left, top, width, height),
+ * which is how the engine's sheets measure a sprite.
+ */
+data class ProjectImage(val path: String, val rect: List<Float> = listOf(0f, 0f, 1f, 1f))
+
+/** Decoded images, kept for the life of the process: they are small and reused. */
 private object SheetCache {
     private val loaded = mutableMapOf<String, ImageBitmap?>()
 
-    fun get(context: Context, sheet: Sheet): ImageBitmap? = loaded.getOrPut(sheet.file) {
+    fun get(context: Context, sheet: Sheet): ImageBitmap? = get(context, "projects/lamplighter/assets/textures/${sheet.file}")
+
+    fun get(context: Context, path: String): ImageBitmap? = loaded.getOrPut(path) {
         runCatching {
-            context.assets.open("projects/lamplighter/assets/textures/${sheet.file}").use {
-                BitmapFactory.decodeStream(it)?.asImageBitmap()
-            }
+            context.assets.open(path).use { BitmapFactory.decodeStream(it)?.asImageBitmap() }
         }.getOrNull()
+    }
+}
+
+/**
+ * Draws [image] as large as fits the bounds, standing on their bottom edge as
+ * a sprite stands on the ground, pixel art unsmoothed. Nothing where the image
+ * is not bundled.
+ */
+@Composable
+fun ProjectSprite(image: ProjectImage, modifier: Modifier = Modifier) {
+    val context = LocalContext.current
+    val bitmap = remember(image.path) { SheetCache.get(context, image.path) } ?: return
+    Canvas(modifier) {
+        val (left, top, width, height) = image.rect
+        val source = IntSize((width * bitmap.width).roundToInt().coerceAtLeast(1), (height * bitmap.height).roundToInt().coerceAtLeast(1))
+        val scale = minOf(size.width / source.width, size.height / source.height)
+        val drawn = IntSize((source.width * scale).roundToInt(), (source.height * scale).roundToInt())
+        drawImage(
+            bitmap,
+            srcOffset = IntOffset((left * bitmap.width).roundToInt(), (top * bitmap.height).roundToInt()),
+            srcSize = source,
+            dstOffset = IntOffset(((size.width - drawn.width) / 2).roundToInt(), (size.height - drawn.height).roundToInt()),
+            dstSize = drawn,
+            filterQuality = FilterQuality.None,
+        )
     }
 }
 

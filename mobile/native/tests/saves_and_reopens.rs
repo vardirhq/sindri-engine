@@ -100,6 +100,7 @@ fn edit(opened: &mut OpenedScene, editing: &mut Editing) -> [f32; 3] {
             LIGHT,
             "intensity",
             json!(1.5),
+            false,
         )
         .expect("the edit applies");
     position(&opened.world, LAMP)

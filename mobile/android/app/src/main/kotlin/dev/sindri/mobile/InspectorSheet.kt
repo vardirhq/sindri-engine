@@ -119,7 +119,13 @@ private fun SectionCard(section: SectionUi, onEvent: (EditorEvent) -> Unit) {
                     Box(
                         Modifier.size(56.dp).clip(RoundedCornerShape(12.dp)).background(Forge.Well).border(1.dp, Forge.Hairline, RoundedCornerShape(12.dp)),
                         contentAlignment = Alignment.BottomCenter,
-                    ) { SpriteThumb(row.sheet, row.cell, 52.dp) }
+                    ) {
+                        when {
+                            row.image != null -> ProjectSprite(row.image, Modifier.size(44.dp).padding(bottom = 4.dp))
+                            row.sheet != null -> SpriteThumb(row.sheet, row.cell, 52.dp)
+                            else -> Symbol(Sym.image, 24.sp, Forge.TextFaint, Modifier.padding(bottom = 14.dp))
+                        }
+                    }
                     Column(Modifier.weight(1f)) {
                         Text(row.file, style = ForgeType.text(14.sp, FontWeight.Medium).copy(fontFamily = ForgeType.Mono))
                         Text(row.detail, style = ForgeType.text(12.sp, color = Forge.TextFaint), modifier = Modifier.padding(top = 2.dp))
@@ -203,10 +209,16 @@ fun SliderRow(row: RowUi.Slider, change: (RowChange) -> Unit) {
                 .height(36.dp)
                 .semantics { contentDescription = "${row.label} ${row.value}" }
                 .pointerInput(row.label) {
-                    detectTapGestures { change(RowChange.To((it.x / size.width).coerceIn(0f, 1f))) }
+                    detectTapGestures {
+                        change(RowChange.To((it.x / size.width).coerceIn(0f, 1f)))
+                        change(RowChange.Settled)
+                    }
                 }
                 .pointerInput(row.label) {
-                    detectHorizontalDragGestures { pointer, _ -> change(RowChange.To((pointer.position.x / size.width).coerceIn(0f, 1f))) }
+                    detectHorizontalDragGestures(
+                        onDragEnd = { change(RowChange.Settled) },
+                        onDragCancel = { change(RowChange.Settled) },
+                    ) { pointer, _ -> change(RowChange.To((pointer.position.x / size.width).coerceIn(0f, 1f))) }
                 },
         ) {
             val fraction = row.fraction.coerceIn(0f, 1f)

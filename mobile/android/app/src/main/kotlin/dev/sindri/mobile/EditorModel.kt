@@ -115,7 +115,8 @@ sealed interface RowUi {
     data class Toggle(override val label: String, val on: Boolean) : RowUi
     data class Segment(override val label: String, val options: List<String>, val chosen: Int) : RowUi
     data class Swatches(override val label: String, val colors: List<Color>, val chosen: Int) : RowUi
-    data class SpriteRef(override val label: String, val sheet: Sheet, val cell: Int, val file: String, val detail: String) : RowUi
+    /** A sprite: drawn from a cell of a sample [sheet], or from [image] in the project. */
+    data class SpriteRef(override val label: String, val sheet: Sheet?, val cell: Int, val file: String, val detail: String, val image: ProjectImage? = null) : RowUi
     data class Behaviour(override val label: String) : RowUi
     data class Facts(override val label: String, val items: List<Pair<String, String>>) : RowUi
     data class More(override val label: String, val expanded: Boolean) : RowUi
@@ -193,6 +194,8 @@ sealed interface RowChange {
     data object Minus : RowChange
     data object Plus : RowChange
     data class To(val fraction: Float) : RowChange
+    /** A finger left a slider: the values it sent are one finished edit. */
+    data object Settled : RowChange
     data class Choose(val index: Int) : RowChange
     data class Switch(val on: Boolean) : RowChange
     data object Open : RowChange

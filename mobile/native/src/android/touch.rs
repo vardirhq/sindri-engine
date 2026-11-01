@@ -6,7 +6,7 @@
 use serde_json::{Value, json};
 
 use super::Host;
-use crate::{Editing, Handle, OpenedScene};
+use crate::{Editing, Handle, OpenedScene, Place};
 
 impl Host {
     /// The surface's size in pixels, which every touch is measured against.
@@ -85,21 +85,29 @@ impl Host {
         Ok(())
     }
 
-    /// Sets a field to the value the inspector sends, such as `1.25` or `true`.
+    /// Sets a field, by its path, to the value the inspector sends, such as
+    /// `1.25` or `true`; `merging` while a slider is being dragged.
     pub(super) fn set_field(
         &mut self,
         type_name: &str,
-        field: &str,
+        path: &str,
         value: Value,
+        merging: bool,
     ) -> Result<(), String> {
         let (opened, editing) = self.editing()?;
         editing.set_field(
             &mut opened.world,
             &opened.extractor,
             type_name,
-            field,
+            path,
             value,
+            merging,
         )
+    }
+
+    pub(super) fn set_place(&mut self, place: Place, merging: bool) -> Result<(), String> {
+        let (opened, editing) = self.editing()?;
+        editing.set_place(&mut opened.world, place, merging)
     }
 
     /// Everything the app's overlay draws from, as one JSON object: the status
@@ -109,7 +117,7 @@ impl Host {
         let size = self.size();
         let (inspector, origin, bounds, undo, redo, unsaved) = match (&self.opened, &self.editing) {
             (Some(opened), Some(editing)) => (
-                editing.inspector(&opened.world, &opened.extractor),
+                editing.inspector(&opened.world, &opened.extractor, &opened.assets.sheets),
                 editing.selection_pixel(&opened.world, size),
                 // An outline that cannot be placed is left off rather than
                 // failing the whole state; the pick that selected it worked.
@@ -193,7 +201,20 @@ impl Host {
                     .get(2)
                     .cloned()
                     .ok_or_else(|| format!("{command}: no value"))?;
-                self.set_field(text(0)?, text(1)?, value)
+                let merging = arguments.get(3).and_then(Value::as_bool).unwrap_or(false);
+                self.set_field(text(0)?, text(1)?, value, merging)
+            }
+            "setPlace" => {
+                let value = arguments.get(1).cloned().unwrap_or(Value::Null);
+                let place = Place::named(text(0)?, &value).ok_or_else(|| {
+                    format!("{command}: no place {} of {value}", text(0).unwrap_or(""))
+                })?;
+                let merging = arguments.get(2).and_then(Value::as_bool).unwrap_or(false);
+                self.set_place(place, merging)
+            }
+            "settle" => {
+                self.editing()?.1.settle();
+                Ok(())
             }
             other => Err(format!("unknown command {other}")),
         }

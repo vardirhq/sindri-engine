@@ -187,6 +187,7 @@ fn a_field_edit_is_checked_shown_and_undone() {
             LIGHT,
             "intensity",
             json!("bright"),
+            false,
         )
         .expect_err("a light's intensity is a number");
     assert!(refused.contains("intensity"), "{refused}");
@@ -203,9 +204,10 @@ fn a_field_edit_is_checked_shown_and_undone() {
             LIGHT,
             "intensity",
             json!(1.5),
+            false,
         )
         .expect("the edit applies");
-    let shown = editing.inspector(&opened.world, &opened.extractor);
+    let shown = editing.inspector(&opened.world, &opened.extractor, &opened.assets.sheets);
     let light = shown["components"]
         .as_array()
         .expect("components")
@@ -238,7 +240,7 @@ fn nothing_selected_shows_nothing_and_edits_nothing() {
     let mut editing = Editing::new(&opened.world, &opened.extractor).expect("editing starts");
     assert!(
         editing
-            .inspector(&opened.world, &opened.extractor)
+            .inspector(&opened.world, &opened.extractor, &opened.assets.sheets)
             .is_null()
     );
     assert!(
@@ -248,7 +250,8 @@ fn nothing_selected_shows_nothing_and_edits_nothing() {
                 &opened.extractor,
                 LIGHT,
                 "intensity",
-                json!(1.0)
+                json!(1.0),
+                false,
             )
             .is_err()
     );
@@ -426,4 +429,100 @@ fn the_handles_turn_and_scale_the_selection_in_one_undo_step_each() {
     );
     editing.undo(&mut opened.world).expect("the turn undoes");
     assert_eq!(transform(&opened, lamp), before);
+}
+
+#[test]
+fn the_inspector_reports_effective_values_meanings_and_the_sprite_region() {
+    let opened = opened();
+    let mut editing = Editing::new(&opened.world, &opened.extractor).expect("editing starts");
+    editing.selected = Some(entity(&opened, "cover-17"));
+    let shown = editing.inspector(&opened.world, &opened.extractor, &opened.assets.sheets);
+    assert_eq!(shown["id"], json!("cover-17"));
+    assert_eq!(shown["tile"], json!(1.0));
+    assert_eq!(shown["scale"], json!([-1.5, 1.5, 1.0]));
+    let sprite = shown["components"]
+        .as_array()
+        .expect("components")
+        .iter()
+        .find(|component| component["type"] == "sindri.sprite")
+        .expect("the sprite is shown");
+    // The scene stores only texture and layer; the rest is the engine's default.
+    assert_eq!(sprite["values"]["layer"], json!(3));
+    assert_eq!(sprite["values"]["unlit"], json!(false));
+    assert_eq!(sprite["meanings"]["tint"]["kind"], json!("color"));
+    // decor.png is four cells across; mushrooms is the third.
+    assert_eq!(shown["sprite"]["texture"], json!("textures/decor.png"));
+    assert_eq!(shown["sprite"]["region"], json!("mushrooms"));
+    assert_eq!(shown["sprite"]["rect"], json!([0.5, 0.0, 0.25, 1.0]));
+}
+
+#[test]
+fn a_slider_drag_is_one_undo_step_and_place_and_nested_fields_are_edited() {
+    let mut opened = opened();
+    let mut editing = Editing::new(&opened.world, &opened.extractor).expect("editing starts");
+    let lamp = entity(&opened, "cover-17");
+    editing.selected = Some(lamp);
+    for radius in [3.0, 3.5, 4.0] {
+        editing
+            .set_field(
+                &mut opened.world,
+                &opened.extractor,
+                LIGHT,
+                "radius",
+                json!(radius),
+                true,
+            )
+            .expect("the radius applies");
+    }
+    editing.settle();
+    assert_eq!(editing.history.undo_steps().len(), 1, "one drag, one step");
+    for size in [2.0, 2.5] {
+        editing
+            .set_place(&mut opened.world, sindri_mobile::Place::Size(size), true)
+            .expect("the size applies");
+    }
+    editing.settle();
+    editing
+        .set_place(&mut opened.world, sindri_mobile::Place::Turn(90.0), false)
+        .expect("the turn applies");
+    assert_eq!(editing.history.undo_steps().len(), 3);
+    let placed = transform(&opened, lamp);
+    assert!(
+        near(placed.scale[0], -2.5) && near(placed.scale[1], 2.5),
+        "{placed:?}"
+    );
+    let shown = editing.inspector(&opened.world, &opened.extractor, &opened.assets.sheets);
+    assert!(
+        (shown["turn"].as_f64().expect("a turn") - 90.0).abs() < 1e-3,
+        "{}",
+        shown["turn"]
+    );
+
+    let wick = entity(&opened, "wick");
+    editing.selected = Some(wick);
+    editing
+        .set_field(
+            &mut opened.world,
+            &opened.extractor,
+            "sindri.physics2d.collider",
+            "pieces.0.shape.radius",
+            json!(0.6),
+            false,
+        )
+        .expect("a nested field applies");
+    let stored = &opened.world.get(wick).expect("Wick").components["sindri.physics2d.collider"];
+    assert_eq!(stored["pieces"][0]["shape"]["radius"], json!(0.6));
+    assert!(
+        editing
+            .set_field(
+                &mut opened.world,
+                &opened.extractor,
+                "sindri.physics2d.collider",
+                "pieces.0.shape.radius",
+                json!("wide"),
+                false,
+            )
+            .is_err(),
+        "the schema still refuses a nested field it cannot decode"
+    );
 }
