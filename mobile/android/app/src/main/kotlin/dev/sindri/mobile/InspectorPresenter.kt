@@ -8,7 +8,7 @@ import kotlin.math.roundToLong
 /**
  * Presents the engine's selection the way the design's inspector does: a few
  * friendly sections (Place in tiles, Light 2D, Sprite, Collider 2D, Body,
- * Shadow) with sliders over sensible ranges, units and colour swatches, rather
+ * Shadow) with sliders over sensible ranges, units and color swatches, rather
  * than each component's raw fields. Components it has no presentation of are
  * shown plainly after them, so nothing the engine holds is hidden.
  *
@@ -24,8 +24,8 @@ object InspectorPresenter {
 
     fun key(section: String, row: String) = "$section/$row"
 
-    /** Colours a light can be given in one tap: the design's lamp, cool and ember. */
-    val lightColours = listOf(
+    /** Colors a light can be given in one tap: the design's lamp, cool and ember. */
+    val lightColors = listOf(
         listOf(1.0, 0.84, 0.59),
         listOf(0.67, 0.78, 1.0),
         listOf(1.0, 0.59, 0.35),
@@ -117,13 +117,13 @@ object InspectorPresenter {
         if (light.value("enabled") == false) section.add(RowUi.Toggle("On", false), RowBinding.FieldSwitch(LIGHT, "enabled"))
         slider(section, light, "radius", "Radius", 0.25 * tile, 12.0 * tile, unit = tile, suffix = " tiles", step = 0.05)
         slider(section, light, "intensity", "Brightness", 0.0, 3.0, step = 0.05)
-        val colour = (light.value("color") as? List<*>)?.mapNotNull { (it as? Number)?.toDouble() }
-        if (colour != null && colour.size == 4) {
-            val known = lightColours.indexOfFirst { preset -> preset.indices.all { abs(preset[it] - colour[it]) < 0.02 } }
-            val choices = if (known >= 0) lightColours else listOf(colour.take(3)) + lightColours
+        val color = (light.value("color") as? List<*>)?.mapNotNull { (it as? Number)?.toDouble() }
+        if (color != null && color.size == 4) {
+            val known = lightColors.indexOfFirst { preset -> preset.indices.all { abs(preset[it] - color[it]) < 0.02 } }
+            val choices = if (known >= 0) lightColors else listOf(color.take(3)) + lightColors
             section.add(
-                RowUi.Swatches("Colour", choices.map { Color(it[0].toFloat().coerceIn(0f, 1f), it[1].toFloat().coerceIn(0f, 1f), it[2].toFloat().coerceIn(0f, 1f)) }, if (known >= 0) known else 0),
-                RowBinding.FieldChoice(LIGHT, "color", choices.map { it + colour[3] }),
+                RowUi.Swatches("Color", choices.map { Color(it[0].toFloat().coerceIn(0f, 1f), it[1].toFloat().coerceIn(0f, 1f), it[2].toFloat().coerceIn(0f, 1f)) }, if (known >= 0) known else 0),
+                RowBinding.FieldChoice(LIGHT, "color", choices.map { it + color[3] }),
             )
         }
         (light.value("shadows") as? Boolean)?.let { section.add(RowUi.Toggle("Casts shadows", it), RowBinding.FieldSwitch(LIGHT, "shadows")) }

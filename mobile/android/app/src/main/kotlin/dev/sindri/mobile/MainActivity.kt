@@ -44,6 +44,7 @@ private sealed interface Screen {
 private object NativeHost : EditorController.Native {
     override fun command(command: String, vararg arguments: Any?): String? = NativeBridge.command(command, *arguments)
     override fun state(): EditorState = EditorState.read(NativeBridge.state())
+    override fun script(): DecayScript? = DecayScript.read(NativeBridge.script())
 }
 
 @Composable

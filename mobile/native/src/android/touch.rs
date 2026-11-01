@@ -226,6 +226,22 @@ impl Host {
                 self.pause(paused)
             }
             "stepOnce" => self.step_once(),
+            "openScript" => self.open_script(text(0)?),
+            "closeScript" => {
+                self.close_script();
+                Ok(())
+            }
+            "editScript" => {
+                let at = |index: usize| -> Result<usize, String> {
+                    arguments
+                        .get(index)
+                        .and_then(Value::as_u64)
+                        .and_then(|value| usize::try_from(value).ok())
+                        .ok_or_else(|| format!("{command}: argument {index} is not a position"))
+                };
+                let value = arguments.get(3).cloned().unwrap_or(Value::Null);
+                self.edit_script(text(0)?, [at(1)?, at(2)?], &value)
+            }
             "save" => self.save(),
             "undo" => self.undo(),
             "redo" => self.redo(),

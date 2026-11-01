@@ -37,7 +37,7 @@ All in `mobile/android/app/src/main/kotlin/dev/sindri/mobile/`.
 
 | Part | Where | What it is |
 | --- | --- | --- |
-| Palette | `Forge.kt` | The prototype's colours by role: ground, page, well, sheet, card, raised, hairline, line; three text tones; metal, bright metal, metal fill, metal border, on-metal; success, danger; glass and popover |
+| Palette | `Forge.kt` | The prototype's colors by role: ground, page, well, sheet, card, raised, hairline, line; three text tones; metal, bright metal, metal fill, metal border, on-metal; success, danger; glass and popover |
 | Type | `ForgeType.kt` | Inter (variable, by weight) for everything, JetBrains Mono for files and Decay |
 | Icons | `ForgeType.kt` | Material Symbols Outlined, subset to the 124 icons the prototype draws, as a 27 KB font; a filled subset for play, pause and stop. `Sym` names them, so a missing icon is a compile error |
 | Sprites | `Sprites.kt` | Lamplighter's sprite sheets from the bundled project, cut into cells and drawn unsmoothed, as the prototype draws them |
@@ -54,15 +54,15 @@ Fonts are bundled under their own licences in `mobile/android/licenses/`.
 | `01-dashboard` | `DashboardScreen` | ✅ | Continue opens the editor on the bundled Lamplighter. Samples, settings and Open folder do nothing yet |
 | `02`–`04` New game | `NewGameScreen` | ✅ | The steps play out; creating a project is not wired, so the bundled Lamplighter opens instead |
 | `10-editor` | `EditorScreen` | ✅ | The canvas is the engine's scene: drag to pan, pinch to zoom, tap to select, drag a selection to move it. Tapping the ground lets the selection go: a tilemap is painted, not selected, as in the prototype. Back steps out of the menu, a sheet, painting, a run and the selection before leaving the editor. Moves are saved when the finger lifts |
-| `11-more-menu` | `EditorScreen` | ✅ | The switches are remembered while the menu is closed. Lighting preview (off by default) draws the scene's 2D lights or leaves every sprite in its own colours; Snap keeps the turn handle to 15° and the scale handle to tenths; the tile grid is not drawn yet. Frame everything is not wired |
+| `11-more-menu` | `EditorScreen` | ✅ | The switches are remembered while the menu is closed. Lighting preview (off by default) draws the scene's 2D lights or leaves every sprite in its own colors; Snap keeps the turn handle to 15° and the scale handle to tenths; the tile grid is not drawn yet. Frame everything is not wired |
 | `12-add` | `EditorSheets` | ✅ | Sample prefabs; placing is not wired |
 | `13-paint` | `EditorScreen` | ✅ | Brush, size and Move are chosen; painting is not wired |
 | `14-assets`, `15-import` | `EditorSheets` | ✅ | Sample content; the slicer (`16-slicer`) is not built yet |
 | `17-layers`, `17b-layers-objects` | `EditorSheets` | ✅ | Sample content |
 | `18-scenes` | `EditorSheets` | ✅ | Sample content |
 | `19-selected`, `24-multi` | `EditorScreen` | ✅ | The engine draws the selection with the prototype's bright-metal edge round its own shape; the ring at its feet and the turn and scale handles turn and scale it in one undo step each. The chip names it. Duplicate, Select more, Group and Delete are not wired, so `24-multi` is not reached |
-| `20`, `21` Inspector | `InspectorSheet`, `InspectorPresenter` | ✅ | The engine's selection in the design's sections: Place (across and up in tiles, turn, size), Light 2D (radius, brightness, colour swatches, shadows), Sprite (its real thumbnail, mirror, draw layer), Collider 2D (shape, sensor, reach or size), Body, Shadow; other components plainly after them; Behaviour names the script; Details lists the rest. Every row is a checked, undoable, saved edit, and a slider drag is one step. Swapping a sprite and adding a component are not wired. `20e`/`21e` draw it beside the prototype's |
-| `22`, `23` Behaviour | `BehaviourSheet` | ✅ | Opens for the selection with no rules; blocks are not wired to Decay |
+| `20`, `21` Inspector | `InspectorSheet`, `InspectorPresenter` | ✅ | The engine's selection in the design's sections: Place (across and up in tiles, turn, size), Light 2D (radius, brightness, color swatches, shadows), Sprite (its real thumbnail, mirror, draw layer), Collider 2D (shape, sensor, reach or size), Body, Shadow; other components plainly after them; Behaviour names the script; Details lists the rest. Every row is a checked, undoable, saved edit, and a slider drag is one step. Swapping a sprite and adding a component are not wired. `20e`/`21e` draw it beside the prototype's |
+| `22`, `23` Behaviour | `BehaviourSheet`, `DecayBlocks` | ✅ | For a selection with a script: the real `.decay` file as Decay blocks (`22d`). Its values, each handler as a When card, statements nested as written, comments and code with no block yet shown as they are. Numbers, text and switches edit the file in place, one slot at a time. Code shows the same file. Adding, moving or deleting blocks, and starting a script from blocks, are not wired. The design's sample rule cards still show for a selection without a script |
 | `25-play`, `26-frozen`, `26b-frozen-tune` | `PlayChrome` | ✅ | ▶ runs the real game in place of the canvas: Stop, Pause, Step one frame and the clock work, and dragging anywhere shows the design's stick (`25b-play-stick`) and walks the player. Tapping something while paused to tune it, and Step back, are not wired |
 | `27-review` | `EditorSheets` | ✅ | Nothing produces run edits yet |
 | `28-coach` | `EditorScreen` | ✅ | Nothing shows tips yet |
@@ -89,7 +89,7 @@ answers with a short "not wired yet" toast rather than pretending.
   and short choices, so nothing the engine holds is hidden.
 - **The outline is drawn by the engine, the handles by the app.** The edge
   round the selection's shape is part of the canvas's frame (copies of its
-  sprite in one flat colour, in a scratch world only the canvas draws), so it
+  sprite in one flat color, in a scratch world only the canvas draws), so it
   follows the art exactly. A tilemap or cube has no outline yet, only its
   handles.
 
@@ -113,4 +113,5 @@ The prototype names five, and they are the acceptance path for functionality:
    what feels wrong before wiring more.
 2. Live tuning while paused, and the Review sheet at Stop.
 3. The journeys above, one at a time: placing prefabs, painting, Behaviour
-   blocks that write Decay, importing and slicing.
+   blocks beyond editing slots (adding, moving and deleting statements, picking
+   host calls), importing and slicing.

@@ -2,9 +2,9 @@
 //! it, with everything the app needs to present it the design's way.
 //!
 //! The app turns this into friendly sections (Place in tiles, Light 2D with
-//! sliders and colour swatches, Sprite, Collider 2D …), so it needs more than
+//! sliders and color swatches, Sprite, Collider 2D …), so it needs more than
 //! the stored payload: every field at its effective value, defaults included,
-//! and what the engine says each field means (a range, a choice, a colour).
+//! and what the engine says each field means (a range, a choice, a color).
 //! Both come from the component registry, the same source the desktop
 //! inspector uses, so the phone never guesses a bound the engine would refuse.
 

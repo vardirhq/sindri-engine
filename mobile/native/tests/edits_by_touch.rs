@@ -335,7 +335,7 @@ fn the_canvas_draws_the_selection_outlined_and_the_scene_untouched() {
         assert_eq!(
             sprite["color_transform"]["multiply"],
             json!([0.0, 0.0, 0.0, 1.0]),
-            "the edge is one flat colour"
+            "the edge is one flat color"
         );
         assert!(
             !edge.components.contains_key(LIGHT),

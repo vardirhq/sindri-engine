@@ -33,6 +33,8 @@ class EditorControllerTest {
         }
 
         override fun state() = state.copy(lighting = lighting, play = playing)
+
+        override fun script() = EngineSamples.lampScript
     }
 
     private val host = Host()
@@ -145,5 +147,23 @@ class EditorControllerTest {
         assertEquals(PlayMode.Edit, controller.ui.mode)
         assertEquals("The game stopped: a solver failed", controller.ui.toast?.text)
         assertEquals(listOf("stop"), host.commands.last())
+    }
+
+    @Test
+    fun a_script_opens_as_decay_blocks_and_a_slot_edit_changes_the_file_there() {
+        host.state = EditorState(
+            inspector = Inspector(
+                "Lamp post", listOf(0.0, 0.0, 0.0),
+                listOf(Component("sindri.script", "Script", emptyList(), values = mapOf("source" to "scripts/lamp.decay"))),
+            ),
+        )
+        controller.refresh()
+        controller.on(EditorEvent.OpenBehaviour) {}
+        assertEquals(listOf("openScript", "scripts/lamp.decay"), host.commands.last())
+        val sheet = controller.ui.sheet as EditorSheet.Behaviour
+        assertEquals(EngineSamples.lampScript, sheet.behaviour.decay)
+
+        controller.on(EditorEvent.ScriptSlot(DecaySlot.Number(1.5, 40 to 43), 2.0)) {}
+        assertEquals(listOf("editScript", "number", 40, 43, 2.0), host.commands.last())
     }
 }

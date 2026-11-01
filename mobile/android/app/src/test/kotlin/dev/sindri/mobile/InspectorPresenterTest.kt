@@ -38,12 +38,12 @@ class InspectorPresenterTest {
         assertEquals("4.5 tiles", radius.value)
         val edit = presented.binding("Light 2D", "Radius")!!.edit(RowChange.To(1f))!!
         assertEquals(listOf("sindri.light2d", "radius", 12.0, true), edit.arguments)
-        val colour = row("Light 2D", "Colour") as RowUi.Swatches
-        assertEquals("the lamp's colour is the first preset", 0, colour.chosen)
-        assertEquals(3, colour.colors.size)
+        val color = row("Light 2D", "Color") as RowUi.Swatches
+        assertEquals("the lamp's color is the first preset", 0, color.chosen)
+        assertEquals(3, color.colors.size)
         assertEquals(
             NativeEdit("setField", listOf("sindri.light2d", "color", listOf(0.67, 0.78, 1.0, 1.0), false)),
-            presented.binding("Light 2D", "Colour")!!.edit(RowChange.Choose(1)),
+            presented.binding("Light 2D", "Color")!!.edit(RowChange.Choose(1)),
         )
         assertEquals(listOf("sindri.light2d", "shadows", true, false), presented.binding("Light 2D", "Casts shadows")!!.edit(RowChange.Switch(true))!!.arguments)
     }

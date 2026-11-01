@@ -98,7 +98,7 @@ impl SceneRenderer {
     }
 
     /// Whether frames show the scene's 2D lights and the darkness they light,
-    /// as the game does (the default), or every sprite in its own colours, as
+    /// as the game does (the default), or every sprite in its own colors, as
     /// an editor's view with its lighting preview off does.
     pub const fn set_lit(&mut self, lit: bool) {
         self.lit = lit;

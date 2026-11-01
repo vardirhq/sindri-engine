@@ -74,7 +74,7 @@ object SampleEditor {
             listOf(
                 RowUi.Slider("Radius", 3.5f / 7f, "4.5 tiles"),
                 RowUi.Slider("Brightness", 1.2f / 3f, "1.2"),
-                RowUi.Swatches("Colour", listOf(lampWarm, lampCool, lampEmber), 0),
+                RowUi.Swatches("Color", listOf(lampWarm, lampCool, lampEmber), 0),
             ),
         )
         val sprite = SectionUi(

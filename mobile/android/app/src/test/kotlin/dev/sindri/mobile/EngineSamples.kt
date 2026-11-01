@@ -27,4 +27,43 @@ object EngineSamples {
         ),
     )
 
+
+    /** `scripts/lamp.decay` as visual Decay reads it: a value, two handlers, comments and nesting. */
+    val lampScript = DecayScript(
+        name = "scripts/lamp.decay",
+        source = "script Lamp { ... }",
+        containers = listOf(
+            DecayContainer(
+                "script", "Lamp",
+                fields = listOf(
+                    DecayField("glow", exported = true, mutable = false, type = "number", value = DecaySlot.Number(1.5, 40 to 43), note = "How bright it burns once lit."),
+                    DecayField("lit", exported = false, mutable = true, type = "bool", value = DecaySlot.Bool(false, 60 to 65), note = null),
+                ),
+                handlers = listOf(
+                    DecayHandler(
+                        "start", "When it starts", event = true, params = emptyList(), note = null,
+                        body = listOf(
+                            DecayBlock.Comment("Dark until Wick reaches it."),
+                            DecayBlock.Set(DecaySlot.Name("this.light.enabled"), DecaySlot.Bool(false, 120 to 125)),
+                        ),
+                    ),
+                    DecayHandler(
+                        "update", "Every frame", event = true, params = listOf("dt"), note = null,
+                        body = listOf(
+                            DecayBlock.If(
+                                DecaySlot.Op("&&", DecaySlot.Unary("!", DecaySlot.Name("this.lit")), DecaySlot.Call("World.near", listOf(DecaySlot.Name("this"), DecaySlot.Text("wick", 200 to 206), DecaySlot.Number(1.2, 208 to 211)))),
+                                then = listOf(
+                                    DecayBlock.Set(DecaySlot.Name("this.lit"), DecaySlot.Bool(true, 230 to 234)),
+                                    DecayBlock.Change(DecaySlot.Name("Game.lit"), "+=", DecaySlot.Number(1.0, 250 to 253)),
+                                    DecayBlock.Do(DecaySlot.Call("Camera.shake", listOf(DecaySlot.Number(0.3, 270 to 273)))),
+                                ),
+                                otherwise = null,
+                            ),
+                            DecayBlock.Code("this.light.intensity = lerp(this.light.intensity, this.glow, dt * 4.0);"),
+                        ),
+                    ),
+                ),
+            ),
+        ),
+    )
 }

@@ -12,6 +12,7 @@
 
 mod exports;
 mod playing;
+mod scripts;
 mod touch;
 mod window;
 
@@ -53,6 +54,8 @@ struct Host {
     last_frame: Option<std::time::Instant>,
     /// Why the last run stopped by itself, until the app has seen it.
     play_error: Option<String>,
+    /// The script the Behaviour sheet has open, as Decay blocks.
+    script: Option<scripts::OpenScript>,
 }
 
 impl Host {

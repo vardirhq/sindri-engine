@@ -24,6 +24,9 @@ class EditorController(
     interface Native {
         fun command(command: String, vararg arguments: Any?): String?
         fun state(): EditorState
+
+        /** The script `openScript` opened, as Decay blocks, or null. */
+        fun script(): DecayScript? = null
     }
 
     var ui by mutableStateOf(SampleEditor.base.copy(projectTitle = "Lamplighter", canUndo = false))
@@ -156,6 +159,7 @@ class EditorController(
                 refresh()
             }
             EditorEvent.HandleReleased -> nativeEdit("release")
+            is EditorEvent.ScriptSlot -> scriptSlot(event)
             else -> notWired(null)
         }
     }
@@ -257,21 +261,60 @@ class EditorController(
 
     private fun openBehaviour() {
         val inspector = state.inspector ?: return
-        ui = ui.copy(
-            sheet = EditorSheet.Behaviour(
-                BehaviourUi(
-                    subject = inspector.name,
-                    templates = listOf(
-                        BehaviourTemplate(Sym.star, "Collectible", "Disappears and adds to the score", false),
-                        BehaviourTemplate(Sym.door_front, "Door to a scene", "Interact to go to another scene", false),
-                    ),
-                    rules = emptyList(),
-                    codeFile = "No script yet",
-                    code = emptyList(),
-                    codeNote = "Behaviour blocks are not wired to Decay yet.",
+        val source = inspector.component("sindri.script")?.value("source") as? String
+        val script = source?.let {
+            native.command("openScript", it)?.let { failed ->
+                ui = ui.copy(toast = ToastUi(failed))
+                null
+            } ?: native.script()
+        }
+        ui = ui.copy(sheet = EditorSheet.Behaviour(behaviourUi(inspector.name, script)))
+    }
+
+    /**
+     * The Behaviour sheet for [subject]: its real script as Decay blocks, and
+     * the same file as code, or, with no script, the design's starting points.
+     */
+    private fun behaviourUi(subject: String, script: DecayScript?): BehaviourUi =
+        if (script != null) {
+            BehaviourUi(
+                subject = subject,
+                templates = emptyList(),
+                rules = emptyList(),
+                codeFile = script.name,
+                code = script.source.lines(),
+                codeNote = "The blocks are this file: a change in one is a change in the other.",
+                decay = script,
+            )
+        } else {
+            BehaviourUi(
+                subject = subject,
+                templates = listOf(
+                    BehaviourTemplate(Sym.star, "Collectible", "Disappears and adds to the score", false),
+                    BehaviourTemplate(Sym.door_front, "Door to a scene", "Interact to go to another scene", false),
                 ),
-            ),
-        )
+                rules = emptyList(),
+                codeFile = "No script yet",
+                code = emptyList(),
+                codeNote = "Adding a script from blocks is not wired yet.",
+            )
+        }
+
+    /** A block's slot edited: the script file changes in that one place, and is read again. */
+    private fun scriptSlot(event: EditorEvent.ScriptSlot) {
+        val sheet = ui.sheet as? EditorSheet.Behaviour ?: return
+        val (kind, span) = when (val slot = event.slot) {
+            is DecaySlot.Number -> "number" to slot.span
+            is DecaySlot.Text -> "text" to slot.span
+            is DecaySlot.Bool -> "bool" to slot.span
+            else -> return
+        }
+        native.command("editScript", kind, span.first, span.second, event.value)?.let { failed ->
+            ui = ui.copy(toast = ToastUi(failed))
+            return
+        }
+        val script = native.script() ?: return
+        ui = ui.copy(sheet = sheet.copy(behaviour = behaviourUi(sheet.behaviour.subject, script)))
     }
 
     /**

@@ -116,11 +116,11 @@ faster to compile and much slower to run.
    on; dragging the scale handle scales it about where it stands. Each is one
    undo step, and the handles stay the same size at any zoom.
 5. With Lighting preview off (the default) the night field shows in its own
-   colours; turned on in the ⋮ menu, it is dark and lit by its lamps. The menu
+   colors; turned on in the ⋮ menu, it is dark and lit by its lamps. The menu
    remembers the setting when closed and reopened.
 6. With Lighting preview on, dragging a lamp's Radius or Brightness slider in
    its inspector changes its light as the finger moves, and undo takes the
-   whole drag back in one step. A colour swatch recolours it; Turn, Size and
+   whole drag back in one step. A color swatch recolors it; Turn, Size and
    Mirror in Place and Sprite change it on the canvas.
 7. Dragging something that was not selected first pans instead of moving it.
 8. TalkBack reads the canvas, the handles, the undo and redo buttons, and each

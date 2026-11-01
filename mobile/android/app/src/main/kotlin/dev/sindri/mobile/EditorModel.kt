@@ -140,6 +140,8 @@ data class BehaviourUi(
     val codeFile: String,
     val code: List<String>,
     val codeNote: String,
+    /** The selection's real script, as Decay blocks; the sample rules show without one. */
+    val decay: DecayScript? = null,
 )
 
 data class BehaviourTemplate(val icon: Sym, val label: String, val description: String, val chosen: Boolean)
@@ -195,6 +197,8 @@ sealed interface EditorEvent {
     data class HandleTaken(val handle: HandleKind, val x: Float, val y: Float) : EditorEvent
     data class HandleDragged(val x: Float, val y: Float) : EditorEvent
     data object HandleReleased : EditorEvent
+    /** A number, text or switch slot of the open script given a new value. */
+    data class ScriptSlot(val slot: DecaySlot, val value: Any) : EditorEvent
 }
 
 enum class MenuItem { Snap, LightingPreview, TileGrid }

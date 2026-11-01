@@ -156,7 +156,7 @@ fn the_field_draws_at_phone_resolution() {
     let pixels = drawing.draw(None, CameraView::default(), true);
     // Lamplighter is a night: its ambient is near black and its lamps light
     // the way. With the lighting preview off the field shows in its own
-    // colours, which is far brighter than the lit night.
+    // colors, which is far brighter than the lit night.
     assert!(
         brightness(&unlit) > brightness(&pixels) * 2,
         "the unlit field is brighter than the lit night"

@@ -105,6 +105,16 @@ class DesignScreens {
         lamp.copy(sheet = EditorSheet.Inspector(InspectorPresenter.present(EngineSamples.lamp, "world.scene", "projects/lamplighter/assets/", details = false).ui, full = true)),
     )
 
+    /** A real script as Decay blocks, in the Behaviour sheet. */
+    @Test fun behaviourDecay() = editor(
+        "22d-behaviour-decay",
+        lamp.copy(
+            sheet = EditorSheet.Behaviour(
+                BehaviourUi("Lamp post", emptyList(), emptyList(), "scripts/lamp.decay", listOf("script Lamp {"), "", decay = EngineSamples.lampScript),
+            ),
+        ),
+    )
+
     @Test fun inspectorFull() = editor("21-inspector-full", lamp.copy(sheet = EditorSheet.Inspector(SampleEditor.lampInspector(), full = true)))
 
     @Test fun behaviourBlocks() = editor("22-behaviour-blocks", lamp.copy(sheet = EditorSheet.Behaviour(SampleEditor.lampBehaviour)))

@@ -48,6 +48,10 @@ fun BoxScope.BehaviourSheet(sheet: EditorSheet.Behaviour, onEvent: (EditorEvent)
 
 @Composable
 private fun androidx.compose.foundation.layout.ColumnScope.BlocksView(behaviour: BehaviourUi, onEvent: (EditorEvent) -> Unit) = SheetBody(horizontal = 12.dp) {
+    behaviour.decay?.let { script ->
+        DecayScriptView(script) { slot, value -> onEvent(EditorEvent.ScriptSlot(slot, value)) }
+        return@SheetBody
+    }
     if (behaviour.templates.isNotEmpty()) {
         Column {
             Text("Start from", style = ForgeType.text(12.sp, FontWeight.Medium, Forge.TextFaint), modifier = Modifier.padding(start = 4.dp, end = 4.dp, top = 2.dp, bottom = 8.dp))
@@ -241,7 +245,7 @@ private val keywords = setOf("script", "fn", "let", "var", "if", "else", "return
 private val types = setOf("number", "bool", "String", "Entity")
 private val token = Regex("""(//.*$)|("[^"]*")|(@export)|(\b\d+(?:\.\d+)?\b)|([A-Za-z_][A-Za-z0-9_]*)|(\s+)|(.)""")
 
-/** Decay coloured as the prototype colours it: keywords metal, types blue, strings green. */
+/** Decay colored as the prototype colors it: keywords metal, types blue, strings green. */
 private fun highlight(line: String): AnnotatedString = buildAnnotatedString {
     token.findAll(line).forEach { match ->
         val groups = match.groups

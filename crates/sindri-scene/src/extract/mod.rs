@@ -495,7 +495,7 @@ pub struct SceneRuntime<'a> {
     /// The measured words of text elements that fit their content, from
     /// [`crate::measure_ui_text`]. `None` lays them out at their own size.
     pub text_sizes: Option<&'a UiTextSizes>,
-    /// Draws every sprite and shape at its own colour, leaving out the scene's
+    /// Draws every sprite and shape at its own color, leaving out the scene's
     /// 2D lights and the darkness they light: an editor's view with its
     /// lighting preview off, for working in a scene that is dark on purpose.
     /// `false`, the default, draws the scene as it is lit.

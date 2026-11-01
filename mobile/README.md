@@ -56,11 +56,31 @@ Touch interaction is a product requirement: tap a socket to search for and conne
 
 ### Representation and code
 
-Proposed starting direction: save a versioned graph asset and compile it to Decay using the actual language and host contracts. Keep graph layout separate from executable semantics where practical. Show generated source for inspection; do not claim arbitrary graph-to-text-to-graph round trips. Handwritten Decay must coexist with visual scripts, and unsupported code must never be silently rewritten or discarded.
+**Decided (2026-11-01): visual scripting is Decay, but visual.** The `.decay` file
+is the only thing stored. There is no graph asset beside it and nothing is
+converted: the blocks are how an editor shows a script, and a block edit is a
+change to that script's text. A script written by hand on desktop opens as
+blocks on the phone, and one edited as blocks reads on desktop exactly as if it
+had been typed there.
 
-This representation is a proposal, not a settled format. Before committing to it, investigate Decay's parser, AST, compiler, diagnostics, source mapping, language-server tooling, script loading, and export pipeline. Prove how generated code maps errors and runtime observations back to nodes; how graphs are versioned and migrated; how stable IDs and entity references work; how changes are validated; and how desktop and Android preserve unknown graph data. If safe bidirectional editing proves feasible, it can be added deliberately.
+This replaces the earlier proposal of a versioned graph asset compiled to Decay.
+How it works, in `sindri_authoring::visual_decay`:
 
-Visual scripts must run through the same Decay and runtime path as text scripts. Do not invent syntax or host calls: verify against current definitions and checked scripts. Gameplay-specific logic belongs in Decay, not bespoke Rust game implementations.
+- Blocks are read through Decay's own parser (`decay-syntax`). Handlers are
+  "When …" blocks, with the lifecycle taken from `sindri_decay::LIFECYCLE`.
+  Statements are blocks, and expressions sit in slots. Comments between
+  statements, and above values and handlers, are shown. Anything with no block
+  shape yet is shown as its exact source, so nothing is hidden.
+- Every node carries its span in the file. An edit replaces exactly the text of
+  the slot it changed, then the result is parsed and refused if it no longer
+  reads. Every other byte, comments and formatting included, stays as it was.
+  A script with syntax errors is fixed as text before its blocks edit.
+- Graph layout is not stored. The blocks follow the code's own order and
+  nesting, which is what makes them the same thing as the script.
+
+Blueprint-style wiring, placing new nodes, and following execution during Play
+build on this. Each new kind of edit is a span edit checked the same way. The
+round trip is tested on every script in the repository.
 
 ## Architecture direction
 

@@ -43,6 +43,9 @@ object NativeBridge {
     /** The overlay's state as JSON: status, inspector, the selection's origin and bounds, undo and redo labels, lighting. */
     @JvmStatic external fun state(): String
 
+    /** The script `openScript` opened, as JSON: its name, source and Decay blocks; `null` with none. */
+    @JvmStatic external fun script(): String
+
     /** [call] with its arguments written as a JSON array. */
     fun command(command: String, vararg arguments: Any?): String? =
         call(command, JSONArray(arguments.toList()).toString())

@@ -1,9 +1,9 @@
 //! The selection's outline: the design draws the selected object with a thin
 //! bright-metal edge around its own shape, not a box.
 //!
-//! The engine already has what that takes. A sprite's colour transform can
-//! paint every pixel it draws one solid colour (multiply by nothing, offset by
-//! the colour), so a copy of the selected sprite painted bright metal, nudged a
+//! The engine already has what that takes. A sprite's color transform can
+//! paint every pixel it draws one solid color (multiply by nothing, offset by
+//! the color), so a copy of the selected sprite painted bright metal, nudged a
 //! pixel and a half each way and drawn just behind the sprite itself, leaves
 //! exactly an edge around its silhouette. Nothing in the renderer is special to
 //! the editor; the copies live only in a scratch world the canvas draws, never
@@ -12,8 +12,8 @@
 use serde_json::{Value, json};
 use sindri_core::{EntityData, EntityId, Transform3D, World};
 
-/// The design's bright metal, `#FFBE55`, as the colour transform's offset.
-/// In linear light, because that is what a sprite's colour is worked in: the
+/// The design's bright metal, `#FFBE55`, as the color transform's offset.
+/// In linear light, because that is what a sprite's color is worked in: the
 /// sRGB target turns it back into `#FFBE55` on the screen.
 const METAL_BRIGHT: [f32; 4] = [1.0, 0.5149, 0.0908, 0.0];
 
@@ -67,7 +67,7 @@ pub fn outlined(world: &World, entity: EntityId, width: f32) -> Option<World> {
     Some(outlined)
 }
 
-/// The selected sprite as one flat colour: the same picture, layer and
+/// The selected sprite as one flat color: the same picture, layer and
 /// drawing, unlit so the edge shows in a dark scene, with no shader or normal
 /// map to change its shape or shade.
 fn edge_sprite(sprite: &Value, alpha: f64) -> Value {

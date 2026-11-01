@@ -14,7 +14,7 @@ data class Field(val name: String, val value: Any) {
     val step: Double get() = if (isWhole) 1.0 else 0.1
 }
 
-/** What the engine says a field means: a bounded number, one of some spellings, a colour … */
+/** What the engine says a field means: a bounded number, one of some spellings, a color … */
 data class Meaning(val kind: String, val min: Double? = null, val max: Double? = null, val options: List<String> = emptyList())
 
 data class Component(
