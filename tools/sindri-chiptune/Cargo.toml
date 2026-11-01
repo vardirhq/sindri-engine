@@ -27,7 +27,7 @@ web-time.workspace = true
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 getrandom.workspace = true
 rfd = { version = "0.17.2", default-features = false, features = ["xdg-portal"] }
-rodio = { version = "0.22.2", default-features = false, features = ["playback"] }
+rodio = { version = "0.23.0", default-features = false, features = ["playback"] }
 toml_edit = "0.25"
 # Songs are delivered as Ogg Vorbis, a tenth of their WAV size: the reference
 # encoder (libvorbis, BSD-3-Clause) through safe bindings. Native only, because
