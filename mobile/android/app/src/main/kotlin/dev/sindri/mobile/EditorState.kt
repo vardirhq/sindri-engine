@@ -22,7 +22,7 @@ data class Inspector(
     val components: List<Component>,
 )
 
-/** What the overlay draws, read from the native host's `state()`. */
+/** What the native host reports through `state()`, which [EditorController] turns into the design's [EditorUi]. */
 data class EditorState(
     val status: String = "",
     val inspector: Inspector? = null,

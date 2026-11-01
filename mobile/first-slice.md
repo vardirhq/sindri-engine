@@ -4,7 +4,9 @@ Status: steps 1 to 3 are built. The step 1–2 app has been installed and run on
 the reference Pixel 8 ("it kinda works"); the checks below are still to be
 recorded one by one, and step 3 has not been on a device yet. The slice is defined in
 [the mobile direction](README.md#proposed-first-technical-slice). This file
-tracks what has been proven, what has not, and what is still open. Update it in
+tracks what has been proven, what has not, and what is still open. The app's
+screens now follow the prototype's design; [design.md](design.md) tracks that
+side, including which screens are wired to what is proven here. Update it in
 the same change as the work it describes.
 
 ## Decisions

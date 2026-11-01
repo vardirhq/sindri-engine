@@ -771,6 +771,17 @@ jobs:
           name: sindri-mobile-apk
           path: mobile/android/app/build/outputs/apk/release/app-release.apk
           retention-days: 14
+      # Every designed screen, drawn on the JVM at the prototype's viewport, to
+      # set beside the prototype's own captures (mobile/design.md).
+      - name: Draw the design screens
+        id: android_design
+        working-directory: mobile/android
+        run: ./gradlew --no-daemon :app:recordRoborazziDebug --tests 'dev.sindri.mobile.DesignScreens'
+      - uses: actions/upload-artifact@v7
+        with:
+          name: sindri-mobile-design
+          path: mobile/android/app/build/outputs/roborazzi/
+          retention-days: 14
 
       - name: Capture job failure
         id: failure
@@ -780,6 +791,7 @@ jobs:
           failed_step="Android app"
           [[ "${{ steps.android_clippy.outcome }}" == "failure" ]] && failed_step="Clippy for Android"
           [[ "${{ steps.android_build.outcome }}" == "failure" ]] && failed_step="Build the app"
+          [[ "${{ steps.android_design.outcome }}" == "failure" ]] && failed_step="Draw the design screens"
           {
             echo "Android app"
             echo "failed: $failed_step"
