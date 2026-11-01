@@ -27,8 +27,8 @@ published identity is chosen. Release builds are signed with the debug key.
 | Slice step | Headless, shared seams | Android build | On the Pixel 8 |
 | --- | --- | --- | --- |
 | 1. Open a real project and display a scene with the real renderer | ✅ Lamplighter's `world.scene` opens as an authored world and draws offscreen at 1080×2400 through `SceneRenderer` | ✅ The APK builds, bundles Lamplighter, and links `libsindri_mobile.so` for arm64 | 🟡 Runs on the Pixel 8; details to record |
-| 2. Select and move an entity with touch; edit one schema-checked property | ✅ `Editing` pans, pinches, picks through the engine's own camera matrix, moves the selection in one undo step per drag, and edits component fields with schema validation and undo | ✅ Tap, drag and pinch on the `SurfaceView`; a selection marker; undo and redo in the top bar; an inspector sheet with number steppers, typed values and switches | 🟡 Runs on the Pixel 8; details to record |
-| 3. Undo, redo, save, restart, reopen; open the result on desktop | ✅ The phone opens and saves through `sindri-authoring`, the desktop editor's own code. A touch edit, undone and redone, saves, reopens after a restart, reads back through desktop's open path, and plays in a build; an unchanged second save writes identical bytes; a failed save keeps the edit unsaved | ✅ A Save button that is live only with unsaved edits; the project lives in app-specific external storage, so `adb pull` can fetch it; an app update no longer replaces it | ❌ Not yet tried |
+| 2. Select and move an entity with touch; edit one schema-checked property | ✅ `Editing` pans, pinches, picks through the engine's own camera matrix, outlines the selection round its own shape, moves, turns and scales it in one undo step per drag, and edits component fields with schema validation and undo | ✅ Tap, drag and pinch on the `SurfaceView`; the design's outline, ring and turn and scale handles on the selection; undo and redo in the top bar; the inspector sheet's steppers and switches | 🟡 Runs on the Pixel 8; details to record |
+| 3. Undo, redo, save, restart, reopen; open the result on desktop | ✅ The phone opens and saves through `sindri-authoring`, the desktop editor's own code. A touch edit, undone and redone, saves, reopens after a restart, reads back through desktop's open path, and plays in a build; an unchanged second save writes identical bytes; a failed save keeps the edit unsaved | ✅ Every edit is saved as it is made, a drag when the finger lifts (the design has no Save button); the project lives in app-specific external storage, so `adb pull` can fetch it; an app update no longer replaces it | ❌ Not yet tried |
 | 4. Start and stop a real `Session`; touch input; the scene returns to its state | 🟡 A build-style run starts from the saved edit and leaves the authoring world and the file unchanged. Running from unsaved edits and the keep/discard review of Play edits are not covered | ❌ | ❌ |
 | 5. Background/resume, surface recreation, keyboard/insets, interrupted save; device notes | — | 🟡 The surface is released and rebuilt on the existing device. Unexercised | ❌ |
 
@@ -106,23 +106,31 @@ faster to compile and much slower to run.
 ### What to check on the Pixel 8 for step 2
 
 1. Dragging empty ground pans the field; pinching zooms about the fingers.
-2. Tapping Wick or a lamp marks it with a ring and opens its inspector; tapping
-   empty ground or ✕ closes it.
-3. Dragging the marked entity moves it under the finger. Undo returns it in one
-   step, and redo moves it again.
-4. In a lamp's light, stepping `intensity` brightens it on screen. Typing a value
-   and pressing Done applies it, with the keyboard not covering the field.
-5. Dragging something that was not selected first pans instead of moving it.
-6. TalkBack reads the canvas, the undo and redo buttons, and each field.
+2. Tapping Wick or a lamp draws a bright-metal edge round its shape, a ring at
+   its feet, a turn handle above and a scale handle at its lower right, and
+   names it in the chip above the bar; tapping empty ground clears it.
+3. Dragging the selected entity moves it under the finger. Undo returns it in
+   one step, and redo moves it again.
+4. Dragging the turn handle turns it to face the finger, in 15° steps with Snap
+   on; dragging the scale handle scales it about where it stands. Each is one
+   undo step, and the handles stay the same size at any zoom.
+5. With Lighting preview off (the default) the night field shows in its own
+   colours; turned on in the ⋮ menu, it is dark and lit by its lamps. The menu
+   remembers the setting when closed and reopened.
+6. With Lighting preview on, stepping a lamp's `intensity` in its inspector
+   brightens it on screen.
+7. Dragging something that was not selected first pans instead of moving it.
+8. TalkBack reads the canvas, the handles, the undo and redo buttons, and each
+   field.
 
 ### What to check on the Pixel 8 for step 3
 
 Reinstall over the step 1–2 app; the project is installed afresh in its new
 place the first time.
 
-1. Move a lamp and change its intensity. The top bar says *unsaved* and the save
-   button (⤓) lights; undoing both edits puts it back to saved.
-2. Redo, save, then force-stop the app (Settings › Apps › Sindri › Force stop)
+1. Move a lamp and change its intensity. Each is saved as it is made: no `•`
+   stays after the scene's name.
+2. Force-stop the app (Settings › Apps › Sindri › Force stop)
    and open it again. The lamp is where it was left, as bright as it was set.
 3. Pull the project and open it on desktop:
 
@@ -145,15 +153,20 @@ place the first time.
 - `mobile/native/tests/edits_by_touch.rs` covers step 2 on Lamplighter's field: the
   canvas opens where the scene camera looks, a tap where the canvas says an entity
   is picks that entity after panning and pinching, a drag on the selection moves
-  it in one undo step while a drag elsewhere pans, pinching keeps the point under
-  the fingers, and a field edit is validated, shown and undone.
+  it in one undo step while a drag elsewhere pans, the turn and scale handles
+  change it in one undo step each, the outline's box encloses the selection and
+  follows the view, the outlined copy of the world leaves the scene untouched,
+  pinching keeps the point under the fingers, and a field edit is validated,
+  shown and undone.
 - `mobile/native/tests/saves_and_reopens.rs` covers step 3 on a copy of
   Lamplighter: a touch drag and a field edit, undone (back to saved) and redone,
   are saved; after a restart the phone reads the edit back; desktop's open path
   and a build both see it; a second save with nothing changed writes the same
   bytes; and a save that cannot be written leaves the edit unsaved.
 - `mobile/native/tests/shows_lamplighter.rs` opens Lamplighter's scenes through
-  `OpenedScene` and draws `world.scene` at the Pixel 8's resolution. The draw needs
+  `OpenedScene` and draws `world.scene` at the Pixel 8's resolution, lit and
+  unlit (the unlit night is far brighter), and draws a selection with its
+  bright-metal edge, lit or not. The draw needs
   a GPU adapter. It skips without one unless `SINDRI_REQUIRE_GPU` is set; it was
   run here on Mesa's software Vulkan.
 

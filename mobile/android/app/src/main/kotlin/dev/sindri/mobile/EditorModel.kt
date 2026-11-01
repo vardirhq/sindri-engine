@@ -23,7 +23,7 @@ data class EditorUi(
     val menu: MenuUi? = null,
     val coach: String? = null,
     val toast: ToastUi? = null,
-    /** Where the selection's handles are on the canvas, in canvas pixels. */
+    /** Where the selection's handles go on the canvas, in dp. */
     val handles: HandlesUi? = null,
     val play: PlayUi = PlayUi(),
 )
@@ -33,7 +33,23 @@ enum class PlayMode { Edit, Play, Paused }
 /** The selection as the chip above the bar names it. */
 data class SelectionUi(val icon: Sym, val name: String, val detail: String, val count: Int = 1)
 
-data class HandlesUi(val x: Float, val y: Float, val width: Float, val height: Float)
+/**
+ * Where the selection is on the canvas, in dp from its top left: its origin
+ * (where it stands, and what a scale keeps still) and the box it covers. The
+ * engine draws the outline round its shape; these place the ring at its feet
+ * and the turn and scale handles.
+ */
+data class HandlesUi(
+    val originX: Float,
+    val originY: Float,
+    val left: Float,
+    val top: Float,
+    val right: Float,
+    val bottom: Float,
+)
+
+/** The selection's two handles, named as the native host knows them. */
+enum class HandleKind(val native: String) { Turn("turn"), Scale("scale") }
 
 data class ToastUi(val text: String, val undo: Boolean = false)
 
@@ -164,6 +180,10 @@ sealed interface EditorEvent {
     data class KeepRunEdit(val index: Int) : EditorEvent
     data object KeepEdits : EditorEvent
     data object DiscardEdits : EditorEvent
+    /** A finger took a handle, at a point on the canvas in pixels. */
+    data class HandleTaken(val handle: HandleKind, val x: Float, val y: Float) : EditorEvent
+    data class HandleDragged(val x: Float, val y: Float) : EditorEvent
+    data object HandleReleased : EditorEvent
 }
 
 enum class MenuItem { Snap, LightingPreview, TileGrid }

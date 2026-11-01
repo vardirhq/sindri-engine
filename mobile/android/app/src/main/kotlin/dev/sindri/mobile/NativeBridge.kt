@@ -37,7 +37,7 @@ object NativeBridge {
      */
     @JvmStatic external fun call(command: String, arguments: String): String?
 
-    /** The overlay's state as JSON: status, inspector, marker, undo and redo labels. */
+    /** The overlay's state as JSON: status, inspector, the selection's origin and bounds, undo and redo labels, lighting. */
     @JvmStatic external fun state(): String
 
     /** [call] with its arguments written as a JSON array. */

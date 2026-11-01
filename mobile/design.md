@@ -53,14 +53,14 @@ Fonts are bundled under their own licences in `mobile/android/licenses/`.
 | --- | --- | --- | --- |
 | `01-dashboard` | `DashboardScreen` | ✅ | Continue opens the editor on the bundled Lamplighter. Samples, settings and Open folder do nothing yet |
 | `02`–`04` New game | `NewGameScreen` | ✅ | The steps play out; creating a project is not wired, so the bundled Lamplighter opens instead |
-| `10-editor` | `EditorScreen` | ✅ | The canvas is the engine's scene: drag to pan, pinch to zoom, tap to select, drag a selection to move it |
-| `11-more-menu` | `EditorScreen` | ✅ | The switches flip; none changes the canvas yet |
+| `10-editor` | `EditorScreen` | ✅ | The canvas is the engine's scene: drag to pan, pinch to zoom, tap to select, drag a selection to move it. Moves are saved when the finger lifts |
+| `11-more-menu` | `EditorScreen` | ✅ | The switches are remembered while the menu is closed. Lighting preview (off by default) draws the scene's 2D lights or leaves every sprite in its own colours; Snap keeps the turn handle to 15° and the scale handle to tenths; the tile grid is not drawn yet. Frame everything is not wired |
 | `12-add` | `EditorSheets` | ✅ | Sample prefabs; placing is not wired |
 | `13-paint` | `EditorScreen` | ✅ | Brush, size and Move are chosen; painting is not wired |
 | `14-assets`, `15-import` | `EditorSheets` | ✅ | Sample content; the slicer (`16-slicer`) is not built yet |
 | `17-layers`, `17b-layers-objects` | `EditorSheets` | ✅ | Sample content |
 | `18-scenes` | `EditorSheets` | ✅ | Sample content |
-| `19-selected`, `24-multi` | `EditorScreen` | ✅ | The chip names the engine's selection. Duplicate, Select more, Group and Delete are not wired |
+| `19-selected`, `24-multi` | `EditorScreen` | ✅ | The engine draws the selection with the prototype's bright-metal edge round its own shape; the ring at its feet and the turn and scale handles turn and scale it in one undo step each. The chip names it. Duplicate, Select more, Group and Delete are not wired, so `24-multi` is not reached |
 | `20`, `21` Inspector | `InspectorSheet` | ✅ | For the engine's selection: its position, and each component's numbers (steppers) and switches, edited through checked, undoable commands |
 | `22`, `23` Behaviour | `BehaviourSheet` | ✅ | Opens for the selection with no rules; blocks are not wired to Decay |
 | `25-play`, `26-frozen`, `26b-frozen-tune` | `PlayChrome` | ✅ | The chrome appears; the game does not run yet (slice step 4) |
@@ -83,6 +83,11 @@ answers with a short "not wired yet" toast rather than pretending.
   colour swatches. For the engine's own objects the app shows each component's
   fields as steppers and switches until a presentation layer maps components to
   the curated rows. The sample lamp post shows the curated version.
+- **The outline is drawn by the engine, the handles by the app.** The edge
+  round the selection's shape is part of the canvas's frame (copies of its
+  sprite in one flat colour, in a scratch world only the canvas draws), so it
+  follows the art exactly. A tilemap or cube has no outline yet, only its
+  handles.
 - **Place is read-only for now.** Across and Down show the position; moving is by
   dragging until stepping by number is wired.
 

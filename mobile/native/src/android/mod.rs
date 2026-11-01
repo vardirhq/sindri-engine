@@ -40,6 +40,9 @@ struct Host {
     gpu: Option<GpuContext>,
     surface: Option<WindowSurface>,
     renderer: Option<SceneRenderer>,
+    /// How wide the selection's outline is, in surface pixels: the design's
+    /// one and a half points at the screen's density, which the app sends.
+    outline_width: f32,
 }
 
 impl Host {
@@ -155,12 +158,13 @@ impl Host {
 
     /// Draws one frame, if there is a surface and a scene to draw.
     fn draw(&mut self) -> Result<(), String> {
+        let outline = self.outline_width;
         let (Some(gpu), Some(surface), Some(renderer), Some(opened), Some(editing)) = (
             &self.gpu,
             &mut self.surface,
             &mut self.renderer,
             &self.opened,
-            &self.editing,
+            &mut self.editing,
         ) else {
             return Ok(());
         };
@@ -174,13 +178,18 @@ impl Host {
             format: Some(surface.format()),
             ..Default::default()
         });
+        #[allow(clippy::cast_precision_loss)] // A screen is far below 2^24 pixels.
+        let size = [surface.width() as f32, surface.height() as f32];
+        let view_camera = editing.canvas.view();
+        renderer.set_lit(editing.lighting_preview);
+        let world = editing.drawn(&opened.world, size, outline);
         renderer.draw(
             &gpu.device,
             &gpu.queue,
             &view,
             &opened.extractor,
-            &opened.world,
-            editing.canvas.view(),
+            world,
+            view_camera,
         )?;
         gpu.queue.present(frame);
         Ok(())

@@ -345,6 +345,7 @@ impl SceneExtractor {
             tile_sets,
             seconds,
             text_sizes,
+            unlit,
         } = runtime;
         let aspect = viewport.aspect_ratio()?;
         let mut cameras = self.resolve_cameras(world, aspect, view)?;
@@ -355,7 +356,11 @@ impl SceneExtractor {
         let mut frame = ExtractedFrame::new(viewport, environment_clear(self.environment(world)?));
         frame.set_sprite_environment(SpriteEnvironment {
             time: seconds,
-            lighting: self.lighting_2d(world, &cameras)?,
+            lighting: if unlit {
+                None
+            } else {
+                self.lighting_2d(world, &cameras)?
+            },
         });
         self.push_meshes(world, &cameras, textures, &mut frame)?;
         self.push_models(world, &cameras, &mut frame)?;
@@ -408,6 +413,7 @@ impl SceneExtractor {
             tile_sets,
             seconds,
             text_sizes,
+            unlit,
         } = runtime;
         let aspect = viewport.aspect_ratio()?;
         let mut cameras = resolved_screen_overlay(aspect);
@@ -424,7 +430,11 @@ impl SceneExtractor {
         let mut frame = ExtractedFrame::new(viewport, environment_clear(self.environment(world)?));
         frame.set_sprite_environment(SpriteEnvironment {
             time: seconds,
-            lighting: self.lighting_2d(world, &cameras)?,
+            lighting: if unlit {
+                None
+            } else {
+                self.lighting_2d(world, &cameras)?
+            },
         });
         self.push_meshes(world, &cameras, textures, &mut frame)?;
         self.push_models(world, &cameras, &mut frame)?;
@@ -485,6 +495,11 @@ pub struct SceneRuntime<'a> {
     /// The measured words of text elements that fit their content, from
     /// [`crate::measure_ui_text`]. `None` lays them out at their own size.
     pub text_sizes: Option<&'a UiTextSizes>,
+    /// Draws every sprite and shape at its own colour, leaving out the scene's
+    /// 2D lights and the darkness they light: an editor's view with its
+    /// lighting preview off, for working in a scene that is dark on purpose.
+    /// `false`, the default, draws the scene as it is lit.
+    pub unlit: bool,
 }
 
 impl<'a> SceneRuntime<'a> {
@@ -521,6 +536,13 @@ impl<'a> SceneRuntime<'a> {
     #[must_use]
     pub const fn with_tile_sets(mut self, tile_sets: &'a TileSetBindings) -> Self {
         self.tile_sets = Some(tile_sets);
+        self
+    }
+
+    /// The runtime drawing without the scene's 2D lighting; see [`Self::unlit`].
+    #[must_use]
+    pub const fn with_unlit(mut self, unlit: bool) -> Self {
+        self.unlit = unlit;
         self
     }
 

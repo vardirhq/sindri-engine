@@ -15,15 +15,18 @@
 //!   `Surface` into a `wgpu` surface and hands it frames, and it is the only
 //!   code in this crate allowed to be unsafe.
 //!
-//! **A first slice of an editor.** One scene can be panned, pinched, selected,
-//! moved, and have a field edited, with undo. Saving and playing come in later
-//! slice steps, through the same code the desktop editor uses.
+//! **A first slice of an editor.** One scene can be panned, pinched, selected
+//! (and outlined), moved, turned, scaled, have a field edited, undone and
+//! saved, through the same code the desktop editor uses. Playing comes in a
+//! later slice step.
 
 mod canvas;
 #[cfg(not(target_arch = "wasm32"))]
 mod editing;
 #[cfg(not(target_arch = "wasm32"))]
 mod opened;
+#[cfg(not(target_arch = "wasm32"))]
+mod outline;
 mod renderer;
 
 #[cfg(target_os = "android")]
@@ -31,7 +34,7 @@ mod android;
 
 pub use canvas::Canvas;
 #[cfg(not(target_arch = "wasm32"))]
-pub use editing::Editing;
+pub use editing::{Editing, Handle};
 #[cfg(not(target_arch = "wasm32"))]
 pub use opened::OpenedScene;
 pub use renderer::SceneRenderer;

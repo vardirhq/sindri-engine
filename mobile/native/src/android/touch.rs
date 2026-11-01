@@ -6,7 +6,7 @@
 use serde_json::{Value, json};
 
 use super::Host;
-use crate::{Editing, OpenedScene};
+use crate::{Editing, Handle, OpenedScene};
 
 impl Host {
     /// The surface's size in pixels, which every touch is measured against.
@@ -41,6 +41,17 @@ impl Host {
         let size = self.size();
         let (opened, editing) = self.editing()?;
         editing.drag(&mut opened.world, pixel, size)
+    }
+
+    pub(super) fn take_handle(
+        &mut self,
+        handle: Handle,
+        pixel: [f32; 2],
+        snap: bool,
+    ) -> Result<(), String> {
+        let size = self.size();
+        let (opened, editing) = self.editing()?;
+        editing.take_handle(&opened.world, &opened.extractor, handle, pixel, size, snap)
     }
 
     pub(super) fn release(&mut self) -> Result<(), String> {
@@ -92,26 +103,35 @@ impl Host {
     }
 
     /// Everything the app's overlay draws from, as one JSON object: the status
-    /// line, the inspector (or `null`), and where to draw the selection marker.
+    /// line, the inspector (or `null`), where the selection's origin is and the
+    /// box it covers (for its handles), the undo state and the lighting preview.
     pub(super) fn state(&self) -> String {
         let size = self.size();
-        let (inspector, marker, undo, redo, unsaved) = match (&self.opened, &self.editing) {
+        let (inspector, origin, bounds, undo, redo, unsaved) = match (&self.opened, &self.editing) {
             (Some(opened), Some(editing)) => (
                 editing.inspector(&opened.world, &opened.extractor),
                 editing.selection_pixel(&opened.world, size),
+                // An outline that cannot be placed is left off rather than
+                // failing the whole state; the pick that selected it worked.
+                editing
+                    .selection_bounds(&opened.world, &opened.extractor, size)
+                    .ok()
+                    .flatten(),
                 editing.history.undo_label(),
                 editing.history.redo_label(),
                 editing.unsaved(),
             ),
-            _ => (Value::Null, None, None, None, false),
+            _ => (Value::Null, None, None, None, None, false),
         };
         json!({
             "status": self.status(),
             "inspector": inspector,
-            "marker": marker,
+            "origin": origin,
+            "bounds": bounds,
             "undo": undo,
             "redo": redo,
             "unsaved": unsaved,
+            "lighting": self.editing.as_ref().is_some_and(|editing| editing.lighting_preview),
         })
         .to_string()
     }
@@ -144,6 +164,25 @@ impl Host {
             "zoom" => self.zoom(number(0)?, [number(1)?, number(2)?]),
             "deselect" => {
                 self.editing()?.1.selected = None;
+                Ok(())
+            }
+            "lighting" => {
+                let on = arguments
+                    .first()
+                    .and_then(Value::as_bool)
+                    .ok_or_else(|| format!("{command}: argument 0 is not a switch"))?;
+                self.editing()?.1.lighting_preview = on;
+                Ok(())
+            }
+            "handle" => {
+                let handle = Handle::named(text(0)?).ok_or_else(|| {
+                    format!("{command}: no handle named {}", text(0).unwrap_or(""))
+                })?;
+                let snap = arguments.get(3).and_then(Value::as_bool).unwrap_or(false);
+                self.take_handle(handle, [number(1)?, number(2)?], snap)
+            }
+            "outlineWidth" => {
+                self.outline_width = number(0)?.max(0.0);
                 Ok(())
             }
             "save" => self.save(),

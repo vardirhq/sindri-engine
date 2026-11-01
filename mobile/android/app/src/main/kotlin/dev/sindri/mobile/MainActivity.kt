@@ -14,6 +14,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import kotlinx.coroutines.Dispatchers
@@ -92,6 +93,7 @@ private fun NewGameFlow(step: NewGameStep, onStep: (NewGameStep) -> Unit, onDone
 @Composable
 private fun EditorRoute(controller: EditorController, onHome: () -> Unit) {
     val context = LocalContext.current
+    val density = LocalDensity.current.density
     var surface by remember { mutableStateOf<SceneSurface?>(null) }
     var opened by remember { mutableStateOf(false) }
 
@@ -101,7 +103,7 @@ private fun EditorRoute(controller: EditorController, onHome: () -> Unit) {
             // On the main thread, where the native host lives.
             NativeBridge.open(directory.path, SCENE)
             opened = true
-            controller.refresh()
+            controller.opened(density)
         }
     }
     LifecycleResumeEffect(surface) {
@@ -118,7 +120,7 @@ private fun EditorRoute(controller: EditorController, onHome: () -> Unit) {
         AndroidView(
             modifier = Modifier.fillMaxSize(),
             factory = { viewContext ->
-                SceneSurface(viewContext, onError = {}, onChanged = { if (opened) controller.refresh() }).also { created ->
+                SceneSurface(viewContext, onError = {}, onChanged = { settled -> if (opened) controller.canvasChanged(settled) }).also { created ->
                     created.running = true
                     surface = created
                 }

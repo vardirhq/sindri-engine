@@ -27,11 +27,15 @@ data class EditorState(
     val status: String = "",
     val inspector: Inspector? = null,
     /** Where the selection's origin is, in surface pixels. */
-    val marker: Pair<Float, Float>? = null,
+    val origin: Pair<Float, Float>? = null,
+    /** The box the selection covers: left, top, right, bottom, in surface pixels. */
+    val bounds: List<Float>? = null,
     val undo: String? = null,
     val redo: String? = null,
     /** Whether the scene holds edits its file does not. */
     val unsaved: Boolean = false,
+    /** Whether the canvas shows the scene's 2D lighting. */
+    val lighting: Boolean = false,
 ) {
     companion object {
         fun read(json: String): EditorState {
@@ -39,12 +43,14 @@ data class EditorState(
             return EditorState(
                 status = root.optString("status"),
                 inspector = root.optJSONObject("inspector")?.let(::inspector),
-                marker = root.optJSONArray("marker")?.let {
+                origin = root.optJSONArray("origin")?.let {
                     it.getDouble(0).toFloat() to it.getDouble(1).toFloat()
                 },
+                bounds = root.optJSONArray("bounds")?.doubles()?.map { it.toFloat() },
                 undo = root.optStringOrNull("undo"),
                 redo = root.optStringOrNull("redo"),
                 unsaved = root.optBoolean("unsaved"),
+                lighting = root.optBoolean("lighting"),
             )
         }
 

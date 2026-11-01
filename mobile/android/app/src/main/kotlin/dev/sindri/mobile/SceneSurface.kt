@@ -22,12 +22,13 @@ import kotlin.math.hypot
  *   nothing moves that was not chosen first. One drag is one undo step.
  * - **Pinch** zooms about the fingers.
  *
- * Every gesture calls [onChanged] so the overlay can refresh from the host.
+ * Every gesture calls [onChanged] so the overlay can refresh from the host,
+ * with `true` when a finger lifts, which is when a move is finished and saved.
  */
 class SceneSurface(
     context: Context,
     private val onError: (String) -> Unit,
-    private val onChanged: () -> Unit,
+    private val onChanged: (settled: Boolean) -> Unit,
 ) : SurfaceView(context), SurfaceHolder.Callback, Choreographer.FrameCallback {
 
     private var attached = false
@@ -97,12 +98,12 @@ class SceneSurface(
         if (landed == null) return
         landed = null
         dragging = false
-        report(NativeBridge.command("release"))
+        report(NativeBridge.command("release"), settled = true)
     }
 
-    private fun report(error: String?) {
+    private fun report(error: String?, settled: Boolean = false) {
         if (error != null) onError(error)
-        onChanged()
+        onChanged(settled)
     }
 
     override fun surfaceCreated(holder: SurfaceHolder) = Unit
@@ -118,7 +119,7 @@ class SceneSurface(
             return
         }
         attached = true
-        onChanged()
+        onChanged(false)
         schedule()
     }
 

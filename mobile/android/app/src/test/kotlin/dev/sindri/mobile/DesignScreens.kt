@@ -69,6 +69,9 @@ class DesignScreens {
     private val base = SampleEditor.base
     private val lamp = base.copy(selection = SampleEditor.lampSelection)
 
+    /** The stand-in lamp post's place on the stand-in canvas, as the host would report it. */
+    private val lampHandles = HandlesUi(originX = 182f, originY = 122f, left = 166f, top = 64f, right = 198f, bottom = 122f)
+
     @Test fun editor() = editor("10-editor", base)
 
     @Test fun moreMenu() = editor("11-more-menu", base.copy(menu = MenuUi(snap = true, lightingPreview = false, tileGrid = false)))
@@ -87,7 +90,7 @@ class DesignScreens {
 
     @Test fun scenes() = editor("18-scenes", base.copy(sheet = EditorSheet.Scenes(SampleEditor.scenes, listOf("title" to "world"))))
 
-    @Test fun selected() = editor("19-selected", lamp)
+    @Test fun selected() = editor("19-selected", lamp.copy(handles = lampHandles))
 
     @Test fun inspectorHalf() = editor("20-inspector-half", lamp.copy(sheet = EditorSheet.Inspector(SampleEditor.lampInspector())))
 

@@ -30,16 +30,54 @@ class EditorController(private val native: Native) {
     private var state = EditorState()
     private var error: String? = null
 
-    /** Something on the canvas changed: a tap, a drag, an undo. */
+    /**
+     * The overflow menu's switches. Kept apart from whether the menu is open,
+     * so closing it forgets nothing. Lighting preview starts off, as the
+     * design has it.
+     */
+    private var settings = MenuUi(snap = true, lightingPreview = false, tileGrid = false)
+
+    /** Screen pixels per dp, which turns the host's pixels into the design's dp. */
+    private var density = 1f
+
+    /**
+     * A scene was opened on the host: tells it what the design draws at this
+     * screen's [density] (the outline's width) and the lighting preview
+     * setting, and draws the state it opened in.
+     */
+    fun opened(density: Float) {
+        this.density = density
+        native.command("outlineWidth", OUTLINE_DP * density)
+        native.command("lighting", settings.lightingPreview)
+        refresh()
+    }
+
+    /**
+     * Something on the canvas changed: a tap, a drag, a pinch. [settled] is a
+     * finger lifting, which ends a move, so an edit it made is saved then, as
+     * every other edit is.
+     */
+    fun canvasChanged(settled: Boolean = false) {
+        refresh()
+        if (settled && state.unsaved) {
+            error = native.command("save")
+            refresh()
+        }
+    }
+
+    /** Something changed on the host: draws its state again. */
     fun refresh() {
         state = native.state()
         val inspector = state.inspector
         val selection = inspector?.let { SelectionUi(iconFor(it), it.name, "Properties") }
+        settings = settings.copy(lightingPreview = state.lighting)
         ui = ui.copy(
             canUndo = state.undo != null,
             canRedo = state.redo != null,
             unsaved = state.unsaved,
             selection = selection,
+            handles = handles(),
+            menu = ui.menu?.let { settings },
             sheet = when (val sheet = ui.sheet) {
                 is EditorSheet.Inspector -> inspector?.let { sheet.copy(inspector = inspectorUi(it)) }
                 is EditorSheet.Behaviour -> if (inspector == null) null else sheet
@@ -56,16 +94,8 @@ class EditorController(private val native: Native) {
             EditorEvent.Undo -> nativeEdit("undo")
             EditorEvent.Redo -> nativeEdit("redo")
             EditorEvent.Save -> nativeEdit("save")
-            EditorEvent.ToggleMenu -> ui = ui.copy(menu = if (ui.menu == null) MenuUi(snap = true, lightingPreview = false, tileGrid = false) else null)
-            is EditorEvent.MenuToggle -> ui.menu?.let { menu ->
-                ui = ui.copy(
-                    menu = when (event.item) {
-                        MenuItem.Snap -> menu.copy(snap = !menu.snap)
-                        MenuItem.LightingPreview -> menu.copy(lightingPreview = !menu.lightingPreview)
-                        MenuItem.TileGrid -> menu.copy(tileGrid = !menu.tileGrid)
-                    },
-                )
-            }
+            EditorEvent.ToggleMenu -> ui = ui.copy(menu = if (ui.menu == null) settings else null)
+            is EditorEvent.MenuToggle -> menuToggle(event.item)
             EditorEvent.FrameAll -> notWired("Frame everything")
             EditorEvent.OpenScenes -> toggle(EditorSheet.Scenes(SampleEditor.scenes, listOf("title" to "world")))
             is EditorEvent.Tool -> tool(event.tool)
@@ -90,8 +120,45 @@ class EditorController(private val native: Native) {
             EditorEvent.BackToAssets -> ui = ui.copy(sheet = EditorSheet.Assets(AssetTab.Prefabs, SampleEditor.assets))
             is EditorEvent.LayerTabChosen -> (ui.sheet as? EditorSheet.Layers)?.let { ui = ui.copy(sheet = it.copy(tab = event.tab)) }
             is EditorEvent.InspectorRow -> inspectorRow(event)
+            is EditorEvent.HandleTaken -> {
+                error = native.command("handle", event.handle.native, event.x, event.y, settings.snap)
+                refresh()
+            }
+            is EditorEvent.HandleDragged -> {
+                error = native.command("drag", event.x, event.y)
+                refresh()
+            }
+            EditorEvent.HandleReleased -> nativeEdit("release")
             else -> notWired(null)
         }
+    }
+
+    /**
+     * Flips one of the menu's switches. Lighting preview is the host's: the
+     * canvas draws the scene's 2D lights only while it is on. Snap keeps the
+     * handles to whole steps. The tile grid is not drawn yet.
+     */
+    private fun menuToggle(item: MenuItem) {
+        settings = when (item) {
+            MenuItem.Snap -> settings.copy(snap = !settings.snap)
+            MenuItem.LightingPreview -> settings.copy(lightingPreview = !settings.lightingPreview)
+            MenuItem.TileGrid -> settings.copy(tileGrid = !settings.tileGrid)
+        }
+        when (item) {
+            MenuItem.LightingPreview -> {
+                error = native.command("lighting", settings.lightingPreview)
+                refresh()
+            }
+            MenuItem.TileGrid -> ui = ui.copy(menu = settings, toast = ToastUi("The tile grid is not drawn yet."))
+            MenuItem.Snap -> ui = ui.copy(menu = settings)
+        }
+    }
+
+    /** The host's selection origin and bounds, in the design's dp. */
+    private fun handles(): HandlesUi? {
+        val (x, y) = state.origin ?: return null
+        val bounds = state.bounds?.takeIf { it.size == 4 } ?: return null
+        return HandlesUi(x / density, y / density, bounds[0] / density, bounds[1] / density, bounds[2] / density, bounds[3] / density)
     }
 
     private fun tool(tool: BarItem) {
@@ -211,4 +278,9 @@ class EditorController(private val native: Native) {
 
     private fun format(value: Double): String =
         if (value == Math.rint(value)) value.toLong().toString() else String.format(Locale.ROOT, "%.2f", value).trimEnd('0').trimEnd('.')
+
+    private companion object {
+        /** How wide the engine draws the selection's outline: the design's 1.5 px edge, at one pixel per dp. */
+        const val OUTLINE_DP = 1.5f
+    }
 }

@@ -1,6 +1,19 @@
 package dev.sindri.mobile
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.positionChanged
+import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -44,7 +57,7 @@ import androidx.compose.ui.unit.sp
 fun EditorScreen(ui: EditorUi, onEvent: (EditorEvent) -> Unit, canvas: @Composable BoxScope.() -> Unit) {
     Box(Modifier.fillMaxSize().background(Forge.Ground)) {
         canvas()
-        ui.handles?.let { SelectionOutline(it) }
+        if (ui.mode == PlayMode.Edit && ui.painting == null) ui.handles?.let { SelectionHandles(it, onEvent) }
         when (ui.mode) {
             PlayMode.Edit -> EditChrome(ui, onEvent)
             PlayMode.Play -> PlayChrome(ui.play, onEvent)
@@ -344,14 +357,72 @@ private fun BrushButton(brush: Brush, on: Boolean, onClick: () -> Unit) {
     }
 }
 
+/**
+ * The selection's ring and handles, as the prototype draws them over its
+ * outline (which the engine draws round the selection's own shape): an
+ * ellipse at its feet, a turn handle on a stem above it, and a scale handle
+ * at its lower right. They keep their size on screen at any zoom.
+ */
 @Composable
-private fun SelectionOutline(handles: HandlesUi) {
+private fun SelectionHandles(handles: HandlesUi, onEvent: (EditorEvent) -> Unit) {
+    val turnY = handles.top - HANDLE_LIFT
     Box(
         Modifier
-            .offset(handles.x.dp, handles.y.dp)
-            .size(handles.width.dp, handles.height.dp)
-            .border(2.dp, Forge.MetalBright, RoundedCornerShape(6.dp)),
+            .offset((handles.originX - 12).dp, (handles.originY - 5).dp)
+            .size(24.dp, 10.dp)
+            .border(1.5.dp, Forge.MetalBright, RoundedCornerShape(50)),
     )
+    Box(
+        Modifier
+            .offset((handles.originX - 0.75f).dp, (turnY + HANDLE / 2).dp)
+            .size(1.5.dp, (handles.top - turnY - HANDLE / 2).coerceAtLeast(0f).dp)
+            .background(Forge.MetalBright),
+    )
+    Handle(HandleKind.Turn, handles.originX, turnY, Forge.Metal, Sym.rotate_right, "Turn", onEvent)
+    Handle(HandleKind.Scale, handles.right + 6, handles.bottom, Forge.Text, Sym.open_in_full, "Scale", onEvent)
+}
+
+/** The prototype's handle: 34 across, round, with a drop shadow. */
+private const val HANDLE = 34f
+
+/** How far above the selection's top the turn handle sits. */
+private const val HANDLE_LIFT = 30f
+
+/** One round handle centred on [x], [y] in dp, which turns a drag into handle events in canvas pixels. */
+@Composable
+private fun Handle(kind: HandleKind, x: Float, y: Float, fill: Color, icon: Sym, name: String, onEvent: (EditorEvent) -> Unit) {
+    val events by rememberUpdatedState(onEvent)
+    var placed by remember { mutableStateOf<LayoutCoordinates?>(null) }
+    Box(
+        Modifier
+            .offset((x - HANDLE / 2).dp, (y - HANDLE / 2).dp)
+            .size(HANDLE.dp)
+            .shadow(8.dp, CircleShape)
+            .clip(CircleShape)
+            .background(fill)
+            .onGloballyPositioned { placed = it }
+            .semantics { contentDescription = "$name handle" }
+            .pointerInput(kind) {
+                awaitEachGesture {
+                    val down = awaitFirstDown()
+                    down.consume()
+                    val at = { position: Offset -> placed?.localToRoot(position) ?: position }
+                    at(down.position).let { events(EditorEvent.HandleTaken(kind, it.x, it.y)) }
+                    while (true) {
+                        val change = awaitPointerEvent().changes.firstOrNull { it.id == down.id } ?: break
+                        if (!change.pressed) break
+                        if (change.positionChanged()) {
+                            change.consume()
+                            at(change.position).let { events(EditorEvent.HandleDragged(it.x, it.y)) }
+                        }
+                    }
+                    events(EditorEvent.HandleReleased)
+                }
+            },
+        contentAlignment = Alignment.Center,
+    ) {
+        Symbol(icon, 18.sp, Forge.OnMetal)
+    }
 }
 
 @Composable

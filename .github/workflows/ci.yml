@@ -771,6 +771,12 @@ jobs:
           name: sindri-mobile-apk
           path: mobile/android/app/build/outputs/apk/release/app-release.apk
           retention-days: 14
+      # How the app's controller drives the native host, against a recording
+      # stand-in: the menu's switches, the selection's handles, saving.
+      - name: Test the app
+        id: android_test
+        working-directory: mobile/android
+        run: ./gradlew --no-daemon :app:testDebugUnitTest --tests 'dev.sindri.mobile.EditorControllerTest'
       # Every designed screen, drawn on the JVM at the prototype's viewport, to
       # set beside the prototype's own captures (mobile/design.md).
       - name: Draw the design screens
@@ -791,6 +797,7 @@ jobs:
           failed_step="Android app"
           [[ "${{ steps.android_clippy.outcome }}" == "failure" ]] && failed_step="Clippy for Android"
           [[ "${{ steps.android_build.outcome }}" == "failure" ]] && failed_step="Build the app"
+          [[ "${{ steps.android_test.outcome }}" == "failure" ]] && failed_step="Test the app"
           [[ "${{ steps.android_design.outcome }}" == "failure" ]] && failed_step="Draw the design screens"
           {
             echo "Android app"

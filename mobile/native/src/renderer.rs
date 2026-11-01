@@ -38,6 +38,8 @@ pub struct SceneRenderer {
     text: TextRenderer,
     glyphs: GlyphRenderer,
     shapes: ShapeRenderer,
+    /// Whether frames show the scene's 2D lighting.
+    lit: bool,
 }
 
 impl SceneRenderer {
@@ -90,7 +92,15 @@ impl SceneRenderer {
             text: TextRenderer::new(),
             glyphs: GlyphRenderer::new(device, format),
             shapes: ShapeRenderer::new(device, format),
+            lit: true,
         })
+    }
+
+    /// Whether frames show the scene's 2D lights and the darkness they light,
+    /// as the game does (the default), or every sprite in its own colours, as
+    /// an editor's view with its lighting preview off does.
+    pub const fn set_lit(&mut self, lit: bool) {
+        self.lit = lit;
     }
 
     /// The view format these renderers were built for.
@@ -179,7 +189,8 @@ impl SceneRenderer {
     }
 
     /// Draws `world` into `view`, through `camera`: the scene's own with
-    /// [`CameraView::default`], or a [`crate::Canvas`] view.
+    /// [`CameraView::default`], or a [`crate::Canvas`] view, lit or not as
+    /// [`Self::set_lit`] last said.
     ///
     /// # Errors
     /// A component that will not extract, or a frame that will not encode.
@@ -204,7 +215,8 @@ impl SceneRenderer {
                 &self.bindings,
                 SceneRuntime::default()
                     .with_tile_sets(&self.tile_sets)
-                    .with_text_sizes(&sizes),
+                    .with_text_sizes(&sizes)
+                    .with_unlit(!self.lit),
             )
             .map_err(text)?;
         let mut encoder = device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
