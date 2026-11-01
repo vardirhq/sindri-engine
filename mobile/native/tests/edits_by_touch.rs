@@ -526,3 +526,46 @@ fn a_slider_drag_is_one_undo_step_and_place_and_nested_fields_are_edited() {
         "the schema still refuses a nested field it cannot decode"
     );
 }
+
+#[test]
+fn a_tap_on_the_ground_lets_the_selection_go() {
+    let opened = opened();
+    let mut editing = Editing::new(&opened.world, &opened.extractor).expect("editing starts");
+    let lamp = entity(&opened, "cover-17");
+    look_at(&mut editing, &opened, lamp);
+    editing.selected = Some(lamp);
+    // Somewhere on the field's painted ground: where the engine's picking
+    // finds a tilemap, which the canvas does not select.
+    let camera = editing
+        .canvas
+        .camera(&opened.world, &opened.extractor, SIZE)
+        .expect("the camera resolves");
+    let ground = (0..20_u8)
+        .flat_map(|row| {
+            (0..10_u8).map(move |column| {
+                [
+                    54.0 + 108.0 * f32::from(column),
+                    60.0 + 120.0 * f32::from(row),
+                ]
+            })
+        })
+        .find(|pixel| {
+            sindri_scene::picking::pick_world(
+                &opened.world,
+                opened.extractor.components(),
+                camera.view_projection,
+                [pixel[0] / SIZE[0], pixel[1] / SIZE[1]],
+            )
+            .expect("the pick runs")
+            .and_then(|entity| opened.world.get(entity))
+            .is_some_and(|data| data.components.contains_key("sindri.tilemap"))
+        })
+        .expect("the field's ground is on the screen");
+    editing
+        .tap(&opened.world, &opened.extractor, ground, SIZE)
+        .expect("the tap picks");
+    assert_eq!(
+        editing.selected, None,
+        "the ground is not selected; the lamp is let go"
+    );
+}

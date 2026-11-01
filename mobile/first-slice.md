@@ -108,7 +108,8 @@ faster to compile and much slower to run.
 1. Dragging empty ground pans the field; pinching zooms about the fingers.
 2. Tapping Wick or a lamp draws a bright-metal edge round its shape, a ring at
    its feet, a turn handle above and a scale handle at its lower right, and
-   names it in the chip above the bar; tapping empty ground clears it.
+   names it in the chip above the bar; tapping the ground (which is never
+   selected itself) or pressing Back lets it go.
 3. Dragging the selected entity moves it under the finger. Undo returns it in
    one step, and redo moves it again.
 4. Dragging the turn handle turns it to face the finger, in 15° steps with Snap

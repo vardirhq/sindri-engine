@@ -252,6 +252,27 @@ class EditorController(
         ui = ui.copy(toast = ToastUi(if (what != null) "$what is not wired yet." else "Not wired yet."))
     }
 
+    /**
+     * The system Back gesture, which steps out one level at a time: the menu,
+     * then a sheet, then painting, then a running game, then the selection.
+     * `false` when there is nothing left to step out of, and Back leaves the
+     * editor.
+     */
+    fun back(): Boolean {
+        when {
+            ui.menu != null -> ui = ui.copy(menu = null)
+            ui.sheet != null -> ui = ui.copy(sheet = null)
+            ui.painting != null -> ui = ui.copy(painting = null)
+            ui.mode != PlayMode.Edit -> ui = ui.copy(mode = PlayMode.Edit)
+            ui.selection != null -> {
+                error = native.command("deselect")
+                refresh()
+            }
+            else -> return false
+        }
+        return true
+    }
+
     fun dismissToast() {
         ui = ui.copy(toast = null)
     }

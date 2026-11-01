@@ -53,6 +53,9 @@ private fun SindriApp() {
     BackHandler(screen != Screen.Dashboard) {
         screen = when (val current = screen) {
             is Screen.NewGame -> if (current.step is NewGameStep.Name) Screen.NewGame(NewGameStep.Template) else Screen.Dashboard
+            // In the editor, Back steps out of the menu, a sheet, painting,
+            // a run and the selection before it leaves.
+            Screen.Editor -> if (controller.back()) Screen.Editor else Screen.Dashboard
             else -> Screen.Dashboard
         }
     }

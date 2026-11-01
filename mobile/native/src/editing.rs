@@ -35,6 +35,8 @@ impl Handle {
     }
 }
 
+const TILEMAP: &str = "sindri.tilemap";
+
 /// A scale is kept between these, so a handle cannot shrink something out of
 /// reach or blow it up past any use.
 const SMALLEST_SCALE: f32 = 0.05;
@@ -122,6 +124,11 @@ impl Editing {
 
     /// The entity drawn topmost under `pixel`, through the frame's own camera.
     ///
+    /// The ground is not picked: a tilemap is painted, as the design has it,
+    /// not selected and dragged, and a tap on it is a tap on nothing, which is
+    /// how a selection is let go. Picking it would leave nowhere on a tiled
+    /// scene to tap that clears the selection.
+    ///
     /// # Errors
     /// A camera that does not resolve, or a component that does not decode.
     pub fn pick(
@@ -133,8 +140,13 @@ impl Editing {
     ) -> Result<Option<EntityId>, String> {
         let camera = self.canvas.camera(world, extractor, size)?;
         let point = [pixel[0] / size[0].max(1.0), pixel[1] / size[1].max(1.0)];
-        pick_world(world, extractor.components(), camera.view_projection, point)
-            .map_err(|error| error.to_string())
+        let picked = pick_world(world, extractor.components(), camera.view_projection, point)
+            .map_err(|error| error.to_string())?;
+        Ok(picked.filter(|entity| {
+            world
+                .get(*entity)
+                .is_none_or(|data| !data.components.contains_key(TILEMAP))
+        }))
     }
 
     /// A tap: selects what is under it, or clears the selection over nothing.

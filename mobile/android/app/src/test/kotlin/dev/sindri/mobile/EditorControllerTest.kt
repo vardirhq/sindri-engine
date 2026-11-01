@@ -89,4 +89,23 @@ class EditorControllerTest {
         assertNotNull(host.commands.lastOrNull { it == listOf("save") })
         assertFalse(controller.ui.unsaved)
     }
+
+    @Test
+    fun back_lets_go_of_the_sheet_then_the_selection_then_leaves() {
+        host.state = EditorState(inspector = Inspector("Lamp post", listOf(0.0, 0.0, 0.0), emptyList()))
+        controller.refresh()
+        controller.on(EditorEvent.OpenInspector) {}
+        assertNotNull(controller.ui.sheet)
+
+        assertTrue(controller.back())
+        assertNull("the sheet closes first", controller.ui.sheet)
+        assertNotNull(controller.ui.selection)
+
+        host.state = EditorState()
+        assertTrue(controller.back())
+        assertEquals(listOf("deselect"), host.commands.last())
+        assertNull("then the selection is let go", controller.ui.selection)
+
+        assertFalse("then Back leaves the editor", controller.back())
+    }
 }

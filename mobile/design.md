@@ -53,7 +53,7 @@ Fonts are bundled under their own licences in `mobile/android/licenses/`.
 | --- | --- | --- | --- |
 | `01-dashboard` | `DashboardScreen` | ✅ | Continue opens the editor on the bundled Lamplighter. Samples, settings and Open folder do nothing yet |
 | `02`–`04` New game | `NewGameScreen` | ✅ | The steps play out; creating a project is not wired, so the bundled Lamplighter opens instead |
-| `10-editor` | `EditorScreen` | ✅ | The canvas is the engine's scene: drag to pan, pinch to zoom, tap to select, drag a selection to move it. Moves are saved when the finger lifts |
+| `10-editor` | `EditorScreen` | ✅ | The canvas is the engine's scene: drag to pan, pinch to zoom, tap to select, drag a selection to move it. Tapping the ground lets the selection go: a tilemap is painted, not selected, as in the prototype. Back steps out of the menu, a sheet, painting, a run and the selection before leaving the editor. Moves are saved when the finger lifts |
 | `11-more-menu` | `EditorScreen` | ✅ | The switches are remembered while the menu is closed. Lighting preview (off by default) draws the scene's 2D lights or leaves every sprite in its own colours; Snap keeps the turn handle to 15° and the scale handle to tenths; the tile grid is not drawn yet. Frame everything is not wired |
 | `12-add` | `EditorSheets` | ✅ | Sample prefabs; placing is not wired |
 | `13-paint` | `EditorScreen` | ✅ | Brush, size and Move are chosen; painting is not wired |
