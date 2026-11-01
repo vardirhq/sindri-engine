@@ -73,7 +73,7 @@ editor re-exports each at its old path.
 The workspace forbids unsafe code, and a JNI bridge cannot be written without it:
 every function Java calls is exported unmangled, and a `Surface` becomes a
 native window only through an unsafe NDK call. `sindri-mobile` therefore denies
-unsafe code instead of forbidding it. The eight items that need it, all in
+unsafe code instead of forbidding it. The nine items that need it, all in
 `mobile/native/src/android/`, each carry an `#[allow(unsafe_code)]` and a reason.
 `AGENTS.md` records the exception. Every editing command crosses the bridge
 through one `call(command, arguments)` export, so adding a gesture adds no unsafe
