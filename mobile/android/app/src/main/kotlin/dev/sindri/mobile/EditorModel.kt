@@ -199,6 +199,12 @@ sealed interface EditorEvent {
     data object HandleReleased : EditorEvent
     /** A number, text or switch slot of the open script given a new value. */
     data class ScriptSlot(val slot: DecaySlot, val value: Any) : EditorEvent
+    /**
+     * A change to the open script's shape at a node's [span]: `delete`,
+     * `moveUp`, `moveDown`, `insertAfter` or `insertInside`, with the palette
+     * id (and, inside, the branch) that [value] names.
+     */
+    data class ChangeScript(val kind: String, val span: Pair<Int, Int>, val value: Any? = null) : EditorEvent
     /** A node of the open script dragged to [x], [y] on the canvas, in points. */
     data class MoveNode(val key: String, val x: Float, val y: Float) : EditorEvent
 }

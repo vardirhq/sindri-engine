@@ -169,7 +169,7 @@ sindri-scene      -> sindri-core + sindri-grid + sindri-render + sindri-physics 
 sindri-decay      -> core + grid + physics + platform + scene + decay language crates
 sindri-runtime    -> assets + core + decay + platform + scene + weave
 sindri-player     -> assets + core + decay + desktop + platform + render + runtime + scene
-sindri-authoring  -> core + decay + runtime + scene (+ decay-syntax)
+sindri-authoring  -> core + decay + runtime + scene (+ decay-syntax, decay-semantic)
 editor            -> assets + authoring + core + decay + physics + platform + render + runtime + scene
 sindri-mobile     -> assets + authoring + core + gpu + platform + render + runtime + scene (+ jni/ndk on Android)
 sindri-causeway   -> consumer of the engine; nothing depends on it

@@ -1,7 +1,12 @@
 package dev.sindri.mobile
 
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.click
 import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTouchInput
+import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -40,6 +45,29 @@ class DecayCanvasTest {
         compose.setContent {
             ForgeTheme { DecayCanvas(DecayScript("scripts/gloom.decay", "", emptyList(), graph = graph), onEdit = { _, _ -> }, onMove = { _, _, _ -> }) }
         }
-        compose.onNodeWithContentDescription("Gloom.update, drag to move").assertExists()
+        compose.onNodeWithContentDescription("Gloom.update, drag to move, tap for its menu").assertExists()
+    }
+
+    @Test
+    fun a_node_menu_adds_a_step_from_the_palette_and_deletes() {
+        val set = DecayNode("Lamp.start/0", "statement", "Set this.lit", null, emptyList(), listOf(""), 0f, 0f, span = 40 to 56)
+        val script = DecayScript(
+            "scripts/lamp.decay", "", emptyList(),
+            graph = DecayGraph(listOf(set), emptyList()),
+            palette = listOf("set:glow" to "Set glow", "comment" to "Comment"),
+        )
+        val changes = mutableListOf<Triple<String, Pair<Int, Int>, Any?>>()
+        compose.setContent {
+            ForgeTheme { DecayCanvas(script, onEdit = { _, _ -> }, onMove = { _, _, _ -> }, onChange = { kind, span, value -> changes += Triple(kind, span, value) }) }
+        }
+        val header = compose.onNodeWithContentDescription("Set this.lit, drag to move, tap for its menu")
+        header.performTouchInput { click() }
+        compose.onNodeWithText("Add after…").performClick()
+        compose.onNodeWithText("Set glow").performClick()
+        assertEquals(Triple("insertAfter", 40 to 56, "set:glow"), changes.last())
+
+        header.performTouchInput { click() }
+        compose.onNodeWithText("Delete").performClick()
+        assertEquals(Triple("delete", 40 to 56, null), changes.last())
     }
 }

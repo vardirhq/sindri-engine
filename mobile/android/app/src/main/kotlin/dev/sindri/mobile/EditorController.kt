@@ -161,6 +161,7 @@ class EditorController(
             EditorEvent.HandleReleased -> nativeEdit("release")
             is EditorEvent.ScriptSlot -> scriptSlot(event)
             is EditorEvent.MoveNode -> moveNode(event)
+            is EditorEvent.ChangeScript -> changeScript(event)
             else -> notWired(null)
         }
     }
@@ -300,6 +301,17 @@ class EditorController(
                 codeNote = "Adding a script from blocks is not wired yet.",
             )
         }
+
+    /** A node's menu changed the script's shape: the file changes, checked, and is read again. */
+    private fun changeScript(event: EditorEvent.ChangeScript) {
+        val sheet = ui.sheet as? EditorSheet.Behaviour ?: return
+        native.command("editScript", event.kind, event.span.first, event.span.second, event.value)?.let { failed ->
+            ui = ui.copy(toast = ToastUi(failed))
+            return
+        }
+        val script = native.script() ?: return
+        ui = ui.copy(sheet = sheet.copy(behaviour = behaviourUi(sheet.behaviour.subject, script)))
+    }
 
     /** A node dragged: where it was left is kept beside the script, and the graph read again. */
     private fun moveNode(event: EditorEvent.MoveNode) {

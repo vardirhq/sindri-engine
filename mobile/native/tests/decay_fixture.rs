@@ -25,6 +25,10 @@ fn the_lamp_script_fixture_is_what_the_phone_reads() {
         "source": source,
         "blocks": blocks,
         "graph": graph,
+        "palette": visual_decay::palette(&blocks)
+            .into_iter()
+            .map(|(id, label)| serde_json::json!({ "id": id, "label": label }))
+            .collect::<Vec<_>>(),
     }))
     .expect("writes");
     json.push('\n');

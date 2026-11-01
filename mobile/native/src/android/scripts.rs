@@ -10,7 +10,7 @@ use std::path::PathBuf;
 
 use serde_json::{Value, json};
 use sindri_authoring::visual_decay::layout::LAYOUT_SUFFIX;
-use sindri_authoring::visual_decay::{self, Layout, ScriptEdit};
+use sindri_authoring::visual_decay::{self, Layout, ScriptEdit, Shape, Template};
 
 use super::Host;
 
@@ -64,14 +64,23 @@ impl Host {
         self.script = None;
     }
 
-    /// Makes a block's edit to the open script and writes it to its file.
-    /// `kind` is `number`, `text` or `bool`; `span` the slot's bytes.
+    /// Makes a node's edit to the open script and writes it to its file.
+    /// `kind` is `number`, `text` or `bool` for a slot at `span`, with its
+    /// new `value`; or a change of shape at the node at `span`: `delete`,
+    /// `moveUp`, `moveDown`, `insertAfter` (`value` a palette id) or
+    /// `insertInside` (`value` `{ "template": id, "branch": n }`).
     pub(super) fn edit_script(
         &mut self,
         kind: &str,
         span: [usize; 2],
         value: &Value,
     ) -> Result<(), String> {
+        if matches!(
+            kind,
+            "delete" | "moveUp" | "moveDown" | "insertAfter" | "insertInside"
+        ) {
+            return self.change_script(kind, span, value);
+        }
         let script = self.script.as_mut().ok_or("no script is open")?;
         let edit = match kind {
             "number" => ScriptEdit::Number {
@@ -95,6 +104,44 @@ impl Host {
         Ok(())
     }
 
+    fn change_script(&mut self, kind: &str, span: [usize; 2], value: &Value) -> Result<(), String> {
+        let opened = self.opened.as_ref().ok_or("no project is open")?;
+        let script = self.script.as_mut().ok_or("no script is open")?;
+        let template = |id: Option<&str>| {
+            let id = id.ok_or("no statement was chosen")?;
+            Template::named(id, &visual_decay::blocks(&script.source), &script.source)
+                .ok_or_else(|| format!("no statement {id} for this script"))
+        };
+        let shape = match kind {
+            "delete" => Shape::Delete(span),
+            "moveUp" | "moveDown" => Shape::Move {
+                statement: span,
+                up: kind == "moveUp",
+            },
+            "insertAfter" => Shape::After {
+                statement: span,
+                template: template(value.as_str())?,
+            },
+            _ => Shape::Inside {
+                node: span,
+                branch: value
+                    .get("branch")
+                    .and_then(Value::as_u64)
+                    .and_then(|branch| usize::try_from(branch).ok())
+                    .unwrap_or(0),
+                template: template(value.get("template").and_then(Value::as_str))?,
+            },
+        };
+        // Checked against the project's scripts, with this one as it is now.
+        let mut sources = opened.assets.scripts.clone();
+        sources.insert(script.name.clone(), script.source.clone());
+        let changed = visual_decay::change(&script.source, &shape, sources.environment())?;
+        std::fs::write(&script.path, &changed)
+            .map_err(|error| format!("{}: {error}", script.name))?;
+        script.source = changed;
+        Ok(())
+    }
+
     /// A node of the open script was dragged to `at`: kept in its layout file.
     pub(super) fn move_node(&mut self, key: &str, at: [f32; 2]) -> Result<(), String> {
         let script = self.script.as_mut().ok_or("no script is open")?;
@@ -111,8 +158,9 @@ impl Host {
     }
 
     /// The open script for the Behaviour sheet, as JSON: its `name`, its
-    /// `source` for the Code view, its `blocks` and its node `graph`, placed;
-    /// `null` with none open.
+    /// `source` for the Code view, its `blocks`, its node `graph`, placed,
+    /// and the `palette` of statements its node menu can add; `null` with none
+    /// open.
     pub(super) fn script(&self) -> String {
         self.script.as_ref().map_or_else(
             || "null".to_owned(),
@@ -122,6 +170,10 @@ impl Host {
                     "source": script.source,
                     "blocks": visual_decay::blocks(&script.source),
                     "graph": script.graph(),
+                    "palette": visual_decay::palette(&visual_decay::blocks(&script.source))
+                        .into_iter()
+                        .map(|(id, label)| json!({ "id": id, "label": label }))
+                        .collect::<Vec<_>>(),
                 })
                 .to_string()
             },

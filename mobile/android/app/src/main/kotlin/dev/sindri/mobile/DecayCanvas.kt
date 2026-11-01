@@ -2,6 +2,11 @@ package dev.sindri.mobile
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTransformGestures
@@ -64,6 +69,7 @@ fun DecayCanvas(
     script: DecayScript,
     onEdit: (DecaySlot, Any) -> Unit,
     onMove: (key: String, x: Float, y: Float) -> Unit,
+    onChange: (kind: String, span: Pair<Int, Int>, value: Any?) -> Unit = { _, _, _ -> },
 ) {
     val graph = script.graph
     val editable = script.problems.isEmpty()
@@ -74,6 +80,7 @@ fun DecayCanvas(
     // Where nodes are while a finger drags them, ahead of the host.
     val dragged = remember(graph) { mutableStateMapOf<String, Offset>() }
     var editing by remember { mutableStateOf<DecaySlot?>(null) }
+    var menu by remember { mutableStateOf<DecayNode?>(null) }
     val density = LocalDensity.current.density
     val place = { node: DecayNode -> dragged[node.key] ?: Offset(node.x, node.y) }
     val tap: (DecaySlot) -> Unit = { slot ->
@@ -122,6 +129,7 @@ fun DecayCanvas(
                     at = place(node),
                     tap = if (editable) tap else null,
                     onDrag = { delta -> dragged[node.key] = place(node) + delta / density },
+                    onTap = { if (editable && node.kind in listOf("statement", "event", "function")) menu = node },
                     onDropped = { place(node).let { onMove(node.key, it.x, it.y) } },
                 )
             }
@@ -142,6 +150,69 @@ fun DecayCanvas(
         }
     }
     editing?.let { slot -> SlotDialog(slot) { value -> editing = null; value?.let { onEdit(slot, it) } } }
+    menu?.let { node -> NodeMenu(node, script.palette, onDone = { menu = null }, onChange = onChange) }
+}
+
+/**
+ * What can be done to a node: a statement deleted, moved past its neighbor,
+ * or followed by a new one; a branch, loop or handler given a first step. A
+ * new statement is chosen from the script's palette. Each is checked by the
+ * host before the script changes, and a refusal says why.
+ */
+@Composable
+private fun NodeMenu(
+    node: DecayNode,
+    palette: List<Pair<String, String>>,
+    onDone: () -> Unit,
+    onChange: (kind: String, span: Pair<Int, Int>, value: Any?) -> Unit,
+) {
+    // Where a chosen statement goes: after the node, or first in one of its branches.
+    var adding by remember(node) { mutableStateOf<((String) -> Unit)?>(null) }
+    val actions = buildList<Pair<String, () -> Unit>> {
+        val statement = node.kind == "statement"
+        if (statement) {
+            add("Add after…" to { adding = { id -> onChange("insertAfter", node.span, id) } })
+        }
+        val branches = if (statement) node.outputs.filter { it.isNotEmpty() && it != "Next" } else listOf("")
+        branches.forEachIndexed { index, branch ->
+            val where = if (branch.isEmpty()) "Add first step…" else "Add inside $branch…"
+            add(where to { adding = { id -> onChange("insertInside", node.span, mapOf("template" to id, "branch" to index)) } })
+        }
+        if (statement) {
+            add("Move up" to { onChange("moveUp", node.span, null); onDone() })
+            add("Move down" to { onChange("moveDown", node.span, null); onDone() })
+            add("Delete" to { onChange("delete", node.span, null); onDone() })
+        }
+    }
+    val choosing = adding
+    androidx.compose.material3.AlertDialog(
+        onDismissRequest = onDone,
+        containerColor = Forge.Popover,
+        title = { Text(if (choosing != null) "Add a step" else node.title, style = ForgeType.text(16.sp, FontWeight.SemiBold)) },
+        text = {
+            Column(
+                Modifier.heightIn(max = 420.dp).verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(2.dp),
+            ) {
+                if (choosing != null) {
+                    palette.forEach { (id, label) -> MenuRow(label) { choosing(id); onDone() } }
+                } else {
+                    actions.forEach { (label, act) -> MenuRow(label, danger = label == "Delete", onClick = act) }
+                }
+            }
+        },
+        confirmButton = {},
+        dismissButton = { androidx.compose.material3.TextButton(onClick = onDone) { Text("Cancel", color = Forge.TextMuted) } },
+    )
+}
+
+@Composable
+private fun MenuRow(label: String, danger: Boolean = false, onClick: () -> Unit) {
+    Text(
+        label,
+        style = ForgeType.text(15.sp, color = if (danger) Forge.Danger else Forge.Text),
+        modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp)).clickable(onClick = onClick).padding(horizontal = 8.dp, vertical = 12.dp),
+    )
 }
 
 /** The pan (in points) and zoom that show every node. */
@@ -206,7 +277,9 @@ private fun NodeCard(
     tap: ((DecaySlot) -> Unit)?,
     onDrag: (Offset) -> Unit,
     onDropped: () -> Unit,
+    onTap: () -> Unit,
 ) {
+    val tapped by rememberUpdatedState(onTap)
     val drag by rememberUpdatedState(onDrag)
     val dropped by rememberUpdatedState(onDropped)
     val (head, text) = when (node.kind) {
@@ -238,13 +311,14 @@ private fun NodeCard(
                 .fillMaxWidth()
                 .height(HEADER.dp)
                 .background(head)
+                .pointerInput(node.key) { detectTapGestures { tapped() } }
                 .pointerInput(node.key) {
                     detectDragGestures(onDragEnd = { dropped() }) { change, amount ->
                         change.consume()
                         drag(amount)
                     }
                 }
-                .semantics { contentDescription = "${node.title}, drag to move" }
+                .semantics { contentDescription = "${node.title}, drag to move, tap for its menu" }
                 .padding(horizontal = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(6.dp),

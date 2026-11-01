@@ -51,6 +51,7 @@ fun BoxScope.BehaviourSheet(sheet: EditorSheet.Behaviour, onEvent: (EditorEvent)
                 script,
                 onEdit = { slot, value -> onEvent(EditorEvent.ScriptSlot(slot, value)) },
                 onMove = { key, x, y -> onEvent(EditorEvent.MoveNode(key, x, y)) },
+                onChange = { kind, span, value -> onEvent(EditorEvent.ChangeScript(kind, span, value)) },
             )
         }
         else -> BlocksView(behaviour, onEvent)

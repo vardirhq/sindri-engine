@@ -17,6 +17,8 @@ data class DecayScript(
     val problems: List<String> = emptyList(),
     /** The same reading as a node graph, placed, for the canvas. */
     val graph: DecayGraph = DecayGraph(emptyList(), emptyList()),
+    /** The statements a node menu can add: an id the host knows, and its words. */
+    val palette: List<Pair<String, String>> = emptyList(),
 ) {
     companion object {
         /** The native host's `script()` answer, or null for `null`. */
@@ -30,6 +32,7 @@ data class DecayScript(
                 containers = blocks.optJSONArray("containers").objects().map(::container),
                 problems = blocks.optJSONArray("problems").objects().map { "Line ${it.optInt("line")}: ${it.optString("message")}" },
                 graph = root.optJSONObject("graph")?.let(::graph) ?: DecayGraph(emptyList(), emptyList()),
+                palette = root.optJSONArray("palette").objects().map { it.optString("id") to it.optString("label") },
             )
         }
 
@@ -45,6 +48,7 @@ data class DecayScript(
                     outputs = node.optJSONArray("outputs").strings(),
                     x = at?.optDouble(0)?.toFloat() ?: 0f,
                     y = at?.optDouble(1)?.toFloat() ?: 0f,
+                    span = node.optJSONArray("span")?.let { it.optInt(0) to it.optInt(1) } ?: (0 to 0),
                 )
             },
             wires = json.optJSONArray("wires").objects().map { wire ->
@@ -138,6 +142,8 @@ data class DecayNode(
     val outputs: List<String>,
     val x: Float,
     val y: Float,
+    /** Where it is in the script: what a change to it is made at. */
+    val span: Pair<Int, Int> = 0 to 0,
 ) {
     val takesFlow get() = kind == "statement"
     val givesValue get() = kind == "value"

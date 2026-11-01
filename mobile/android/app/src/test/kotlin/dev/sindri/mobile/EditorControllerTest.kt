@@ -169,5 +169,8 @@ class EditorControllerTest {
         controller.on(EditorEvent.MoveNode("Lamp.update/0", 320f, 96f)) {}
         assertEquals(listOf("moveNode", "Lamp.update/0", 320f, 96f), host.commands.last())
         assertTrue("the sheet stays open on the script", controller.ui.sheet is EditorSheet.Behaviour)
+
+        controller.on(EditorEvent.ChangeScript("insertInside", 120 to 180, mapOf("template" to "if:lit", "branch" to 0))) {}
+        assertEquals(listOf("editScript", "insertInside", 120, 180, mapOf("template" to "if:lit", "branch" to 0)), host.commands.last())
     }
 }

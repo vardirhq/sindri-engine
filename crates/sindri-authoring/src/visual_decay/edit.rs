@@ -1,8 +1,10 @@
 //! Changing a script from its blocks: one node's text replaced, nothing else.
 
+use decay_semantic::Environment;
 use decay_syntax::{TokenKind, lex, parse};
 
 use super::Span;
+use super::structure::{Shape, reshape};
 
 /// A change a block makes to the script, at the span of the slot it edits.
 #[derive(Clone, Debug, PartialEq)]
@@ -68,6 +70,39 @@ pub fn edit(source: &str, edit: &ScriptEdit) -> Result<String, String> {
         return Err(format!("that would not read: {}", problem.message));
     }
     Ok(edited)
+}
+
+/// `source` with its shape changed from a node menu ([`Shape`]): whole
+/// statements deleted, moved or added, and nothing else touched.
+///
+/// Checked twice: the result must parse, and it must not have more problems
+/// than the script had before against `environment` (the project's scripts
+/// and the engine's API, as `ScriptSources::environment` gives it), so
+/// deleting a `let` something still reads, or adding a call to a function
+/// that takes arguments, is refused with the reason rather than found at Play.
+///
+/// # Errors
+/// A script with syntax errors (fixed as text first), a statement that is no
+/// longer where its node said, a move past the end of its block, or a result
+/// that does not read or does not check — each in words for the app.
+pub fn change(source: &str, shape: &Shape, environment: &Environment) -> Result<String, String> {
+    if !parse(source).diagnostics.is_empty() {
+        return Err("the script has errors to fix as text first".to_owned());
+    }
+    let changed = reshape(source, shape)?;
+    if let Some(problem) = parse(&changed).diagnostics.first() {
+        return Err(format!("that would not read: {}", problem.message));
+    }
+    let before = decay_semantic::analyze_with_environment(source, environment).diagnostics;
+    let after = decay_semantic::analyze_with_environment(&changed, environment).diagnostics;
+    if after.len() > before.len() {
+        let new = after
+            .iter()
+            .find(|problem| !before.iter().any(|old| old.message == problem.message))
+            .unwrap_or(&after[0]);
+        return Err(format!("that would not work: {}", new.message));
+    }
+    Ok(changed)
 }
 
 /// The one token `text` is, or `None` for none or several.

@@ -1921,5 +1921,47 @@
     ]
   },
   "name": "scripts/lantern.decay",
+  "palette": [
+    {
+      "id": "set:light_name",
+      "label": "Set light_name"
+    },
+    {
+      "id": "set:lit",
+      "label": "Set lit"
+    },
+    {
+      "id": "if:lit",
+      "label": "If lit"
+    },
+    {
+      "id": "ifnot:lit",
+      "label": "If not lit"
+    },
+    {
+      "id": "set:flare",
+      "label": "Set flare"
+    },
+    {
+      "id": "set:light",
+      "label": "Set light"
+    },
+    {
+      "id": "set:sparks",
+      "label": "Set sparks"
+    },
+    {
+      "id": "call:ignite",
+      "label": "Call ignite"
+    },
+    {
+      "id": "return",
+      "label": "Return"
+    },
+    {
+      "id": "comment",
+      "label": "Comment"
+    }
+  ],
   "source": "// A lamp post is dark until Wick touches it, then it swaps to its lit sprite and\n// the light up at the lantern flares and burns on. The goal lamp is the last:\n// lighting it opens the way. A lit lamp is also a safe pool: the gloom will not hunt\n// Wick while he stands in it, and are driven out of it (`gloom.decay` reads `lit`).\nscript Lantern {\n    // The name of the entity that carries this lamp's light, up at the lantern.\n    @export let light_name: String = \"\";\n\n    var lit: bool = false;\n    var flare: number = 0.0;\n    var light: Entity = null;\n    var sparks: Entity = null;\n\n    fn start() {\n        this.light = World.find(this.light_name);\n        this.sparks = World.find(\"fx-spark\");\n    }\n\n    fn update(dt: number) {\n        if !this.lit {\n            return;\n        }\n        this.flare = max(0.0, this.flare - dt);\n        this.light.light2d.intensity = 1.1 + 2.4 * (this.flare / 0.8);\n    }\n\n    fn ignite() {\n        if this.lit {\n            return;\n        }\n        this.lit = true;\n        this.flare = 0.8;\n        Animation.play(this.entity, \"lit\");\n        // Sparks off the flame, and a small shake: it caught.\n        Effects.burst_at(this.sparks, this.transform.world_position.x, this.transform.world_position.y + 2.6);\n        Camera.add_trauma(0.18);\n        Game.lit += 1.0;\n        if World.has_tag(this.entity, \"goal\") || Game.lit >= Game.total {\n            Game.won = true;\n        }\n    }\n}\n"
 }

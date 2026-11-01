@@ -86,8 +86,17 @@ How it works, in `sindri_authoring::visual_decay`:
   node nobody placed is laid out from the code. Fields a newer editor wrote
   are kept, and a newer file is not overwritten.
 
-Wiring and placing new nodes, and following execution during Play, build on
-this. Each new kind of edit is a span edit checked the same way. The round
+- Structure changes from a node's menu (`visual_decay::change`): delete,
+  move, add after or first inside. Whole lines are cut, swapped or added at
+  the code's own indentation, with a statement's comment travelling with it.
+  The result must parse and must not add a problem the checker
+  (`decay-semantic`, against the project's scripts and the engine's API)
+  finds.
+
+The look follows Unreal's Blueprints (execution and value wires, Branch with
+True and False). The interaction follows Unity's Visual Scripting (flow and
+value ports), and a searchable finder for engine calls is next. Wiring values
+between nodes and following execution during Play build on this. Each new kind of edit is a span edit checked the same way. The round
 trip is tested on every script in the repository.
 
 ## Architecture direction

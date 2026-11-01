@@ -12,6 +12,8 @@ publish = false
 [dependencies]
 # Decay's own parser, which visual Decay reads scripts with and checks edits by.
 decay-syntax = { path = "../../decay/crates/decay-syntax" }
+# Its checker, which a change to a script's shape must pass as the script did.
+decay-semantic = { path = "../../decay/crates/decay-semantic" }
 serde.workspace = true
 serde_json.workspace = true
 sindri-core = { path = "../sindri-core" }

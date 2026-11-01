@@ -26,13 +26,15 @@ mod graph;
 pub mod layout;
 mod project;
 mod slots;
+mod structure;
 
 use serde::Serialize;
 
-pub use edit::{ScriptEdit, edit};
+pub use edit::{ScriptEdit, change, edit};
 pub use graph::{Graph, Node, Pin, Wire, graph};
 pub use layout::Layout;
 pub use project::blocks;
+pub use structure::{Shape, Template, palette};
 
 /// Where something is in the script: its first byte and the byte after it.
 pub type Span = [usize; 2];
@@ -253,5 +255,7 @@ impl Slot {
 
 #[cfg(test)]
 mod graph_tests;
+#[cfg(test)]
+mod structure_tests;
 #[cfg(test)]
 mod tests;
