@@ -265,7 +265,12 @@ fn the_selection_outline_encloses_the_selection_and_follows_the_view() {
     look_at(&mut editing, &opened, lamp);
     assert_eq!(
         editing
-            .selection_bounds(&opened.world, &opened.extractor, SIZE)
+            .selection_bounds(
+                &opened.world,
+                &opened.extractor,
+                &opened.assets.sheets,
+                SIZE
+            )
             .expect("bounds resolve"),
         None,
         "nothing selected, nothing outlined"
@@ -273,7 +278,12 @@ fn the_selection_outline_encloses_the_selection_and_follows_the_view() {
     editing.selected = Some(lamp);
     let outline = |editing: &Editing| {
         editing
-            .selection_bounds(&opened.world, &opened.extractor, SIZE)
+            .selection_bounds(
+                &opened.world,
+                &opened.extractor,
+                &opened.assets.sheets,
+                SIZE,
+            )
             .expect("bounds resolve")
             .expect("the lamp is on the canvas")
     };
@@ -363,7 +373,12 @@ fn the_handles_turn_and_scale_the_selection_in_one_undo_step_each() {
     editing.selected = Some(lamp);
     let before = transform(&opened, lamp);
     let [left, top, right, bottom] = editing
-        .selection_bounds(&opened.world, &opened.extractor, SIZE)
+        .selection_bounds(
+            &opened.world,
+            &opened.extractor,
+            &opened.assets.sheets,
+            SIZE,
+        )
         .expect("bounds resolve")
         .expect("the lamp is on the canvas");
     let middle = [(left + right) * 0.5, (top + bottom) * 0.5];
@@ -371,14 +386,7 @@ fn the_handles_turn_and_scale_the_selection_in_one_undo_step_each() {
     // Taken above the lamp and carried round to its right, with snapping on:
     // a quarter turn clockwise.
     editing
-        .take_handle(
-            &opened.world,
-            &opened.extractor,
-            Handle::Turn,
-            [middle[0], top - 60.0],
-            SIZE,
-            true,
-        )
+        .take_handle(&opened, Handle::Turn, [middle[0], top - 60.0], SIZE, true)
         .expect("the turn handle is taken");
     for pixel in [
         [middle[0] + 50.0, top - 40.0],
@@ -404,14 +412,7 @@ fn the_handles_turn_and_scale_the_selection_in_one_undo_step_each() {
         origin[1] + (from[1] - origin[1]) * 2.0,
     ];
     editing
-        .take_handle(
-            &opened.world,
-            &opened.extractor,
-            Handle::Scale,
-            from,
-            SIZE,
-            false,
-        )
+        .take_handle(&opened, Handle::Scale, from, SIZE, false)
         .expect("the scale handle is taken");
     editing
         .drag(&mut opened.world, twice, SIZE)

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The Sindri mark in one color, for themed icons. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:pathData="M54.00,27.19 L77.22,40.59 L77.22,67.41 L54.00,80.81 L30.78,67.41 L30.78,40.59 Z"
+        android:strokeColor="#FF000000"
+        android:strokeWidth="3.30"
+        android:strokeLineJoin="miter" />
+    <path
+        android:pathData="M54.00,39.56 L66.50,46.78 L66.50,61.22 L54.00,68.44 L41.50,61.22 L41.50,46.78 Z"
+        android:strokeColor="#FF000000"
+        android:strokeWidth="2.48"
+        android:strokeLineJoin="miter" />
+    <path
+        android:fillColor="#FF000000"
+        android:pathData="M54.00,48.22 L58.99,51.11 L58.99,56.89 L54.00,59.77 L49.01,56.89 L49.01,51.11 Z" />
+</vector>
