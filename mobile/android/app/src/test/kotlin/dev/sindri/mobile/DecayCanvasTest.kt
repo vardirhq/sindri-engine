@@ -90,6 +90,22 @@ class DecayCanvasTest {
     }
 
     @Test
+    fun calls_read_in_words_and_the_finder_matches_words_or_code() {
+        assertEquals("Play sound", plain("Audio.play"))
+        assertEquals("Set number · Save", plain("Save.set_number"))
+        assertEquals("Is held? · Ui", plain("Ui.is_held"))
+        assertEquals("Set this.light", plain("Set this.light"))
+        assertEquals("If", plain("If"))
+
+        val palette = listOf("set:glow" to "Set glow", "comment" to "Comment")
+        val engine = listOf("engine:Audio.play" to "Audio.play(\"\", 0)", "engine:World.find" to "World.find(\"\")")
+        assertEquals(4, findSteps("", palette, engine).size)
+        assertEquals(listOf("engine:Audio.play"), findSteps("sound", palette, engine).map { it.first })
+        assertEquals(listOf("engine:World.find"), findSteps("world.f", palette, engine).map { it.first })
+        assertEquals(listOf("set:glow"), findSteps("glow", palette, engine).map { it.first })
+    }
+
+    @Test
     fun a_pin_offers_the_fields_of_its_type() {
         val script = DecayScript(
             "scripts/lamp.decay", "",

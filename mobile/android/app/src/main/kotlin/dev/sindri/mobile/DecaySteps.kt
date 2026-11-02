@@ -18,6 +18,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -173,7 +174,7 @@ fun DecaySteps(
             },
         ) { value -> editing = null; value?.let { onEdit(slot, it) } }
     }
-    menu?.let { node -> NodeMenu(node, script.palette, onDone = { menu = null }, onChange = onChange) }
+    menu?.let { node -> NodeMenu(node, script.palette, onDone = { menu = null }, onChange = onChange, engine = script.engine) }
     adding?.let { add ->
         AlertDialog(
             onDismissRequest = { adding = null },
@@ -181,7 +182,7 @@ fun DecaySteps(
             title = { Text("Add a step", style = ForgeType.text(16.sp, FontWeight.SemiBold)) },
             text = {
                 Column(Modifier.heightIn(max = 420.dp).verticalScroll(rememberScrollState())) {
-                    script.palette.forEach { (id, label) -> MenuRow(label) { add(id); adding = null } }
+                    Finder(script.palette, script.engine) { id -> add(id); adding = null }
                 }
             },
             confirmButton = {},
@@ -191,6 +192,9 @@ fun DecaySteps(
 }
 
 private const val INDENT = 20
+
+/** Choices past which a finder offers search. */
+private const val SEARCHED = 12
 
 @Composable
 private fun Chip(label: String, on: Boolean, onClick: () -> Unit) = Text(
@@ -229,7 +233,7 @@ private fun Card(depth: Int, onMenu: (() -> Unit)?, title: String? = null, conte
 @Composable
 private fun Sentence(title: String, pins: List<DecayPin>, graph: DecayGraph, tap: ((DecaySlot) -> Unit)?, node: DecayNode? = null) {
     FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        Text(title, style = ForgeType.text(14.sp, FontWeight.SemiBold), modifier = Modifier.align(Alignment.CenterVertically))
+        Text(plain(title), style = ForgeType.text(14.sp, FontWeight.SemiBold), modifier = Modifier.align(Alignment.CenterVertically))
         Values(pins, node, graph, tap)
     }
 }
@@ -247,9 +251,73 @@ private fun FlowRowScope.Values(pins: List<DecayPin>, node: DecayNode?, graph: D
         } else if (node != null) {
             val wire = graph.wires.firstOrNull { !it.flow && it.to == node.key && it.into == pin.name }
             graph.nodes.firstOrNull { it.key == wire?.from }?.let { from ->
-                Text(from.title, style = ForgeType.text(13.sp, FontWeight.Medium, Forge.Info), modifier = Modifier.align(Alignment.CenterVertically))
+                Text(plain(from.title), style = ForgeType.text(13.sp, FontWeight.Medium, Forge.Info), modifier = Modifier.align(Alignment.CenterVertically))
                 Values(from.inputs, from, graph, tap)
             }
         }
     }
+}
+
+/** The calls scripts make most, in words; anything else is spelled from its name. */
+private val WORDS = mapOf(
+    "World.find" to "Find entity",
+    "World.set_property" to "Set property",
+    "World.set_active" to "Show or hide",
+    "World.spawn" to "Spawn",
+    "World.despawn" to "Remove entity",
+    "World.exists" to "Entity exists?",
+    "World.has_tag" to "Has tag?",
+    "World.with_tag" to "Entities tagged",
+    "Ui.set_text" to "Set UI text",
+    "Ui.is_pressed" to "UI pressed?",
+    "Physics.set_velocity" to "Set velocity",
+    "Audio.play" to "Play sound",
+    "Input.just_pressed" to "Key just pressed?",
+    "Random.range" to "Random number",
+    "Effects.burst" to "Burst of effects",
+    "Animation.play" to "Play animation",
+    "Scene.go" to "Go to scene",
+)
+
+/**
+ * A call's name in words: `Audio.play` reads "Play sound", and one with no
+ * entry of its own reads from its name, `Save.set_number` as "Set number ·
+ * Save". Anything that is not a bare call name stays as it is.
+ */
+fun plain(name: String): String {
+    WORDS[name]?.let { return it }
+    val (owner, member) = name.split('.').takeIf { it.size == 2 } ?: return name
+    if (owner.firstOrNull()?.isUpperCase() != true || owner.any { !it.isLetterOrDigit() } || member.isEmpty() || member.any { !it.isLetterOrDigit() && it != '_' }) return name
+    val words = member.replace('_', ' ').replaceFirstChar { it.uppercase() }
+    val asks = member.startsWith("is_") || member.startsWith("has_")
+    return "$words${if (asks) "?" else ""} · $owner"
+}
+
+/**
+ * What a finder lists for [query]: the script's own statements, then the
+ * engine's calls in words, each matched by its words or its code.
+ */
+fun findSteps(query: String, palette: List<Pair<String, String>>, engine: List<Pair<String, String>>): List<Pair<String, String>> {
+    val calls = engine.map { (id, call) -> id to "${plain(call.substringBefore('('))}  ·  $call" }
+    val all = palette + calls
+    val wanted = query.trim()
+    return if (wanted.isEmpty()) all else all.filter { (_, label) -> label.contains(wanted, ignoreCase = true) }
+}
+
+/**
+ * A search box over [findSteps], each result a row that gives its id to
+ * [onPick]. A list short enough to see whole has no box.
+ */
+@Composable
+fun Finder(palette: List<Pair<String, String>>, engine: List<Pair<String, String>>, onPick: (String) -> Unit) {
+    var query by remember { mutableStateOf("") }
+    if (palette.size + engine.size > SEARCHED) OutlinedTextField(
+        value = query,
+        onValueChange = { query = it },
+        singleLine = true,
+        placeholder = { Text("Search, such as sound or find", style = ForgeType.text(14.sp, color = Forge.TextFaint)) },
+        textStyle = ForgeType.text(14.sp),
+        modifier = Modifier.fillMaxWidth().padding(bottom = 6.dp),
+    )
+    findSteps(query, palette, engine).take(60).forEach { (id, label) -> MenuRow(label) { onPick(id) } }
 }

@@ -170,10 +170,18 @@ impl Host {
     fn change_script(&mut self, kind: &str, span: [usize; 2], value: &Value) -> Result<(), String> {
         let opened = self.opened.as_ref().ok_or("no project is open")?;
         let script = self.script.as_mut().ok_or("no script is open")?;
+        // Checked against the project's scripts, with this one as it is now.
+        let mut sources = opened.assets.scripts.clone();
+        sources.insert(script.name.clone(), script.source.clone());
+        let environment = sources.environment();
         let template = |id: Option<&str>| {
             let id = id.ok_or("no statement was chosen")?;
-            Template::named(id, &visual_decay::blocks(&script.source), &script.source)
-                .ok_or_else(|| format!("no statement {id} for this script"))
+            if id.starts_with("engine:") {
+                Template::engine(id, environment)
+            } else {
+                Template::named(id, &visual_decay::blocks(&script.source), &script.source)
+            }
+            .ok_or_else(|| format!("no statement {id} for this script"))
         };
         let shape = match kind {
             "delete" => Shape::Delete(span),
@@ -199,10 +207,7 @@ impl Host {
                 template: template(value.get("template").and_then(Value::as_str))?,
             },
         };
-        // Checked against the project's scripts, with this one as it is now.
-        let mut sources = opened.assets.scripts.clone();
-        sources.insert(script.name.clone(), script.source.clone());
-        let changed = visual_decay::change(&script.source, &shape, sources.environment())?;
+        let changed = visual_decay::change(&script.source, &shape, environment)?;
         script.write(changed, Step::Edit)
     }
 
@@ -221,9 +226,21 @@ impl Host {
             .map_err(|error| format!("{}{LAYOUT_SUFFIX}: {error}", script.name))
     }
 
+    /// The engine calls a step can add, for the finder: `{ id, call }`.
+    fn engine_calls(&self) -> Vec<Value> {
+        let Some(opened) = self.opened.as_ref() else {
+            return Vec::new();
+        };
+        visual_decay::engine_calls(opened.assets.scripts.environment())
+            .into_iter()
+            .map(|(id, call)| json!({ "id": id, "call": call }))
+            .collect()
+    }
+
     /// The open script for the Behaviour sheet, as JSON: its `name`, its
     /// `source` for the Code view, its `blocks`, its node `graph`, placed,
-    /// and the `palette` of statements its node menu can add; `null` with none
+    /// the `palette` of statements its node menu can add, and the `engine`
+    /// calls its finder offers; `null` with none
     /// open.
     pub(super) fn script(&self) -> String {
         self.script.as_ref().map_or_else(
@@ -240,6 +257,7 @@ impl Host {
                         .into_iter()
                         .map(|(id, label)| json!({ "id": id, "label": label }))
                         .collect::<Vec<_>>(),
+                    "engine": self.engine_calls(),
                 })
                 .to_string()
             },

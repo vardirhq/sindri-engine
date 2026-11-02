@@ -210,6 +210,7 @@ internal fun NodeMenu(
     palette: List<Pair<String, String>>,
     onDone: () -> Unit,
     onChange: (kind: String, span: Pair<Int, Int>, value: Any?) -> Unit,
+    engine: List<Pair<String, String>> = emptyList(),
 ) {
     // Where a chosen statement goes: after the node, or first in one of its branches.
     var adding by remember(node) { mutableStateOf<((String) -> Unit)?>(null) }
@@ -240,7 +241,7 @@ internal fun NodeMenu(
                 verticalArrangement = Arrangement.spacedBy(2.dp),
             ) {
                 if (choosing != null) {
-                    palette.forEach { (id, label) -> MenuRow(label) { choosing(id); onDone() } }
+                    Finder(palette, engine) { id -> choosing(id); onDone() }
                 } else {
                     actions.forEach { (label, act) -> MenuRow(label, danger = label == "Delete", onClick = act) }
                 }
