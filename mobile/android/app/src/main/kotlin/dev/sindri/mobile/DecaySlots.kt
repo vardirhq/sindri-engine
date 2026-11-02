@@ -3,6 +3,7 @@ package dev.sindri.mobile
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -61,9 +62,22 @@ fun SlotChip(slot: DecaySlot, onTap: (() -> Unit)?, modifier: Modifier = Modifie
     )
 }
 
-/** Asks for a slot's new number or text; null when cancelled. */
+/** The script's fields a number or text slot could read instead of its value. */
+fun DecayScript.fieldsFor(slot: DecaySlot): List<String> {
+    val type = when (slot) {
+        is DecaySlot.Number -> "number"
+        is DecaySlot.Text -> "String"
+        else -> return emptyList()
+    }
+    return containers.flatMap { it.fields }.filter { it.type == type }.map { it.name }
+}
+
+/**
+ * Asks for a slot's new number or text; null when cancelled. Or the slot can
+ * read one of [fields] instead, given to [onField].
+ */
 @Composable
-fun SlotDialog(slot: DecaySlot, onDone: (Any?) -> Unit) {
+fun SlotDialog(slot: DecaySlot, fields: List<String> = emptyList(), onField: (String) -> Unit = {}, onDone: (Any?) -> Unit) {
     val number = slot is DecaySlot.Number
     var text by remember(slot) {
         mutableStateOf(
@@ -80,13 +94,21 @@ fun SlotDialog(slot: DecaySlot, onDone: (Any?) -> Unit) {
         containerColor = Forge.Popover,
         title = { Text(if (number) "Number" else "Text", style = ForgeType.text(16.sp, FontWeight.SemiBold)) },
         text = {
-            OutlinedTextField(
-                value = text,
-                onValueChange = { text = it },
-                singleLine = number,
-                keyboardOptions = KeyboardOptions(keyboardType = if (number) KeyboardType.Decimal else KeyboardType.Text),
-                textStyle = ForgeType.text(15.sp),
-            )
+            Column {
+                OutlinedTextField(
+                    value = text,
+                    onValueChange = { text = it },
+                    singleLine = number,
+                    keyboardOptions = KeyboardOptions(keyboardType = if (number) KeyboardType.Decimal else KeyboardType.Text),
+                    textStyle = ForgeType.text(15.sp),
+                )
+                if (fields.isNotEmpty()) {
+                    Text("Or use a field", style = ForgeType.text(12.sp, color = Forge.TextMuted), modifier = Modifier.padding(top = 12.dp))
+                    fields.forEach { field ->
+                        TextButton(onClick = { onField(field) }) { Text("this.$field", color = Forge.MetalBright) }
+                    }
+                }
+            }
         },
         confirmButton = { TextButton(onClick = { onDone(parsed) }, enabled = parsed != null) { Text("Done", color = Forge.MetalBright) } },
         dismissButton = { TextButton(onClick = { onDone(null) }) { Text("Cancel", color = Forge.TextMuted) } },

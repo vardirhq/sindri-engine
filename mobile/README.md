@@ -75,6 +75,9 @@ How it works, in `sindri_authoring::visual_decay`:
   the slot it changed, then the result is parsed and refused if it no longer
   reads. Every other byte, comments and formatting included, stays as it was.
   A script with syntax errors is fixed as text before its blocks edit.
+- A number or text pin can read one of the script's fields of that type
+  instead of its typed value: the pin's text becomes `this.field`, checked
+  like any other change.
 - With a script open, the editor's Undo and Redo step through the edits made
   to it there, each as a whole text of the script. If the file changed
   elsewhere since, that history is dropped rather than written over it.

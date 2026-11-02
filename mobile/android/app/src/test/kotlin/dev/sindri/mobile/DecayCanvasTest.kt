@@ -73,6 +73,27 @@ class DecayCanvasTest {
     }
 
     @Test
+    fun a_pin_offers_the_fields_of_its_type() {
+        val script = DecayScript(
+            "scripts/lamp.decay", "",
+            listOf(
+                DecayContainer(
+                    "script", "Lamp",
+                    listOf(
+                        DecayField("glow", exported = true, mutable = false, type = "number", value = DecaySlot.Number(1.5, 40 to 43), note = null),
+                        DecayField("lit", exported = false, mutable = true, type = "bool", value = DecaySlot.Bool(false, 60 to 65), note = null),
+                        DecayField("label", exported = false, mutable = true, type = "String", value = DecaySlot.Text("", 70 to 72), note = null),
+                    ),
+                    emptyList(),
+                ),
+            ),
+        )
+        assertEquals(listOf("glow"), script.fieldsFor(DecaySlot.Number(3.0, 90 to 93)))
+        assertEquals(listOf("label"), script.fieldsFor(DecaySlot.Text("hi", 90 to 94)))
+        assertEquals(emptyList<String>(), script.fieldsFor(DecaySlot.Bool(true, 90 to 94)))
+    }
+
+    @Test
     fun one_handler_shows_at_a_time_and_its_tab_switches() {
         val graph = DecayGraph(
             nodes = listOf(

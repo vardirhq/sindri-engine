@@ -125,7 +125,8 @@ impl Host {
     /// `kind` is `number`, `text` or `bool` for a slot at `span`, with its
     /// new `value`; or a change of shape at the node at `span`: `delete`,
     /// `moveUp`, `moveDown`, `insertAfter` (`value` a palette id) or
-    /// `insertInside` (`value` `{ "template": id, "branch": n }`); or `undo`
+    /// `insertInside` (`value` `{ "template": id, "branch": n }`) or
+    /// `useField` (the slot at `span` reads the field `value`); or `undo`
     /// or `redo`, which take no `span` or `value`.
     pub(super) fn edit_script(
         &mut self,
@@ -142,7 +143,7 @@ impl Host {
         }
         if matches!(
             kind,
-            "delete" | "moveUp" | "moveDown" | "insertAfter" | "insertInside"
+            "delete" | "moveUp" | "moveDown" | "insertAfter" | "insertInside" | "useField"
         ) {
             return self.change_script(kind, span, value);
         }
@@ -179,6 +180,10 @@ impl Host {
             "moveUp" | "moveDown" => Shape::Move {
                 statement: span,
                 up: kind == "moveUp",
+            },
+            "useField" => Shape::Field {
+                slot: span,
+                field: value.as_str().ok_or("no field was chosen")?.to_owned(),
             },
             "insertAfter" => Shape::After {
                 statement: span,

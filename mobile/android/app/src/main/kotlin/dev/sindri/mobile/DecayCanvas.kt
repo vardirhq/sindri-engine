@@ -184,7 +184,17 @@ fun DecayCanvas(
             )
         }
     }
-    editing?.let { slot -> SlotDialog(slot) { value -> editing = null; value?.let { onEdit(slot, it) } } }
+    editing?.let { slot ->
+        SlotDialog(
+            slot,
+            fields = script.fieldsFor(slot),
+            onField = { field ->
+                editing = null
+                ((slot as? DecaySlot.Number)?.span ?: (slot as? DecaySlot.Text)?.span)
+                    ?.let { onChange("useField", it, field) }
+            },
+        ) { value -> editing = null; value?.let { onEdit(slot, it) } }
+    }
     menu?.let { node -> NodeMenu(node, script.palette, onDone = { menu = null }, onChange = onChange) }
 }
 

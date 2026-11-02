@@ -125,6 +125,9 @@ pub enum Shape {
         branch: usize,
         template: Template,
     },
+    /// The value in a pin at this span replaced by one of the script's
+    /// fields, read as `this.field`.
+    Field { slot: Span, field: String },
 }
 
 /// `source` with `shape` made, before it is checked.
@@ -177,6 +180,24 @@ pub(super) fn reshape(source: &str, shape: &Shape) -> Result<String, String> {
             } else {
                 format!("{}\n{indent}{text}{}", &source[..end], &source[end..])
             })
+        }
+        Shape::Field { slot, field } => {
+            let named = !field.is_empty()
+                && field
+                    .chars()
+                    .all(|character| character.is_alphanumeric() || character == '_');
+            if !named {
+                return Err(format!("{field} is not a field's name"));
+            }
+            let [start, end] = *slot;
+            if start > end || source.get(start..end).is_none() {
+                return Err(GONE.to_owned());
+            }
+            Ok(format!(
+                "{}this.{field}{}",
+                &source[..start],
+                &source[end..]
+            ))
         }
         Shape::Inside {
             node,

@@ -207,3 +207,37 @@ fn a_real_script_takes_a_change_against_its_project() {
             < changed.find("Effects.burst_at").expect("still there")
     );
 }
+
+#[test]
+fn a_pin_takes_a_field_in_place_of_its_value_and_an_unknown_one_is_refused() {
+    let start = SCRIPT.find("3.0").expect("the literal");
+    let slot = [start, start + 3];
+    let changed = change(
+        SCRIPT,
+        &Shape::Field {
+            slot,
+            field: "glow".to_owned(),
+        },
+        &environment(),
+    )
+    .expect("glow is a field");
+    assert_eq!(
+        changed,
+        SCRIPT.replace("this.glow = 3.0;", "this.glow = this.glow;")
+    );
+
+    for field in ["warmth", "glow; this.lit = true"] {
+        assert!(
+            change(
+                SCRIPT,
+                &Shape::Field {
+                    slot,
+                    field: field.to_owned(),
+                },
+                &environment(),
+            )
+            .is_err(),
+            "{field} is not a field"
+        );
+    }
+}
