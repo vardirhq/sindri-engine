@@ -34,7 +34,7 @@ pub use edit::{ScriptEdit, change, edit};
 pub use graph::{Graph, Node, Pin, Wire, graph, graph_flowing};
 pub use layout::{Flow, Layout};
 pub use project::blocks;
-pub use structure::{Shape, Template, engine_calls, palette};
+pub use structure::{Member, Shape, Template, engine_calls, palette};
 
 /// Where something is in the script: its first byte and the byte after it.
 pub type Span = [usize; 2];

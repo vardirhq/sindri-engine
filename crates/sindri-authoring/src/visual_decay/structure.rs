@@ -6,7 +6,7 @@
 //! attached above a statement travelling with it, as the node shows them as
 //! its note. Nothing outside those lines changes.
 
-use decay_syntax::{Block, Item, Member, Program, Stmt, parse};
+use decay_syntax::{Block, Item, Member as Member_, Program, Stmt, parse};
 
 use decay_semantic::{Environment, ExternalSymbol, Type};
 
@@ -185,6 +185,58 @@ pub enum Shape {
     /// The value in a pin at this span replaced by one of the script's
     /// fields, read as `this.field`.
     Field { slot: Span, field: String },
+    /// A new member of the script: written first among its fields for a
+    /// variable, last for a function or event.
+    Add(Member),
+}
+
+/// What a script can gain from the tab bar's "+".
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum Member {
+    /// `var name: ty = <its type's empty value>;`, for `number`, `bool` or
+    /// `String`.
+    Variable { name: String, ty: String },
+    /// `fn name() { }`
+    Function { name: String },
+    /// One of the engine's events, by its lifecycle name: `fn update(dt: number) { }`.
+    Event { name: String },
+}
+
+impl Member {
+    fn name(&self) -> &str {
+        match self {
+            Self::Variable { name, .. } | Self::Function { name } | Self::Event { name } => name,
+        }
+    }
+
+    /// Its lines, before indentation.
+    fn lines(&self) -> Result<Vec<String>, String> {
+        Ok(match self {
+            Self::Variable { name, ty } => {
+                let value = match ty.as_str() {
+                    "number" => "0",
+                    "bool" => "false",
+                    "String" => "\"\"",
+                    other => return Err(format!("a new variable cannot be a {other} yet")),
+                };
+                vec![format!("var {name}: {ty} = {value};")]
+            }
+            Self::Function { name } => vec![format!("fn {name}() {{"), "}".to_owned()],
+            Self::Event { name } => {
+                let event = sindri_decay::LIFECYCLE
+                    .iter()
+                    .find(|event| event.name == name)
+                    .ok_or_else(|| format!("{name} is not one of the engine's events"))?;
+                let params = event
+                    .params
+                    .iter()
+                    .map(|(param, ty)| format!("{param}: {ty}"))
+                    .collect::<Vec<_>>()
+                    .join(", ");
+                vec![format!("fn {name}({params}) {{"), "}".to_owned()]
+            }
+        })
+    }
 }
 
 /// `source` with `shape` made, before it is checked.
@@ -256,6 +308,7 @@ pub(super) fn reshape(source: &str, shape: &Shape) -> Result<String, String> {
                 &source[end..]
             ))
         }
+        Shape::Add(member) => add(source, &program, member),
         Shape::Inside {
             node,
             branch,
@@ -288,6 +341,71 @@ pub(super) fn reshape(source: &str, shape: &Shape) -> Result<String, String> {
 }
 
 const GONE: &str = "that part of the script is no longer there";
+
+/// `source` with `member` written into its first script or component.
+fn add(source: &str, program: &Program, member: &Member) -> Result<String, String> {
+    let name = member.name();
+    let named = name
+        .chars()
+        .next()
+        .is_some_and(|first| first.is_alphabetic() || first == '_')
+        && name
+            .chars()
+            .all(|character| character.is_alphanumeric() || character == '_');
+    if !named {
+        return Err(format!(
+            "\"{name}\" cannot be a name: use letters, digits and _"
+        ));
+    }
+    let container = program
+        .items
+        .iter()
+        .find_map(|item| match item {
+            Item::Script(container) | Item::Component(container) => Some(container),
+            _ => None,
+        })
+        .ok_or("the file has no script to add to")?;
+    let outer = indentation(source, container.span.start);
+    let indent = container.members.first().map_or_else(
+        || format!("{outer}    "),
+        |first| {
+            let start = match first {
+                Member_::Field(field) => field.span.start,
+                Member_::Function(function) => function.span.start,
+            };
+            indentation(source, start)
+        },
+    );
+    let text = member.lines()?.join(&format!("\n{indent}"));
+    if matches!(member, Member::Variable { .. }) {
+        // First among the fields: just inside the script's opening brace.
+        let open = source[container.span.start..container.span.end]
+            .find('{')
+            .map(|at| container.span.start + at)
+            .ok_or(GONE)?;
+        let line_end = source[open..]
+            .find('\n')
+            .map_or(source.len(), |at| open + at + 1);
+        return Ok(format!(
+            "{}{indent}{text}\n{}",
+            &source[..line_end],
+            &source[line_end..]
+        ));
+    }
+    // Last: on its own lines before the script's closing brace.
+    let close = container.span.end - 1;
+    let line_start = source[..close].rfind('\n').map_or(0, |at| at + 1);
+    let blank = if container.members.is_empty() {
+        ""
+    } else {
+        "\n"
+    };
+    Ok(format!(
+        "{}{blank}{indent}{text}\n{}",
+        &source[..line_start],
+        &source[line_start..]
+    ))
+}
 
 fn indented(template: &Template, indent: &str) -> String {
     template.lines().join(&format!("\n{indent}"))
@@ -341,8 +459,8 @@ fn functions(program: &Program) -> impl Iterator<Item = &decay_syntax::FunctionD
             .members
             .iter()
             .filter_map(|member| match member {
-                Member::Function(function) => Some(function),
-                Member::Field(_) => None,
+                Member_::Function(function) => Some(function),
+                Member_::Field(_) => None,
             })
             .collect::<Vec<_>>(),
         Item::Function(function) => vec![function],

@@ -93,6 +93,7 @@ fun DecaySteps(
     var editing by remember { mutableStateOf<DecaySlot?>(null) }
     var menu by remember { mutableStateOf<DecayNode?>(null) }
     var adding by remember { mutableStateOf<((String) -> Unit)?>(null) }
+    var growing by remember { mutableStateOf(false) }
     val tap: ((DecaySlot) -> Unit)? = if (!editable) null else { slot ->
         if (slot is DecaySlot.Bool) onEdit(slot, !slot.value) else editing = slot
     }
@@ -106,6 +107,7 @@ fun DecaySteps(
                 val on = handler.key == current?.key
                 Chip(if (handler.kind == "values") "Values" else handler.title, on) { shown = handler.key }
             }
+            if (editable) Chip("+", false) { growing = true }
         }
         if (!editable) {
             Text(
@@ -173,6 +175,9 @@ fun DecaySteps(
                 ((slot as? DecaySlot.Number)?.span ?: (slot as? DecaySlot.Text)?.span)?.let { onChange("useField", it, field) }
             },
         ) { value -> editing = null; value?.let { onEdit(slot, it) } }
+    }
+    if (growing) {
+        GrowDialog(missingEvents(script), onDone = { growing = false }) { member -> onChange("add", 0 to 0, member) }
     }
     menu?.let { node -> NodeMenu(node, script.palette, onDone = { menu = null }, onChange = onChange, engine = script.engine) }
     adding?.let { add ->
@@ -320,4 +325,65 @@ fun Finder(palette: List<Pair<String, String>>, engine: List<Pair<String, String
         modifier = Modifier.fillMaxWidth().padding(bottom = 6.dp),
     )
     findSteps(query, palette, engine).take(60).forEach { (id, label) -> MenuRow(label) { onPick(id) } }
+}
+
+/** The engine's events [script] has no handler for yet: each lifecycle name, and how it reads. */
+fun missingEvents(script: DecayScript): List<Pair<String, String>> {
+    val have = script.containers.flatMap { it.handlers }.mapTo(HashSet()) { it.name }
+    return listOf("start" to "When it starts", "update" to "Every frame").filter { it.first !in have }
+}
+
+/**
+ * What the tab bar's "+" adds: a variable (named, with its kind), a function
+ * (named), or one of [events]. [onAdd] gets what the host's `add` takes.
+ */
+@Composable
+private fun GrowDialog(events: List<Pair<String, String>>, onDone: () -> Unit, onAdd: (Map<String, String>) -> Unit) {
+    var naming by remember { mutableStateOf<String?>(null) }
+    var name by remember { mutableStateOf("") }
+    var type by remember { mutableStateOf("number") }
+    val kind = naming
+    AlertDialog(
+        onDismissRequest = onDone,
+        containerColor = Forge.Popover,
+        title = { Text(if (kind == null) "Add to the script" else "New $kind", style = ForgeType.text(16.sp, FontWeight.SemiBold)) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                if (kind == null) {
+                    MenuRow("New variable…") { naming = "variable" }
+                    MenuRow("New function…") { naming = "function" }
+                    events.forEach { (event, label) ->
+                        MenuRow("New event: $label") { onAdd(mapOf("member" to "event", "name" to event)); onDone() }
+                    }
+                } else {
+                    OutlinedTextField(
+                        value = name,
+                        onValueChange = { name = it.filter { c -> c.isLetterOrDigit() || c == '_' } },
+                        singleLine = true,
+                        placeholder = { Text(if (kind == "variable") "speed" else "open_door", style = ForgeType.text(14.sp, color = Forge.TextFaint)) },
+                        textStyle = ForgeType.text(15.sp),
+                    )
+                    if (kind == "variable") {
+                        Row(horizontalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.padding(top = 8.dp)) {
+                            listOf("number" to "Number", "bool" to "Switch", "String" to "Text").forEach { (id, label) ->
+                                Chip(label, type == id) { type = id }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            if (kind != null) {
+                TextButton(
+                    onClick = {
+                        onAdd(mapOf("member" to kind, "name" to name, "type" to type))
+                        onDone()
+                    },
+                    enabled = name.isNotEmpty(),
+                ) { Text("Add", color = Forge.MetalBright) }
+            }
+        },
+        dismissButton = { TextButton(onClick = onDone) { Text("Cancel", color = Forge.TextMuted) } },
+    )
 }
