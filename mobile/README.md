@@ -75,6 +75,9 @@ How it works, in `sindri_authoring::visual_decay`:
   the slot it changed, then the result is parsed and refused if it no longer
   reads. Every other byte, comments and formatting included, stays as it was.
   A script with syntax errors is fixed as text before its blocks edit.
+- The Behavior sheet opens a script as **Steps** first: each handler a list
+  of sentences in running order, branch and loop bodies indented, values as
+  chips, and a menu on each step. Nodes and Code are the other two tabs.
 - A number or text pin can read one of the script's fields of that type
   instead of its typed value: the pin's text becomes `this.field`, checked
   like any other change.

@@ -73,6 +73,23 @@ class DecayCanvasTest {
     }
 
     @Test
+    fun steps_read_in_running_order_with_branches_indented_under_their_statement() {
+        fun at(key: String, outputs: List<String> = listOf("")) = DecayNode(key, "statement", key, null, emptyList(), outputs, 0f, 0f)
+        val start = DecayNode("start", "event", "When it starts", null, emptyList(), listOf(""), 0f, 0f)
+        val branch = at("if", listOf("True", "False", "Next"))
+        val (yes, no, after) = listOf(at("yes"), at("no"), at("after"))
+        fun flow(from: String, out: String, to: String) = DecayWire(from, out, to, "", flow = true)
+        val graph = DecayGraph(
+            listOf(start, branch, yes, no, after),
+            listOf(flow("start", "", "if"), flow("if", "True", "yes"), flow("if", "False", "no"), flow("if", "Next", "after")),
+        )
+        assertEquals(
+            listOf(StepRow.Step(branch, 0), StepRow.Step(yes, 1), StepRow.Branch("Otherwise", 0), StepRow.Step(no, 1), StepRow.Step(after, 0)),
+            steps(graph, start),
+        )
+    }
+
+    @Test
     fun a_pin_offers_the_fields_of_its_type() {
         val script = DecayScript(
             "scripts/lamp.decay", "",

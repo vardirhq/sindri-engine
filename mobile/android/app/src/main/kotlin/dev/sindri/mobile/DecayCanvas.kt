@@ -205,7 +205,7 @@ fun DecayCanvas(
  * host before the script changes, and a refusal says why.
  */
 @Composable
-private fun NodeMenu(
+internal fun NodeMenu(
     node: DecayNode,
     palette: List<Pair<String, String>>,
     onDone: () -> Unit,
@@ -252,7 +252,7 @@ private fun NodeMenu(
 }
 
 @Composable
-private fun MenuRow(label: String, danger: Boolean = false, onClick: () -> Unit) {
+internal fun MenuRow(label: String, danger: Boolean = false, onClick: () -> Unit) {
     Text(
         label,
         style = ForgeType.text(15.sp, color = if (danger) Forge.Danger else Forge.Text),

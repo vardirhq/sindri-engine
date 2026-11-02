@@ -105,9 +105,9 @@ class DesignScreens {
         lamp.copy(sheet = EditorSheet.Inspector(InspectorPresenter.present(EngineSamples.lamp, "world.scene", "projects/lamplighter/assets/", details = false).ui, full = true)),
     )
 
-    /** The lamp post's real script as Decay nodes, read by the phone's own code (`mobile/native/tests/decay_fixture.rs`). */
-    @Test fun behaviourNodes() = editor(
-        "22d-behaviour-nodes",
+    /** The lamp post's real script as Decay steps, read by the phone's own code (`mobile/native/tests/decay_fixture.rs`). */
+    @Test fun behaviourSteps() = editor(
+        "22d-behaviour-steps",
         lamp.copy(
             sheet = EditorSheet.Behaviour(
                 BehaviourUi("Lamp post", emptyList(), emptyList(), "scripts/lantern.decay", emptyList(), "", decay = lantern()),
