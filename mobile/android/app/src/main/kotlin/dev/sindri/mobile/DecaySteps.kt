@@ -93,6 +93,8 @@ fun DecaySteps(
     var editing by remember { mutableStateOf<DecaySlot?>(null) }
     var menu by remember { mutableStateOf<DecayNode?>(null) }
     var adding by remember { mutableStateOf<((String) -> Unit)?>(null) }
+    var growing by remember { mutableStateOf(false) }
+    var member by remember { mutableStateOf<String?>(null) }
     val tap: ((DecaySlot) -> Unit)? = if (!editable) null else { slot ->
         if (slot is DecaySlot.Bool) onEdit(slot, !slot.value) else editing = slot
     }
@@ -104,8 +106,12 @@ fun DecaySteps(
         ) {
             handlers.forEach { handler ->
                 val on = handler.key == current?.key
-                Chip(if (handler.kind == "values") "Values" else handler.title, on) { shown = handler.key }
+                Chip(if (handler.kind == "values") "Values" else handler.title, on) {
+                    // A function's tab, tapped again, offers renaming or removing it.
+                    if (on && handler.kind == "function" && editable) member = handler.title else shown = handler.key
+                }
             }
+            if (editable) Chip("+", false) { growing = true }
         }
         if (!editable) {
             Text(
@@ -122,7 +128,7 @@ fun DecaySteps(
             when {
                 current == null -> Unit
                 current.kind == "values" -> current.inputs.forEach { pin ->
-                    Card(0, null) { Sentence(pin.name, listOf(pin), graph, tap) }
+                    Card(0, if (editable) ({ member = pin.name }) else null, pin.name) { Sentence(pin.name, listOf(pin), graph, tap) }
                 }
                 else -> {
                     val rows = steps(graph, current)
@@ -173,6 +179,10 @@ fun DecaySteps(
                 ((slot as? DecaySlot.Number)?.span ?: (slot as? DecaySlot.Text)?.span)?.let { onChange("useField", it, field) }
             },
         ) { value -> editing = null; value?.let { onEdit(slot, it) } }
+    }
+    member?.let { name -> MemberDialog(name, onDone = { member = null }, onChange = onChange) }
+    if (growing) {
+        GrowDialog(missingEvents(script), onDone = { growing = false }) { member -> onChange("add", 0 to 0, member) }
     }
     menu?.let { node -> NodeMenu(node, script.palette, onDone = { menu = null }, onChange = onChange, engine = script.engine) }
     adding?.let { add ->
@@ -311,6 +321,20 @@ fun findSteps(query: String, palette: List<Pair<String, String>>, engine: List<P
 @Composable
 fun Finder(palette: List<Pair<String, String>>, engine: List<Pair<String, String>>, onPick: (String) -> Unit) {
     var query by remember { mutableStateOf("") }
+    var naming by remember { mutableStateOf(false) }
+    if (naming) {
+        // "Remember a value" needs a name before it is a step.
+        var name by remember { mutableStateOf("") }
+        OutlinedTextField(
+            value = name,
+            onValueChange = { name = it.filter { c -> c.isLetterOrDigit() || c == '_' } },
+            singleLine = true,
+            placeholder = { Text("Its name, such as boost", style = ForgeType.text(14.sp, color = Forge.TextFaint)) },
+            textStyle = ForgeType.text(15.sp),
+        )
+        TextButton(onClick = { onPick("let:$name") }, enabled = name.isNotEmpty()) { Text("Add", color = Forge.MetalBright) }
+        return
+    }
     if (palette.size + engine.size > SEARCHED) OutlinedTextField(
         value = query,
         onValueChange = { query = it },
@@ -319,5 +343,129 @@ fun Finder(palette: List<Pair<String, String>>, engine: List<Pair<String, String
         textStyle = ForgeType.text(14.sp),
         modifier = Modifier.fillMaxWidth().padding(bottom = 6.dp),
     )
-    findSteps(query, palette, engine).take(60).forEach { (id, label) -> MenuRow(label) { onPick(id) } }
+    findSteps(query, palette, engine).take(60).forEach { (id, label) ->
+        MenuRow(if (id == "let") "$label…" else label) { if (id == "let") naming = true else onPick(id) }
+    }
+}
+
+/** The engine's events [script] has no handler for yet: each lifecycle name, and how it reads. */
+fun missingEvents(script: DecayScript): List<Pair<String, String>> {
+    val have = script.containers.flatMap { it.handlers }.mapTo(HashSet()) { it.name }
+    return listOf("start" to "When it starts", "update" to "Every frame").filter { it.first !in have }
+}
+
+/**
+ * What the tab bar's "+" adds: a variable (named, with its kind), a function
+ * (named), or one of [events]. [onAdd] gets what the host's `add` takes.
+ */
+@Composable
+private fun GrowDialog(events: List<Pair<String, String>>, onDone: () -> Unit, onAdd: (Map<String, Any>) -> Unit) {
+    var naming by remember { mutableStateOf<String?>(null) }
+    var name by remember { mutableStateOf("") }
+    var type by remember { mutableStateOf("number") }
+    val inputs = remember { androidx.compose.runtime.mutableStateListOf<Pair<String, String>>() }
+    val kind = naming
+    AlertDialog(
+        onDismissRequest = onDone,
+        containerColor = Forge.Popover,
+        title = { Text(if (kind == null) "Add to the script" else "New $kind", style = ForgeType.text(16.sp, FontWeight.SemiBold)) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                if (kind == null) {
+                    MenuRow("New variable…") { naming = "variable" }
+                    MenuRow("New function…") { naming = "function" }
+                    events.forEach { (event, label) ->
+                        MenuRow("New event: $label") { onAdd(mapOf("member" to "event", "name" to event)); onDone() }
+                    }
+                } else {
+                    OutlinedTextField(
+                        value = name,
+                        onValueChange = { name = it.filter { c -> c.isLetterOrDigit() || c == '_' } },
+                        singleLine = true,
+                        placeholder = { Text(if (kind == "variable") "speed" else "open_door", style = ForgeType.text(14.sp, color = Forge.TextFaint)) },
+                        textStyle = ForgeType.text(15.sp),
+                    )
+                    if (kind == "variable") {
+                        Kinds(type) { type = it }
+                    } else {
+                        inputs.forEachIndexed { index, (input, inputType) ->
+                            Text("Input ${index + 1}", style = ForgeType.text(12.sp, color = Forge.TextMuted), modifier = Modifier.padding(top = 8.dp))
+                            OutlinedTextField(
+                                value = input,
+                                onValueChange = { inputs[index] = it.filter { c -> c.isLetterOrDigit() || c == '_' } to inputType },
+                                singleLine = true,
+                                textStyle = ForgeType.text(15.sp),
+                            )
+                            Kinds(inputType) { inputs[index] = input to it }
+                        }
+                        MenuRow("+ Add an input") { inputs += "" to "number" }
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            if (kind != null) {
+                TextButton(
+                    onClick = {
+                        onAdd(
+                            mapOf(
+                                "member" to kind,
+                                "name" to name,
+                                "type" to type,
+                                "inputs" to inputs.filter { it.first.isNotEmpty() }.map { (input, inputType) -> mapOf("name" to input, "type" to inputType) },
+                            ),
+                        )
+                        onDone()
+                    },
+                    enabled = name.isNotEmpty(),
+                ) { Text("Add", color = Forge.MetalBright) }
+            }
+        },
+        dismissButton = { TextButton(onClick = onDone) { Text("Cancel", color = Forge.TextMuted) } },
+    )
+}
+
+/** The kinds a new variable or input can be, as chips; [type] is chosen. */
+@Composable
+private fun Kinds(type: String, onPick: (String) -> Unit) {
+    Row(horizontalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.padding(top = 8.dp)) {
+        listOf("number" to "Number", "bool" to "Switch", "String" to "Text").forEach { (id, label) ->
+            Chip(label, type == id) { onPick(id) }
+        }
+    }
+}
+
+/** Renaming or removing the script's variable or function [name]. */
+@Composable
+private fun MemberDialog(name: String, onDone: () -> Unit, onChange: (kind: String, span: Pair<Int, Int>, value: Any?) -> Unit) {
+    var renaming by remember { mutableStateOf<String?>(null) }
+    val to = renaming
+    AlertDialog(
+        onDismissRequest = onDone,
+        containerColor = Forge.Popover,
+        title = { Text(name, style = ForgeType.text(16.sp, FontWeight.SemiBold)) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                if (to == null) {
+                    MenuRow("Rename…") { renaming = name }
+                    MenuRow("Delete", danger = true) { onChange("remove", 0 to 0, name); onDone() }
+                } else {
+                    OutlinedTextField(
+                        value = to,
+                        onValueChange = { renaming = it.filter { c -> c.isLetterOrDigit() || c == '_' } },
+                        singleLine = true,
+                        textStyle = ForgeType.text(15.sp),
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            if (to != null) {
+                TextButton(onClick = { onChange("rename", 0 to 0, mapOf("from" to name, "to" to to)); onDone() }, enabled = to.isNotEmpty() && to != name) {
+                    Text("Rename", color = Forge.MetalBright)
+                }
+            }
+        },
+        dismissButton = { TextButton(onClick = onDone) { Text("Cancel", color = Forge.TextMuted) } },
+    )
 }

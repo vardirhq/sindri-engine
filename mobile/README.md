@@ -78,6 +78,15 @@ How it works, in `sindri_authoring::visual_decay`:
 - The Behavior sheet opens a script as **Steps** first: each handler a list
   of sentences in running order, branch and loop bodies indented, values as
   chips, and a menu on each step. Nodes and Code are the other two tabs.
+- The tab bar's "+" grows the script: a new variable (number, switch or
+  text, written first among its fields), a new function, or an engine event
+  it lacks (written last), each checked like any other change.
+- A new function can take inputs (number, switch or text), and calling it
+  from the finder fills them with placeholders. "Remember a value" adds a
+  named `let`. Tapping a variable in Values, or an open function's tab
+  again, renames it everywhere the script names it, or deletes it; both are
+  refused where they would break the script, and an inspector variable keeps
+  its name because scenes store its value by it.
 - Adding a step opens a finder: the script's own statements, then every
   engine call whose arguments are numbers, text or switches
   (`visual_decay::engine_calls`), written in with placeholders and checked.

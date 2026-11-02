@@ -106,6 +106,15 @@ class DecayCanvasTest {
     }
 
     @Test
+    fun the_plus_offers_only_the_events_a_script_lacks() {
+        fun handler(name: String) = DecayHandler(name, name, event = true, params = emptyList(), body = emptyList(), note = null)
+        fun script(vararg names: String) = DecayScript("s.decay", "", listOf(DecayContainer("script", "S", emptyList(), names.map(::handler))))
+        assertEquals(listOf("start" to "When it starts", "update" to "Every frame"), missingEvents(script()))
+        assertEquals(listOf("update" to "Every frame"), missingEvents(script("start", "ignite")))
+        assertEquals(emptyList<Pair<String, String>>(), missingEvents(script("start", "update")))
+    }
+
+    @Test
     fun a_pin_offers_the_fields_of_its_type() {
         val script = DecayScript(
             "scripts/lamp.decay", "",

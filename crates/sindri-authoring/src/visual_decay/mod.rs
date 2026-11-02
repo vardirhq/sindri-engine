@@ -24,6 +24,7 @@
 mod edit;
 mod graph;
 pub mod layout;
+mod members;
 mod project;
 mod slots;
 mod structure;
@@ -33,6 +34,7 @@ use serde::Serialize;
 pub use edit::{ScriptEdit, change, edit};
 pub use graph::{Graph, Node, Pin, Wire, graph, graph_flowing};
 pub use layout::{Flow, Layout};
+pub use members::Member;
 pub use project::blocks;
 pub use structure::{Shape, Template, engine_calls, palette};
 

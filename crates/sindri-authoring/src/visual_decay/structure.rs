@@ -6,10 +6,11 @@
 //! attached above a statement travelling with it, as the node shows them as
 //! its note. Nothing outside those lines changes.
 
-use decay_syntax::{Block, Item, Member, Program, Stmt, parse};
+use decay_syntax::{Block, Item, Member as Member_, Program, Stmt, parse};
 
 use decay_semantic::{Environment, ExternalSymbol, Type};
 
+use super::members::{Member, add, is_name, member_span, placeholders, rename};
 use super::{Span, VisualScript};
 
 /// A statement a node menu can add, written as the code around it would be.
@@ -19,8 +20,14 @@ pub enum Template {
     Set { field: String, value: String },
     /// `if this.field { }`, or `if !this.field { }`.
     If { field: String, negated: bool },
-    /// `function();`, one of the script's own functions that takes nothing.
-    Call { function: String },
+    /// `function(…);`, one of the script's own functions, its inputs given
+    /// placeholders.
+    Call {
+        function: String,
+        arguments: Vec<String>,
+    },
+    /// `let name = 0;`, a value the steps after it can read.
+    Let { name: String },
     /// `return;`
     Return,
     /// `// text`
@@ -56,6 +63,10 @@ impl Template {
             }),
             "call" => Some(Self::Call {
                 function: name.to_owned(),
+                arguments: placeholders(source, name)?,
+            }),
+            "let" => is_name(name).then(|| Self::Let {
+                name: name.to_owned(),
             }),
             "return" => Some(Self::Return),
             "comment" => Some(Self::Comment {
@@ -83,7 +94,11 @@ impl Template {
                 format!("if {}this.{field} {{", if *negated { "!" } else { "" }),
                 "}".to_owned(),
             ],
-            Self::Call { function } => vec![format!("{function}();")],
+            Self::Call {
+                function,
+                arguments,
+            } => vec![format!("{function}({});", arguments.join(", "))],
+            Self::Let { name } => vec![format!("let {name} = 0;")],
             Self::Return => vec!["return;".to_owned()],
             Self::Comment { text } => vec![format!("// {text}")],
             Self::Engine { call } => vec![format!("{call};")],
@@ -110,7 +125,7 @@ pub fn palette(script: &VisualScript) -> Vec<(String, String)> {
             }
         }
         for handler in &container.handlers {
-            if handler.role == "function" && handler.params.is_empty() {
+            if handler.role == "function" {
                 choices.push((
                     format!("call:{}", handler.name),
                     format!("Call {}", handler.name),
@@ -118,6 +133,7 @@ pub fn palette(script: &VisualScript) -> Vec<(String, String)> {
             }
         }
     }
+    choices.push(("let".to_owned(), "Remember a value".to_owned()));
     choices.push(("return".to_owned(), "Return".to_owned()));
     choices.push(("comment".to_owned(), "Comment".to_owned()));
     choices
@@ -185,6 +201,15 @@ pub enum Shape {
     /// The value in a pin at this span replaced by one of the script's
     /// fields, read as `this.field`.
     Field { slot: Span, field: String },
+    /// A new member of the script: written first among its fields for a
+    /// variable, last for a function or event.
+    Add(Member),
+    /// The variable or function `name` taken out of the script, with the
+    /// comment lines above it.
+    Remove { name: String },
+    /// The variable or function `from` renamed `to`, everywhere this script
+    /// names it.
+    Rename { from: String, to: String },
 }
 
 /// `source` with `shape` made, before it is checked.
@@ -238,24 +263,14 @@ pub(super) fn reshape(source: &str, shape: &Shape) -> Result<String, String> {
                 format!("{}\n{indent}{text}{}", &source[..end], &source[end..])
             })
         }
-        Shape::Field { slot, field } => {
-            let named = !field.is_empty()
-                && field
-                    .chars()
-                    .all(|character| character.is_alphanumeric() || character == '_');
-            if !named {
-                return Err(format!("{field} is not a field's name"));
-            }
-            let [start, end] = *slot;
-            if start > end || source.get(start..end).is_none() {
-                return Err(GONE.to_owned());
-            }
-            Ok(format!(
-                "{}this.{field}{}",
-                &source[..start],
-                &source[end..]
-            ))
+        Shape::Field { slot, field } => use_field(source, *slot, field),
+        Shape::Add(member) => add(source, &program, member),
+        Shape::Remove { name } => {
+            let span = member_span(&program, name)?;
+            let [start, end] = lines_of(source, span, true);
+            Ok(format!("{}{}", &source[..start], &source[end..]))
         }
+        Shape::Rename { from, to } => rename(source, &program, from, to),
         Shape::Inside {
             node,
             branch,
@@ -287,14 +302,34 @@ pub(super) fn reshape(source: &str, shape: &Shape) -> Result<String, String> {
     }
 }
 
-const GONE: &str = "that part of the script is no longer there";
+pub(super) const GONE: &str = "that part of the script is no longer there";
+
+/// `source` with the pin at `slot` reading `this.field`.
+fn use_field(source: &str, slot: Span, field: &str) -> Result<String, String> {
+    let named = !field.is_empty()
+        && field
+            .chars()
+            .all(|character| character.is_alphanumeric() || character == '_');
+    if !named {
+        return Err(format!("{field} is not a field's name"));
+    }
+    let [start, end] = slot;
+    if start > end || source.get(start..end).is_none() {
+        return Err(GONE.to_owned());
+    }
+    Ok(format!(
+        "{}this.{field}{}",
+        &source[..start],
+        &source[end..]
+    ))
+}
 
 fn indented(template: &Template, indent: &str) -> String {
     template.lines().join(&format!("\n{indent}"))
 }
 
 /// The whitespace a line starts with, for the line holding `at`.
-fn indentation(source: &str, at: usize) -> String {
+pub(super) fn indentation(source: &str, at: usize) -> String {
     let start = source[..at].rfind('\n').map_or(0, |line| line + 1);
     source[start..at]
         .chars()
@@ -335,14 +370,14 @@ struct Located {
     index: usize,
 }
 
-fn functions(program: &Program) -> impl Iterator<Item = &decay_syntax::FunctionDecl> {
+pub(super) fn functions(program: &Program) -> impl Iterator<Item = &decay_syntax::FunctionDecl> {
     program.items.iter().flat_map(|item| match item {
         Item::Script(container) | Item::Component(container) => container
             .members
             .iter()
             .filter_map(|member| match member {
-                Member::Function(function) => Some(function),
-                Member::Field(_) => None,
+                Member_::Function(function) => Some(function),
+                Member_::Field(_) => None,
             })
             .collect::<Vec<_>>(),
         Item::Function(function) => vec![function],

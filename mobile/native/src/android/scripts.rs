@@ -10,7 +10,7 @@ use std::path::PathBuf;
 
 use serde_json::{Value, json};
 use sindri_authoring::visual_decay::layout::LAYOUT_SUFFIX;
-use sindri_authoring::visual_decay::{self, Flow, Layout, ScriptEdit, Shape, Template};
+use sindri_authoring::visual_decay::{self, Flow, Layout, Member, ScriptEdit, Shape, Template};
 
 use super::Host;
 
@@ -126,7 +126,10 @@ impl Host {
     /// new `value`; or a change of shape at the node at `span`: `delete`,
     /// `moveUp`, `moveDown`, `insertAfter` (`value` a palette id) or
     /// `insertInside` (`value` `{ "template": id, "branch": n }`) or
-    /// `useField` (the slot at `span` reads the field `value`); or `undo`
+    /// `useField` (the slot at `span` reads the field `value`) or `add`
+    /// (`value` `{ "member": variable|function|event, "name", "type",
+    /// "inputs": [{ "name", "type" }] }`), `remove` (`value` a name) or
+    /// `rename` (`value` `{ "from", "to" }`), which take no `span`; or `undo`
     /// or `redo`, which take no `span` or `value`.
     pub(super) fn edit_script(
         &mut self,
@@ -143,7 +146,15 @@ impl Host {
         }
         if matches!(
             kind,
-            "delete" | "moveUp" | "moveDown" | "insertAfter" | "insertInside" | "useField"
+            "delete"
+                | "moveUp"
+                | "moveDown"
+                | "insertAfter"
+                | "insertInside"
+                | "useField"
+                | "add"
+                | "remove"
+                | "rename"
         ) {
             return self.change_script(kind, span, value);
         }
@@ -188,6 +199,61 @@ impl Host {
             "moveUp" | "moveDown" => Shape::Move {
                 statement: span,
                 up: kind == "moveUp",
+            },
+            "add" => {
+                let text = |key: &str| {
+                    value
+                        .get(key)
+                        .and_then(Value::as_str)
+                        .map(str::to_owned)
+                        .ok_or_else(|| format!("no {key} was given"))
+                };
+                let name = text("name")?;
+                Shape::Add(match value.get("member").and_then(Value::as_str) {
+                    Some("variable") => Member::Variable {
+                        name,
+                        ty: text("type")?,
+                    },
+                    Some("function") => Member::Function {
+                        name,
+                        inputs: value
+                            .get("inputs")
+                            .and_then(Value::as_array)
+                            .into_iter()
+                            .flatten()
+                            .map(|input| {
+                                let part = |key: &str| {
+                                    input
+                                        .get(key)
+                                        .and_then(Value::as_str)
+                                        .unwrap_or_default()
+                                        .to_owned()
+                                };
+                                (part("name"), part("type"))
+                            })
+                            .collect(),
+                    },
+                    Some("event") => Member::Event { name },
+                    _ => return Err("nothing to add was chosen".to_owned()),
+                })
+            }
+            "remove" => Shape::Remove {
+                name: value
+                    .as_str()
+                    .ok_or("nothing to remove was chosen")?
+                    .to_owned(),
+            },
+            "rename" => Shape::Rename {
+                from: value
+                    .get("from")
+                    .and_then(Value::as_str)
+                    .ok_or("nothing to rename was chosen")?
+                    .to_owned(),
+                to: value
+                    .get("to")
+                    .and_then(Value::as_str)
+                    .ok_or("no new name was given")?
+                    .to_owned(),
             },
             "useField" => Shape::Field {
                 slot: span,
