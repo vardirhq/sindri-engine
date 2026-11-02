@@ -1,18 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Sindri the smith's anvil, struck: a spark above it in bright metal.
-     Drawn inside the adaptive icon's safe circle (21 to 87). -->
+<!-- The Sindri mark (assets/branding/sindri-mark.svg), scaled into the adaptive
+     icon's safe zone: two hexagon rings and the gold core. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
     <path
-        android:fillColor="#FFE9A33A"
-        android:pathData="M27,47 L80,47 L80,55 L70,55 Q65,55 63,60 L63,64 L71,70 L71,76 L37,76 L37,70 L45,64 L45,60 Q43,55 38,55 L35,55 Q29,55 27,51 Z" />
+        android:pathData="M54.00,27.19 L77.22,40.59 L77.22,67.41 L54.00,80.81 L30.78,67.41 L30.78,40.59 Z"
+        android:strokeColor="#FFE6E1D4"
+        android:strokeWidth="3.30"
+        android:strokeLineJoin="miter" />
     <path
-        android:fillColor="#FFFFBE55"
-        android:pathData="M60,23 L62.6,32.4 L72,35 L62.6,37.6 L60,47 L57.4,37.6 L48,35 L57.4,32.4 Z" />
+        android:pathData="M54.00,39.56 L66.50,46.78 L66.50,61.22 L54.00,68.44 L41.50,61.22 L41.50,46.78 Z"
+        android:strokeColor="#FFE6E1D4"
+        android:strokeWidth="2.48"
+        android:strokeLineJoin="miter" />
     <path
-        android:fillColor="#FFFFBE55"
-        android:pathData="M73,24 L74.2,27.8 L78,29 L74.2,30.2 L73,34 L71.8,30.2 L68,29 L71.8,27.8 Z" />
+        android:fillColor="#FFF0C050"
+        android:pathData="M54.00,48.22 L58.99,51.11 L58.99,56.89 L54.00,59.77 L49.01,56.89 L49.01,51.11 Z" />
 </vector>
