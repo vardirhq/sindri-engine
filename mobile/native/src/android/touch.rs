@@ -63,7 +63,7 @@ impl Host {
     ) -> Result<(), String> {
         let size = self.size();
         let (opened, editing) = self.editing()?;
-        editing.take_handle(&opened.world, &opened.extractor, handle, pixel, size, snap)
+        editing.take_handle(opened, handle, pixel, size, snap)
     }
 
     pub(super) fn release(&mut self) -> Result<(), String> {
@@ -143,7 +143,12 @@ impl Host {
                 // An outline that cannot be placed is left off rather than
                 // failing the whole state; the pick that selected it worked.
                 editing
-                    .selection_bounds(&opened.world, &opened.extractor, size)
+                    .selection_bounds(
+                        &opened.world,
+                        &opened.extractor,
+                        &opened.assets.sheets,
+                        size,
+                    )
                     .ok()
                     .flatten(),
                 editing.history.undo_label(),

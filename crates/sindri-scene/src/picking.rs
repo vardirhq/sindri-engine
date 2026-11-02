@@ -97,6 +97,20 @@ pub fn world_bounds(
     view_projection: Mat4,
     entity: EntityId,
 ) -> Result<Option<[f32; 4]>, ComponentRegistryError> {
+    anchored_bounds(world, components, view_projection, entity, [0.0, 0.0])
+}
+
+/// [`world_bounds`] for a sprite whose sheet anchors it off its centre:
+/// `offset` moves its quad in the quad's own space, as
+/// [`sindri_core::SpriteAnchor::offset`] gives it and the renderer applies
+/// it, so a sprite standing on its feet is boxed where it is drawn.
+pub fn anchored_bounds(
+    world: &World,
+    components: &ComponentSchemaRegistry,
+    view_projection: Mat4,
+    entity: EntityId,
+    offset: [f32; 2],
+) -> Result<Option<[f32; 4]>, ComponentRegistryError> {
     let corners: Vec<Vec3> = if let Some(map) = components.get::<TilemapComponent>(world, entity)? {
         if map.grid_bounds().is_err() {
             return Ok(None);
@@ -116,7 +130,7 @@ pub fn world_bounds(
         .is_some_and(|sprite| is_drawn(sprite.tint))
     {
         [[-0.5, -0.5], [0.5, -0.5], [-0.5, 0.5], [0.5, 0.5]]
-            .map(|[x, y]| Vec3::new(x, y, 0.0))
+            .map(|[x, y]| Vec3::new(x + offset[0], y + offset[1], 0.0))
             .to_vec()
     } else if components
         .get::<MeshComponent>(world, entity)?

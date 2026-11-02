@@ -6,10 +6,16 @@
 //! merged into one undo step, and a field edit is validated against the
 //! component's schema before it is applied.
 
-use sindri_core::{CommandBuffer, CommandHistory, EntityId, Transform3D, World, WorldCommand};
-use sindri_scene::SceneExtractor;
-use sindri_scene::picking::{pick_world, world_bounds};
+use std::collections::BTreeMap;
 
+use sindri_core::{
+    AssetId, CommandBuffer, CommandHistory, EntityId, SpriteSheetDocument, Transform3D, World,
+    WorldCommand, sheet_id_for,
+};
+use sindri_scene::picking::{anchored_bounds, pick_world};
+use sindri_scene::{SceneExtractor, SpriteComponent};
+
+use crate::OpenedScene;
 use crate::canvas::Canvas;
 use crate::outline::outlined;
 
@@ -279,13 +285,13 @@ impl Editing {
     /// Nothing selected, or a selection with no transform to change.
     pub fn take_handle(
         &mut self,
-        world: &World,
-        extractor: &SceneExtractor,
+        opened: &OpenedScene,
         handle: Handle,
         pixel: [f32; 2],
         size: [f32; 2],
         snap: bool,
     ) -> Result<(), String> {
+        let (world, extractor) = (&opened.world, &opened.extractor);
         let entity = self.selected.ok_or("nothing is selected")?;
         let start = world
             .get(entity)
@@ -296,7 +302,10 @@ impl Editing {
             .ok_or("the selection has no transform to change")?;
         // A turn is about the middle of what is drawn, which is where the
         // eye puts it; a scale is about the origin, which is what stays put.
-        let pivot = match (handle, self.selection_bounds(world, extractor, size)?) {
+        let pivot = match (
+            handle,
+            self.selection_bounds(world, extractor, &opened.assets.sheets, size)?,
+        ) {
             (Handle::Turn, Some([left, top, right, bottom])) => {
                 [(left + right) * 0.5, (top + bottom) * 0.5]
             }
@@ -393,17 +402,32 @@ impl Editing {
         &self,
         world: &World,
         extractor: &SceneExtractor,
+        sheets: &BTreeMap<String, SpriteSheetDocument>,
         size: [f32; 2],
     ) -> Result<Option<[f32; 4]>, String> {
         let Some(entity) = self.selected else {
             return Ok(None);
         };
         let camera = self.canvas.camera(world, extractor, size)?;
-        let bounds = world_bounds(
+        // A sheet that stands its sprites on their feet moves the drawn quad;
+        // the box moves with it, or the handles sit below the picture.
+        let offset = extractor
+            .components()
+            .get::<SpriteComponent>(world, entity)
+            .ok()
+            .flatten()
+            .and_then(|sprite| sprite.reference().ok())
+            .and_then(|reference| reference.texture().parse::<AssetId>().ok())
+            .and_then(|texture| sheet_id_for(&texture))
+            .and_then(|sheet| sheets.get(sheet.as_str()).and_then(|sheet| sheet.anchor))
+            .unwrap_or_default()
+            .offset();
+        let bounds = anchored_bounds(
             world,
             extractor.components(),
             camera.view_projection,
             entity,
+            offset,
         )
         .map_err(|error| error.to_string())?;
         Ok(bounds.map(|[left, top, right, bottom]| {
