@@ -75,6 +75,9 @@ How it works, in `sindri_authoring::visual_decay`:
   the slot it changed, then the result is parsed and refused if it no longer
   reads. Every other byte, comments and formatting included, stays as it was.
   A script with syntax errors is fixed as text before its blocks edit.
+- With a script open, the editor's Undo and Redo step through the edits made
+  to it there, each as a whole text of the script. If the file changed
+  elsewhere since, that history is dropped rather than written over it.
 - The same reading is drawn as Blueprint-style nodes (`visual_decay::graph`):
   handlers are event nodes, statements a chain joined by execution wires,
   and calls value nodes wired into pins. Literals and simple arithmetic sit

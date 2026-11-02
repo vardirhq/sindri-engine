@@ -93,8 +93,8 @@ class EditorController(
         ui = ui.copy(
             mode = if (stoppedItself) PlayMode.Edit else ui.mode,
             play = if (play == null) PlayUi() else ui.play.copy(clock = clock(play.seconds), stick = stick(play)),
-            canUndo = state.undo != null,
-            canRedo = state.redo != null,
+            canUndo = script?.canUndo ?: (state.undo != null),
+            canRedo = script?.canRedo ?: (state.redo != null),
             unsaved = state.unsaved,
             selection = selection,
             handles = handles(),
@@ -112,8 +112,9 @@ class EditorController(
     fun on(event: EditorEvent, onHome: () -> Unit) {
         when (event) {
             EditorEvent.Home -> onHome()
-            EditorEvent.Undo -> nativeEdit("undo")
-            EditorEvent.Redo -> nativeEdit("redo")
+            // With a script open, Undo and Redo step through its edits.
+            EditorEvent.Undo -> if (script != null) changeScript(EditorEvent.ChangeScript("undo", 0 to 0)) else nativeEdit("undo")
+            EditorEvent.Redo -> if (script != null) changeScript(EditorEvent.ChangeScript("redo", 0 to 0)) else nativeEdit("redo")
             EditorEvent.Save -> nativeEdit("save")
             EditorEvent.ToggleMenu -> ui = ui.copy(menu = if (ui.menu == null) settings else null)
             is EditorEvent.MenuToggle -> menuToggle(event.item)
@@ -133,7 +134,10 @@ class EditorController(
                 refresh()
             }
             EditorEvent.StepBack -> notWired("Stepping back")
-            EditorEvent.CloseSheet -> ui = ui.copy(sheet = null)
+            EditorEvent.CloseSheet -> {
+                ui = ui.copy(sheet = null)
+                refresh()
+            }
             EditorEvent.ToggleDetent -> (ui.sheet as? EditorSheet.Inspector)?.let { ui = ui.copy(sheet = it.copy(full = !it.full)) }
             EditorEvent.OpenInspector -> openInspector()
             EditorEvent.OpenBehaviour -> openBehaviour()
@@ -270,7 +274,28 @@ class EditorController(
                 null
             } ?: native.script()
         }
-        ui = ui.copy(sheet = EditorSheet.Behaviour(behaviourUi(inspector.name, script)))
+        scriptRead = script
+        ui = ui.copy(
+            sheet = EditorSheet.Behaviour(behaviourUi(inspector.name, script)),
+            canUndo = script?.canUndo ?: ui.canUndo,
+            canRedo = script?.canRedo ?: ui.canRedo,
+        )
+    }
+
+    /** The script open in the Behaviour sheet, as last read, when one is. */
+    private var scriptRead: DecayScript? = null
+    private val script: DecayScript?
+        get() = if (ui.sheet is EditorSheet.Behaviour) scriptRead else null
+
+    /** The open script read again after a change, with whether it can be undone. */
+    private fun showScript(sheet: EditorSheet.Behaviour) {
+        val script = native.script() ?: return
+        scriptRead = script
+        ui = ui.copy(
+            sheet = sheet.copy(behaviour = behaviourUi(sheet.behaviour.subject, script)),
+            canUndo = script.canUndo,
+            canRedo = script.canRedo,
+        )
     }
 
     /**
@@ -309,8 +334,7 @@ class EditorController(
             ui = ui.copy(toast = ToastUi(failed))
             return
         }
-        val script = native.script() ?: return
-        ui = ui.copy(sheet = sheet.copy(behaviour = behaviourUi(sheet.behaviour.subject, script)))
+        showScript(sheet)
     }
 
     /** A node dragged: where it was left is kept beside the script, and the graph read again. */
@@ -319,8 +343,7 @@ class EditorController(
         native.command("moveNode", event.key, event.x, event.y)?.let { failed ->
             ui = ui.copy(toast = ToastUi(failed))
         }
-        val script = native.script() ?: return
-        ui = ui.copy(sheet = sheet.copy(behaviour = behaviourUi(sheet.behaviour.subject, script)))
+        showScript(sheet)
     }
 
     /** A block's slot edited: the script file changes in that one place, and is read again. */
@@ -336,8 +359,7 @@ class EditorController(
             ui = ui.copy(toast = ToastUi(failed))
             return
         }
-        val script = native.script() ?: return
-        ui = ui.copy(sheet = sheet.copy(behaviour = behaviourUi(sheet.behaviour.subject, script)))
+        showScript(sheet)
     }
 
     /**

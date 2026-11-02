@@ -22,6 +22,10 @@ pub(super) struct OpenScript {
     source: String,
     /// Where its nodes were dragged, from beside it.
     layout: Layout,
+    /// Its text before each edit made here, latest last, for Undo.
+    earlier: Vec<String>,
+    /// Its text before each Undo, latest last, for Redo.
+    undone: Vec<String>,
 }
 
 impl OpenScript {
@@ -41,6 +45,52 @@ impl OpenScript {
         self.layout.place(&mut graph);
         graph
     }
+
+    /// Writes `source` as the script's text, after `edit` changed it; Undo
+    /// and Redo move it between the two histories, any other edit forgets
+    /// what was undone. If the file was changed elsewhere since it was read,
+    /// both are forgotten, so going back never overwrites that work.
+    fn write(&mut self, source: String, edit: Step) -> Result<(), String> {
+        let on_disk = std::fs::read_to_string(&self.path).ok();
+        if on_disk.as_deref() != Some(self.source.as_str()) {
+            self.earlier.clear();
+            self.undone.clear();
+            if edit != Step::Edit {
+                return Err(format!(
+                    "{} was changed elsewhere, so there is nothing to go back to",
+                    self.name
+                ));
+            }
+        }
+        std::fs::write(&self.path, &source).map_err(|error| format!("{}: {error}", self.name))?;
+        let before = std::mem::replace(&mut self.source, source);
+        match edit {
+            Step::Edit => {
+                self.earlier.push(before);
+                self.undone.clear();
+            }
+            Step::Undo => self.undone.push(before),
+            Step::Redo => self.earlier.push(before),
+        }
+        Ok(())
+    }
+
+    /// Goes back one edit, or forward again after going back.
+    fn step(&mut self, edit: Step) -> Result<(), String> {
+        let source = match edit {
+            Step::Undo => self.earlier.pop().ok_or("there is nothing to undo")?,
+            _ => self.undone.pop().ok_or("there is nothing to redo")?,
+        };
+        self.write(source, edit)
+    }
+}
+
+/// What made a script's new text.
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum Step {
+    Edit,
+    Undo,
+    Redo,
 }
 
 impl Host {
@@ -58,6 +108,8 @@ impl Host {
             path,
             source,
             layout: Layout::default(),
+            earlier: Vec::new(),
+            undone: Vec::new(),
         };
         let stored = std::fs::read_to_string(script.layout_path()).ok();
         script.layout = Layout::read(stored.as_deref())?;
@@ -73,13 +125,21 @@ impl Host {
     /// `kind` is `number`, `text` or `bool` for a slot at `span`, with its
     /// new `value`; or a change of shape at the node at `span`: `delete`,
     /// `moveUp`, `moveDown`, `insertAfter` (`value` a palette id) or
-    /// `insertInside` (`value` `{ "template": id, "branch": n }`).
+    /// `insertInside` (`value` `{ "template": id, "branch": n }`); or `undo`
+    /// or `redo`, which take no `span` or `value`.
     pub(super) fn edit_script(
         &mut self,
         kind: &str,
         span: [usize; 2],
         value: &Value,
     ) -> Result<(), String> {
+        if let Some(step) = match kind {
+            "undo" => Some(Step::Undo),
+            "redo" => Some(Step::Redo),
+            _ => None,
+        } {
+            return self.script.as_mut().ok_or("no script is open")?.step(step);
+        }
         if matches!(
             kind,
             "delete" | "moveUp" | "moveDown" | "insertAfter" | "insertInside"
@@ -103,10 +163,7 @@ impl Host {
             other => return Err(format!("no slot of kind {other}")),
         };
         let edited = visual_decay::edit(&script.source, &edit)?;
-        std::fs::write(&script.path, &edited)
-            .map_err(|error| format!("{}: {error}", script.name))?;
-        script.source = edited;
-        Ok(())
+        script.write(edited, Step::Edit)
     }
 
     fn change_script(&mut self, kind: &str, span: [usize; 2], value: &Value) -> Result<(), String> {
@@ -141,10 +198,7 @@ impl Host {
         let mut sources = opened.assets.scripts.clone();
         sources.insert(script.name.clone(), script.source.clone());
         let changed = visual_decay::change(&script.source, &shape, sources.environment())?;
-        std::fs::write(&script.path, &changed)
-            .map_err(|error| format!("{}: {error}", script.name))?;
-        script.source = changed;
-        Ok(())
+        script.write(changed, Step::Edit)
     }
 
     /// A node of the open script was dragged to `at`: kept in its layout file.
@@ -173,6 +227,8 @@ impl Host {
                 json!({
                     "name": script.name,
                     "source": script.source,
+                    "canUndo": !script.earlier.is_empty(),
+                    "canRedo": !script.undone.is_empty(),
                     "blocks": visual_decay::blocks(&script.source),
                     "graph": script.graph(),
                     "palette": visual_decay::palette(&visual_decay::blocks(&script.source))

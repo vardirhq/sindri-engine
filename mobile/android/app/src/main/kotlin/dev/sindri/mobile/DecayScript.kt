@@ -19,6 +19,9 @@ data class DecayScript(
     val graph: DecayGraph = DecayGraph(emptyList(), emptyList()),
     /** The statements a node menu can add: an id the host knows, and its words. */
     val palette: List<Pair<String, String>> = emptyList(),
+    /** Whether an edit made here can be taken back, or an undone one made again. */
+    val canUndo: Boolean = false,
+    val canRedo: Boolean = false,
 ) {
     companion object {
         /** The native host's `script()` answer, or null for `null`. */
@@ -33,6 +36,8 @@ data class DecayScript(
                 problems = blocks.optJSONArray("problems").objects().map { "Line ${it.optInt("line")}: ${it.optString("message")}" },
                 graph = root.optJSONObject("graph")?.let(::graph) ?: DecayGraph(emptyList(), emptyList()),
                 palette = root.optJSONArray("palette").objects().map { it.optString("id") to it.optString("label") },
+                canUndo = root.optBoolean("canUndo"),
+                canRedo = root.optBoolean("canRedo"),
             )
         }
 
