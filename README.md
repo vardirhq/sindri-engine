@@ -4,13 +4,58 @@
 
 <p align="center"><strong>A Rust-powered 2D + 3D game engine with a native visual editor, the Decay gameplay language, and responsive Weave UI.</strong></p>
 
-Sindri Engine is a from-the-foundation rebuild of the original Sindri. It is built around one runtime model, one scene format, one asset pipeline, and one renderer targeting native desktops and WebGPU browsers. Games are meant to be authored through the editor, Decay, and Weave; Rust is the implementation language underneath rather than a requirement for ordinary gameplay work.
+<p align="center">
+  <a href="#games-prove-the-engine">Games</a> ·
+  <a href="#the-editor">Editor</a> ·
+  <a href="#decay">Decay</a> ·
+  <a href="#visual-decay-on-the-phone">Visual Decay</a> ·
+  <a href="#weave">Weave</a> ·
+  <a href="#try-it">Try it</a>
+</p>
+
+<p align="center">
+  <img src="site/screenshots/causeway.png" alt="Causeway, a turn-based tactics game on a lit low-poly island diorama" width="860">
+  <br>
+  <sub><strong>Causeway</strong>, the flagship: turn-based tactics on a lit low-poly diorama, built with Sindri's editor, Decay and Weave.</sub>
+</p>
+
+Sindri is a from-the-foundation rebuild of the original Sindri engine: **one runtime model, one scene format, one asset pipeline, and one renderer**, targeting native desktops, WebGPU browsers and, increasingly, phones. Games are authored through the editor, Decay and Weave. Rust is the language the engine is written in, not something you need for ordinary gameplay.
 
 > **Status:** pre-alpha and under active development. Public APIs, Decay, Weave, editor workflows, and serialized formats may change while the engine is proven through real games.
 
-## The authoring model
+## Games prove the engine
 
-Sindri is deliberately more than a Rust framework. Its primary authoring stack is developed together:
+Nothing here counts as done because an API exists. A feature is finished when the editor can author it, Decay or Weave can drive it, and a real game uses it.
+
+<table>
+  <tr>
+    <td width="50%"><img src="site/screenshots/lamplighter.png" alt="Lamplighter: a hooded figure lighting a lantern on a dark forest path"><br><sub><strong>Lamplighter</strong>: 2D lights and a darkness that pushes back, every lantern a Decay script.</sub></td>
+    <td width="50%"><img src="site/screenshots/low-tide.jpg" alt="Low Tide: a crawler deck on a salt flat"><br><sub><strong>Low Tide</strong>: a crew walking a tilemap deck that drives and turns under them.</sub></td>
+  </tr>
+  <tr>
+    <td width="50%"><img src="site/screenshots/orbital-baked-aegis.png" alt="Orbital Last Stand: the Aegis boss fight"><br><sub><strong>Orbital Last Stand</strong>: the forcing function. A complete game rebuilt through the editor and Decay; every gap it exposes becomes an engine capability.</sub></td>
+    <td width="50%"><img src="site/screenshots/voxel-lab.jpg" alt="Voxel Lab: snow-capped voxel mountains"><br><sub><strong>Voxel Lab</strong>: generated, streamed and meshed voxel terrain.</sub></td>
+  </tr>
+</table>
+
+- **Causeway** is the showcase: a game worth playing that pushes 3D rendering, model import, UI, scripting and audio.
+- **Orbital Last Stand** is the forcing function described above.
+- **Genre showcases** prove ordinary workflows: the platformer for plain 2D, **Scorchball** for local multiplayer, player-slot input, prefabs, animation and AI, and **Low Tide** for moving homes and tile reads and writes from Decay.
+- **Feature examples and labs** isolate cameras, Weave, graphics and voxels where isolation is the honest way to test them.
+
+Exact proof status for each capability lives in [`docs/parity.md`](docs/parity.md), with the evidence in [`docs/capabilities.md`](docs/capabilities.md). Every image in this README is produced by a capture tool in the repository, not a screen grab; see [`site/screenshots`](site/screenshots/README.md).
+
+## The editor
+
+<p align="center">
+  <img src="site/screenshots/editor-orbital-scene.png" alt="The Sindri editor holding Orbital Last Stand: Scene and Game views, a 79-entity hierarchy, the project browser and the inspector" width="860">
+  <br>
+  <sub>The native editor holding a whole game: Orbital Last Stand's 79-entity hierarchy, its asset tree, and the Scene and Game views.</sub>
+</p>
+
+The editor works on the **same world the runtime runs**: there is no mock copy to drift out of sync. It covers project browsing, hierarchy authoring, transforms and component editing, sprite-sheet slicing and animation preview, Decay `@export` fields, undo and redo, Scene and Game views, and Play, Pause and Stop against the real engine lifecycle, with console output and hot reload for assets and scripts.
+
+## The authoring model
 
 ```text
                  Sindri Editor
@@ -25,36 +70,23 @@ Sindri is deliberately more than a Rust framework. Its primary authoring stack i
                      Rust
 ```
 
-- **Editor** authors the same world and scene representation used by the runtime.
-- **Decay** is the statically typed gameplay language: game state, behaviour, events, input, physics, spawning, animation, audio, UI interaction, persistence, and engine-facing logic live here rather than in ordinary Rust gameplay code.
-- **Weave** is Sindri's responsive presentation system. Styles and composition resolve into ordinary Sindri UI data and can adapt one authored interface across different viewport shapes.
-- **Rust** implements the engine, renderer, platform layer, editor, and language/runtime integrations beneath those authoring surfaces.
+- **Editor** authors the same world and scene representation the runtime uses.
+- **Decay** is the statically typed gameplay language: state, behavior, events, input, physics, spawning, animation, audio, UI interaction and persistence live here, not in Rust gameplay code.
+- **Weave** is the responsive presentation system: one authored interface adapts across viewport shapes.
+- **Rust** implements the engine, renderer, platform layer, editor and language integration beneath them.
 
-The goal is that somebody can build and ship a Sindri game without needing to understand the Rust implementation underneath.
+The goal: somebody can build and ship a Sindri game without understanding the Rust underneath.
 
 ## What Sindri is trying to be
 
-- **2D and 3D in one engine**, without forcing ordinary 2D work through needlessly complicated 3D abstractions.
-- **A real native visual editor**, not a separate mock representation of the runtime.
-- **A purpose-built gameplay language.** Decay is Rust-inspired, statically typed, project-aware, and designed around game authoring rather than general-purpose systems programming.
-- **Responsive game UI through Weave**, with presentation rules separated from gameplay and authored for multiple viewport shapes.
-- **Native and web from the same foundation**, using Rust, `wgpu`, `winit`, WebGPU, and WASM where appropriate.
-- **Portable, review-friendly projects** with canonical scene files, logical asset IDs, reusable prefabs and profiles, and no hidden sidecar identity system.
-- **Actionable diagnostics and tooling**, including changed-scope preflight, structured CI diagnostics, and project-aware Decay checking.
-- **Features proved by games.** An API, component, editor control, or language feature is not considered complete merely because it exists.
+- **2D and 3D in one engine**, without forcing ordinary 2D work through 3D abstractions.
+- **A real native visual editor**, not a separate mock of the runtime.
+- **A purpose-built gameplay language**: Rust-inspired, statically typed, project-aware, and made for games rather than systems programming.
+- **Native and web from the same foundation**: Rust, `wgpu`, `winit`, WebGPU and WASM.
+- **Portable, review-friendly projects**: canonical scene files, logical asset IDs, reusable prefabs and profiles, no hidden sidecar identity.
+- **Actionable diagnostics**: changed-scope preflight, structured CI diagnostics, project-aware Decay checking.
 
-Sindri is not trying to win a feature-count contest with mature engines. The goal is a coherent engine and authoring environment that is pleasant to build games with and difficult to accidentally lie about.
-
-## Games prove the engine
-
-Sindri is developed vertically: runtime capability, editor authoring, Decay/Weave access, and a real project evolve together where a feature applies.
-
-- **Causeway** is the flagship showcase: a turn-based tactics game on a lit low-poly diorama that pushes the engine's 3D rendering, model import, UI, scripting, and audio capabilities by trying to become a game worth playing rather than a disposable demo.
-- **Orbital Last Stand** is the forcing function: a recreation of a complete game built through the editor and Decay. Gaps it exposes are closed as general Sindri capabilities rather than game-specific hacks.
-- **Genre showcases** are small complete games that prove ordinary workflows. The platformer exercises the plain 2D path; **Scorchball** exercises local multiplayer, player-slot input, prefab-driven players, animation, typed Decay communication, events, state, and increasingly game-like AI and mechanics. **Low Tide** exercises a moving home: a crew walking a tilemap deck that drives and turns under them, a camera that turns with the deck, and tile reads and writes from Decay.
-- **Feature examples and labs** isolate larger systems such as cameras, Weave, graphics, and voxels when isolation is the honest way to test them.
-
-The exact proof status for each capability lives in [`docs/parity.md`](docs/parity.md), and the detailed evidence lives in [`docs/capabilities.md`](docs/capabilities.md).
+Sindri is not trying to win a feature-count contest with mature engines. The goal is a coherent engine that is pleasant to build games with and difficult to accidentally lie about.
 
 ## Decay
 
@@ -89,6 +121,27 @@ A misspelled host member, wrong event payload, invalid script relationship, or i
 Decay intentionally does **not** inherit Rust's ownership, borrowing, lifetimes, `unsafe`, or systems-programming machinery. Rust inspires the syntax, static typing, and tooling quality; Decay remains focused on gameplay.
 
 See [`decay/LANGUAGE.md`](decay/LANGUAGE.md), [`docs/scripting.md`](docs/scripting.md), and [`docs/decay-direction.md`](docs/decay-direction.md).
+
+## Visual Decay on the phone
+
+<table>
+  <tr>
+    <td width="33%"><img src="site/screenshots/phone-selected.png" alt="The Android editor with a lamp post selected"></td>
+    <td width="33%"><img src="site/screenshots/phone-inspector.png" alt="The Android inspector showing a lamp post's place and 2D light"></td>
+    <td width="33%"><img src="site/screenshots/phone-decay-nodes.png" alt="A Decay script shown as nodes on the phone"></td>
+  </tr>
+</table>
+
+The Android editor, in progress, runs the same engine as the desktop editor: select, inspect, edit and play a scene on the phone. Scripts open as **nodes**, Blueprint-style, but there is no graph format behind them. **Visual scripting is Decay, but visual:** the `.decay` file is the only thing stored. The handler on the right above is just this:
+
+```rust
+fn start() {
+    this.light = World.find(this.light_name);
+    this.sparks = World.find("fx-spark");
+}
+```
+
+Write a script by hand on desktop, open it as nodes on the phone, change it there, and it reads on desktop exactly as if it had been typed. Every node edit is a splice of the script's text, re-parsed and type-checked before it is kept, with comments and formatting left alone. On the phone nodes run top to bottom like code; on desktop, left to right. See [`mobile/README.md`](mobile/README.md#visual-decay).
 
 ## Weave
 
@@ -126,10 +179,6 @@ Sindri is pre-alpha, but the working surface is already broad. Highlights includ
 - responsive Weave presentation;
 - static web export;
 - deterministic rendering/capture paths exercised in CI.
-
-### Editor
-
-The native editor works on the same scene/world model as the runtime. It supports scene/project browsing, hierarchy authoring, transforms and component editing, asset selection, sprite-sheet slicing and animation preview, Decay `@export` fields, undo/redo, Scene and Game views, camera navigation and selection, Play/Pause/Stop against the real engine lifecycle, console output, preferences/layout persistence, and asset/script hot reload.
 
 This summary is intentionally not exhaustive. [`docs/capabilities.md`](docs/capabilities.md) is the evidence-based inventory; [`docs/parity.md`](docs/parity.md) records Engine / Editor / Decay / proof status and the important gaps against a conventional game-engine baseline.
 
@@ -185,19 +234,19 @@ Sindri is still pre-alpha. Among the meaningful gaps and incomplete areas are:
 
 For the current outside-in audit rather than an aspirational feature list, see [`docs/parity.md`](docs/parity.md).
 
-## Try the editor
+## Try it
 
 The workspace currently requires Rust 1.95.
 
 ```bash
-cargo editor                      # the welcome window, optimised
+cargo editor                      # the welcome window, optimized
 cargo editor games/platformer     # straight into a project
 ```
 
-`cargo editor` is an alias for an optimised, incrementally built profile: the
+`cargo editor` is an alias for an optimized, incrementally built profile: the
 editor plays a game about as fast as a release build does. Working on the
 editor itself, `cargo run --package sindri-editor` builds faster after an
-edit and still optimises every dependency.
+edit and still optimizes every dependency.
 
 The repository includes games, feature examples, fixtures, deterministic captures, and regression tests that exercise the same implementations used by the editor and runtime.
 
