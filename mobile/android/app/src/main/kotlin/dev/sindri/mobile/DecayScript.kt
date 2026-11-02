@@ -22,6 +22,8 @@ data class DecayScript(
     /** Whether an edit made here can be taken back, or an undone one made again. */
     val canUndo: Boolean = false,
     val canRedo: Boolean = false,
+    /** The engine calls a step can make: an id the host knows, and the call with placeholders. */
+    val engine: List<Pair<String, String>> = emptyList(),
 ) {
     companion object {
         /** The native host's `script()` answer, or null for `null`. */
@@ -38,6 +40,7 @@ data class DecayScript(
                 palette = root.optJSONArray("palette").objects().map { it.optString("id") to it.optString("label") },
                 canUndo = root.optBoolean("canUndo"),
                 canRedo = root.optBoolean("canRedo"),
+                engine = root.optJSONArray("engine").objects().map { it.optString("id") to it.optString("call") },
             )
         }
 

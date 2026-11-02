@@ -18,6 +18,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -40,12 +44,28 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun BoxScope.BehaviourSheet(sheet: EditorSheet.Behaviour, onEvent: (EditorEvent) -> Unit) = SheetFrame(SheetHeight.Below(56.dp)) {
     val behaviour = sheet.behaviour
+    var nodes by remember { mutableStateOf(false) }
     SheetHeader("Behaviour", behaviour.subject, onBack = { onEvent(EditorEvent.OpenInspector) }) {
-        Segmented(listOf(if (behaviour.decay != null) "Nodes" else "Blocks", "Code"), if (sheet.code) 1 else 0, { onEvent(if (it == 1) EditorEvent.BehaviourCode else EditorEvent.BehaviourBlocks) })
+        if (behaviour.decay != null) {
+            // Steps first: the script as sentences. Nodes are the same script wired.
+            Segmented(listOf("Steps", "Nodes", "Code"), if (sheet.code) 2 else if (nodes) 1 else 0, {
+                nodes = it == 1
+                onEvent(if (it == 2) EditorEvent.BehaviourCode else EditorEvent.BehaviourBlocks)
+            })
+        } else {
+            Segmented(listOf("Blocks", "Code"), if (sheet.code) 1 else 0, { onEvent(if (it == 1) EditorEvent.BehaviourCode else EditorEvent.BehaviourBlocks) })
+        }
     }
     val script = behaviour.decay
     when {
         sheet.code -> CodeView(behaviour, onEvent)
+        script != null && !nodes -> Box(Modifier.weight(1f).fillMaxWidth()) {
+            DecaySteps(
+                script,
+                onEdit = { slot, value -> onEvent(EditorEvent.ScriptSlot(slot, value)) },
+                onChange = { kind, span, value -> onEvent(EditorEvent.ChangeScript(kind, span, value)) },
+            )
+        }
         script != null -> Box(Modifier.weight(1f).fillMaxWidth()) {
             DecayCanvas(
                 script,

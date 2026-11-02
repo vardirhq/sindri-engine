@@ -8,6 +8,8 @@
 
 use decay_syntax::{Block, Item, Member, Program, Stmt, parse};
 
+use decay_semantic::{Environment, ExternalSymbol, Type};
+
 use super::{Span, VisualScript};
 
 /// A statement a node menu can add, written as the code around it would be.
@@ -23,6 +25,8 @@ pub enum Template {
     Return,
     /// `// text`
     Comment { text: String },
+    /// One of the engine's calls with placeholder arguments: `Audio.play("", 0);`.
+    Engine { call: String },
 }
 
 impl Template {
@@ -61,6 +65,16 @@ impl Template {
         }
     }
 
+    /// The engine call `engine:World.find` names, from
+    /// [`engine_calls`] for `environment`.
+    #[must_use]
+    pub fn engine(id: &str, environment: &Environment) -> Option<Self> {
+        engine_calls(environment)
+            .into_iter()
+            .find(|(choice, _)| choice == id)
+            .map(|(_, call)| Self::Engine { call })
+    }
+
     /// Its lines, before indentation.
     fn lines(&self) -> Vec<String> {
         match self {
@@ -72,6 +86,7 @@ impl Template {
             Self::Call { function } => vec![format!("{function}();")],
             Self::Return => vec!["return;".to_owned()],
             Self::Comment { text } => vec![format!("// {text}")],
+            Self::Engine { call } => vec![format!("{call};")],
         }
     }
 }
@@ -106,6 +121,48 @@ pub fn palette(script: &VisualScript) -> Vec<(String, String)> {
     choices.push(("return".to_owned(), "Return".to_owned()));
     choices.push(("comment".to_owned(), "Comment".to_owned()));
     choices
+}
+
+/// The engine's calls a step can make, for a finder: each one's id, for
+/// [`Template::engine`], and its call with placeholder arguments, such as
+/// `Audio.play("", 0)`. Only calls whose arguments all have a plain placeholder
+/// (a number, text or a switch) are offered, sorted by name.
+#[must_use]
+pub fn engine_calls(environment: &Environment) -> Vec<(String, String)> {
+    let mut calls = Vec::new();
+    for (global, symbol) in environment.globals() {
+        let (ExternalSymbol::Value(Type::Named(ty))
+        | ExternalSymbol::ReadOnlyValue(Type::Named(ty))) = symbol
+        else {
+            continue;
+        };
+        let Some(host) = environment.get_type(ty) else {
+            continue;
+        };
+        for (name, member) in host.members() {
+            let ExternalSymbol::Function(function) = member else {
+                continue;
+            };
+            let arguments: Option<Vec<&str>> = function
+                .params
+                .iter()
+                .map(|param| match param {
+                    Type::Number => Some("0"),
+                    Type::Bool => Some("false"),
+                    Type::String => Some("\"\""),
+                    _ => None,
+                })
+                .collect();
+            if let Some(arguments) = arguments {
+                calls.push((
+                    format!("engine:{global}.{name}"),
+                    format!("{global}.{name}({})", arguments.join(", ")),
+                ));
+            }
+        }
+    }
+    calls.sort();
+    calls
 }
 
 /// A change to a script's shape.

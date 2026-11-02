@@ -148,9 +148,9 @@ cp target/baker-captures/baker-desktop.png site/screenshots/isometric-baker.png
 
 ## The phone editor
 
-`phone-selected.png`, `phone-inspector.png` and `phone-decay-nodes.png` are the
+`phone-selected.png`, `phone-inspector.png` and `phone-decay-steps.png` are the
 Android editor's design screens (`19-selected`, `20e-inspector-engine` and
-`22d-behaviour-nodes`), rendered by its Robolectric tests:
+`22d-behaviour-nodes`, now `22d-behaviour-steps`), rendered by its Robolectric tests:
 
 ```
 cd mobile/android && ./gradlew :app:recordRoborazziDebug --tests 'dev.sindri.mobile.DesignScreens'

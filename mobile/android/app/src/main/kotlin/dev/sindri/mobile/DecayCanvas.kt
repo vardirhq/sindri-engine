@@ -205,11 +205,12 @@ fun DecayCanvas(
  * host before the script changes, and a refusal says why.
  */
 @Composable
-private fun NodeMenu(
+internal fun NodeMenu(
     node: DecayNode,
     palette: List<Pair<String, String>>,
     onDone: () -> Unit,
     onChange: (kind: String, span: Pair<Int, Int>, value: Any?) -> Unit,
+    engine: List<Pair<String, String>> = emptyList(),
 ) {
     // Where a chosen statement goes: after the node, or first in one of its branches.
     var adding by remember(node) { mutableStateOf<((String) -> Unit)?>(null) }
@@ -240,7 +241,7 @@ private fun NodeMenu(
                 verticalArrangement = Arrangement.spacedBy(2.dp),
             ) {
                 if (choosing != null) {
-                    palette.forEach { (id, label) -> MenuRow(label) { choosing(id); onDone() } }
+                    Finder(palette, engine) { id -> choosing(id); onDone() }
                 } else {
                     actions.forEach { (label, act) -> MenuRow(label, danger = label == "Delete", onClick = act) }
                 }
@@ -252,7 +253,7 @@ private fun NodeMenu(
 }
 
 @Composable
-private fun MenuRow(label: String, danger: Boolean = false, onClick: () -> Unit) {
+internal fun MenuRow(label: String, danger: Boolean = false, onClick: () -> Unit) {
     Text(
         label,
         style = ForgeType.text(15.sp, color = if (danger) Forge.Danger else Forge.Text),

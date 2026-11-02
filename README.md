@@ -128,11 +128,11 @@ See [`decay/LANGUAGE.md`](decay/LANGUAGE.md), [`docs/scripting.md`](docs/scripti
   <tr>
     <td width="33%"><img src="site/screenshots/phone-selected.png" alt="The Android editor with a lamp post selected"></td>
     <td width="33%"><img src="site/screenshots/phone-inspector.png" alt="The Android inspector showing a lamp post's place and 2D light"></td>
-    <td width="33%"><img src="site/screenshots/phone-decay-nodes.png" alt="A Decay script shown as nodes on the phone"></td>
+    <td width="33%"><img src="site/screenshots/phone-decay-steps.png" alt="A Decay script shown as steps on the phone"></td>
   </tr>
 </table>
 
-The Android editor, in progress, runs the same engine as the desktop editor: select, inspect, edit and play a scene on the phone. Scripts open as **nodes**, Blueprint-style, but there is no graph format behind them. **Visual scripting is Decay, but visual:** the `.decay` file is the only thing stored. The handler on the right above is just this:
+The Android editor, in progress, runs the same engine as the desktop editor: select, inspect, edit and play a scene on the phone. Scripts open as **steps**: each line of Decay a sentence with its values as tappable chips, branches indented beneath, and the same script one tap away as Blueprint-style nodes. There is no graph format behind either. **Visual scripting is Decay, but visual:** the `.decay` file is the only thing stored. The handler on the right above is just this:
 
 ```rust
 fn start() {

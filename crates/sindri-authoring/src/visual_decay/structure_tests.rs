@@ -241,3 +241,29 @@ fn a_pin_takes_a_field_in_place_of_its_value_and_an_unknown_one_is_refused() {
         );
     }
 }
+
+#[test]
+fn a_step_can_call_the_engine_from_the_finder_and_still_reads() {
+    let environment = environment();
+    let calls = engine_calls(&environment);
+    let (id, call) = calls
+        .iter()
+        .find(|(id, _)| id == "engine:Audio.play")
+        .expect("Audio.play takes plain arguments");
+    assert_eq!(call, "Audio.play(\"\", 0)");
+    let template = Template::engine(id, &environment).expect("named by its id");
+    let changed = change(
+        SCRIPT,
+        &Shape::After {
+            statement: at(SCRIPT, "this.glow = 3.0"),
+            template,
+        },
+        &environment,
+    )
+    .expect("an engine call with placeholders still checks");
+    assert!(changed.contains("this.glow = 3.0;\n        Audio.play(\"\", 0);\n"));
+    assert!(
+        calls.iter().all(|(_, call)| !call.contains("Vec3")),
+        "only plain placeholders"
+    );
+}
