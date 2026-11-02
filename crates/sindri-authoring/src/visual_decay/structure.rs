@@ -19,8 +19,14 @@ pub enum Template {
     Set { field: String, value: String },
     /// `if this.field { }`, or `if !this.field { }`.
     If { field: String, negated: bool },
-    /// `function();`, one of the script's own functions that takes nothing.
-    Call { function: String },
+    /// `function(…);`, one of the script's own functions, its inputs given
+    /// placeholders.
+    Call {
+        function: String,
+        arguments: Vec<String>,
+    },
+    /// `let name = 0;`, a value the steps after it can read.
+    Let { name: String },
     /// `return;`
     Return,
     /// `// text`
@@ -56,6 +62,10 @@ impl Template {
             }),
             "call" => Some(Self::Call {
                 function: name.to_owned(),
+                arguments: placeholders(source, name)?,
+            }),
+            "let" => is_name(name).then(|| Self::Let {
+                name: name.to_owned(),
             }),
             "return" => Some(Self::Return),
             "comment" => Some(Self::Comment {
@@ -83,7 +93,11 @@ impl Template {
                 format!("if {}this.{field} {{", if *negated { "!" } else { "" }),
                 "}".to_owned(),
             ],
-            Self::Call { function } => vec![format!("{function}();")],
+            Self::Call {
+                function,
+                arguments,
+            } => vec![format!("{function}({});", arguments.join(", "))],
+            Self::Let { name } => vec![format!("let {name} = 0;")],
             Self::Return => vec!["return;".to_owned()],
             Self::Comment { text } => vec![format!("// {text}")],
             Self::Engine { call } => vec![format!("{call};")],
@@ -110,7 +124,7 @@ pub fn palette(script: &VisualScript) -> Vec<(String, String)> {
             }
         }
         for handler in &container.handlers {
-            if handler.role == "function" && handler.params.is_empty() {
+            if handler.role == "function" {
                 choices.push((
                     format!("call:{}", handler.name),
                     format!("Call {}", handler.name),
@@ -118,6 +132,7 @@ pub fn palette(script: &VisualScript) -> Vec<(String, String)> {
             }
         }
     }
+    choices.push(("let".to_owned(), "Remember a value".to_owned()));
     choices.push(("return".to_owned(), "Return".to_owned()));
     choices.push(("comment".to_owned(), "Comment".to_owned()));
     choices
@@ -188,6 +203,12 @@ pub enum Shape {
     /// A new member of the script: written first among its fields for a
     /// variable, last for a function or event.
     Add(Member),
+    /// The variable or function `name` taken out of the script, with the
+    /// comment lines above it.
+    Remove { name: String },
+    /// The variable or function `from` renamed `to`, everywhere this script
+    /// names it.
+    Rename { from: String, to: String },
 }
 
 /// What a script can gain from the tab bar's "+".
@@ -196,8 +217,11 @@ pub enum Member {
     /// `var name: ty = <its type's empty value>;`, for `number`, `bool` or
     /// `String`.
     Variable { name: String, ty: String },
-    /// `fn name() { }`
-    Function { name: String },
+    /// `fn name(input: type, …) { }`, each input a `number`, `bool` or `String`.
+    Function {
+        name: String,
+        inputs: Vec<(String, String)>,
+    },
     /// One of the engine's events, by its lifecycle name: `fn update(dt: number) { }`.
     Event { name: String },
 }
@@ -205,7 +229,9 @@ pub enum Member {
 impl Member {
     fn name(&self) -> &str {
         match self {
-            Self::Variable { name, .. } | Self::Function { name } | Self::Event { name } => name,
+            Self::Variable { name, .. } | Self::Function { name, .. } | Self::Event { name } => {
+                name
+            }
         }
     }
 
@@ -213,15 +239,28 @@ impl Member {
     fn lines(&self) -> Result<Vec<String>, String> {
         Ok(match self {
             Self::Variable { name, ty } => {
-                let value = match ty.as_str() {
-                    "number" => "0",
-                    "bool" => "false",
-                    "String" => "\"\"",
-                    other => return Err(format!("a new variable cannot be a {other} yet")),
-                };
+                let value = placeholder(ty)
+                    .ok_or_else(|| format!("a new variable cannot be a {ty} yet"))?;
                 vec![format!("var {name}: {ty} = {value};")]
             }
-            Self::Function { name } => vec![format!("fn {name}() {{"), "}".to_owned()],
+            Self::Function { name, inputs } => {
+                for (input, ty) in inputs {
+                    if !is_name(input) {
+                        return Err(format!(
+                            "\"{input}\" cannot be a name: use letters, digits and _"
+                        ));
+                    }
+                    if placeholder(ty).is_none() {
+                        return Err(format!("an input cannot be a {ty} yet"));
+                    }
+                }
+                let inputs = inputs
+                    .iter()
+                    .map(|(input, ty)| format!("{input}: {ty}"))
+                    .collect::<Vec<_>>()
+                    .join(", ");
+                vec![format!("fn {name}({inputs}) {{"), "}".to_owned()]
+            }
             Self::Event { name } => {
                 let event = sindri_decay::LIFECYCLE
                     .iter()
@@ -290,25 +329,14 @@ pub(super) fn reshape(source: &str, shape: &Shape) -> Result<String, String> {
                 format!("{}\n{indent}{text}{}", &source[..end], &source[end..])
             })
         }
-        Shape::Field { slot, field } => {
-            let named = !field.is_empty()
-                && field
-                    .chars()
-                    .all(|character| character.is_alphanumeric() || character == '_');
-            if !named {
-                return Err(format!("{field} is not a field's name"));
-            }
-            let [start, end] = *slot;
-            if start > end || source.get(start..end).is_none() {
-                return Err(GONE.to_owned());
-            }
-            Ok(format!(
-                "{}this.{field}{}",
-                &source[..start],
-                &source[end..]
-            ))
-        }
+        Shape::Field { slot, field } => use_field(source, *slot, field),
         Shape::Add(member) => add(source, &program, member),
+        Shape::Remove { name } => {
+            let span = member_span(&program, name)?;
+            let [start, end] = lines_of(source, span, true);
+            Ok(format!("{}{}", &source[..start], &source[end..]))
+        }
+        Shape::Rename { from, to } => rename(source, &program, from, to),
         Shape::Inside {
             node,
             branch,
@@ -342,29 +370,124 @@ pub(super) fn reshape(source: &str, shape: &Shape) -> Result<String, String> {
 
 const GONE: &str = "that part of the script is no longer there";
 
-/// `source` with `member` written into its first script or component.
-fn add(source: &str, program: &Program, member: &Member) -> Result<String, String> {
-    let name = member.name();
-    let named = name
-        .chars()
+/// `source` with the pin at `slot` reading `this.field`.
+fn use_field(source: &str, slot: Span, field: &str) -> Result<String, String> {
+    let named = !field.is_empty()
+        && field
+            .chars()
+            .all(|character| character.is_alphanumeric() || character == '_');
+    if !named {
+        return Err(format!("{field} is not a field's name"));
+    }
+    let [start, end] = slot;
+    if start > end || source.get(start..end).is_none() {
+        return Err(GONE.to_owned());
+    }
+    Ok(format!(
+        "{}this.{field}{}",
+        &source[..start],
+        &source[end..]
+    ))
+}
+
+fn is_name(name: &str) -> bool {
+    name.chars()
         .next()
         .is_some_and(|first| first.is_alphabetic() || first == '_')
         && name
             .chars()
-            .all(|character| character.is_alphanumeric() || character == '_');
-    if !named {
+            .all(|character| character.is_alphanumeric() || character == '_')
+}
+
+/// What a new value of type `ty` starts as, for the types that have one.
+fn placeholder(ty: &str) -> Option<&'static str> {
+    match ty {
+        "number" => Some("0"),
+        "bool" => Some("false"),
+        "String" => Some("\"\""),
+        _ => None,
+    }
+}
+
+/// A placeholder for each input of the script's function `name`.
+fn placeholders(source: &str, name: &str) -> Option<Vec<String>> {
+    let program = parse(source).program;
+    let function = functions(&program).find(|function| function.name == name)?;
+    function
+        .params
+        .iter()
+        .map(|param| {
+            let ty = param
+                .ty
+                .as_ref()
+                .map(|ty| ty.name.as_str())
+                .unwrap_or_default();
+            placeholder(ty).map(str::to_owned)
+        })
+        .collect()
+}
+
+fn first_container(program: &Program) -> Option<&decay_syntax::ContainerDecl> {
+    program.items.iter().find_map(|item| match item {
+        Item::Script(container) | Item::Component(container) => Some(container),
+        _ => None,
+    })
+}
+
+/// Where the script's variable or function `name` is.
+fn member_span(program: &Program, name: &str) -> Result<decay_syntax::Span, String> {
+    first_container(program)
+        .into_iter()
+        .flat_map(|container| &container.members)
+        .find_map(|member| match member {
+            Member_::Field(field) if field.name == name => Some(field.span),
+            Member_::Function(function) if function.name == name => Some(function.span),
+            _ => None,
+        })
+        .ok_or_else(|| format!("the script has no {name}"))
+}
+
+/// `source` with every name `from` written `to`. A variable shown in the
+/// inspector keeps its value in scenes by name, so it is not renamed here.
+fn rename(source: &str, program: &Program, from: &str, to: &str) -> Result<String, String> {
+    if !is_name(to) {
+        return Err(format!(
+            "\"{to}\" cannot be a name: use letters, digits and _"
+        ));
+    }
+    member_span(program, from)?;
+    let exported = first_container(program).is_some_and(|container| {
+        container.members.iter().any(|member| {
+            matches!(member, Member_::Field(field) if field.name == from && !field.attributes.is_empty())
+        })
+    });
+    if exported {
+        return Err(format!(
+            "{from} is shown in the inspector, and scenes keep its value by that name"
+        ));
+    }
+    let mut renamed = source.to_owned();
+    let mut names: Vec<_> = decay_syntax::lex(source)
+        .tokens
+        .into_iter()
+        .filter(|token| matches!(&token.kind, decay_syntax::TokenKind::Identifier(name) if name == from))
+        .collect();
+    names.reverse();
+    for token in names {
+        renamed.replace_range(token.span.start..token.span.end, to);
+    }
+    Ok(renamed)
+}
+
+/// `source` with `member` written into its first script or component.
+fn add(source: &str, program: &Program, member: &Member) -> Result<String, String> {
+    let name = member.name();
+    if !is_name(name) {
         return Err(format!(
             "\"{name}\" cannot be a name: use letters, digits and _"
         ));
     }
-    let container = program
-        .items
-        .iter()
-        .find_map(|item| match item {
-            Item::Script(container) | Item::Component(container) => Some(container),
-            _ => None,
-        })
-        .ok_or("the file has no script to add to")?;
+    let container = first_container(program).ok_or("the file has no script to add to")?;
     let outer = indentation(source, container.span.start);
     let indent = container.members.first().map_or_else(
         || format!("{outer}    "),

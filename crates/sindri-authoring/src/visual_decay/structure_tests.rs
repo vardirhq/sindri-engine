@@ -168,6 +168,7 @@ fn a_change_that_would_not_check_is_refused_with_the_reason() {
     assert!(refused.contains("warmth"), "{refused}");
     let missing = Template::Call {
         function: "nowhere".to_owned(),
+        arguments: Vec::new(),
     };
     assert!(
         change(
@@ -282,6 +283,7 @@ fn a_script_gains_variables_functions_and_events_where_its_code_keeps_them() {
 
     let function = add(Member::Function {
         name: "dim".to_owned(),
+        inputs: Vec::new(),
     })
     .expect("a new function");
     assert!(function.ends_with("        this.glow = 3.0;\n    }\n\n    fn dim() {\n    }\n}\n"));
@@ -293,6 +295,7 @@ fn a_script_gains_variables_functions_and_events_where_its_code_keeps_them() {
         },
         Member::Function {
             name: "2fast".to_owned(),
+            inputs: Vec::new(),
         },
         Member::Variable {
             name: "glow".to_owned(),
@@ -315,5 +318,86 @@ fn a_script_gains_variables_functions_and_events_where_its_code_keeps_them() {
     assert_eq!(
         event,
         "script Bare {\n    fn update(dt: number) {\n    }\n}\n"
+    );
+}
+
+#[test]
+fn functions_take_inputs_steps_remember_values_and_members_rename_or_go() {
+    let environment = environment();
+    let with_inputs = change(
+        SCRIPT,
+        &Shape::Add(Member::Function {
+            name: "dim".to_owned(),
+            inputs: vec![
+                ("by".to_owned(), "number".to_owned()),
+                ("why".to_owned(), "String".to_owned()),
+            ],
+        }),
+        &environment,
+    )
+    .expect("a function with inputs");
+    assert!(with_inputs.contains("    fn dim(by: number, why: String) {\n    }\n"));
+    let call = Template::named("call:dim", &blocks(&with_inputs), &with_inputs).expect("callable");
+    assert_eq!(
+        call,
+        Template::Call {
+            function: "dim".to_owned(),
+            arguments: vec!["0".to_owned(), "\"\"".to_owned()],
+        }
+    );
+
+    let remembered = change(
+        SCRIPT,
+        &Shape::After {
+            statement: at(SCRIPT, "this.glow = 3.0"),
+            template: Template::named("let:boost", &blocks(SCRIPT), SCRIPT).expect("a let"),
+        },
+        &environment,
+    )
+    .expect("a remembered value checks");
+    assert!(remembered.contains("this.glow = 3.0;\n        let boost = 0;\n"));
+
+    let renamed = change(
+        SCRIPT,
+        &Shape::Rename {
+            from: "lit".to_owned(),
+            to: "burning".to_owned(),
+        },
+        &environment,
+    )
+    .expect("lit renames");
+    assert_eq!(renamed, SCRIPT.replace("lit", "burning"));
+    assert!(
+        change(
+            SCRIPT,
+            &Shape::Rename {
+                from: "glow".to_owned(),
+                to: "shine".to_owned(),
+            },
+            &environment,
+        )
+        .is_err(),
+        "an inspector field keeps its name"
+    );
+
+    let removed = change(
+        SCRIPT,
+        &Shape::Remove {
+            name: "flare".to_owned(),
+        },
+        &environment,
+    )
+    .expect("flare is used nowhere");
+    assert!(!removed.contains("flare"));
+    assert!(
+        change(
+            SCRIPT,
+            &Shape::Remove {
+                name: "lit".to_owned(),
+            },
+            &environment,
+        )
+        .is_err(),
+        "lit is still read"
     );
 }

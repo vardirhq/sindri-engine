@@ -1680,6 +1680,10 @@
       "label": "Call ignite"
     },
     {
+      "id": "let",
+      "label": "Remember a value"
+    },
+    {
       "id": "return",
       "label": "Return"
     },
