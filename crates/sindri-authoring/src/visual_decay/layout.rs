@@ -39,6 +39,49 @@ pub const LAYOUT_VERSION: u32 = 1;
 /// The suffix the positions file adds to the script's own name.
 pub const LAYOUT_SUFFIX: &str = ".layout";
 
+/// Which way execution runs on the canvas.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Flow {
+    /// Left to right, as Blueprints run on a wide screen: nested chains in
+    /// lanes below, values to the left of what takes them. Desktop's.
+    Right,
+    /// Top to bottom, as code reads, for a phone held upright: each step
+    /// below the last, a branch's or loop's steps indented beneath it, and
+    /// the values a step takes in a column to its left.
+    Down,
+}
+
+impl Flow {
+    #[must_use]
+    pub const fn name(self) -> &'static str {
+        match self {
+            Self::Right => "right",
+            Self::Down => "down",
+        }
+    }
+
+    /// The key a position is stored under: as the node's key for left to
+    /// right, which every file before this had, and `down:` before it for
+    /// top to bottom, so the two ways keep their own positions.
+    fn stored(self, key: &str) -> String {
+        match self {
+            Self::Right => key.to_owned(),
+            Self::Down => format!("down:{key}"),
+        }
+    }
+
+    fn of(graph: &Graph) -> Self {
+        if graph.flow == "down" {
+            Self::Down
+        } else {
+            Self::Right
+        }
+    }
+}
+
+/// How far right of its branch a nested chain stands, top to bottom.
+const INDENT: f32 = 40.0;
+
 /// How tall `node` is drawn.
 #[must_use]
 pub fn height(node: &Node) -> f32 {
@@ -103,11 +146,11 @@ impl Layout {
             .map_err(|error| error.to_string())
     }
 
-    /// `node` was dragged to `at`.
-    pub fn moved(&mut self, node: &Node, at: [f32; 2]) {
+    /// `node` was dragged to `at`, on a canvas running `flow`.
+    pub fn moved(&mut self, node: &Node, flow: Flow, at: [f32; 2]) {
         let stored = self
             .nodes
-            .entry(node.key.clone())
+            .entry(flow.stored(&node.key))
             .or_insert_with(|| Stored {
                 at,
                 print: node.print.clone(),
@@ -119,22 +162,25 @@ impl Layout {
 
     /// Lays this layout's positions over `graph`'s laid-out ones: by key where
     /// the fingerprint agrees, else by a fingerprint no other node shares.
+    /// Only positions stored for `graph`'s flow are used.
     pub fn place(&self, graph: &mut Graph) {
+        let flow = Flow::of(graph);
         let mut used = BTreeSet::new();
         for node in &mut graph.nodes {
             if let Some(stored) = self
                 .nodes
-                .get(&node.key)
+                .get(&flow.stored(&node.key))
                 .filter(|stored| stored.print == node.print)
             {
                 node.at = stored.at;
                 node.placed = true;
-                used.insert(node.key.clone());
+                used.insert(flow.stored(&node.key));
             }
         }
         let mut by_print: BTreeMap<&str, Vec<&String>> = BTreeMap::new();
+        let ours = |key: &String| (flow == Flow::Down) == key.starts_with("down:");
         for (key, stored) in &self.nodes {
-            if !used.contains(key) {
+            if !used.contains(key) && ours(key) {
                 by_print.entry(stored.print.as_str()).or_default().push(key);
             }
         }
@@ -160,9 +206,9 @@ impl Layout {
     }
 }
 
-/// Lays `graph` out from the code: each handler a band, its chain left to
-/// right, nested chains in lanes below, values to the left of what takes them.
-pub(super) fn arrange(graph: &mut Graph) {
+/// Lays `graph` out from the code, running `direction`: each handler a band
+/// of its own, and within it as [`Flow`] says.
+pub(super) fn arrange(graph: &mut Graph, direction: Flow) {
     let index: BTreeMap<String, usize> = graph
         .nodes
         .iter()
@@ -193,12 +239,21 @@ pub(super) fn arrange(graph: &mut Graph) {
         feeds,
     };
     let mut top = 0.0;
+    // Top to bottom, steps stand right of a column kept for their values.
+    let column = if direction == Flow::Down {
+        VALUE_ACROSS
+    } else {
+        0.0
+    };
     for (at, node) in graph.nodes.iter().enumerate() {
         if node.kind == "values" {
-            arranger.at[at] = [0.0, top];
+            arranger.at[at] = [column, top];
             top += arranger.heights[at] + BAND;
         } else if matches!(node.kind, "event" | "function") {
-            top += arranger.chain(at, 0.0, top) + BAND;
+            top += match direction {
+                Flow::Right => arranger.chain(at, 0.0, top),
+                Flow::Down => arranger.chain_down(at, column, top) - top,
+            } + BAND;
         }
     }
     for (node, at) in graph.nodes.iter_mut().zip(arranger.at) {
@@ -256,6 +311,49 @@ impl Arranger {
             }
         }
         lane - LANE - y
+    }
+
+    /// Places the chain starting at `first` top to bottom from `x`, `y`, as
+    /// code reads: each step, then the chains its outputs run, indented, then
+    /// the next step; answers where it ends.
+    fn chain_down(&mut self, first: usize, x: f32, y: f32) -> f32 {
+        let mut at = Some(first);
+        let mut bottom = y;
+        while let Some(member) = at {
+            self.at[member] = [x, bottom];
+            let values = self.values_down(member, x, bottom);
+            bottom += self.heights[member].max(values) + BETWEEN;
+            let nested: Vec<usize> = self.outputs[member]
+                .iter()
+                .filter(|output| !output.is_empty() && *output != "Next")
+                .filter_map(|output| self.flow.get(&(member, output.clone())).copied())
+                .collect();
+            for start in nested {
+                bottom = self.chain_down(start, x + INDENT, bottom);
+            }
+            at = self
+                .flow
+                .get(&(member, String::new()))
+                .or_else(|| self.flow.get(&(member, "Next".to_owned())))
+                .copied();
+        }
+        bottom
+    }
+
+    /// Stacks every value node `node` (at `x`) takes, its values' values too,
+    /// in one column to its left from `top`, so the canvas stays two nodes
+    /// wide; answers how far down they reach.
+    fn values_down(&mut self, node: usize, x: f32, top: f32) -> f32 {
+        let mut stack = self.feeds.get(&node).cloned().unwrap_or_default();
+        let mut bottom = top;
+        while let Some(value) = (!stack.is_empty()).then(|| stack.remove(0)) {
+            self.at[value] = [x - VALUE_ACROSS, bottom];
+            bottom += self.heights[value] + BETWEEN;
+            if let Some(own) = self.feeds.get(&value) {
+                stack.splice(0..0, own.iter().copied());
+            }
+        }
+        (bottom - top - BETWEEN).max(0.0)
     }
 
     /// How many value nodes deep the values `node` takes go.

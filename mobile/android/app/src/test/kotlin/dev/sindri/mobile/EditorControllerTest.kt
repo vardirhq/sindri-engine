@@ -19,6 +19,7 @@ class EditorControllerTest {
         var lighting = false
 
         var playing: PlayState? = null
+        var scriptEdits = 0
 
         override fun command(command: String, vararg arguments: Any?): String? {
             commands += listOf(command, *arguments)
@@ -28,13 +29,14 @@ class EditorControllerTest {
                 "play" -> playing = PlayState(seconds = 0.0, paused = false)
                 "stop" -> playing = null
                 "pause" -> playing = playing?.copy(paused = arguments[0] as Boolean)
+                "editScript" -> scriptEdits += if (arguments[0] == "undo") -1 else 1
             }
             return null
         }
 
         override fun state() = state.copy(lighting = lighting, play = playing)
 
-        override fun script() = EngineSamples.lampScript
+        override fun script() = EngineSamples.lampScript.copy(canUndo = scriptEdits > 0)
     }
 
     private val host = Host()
@@ -147,6 +149,32 @@ class EditorControllerTest {
         assertEquals(PlayMode.Edit, controller.ui.mode)
         assertEquals("The game stopped: a solver failed", controller.ui.toast?.text)
         assertEquals(listOf("stop"), host.commands.last())
+    }
+
+    @Test
+    fun undo_with_a_script_open_takes_back_its_edits_and_otherwise_the_scenes() {
+        host.state = EditorState(
+            inspector = Inspector(
+                "Lamp post", listOf(0.0, 0.0, 0.0),
+                listOf(Component("sindri.script", "Script", emptyList(), values = mapOf("source" to "scripts/lamp.decay"))),
+            ),
+        )
+        controller.refresh()
+        controller.on(EditorEvent.OpenBehaviour) {}
+        assertFalse("nothing to take back in a script just opened", controller.ui.canUndo)
+
+        controller.on(EditorEvent.ScriptSlot(DecaySlot.Number(1.5, 40 to 43), 2.0)) {}
+        assertTrue(controller.ui.canUndo)
+        controller.refresh()
+        assertTrue("the scene's history does not hide the script's", controller.ui.canUndo)
+
+        controller.on(EditorEvent.Undo) {}
+        assertEquals(listOf("editScript", "undo", 0, 0, null), host.commands.last())
+        assertFalse(controller.ui.canUndo)
+
+        controller.on(EditorEvent.CloseSheet) {}
+        controller.on(EditorEvent.Undo) {}
+        assertEquals(listOf("undo"), host.commands.last())
     }
 
     @Test

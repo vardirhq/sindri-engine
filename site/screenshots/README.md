@@ -145,3 +145,15 @@ node tools/isometric-baker/web/build.mjs target/baker
 node scripts/browser/baker.mjs target/baker target/baker-captures
 cp target/baker-captures/baker-desktop.png site/screenshots/isometric-baker.png
 ```
+
+## The phone editor
+
+`phone-selected.png`, `phone-inspector.png` and `phone-decay-nodes.png` are the
+Android editor's design screens (`19-selected`, `20e-inspector-engine` and
+`22d-behaviour-nodes`), rendered by its Robolectric tests:
+
+```
+cd mobile/android && ./gradlew :app:recordRoborazziDebug --tests 'dev.sindri.mobile.DesignScreens'
+```
+
+They land in `mobile/android/app/build/outputs/roborazzi/`.

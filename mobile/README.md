@@ -75,10 +75,19 @@ How it works, in `sindri_authoring::visual_decay`:
   the slot it changed, then the result is parsed and refused if it no longer
   reads. Every other byte, comments and formatting included, stays as it was.
   A script with syntax errors is fixed as text before its blocks edit.
+- A number or text pin can read one of the script's fields of that type
+  instead of its typed value: the pin's text becomes `this.field`, checked
+  like any other change.
+- With a script open, the editor's Undo and Redo step through the edits made
+  to it there, each as a whole text of the script. If the file changed
+  elsewhere since, that history is dropped rather than written over it.
 - The same reading is drawn as Blueprint-style nodes (`visual_decay::graph`):
   handlers are event nodes, statements a chain joined by execution wires,
-  and calls and operators value nodes wired into pins. Literals sit on their
-  pins.
+  and calls value nodes wired into pins. Literals and simple arithmetic sit
+  on their pins. Desktop runs execution left to right, as Blueprints do; the
+  phone runs it top to bottom, as code reads, with branches indented and
+  values in a column to the left. Each way keeps its own dragged positions,
+  and the canvas shows one handler at a time.
 - Node positions are the one thing a script does not hold. They live beside
   it in `<script>.layout`, never in it (`visual_decay::layout`). A stored
   position finds its node by its place in the code and by a fingerprint of
