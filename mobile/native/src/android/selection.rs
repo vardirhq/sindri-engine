@@ -4,7 +4,11 @@ use super::Host;
 use serde_json::Value;
 
 impl Host {
-    pub(super) fn object_command(&mut self, command: &str, arguments: &[Value]) -> Result<(), String> {
+    pub(super) fn object_command(
+        &mut self,
+        command: &str,
+        arguments: &[Value],
+    ) -> Result<(), String> {
         match command {
             "clearObjects" => {
                 self.objects.clear();
@@ -16,7 +20,9 @@ impl Host {
                 Ok(())
             }
             "selectObject" => {
-                let id = arguments.first().and_then(Value::as_str)
+                let id = arguments
+                    .first()
+                    .and_then(Value::as_str)
                     .ok_or_else(|| format!("{command}: argument 0 is not text"))?;
                 let (opened, editing) = self.editing()?;
                 editing.select_object(&opened.world, id)
