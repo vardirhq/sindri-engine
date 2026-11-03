@@ -35,6 +35,7 @@ class EditorController(
 
     /** The last native state, which selection and the inspector are drawn from. */
     private var state = EditorState()
+    private var objectsLoaded = false
     var recoveryConflict by mutableStateOf(false)
         private set
     private var error: String? = null
@@ -97,6 +98,13 @@ class EditorController(
 
     /** Something changed on the host: draws its state again. */
     fun refresh() {
+        if (ui.sheet is EditorSheet.Layers) {
+            native.command("refreshObjects")
+            objectsLoaded = true
+        } else if (objectsLoaded) {
+            native.command("clearObjects")
+            objectsLoaded = false
+        }
         state = native.state()
         recoveryConflict = state.recoveryConflict
         val inspector = state.inspector
@@ -123,6 +131,7 @@ class EditorController(
             sheet = when (val sheet = ui.sheet) {
                 is EditorSheet.Inspector -> inspector?.let { sheet.copy(inspector = inspectorUi(it)) }
                 is EditorSheet.Behaviour -> if (inspector == null) null else sheet
+                is EditorSheet.Layers -> sheet.copy(objects = state.objects)
                 else -> sheet
             },
             toast = error?.let { ToastUi(it) } ?: ui.toast,
@@ -174,6 +183,11 @@ class EditorController(
             is EditorEvent.AssetTabChosen -> ui = ui.copy(sheet = EditorSheet.Assets(event.tab, if (event.tab == AssetTab.Prefabs) SampleEditor.assets else emptyList()))
             EditorEvent.OpenImport -> ui = ui.copy(sheet = EditorSheet.Import(SampleEditor.importFiles))
             EditorEvent.BackToAssets -> ui = ui.copy(sheet = EditorSheet.Assets(AssetTab.Prefabs, SampleEditor.assets))
+            is EditorEvent.TreeRowTapped -> event.row.id?.let { id ->
+                error = native.command("selectObject", id)
+                if (error == null) ui = ui.copy(sheet = null)
+                refresh()
+            }
             is EditorEvent.LayerTabChosen -> (ui.sheet as? EditorSheet.Layers)?.let { ui = ui.copy(sheet = it.copy(tab = event.tab)) }
             is EditorEvent.InspectorRow -> inspectorRow(event)
             is EditorEvent.HandleTaken -> {
@@ -291,7 +305,10 @@ class EditorController(
             BarItem.Add -> toggle(EditorSheet.Add(SampleEditor.prefabs))
             BarItem.Paint -> ui = ui.copy(painting = PaintUi(), sheet = null, toast = ToastUi("Painting the ground is not wired yet."))
             BarItem.Assets -> toggle(EditorSheet.Assets(AssetTab.Prefabs, SampleEditor.assets))
-            BarItem.Layers -> toggle(EditorSheet.Layers(LayerTab.Layers, SampleEditor.layers, SampleEditor.objects))
+            BarItem.Layers -> {
+                toggle(EditorSheet.Layers(LayerTab.Objects, emptyList(), emptyList()))
+                refresh()
+            }
             BarItem.Scenes -> openScenes()
             BarItem.SelectMore -> { error = native.command("selectMore"); refresh() }
             BarItem.Duplicate -> nativeEdit("duplicate")

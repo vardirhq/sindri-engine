@@ -135,6 +135,19 @@ class EditorControllerTest {
     }
 
     @Test
+    fun layers_list_real_objects_and_select_the_tapped_handle() {
+        val objects = listOf(TreeRow(0, Sym.web_asset, "HUD", detail = "Screen UI", id = "4294967296"))
+        host.state = EditorState(objects = objects)
+        controller.on(EditorEvent.Tool(BarItem.Layers)) {}
+        val sheet = controller.ui.sheet as EditorSheet.Layers
+        assertEquals(objects, sheet.objects)
+        assertTrue(sheet.layers.isEmpty())
+        controller.on(EditorEvent.TreeRowTapped(objects.single())) {}
+        assertTrue(listOf("selectObject", "4294967296") in host.commands)
+        assertNull(controller.ui.sheet)
+    }
+
+    @Test
     fun scenes_come_from_the_host_and_open_the_tapped_scene() {
         val opened = mutableListOf<String>()
         val controller = EditorController(host, onSceneOpened = { opened += it })

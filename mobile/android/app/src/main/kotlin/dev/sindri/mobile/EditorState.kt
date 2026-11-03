@@ -76,6 +76,7 @@ data class EditorState(
     val sceneName: String? = null,
     val scenes: List<SceneCard> = emptyList(),
     val inspector: Inspector? = null,
+    val objects: List<TreeRow> = emptyList(),
     val selectionCount: Int = 0,
     val selectingMore: Boolean = false,
     /** Where the selection's origin is, in surface pixels. */
@@ -106,6 +107,12 @@ data class EditorState(
                     SceneCard(name, scene.optBoolean("main"), name == root.optString("sceneName"), preview = false)
                 }.orEmpty(),
                 inspector = root.optJSONObject("inspector")?.let(::inspector),
+                objects = root.optJSONArray("objects")?.objects()?.map { obj ->
+                    val screen = obj.optBoolean("screen")
+                    TreeRow(0, if (screen) Sym.web_asset else Sym.deployed_code, obj.getString("name"),
+                        detail = if (obj.optBoolean("disabled")) "Disabled" else if (screen) "Screen UI" else "",
+                        selected = obj.optBoolean("selected"), id = obj.getString("id"))
+                }.orEmpty(),
                 selectionCount = root.optInt("selectionCount"),
                 selectingMore = root.optBoolean("selectingMore"),
                 origin = root.optJSONArray("origin")?.let {

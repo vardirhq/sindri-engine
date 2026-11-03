@@ -100,7 +100,7 @@ enum class LayerTab(val label: String) { Layers("Layers"), Objects("Objects") }
 
 data class LayerRow(val icon: Sym, val name: String, val detail: String, val visible: Boolean, val locked: Boolean = false)
 
-data class TreeRow(val depth: Int, val icon: Sym, val name: String, val detail: String = "", val chevron: Sym? = null, val selected: Boolean = false)
+data class TreeRow(val depth: Int, val icon: Sym, val name: String, val detail: String = "", val chevron: Sym? = null, val selected: Boolean = false, val id: String? = null)
 
 data class SceneCard(val name: String, val main: Boolean, val current: Boolean, val preview: Boolean)
 

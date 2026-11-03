@@ -13,6 +13,40 @@ impl Editing {
             .collect()
     }
 
+    /// List the live scene, including prefab children without persistent scene IDs.
+    pub fn scene_objects(&self, world: &World) -> Vec<serde_json::Value> {
+        let selected = self.selected_entities();
+        let mut objects: Vec<_> = world.entities().map(|(entity, data)| {
+            let name = data.name.clone()
+                .or_else(|| data.source_id.as_ref().map(|id| id.as_str().to_owned()))
+                .unwrap_or_else(|| format!("{entity:?}"));
+            serde_json::json!({
+                "id": entity.to_bits().to_string(),
+                "name": name,
+                "selected": selected.contains(&entity),
+                "disabled": data.disabled,
+                "screen": data.components.keys().any(|name| name.starts_with("sindri.ui.")),
+            })
+        }).collect();
+        objects.sort_by(|a, b| a["name"].as_str().cmp(&b["name"].as_str()).then_with(|| a["id"].as_str().cmp(&b["id"].as_str())));
+        objects
+    }
+
+    /// Select an object using a generation-checked handle from the current scene.
+    ///
+    /// # Errors
+    /// Returns an error if the handle is invalid or no longer refers to a live object.
+    pub fn select_object(&mut self, world: &World, id: &str) -> Result<(), String> {
+        let bits = id.parse::<u64>().map_err(|_| "Invalid object handle")?;
+        let entity = EntityId::from_bits(bits);
+        if world.get(entity).is_none() {
+            return Err("Object no longer exists".to_owned());
+        }
+        self.clear_selection();
+        self.selected = Some(entity);
+        Ok(())
+    }
+
     /// Toggle whether canvas taps add or remove objects from the selection.
     pub fn select_more(&mut self) {
         self.selecting_more = !self.selecting_more;
