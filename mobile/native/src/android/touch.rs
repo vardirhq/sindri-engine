@@ -304,6 +304,18 @@ impl Host {
         .to_string()
     }
 
+    fn edit_script_arguments(&mut self, kind: &str, arguments: &[Value]) -> Result<(), String> {
+        let at = |index: usize| -> Result<usize, String> {
+            arguments
+                .get(index)
+                .and_then(Value::as_u64)
+                .and_then(|value| usize::try_from(value).ok())
+                .ok_or_else(|| format!("editScript: argument {index} is not a position"))
+        };
+        let value = arguments.get(3).cloned().unwrap_or(Value::Null);
+        self.edit_script(kind, [at(1)?, at(2)?], &value)
+    }
+
     /// Runs one named editing command with its JSON array of arguments, which
     /// is how every gesture and inspector edit crosses the bridge: one export
     /// for all of them keeps the unsafe surface to the few calls that need it.
@@ -369,17 +381,7 @@ impl Host {
                 self.close_script();
                 Ok(())
             }
-            "editScript" => {
-                let at = |index: usize| -> Result<usize, String> {
-                    arguments
-                        .get(index)
-                        .and_then(Value::as_u64)
-                        .and_then(|value| usize::try_from(value).ok())
-                        .ok_or_else(|| format!("{command}: argument {index} is not a position"))
-                };
-                let value = arguments.get(3).cloned().unwrap_or(Value::Null);
-                self.edit_script(text(0)?, [at(1)?, at(2)?], &value)
-            }
+            "editScript" => self.edit_script_arguments(text(0)?, &arguments),
             "refreshScenes" => {
                 let (project, _) = self.source.as_ref().ok_or("no project is open")?;
                 self.scenes = crate::listed_scenes(project)?;
