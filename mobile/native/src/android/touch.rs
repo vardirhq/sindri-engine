@@ -412,18 +412,8 @@ impl Host {
                 Ok(())
             }
             "openScene" => self.open_scene(text(0)?),
-            "clearObjects" => {
-                self.objects.clear();
-                Ok(())
-            }
-            "refreshObjects" => {
-                let (opened, editing) = self.editing()?;
-                self.objects = editing.scene_objects(&opened.world);
-                Ok(())
-            }
-            "selectObject" => {
-                let (opened, editing) = self.editing()?;
-                editing.select_object(&opened.world, text(0)?)
+            "clearObjects" | "refreshObjects" | "selectObject" => {
+                self.object_command(command, &arguments)
             }
             "recovery" => self.configure_recovery(text(0)?),
             "recoveryRestore" => self.restore_recovery(),
