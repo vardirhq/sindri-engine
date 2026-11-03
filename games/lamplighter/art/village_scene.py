@@ -35,7 +35,7 @@ HOUSES = [
 LAMPS = [(-3.5, 3.5), (3.5, 3.5), (-3.5, -3.5), (3.5, -3.5)]
 DIRECTIONS = ['south', 'west', 'north', 'east']
 
-# The roads, as `village_ground.decay` has them (left, right, bottom, top): the scatter keeps clear.
+# The roads (left, right, bottom, top): the ground and scatter share this layout.
 ROADS = [(-24, -5, -1.3, 1.3), (5, 24, -1.3, 1.3), (-6, 6, -6, 6), (-1.3, 1.3, 0, 13.5), (-1.3, 1.3, -13, 0),
          (-15, 15, -12.8, -10.2), (9.8, 11.2, 0, 3.2), (-11.2, -9.8, 0, 3.2), (9.8, 11.2, -10.2, -8.8),
          (-11.2, -9.8, -10.2, -8.8)]
@@ -193,19 +193,57 @@ def villager(person, lamp, home, place):
                           'properties': {'lamp_name': lamp}}})
 
 
+def corner_tiles(predicate, empty=False):
+    """The engine's corners terrain bit order: SE, SW, NE, NW are 1, 2, 4, 8.
+
+    A corner lies on grid lines, so the same painted corner contributes to up
+    to four neighboring tiles. Overlay tiles with no painted corners stay empty.
+    """
+    tiles = []
+    for row in range(ROWS):
+        for col in range(COLUMNS):
+            mask = 0
+            for dx, dy, bit in ((0, 0, 8), (1, 0, 4), (0, 1, 2), (1, 1, 1)):
+                x, y = LEFT + col + dx, TOP - row - dy
+                if predicate(x, y):
+                    mask |= bit
+            tiles.append(None if empty and mask == 0 else mask)
+    return tiles
+
+
+def on_road(x, y):
+    return any(x0 <= x <= x1 and y0 <= y <= y1 for x0, x1, y0, y1 in ROADS)
+
+
+def on_cobble(x, y):
+    return (abs(x) <= 5.2 and abs(y) <= 5.2 and
+            (abs(x) < 3.6 or abs(y) < 3.6 or math.hypot(abs(x) - 3.6, abs(y) - 3.6) <= 1.7))
+
+
+def on_flag(x, y):
+    # The original painter visits the inclusive floor-rounded door rectangles.
+    pad = any(math.hypot(x - lx, y - ly) <= 1.7 for lx, ly in LAMPS)
+    door = any(math.floor(dx - 1.4) <= x <= math.floor(dx + 1.4) and
+               math.ceil(dy - 1.4) <= y <= math.ceil(dy + 0.2)
+               for _, _, dx, dy, *_ in HOUSES)
+    return pad or door
+
+
+def on_soil(x, y):
+    # Grid line bounds follow the original painter's floor(row/column) calls.
+    return -21 <= x <= -15 and 5 <= y <= 8
+
+
 def ground():
-    return [
-        entity('ground', 'Ground', at(LEFT, TOP, -1.0), **{
-            'sindri.tilemap': {
-                'texture': 'textures/village-ground.png', 'palette': [f'village-ground-{i}' for i in range(16)],
-                'columns': COLUMNS, 'rows': ROWS, 'tiles': [0] * (COLUMNS * ROWS), 'layer': -10},
-            'sindri.script': {'source': 'scripts/village_ground.decay', 'script': 'VillageGround',
-                              'properties': {'left': float(LEFT), 'top': float(TOP)}}}),
-        *[entity(name, name, at(LEFT, TOP, z), **{'sindri.tilemap': {
-            'texture': f'textures/village-{name}.png', 'palette': [], 'columns': COLUMNS, 'rows': ROWS,
-            'tiles': [None] * (COLUMNS * ROWS), 'layer': order}})
-          for name, z, order in (('soil', -0.95, -9), ('cobble', -0.9, -8), ('flag', -0.85, -7))],
-    ]
+    layers = [('ground', 'Ground', -1.0, -10, on_road, False),
+              ('soil', 'soil', -0.95, -9, on_soil, True),
+              ('cobble', 'cobble', -0.9, -8, on_cobble, True),
+              ('flag', 'flag', -0.85, -7, on_flag, True)]
+    return [entity(ident, name, at(LEFT, TOP, z), **{'sindri.tilemap': {
+        'texture': f'textures/village-{ident}.png',
+        'palette': [f'village-{ident}-{i}' for i in range(16)],
+        'columns': COLUMNS, 'rows': ROWS, 'tiles': corner_tiles(predicate, empty), 'layer': order}})
+        for ident, name, z, order, predicate, empty in layers]
 
 
 def clear_of_roads(x, y, margin):

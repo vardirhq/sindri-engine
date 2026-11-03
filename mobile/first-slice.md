@@ -211,6 +211,12 @@ SINDRI_REQUIRE_GPU=1 cargo test -p sindri-mobile
   recovery after restart. New scene and scene-door editing remain unwired.
   Scene names must be unique because the runtime resolves them by file name.
   Switching and restarting have not yet been exercised on the Pixel 8.
+- **Village ground.** The village's roads, cobbles, flagstones and soil are
+  authored in its scene, so the mobile editor can draw them before Play. An
+  unchanged copy of the previous bundled village is upgraded on app update;
+  edited village files and projects with pending recovery are left untouched.
+  Existing edited copies need a separate, non-destructive migration. The new
+  layout still needs a Pixel 8 check.
 - **Picking.** Taps pick what is drawn in the world; screen UI is not picked yet.
 - **Recovery needs device proof.** Before a mobile scene save the app writes an
   app-private recovery copy. Backgrounding finishes a gesture and attempts to
