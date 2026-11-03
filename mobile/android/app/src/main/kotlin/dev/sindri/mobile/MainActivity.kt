@@ -53,7 +53,9 @@ private object NativeHost : EditorController.Native {
 @Composable
 private fun SindriApp() {
     var screen by remember { mutableStateOf<Screen>(Screen.Dashboard) }
-    val controller = remember { EditorController(NativeHost) }
+    val context = LocalContext.current
+    val preferences = remember { context.getSharedPreferences("editor", 0) }
+    val controller = remember { EditorController(NativeHost, onSceneOpened = { name -> preferences.edit().putString("scene", name).commit() }) }
     BackHandler(screen != Screen.Dashboard) {
         screen = when (val current = screen) {
             is Screen.NewGame -> if (current.step is NewGameStep.Name) Screen.NewGame(NewGameStep.Template) else Screen.Dashboard
@@ -101,6 +103,7 @@ private fun NewGameFlow(step: NewGameStep, onStep: (NewGameStep) -> Unit, onDone
 private fun EditorRoute(controller: EditorController, onHome: () -> Unit) {
     val context = LocalContext.current
     val density = LocalDensity.current.density
+    val lastScene = remember { context.getSharedPreferences("editor", 0).getString("scene", SCENE) ?: SCENE }
     var surface by remember { mutableStateOf<SceneSurface?>(null) }
     var opened by remember { mutableStateOf(false) }
     var openError by remember { mutableStateOf<String?>(null) }
@@ -109,7 +112,7 @@ private fun EditorRoute(controller: EditorController, onHome: () -> Unit) {
         val project = withContext(Dispatchers.IO) { runCatching { BundledProjects.install(context, PROJECT) } }
         project.onSuccess { directory ->
             // On the main thread, where the native host lives.
-            val failure = NativeBridge.open(directory.path, SCENE)
+            val failure = NativeBridge.open(directory.path, lastScene)
                 ?: NativeBridge.command("recovery", context.filesDir.resolve("scene-recovery").path)
             if (failure == null) {
                 opened = true

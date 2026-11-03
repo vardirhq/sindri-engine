@@ -4,6 +4,8 @@
 
 - Author the Lamplighter village roads and paving in the scene so both editors show the same terrain as Play. Existing untouched bundled village copies are updated without replacing edited scenes or pending recovery.
 
+- List and open project scenes in the mobile editor, saving the current scene before switching and remembering the selected scene across restarts.
+
 - Preserve mobile scene edits in app-private recovery before saving. Backgrounding finishes an active gesture; failed or interrupted saves reopen as unsaved, with a choice if the scene changed externally.
 
 - Protect scene and prefab files from partial writes by saving to a temporary file before replacing the original. Symbolic-link targets are rejected. Recovery of unsaved mobile edits is still outstanding.

@@ -206,6 +206,11 @@ SINDRI_REQUIRE_GPU=1 cargo test -p sindri-mobile
 - **Fields.** The inspector edits a component's top-level numbers and switches.
   Text, vectors, colors, enums and references are not shown yet, and a field
   authored as a whole number steps by whole numbers.
+- **Scenes.** The Scenes sheet lists the project's manifest and opens a selected
+  scene; it saves the current scene first and remembers the selected scene for
+  recovery after restart. New scene and scene-door editing remain unwired.
+  Scene names must be unique because the runtime resolves them by file name.
+  Switching and restarting have not yet been exercised on the Pixel 8.
 - **Village ground.** The village's roads, cobbles, flagstones and soil are
   authored in its scene, so the mobile editor can draw them before Play. An
   unchanged copy of the previous bundled village is upgraded on app update;

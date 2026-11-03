@@ -343,7 +343,7 @@ private fun BoxScope.ScenesSheet(sheet: EditorSheet.Scenes, onEvent: (EditorEven
                     when {
                         scene == null -> Text("+", style = ForgeType.text(28.sp, color = Forge.TextFaint))
                         scene.preview -> TiledSheet(Sheet.Ground, 64f, Modifier.fillMaxSize())
-                        else -> Text("Lantern Crossing", style = ForgeType.text(13.sp, FontWeight.SemiBold, Forge.Text))
+                        else -> Symbol(Sym.view_quilt, 32.sp, Forge.TextFaint)
                     }
                 }
                 Row(Modifier.padding(start = 12.dp, end = 12.dp, top = 10.dp, bottom = 12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -352,7 +352,7 @@ private fun BoxScope.ScenesSheet(sheet: EditorSheet.Scenes, onEvent: (EditorEven
                 }
             }
         }
-        SectionLabel("Doors between scenes", Modifier.padding(start = 4.dp, top = 6.dp))
+        if (sheet.doors.isNotEmpty()) SectionLabel("Doors between scenes", Modifier.padding(start = 4.dp, top = 6.dp))
         sheet.doors.forEach { (from, to) ->
             Row(Modifier.fillMaxWidth().card().padding(horizontal = 14.dp, vertical = 12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 Text(from, style = ForgeType.text(13.sp).copy(fontFamily = ForgeType.Mono))
