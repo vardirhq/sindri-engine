@@ -77,6 +77,15 @@ class EditorController(
         }
     }
 
+    /** Finish a gesture and try to save before Android can end the backgrounded app. */
+    fun background() {
+        if (ui.mode != PlayMode.Edit) return
+        error = native.command("release")
+        if (error == null) error = native.command("settle")
+        if (error == null && native.state().unsaved) error = native.command("save")
+        refresh()
+    }
+
     /** Something changed on the host: draws its state again. */
     fun refresh() {
         state = native.state()

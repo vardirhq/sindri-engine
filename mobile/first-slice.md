@@ -207,8 +207,9 @@ SINDRI_REQUIRE_GPU=1 cargo test -p sindri-mobile
   Text, vectors, colors, enums and references are not shown yet, and a field
   authored as a whole number steps by whole numbers.
 - **Picking.** Taps pick what is drawn in the world; screen UI is not picked yet.
-- **Unsaved work is not yet recovered.** Unsaved edits are lost if Android ends
-  the app in the background. Scene and prefab saves now write and sync a
+- **Unsaved work is not yet recovered.** Backgrounding finishes a gesture and
+  attempts to save its edits, but if saving fails unsaved edits can still be
+  lost when Android ends the app. Scene and prefab saves now write and sync a
   temporary file before replacing the original; interruption behavior still
   needs to be exercised on the phone. Symbolic-link targets are rejected.
 - **The first save rewrites the whole file.** Lamplighter's checked-in scenes are

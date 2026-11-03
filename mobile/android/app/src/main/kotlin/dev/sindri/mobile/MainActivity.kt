@@ -112,7 +112,10 @@ private fun EditorRoute(controller: EditorController, onHome: () -> Unit) {
     }
     LifecycleResumeEffect(surface) {
         surface?.running = true
-        onPauseOrDispose { surface?.running = false }
+        onPauseOrDispose {
+            surface?.running = false
+            if (opened) controller.background()
+        }
     }
     // While a game runs, its clock and whether it is still running are read
     // a few times a second; the frames themselves are the surface's.
