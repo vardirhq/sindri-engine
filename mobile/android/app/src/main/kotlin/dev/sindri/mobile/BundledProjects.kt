@@ -23,15 +23,24 @@ object BundledProjects {
      * The installed copy of the bundled project [name], copied out of the APK
      * the first time it is asked for.
      *
-     * Never copied over once it exists: the copy is the person's project, saved
-     * into, and an app update must not replace their edits with the bundled
-     * original. The marker records which version it was installed from.
+     * The copy is the person's project: an app update must not replace edits.
+     * A specific, byte-identical old village may be upgraded if no recovery is
+     * pending. The marker records which version the project was installed from.
      */
     fun install(context: Context, name: String): File {
         val base = context.getExternalFilesDir(null) ?: context.filesDir
         val target = File(base, "$ROOT/$name")
         val marker = File(target, MARKER)
         if (marker.isFile) {
+            if (name == "lamplighter") {
+                val scene = File(target, "assets/village.scene")
+                val recovery = File(context.filesDir, "scene-recovery/recovery.json")
+                runCatching {
+                    BundledVillageUpgrade.apply(scene, recovery) {
+                        context.assets.open("$ROOT/$name/assets/village.scene").use { it.readBytes() }
+                    }
+                }.onFailure { android.util.Log.w("Sindri", "Could not update the untouched village", it) }
+            }
             return target
         }
         target.deleteRecursively()

@@ -19,5 +19,9 @@ sindri-platform = { path = "../../crates/sindri-platform", default-features = fa
 sindri-runtime = { path = "../../crates/sindri-runtime" }
 sindri-scene = { path = "../../crates/sindri-scene" }
 
+[dev-dependencies]
+serde_json.workspace = true
+tempfile = "3"
+
 [lints]
 workspace = true

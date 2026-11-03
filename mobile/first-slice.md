@@ -206,6 +206,12 @@ SINDRI_REQUIRE_GPU=1 cargo test -p sindri-mobile
 - **Fields.** The inspector edits a component's top-level numbers and switches.
   Text, vectors, colors, enums and references are not shown yet, and a field
   authored as a whole number steps by whole numbers.
+- **Village ground.** The village's roads, cobbles, flagstones and soil are
+  authored in its scene, so the mobile editor can draw them before Play. An
+  unchanged copy of the previous bundled village is upgraded on app update;
+  edited village files and projects with pending recovery are left untouched.
+  Existing edited copies need a separate, non-destructive migration. The new
+  layout still needs a Pixel 8 check.
 - **Picking.** Taps pick what is drawn in the world; screen UI is not picked yet.
 - **Recovery needs device proof.** Before a mobile scene save the app writes an
   app-private recovery copy. Backgrounding finishes a gesture and attempts to
