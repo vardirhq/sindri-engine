@@ -265,20 +265,29 @@ impl Host {
     pub(super) fn state(&self) -> String {
         let size = self.size();
         let screen_selection = match (&self.opened, &self.editing) {
-            (Some(opened), Some(editing)) => editing.selected
+            (Some(opened), Some(editing)) => editing
+                .selected
                 .and_then(|entity| opened.world.get(entity))
-                .is_some_and(|data| data.components.keys().any(|name| name.starts_with("sindri.ui."))),
+                .is_some_and(|data| {
+                    data.components
+                        .keys()
+                        .any(|name| name.starts_with("sindri.ui."))
+                }),
             _ => false,
         };
         let (inspector, origin, bounds, undo, redo, unsaved) = match (&self.opened, &self.editing) {
             (Some(opened), Some(editing)) => (
                 editing.inspector(&opened.world, &opened.extractor, &opened.assets.sheets),
-                (editing.selected_entities().len() == 1 && !editing.selecting_more && !screen_selection)
+                (editing.selected_entities().len() == 1
+                    && !editing.selecting_more
+                    && !screen_selection)
                     .then(|| editing.selection_pixel(&opened.world, size))
                     .flatten(),
                 // An outline that cannot be placed is left off rather than
                 // failing the whole state; the pick that selected it worked.
-                (editing.selected_entities().len() == 1 && !editing.selecting_more && !screen_selection)
+                (editing.selected_entities().len() == 1
+                    && !editing.selecting_more
+                    && !screen_selection)
                     .then(|| {
                         editing
                             .selection_bounds(

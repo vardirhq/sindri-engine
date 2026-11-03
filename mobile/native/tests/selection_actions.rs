@@ -90,8 +90,14 @@ fn scene_objects_include_unnamed_prefab_children_and_select_by_runtime_handle() 
     });
     let mut editing = Editing::new(&opened.world, &opened.extractor).expect("editing");
     let objects = editing.scene_objects(&opened.world);
-    assert!(objects.iter().any(|row| row["id"] == child.to_bits().to_string() && row["name"] == "Screen HUD"));
-    editing.select_object(&opened.world, &child.to_bits().to_string()).expect("select");
+    assert!(
+        objects
+            .iter()
+            .any(|row| row["id"] == child.to_bits().to_string() && row["name"] == "Screen HUD")
+    );
+    editing
+        .select_object(&opened.world, &child.to_bits().to_string())
+        .expect("select");
     assert_eq!(editing.selected, Some(child));
     assert!(editing.select_object(&opened.world, "not an id").is_err());
     assert_eq!(editing.selected, Some(child));

@@ -16,19 +16,29 @@ impl Editing {
     /// List the live scene, including prefab children without persistent scene IDs.
     pub fn scene_objects(&self, world: &World) -> Vec<serde_json::Value> {
         let selected = self.selected_entities();
-        let mut objects: Vec<_> = world.entities().map(|(entity, data)| {
-            let name = data.name.clone()
-                .or_else(|| data.source_id.as_ref().map(|id| id.as_str().to_owned()))
-                .unwrap_or_else(|| format!("{entity:?}"));
-            serde_json::json!({
-                "id": entity.to_bits().to_string(),
-                "name": name,
-                "selected": selected.contains(&entity),
-                "disabled": data.disabled,
-                "screen": data.components.keys().any(|name| name.starts_with("sindri.ui.")),
+        let mut objects: Vec<_> = world
+            .entities()
+            .map(|(entity, data)| {
+                let name = data
+                    .name
+                    .clone()
+                    .or_else(|| data.source_id.as_ref().map(|id| id.as_str().to_owned()))
+                    .unwrap_or_else(|| format!("{entity:?}"));
+                serde_json::json!({
+                    "id": entity.to_bits().to_string(),
+                    "name": name,
+                    "selected": selected.contains(&entity),
+                    "disabled": data.disabled,
+                    "screen": data.components.keys().any(|name| name.starts_with("sindri.ui.")),
+                })
             })
-        }).collect();
-        objects.sort_by(|a, b| a["name"].as_str().cmp(&b["name"].as_str()).then_with(|| a["id"].as_str().cmp(&b["id"].as_str())));
+            .collect();
+        objects.sort_by(|a, b| {
+            a["name"]
+                .as_str()
+                .cmp(&b["name"].as_str())
+                .then_with(|| a["id"].as_str().cmp(&b["id"].as_str()))
+        });
         objects
     }
 
