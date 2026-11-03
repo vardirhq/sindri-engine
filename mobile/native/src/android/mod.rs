@@ -22,7 +22,7 @@ use sindri_gpu::{GpuContext, GpuRequestOptions, WindowSurface};
 
 use sindri_runtime::ProjectAssets;
 
-use crate::{Editing, OpenedScene, Playing, SceneRenderer};
+use crate::{Editing, OpenedScene, Playing, Recovery, SceneRenderer};
 use window::AndroidWindow;
 
 /// Everything the app has opened and is drawing into.
@@ -32,6 +32,9 @@ struct Host {
     /// renderer can be rebuilt if a new surface wants a different format.
     source: Option<(PathBuf, String)>,
     opened: Option<OpenedScene>,
+    recovery: Option<Recovery>,
+    recovery_conflict: bool,
+    recovered: bool,
     /// The selection, history and view over the opened scene.
     editing: Option<Editing>,
     /// Whether a renderer has already taken the opened scene's textures.
@@ -61,6 +64,9 @@ struct Host {
 impl Host {
     fn open(&mut self, project: PathBuf, scene: String) -> Result<(), String> {
         let opened = OpenedScene::open(&project, &scene)?;
+        self.recovery = None;
+        self.recovery_conflict = false;
+        self.recovered = false;
         self.editing = Some(Editing::new(&opened.world, &opened.extractor)?);
         self.opened = Some(opened);
         self.installed = false;

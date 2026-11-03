@@ -2,6 +2,8 @@
 
 # Changelog
 
+- Preserve mobile scene edits in app-private recovery before saving. Backgrounding finishes an active gesture; failed or interrupted saves reopen as unsaved, with a choice if the scene changed externally.
+
 - Protect scene and prefab files from partial writes by saving to a temporary file before replacing the original. Symbolic-link targets are rejected. Recovery of unsaved mobile edits is still outstanding.
 
 - Make 2D lighting lighter on slow hardware. `SceneExtractor::set_lighting_quality` takes a

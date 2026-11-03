@@ -34,6 +34,8 @@ class EditorController(
 
     /** The last native state, which selection and the inspector are drawn from. */
     private var state = EditorState()
+    var recoveryConflict by mutableStateOf(false)
+        private set
     private var error: String? = null
 
     /**
@@ -62,6 +64,12 @@ class EditorController(
         native.command("density", density)
         native.command("lighting", settings.lightingPreview)
         refresh()
+        if (state.recovered) ui = ui.copy(toast = ToastUi("Recovered unsaved scene edits."))
+    }
+
+    fun chooseRecovery(restore: Boolean) {
+        error = native.command(if (restore) "recoveryRestore" else "recoveryDiscard")
+        refresh()
     }
 
     /**
@@ -77,9 +85,19 @@ class EditorController(
         }
     }
 
+    /** Finish a gesture and try to save before Android can end the backgrounded app. */
+    fun background() {
+        if (ui.mode != PlayMode.Edit) return
+        error = native.command("release")
+        if (error == null) error = native.command("settle")
+        if (error == null && native.state().unsaved) error = native.command("save")
+        refresh()
+    }
+
     /** Something changed on the host: draws its state again. */
     fun refresh() {
         state = native.state()
+        recoveryConflict = state.recoveryConflict
         val inspector = state.inspector
         val selection = inspector?.let { SelectionUi(InspectorPresenter.iconFor(it), it.name, "Properties") }
         settings = settings.copy(lightingPreview = state.lighting)

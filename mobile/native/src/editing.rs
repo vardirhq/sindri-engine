@@ -123,6 +123,11 @@ impl Editing {
         self.history.revision() != self.saved_revision
     }
 
+    /// A recovered world differs from the scene currently on disk.
+    pub fn recovered(&mut self) {
+        self.saved_revision = u64::MAX;
+    }
+
     /// The world was just written to its file.
     pub fn saved(&mut self) {
         self.saved_revision = self.history.revision();

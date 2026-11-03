@@ -6,6 +6,9 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -100,19 +103,28 @@ private fun EditorRoute(controller: EditorController, onHome: () -> Unit) {
     val density = LocalDensity.current.density
     var surface by remember { mutableStateOf<SceneSurface?>(null) }
     var opened by remember { mutableStateOf(false) }
+    var openError by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(Unit) {
         val project = withContext(Dispatchers.IO) { runCatching { BundledProjects.install(context, PROJECT) } }
         project.onSuccess { directory ->
             // On the main thread, where the native host lives.
-            NativeBridge.open(directory.path, SCENE)
-            opened = true
-            controller.opened(density)
+            val failure = NativeBridge.open(directory.path, SCENE)
+                ?: NativeBridge.command("recovery", context.filesDir.resolve("scene-recovery").path)
+            if (failure == null) {
+                opened = true
+                controller.opened(density)
+            } else {
+                openError = failure
+            }
         }
     }
     LifecycleResumeEffect(surface) {
         surface?.running = true
-        onPauseOrDispose { surface?.running = false }
+        onPauseOrDispose {
+            surface?.running = false
+            if (opened) controller.background()
+        }
     }
     // While a game runs, its clock and whether it is still running are read
     // a few times a second; the frames themselves are the surface's.
@@ -127,6 +139,23 @@ private fun EditorRoute(controller: EditorController, onHome: () -> Unit) {
             delay(2600)
             controller.dismissToast()
         }
+    }
+    if (controller.recoveryConflict) {
+        AlertDialog(
+            onDismissRequest = {},
+            title = { Text("Scene changed") },
+            text = { Text("The scene on disk changed since unsaved edits were recovered. Restore the recovered edits and replace the current scene when saved, or keep the current scene and discard the recovery?") },
+            confirmButton = { TextButton(onClick = { controller.chooseRecovery(true) }) { Text("Restore edits") } },
+            dismissButton = { TextButton(onClick = { controller.chooseRecovery(false) }) { Text("Keep current") } },
+        )
+    }
+    openError?.let { message ->
+        AlertDialog(
+            onDismissRequest = {},
+            title = { Text("Could not open scene") },
+            text = { Text(message) },
+            confirmButton = { TextButton(onClick = onHome) { Text("Back") } },
+        )
     }
     EditorScreen(controller.ui, { controller.on(it, onHome) }) {
         AndroidView(

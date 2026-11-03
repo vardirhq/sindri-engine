@@ -100,6 +100,33 @@ class EditorControllerTest {
     }
 
     @Test
+    fun backgrounding_finishes_an_edit_and_saves_it() {
+        host.state = EditorState(unsaved = true)
+        controller.background()
+        assertEquals(listOf("release"), host.commands[host.commands.size - 3])
+        assertEquals(listOf("settle"), host.commands[host.commands.size - 2])
+        assertEquals(listOf("save"), host.commands.last())
+        assertFalse(controller.ui.unsaved)
+    }
+
+    @Test
+    fun backgrounding_a_clean_scene_does_not_save() {
+        controller.background()
+        assertFalse(listOf("save") in host.commands)
+    }
+
+    @Test
+    fun recovery_conflict_offers_explicit_choices() {
+        host.state = EditorState(recoveryConflict = true)
+        controller.refresh()
+        assertTrue(controller.recoveryConflict)
+        controller.chooseRecovery(true)
+        assertEquals(listOf("recoveryRestore"), host.commands.last())
+        controller.chooseRecovery(false)
+        assertEquals(listOf("recoveryDiscard"), host.commands.last())
+    }
+
+    @Test
     fun back_lets_go_of_the_sheet_then_the_selection_then_leaves() {
         host.state = EditorState(inspector = Inspector("Lamp post", listOf(0.0, 0.0, 0.0), emptyList()))
         controller.refresh()

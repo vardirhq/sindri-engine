@@ -207,10 +207,14 @@ SINDRI_REQUIRE_GPU=1 cargo test -p sindri-mobile
   Text, vectors, colors, enums and references are not shown yet, and a field
   authored as a whole number steps by whole numbers.
 - **Picking.** Taps pick what is drawn in the world; screen UI is not picked yet.
-- **Unsaved work is not yet recovered.** Unsaved edits are lost if Android ends
-  the app in the background. Scene and prefab saves now write and sync a
-  temporary file before replacing the original; interruption behavior still
-  needs to be exercised on the phone. Symbolic-link targets are rejected.
+- **Recovery needs device proof.** Before a mobile scene save the app writes an
+  app-private recovery copy. Backgrounding finishes a gesture and attempts to
+  save it; after a failed or interrupted save, the next opening restores the
+  copy as unsaved. If the scene changed externally, the user chooses which
+  version to keep. A scene that cannot be opened at all cannot yet be restored.
+  Abrupt termination before an edit reaches a save or background callback can
+  still lose that edit. Interruption behavior needs to be exercised on the
+  phone. Scene and prefab saves reject symbolic-link targets.
 - **The first save rewrites the whole file.** Lamplighter's checked-in scenes are
   not stored in canonical form, so the first save from any editor, desktop
   included, rewrites them in canonical order and spacing (`world.scene` goes
@@ -252,5 +256,5 @@ Already shared: `CommandHistory`, `WorldCommand`, schema validation, `Session`,
 1. Record what "kinda works" means on the Pixel 8: run the step 1–3 checks above
    and fix what fails before adding more.
 2. Run the step 4 checks on the Pixel 8.
-3. Step 5: prove interrupted saves, keep unsaved edits across Android ending the app, and
+3. Step 5: prove interrupted saves and recovery across Android ending the app, and
    the surface, keyboard and inset behavior on the device.

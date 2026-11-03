@@ -82,6 +82,8 @@ data class EditorState(
     val redo: String? = null,
     /** Whether the scene holds edits its file does not. */
     val unsaved: Boolean = false,
+    val recoveryConflict: Boolean = false,
+    val recovered: Boolean = false,
     /** Whether the canvas shows the scene's 2D lighting. */
     val lighting: Boolean = false,
     /** The game running from the editor, or null in the editor. */
@@ -102,6 +104,8 @@ data class EditorState(
                 undo = root.optStringOrNull("undo"),
                 redo = root.optStringOrNull("redo"),
                 unsaved = root.optBoolean("unsaved"),
+                recoveryConflict = root.optBoolean("recoveryConflict"),
+                recovered = root.optBoolean("recovered"),
                 lighting = root.optBoolean("lighting"),
                 play = root.optJSONObject("play")?.let { play ->
                     val stick = play.optJSONObject("stick")
