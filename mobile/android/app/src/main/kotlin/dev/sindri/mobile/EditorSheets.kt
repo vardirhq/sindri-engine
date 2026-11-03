@@ -288,7 +288,9 @@ private fun BoxScope.ImportSheet(sheet: EditorSheet.Import, onEvent: (EditorEven
 @Composable
 private fun BoxScope.LayersSheet(sheet: EditorSheet.Layers, onEvent: (EditorEvent) -> Unit) = SheetFrame(SheetHeight.Share(600.dp, 0.86f)) {
     SheetHeader("Layers", onClose = { onEvent(EditorEvent.CloseSheet) }) {
-        Segmented(LayerTab.entries.map { it.label }, sheet.tab.ordinal, { onEvent(EditorEvent.LayerTabChosen(LayerTab.entries[it])) })
+        if (sheet.layers.isNotEmpty()) {
+            Segmented(LayerTab.entries.map { it.label }, sheet.tab.ordinal, { onEvent(EditorEvent.LayerTabChosen(LayerTab.entries[it])) })
+        }
     }
     SheetBody(horizontal = 10.dp, gap = 0.dp) {
         when (sheet.tab) {
@@ -309,7 +311,9 @@ private fun BoxScope.LayersSheet(sheet: EditorSheet.Layers, onEvent: (EditorEven
                 }
                 Hairline()
             }
-            LayerTab.Objects -> sheet.objects.forEach { row ->
+            LayerTab.Objects -> {
+                if (sheet.objects.isEmpty()) Text("No objects in this scene", style = ForgeType.text(14.sp, color = Forge.TextMuted), modifier = Modifier.padding(16.dp))
+                sheet.objects.forEach { row ->
                 Row(
                     Modifier
                         .fillMaxWidth()
@@ -326,6 +330,7 @@ private fun BoxScope.LayersSheet(sheet: EditorSheet.Layers, onEvent: (EditorEven
                     Symbol(row.icon, 20.sp, Forge.TextMuted)
                     Text(row.name, style = ForgeType.text(14.sp, color = if (row.selected) Forge.MetalBright else Forge.Text), modifier = Modifier.weight(1f), maxLines = 1, overflow = TextOverflow.Ellipsis)
                     Text(row.detail, style = ForgeType.text(12.sp, color = Forge.TextFaint), modifier = Modifier.padding(end = 8.dp))
+                }
                 }
             }
         }

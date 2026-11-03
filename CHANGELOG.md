@@ -2,6 +2,8 @@
 
 # Changelog
 
+- List the open scene’s objects in the mobile Layers sheet and select them by tapping, including screen UI and prefab children.
+
 - Ignore transparent sprite padding when picking in the mobile editor, and place selection handles around the visible art. Sheet anchors are honored.
 - Add multi-selection, duplicate and delete to the mobile editor. Subtree edits share the desktop duplication rules and undo as one step.
 

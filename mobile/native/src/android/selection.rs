@@ -1,8 +1,36 @@
 //! Selection actions from the mobile toolbar.
 
 use super::Host;
+use serde_json::Value;
 
 impl Host {
+    pub(super) fn object_command(
+        &mut self,
+        command: &str,
+        arguments: &[Value],
+    ) -> Result<(), String> {
+        match command {
+            "clearObjects" => {
+                self.objects.clear();
+                Ok(())
+            }
+            "refreshObjects" => {
+                let (opened, editing) = self.editing()?;
+                self.objects = editing.scene_objects(&opened.world);
+                Ok(())
+            }
+            "selectObject" => {
+                let id = arguments
+                    .first()
+                    .and_then(Value::as_str)
+                    .ok_or_else(|| format!("{command}: argument 0 is not text"))?;
+                let (opened, editing) = self.editing()?;
+                editing.select_object(&opened.world, id)
+            }
+            _ => Err(format!("unknown object command {command}")),
+        }
+    }
+
     pub(super) fn selection_command(&mut self, command: &str) -> Result<(), String> {
         let (opened, editing) = self.editing()?;
         match command {

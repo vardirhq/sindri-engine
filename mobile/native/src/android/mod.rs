@@ -36,6 +36,8 @@ struct Host {
     recovery: Option<Recovery>,
     recovery_directory: Option<PathBuf>,
     scenes: Vec<ListedScene>,
+    /// A snapshot requested when the Layers sheet is open.
+    objects: Vec<serde_json::Value>,
     recovery_conflict: bool,
     recovered: bool,
     /// The selection, history and view over the opened scene.

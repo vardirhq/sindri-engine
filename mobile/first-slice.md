@@ -203,6 +203,7 @@ SINDRI_REQUIRE_GPU=1 cargo test -p sindri-mobile
 
 ## Known limits
 
+- **Objects.** Layers lists real scene objects, including screen UI and prefab children, and tapping a row selects it. The list is flat; layer visibility and hierarchy controls are not wired. Screen UI selection is inspectable but has no canvas handles. Device verification remains open.
 - **Fields.** The inspector edits a component's top-level numbers and switches.
   Text, vectors, colors, enums and references are not shown yet, and a field
   authored as a whole number steps by whole numbers.

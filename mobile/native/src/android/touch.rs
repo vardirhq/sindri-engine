@@ -264,15 +264,30 @@ impl Host {
     /// box it covers (for its handles), the undo state and the lighting preview.
     pub(super) fn state(&self) -> String {
         let size = self.size();
+        let screen_selection = match (&self.opened, &self.editing) {
+            (Some(opened), Some(editing)) => editing
+                .selected
+                .and_then(|entity| opened.world.get(entity))
+                .is_some_and(|data| {
+                    data.components
+                        .keys()
+                        .any(|name| name.starts_with("sindri.ui."))
+                }),
+            _ => false,
+        };
         let (inspector, origin, bounds, undo, redo, unsaved) = match (&self.opened, &self.editing) {
             (Some(opened), Some(editing)) => (
                 editing.inspector(&opened.world, &opened.extractor, &opened.assets.sheets),
-                (editing.selected_entities().len() == 1 && !editing.selecting_more)
+                (editing.selected_entities().len() == 1
+                    && !editing.selecting_more
+                    && !screen_selection)
                     .then(|| editing.selection_pixel(&opened.world, size))
                     .flatten(),
                 // An outline that cannot be placed is left off rather than
                 // failing the whole state; the pick that selected it worked.
-                (editing.selected_entities().len() == 1 && !editing.selecting_more)
+                (editing.selected_entities().len() == 1
+                    && !editing.selecting_more
+                    && !screen_selection)
                     .then(|| {
                         editing
                             .selection_bounds(
@@ -296,6 +311,7 @@ impl Host {
             "sceneName": self.opened.as_ref().map(|opened| &opened.name),
             "scenes": self.scenes.iter().map(|scene| json!({"name": scene.name, "main": scene.main})).collect::<Vec<_>>(),
             "inspector": inspector,
+            "objects": self.objects,
             "selectionCount": self.editing.as_ref().map_or(0, |editing| editing.selected_entities().len()),
             "selectingMore": self.editing.as_ref().is_some_and(|editing| editing.selecting_more),
             "origin": origin,
@@ -396,6 +412,9 @@ impl Host {
                 Ok(())
             }
             "openScene" => self.open_scene(text(0)?),
+            "clearObjects" | "refreshObjects" | "selectObject" => {
+                self.object_command(command, &arguments)
+            }
             "recovery" => self.configure_recovery(text(0)?),
             "recoveryRestore" => self.restore_recovery(),
             "recoveryDiscard" => self.discard_recovery(),
