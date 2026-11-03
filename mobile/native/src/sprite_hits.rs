@@ -4,7 +4,7 @@ use std::collections::BTreeMap;
 
 use sindri_core::sheet_id_for;
 use sindri_runtime::ProjectAssets;
-use sindri_scene::SpriteComponent;
+use sindri_scene::{ImageDraw, SpriteComponent};
 
 #[derive(Clone)]
 struct Frame {
@@ -88,7 +88,7 @@ impl SpriteHits {
         }
         // Sliced sprites stretch their borders nonlinearly; keep their quad
         // selectable until the same nine-slice mapping is available here.
-        if sprite.draw != Default::default() || !sprite.shader.is_empty() {
+        if sprite.draw != ImageDraw::default() || !sprite.shader.is_empty() {
             return true;
         }
         let [left, top, width, height] = frame.rect;
@@ -105,7 +105,7 @@ impl SpriteHits {
 
     /// Visible local bounds, accounting for the sheet anchor.
     pub fn bounds(&self, sprite: &SpriteComponent) -> Option<[f32; 4]> {
-        if sprite.draw != Default::default() || !sprite.shader.is_empty() {
+        if sprite.draw != ImageDraw::default() || !sprite.shader.is_empty() {
             return None;
         }
         let (image, frame) = self.image_and_frame(sprite)?;
