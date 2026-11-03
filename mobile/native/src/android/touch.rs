@@ -268,17 +268,23 @@ impl Host {
             (Some(opened), Some(editing)) => (
                 editing.inspector(&opened.world, &opened.extractor, &opened.assets.sheets),
                 (editing.selected_entities().len() == 1 && !editing.selecting_more)
-                    .then(|| editing.selection_pixel(&opened.world, size)).flatten(),
+                    .then(|| editing.selection_pixel(&opened.world, size))
+                    .flatten(),
                 // An outline that cannot be placed is left off rather than
                 // failing the whole state; the pick that selected it worked.
                 (editing.selected_entities().len() == 1 && !editing.selecting_more)
-                    .then(|| editing.selection_bounds(
-                        &opened.world,
-                        &opened.extractor,
-                        &opened.assets.sheets,
-                        size,
-                    )
-                    .ok().flatten()).flatten(),
+                    .then(|| {
+                        editing
+                            .selection_bounds(
+                                &opened.world,
+                                &opened.extractor,
+                                &opened.assets.sheets,
+                                size,
+                            )
+                            .ok()
+                            .flatten()
+                    })
+                    .flatten(),
                 editing.history.undo_label(),
                 editing.history.redo_label(),
                 editing.unsaved(),

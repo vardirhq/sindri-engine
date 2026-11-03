@@ -373,7 +373,9 @@ impl Editing {
         if self.outline.as_ref().map(|(built, _)| *built) != Some(key) {
             let mut result = outlined(world, entity, width);
             for other in &self.additional {
-                if let Some(outlined_world) = outlined(result.as_ref().unwrap_or(world), *other, width) {
+                if let Some(outlined_world) =
+                    outlined(result.as_ref().unwrap_or(world), *other, width)
+                {
                     result = Some(outlined_world);
                 }
             }
@@ -391,7 +393,9 @@ impl Editing {
     /// The world refused the reversal.
     pub fn undo(&mut self, world: &mut World) -> Result<(), String> {
         self.touch = None;
-        self.history.undo(world).map_err(|error| error.to_string())?;
+        self.history
+            .undo(world)
+            .map_err(|error| error.to_string())?;
         self.prune_selection(world);
         self.outline = None;
         Ok(())
@@ -403,7 +407,9 @@ impl Editing {
     /// The world refused the step.
     pub fn redo(&mut self, world: &mut World) -> Result<(), String> {
         self.touch = None;
-        self.history.redo(world).map_err(|error| error.to_string())?;
+        self.history
+            .redo(world)
+            .map_err(|error| error.to_string())?;
         self.prune_selection(world);
         self.outline = None;
         Ok(())

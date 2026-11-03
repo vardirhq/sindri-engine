@@ -7,7 +7,10 @@ use crate::Editing;
 impl Editing {
     /// Every selected entity, with the primary first.
     pub fn selected_entities(&self) -> Vec<EntityId> {
-        self.selected.into_iter().chain(self.additional.iter().copied()).collect()
+        self.selected
+            .into_iter()
+            .chain(self.additional.iter().copied())
+            .collect()
     }
 
     /// Toggle whether canvas taps add or remove objects from the selection.
@@ -18,7 +21,11 @@ impl Editing {
     /// Add or remove an entity from the selection.
     pub fn toggle_selected(&mut self, entity: EntityId) {
         if self.selected == Some(entity) {
-            self.selected = if self.additional.is_empty() { None } else { Some(self.additional.remove(0)) };
+            self.selected = if self.additional.is_empty() {
+                None
+            } else {
+                Some(self.additional.remove(0))
+            };
         } else if let Some(index) = self.additional.iter().position(|item| *item == entity) {
             self.additional.remove(index);
         } else if self.selected.is_none() {
@@ -26,7 +33,9 @@ impl Editing {
         } else {
             self.additional.push(entity);
         }
-        if self.selected.is_none() { self.selecting_more = false; }
+        if self.selected.is_none() {
+            self.selecting_more = false;
+        }
     }
 
     /// Clear both the selection and the add-to-selection mode.
@@ -39,11 +48,17 @@ impl Editing {
     /// Delete selected subtrees in one undoable transaction.
     pub fn delete_selection(&mut self, world: &mut World) -> Result<(), String> {
         let roots = topmost(world, &self.selected_entities());
-        if roots.is_empty() { return Err("Nothing is selected".to_owned()); }
+        if roots.is_empty() {
+            return Err("Nothing is selected".to_owned());
+        }
         let mut commands = CommandBuffer::new();
-        for entity in roots { commands.push(WorldCommand::Despawn { entity }); }
+        for entity in roots {
+            commands.push(WorldCommand::Despawn { entity });
+        }
         self.history.break_merge_run();
-        self.history.apply(commands.into_transaction("Delete selection"), world).map_err(|e| e.to_string())?;
+        self.history
+            .apply(commands.into_transaction("Delete selection"), world)
+            .map_err(|e| e.to_string())?;
         self.clear_selection();
         Ok(())
     }
@@ -51,15 +66,24 @@ impl Editing {
     /// Duplicate selected subtrees using the desktop editor's copy semantics.
     pub fn duplicate_selection(&mut self, world: &mut World) -> Result<(), String> {
         let roots = topmost(world, &self.selected_entities());
-        if roots.is_empty() { return Err("Nothing is selected".to_owned()); }
+        if roots.is_empty() {
+            return Err("Nothing is selected".to_owned());
+        }
         let mut commands = CommandBuffer::new();
         let mut rehearsal = world.clone();
         let mut copies = Vec::new();
         for entity in roots {
-            copies.extend(sindri_authoring::duplicate::duplicate_into(&mut rehearsal, world, entity, &mut commands));
+            copies.extend(sindri_authoring::duplicate::duplicate_into(
+                &mut rehearsal,
+                world,
+                entity,
+                &mut commands,
+            ));
         }
         self.history.break_merge_run();
-        self.history.apply(commands.into_transaction("Duplicate selection"), world).map_err(|e| e.to_string())?;
+        self.history
+            .apply(commands.into_transaction("Duplicate selection"), world)
+            .map_err(|e| e.to_string())?;
         self.selected = copies.first().copied();
         self.additional = copies.into_iter().skip(1).collect();
         self.selecting_more = false;
@@ -70,20 +94,34 @@ impl Editing {
     pub(crate) fn prune_selection(&mut self, world: &World) {
         self.additional.retain(|id| world.get(*id).is_some());
         if self.selected.is_some_and(|id| world.get(id).is_none()) {
-            self.selected = if self.additional.is_empty() { None } else { Some(self.additional.remove(0)) };
+            self.selected = if self.additional.is_empty() {
+                None
+            } else {
+                Some(self.additional.remove(0))
+            };
         }
-        if self.selected.is_none() { self.selecting_more = false; }
+        if self.selected.is_none() {
+            self.selecting_more = false;
+        }
     }
 }
 
 fn topmost(world: &World, selected: &[EntityId]) -> Vec<EntityId> {
-    selected.iter().copied().filter(|entity| {
-        if world.get(*entity).is_none() { return false; }
-        let mut parent = world.get(*entity).and_then(|data| data.parent);
-        while let Some(id) = parent {
-            if selected.contains(&id) { return false; }
-            parent = world.get(id).and_then(|data| data.parent);
-        }
-        true
-    }).collect()
+    selected
+        .iter()
+        .copied()
+        .filter(|entity| {
+            if world.get(*entity).is_none() {
+                return false;
+            }
+            let mut parent = world.get(*entity).and_then(|data| data.parent);
+            while let Some(id) = parent {
+                if selected.contains(&id) {
+                    return false;
+                }
+                parent = world.get(id).and_then(|data| data.parent);
+            }
+            true
+        })
+        .collect()
 }

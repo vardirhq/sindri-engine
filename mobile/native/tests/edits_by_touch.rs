@@ -579,11 +579,17 @@ fn select_more_toggles_an_object_by_tapping_the_canvas() {
     let other = entity(&opened, "cover-19");
     look_at(&mut editing, &opened, lamp);
     editing.selected = Some(lamp);
-    let pixel = editing.selection_pixel(&opened.world, SIZE).expect("lamp on canvas");
+    let pixel = editing
+        .selection_pixel(&opened.world, SIZE)
+        .expect("lamp on canvas");
     editing.selected = Some(other);
     editing.select_more();
-    editing.tap(&opened.world, &opened.extractor, pixel, SIZE).expect("tap adds lamp");
+    editing
+        .tap(&opened.world, &opened.extractor, pixel, SIZE)
+        .expect("tap adds lamp");
     assert_eq!(editing.selected_entities(), vec![other, lamp]);
-    editing.tap(&opened.world, &opened.extractor, pixel, SIZE).expect("tap removes lamp");
+    editing
+        .tap(&opened.world, &opened.extractor, pixel, SIZE)
+        .expect("tap removes lamp");
     assert_eq!(editing.selected_entities(), vec![other]);
 }

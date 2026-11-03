@@ -17,15 +17,32 @@ fn id(name: &str) -> SceneEntityId {
 #[test]
 fn duplicating_parent_and_child_copies_one_subtree_and_undoes_as_one() {
     let mut opened = scene();
-    let parent = opened.world.spawn(EntityData { source_id: Some(id("test-parent")), ..Default::default() });
-    let child = opened.world.spawn(EntityData { source_id: Some(id("test-child")), ..Default::default() });
-    opened.world.set_parent(child, Some(parent)).expect("parenting");
+    let parent = opened.world.spawn(EntityData {
+        source_id: Some(id("test-parent")),
+        ..Default::default()
+    });
+    let child = opened.world.spawn(EntityData {
+        source_id: Some(id("test-child")),
+        ..Default::default()
+    });
+    opened
+        .world
+        .set_parent(child, Some(parent))
+        .expect("parenting");
     let mut editing = Editing::new(&opened.world, &opened.extractor).expect("editing");
     editing.selected = Some(parent);
     editing.toggle_selected(child);
-    editing.duplicate_selection(&mut opened.world).expect("duplicate");
-    let copy = opened.world.entity_for_source_id(&id("test-parent-copy")).expect("parent copied");
-    let child_copy = opened.world.entity_for_source_id(&id("test-child-copy")).expect("child copied");
+    editing
+        .duplicate_selection(&mut opened.world)
+        .expect("duplicate");
+    let copy = opened
+        .world
+        .entity_for_source_id(&id("test-parent-copy"))
+        .expect("parent copied");
+    let child_copy = opened
+        .world
+        .entity_for_source_id(&id("test-child-copy"))
+        .expect("child copied");
     assert_eq!(opened.world.get(child_copy).unwrap().parent, Some(copy));
     assert_eq!(editing.selected_entities(), vec![copy]);
     editing.undo(&mut opened.world).expect("undo");
@@ -40,9 +57,18 @@ fn duplicating_parent_and_child_copies_one_subtree_and_undoes_as_one() {
 #[test]
 fn deleting_overlapping_selection_restores_the_subtree_on_undo() {
     let mut opened = scene();
-    let parent = opened.world.spawn(EntityData { source_id: Some(id("delete-parent")), ..Default::default() });
-    let child = opened.world.spawn(EntityData { source_id: Some(id("delete-child")), ..Default::default() });
-    opened.world.set_parent(child, Some(parent)).expect("parenting");
+    let parent = opened.world.spawn(EntityData {
+        source_id: Some(id("delete-parent")),
+        ..Default::default()
+    });
+    let child = opened.world.spawn(EntityData {
+        source_id: Some(id("delete-child")),
+        ..Default::default()
+    });
+    opened
+        .world
+        .set_parent(child, Some(parent))
+        .expect("parenting");
     let mut editing = Editing::new(&opened.world, &opened.extractor).expect("editing");
     editing.selected = Some(parent);
     editing.toggle_selected(child);
