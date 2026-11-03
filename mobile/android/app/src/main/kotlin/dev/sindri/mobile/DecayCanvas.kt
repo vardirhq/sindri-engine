@@ -195,7 +195,7 @@ fun DecayCanvas(
             },
         ) { value -> editing = null; value?.let { onEdit(slot, it) } }
     }
-    menu?.let { node -> NodeMenu(node, script.palette, onDone = { menu = null }, onChange = onChange) }
+    menu?.let { node -> NodeMenu(node, script.palette, onDone = { menu = null }, onChange = onChange, engine = script.engine) }
 }
 
 /**

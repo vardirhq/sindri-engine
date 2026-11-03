@@ -142,7 +142,9 @@ pub fn palette(script: &VisualScript) -> Vec<(String, String)> {
 /// The engine's calls a step can make, for a finder: each one's id, for
 /// [`Template::engine`], and its call with placeholder arguments, such as
 /// `Audio.play("", 0)`. Only calls whose arguments all have a plain placeholder
-/// (a number, text or a switch) are offered, sorted by name.
+/// (a number, text, switch, vector, or the current entity) are offered,
+/// sorted by name. Other argument types stay unavailable until they can be
+/// authored safely.
 #[must_use]
 pub fn engine_calls(environment: &Environment) -> Vec<(String, String)> {
     let mut calls = Vec::new();
@@ -166,6 +168,9 @@ pub fn engine_calls(environment: &Environment) -> Vec<(String, String)> {
                     Type::Number => Some("0"),
                     Type::Bool => Some("false"),
                     Type::String => Some("\"\""),
+                    Type::Vec2 => Some("Vec2(0, 0)"),
+                    Type::Vec3 => Some("Vec3(0, 0, 0)"),
+                    Type::Named(name) if name == "Entity" => Some("this.entity"),
                     _ => None,
                 })
                 .collect();

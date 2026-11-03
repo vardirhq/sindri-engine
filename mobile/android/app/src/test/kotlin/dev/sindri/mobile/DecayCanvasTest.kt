@@ -7,6 +7,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -103,6 +104,19 @@ class DecayCanvasTest {
         assertEquals(listOf("engine:Audio.play"), findSteps("sound", palette, engine).map { it.first })
         assertEquals(listOf("engine:World.find"), findSteps("world.f", palette, engine).map { it.first })
         assertEquals(listOf("set:glow"), findSteps("glow", palette, engine).map { it.first })
+    }
+
+    @Test
+    fun finder_categories_and_search_cover_every_result() {
+        val palette = listOf("return" to "Return")
+        val engine = (1..75).map { "engine:World.call$it" to "World.call$it(this.entity)" } +
+            ("engine:World.despawn" to "World.despawn(this.entity)") +
+            ("engine:Audio.play" to "Audio.play(\"\", 0)")
+        assertTrue("Objects" in stepCategories(palette, engine))
+        assertTrue("Audio" in stepCategories(palette, engine))
+        assertEquals(76, findSteps("", palette, engine, "Objects").size)
+        assertEquals(listOf("engine:World.despawn"), findSteps("despawn", palette, engine).map { it.first })
+        assertEquals(listOf("return"), findSteps("", palette, engine, "Script").map { it.first })
     }
 
     @Test
