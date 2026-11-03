@@ -2,6 +2,8 @@
 
 # Changelog
 
+- Ignore transparent sprite padding when picking in the mobile editor, and place selection handles around the visible art. Sheet anchors are honored.
+
 - Author the Lamplighter village roads and paving in the scene so both editors show the same terrain as Play. Existing untouched bundled village copies are updated without replacing edited scenes or pending recovery.
 
 - List and open project scenes in the mobile editor, saving the current scene before switching and remembering the selected scene across restarts.

@@ -217,7 +217,10 @@ SINDRI_REQUIRE_GPU=1 cargo test -p sindri-mobile
   edited village files and projects with pending recovery are left untouched.
   Existing edited copies need a separate, non-destructive migration. The new
   layout still needs a Pixel 8 check.
-- **Picking.** Taps pick what is drawn in the world; screen UI is not picked yet.
+- **Picking.** Sprite taps use the sheet anchor and nontransparent pixels,
+  and selection handles use visible pixel bounds. Sliced and custom-shader
+  sprites fall back to their full frames. Screen UI is not picked yet; the new
+  picking behavior still needs verification on the phone.
 - **Recovery needs device proof.** Before a mobile scene save the app writes an
   app-private recovery copy. Backgrounding finishes a gesture and attempts to
   save it; after a failed or interrupted save, the next opening restores the

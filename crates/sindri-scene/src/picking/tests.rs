@@ -469,3 +469,16 @@ fn bounds_are_none_for_an_entity_with_nothing_drawn() {
         None
     );
 }
+
+#[test]
+fn rejecting_a_transparent_sprite_hit_allows_the_sprite_behind_it() {
+    let extractor = SceneExtractor::new().unwrap();
+    let mut world = World::default();
+    let behind = spawn(&mut world, Transform3D::default(), "sindri.sprite", sprite(0));
+    let front = spawn(&mut world, Transform3D::default(), "sindri.sprite", sprite(1));
+    let picked = pick_world_with_sprite_hit(
+        &world, extractor.components(), Mat4::IDENTITY, [0.5, 0.5],
+        |entity, _, local| entity != front && local[0].abs() < 0.5 && local[1].abs() < 0.5,
+    ).unwrap();
+    assert_eq!(picked, Some(behind));
+}

@@ -32,6 +32,20 @@ pub fn pick_world(
     view_projection: Mat4,
     point: [f32; 2],
 ) -> Result<Option<EntityId>, ComponentRegistryError> {
+    pick_world_with_sprite_hit(world, components, view_projection, point, |_, _, local| {
+        local[0].abs() <= 0.5 && local[1].abs() <= 0.5
+    })
+}
+
+/// Pick with caller-provided sprite geometry, while preserving world draw order.
+/// The callback receives a point in the entity's local coordinate system.
+pub fn pick_world_with_sprite_hit(
+    world: &World,
+    components: &ComponentSchemaRegistry,
+    view_projection: Mat4,
+    point: [f32; 2],
+    hit: impl Fn(EntityId, &SpriteComponent, [f32; 2]) -> bool,
+) -> Result<Option<EntityId>, ComponentRegistryError> {
     let Some(ray) = RaySegment::through_viewport(view_projection, point) else {
         return Ok(None);
     };
@@ -56,7 +70,8 @@ pub fn pick_world(
         .filter(|(_, sprite)| is_drawn(sprite.tint))
         .filter_map(|(entity, sprite)| {
             let transform = transform_of(world, entity);
-            plane_hit(ray, transform, 0.5).map(|(depth, _)| Hit {
+            let (depth, local) = plane_hit(ray, transform, f32::INFINITY)?;
+            hit(entity, &sprite, [local.x, local.y]).then_some(Hit {
                 entity,
                 depth,
                 layer: sprite.layer,
@@ -145,6 +160,28 @@ pub fn anchored_bounds(
     } else {
         return Ok(None);
     };
+    Ok(project_bounds(world, view_projection, entity, corners))
+}
+
+/// Project a sprite's visible local rectangle, including its anchor offset.
+pub fn sprite_content_bounds(
+    world: &World,
+    view_projection: Mat4,
+    entity: EntityId,
+    bounds: [f32; 4],
+) -> Option<[f32; 4]> {
+    let [left, bottom, right, top] = bounds;
+    let corners = [[left, bottom], [right, bottom], [left, top], [right, top]]
+        .into_iter().map(|[x, y]| Vec3::new(x, y, 0.0)).collect();
+    project_bounds(world, view_projection, entity, corners)
+}
+
+fn project_bounds(
+    world: &World,
+    view_projection: Mat4,
+    entity: EntityId,
+    corners: Vec<Vec3>,
+) -> Option<[f32; 4]> {
     let model = view_projection * transform_matrix(transform_of(world, entity));
     let mut bounds = [
         f32::INFINITY,
@@ -155,7 +192,7 @@ pub fn anchored_bounds(
     for corner in corners {
         let clip = model * corner.extend(1.0);
         if clip.w <= f32::EPSILON {
-            return Ok(None);
+            return None;
         }
         let x = (clip.x / clip.w + 1.0) * 0.5;
         let y = (1.0 - clip.y / clip.w) * 0.5;
@@ -171,7 +208,7 @@ pub fn anchored_bounds(
         && bounds[0] <= 1.0
         && bounds[3] >= 0.0
         && bounds[1] <= 1.0;
-    Ok(reaches.then_some(bounds))
+    reaches.then_some(bounds)
 }
 
 /// Selects the topmost UI element under a normalized viewport point.

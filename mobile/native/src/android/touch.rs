@@ -144,7 +144,7 @@ impl Host {
         }
         let project = project.clone();
         let mut opened = OpenedScene::open(&project, name)?;
-        let mut editing = Editing::new(&opened.world, &opened.extractor)?;
+        let mut editing = Editing::for_scene(&opened)?;
         editing.lighting_preview = self
             .editing
             .as_ref()
@@ -200,7 +200,7 @@ impl Host {
         let recovery = self.recovery.as_ref().ok_or("recovery is not ready")?;
         let opened = self.opened.as_mut().ok_or("no scene is open")?;
         recovery.restore(opened)?;
-        let mut editing = Editing::new(&opened.world, &opened.extractor)?;
+        let mut editing = Editing::for_scene(opened)?;
         editing.recovered();
         self.editing = Some(editing);
         self.recovery_conflict = false;

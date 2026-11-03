@@ -12,7 +12,7 @@ use sindri_core::{
     AssetId, CommandBuffer, CommandHistory, EntityId, SpriteSheetDocument, Transform3D, World,
     WorldCommand, sheet_id_for,
 };
-use sindri_scene::picking::{anchored_bounds, pick_world};
+use sindri_scene::picking::{anchored_bounds, pick_world, pick_world_with_sprite_hit, sprite_content_bounds};
 use sindri_scene::{SceneExtractor, SpriteComponent};
 
 use crate::OpenedScene;
@@ -85,6 +85,7 @@ enum Touch {
 /// An opened scene being edited: its history, its selection, and the view.
 pub struct Editing {
     pub history: CommandHistory,
+    sprite_hits: Option<std::sync::Arc<crate::sprite_hits::SpriteHits>>,
     pub selected: Option<EntityId>,
     pub canvas: Canvas,
     /// Whether the canvas shows the scene's 2D lights and the darkness they
@@ -109,6 +110,7 @@ impl Editing {
     pub fn new(world: &World, extractor: &SceneExtractor) -> Result<Self, String> {
         Ok(Self {
             history: CommandHistory::default(),
+            sprite_hits: None,
             selected: None,
             canvas: Canvas::framing(world, extractor)?,
             lighting_preview: false,
@@ -116,6 +118,13 @@ impl Editing {
             outline: None,
             saved_revision: 0,
         })
+    }
+
+    /// Begin editing with the scene's sprite alpha and anchor information.
+    pub fn for_scene(opened: &OpenedScene) -> Result<Self, String> {
+        let mut editing = Self::new(&opened.world, &opened.extractor)?;
+        editing.sprite_hits = Some(std::sync::Arc::clone(&opened.sprite_hits));
+        Ok(editing)
     }
 
     /// Whether the world holds edits its file does not.
@@ -151,8 +160,12 @@ impl Editing {
     ) -> Result<Option<EntityId>, String> {
         let camera = self.canvas.camera(world, extractor, size)?;
         let point = [pixel[0] / size[0].max(1.0), pixel[1] / size[1].max(1.0)];
-        let picked = pick_world(world, extractor.components(), camera.view_projection, point)
-            .map_err(|error| error.to_string())?;
+        let picked = if let Some(hits) = &self.sprite_hits {
+            pick_world_with_sprite_hit(world, extractor.components(), camera.view_projection, point,
+                |_, sprite, local| hits.hit(sprite, local))
+        } else {
+            pick_world(world, extractor.components(), camera.view_projection, point)
+        }.map_err(|error| error.to_string())?;
         Ok(picked.filter(|entity| {
             world
                 .get(*entity)
@@ -416,6 +429,13 @@ impl Editing {
         let camera = self.canvas.camera(world, extractor, size)?;
         // A sheet that stands its sprites on their feet moves the drawn quad;
         // the box moves with it, or the handles sit below the picture.
+        if let Some(hits) = &self.sprite_hits
+            && let Some(sprite) = extractor.components().get::<SpriteComponent>(world, entity).ok().flatten()
+            && let Some(bounds) = hits.bounds(&sprite)
+            && let Some([left, top, right, bottom]) = sprite_content_bounds(world, camera.view_projection, entity, bounds)
+        {
+            return Ok(Some([left * size[0], top * size[1], right * size[0], bottom * size[1]]));
+        }
         let offset = extractor
             .components()
             .get::<SpriteComponent>(world, entity)
