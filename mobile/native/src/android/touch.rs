@@ -18,7 +18,7 @@ impl Host {
     }
 
     /// The scene and its editing session, or why there are none.
-    fn editing(&mut self) -> Result<(&mut OpenedScene, &mut Editing), String> {
+    pub(super) fn editing(&mut self) -> Result<(&mut OpenedScene, &mut Editing), String> {
         match (&mut self.opened, &mut self.editing) {
             (Some(opened), Some(editing)) => Ok((opened, editing)),
             _ => Err("no scene is open".to_owned()),
@@ -267,18 +267,18 @@ impl Host {
         let (inspector, origin, bounds, undo, redo, unsaved) = match (&self.opened, &self.editing) {
             (Some(opened), Some(editing)) => (
                 editing.inspector(&opened.world, &opened.extractor, &opened.assets.sheets),
-                editing.selection_pixel(&opened.world, size),
+                (editing.selected_entities().len() == 1 && !editing.selecting_more)
+                    .then(|| editing.selection_pixel(&opened.world, size)).flatten(),
                 // An outline that cannot be placed is left off rather than
                 // failing the whole state; the pick that selected it worked.
-                editing
-                    .selection_bounds(
+                (editing.selected_entities().len() == 1 && !editing.selecting_more)
+                    .then(|| editing.selection_bounds(
                         &opened.world,
                         &opened.extractor,
                         &opened.assets.sheets,
                         size,
                     )
-                    .ok()
-                    .flatten(),
+                    .ok().flatten()).flatten(),
                 editing.history.undo_label(),
                 editing.history.redo_label(),
                 editing.unsaved(),
@@ -290,6 +290,8 @@ impl Host {
             "sceneName": self.opened.as_ref().map(|opened| &opened.name),
             "scenes": self.scenes.iter().map(|scene| json!({"name": scene.name, "main": scene.main})).collect::<Vec<_>>(),
             "inspector": inspector,
+            "selectionCount": self.editing.as_ref().map_or(0, |editing| editing.selected_entities().len()),
+            "selectingMore": self.editing.as_ref().is_some_and(|editing| editing.selecting_more),
             "origin": origin,
             "bounds": bounds,
             "undo": undo,
@@ -343,7 +345,7 @@ impl Host {
             "release" => self.release(),
             "zoom" => self.zoom(number(0)?, [number(1)?, number(2)?]),
             "deselect" => {
-                self.editing()?.1.selected = None;
+                self.editing()?.1.clear_selection();
                 Ok(())
             }
             "lighting" => {
@@ -392,6 +394,7 @@ impl Host {
             "recoveryRestore" => self.restore_recovery(),
             "recoveryDiscard" => self.discard_recovery(),
             "save" => self.save(),
+            "selectMore" | "duplicate" | "delete" => self.selection_command(command),
             "undo" => self.undo(),
             "redo" => self.redo(),
             "setField" => {

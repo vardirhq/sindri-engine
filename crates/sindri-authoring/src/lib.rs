@@ -16,6 +16,7 @@
 //! engine's checked commands in between.
 
 mod atomic_write;
+pub mod duplicate;
 pub mod prefab;
 pub mod scene_file;
 pub mod visual_decay;

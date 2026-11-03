@@ -36,6 +36,8 @@ mod play;
 #[cfg(not(target_arch = "wasm32"))]
 mod recovery;
 mod renderer;
+#[cfg(not(target_arch = "wasm32"))]
+mod selection_actions;
 
 #[cfg(target_os = "android")]
 mod android;

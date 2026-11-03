@@ -1,0 +1,56 @@
+//! Selection verbs keep hierarchies and their undo history intact.
+
+use std::path::Path;
+
+use sindri_core::{EntityData, SceneEntityId};
+use sindri_mobile::{Editing, OpenedScene};
+
+fn scene() -> OpenedScene {
+    let project = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../games/lamplighter");
+    OpenedScene::open(&project, "world.scene").expect("scene opens")
+}
+
+fn id(name: &str) -> SceneEntityId {
+    SceneEntityId::new(name.to_owned()).expect("valid ID")
+}
+
+#[test]
+fn duplicating_parent_and_child_copies_one_subtree_and_undoes_as_one() {
+    let mut opened = scene();
+    let parent = opened.world.spawn(EntityData { source_id: Some(id("test-parent")), ..Default::default() });
+    let child = opened.world.spawn(EntityData { source_id: Some(id("test-child")), ..Default::default() });
+    opened.world.set_parent(child, Some(parent)).expect("parenting");
+    let mut editing = Editing::new(&opened.world, &opened.extractor).expect("editing");
+    editing.selected = Some(parent);
+    editing.toggle_selected(child);
+    editing.duplicate_selection(&mut opened.world).expect("duplicate");
+    let copy = opened.world.entity_for_source_id(&id("test-parent-copy")).expect("parent copied");
+    let child_copy = opened.world.entity_for_source_id(&id("test-child-copy")).expect("child copied");
+    assert_eq!(opened.world.get(child_copy).unwrap().parent, Some(copy));
+    assert_eq!(editing.selected_entities(), vec![copy]);
+    editing.undo(&mut opened.world).expect("undo");
+    assert!(opened.world.get(copy).is_none());
+    assert!(opened.world.get(child_copy).is_none());
+    assert!(editing.selected_entities().is_empty());
+    editing.redo(&mut opened.world).expect("redo");
+    assert!(opened.world.get(copy).is_some());
+    assert_eq!(opened.world.get(child_copy).unwrap().parent, Some(copy));
+}
+
+#[test]
+fn deleting_overlapping_selection_restores_the_subtree_on_undo() {
+    let mut opened = scene();
+    let parent = opened.world.spawn(EntityData { source_id: Some(id("delete-parent")), ..Default::default() });
+    let child = opened.world.spawn(EntityData { source_id: Some(id("delete-child")), ..Default::default() });
+    opened.world.set_parent(child, Some(parent)).expect("parenting");
+    let mut editing = Editing::new(&opened.world, &opened.extractor).expect("editing");
+    editing.selected = Some(parent);
+    editing.toggle_selected(child);
+    editing.delete_selection(&mut opened.world).expect("delete");
+    assert!(opened.world.get(parent).is_none());
+    assert!(opened.world.get(child).is_none());
+    editing.undo(&mut opened.world).expect("undo");
+    assert_eq!(opened.world.get(child).unwrap().parent, Some(parent));
+    editing.redo(&mut opened.world).expect("redo");
+    assert!(opened.world.get(parent).is_none());
+}

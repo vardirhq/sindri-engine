@@ -86,6 +86,8 @@ enum Touch {
 pub struct Editing {
     pub history: CommandHistory,
     pub selected: Option<EntityId>,
+    pub(crate) additional: Vec<EntityId>,
+    pub selecting_more: bool,
     pub canvas: Canvas,
     /// Whether the canvas shows the scene's 2D lights and the darkness they
     /// light. Off by default, as the design's menu has it, so a scene that is
@@ -110,6 +112,8 @@ impl Editing {
         Ok(Self {
             history: CommandHistory::default(),
             selected: None,
+            additional: Vec::new(),
+            selecting_more: false,
             canvas: Canvas::framing(world, extractor)?,
             lighting_preview: false,
             touch: None,
@@ -171,7 +175,16 @@ impl Editing {
         pixel: [f32; 2],
         size: [f32; 2],
     ) -> Result<(), String> {
-        self.selected = self.pick(world, extractor, pixel, size)?;
+        let picked = self.pick(world, extractor, pixel, size)?;
+        if self.selecting_more {
+            if let Some(entity) = picked {
+                self.toggle_selected(entity);
+            }
+        } else {
+            self.selected = picked;
+            self.additional.clear();
+        }
+        self.outline = None;
         Ok(())
     }
 
@@ -190,6 +203,7 @@ impl Editing {
         let under = self.pick(world, extractor, pixel, size)?;
         let start = self
             .selected
+            .filter(|_| self.additional.is_empty() && !self.selecting_more)
             .filter(|selected| under == Some(*selected))
             .and_then(|entity| {
                 let transform = world.get(entity)?.transform_3d?;
@@ -297,6 +311,9 @@ impl Editing {
         snap: bool,
     ) -> Result<(), String> {
         let (world, extractor) = (&opened.world, &opened.extractor);
+        if !self.additional.is_empty() || self.selecting_more {
+            return Err("Finish selecting one object before using its handles".to_owned());
+        }
         let entity = self.selected.ok_or("nothing is selected")?;
         let start = world
             .get(entity)
@@ -354,7 +371,13 @@ impl Editing {
             width: width.to_bits(),
         };
         if self.outline.as_ref().map(|(built, _)| *built) != Some(key) {
-            self.outline = Some((key, outlined(world, entity, width)));
+            let mut result = outlined(world, entity, width);
+            for other in &self.additional {
+                if let Some(outlined_world) = outlined(result.as_ref().unwrap_or(world), *other, width) {
+                    result = Some(outlined_world);
+                }
+            }
+            self.outline = Some((key, result));
         }
         self.outline
             .as_ref()
@@ -368,10 +391,10 @@ impl Editing {
     /// The world refused the reversal.
     pub fn undo(&mut self, world: &mut World) -> Result<(), String> {
         self.touch = None;
-        self.history
-            .undo(world)
-            .map(|_| ())
-            .map_err(|error| error.to_string())
+        self.history.undo(world).map_err(|error| error.to_string())?;
+        self.prune_selection(world);
+        self.outline = None;
+        Ok(())
     }
 
     /// Redoes the last undone step, if there is one.
@@ -380,10 +403,10 @@ impl Editing {
     /// The world refused the step.
     pub fn redo(&mut self, world: &mut World) -> Result<(), String> {
         self.touch = None;
-        self.history
-            .redo(world)
-            .map(|_| ())
-            .map_err(|error| error.to_string())
+        self.history.redo(world).map_err(|error| error.to_string())?;
+        self.prune_selection(world);
+        self.outline = None;
+        Ok(())
     }
 
     /// Where the selection's origin is on screen, in pixels, for the app to

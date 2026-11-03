@@ -13,6 +13,7 @@
 mod exports;
 mod playing;
 mod scripts;
+mod selection;
 mod touch;
 mod window;
 
