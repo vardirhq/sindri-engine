@@ -7,6 +7,37 @@ use sindri_core::World;
 use sindri_runtime::ProjectAssets;
 use sindri_scene::SceneExtractor;
 
+/// A scene listed by the project's manifest, named as `Scene.go` names it.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct ListedScene {
+    pub name: String,
+    pub main: bool,
+}
+
+/// Lists the manifest's main scene followed by its other scenes.
+/// Ambiguous file names are rejected because the runtime opens by file name.
+pub fn listed_scenes(project: &Path) -> Result<Vec<ListedScene>, String> {
+    let (main, _, others) = sindri_runtime::project::manifest(project)?;
+    let paths = std::iter::once(sindri_runtime::project::assets_root(project).join(main))
+        .chain(others.iter().map(|other| project.join(other)));
+    let mut scenes: Vec<ListedScene> = Vec::new();
+    for (index, path) in paths.enumerate() {
+        let name = path
+            .file_name()
+            .and_then(|name| name.to_str())
+            .ok_or_else(|| format!("{}: invalid scene name", path.display()))?
+            .to_owned();
+        if scenes.iter().any(|scene| scene.name == name) {
+            return Err(format!("scene name {name} is listed more than once"));
+        }
+        scenes.push(ListedScene {
+            name,
+            main: index == 0,
+        });
+    }
+    Ok(scenes)
+}
+
 /// One scene of a project, built into a world, with the file it came from and
 /// everything the project holds that drawing it needs.
 ///

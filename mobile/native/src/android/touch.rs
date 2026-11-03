@@ -119,10 +119,80 @@ impl Host {
         let recovery = crate::Recovery::new(std::path::Path::new(directory), opened)?;
         let pending = recovery.pending()?;
         self.recovery = Some(recovery);
+        self.recovery_directory = Some(std::path::PathBuf::from(directory));
         self.recovery_conflict = pending == Some(true);
         if pending == Some(false) {
             self.restore_recovery()?;
         }
+        Ok(())
+    }
+
+    /// Switch only after the old scene is saved; a failed open keeps it active.
+    fn open_scene(&mut self, name: &str) -> Result<(), String> {
+        if self.playing.is_some() {
+            return Err("Stop Play before switching scenes.".to_owned());
+        }
+        if self.recovery_conflict {
+            return Err("Choose which scene to keep before switching.".to_owned());
+        }
+        let (project, current) = self.source.as_ref().ok_or("no project is open")?;
+        if current == name {
+            return Ok(());
+        }
+        if !self.scenes.iter().any(|scene| scene.name == name) {
+            return Err(format!("the project lists no scene {name}"));
+        }
+        let project = project.clone();
+        let mut opened = OpenedScene::open(&project, name)?;
+        let mut editing = Editing::new(&opened.world, &opened.extractor)?;
+        editing.lighting_preview = self
+            .editing
+            .as_ref()
+            .is_some_and(|editing| editing.lighting_preview);
+        if self.editing.as_ref().is_some_and(Editing::unsaved) {
+            self.save()?;
+        }
+        if let Some(recovery) = &self.recovery
+            && recovery.pending()?.is_some()
+        {
+            return Err("Resolve the current scene's recovery before switching.".to_owned());
+        }
+        let directory = self
+            .recovery_directory
+            .as_ref()
+            .ok_or("recovery is not ready")?;
+        let recovery = crate::Recovery::new(directory, &opened)?;
+        if recovery.pending()?.is_some() {
+            return Err("Resolve the stored recovery before switching.".to_owned());
+        }
+        // Build before replacing the old state, so a GPU error cannot strand
+        // the controller on a scene it was told did not open.
+        let renderer = if let (Some(gpu), Some(surface)) = (&self.gpu, &self.surface) {
+            let mut renderer = crate::SceneRenderer::new(
+                &gpu.device,
+                &gpu.queue,
+                surface.format(),
+                surface.width(),
+                surface.height(),
+            )?;
+            renderer.install(
+                &gpu.device,
+                &gpu.queue,
+                &mut opened.extractor,
+                &mut opened.assets,
+            )?;
+            Some(renderer)
+        } else {
+            None
+        };
+        self.installed = renderer.is_some();
+        self.renderer = renderer;
+        self.opened = Some(opened);
+        self.editing = Some(editing);
+        self.recovery = Some(recovery);
+        self.recovered = false;
+        self.script = None;
+        self.source = Some((project, name.to_owned()));
         Ok(())
     }
 
@@ -217,6 +287,8 @@ impl Host {
         };
         json!({
             "status": self.status(),
+            "sceneName": self.opened.as_ref().map(|opened| &opened.name),
+            "scenes": self.scenes.iter().map(|scene| json!({"name": scene.name, "main": scene.main})).collect::<Vec<_>>(),
             "inspector": inspector,
             "origin": origin,
             "bounds": bounds,
@@ -230,6 +302,18 @@ impl Host {
             "lighting": self.editing.as_ref().is_some_and(|editing| editing.lighting_preview),
         })
         .to_string()
+    }
+
+    fn edit_script_arguments(&mut self, kind: &str, arguments: &[Value]) -> Result<(), String> {
+        let at = |index: usize| -> Result<usize, String> {
+            arguments
+                .get(index)
+                .and_then(Value::as_u64)
+                .and_then(|value| usize::try_from(value).ok())
+                .ok_or_else(|| format!("editScript: argument {index} is not a position"))
+        };
+        let value = arguments.get(3).cloned().unwrap_or(Value::Null);
+        self.edit_script(kind, [at(1)?, at(2)?], &value)
     }
 
     /// Runs one named editing command with its JSON array of arguments, which
@@ -297,17 +381,13 @@ impl Host {
                 self.close_script();
                 Ok(())
             }
-            "editScript" => {
-                let at = |index: usize| -> Result<usize, String> {
-                    arguments
-                        .get(index)
-                        .and_then(Value::as_u64)
-                        .and_then(|value| usize::try_from(value).ok())
-                        .ok_or_else(|| format!("{command}: argument {index} is not a position"))
-                };
-                let value = arguments.get(3).cloned().unwrap_or(Value::Null);
-                self.edit_script(text(0)?, [at(1)?, at(2)?], &value)
+            "editScript" => self.edit_script_arguments(text(0)?, &arguments),
+            "refreshScenes" => {
+                let (project, _) = self.source.as_ref().ok_or("no project is open")?;
+                self.scenes = crate::listed_scenes(project)?;
+                Ok(())
             }
+            "openScene" => self.open_scene(text(0)?),
             "recovery" => self.configure_recovery(text(0)?),
             "recoveryRestore" => self.restore_recovery(),
             "recoveryDiscard" => self.discard_recovery(),

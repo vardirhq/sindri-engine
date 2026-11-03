@@ -206,6 +206,11 @@ SINDRI_REQUIRE_GPU=1 cargo test -p sindri-mobile
 - **Fields.** The inspector edits a component's top-level numbers and switches.
   Text, vectors, colors, enums and references are not shown yet, and a field
   authored as a whole number steps by whole numbers.
+- **Scenes.** The Scenes sheet lists the project's manifest and opens a selected
+  scene; it saves the current scene first and remembers the selected scene for
+  recovery after restart. New scene and scene-door editing remain unwired.
+  Scene names must be unique because the runtime resolves them by file name.
+  Switching and restarting have not yet been exercised on the Pixel 8.
 - **Picking.** Taps pick what is drawn in the world; screen UI is not picked yet.
 - **Recovery needs device proof.** Before a mobile scene save the app writes an
   app-private recovery copy. Backgrounding finishes a gesture and attempts to

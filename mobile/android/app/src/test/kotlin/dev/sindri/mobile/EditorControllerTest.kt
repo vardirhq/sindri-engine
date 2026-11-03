@@ -20,11 +20,14 @@ class EditorControllerTest {
 
         var playing: PlayState? = null
         var scriptEdits = 0
+        var openSceneError: String? = null
 
         override fun command(command: String, vararg arguments: Any?): String? {
             commands += listOf(command, *arguments)
+            if (command == "openScene" && openSceneError != null) return openSceneError
             when (command) {
                 "lighting" -> lighting = arguments[0] as Boolean
+                "openScene" -> state = state.copy(sceneName = arguments[0] as String)
                 "save" -> state = state.copy(unsaved = false)
                 "play" -> playing = PlayState(seconds = 0.0, paused = false)
                 "stop" -> playing = null
@@ -113,6 +116,39 @@ class EditorControllerTest {
     fun backgrounding_a_clean_scene_does_not_save() {
         controller.background()
         assertFalse(listOf("save") in host.commands)
+    }
+
+    @Test
+    fun scenes_come_from_the_host_and_open_the_tapped_scene() {
+        val opened = mutableListOf<String>()
+        val controller = EditorController(host, onSceneOpened = { opened += it })
+        val world = SceneCard("world.scene", false, true, false)
+        val title = SceneCard("title.scene", true, false, false)
+        host.state = EditorState(sceneName = "world.scene", scenes = listOf(title, world))
+        controller.opened(2f)
+        controller.on(EditorEvent.OpenScenes) {}
+        assertEquals(listOf(title, world), (controller.ui.sheet as EditorSheet.Scenes).scenes)
+        controller.on(EditorEvent.SceneTapped(title)) {}
+        assertEquals(listOf("openScene", "title.scene"), host.commands.last())
+        assertEquals("title.scene", controller.ui.sceneName)
+        assertEquals(listOf("title.scene"), opened)
+        assertNull(controller.ui.sheet)
+    }
+
+    @Test
+    fun failed_scene_switch_keeps_the_sheet_and_does_not_remember_the_target() {
+        val opened = mutableListOf<String>()
+        val controller = EditorController(host, onSceneOpened = { opened += it })
+        val target = SceneCard("title.scene", true, false, false)
+        host.state = EditorState(sceneName = "world.scene", scenes = listOf(target), unsaved = true)
+        controller.opened(2f)
+        controller.on(EditorEvent.OpenScenes) {}
+        host.openSceneError = "Save failed"
+        controller.on(EditorEvent.SceneTapped(target)) {}
+        assertEquals("world.scene", controller.ui.sceneName)
+        assertTrue(opened.isEmpty())
+        assertNotNull(controller.ui.sheet)
+        assertEquals("Save failed", controller.ui.toast?.text)
     }
 
     @Test
