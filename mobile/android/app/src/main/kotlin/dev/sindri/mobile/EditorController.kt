@@ -19,6 +19,7 @@ class EditorController(
     private val native: Native,
     /** Where the open project's assets are among the app's own, for sprite thumbnails. */
     private val assetRoot: String = "projects/lamplighter/assets/",
+    private val onSceneOpened: (String) -> Unit = {},
 ) {
     /** The native calls the controller needs, so the design tests can run without the library. */
     interface Native {
@@ -109,6 +110,7 @@ class EditorController(
             native.command("stop")
         }
         ui = ui.copy(
+            sceneName = state.sceneName ?: ui.sceneName,
             mode = if (stoppedItself) PlayMode.Edit else ui.mode,
             play = if (play == null) PlayUi() else ui.play.copy(clock = clock(play.seconds), stick = stick(play)),
             canUndo = script?.canUndo ?: (state.undo != null),
@@ -137,7 +139,8 @@ class EditorController(
             EditorEvent.ToggleMenu -> ui = ui.copy(menu = if (ui.menu == null) settings else null)
             is EditorEvent.MenuToggle -> menuToggle(event.item)
             EditorEvent.FrameAll -> notWired("Frame everything")
-            EditorEvent.OpenScenes -> toggle(EditorSheet.Scenes(SampleEditor.scenes, listOf("title" to "world")))
+            EditorEvent.OpenScenes -> openScenes()
+            is EditorEvent.SceneTapped -> openScene(event.scene)
             is EditorEvent.Tool -> tool(event.tool)
             EditorEvent.Play -> play()
             EditorEvent.Stop -> stop()
@@ -186,6 +189,32 @@ class EditorController(
             is EditorEvent.ChangeScript -> changeScript(event)
             else -> notWired(null)
         }
+    }
+
+    private fun openScenes() {
+        val failure = native.command("refreshScenes")
+        if (failure != null) {
+            error = failure
+            refresh()
+            return
+        }
+        refresh()
+        toggle(EditorSheet.Scenes(state.scenes, emptyList()))
+    }
+
+    private fun openScene(scene: SceneCard) {
+        if (scene.current) {
+            ui = ui.copy(sheet = null)
+            return
+        }
+        val failure = native.command("openScene", scene.name)
+        if (failure == null) {
+            onSceneOpened(scene.name)
+            ui = ui.copy(sheet = null, painting = null)
+        } else {
+            error = failure
+        }
+        refresh()
     }
 
     /**
@@ -262,7 +291,7 @@ class EditorController(
             BarItem.Paint -> ui = ui.copy(painting = PaintUi(), sheet = null, toast = ToastUi("Painting the ground is not wired yet."))
             BarItem.Assets -> toggle(EditorSheet.Assets(AssetTab.Prefabs, SampleEditor.assets))
             BarItem.Layers -> toggle(EditorSheet.Layers(LayerTab.Layers, SampleEditor.layers, SampleEditor.objects))
-            BarItem.Scenes -> toggle(EditorSheet.Scenes(SampleEditor.scenes, listOf("title" to "world")))
+            BarItem.Scenes -> openScenes()
             BarItem.Properties -> openInspector()
             BarItem.Behaviour -> openBehaviour()
             else -> notWired(tool.label)

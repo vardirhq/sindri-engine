@@ -46,7 +46,7 @@ pub use editing::{Editing, Handle};
 #[cfg(not(target_arch = "wasm32"))]
 pub use edits::Place;
 #[cfg(not(target_arch = "wasm32"))]
-pub use opened::OpenedScene;
+pub use opened::{ListedScene, OpenedScene, listed_scenes};
 #[cfg(not(target_arch = "wasm32"))]
 pub use play::Playing;
 #[cfg(not(target_arch = "wasm32"))]

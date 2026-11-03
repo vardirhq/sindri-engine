@@ -73,6 +73,8 @@ data class PlayState(
 /** What the native host reports through `state()`, which [EditorController] turns into the design's [EditorUi]. */
 data class EditorState(
     val status: String = "",
+    val sceneName: String? = null,
+    val scenes: List<SceneCard> = emptyList(),
     val inspector: Inspector? = null,
     /** Where the selection's origin is, in surface pixels. */
     val origin: Pair<Float, Float>? = null,
@@ -96,6 +98,11 @@ data class EditorState(
             val root = JSONObject(json)
             return EditorState(
                 status = root.optString("status"),
+                sceneName = root.optStringOrNull("sceneName"),
+                scenes = root.optJSONArray("scenes")?.objects()?.map { scene ->
+                    val name = scene.getString("name")
+                    SceneCard(name, scene.optBoolean("main"), name == root.optString("sceneName"), preview = false)
+                }.orEmpty(),
                 inspector = root.optJSONObject("inspector")?.let(::inspector),
                 origin = root.optJSONArray("origin")?.let {
                     it.getDouble(0).toFloat() to it.getDouble(1).toFloat()
