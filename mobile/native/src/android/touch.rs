@@ -90,19 +90,71 @@ impl Host {
 
     pub(super) fn undo(&mut self) -> Result<(), String> {
         let (opened, editing) = self.editing()?;
-        editing.undo(&mut opened.world)
+        editing.undo(&mut opened.world)?;
+        self.clear_clean_recovery()
     }
 
     pub(super) fn redo(&mut self) -> Result<(), String> {
         let (opened, editing) = self.editing()?;
-        editing.redo(&mut opened.world)
+        editing.redo(&mut opened.world)?;
+        self.clear_clean_recovery()
     }
 
-    /// Writes the scene back to its file, through the same code as desktop.
+    fn clear_clean_recovery(&self) -> Result<(), String> {
+        if !self.recovery_conflict
+            && self.editing.as_ref().is_some_and(|editing| !editing.unsaved())
+            && let Some(recovery) = &self.recovery
+        {
+            recovery.clear()?;
+        }
+        Ok(())
+    }
+
+    /// Configure app-private recovery before allowing any save.
+    fn configure_recovery(&mut self, directory: &str) -> Result<(), String> {
+        let opened = self.opened.as_ref().ok_or("no scene is open")?;
+        let recovery = crate::Recovery::new(std::path::Path::new(directory), opened)?;
+        let pending = recovery.pending()?;
+        self.recovery = Some(recovery);
+        self.recovery_conflict = pending == Some(true);
+        if pending == Some(false) {
+            self.restore_recovery()?;
+        }
+        Ok(())
+    }
+
+    fn restore_recovery(&mut self) -> Result<(), String> {
+        let recovery = self.recovery.as_ref().ok_or("recovery is not ready")?;
+        let opened = self.opened.as_mut().ok_or("no scene is open")?;
+        recovery.restore(opened)?;
+        let mut editing = Editing::new(&opened.world, &opened.extractor)?;
+        editing.recovered();
+        self.editing = Some(editing);
+        self.recovery_conflict = false;
+        self.recovered = true;
+        Ok(())
+    }
+
+    fn discard_recovery(&mut self) -> Result<(), String> {
+        self.recovery.as_ref().ok_or("recovery is not ready")?.clear()?;
+        self.recovery_conflict = false;
+        Ok(())
+    }
+
+    /// Keep a recovery copy before attempting to replace the project file.
     pub(super) fn save(&mut self) -> Result<(), String> {
-        let (opened, editing) = self.editing()?;
+        if self.recovery_conflict {
+            return Err("Choose which scene to keep before saving.".to_owned());
+        }
+        let recovery = self.recovery.as_mut().ok_or("recovery is not ready")?;
+        let opened = self.opened.as_mut().ok_or("no scene is open")?;
+        let editing = self.editing.as_mut().ok_or("no scene is open")?;
+        recovery.checkpoint(opened)?;
+        recovery.check_original()?;
         opened.save()?;
         editing.saved();
+        self.recovered = false;
+        recovery.saved()?;
         Ok(())
     }
 
@@ -165,6 +217,8 @@ impl Host {
             "undo": undo,
             "redo": redo,
             "unsaved": unsaved,
+            "recoveryConflict": self.recovery_conflict,
+            "recovered": self.recovered,
             "play": self.play_state(),
             "playError": self.play_error,
             "lighting": self.editing.as_ref().is_some_and(|editing| editing.lighting_preview),
@@ -248,6 +302,9 @@ impl Host {
                 let value = arguments.get(3).cloned().unwrap_or(Value::Null);
                 self.edit_script(text(0)?, [at(1)?, at(2)?], &value)
             }
+            "recovery" => self.configure_recovery(text(0)?),
+            "recoveryRestore" => self.restore_recovery(),
+            "recoveryDiscard" => self.discard_recovery(),
             "save" => self.save(),
             "undo" => self.undo(),
             "redo" => self.redo(),

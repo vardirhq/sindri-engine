@@ -187,3 +187,91 @@ fn a_failed_save_leaves_the_file_and_the_unsaved_state_as_they_were() {
     assert!(editing.unsaved(), "the edit is still unsaved");
     assert!(!file.exists() || std::fs::read(&file).expect("reads") == before);
 }
+
+#[test]
+fn recovery_survives_a_failed_save_and_restart() {
+    let (dir, root) = lamplighter_copy();
+    let recovery_dir = dir.path().join("private-recovery");
+    let scene = root.join("assets").join(SCENE);
+    let original = std::fs::read(&scene).expect("original scene");
+    let mut opened = OpenedScene::open(&root, SCENE).expect("open");
+    let mut editing = Editing::new(&opened.world, &opened.extractor).expect("editing");
+    let moved = edit(&mut opened, &mut editing);
+    let recovery = sindri_mobile::Recovery::new(&recovery_dir, &opened).expect("recovery");
+    recovery.checkpoint(&opened).expect("checkpoint");
+    std::fs::remove_dir_all(root.join("assets")).expect("project storage disappears");
+    assert!(opened.save().is_err());
+    drop(opened);
+    copy_tree(&Path::new(env!("CARGO_MANIFEST_DIR")).join("../../games/lamplighter/assets"), &root.join("assets"));
+    assert_eq!(std::fs::read(&scene).unwrap(), original);
+    let mut reopened = OpenedScene::open(&root, SCENE).expect("reopen");
+    let mut recovery = sindri_mobile::Recovery::new(&recovery_dir, &reopened).expect("recovery");
+    assert_eq!(recovery.pending().unwrap(), Some(false));
+    recovery.restore(&mut reopened).expect("restore");
+    assert!(near(position(&reopened.world, LAMP)[0], moved[0]));
+    assert!((intensity(&reopened.world) - 1.5).abs() < 1e-9);
+    assert_eq!(std::fs::read(&scene).unwrap(), original, "restore does not overwrite the scene");
+    recovery.check_original().unwrap();
+    reopened.save().unwrap();
+    recovery.saved().unwrap();
+    assert_eq!(recovery.pending().unwrap(), None);
+}
+
+#[test]
+fn recovery_detects_external_scene_changes_without_overwriting_them() {
+    let (dir, root) = lamplighter_copy();
+    let recovery_dir = dir.path().join("private-recovery");
+    let scene = root.join("assets").join(SCENE);
+    let mut opened = OpenedScene::open(&root, SCENE).unwrap();
+    let mut editing = Editing::new(&opened.world, &opened.extractor).unwrap();
+    edit(&mut opened, &mut editing);
+    let recovery = sindri_mobile::Recovery::new(&recovery_dir, &opened).unwrap();
+    recovery.checkpoint(&opened).unwrap();
+    let changed = format!("{}\n", std::fs::read_to_string(&scene).unwrap());
+    std::fs::write(&scene, &changed).unwrap();
+    assert!(recovery.check_original().is_err());
+    drop(opened);
+    let mut reopened = OpenedScene::open(&root, SCENE).unwrap();
+    let recovery = sindri_mobile::Recovery::new(&recovery_dir, &reopened).unwrap();
+    assert_eq!(recovery.pending().unwrap(), Some(true));
+    assert_eq!(std::fs::read_to_string(&scene).unwrap(), changed);
+    assert!(recovery_dir.join("recovery.json").exists());
+    recovery.restore(&mut reopened).unwrap();
+    assert_eq!(std::fs::read_to_string(&scene).unwrap(), changed, "the user's choice does not immediately overwrite the scene");
+    recovery.checkpoint(&reopened).unwrap();
+    recovery.check_original().unwrap();
+    reopened.save().unwrap();
+    assert!((intensity(&reopened.world) - 1.5).abs() < 1e-9);
+}
+
+#[test]
+fn interrupted_recovery_update_keeps_previous_checkpoint() {
+    let (dir, root) = lamplighter_copy();
+    let recovery_dir = dir.path().join("private-recovery");
+    let mut opened = OpenedScene::open(&root, SCENE).unwrap();
+    let mut editing = Editing::new(&opened.world, &opened.extractor).unwrap();
+    edit(&mut opened, &mut editing);
+    let recovery = sindri_mobile::Recovery::new(&recovery_dir, &opened).unwrap();
+    recovery.checkpoint(&opened).unwrap();
+    let previous = std::fs::read(recovery_dir.join("recovery.json")).unwrap();
+    std::fs::create_dir(recovery_dir.join("snapshot.scene")).unwrap();
+    assert!(recovery.checkpoint(&opened).is_err());
+    assert_eq!(std::fs::read(recovery_dir.join("recovery.json")).unwrap(), previous);
+}
+
+#[test]
+fn checkpoint_left_after_successful_save_is_not_recovered_twice() {
+    let (dir, root) = lamplighter_copy();
+    let recovery_dir = dir.path().join("private-recovery");
+    let mut opened = OpenedScene::open(&root, SCENE).unwrap();
+    let mut editing = Editing::new(&opened.world, &opened.extractor).unwrap();
+    edit(&mut opened, &mut editing);
+    let recovery = sindri_mobile::Recovery::new(&recovery_dir, &opened).unwrap();
+    recovery.checkpoint(&opened).unwrap();
+    opened.save().unwrap();
+    drop(opened);
+    let reopened = OpenedScene::open(&root, SCENE).unwrap();
+    let recovery = sindri_mobile::Recovery::new(&recovery_dir, &reopened).unwrap();
+    assert_eq!(recovery.pending().unwrap(), None);
+    assert!(!recovery_dir.join("recovery.json").exists());
+}

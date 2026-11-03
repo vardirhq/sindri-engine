@@ -67,6 +67,10 @@ Fonts are bundled under their own licences in `mobile/android/licenses/`.
 | `27-review` | `EditorSheets` | ✅ | Nothing produces run edits yet |
 | `28-coach` | `EditorScreen` | ✅ | Nothing shows tips yet |
 
+Mobile scene saves first write an app-private recovery copy. A conflicting
+scene on disk prompts the user to restore recovered edits or keep the current
+scene; otherwise recovered edits reopen unsaved. Device testing remains open.
+
 Undo, redo and saving are wired: every engine edit is saved as it is made,
 through the same code as desktop (`sindri-authoring`). Anything not wired
 answers with a short "not wired yet" toast rather than pretending.

@@ -32,6 +32,8 @@ mod opened;
 #[cfg(not(target_arch = "wasm32"))]
 mod outline;
 #[cfg(not(target_arch = "wasm32"))]
+mod recovery;
+#[cfg(not(target_arch = "wasm32"))]
 mod play;
 mod renderer;
 
@@ -47,4 +49,6 @@ pub use edits::Place;
 pub use opened::OpenedScene;
 #[cfg(not(target_arch = "wasm32"))]
 pub use play::Playing;
+#[cfg(not(target_arch = "wasm32"))]
+pub use recovery::Recovery;
 pub use renderer::{SceneRenderer, Shot};

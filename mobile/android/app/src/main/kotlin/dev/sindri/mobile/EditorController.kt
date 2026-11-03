@@ -34,6 +34,8 @@ class EditorController(
 
     /** The last native state, which selection and the inspector are drawn from. */
     private var state = EditorState()
+    var recoveryConflict by mutableStateOf(false)
+        private set
     private var error: String? = null
 
     /**
@@ -62,6 +64,12 @@ class EditorController(
         native.command("density", density)
         native.command("lighting", settings.lightingPreview)
         refresh()
+        if (state.recovered) ui = ui.copy(toast = ToastUi("Recovered unsaved scene edits."))
+    }
+
+    fun chooseRecovery(restore: Boolean) {
+        error = native.command(if (restore) "recoveryRestore" else "recoveryDiscard")
+        refresh()
     }
 
     /**
@@ -89,6 +97,7 @@ class EditorController(
     /** Something changed on the host: draws its state again. */
     fun refresh() {
         state = native.state()
+        recoveryConflict = state.recoveryConflict
         val inspector = state.inspector
         val selection = inspector?.let { SelectionUi(InspectorPresenter.iconFor(it), it.name, "Properties") }
         settings = settings.copy(lightingPreview = state.lighting)
