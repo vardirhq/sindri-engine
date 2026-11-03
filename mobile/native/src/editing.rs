@@ -12,7 +12,9 @@ use sindri_core::{
     AssetId, CommandBuffer, CommandHistory, EntityId, SpriteSheetDocument, Transform3D, World,
     WorldCommand, sheet_id_for,
 };
-use sindri_scene::picking::{anchored_bounds, pick_world, pick_world_with_sprite_hit, sprite_content_bounds};
+use sindri_scene::picking::{
+    anchored_bounds, pick_world, pick_world_with_sprite_hit, sprite_content_bounds,
+};
 use sindri_scene::{SceneExtractor, SpriteComponent};
 
 use crate::OpenedScene;
@@ -161,11 +163,17 @@ impl Editing {
         let camera = self.canvas.camera(world, extractor, size)?;
         let point = [pixel[0] / size[0].max(1.0), pixel[1] / size[1].max(1.0)];
         let picked = if let Some(hits) = &self.sprite_hits {
-            pick_world_with_sprite_hit(world, extractor.components(), camera.view_projection, point,
-                |_, sprite, local| hits.hit(sprite, local))
+            pick_world_with_sprite_hit(
+                world,
+                extractor.components(),
+                camera.view_projection,
+                point,
+                |_, sprite, local| hits.hit(sprite, local),
+            )
         } else {
             pick_world(world, extractor.components(), camera.view_projection, point)
-        }.map_err(|error| error.to_string())?;
+        }
+        .map_err(|error| error.to_string())?;
         Ok(picked.filter(|entity| {
             world
                 .get(*entity)
@@ -430,11 +438,21 @@ impl Editing {
         // A sheet that stands its sprites on their feet moves the drawn quad;
         // the box moves with it, or the handles sit below the picture.
         if let Some(hits) = &self.sprite_hits
-            && let Some(sprite) = extractor.components().get::<SpriteComponent>(world, entity).ok().flatten()
+            && let Some(sprite) = extractor
+                .components()
+                .get::<SpriteComponent>(world, entity)
+                .ok()
+                .flatten()
             && let Some(bounds) = hits.bounds(&sprite)
-            && let Some([left, top, right, bottom]) = sprite_content_bounds(world, camera.view_projection, entity, bounds)
+            && let Some([left, top, right, bottom]) =
+                sprite_content_bounds(world, camera.view_projection, entity, bounds)
         {
-            return Ok(Some([left * size[0], top * size[1], right * size[0], bottom * size[1]]));
+            return Ok(Some([
+                left * size[0],
+                top * size[1],
+                right * size[0],
+                bottom * size[1],
+            ]));
         }
         let offset = extractor
             .components()

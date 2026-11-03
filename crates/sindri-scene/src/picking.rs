@@ -172,7 +172,9 @@ pub fn sprite_content_bounds(
 ) -> Option<[f32; 4]> {
     let [left, bottom, right, top] = bounds;
     let corners = [[left, bottom], [right, bottom], [left, top], [right, top]]
-        .into_iter().map(|[x, y]| Vec3::new(x, y, 0.0)).collect();
+        .into_iter()
+        .map(|[x, y]| Vec3::new(x, y, 0.0))
+        .collect();
     project_bounds(world, view_projection, entity, corners)
 }
 
