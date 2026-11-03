@@ -180,9 +180,11 @@ impl SceneFile {
         restore(&mut written);
         if is_prefab_path(path) {
             let text = prefab_text(&written).map_err(SceneFileError::Prefab)?;
-            crate::atomic_write::write(path, text.as_bytes()).map_err(|source| SceneFileError::Write {
-                path: path.display().to_string(),
-                source,
+            crate::atomic_write::write(path, text.as_bytes()).map_err(|source| {
+                SceneFileError::Write {
+                    path: path.display().to_string(),
+                    source,
+                }
             })?;
         } else {
             write_scene(path, &written)?;

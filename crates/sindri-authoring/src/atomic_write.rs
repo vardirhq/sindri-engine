@@ -22,10 +22,16 @@ pub(crate) fn write(path: &Path, bytes: &[u8]) -> io::Result<()> {
 }
 
 fn write_with(path: &Path, write: impl FnOnce(&mut File) -> io::Result<()>) -> io::Result<()> {
-    let parent = path.parent().filter(|p| !p.as_os_str().is_empty()).unwrap_or(Path::new("."));
+    let parent = path
+        .parent()
+        .filter(|p| !p.as_os_str().is_empty())
+        .unwrap_or(Path::new("."));
     let metadata = match fs::symlink_metadata(path) {
         Ok(metadata) if metadata.file_type().is_symlink() => {
-            return Err(io::Error::new(io::ErrorKind::InvalidInput, "cannot replace a symbolic link"));
+            return Err(io::Error::new(
+                io::ErrorKind::InvalidInput,
+                "cannot replace a symbolic link",
+            ));
         }
         Ok(metadata) => Some(metadata),
         Err(error) if error.kind() == io::ErrorKind::NotFound => None,
@@ -33,8 +39,15 @@ fn write_with(path: &Path, write: impl FnOnce(&mut File) -> io::Result<()>) -> i
     };
     let (temporary, mut file) = loop {
         let sequence = NEXT_FILE.fetch_add(1, Ordering::Relaxed);
-        let candidate = parent.join(format!(".sindri-save-{}-{sequence}.tmp", std::process::id()));
-        match OpenOptions::new().write(true).create_new(true).open(&candidate) {
+        let candidate = parent.join(format!(
+            ".sindri-save-{}-{sequence}.tmp",
+            std::process::id()
+        ));
+        match OpenOptions::new()
+            .write(true)
+            .create_new(true)
+            .open(&candidate)
+        {
             Ok(file) => break (Temporary(candidate), file),
             Err(error) if error.kind() == io::ErrorKind::AlreadyExists => continue,
             Err(error) => return Err(error),
