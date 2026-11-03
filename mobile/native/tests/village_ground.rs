@@ -11,12 +11,17 @@ fn sprites(world: &World, id: &str) -> Vec<Option<String>> {
     let entity = world.entity_for_source_id(&source).expect("layer exists");
     let payload = &world.get(entity).expect("entity exists").components["sindri.tilemap"];
     let palette = payload["palette"].as_array().expect("palette");
-    payload["tiles"].as_array().expect("tiles").iter().map(|tile| {
-        tile.as_u64().map(|index| {
-            let index = usize::try_from(index).expect("palette index fits");
-            palette[index].as_str().expect("sprite name").to_owned()
+    payload["tiles"]
+        .as_array()
+        .expect("tiles")
+        .iter()
+        .map(|tile| {
+            tile.as_u64().map(|index| {
+                let index = usize::try_from(index).expect("palette index fits");
+                palette[index].as_str().expect("sprite name").to_owned()
+            })
         })
-    }).collect()
+        .collect()
 }
 
 #[test]
