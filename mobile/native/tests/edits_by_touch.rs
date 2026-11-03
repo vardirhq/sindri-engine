@@ -570,3 +570,26 @@ fn a_tap_on_the_ground_lets_the_selection_go() {
         "the ground is not selected; the lamp is let go"
     );
 }
+
+#[test]
+fn select_more_toggles_an_object_by_tapping_the_canvas() {
+    let opened = opened();
+    let mut editing = Editing::new(&opened.world, &opened.extractor).expect("editing starts");
+    let lamp = entity(&opened, "cover-17");
+    let other = entity(&opened, "cover-19");
+    look_at(&mut editing, &opened, lamp);
+    editing.selected = Some(lamp);
+    let pixel = editing
+        .selection_pixel(&opened.world, SIZE)
+        .expect("lamp on canvas");
+    editing.selected = Some(other);
+    editing.select_more();
+    editing
+        .tap(&opened.world, &opened.extractor, pixel, SIZE)
+        .expect("tap adds lamp");
+    assert_eq!(editing.selected_entities(), vec![other, lamp]);
+    editing
+        .tap(&opened.world, &opened.extractor, pixel, SIZE)
+        .expect("tap removes lamp");
+    assert_eq!(editing.selected_entities(), vec![other]);
+}

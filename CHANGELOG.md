@@ -3,6 +3,7 @@
 # Changelog
 
 - Ignore transparent sprite padding when picking in the mobile editor, and place selection handles around the visible art. Sheet anchors are honored.
+- Add multi-selection, duplicate and delete to the mobile editor. Subtree edits share the desktop duplication rules and undo as one step.
 
 - Author the Lamplighter village roads and paving in the scene so both editors show the same terrain as Play. Existing untouched bundled village copies are updated without replacing edited scenes or pending recovery.
 

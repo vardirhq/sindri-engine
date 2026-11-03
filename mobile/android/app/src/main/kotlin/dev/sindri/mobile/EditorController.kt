@@ -100,7 +100,7 @@ class EditorController(
         state = native.state()
         recoveryConflict = state.recoveryConflict
         val inspector = state.inspector
-        val selection = inspector?.let { SelectionUi(InspectorPresenter.iconFor(it), it.name, "Properties") }
+        val selection = inspector?.let { SelectionUi(InspectorPresenter.iconFor(it), it.name, if (state.selectingMore) "Tap objects to select" else "Properties", count = state.selectionCount.coerceAtLeast(1)) }
         settings = settings.copy(lightingPreview = state.lighting)
         val play = state.play
         val stoppedItself = play == null && ui.mode != PlayMode.Edit
@@ -117,6 +117,7 @@ class EditorController(
             canRedo = script?.canRedo ?: (state.redo != null),
             unsaved = state.unsaved,
             selection = selection,
+            selectingMore = state.selectingMore,
             handles = handles(),
             menu = ui.menu?.let { settings },
             sheet = when (val sheet = ui.sheet) {
@@ -292,6 +293,9 @@ class EditorController(
             BarItem.Assets -> toggle(EditorSheet.Assets(AssetTab.Prefabs, SampleEditor.assets))
             BarItem.Layers -> toggle(EditorSheet.Layers(LayerTab.Layers, SampleEditor.layers, SampleEditor.objects))
             BarItem.Scenes -> openScenes()
+            BarItem.SelectMore -> { error = native.command("selectMore"); refresh() }
+            BarItem.Duplicate -> nativeEdit("duplicate")
+            BarItem.Delete -> nativeEdit("delete")
             BarItem.Properties -> openInspector()
             BarItem.Behaviour -> openBehaviour()
             else -> notWired(tool.label)
@@ -304,6 +308,7 @@ class EditorController(
     }
 
     private fun openInspector() {
+        if (state.selectionCount > 1) return notWired("Editing multiple objects")
         val inspector = state.inspector ?: return
         ui = ui.copy(sheet = EditorSheet.Inspector(inspectorUi(inspector)), menu = null)
     }
@@ -313,6 +318,7 @@ class EditorController(
         InspectorPresenter.present(inspector, ui.sceneName, assetRoot, details).also { presented = it }.ui
 
     private fun openBehaviour() {
+        if (state.selectionCount > 1) return notWired("Editing multiple objects")
         val inspector = state.inspector ?: return
         val source = inspector.component("sindri.script")?.value("source") as? String
         val script = source?.let {

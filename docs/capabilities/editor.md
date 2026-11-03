@@ -236,7 +236,7 @@ Every per-entity verb on its row menu and a key, each one undo step; deleting an
 
 Engine — · Editor ✅ · Decay — · Proof —
 
-**Tested by:** [`editor/src/native/tests/hierarchy.rs`](../../editor/src/native/tests/hierarchy.rs), [`editor/src/native/tests/hierarchy_input.rs`](../../editor/src/native/tests/hierarchy_input.rs), [`editor/src/native/tests/shortcuts.rs`](../../editor/src/native/tests/shortcuts.rs), [`editor/src/native/editing/duplicate/reference_tests.rs`](../../editor/src/native/editing/duplicate/reference_tests.rs)
+**Tested by:** [`editor/src/native/tests/hierarchy.rs`](../../editor/src/native/tests/hierarchy.rs), [`editor/src/native/tests/hierarchy_input.rs`](../../editor/src/native/tests/hierarchy_input.rs), [`editor/src/native/tests/shortcuts.rs`](../../editor/src/native/tests/shortcuts.rs), [`crates/sindri-authoring/src/duplicate/reference_tests.rs`](../../crates/sindri-authoring/src/duplicate/reference_tests.rs)
 
 <details markdown="1">
 <summary>Evidence</summary>

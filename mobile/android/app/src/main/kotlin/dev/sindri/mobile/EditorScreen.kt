@@ -207,7 +207,7 @@ private fun SelectionChip(selection: SelectionUi, onEvent: (EditorEvent) -> Unit
 private fun BoxScope.BottomBar(ui: EditorUi, onEvent: (EditorEvent) -> Unit) {
     val items = when {
         ui.selection == null -> listOf(BarItem.Add, BarItem.Paint, BarItem.Assets, BarItem.Layers, BarItem.Scenes)
-        ui.selection.count > 1 -> listOf(BarItem.Properties, BarItem.Behaviour, BarItem.Duplicate, BarItem.Group, BarItem.Delete)
+        ui.selection.count > 1 -> listOf(BarItem.Properties, BarItem.Behaviour, BarItem.Duplicate, BarItem.SelectMore, BarItem.Delete)
         else -> listOf(BarItem.Properties, BarItem.Behaviour, BarItem.Duplicate, BarItem.SelectMore, BarItem.Delete)
     }
     val open = when (ui.sheet) {
