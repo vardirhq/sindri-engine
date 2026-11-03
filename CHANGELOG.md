@@ -2,6 +2,8 @@
 
 # Changelog
 
+- Protect scene and prefab files from partial writes by saving to a temporary file before replacing the original. Symbolic-link targets are rejected. Recovery of unsaved mobile edits is still outstanding.
+
 - Make 2D lighting lighter on slow hardware. `SceneExtractor::set_lighting_quality` takes a
   `LightingQuality`: `Reduced` keeps the eight lights nearest the camera and casts shadows from a
   point rather than five samples, which is a fifth of the shadow work. The browser player watches

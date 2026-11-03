@@ -15,6 +15,7 @@
 //! from a file or written to one, and every edit to it goes through the
 //! engine's checked commands in between.
 
+mod atomic_write;
 pub mod prefab;
 pub mod scene_file;
 pub mod visual_decay;
