@@ -576,7 +576,7 @@ fn select_more_toggles_an_object_by_tapping_the_canvas() {
     let opened = opened();
     let mut editing = Editing::new(&opened.world, &opened.extractor).expect("editing starts");
     let lamp = entity(&opened, "cover-17");
-    let other = entity(&opened, "cover-18");
+    let other = entity(&opened, "cover-19");
     look_at(&mut editing, &opened, lamp);
     editing.selected = Some(lamp);
     let pixel = editing.selection_pixel(&opened.world, SIZE).expect("lamp on canvas");
