@@ -58,6 +58,7 @@ pub struct OpenedScene {
     pub assets: ProjectAssets,
     /// The schemas the scene is read and drawn with.
     pub extractor: SceneExtractor,
+    pub(crate) sprite_hits: std::sync::Arc<crate::sprite_hits::SpriteHits>,
 }
 
 impl OpenedScene {
@@ -73,12 +74,14 @@ impl OpenedScene {
         let extractor = sindri_runtime::scene_extractor()?;
         let world = load_world(&extractor, &file).map_err(|error| format!("{scene}: {error}"))?;
         let assets = ProjectAssets::read(project)?;
+        let sprite_hits = std::sync::Arc::new(crate::sprite_hits::SpriteHits::new(&assets));
         Ok(Self {
             name: scene.to_owned(),
             world,
             file,
             assets,
             extractor,
+            sprite_hits,
         })
     }
 

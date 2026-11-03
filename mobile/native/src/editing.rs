@@ -12,7 +12,9 @@ use sindri_core::{
     AssetId, CommandBuffer, CommandHistory, EntityId, SpriteSheetDocument, Transform3D, World,
     WorldCommand, sheet_id_for,
 };
-use sindri_scene::picking::{anchored_bounds, pick_world};
+use sindri_scene::picking::{
+    anchored_bounds, pick_world, pick_world_with_sprite_hit, sprite_content_bounds,
+};
 use sindri_scene::{SceneExtractor, SpriteComponent};
 
 use crate::OpenedScene;
@@ -85,7 +87,10 @@ enum Touch {
 /// An opened scene being edited: its history, its selection, and the view.
 pub struct Editing {
     pub history: CommandHistory,
+    sprite_hits: Option<std::sync::Arc<crate::sprite_hits::SpriteHits>>,
     pub selected: Option<EntityId>,
+    pub(crate) additional: Vec<EntityId>,
+    pub selecting_more: bool,
     pub canvas: Canvas,
     /// Whether the canvas shows the scene's 2D lights and the darkness they
     /// light. Off by default, as the design's menu has it, so a scene that is
@@ -109,13 +114,23 @@ impl Editing {
     pub fn new(world: &World, extractor: &SceneExtractor) -> Result<Self, String> {
         Ok(Self {
             history: CommandHistory::default(),
+            sprite_hits: None,
             selected: None,
+            additional: Vec::new(),
+            selecting_more: false,
             canvas: Canvas::framing(world, extractor)?,
             lighting_preview: false,
             touch: None,
             outline: None,
             saved_revision: 0,
         })
+    }
+
+    /// Begin editing with the scene's sprite alpha and anchor information.
+    pub fn for_scene(opened: &OpenedScene) -> Result<Self, String> {
+        let mut editing = Self::new(&opened.world, &opened.extractor)?;
+        editing.sprite_hits = Some(std::sync::Arc::clone(&opened.sprite_hits));
+        Ok(editing)
     }
 
     /// Whether the world holds edits its file does not.
@@ -151,8 +166,18 @@ impl Editing {
     ) -> Result<Option<EntityId>, String> {
         let camera = self.canvas.camera(world, extractor, size)?;
         let point = [pixel[0] / size[0].max(1.0), pixel[1] / size[1].max(1.0)];
-        let picked = pick_world(world, extractor.components(), camera.view_projection, point)
-            .map_err(|error| error.to_string())?;
+        let picked = if let Some(hits) = &self.sprite_hits {
+            pick_world_with_sprite_hit(
+                world,
+                extractor.components(),
+                camera.view_projection,
+                point,
+                |_, sprite, local| hits.hit(sprite, local),
+            )
+        } else {
+            pick_world(world, extractor.components(), camera.view_projection, point)
+        }
+        .map_err(|error| error.to_string())?;
         Ok(picked.filter(|entity| {
             world
                 .get(*entity)
@@ -171,7 +196,16 @@ impl Editing {
         pixel: [f32; 2],
         size: [f32; 2],
     ) -> Result<(), String> {
-        self.selected = self.pick(world, extractor, pixel, size)?;
+        let picked = self.pick(world, extractor, pixel, size)?;
+        if self.selecting_more {
+            if let Some(entity) = picked {
+                self.toggle_selected(entity);
+            }
+        } else {
+            self.selected = picked;
+            self.additional.clear();
+        }
+        self.outline = None;
         Ok(())
     }
 
@@ -190,6 +224,7 @@ impl Editing {
         let under = self.pick(world, extractor, pixel, size)?;
         let start = self
             .selected
+            .filter(|_| self.additional.is_empty() && !self.selecting_more)
             .filter(|selected| under == Some(*selected))
             .and_then(|entity| {
                 let transform = world.get(entity)?.transform_3d?;
@@ -297,6 +332,9 @@ impl Editing {
         snap: bool,
     ) -> Result<(), String> {
         let (world, extractor) = (&opened.world, &opened.extractor);
+        if !self.additional.is_empty() || self.selecting_more {
+            return Err("Finish selecting one object before using its handles".to_owned());
+        }
         let entity = self.selected.ok_or("nothing is selected")?;
         let start = world
             .get(entity)
@@ -354,7 +392,15 @@ impl Editing {
             width: width.to_bits(),
         };
         if self.outline.as_ref().map(|(built, _)| *built) != Some(key) {
-            self.outline = Some((key, outlined(world, entity, width)));
+            let mut result = outlined(world, entity, width);
+            for other in &self.additional {
+                if let Some(outlined_world) =
+                    outlined(result.as_ref().unwrap_or(world), *other, width)
+                {
+                    result = Some(outlined_world);
+                }
+            }
+            self.outline = Some((key, result));
         }
         self.outline
             .as_ref()
@@ -370,8 +416,10 @@ impl Editing {
         self.touch = None;
         self.history
             .undo(world)
-            .map(|_| ())
-            .map_err(|error| error.to_string())
+            .map_err(|error| error.to_string())?;
+        self.prune_selection(world);
+        self.outline = None;
+        Ok(())
     }
 
     /// Redoes the last undone step, if there is one.
@@ -382,8 +430,10 @@ impl Editing {
         self.touch = None;
         self.history
             .redo(world)
-            .map(|_| ())
-            .map_err(|error| error.to_string())
+            .map_err(|error| error.to_string())?;
+        self.prune_selection(world);
+        self.outline = None;
+        Ok(())
     }
 
     /// Where the selection's origin is on screen, in pixels, for the app to
@@ -416,6 +466,23 @@ impl Editing {
         let camera = self.canvas.camera(world, extractor, size)?;
         // A sheet that stands its sprites on their feet moves the drawn quad;
         // the box moves with it, or the handles sit below the picture.
+        if let Some(hits) = &self.sprite_hits
+            && let Some(sprite) = extractor
+                .components()
+                .get::<SpriteComponent>(world, entity)
+                .ok()
+                .flatten()
+            && let Some(bounds) = hits.bounds(&sprite)
+            && let Some([left, top, right, bottom]) =
+                sprite_content_bounds(world, camera.view_projection, entity, bounds)
+        {
+            return Ok(Some([
+                left * size[0],
+                top * size[1],
+                right * size[0],
+                bottom * size[1],
+            ]));
+        }
         let offset = extractor
             .components()
             .get::<SpriteComponent>(world, entity)

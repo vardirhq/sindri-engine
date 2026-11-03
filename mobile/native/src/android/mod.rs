@@ -13,6 +13,7 @@
 mod exports;
 mod playing;
 mod scripts;
+mod selection;
 mod touch;
 mod window;
 
@@ -72,7 +73,7 @@ impl Host {
         self.recovery_directory = None;
         self.recovery_conflict = false;
         self.recovered = false;
-        self.editing = Some(Editing::new(&opened.world, &opened.extractor)?);
+        self.editing = Some(Editing::for_scene(&opened)?);
         self.opened = Some(opened);
         self.installed = false;
         self.source = Some((project, scene));

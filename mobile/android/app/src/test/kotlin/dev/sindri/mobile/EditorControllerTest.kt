@@ -119,6 +119,22 @@ class EditorControllerTest {
     }
 
     @Test
+    fun selection_actions_reach_the_host_and_edits_are_saved() {
+        host.state = EditorState(inspector = Inspector("Lamp", null, emptyList()), selectionCount = 1)
+        controller.refresh()
+        controller.on(EditorEvent.Tool(BarItem.SelectMore)) {}
+        assertEquals(listOf("selectMore"), host.commands.last())
+        host.state = host.state.copy(unsaved = true, selectionCount = 2)
+        controller.on(EditorEvent.Tool(BarItem.Duplicate)) {}
+        assertTrue(listOf("duplicate") in host.commands)
+        assertEquals(listOf("save"), host.commands.last())
+        host.state = host.state.copy(unsaved = true)
+        controller.on(EditorEvent.Tool(BarItem.Delete)) {}
+        assertTrue(listOf("delete") in host.commands)
+        assertEquals(listOf("save"), host.commands.last())
+    }
+
+    @Test
     fun scenes_come_from_the_host_and_open_the_tapped_scene() {
         val opened = mutableListOf<String>()
         val controller = EditorController(host, onSceneOpened = { opened += it })

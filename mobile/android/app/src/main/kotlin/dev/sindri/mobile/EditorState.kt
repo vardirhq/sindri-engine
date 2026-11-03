@@ -76,6 +76,8 @@ data class EditorState(
     val sceneName: String? = null,
     val scenes: List<SceneCard> = emptyList(),
     val inspector: Inspector? = null,
+    val selectionCount: Int = 0,
+    val selectingMore: Boolean = false,
     /** Where the selection's origin is, in surface pixels. */
     val origin: Pair<Float, Float>? = null,
     /** The box the selection covers: left, top, right, bottom, in surface pixels. */
@@ -104,6 +106,8 @@ data class EditorState(
                     SceneCard(name, scene.optBoolean("main"), name == root.optString("sceneName"), preview = false)
                 }.orEmpty(),
                 inspector = root.optJSONObject("inspector")?.let(::inspector),
+                selectionCount = root.optInt("selectionCount"),
+                selectingMore = root.optBoolean("selectingMore"),
                 origin = root.optJSONArray("origin")?.let {
                     it.getDouble(0).toFloat() to it.getDouble(1).toFloat()
                 },
