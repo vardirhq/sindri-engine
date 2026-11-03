@@ -102,7 +102,10 @@ impl Host {
 
     fn clear_clean_recovery(&self) -> Result<(), String> {
         if !self.recovery_conflict
-            && self.editing.as_ref().is_some_and(|editing| !editing.unsaved())
+            && self
+                .editing
+                .as_ref()
+                .is_some_and(|editing| !editing.unsaved())
             && let Some(recovery) = &self.recovery
         {
             recovery.clear()?;
@@ -136,7 +139,10 @@ impl Host {
     }
 
     fn discard_recovery(&mut self) -> Result<(), String> {
-        self.recovery.as_ref().ok_or("recovery is not ready")?.clear()?;
+        self.recovery
+            .as_ref()
+            .ok_or("recovery is not ready")?
+            .clear()?;
         self.recovery_conflict = false;
         Ok(())
     }

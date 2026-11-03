@@ -32,9 +32,9 @@ mod opened;
 #[cfg(not(target_arch = "wasm32"))]
 mod outline;
 #[cfg(not(target_arch = "wasm32"))]
-mod recovery;
-#[cfg(not(target_arch = "wasm32"))]
 mod play;
+#[cfg(not(target_arch = "wasm32"))]
+mod recovery;
 mod renderer;
 
 #[cfg(target_os = "android")]
