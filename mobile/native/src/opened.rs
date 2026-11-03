@@ -22,12 +22,18 @@ pub fn listed_scenes(project: &Path) -> Result<Vec<ListedScene>, String> {
         .chain(others.iter().map(|other| project.join(other)));
     let mut scenes: Vec<ListedScene> = Vec::new();
     for (index, path) in paths.enumerate() {
-        let name = path.file_name().and_then(|name| name.to_str())
-            .ok_or_else(|| format!("{}: invalid scene name", path.display()))?.to_owned();
+        let name = path
+            .file_name()
+            .and_then(|name| name.to_str())
+            .ok_or_else(|| format!("{}: invalid scene name", path.display()))?
+            .to_owned();
         if scenes.iter().any(|scene| scene.name == name) {
             return Err(format!("scene name {name} is listed more than once"));
         }
-        scenes.push(ListedScene { name, main: index == 0 });
+        scenes.push(ListedScene {
+            name,
+            main: index == 0,
+        });
     }
     Ok(scenes)
 }

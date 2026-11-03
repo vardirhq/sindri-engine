@@ -136,14 +136,19 @@ impl Host {
             return Err("Choose which scene to keep before switching.".to_owned());
         }
         let (project, current) = self.source.as_ref().ok_or("no project is open")?;
-        if current == name { return Ok(()); }
+        if current == name {
+            return Ok(());
+        }
         if !self.scenes.iter().any(|scene| scene.name == name) {
             return Err(format!("the project lists no scene {name}"));
         }
         let project = project.clone();
         let mut opened = OpenedScene::open(&project, name)?;
         let mut editing = Editing::new(&opened.world, &opened.extractor)?;
-        editing.lighting_preview = self.editing.as_ref().is_some_and(|editing| editing.lighting_preview);
+        editing.lighting_preview = self
+            .editing
+            .as_ref()
+            .is_some_and(|editing| editing.lighting_preview);
         if self.editing.as_ref().is_some_and(Editing::unsaved) {
             self.save()?;
         }
@@ -152,7 +157,10 @@ impl Host {
         {
             return Err("Resolve the current scene's recovery before switching.".to_owned());
         }
-        let directory = self.recovery_directory.as_ref().ok_or("recovery is not ready")?;
+        let directory = self
+            .recovery_directory
+            .as_ref()
+            .ok_or("recovery is not ready")?;
         let recovery = crate::Recovery::new(directory, &opened)?;
         if recovery.pending()?.is_some() {
             return Err("Resolve the stored recovery before switching.".to_owned());
@@ -161,9 +169,18 @@ impl Host {
         // the controller on a scene it was told did not open.
         let renderer = if let (Some(gpu), Some(surface)) = (&self.gpu, &self.surface) {
             let mut renderer = crate::SceneRenderer::new(
-                &gpu.device, &gpu.queue, surface.format(), surface.width(), surface.height(),
+                &gpu.device,
+                &gpu.queue,
+                surface.format(),
+                surface.width(),
+                surface.height(),
             )?;
-            renderer.install(&gpu.device, &gpu.queue, &mut opened.extractor, &mut opened.assets)?;
+            renderer.install(
+                &gpu.device,
+                &gpu.queue,
+                &mut opened.extractor,
+                &mut opened.assets,
+            )?;
             Some(renderer)
         } else {
             None
