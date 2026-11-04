@@ -313,6 +313,10 @@ impl Host {
             "inspector": inspector,
             "prefabs": self.opened.as_ref().map(|opened| opened.assets.prefabs.ids().collect::<Vec<_>>()).unwrap_or_default(),
             "objects": self.objects,
+            "gizmos": match (&self.opened, &self.editing, &self.playing) {
+                (Some(opened), Some(editing), None) => editing.gizmos(&opened.world, size),
+                _ => Vec::new(),
+            },
             "selectionCount": self.editing.as_ref().map_or(0, |editing| editing.selected_entities().len()),
             "selectingMore": self.editing.as_ref().is_some_and(|editing| editing.selecting_more),
             "origin": origin,
@@ -425,7 +429,7 @@ impl Host {
                 Ok(())
             }
             "openScene" => self.open_scene(text(0)?),
-            "clearObjects" | "refreshObjects" | "selectObject" => {
+            "clearObjects" | "refreshObjects" | "selectObject" | "gizmoPress" => {
                 self.object_command(command, &arguments)
             }
             "recovery" => self.configure_recovery(text(0)?),

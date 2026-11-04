@@ -62,7 +62,7 @@ struct OutlineKey {
 
 /// What one touch on the canvas is doing.
 #[derive(Clone, Copy, Debug, PartialEq)]
-enum Touch {
+pub(crate) enum Touch {
     /// Moving the view, because it did not start on the selection.
     Panning { last: [f32; 2] },
     /// Moving the selected entity, by how far the finger has gone from where
@@ -96,7 +96,7 @@ pub struct Editing {
     /// light. Off by default, as the design's menu has it, so a scene that is
     /// dark on purpose can still be seen to be worked on.
     pub lighting_preview: bool,
-    touch: Option<Touch>,
+    pub(crate) touch: Option<Touch>,
     /// The world the canvas last drew with the selection outlined, and what it
     /// was built for.
     outline: Option<(OutlineKey, Option<World>)>,
@@ -185,6 +185,10 @@ impl Editing {
         }))
     }
 
+    pub(crate) fn invalidate_outline(&mut self) {
+        self.outline = None;
+    }
+
     /// A tap: selects what is under it, or clears the selection over nothing.
     ///
     /// # Errors
@@ -227,7 +231,7 @@ impl Editing {
             .filter(|_| self.additional.is_empty() && !self.selecting_more)
             .filter(|selected| under == Some(*selected))
             .and_then(|entity| {
-                let transform = world.get(entity)?.transform_3d?;
+                let transform = world.world_transform(entity)?;
                 Some((entity, transform.position))
             });
         self.touch = Some(match start {
@@ -264,15 +268,19 @@ impl Editing {
                 start,
             }) => {
                 let per_pixel = self.canvas.per_pixel(size[1]);
-                let Some(mut transform) = world.get(entity).and_then(|data| data.transform_3d)
-                else {
+                let Some(data) = world.get(entity) else {
                     return Ok(());
                 };
-                transform.position = [
+                let mut transform = data.transform_3d.unwrap_or_default();
+                let mut world_transform = world
+                    .world_transform(entity)
+                    .unwrap_or_else(|| world.parent_space(entity));
+                world_transform.position = [
                     start[0] + (pixel[0] - from[0]) * per_pixel,
                     start[1] - (pixel[1] - from[1]) * per_pixel,
                     start[2],
                 ];
+                transform.position = world.local_for_world(entity, world_transform).position;
                 let mut buffer = CommandBuffer::new();
                 buffer.push(WorldCommand::SetTransform3D {
                     entity,
@@ -439,7 +447,12 @@ impl Editing {
     /// Where the selection's origin is on screen, in pixels, for the app to
     /// draw its marker. `None` with nothing selected or off the camera.
     pub fn selection_pixel(&self, world: &World, size: [f32; 2]) -> Option<[f32; 2]> {
-        let position = world.get(self.selected?)?.transform_3d?.position;
+        let entity = self.selected?;
+        world.get(entity)?;
+        let position = world
+            .world_transform(entity)
+            .unwrap_or_else(|| world.parent_space(entity))
+            .position;
         let per_pixel = self.canvas.per_pixel(size[1]);
         Some([
             size[0] * 0.5 + (position[0] - self.canvas.center[0]) / per_pixel,

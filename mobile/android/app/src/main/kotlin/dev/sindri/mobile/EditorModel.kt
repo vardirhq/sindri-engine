@@ -25,8 +25,12 @@ data class EditorUi(
     val toast: ToastUi? = null,
     /** Where the selection's handles go on the canvas, in dp. */
     val handles: HandlesUi? = null,
+    val gizmos: List<GizmoUi> = emptyList(),
     val play: PlayUi = PlayUi(),
 )
+
+/** A non-sprite object's editor marker, positioned in the canvas. */
+data class GizmoUi(val id: String, val name: String, val kind: String, val x: Float, val y: Float, val selected: Boolean)
 
 enum class PlayMode { Edit, Play, Paused }
 
@@ -196,6 +200,7 @@ sealed interface EditorEvent {
     data object DiscardEdits : EditorEvent
     /** A finger took a handle, at a point on the canvas in pixels. */
     data class HandleTaken(val handle: HandleKind, val x: Float, val y: Float) : EditorEvent
+    data class GizmoTaken(val id: String, val x: Float, val y: Float) : EditorEvent
     data class HandleDragged(val x: Float, val y: Float) : EditorEvent
     data object HandleReleased : EditorEvent
     /** A number, text or switch slot of the open script given a new value. */
