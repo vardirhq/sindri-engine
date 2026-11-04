@@ -12,14 +12,21 @@ fn frame_all_fits_tilemap_and_ignores_screen_ui() {
     opened.world = World::default();
     opened.world.spawn(EntityData {
         transform_3d: Some(Transform3D::default()),
-        components: [("sindri.tilemap".to_owned(), json!({
-            "texture": "textures/village-ground.png", "palette": ["tile"],
-            "columns": 4, "rows": 2, "tile_size": [2.0, 3.0], "tiles": [0, 0, 0, 0, 0, 0, 0, 0]
-        }))].into(),
+        components: [(
+            "sindri.tilemap".to_owned(),
+            json!({
+                "texture": "textures/village-ground.png", "palette": ["tile"],
+                "columns": 4, "rows": 2, "tile_size": [2.0, 3.0], "tiles": [0, 0, 0, 0, 0, 0, 0, 0]
+            }),
+        )]
+        .into(),
         ..EntityData::default()
     });
     opened.world.spawn(EntityData {
-        transform_3d: Some(Transform3D { position: [1000.0, 1000.0, 0.0], ..Transform3D::default() }),
+        transform_3d: Some(Transform3D {
+            position: [1000.0, 1000.0, 0.0],
+            ..Transform3D::default()
+        }),
         components: [("sindri.ui.text".to_owned(), json!({}))].into(),
         ..EntityData::default()
     });
