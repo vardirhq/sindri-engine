@@ -322,11 +322,19 @@ fn find_object(source: &str, slot: Span, name: &str) -> Result<String, String> {
     let Some(field) = old.strip_prefix("this.") else {
         return Err("that is no longer an object pin".to_owned());
     };
-    if field.is_empty() || !field.chars().all(|character| character.is_alphanumeric() || character == '_') {
+    if field.is_empty()
+        || !field
+            .chars()
+            .all(|character| character.is_alphanumeric() || character == '_')
+    {
         return Err("that is no longer an object pin".to_owned());
     }
     let quoted = serde_json::to_string(name).map_err(|error| error.to_string())?;
-    Ok(format!("{}World.find({quoted}){}", &source[..start], &source[end..]))
+    Ok(format!(
+        "{}World.find({quoted}){}",
+        &source[..start],
+        &source[end..]
+    ))
 }
 
 fn use_field(source: &str, slot: Span, field: &str) -> Result<String, String> {

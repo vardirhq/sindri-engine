@@ -289,7 +289,11 @@ impl Host {
                 *counts.entry(name).or_insert(0usize) += 1;
             }
         }
-        counts.into_iter().filter(|(_, count)| *count == 1).map(|(name, _)| name.to_owned()).collect()
+        counts
+            .into_iter()
+            .filter(|(_, count)| *count == 1)
+            .map(|(name, _)| name.to_owned())
+            .collect()
     }
 
     /// The open script for the Behaviour sheet, as JSON: its `name`, its
@@ -324,18 +328,35 @@ impl Host {
 /// Parse a new script member requested by the app.
 fn parse_member(value: &Value) -> Result<Member, String> {
     let text = |key: &str| {
-        value.get(key).and_then(Value::as_str).map(str::to_owned)
+        value
+            .get(key)
+            .and_then(Value::as_str)
+            .map(str::to_owned)
             .ok_or_else(|| format!("no {key} was given"))
     };
     let name = text("name")?;
     match value.get("member").and_then(Value::as_str) {
-        Some("variable") => Ok(Member::Variable { name, ty: text("type")? }),
+        Some("variable") => Ok(Member::Variable {
+            name,
+            ty: text("type")?,
+        }),
         Some("function") => {
-            let inputs = value.get("inputs").and_then(Value::as_array).into_iter().flatten()
+            let inputs = value
+                .get("inputs")
+                .and_then(Value::as_array)
+                .into_iter()
+                .flatten()
                 .map(|input| {
-                    let part = |key: &str| input.get(key).and_then(Value::as_str).unwrap_or_default().to_owned();
+                    let part = |key: &str| {
+                        input
+                            .get(key)
+                            .and_then(Value::as_str)
+                            .unwrap_or_default()
+                            .to_owned()
+                    };
                     (part("name"), part("type"))
-                }).collect();
+                })
+                .collect();
             Ok(Member::Function { name, inputs })
         }
         Some("event") => Ok(Member::Event { name }),

@@ -247,11 +247,39 @@ fn a_pin_takes_a_field_in_place_of_its_value_and_an_unknown_one_is_refused() {
 fn an_entity_pin_can_find_a_named_scene_object() {
     let source = "script Lamp { fn start() { World.despawn(this.entity); } }";
     let start = source.find("this.entity").expect("entity pin");
-    let changed = change(source, &Shape::FindObject { slot: [start, start + "this.entity".len()], name: "Wick\"s lantern".to_owned() }, &environment()).expect("valid object lookup");
+    let changed = change(
+        source,
+        &Shape::FindObject {
+            slot: [start, start + "this.entity".len()],
+            name: "Wick\"s lantern".to_owned(),
+        },
+        &environment(),
+    )
+    .expect("valid object lookup");
     assert!(changed.contains(r#"World.find("Wick\"s lantern")"#));
-    assert!(change(source, &Shape::FindObject { slot: [start, start + "this.entity".len()], name: String::new() }, &environment()).is_err());
+    assert!(
+        change(
+            source,
+            &Shape::FindObject {
+                slot: [start, start + "this.entity".len()],
+                name: String::new()
+            },
+            &environment()
+        )
+        .is_err()
+    );
     let invalid = source.find("World").expect("call");
-    assert!(change(source, &Shape::FindObject { slot: [invalid, invalid + 5], name: "Wick".to_owned() }, &environment()).is_err());
+    assert!(
+        change(
+            source,
+            &Shape::FindObject {
+                slot: [invalid, invalid + 5],
+                name: "Wick".to_owned()
+            },
+            &environment()
+        )
+        .is_err()
+    );
 }
 
 #[test]
