@@ -23,14 +23,14 @@ data class EditorUi(
     val menu: MenuUi? = null,
     val coach: String? = null,
     val toast: ToastUi? = null,
-    /** A non-sprite object's editor marker, positioned in the canvas. */
-data class GizmoUi(val id: String, val name: String, val kind: String, val x: Float, val y: Float, val selected: Boolean)
-
-/** Where the selection's handles go on the canvas, in dp. */
+    /** Where the selection's handles go on the canvas, in dp. */
     val handles: HandlesUi? = null,
     val gizmos: List<GizmoUi> = emptyList(),
     val play: PlayUi = PlayUi(),
 )
+
+/** A non-sprite object's editor marker, positioned in the canvas. */
+data class GizmoUi(val id: String, val name: String, val kind: String, val x: Float, val y: Float, val selected: Boolean)
 
 enum class PlayMode { Edit, Play, Paused }
 
