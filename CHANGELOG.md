@@ -2,6 +2,8 @@
 
 # Changelog
 
+- Let mobile visual scripts choose this object, an Entity field or a uniquely named scene object for object pins.
+
 - Browse visual script steps by category or search the whole finder, including engine calls with object and vector arguments.
 
 - List the open scene’s objects in the mobile Layers sheet and select them by tapping, including screen UI and prefab children.

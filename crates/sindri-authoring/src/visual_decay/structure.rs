@@ -206,6 +206,8 @@ pub enum Shape {
     /// The value in a pin at this span replaced by one of the script's
     /// fields, read as `this.field`.
     Field { slot: Span, field: String },
+    /// Replace an object pin with a lookup by its scene name.
+    FindObject { slot: Span, name: String },
     /// A new member of the script: written first among its fields for a
     /// variable, last for a function or event.
     Add(Member),
@@ -269,6 +271,7 @@ pub(super) fn reshape(source: &str, shape: &Shape) -> Result<String, String> {
             })
         }
         Shape::Field { slot, field } => use_field(source, *slot, field),
+        Shape::FindObject { slot, name } => find_object(source, *slot, name),
         Shape::Add(member) => add(source, &program, member),
         Shape::Remove { name } => {
             let span = member_span(&program, name)?;
@@ -310,6 +313,22 @@ pub(super) fn reshape(source: &str, shape: &Shape) -> Result<String, String> {
 pub(super) const GONE: &str = "that part of the script is no longer there";
 
 /// `source` with the pin at `slot` reading `this.field`.
+fn find_object(source: &str, slot: Span, name: &str) -> Result<String, String> {
+    if name.is_empty() {
+        return Err("Choose a named object".to_owned());
+    }
+    let [start, end] = slot;
+    let old = source.get(start..end).ok_or(GONE)?;
+    let Some(field) = old.strip_prefix("this.") else {
+        return Err("that is no longer an object pin".to_owned());
+    };
+    if field.is_empty() || !field.chars().all(|character| character.is_alphanumeric() || character == '_') {
+        return Err("that is no longer an object pin".to_owned());
+    }
+    let quoted = serde_json::to_string(name).map_err(|error| error.to_string())?;
+    Ok(format!("{}World.find({quoted}){}", &source[..start], &source[end..]))
+}
+
 fn use_field(source: &str, slot: Span, field: &str) -> Result<String, String> {
     let named = !field.is_empty()
         && field

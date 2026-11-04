@@ -24,6 +24,7 @@ data class DecayScript(
     val canRedo: Boolean = false,
     /** The engine calls a step can make: an id the host knows, and the call with placeholders. */
     val engine: List<Pair<String, String>> = emptyList(),
+    val objects: List<String> = emptyList(),
 ) {
     companion object {
         /** The native host's `script()` answer, or null for `null`. */
@@ -31,16 +32,25 @@ data class DecayScript(
             if (json.isBlank() || json == "null") return null
             val root = JSONObject(json)
             val blocks = root.getJSONObject("blocks")
+            val containers = blocks.optJSONArray("containers").objects().map(::container)
+            val entityFields = containers.flatMap { it.fields }.filter { it.type == "Entity" }.mapTo(HashSet()) { "this.${it.name}" }
+            entityFields.add("this.entity")
+            val rawGraph = root.optJSONObject("graph")?.let(::graph) ?: DecayGraph(emptyList(), emptyList())
+            val annotated = rawGraph.copy(nodes = rawGraph.nodes.map { node -> node.copy(inputs = node.inputs.map { pin ->
+                val value = pin.value
+                if (value is DecaySlot.Name && value.path in entityFields) pin.copy(value = value.copy(objectReference = true)) else pin
+            }) })
             return DecayScript(
                 name = root.optString("name"),
                 source = root.optString("source"),
-                containers = blocks.optJSONArray("containers").objects().map(::container),
+                containers = containers,
                 problems = blocks.optJSONArray("problems").objects().map { "Line ${it.optInt("line")}: ${it.optString("message")}" },
-                graph = root.optJSONObject("graph")?.let(::graph) ?: DecayGraph(emptyList(), emptyList()),
+                graph = annotated,
                 palette = root.optJSONArray("palette").objects().map { it.optString("id") to it.optString("label") },
                 canUndo = root.optBoolean("canUndo"),
                 canRedo = root.optBoolean("canRedo"),
                 engine = root.optJSONArray("engine").objects().map { it.optString("id") to it.optString("call") },
+                objects = root.optJSONArray("objects").strings(),
             )
         }
 
@@ -118,7 +128,7 @@ data class DecayScript(
                 "text" -> DecaySlot.Text(json.optString("value"), span)
                 "bool" -> DecaySlot.Bool(json.optBoolean("value"), span)
                 "null" -> DecaySlot.Null
-                "name" -> DecaySlot.Name(json.optString("path"))
+                "name" -> DecaySlot.Name(json.optString("path"), span)
                 "call" -> DecaySlot.Call(json.optString("callee"), json.optJSONArray("args").objects().map(::slot))
                 "op" -> DecaySlot.Op(json.optString("op"), slot(json.getJSONObject("left")), slot(json.getJSONObject("right")))
                 "unary" -> DecaySlot.Unary(json.optString("op"), slot(json.getJSONObject("operand")))
@@ -216,7 +226,7 @@ sealed interface DecaySlot {
     data class Text(val value: String, val span: Pair<Int, Int>) : DecaySlot
     data class Bool(val value: Boolean, val span: Pair<Int, Int>) : DecaySlot
     data object Null : DecaySlot
-    data class Name(val path: String) : DecaySlot
+    data class Name(val path: String, val span: Pair<Int, Int> = 0 to 0, val objectReference: Boolean = false) : DecaySlot
     data class Call(val callee: String, val args: List<DecaySlot>) : DecaySlot
     data class Op(val op: String, val left: DecaySlot, val right: DecaySlot) : DecaySlot
     data class Unary(val op: String, val operand: DecaySlot) : DecaySlot
