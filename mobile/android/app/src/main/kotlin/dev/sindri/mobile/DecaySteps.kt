@@ -3,8 +3,10 @@ package dev.sindri.mobile
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -14,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -29,6 +32,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -191,7 +195,7 @@ fun DecaySteps(
             containerColor = Forge.Popover,
             title = { Text("Add a step", style = ForgeType.text(16.sp, FontWeight.SemiBold)) },
             text = {
-                Column(Modifier.heightIn(max = 420.dp).verticalScroll(rememberScrollState())) {
+                Column(Modifier.heightIn(max = 420.dp)) {
                     Finder(script.palette, script.engine) { id -> add(id); adding = null }
                 }
             },
@@ -202,9 +206,6 @@ fun DecaySteps(
 }
 
 private const val INDENT = 20
-
-/** Choices past which a finder offers search. */
-private const val SEARCHED = 12
 
 @Composable
 private fun Chip(label: String, on: Boolean, onClick: () -> Unit) = Text(
@@ -303,27 +304,39 @@ fun plain(name: String): String {
     return "$words${if (asks) "?" else ""} · $owner"
 }
 
-/**
- * What a finder lists for [query]: the script's own statements, then the
- * engine's calls in words, each matched by its words or its code.
- */
-fun findSteps(query: String, palette: List<Pair<String, String>>, engine: List<Pair<String, String>>): List<Pair<String, String>> {
-    val calls = engine.map { (id, call) -> id to "${plain(call.substringBefore('('))}  ·  $call" }
-    val all = palette + calls
-    val wanted = query.trim()
-    return if (wanted.isEmpty()) all else all.filter { (_, label) -> label.contains(wanted, ignoreCase = true) }
+/** A category follows the engine namespace, with the script's own steps together. */
+private fun stepCategory(id: String, call: String): String {
+    if (!id.startsWith("engine:")) return "Script"
+    val owner = call.substringBefore('(').substringBefore('.')
+    return when (owner) {
+        "World" -> "Objects"
+        "Ui" -> "Screen UI"
+        else -> owner
+    }
 }
 
-/**
- * A search box over [findSteps], each result a row that gives its id to
- * [onPick]. A list short enough to see whole has no box.
- */
+/** The categories available in this script's actual catalog. */
+fun stepCategories(palette: List<Pair<String, String>>, engine: List<Pair<String, String>>): List<String> =
+    listOf("All") + (palette + engine).map { (id, call) -> stepCategory(id, call) }.distinct().sorted()
+
+/** Search words and code, optionally within a category. */
+fun findSteps(query: String, palette: List<Pair<String, String>>, engine: List<Pair<String, String>>, category: String = "All"): List<Pair<String, String>> {
+    val wanted = query.trim()
+    val own = palette.filter { (id, label) -> (category == "All" || stepCategory(id, label) == category) && label.contains(wanted, ignoreCase = true) }
+    val calls = engine.filter { (id, call) -> category == "All" || stepCategory(id, call) == category }
+        .map { (id, call) -> id to "${plain(call.substringBefore('('))}  ·  $call" }
+        .filter { (_, label) -> label.contains(wanted, ignoreCase = true) }
+    return own + calls
+}
+
+/** Search or browse the full catalog; selecting a result inserts its checked template. */
 @Composable
 fun Finder(palette: List<Pair<String, String>>, engine: List<Pair<String, String>>, onPick: (String) -> Unit) {
     var query by remember { mutableStateOf("") }
+    var category by remember { mutableStateOf("All") }
     var naming by remember { mutableStateOf(false) }
+    var searching by remember { mutableStateOf(false) }
     if (naming) {
-        // "Remember a value" needs a name before it is a step.
         var name by remember { mutableStateOf("") }
         OutlinedTextField(
             value = name,
@@ -335,16 +348,38 @@ fun Finder(palette: List<Pair<String, String>>, engine: List<Pair<String, String
         TextButton(onClick = { onPick("let:$name") }, enabled = name.isNotEmpty()) { Text("Add", color = Forge.MetalBright) }
         return
     }
-    if (palette.size + engine.size > SEARCHED) OutlinedTextField(
-        value = query,
-        onValueChange = { query = it },
-        singleLine = true,
-        placeholder = { Text("Search, such as sound or find", style = ForgeType.text(14.sp, color = Forge.TextFaint)) },
-        textStyle = ForgeType.text(14.sp),
-        modifier = Modifier.fillMaxWidth().padding(bottom = 6.dp),
-    )
-    findSteps(query, palette, engine).take(60).forEach { (id, label) ->
-        MenuRow(if (id == "let") "$label…" else label) { if (id == "let") naming = true else onPick(id) }
+    if (searching) {
+        BasicTextField(
+            value = query,
+            onValueChange = { query = it },
+            singleLine = true,
+            textStyle = ForgeType.text(14.sp),
+            // A text field filling a platform-width dialog can loop during
+            // layout in Robolectric at phone widths (robolectric#8460).
+            modifier = Modifier.width(240.dp).padding(bottom = 6.dp).testTag("step-search")
+                .border(1.dp, Forge.LineStrong, RoundedCornerShape(10.dp)).padding(12.dp),
+            decorationBox = { input ->
+                Box {
+                    if (query.isEmpty()) Text("Search steps", style = ForgeType.text(14.sp, color = Forge.TextFaint))
+                    input()
+                }
+            },
+        )
+    } else {
+        TextButton(onClick = { searching = true }) { Text("Search", color = Forge.MetalBright) }
+    }
+    val categories = stepCategories(palette, engine)
+    if (categories.size > 2) {
+        Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(bottom = 8.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            categories.forEach { item -> Chip(item, item == category) { category = item } }
+        }
+    }
+    val results = findSteps(query, palette, engine, category)
+    Column(Modifier.heightIn(max = 260.dp).verticalScroll(rememberScrollState())) {
+        if (results.isEmpty()) Text("No matching steps", style = ForgeType.text(14.sp, color = Forge.TextMuted), modifier = Modifier.padding(12.dp))
+        results.forEach { (id, label) ->
+            MenuRow(if (id == "let") "$label…" else label) { if (id == "let") naming = true else onPick(id) }
+        }
     }
 }
 

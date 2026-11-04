@@ -4,9 +4,12 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.click
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTouchInput
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -103,6 +106,39 @@ class DecayCanvasTest {
         assertEquals(listOf("engine:Audio.play"), findSteps("sound", palette, engine).map { it.first })
         assertEquals(listOf("engine:World.find"), findSteps("world.f", palette, engine).map { it.first })
         assertEquals(listOf("set:glow"), findSteps("glow", palette, engine).map { it.first })
+    }
+
+    @Test
+    fun finder_categories_and_search_cover_every_result() {
+        val palette = listOf("return" to "Return")
+        val engine = (1..75).map { "engine:World.call$it" to "World.call$it(this.entity)" } +
+            ("engine:World.despawn" to "World.despawn(this.entity)") +
+            ("engine:Audio.play" to "Audio.play(\"\", 0)")
+        assertTrue("Objects" in stepCategories(palette, engine))
+        assertTrue("Audio" in stepCategories(palette, engine))
+        assertEquals(76, findSteps("", palette, engine, "Objects").size)
+        assertEquals(listOf("engine:World.despawn"), findSteps("despawn", palette, engine).map { it.first })
+        assertEquals(listOf("return"), findSteps("", palette, engine, "Script").map { it.first })
+    }
+
+    @Test
+    fun finder_searches_engine_calls_in_the_node_menu() {
+        val set = DecayNode("Lamp.start/0", "statement", "Set this.lit", null, emptyList(), listOf(""), 0f, 0f, span = 40 to 56)
+        val script = DecayScript(
+            "scripts/lamp.decay", "", emptyList(),
+            graph = DecayGraph(listOf(set), emptyList()),
+            engine = listOf("engine:World.despawn" to "World.despawn(this.entity)"),
+        )
+        val changes = mutableListOf<Triple<String, Pair<Int, Int>, Any?>>()
+        compose.setContent {
+            ForgeTheme { DecayCanvas(script, onEdit = { _, _ -> }, onMove = { _, _, _ -> }, onChange = { kind, span, value -> changes += Triple(kind, span, value) }) }
+        }
+        compose.onNodeWithContentDescription("Set this.lit, drag to move, tap for its menu").performTouchInput { click() }
+        compose.onNodeWithText("Add after…").performClick()
+        compose.onNodeWithText("Search").performClick()
+        compose.onNodeWithTag("step-search").performTextInput("despawn")
+        compose.onNodeWithText("Remove entity  ·  World.despawn(this.entity)").performClick()
+        assertEquals(Triple("insertAfter", 40 to 56, "engine:World.despawn"), changes.last())
     }
 
     @Test

@@ -263,10 +263,44 @@ fn a_step_can_call_the_engine_from_the_finder_and_still_reads() {
     )
     .expect("an engine call with placeholders still checks");
     assert!(changed.contains("this.glow = 3.0;\n        Audio.play(\"\", 0);\n"));
-    assert!(
-        calls.iter().all(|(_, call)| !call.contains("Vec3")),
-        "only plain placeholders"
-    );
+    let despawn = calls
+        .iter()
+        .find(|(id, _)| id == "engine:World.despawn")
+        .expect("entity calls are available");
+    assert_eq!(despawn.1, "World.despawn(this.entity)");
+    let template = Template::engine(&despawn.0, &environment).expect("despawn template");
+    let changed = change(
+        SCRIPT,
+        &Shape::After {
+            statement: at(SCRIPT, "this.glow = 3.0"),
+            template,
+        },
+        &environment,
+    )
+    .expect("despawn with its entity checks");
+    assert!(changed.contains("World.despawn(this.entity);"));
+    for (id, expected) in [
+        (
+            "engine:Physics.apply_force",
+            "Physics.apply_force(this.entity, Vec2(0, 0));",
+        ),
+        (
+            "engine:World.nearest",
+            "World.nearest(\"\", Vec3(0, 0, 0));",
+        ),
+    ] {
+        let template = Template::engine(id, &environment).expect("vector call is available");
+        let changed = change(
+            SCRIPT,
+            &Shape::After {
+                statement: at(SCRIPT, "this.glow = 3.0"),
+                template,
+            },
+            &environment,
+        )
+        .expect("vector placeholder checks");
+        assert!(changed.contains(expected));
+    }
 }
 
 #[test]

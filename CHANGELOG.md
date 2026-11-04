@@ -2,6 +2,8 @@
 
 # Changelog
 
+- Browse visual script steps by category or search the whole finder, including engine calls with object and vector arguments.
+
 - List the open scene’s objects in the mobile Layers sheet and select them by tapping, including screen UI and prefab children.
 
 - Ignore transparent sprite padding when picking in the mobile editor, and place selection handles around the visible art. Sheet anchors are honored.
