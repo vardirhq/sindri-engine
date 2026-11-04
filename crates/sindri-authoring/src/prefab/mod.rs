@@ -9,8 +9,10 @@
 pub mod document;
 mod library;
 pub mod missing;
+mod sync;
 
 pub use library::ScenePrefabs;
+pub use sync::{reconcile, spawn_instance};
 
 use std::path::Path;
 

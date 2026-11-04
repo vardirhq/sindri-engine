@@ -55,7 +55,7 @@ Fonts are bundled under their own licences in `mobile/android/licenses/`.
 | `02`–`04` New game | `NewGameScreen` | ✅ | The steps play out; creating a project is not wired, so the bundled Lamplighter opens instead |
 | `10-editor` | `EditorScreen` | ✅ | The canvas is the engine's scene: drag to pan, pinch to zoom, tap to select, drag a selection to move it. Tapping the ground lets the selection go: a tilemap is painted, not selected, as in the prototype. Back steps out of the menu, a sheet, painting, a run and the selection before leaving the editor. Moves are saved when the finger lifts |
 | `11-more-menu` | `EditorScreen` | ✅ | The switches are remembered while the menu is closed. Lighting preview (off by default) draws the scene's 2D lights or leaves every sprite in its own colors; Snap keeps the turn handle to 15° and the scale handle to tenths; the tile grid is not drawn yet. Frame everything is not wired |
-| `12-add` | `EditorSheets` | ✅ | Sample prefabs; placing is not wired |
+| `12-add` | `EditorSheets` | ✅ | Lists project prefabs; tapping places a linked instance at the view center. Empty and Light 2D add real objects. Drag placement and prefab thumbnails are not wired. |
 | `13-paint` | `EditorScreen` | ✅ | Brush, size and Move are chosen; painting is not wired |
 | `14-assets`, `15-import` | `EditorSheets` | ✅ | Sample content; the slicer (`16-slicer`) is not built yet |
 | `17-layers`, `17b-layers-objects` | `EditorSheets` | ✅ | Lists real objects in the open scene, including screen UI and prefab children; tap one to select it. Layer visibility and hierarchy controls are not wired. |

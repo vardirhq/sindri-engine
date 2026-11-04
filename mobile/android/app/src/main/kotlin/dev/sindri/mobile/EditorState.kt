@@ -75,6 +75,7 @@ data class EditorState(
     val status: String = "",
     val sceneName: String? = null,
     val scenes: List<SceneCard> = emptyList(),
+    val prefabs: List<PrefabTile> = emptyList(),
     val inspector: Inspector? = null,
     val objects: List<TreeRow> = emptyList(),
     val selectionCount: Int = 0,
@@ -105,6 +106,12 @@ data class EditorState(
                 scenes = root.optJSONArray("scenes")?.objects()?.map { scene ->
                     val name = scene.getString("name")
                     SceneCard(name, scene.optBoolean("main"), name == root.optString("sceneName"), preview = false)
+                }.orEmpty(),
+                prefabs = root.optJSONArray("prefabs")?.let { ids ->
+                    List(ids.length()) { index ->
+                        val id = ids.getString(index)
+                        PrefabTile(id.substringAfterLast('/').removeSuffix(".prefab"), id = id)
+                    }
                 }.orEmpty(),
                 inspector = root.optJSONObject("inspector")?.let(::inspector),
                 objects = root.optJSONArray("objects")?.objects()?.map { obj ->

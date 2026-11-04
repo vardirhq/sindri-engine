@@ -203,6 +203,7 @@ SINDRI_REQUIRE_GPU=1 cargo test -p sindri-mobile
 
 ## Known limits
 
+- **Add.** Lists project prefabs and places linked instances at the view center; Empty and Light 2D are available without prefabs. Each is undoable and saves through the scene. Lamplighter currently has no prefabs, so its prefab list is empty. Drag placement and thumbnails are not wired; device verification remains open.
 - **Objects.** Layers lists real scene objects, including screen UI and prefab children, and tapping a row selects it. The list is flat; layer visibility and hierarchy controls are not wired. Screen UI selection is inspectable but has no canvas handles. Device verification remains open.
 - **Script finder.** Search all supported calls or browse engine categories. Object arguments default to this object and vectors to zero. Some argument types are still unavailable. Object pins can use this object, an Entity field, or a uniquely named scene object found by name; duplicate or unnamed scene objects are not offered. Device verification remains open.
 - **Fields.** The inspector edits a component's top-level numbers and switches.

@@ -188,6 +188,8 @@ class EditorController(
                 if (error == null) ui = ui.copy(sheet = null)
                 refresh()
             }
+            is EditorEvent.PrefabChosen -> event.prefab.id?.let { addObject("addPrefab", it) }
+            is EditorEvent.AddBasic -> addObject("addBasic", event.kind)
             is EditorEvent.LayerTabChosen -> (ui.sheet as? EditorSheet.Layers)?.let { ui = ui.copy(sheet = it.copy(tab = event.tab)) }
             is EditorEvent.InspectorRow -> inspectorRow(event)
             is EditorEvent.HandleTaken -> {
@@ -302,7 +304,7 @@ class EditorController(
 
     private fun tool(tool: BarItem) {
         when (tool) {
-            BarItem.Add -> toggle(EditorSheet.Add(SampleEditor.prefabs))
+            BarItem.Add -> { refresh(); toggle(EditorSheet.Add(state.prefabs)) }
             BarItem.Paint -> ui = ui.copy(painting = PaintUi(), sheet = null, toast = ToastUi("Painting the ground is not wired yet."))
             BarItem.Assets -> toggle(EditorSheet.Assets(AssetTab.Prefabs, SampleEditor.assets))
             BarItem.Layers -> {
@@ -317,6 +319,15 @@ class EditorController(
             BarItem.Behaviour -> openBehaviour()
             else -> notWired(tool.label)
         }
+    }
+
+    private fun addObject(command: String, value: String) {
+        error = native.command(command, value)
+        if (error == null) {
+            ui = ui.copy(sheet = null)
+            if (native.state().unsaved) error = native.command("save")
+        }
+        refresh()
     }
 
     /** Opens [sheet], or closes it if the same kind is already open, as the bar does. */

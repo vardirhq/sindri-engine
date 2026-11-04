@@ -21,10 +21,12 @@ class EditorControllerTest {
         var playing: PlayState? = null
         var scriptEdits = 0
         var openSceneError: String? = null
+        var addError: String? = null
 
         override fun command(command: String, vararg arguments: Any?): String? {
             commands += listOf(command, *arguments)
             if (command == "openScene" && openSceneError != null) return openSceneError
+            if (command.startsWith("add") && addError != null) return addError
             when (command) {
                 "lighting" -> lighting = arguments[0] as Boolean
                 "openScene" -> state = state.copy(sceneName = arguments[0] as String)
@@ -145,6 +147,33 @@ class EditorControllerTest {
         controller.on(EditorEvent.TreeRowTapped(objects.single())) {}
         assertTrue(listOf("selectObject", "4294967296") in host.commands)
         assertNull(controller.ui.sheet)
+    }
+
+    @Test
+    fun add_lists_project_prefabs_and_sends_the_selected_asset() {
+        val prefab = PrefabTile("marker", id = "prefabs/marker.prefab")
+        host.state = EditorState(prefabs = listOf(prefab))
+        controller.on(EditorEvent.Tool(BarItem.Add)) {}
+        assertEquals(listOf(prefab), (controller.ui.sheet as EditorSheet.Add).prefabs)
+        host.state = host.state.copy(unsaved = true)
+        controller.on(EditorEvent.PrefabChosen(prefab)) {}
+        assertTrue(listOf("addPrefab", "prefabs/marker.prefab") in host.commands)
+        assertEquals(listOf("save"), host.commands.last())
+        assertNull(controller.ui.sheet)
+        controller.on(EditorEvent.Tool(BarItem.Add)) {}
+        controller.on(EditorEvent.AddBasic("light2d")) {}
+        assertTrue(listOf("addBasic", "light2d") in host.commands)
+    }
+
+    @Test
+    fun failed_placement_keeps_the_add_sheet_open() {
+        val prefab = PrefabTile("marker", id = "prefabs/marker.prefab")
+        host.state = EditorState(prefabs = listOf(prefab))
+        host.addError = "Prefab could not be placed"
+        controller.on(EditorEvent.Tool(BarItem.Add)) {}
+        controller.on(EditorEvent.PrefabChosen(prefab)) {}
+        assertNotNull(controller.ui.sheet)
+        assertEquals("Prefab could not be placed", controller.ui.toast?.text)
     }
 
     @Test

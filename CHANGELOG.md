@@ -2,6 +2,8 @@
 
 # Changelog
 
+- Add project prefab instances, empty objects and 2D lights from the mobile editor, with undo and scene persistence.
+
 - Let mobile visual scripts choose this object, an Entity field or a uniquely named scene object for object pins.
 
 - Browse visual script steps by category or search the whole finder, including engine calls with object and vector arguments.

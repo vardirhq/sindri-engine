@@ -288,6 +288,11 @@ named in the coin's prefab, not in the scene.
 
 ## In the editor
 
+Mobile's Add sheet lists the project's prefabs and places a linked instance at
+its view center as one undoable edit. It uses the same authoring placement as
+desktop. A prefab must be addressable from the scene's directory; dragging to a
+point, thumbnails and grid-cell placement on mobile remain future work.
+
 - **Placing.** Drag a prefab from the project browser into the Scene view: it
   lands on the grid cell under the pointer when there is one, and otherwise
   where the pointer meets the plane a 2D scene is drawn in, at the prefab's own

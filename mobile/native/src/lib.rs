@@ -20,6 +20,8 @@
 //! saved, through the same code the desktop editor uses. Playing comes in a
 //! later slice step.
 
+#[cfg(not(target_arch = "wasm32"))]
+mod add;
 mod canvas;
 #[cfg(not(target_arch = "wasm32"))]
 mod editing;

@@ -51,6 +51,8 @@ pub fn listed_scenes(project: &Path) -> Result<Vec<ListedScene>, String> {
 pub struct OpenedScene {
     /// The file name the scene is known by, as `Scene.go` names it.
     pub name: String,
+    /// Project directory, for resolving asset IDs against the open scene.
+    pub project: PathBuf,
     pub world: World,
     /// The file the world is read from and saved to.
     pub file: SceneFile,
@@ -77,6 +79,7 @@ impl OpenedScene {
         let sprite_hits = std::sync::Arc::new(crate::sprite_hits::SpriteHits::new(&assets));
         Ok(Self {
             name: scene.to_owned(),
+            project: project.to_path_buf(),
             world,
             file,
             assets,
