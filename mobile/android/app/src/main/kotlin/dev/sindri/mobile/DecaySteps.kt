@@ -3,8 +3,10 @@ package dev.sindri.mobile
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -346,13 +348,19 @@ fun Finder(palette: List<Pair<String, String>>, engine: List<Pair<String, String
         return
     }
     if (searching) {
-        OutlinedTextField(
+        BasicTextField(
             value = query,
             onValueChange = { query = it },
             singleLine = true,
-            placeholder = { Text("Search steps", style = ForgeType.text(14.sp, color = Forge.TextFaint)) },
             textStyle = ForgeType.text(14.sp),
-            modifier = Modifier.fillMaxWidth().padding(bottom = 6.dp).testTag("step-search"),
+            modifier = Modifier.fillMaxWidth().padding(bottom = 6.dp).testTag("step-search")
+                .border(1.dp, Forge.LineStrong, RoundedCornerShape(10.dp)).padding(12.dp),
+            decorationBox = { input ->
+                Box {
+                    if (query.isEmpty()) Text("Search steps", style = ForgeType.text(14.sp, color = Forge.TextFaint))
+                    input()
+                }
+            },
         )
     } else {
         TextButton(onClick = { searching = true }) { Text("Search", color = Forge.MetalBright) }
