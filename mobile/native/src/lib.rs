@@ -28,6 +28,8 @@ mod editing;
 #[cfg(not(target_arch = "wasm32"))]
 mod edits;
 #[cfg(not(target_arch = "wasm32"))]
+mod frame;
+#[cfg(not(target_arch = "wasm32"))]
 mod gizmos;
 #[cfg(not(target_arch = "wasm32"))]
 mod inspector;

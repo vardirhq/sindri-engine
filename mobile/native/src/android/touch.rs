@@ -88,6 +88,12 @@ impl Host {
         Ok(())
     }
 
+    fn frame_all(&mut self) -> Result<(), String> {
+        let size = self.size();
+        let (opened, editing) = self.editing()?;
+        editing.frame_all(opened, size)
+    }
+
     pub(super) fn undo(&mut self) -> Result<(), String> {
         let (opened, editing) = self.editing()?;
         editing.undo(&mut opened.world)?;
@@ -383,6 +389,7 @@ impl Host {
             "drag" => self.drag([number(0)?, number(1)?]),
             "release" => self.release(),
             "zoom" => self.zoom(number(0)?, [number(1)?, number(2)?]),
+            "frameAll" => self.frame_all(),
             "deselect" => {
                 self.editing()?.1.clear_selection();
                 Ok(())
