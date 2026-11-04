@@ -34,11 +34,18 @@ impl Host {
                 Ok(())
             }
             "gizmoPress" => {
-                let id = arguments.first().and_then(Value::as_str).ok_or("gizmoPress: no object")?;
+                let id = arguments
+                    .first()
+                    .and_then(Value::as_str)
+                    .ok_or("gizmoPress: no object")?;
                 let number = |index: usize| -> Result<f32, String> {
                     #[allow(clippy::cast_possible_truncation)] // Surface coordinates fit in f32.
-                    arguments.get(index).and_then(Value::as_f64).map(|value| value as f32)
-                        .filter(|value| value.is_finite()).ok_or_else(|| format!("gizmoPress: invalid coordinate {index}"))
+                    arguments
+                        .get(index)
+                        .and_then(Value::as_f64)
+                        .map(|value| value as f32)
+                        .filter(|value| value.is_finite())
+                        .ok_or_else(|| format!("gizmoPress: invalid coordinate {index}"))
                 };
                 let pixel = [number(1)?, number(2)?];
                 let (opened, editing) = self.editing()?;

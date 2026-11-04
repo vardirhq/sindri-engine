@@ -272,7 +272,9 @@ impl Editing {
                     return Ok(());
                 };
                 let mut transform = data.transform_3d.unwrap_or_default();
-                let mut world_transform = world.world_transform(entity).unwrap_or_else(|| world.parent_space(entity));
+                let mut world_transform = world
+                    .world_transform(entity)
+                    .unwrap_or_else(|| world.parent_space(entity));
                 world_transform.position = [
                     start[0] + (pixel[0] - from[0]) * per_pixel,
                     start[1] - (pixel[1] - from[1]) * per_pixel,
@@ -447,7 +449,10 @@ impl Editing {
     pub fn selection_pixel(&self, world: &World, size: [f32; 2]) -> Option<[f32; 2]> {
         let entity = self.selected?;
         world.get(entity)?;
-        let position = world.world_transform(entity).unwrap_or_else(|| world.parent_space(entity)).position;
+        let position = world
+            .world_transform(entity)
+            .unwrap_or_else(|| world.parent_space(entity))
+            .position;
         let per_pixel = self.canvas.per_pixel(size[1]);
         Some([
             size[0] * 0.5 + (position[0] - self.canvas.center[0]) / per_pixel,

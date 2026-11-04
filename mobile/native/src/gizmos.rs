@@ -1,20 +1,33 @@
 //! Editor-only touch targets for objects without drawn world geometry.
 
-use serde_json::{Value, json};
-use sindri_core::{EntityId, World};
 use crate::Editing;
 use crate::editing::Touch;
+use serde_json::{Value, json};
+use sindri_core::{EntityId, World};
 
 /// World markers do not represent screen-space UI or already drawn geometry.
 fn has_gizmo(world: &World, entity: EntityId) -> bool {
-    let Some(data) = world.get(entity) else { return false; };
-    if ["sindri.sprite", "sindri.mesh", "sindri.tilemap"].iter().any(|kind| data.components.contains_key(*kind)) {
+    let Some(data) = world.get(entity) else {
+        return false;
+    };
+    if ["sindri.sprite", "sindri.mesh", "sindri.tilemap"]
+        .iter()
+        .any(|kind| data.components.contains_key(*kind))
+    {
         return false;
     }
     let mut current = Some(entity);
     while let Some(id) = current {
-        let Some(part) = world.get(id) else { break; };
-        if part.components.keys().any(|name| name.starts_with("sindri.ui.")) { return false; }
+        let Some(part) = world.get(id) else {
+            break;
+        };
+        if part
+            .components
+            .keys()
+            .any(|name| name.starts_with("sindri.ui."))
+        {
+            return false;
+        }
         current = part.parent;
     }
     true
@@ -39,7 +52,9 @@ impl Editing {
     pub fn press_gizmo(&mut self, world: &World, id: &str, pixel: [f32; 2]) -> Result<(), String> {
         let bits = id.parse::<u64>().map_err(|_| "Invalid object handle")?;
         let entity = EntityId::from_bits(bits);
-        if !has_gizmo(world, entity) { return Err("This object no longer has a marker".to_owned()); }
+        if !has_gizmo(world, entity) {
+            return Err("This object no longer has a marker".to_owned());
+        }
         if self.selecting_more {
             self.toggle_selected(entity);
             self.invalidate_outline();
@@ -48,8 +63,15 @@ impl Editing {
         }
         self.clear_selection();
         self.selected = Some(entity);
-        let start = world.world_transform(entity).unwrap_or_else(|| world.parent_space(entity)).position;
-        self.touch = Some(Touch::Moving { entity, from: pixel, start });
+        let start = world
+            .world_transform(entity)
+            .unwrap_or_else(|| world.parent_space(entity))
+            .position;
+        self.touch = Some(Touch::Moving {
+            entity,
+            from: pixel,
+            start,
+        });
         Ok(())
     }
 }
