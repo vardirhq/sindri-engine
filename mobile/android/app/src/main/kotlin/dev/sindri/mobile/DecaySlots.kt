@@ -5,6 +5,9 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
@@ -26,7 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 /** Whether a slot is edited on its pin: a number, text or a switch. */
-val DecaySlot.editable get() = this is DecaySlot.Number || this is DecaySlot.Text || this is DecaySlot.Bool
+val DecaySlot.editable get() = this is DecaySlot.Number || this is DecaySlot.Text || this is DecaySlot.Bool || (this is DecaySlot.Name && objectReference)
 
 /**
  * What a pin holds, as a chip: a literal in bright metal, tapped to change it;
@@ -40,7 +43,7 @@ fun SlotChip(slot: DecaySlot, onTap: (() -> Unit)?, modifier: Modifier = Modifie
         is DecaySlot.Text -> "“${slot.value}”" to true
         is DecaySlot.Bool -> slot.value.toString() to true
         DecaySlot.Null -> "nothing" to false
-        is DecaySlot.Name -> slot.path to false
+        is DecaySlot.Name -> (if (slot.path == "this.entity" && slot.objectReference) "This object" else slot.path) to slot.objectReference
         is DecaySlot.Code -> slot.source to false
         is DecaySlot.Call -> slot.callee + "(…)" to false
         is DecaySlot.Op -> slot.op to false
@@ -67,6 +70,7 @@ fun DecayScript.fieldsFor(slot: DecaySlot): List<String> {
     val type = when (slot) {
         is DecaySlot.Number -> "number"
         is DecaySlot.Text -> "String"
+        is DecaySlot.Name -> if (slot.objectReference) "Entity" else return emptyList()
         else -> return emptyList()
     }
     return containers.flatMap { it.fields }.filter { it.type == type }.map { it.name }
@@ -112,5 +116,32 @@ fun SlotDialog(slot: DecaySlot, fields: List<String> = emptyList(), onField: (St
         },
         confirmButton = { TextButton(onClick = { onDone(parsed) }, enabled = parsed != null) { Text("Done", color = Forge.MetalBright) } },
         dismissButton = { TextButton(onClick = { onDone(null) }) { Text("Cancel", color = Forge.TextMuted) } },
+    )
+}
+
+/** Choose the script's own object, an entity field, or a uniquely named scene object. */
+@Composable
+fun ObjectDialog(script: DecayScript, slot: DecaySlot.Name, onDone: () -> Unit, onChoose: (String, String) -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDone,
+        containerColor = Forge.Popover,
+        title = { Text("Choose object", style = ForgeType.text(16.sp, FontWeight.SemiBold)) },
+        text = {
+            Column(Modifier.heightIn(max = 400.dp).verticalScroll(rememberScrollState())) {
+                TextButton(onClick = { onChoose("useField", "entity") }) { Text("This object", color = Forge.MetalBright) }
+                val fields = script.fieldsFor(slot)
+                if (fields.isNotEmpty()) {
+                    Text("Script fields", style = ForgeType.text(12.sp, color = Forge.TextMuted))
+                    fields.forEach { field -> TextButton(onClick = { onChoose("useField", field) }) { Text(field, color = Forge.MetalBright) } }
+                }
+                if (script.objects.isNotEmpty()) {
+                    Text("Scene objects · found by name", style = ForgeType.text(12.sp, color = Forge.TextMuted))
+                    script.objects.forEach { name -> TextButton(onClick = { onChoose("findObject", name) }) { Text(name, color = Forge.MetalBright) } }
+                }
+                Text("Objects with duplicate or missing names are not listed.", style = ForgeType.text(12.sp, color = Forge.TextFaint))
+            }
+        },
+        confirmButton = {},
+        dismissButton = { TextButton(onClick = onDone) { Text("Cancel", color = Forge.TextMuted) } },
     )
 }

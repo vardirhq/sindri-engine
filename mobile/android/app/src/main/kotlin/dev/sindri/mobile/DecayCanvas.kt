@@ -185,7 +185,12 @@ fun DecayCanvas(
         }
     }
     editing?.let { slot ->
-        SlotDialog(
+        if (slot is DecaySlot.Name && slot.objectReference) {
+            ObjectDialog(script, slot, onDone = { editing = null }) { kind, value ->
+                editing = null
+                onChange(kind, slot.span, value)
+            }
+        } else SlotDialog(
             slot,
             fields = script.fieldsFor(slot),
             onField = { field ->

@@ -142,6 +142,31 @@ class DecayCanvasTest {
     }
 
     @Test
+    fun object_pins_keep_their_span_and_offer_compatible_fields() {
+        val slot = DecaySlot.Name("this.entity", 10 to 21, objectReference = true)
+        assertTrue(slot.editable)
+        val script = DecayScript.read("""{"name":"s.decay","blocks":{"containers":[{"name":"S","fields":[{"name":"target","type":"Entity"},{"name":"speed","type":"number"}],"handlers":[]}]},"graph":{"nodes":[{"key":"n","inputs":[{"name":"entity","value":{"kind":"name","path":"this.entity","span":[10,21]}}]}]}}""")!!
+        val actual = script.graph.nodes.single().inputs.single().value as DecaySlot.Name
+        assertEquals(10 to 21, actual.span)
+        assertTrue(actual.objectReference)
+        assertEquals(listOf("target"), script.fieldsFor(actual))
+    }
+
+    @Test
+    fun object_dialog_selects_a_named_scene_object() {
+        val slot = DecaySlot.Name("this.entity", 10 to 21, objectReference = true)
+        val script = DecayScript("s.decay", "", emptyList(), objects = listOf("Wick"))
+        val choices = mutableListOf<Pair<String, String>>()
+        compose.setContent {
+            ForgeTheme { ObjectDialog(script, slot, onDone = {}) { kind, value -> choices += kind to value } }
+        }
+        compose.onNodeWithText("Wick").performClick()
+        assertEquals(listOf("findObject" to "Wick"), choices)
+        compose.onNodeWithText("This object").performClick()
+        assertEquals("useField" to "entity", choices.last())
+    }
+
+    @Test
     fun the_plus_offers_only_the_events_a_script_lacks() {
         fun handler(name: String) = DecayHandler(name, name, event = true, params = emptyList(), body = emptyList(), note = null)
         fun script(vararg names: String) = DecayScript("s.decay", "", listOf(DecayContainer("script", "S", emptyList(), names.map(::handler))))
