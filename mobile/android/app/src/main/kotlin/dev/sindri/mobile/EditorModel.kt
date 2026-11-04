@@ -88,7 +88,7 @@ sealed interface EditorSheet {
 }
 
 /** A prefab in the Add sheet, drawn from its sprite, [zoom]ed in when it is small in its cell. */
-data class PrefabTile(val name: String, val sheet: Sheet, val cell: Int, val zoom: Float = 1f)
+data class PrefabTile(val name: String, val sheet: Sheet? = null, val cell: Int = 0, val zoom: Float = 1f, val id: String? = null)
 
 enum class AssetTab(val label: String) { Prefabs("Prefabs"), Sprites("Sprites"), Tiles("Tiles"), Scripts("Scripts"), Audio("Audio") }
 
@@ -185,6 +185,7 @@ sealed interface EditorEvent {
     data class SceneTapped(val scene: SceneCard) : EditorEvent
     data object NewScene : EditorEvent
     data class PrefabChosen(val prefab: PrefabTile) : EditorEvent
+    data class AddBasic(val kind: String) : EditorEvent
     data class InspectorRow(val section: String, val row: String, val change: RowChange) : EditorEvent
     data object ToggleActive : EditorEvent
     data object AddComponent : EditorEvent

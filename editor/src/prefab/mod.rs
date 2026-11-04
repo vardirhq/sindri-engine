@@ -19,11 +19,10 @@
 
 mod apply;
 mod subtree;
-mod sync;
 
 // Reading the prefabs a scene places, and opening one as a document, are what
 // opening and saving a scene needs, so they live in `sindri-authoring` with
-// the scene file. Placing and syncing instances stay here.
+// the scene file. Placing and syncing instances are shared with mobile.
 pub use sindri_authoring::prefab::{ScenePrefabs, document, load, missing};
 
 use std::path::{Path, PathBuf};
@@ -35,7 +34,7 @@ use sindri_core::{
 
 pub use apply::applied;
 pub use subtree::subtree_prefab;
-pub use sync::{reconcile, spawn_instance};
+pub use sindri_authoring::prefab::{reconcile, spawn_instance};
 
 /// What a placed prefab carries to say where it stands.
 pub const PLACEMENT_COMPONENT: &str = "sindri.grid.placement";

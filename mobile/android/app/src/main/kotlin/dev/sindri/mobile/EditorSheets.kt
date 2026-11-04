@@ -173,37 +173,34 @@ fun Modifier.card(chosen: Boolean = false, radius: Dp = 14.dp): Modifier {
 
 @Composable
 private fun BoxScope.AddSheet(sheet: EditorSheet.Add, onEvent: (EditorEvent) -> Unit) = SheetFrame(SheetHeight.Share(520.dp, 0.8f)) {
-    SheetHeader("Add to world.scene", "Tap to place in view, or drag up into the world", onClose = { onEvent(EditorEvent.CloseSheet) })
+    SheetHeader("Add", "Tap to place in the center of the view", onClose = { onEvent(EditorEvent.CloseSheet) })
     SheetBody {
         SectionLabel("This project's prefabs", Modifier.padding(start = 4.dp))
+        if (sheet.prefabs.isEmpty()) Text("No prefabs in this project", style = ForgeType.text(13.sp, color = Forge.TextMuted))
         Grid(sheet.prefabs, columns = 4) { prefab ->
             Column(
                 Modifier.fillMaxWidth().card().clickable(onClickLabel = "Place ${prefab.name}") { onEvent(EditorEvent.PrefabChosen(prefab)) }.padding(horizontal = 4.dp, vertical = 8.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
-                SpriteThumb(prefab.sheet, prefab.cell, 60.dp, Modifier.padding(2.dp), zoom = prefab.zoom)
+                if (prefab.sheet != null) SpriteThumb(prefab.sheet, prefab.cell, 60.dp, Modifier.padding(2.dp), zoom = prefab.zoom)
+                else Box(Modifier.size(60.dp), contentAlignment = Alignment.Center) { Symbol(Sym.deployed_code, 30.sp, Forge.TextMuted) }
                 Text(prefab.name, style = ForgeType.text(11.5.sp, color = Forge.TextMuted), maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
         }
         SectionLabel("Basics", Modifier.padding(start = 4.dp, top = 4.dp))
         val basics = listOf(
-            Triple(Sym.sunny, "Light 2D", "A glow, no sprite") to true,
-            Triple(Sym.deployed_code, "Empty", "A parent or a marker") to true,
-            Triple(Sym.camera_alt, "Camera", "The scene already has a world camera") to false,
-            Triple(Sym.title, "Text", "Goes on the Screen layer") to false,
+            Triple(Sym.sunny, "Light 2D", "light2d"),
+            Triple(Sym.deployed_code, "Empty", "empty"),
         )
-        Grid(basics, columns = 2) { (basic, available) ->
+        Grid(basics, columns = 2) { basic ->
             Row(
-                Modifier.fillMaxWidth().heightIn(min = 56.dp).alpha(if (available) 1f else 0.45f).card().clickable {}.padding(horizontal = 12.dp, vertical = 8.dp),
+                Modifier.fillMaxWidth().heightIn(min = 56.dp).card().clickable { onEvent(EditorEvent.AddBasic(basic.third)) }.padding(horizontal = 12.dp, vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
             ) {
                 Symbol(basic.first, 20.sp, Forge.Text)
-                Column {
-                    Text(basic.second, style = ForgeType.text(13.sp, FontWeight.Medium))
-                    Text(basic.third, style = ForgeType.text(11.sp, color = Forge.TextFaint).copy(lineHeight = 14.sp))
-                }
+                Text(basic.second, style = ForgeType.text(13.sp, FontWeight.Medium))
             }
         }
     }
