@@ -78,6 +78,7 @@ data class EditorState(
     val prefabs: List<PrefabTile> = emptyList(),
     val inspector: Inspector? = null,
     val objects: List<TreeRow> = emptyList(),
+    val gizmos: List<GizmoUi> = emptyList(),
     val selectionCount: Int = 0,
     val selectingMore: Boolean = false,
     /** Where the selection's origin is, in surface pixels. */
@@ -119,6 +120,10 @@ data class EditorState(
                     TreeRow(0, if (screen) Sym.web_asset else Sym.deployed_code, obj.getString("name"),
                         detail = if (obj.optBoolean("disabled")) "Disabled" else if (screen) "Screen UI" else "",
                         selected = obj.optBoolean("selected"), id = obj.getString("id"))
+                }.orEmpty(),
+                gizmos = root.optJSONArray("gizmos")?.objects()?.map { gizmo ->
+                    GizmoUi(gizmo.getString("id"), gizmo.optString("name"), gizmo.optString("kind"),
+                        gizmo.getDouble("x").toFloat(), gizmo.getDouble("y").toFloat(), gizmo.optBoolean("selected"))
                 }.orEmpty(),
                 selectionCount = root.optInt("selectionCount"),
                 selectingMore = root.optBoolean("selectingMore"),

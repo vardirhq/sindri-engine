@@ -127,6 +127,7 @@ class EditorController(
             selection = selection,
             selectingMore = state.selectingMore,
             handles = handles(),
+            gizmos = state.gizmos.map { it.copy(x = it.x / density, y = it.y / density) },
             menu = ui.menu?.let { settings },
             sheet = when (val sheet = ui.sheet) {
                 is EditorSheet.Inspector -> inspector?.let { sheet.copy(inspector = inspectorUi(it)) }
@@ -192,6 +193,10 @@ class EditorController(
             is EditorEvent.AddBasic -> addObject("addBasic", event.kind)
             is EditorEvent.LayerTabChosen -> (ui.sheet as? EditorSheet.Layers)?.let { ui = ui.copy(sheet = it.copy(tab = event.tab)) }
             is EditorEvent.InspectorRow -> inspectorRow(event)
+            is EditorEvent.GizmoTaken -> {
+                error = native.command("gizmoPress", event.id, event.x, event.y)
+                refresh()
+            }
             is EditorEvent.HandleTaken -> {
                 error = native.command("handle", event.handle.native, event.x, event.y, settings.snap)
                 refresh()
