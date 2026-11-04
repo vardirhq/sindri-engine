@@ -8,8 +8,8 @@
 
 pub mod document;
 mod library;
-mod sync;
 pub mod missing;
+mod sync;
 
 pub use library::ScenePrefabs;
 pub use sync::{reconcile, spawn_instance};

@@ -7,8 +7,12 @@ impl Host {
     pub(super) fn add_command(&mut self, command: &str, value: &str) -> Result<(), String> {
         let (opened, editing) = self.editing()?;
         match command {
-            "addPrefab" => { editing.place_prefab(opened, value)?; }
-            "addBasic" => { editing.add_basic(&mut opened.world, value)?; }
+            "addPrefab" => {
+                editing.place_prefab(opened, value)?;
+            }
+            "addBasic" => {
+                editing.add_basic(&mut opened.world, value)?;
+            }
             _ => return Err(format!("unknown add command {command}")),
         }
         Ok(())

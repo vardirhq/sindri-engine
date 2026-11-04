@@ -33,8 +33,8 @@ use sindri_core::{
 };
 
 pub use apply::applied;
-pub use subtree::subtree_prefab;
 pub use sindri_authoring::prefab::{reconcile, spawn_instance};
+pub use subtree::subtree_prefab;
 
 /// What a placed prefab carries to say where it stands.
 pub const PLACEMENT_COMPONENT: &str = "sindri.grid.placement";
