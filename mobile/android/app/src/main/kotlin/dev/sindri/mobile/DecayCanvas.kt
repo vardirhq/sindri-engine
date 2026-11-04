@@ -237,13 +237,15 @@ internal fun NodeMenu(
         title = { Text(if (choosing != null) "Add a step" else node.title, style = ForgeType.text(16.sp, FontWeight.SemiBold)) },
         text = {
             Column(
-                Modifier.heightIn(max = 420.dp).verticalScroll(rememberScrollState()),
+                Modifier.heightIn(max = 420.dp),
                 verticalArrangement = Arrangement.spacedBy(2.dp),
             ) {
                 if (choosing != null) {
                     Finder(palette, engine) { id -> choosing(id); onDone() }
                 } else {
-                    actions.forEach { (label, act) -> MenuRow(label, danger = label == "Delete", onClick = act) }
+                    Column(Modifier.verticalScroll(rememberScrollState())) {
+                        actions.forEach { (label, act) -> MenuRow(label, danger = label == "Delete", onClick = act) }
+                    }
                 }
             }
         },

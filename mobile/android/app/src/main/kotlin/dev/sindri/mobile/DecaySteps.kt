@@ -194,7 +194,7 @@ fun DecaySteps(
             containerColor = Forge.Popover,
             title = { Text("Add a step", style = ForgeType.text(16.sp, FontWeight.SemiBold)) },
             text = {
-                Column(Modifier.heightIn(max = 420.dp).verticalScroll(rememberScrollState())) {
+                Column(Modifier.heightIn(max = 420.dp)) {
                     Finder(script.palette, script.engine) { id -> add(id); adding = null }
                 }
             },
@@ -372,9 +372,11 @@ fun Finder(palette: List<Pair<String, String>>, engine: List<Pair<String, String
         }
     }
     val results = findSteps(query, palette, engine, category)
-    if (results.isEmpty()) Text("No matching steps", style = ForgeType.text(14.sp, color = Forge.TextMuted), modifier = Modifier.padding(12.dp))
-    results.forEach { (id, label) ->
-        MenuRow(if (id == "let") "$label…" else label) { if (id == "let") naming = true else onPick(id) }
+    Column(Modifier.heightIn(max = 260.dp).verticalScroll(rememberScrollState())) {
+        if (results.isEmpty()) Text("No matching steps", style = ForgeType.text(14.sp, color = Forge.TextMuted), modifier = Modifier.padding(12.dp))
+        results.forEach { (id, label) ->
+            MenuRow(if (id == "let") "$label…" else label) { if (id == "let") naming = true else onPick(id) }
+        }
     }
 }
 
