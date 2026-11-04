@@ -341,6 +341,18 @@ impl Host {
         self.edit_script(kind, [at(1)?, at(2)?], &value)
     }
 
+    fn set_place_arguments(&mut self, arguments: &[Value]) -> Result<(), String> {
+        let name = arguments
+            .first()
+            .and_then(Value::as_str)
+            .ok_or("setPlace: argument 0 is not text")?;
+        let value = arguments.get(1).cloned().unwrap_or(Value::Null);
+        let place = Place::named(name, &value)
+            .ok_or_else(|| format!("setPlace: no place {name} of {value}"))?;
+        let merging = arguments.get(2).and_then(Value::as_bool).unwrap_or(false);
+        self.set_place(place, merging)
+    }
+
     /// Runs one named editing command with its JSON array of arguments, which
     /// is how every gesture and inspector edit crosses the bridge: one export
     /// for all of them keeps the unsafe surface to the few calls that need it.
@@ -432,14 +444,7 @@ impl Host {
                 let merging = arguments.get(3).and_then(Value::as_bool).unwrap_or(false);
                 self.set_field(text(0)?, text(1)?, value, merging)
             }
-            "setPlace" => {
-                let value = arguments.get(1).cloned().unwrap_or(Value::Null);
-                let place = Place::named(text(0)?, &value).ok_or_else(|| {
-                    format!("{command}: no place {} of {value}", text(0).unwrap_or(""))
-                })?;
-                let merging = arguments.get(2).and_then(Value::as_bool).unwrap_or(false);
-                self.set_place(place, merging)
-            }
+            "setPlace" => self.set_place_arguments(&arguments),
             "settle" => {
                 self.editing()?.1.settle();
                 Ok(())
