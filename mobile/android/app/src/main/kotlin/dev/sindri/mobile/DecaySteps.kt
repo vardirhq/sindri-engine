@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -353,7 +354,9 @@ fun Finder(palette: List<Pair<String, String>>, engine: List<Pair<String, String
             onValueChange = { query = it },
             singleLine = true,
             textStyle = ForgeType.text(14.sp),
-            modifier = Modifier.fillMaxWidth().padding(bottom = 6.dp).testTag("step-search")
+            // A text field filling a platform-width dialog can loop during
+            // layout in Robolectric at phone widths (robolectric#8460).
+            modifier = Modifier.width(240.dp).padding(bottom = 6.dp).testTag("step-search")
                 .border(1.dp, Forge.LineStrong, RoundedCornerShape(10.dp)).padding(12.dp),
             decorationBox = { input ->
                 Box {
