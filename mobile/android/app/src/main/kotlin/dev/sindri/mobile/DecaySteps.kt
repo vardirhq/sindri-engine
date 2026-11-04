@@ -22,7 +22,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -30,8 +29,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -207,11 +205,11 @@ fun DecaySteps(
 private const val INDENT = 20
 
 @Composable
-private fun Chip(label: String, on: Boolean, modifier: Modifier = Modifier, onClick: () -> Unit) = Text(
+private fun Chip(label: String, on: Boolean, onClick: () -> Unit) = Text(
     label,
     style = ForgeType.text(12.sp, FontWeight.SemiBold, if (on) Forge.MetalBright else Forge.TextMuted),
     maxLines = 1,
-    modifier = modifier
+    modifier = Modifier
         .clip(RoundedCornerShape(10.dp))
         .background(if (on) Forge.MetalDeep else Forge.Raised)
         .border(1.dp, if (on) Forge.MetalLine else Forge.Line, RoundedCornerShape(10.dp))
@@ -334,7 +332,7 @@ fun Finder(palette: List<Pair<String, String>>, engine: List<Pair<String, String
     var query by remember { mutableStateOf("") }
     var category by remember { mutableStateOf("All") }
     var naming by remember { mutableStateOf(false) }
-    val categoryFocus = remember { FocusRequester() }
+    var searching by remember { mutableStateOf(false) }
     if (naming) {
         var name by remember { mutableStateOf("") }
         OutlinedTextField(
@@ -347,20 +345,24 @@ fun Finder(palette: List<Pair<String, String>>, engine: List<Pair<String, String
         TextButton(onClick = { onPick("let:$name") }, enabled = name.isNotEmpty()) { Text("Add", color = Forge.MetalBright) }
         return
     }
-    OutlinedTextField(
-        value = query,
-        onValueChange = { query = it },
-        singleLine = true,
-        placeholder = { Text("Search steps", style = ForgeType.text(14.sp, color = Forge.TextFaint)) },
-        textStyle = ForgeType.text(14.sp),
-        modifier = Modifier.fillMaxWidth().padding(bottom = 6.dp),
-    )
-    Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(bottom = 8.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-        stepCategories(palette, engine).forEach { item ->
-            Chip(item, item == category, if (item == "All") Modifier.focusRequester(categoryFocus) else Modifier) { category = item }
+    if (searching) {
+        OutlinedTextField(
+            value = query,
+            onValueChange = { query = it },
+            singleLine = true,
+            placeholder = { Text("Search steps", style = ForgeType.text(14.sp, color = Forge.TextFaint)) },
+            textStyle = ForgeType.text(14.sp),
+            modifier = Modifier.fillMaxWidth().padding(bottom = 6.dp).testTag("step-search"),
+        )
+    } else {
+        TextButton(onClick = { searching = true }) { Text("Search", color = Forge.MetalBright) }
+    }
+    val categories = stepCategories(palette, engine)
+    if (categories.size > 2) {
+        Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(bottom = 8.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            categories.forEach { item -> Chip(item, item == category) { category = item } }
         }
     }
-    LaunchedEffect(naming) { categoryFocus.requestFocus() }
     val results = findSteps(query, palette, engine, category)
     if (results.isEmpty()) Text("No matching steps", style = ForgeType.text(14.sp, color = Forge.TextMuted), modifier = Modifier.padding(12.dp))
     results.forEach { (id, label) ->
