@@ -778,6 +778,18 @@ jobs:
         id: android_test
         working-directory: mobile/android
         run: ./gradlew --no-daemon :app:testDebugUnitTest --tests 'dev.sindri.mobile.EditorControllerTest' --tests 'dev.sindri.mobile.InspectorPresenterTest' --tests 'dev.sindri.mobile.DecayCanvasTest'
+      - name: Report Android test failures
+        if: ${{ failure() && steps.android_test.outcome == 'failure' }}
+        run: |
+          python3 - <<'PY'
+          import glob
+          import xml.etree.ElementTree as ET
+          for path in glob.glob('mobile/android/app/build/test-results/testDebugUnitTest/TEST-*.xml'):
+              root = ET.parse(path).getroot()
+              for case in root.findall('testcase'):
+                  for failure in case.findall('failure'):
+                      print(f"{case.get('classname')}.{case.get('name')}:\n{failure.text or failure.get('message', '')}")
+          PY
       # Every designed screen, drawn on the JVM at the prototype's viewport, to
       # set beside the prototype's own captures (mobile/design.md).
       - name: Draw the design screens
