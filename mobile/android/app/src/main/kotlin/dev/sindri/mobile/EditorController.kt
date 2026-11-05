@@ -189,10 +189,21 @@ class EditorController(
             EditorEvent.OpenImport -> ui = ui.copy(sheet = EditorSheet.Import(SampleEditor.importFiles))
             EditorEvent.BackToAssets -> ui = ui.copy(sheet = EditorSheet.Assets(AssetTab.Prefabs, SampleEditor.assets))
             is EditorEvent.TreeRowTapped -> event.row.id?.let { id ->
-                error = native.command("selectObject", id)
-                if (error == null) ui = ui.copy(sheet = null)
-                refresh()
+                val sheet = ui.sheet as? EditorSheet.Layers
+                if (sheet?.moving != null) moveTree(sheet.moving, id)
+                else {
+                    error = native.command("selectObject", id)
+                    if (error == null) ui = ui.copy(sheet = null)
+                    refresh()
+                }
             }
+            is EditorEvent.ToggleTree -> (ui.sheet as? EditorSheet.Layers)?.let { sheet ->
+                val collapsed = if (event.id in sheet.collapsed) sheet.collapsed - event.id else sheet.collapsed + event.id
+                ui = ui.copy(sheet = sheet.copy(collapsed = collapsed))
+            }
+            is EditorEvent.MoveTree -> (ui.sheet as? EditorSheet.Layers)?.let { ui = ui.copy(sheet = it.copy(moving = event.id, collapsed = emptySet())) }
+            EditorEvent.MoveTreeToRoot -> (ui.sheet as? EditorSheet.Layers)?.moving?.let { moveTree(it, "") }
+            EditorEvent.CancelTreeMove -> (ui.sheet as? EditorSheet.Layers)?.let { ui = ui.copy(sheet = it.copy(moving = null)) }
             is EditorEvent.PrefabChosen -> event.prefab.id?.let { addObject("addPrefab", it) }
             is EditorEvent.AddBasic -> addObject("addBasic", event.kind)
             is EditorEvent.LayerTabChosen -> (ui.sheet as? EditorSheet.Layers)?.let { ui = ui.copy(sheet = it.copy(tab = event.tab)) }
@@ -480,6 +491,16 @@ class EditorController(
         error = native.command(command, *arguments)
         if (error == null && command != "save" && native.state().unsaved) {
             error = native.command("save")
+        }
+        refresh()
+    }
+
+    private fun moveTree(child: String, parent: String) {
+        error = native.command("reparentObject", child, parent)
+        if (error == null) {
+            val sheet = ui.sheet as? EditorSheet.Layers
+            if (sheet != null) ui = ui.copy(sheet = sheet.copy(moving = null))
+            if (native.state().unsaved) error = native.command("save")
         }
         refresh()
     }

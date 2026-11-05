@@ -309,8 +309,18 @@ private fun BoxScope.LayersSheet(sheet: EditorSheet.Layers, onEvent: (EditorEven
                 Hairline()
             }
             LayerTab.Objects -> {
+                if (sheet.moving != null) {
+                    Text("Choose a parent, or move to the root", style = ForgeType.text(14.sp, color = Forge.TextMuted), modifier = Modifier.padding(12.dp))
+                    Row(Modifier.fillMaxWidth().heightIn(min = 48.dp), horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Text("Move to root", style = ForgeType.text(14.sp, color = Forge.MetalBright), modifier = Modifier.clickable { onEvent(EditorEvent.MoveTreeToRoot) }.padding(12.dp))
+                        Text("Cancel", style = ForgeType.text(14.sp), modifier = Modifier.clickable { onEvent(EditorEvent.CancelTreeMove) }.padding(12.dp))
+                    }
+                }
                 if (sheet.objects.isEmpty()) Text("No objects in this scene", style = ForgeType.text(14.sp, color = Forge.TextMuted), modifier = Modifier.padding(16.dp))
+                var hiddenBelow: Int? = null
                 sheet.objects.forEach { row ->
+                if (hiddenBelow?.let { row.depth <= it } == true) hiddenBelow = null
+                if (hiddenBelow == null) {
                 Row(
                     Modifier
                         .fillMaxWidth()
@@ -322,11 +332,16 @@ private fun BoxScope.LayersSheet(sheet: EditorSheet.Layers, onEvent: (EditorEven
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    Box(Modifier.width((row.depth * 18).dp))
-                    Box(Modifier.size(20.dp), contentAlignment = Alignment.Center) { row.chevron?.let { Symbol(it, 20.sp, Forge.TextFaint) } }
+                    Box(Modifier.width((row.depth.coerceAtMost(8) * 18).dp))
+                    Box(Modifier.size(32.dp), contentAlignment = Alignment.Center) {
+                        if (row.hasChildren && row.id != null) IconButton(if (row.id in sheet.collapsed) Sym.chevron_right else Sym.expand_more, "Toggle ${row.name}", { onEvent(EditorEvent.ToggleTree(row.id)) }, size = 32.dp)
+                    }
                     Symbol(row.icon, 20.sp, Forge.TextMuted)
                     Text(row.name, style = ForgeType.text(14.sp, color = if (row.selected) Forge.MetalBright else Forge.Text), modifier = Modifier.weight(1f), maxLines = 1, overflow = TextOverflow.Ellipsis)
                     Text(row.detail, style = ForgeType.text(12.sp, color = Forge.TextFaint), modifier = Modifier.padding(end = 8.dp))
+                    if (sheet.moving == null && row.id != null) IconButton(Sym.folder_special, "Change parent of ${row.name}", { onEvent(EditorEvent.MoveTree(row.id)) }, size = 40.dp)
+                }
+                if (row.id != null && row.id in sheet.collapsed) hiddenBelow = row.depth
                 }
                 }
             }

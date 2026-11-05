@@ -32,6 +32,8 @@ mod frame;
 #[cfg(not(target_arch = "wasm32"))]
 mod gizmos;
 #[cfg(not(target_arch = "wasm32"))]
+mod hierarchy;
+#[cfg(not(target_arch = "wasm32"))]
 mod inspector;
 #[cfg(not(target_arch = "wasm32"))]
 mod opened;

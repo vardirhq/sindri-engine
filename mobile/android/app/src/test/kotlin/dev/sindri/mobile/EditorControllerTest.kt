@@ -55,6 +55,19 @@ class EditorControllerTest {
     }
 
     @Test
+    fun object_tree_moves_a_child_and_saves() {
+        controller.on(EditorEvent.Tool(BarItem.Layers)) {}
+        controller.on(EditorEvent.MoveTree("child")) {}
+        val sheet = controller.ui.sheet as EditorSheet.Layers
+        assertEquals("child", sheet.moving)
+        host.state = host.state.copy(unsaved = true)
+        controller.on(EditorEvent.TreeRowTapped(TreeRow(0, Sym.folder, "Parent", id = "parent"))) {}
+        assertTrue(listOf("reparentObject", "child", "parent") in host.commands)
+        assertTrue(listOf("save") in host.commands)
+        assertNull((controller.ui.sheet as EditorSheet.Layers).moving)
+    }
+
+    @Test
     fun frame_everything_closes_the_menu_and_does_not_save() {
         controller.on(EditorEvent.ToggleMenu) {}
         controller.on(EditorEvent.FrameAll) {}

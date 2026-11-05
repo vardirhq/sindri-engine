@@ -84,7 +84,7 @@ sealed interface EditorSheet {
     data class Add(val prefabs: List<PrefabTile>) : EditorSheet
     data class Assets(val tab: AssetTab, val items: List<AssetItem>) : EditorSheet
     data class Import(val files: List<ImportFile>) : EditorSheet
-    data class Layers(val tab: LayerTab, val layers: List<LayerRow>, val objects: List<TreeRow>) : EditorSheet
+    data class Layers(val tab: LayerTab, val layers: List<LayerRow>, val objects: List<TreeRow>, val collapsed: Set<String> = emptySet(), val moving: String? = null) : EditorSheet
     data class Scenes(val scenes: List<SceneCard>, val doors: List<Pair<String, String>>) : EditorSheet
     data class Inspector(val inspector: InspectorUi, val full: Boolean = false, val live: Boolean = false) : EditorSheet
     data class Behaviour(val behaviour: BehaviourUi, val code: Boolean = false) : EditorSheet
@@ -104,7 +104,7 @@ enum class LayerTab(val label: String) { Layers("Layers"), Objects("Objects") }
 
 data class LayerRow(val icon: Sym, val name: String, val detail: String, val visible: Boolean, val locked: Boolean = false)
 
-data class TreeRow(val depth: Int, val icon: Sym, val name: String, val detail: String = "", val chevron: Sym? = null, val selected: Boolean = false, val id: String? = null)
+data class TreeRow(val depth: Int, val icon: Sym, val name: String, val detail: String = "", val chevron: Sym? = null, val selected: Boolean = false, val id: String? = null, val hasChildren: Boolean = false)
 
 data class SceneCard(val name: String, val main: Boolean, val current: Boolean, val preview: Boolean)
 
@@ -186,6 +186,10 @@ sealed interface EditorEvent {
     data class LayerTabChosen(val tab: LayerTab) : EditorEvent
     data class LayerVisibility(val layer: String) : EditorEvent
     data class TreeRowTapped(val row: TreeRow) : EditorEvent
+    data class ToggleTree(val id: String) : EditorEvent
+    data class MoveTree(val id: String) : EditorEvent
+    data object MoveTreeToRoot : EditorEvent
+    data object CancelTreeMove : EditorEvent
     data class SceneTapped(val scene: SceneCard) : EditorEvent
     data object NewScene : EditorEvent
     data class PrefabChosen(val prefab: PrefabTile) : EditorEvent

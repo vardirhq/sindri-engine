@@ -117,9 +117,9 @@ data class EditorState(
                 inspector = root.optJSONObject("inspector")?.let(::inspector),
                 objects = root.optJSONArray("objects")?.objects()?.map { obj ->
                     val screen = obj.optBoolean("screen")
-                    TreeRow(0, if (screen) Sym.web_asset else Sym.deployed_code, obj.getString("name"),
+                    TreeRow(obj.optInt("depth"), if (screen) Sym.web_asset else Sym.deployed_code, obj.getString("name"),
                         detail = if (obj.optBoolean("disabled")) "Disabled" else if (screen) "Screen UI" else "",
-                        selected = obj.optBoolean("selected"), id = obj.getString("id"))
+                        selected = obj.optBoolean("selected"), id = obj.getString("id"), hasChildren = obj.optBoolean("hasChildren"))
                 }.orEmpty(),
                 gizmos = root.optJSONArray("gizmos")?.objects()?.map { gizmo ->
                     GizmoUi(gizmo.getString("id"), gizmo.optString("name"), gizmo.optString("kind"),
