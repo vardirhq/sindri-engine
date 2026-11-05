@@ -442,7 +442,9 @@ impl Host {
             "recoveryRestore" => self.restore_recovery(),
             "recoveryDiscard" => self.discard_recovery(),
             "save" => self.save(),
-            "addPrefab" | "addBasic" | "addComponent" | "addSprite" => self.add_command(command, text(0)?),
+            "addPrefab" | "addBasic" | "addComponent" | "addSprite" => {
+                self.add_command(command, text(0)?)
+            }
             "reloadAssets" => self.reload_assets(),
             "selectMore" | "duplicate" | "delete" => self.selection_command(command),
             "undo" => self.undo(),

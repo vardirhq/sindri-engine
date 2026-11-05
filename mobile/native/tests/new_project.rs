@@ -24,12 +24,16 @@ fn mobile_blank_scene_opens_and_reopens() {
     fs::write(directory.path().join("assets/world.scene"), scene).unwrap();
     fs::create_dir(directory.path().join("assets/textures")).unwrap();
     fs::copy(
-        std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../games/lamplighter/assets/textures/decor.png"),
+        std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../../games/lamplighter/assets/textures/decor.png"),
         directory.path().join("assets/textures/decor.png"),
-    ).unwrap();
+    )
+    .unwrap();
     let mut opened = OpenedScene::open(directory.path(), "world.scene").unwrap();
     let mut editing = Editing::for_scene(&opened).unwrap();
-    editing.add_sprite(&mut opened, "textures/decor.png").unwrap();
+    editing
+        .add_sprite(&mut opened, "textures/decor.png")
+        .unwrap();
     opened.save().unwrap();
     assert_eq!(
         OpenedScene::open(directory.path(), "world.scene")
