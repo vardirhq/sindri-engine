@@ -22,9 +22,9 @@
 
 #[cfg(not(target_arch = "wasm32"))]
 mod add;
+mod canvas;
 #[cfg(not(target_arch = "wasm32"))]
 mod components;
-mod canvas;
 #[cfg(not(target_arch = "wasm32"))]
 mod editing;
 #[cfg(not(target_arch = "wasm32"))]
