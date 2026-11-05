@@ -1029,6 +1029,8 @@ requests, commit history, and subsystem documentation rather than this file.
 
 ### Added
 
+- Show and edit the object hierarchy in the mobile editor, with collapsible branches and undoable parenting.
+
 - Frame everything in the mobile editor fits world objects and terrain to the viewport.
 
 - A left virtual stick and a right jump control for Lamplighter touch screens, usable together with two fingers.

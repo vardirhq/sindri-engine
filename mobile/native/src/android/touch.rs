@@ -436,7 +436,7 @@ impl Host {
                 Ok(())
             }
             "openScene" => self.open_scene(text(0)?),
-            "clearObjects" | "refreshObjects" | "selectObject" | "gizmoPress" => {
+            "clearObjects" | "refreshObjects" | "selectObject" | "gizmoPress" | "reparentObject" => {
                 self.object_command(command, &arguments)
             }
             "recovery" => self.configure_recovery(text(0)?),
