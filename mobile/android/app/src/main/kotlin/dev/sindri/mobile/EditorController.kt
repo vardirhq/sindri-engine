@@ -21,6 +21,7 @@ class EditorController(
     private val assetRoot: String = "projects/lamplighter/assets/",
     private val onSceneOpened: (String) -> Unit = {},
     projectTitle: String = "Lamplighter",
+    private val images: () -> List<AssetItem> = { emptyList() },
 ) {
     /** The native calls the controller needs, so the design tests can run without the library. */
     interface Native {
@@ -186,7 +187,8 @@ class EditorController(
             is EditorEvent.BrushSize -> ui.painting?.let { ui = ui.copy(painting = it.copy(size = event.size)) }
             EditorEvent.ToggleMoveView -> ui.painting?.let { ui = ui.copy(painting = it.copy(moveView = !it.moveView)) }
             EditorEvent.DonePainting -> ui = ui.copy(painting = null)
-            is EditorEvent.AssetTabChosen -> ui = ui.copy(sheet = EditorSheet.Assets(event.tab, if (event.tab == AssetTab.Prefabs) SampleEditor.assets else emptyList()))
+            is EditorEvent.AssetTabChosen -> showAssets(event.tab)
+            is EditorEvent.AssetChosen -> if ((ui.sheet as? EditorSheet.Assets)?.tab == AssetTab.Sprites) addObject("addSprite", event.item.path)
             EditorEvent.OpenImport -> ui = ui.copy(sheet = EditorSheet.Import(SampleEditor.importFiles))
             EditorEvent.BackToAssets -> ui = ui.copy(sheet = EditorSheet.Assets(AssetTab.Prefabs, SampleEditor.assets))
             is EditorEvent.TreeRowTapped -> event.row.id?.let { id ->
@@ -332,7 +334,7 @@ class EditorController(
         when (tool) {
             BarItem.Add -> { refresh(); toggle(EditorSheet.Add(state.prefabs)) }
             BarItem.Paint -> ui = ui.copy(painting = PaintUi(), sheet = null, toast = ToastUi("Painting the ground is not wired yet."))
-            BarItem.Assets -> toggle(EditorSheet.Assets(AssetTab.Prefabs, SampleEditor.assets))
+            BarItem.Assets -> if (ui.sheet is EditorSheet.Assets) ui = ui.copy(sheet = null) else showAssets(AssetTab.Sprites)
             BarItem.Layers -> {
                 toggle(EditorSheet.Layers(LayerTab.Objects, emptyList(), emptyList()))
                 refresh()
@@ -353,6 +355,16 @@ class EditorController(
             ui = ui.copy(sheet = null)
             if (native.state().unsaved) error = native.command("save")
         }
+        refresh()
+    }
+
+    fun showAssets(tab: AssetTab = AssetTab.Sprites) {
+        ui = ui.copy(sheet = EditorSheet.Assets(tab, if (tab == AssetTab.Sprites) images() else emptyList()), menu = null)
+    }
+
+    fun importResult(message: String?) {
+        showAssets()
+        if (message != null) ui = ui.copy(toast = ToastUi(message))
         refresh()
     }
 

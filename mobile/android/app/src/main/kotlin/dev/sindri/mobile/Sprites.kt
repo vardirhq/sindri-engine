@@ -45,7 +45,8 @@ private object SheetCache {
 
     fun get(context: Context, path: String): ImageBitmap? = loaded.getOrPut(path) {
         runCatching {
-            context.assets.open(path).use { BitmapFactory.decodeStream(it)?.asImageBitmap() }
+            if (java.io.File(path).isAbsolute) BitmapFactory.decodeFile(path)?.asImageBitmap()
+            else context.assets.open(path).use { BitmapFactory.decodeStream(it)?.asImageBitmap() }
         }.getOrNull()
     }
 }

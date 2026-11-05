@@ -16,6 +16,9 @@ impl Host {
             "addComponent" => {
                 editing.add_component(&mut opened.world, &opened.extractor, value)?;
             }
+            "addSprite" => {
+                editing.add_sprite(opened, value)?;
+            }
             _ => return Err(format!("unknown add command {command}")),
         }
         Ok(())

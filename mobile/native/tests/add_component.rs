@@ -55,3 +55,18 @@ fn add_collider_is_checked_and_undoable() {
             .contains_key(kind)
     );
 }
+
+#[test]
+fn a_loaded_texture_can_be_added_as_an_undoable_sprite() {
+    let project = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../games/lamplighter");
+    let mut opened = OpenedScene::open(&project, "world.scene").unwrap();
+    let texture = opened.assets.textures.first().unwrap().0.as_str().to_owned();
+    let mut editing = Editing::for_scene(&opened).unwrap();
+    assert!(editing.add_sprite(&mut opened, "missing.png").is_err());
+    let entity = editing.add_sprite(&mut opened, &texture).unwrap();
+    assert_eq!(opened.world.get(entity).unwrap().components["sindri.sprite"]["texture"].as_str(), Some(texture.as_str()));
+    editing.undo(&mut opened.world).unwrap();
+    assert!(opened.world.get(entity).is_none());
+    editing.redo(&mut opened.world).unwrap();
+    assert!(opened.world.get(entity).is_some());
+}

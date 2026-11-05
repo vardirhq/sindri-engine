@@ -3,6 +3,8 @@ package dev.sindri.mobile
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,6 +16,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -23,6 +26,7 @@ import androidx.lifecycle.compose.LifecycleResumeEffect
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.launch
 
 /** The project and scene the slice opens. */
 private const val PROJECT = "lamplighter"
@@ -60,7 +64,7 @@ private fun SindriApp() {
     val currentId = (screen as? Screen.Editor)?.project ?: PROJECT
     val title = projects.firstOrNull { it.id == currentId }?.name ?: "Lamplighter"
     val sceneKey = if (currentId == PROJECT) "scene" else "scene:$currentId"
-    val controller = remember(currentId) { EditorController(NativeHost, assetRoot = "projects/$currentId/assets/", onSceneOpened = { name -> preferences.edit().putString(sceneKey, name).commit() }, projectTitle = title) }
+    val controller = remember(currentId) { EditorController(NativeHost, assetRoot = "projects/$currentId/assets/", onSceneOpened = { name -> preferences.edit().putString(sceneKey, name).commit() }, projectTitle = title, images = { ImportedImages.list(base.resolve(currentId)) }) }
     LaunchedEffect(screen) {
         if (screen == Screen.Dashboard) projects = withContext(Dispatchers.IO) { LocalProjects.list(base) }
     }
@@ -112,6 +116,18 @@ private fun NewGameFlow(step: NewGameStep, base: java.io.File, onStep: (NewGameS
 @Composable
 private fun EditorRoute(controller: EditorController, projectId: String, localProject: java.io.File?, onHome: () -> Unit) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val directory = localProject ?: (context.getExternalFilesDir(null) ?: context.filesDir).resolve("projects/$PROJECT")
+    val importImage = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        if (uri != null) scope.launch {
+            val imported = withContext(Dispatchers.IO) { runCatching { ImportedImages.import(directory, requireNotNull(context.contentResolver.openInputStream(uri)) { "Could not read the image." }) } }
+            imported.onSuccess { file ->
+                val failure = NativeBridge.command("reloadAssets")
+                if (failure != null) file.delete()
+                controller.importResult(failure ?: "Image imported. Tap it to add a sprite.")
+            }.onFailure { controller.importResult(it.message ?: "Could not import the image.") }
+        }
+    }
     val density = LocalDensity.current.density
     val lastScene = remember(projectId) { context.getSharedPreferences("editor", 0).getString(if (projectId == PROJECT) "scene" else "scene:$projectId", SCENE) ?: SCENE }
     var surface by remember { mutableStateOf<SceneSurface?>(null) }
@@ -170,7 +186,7 @@ private fun EditorRoute(controller: EditorController, projectId: String, localPr
             confirmButton = { TextButton(onClick = onHome) { Text("Back") } },
         )
     }
-    EditorScreen(controller.ui, { controller.on(it, onHome) }) {
+    EditorScreen(controller.ui, { event -> if (event == EditorEvent.OpenImport) importImage.launch(arrayOf("image/png")) else controller.on(event, onHome) }) {
         AndroidView(
             modifier = Modifier.fillMaxSize(),
             factory = { viewContext ->

@@ -9,6 +9,33 @@ use sindri_scene::Light2dComponent;
 use crate::{Editing, OpenedScene};
 
 impl Editing {
+    /// Create a sprite object from a loaded project texture.
+    pub fn add_sprite(&mut self, opened: &mut OpenedScene, texture: &str) -> Result<EntityId, String> {
+        if !opened.sprite_hits.contains_texture(texture) {
+            return Err("This image is not loaded in the project".to_owned());
+        }
+        let payload = serde_json::json!({"texture": texture});
+        opened.extractor.components().validate_payload("sindri.sprite", &payload).map_err(|error| error.to_string())?;
+        let mut number = 1u32;
+        let id = loop {
+            let id = SceneEntityId::new(format!("sprite-{number}")).map_err(|error| error.to_string())?;
+            if opened.world.entity_for_source_id(&id).is_none() { break id; }
+            number = number.checked_add(1).ok_or("No object IDs remain")?;
+        };
+        let entity = opened.world.next_handle();
+        let data = EntityData {
+            source_id: Some(id), name: Some(format!("Sprite {number}")),
+            transform_3d: Some(Transform3D { position: [self.canvas.center[0], self.canvas.center[1], 0.0], ..Transform3D::default() }),
+            components: [("sindri.sprite".to_owned(), payload)].into(), ..EntityData::default()
+        };
+        let mut commands = CommandBuffer::new();
+        commands.push(WorldCommand::Spawn { entity, data: Box::new(data) });
+        self.history.break_merge_run();
+        self.history.apply(commands.into_transaction("Add sprite"), &mut opened.world).map_err(|error| error.to_string())?;
+        self.clear_selection();
+        self.selected = Some(entity);
+        Ok(entity)
+    }
     /// Place an authored prefab at the view center as one undoable instance.
     pub fn place_prefab(
         &mut self,

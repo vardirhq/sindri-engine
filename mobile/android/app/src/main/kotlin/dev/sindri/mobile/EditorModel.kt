@@ -96,7 +96,7 @@ data class PrefabTile(val name: String, val sheet: Sheet? = null, val cell: Int 
 
 enum class AssetTab(val label: String) { Prefabs("Prefabs"), Sprites("Sprites"), Tiles("Tiles"), Scripts("Scripts"), Audio("Audio") }
 
-data class AssetItem(val name: String, val path: String, val sheet: Sheet? = null, val cell: Int = 0, val icon: Sym = Sym.image, val zoom: Float = 1f)
+data class AssetItem(val name: String, val path: String, val sheet: Sheet? = null, val cell: Int = 0, val icon: Sym = Sym.image, val zoom: Float = 1f, val image: ProjectImage? = null)
 
 data class ImportFile(val name: String, val detail: String, val supported: Boolean, val sheet: Sheet? = null)
 
@@ -182,6 +182,7 @@ sealed interface EditorEvent {
     data object ToggleMoveView : EditorEvent
     data object DonePainting : EditorEvent
     data class AssetTabChosen(val tab: AssetTab) : EditorEvent
+    data class AssetChosen(val item: AssetItem) : EditorEvent
     data object OpenImport : EditorEvent
     data object BackToAssets : EditorEvent
     data class LayerTabChosen(val tab: LayerTab) : EditorEvent

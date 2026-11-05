@@ -228,13 +228,14 @@ private fun BoxScope.AssetsSheet(sheet: EditorSheet.Assets, onEvent: (EditorEven
         AssetTab.entries.forEach { tab -> Chip(tab.label, tab == sheet.tab, { onEvent(EditorEvent.AssetTabChosen(tab)) }) }
     }
     SheetBody(gap = 0.dp) {
+        if (sheet.tab == AssetTab.Sprites) Text(if (sheet.items.isEmpty()) "Import a PNG to add a sprite." else "Tap an image to add a sprite to the scene.", style = ForgeType.text(13.sp, color = Forge.TextMuted), modifier = Modifier.padding(12.dp))
         Grid(sheet.items, columns = 3) { item ->
             Column(
-                Modifier.fillMaxWidth().card().clickable {}.padding(horizontal = 8.dp, vertical = 10.dp),
+                Modifier.fillMaxWidth().card().clickable { onEvent(EditorEvent.AssetChosen(item)) }.padding(horizontal = 8.dp, vertical = 10.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(2.dp),
             ) {
-                if (item.sheet != null) SpriteThumb(item.sheet, item.cell, 72.dp, zoom = item.zoom) else Symbol(item.icon, 32.sp, Forge.TextMuted)
+                if (item.image != null) ProjectSprite(item.image, Modifier.size(72.dp)) else if (item.sheet != null) SpriteThumb(item.sheet, item.cell, 72.dp, zoom = item.zoom) else Symbol(item.icon, 32.sp, Forge.TextMuted)
                 Text(item.name, style = ForgeType.text(12.sp, FontWeight.Medium), maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(top = 4.dp))
                 Text(item.path, style = ForgeType.text(11.sp, color = Forge.TextFaint), maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
