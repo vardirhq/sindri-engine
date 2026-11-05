@@ -55,6 +55,14 @@ class EditorControllerTest {
     }
 
     @Test
+    fun frame_everything_closes_the_menu_and_does_not_save() {
+        controller.on(EditorEvent.ToggleMenu) {}
+        controller.on(EditorEvent.FrameAll) {}
+        assertNull(controller.ui.menu)
+        assertEquals(listOf("frameAll"), host.commands.last())
+    }
+
+    @Test
     fun lighting_preview_reaches_the_host_and_the_menu_remembers_it() {
         controller.on(EditorEvent.ToggleMenu) {}
         assertEquals(false, controller.ui.menu?.lightingPreview)

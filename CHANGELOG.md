@@ -1029,6 +1029,8 @@ requests, commit history, and subsystem documentation rather than this file.
 
 ### Added
 
+- Frame everything in the mobile editor fits world objects and terrain to the viewport.
+
 - A left virtual stick and a right jump control for Lamplighter touch screens, usable together with two fingers.
 
 - Add reusable `render_material` profiles for shared 3D factors and sidedness,

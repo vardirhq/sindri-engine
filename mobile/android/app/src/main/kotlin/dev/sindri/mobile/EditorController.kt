@@ -149,7 +149,11 @@ class EditorController(
             EditorEvent.Save -> nativeEdit("save")
             EditorEvent.ToggleMenu -> ui = ui.copy(menu = if (ui.menu == null) settings else null)
             is EditorEvent.MenuToggle -> menuToggle(event.item)
-            EditorEvent.FrameAll -> notWired("Frame everything")
+            EditorEvent.FrameAll -> {
+                ui = ui.copy(menu = null)
+                error = native.command("frameAll")
+                refresh()
+            }
             EditorEvent.OpenScenes -> openScenes()
             is EditorEvent.SceneTapped -> openScene(event.scene)
             is EditorEvent.Tool -> tool(event.tool)

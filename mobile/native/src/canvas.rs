@@ -24,6 +24,26 @@ pub struct Canvas {
 }
 
 impl Canvas {
+    /// Fit world-space bounds with a margin, respecting the viewport aspect ratio.
+    pub fn fit_bounds(&mut self, bounds: [f32; 4], size: [f32; 2]) {
+        if !bounds
+            .iter()
+            .chain(size.iter())
+            .all(|value| value.is_finite())
+            || size[0] <= 0.0
+            || size[1] <= 0.0
+            || bounds[2] < bounds[0]
+            || bounds[3] < bounds[1]
+        {
+            return;
+        }
+        self.center = [(bounds[0] + bounds[2]) * 0.5, (bounds[1] + bounds[3]) * 0.5];
+        let aspect = size[0] / size[1];
+        let width = bounds[2] - bounds[0];
+        let height = bounds[3] - bounds[1];
+        self.half_height = (0.6 * height.max(width / aspect)).clamp(CLOSEST, FARTHEST);
+    }
+
     /// The canvas the scene opens on: where its own camera looks, as much as it
     /// shows, or the origin at a modest size for a scene with no camera.
     ///
