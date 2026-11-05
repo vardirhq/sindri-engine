@@ -276,6 +276,20 @@ class EditorControllerTest {
     }
 
     @Test
+    fun add_component_uses_the_host_and_saves() {
+        host.state = EditorState(inspector = Inspector("Object", null, emptyList(), addable = listOf(ComponentChoice("sindri.physics2d.collider", "Collider"))), selectionCount = 1)
+        controller.refresh()
+        controller.on(EditorEvent.OpenInspector) {}
+        controller.on(EditorEvent.AddComponent) {}
+        assertTrue((controller.ui.sheet as EditorSheet.Inspector).adding)
+        host.state = host.state.copy(unsaved = true)
+        controller.on(EditorEvent.ComponentChosen("sindri.physics2d.collider")) {}
+        assertTrue(listOf("addComponent", "sindri.physics2d.collider") in host.commands)
+        assertTrue(listOf("save") in host.commands)
+        assertFalse((controller.ui.sheet as EditorSheet.Inspector).adding)
+    }
+
+    @Test
     fun play_saves_first_runs_pauses_and_stop_returns_to_editing() {
         host.state = EditorState(unsaved = true)
         controller.on(EditorEvent.Play) {}

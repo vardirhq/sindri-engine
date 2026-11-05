@@ -71,6 +71,7 @@ impl Editing {
             "tile": tile_size(world, registry),
             "sprite": sprite,
             "components": components,
+            "addable": crate::components::addable(world, entity, registry),
             "undo": self.history.undo_label(),
             "redo": self.history.redo_label(),
         })

@@ -209,6 +209,11 @@ class EditorController(
             is EditorEvent.AddBasic -> addObject("addBasic", event.kind)
             is EditorEvent.LayerTabChosen -> (ui.sheet as? EditorSheet.Layers)?.let { ui = ui.copy(sheet = it.copy(tab = event.tab)) }
             is EditorEvent.InspectorRow -> inspectorRow(event)
+            EditorEvent.AddComponent -> (ui.sheet as? EditorSheet.Inspector)?.let { ui = ui.copy(sheet = it.copy(adding = !it.adding, full = true)) }
+            is EditorEvent.ComponentChosen -> {
+                nativeEdit("addComponent", event.type)
+                (ui.sheet as? EditorSheet.Inspector)?.let { ui = ui.copy(sheet = it.copy(adding = false)) }
+            }
             is EditorEvent.GizmoTaken -> {
                 error = native.command("gizmoPress", event.id, event.x, event.y)
                 refresh()

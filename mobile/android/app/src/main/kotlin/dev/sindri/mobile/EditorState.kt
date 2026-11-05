@@ -53,9 +53,12 @@ data class Inspector(
     /** World units across one of the scene's tiles. */
     val tile: Double = 1.0,
     val sprite: SpriteRegion? = null,
+    val addable: List<ComponentChoice> = emptyList(),
 ) {
     fun component(type: String): Component? = components.firstOrNull { it.type == type }
 }
+
+data class ComponentChoice(val type: String, val display: String)
 
 /**
  * A game running from the editor: its clock, whether it is paused, and the
@@ -177,6 +180,7 @@ data class EditorState(
                 )
             }.orEmpty(),
             id = json.optStringOrNull("id"),
+            addable = json.optJSONArray("addable")?.objects()?.map { ComponentChoice(it.getString("type"), it.getString("display")) }.orEmpty(),
             turn = json.optDouble("turn", 0.0).takeUnless { it.isNaN() } ?: 0.0,
             scale = json.optJSONArray("scale")?.doubles() ?: listOf(1.0, 1.0, 1.0),
             tile = json.optDouble("tile", 1.0).takeUnless { it.isNaN() || it <= 0.0 } ?: 1.0,

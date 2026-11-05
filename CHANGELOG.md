@@ -1030,6 +1030,7 @@ requests, commit history, and subsystem documentation rather than this file.
 ### Added
 
 - Create and reopen separate blank 2D projects in the mobile editor.
+- Add supported 2D components to objects in the mobile inspector.
 
 - Show and edit the object hierarchy in the mobile editor, with collapsible branches and undoable parenting.
 
