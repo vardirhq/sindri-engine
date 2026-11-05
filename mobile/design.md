@@ -52,7 +52,7 @@ Fonts are bundled under their own licences in `mobile/android/licenses/`.
 | Prototype state | Compose | Designed | Wired to the engine |
 | --- | --- | --- | --- |
 | `01-dashboard` | `DashboardScreen` | ✅ | Continue opens the editor on the bundled Lamplighter. Samples, settings and Open folder do nothing yet |
-| `02`–`04` New game | `NewGameScreen` | ✅ | The steps play out; creating a project is not wired, so the bundled Lamplighter opens instead |
+| `02`–`04` New game | `NewGameScreen` | ✅ | Creates a separate blank 2D project with a camera; created projects can be reopened from the dashboard. Other templates are unavailable. Device verification remains open. |
 | `10-editor` | `EditorScreen` | ✅ | The canvas is the engine's scene: drag to pan, pinch to zoom, tap to select, drag a selection to move it. Tapping the ground lets the selection go: a tilemap is painted, not selected, as in the prototype. Back steps out of the menu, a sheet, painting, a run and the selection before leaving the editor. Moves are saved when the finger lifts |
 | `11-more-menu` | `EditorScreen` | ✅ | The switches are remembered while the menu is closed. Lighting preview (off by default) draws the scene's 2D lights or leaves every sprite in its own colors; Snap keeps the turn handle to 15° and the scale handle to tenths; Frame everything fits world objects to the view. The tile grid is not drawn yet. |
 | `12-add` | `EditorSheets` | ✅ | Lists project prefabs; tapping places a linked instance at the view center. Empty and Light 2D add real objects. Drag placement and prefab thumbnails are not wired. |

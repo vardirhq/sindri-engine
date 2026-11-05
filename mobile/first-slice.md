@@ -256,8 +256,7 @@ SINDRI_REQUIRE_GPU=1 cargo test -p sindri-mobile
 - **No live tuning or run edits.** Pausing holds the game, but tapping
   something to tune it (the design's `26-frozen`) and the Review sheet at Stop
   are not wired, and Step back is not.
-- **One project.** The app opens the bundled Lamplighter and nothing else; there
-  is no project list, import or export yet.
+- **Projects.** The dashboard opens bundled Lamplighter and blank 2D projects created on the phone. Created projects have separate scene preferences and recovery. Import and export are not available yet, and project creation needs device verification.
 
 ## What a mobile host cannot reach yet
 

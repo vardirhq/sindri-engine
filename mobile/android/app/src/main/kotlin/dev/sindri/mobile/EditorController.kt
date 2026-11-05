@@ -20,6 +20,7 @@ class EditorController(
     /** Where the open project's assets are among the app's own, for sprite thumbnails. */
     private val assetRoot: String = "projects/lamplighter/assets/",
     private val onSceneOpened: (String) -> Unit = {},
+    projectTitle: String = "Lamplighter",
 ) {
     /** The native calls the controller needs, so the design tests can run without the library. */
     interface Native {
@@ -30,7 +31,7 @@ class EditorController(
         fun script(): DecayScript? = null
     }
 
-    var ui by mutableStateOf(SampleEditor.base.copy(projectTitle = "Lamplighter", canUndo = false))
+    var ui by mutableStateOf(SampleEditor.base.copy(projectTitle = projectTitle, canUndo = false))
         private set
 
     /** The last native state, which selection and the inspector are drawn from. */

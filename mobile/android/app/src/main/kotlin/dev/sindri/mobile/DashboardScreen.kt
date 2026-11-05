@@ -56,6 +56,8 @@ fun DashboardScreen(
     onOpenFolder: () -> Unit,
     onSample: (SampleGame) -> Unit,
     onSettings: () -> Unit,
+    projects: List<GameCard> = emptyList(),
+    onProject: (GameCard) -> Unit = {},
 ) {
     Box(Modifier.fillMaxSize().background(Forge.Page)) {
         Column(Modifier.fillMaxSize().statusBarsPadding()) {
@@ -70,6 +72,7 @@ fun DashboardScreen(
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     SectionLabel("Your games", Modifier.padding(start = 4.dp))
                     GameHero(game, onContinue)
+                    projects.forEach { project -> GameHero(project) { onProject(project) } }
                 }
                 Column {
                     SectionLabel("Samples to learn from", Modifier.padding(start = 4.dp, end = 4.dp, bottom = 6.dp))
@@ -82,7 +85,7 @@ fun DashboardScreen(
 }
 
 /** What the dashboard knows about a game: its name and a line about it. */
-data class GameCard(val name: String, val detail: String)
+data class GameCard(val name: String, val detail: String, val id: String? = null)
 
 @Composable
 private fun DashboardHeader(onSettings: () -> Unit) {
@@ -108,7 +111,7 @@ private fun GameHero(game: GameCard, onContinue: () -> Unit) {
             .border(1.dp, Forge.Hairline, shape)
             .clickable(onClickLabel = "Continue ${game.name}", onClick = onContinue),
     ) {
-        Box(Modifier.fillMaxWidth().height(190.dp).clip(RoundedCornerShape(0.dp))) {
+        if (game.id == null) Box(Modifier.fillMaxWidth().height(190.dp).clip(RoundedCornerShape(0.dp))) {
             TiledSheet(Sheet.Ground, tile = 128f, modifier = Modifier.fillMaxSize())
             // The prototype's scene: a house, a lit lamp post and Wick.
             Sprite(Sheet.Village, cell = 1, modifier = Modifier.offset((-10).dp, (-6).dp).size(168.dp))
