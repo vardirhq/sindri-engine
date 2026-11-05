@@ -109,31 +109,52 @@ fn hierarchy_reparent_preserves_world_position_and_undoes() {
     let mut opened = scene();
     let parent = opened.world.spawn(EntityData {
         name: Some("Test parent".to_owned()),
-        transform_3d: Some(sindri_core::Transform3D { position: [10.0, 3.0, 0.0], scale: [2.0, 2.0, 1.0], ..Default::default() }),
+        transform_3d: Some(sindri_core::Transform3D {
+            position: [10.0, 3.0, 0.0],
+            scale: [2.0, 2.0, 1.0],
+            ..Default::default()
+        }),
         ..Default::default()
     });
     let child = opened.world.spawn(EntityData {
         name: Some("Test child".to_owned()),
-        transform_3d: Some(sindri_core::Transform3D { position: [4.0, 7.0, 0.0], ..Default::default() }),
+        transform_3d: Some(sindri_core::Transform3D {
+            position: [4.0, 7.0, 0.0],
+            ..Default::default()
+        }),
         ..Default::default()
     });
     let mut editing = Editing::new(&opened.world, &opened.extractor).unwrap();
     let parent_id = parent.to_bits().to_string();
     let child_id = child.to_bits().to_string();
-    editing.reparent_object(&mut opened.world, &child_id, Some(&parent_id)).unwrap();
+    editing
+        .reparent_object(&mut opened.world, &child_id, Some(&parent_id))
+        .unwrap();
     let rows = editing.scene_objects(&opened.world);
-    let parent_index = rows.iter().position(|row| row["id"].as_str() == Some(parent_id.as_str())).unwrap();
-    assert_eq!(rows[parent_index + 1]["id"].as_str(), Some(child_id.as_str()));
+    let parent_index = rows
+        .iter()
+        .position(|row| row["id"].as_str() == Some(parent_id.as_str()))
+        .unwrap();
+    assert_eq!(
+        rows[parent_index + 1]["id"].as_str(),
+        Some(child_id.as_str())
+    );
     assert_eq!(rows[parent_index + 1]["depth"].as_u64(), Some(1));
     let position = opened.world.world_transform(child).unwrap().position;
     assert!((position[0] - 4.0).abs() < 1e-4 && (position[1] - 7.0).abs() < 1e-4);
-    assert!(editing.reparent_object(&mut opened.world, &parent_id, Some(&child_id)).is_err());
+    assert!(
+        editing
+            .reparent_object(&mut opened.world, &parent_id, Some(&child_id))
+            .is_err()
+    );
     editing.undo(&mut opened.world).unwrap();
     assert_eq!(opened.world.get(child).unwrap().parent, None);
     let position = opened.world.world_transform(child).unwrap().position;
     assert!((position[0] - 4.0).abs() < 1e-4 && (position[1] - 7.0).abs() < 1e-4);
     editing.redo(&mut opened.world).unwrap();
     assert_eq!(opened.world.get(child).unwrap().parent, Some(parent));
-    editing.reparent_object(&mut opened.world, &child_id, None).unwrap();
+    editing
+        .reparent_object(&mut opened.world, &child_id, None)
+        .unwrap();
     assert_eq!(opened.world.get(child).unwrap().parent, None);
 }

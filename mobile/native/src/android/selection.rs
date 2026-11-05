@@ -34,8 +34,14 @@ impl Host {
                 Ok(())
             }
             "reparentObject" => {
-                let child = arguments.first().and_then(Value::as_str).ok_or("Missing object")?;
-                let parent = arguments.get(1).and_then(Value::as_str).filter(|id| !id.is_empty());
+                let child = arguments
+                    .first()
+                    .and_then(Value::as_str)
+                    .ok_or("Missing object")?;
+                let parent = arguments
+                    .get(1)
+                    .and_then(Value::as_str)
+                    .filter(|id| !id.is_empty());
                 let (opened, editing) = self.editing()?;
                 editing.reparent_object(&mut opened.world, child, parent)
             }
