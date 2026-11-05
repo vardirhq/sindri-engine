@@ -80,7 +80,12 @@ fun BoxScope.InspectorSheet(sheet: EditorSheet.Inspector, onEvent: (EditorEvent)
                     horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
                 ) {
                     Symbol(Sym.add, 20.sp, Forge.TextMuted)
-                    Text("Add a component", style = ForgeType.text(14.sp, color = Forge.TextMuted))
+                    Text(if (sheet.adding) "Cancel" else "Add a component", style = ForgeType.text(14.sp, color = Forge.TextMuted))
+                }
+                if (sheet.adding) inspector.addable.forEach { choice ->
+                    Row(Modifier.fillMaxWidth().height(52.dp).card(radius = 12.dp).clickable { onEvent(EditorEvent.ComponentChosen(choice.type)) }.padding(horizontal = 16.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Text(choice.display, style = ForgeType.text(14.sp, color = Forge.Text))
+                    }
                 }
             }
         }

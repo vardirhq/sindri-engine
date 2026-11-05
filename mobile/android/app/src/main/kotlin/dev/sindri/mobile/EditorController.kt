@@ -20,6 +20,8 @@ class EditorController(
     /** Where the open project's assets are among the app's own, for sprite thumbnails. */
     private val assetRoot: String = "projects/lamplighter/assets/",
     private val onSceneOpened: (String) -> Unit = {},
+    projectTitle: String = "Lamplighter",
+    private val images: () -> List<AssetItem> = { emptyList() },
 ) {
     /** The native calls the controller needs, so the design tests can run without the library. */
     interface Native {
@@ -30,7 +32,7 @@ class EditorController(
         fun script(): DecayScript? = null
     }
 
-    var ui by mutableStateOf(SampleEditor.base.copy(projectTitle = "Lamplighter", canUndo = false))
+    var ui by mutableStateOf(SampleEditor.base.copy(projectTitle = projectTitle, canUndo = false))
         private set
 
     /** The last native state, which selection and the inspector are drawn from. */
@@ -185,7 +187,8 @@ class EditorController(
             is EditorEvent.BrushSize -> ui.painting?.let { ui = ui.copy(painting = it.copy(size = event.size)) }
             EditorEvent.ToggleMoveView -> ui.painting?.let { ui = ui.copy(painting = it.copy(moveView = !it.moveView)) }
             EditorEvent.DonePainting -> ui = ui.copy(painting = null)
-            is EditorEvent.AssetTabChosen -> ui = ui.copy(sheet = EditorSheet.Assets(event.tab, if (event.tab == AssetTab.Prefabs) SampleEditor.assets else emptyList()))
+            is EditorEvent.AssetTabChosen -> showAssets(event.tab)
+            is EditorEvent.AssetChosen -> if ((ui.sheet as? EditorSheet.Assets)?.tab == AssetTab.Sprites) addObject("addSprite", event.item.path)
             EditorEvent.OpenImport -> ui = ui.copy(sheet = EditorSheet.Import(SampleEditor.importFiles))
             EditorEvent.BackToAssets -> ui = ui.copy(sheet = EditorSheet.Assets(AssetTab.Prefabs, SampleEditor.assets))
             is EditorEvent.TreeRowTapped -> event.row.id?.let { id ->
@@ -208,6 +211,11 @@ class EditorController(
             is EditorEvent.AddBasic -> addObject("addBasic", event.kind)
             is EditorEvent.LayerTabChosen -> (ui.sheet as? EditorSheet.Layers)?.let { ui = ui.copy(sheet = it.copy(tab = event.tab)) }
             is EditorEvent.InspectorRow -> inspectorRow(event)
+            EditorEvent.AddComponent -> (ui.sheet as? EditorSheet.Inspector)?.let { ui = ui.copy(sheet = it.copy(adding = !it.adding, full = true)) }
+            is EditorEvent.ComponentChosen -> {
+                nativeEdit("addComponent", event.type)
+                (ui.sheet as? EditorSheet.Inspector)?.let { ui = ui.copy(sheet = it.copy(adding = false)) }
+            }
             is EditorEvent.GizmoTaken -> {
                 error = native.command("gizmoPress", event.id, event.x, event.y)
                 refresh()
@@ -326,7 +334,7 @@ class EditorController(
         when (tool) {
             BarItem.Add -> { refresh(); toggle(EditorSheet.Add(state.prefabs)) }
             BarItem.Paint -> ui = ui.copy(painting = PaintUi(), sheet = null, toast = ToastUi("Painting the ground is not wired yet."))
-            BarItem.Assets -> toggle(EditorSheet.Assets(AssetTab.Prefabs, SampleEditor.assets))
+            BarItem.Assets -> if (ui.sheet is EditorSheet.Assets) ui = ui.copy(sheet = null) else showAssets(AssetTab.Sprites)
             BarItem.Layers -> {
                 toggle(EditorSheet.Layers(LayerTab.Objects, emptyList(), emptyList()))
                 refresh()
@@ -347,6 +355,16 @@ class EditorController(
             ui = ui.copy(sheet = null)
             if (native.state().unsaved) error = native.command("save")
         }
+        refresh()
+    }
+
+    fun showAssets(tab: AssetTab = AssetTab.Sprites) {
+        ui = ui.copy(sheet = EditorSheet.Assets(tab, if (tab == AssetTab.Sprites) images() else emptyList()), menu = null)
+    }
+
+    fun importResult(message: String?) {
+        showAssets()
+        if (message != null) ui = ui.copy(toast = ToastUi(message))
         refresh()
     }
 

@@ -86,7 +86,7 @@ sealed interface EditorSheet {
     data class Import(val files: List<ImportFile>) : EditorSheet
     data class Layers(val tab: LayerTab, val layers: List<LayerRow>, val objects: List<TreeRow>, val collapsed: Set<String> = emptySet(), val moving: String? = null) : EditorSheet
     data class Scenes(val scenes: List<SceneCard>, val doors: List<Pair<String, String>>) : EditorSheet
-    data class Inspector(val inspector: InspectorUi, val full: Boolean = false, val live: Boolean = false) : EditorSheet
+    data class Inspector(val inspector: InspectorUi, val full: Boolean = false, val live: Boolean = false, val adding: Boolean = false) : EditorSheet
     data class Behaviour(val behaviour: BehaviourUi, val code: Boolean = false) : EditorSheet
     data class Review(val edits: List<RunEdit>) : EditorSheet
 }
@@ -96,7 +96,7 @@ data class PrefabTile(val name: String, val sheet: Sheet? = null, val cell: Int 
 
 enum class AssetTab(val label: String) { Prefabs("Prefabs"), Sprites("Sprites"), Tiles("Tiles"), Scripts("Scripts"), Audio("Audio") }
 
-data class AssetItem(val name: String, val path: String, val sheet: Sheet? = null, val cell: Int = 0, val icon: Sym = Sym.image, val zoom: Float = 1f)
+data class AssetItem(val name: String, val path: String, val sheet: Sheet? = null, val cell: Int = 0, val icon: Sym = Sym.image, val zoom: Float = 1f, val image: ProjectImage? = null)
 
 data class ImportFile(val name: String, val detail: String, val supported: Boolean, val sheet: Sheet? = null)
 
@@ -116,6 +116,7 @@ data class InspectorUi(
     val active: Boolean,
     val sections: List<SectionUi>,
     val canAddComponent: Boolean = true,
+    val addable: List<ComponentChoice> = emptyList(),
 )
 
 data class SectionUi(val icon: Sym, val title: String, val note: String = "", val rows: List<RowUi>)
@@ -181,6 +182,7 @@ sealed interface EditorEvent {
     data object ToggleMoveView : EditorEvent
     data object DonePainting : EditorEvent
     data class AssetTabChosen(val tab: AssetTab) : EditorEvent
+    data class AssetChosen(val item: AssetItem) : EditorEvent
     data object OpenImport : EditorEvent
     data object BackToAssets : EditorEvent
     data class LayerTabChosen(val tab: LayerTab) : EditorEvent
@@ -197,6 +199,7 @@ sealed interface EditorEvent {
     data class InspectorRow(val section: String, val row: String, val change: RowChange) : EditorEvent
     data object ToggleActive : EditorEvent
     data object AddComponent : EditorEvent
+    data class ComponentChosen(val type: String) : EditorEvent
     data object BehaviourCode : EditorEvent
     data object BehaviourBlocks : EditorEvent
     data class KeepRunEdit(val index: Int) : EditorEvent

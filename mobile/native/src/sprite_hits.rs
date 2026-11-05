@@ -26,6 +26,9 @@ pub(crate) struct SpriteHits {
 }
 
 impl SpriteHits {
+    pub(crate) fn contains_texture(&self, id: &str) -> bool {
+        self.images.contains_key(id)
+    }
     pub fn new(assets: &ProjectAssets) -> Self {
         let mut images = BTreeMap::new();
         for (id, texture) in &assets.textures {

@@ -1029,6 +1029,10 @@ requests, commit history, and subsystem documentation rather than this file.
 
 ### Added
 
+- Create and reopen separate blank 2D projects in the mobile editor.
+- Add supported 2D components to objects in the mobile inspector.
+- Import PNG images and add them to a mobile scene as sprite objects.
+
 - Show and edit the object hierarchy in the mobile editor, with collapsible branches and undoable parenting.
 
 - Frame everything in the mobile editor fits world objects and terrain to the viewport.

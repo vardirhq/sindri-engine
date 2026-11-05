@@ -66,7 +66,7 @@ object InspectorPresenter {
             listOfNotNull(inspector.component(SCRIPT)?.let { behaviour(it).done() }, details(inspector, details).done())
 
         val icon = iconFor(inspector)
-        return Presented(InspectorUi(icon, inspector.name, "In $sceneName", active = true, sections = sections, canAddComponent = false), bindings)
+        return Presented(InspectorUi(icon, inspector.name, "In $sceneName", active = true, sections = sections, canAddComponent = inspector.addable.isNotEmpty(), addable = inspector.addable), bindings)
     }
 
     fun iconFor(inspector: Inspector): Sym {

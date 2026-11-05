@@ -48,6 +48,20 @@ class EditorControllerTest {
     private val controller = EditorController(host).also { it.opened(density = 2f) }
 
     @Test
+    fun image_asset_adds_a_sprite_and_saves() {
+        val image = AssetItem("Tree", "textures/tree.png")
+        val editor = EditorController(host, images = { listOf(image) })
+        editor.opened(density = 2f)
+        editor.on(EditorEvent.Tool(BarItem.Assets)) {}
+        assertEquals(listOf(image), (editor.ui.sheet as EditorSheet.Assets).items)
+        host.state = host.state.copy(unsaved = true)
+        editor.on(EditorEvent.AssetChosen(image)) {}
+        assertTrue(listOf("addSprite", "textures/tree.png") in host.commands)
+        assertTrue(listOf("save") in host.commands)
+        assertNull(editor.ui.sheet)
+    }
+
+    @Test
     fun opening_tells_the_host_the_density_and_that_lighting_preview_is_off() {
         assertTrue(listOf("density", 2f) in host.commands)
         assertTrue(listOf("lighting", false) in host.commands)
@@ -273,6 +287,20 @@ class EditorControllerTest {
         assertNull("then the selection is let go", controller.ui.selection)
 
         assertFalse("then Back leaves the editor", controller.back())
+    }
+
+    @Test
+    fun add_component_uses_the_host_and_saves() {
+        host.state = EditorState(inspector = Inspector("Object", null, emptyList(), addable = listOf(ComponentChoice("sindri.physics2d.collider", "Collider"))), selectionCount = 1)
+        controller.refresh()
+        controller.on(EditorEvent.OpenInspector) {}
+        controller.on(EditorEvent.AddComponent) {}
+        assertTrue((controller.ui.sheet as EditorSheet.Inspector).adding)
+        host.state = host.state.copy(unsaved = true)
+        controller.on(EditorEvent.ComponentChosen("sindri.physics2d.collider")) {}
+        assertTrue(listOf("addComponent", "sindri.physics2d.collider") in host.commands)
+        assertTrue(listOf("save") in host.commands)
+        assertFalse((controller.ui.sheet as EditorSheet.Inspector).adding)
     }
 
     @Test

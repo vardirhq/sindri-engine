@@ -67,6 +67,16 @@ struct Host {
 }
 
 impl Host {
+    fn reload_assets(&mut self) -> Result<(), String> {
+        let (opened, editing) = self.editing()?;
+        let assets = ProjectAssets::read(&opened.project)?;
+        opened.sprite_hits = std::sync::Arc::new(crate::sprite_hits::SpriteHits::new(&assets));
+        opened.assets = assets;
+        editing.reload_sprite_hits(opened);
+        self.renderer = None;
+        self.installed = false;
+        self.prepare_renderer()
+    }
     fn open(&mut self, project: PathBuf, scene: String) -> Result<(), String> {
         let scenes = listed_scenes(&project)?;
         let opened = OpenedScene::open(&project, &scene)?;

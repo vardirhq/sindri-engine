@@ -41,9 +41,9 @@ import androidx.compose.ui.unit.sp
 data class GameTemplate(val name: String, val description: String, val tag: String?, val icon: Sym?, val available: Boolean)
 
 val GameTemplates = listOf(
-    GameTemplate("Top-down adventure", "Walk around a tile world. Starts with Wick, a camera and a grass tileset.", null, null, true),
+    GameTemplate("Top-down adventure", "Walk around a tile world.", "Coming later", null, false),
     GameTemplate("Side-on platformer", "Run and jump with gravity and 2D physics.", "Not in prototype", Sym.directions_run, false),
-    GameTemplate("Empty 2D", "A camera and nothing else.", "Not in prototype", Sym.crop_free, false),
+    GameTemplate("Empty 2D", "A camera and an empty scene.", null, Sym.crop_free, true),
     GameTemplate("Empty 3D", "Meshes, lights and GLB models. Touch editing for 3D comes later.", "Limited", Sym.view_in_ar, false),
 )
 
@@ -64,7 +64,7 @@ sealed interface NewGameStep {
 val CreateLines = listOf(
     "Writing sindri.toml",
     "Making world.scene with a camera",
-    "Adding Wick and the ground tileset",
+    "Creating the assets folder",
     "Opening the scene",
 )
 
@@ -190,23 +190,10 @@ private fun NameStep(step: NewGameStep.Name, onName: (String) -> Unit, onOrienta
             },
         )
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            SectionLabel("The game plays")
-            Segmented(
-                options = Orientation.entries.map { it.label },
-                chosen = step.orientation.ordinal,
-                onChoose = { onOrientation(Orientation.entries[it]) },
-                fill = true,
-                icons = Orientation.entries.map { it.icon },
-                height = 48.dp,
-                modifier = Modifier.fillMaxWidth(),
-            )
-        }
-        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
             SectionLabel("You start with")
             listOf(
-                "world.scene, with a camera that follows Wick",
-                "Wick, who walks and carries a lantern",
-                "A grass and path tileset, ready to paint",
+                "An empty world.scene with a camera",
+                "An assets folder for your game",
             ).forEach { line ->
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     Symbol(Sym.check, 20.sp, Forge.Success)

@@ -205,6 +205,8 @@ SINDRI_REQUIRE_GPU=1 cargo test -p sindri-mobile
 
 - **Frame everything.** The overflow action fits world objects, sprite art and tilemaps with a margin; screen UI is excluded. Zoom remains limited to the canvas's normal range, so very large scenes may not fit completely. Device verification is open.
 - **Add.** Lists project prefabs and places linked instances at the view center; Empty and Light 2D are available without prefabs. Each is undoable and saves through the scene. Lamplighter currently has no prefabs, so its prefab list is empty. Drag placement and thumbnails are not wired; device verification remains open.
+- **Components.** The inspector can add supported lights, 2D colliders, rigid bodies and shadows with validated engine defaults and undo. Adding a sprite component to an existing object and other asset-dependent components remain open. Device verification remains open.
+- **Images.** Android's document picker imports a PNG into the open project's textures. The Sprites tab lists project PNGs and tapping one creates an undoable sprite object. Other asset tabs, sprite swapping and slicing remain open; device verification remains open.
 - **Objects.** Layers shows the scene hierarchy, including screen UI and prefab children, with collapsible branches and parent selection. Reparenting is undoable; prefab-owned children cannot be restructured. Layer visibility is not wired. Screen UI selection is inspectable but has no canvas handles, and reparenting screen UI retains its local layout. Device verification remains open.
 - **Script finder.** Search all supported calls or browse engine categories. Object arguments default to this object and vectors to zero. Some argument types are still unavailable. Object pins can use this object, an Entity field, or a uniquely named scene object found by name; duplicate or unnamed scene objects are not offered. Device verification remains open.
 - **Fields.** The inspector edits a component's top-level numbers and switches.
@@ -256,8 +258,7 @@ SINDRI_REQUIRE_GPU=1 cargo test -p sindri-mobile
 - **No live tuning or run edits.** Pausing holds the game, but tapping
   something to tune it (the design's `26-frozen`) and the Review sheet at Stop
   are not wired, and Step back is not.
-- **One project.** The app opens the bundled Lamplighter and nothing else; there
-  is no project list, import or export yet.
+- **Projects.** The dashboard opens bundled Lamplighter and blank 2D projects created on the phone. Created projects have separate scene preferences and recovery. Import and export are not available yet, and project creation needs device verification.
 
 ## What a mobile host cannot reach yet
 

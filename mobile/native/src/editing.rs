@@ -133,6 +133,12 @@ impl Editing {
         Ok(editing)
     }
 
+    #[cfg(target_os = "android")]
+    pub(crate) fn reload_sprite_hits(&mut self, opened: &OpenedScene) {
+        self.sprite_hits = Some(std::sync::Arc::clone(&opened.sprite_hits));
+        self.invalidate_outline();
+    }
+
     /// Whether the world holds edits its file does not.
     pub fn unsaved(&self) -> bool {
         self.history.revision() != self.saved_revision
