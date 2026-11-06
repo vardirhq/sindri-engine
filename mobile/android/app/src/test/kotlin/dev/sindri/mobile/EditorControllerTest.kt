@@ -35,6 +35,7 @@ class EditorControllerTest {
                 "stop" -> playing = null
                 "pause" -> playing = playing?.copy(paused = arguments[0] as Boolean)
                 "editScript" -> scriptEdits += if (arguments[0] == "undo") -1 else 1
+                "createScript" -> state = state.copy(inspector = state.inspector?.copy(components = listOf(Component("sindri.script", "Script", emptyList(), values = mapOf("source" to "scripts/new.decay")))), unsaved = true)
             }
             return null
         }
@@ -46,6 +47,19 @@ class EditorControllerTest {
 
     private val host = Host()
     private val controller = EditorController(host).also { it.opened(density = 2f) }
+
+    @Test
+    fun create_behavior_attaches_saves_and_opens_the_script() {
+        host.state = EditorState(inspector = Inspector("Object", null, emptyList()), selectionCount = 1)
+        controller.refresh()
+        controller.on(EditorEvent.OpenBehaviour) {}
+        assertTrue((controller.ui.sheet as EditorSheet.Behaviour).behaviour.canCreateScript)
+        controller.on(EditorEvent.CreateScript) {}
+        assertTrue(listOf("createScript", "") in host.commands)
+        assertTrue(listOf("save") in host.commands)
+        assertTrue(listOf("openScript", "scripts/new.decay") in host.commands)
+        assertNotNull((controller.ui.sheet as EditorSheet.Behaviour).behaviour.decay)
+    }
 
     @Test
     fun image_asset_adds_a_sprite_and_saves() {

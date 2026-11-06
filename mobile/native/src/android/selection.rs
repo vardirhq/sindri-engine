@@ -19,6 +19,9 @@ impl Host {
             "addSprite" => {
                 editing.add_sprite(opened, value)?;
             }
+            "createScript" => {
+                editing.create_script(opened)?;
+            }
             _ => return Err(format!("unknown add command {command}")),
         }
         Ok(())
