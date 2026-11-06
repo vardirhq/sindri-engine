@@ -122,7 +122,10 @@ pub fn effective(registry: &ComponentSchemaRegistry, type_name: &str, stored: &V
     // A legacy single collider and a compound are alternate serialized forms.
     // Merging the compound default into the single form invents a first piece
     // and makes the inspector edit that instead of the authored shape.
-    if type_name == "sindri.physics2d.collider" && stored.get("shape").is_some() && stored.get("pieces").is_none() {
+    if type_name == "sindri.physics2d.collider"
+        && stored.get("shape").is_some()
+        && stored.get("pieces").is_none()
+    {
         return stored.clone();
     }
     match registry.fields(type_name) {
