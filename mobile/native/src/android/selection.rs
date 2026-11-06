@@ -19,6 +19,20 @@ impl Host {
             "addSprite" => {
                 editing.add_sprite(opened, value)?;
             }
+            "setSprite" => {
+                editing.set_sprite(opened, value)?;
+            }
+            "colliderAdd" | "colliderRemove" => {
+                let index = value
+                    .parse::<usize>()
+                    .map_err(|_| "Invalid collider piece")?;
+                editing.edit_collider_pieces(
+                    &mut opened.world,
+                    &opened.extractor,
+                    index,
+                    command == "colliderAdd",
+                )?;
+            }
             "createScript" => {
                 editing.create_script(opened)?;
             }

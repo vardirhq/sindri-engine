@@ -82,11 +82,12 @@ data class RunEdit(val name: String, val label: String, val from: String, val to
 /** Which sheet covers the bottom of the canvas. */
 sealed interface EditorSheet {
     data class Add(val prefabs: List<PrefabTile>) : EditorSheet
-    data class Assets(val tab: AssetTab, val items: List<AssetItem>) : EditorSheet
+    data class Assets(val tab: AssetTab, val items: List<AssetItem>, val pickingSprite: Boolean = false) : EditorSheet
     data class Import(val files: List<ImportFile>) : EditorSheet
     data class Layers(val tab: LayerTab, val layers: List<LayerRow>, val objects: List<TreeRow>, val collapsed: Set<String> = emptySet(), val moving: String? = null) : EditorSheet
     data class Scenes(val scenes: List<SceneCard>, val doors: List<Pair<String, String>>) : EditorSheet
     data class Inspector(val inspector: InspectorUi, val full: Boolean = false, val live: Boolean = false, val adding: Boolean = false) : EditorSheet
+    data class Collider(val inspector: dev.sindri.mobile.Inspector, val image: ProjectImage?, val piece: Int = 0) : EditorSheet
     data class Behaviour(val behaviour: BehaviourUi, val code: Boolean = false) : EditorSheet
     data class Review(val edits: List<RunEdit>) : EditorSheet
 }
@@ -199,6 +200,11 @@ sealed interface EditorEvent {
     data class PrefabChosen(val prefab: PrefabTile) : EditorEvent
     data class AddBasic(val kind: String) : EditorEvent
     data class InspectorRow(val section: String, val row: String, val change: RowChange) : EditorEvent
+    data object OpenCollider : EditorEvent
+    data class ColliderPiece(val index: Int) : EditorEvent
+    data class ColliderField(val path: String, val value: Any) : EditorEvent
+    data object AddColliderPiece : EditorEvent
+    data object RemoveColliderPiece : EditorEvent
     data object ToggleActive : EditorEvent
     data object AddComponent : EditorEvent
     data class ComponentChosen(val type: String) : EditorEvent
