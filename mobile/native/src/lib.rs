@@ -45,9 +45,9 @@ mod outline;
 mod play;
 #[cfg(not(target_arch = "wasm32"))]
 mod recovery;
+mod renderer;
 #[cfg(not(target_arch = "wasm32"))]
 mod script_create;
-mod renderer;
 #[cfg(not(target_arch = "wasm32"))]
 mod selection_actions;
 #[cfg(not(target_arch = "wasm32"))]
