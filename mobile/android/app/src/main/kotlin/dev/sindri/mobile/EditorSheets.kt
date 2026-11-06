@@ -208,7 +208,7 @@ private fun BoxScope.AddSheet(sheet: EditorSheet.Add, onEvent: (EditorEvent) -> 
 
 @Composable
 private fun BoxScope.AssetsSheet(sheet: EditorSheet.Assets, onEvent: (EditorEvent) -> Unit) = SheetFrame(SheetHeight.Share(580.dp, 0.84f)) {
-    SheetHeader("Assets", onClose = { onEvent(EditorEvent.CloseSheet) }) {
+    SheetHeader(if (sheet.pickingSprite) "Choose sprite" else "Assets", onClose = { onEvent(EditorEvent.CloseSheet) }) {
         Row(
             Modifier
                 .height(40.dp)
@@ -228,7 +228,7 @@ private fun BoxScope.AssetsSheet(sheet: EditorSheet.Assets, onEvent: (EditorEven
         AssetTab.entries.forEach { tab -> Chip(tab.label, tab == sheet.tab, { onEvent(EditorEvent.AssetTabChosen(tab)) }) }
     }
     SheetBody(gap = 0.dp) {
-        if (sheet.tab == AssetTab.Sprites) Text(if (sheet.items.isEmpty()) "Import a PNG to add a sprite." else "Tap an image to add a sprite to the scene.", style = ForgeType.text(13.sp, color = Forge.TextMuted), modifier = Modifier.padding(12.dp))
+        if (sheet.tab == AssetTab.Sprites) Text(if (sheet.items.isEmpty()) "Import a PNG to add a sprite." else if (sheet.pickingSprite) "Tap an image to use it on this object." else "Tap an image to add a sprite to the scene.", style = ForgeType.text(13.sp, color = Forge.TextMuted), modifier = Modifier.padding(12.dp))
         Grid(sheet.items, columns = 3) { item ->
             Column(
                 Modifier.fillMaxWidth().card().clickable { onEvent(EditorEvent.AssetChosen(item)) }.padding(horizontal = 8.dp, vertical = 10.dp),

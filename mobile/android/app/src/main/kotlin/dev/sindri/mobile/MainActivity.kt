@@ -124,7 +124,7 @@ private fun EditorRoute(controller: EditorController, projectId: String, localPr
             imported.onSuccess { file ->
                 val failure = NativeBridge.command("reloadAssets")
                 if (failure != null) file.delete()
-                controller.importResult(failure ?: "Image imported. Tap it to add a sprite.")
+                controller.importResult(failure ?: "Image imported. Tap it to use it.")
             }.onFailure { controller.importResult(it.message ?: "Could not import the image.") }
         }
     }

@@ -19,6 +19,9 @@ impl Host {
             "addSprite" => {
                 editing.add_sprite(opened, value)?;
             }
+            "setSprite" => {
+                editing.set_sprite(opened, value)?;
+            }
             "createScript" => {
                 editing.create_script(opened)?;
             }

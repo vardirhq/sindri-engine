@@ -195,8 +195,13 @@ class EditorController(
             is EditorEvent.BrushSize -> ui.painting?.let { ui = ui.copy(painting = it.copy(size = event.size)) }
             EditorEvent.ToggleMoveView -> ui.painting?.let { ui = ui.copy(painting = it.copy(moveView = !it.moveView)) }
             EditorEvent.DonePainting -> ui = ui.copy(painting = null)
-            is EditorEvent.AssetTabChosen -> showAssets(event.tab)
-            is EditorEvent.AssetChosen -> if ((ui.sheet as? EditorSheet.Assets)?.tab == AssetTab.Sprites) addObject("addSprite", event.item.path)
+            is EditorEvent.AssetTabChosen -> showAssets(event.tab, (ui.sheet as? EditorSheet.Assets)?.pickingSprite == true)
+            is EditorEvent.AssetChosen -> if ((ui.sheet as? EditorSheet.Assets)?.tab == AssetTab.Sprites) {
+                if ((ui.sheet as? EditorSheet.Assets)?.pickingSprite == true) {
+                    nativeEdit("setSprite", event.item.path)
+                    openInspector()
+                } else addObject("addSprite", event.item.path)
+            }
             EditorEvent.OpenImport -> ui = ui.copy(sheet = EditorSheet.Import(SampleEditor.importFiles))
             EditorEvent.BackToAssets -> ui = ui.copy(sheet = EditorSheet.Assets(AssetTab.Prefabs, SampleEditor.assets))
             is EditorEvent.TreeRowTapped -> event.row.id?.let { id ->
@@ -221,8 +226,11 @@ class EditorController(
             is EditorEvent.InspectorRow -> inspectorRow(event)
             EditorEvent.AddComponent -> (ui.sheet as? EditorSheet.Inspector)?.let { ui = ui.copy(sheet = it.copy(adding = !it.adding, full = true)) }
             is EditorEvent.ComponentChosen -> {
-                nativeEdit("addComponent", event.type)
-                (ui.sheet as? EditorSheet.Inspector)?.let { ui = ui.copy(sheet = it.copy(adding = false)) }
+                if (event.type == "sindri.sprite") showAssets(AssetTab.Sprites, true)
+                else {
+                    nativeEdit("addComponent", event.type)
+                    (ui.sheet as? EditorSheet.Inspector)?.let { ui = ui.copy(sheet = it.copy(adding = false)) }
+                }
             }
             is EditorEvent.GizmoTaken -> {
                 error = native.command("gizmoPress", event.id, event.x, event.y)
@@ -366,12 +374,12 @@ class EditorController(
         refresh()
     }
 
-    fun showAssets(tab: AssetTab = AssetTab.Sprites) {
-        ui = ui.copy(sheet = EditorSheet.Assets(tab, if (tab == AssetTab.Sprites) images() else emptyList()), menu = null)
+    fun showAssets(tab: AssetTab = AssetTab.Sprites, pickingSprite: Boolean = false) {
+        ui = ui.copy(sheet = EditorSheet.Assets(tab, if (tab == AssetTab.Sprites) images() else emptyList(), pickingSprite), menu = null)
     }
 
     fun importResult(message: String?) {
-        showAssets()
+        showAssets(pickingSprite = (ui.sheet as? EditorSheet.Assets)?.pickingSprite == true)
         if (message != null) ui = ui.copy(toast = ToastUi(message))
         refresh()
     }
@@ -500,6 +508,7 @@ class EditorController(
                 details = !details
                 refresh()
             }
+            binding is RowBinding.PickSprite -> showAssets(AssetTab.Sprites, true)
             binding is RowBinding.NotWired -> notWired(binding.what)
             event.change == RowChange.Settled -> nativeEdit("settle")
             event.change is RowChange.To -> binding.edit(event.change)?.let { edit ->

@@ -82,7 +82,7 @@ data class RunEdit(val name: String, val label: String, val from: String, val to
 /** Which sheet covers the bottom of the canvas. */
 sealed interface EditorSheet {
     data class Add(val prefabs: List<PrefabTile>) : EditorSheet
-    data class Assets(val tab: AssetTab, val items: List<AssetItem>) : EditorSheet
+    data class Assets(val tab: AssetTab, val items: List<AssetItem>, val pickingSprite: Boolean = false) : EditorSheet
     data class Import(val files: List<ImportFile>) : EditorSheet
     data class Layers(val tab: LayerTab, val layers: List<LayerRow>, val objects: List<TreeRow>, val collapsed: Set<String> = emptySet(), val moving: String? = null) : EditorSheet
     data class Scenes(val scenes: List<SceneCard>, val doors: List<Pair<String, String>>) : EditorSheet

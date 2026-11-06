@@ -76,6 +76,24 @@ class EditorControllerTest {
     }
 
     @Test
+    fun sprite_component_picker_survives_import_and_sets_selected_object() {
+        val image = AssetItem("Tree", "textures/tree.png")
+        val editor = EditorController(host, images = { listOf(image) })
+        host.state = EditorState(inspector = Inspector("Empty", null, emptyList(), addable = listOf(ComponentChoice("sindri.sprite", "Sprite"))), selectionCount = 1)
+        editor.opened(2f)
+        editor.on(EditorEvent.OpenInspector) {}
+        editor.on(EditorEvent.ComponentChosen("sindri.sprite")) {}
+        assertTrue((editor.ui.sheet as EditorSheet.Assets).pickingSprite)
+        editor.importResult("Image imported")
+        assertTrue((editor.ui.sheet as EditorSheet.Assets).pickingSprite)
+        host.state = host.state.copy(unsaved = true)
+        editor.on(EditorEvent.AssetChosen(image)) {}
+        assertTrue(listOf("setSprite", "textures/tree.png") in host.commands)
+        assertTrue(listOf("save") in host.commands)
+        assertTrue(editor.ui.sheet is EditorSheet.Inspector)
+    }
+
+    @Test
     fun opening_tells_the_host_the_density_and_that_lighting_preview_is_off() {
         assertTrue(listOf("density", 2f) in host.commands)
         assertTrue(listOf("lighting", false) in host.commands)
