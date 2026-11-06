@@ -88,6 +88,11 @@ impl Host {
         Ok(())
     }
 
+    fn deselect(&mut self) -> Result<(), String> {
+        self.editing()?.1.clear_selection();
+        Ok(())
+    }
+
     fn frame_all(&mut self) -> Result<(), String> {
         let size = self.size();
         let (opened, editing) = self.editing()?;
@@ -390,10 +395,7 @@ impl Host {
             "release" => self.release(),
             "zoom" => self.zoom(number(0)?, [number(1)?, number(2)?]),
             "frameAll" => self.frame_all(),
-            "deselect" => {
-                self.editing()?.1.clear_selection();
-                Ok(())
-            }
+            "deselect" => self.deselect(),
             "lighting" => {
                 let on = arguments
                     .first()
@@ -443,7 +445,7 @@ impl Host {
             "recoveryDiscard" => self.discard_recovery(),
             "save" => self.save(),
             "addPrefab" | "addBasic" | "addComponent" | "addSprite" | "createScript"
-            | "setSprite" => self.add_command(command, text(0)?),
+            | "setSprite" | "colliderAdd" | "colliderRemove" => self.add_command(command, text(0)?),
             "reloadAssets" => self.reload_assets(),
             "selectMore" | "duplicate" | "delete" => self.selection_command(command),
             "undo" => self.undo(),

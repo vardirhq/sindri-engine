@@ -1030,6 +1030,7 @@ requests, commit history, and subsystem documentation rather than this file.
 ### Added
 
 - Search and browse supported mobile components, and add or change a selected object's sprite.
+- Edit 2D collider pieces in a focused mobile workspace, including legacy single colliders.
 
 - Create and attach a new visual Decay script to an object in the mobile editor.
 

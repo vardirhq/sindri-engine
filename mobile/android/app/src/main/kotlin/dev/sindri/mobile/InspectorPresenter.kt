@@ -146,6 +146,7 @@ object InspectorPresenter {
 
     private fun collider(collider: Component, tile: Double): SectionBuilder {
         val section = SectionBuilder(Sym.crop_square, "Collider 2D")
+        section.add(RowUi.More("Edit collider shapes", false), RowBinding.OpenCollider)
         val pieces = (collider.value("pieces") as? List<*>)?.size ?: 0
         val at = if (pieces > 0) "pieces.0." else ""
         val shape = collider.value("${at}shape.shape") as? String ?: return section
@@ -300,6 +301,8 @@ data class NativeEdit(val command: String, val arguments: List<Any?>)
  */
 sealed interface RowBinding {
     fun edit(change: RowChange): NativeEdit?
+
+    data object OpenCollider : RowBinding { override fun edit(change: RowChange): NativeEdit? = null }
 
     data object PickSprite : RowBinding { override fun edit(change: RowChange): NativeEdit? = null }
 

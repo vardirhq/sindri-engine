@@ -26,6 +26,8 @@ mod canvas;
 #[cfg(not(target_arch = "wasm32"))]
 mod components;
 #[cfg(not(target_arch = "wasm32"))]
+mod collider_edit;
+#[cfg(not(target_arch = "wasm32"))]
 mod editing;
 #[cfg(not(target_arch = "wasm32"))]
 mod edits;

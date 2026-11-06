@@ -133,6 +133,7 @@ class EditorController(
             menu = ui.menu?.let { settings },
             sheet = when (val sheet = ui.sheet) {
                 is EditorSheet.Inspector -> inspector?.let { sheet.copy(inspector = inspectorUi(it)) }
+                is EditorSheet.Collider -> inspector?.let { sheet.copy(inspector = it) }
                 is EditorSheet.Behaviour -> if (inspector == null) null else sheet
                 is EditorSheet.Layers -> sheet.copy(objects = state.objects)
                 else -> sheet
@@ -224,6 +225,14 @@ class EditorController(
             is EditorEvent.AddBasic -> addObject("addBasic", event.kind)
             is EditorEvent.LayerTabChosen -> (ui.sheet as? EditorSheet.Layers)?.let { ui = ui.copy(sheet = it.copy(tab = event.tab)) }
             is EditorEvent.InspectorRow -> inspectorRow(event)
+            EditorEvent.OpenCollider -> openCollider()
+            is EditorEvent.ColliderPiece -> (ui.sheet as? EditorSheet.Collider)?.let { ui = ui.copy(sheet = it.copy(piece = event.index)) }
+            is EditorEvent.ColliderField -> nativeEdit("setField", "sindri.physics2d.collider", event.path, event.value, false)
+            EditorEvent.AddColliderPiece -> (ui.sheet as? EditorSheet.Collider)?.let { nativeEdit("colliderAdd", it.piece.toString()) }
+            EditorEvent.RemoveColliderPiece -> (ui.sheet as? EditorSheet.Collider)?.let { sheet ->
+                nativeEdit("colliderRemove", sheet.piece.toString())
+                (ui.sheet as? EditorSheet.Collider)?.let { ui = ui.copy(sheet = it.copy(piece = 0)) }
+            }
             EditorEvent.AddComponent -> (ui.sheet as? EditorSheet.Inspector)?.let { ui = ui.copy(sheet = it.copy(adding = !it.adding, full = true)) }
             is EditorEvent.ComponentChosen -> {
                 if (event.type == "sindri.sprite") showAssets(AssetTab.Sprites, true)
@@ -395,6 +404,13 @@ class EditorController(
         ui = ui.copy(sheet = EditorSheet.Inspector(inspectorUi(inspector)), menu = null)
     }
 
+    private fun openCollider() {
+        val inspector = state.inspector ?: return
+        val sheet = ui.sheet as? EditorSheet.Inspector
+        val image = sheet?.inspector?.sections?.flatMap { it.rows }?.filterIsInstance<RowUi.SpriteRef>()?.firstOrNull()?.image
+        ui = ui.copy(sheet = EditorSheet.Collider(inspector, image))
+    }
+
     /** The engine's selection as the design's inspector, remembering what each row edits. */
     private fun inspectorUi(inspector: Inspector): InspectorUi =
         InspectorPresenter.present(inspector, ui.sceneName, assetRoot, details).also { presented = it }.ui
@@ -509,6 +525,7 @@ class EditorController(
                 refresh()
             }
             binding is RowBinding.PickSprite -> showAssets(AssetTab.Sprites, true)
+            binding is RowBinding.OpenCollider -> openCollider()
             binding is RowBinding.NotWired -> notWired(binding.what)
             event.change == RowChange.Settled -> nativeEdit("settle")
             event.change is RowChange.To -> binding.edit(event.change)?.let { edit ->

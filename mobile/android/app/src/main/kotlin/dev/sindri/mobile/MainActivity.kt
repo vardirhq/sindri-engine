@@ -64,7 +64,7 @@ private fun SindriApp() {
     val currentId = (screen as? Screen.Editor)?.project ?: PROJECT
     val title = projects.firstOrNull { it.id == currentId }?.name ?: "Lamplighter"
     val sceneKey = if (currentId == PROJECT) "scene" else "scene:$currentId"
-    val controller = remember(currentId) { EditorController(NativeHost, assetRoot = "projects/$currentId/assets/", onSceneOpened = { name -> preferences.edit().putString(sceneKey, name).commit() }, projectTitle = title, images = { ImportedImages.list(base.resolve(currentId)) }) }
+    val controller = remember(currentId) { EditorController(NativeHost, assetRoot = base.resolve("$currentId/assets").absolutePath + "/", onSceneOpened = { name -> preferences.edit().putString(sceneKey, name).commit() }, projectTitle = title, images = { ImportedImages.list(base.resolve(currentId)) }) }
     LaunchedEffect(screen) {
         if (screen == Screen.Dashboard) projects = withContext(Dispatchers.IO) { LocalProjects.list(base) }
     }
