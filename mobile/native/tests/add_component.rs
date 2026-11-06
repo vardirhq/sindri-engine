@@ -89,10 +89,25 @@ fn sprite_component_can_be_added_and_changed_without_replacing_the_object() {
     let second = opened.assets.textures[1].0.as_str().to_owned();
     let mut editing = Editing::for_scene(&opened).unwrap();
     let entity = editing.add_basic(&mut opened.world, "empty").unwrap();
-    assert!(editing.inspector(&opened.world, &opened.extractor, &opened.assets.sheets)["addable"].as_array().unwrap().iter().any(|choice| choice["type"] == "sindri.sprite"));
+    assert!(
+        editing.inspector(&opened.world, &opened.extractor, &opened.assets.sheets)["addable"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|choice| choice["type"] == "sindri.sprite")
+    );
     assert!(editing.set_sprite(&mut opened, "missing.png").is_err());
     editing.set_sprite(&mut opened, &first).unwrap();
-    editing.set_field(&mut opened.world, &opened.extractor, "sindri.sprite", "layer", serde_json::json!(7), false).unwrap();
+    editing
+        .set_field(
+            &mut opened.world,
+            &opened.extractor,
+            "sindri.sprite",
+            "layer",
+            serde_json::json!(7),
+            false,
+        )
+        .unwrap();
     editing.set_sprite(&mut opened, &second).unwrap();
     let sprite = &opened.world.get(entity).unwrap().components["sindri.sprite"];
     assert_eq!(sprite["texture"].as_str(), Some(second.as_str()));
