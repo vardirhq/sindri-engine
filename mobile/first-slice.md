@@ -209,6 +209,7 @@ SINDRI_REQUIRE_GPU=1 cargo test -p sindri-mobile
 - **Images.** Android's document picker imports a PNG into the open project's textures. The Sprites tab lists project PNGs and tapping one creates an undoable sprite object. Other asset tabs, sprite swapping and slicing remain open; device verification remains open.
 - **Objects.** Layers shows the scene hierarchy, including screen UI and prefab children, with collapsible branches and parent selection. Reparenting is undoable; prefab-owned children cannot be restructured. Layer visibility is not wired. Screen UI selection is inspectable but has no canvas handles, and reparenting screen UI retains its local layout. Device verification remains open.
 - **Script finder.** Search all supported calls or browse engine categories. Object arguments default to this object and vectors to zero. Some argument types are still unavailable. Object pins can use this object, an Entity field, or a uniquely named scene object found by name; duplicate or unnamed scene objects are not offered. Device verification remains open.
+- **New scripts.** An object without a script can create and attach a new Decay behavior, initially with an empty update handler. Undo detaches it but retains the file; script selection and renaming remain open. Device verification remains open.
 - **Fields.** The inspector edits a component's top-level numbers and switches.
   Text, vectors, colors, enums and references are not shown yet, and a field
   authored as a whole number steps by whole numbers.

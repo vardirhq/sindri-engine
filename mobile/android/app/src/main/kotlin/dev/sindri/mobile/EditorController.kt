@@ -179,6 +179,14 @@ class EditorController(
             EditorEvent.ToggleDetent -> (ui.sheet as? EditorSheet.Inspector)?.let { ui = ui.copy(sheet = it.copy(full = !it.full)) }
             EditorEvent.OpenInspector -> openInspector()
             EditorEvent.OpenBehaviour -> openBehaviour()
+            EditorEvent.CreateScript -> {
+                error = native.command("createScript", "")
+                if (error == null) {
+                    if (native.state().unsaved) error = native.command("save")
+                    refresh()
+                    openBehaviour()
+                } else refresh()
+            }
             EditorEvent.BehaviourCode -> (ui.sheet as? EditorSheet.Behaviour)?.let { ui = ui.copy(sheet = it.copy(code = true)) }
             EditorEvent.BehaviourBlocks -> (ui.sheet as? EditorSheet.Behaviour)?.let { ui = ui.copy(sheet = it.copy(code = false)) }
             EditorEvent.DismissCoach -> ui = ui.copy(coach = null)
@@ -435,14 +443,12 @@ class EditorController(
         } else {
             BehaviourUi(
                 subject = subject,
-                templates = listOf(
-                    BehaviourTemplate(Sym.star, "Collectible", "Disappears and adds to the score", false),
-                    BehaviourTemplate(Sym.door_front, "Door to a scene", "Interact to go to another scene", false),
-                ),
+                templates = emptyList(),
                 rules = emptyList(),
                 codeFile = "No script yet",
                 code = emptyList(),
-                codeNote = "Adding a script from blocks is not wired yet.",
+                codeNote = "Create a script to add behavior to this object.",
+                canCreateScript = state.inspector?.component("sindri.script") == null,
             )
         }
 

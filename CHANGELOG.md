@@ -1029,6 +1029,8 @@ requests, commit history, and subsystem documentation rather than this file.
 
 ### Added
 
+- Create and attach a new visual Decay script to an object in the mobile editor.
+
 - Create and reopen separate blank 2D projects in the mobile editor.
 - Add supported 2D components to objects in the mobile inspector.
 - Import PNG images and add them to a mobile scene as sprite objects.

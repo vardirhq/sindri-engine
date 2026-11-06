@@ -47,6 +47,8 @@ mod play;
 mod recovery;
 mod renderer;
 #[cfg(not(target_arch = "wasm32"))]
+mod script_create;
+#[cfg(not(target_arch = "wasm32"))]
 mod selection_actions;
 #[cfg(not(target_arch = "wasm32"))]
 mod sprite_hits;

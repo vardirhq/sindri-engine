@@ -80,6 +80,12 @@ fun BoxScope.BehaviourSheet(sheet: EditorSheet.Behaviour, onEvent: (EditorEvent)
 
 @Composable
 private fun androidx.compose.foundation.layout.ColumnScope.BlocksView(behaviour: BehaviourUi, onEvent: (EditorEvent) -> Unit) = SheetBody(horizontal = 12.dp) {
+    if (behaviour.canCreateScript) {
+        Row(Modifier.fillMaxWidth().height(52.dp).clip(RoundedCornerShape(16.dp)).background(Forge.MetalDeep).clickable(role = Role.Button) { onEvent(EditorEvent.CreateScript) }, verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally)) {
+            Symbol(Sym.add, 20.sp, Forge.MetalBright)
+            Text("Create script", style = ForgeType.text(14.sp, FontWeight.Medium, Forge.MetalBright))
+        }
+    }
     if (behaviour.templates.isNotEmpty()) {
         Column {
             Text("Start from", style = ForgeType.text(12.sp, FontWeight.Medium, Forge.TextFaint), modifier = Modifier.padding(start = 4.dp, end = 4.dp, top = 2.dp, bottom = 8.dp))
@@ -106,7 +112,7 @@ private fun androidx.compose.foundation.layout.ColumnScope.BlocksView(behaviour:
         }
     }
     behaviour.rules.forEach { rule -> RuleCard(rule) }
-    Row(
+    if (behaviour.rules.isNotEmpty()) Row(
         Modifier
             .fillMaxWidth()
             .height(52.dp)

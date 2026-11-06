@@ -147,6 +147,7 @@ data class BehaviourUi(
     val codeNote: String,
     /** The selection's real script, as Decay blocks; the sample rules show without one. */
     val decay: DecayScript? = null,
+    val canCreateScript: Boolean = false,
 )
 
 data class BehaviourTemplate(val icon: Sym, val label: String, val description: String, val chosen: Boolean)
@@ -175,6 +176,7 @@ sealed interface EditorEvent {
     data object ToggleDetent : EditorEvent
     data object OpenInspector : EditorEvent
     data object OpenBehaviour : EditorEvent
+    data object CreateScript : EditorEvent
     data object DismissCoach : EditorEvent
     data object ToastUndo : EditorEvent
     data class Brush(val brush: dev.sindri.mobile.Brush) : EditorEvent
