@@ -87,7 +87,7 @@ sealed interface EditorSheet {
     data class Layers(val tab: LayerTab, val layers: List<LayerRow>, val objects: List<TreeRow>, val collapsed: Set<String> = emptySet(), val moving: String? = null) : EditorSheet
     data class Scenes(val scenes: List<SceneCard>, val doors: List<Pair<String, String>>) : EditorSheet
     data class Inspector(val inspector: InspectorUi, val full: Boolean = false, val live: Boolean = false, val adding: Boolean = false) : EditorSheet
-    data class Collider(val inspector: Inspector, val image: ProjectImage?, val piece: Int = 0) : EditorSheet
+    data class Collider(val inspector: dev.sindri.mobile.Inspector, val image: ProjectImage?, val piece: Int = 0) : EditorSheet
     data class Behaviour(val behaviour: BehaviourUi, val code: Boolean = false) : EditorSheet
     data class Review(val edits: List<RunEdit>) : EditorSheet
 }
