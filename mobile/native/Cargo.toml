@@ -30,7 +30,7 @@ sindri-scene = { path = "../../crates/sindri-scene" }
 wgpu.workspace = true
 
 [target.'cfg(target_os = "android")'.dependencies]
-jni = "0.21.1"
+jni = "0.22.4"
 ndk = { version = "0.9", default-features = false, features = ["nativewindow", "rwh_06"] }
 pollster.workspace = true
 raw-window-handle = "0.6.2"
