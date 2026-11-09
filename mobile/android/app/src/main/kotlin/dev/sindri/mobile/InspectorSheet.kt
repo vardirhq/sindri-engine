@@ -3,6 +3,9 @@ package dev.sindri.mobile
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -20,11 +23,16 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
@@ -42,6 +50,8 @@ import androidx.compose.ui.unit.sp
  */
 @Composable
 fun BoxScope.InspectorSheet(sheet: EditorSheet.Inspector, onEvent: (EditorEvent) -> Unit) {
+    var query by remember { mutableStateOf("") }
+    var category by remember { mutableStateOf("All") }
     val height = if (sheet.full) SheetHeight.Below(56.dp) else SheetHeight.Share(520.dp, 0.58f)
     SheetFrame(height, onHandle = { onEvent(EditorEvent.ToggleDetent) }) {
         val inspector = sheet.inspector
@@ -82,14 +92,28 @@ fun BoxScope.InspectorSheet(sheet: EditorSheet.Inspector, onEvent: (EditorEvent)
                     Symbol(Sym.add, 20.sp, Forge.TextMuted)
                     Text(if (sheet.adding) "Cancel" else "Add a component", style = ForgeType.text(14.sp, color = Forge.TextMuted))
                 }
-                if (sheet.adding) inspector.addable.forEach { choice ->
+                if (sheet.adding) {
+                    BasicTextField(value = query, onValueChange = { query = it }, singleLine = true, textStyle = ForgeType.text(14.sp), cursorBrush = SolidColor(Forge.Metal), modifier = Modifier.fillMaxWidth().background(Forge.Well, RoundedCornerShape(12.dp)).padding(14.dp).semantics { contentDescription = "Search components" }, decorationBox = { field -> Box { if (query.isEmpty()) Text("Search components", style = ForgeType.text(14.sp, color = Forge.TextFaint)); field() } })
+                    Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        listOf("All", "Rendering", "Physics", "Lighting").forEach { label -> Chip(label, category == label, { category = label }) }
+                    }
+                    val choices = inspector.addable.filter { (category == "All" || componentCategory(it.type) == category) && (it.display.contains(query, true) || it.type.contains(query, true)) }
+                    if (choices.isEmpty()) Text("No matching components", style = ForgeType.text(13.sp, color = Forge.TextMuted), modifier = Modifier.padding(12.dp))
+                    choices.forEach { choice ->
                     Row(Modifier.fillMaxWidth().height(52.dp).card(radius = 12.dp).clickable { onEvent(EditorEvent.ComponentChosen(choice.type)) }.padding(horizontal = 16.dp), verticalAlignment = Alignment.CenterVertically) {
                         Text(choice.display, style = ForgeType.text(14.sp, color = Forge.Text))
+                    }
                     }
                 }
             }
         }
     }
+}
+
+private fun componentCategory(type: String): String = when {
+    type.startsWith("sindri.physics") -> "Physics"
+    type.startsWith("sindri.light") || type == "sindri.shadow2d" -> "Lighting"
+    else -> "Rendering"
 }
 
 @Composable

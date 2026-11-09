@@ -138,7 +138,7 @@ object InspectorPresenter {
         val layer = sprite.number("layer")?.toLong() ?: 0
         val detail = listOfNotNull(region?.region, "layer $layer").joinToString(" · ")
         val image = region?.rect?.takeIf { it.size == 4 }?.let { ProjectImage(assetRoot + region.texture, it) }
-        section.add(RowUi.SpriteRef("Sprite", null, 0, file, detail, image), RowBinding.NotWired("Swapping a sprite"))
+        section.add(RowUi.SpriteRef("Sprite", null, 0, file, detail, image), RowBinding.PickSprite)
         section.add(RowUi.Toggle("Mirror", inspector.scale.getOrElse(0) { 1.0 } < 0), RowBinding.PlaceSwitch("mirror"))
         section.add(RowUi.Stepper("Draw layer", "", Forge.TextFaint, layer.toString()), RowBinding.FieldStep(SPRITE, "layer", layer.toDouble(), 1.0, whole = true))
         return section
@@ -146,6 +146,7 @@ object InspectorPresenter {
 
     private fun collider(collider: Component, tile: Double): SectionBuilder {
         val section = SectionBuilder(Sym.crop_square, "Collider 2D")
+        section.add(RowUi.More("Edit collider shapes", false), RowBinding.OpenCollider)
         val pieces = (collider.value("pieces") as? List<*>)?.size ?: 0
         val at = if (pieces > 0) "pieces.0." else ""
         val shape = collider.value("${at}shape.shape") as? String ?: return section
@@ -300,6 +301,10 @@ data class NativeEdit(val command: String, val arguments: List<Any?>)
  */
 sealed interface RowBinding {
     fun edit(change: RowChange): NativeEdit?
+
+    data object OpenCollider : RowBinding { override fun edit(change: RowChange): NativeEdit? = null }
+
+    data object PickSprite : RowBinding { override fun edit(change: RowChange): NativeEdit? = null }
 
     data class PlaceStep(val what: String, val current: Double, val step: Double) : RowBinding {
         override fun edit(change: RowChange) = when (change) {

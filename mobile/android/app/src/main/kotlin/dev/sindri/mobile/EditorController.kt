@@ -133,6 +133,7 @@ class EditorController(
             menu = ui.menu?.let { settings },
             sheet = when (val sheet = ui.sheet) {
                 is EditorSheet.Inspector -> inspector?.let { sheet.copy(inspector = inspectorUi(it)) }
+                is EditorSheet.Collider -> inspector?.let { sheet.copy(inspector = it) }
                 is EditorSheet.Behaviour -> if (inspector == null) null else sheet
                 is EditorSheet.Layers -> sheet.copy(objects = state.objects)
                 else -> sheet
@@ -195,8 +196,13 @@ class EditorController(
             is EditorEvent.BrushSize -> ui.painting?.let { ui = ui.copy(painting = it.copy(size = event.size)) }
             EditorEvent.ToggleMoveView -> ui.painting?.let { ui = ui.copy(painting = it.copy(moveView = !it.moveView)) }
             EditorEvent.DonePainting -> ui = ui.copy(painting = null)
-            is EditorEvent.AssetTabChosen -> showAssets(event.tab)
-            is EditorEvent.AssetChosen -> if ((ui.sheet as? EditorSheet.Assets)?.tab == AssetTab.Sprites) addObject("addSprite", event.item.path)
+            is EditorEvent.AssetTabChosen -> showAssets(event.tab, (ui.sheet as? EditorSheet.Assets)?.pickingSprite == true)
+            is EditorEvent.AssetChosen -> if ((ui.sheet as? EditorSheet.Assets)?.tab == AssetTab.Sprites) {
+                if ((ui.sheet as? EditorSheet.Assets)?.pickingSprite == true) {
+                    nativeEdit("setSprite", event.item.path)
+                    openInspector()
+                } else addObject("addSprite", event.item.path)
+            }
             EditorEvent.OpenImport -> ui = ui.copy(sheet = EditorSheet.Import(SampleEditor.importFiles))
             EditorEvent.BackToAssets -> ui = ui.copy(sheet = EditorSheet.Assets(AssetTab.Prefabs, SampleEditor.assets))
             is EditorEvent.TreeRowTapped -> event.row.id?.let { id ->
@@ -219,10 +225,21 @@ class EditorController(
             is EditorEvent.AddBasic -> addObject("addBasic", event.kind)
             is EditorEvent.LayerTabChosen -> (ui.sheet as? EditorSheet.Layers)?.let { ui = ui.copy(sheet = it.copy(tab = event.tab)) }
             is EditorEvent.InspectorRow -> inspectorRow(event)
+            EditorEvent.OpenCollider -> openCollider()
+            is EditorEvent.ColliderPiece -> (ui.sheet as? EditorSheet.Collider)?.let { ui = ui.copy(sheet = it.copy(piece = event.index)) }
+            is EditorEvent.ColliderField -> nativeEdit("setField", "sindri.physics2d.collider", event.path, event.value, false)
+            EditorEvent.AddColliderPiece -> (ui.sheet as? EditorSheet.Collider)?.let { nativeEdit("colliderAdd", it.piece.toString()) }
+            EditorEvent.RemoveColliderPiece -> (ui.sheet as? EditorSheet.Collider)?.let { sheet ->
+                nativeEdit("colliderRemove", sheet.piece.toString())
+                (ui.sheet as? EditorSheet.Collider)?.let { ui = ui.copy(sheet = it.copy(piece = 0)) }
+            }
             EditorEvent.AddComponent -> (ui.sheet as? EditorSheet.Inspector)?.let { ui = ui.copy(sheet = it.copy(adding = !it.adding, full = true)) }
             is EditorEvent.ComponentChosen -> {
-                nativeEdit("addComponent", event.type)
-                (ui.sheet as? EditorSheet.Inspector)?.let { ui = ui.copy(sheet = it.copy(adding = false)) }
+                if (event.type == "sindri.sprite") showAssets(AssetTab.Sprites, true)
+                else {
+                    nativeEdit("addComponent", event.type)
+                    (ui.sheet as? EditorSheet.Inspector)?.let { ui = ui.copy(sheet = it.copy(adding = false)) }
+                }
             }
             is EditorEvent.GizmoTaken -> {
                 error = native.command("gizmoPress", event.id, event.x, event.y)
@@ -366,12 +383,12 @@ class EditorController(
         refresh()
     }
 
-    fun showAssets(tab: AssetTab = AssetTab.Sprites) {
-        ui = ui.copy(sheet = EditorSheet.Assets(tab, if (tab == AssetTab.Sprites) images() else emptyList()), menu = null)
+    fun showAssets(tab: AssetTab = AssetTab.Sprites, pickingSprite: Boolean = false) {
+        ui = ui.copy(sheet = EditorSheet.Assets(tab, if (tab == AssetTab.Sprites) images() else emptyList(), pickingSprite), menu = null)
     }
 
     fun importResult(message: String?) {
-        showAssets()
+        showAssets(pickingSprite = (ui.sheet as? EditorSheet.Assets)?.pickingSprite == true)
         if (message != null) ui = ui.copy(toast = ToastUi(message))
         refresh()
     }
@@ -385,6 +402,13 @@ class EditorController(
         if (state.selectionCount > 1) return notWired("Editing multiple objects")
         val inspector = state.inspector ?: return
         ui = ui.copy(sheet = EditorSheet.Inspector(inspectorUi(inspector)), menu = null)
+    }
+
+    private fun openCollider() {
+        val inspector = state.inspector ?: return
+        val sheet = ui.sheet as? EditorSheet.Inspector
+        val image = sheet?.inspector?.sections?.flatMap { it.rows }?.filterIsInstance<RowUi.SpriteRef>()?.firstOrNull()?.image
+        ui = ui.copy(sheet = EditorSheet.Collider(inspector, image))
     }
 
     /** The engine's selection as the design's inspector, remembering what each row edits. */
@@ -500,6 +524,8 @@ class EditorController(
                 details = !details
                 refresh()
             }
+            binding is RowBinding.PickSprite -> showAssets(AssetTab.Sprites, true)
+            binding is RowBinding.OpenCollider -> openCollider()
             binding is RowBinding.NotWired -> notWired(binding.what)
             event.change == RowChange.Settled -> nativeEdit("settle")
             event.change is RowChange.To -> binding.edit(event.change)?.let { edit ->

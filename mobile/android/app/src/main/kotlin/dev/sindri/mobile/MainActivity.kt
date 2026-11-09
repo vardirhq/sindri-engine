@@ -64,7 +64,7 @@ private fun SindriApp() {
     val currentId = (screen as? Screen.Editor)?.project ?: PROJECT
     val title = projects.firstOrNull { it.id == currentId }?.name ?: "Lamplighter"
     val sceneKey = if (currentId == PROJECT) "scene" else "scene:$currentId"
-    val controller = remember(currentId) { EditorController(NativeHost, assetRoot = "projects/$currentId/assets/", onSceneOpened = { name -> preferences.edit().putString(sceneKey, name).commit() }, projectTitle = title, images = { ImportedImages.list(base.resolve(currentId)) }) }
+    val controller = remember(currentId) { EditorController(NativeHost, assetRoot = base.resolve("$currentId/assets").absolutePath + "/", onSceneOpened = { name -> preferences.edit().putString(sceneKey, name).commit() }, projectTitle = title, images = { ImportedImages.list(base.resolve(currentId)) }) }
     LaunchedEffect(screen) {
         if (screen == Screen.Dashboard) projects = withContext(Dispatchers.IO) { LocalProjects.list(base) }
     }
@@ -124,7 +124,7 @@ private fun EditorRoute(controller: EditorController, projectId: String, localPr
             imported.onSuccess { file ->
                 val failure = NativeBridge.command("reloadAssets")
                 if (failure != null) file.delete()
-                controller.importResult(failure ?: "Image imported. Tap it to add a sprite.")
+                controller.importResult(failure ?: "Image imported. Tap it to use it.")
             }.onFailure { controller.importResult(it.message ?: "Could not import the image.") }
         }
     }
