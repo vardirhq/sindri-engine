@@ -288,18 +288,19 @@ def wick(fresh=True):
         # and the light is its flame, so what it lights and the shadows it casts start at the
         # lantern: a beam turned to the way he faces, so the dark is behind him, and a small
         # round halo that keeps what is at his heels from being black. The lantern carries its
-        # own drawing, at a size; its particles and two lights still hang from it, as an
-        # object holds one of each kind of part.
+        # own drawing, at a size, and its two emitters as parts: embers that lift off the
+        # flame, and a faint glow (`#glow`) that swells and fades round it. Its two lights
+        # still hang from it, each with the script that flickers it, as an object runs one
+        # script.
         entity('wick-lantern', 'wick-lantern', at(*LANTERN_START), 'wick', **{
             'sindri.sprite': {'texture': 'textures/lantern.png', 'layer': 5, 'tint': [1.0, 1.0, 1.0, 1.0],
-                              'size': [0.6, 0.8]}}),
-        # Embers that lift off the flame, and a faint glow that swells and fades round it.
-        entity('wick-embers', 'wick-embers', at(0, 0.05, 0.001), 'wick-lantern', **{'sindri.particles': motes(
-            16.0, 1.3, 0.6, [[1.0, 0.8, 0.4, 0.0], [1.0, 0.65, 0.22, 1.0], [0.9, 0.3, 0.08, 0.0]], 0.2, 0.03,
-            spread=60.0, shape_size=[0.25, 0.1], gravity=[0.0, 0.9], drag=0.4, layer=6)}),
-        entity('wick-glow', 'wick-glow', at(0, 0, -0.001), 'wick-lantern', **{'sindri.particles': motes(
-            2.5, 1.4, 0.0, [[1.0, 0.7, 0.3, 0.0], [1.0, 0.7, 0.3, 0.36], [1.0, 0.6, 0.25, 0.0]], 1.4, 2.4,
-            spread=360.0, shape_size=[0.1, 0.1], gravity=[0.0, 0.0], drag=1.0, layer=4)}),
+                              'size': [0.6, 0.8]},
+            'sindri.particles': motes(
+                16.0, 1.3, 0.6, [[1.0, 0.8, 0.4, 0.0], [1.0, 0.65, 0.22, 1.0], [0.9, 0.3, 0.08, 0.0]], 0.2, 0.03,
+                spread=60.0, offset=[0.0, 0.05], shape_size=[0.25, 0.1], gravity=[0.0, 0.9], drag=0.4, layer=6),
+            'sindri.particles#glow': motes(
+                2.5, 1.4, 0.0, [[1.0, 0.7, 0.3, 0.0], [1.0, 0.7, 0.3, 0.36], [1.0, 0.6, 0.25, 0.0]], 1.4, 2.4,
+                spread=360.0, shape_size=[0.1, 0.1], gravity=[0.0, 0.0], drag=1.0, layer=4)}),
         entity('wick-light', 'wick-light', at(0, 0, 0.1), 'wick-lantern', **{
             'sindri.light2d': {'enabled': True, 'color': [1.0, 0.76, 0.42, 1.0], 'intensity': 1.5,
                                'radius': 10.0, 'falloff': 1.3, 'height': 1.0, 'shadows': True,

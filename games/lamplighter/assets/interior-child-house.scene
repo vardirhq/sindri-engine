@@ -1932,32 +1932,7 @@
             0.6,
             0.8
           ]
-        }
-      }
-    },
-    {
-      "id": "wick-embers",
-      "name": "wick-embers",
-      "transform_3d": {
-        "position": [
-          0,
-          0.05,
-          0.001
-        ],
-        "rotation": [
-          0,
-          0,
-          0,
-          1
-        ],
-        "scale": [
-          1.0,
-          1.0,
-          1
-        ]
-      },
-      "parent": "wick-lantern",
-      "components": {
+        },
         "sindri.particles": {
           "playing": true,
           "texture": "textures/mote.png",
@@ -1972,7 +1947,7 @@
           "shape": "circle",
           "offset": [
             0.0,
-            0.0
+            0.05
           ],
           "shape_size": [
             0.25,
@@ -2009,33 +1984,8 @@
           "spin": 0.0,
           "space": "world",
           "layer": 6
-        }
-      }
-    },
-    {
-      "id": "wick-glow",
-      "name": "wick-glow",
-      "transform_3d": {
-        "position": [
-          0,
-          0,
-          -0.001
-        ],
-        "rotation": [
-          0,
-          0,
-          0,
-          1
-        ],
-        "scale": [
-          1.0,
-          1.0,
-          1
-        ]
-      },
-      "parent": "wick-lantern",
-      "components": {
-        "sindri.particles": {
+        },
+        "sindri.particles#glow": {
           "playing": true,
           "texture": "textures/mote.png",
           "rate": 2.5,
