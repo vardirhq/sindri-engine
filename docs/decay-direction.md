@@ -313,3 +313,42 @@ The old spelling named the engine's storage, not the language's, so it described
 Any of those starts a design for `int` (literals, promotion, overflow, the host boundary, indexing), not a silent conversion.
 
 **Native and browser must agree.** The runtime's arithmetic is IEEE-754 `f64` (`+ - * / %` and `sqrt` are exactly rounded), so it gives the same bits on every target. A math function that is not exactly rounded (`sin`, `pow` and the like) must come from one implementation on every target, not from the platform's library, before it is offered to scripts. A test running the same arithmetic natively and on `wasm32-unknown-unknown` is the open item that proves this.
+
+# Named parts
+
+**Decided 2026-11-12.** An object can hold several components of one kind as
+named parts (`sindri.light2d` and `sindri.light2d#halo`; `docs/object-parts.md`).
+Scripts reach them this way:
+
+```decay
+// The unnamed part, unchanged: every existing script keeps working.
+this.light2d.intensity = 1.5;
+
+// A named part is looked up, typed, and may be missing.
+let halo = this.entity.light2d("halo");
+if halo != null {
+    halo.radius = 4.6;
+}
+```
+
+- `light2d("halo")` answers a `Light2d?`. The kind is checked when the script
+  compiles; the name is checked when it runs, as `World.find` checks a name. The
+  same call exists for each kind a part can be: `sprite("glow")`,
+  `particles("embers")`.
+- **A script that is a part sees its own name first.** A script attached as
+  `sindri.script#halo` reads `this.light2d` as `light2d#halo` when that part
+  exists, and as the unnamed part otherwise. So one script written for "my
+  light" serves a lantern's beam and its halo, attached twice.
+- Contacts and sensor events name the collider piece they involve, by its
+  `name` (`contact.piece == "sword"`).
+
+Rejected: a part as a member (`this.light2d.halo.radius`), which competes with
+the component's own field names and reads as a field; and a declared part
+(`@part let halo: Light2d = "halo"`), a new kind of declaration that does not
+by itself let one object run two scripts.
+
+The decision is recorded here before it is built, as the isolation rule above
+asks. The call form needs the analyzer to accept a call partway through a
+host path and a `Light2d` value type; several scripts on one object needs the
+host to key running scripts by object and part rather than by object. Neither
+reaches into `decay/` from a `sindri-*` crate.

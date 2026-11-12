@@ -17,6 +17,25 @@ use sindri_core::{
 use super::pool::{Effects2d, Fleck};
 use super::{EmissionShape, ParticleSpace, ParticlesComponent};
 
+/// Which emitter threw a particle: its entity, and which of that entity's
+/// particle parts. An entity's unnamed `sindri.particles` and a named
+/// `sindri.particles#glow` are two emitters with state of their own.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct EmitterId {
+    pub entity: EntityId,
+    /// 0 for the unnamed part, otherwise one more than its name's place in
+    /// the pool's list of part names.
+    part: u16,
+}
+
+impl EmitterId {
+    /// The entity's own, unnamed emitter.
+    #[must_use]
+    pub const fn of(entity: EntityId) -> Self {
+        Self { entity, part: 0 }
+    }
+}
+
 /// What an emitter carries between steps.
 #[derive(Clone, Copy, Debug, Default)]
 pub(crate) struct EmitterState {
@@ -59,9 +78,14 @@ impl Effects2d {
     ) -> Result<Vec<String>, ComponentRegistryError> {
         let seconds = delta.as_secs_f32();
         let mut problems = Vec::new();
-        let mut emitters = components.query::<ParticlesComponent>(world)?;
-        emitters.retain(|(entity, _)| wanted(*entity));
-        for (entity, particles) in &emitters {
+        let mut parts = components.query_parts::<ParticlesComponent>(world)?;
+        parts.retain(|(entity, _, _)| wanted(*entity));
+        let emitters: Vec<(EmitterId, ParticlesComponent)> = parts
+            .into_iter()
+            .map(|(entity, part, particles)| (self.emitter_id(entity, part.as_deref()), particles))
+            .collect();
+        for (emitter, particles) in &emitters {
+            let entity = &emitter.entity;
             if let Err(error) = particles.validate() {
                 problems.push(format!("{}: {error}", ParticlesComponent::TYPE_NAME));
                 continue;
@@ -71,28 +95,28 @@ impl Effects2d {
                 .unwrap_or_default()
                 .position_2d();
             let at = [at[0], at[1]];
-            let state = self.emitters.entry(*entity).or_default();
+            let state = self.emitters.entry(*emitter).or_default();
             let moved = state.last.map(|last| [at[0] - last[0], at[1] - last[1]]);
             state.last = Some(at);
             if particles.space == ParticleSpace::Local
                 && let Some(moved) = moved.filter(|moved| moved[0].abs() + moved[1].abs() > 0.0)
             {
-                self.follow(*entity, moved);
+                self.follow(*emitter, moved);
             }
             if !particles.playing || seconds <= 0.0 {
                 continue;
             }
-            let state = self.emitters.entry(*entity).or_default();
+            let state = self.emitters.entry(*emitter).or_default();
             state.carry += particles.rate * seconds;
             let whole = state.carry.floor();
             state.carry -= whole;
             #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
-            self.emit_now(*entity, particles, at, whole as u32);
+            self.emit_from(*emitter, particles, at, whole as u32);
         }
         // An emitter that is gone, and whose particles are too, is forgotten.
-        let present: Vec<EntityId> = emitters.iter().map(|(entity, _)| *entity).collect();
+        let present: Vec<EmitterId> = emitters.iter().map(|(emitter, _)| *emitter).collect();
         self.emitters
-            .retain(|entity, state| state.live > 0 || present.contains(entity));
+            .retain(|emitter, state| state.live > 0 || present.contains(emitter));
         Ok(problems)
     }
 
@@ -101,6 +125,17 @@ impl Effects2d {
     pub fn emit_now(
         &mut self,
         entity: EntityId,
+        particles: &ParticlesComponent,
+        at: [f32; 2],
+        count: u32,
+    ) -> usize {
+        self.emit_from(EmitterId::of(entity), particles, at, count)
+    }
+
+    /// [`Self::emit_now`] for any emitter, a named part's included.
+    fn emit_from(
+        &mut self,
+        entity: EmitterId,
         particles: &ParticlesComponent,
         at: [f32; 2],
         count: u32,
@@ -128,7 +163,7 @@ impl Effects2d {
         at: [f32; 2],
         texture: usize,
         ramp: usize,
-        entity: EntityId,
+        entity: EmitterId,
     ) -> Fleck {
         let offset = self.offset(particles.shape, particles.shape_size);
         let angle = particles
@@ -196,7 +231,7 @@ impl Effects2d {
     }
 
     /// Moves an emitter's particles by as far as it moved.
-    fn follow(&mut self, entity: EntityId, moved: [f32; 2]) {
+    fn follow(&mut self, entity: EmitterId, moved: [f32; 2]) {
         for fleck in self.flecks_mut() {
             if fleck.emitter == Some(entity) {
                 fleck.position[0] += moved[0];
@@ -216,7 +251,39 @@ impl Effects2d {
     /// How many of an emitter's particles are alive.
     #[must_use]
     pub fn emitter_live(&self, entity: EntityId) -> u32 {
-        self.emitters.get(&entity).map_or(0, |state| state.live)
+        self.emitters
+            .get(&EmitterId::of(entity))
+            .map_or(0, |state| state.live)
+    }
+
+    /// How many of a named emitter part's particles are alive.
+    #[must_use]
+    pub fn part_live(&self, entity: EntityId, part: &str) -> u32 {
+        self.part_names
+            .iter()
+            .position(|name| name == part)
+            .and_then(|index| u16::try_from(index + 1).ok())
+            .and_then(|part| self.emitters.get(&EmitterId { entity, part }))
+            .map_or(0, |state| state.live)
+    }
+
+    /// The emitter a part of `entity` is, its name learned the first time.
+    fn emitter_id(&mut self, entity: EntityId, part: Option<&str>) -> EmitterId {
+        let Some(name) = part else {
+            return EmitterId::of(entity);
+        };
+        let index = self
+            .part_names
+            .iter()
+            .position(|known| known == name)
+            .unwrap_or_else(|| {
+                self.part_names.push(name.to_owned());
+                self.part_names.len() - 1
+            });
+        // A scene with more than sixty-five thousand differently named
+        // emitter parts shares the last number among the rest.
+        let part = u16::try_from(index + 1).unwrap_or(u16::MAX);
+        EmitterId { entity, part }
     }
 }
 

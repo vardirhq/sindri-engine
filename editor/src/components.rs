@@ -397,6 +397,8 @@ const KNOWN: &[Known] = &[
 ];
 
 fn known(type_name: &str) -> Option<&'static Known> {
+    // A named part (`sindri.light2d#halo`) is listed as its type is.
+    let type_name = sindri_core::split_part(type_name).0;
     KNOWN.iter().find(|known| known.type_name == type_name)
 }
 

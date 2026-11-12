@@ -74,7 +74,7 @@ impl ComponentSchemaRegistry {
     /// whole component, the closest of those winning.
     #[must_use]
     pub fn apply_mode(&self, type_name: &str, path: &str) -> ApplyMode {
-        let Some(registration) = self.registrations.get(type_name) else {
+        let Some(registration) = self.registration(type_name) else {
             return ApplyMode::Instant;
         };
         let segments = if path.is_empty() {
@@ -102,8 +102,7 @@ impl ComponentSchemaRegistry {
     /// Every apply mode a component declares, in registration order, for
     /// generated documents.
     pub fn apply_modes(&self, type_name: &str) -> impl Iterator<Item = (&str, ApplyMode)> {
-        self.registrations
-            .get(type_name)
+        self.registration(type_name)
             .into_iter()
             .flat_map(|registration| registration.apply.iter())
             .map(|(path, mode)| (path.as_str(), *mode))

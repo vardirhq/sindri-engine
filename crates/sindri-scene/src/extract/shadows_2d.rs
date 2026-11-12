@@ -82,7 +82,7 @@ impl SceneExtractor {
             return Ok(None);
         }
         let mut lights = Vec::new();
-        for (entity, light) in self.components.query::<Light2dComponent>(world)? {
+        for (entity, _, light) in self.components.query_parts::<Light2dComponent>(world)? {
             let Ok(light) = light.validate() else {
                 continue;
             };

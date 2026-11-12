@@ -3,7 +3,7 @@
 use std::collections::BTreeMap;
 use std::time::Duration;
 
-use sindri_core::{EntityId, Rng};
+use sindri_core::Rng;
 
 use super::EffectBurstComponent;
 
@@ -37,7 +37,7 @@ pub struct Fleck {
     /// Which of the pool's color ramps it draws through, instead of `tint`.
     pub ramp: Option<usize>,
     /// The emitter that threw it, if one did rather than a burst.
-    pub emitter: Option<EntityId>,
+    pub emitter: Option<super::EmitterId>,
 }
 
 impl Fleck {
@@ -97,7 +97,10 @@ pub struct Effects2d {
     /// The emitters' color ramps, found the way textures are.
     pub(super) ramps: Vec<Vec<[f32; 4]>>,
     /// What each emitter carries between steps.
-    pub(super) emitters: BTreeMap<EntityId, super::emitter::EmitterState>,
+    pub(super) emitters: BTreeMap<super::EmitterId, super::emitter::EmitterState>,
+    /// The names of named emitter parts, so an [`super::EmitterId`] carries a
+    /// number rather than a string and a fleck stays cheap to copy.
+    pub(super) part_names: Vec<String>,
     /// How many flecks were dropped for want of room, since the last look.
     overflowed: usize,
 }
@@ -130,6 +133,7 @@ impl Effects2d {
             textures: Vec::new(),
             ramps: Vec::new(),
             emitters: BTreeMap::new(),
+            part_names: Vec::new(),
             overflowed: 0,
         }
     }

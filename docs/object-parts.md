@@ -1,8 +1,8 @@
 # Object parts and the object workspace
 
-Status: proposal. Steps 1 to 3 below are built: sprite `size` and `offset`,
-light `offset`, and the mobile object workspace for a scene object or a
-prefab. The rest is not.
+Status: steps 1 to 3 below, and the first part of step 4, are built: sprite
+`size` and `offset`, light `offset`, the mobile object workspace for a scene
+object or a prefab, and named parts for lights and particles. The rest is not.
 
 ## The problem
 
@@ -70,23 +70,34 @@ emitters. Three shapes are possible:
 | **Named instances in the component map** (`"sindri.light2d"`, `"sindri.light2d#halo"`) | Existing payloads unchanged; a second part is a second key | Queries return each instance; schema lookup reads the type before `#` |
 | Children the editor shows as parts | Unchanged | Nothing, and nothing gets simpler: the objects are still there |
 
-**Recommended: named instances.** The unnamed key stays the object's first
-part, so every scene, script and test keeps working. A second light is
+**Chosen: named instances.** The unnamed key stays the object's first part,
+so every scene, script and test keeps working. A second light is
 `sindri.light2d#halo`. A file from a newer editor still opens in an older one,
-which keeps an unknown component key as an unknown payload. What changes:
+which keeps an unknown component key as an unknown payload. Built:
 
-- `ComponentSchemaRegistry` resolves `type#name` to `type`'s schema, and
-  `query::<T>` yields every instance, each with its name.
-- Extraction draws each instance; nothing about a light or an emitter assumes
-  it is the only one on its object.
-- Decay keeps `this.entity.light2d` for the unnamed part and needs a way to
-  name another. The syntax is an open question for `docs/decay-direction.md`,
-  and nothing is added until it is settled there.
+- Every `ComponentSchemaRegistry` lookup resolves `type#name` to `type`'s
+  schema, so a part is validated, described and given meanings as its type
+  is. A part's name is letters, digits, `-` and `_`; anything else is refused
+  when the scene is checked. `query::<T>` still means the unnamed part, the
+  entity's own; `query_parts::<T>` answers with every part and its name.
+- Lights (drawing, cast shadows, `Lighting.level`) and particle emitters read
+  every part. An emitter part keeps its own state (`EmitterId` is the entity
+  and an interned part number).
+- Desktop's inspector labels a part by its type and name ("Light2d · halo");
+  the phone's inspector edits it under its own key, and the object workspace
+  lists each named light and emitter as a part.
 - Saving stays canonical: keys sort, so `sindri.light2d#halo` follows
   `sindri.light2d`.
+- Lamplighter's lantern carries its embers and glow as `sindri.particles` and
+  `sindri.particles#glow`, so Wick is four objects: the body, the lantern, and
+  the lantern's two lights.
 
-With that, the lantern is one object holding its art, two emitters and two
-lights, and Wick is two: the body and the lantern that moves.
+Decay's syntax is decided in `docs/decay-direction.md` ("Named parts"):
+`this.entity.light2d("halo")` looks a part up, and a script attached as a part
+(`sindri.script#halo`) reads its own name's parts first. Not built yet, so the
+lantern's two lights, each flickered by its own `Flame` script, and the
+glooms' emitters, which `gloom.decay` finds by name, stay objects of their own
+until it is. Desktop's Scene view draws no gizmo for a named light.
 
 ### Colliders
 
@@ -144,8 +155,13 @@ things, not parts.
    instances in the open scene follow through `sindri_authoring::prefab::follow`,
    keeping their overrides (`mobile/native/src/prefab_edit.rs`). Only the
    prefab's root is shown.
-4. Named component instances in the engine and both editors; Decay access once
-   `docs/decay-direction.md` settles the syntax. Collapse Lamplighter's lantern.
+4. Named component instances.
+   - **4a, done:** the key, the registry, lights and particles, both editors,
+     and the lantern's emitters.
+   - **4b:** `entity.light2d("halo")` and its kin in Decay, then the glooms'
+     emitters.
+   - **4c:** several scripts on one object, each a part reading its own
+     name's parts first; then the lantern's lights, so Wick is two objects.
 5. Collider piece names, reported by contacts and sensor events.
 6. The same part handles in desktop's Scene view, so both editors agree.
 

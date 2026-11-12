@@ -21,5 +21,6 @@ mod particles;
 mod pool;
 
 pub use burst::EffectBurstComponent;
+pub use emitter::EmitterId;
 pub use particles::{EmissionShape, ParticleSpace, ParticlesComponent, ParticlesError};
 pub use pool::{Effects2d, Fleck};
