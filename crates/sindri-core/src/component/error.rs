@@ -6,6 +6,12 @@ use crate::{SceneEntityId, SceneError};
 
 #[derive(Debug, Error)]
 pub enum ComponentRegistryError {
+    #[error(
+        "entity '{}': component key '{key}' names a part with something other than \
+         letters, digits, '-' and '_'",
+        entity.as_str()
+    )]
+    InvalidPartName { entity: SceneEntityId, key: String },
     #[error("component type name '{0}' is invalid")]
     InvalidTypeName(&'static str),
     #[error("component display names cannot be empty")]

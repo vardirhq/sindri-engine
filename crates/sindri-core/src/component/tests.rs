@@ -317,3 +317,57 @@ fn a_key_reference_to_a_missing_list_is_refused() {
         "a field that is not a key has nothing referring to it"
     );
 }
+
+#[test]
+fn named_parts_are_read_by_their_types_schema() {
+    let mut registry = ComponentSchemaRegistry::default();
+    registry.register::<Health>("Health").unwrap();
+    let mut scene = health_scene(json!({ "current": 8, "maximum": 10 }));
+    scene.entities[0].components.insert(
+        "game.health#shield".to_owned(),
+        json!({ "current": 3, "maximum": 5 }),
+    );
+    registry
+        .validate_scene(&scene, UnknownComponentPolicy::Reject)
+        .expect("a named part of a registered type is known");
+    assert_eq!(
+        registry
+            .metadata("game.health#shield")
+            .map(|meta| meta.display_name.as_str()),
+        Some("Health")
+    );
+    let loaded = World::from_scene(&scene).unwrap();
+
+    // `query` still means the entity's own, unnamed part.
+    let first = registry.query::<Health>(&loaded.world).unwrap();
+    assert_eq!(first.len(), 1);
+    assert_eq!(first[0].1.current, 8);
+    // `query_parts` answers with every part, named.
+    let parts = registry.query_parts::<Health>(&loaded.world).unwrap();
+    let named: Vec<(Option<&str>, u16)> = parts
+        .iter()
+        .map(|(_, part, health)| (part.as_deref(), health.current))
+        .collect();
+    assert_eq!(named, [(None, 8), (Some("shield"), 3)]);
+
+    // A part's payload is checked against its type.
+    let mut wrong = scene.clone();
+    wrong.entities[0].components.insert(
+        "game.health#shield".to_owned(),
+        json!({ "current": "full" }),
+    );
+    assert!(matches!(
+        registry.validate_scene(&wrong, UnknownComponentPolicy::Preserve),
+        Err(ComponentRegistryError::InvalidPayload { .. })
+    ));
+    // And a part's name is a plain word.
+    let mut badly_named = scene;
+    badly_named.entities[0].components.insert(
+        "game.health#two words".to_owned(),
+        json!({ "current": 1, "maximum": 1 }),
+    );
+    assert!(matches!(
+        registry.validate_scene(&badly_named, UnknownComponentPolicy::Preserve),
+        Err(ComponentRegistryError::InvalidPartName { .. })
+    ));
+}

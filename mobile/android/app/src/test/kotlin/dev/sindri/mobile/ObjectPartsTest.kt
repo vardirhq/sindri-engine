@@ -92,4 +92,24 @@ class ObjectPartsTest {
         val flat = Inspector("Rock", null, listOf(component("sindri.shadow2d", "contact_size" to listOf(0.0, 0.0))))
         assertTrue(ObjectParts.of(flat).isEmpty())
     }
+
+    @Test
+    fun named_lights_and_emitters_are_parts_of_their_own() {
+        val lantern = Inspector(
+            "Lantern",
+            null,
+            listOf(
+                component("sindri.light2d", "radius" to 10.0),
+                component("sindri.light2d#halo", "radius" to 4.6, "offset" to listOf(0.0, 0.5)),
+                component("sindri.particles", "shape" to "box", "shape_size" to listOf(0.25, 0.1)),
+                component("sindri.particles#glow", "shape" to "circle", "shape_size" to listOf(0.1, 0.1)),
+            ),
+        )
+        val parts = ObjectParts.of(lantern)
+        assertEquals(listOf("particles", "particles#glow", "light", "light#halo"), parts.map { it.key })
+        assertEquals("Light · halo", parts.first { it.key == "light#halo" }.label)
+        val halo = parts.first { it.key == "light#halo" }
+        // Its edits are written to its own component key.
+        assertEquals(PartEdit("sindri.light2d#halo", "offset", listOf(0.5, 0.5)), halo.moved(halo.offset, Vec2(0.5, 0.0)))
+    }
 }

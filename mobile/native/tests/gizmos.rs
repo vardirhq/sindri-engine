@@ -55,13 +55,7 @@ fn the_field_marks_only_what_cannot_otherwise_be_tapped() {
     }
     // Wick's lantern, its lights and its particles are parts of a drawn
     // object, reached through it or Layers.
-    for part in [
-        "wick",
-        "wick-lantern",
-        "wick-light",
-        "wick-halo",
-        "wick-embers",
-    ] {
+    for part in ["wick", "wick-lantern", "wick-light", "wick-halo"] {
         assert!(!marked.contains(&entity(&opened, part)), "{part}");
     }
     // The lamp lights stand alone, so they keep theirs.

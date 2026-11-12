@@ -174,3 +174,27 @@ fn an_emitter_the_engine_cannot_use_is_named() {
     assert_eq!(problems.len(), 1);
     assert!(problems[0].contains("lifetime"), "{problems:?}");
 }
+
+/// An entity's named particle parts are emitters of their own, counted apart.
+#[test]
+fn every_particle_part_of_an_entity_emits_on_its_own() {
+    let (mut world, entity) = world_with(&fountain());
+    let glow = ParticlesComponent {
+        rate: 10.0,
+        ..fountain()
+    };
+    world.get_mut(entity).unwrap().components.insert(
+        format!("{}#glow", ParticlesComponent::TYPE_NAME),
+        serde_json::to_value(&glow).unwrap(),
+    );
+    let mut effects = Effects2d::default();
+    run(&mut effects, &world, 60);
+    let embers = effects.emitter_live(entity);
+    let glowing = effects.part_live(entity, "glow");
+    assert!(
+        (29..=31).contains(&embers),
+        "{embers} from the unnamed part"
+    );
+    assert!((9..=11).contains(&glowing), "{glowing} from the glow");
+    assert_eq!(effects.live(), (embers + glowing) as usize);
+}

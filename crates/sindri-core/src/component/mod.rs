@@ -11,6 +11,7 @@ mod error;
 mod fields;
 mod meaning;
 mod optional;
+mod part;
 #[cfg(test)]
 mod tests;
 mod variant;
@@ -20,6 +21,7 @@ pub use decoded::Decoded;
 pub use error::ComponentRegistryError;
 use fields::declared_fields;
 pub use meaning::{AssetKind, FieldMeaning};
+pub use part::{PART_SEPARATOR, is_part_name, part_key, split_part};
 
 pub trait SceneComponent: DeserializeOwned {
     const TYPE_NAME: &'static str;
@@ -295,7 +297,7 @@ impl ComponentSchemaRegistry {
     /// already describes rather than one the editor invents.
     #[must_use]
     pub fn exemplar(&self, type_name: &str, path: &str) -> Option<&Value> {
-        self.registrations.get(type_name)?.exemplar(path)
+        self.registration(type_name)?.exemplar(path)
     }
 
     /// The order the component declares its fields in, which is the order its
@@ -303,8 +305,7 @@ impl ComponentSchemaRegistry {
     /// when the type does not say.
     #[must_use]
     pub fn field_order(&self, type_name: &str) -> &[&'static str] {
-        self.registrations
-            .get(type_name)
+        self.registration(type_name)
             .map_or(&[], |registration| registration.order.as_slice())
     }
 
@@ -328,8 +329,7 @@ impl ComponentSchemaRegistry {
     /// For generated documents, which say what a component consists of and can
     /// now say what its fields are for.
     pub fn meanings(&self, type_name: &str) -> impl Iterator<Item = (&str, &FieldMeaning)> {
-        self.registrations
-            .get(type_name)
+        self.registration(type_name)
             .into_iter()
             .flat_map(|registration| registration.meanings.iter())
             .map(|(path, meaning)| (path.as_str(), meaning))
@@ -343,13 +343,13 @@ impl ComponentSchemaRegistry {
     /// component happened to start with, and nothing at all for a type that
     /// cannot be created.
     pub fn fields(&self, type_name: &str) -> Option<&Value> {
-        self.registrations.get(type_name)?.fields.as_ref()
+        self.registration(type_name)?.fields.as_ref()
     }
 
     /// The payload a freshly added component of this type starts as, or `None`
     /// for one that cannot be created blank.
     pub fn default_payload(&self, type_name: &str) -> Option<&Value> {
-        self.registrations.get(type_name)?.default_payload.as_ref()
+        self.registration(type_name)?.default_payload.as_ref()
     }
 
     /// Whether a payload decodes as this component.
@@ -363,7 +363,7 @@ impl ComponentSchemaRegistry {
         type_name: &str,
         payload: &Value,
     ) -> Result<(), ComponentRegistryError> {
-        let Some(registration) = self.registrations.get(type_name) else {
+        let Some(registration) = self.registration(type_name) else {
             // An unregistered type is one the policy preserves rather than
             // understands. Nothing can be said about its shape, so nothing is.
             return Ok(());
@@ -376,8 +376,7 @@ impl ComponentSchemaRegistry {
     }
 
     pub fn metadata(&self, type_name: &str) -> Option<&ComponentMetadata> {
-        self.registrations
-            .get(type_name)
+        self.registration(type_name)
             .map(|registration| &registration.metadata)
     }
 
@@ -395,7 +394,15 @@ impl ComponentSchemaRegistry {
         scene.validate()?;
         for entity in &scene.entities {
             for (type_name, payload) in &entity.components {
-                let Some(registration) = self.registrations.get(type_name) else {
+                if let (_, Some(part)) = split_part(type_name)
+                    && !is_part_name(part)
+                {
+                    return Err(ComponentRegistryError::InvalidPartName {
+                        entity: entity.id.clone(),
+                        key: type_name.clone(),
+                    });
+                }
+                let Some(registration) = self.registration(type_name) else {
                     if unknown_policy == UnknownComponentPolicy::Reject {
                         return Err(ComponentRegistryError::UnknownComponent {
                             entity: entity.id.clone(),
@@ -493,6 +500,49 @@ impl ComponentSchemaRegistry {
                 type_name: T::TYPE_NAME.to_owned(),
                 source,
             })
+    }
+
+    /// The registration a component key is read by: its type's, for a named
+    /// part as for the unnamed one.
+    fn registration(&self, key: &str) -> Option<&ComponentRegistration> {
+        self.registrations.get(split_part(key).0)
+    }
+
+    /// Every part of kind `T` on every *active* entity, decoded, with each
+    /// part's name, `None` for the unnamed one.
+    ///
+    /// What a system that draws or steps every part of a kind asks, a lamp's
+    /// beam and its halo alike. [`Self::query`] still answers with the unnamed
+    /// part alone, for the many readers that mean "the entity's light".
+    pub fn query_parts<T: SceneComponent>(
+        &self,
+        world: &World,
+    ) -> Result<Vec<(EntityId, Option<String>, T)>, ComponentRegistryError> {
+        self.require_registered(T::TYPE_NAME)?;
+        let mut parts = Vec::new();
+        for (entity_id, entity) in world.entities() {
+            if !world.is_active(entity_id) {
+                continue;
+            }
+            for (key, payload) in &entity.components {
+                let (type_name, part) = split_part(key);
+                if type_name != T::TYPE_NAME {
+                    continue;
+                }
+                let component = T::deserialize(payload).map_err(|source| {
+                    ComponentRegistryError::InvalidPayload {
+                        entity: entity.source_id.as_ref().map_or_else(
+                            || format!("{entity_id:?}"),
+                            |source_id| source_id.as_str().to_owned(),
+                        ),
+                        type_name: key.clone(),
+                        source,
+                    }
+                })?;
+                parts.push((entity_id, part.map(str::to_owned), component));
+            }
+        }
+        Ok(parts)
     }
 
     fn require_registered(&self, type_name: &'static str) -> Result<(), ComponentRegistryError> {

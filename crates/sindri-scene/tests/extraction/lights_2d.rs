@@ -116,6 +116,27 @@ fn a_light_sits_at_its_offset_from_its_object() {
     );
 }
 
+/// One object can carry two lights as named parts: a lantern's beam and its
+/// halo are both drawn, each from its own offset.
+#[test]
+fn every_light_part_of_an_object_lights() {
+    let lantern = r#",
+        { "id": "lantern", "transform_3d": { "position": [2.0, 0.0, 0.0] },
+          "components": {
+            "sindri.light2d": { "radius": 10.0 },
+            "sindri.light2d#halo": { "radius": 4.6, "offset": [0.0, 0.5] } } }"#;
+    let lit = lighting(&(environment(true) + lantern)).expect("lighting is on");
+    let mut lights: Vec<([f32; 2], f32)> = lit
+        .lights
+        .iter()
+        .map(|light| (light.position, light.radius))
+        .collect();
+    lights.sort_by(|a, b| a.1.total_cmp(&b.1));
+    assert_eq!(lights.len(), 2, "the beam and the halo");
+    assert!((lights[0].1 - 4.6).abs() < 1.0e-5 && (lights[0].0[1] - 0.5).abs() < 1.0e-5);
+    assert!((lights[1].1 - 10.0).abs() < 1.0e-5 && lights[1].0[1].abs() < 1.0e-5);
+}
+
 #[test]
 fn a_spot_light_lights_only_its_cone() {
     let beam = r#", "cone_angle": 60.0, "cone_direction": 90.0, "cone_softness": 0.0"#;

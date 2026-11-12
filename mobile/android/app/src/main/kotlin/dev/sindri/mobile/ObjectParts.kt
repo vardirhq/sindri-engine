@@ -151,9 +151,19 @@ object ObjectParts {
     fun of(inspector: Inspector): List<ObjectPart> = listOfNotNull(
         inspector.component(SPRITE)?.let { sprite(it, inspector.sprite?.anchor) },
         inspector.component(SHADOW)?.let(::shadow),
-        inspector.component(PARTICLES)?.let(::particles),
-        inspector.component(LIGHT)?.let(::light),
-    ) + (inspector.component(COLLIDER)?.let(::collider) ?: emptyList())
+    ) + parts(inspector, PARTICLES, ::particles) + parts(inspector, LIGHT, ::light) +
+        (inspector.component(COLLIDER)?.let(::collider) ?: emptyList())
+
+    /** The kind's unnamed part, then each named one (`sindri.light2d#halo`), keyed and labelled by name. */
+    private fun parts(inspector: Inspector, type: String, read: (Component) -> ObjectPart): List<ObjectPart> =
+        inspector.components
+            .filter { it.type == type || it.type.startsWith("$type#") }
+            .sortedBy { it.type != type }
+            .map { component ->
+                val part = read(component)
+                val name = component.type.substringAfter('#', "")
+                if (name.isEmpty()) part else part.copy(key = "${part.key}#$name", label = "${part.label} · $name", type = component.type)
+            }
 
     /** The smallest part under [point]. */
     fun at(parts: List<ObjectPart>, point: Vec2, slop: Double): ObjectPart? =

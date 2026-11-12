@@ -180,7 +180,8 @@ pub(crate) fn gather_lights(
 ) -> Result<Gathered<Light2d>, SceneExtractError> {
     let mut lights = Vec::new();
     let mut refused = Vec::new();
-    for (entity, light) in components.query::<Light2dComponent>(world)? {
+    // Every light part: a lamp's beam and its halo are two lights.
+    for (entity, _, light) in components.query_parts::<Light2dComponent>(world)? {
         if !world.is_active(entity) || !light.enabled {
             continue;
         }

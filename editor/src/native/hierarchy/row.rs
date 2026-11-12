@@ -387,7 +387,13 @@ pub(crate) fn entity_is_bare(entity: &EntityData) -> bool {
 }
 
 pub(crate) fn component_label(name: &str) -> String {
-    humanize(name.strip_prefix("sindri.").unwrap_or(name))
+    // A named part reads as its type and its name: "Light2d · halo".
+    let (type_name, part) = sindri_core::split_part(name);
+    let label = humanize(type_name.strip_prefix("sindri.").unwrap_or(type_name));
+    match part {
+        Some(part) => format!("{label} · {part}"),
+        None => label,
+    }
 }
 
 pub(crate) fn humanize(value: &str) -> String {
