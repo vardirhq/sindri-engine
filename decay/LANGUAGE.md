@@ -319,6 +319,28 @@ This is what a reference is *for*: it is the difference between a script that
 can only describe itself and one that can say something about another thing in
 the world. `docs/scripting.md` records what Sindri makes of it.
 
+#### Members with named parts
+
+A host may say that a value member of one of its types also answers a call
+with a name (`HostType::with_parts`). The member alone is the thing's own
+value; called with one `String` it is another value of the same type, found by
+that name, or `null` when the host has none:
+
+```decay
+this.light2d.radius = 10.0;
+let halo = this.entity.light2d("halo");
+if halo != null {
+    halo.radius = 4.6;
+}
+```
+
+The call is checked as the member is: `light2d("halo").radiuss` is an
+unknown member, and a name that is not a `String`, or a call with no name or
+two, is refused. The value it answers is a held reference like any other. A
+member the host did not mark this way is still a value, and calling it is
+still an error. Against Sindri, `light2d` and `particles` have parts
+(`docs/object-parts.md`).
+
 ### Lists
 
 `List<T>` holds several values of one type, in order. It is the one type that

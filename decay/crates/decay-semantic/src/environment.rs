@@ -107,6 +107,12 @@ impl Environment {
         self.this = std::mem::take(&mut self.this).with_value(name, ty);
     }
 
+    /// Lets the value member `name` of `this` also be called with a part's
+    /// name, as [`HostType::with_parts`] does for a type.
+    pub fn add_this_parts(&mut self, name: impl Into<String>) {
+        self.this = std::mem::take(&mut self.this).with_parts(name);
+    }
+
     /// Adds a callable member to `this`.
     pub fn add_this_function(&mut self, name: impl Into<String>, function: FunctionType) {
         self.this = std::mem::take(&mut self.this).with_function(name, function);
