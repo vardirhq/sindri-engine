@@ -9,20 +9,33 @@ import java.security.MessageDigest
 internal object BundledVillageUpgrade {
     private const val OLD_VILLAGE_SHA256 = "5c175266fa04448076d9d6a3810c5fd65602a33fb6bf799797756cc56d8775fd"
 
-    /** The Wick script that shipped beside that village. */
-    private const val OLD_WICK_SHA256 = "34f04ef14aee7f31efd63f335275c2acebcac476e6fd59aa649d756fba26ecd5"
+    /**
+     * The scripts that shipped beside that village, by their path among the
+     * project's assets. The bundled village expects them as they are bundled
+     * now: Wick's art is on his body, and a gloom's smoke and surge are parts
+     * of it that `gloom.decay` plays by name.
+     */
+    private val OLD_SCRIPTS = mapOf(
+        "scripts/wick.decay" to "34f04ef14aee7f31efd63f335275c2acebcac476e6fd59aa649d756fba26ecd5",
+        "scripts/gloom.decay" to "d44fb8655a098ed5ddad05942cc9e8c50f0f45c3c56900741aeecd38dfb6088f",
+    )
 
     /**
-     * The bundled village's Wick carries his art on his body, which only the
-     * bundled script expects, so the village is replaced only once the script
-     * is the bundled one. The script goes first: it also reads the old layout,
-     * so a phone stopped between the two still plays.
+     * Replaces the old village under [assets], and the untouched scripts that
+     * shipped with it, with the bundled ones [bundled] reads by path. The
+     * scripts go first and the village only once every one is the bundled
+     * one; a phone stopped between the two still plays, `wick.decay` reading
+     * either layout and a gloom's surge merely staying dark.
      */
-    fun apply(scene: File, script: File, recovery: File, bundledScene: () -> ByteArray, bundledScript: () -> ByteArray) {
-        if (recovery.exists() || !scene.isFile || sha256(scene.readBytes()) != OLD_VILLAGE_SHA256) return
-        replaceIfUntouched(script, recovery, OLD_WICK_SHA256, bundledScript)
-        if (!script.isFile || !script.readBytes().contentEquals(bundledScript())) return
-        replaceIfUntouched(scene, recovery, OLD_VILLAGE_SHA256, bundledScene)
+    fun apply(assets: File, recovery: File, bundled: (String) -> ByteArray) =
+        apply(assets, recovery, OLD_VILLAGE_SHA256, OLD_SCRIPTS, bundled)
+
+    internal fun apply(assets: File, recovery: File, oldVillage: String, oldScripts: Map<String, String>, bundled: (String) -> ByteArray) {
+        val scene = File(assets, "village.scene")
+        if (recovery.exists() || !scene.isFile || sha256(scene.readBytes()) != oldVillage) return
+        for ((path, old) in oldScripts) replaceIfUntouched(File(assets, path), recovery, old) { bundled(path) }
+        val current = oldScripts.keys.all { path -> File(assets, path).let { it.isFile && it.readBytes().contentEquals(bundled(path)) } }
+        if (current) replaceIfUntouched(scene, recovery, oldVillage) { bundled("village.scene") }
     }
 
     internal fun sha256(bytes: ByteArray): String = MessageDigest.getInstance("SHA-256")

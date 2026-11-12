@@ -16,7 +16,7 @@ import random
 
 import scenes
 from scenes import (ALL, WALL, at, camera, effects, entity, environment, footprint, gloom, hud, input_actions,
-                    lantern, depth, shadow, static_body, wall, wick, wisps)
+                    lantern, depth, shadow, static_body, wall, wick)
 
 COLUMNS, ROWS = 46, 38
 LEFT, TOP = -COLUMNS // 2, ROWS // 2
@@ -343,7 +343,7 @@ def village():
         if e.get('id') == 'wick':
             e['transform_3d']['position'][:2] = [-20.0, 0.0]
     for n, (x, y) in enumerate(GLOOM_AT, 1):
-        ents += [gloom(f'gloom-{n}', x, y, 1 if n == 1 else 3), *wisps(f'gloom-{n}')]
+        ents += [gloom(f'gloom-{n}', x, y, 1 if n == 1 else 3)]
     ents += hud('title.scene')
     return ents
 
