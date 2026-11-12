@@ -7,10 +7,12 @@
 //! its own as a scene document.
 
 pub mod document;
+mod follow;
 mod library;
 pub mod missing;
 mod sync;
 
+pub use follow::follow;
 pub use library::ScenePrefabs;
 pub use sync::{reconcile, spawn_instance};
 
