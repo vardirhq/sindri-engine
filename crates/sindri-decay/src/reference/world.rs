@@ -103,7 +103,14 @@ pub(super) const TYPES: &[TypeEntry] = &[
                 "The authored scene environment on this object, if present.",
             ),
             value("light", "The object's 3D light, if it has one."),
-            value("light2d", "The object's 2D light, if it has one."),
+            value(
+                "light2d",
+                "The object's 2D light, if it has one. `light2d(\"halo\")` is another of its lights by name, or `null`.",
+            ),
+            value(
+                "particles",
+                "The object's particle emitter, if it has one. `particles(\"surge\")` is another of its emitters by name, or `null`.",
+            ),
             value("sight2d", "The object's 2D viewer, if it has one."),
             value("shape", "The object's drawn shape, if it has one."),
             value("sprite", "The object's image (sprite), if it has one."),
@@ -244,6 +251,33 @@ pub(super) const TYPES: &[TypeEntry] = &[
             value(
                 "enabled",
                 "Whether this light illuminates. Switching it off leaves its entity, scripts and children active.",
+            ),
+        ],
+    },
+    TypeEntry {
+        name: "Particles",
+        text: "A particle emitter on an object: smoke, sparks, embers. It throws `rate` particles a second while it plays. An object's own emitter is `particles`; another, named one is `particles(\"surge\")`.",
+        members: &[
+            value("lifetime", "How many seconds a particle lives."),
+            value(
+                "rate",
+                "How many particles it throws a second while it plays.",
+            ),
+            value("size", "How big a particle is when thrown, in world units."),
+            value(
+                "speed",
+                "How fast a particle leaves, in world units a second.",
+            ),
+            call(
+                "emit",
+                &["count"],
+                "Throws that many particles at once, whether or not it is playing, and gives how many it threw: fewer when its pool is full.",
+            ),
+            call("play", &[], "Starts throwing particles. Gives 1."),
+            call(
+                "stop",
+                &[],
+                "Stops throwing particles; those already out live on. Gives 1.",
             ),
         ],
     },

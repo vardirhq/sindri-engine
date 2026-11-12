@@ -149,7 +149,11 @@ pub const THIS: &[Entry] = &[
     ),
     value(
         "light2d",
-        "The 2D light on this script's object, if it has one: its color, brightness and reach.",
+        "The 2D light on this script's object, if it has one: its color, brightness and reach. Call it with a name, `light2d(\"halo\")`, for another of the object's lights, or `null` when it has none of that name.",
+    ),
+    value(
+        "particles",
+        "The particle emitter on this script's object, if it has one: how many it throws and how fast, and `play()`, `stop()` and `emit(count)`. Call it with a name, `particles(\"surge\")`, for another of the object's emitters, or `null` when it has none of that name.",
     ),
     value(
         "sight2d",

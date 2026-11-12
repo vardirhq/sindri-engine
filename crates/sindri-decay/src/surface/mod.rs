@@ -29,6 +29,7 @@ pub(crate) mod lighting;
 mod maths;
 mod member;
 pub(super) mod names;
+pub(crate) mod particles;
 mod person;
 pub(crate) mod physics3d;
 pub(crate) mod raycast;
@@ -217,6 +218,14 @@ impl Scalar {
     }
 }
 
+/// The members a call with a name reaches another part of, and the component
+/// each one is: `light2d("halo")` is `sindri.light2d#halo`. See
+/// `host/parts.rs` and `docs/object-parts.md`.
+pub(crate) const PART_KINDS: &[(&str, &str)] = &[
+    ("light2d", names::LIGHT_2D_COMPONENT),
+    ("particles", names::PARTICLES_COMPONENT),
+];
+
 /// What `this` offers beyond the script's own fields.
 pub(crate) const THIS: &[(&str, Node)] = &[
     ("transform", Node::Group(TRANSFORM, TRANSFORM_MEMBERS)),
@@ -229,6 +238,10 @@ pub(crate) const THIS: &[(&str, Node)] = &[
     ),
     ("light", Node::Group(light::LIGHT, light::MEMBERS)),
     ("light2d", Node::Group(LIGHT_2D, LIGHT_2D_MEMBERS)),
+    (
+        "particles",
+        Node::Group(names::PARTICLES, particles::MEMBERS),
+    ),
     ("sight2d", Node::Group(SIGHT_2D, SIGHT_2D_MEMBERS)),
     ("world_text", Node::Group(TEXT, TEXT_MEMBERS)),
     ("entity", Node::Handle(Handle::Own)),
@@ -251,6 +264,10 @@ pub(crate) const THROUGH_REFERENCE: &[(&str, Node)] = &[
     ),
     ("light", Node::Group(light::LIGHT, light::MEMBERS)),
     ("light2d", Node::Group(LIGHT_2D, LIGHT_2D_MEMBERS)),
+    (
+        "particles",
+        Node::Group(names::PARTICLES, particles::MEMBERS),
+    ),
     ("sight2d", Node::Group(SIGHT_2D, SIGHT_2D_MEMBERS)),
     ("world_text", Node::Group(TEXT, TEXT_MEMBERS)),
 ];

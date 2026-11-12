@@ -296,6 +296,8 @@ the scene wrote it.
 | `this.light2d.color` | `Color` | yes | yes |
 | `this.light2d.color.{r,g,b,a}` | `number` | yes | yes |
 | `this.light2d.{intensity,radius,falloff,height,cone_angle,cone_direction,cone_softness}` | `number` | yes | yes |
+| `this.particles.{rate,speed,lifetime,size}` | `number` | yes | yes |
+| `this.particles.{play,stop,emit}` | `number` | call | — |
 | `this.sight2d.{radius,unseen,reach}` | `number` | yes | yes |
 | `this.world_text.color` | `Color` | yes | yes |
 | `this.world_text.color.{r,g,b,a}` | `number` | yes | yes |
@@ -313,6 +315,32 @@ the scene wrote it.
 | `this.shape.dashes` | `number` | yes | yes |
 | `this.shape.dash_duty` | `number` | yes | yes |
 | `this.shape.layer` | `number` | yes | yes |
+
+**Named parts.** An object can hold several lights or emitters as named parts
+(`sindri.light2d#halo`; `docs/object-parts.md`). `this.light2d` and
+`this.particles` are its own; called with a name they answer another part, or
+`null` when it has none of that name, and a part is held, compared and stored
+like an entity:
+
+```rust
+script Gloom {
+    var surge: Particles = null;
+    fn start() { this.surge = this.entity.particles("surge"); }
+    fn wind_up() { if this.surge != null { this.surge.play(); } }
+}
+```
+
+| What | Written | Answers |
+| --- | --- | --- |
+| Another light | `this.light2d("halo")`, `entity.light2d("halo")` | `Light2d`, or `null` |
+| Another emitter | `this.particles("surge")`, `entity.particles("surge")` | `Particles`, or `null` |
+| Start or stop an emitter | `surge.play()`, `surge.stop()` | `number` |
+| Throw at once | `surge.emit(count)` | `number` — how many it threw |
+
+A part reaches the same members as the object's own (`halo.radius`,
+`halo.color.a`, `surge.rate`). Asking a part for a part is an error: ask its
+object. An object still runs one script; a script attached as a part is not
+built yet.
 
 `sprite` is the thing in the world and `ui_image` is the thing on the viewport:
 two components, so two paths. A script says which it means rather than writing
@@ -410,6 +438,8 @@ table above lists, reaching the same numbers.
 | `this.entity.light2d.color` | `Color` | yes | yes |
 | `this.entity.light2d.color.{r,g,b,a}` | `number` | yes | yes |
 | `this.entity.light2d.{intensity,radius,falloff,height,cone_angle,cone_direction,cone_softness}` | `number` | yes | yes |
+| `this.entity.particles.{rate,speed,lifetime,size}` | `number` | yes | yes |
+| `this.entity.particles.{play,stop,emit}` | `number` | call | — |
 | `this.entity.sight2d.{radius,unseen,reach}` | `number` | yes | yes |
 | `this.entity.ui_image.tint` | `Color` | yes | yes |
 | `this.entity.ui_image.tint.{r,g,b,a}` | `number` | yes | yes |

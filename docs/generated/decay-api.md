@@ -20,7 +20,8 @@ What the entity a script runs on offers, beyond the script's own fields.
 - `entity`: `Entity` — The object in the game this script is attached to. Pass it to calls that act on an object, such as `World.despawn(this.entity)`.
 - `environment`: `SceneEnvironment` — The scene environment on this object, if authored: ambient intensity/color and background with checked runtime writes.
 - `light`: `Light` — The 3D light on this object: checked color, intensity, range, cone angles and independent enabled state.
-- `light2d`: `Light2d` — The 2D light on this script's object, if it has one: its color, brightness and reach.
+- `light2d`: `Light2d` — The 2D light on this script's object, if it has one: its color, brightness and reach. Call it with a name, `light2d("halo")`, for another of the object's lights, or `null` when it has none of that name.
+- `particles`: `Particles` — The particle emitter on this script's object, if it has one: how many it throws and how fast, and `play()`, `stop()` and `emit(count)`. Call it with a name, `particles("surge")`, for another of the object's emitters, or `null` when it has none of that name.
 - `shape`: `Shape` — The drawn shape on this script's object, if it has one: its colors, outline and how much of it is drawn.
 - `sight2d`: `Sight2d` — The 2D viewer on this script's object, if it has one: how far it sees and how dim what it cannot see goes.
 - `sprite`: `Sprite` — The image (sprite) on this script's object, if it has one: its color and drawing order.
@@ -286,7 +287,8 @@ An object in the game, such as a player, an enemy or a button. Scripts get these
 
 - `environment`: `SceneEnvironment` — The authored scene environment on this object, if present.
 - `light`: `Light` — The object's 3D light, if it has one.
-- `light2d`: `Light2d` — The object's 2D light, if it has one.
+- `light2d`: `Light2d` — The object's 2D light, if it has one. `light2d("halo")` is another of its lights by name, or `null`.
+- `particles`: `Particles` — The object's particle emitter, if it has one. `particles("surge")` is another of its emitters by name, or `null`.
 - `shape`: `Shape` — The object's drawn shape, if it has one.
 - `sight2d`: `Sight2d` — The object's 2D viewer, if it has one.
 - `sprite`: `Sprite` — The object's image (sprite), if it has one.
@@ -415,6 +417,18 @@ Asks the scene's 2D lighting about places in the world. Requires a scene whose e
 A managed number tween; read with Tween.number_value.
 
 The host names this type but has not described its members.
+
+### `Particles`
+
+A particle emitter on an object: smoke, sparks, embers. It throws `rate` particles a second while it plays. An object's own emitter is `particles`; another, named one is `particles("surge")`.
+
+- `emit(count: number)` → `number` — Throws that many particles at once, whether or not it is playing, and gives how many it threw: fewer when its pool is full.
+- `lifetime`: `number` — How many seconds a particle lives.
+- `play()` → `number` — Starts throwing particles. Gives 1.
+- `rate`: `number` — How many particles it throws a second while it plays.
+- `size`: `number` — How big a particle is when thrown, in world units.
+- `speed`: `number` — How fast a particle leaves, in world units a second.
+- `stop()` → `number` — Stops throwing particles; those already out live on. Gives 1.
 
 ### `Physics`
 

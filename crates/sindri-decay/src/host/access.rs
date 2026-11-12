@@ -19,6 +19,9 @@ use crate::surface::{
 
 impl Host for WorldHost<'_> {
     fn load(&mut self, subject: Option<u64>, path: &Path) -> Result<Option<Value>, RuntimeError> {
+        if let Some(result) = self.as_part(subject, path, Self::load) {
+            return result;
+        }
         let parts: Vec<&str> = path.0.iter().map(String::as_str).collect();
 
         // `Game.score`: a declared state, before any namespace the engine
@@ -44,52 +47,10 @@ impl Host for WorldHost<'_> {
             ))));
         }
 
-        // Where the person is pointing, and how many fingers are down. Facts
-        // about the frame like `Time.delta`, and never about a subject: a
-        // reference cannot be asked where the mouse is.
         if subject.is_none()
-            && let [namespace, name] = ungrouped(&parts)
+            && let Some(value) = self.frame_value(&parts)
         {
-            if *namespace == POINTER
-                && let Some((_, value)) = POINTER_VALUES.iter().find(|(known, _)| known == name)
-            {
-                return Ok(Some(self.pointer_value(*value)));
-            }
-            if *namespace == STICK
-                && let Some((_, value)) = STICK_VALUES.iter().find(|(known, _)| known == name)
-            {
-                return Ok(Some(self.stick_value(*value)));
-            }
-            if *namespace == TOUCH && *name == TOUCH_COUNT {
-                // `usize` to `f64` is exact for every count a hand can produce,
-                // and the platform bounds it to ten regardless.
-                #[allow(clippy::cast_precision_loss)]
-                return Ok(Some(Value::Number(self.context.input.touch_count() as f64)));
-            }
-            if *namespace == CAMERA
-                && let Some((_, value)) = CAMERA_VALUES.iter().find(|(known, _)| known == name)
-            {
-                return Ok(Some(self.camera_value(*value)));
-            }
-            if *namespace == GESTURE
-                && let Some((_, value)) = GESTURE_VALUES.iter().find(|(known, _)| known == name)
-            {
-                return Ok(Some(self.gesture_value(*value)));
-            }
-            if *namespace == AIM
-                && let Some((_, value)) = AIM_VALUES.iter().find(|(known, _)| known == name)
-            {
-                return Ok(Some(self.aim_value(*value)));
-            }
-            if *namespace == VIEWPORT
-                && let Some((_, value)) = VIEWPORT_VALUES.iter().find(|(known, _)| known == name)
-            {
-                return Ok(Some(Value::Number(f64::from(match value {
-                    ViewportValue::Aspect => self
-                        .screen_ui
-                        .map_or(1.0, sindri_scene::ScreenUi::viewport_aspect),
-                }))));
-            }
+            return Ok(Some(value));
         }
 
         let Some(under) = Self::addressed(subject, path) else {
@@ -131,6 +92,16 @@ impl Host for WorldHost<'_> {
         // most of what Orbital's scripts spent their time on.
         let components = self.world.get(entity).map(|data| &data.components);
 
+        // A named part reads its own payload by its own key.
+        if let Leaf::Component { component, pointer } = leaf {
+            let key = self.component_key(component);
+            return Ok(components
+                .and_then(|components| components.get(&key))
+                .and_then(|payload| crate::surface::follow(payload, pointer))
+                .and_then(serde_json::Value::as_f64)
+                .map(Value::Number));
+        }
+
         // `None` is how the runtime says "unknown path" with the name attached,
         // and it is the right answer for an entity that has no sprite: the
         // surface says a script *may* reach one, not that every entity has one.
@@ -149,6 +120,9 @@ impl Host for WorldHost<'_> {
         path: &Path,
         value: Value,
     ) -> Result<bool, RuntimeError> {
+        if let Some((entity, reached, part)) = self.through_part(subject, path) {
+            return self.serving(part, |host| host.store(Some(entity), &reached, value));
+        }
         if subject.is_none() && self.shared_store(path, &value)? {
             return Ok(true);
         }
@@ -204,10 +178,11 @@ impl Host for WorldHost<'_> {
             Leaf::Light(_) => unreachable!("handled by store_light"),
             Leaf::TransformRotation(_) => unreachable!("handled by store_rotation"),
             Leaf::Component { component, pointer } => {
+                let key = self.component_key(component);
                 let Some(data) = self.world.get_mut(entity) else {
                     return Ok(false);
                 };
-                let Some(payload) = data.components.get_mut(component) else {
+                let Some(payload) = data.components.get_mut(&key) else {
                     return Err(RuntimeError::Host(format!(
                         "{} needs a {component} on this entity, and it has none",
                         path.dotted()
@@ -249,6 +224,17 @@ impl Host for WorldHost<'_> {
         path: &Path,
         args: &[Value],
     ) -> Result<Option<Value>, RuntimeError> {
+        if let Some(found) = self.part_lookup(subject, path, args) {
+            return found.map(Some);
+        }
+        if let Some(result) =
+            self.as_part(subject, path, |host, at, path| host.call(at, path, args))
+        {
+            return result;
+        }
+        if let Some(value) = self.particles_method(subject, path, args)? {
+            return Ok(Some(value));
+        }
         if let Some(value) = self.transform_call(subject, path, args)? {
             return Ok(Some(value));
         }
@@ -289,6 +275,57 @@ impl Host for WorldHost<'_> {
 }
 
 impl WorldHost<'_> {
+    /// Where the person is pointing, how many fingers are down, what the
+    /// camera and the viewport are: facts about the frame like `Time.delta`,
+    /// and never about a subject, since a reference cannot be asked where the
+    /// mouse is.
+    fn frame_value(&self, parts: &[&str]) -> Option<Value> {
+        let [namespace, name] = ungrouped(parts) else {
+            return None;
+        };
+        if *namespace == POINTER
+            && let Some((_, value)) = POINTER_VALUES.iter().find(|(known, _)| known == name)
+        {
+            return Some(self.pointer_value(*value));
+        }
+        if *namespace == STICK
+            && let Some((_, value)) = STICK_VALUES.iter().find(|(known, _)| known == name)
+        {
+            return Some(self.stick_value(*value));
+        }
+        if *namespace == TOUCH && *name == TOUCH_COUNT {
+            // `usize` to `f64` is exact for every count a hand can produce,
+            // and the platform bounds it to ten regardless.
+            #[allow(clippy::cast_precision_loss)]
+            return Some(Value::Number(self.context.input.touch_count() as f64));
+        }
+        if *namespace == CAMERA
+            && let Some((_, value)) = CAMERA_VALUES.iter().find(|(known, _)| known == name)
+        {
+            return Some(self.camera_value(*value));
+        }
+        if *namespace == GESTURE
+            && let Some((_, value)) = GESTURE_VALUES.iter().find(|(known, _)| known == name)
+        {
+            return Some(self.gesture_value(*value));
+        }
+        if *namespace == AIM
+            && let Some((_, value)) = AIM_VALUES.iter().find(|(known, _)| known == name)
+        {
+            return Some(self.aim_value(*value));
+        }
+        if *namespace == VIEWPORT
+            && let Some((_, value)) = VIEWPORT_VALUES.iter().find(|(known, _)| known == name)
+        {
+            return Some(Value::Number(f64::from(match value {
+                ViewportValue::Aspect => self
+                    .screen_ui
+                    .map_or(1.0, sindri_scene::ScreenUi::viewport_aspect),
+            })));
+        }
+        None
+    }
+
     /// Component leaves whose typed defaults and validation own their reads.
     fn load_checked_leaf(
         &self,
