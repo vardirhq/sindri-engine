@@ -1,7 +1,8 @@
 # Object parts and the object workspace
 
-Status: proposal. Sprite `size` and `offset` and light `offset`, the first
-step, are built; the rest is not.
+Status: proposal. Sprite `size` and `offset`, light `offset` and the mobile
+object workspace for a scene object, the first two steps, are built; the rest
+is not.
 
 ## The problem
 
@@ -134,9 +135,11 @@ things, not parts.
 
 1. **Done:** sprite `size` and `offset`, light `offset`; Lamplighter's Wick and
    lantern carry their art.
-2. The object workspace on mobile for a scene object: the collider workspace
-   grown to every placeable part, with handles for sprite, light, particles and
-   shadow, and a part list. It edits the vector fields the inspector cannot.
+2. **Done:** the object workspace on mobile for a scene object: the collider
+   workspace grown to every placeable part, with handles for the art, the
+   light's reach, a box emitter and the shadow, and a part list
+   (`ObjectWorkspace.kt`, `ObjectParts.kt`; `mobile/first-slice.md` lists
+   what it does not do yet).
 3. Open a prefab file in the workspace; instances in the open scene follow.
    Check which of desktop's prefab-following code needs to move into
    `sindri-authoring` first, since the phone cannot depend on the editor crate.

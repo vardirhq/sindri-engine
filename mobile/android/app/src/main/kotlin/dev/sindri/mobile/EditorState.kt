@@ -39,8 +39,11 @@ data class Component(
     fun number(path: String): Double? = (value(path) as? Number)?.toDouble()
 }
 
-/** A sprite's picture: its texture, the named part, and where that part is in the image. */
-data class SpriteRegion(val texture: String, val region: String?, val rect: List<Float>?)
+/**
+ * A sprite's picture: its texture, the named part, where that part is in the
+ * image, and how its sheet's anchor moves the picture within its quad.
+ */
+data class SpriteRegion(val texture: String, val region: String?, val rect: List<Float>?, val anchor: List<Float>? = null)
 
 data class Inspector(
     val name: String,
@@ -189,6 +192,7 @@ data class EditorState(
                     texture = sprite.optString("texture"),
                     region = sprite.optStringOrNull("region"),
                     rect = sprite.optJSONArray("rect")?.doubles()?.map { it.toFloat() },
+                    anchor = sprite.optJSONArray("anchor")?.doubles()?.map { it.toFloat() },
                 )
             },
         )

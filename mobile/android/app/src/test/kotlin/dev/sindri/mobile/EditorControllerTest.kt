@@ -100,11 +100,32 @@ class EditorControllerTest {
         controller.refresh()
         controller.on(EditorEvent.OpenInspector) {}
         controller.on(EditorEvent.InspectorRow("Collider 2D", "Edit collider shapes", RowChange.Open)) {}
-        assertTrue(controller.ui.sheet is EditorSheet.Collider)
+        assertEquals("collider.0", (controller.ui.sheet as EditorSheet.Parts).part)
         controller.on(EditorEvent.ColliderField("pieces.0.shape.radius", 2.0)) {}
         assertTrue(listOf("setField", "sindri.physics2d.collider", "pieces.0.shape.radius", 2.0, false) in host.commands)
         controller.on(EditorEvent.AddColliderPiece) {}
         assertTrue(listOf("colliderAdd", "0") in host.commands)
+        assertEquals("collider.1", (controller.ui.sheet as EditorSheet.Parts).part)
+    }
+
+    @Test
+    fun the_object_workspace_merges_a_drag_and_saves_when_it_settles() {
+        val sprite = Component("sindri.sprite", "Sprite", emptyList(), values = mapOf("size" to listOf(3.0, 2.75), "offset" to listOf(0.0, 0.0)))
+        host.state = EditorState(inspector = Inspector("Wick", listOf(0.0, 0.0, 0.0), listOf(sprite)), selectionCount = 1)
+        controller.refresh()
+        controller.on(EditorEvent.OpenInspector) {}
+        controller.on(EditorEvent.InspectorRow("Place", "Edit parts", RowChange.Open)) {}
+        val sheet = controller.ui.sheet as EditorSheet.Parts
+        assertNull(sheet.part)
+        controller.on(EditorEvent.PartChosen("sprite")) {}
+        assertEquals("sprite", (controller.ui.sheet as EditorSheet.Parts).part)
+        val saves = host.commands.count { it == listOf("save") }
+        controller.on(EditorEvent.PartDragged(PartEdit("sindri.sprite", "offset", listOf(0.5, 0.0)))) {}
+        assertEquals(listOf("setField", "sindri.sprite", "offset", listOf(0.5, 0.0), true), host.commands.last())
+        host.state = host.state.copy(unsaved = true)
+        controller.on(EditorEvent.PartSettled) {}
+        assertTrue(listOf("settle") in host.commands)
+        assertEquals(saves + 1, host.commands.count { it == listOf("save") })
     }
 
     @Test

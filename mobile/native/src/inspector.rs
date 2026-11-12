@@ -157,15 +157,29 @@ fn sprite_region(texture: &str, sheets: &BTreeMap<String, SpriteSheetDocument>) 
     let Ok(reference) = SpriteRef::parse(texture) else {
         return json!({ "texture": texture, "region": null, "rect": null });
     };
-    let rect = match (reference.sprite(), reference.sheet()) {
+    let sheet = reference
+        .sheet()
+        .and_then(|sheet| sheets.get(sheet.as_str()));
+    let rect = match (reference.sprite(), sheet) {
         (None, _) => Some([0.0, 0.0, 1.0, 1.0]),
-        (Some(region), Some(sheet)) => sheets
-            .get(sheet.as_str())
-            .and_then(|sheet| sheet.rects().ok())
+        (Some(region), Some(sheet)) => sheet
+            .rects()
+            .ok()
             .and_then(|rects| rects.get(region).copied()),
         (Some(_), None) => None,
     };
-    json!({ "texture": reference.texture(), "region": reference.sprite(), "rect": rect })
+    // Where the sheet stands its pictures, as the renderer moves the quad: the
+    // object workspace draws the art where the scene does.
+    let anchor = sheet
+        .and_then(|sheet| sheet.anchor)
+        .unwrap_or_default()
+        .offset();
+    json!({
+        "texture": reference.texture(),
+        "region": reference.sprite(),
+        "rect": rect,
+        "anchor": anchor,
+    })
 }
 
 /// What a field means, for the app: its kind, and a range's ends (`null` for

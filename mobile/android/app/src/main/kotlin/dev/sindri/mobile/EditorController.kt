@@ -133,7 +133,7 @@ class EditorController(
             menu = ui.menu?.let { settings },
             sheet = when (val sheet = ui.sheet) {
                 is EditorSheet.Inspector -> inspector?.let { sheet.copy(inspector = inspectorUi(it)) }
-                is EditorSheet.Collider -> inspector?.let { sheet.copy(inspector = it) }
+                is EditorSheet.Parts -> inspector?.let { sheet.copy(inspector = it) }
                 is EditorSheet.Behaviour -> if (inspector == null) null else sheet
                 is EditorSheet.Layers -> sheet.copy(objects = state.objects)
                 else -> sheet
@@ -225,13 +225,23 @@ class EditorController(
             is EditorEvent.AddBasic -> addObject("addBasic", event.kind)
             is EditorEvent.LayerTabChosen -> (ui.sheet as? EditorSheet.Layers)?.let { ui = ui.copy(sheet = it.copy(tab = event.tab)) }
             is EditorEvent.InspectorRow -> inspectorRow(event)
-            EditorEvent.OpenCollider -> openCollider()
-            is EditorEvent.ColliderPiece -> (ui.sheet as? EditorSheet.Collider)?.let { ui = ui.copy(sheet = it.copy(piece = event.index)) }
+            is EditorEvent.OpenParts -> openParts(event.part)
+            is EditorEvent.PartChosen -> (ui.sheet as? EditorSheet.Parts)?.let { ui = ui.copy(sheet = it.copy(part = event.key)) }
+            is EditorEvent.PartDragged -> {
+                error = native.command("setField", event.edit.type, event.edit.path, event.edit.value, true)
+                refresh()
+            }
+            EditorEvent.PartSettled -> nativeEdit("settle")
+            is EditorEvent.PartField -> nativeEdit("setField", event.edit.type, event.edit.path, event.edit.value, false)
             is EditorEvent.ColliderField -> nativeEdit("setField", "sindri.physics2d.collider", event.path, event.value, false)
-            EditorEvent.AddColliderPiece -> (ui.sheet as? EditorSheet.Collider)?.let { nativeEdit("colliderAdd", it.piece.toString()) }
-            EditorEvent.RemoveColliderPiece -> (ui.sheet as? EditorSheet.Collider)?.let { sheet ->
-                nativeEdit("colliderRemove", sheet.piece.toString())
-                (ui.sheet as? EditorSheet.Collider)?.let { ui = ui.copy(sheet = it.copy(piece = 0)) }
+            EditorEvent.AddColliderPiece -> (ui.sheet as? EditorSheet.Parts)?.let { sheet ->
+                val pieces = ObjectParts.of(sheet.inspector).count { it.type == ObjectParts.COLLIDER }
+                nativeEdit("colliderAdd", (sheet.part?.let(ObjectParts::colliderPiece) ?: 0).toString())
+                (ui.sheet as? EditorSheet.Parts)?.let { ui = ui.copy(sheet = it.copy(part = "collider.$pieces")) }
+            }
+            EditorEvent.RemoveColliderPiece -> (ui.sheet as? EditorSheet.Parts)?.let { sheet ->
+                nativeEdit("colliderRemove", (sheet.part?.let(ObjectParts::colliderPiece) ?: 0).toString())
+                (ui.sheet as? EditorSheet.Parts)?.let { ui = ui.copy(sheet = it.copy(part = "collider.0")) }
             }
             EditorEvent.AddComponent -> (ui.sheet as? EditorSheet.Inspector)?.let { ui = ui.copy(sheet = it.copy(adding = !it.adding, full = true)) }
             is EditorEvent.ComponentChosen -> {
@@ -400,11 +410,12 @@ class EditorController(
         ui = ui.copy(sheet = EditorSheet.Inspector(inspectorUi(inspector)), menu = null)
     }
 
-    private fun openCollider() {
+    /** The object workspace on the selection, with [part] chosen, or its first part. */
+    private fun openParts(part: String? = null) {
+        if (state.selectionCount > 1) return notWired("Editing multiple objects")
         val inspector = state.inspector ?: return
-        val sheet = ui.sheet as? EditorSheet.Inspector
-        val image = sheet?.inspector?.sections?.flatMap { it.rows }?.filterIsInstance<RowUi.SpriteRef>()?.firstOrNull()?.image
-        ui = ui.copy(sheet = EditorSheet.Collider(inspector, image))
+        val image = inspector.sprite?.let { region -> region.rect?.takeIf { it.size == 4 }?.let { ProjectImage(assetRoot + region.texture, it) } }
+        ui = ui.copy(sheet = EditorSheet.Parts(inspector, image, part), menu = null)
     }
 
     /** The engine's selection as the design's inspector, remembering what each row edits. */
@@ -521,7 +532,8 @@ class EditorController(
                 refresh()
             }
             binding is RowBinding.PickSprite -> showAssets(AssetTab.Sprites, true)
-            binding is RowBinding.OpenCollider -> openCollider()
+            binding is RowBinding.OpenCollider -> openParts("collider.0")
+            binding is RowBinding.OpenParts -> openParts()
             binding is RowBinding.NotWired -> notWired(binding.what)
             event.change == RowChange.Settled -> nativeEdit("settle")
             event.change is RowChange.To -> binding.edit(event.change)?.let { edit ->

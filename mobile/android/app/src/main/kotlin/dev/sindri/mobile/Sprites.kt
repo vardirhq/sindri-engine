@@ -51,6 +51,13 @@ private object SheetCache {
     }
 }
 
+/** The decoded image at [path] among the app's assets or on disk, or null where it cannot be read. */
+@Composable
+fun rememberProjectBitmap(path: String): ImageBitmap? {
+    val context = LocalContext.current
+    return remember(path) { SheetCache.get(context, path) }
+}
+
 /**
  * Draws [image] as large as fits the bounds, standing on their bottom edge as
  * a sprite stands on the ground, pixel art unsmoothed. Nothing where the image
