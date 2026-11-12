@@ -48,7 +48,7 @@ fn a_landed_pounce_flashes_the_screen_blinks_wick_and_empties_the_bar() {
     for _ in 0..150 {
         step(&mut run, 1);
         flash = flash.max(run.board("hit"));
-        blink = blink.min(alpha(&run, "wick-sprite"));
+        blink = blink.min(alpha(&run, "wick"));
         low = low.min(fill(&run, "hud-lantern-fill"));
     }
     assert!(flash > 0.9, "the screen reddens at the blow: {flash}");

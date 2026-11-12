@@ -28,4 +28,22 @@ class BundledVillageUpgradeTest {
             directory.deleteRecursively()
         }
     }
+
+    @Test
+    fun the_village_is_replaced_only_with_its_script() {
+        val directory = Files.createTempDirectory("village-upgrade").toFile()
+        try {
+            val scene = directory.resolve("village.scene")
+            val script = directory.resolve("wick.decay")
+            val recovery = directory.resolve("recovery.json")
+            // Not the shipped old village: nothing is touched.
+            scene.writeText("some village")
+            script.writeText("some script")
+            BundledVillageUpgrade.apply(scene, script, recovery, { "new village".toByteArray() }, { "new script".toByteArray() })
+            assertEquals("some village", scene.readText())
+            assertEquals("some script", script.readText())
+        } finally {
+            directory.deleteRecursively()
+        }
+    }
 }

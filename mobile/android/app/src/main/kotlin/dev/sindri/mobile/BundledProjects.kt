@@ -34,11 +34,17 @@ object BundledProjects {
         if (marker.isFile) {
             if (name == "lamplighter") {
                 val scene = File(target, "assets/village.scene")
+                val script = File(target, "assets/scripts/wick.decay")
                 val recovery = File(context.filesDir, "scene-recovery/recovery.json")
+                val bundled = { path: String -> context.assets.open("$ROOT/$name/$path").use { it.readBytes() } }
                 runCatching {
-                    BundledVillageUpgrade.apply(scene, recovery) {
-                        context.assets.open("$ROOT/$name/assets/village.scene").use { it.readBytes() }
-                    }
+                    BundledVillageUpgrade.apply(
+                        scene,
+                        script,
+                        recovery,
+                        { bundled("assets/village.scene") },
+                        { bundled("assets/scripts/wick.decay") },
+                    )
                 }.onFailure { android.util.Log.w("Sindri", "Could not update the untouched village", it) }
             }
             return target

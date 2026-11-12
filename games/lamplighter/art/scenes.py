@@ -271,26 +271,28 @@ def wick(fresh=True):
         'shape': {'shape': 'circle', 'radius': radius}, 'offset': [0, 0.45], 'rotation': 0, 'sensor': sensor,
         'layers': {'memberships': WICK, 'filter': mask}, 'friction': 0, 'restitution': 0}
     return [
+        # The art sits on the body, sized there (one pixel of it is a sixteenth of a world
+        # unit), so the collider and the lantern stay at the size they were made.
         entity('wick', 'Wick', at(0, 0, depth(0)), **{
             'sindri.tags': {'tags': ['wick']},
             'sindri.physics2d.rigid_body': body,
             'sindri.physics2d.collider': {'pieces': [piece(0.4, False, WALL | TARGET), piece(0.7, True, ALL)]},
             'sindri.script': {'source': 'scripts/wick.decay', 'script': 'Wick',
-                             'properties': {} if fresh else {'fresh': False}}}),
-        # One pixel of the art is a sixteenth of a world unit.
-        entity('wick-sprite', 'wick-sprite', at(0, 0, 0, 3.0, 2.75), 'wick', **{
-            'sindri.sprite': {'texture': 'textures/wick.png#idle-south', 'layer': 5, 'tint': [1.0, 1.0, 1.0, 1.0]},
+                             'properties': {} if fresh else {'fresh': False}},
+            'sindri.sprite': {'texture': 'textures/wick.png#idle-south', 'layer': 5, 'tint': [1.0, 1.0, 1.0, 1.0],
+                              'size': [3.0, 2.75]},
             'sindri.shadow2d': shadow(0.9, 0.35),
             'sindri.animation.sprite': {'clips': clips(), 'playing': 'idle-south', 'speed': 1}}),
         # The lantern is not part of Wick's sprite. It floats about him on its own, circling
         # him as he turns (`wick.decay` steers it, and puts it in front of him or behind),
         # and the light is its flame, so what it lights and the shadows it casts start at the
         # lantern: a beam turned to the way he faces, so the dark is behind him, and a small
-        # round halo that keeps what is at his heels from being black. The lantern entity
-        # only places; the drawing, at a size, and the lights hang from it.
-        entity('wick-lantern', 'wick-lantern', at(*LANTERN_START), 'wick'),
-        entity('wick-lantern-sprite', 'wick-lantern-sprite', at(0, 0, 0, 0.6, 0.8), 'wick-lantern', **{
-            'sindri.sprite': {'texture': 'textures/lantern.png', 'layer': 5, 'tint': [1.0, 1.0, 1.0, 1.0]}}),
+        # round halo that keeps what is at his heels from being black. The lantern carries its
+        # own drawing, at a size; its particles and two lights still hang from it, as an
+        # object holds one of each kind of part.
+        entity('wick-lantern', 'wick-lantern', at(*LANTERN_START), 'wick', **{
+            'sindri.sprite': {'texture': 'textures/lantern.png', 'layer': 5, 'tint': [1.0, 1.0, 1.0, 1.0],
+                              'size': [0.6, 0.8]}}),
         # Embers that lift off the flame, and a faint glow that swells and fades round it.
         entity('wick-embers', 'wick-embers', at(0, 0.05, 0.001), 'wick-lantern', **{'sindri.particles': motes(
             16.0, 1.3, 0.6, [[1.0, 0.8, 0.4, 0.0], [1.0, 0.65, 0.22, 1.0], [0.9, 0.3, 0.08, 0.0]], 0.2, 0.03,

@@ -9,8 +9,21 @@ import java.security.MessageDigest
 internal object BundledVillageUpgrade {
     private const val OLD_VILLAGE_SHA256 = "5c175266fa04448076d9d6a3810c5fd65602a33fb6bf799797756cc56d8775fd"
 
-    fun apply(scene: File, recovery: File, bundled: () -> ByteArray) =
-        replaceIfUntouched(scene, recovery, OLD_VILLAGE_SHA256, bundled)
+    /** The Wick script that shipped beside that village. */
+    private const val OLD_WICK_SHA256 = "34f04ef14aee7f31efd63f335275c2acebcac476e6fd59aa649d756fba26ecd5"
+
+    /**
+     * The bundled village's Wick carries his art on his body, which only the
+     * bundled script expects, so the village is replaced only once the script
+     * is the bundled one. The script goes first: it also reads the old layout,
+     * so a phone stopped between the two still plays.
+     */
+    fun apply(scene: File, script: File, recovery: File, bundledScene: () -> ByteArray, bundledScript: () -> ByteArray) {
+        if (recovery.exists() || !scene.isFile || sha256(scene.readBytes()) != OLD_VILLAGE_SHA256) return
+        replaceIfUntouched(script, recovery, OLD_WICK_SHA256, bundledScript)
+        if (!script.isFile || !script.readBytes().contentEquals(bundledScript())) return
+        replaceIfUntouched(scene, recovery, OLD_VILLAGE_SHA256, bundledScene)
+    }
 
     internal fun sha256(bytes: ByteArray): String = MessageDigest.getInstance("SHA-256")
         .digest(bytes).joinToString("") { "%02x".format(it) }

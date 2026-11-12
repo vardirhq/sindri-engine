@@ -26,7 +26,7 @@ fn position(run: &Run, id: &str) -> Option<[f32; 2]> {
 }
 
 fn clip(run: &Run) -> String {
-    let sprite = run.entity("wick-sprite").expect("Wick has a sprite");
+    let sprite = run.entity("wick").expect("Wick is in the scene");
     run.world.get(sprite).expect("it exists").components["sindri.animation.sprite"]["playing"]
         .as_str()
         .expect("a clip")
