@@ -215,7 +215,6 @@ sealed interface EditorEvent {
     data object DiscardEdits : EditorEvent
     /** A finger took a handle, at a point on the canvas in pixels. */
     data class HandleTaken(val handle: HandleKind, val x: Float, val y: Float) : EditorEvent
-    data class GizmoTaken(val id: String, val x: Float, val y: Float) : EditorEvent
     data class HandleDragged(val x: Float, val y: Float) : EditorEvent
     data object HandleReleased : EditorEvent
     /** A number, text or switch slot of the open script given a new value. */

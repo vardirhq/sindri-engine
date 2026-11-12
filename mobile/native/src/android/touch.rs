@@ -8,6 +8,10 @@ use serde_json::{Value, json};
 use super::Host;
 use crate::{Editing, Handle, OpenedScene, Place};
 
+/// How far from a marker's center a finger still lands on it, in points:
+/// wider than the marker drawn, as touch targets are.
+const MARKER_REACH_DP: f32 = 22.0;
+
 impl Host {
     /// The surface's size in pixels, which every touch is measured against.
     fn size(&self) -> [f32; 2] {
@@ -31,7 +35,9 @@ impl Host {
             return Ok(());
         }
         let size = self.size();
+        let radius = MARKER_REACH_DP * self.density;
         let (opened, editing) = self.editing()?;
+        editing.marker_radius = radius;
         editing.tap(&opened.world, &opened.extractor, pixel, size)
     }
 
@@ -41,7 +47,9 @@ impl Host {
             return Ok(());
         }
         let size = self.size();
+        let radius = MARKER_REACH_DP * self.density;
         let (opened, editing) = self.editing()?;
+        editing.marker_radius = radius;
         editing.press(&opened.world, &opened.extractor, pixel, size)
     }
 
@@ -438,8 +446,9 @@ impl Host {
                 Ok(())
             }
             "openScene" => self.open_scene(text(0)?),
-            "clearObjects" | "refreshObjects" | "selectObject" | "gizmoPress"
-            | "reparentObject" => self.object_command(command, &arguments),
+            "clearObjects" | "refreshObjects" | "selectObject" | "reparentObject" => {
+                self.object_command(command, &arguments)
+            }
             "recovery" => self.configure_recovery(text(0)?),
             "recoveryRestore" => self.restore_recovery(),
             "recoveryDiscard" => self.discard_recovery(),

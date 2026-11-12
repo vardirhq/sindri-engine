@@ -241,10 +241,6 @@ class EditorController(
                     (ui.sheet as? EditorSheet.Inspector)?.let { ui = ui.copy(sheet = it.copy(adding = false)) }
                 }
             }
-            is EditorEvent.GizmoTaken -> {
-                error = native.command("gizmoPress", event.id, event.x, event.y)
-                refresh()
-            }
             is EditorEvent.HandleTaken -> {
                 error = native.command("handle", event.handle.native, event.x, event.y, settings.snap)
                 refresh()

@@ -231,18 +231,11 @@ class EditorControllerTest {
     }
 
     @Test
-    fun object_marker_coordinates_and_drag_reach_the_host() {
+    fun object_marker_coordinates_are_scaled_to_points() {
         host.state = EditorState(gizmos = listOf(GizmoUi("42", "Light", "light", 200f, 300f, false)))
         controller.refresh()
         assertEquals(100f, controller.ui.gizmos.single().x, 0.001f)
         assertEquals(150f, controller.ui.gizmos.single().y, 0.001f)
-        controller.on(EditorEvent.GizmoTaken("42", 200f, 300f)) {}
-        assertTrue(listOf("gizmoPress", "42", 200f, 300f) in host.commands)
-        controller.on(EditorEvent.HandleDragged(240f, 310f)) {}
-        assertEquals(listOf("drag", 240f, 310f), host.commands.last())
-        host.state = host.state.copy(unsaved = true)
-        controller.on(EditorEvent.HandleReleased) {}
-        assertEquals(listOf("save"), host.commands.last())
     }
 
     @Test

@@ -97,6 +97,9 @@ pub struct Editing {
     /// dark on purpose can still be seen to be worked on.
     pub lighting_preview: bool,
     pub(crate) touch: Option<Touch>,
+    /// How far from a marker's center, in surface pixels, a finger still
+    /// lands on it. The host sets it from the screen's density.
+    pub marker_radius: f32,
     /// The world the canvas last drew with the selection outlined, and what it
     /// was built for.
     outline: Option<(OutlineKey, Option<World>)>,
@@ -121,6 +124,7 @@ impl Editing {
             canvas: Canvas::framing(world, extractor)?,
             lighting_preview: false,
             touch: None,
+            marker_radius: crate::gizmos::DEFAULT_MARKER_RADIUS,
             outline: None,
             saved_revision: 0,
         })
@@ -193,62 +197,6 @@ impl Editing {
 
     pub(crate) fn invalidate_outline(&mut self) {
         self.outline = None;
-    }
-
-    /// A tap: selects what is under it, or clears the selection over nothing.
-    ///
-    /// # Errors
-    /// As [`Self::pick`].
-    pub fn tap(
-        &mut self,
-        world: &World,
-        extractor: &SceneExtractor,
-        pixel: [f32; 2],
-        size: [f32; 2],
-    ) -> Result<(), String> {
-        let picked = self.pick(world, extractor, pixel, size)?;
-        if self.selecting_more {
-            if let Some(entity) = picked {
-                self.toggle_selected(entity);
-            }
-        } else {
-            self.selected = picked;
-            self.additional.clear();
-        }
-        self.outline = None;
-        Ok(())
-    }
-
-    /// A finger landed. It moves the selection if it landed on it, and the view
-    /// otherwise, so nothing moves that was not chosen first.
-    ///
-    /// # Errors
-    /// As [`Self::pick`].
-    pub fn press(
-        &mut self,
-        world: &World,
-        extractor: &SceneExtractor,
-        pixel: [f32; 2],
-        size: [f32; 2],
-    ) -> Result<(), String> {
-        let under = self.pick(world, extractor, pixel, size)?;
-        let start = self
-            .selected
-            .filter(|_| self.additional.is_empty() && !self.selecting_more)
-            .filter(|selected| under == Some(*selected))
-            .and_then(|entity| {
-                let transform = world.world_transform(entity)?;
-                Some((entity, transform.position))
-            });
-        self.touch = Some(match start {
-            Some((entity, start)) => Touch::Moving {
-                entity,
-                from: pixel,
-                start,
-            },
-            None => Touch::Panning { last: pixel },
-        });
-        Ok(())
     }
 
     /// The finger moved to `pixel`.

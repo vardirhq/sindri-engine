@@ -2,6 +2,8 @@
 
 # Changelog
 
+- Show mobile editor markers only for objects with nothing drawn in their family, so a lamp or Wick is no longer covered by markers for its lights and particles. The engine decides what a tap hits, drawn art first; tapping the same spot again steps to the next thing under the finger; and a marker, like the art, is tapped to select before a drag moves it.
+
 - Add project prefab instances, empty objects and 2D lights from the mobile editor, with undo and scene persistence.
 
 - Let mobile visual scripts choose this object, an Entity field or a uniquely named scene object for object pins.

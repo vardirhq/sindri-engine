@@ -57,7 +57,7 @@ import androidx.compose.ui.unit.sp
 fun EditorScreen(ui: EditorUi, onEvent: (EditorEvent) -> Unit, canvas: @Composable BoxScope.() -> Unit) {
     Box(Modifier.fillMaxSize().background(Forge.Ground)) {
         canvas()
-        if (ui.mode == PlayMode.Edit && ui.painting == null && ui.sheet == null) ObjectGizmos(ui.gizmos, onEvent)
+        if (ui.mode == PlayMode.Edit && ui.painting == null && ui.sheet == null) ObjectGizmos(ui.gizmos)
         if (ui.mode == PlayMode.Edit && ui.painting == null) ui.handles?.let { SelectionHandles(it, onEvent) }
         when (ui.mode) {
             PlayMode.Edit -> EditChrome(ui, onEvent)

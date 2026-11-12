@@ -225,6 +225,14 @@ SINDRI_REQUIRE_GPU=1 cargo test -p sindri-mobile
   edited village files and projects with pending recovery are left untouched.
   Existing edited copies need a separate, non-destructive migration. The new
   layout still needs a Pixel 8 check.
+- **Markers.** Objects with a place in the world and nothing drawn in their
+  family (a standalone light, an empty, a wall shape) show a small marker; the
+  parts of a drawn object show none, and are reached by tapping the art again
+  or through Layers. The selection always shows one. The engine picks drawn art
+  first and markers nearest first, and tapping the same spot again steps to the
+  next candidate. Markers are tapped to select and then dragged, like the art.
+  The first device pass found the old markers covering the lamps and moving
+  parts by accident; the new behavior needs a device check.
 - **Picking and selection.** Sprite taps use the sheet anchor and nontransparent
   pixels, and selection handles use visible pixel bounds. Sliced and custom-shader
   sprites fall back to their full frames. Screen UI is not picked yet. Select
