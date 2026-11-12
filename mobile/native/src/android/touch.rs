@@ -162,6 +162,7 @@ impl Host {
             return Err(format!("the project lists no scene {name}"));
         }
         let project = project.clone();
+        self.close_prefab()?;
         let mut opened = OpenedScene::open(&project, name)?;
         let mut editing = Editing::for_scene(&opened)?;
         editing.lighting_preview = self
@@ -325,11 +326,19 @@ impl Host {
             ),
             _ => (Value::Null, None, None, None, None, false),
         };
+        // A prefab open in the workspace stands in for the selection.
+        let (inspector, undo, redo, unsaved) = self.prefab_state().unwrap_or((
+            inspector,
+            undo.map(str::to_owned),
+            redo.map(str::to_owned),
+            unsaved,
+        ));
         json!({
             "status": self.status(),
             "sceneName": self.opened.as_ref().map(|opened| &opened.name),
             "scenes": self.scenes.iter().map(|scene| json!({"name": scene.name, "main": scene.main})).collect::<Vec<_>>(),
             "inspector": inspector,
+            "prefab": self.prefab.as_ref().map(|session| &session.id),
             "prefabs": self.opened.as_ref().map(|opened| opened.assets.prefabs.ids().collect::<Vec<_>>()).unwrap_or_default(),
             "objects": self.objects,
             "gizmos": match (&self.opened, &self.editing, &self.playing) {
@@ -396,7 +405,12 @@ impl Host {
                 .and_then(Value::as_str)
                 .ok_or_else(|| format!("{command}: argument {index} is not text"))
         };
+        if let Some(result) = self.prefab_command(command, &arguments) {
+            return result;
+        }
         match command {
+            "openPrefab" => self.open_prefab(text(0)?),
+            "closePrefab" => self.close_prefab(),
             "tap" => self.tap([number(0)?, number(1)?]),
             "press" => self.press([number(0)?, number(1)?]),
             "drag" => self.drag([number(0)?, number(1)?]),

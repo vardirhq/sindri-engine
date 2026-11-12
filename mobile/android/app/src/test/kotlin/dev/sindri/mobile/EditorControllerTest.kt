@@ -22,6 +22,8 @@ class EditorControllerTest {
         var scriptEdits = 0
         var openSceneError: String? = null
         var addError: String? = null
+        var sceneSelection: Inspector? = null
+        var prefabRoot: Inspector? = null
 
         override fun command(command: String, vararg arguments: Any?): String? {
             commands += listOf(command, *arguments)
@@ -35,6 +37,8 @@ class EditorControllerTest {
                 "stop" -> playing = null
                 "pause" -> playing = playing?.copy(paused = arguments[0] as Boolean)
                 "editScript" -> scriptEdits += if (arguments[0] == "undo") -1 else 1
+                "openPrefab" -> state = state.copy(prefab = arguments[0] as String, inspector = prefabRoot)
+                "closePrefab" -> state = state.copy(prefab = null, inspector = sceneSelection)
                 "createScript" -> state = state.copy(inspector = state.inspector?.copy(components = listOf(Component("sindri.script", "Script", emptyList(), values = mapOf("source" to "scripts/new.decay")))), unsaved = true)
             }
             return null
@@ -106,6 +110,33 @@ class EditorControllerTest {
         controller.on(EditorEvent.AddColliderPiece) {}
         assertTrue(listOf("colliderAdd", "0") in host.commands)
         assertEquals("collider.1", (controller.ui.sheet as EditorSheet.Parts).part)
+    }
+
+    @Test
+    fun an_instance_opens_its_prefab_in_the_workspace_and_leaving_closes_it() {
+        val light = Component("sindri.light2d", "Light 2D", emptyList(), values = mapOf("radius" to 4.0, "offset" to listOf(0.0, 0.0)))
+        host.sceneSelection = Inspector("lamp-2", listOf(3.0, 1.0, 0.0), listOf(light), prefab = "prefabs/lamp.prefab")
+        host.prefabRoot = Inspector("Lamp", listOf(0.0, 0.0, 0.0), listOf(light))
+        host.state = EditorState(inspector = host.sceneSelection, selectionCount = 1)
+        controller.refresh()
+        controller.on(EditorEvent.OpenInspector) {}
+        controller.on(EditorEvent.InspectorRow("Place", "Edit lamp.prefab", RowChange.Open)) {}
+        assertTrue(listOf("openPrefab", "prefabs/lamp.prefab") in host.commands)
+        val sheet = controller.ui.sheet as EditorSheet.Parts
+        assertEquals("prefabs/lamp.prefab", sheet.prefab)
+        assertEquals("Lamp", sheet.inspector.name)
+        // An edit goes through the same commands; the host routes them to the prefab.
+        controller.on(EditorEvent.PartField(PartEdit("sindri.light2d", "radius", 6.0))) {}
+        assertEquals(listOf("setField", "sindri.light2d", "radius", 6.0, false), host.commands.last { it[0] == "setField" })
+        // Closing the workspace closes the prefab, and the inspector is the scene's again.
+        controller.on(EditorEvent.OpenInspector) {}
+        assertTrue(listOf("closePrefab") in host.commands)
+        assertEquals("lamp-2", (controller.ui.sheet as EditorSheet.Inspector).inspector.name)
+        // Back from a reopened prefab closes it too.
+        controller.on(EditorEvent.OpenPrefab("prefabs/lamp.prefab")) {}
+        val closes = host.commands.count { it == listOf("closePrefab") }
+        controller.back()
+        assertEquals(closes + 1, host.commands.count { it == listOf("closePrefab") })
     }
 
     @Test

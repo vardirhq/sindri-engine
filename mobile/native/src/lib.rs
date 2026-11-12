@@ -46,6 +46,8 @@ mod outline;
 #[cfg(not(target_arch = "wasm32"))]
 mod play;
 #[cfg(not(target_arch = "wasm32"))]
+mod prefab_edit;
+#[cfg(not(target_arch = "wasm32"))]
 mod recovery;
 mod renderer;
 #[cfg(not(target_arch = "wasm32"))]
@@ -67,6 +69,8 @@ pub use edits::Place;
 pub use opened::{ListedScene, OpenedScene, listed_scenes};
 #[cfg(not(target_arch = "wasm32"))]
 pub use play::Playing;
+#[cfg(not(target_arch = "wasm32"))]
+pub use prefab_edit::PrefabSession;
 #[cfg(not(target_arch = "wasm32"))]
 pub use recovery::Recovery;
 pub use renderer::{SceneRenderer, Shot};

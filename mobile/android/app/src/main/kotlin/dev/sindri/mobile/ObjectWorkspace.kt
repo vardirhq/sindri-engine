@@ -92,7 +92,9 @@ fun BoxScope.ObjectWorkspace(sheet: EditorSheet.Parts, onEvent: (EditorEvent) ->
     val parts = ObjectParts.of(sheet.inspector)
     val chosen = parts.firstOrNull { it.key == sheet.part } ?: parts.firstOrNull()
     SheetFrame(SheetHeight.Below(0.dp)) {
-        SheetHeader("Parts", "${sheet.inspector.name} · in the object's own units", onClose = { onEvent(EditorEvent.OpenInspector) })
+        val subtitle = sheet.prefab?.let { "${it.substringAfterLast('/')} · every instance follows" }
+            ?: "${sheet.inspector.name} · in the object's own units"
+        SheetHeader(if (sheet.prefab != null) "Prefab parts" else "Parts", subtitle, onClose = { onEvent(EditorEvent.OpenInspector) })
         PartsCanvas(parts, chosen, sheet.image, onEvent)
         Row(
             Modifier.horizontalScroll(rememberScrollState()).padding(horizontal = 14.dp, vertical = 10.dp),

@@ -12,6 +12,7 @@
 
 mod exports;
 mod playing;
+mod prefab;
 mod scripts;
 mod selection;
 mod touch;
@@ -64,6 +65,8 @@ struct Host {
     play_error: Option<String>,
     /// The script the Behaviour sheet has open, as Decay blocks.
     script: Option<scripts::OpenScript>,
+    /// The prefab the object workspace has open, beside the scene.
+    prefab: Option<crate::PrefabSession>,
 }
 
 impl Host {
@@ -86,6 +89,7 @@ impl Host {
         self.recovery_conflict = false;
         self.recovered = false;
         self.editing = Some(Editing::for_scene(&opened)?);
+        self.prefab = None;
         self.opened = Some(opened);
         self.installed = false;
         self.source = Some((project, scene));

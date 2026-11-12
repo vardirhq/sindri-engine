@@ -1,8 +1,8 @@
 # Object parts and the object workspace
 
-Status: proposal. Sprite `size` and `offset`, light `offset` and the mobile
-object workspace for a scene object, the first two steps, are built; the rest
-is not.
+Status: proposal. Steps 1 to 3 below are built: sprite `size` and `offset`,
+light `offset`, and the mobile object workspace for a scene object or a
+prefab. The rest is not.
 
 ## The problem
 
@@ -140,9 +140,10 @@ things, not parts.
    light's reach, a box emitter and the shadow, and a part list
    (`ObjectWorkspace.kt`, `ObjectParts.kt`; `mobile/first-slice.md` lists
    what it does not do yet).
-3. Open a prefab file in the workspace; instances in the open scene follow.
-   Check which of desktop's prefab-following code needs to move into
-   `sindri-authoring` first, since the phone cannot depend on the editor crate.
+3. **Done:** open a prefab in the workspace, from an instance's inspector;
+   instances in the open scene follow through `sindri_authoring::prefab::follow`,
+   keeping their overrides (`mobile/native/src/prefab_edit.rs`). Only the
+   prefab's root is shown.
 4. Named component instances in the engine and both editors; Decay access once
    `docs/decay-direction.md` settles the syntax. Collapse Lamplighter's lantern.
 5. Collider piece names, reported by contacts and sensor events.

@@ -57,6 +57,8 @@ data class Inspector(
     val tile: Double = 1.0,
     val sprite: SpriteRegion? = null,
     val addable: List<ComponentChoice> = emptyList(),
+    /** The prefab this object is an instance of, or part of one, as the scene places it. */
+    val prefab: String? = null,
 ) {
     fun component(type: String): Component? = components.firstOrNull { it.type == type }
 }
@@ -83,6 +85,8 @@ data class EditorState(
     val scenes: List<SceneCard> = emptyList(),
     val prefabs: List<PrefabTile> = emptyList(),
     val inspector: Inspector? = null,
+    /** The prefab open in the object workspace, which [inspector] then shows the root of. */
+    val prefab: String? = null,
     val objects: List<TreeRow> = emptyList(),
     val gizmos: List<GizmoUi> = emptyList(),
     val selectionCount: Int = 0,
@@ -121,6 +125,7 @@ data class EditorState(
                     }
                 }.orEmpty(),
                 inspector = root.optJSONObject("inspector")?.let(::inspector),
+                prefab = root.optStringOrNull("prefab"),
                 objects = root.optJSONArray("objects")?.objects()?.map { obj ->
                     val screen = obj.optBoolean("screen")
                     TreeRow(obj.optInt("depth"), if (screen) Sym.web_asset else Sym.deployed_code, obj.getString("name"),
@@ -183,6 +188,7 @@ data class EditorState(
                 )
             }.orEmpty(),
             id = json.optStringOrNull("id"),
+            prefab = json.optStringOrNull("prefab"),
             addable = json.optJSONArray("addable")?.objects()?.map { ComponentChoice(it.getString("type"), it.getString("display")) }.orEmpty(),
             turn = json.optDouble("turn", 0.0).takeUnless { it.isNaN() } ?: 0.0,
             scale = json.optJSONArray("scale")?.doubles() ?: listOf(1.0, 1.0, 1.0),

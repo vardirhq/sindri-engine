@@ -110,6 +110,7 @@ object InspectorPresenter {
         val sizes = SliderScale(0.25, maxOf(5.0, size))
         section.add(RowUi.Slider("Size", sizes.fraction(size), "${String.format(Locale.ROOT, "%.1f", size)}×"), RowBinding.PlaceSlider("size", sizes, step = 0.05))
         if (ObjectParts.of(inspector).isNotEmpty()) section.add(RowUi.More("Edit parts", false), RowBinding.OpenParts)
+        inspector.prefab?.let { prefab -> section.add(RowUi.More("Edit ${prefab.substringAfterLast('/')}", false), RowBinding.OpenPrefab(prefab)) }
         return section
     }
 
@@ -305,6 +306,7 @@ sealed interface RowBinding {
 
     data object OpenCollider : RowBinding { override fun edit(change: RowChange): NativeEdit? = null }
     data object OpenParts : RowBinding { override fun edit(change: RowChange): NativeEdit? = null }
+    data class OpenPrefab(val id: String) : RowBinding { override fun edit(change: RowChange): NativeEdit? = null }
 
     data object PickSprite : RowBinding { override fun edit(change: RowChange): NativeEdit? = null }
 

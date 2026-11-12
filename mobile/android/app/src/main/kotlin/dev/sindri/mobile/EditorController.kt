@@ -144,6 +144,12 @@ class EditorController(
     }
 
     fun on(event: EditorEvent, onHome: () -> Unit) {
+        val before = ui.sheet
+        handle(event, onHome)
+        leftPrefab(before)
+    }
+
+    private fun handle(event: EditorEvent, onHome: () -> Unit) {
         when (event) {
             EditorEvent.Home -> onHome()
             // With a script open, Undo and Redo step through its edits.
@@ -226,6 +232,7 @@ class EditorController(
             is EditorEvent.LayerTabChosen -> (ui.sheet as? EditorSheet.Layers)?.let { ui = ui.copy(sheet = it.copy(tab = event.tab)) }
             is EditorEvent.InspectorRow -> inspectorRow(event)
             is EditorEvent.OpenParts -> openParts(event.part)
+            is EditorEvent.OpenPrefab -> openPrefab(event.id)
             is EditorEvent.PartChosen -> (ui.sheet as? EditorSheet.Parts)?.let { ui = ui.copy(sheet = it.copy(part = event.key)) }
             is EditorEvent.PartDragged -> {
                 error = native.command("setField", event.edit.type, event.edit.path, event.edit.value, true)
@@ -410,6 +417,27 @@ class EditorController(
         ui = ui.copy(sheet = EditorSheet.Inspector(inspectorUi(inspector)), menu = null)
     }
 
+    /**
+     * The prefab [id] in the object workspace. The host saves the scene, opens
+     * the prefab beside it and reports its root as the inspector; the prefab is
+     * saved, and its instances followed, as each edit is made.
+     */
+    private fun openPrefab(id: String) {
+        error = native.command("openPrefab", id)
+        refresh()
+        if (error != null) return
+        val inspector = state.inspector ?: return
+        val image = inspector.sprite?.let { region -> region.rect?.takeIf { it.size == 4 }?.let { ProjectImage(assetRoot + region.texture, it) } }
+        ui = ui.copy(sheet = EditorSheet.Parts(inspector, image, null, prefab = id), menu = null)
+    }
+
+    /** Closes the prefab the workspace had open once the workspace is left, so edits go to the scene again. */
+    private fun leftPrefab(before: EditorSheet?) {
+        if ((before as? EditorSheet.Parts)?.prefab == null || (ui.sheet as? EditorSheet.Parts)?.prefab != null) return
+        error = native.command("closePrefab")
+        refresh()
+    }
+
     /** The object workspace on the selection, with [part] chosen, or its first part. */
     private fun openParts(part: String? = null) {
         if (state.selectionCount > 1) return notWired("Editing multiple objects")
@@ -534,6 +562,7 @@ class EditorController(
             binding is RowBinding.PickSprite -> showAssets(AssetTab.Sprites, true)
             binding is RowBinding.OpenCollider -> openParts("collider.0")
             binding is RowBinding.OpenParts -> openParts()
+            binding is RowBinding.OpenPrefab -> openPrefab(binding.id)
             binding is RowBinding.NotWired -> notWired(binding.what)
             event.change == RowChange.Settled -> nativeEdit("settle")
             event.change is RowChange.To -> binding.edit(event.change)?.let { edit ->
@@ -574,6 +603,11 @@ class EditorController(
      * editor.
      */
     fun back(): Boolean {
+        val before = ui.sheet
+        return stepBack().also { leftPrefab(before) }
+    }
+
+    private fun stepBack(): Boolean {
         when {
             ui.menu != null -> ui = ui.copy(menu = null)
             ui.sheet != null -> ui = ui.copy(sheet = null)

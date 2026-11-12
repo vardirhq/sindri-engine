@@ -167,4 +167,9 @@ class DesignScreens {
     @Test fun parts() = editor("29-parts", lamp.copy(sheet = EditorSheet.Parts(wickParts, wickImage, "sprite")))
 
     @Test fun partsCollider() = editor("29b-parts-collider", lamp.copy(sheet = EditorSheet.Parts(wickParts, wickImage, "collider.1")))
+
+    @Test fun partsPrefab() = editor(
+        "29c-parts-prefab",
+        lamp.copy(sheet = EditorSheet.Parts(wickParts.copy(name = "Wick"), wickImage, "light", prefab = "prefabs/wick.prefab")),
+    )
 }

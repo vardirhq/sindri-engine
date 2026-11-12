@@ -70,6 +70,13 @@ impl Editing {
             "scale": transform.map(|transform| transform.scale),
             "tile": tile_size(world, registry),
             "sprite": sprite,
+            // The prefab this is an instance of, or part of one, as the scene
+            // places it: what Edit prefab opens.
+            "prefab": world
+                .instance_root(entity)
+                .and_then(|root| world.get(root))
+                .and_then(|root| root.prefab.as_ref())
+                .map(|link| link.source.clone()),
             "components": components,
             "addable": crate::components::addable(world, entity, registry),
             "undo": self.history.undo_label(),
