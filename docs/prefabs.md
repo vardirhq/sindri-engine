@@ -293,6 +293,14 @@ its view center as one undoable edit. It uses the same authoring placement as
 desktop. A prefab must be addressable from the scene's directory; dragging to a
 point, thumbnails and grid-cell placement on mobile remain future work.
 
+On mobile, an instance's inspector offers *Edit lamp.prefab*, which opens the
+prefab in the object workspace beside the scene, with its own world and undo
+history. Each edit saves the prefab through `sindri-authoring` and brings every
+instance in the open scene up to date as one undo step there, keeping what
+each overrides, then saves the scene. `sindri_authoring::prefab::follow` is
+that step, shared for desktop to use as well. Only the root's parts are shown;
+a prefab's children, and making a prefab, are desktop's for now.
+
 - **Placing.** Drag a prefab from the project browser into the Scene view: it
   lands on the grid cell under the pointer when there is one, and otherwise
   where the pointer meets the plane a 2D scene is drawn in, at the prefab's own

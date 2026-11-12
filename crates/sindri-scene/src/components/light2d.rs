@@ -63,6 +63,10 @@ pub struct Light2dComponent {
     /// How much of the cone's width fades out at its edge, 0 to 1: 0 is a hard
     /// edge and 1 a beam that is brightest only along its middle.
     pub cone_softness: f32,
+    /// Where the light sits from the object's origin, in the object's own
+    /// units: it moves, turns and scales with the object, so a lamp's glow
+    /// can sit at its lantern without an object of its own.
+    pub offset: [f32; 2],
 }
 
 impl SceneComponent for Light2dComponent {
@@ -84,6 +88,7 @@ impl Default for Light2dComponent {
             cone_angle: 360.0,
             cone_direction: 0.0,
             cone_softness: 0.3,
+            offset: [0.0, 0.0],
         }
     }
 }
@@ -129,6 +134,9 @@ impl Light2dComponent {
                 "must be a finite number above 0 and at most 360",
             ));
         }
+        if !self.offset.iter().all(|value| value.is_finite()) {
+            return Err(field("offset", "must be finite numbers"));
+        }
         if !self.cone_direction.is_finite() {
             return Err(field("cone_direction", "must be a finite number"));
         }
@@ -152,6 +160,19 @@ impl Light2dComponent {
             self.cone_angle,
             self.cone_softness,
         ))
+    }
+
+    /// Where the light is in the world, for an object placed at `transform`.
+    #[must_use]
+    pub fn world_position(self, transform: sindri_core::Transform3D) -> [f32; 2] {
+        let rotation = glam::Quat::from_array(transform.rotation);
+        let local = glam::Vec3::new(
+            self.offset[0] * transform.scale[0],
+            self.offset[1] * transform.scale[1],
+            0.0,
+        );
+        let at = glam::Vec3::from_array(transform.position) + rotation * local;
+        [at.x, at.y]
     }
 
     /// The light's color in linear terms, scaled by intensity and alpha.

@@ -455,6 +455,11 @@ fn the_inspector_reports_effective_values_meanings_and_the_sprite_region() {
     assert_eq!(shown["sprite"]["texture"], json!("textures/decor.png"));
     assert_eq!(shown["sprite"]["region"], json!("mushrooms"));
     assert_eq!(shown["sprite"]["rect"], json!([0.5, 0.0, 0.25, 1.0]));
+    // The sheet stands its pictures on their feet, which the object workspace
+    // draws as the renderer does.
+    assert_eq!(shown["sprite"]["anchor"], json!([0.0, 0.5]));
+    // A sprite's own size and offset are effective values like any other.
+    assert_eq!(sprite["values"]["size"], json!([1.0, 1.0]));
 }
 
 #[test]

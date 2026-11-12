@@ -125,6 +125,20 @@ pub struct SpriteComponent {
     /// The `name` of the mask it meets.
     #[serde(default)]
     pub mask_name: String,
+    /// How big the picture is drawn, in the object's own units, before the
+    /// object's scale. Sizing the art here rather than scaling the object
+    /// keeps a body's collider, lights and children at the size they were
+    /// authored, so the art needs no object of its own. Negative mirrors.
+    #[serde(default = "unit_size")]
+    pub size: [f32; 2],
+    /// Where the picture's center sits from the object's origin, in the
+    /// object's own units: it moves, turns and scales with the object.
+    #[serde(default)]
+    pub offset: [f32; 2],
+}
+
+const fn unit_size() -> [f32; 2] {
+    [1.0, 1.0]
 }
 
 /// Whether an image stretches whole or keeps its border.
@@ -159,6 +173,50 @@ impl SpriteComponent {
     /// refusing the file would be refusing to let anyone.
     pub fn reference(&self) -> Result<SpriteRef, SpriteRefError> {
         SpriteRef::parse(&self.texture)
+    }
+}
+
+impl SpriteComponent {
+    /// A point on the picture's unit quad, where the object's own space has
+    /// it: scaled by [`Self::size`] and moved by [`Self::offset`].
+    #[must_use]
+    pub fn to_object(&self, picture: [f32; 2]) -> [f32; 2] {
+        [
+            self.offset[0] + picture[0] * self.size[0],
+            self.offset[1] + picture[1] * self.size[1],
+        ]
+    }
+
+    /// A point in the object's own space, on the picture's unit quad. `None`
+    /// when the picture has no width or height to land on.
+    #[must_use]
+    pub fn to_picture(&self, object: [f32; 2]) -> Option<[f32; 2]> {
+        let usable = |value: f32| value.is_finite() && value.abs() > f32::EPSILON;
+        (usable(self.size[0]) && usable(self.size[1])).then(|| {
+            [
+                (object[0] - self.offset[0]) / self.size[0],
+                (object[1] - self.offset[1]) / self.size[1],
+            ]
+        })
+    }
+
+    /// A rectangle on the picture (left, bottom, right, top) as the object's
+    /// own space has it, still left of right and below top when mirrored.
+    #[must_use]
+    pub fn object_bounds(&self, picture: [f32; 4]) -> [f32; 4] {
+        let [left, bottom, right, top] = picture;
+        let [a, b] = self.to_object([left, bottom]);
+        let [c, d] = self.to_object([right, top]);
+        [a.min(c), b.min(d), a.max(c), b.max(d)]
+    }
+
+    /// Whether the size and offset are numbers a renderer can use.
+    #[must_use]
+    pub fn placement_is_finite(&self) -> bool {
+        self.size
+            .iter()
+            .chain(&self.offset)
+            .all(|value| value.is_finite())
     }
 }
 

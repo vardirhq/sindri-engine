@@ -519,3 +519,39 @@ fn a_child_sprite_is_drawn_relative_to_its_parent() {
     let across = instances[0].model().x_axis.truncate().length();
     assert!(close(across, 2.0), "it grew with its parent: {across}");
 }
+
+/// A sprite's own size and offset place its picture in the object's space,
+/// so art can be sized and moved without scaling or moving the object.
+#[test]
+fn a_sprite_is_sized_and_offset_in_its_objects_space() {
+    let world = world_from(&scene(
+        r#",
+        { "id": "body", "transform_3d": {
+            "position": [10.0, 0.0, 0.5],
+            "rotation": [0.0, 0.0, 0.7071068, 0.7071068],
+            "scale": [2.0, 2.0, 1.0] },
+          "components": { "sindri.sprite": {
+            "texture": "b", "size": [3.0, 1.5], "offset": [1.0, 0.0] } } }"#,
+    ));
+    let frame = SceneExtractor::new()
+        .unwrap()
+        .extract(
+            &world,
+            VIEWPORT,
+            CameraView::default(),
+            &TextureBindings::new(),
+        )
+        .expect("the scene extracts");
+    let FrameCommand::SpriteBatch { instances, .. } = &frame.passes()[0].command else {
+        panic!("expected a sprite batch");
+    };
+    let model = instances[0].model();
+    // One unit along the body's x, which has turned to face up, doubled.
+    let center = model.w_axis.truncate();
+    assert!(
+        close(center.x, 10.0) && close(center.y, 2.0),
+        "the picture's center landed at {center:?}"
+    );
+    assert!(close(model.x_axis.truncate().length(), 6.0));
+    assert!(close(model.y_axis.truncate().length(), 3.0));
+}

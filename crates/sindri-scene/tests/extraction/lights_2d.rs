@@ -99,6 +99,23 @@ fn a_light_carries_its_place_reach_and_color_times_intensity() {
     assert!(lamp.shadow.is_none());
 }
 
+/// An offset places the light from its object, turning with it, so a glow
+/// can sit at a lantern without an object of its own.
+#[test]
+fn a_light_sits_at_its_offset_from_its_object() {
+    let lamp = r#",
+        { "id": "lamp", "transform_3d": {
+            "position": [2.0, 0.0, 0.0],
+            "rotation": [0.0, 0.0, 0.7071068, 0.7071068] },
+          "components": { "sindri.light2d": { "offset": [1.0, 0.5] } } }"#;
+    let lit = lighting(&(environment(true) + lamp)).expect("lighting is on");
+    let [x, y] = lit.lights[0].position;
+    assert!(
+        (x - 1.5).abs() < 1.0e-5 && (y - 1.0).abs() < 1.0e-5,
+        "at {x}, {y}"
+    );
+}
+
 #[test]
 fn a_spot_light_lights_only_its_cone() {
     let beam = r#", "cone_angle": 60.0, "cone_direction": 90.0, "cone_softness": 0.0"#;

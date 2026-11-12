@@ -38867,32 +38867,7 @@
           "source": "scripts/wick.decay",
           "script": "Wick",
           "properties": {}
-        }
-      }
-    },
-    {
-      "id": "wick-sprite",
-      "name": "wick-sprite",
-      "transform_3d": {
-        "position": [
-          0,
-          0,
-          0
-        ],
-        "rotation": [
-          0,
-          0,
-          0,
-          1
-        ],
-        "scale": [
-          3.0,
-          2.75,
-          1
-        ]
-      },
-      "parent": "wick",
-      "components": {
+        },
         "sindri.sprite": {
           "texture": "textures/wick.png#idle-south",
           "layer": 5,
@@ -38901,6 +38876,10 @@
             1.0,
             1.0,
             1.0
+          ],
+          "size": [
+            3.0,
+            2.75
           ]
         },
         "sindri.shadow2d": {
@@ -39088,30 +39067,6 @@
         ]
       },
       "parent": "wick",
-      "components": {}
-    },
-    {
-      "id": "wick-lantern-sprite",
-      "name": "wick-lantern-sprite",
-      "transform_3d": {
-        "position": [
-          0,
-          0,
-          0
-        ],
-        "rotation": [
-          0,
-          0,
-          0,
-          1
-        ],
-        "scale": [
-          0.6,
-          0.8,
-          1
-        ]
-      },
-      "parent": "wick-lantern",
       "components": {
         "sindri.sprite": {
           "texture": "textures/lantern.png",
@@ -39121,6 +39076,10 @@
             1.0,
             1.0,
             1.0
+          ],
+          "size": [
+            0.6,
+            0.8
           ]
         }
       }

@@ -496,3 +496,35 @@ fn rejecting_a_transparent_sprite_hit_allows_the_sprite_behind_it() {
     .unwrap();
     assert_eq!(picked, Some(behind));
 }
+
+#[test]
+fn a_sized_and_offset_sprite_is_picked_and_boxed_where_it_is_drawn() {
+    let extractor = SceneExtractor::new().unwrap();
+    let mut world = World::default();
+    let sprite = spawn(
+        &mut world,
+        Transform3D::default(),
+        "sindri.sprite",
+        json!({
+            "texture": "procedural:checkerboard",
+            "size": [0.4, 0.4],
+            "offset": [0.6, 0.0]
+        }),
+    );
+    let components = extractor.components();
+    // The object's origin is outside its picture; the picture is right of it.
+    assert_eq!(
+        pick_world(&world, components, Mat4::IDENTITY, [0.5, 0.5]).unwrap(),
+        None
+    );
+    assert_eq!(
+        pick_world(&world, components, Mat4::IDENTITY, [0.8, 0.5]).unwrap(),
+        Some(sprite)
+    );
+    let [left, top, right, bottom] = world_bounds(&world, components, Mat4::IDENTITY, sprite)
+        .unwrap()
+        .unwrap();
+    for (found, expected) in [(left, 0.7), (top, 0.4), (right, 0.9), (bottom, 0.6)] {
+        assert!((found - expected).abs() < 1.0e-5, "{found} != {expected}");
+    }
+}

@@ -2,6 +2,14 @@
 
 # Changelog
 
+- Edit a prefab from mobile. An instance's inspector offers *Edit lamp.prefab*, which opens the prefab in the object workspace; each edit saves it and brings every instance in the scene up to date, keeping what each overrides.
+
+- Edit an object's parts on mobile. *Edit parts* opens the object on its own, with its art, shadow, particle emitter, light and collider shapes drawn in its own units: drag a part to place it, drag its handle to size it or set a light's reach, and step its numbers below. It replaces the collider workspace.
+
+- Give `sindri.sprite` its own `size` and `offset`, and `sindri.light2d` an `offset`, all in the object's own space. Art can be sized and placed on a body without scaling its collider, so Lamplighter's Wick and his lantern now carry their art on themselves instead of on two extra objects. Existing scenes draw exactly as before.
+
+- Show mobile editor markers only for objects with nothing drawn in their family, so a lamp or Wick is no longer covered by markers for its lights and particles. The engine decides what a tap hits, drawn art first; tapping the same spot again steps to the next thing under the finger; and a marker, like the art, is tapped to select before a drag moves it.
+
 - Add project prefab instances, empty objects and 2D lights from the mobile editor, with undo and scene persistence.
 
 - Let mobile visual scripts choose this object, an Entity field or a uniquely named scene object for object pins.

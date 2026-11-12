@@ -39,8 +39,11 @@ data class Component(
     fun number(path: String): Double? = (value(path) as? Number)?.toDouble()
 }
 
-/** A sprite's picture: its texture, the named part, and where that part is in the image. */
-data class SpriteRegion(val texture: String, val region: String?, val rect: List<Float>?)
+/**
+ * A sprite's picture: its texture, the named part, where that part is in the
+ * image, and how its sheet's anchor moves the picture within its quad.
+ */
+data class SpriteRegion(val texture: String, val region: String?, val rect: List<Float>?, val anchor: List<Float>? = null)
 
 data class Inspector(
     val name: String,
@@ -54,6 +57,8 @@ data class Inspector(
     val tile: Double = 1.0,
     val sprite: SpriteRegion? = null,
     val addable: List<ComponentChoice> = emptyList(),
+    /** The prefab this object is an instance of, or part of one, as the scene places it. */
+    val prefab: String? = null,
 ) {
     fun component(type: String): Component? = components.firstOrNull { it.type == type }
 }
@@ -80,6 +85,8 @@ data class EditorState(
     val scenes: List<SceneCard> = emptyList(),
     val prefabs: List<PrefabTile> = emptyList(),
     val inspector: Inspector? = null,
+    /** The prefab open in the object workspace, which [inspector] then shows the root of. */
+    val prefab: String? = null,
     val objects: List<TreeRow> = emptyList(),
     val gizmos: List<GizmoUi> = emptyList(),
     val selectionCount: Int = 0,
@@ -118,6 +125,7 @@ data class EditorState(
                     }
                 }.orEmpty(),
                 inspector = root.optJSONObject("inspector")?.let(::inspector),
+                prefab = root.optStringOrNull("prefab"),
                 objects = root.optJSONArray("objects")?.objects()?.map { obj ->
                     val screen = obj.optBoolean("screen")
                     TreeRow(obj.optInt("depth"), if (screen) Sym.web_asset else Sym.deployed_code, obj.getString("name"),
@@ -180,6 +188,7 @@ data class EditorState(
                 )
             }.orEmpty(),
             id = json.optStringOrNull("id"),
+            prefab = json.optStringOrNull("prefab"),
             addable = json.optJSONArray("addable")?.objects()?.map { ComponentChoice(it.getString("type"), it.getString("display")) }.orEmpty(),
             turn = json.optDouble("turn", 0.0).takeUnless { it.isNaN() } ?: 0.0,
             scale = json.optJSONArray("scale")?.doubles() ?: listOf(1.0, 1.0, 1.0),
@@ -189,6 +198,7 @@ data class EditorState(
                     texture = sprite.optString("texture"),
                     region = sprite.optStringOrNull("region"),
                     rect = sprite.optJSONArray("rect")?.doubles()?.map { it.toFloat() },
+                    anchor = sprite.optJSONArray("anchor")?.doubles()?.map { it.toFloat() },
                 )
             },
         )

@@ -38,7 +38,8 @@ pub fn pick_world(
 }
 
 /// Pick with caller-provided sprite geometry, while preserving world draw order.
-/// The callback receives a point in the entity's local coordinate system.
+/// The callback receives a point on the sprite's unit picture quad: the
+/// entity's local point with the sprite's own size and offset taken out.
 pub fn pick_world_with_sprite_hit(
     world: &World,
     components: &ComponentSchemaRegistry,
@@ -71,7 +72,8 @@ pub fn pick_world_with_sprite_hit(
         .filter_map(|(entity, sprite)| {
             let transform = transform_of(world, entity);
             let (depth, local) = plane_hit(ray, transform, f32::INFINITY)?;
-            hit(entity, &sprite, [local.x, local.y]).then_some(Hit {
+            let picture = sprite.to_picture([local.x, local.y])?;
+            hit(entity, &sprite, picture).then_some(Hit {
                 entity,
                 depth,
                 layer: sprite.layer,
@@ -140,12 +142,15 @@ pub fn anchored_bounds(
                     .map(|[dx, dy]| Vec3::new(x + dx * width, y + dy * height, 0.0))
             })
             .collect()
-    } else if components
+    } else if let Some(sprite) = components
         .get::<SpriteComponent>(world, entity)?
-        .is_some_and(|sprite| is_drawn(sprite.tint))
+        .filter(|sprite| is_drawn(sprite.tint))
     {
         [[-0.5, -0.5], [0.5, -0.5], [-0.5, 0.5], [0.5, 0.5]]
-            .map(|[x, y]| Vec3::new(x + offset[0], y + offset[1], 0.0))
+            .map(|[x, y]| {
+                let [x, y] = sprite.to_object([x + offset[0], y + offset[1]]);
+                Vec3::new(x, y, 0.0)
+            })
             .to_vec()
     } else if components
         .get::<MeshComponent>(world, entity)?
@@ -163,7 +168,8 @@ pub fn anchored_bounds(
     Ok(project_bounds(world, view_projection, entity, corners))
 }
 
-/// Project a sprite's visible local rectangle, including its anchor offset.
+/// Project a rectangle in the entity's local space, such as a sprite's
+/// visible pixels placed by [`SpriteComponent::object_bounds`].
 pub fn sprite_content_bounds(
     world: &World,
     view_projection: Mat4,

@@ -70,6 +70,13 @@ impl Editing {
             "scale": transform.map(|transform| transform.scale),
             "tile": tile_size(world, registry),
             "sprite": sprite,
+            // The prefab this is an instance of, or part of one, as the scene
+            // places it: what Edit prefab opens.
+            "prefab": world
+                .instance_root(entity)
+                .and_then(|root| world.get(root))
+                .and_then(|root| root.prefab.as_ref())
+                .map(|link| link.source.clone()),
             "components": components,
             "addable": crate::components::addable(world, entity, registry),
             "undo": self.history.undo_label(),
@@ -157,15 +164,29 @@ fn sprite_region(texture: &str, sheets: &BTreeMap<String, SpriteSheetDocument>) 
     let Ok(reference) = SpriteRef::parse(texture) else {
         return json!({ "texture": texture, "region": null, "rect": null });
     };
-    let rect = match (reference.sprite(), reference.sheet()) {
+    let sheet = reference
+        .sheet()
+        .and_then(|sheet| sheets.get(sheet.as_str()));
+    let rect = match (reference.sprite(), sheet) {
         (None, _) => Some([0.0, 0.0, 1.0, 1.0]),
-        (Some(region), Some(sheet)) => sheets
-            .get(sheet.as_str())
-            .and_then(|sheet| sheet.rects().ok())
+        (Some(region), Some(sheet)) => sheet
+            .rects()
+            .ok()
             .and_then(|rects| rects.get(region).copied()),
         (Some(_), None) => None,
     };
-    json!({ "texture": reference.texture(), "region": reference.sprite(), "rect": rect })
+    // Where the sheet stands its pictures, as the renderer moves the quad: the
+    // object workspace draws the art where the scene does.
+    let anchor = sheet
+        .and_then(|sheet| sheet.anchor)
+        .unwrap_or_default()
+        .offset();
+    json!({
+        "texture": reference.texture(),
+        "region": reference.sprite(),
+        "rect": rect,
+        "anchor": anchor,
+    })
 }
 
 /// What a field means, for the app: its kind, and a range's ends (`null` for

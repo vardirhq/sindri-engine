@@ -50,7 +50,7 @@ fun BoxScope.EditorSheetHost(sheet: EditorSheet, onEvent: (EditorEvent) -> Unit)
         is EditorSheet.Layers -> LayersSheet(sheet, onEvent)
         is EditorSheet.Scenes -> ScenesSheet(sheet, onEvent)
         is EditorSheet.Inspector -> InspectorSheet(sheet, onEvent)
-        is EditorSheet.Collider -> ColliderSheet(sheet, onEvent)
+        is EditorSheet.Parts -> ObjectWorkspace(sheet, onEvent)
         is EditorSheet.Behaviour -> BehaviourSheet(sheet, onEvent)
         is EditorSheet.Review -> ReviewSheet(sheet, onEvent)
     }

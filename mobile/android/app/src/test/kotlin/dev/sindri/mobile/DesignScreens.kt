@@ -141,4 +141,35 @@ class DesignScreens {
     @Test fun review() = editor("27-review", base.copy(sheet = EditorSheet.Review(SampleEditor.runEdits)))
 
     @Test fun coach() = editor("28-coach", base.copy(coach = "Tap the lamp post next to the gap."))
+
+    /** Wick in the object workspace: his art on his body, his shadow and two collider shapes. */
+    private val wickParts = Inspector(
+        "Wick",
+        listOf(0.0, 0.0, 0.5),
+        listOf(
+            Component("sindri.sprite", "Sprite", emptyList(), values = mapOf("size" to listOf(3.0, 2.75), "offset" to listOf(0.0, 0.0))),
+            Component("sindri.shadow2d", "Shadow", emptyList(), values = mapOf("contact_size" to listOf(0.9, 0.35), "contact_offset" to listOf(0.0, 0.0))),
+            Component(
+                "sindri.physics2d.collider", "Collider", emptyList(),
+                values = mapOf(
+                    "pieces" to listOf(
+                        mapOf("shape" to mapOf("shape" to "circle", "radius" to 0.4), "offset" to listOf(0.0, 0.45), "rotation" to 0.0, "sensor" to false),
+                        mapOf("shape" to mapOf("shape" to "circle", "radius" to 0.7), "offset" to listOf(0.0, 0.45), "rotation" to 0.0, "sensor" to true),
+                    ),
+                ),
+            ),
+            Component("sindri.light2d", "Light 2D", emptyList(), values = mapOf("radius" to 2.2, "offset" to listOf(-0.74, 0.76))),
+        ),
+        sprite = SpriteRegion("textures/wick.png", "idle-south", listOf(0f, 0f, 48f / 816f, 44f / 176f), anchor = listOf(0f, 0.5f)),
+    )
+    private val wickImage = ProjectImage("projects/lamplighter/assets/textures/wick.png", listOf(0f, 0f, 48f / 816f, 44f / 176f))
+
+    @Test fun parts() = editor("29-parts", lamp.copy(sheet = EditorSheet.Parts(wickParts, wickImage, "sprite")))
+
+    @Test fun partsCollider() = editor("29b-parts-collider", lamp.copy(sheet = EditorSheet.Parts(wickParts, wickImage, "collider.1")))
+
+    @Test fun partsPrefab() = editor(
+        "29c-parts-prefab",
+        lamp.copy(sheet = EditorSheet.Parts(wickParts.copy(name = "Wick"), wickImage, "light", prefab = "prefabs/wick.prefab")),
+    )
 }

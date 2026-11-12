@@ -191,9 +191,9 @@ pub(crate) fn gather_lights(
                 continue;
             }
         };
-        let position = world.world_transform(entity).unwrap_or_default().position;
+        let position = light.world_position(world.world_transform(entity).unwrap_or_default());
         lights.push(Light2d {
-            position: [position[0], position[1]],
+            position,
             height: light.height,
             radius: light.radius,
             falloff: light.falloff,

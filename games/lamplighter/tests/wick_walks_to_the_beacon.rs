@@ -111,7 +111,7 @@ fn a_run_lights_every_lantern_and_the_last_opens_the_way() {
 
 /// The clip Wick's sprite is playing.
 fn clip(run: &Run) -> String {
-    let sprite = run.entity("wick-sprite").expect("Wick has a sprite");
+    let sprite = run.entity("wick").expect("Wick is in the scene");
     let data = run.world.get(sprite).expect("it exists");
     data.components["sindri.animation.sprite"]["playing"]
         .as_str()

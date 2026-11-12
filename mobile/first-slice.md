@@ -206,14 +206,16 @@ SINDRI_REQUIRE_GPU=1 cargo test -p sindri-mobile
 - **Frame everything.** The overflow action fits world objects, sprite art and tilemaps with a margin; screen UI is excluded. Zoom remains limited to the canvas's normal range, so very large scenes may not fit completely. Device verification is open.
 - **Add.** Lists project prefabs and places linked instances at the view center; Empty and Light 2D are available without prefabs. Each is undoable and saves through the scene. Lamplighter currently has no prefabs, so its prefab list is empty. Drag placement and thumbnails are not wired; device verification remains open.
 - **Components.** The searchable, categorized inspector picker adds supported lights, 2D colliders, rigid bodies and shadows with validated engine defaults and undo. Sprite can be added to an existing world object and its image changed; other asset-dependent components remain open. Device verification remains open.
-- **Collider workspace.** The inspector opens a full-height view with a local sprite and selected collider-piece preview. Box, circle and capsule pieces can be added, removed and edited through controls; offset, rotation, sensor, friction and restitution are editable. Shapes are selected individually; direct canvas manipulation and collision-layer controls remain open. Device verification remains open.
+- **Object workspace.** *Edit parts* in the inspector's Place section (and *Edit collider shapes*) opens the selected object on its own, framed in its own units: its art, contact shadow, particle emitter, light and each collider shape are drawn and listed as parts. Tap a part or its chip to choose it; drag it to move its offset; drag its handle to size the art, the shadow or a box emitter, or to set a light's reach. Each drag is one undo step, saved when the finger lifts. Below the canvas the chosen part's offset and size step by 0.05, and a collider shape keeps its kind, turn, size, friction, bounce and sensor controls and can be added or removed. Collider shapes are not resized by handle, rotation is not dragged, an object's own scale is not shown, and particle offsets are in world units, so on a scaled object they sit off where the workspace draws them. An instance's inspector also offers *Edit lamp.prefab*, which opens that prefab's root in the workspace instead: each edit saves the prefab and brings every instance in the scene up to date, keeping their overrides, as one undo step in the scene. Only the root's parts are shown, and the prefab's own undo history ends when the workspace closes. Device verification remains open.
 - **Images.** Android's document picker imports a PNG into the open project's textures. The Sprites tab lists project PNGs and tapping one creates an undoable sprite object. Other asset tabs, sprite swapping and slicing remain open; device verification remains open.
 - **Objects.** Layers shows the scene hierarchy, including screen UI and prefab children, with collapsible branches and parent selection. Reparenting is undoable; prefab-owned children cannot be restructured. Layer visibility is not wired. Screen UI selection is inspectable but has no canvas handles, and reparenting screen UI retains its local layout. Device verification remains open.
 - **Script finder.** Search all supported calls or browse engine categories. Object arguments default to this object and vectors to zero. Some argument types are still unavailable. Object pins can use this object, an Entity field, or a uniquely named scene object found by name; duplicate or unnamed scene objects are not offered. Device verification remains open.
 - **New scripts.** An object without a script can create and attach a new Decay behavior, initially with an empty update handler. Undo detaches it but retains the file; script selection and renaming remain open. Device verification remains open.
 - **Fields.** The inspector edits a component's top-level numbers and switches.
   Text, vectors, colors, enums and references are not shown yet, and a field
-  authored as a whole number steps by whole numbers.
+  authored as a whole number steps by whole numbers. A sprite's `size` and
+  `offset`, a light's `offset` and the other parts' placement are edited in
+  the object workspace instead.
 - **Scenes.** The Scenes sheet lists the project's manifest and opens a selected
   scene; it saves the current scene first and remembers the selected scene for
   recovery after restart. New scene and scene-door editing remain unwired.
@@ -225,6 +227,14 @@ SINDRI_REQUIRE_GPU=1 cargo test -p sindri-mobile
   edited village files and projects with pending recovery are left untouched.
   Existing edited copies need a separate, non-destructive migration. The new
   layout still needs a Pixel 8 check.
+- **Markers.** Objects with a place in the world and nothing drawn in their
+  family (a standalone light, an empty, a wall shape) show a small marker; the
+  parts of a drawn object show none, and are reached by tapping the art again
+  or through Layers. The selection always shows one. The engine picks drawn art
+  first and markers nearest first, and tapping the same spot again steps to the
+  next candidate. Markers are tapped to select and then dragged, like the art.
+  The first device pass found the old markers covering the lamps and moving
+  parts by accident; the new behavior needs a device check.
 - **Picking and selection.** Sprite taps use the sheet anchor and nontransparent
   pixels, and selection handles use visible pixel bounds. Sliced and custom-shader
   sprites fall back to their full frames. Screen UI is not picked yet. Select

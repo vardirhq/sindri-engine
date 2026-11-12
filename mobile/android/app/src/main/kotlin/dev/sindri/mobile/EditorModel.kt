@@ -87,7 +87,13 @@ sealed interface EditorSheet {
     data class Layers(val tab: LayerTab, val layers: List<LayerRow>, val objects: List<TreeRow>, val collapsed: Set<String> = emptySet(), val moving: String? = null) : EditorSheet
     data class Scenes(val scenes: List<SceneCard>, val doors: List<Pair<String, String>>) : EditorSheet
     data class Inspector(val inspector: InspectorUi, val full: Boolean = false, val live: Boolean = false, val adding: Boolean = false) : EditorSheet
-    data class Collider(val inspector: dev.sindri.mobile.Inspector, val image: ProjectImage?, val piece: Int = 0) : EditorSheet
+    /** The object workspace: the selection's parts, with [part] chosen (a key from [ObjectParts]). */
+    /**
+     * The object workspace: the selection's parts, with [part] chosen (a key
+     * from [ObjectParts]). With [prefab] it shows that prefab's root instead,
+     * and every instance in the scene follows what is saved.
+     */
+    data class Parts(val inspector: dev.sindri.mobile.Inspector, val image: ProjectImage?, val part: String? = null, val prefab: String? = null) : EditorSheet
     data class Behaviour(val behaviour: BehaviourUi, val code: Boolean = false) : EditorSheet
     data class Review(val edits: List<RunEdit>) : EditorSheet
 }
@@ -200,8 +206,16 @@ sealed interface EditorEvent {
     data class PrefabChosen(val prefab: PrefabTile) : EditorEvent
     data class AddBasic(val kind: String) : EditorEvent
     data class InspectorRow(val section: String, val row: String, val change: RowChange) : EditorEvent
-    data object OpenCollider : EditorEvent
-    data class ColliderPiece(val index: Int) : EditorEvent
+    /** Open the object workspace, with [part] chosen if it is given. */
+    data class OpenParts(val part: String? = null) : EditorEvent
+    /** Open the prefab [id] in the object workspace, as the scene places it. */
+    data class OpenPrefab(val id: String) : EditorEvent
+    data class PartChosen(val key: String) : EditorEvent
+    /** A part moved or resized while a finger is still on it: merged into one undo step. */
+    data class PartDragged(val edit: PartEdit) : EditorEvent
+    /** The finger lifted: the drag's undo step is closed and saved. */
+    data object PartSettled : EditorEvent
+    data class PartField(val edit: PartEdit) : EditorEvent
     data class ColliderField(val path: String, val value: Any) : EditorEvent
     data object AddColliderPiece : EditorEvent
     data object RemoveColliderPiece : EditorEvent
@@ -215,7 +229,6 @@ sealed interface EditorEvent {
     data object DiscardEdits : EditorEvent
     /** A finger took a handle, at a point on the canvas in pixels. */
     data class HandleTaken(val handle: HandleKind, val x: Float, val y: Float) : EditorEvent
-    data class GizmoTaken(val id: String, val x: Float, val y: Float) : EditorEvent
     data class HandleDragged(val x: Float, val y: Float) : EditorEvent
     data object HandleReleased : EditorEvent
     /** A number, text or switch slot of the open script given a new value. */

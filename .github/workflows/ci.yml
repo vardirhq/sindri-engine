@@ -777,7 +777,7 @@ jobs:
       - name: Test the app
         id: android_test
         working-directory: mobile/android
-        run: ./gradlew --no-daemon :app:testDebugUnitTest --tests 'dev.sindri.mobile.EditorControllerTest' --tests 'dev.sindri.mobile.InspectorPresenterTest' --tests 'dev.sindri.mobile.DecayCanvasTest'
+        run: ./gradlew --no-daemon :app:testDebugUnitTest --tests 'dev.sindri.mobile.EditorControllerTest' --tests 'dev.sindri.mobile.InspectorPresenterTest' --tests 'dev.sindri.mobile.DecayCanvasTest' --tests 'dev.sindri.mobile.ObjectPartsTest' --tests 'dev.sindri.mobile.BundledVillageUpgradeTest'
       - name: Report Android test failures
         if: ${{ failure() && steps.android_test.outcome == 'failure' }}
         run: |
