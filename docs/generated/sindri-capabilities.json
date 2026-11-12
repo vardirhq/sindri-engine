@@ -655,6 +655,10 @@
         "falloff": 1.5,
         "height": 1.0,
         "intensity": 1.0,
+        "offset": [
+          0.0,
+          0.0
+        ],
         "radius": 4.0,
         "shadow_reach": 0.10000000149011612,
         "shadow_source_radius": 0.0,
@@ -675,6 +679,10 @@
         "falloff": 1.5,
         "height": 1.0,
         "intensity": 1.0,
+        "offset": [
+          0.0,
+          0.0
+        ],
         "radius": 4.0,
         "shadow_reach": 0.10000000149011612,
         "shadow_source_radius": 0.0,
@@ -2125,12 +2133,20 @@
         "mask": "none",
         "mask_name": "",
         "normal_map": "",
+        "offset": [
+          0.0,
+          0.0
+        ],
         "shader": "",
         "shader_params": [
           0.0,
           0.0,
           0.0,
           0.0
+        ],
+        "size": [
+          1.0,
+          1.0
         ],
         "texture": "procedural:checkerboard",
         "tint": [
@@ -2164,12 +2180,20 @@
         "mask": "none",
         "mask_name": "",
         "normal_map": "",
+        "offset": [
+          0.0,
+          0.0
+        ],
         "shader": "",
         "shader_params": [
           0.0,
           0.0,
           0.0,
           0.0
+        ],
+        "size": [
+          1.0,
+          1.0
         ],
         "texture": "procedural:checkerboard",
         "tint": [

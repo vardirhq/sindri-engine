@@ -240,7 +240,8 @@ pub(super) fn register_sprite(
             "shader_params": [0.0, 0.0, 0.0, 0.0],
             "normal_map": "",
             "unlit": false,
-            "draw": "simple", "border_scale": 1.0 / 16.0, "mask": "none", "mask_name": ""
+            "draw": "simple", "border_scale": 1.0 / 16.0, "mask": "none", "mask_name": "",
+            "size": [1.0, 1.0], "offset": [0.0, 0.0]
         }),
     )?;
     Ok(())

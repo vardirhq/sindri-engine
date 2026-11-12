@@ -418,7 +418,13 @@ lands in, and what its transform means.
 | Component | Projection | Stage | Depth | Transform |
 | --- | --- | --- | --- | --- |
 | `sindri.ui.image` | Viewport-owned screen projection | `Overlay` | Ignored — nothing in the world may hide a HUD | X and Y offset an anchor; Z orders it without moving it |
-| `sindri.sprite` | Authored world camera, perspective or orthographic | `Transparent2d` | Tested, never written | The whole transform, exactly as a mesh reads it |
+| `sindri.sprite` | Authored world camera, perspective or orthographic | `Transparent2d` | Tested, never written | The whole transform, exactly as a mesh reads it, then the sprite's own `size` and `offset` in the entity's space |
+
+A sprite's `size` (default `[1, 1]`) and `offset` (default `[0, 0]`) place its picture in its
+entity's own space, before the entity's scale, so a body's art can be sized and moved without
+scaling its collider or giving the art an object of its own. Picking and the editors' selection
+boxes take the same placement out before they test the picture, so a tap lands where the art is
+drawn.
 
 This used to be a `space` field on one component, and it is two components because the rows of that
 table are not two values of one thing: the anchor column is a field a UI image has and a sprite does

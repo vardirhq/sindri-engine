@@ -89,11 +89,11 @@ impl SceneExtractor {
             if !world.is_active(entity) || !light.enabled {
                 continue;
             }
-            let position = world.world_transform(entity).unwrap_or_default().position;
+            let position = light.world_position(world.world_transform(entity).unwrap_or_default());
             let [r, g, b] = light.radiance();
             lights.push(Caster {
                 entity,
-                position: [position[0], position[1]],
+                position,
                 height: light.height,
                 radius: light.radius,
                 falloff: light.falloff,

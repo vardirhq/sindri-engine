@@ -440,8 +440,12 @@ impl Editing {
                 .ok()
                 .flatten()
             && let Some(bounds) = hits.bounds(&sprite)
-            && let Some([left, top, right, bottom]) =
-                sprite_content_bounds(world, camera.view_projection, entity, bounds)
+            && let Some([left, top, right, bottom]) = sprite_content_bounds(
+                world,
+                camera.view_projection,
+                entity,
+                sprite.object_bounds(bounds),
+            )
         {
             return Ok(Some([
                 left * size[0],

@@ -222,7 +222,15 @@ impl SceneExtractor {
             } else {
                 transform_matrix(transform)
             };
-            let model = placed * Mat4::from_translation(Vec3::new(offset_x, offset_y, 0.0));
+            if !sprite.placement_is_finite() {
+                return Err(SceneExtractError::InvalidSpritePlacement);
+            }
+            // The sprite's own size and offset place the picture in the
+            // object's space; the anchor then moves it within the picture.
+            let model = placed
+                * Mat4::from_translation(Vec3::new(sprite.offset[0], sprite.offset[1], 0.0))
+                * Mat4::from_scale(Vec3::new(sprite.size[0], sprite.size[1], 1.0))
+                * Mat4::from_translation(Vec3::new(offset_x, offset_y, 0.0));
             let order = TransparentOrder::new(
                 sprite.layer,
                 camera_distance(camera.view, model.w_axis.truncate()),

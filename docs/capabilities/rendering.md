@@ -223,9 +223,9 @@ Textured sprites in screen or world space, batched per space, layer and texture,
 
 Engine ✅ · Editor ✅ · Decay 🟡 · Proof ✅ — parity row *Sprites, sheets, UVs, layers, blending*
 
-**Tested by:** [`crates/sindri-gpu/tests/sprite_batches_are_independent.rs`](../../crates/sindri-gpu/tests/sprite_batches_are_independent.rs), [`crates/sindri-gpu/tests/sprite_uv_rect.rs`](../../crates/sindri-gpu/tests/sprite_uv_rect.rs), [`crates/sindri-gpu/tests/world_sprites.rs`](../../crates/sindri-gpu/tests/world_sprites.rs), [`crates/sindri-gpu/tests/sprite_textures_follow_their_registry.rs`](../../crates/sindri-gpu/tests/sprite_textures_follow_their_registry.rs), [`crates/sindri-render/src/sprite_batch/tests.rs`](../../crates/sindri-render/src/sprite_batch/tests.rs), [`crates/sindri-scene/tests/extraction/sprites.rs`](../../crates/sindri-scene/tests/extraction/sprites.rs), [`crates/sindri-core/src/sheet/tests.rs`](../../crates/sindri-core/src/sheet/tests.rs)
+**Tested by:** [`crates/sindri-gpu/tests/sprite_batches_are_independent.rs`](../../crates/sindri-gpu/tests/sprite_batches_are_independent.rs), [`crates/sindri-gpu/tests/sprite_uv_rect.rs`](../../crates/sindri-gpu/tests/sprite_uv_rect.rs), [`crates/sindri-gpu/tests/world_sprites.rs`](../../crates/sindri-gpu/tests/world_sprites.rs), [`crates/sindri-gpu/tests/sprite_textures_follow_their_registry.rs`](../../crates/sindri-gpu/tests/sprite_textures_follow_their_registry.rs), [`crates/sindri-render/src/sprite_batch/tests.rs`](../../crates/sindri-render/src/sprite_batch/tests.rs), [`crates/sindri-scene/tests/extraction/sprites.rs`](../../crates/sindri-scene/tests/extraction/sprites.rs), [`crates/sindri-scene/src/picking/tests.rs`](../../crates/sindri-scene/src/picking/tests.rs), [`crates/sindri-core/src/sheet/tests.rs`](../../crates/sindri-core/src/sheet/tests.rs)
 
-**Exercised in:** [`games/platformer`](../../games/platformer), [`games/orbital-baked`](../../games/orbital-baked)
+**Exercised in:** [`games/platformer`](../../games/platformer), [`games/orbital-baked`](../../games/orbital-baked), [`games/lamplighter`](../../games/lamplighter)
 
 <details markdown="1">
 <summary>Evidence</summary>
@@ -251,6 +251,13 @@ instance so every part of one sheet stays in one draw call — a GPU test reads
 the pixels back to prove the shader honours it. A name no loaded sheet places
 draws the whole image and is reported by `unresolved_sprites`, the same rule an
 unbound texture follows.
+
+**A sprite is placed on its object.** Its own `size` and `offset` put the
+picture in the object's space before the object's scale, so a body's art is
+sized without scaling its collider and needs no object of its own. Extraction,
+picking and selection boxes apply the same placement; a test places a turned,
+scaled body's art and picks a sprite whose picture sits beside its origin.
+Lamplighter's Wick carries his art this way.
 
 </details>
 
@@ -572,7 +579,7 @@ away from each of the two strongest lights near it, as long as `height * distanc
 light height` up to `max_length` and as dark as the light that reaches its feet.
 `sindri.sight2d` on one entity makes it the viewer: what it cannot see past an
 occluder is dimmed by `unseen`, out to its `radius`. A light with a `cone_angle` below 360 is a spot light: a beam `cone_direction`
-degrees round, fading at its edge by `cone_softness`. Decay writes a light's color,
+degrees round, fading at its edge by `cone_softness`. An `offset` places a light from its entity, turning and scaling with it, and the cast shadows and `Lighting.level` read the same place. Decay writes a light's color,
 intensity, radius, falloff, height and beam, and
 asks the lighting with `Lighting.visible(from, to)` for line of sight past the
 occluders and `Lighting.level(point)` for how bright a place is. The Scene

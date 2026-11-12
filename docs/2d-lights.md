@@ -25,7 +25,7 @@ content are never lit.
 
 ## Lights
 
-`sindri.light2d` is a point of light at its entity's world position:
+`sindri.light2d` is a point of light at its entity's world position, moved by its `offset`:
 
 | Field | Meaning | Default |
 | --- | --- | --- |
@@ -41,6 +41,7 @@ content are never lit.
 | `cone_angle` | How wide the beam is, in degrees across; 360 lights every way | `360` |
 | `cone_direction` | Where the beam points, in degrees: 0 is right and 90 is up | `0` |
 | `cone_softness` | How much of the cone's width fades out at its edge: 0 is hard, 1 is brightest only along the middle | `0.3` |
+| `offset` | Where the light sits from its entity, in the entity's own units: it moves, turns and scales with it, so a lamp's glow sits at its lantern without an object of its own. Rendering, cast shadows and `Lighting.level` all read it | `[0, 0]` |
 
 It is its own component rather than a kind of `sindri.light`: a 3D light shades
 surfaces by the way they face, and a 2D light lights pictures, which face only

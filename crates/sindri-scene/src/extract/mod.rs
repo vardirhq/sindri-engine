@@ -166,6 +166,8 @@ pub enum SceneExtractError {
     InvalidColorTransform,
     #[error("a sprite's shader parameters must be finite")]
     InvalidShaderParams,
+    #[error("a sprite's size and offset must be finite")]
+    InvalidSpritePlacement,
     #[error(transparent)]
     Light2d(#[from] crate::Light2dError),
     #[error(transparent)]

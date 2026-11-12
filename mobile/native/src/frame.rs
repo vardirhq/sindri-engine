@@ -41,7 +41,7 @@ fn include(bounds: &mut Option<[f32; 4]>, point: Vec3) {
 
 fn sprite_bounds(opened: &OpenedScene, sprite: &SpriteComponent) -> [f32; 4] {
     if let Some(bounds) = opened.sprite_hits.bounds(sprite) {
-        return bounds;
+        return sprite.object_bounds(bounds);
     }
     let offset = sprite
         .reference()
@@ -57,12 +57,12 @@ fn sprite_bounds(opened: &OpenedScene, sprite: &SpriteComponent) -> [f32; 4] {
         })
         .unwrap_or_default()
         .offset();
-    [
+    sprite.object_bounds([
         offset[0] - 0.5,
         offset[1] - 0.5,
         offset[0] + 0.5,
         offset[1] + 0.5,
-    ]
+    ])
 }
 
 fn tile_bounds(map: &TilemapComponent) -> Option<[f32; 4]> {
