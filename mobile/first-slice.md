@@ -213,7 +213,9 @@ SINDRI_REQUIRE_GPU=1 cargo test -p sindri-mobile
 - **New scripts.** An object without a script can create and attach a new Decay behavior, initially with an empty update handler. Undo detaches it but retains the file; script selection and renaming remain open. Device verification remains open.
 - **Fields.** The inspector edits a component's top-level numbers and switches.
   Text, vectors, colors, enums and references are not shown yet, and a field
-  authored as a whole number steps by whole numbers.
+  authored as a whole number steps by whole numbers. So a sprite's `size` and
+  `offset` and a light's `offset` cannot be edited on the phone yet; they are
+  what the planned object workspace (`docs/object-parts.md`) will drag.
 - **Scenes.** The Scenes sheet lists the project's manifest and opens a selected
   scene; it saves the current scene first and remembers the selected scene for
   recovery after restart. New scene and scene-door editing remain unwired.
