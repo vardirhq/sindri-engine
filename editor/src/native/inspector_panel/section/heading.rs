@@ -28,6 +28,18 @@ pub(super) enum HeadingAsk {
     Paste(Value),
     Reset(Value),
     Remove,
+    /// Give the part this name: `sindri.light2d#halo`.
+    Rename(String),
+}
+
+/// What a component's heading asks of the entity, beyond its own payload.
+pub(crate) enum SectionAsk {
+    Remove(String),
+    /// The part `from` is to be named `to`, a part name.
+    Rename {
+        from: String,
+        to: String,
+    },
 }
 
 /// The heading menu's entries for the component `name`, whose payload is
@@ -71,6 +83,9 @@ pub(super) fn heading_menu(
         *asked = Some(HeadingAsk::Reset(blank));
         ui.close();
     }
+    if crate::native::inspector_panel::parts::has_parts(name) {
+        rename_part_menu(ui, name, asked);
+    }
     if removable {
         ui.separator();
         if menu::danger(ui, "Remove component", "").clicked() {
@@ -80,14 +95,40 @@ pub(super) fn heading_menu(
     }
 }
 
+/// "Name part": what a script calls this part by, `light2d("halo")`. Typed
+/// in place, and kept in egui's memory while the menu is open.
+fn rename_part_menu(ui: &mut egui::Ui, name: &str, asked: &mut Option<HeadingAsk>) {
+    let id = egui::Id::new(("inspector-part-name", name));
+    let current = sindri_core::split_part(name)
+        .1
+        .unwrap_or_default()
+        .to_owned();
+    ui.menu_button("Name part", |ui| {
+        let mut typed = ui
+            .ctx()
+            .data(|data| data.get_temp::<String>(id))
+            .unwrap_or(current);
+        let field = ui.text_edit_singleline(&mut typed);
+        let submitted = field.lost_focus() && ui.input(|input| input.key_pressed(egui::Key::Enter));
+        if ui.button("Name it").clicked() || submitted {
+            *asked = Some(HeadingAsk::Rename(typed.trim().to_owned()));
+            ui.ctx().data_mut(|data| data.remove::<String>(id));
+            ui.close();
+        } else {
+            ui.ctx().data_mut(|data| data.insert_temp(id, typed));
+        }
+    });
+}
+
 /// Carries out what the heading's menu asked for on the draft payload,
-/// answering whether the component is to be removed.
+/// answering what is asked of the entity: removing the component, or naming
+/// the part.
 pub(super) fn act_on_heading(
     ui: &egui::Ui,
     name: &str,
     payload: &mut Value,
     asked: HeadingAsk,
-) -> bool {
+) -> Option<SectionAsk> {
     match asked {
         HeadingAsk::Copy => {
             ui.ctx().data_mut(|data| {
@@ -101,13 +142,17 @@ pub(super) fn act_on_heading(
             if let Ok(text) = serde_json::to_string_pretty(payload) {
                 ui.ctx().copy_text(text);
             }
-            false
+            None
         }
         HeadingAsk::Paste(value) | HeadingAsk::Reset(value) => {
             *payload = value;
-            false
+            None
         }
-        HeadingAsk::Remove => true,
+        HeadingAsk::Remove => Some(SectionAsk::Remove(name.to_owned())),
+        HeadingAsk::Rename(to) => Some(SectionAsk::Rename {
+            from: name.to_owned(),
+            to,
+        }),
     }
 }
 

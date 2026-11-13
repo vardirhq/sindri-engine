@@ -24,6 +24,7 @@ mod light;
 pub(super) mod list;
 mod mask;
 mod orbit;
+pub(crate) mod parts;
 pub(super) mod rows;
 mod scene;
 pub(super) mod section;
@@ -48,6 +49,7 @@ pub(super) use self::held::HeldInspectorEdits;
 use self::scene::{SceneSummary, scene_section};
 use self::section::components_sections;
 use self::section::grid::grid_choices;
+use self::section::heading::SectionAsk;
 use sindri_scene::TileSetBindings;
 
 use crate::{
@@ -343,10 +345,15 @@ impl EditorApp {
             self.console.warning(error);
             return;
         }
+        // A second light or emitter is a named part beside the first.
+        let held = self.world.get(entity).map(|data| &data.components);
+        let key = parts::free_key(type_name, |key| {
+            held.is_some_and(|held| held.contains_key(key))
+        });
         let mut buffer = CommandBuffer::new();
         buffer.push(WorldCommand::SetComponent {
             entity,
-            type_name: type_name.to_owned(),
+            type_name: key,
             payload,
         });
         self.break_merge_runs();
@@ -536,8 +543,10 @@ impl EditorApp {
         self.commit_draft(entity, &original, &draft);
         self.settle_identity(entity, identity, identity_edit);
         self.commit_held(ui.ctx(), entity, held, &components);
-        if let Some(type_name) = removed {
-            self.remove_component(entity, &type_name);
+        match removed {
+            Some(SectionAsk::Remove(type_name)) => self.remove_component(entity, &type_name),
+            Some(SectionAsk::Rename { from, to }) => self.rename_part(entity, &from, &to),
+            None => {}
         }
         if let Some(type_name) = added {
             self.add_component(entity, &type_name, context.defaults());
