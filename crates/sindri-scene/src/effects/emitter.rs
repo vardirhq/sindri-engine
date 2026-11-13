@@ -132,6 +132,20 @@ impl Effects2d {
         self.emit_from(EmitterId::of(entity), particles, at, count)
     }
 
+    /// [`Self::emit_now`] for a named emitter part, or the entity's own with
+    /// `None`.
+    pub fn emit_part_now(
+        &mut self,
+        entity: EntityId,
+        part: Option<&str>,
+        particles: &ParticlesComponent,
+        at: [f32; 2],
+        count: u32,
+    ) -> usize {
+        let emitter = self.emitter_id(entity, part);
+        self.emit_from(emitter, particles, at, count)
+    }
+
     /// [`Self::emit_now`] for any emitter, a named part's included.
     fn emit_from(
         &mut self,

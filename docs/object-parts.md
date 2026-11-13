@@ -1,8 +1,9 @@
 # Object parts and the object workspace
 
-Status: steps 1 to 3 below, and the first part of step 4, are built: sprite
-`size` and `offset`, light `offset`, the mobile object workspace for a scene
-object or a prefab, and named parts for lights and particles. The rest is not.
+Status: steps 1 to 3 below, and the first two parts of step 4, are built:
+sprite `size` and `offset`, light `offset`, the mobile object workspace for a
+scene object or a prefab, named parts for lights and particles, and scripts
+reaching them. The rest is not.
 
 ## The problem
 
@@ -92,12 +93,18 @@ which keeps an unknown component key as an unknown payload. Built:
   `sindri.particles#glow`, so Wick is four objects: the body, the lantern, and
   the lantern's two lights.
 
-Decay's syntax is decided in `docs/decay-direction.md` ("Named parts"):
-`this.entity.light2d("halo")` looks a part up, and a script attached as a part
-(`sindri.script#halo`) reads its own name's parts first. Not built yet, so the
-lantern's two lights, each flickered by its own `Flame` script, and the
-glooms' emitters, which `gloom.decay` finds by name, stay objects of their own
-until it is. Desktop's Scene view draws no gizmo for a named light.
+Scripts reach a part as `docs/decay-direction.md` ("Named parts") decided:
+`this.entity.light2d("halo")` and `this.entity.particles("surge")` answer the
+part, or `null`, and a part is held and compared like an entity. The language
+gained one thing for it, a host member that also answers a call with a name
+(`decay/LANGUAGE.md`, "Members with named parts"); the host keeps an interned
+list of the parts scripts reach and swaps the component key while it serves
+one, so every member of the kind reaches a part by the same code as the
+object's own. Each gloom now carries its smoke and surge as parts.
+
+A script attached as a part (`sindri.script#halo`) is not built yet, so the
+lantern's two lights, each flickered by its own `Flame` script, stay objects
+of their own. Desktop's Scene view draws no gizmo for a named light.
 
 ### Colliders
 
@@ -158,8 +165,9 @@ things, not parts.
 4. Named component instances.
    - **4a, done:** the key, the registry, lights and particles, both editors,
      and the lantern's emitters.
-   - **4b:** `entity.light2d("halo")` and its kin in Decay, then the glooms'
-     emitters.
+   - **4b, done:** `this.light2d("halo")` and `this.particles("surge")` in
+     Decay, with an emitter's own `play()`, `stop()` and `emit(count)`; the
+     glooms carry their smoke and surge as parts that `gloom.decay` plays.
    - **4c:** several scripts on one object, each a part reading its own
      name's parts first; then the lantern's lights, so Wick is two objects.
 5. Collider piece names, reported by contacts and sensor events.

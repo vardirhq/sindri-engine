@@ -285,3 +285,101 @@ fn computed_host_values_reject_whole_and_component_writes_but_allow_copies() {
     );
     assert!(copied.diagnostics.is_empty(), "{:?}", copied.diagnostics);
 }
+
+/// A member with named parts: the member alone is the thing's own, and a call
+/// with a name answers another of the same type, or `null`.
+#[test]
+fn a_member_with_parts_is_called_with_a_name() {
+    let mut environment = Environment::new();
+    environment.add_type(
+        "Light2d",
+        HostType::new().with_value("radius", Type::Number),
+    );
+    environment.add_type(
+        "Entity",
+        HostType::new()
+            .with_value("light2d", Type::Named("Light2d".to_owned()))
+            .with_parts("light2d"),
+    );
+    environment.add_this_value("light2d", Type::Named("Light2d".to_owned()));
+    environment.add_this_parts("light2d");
+    environment.add_this_value("entity", Type::Named("Entity".to_owned()));
+
+    let good = analyze_with_environment(
+        r#"
+        script Lantern {
+            fn update(dt: f32) {
+                this.light2d.radius = 10.0;
+                let halo = this.entity.light2d("halo");
+                if halo != null {
+                    halo.radius = 4.6;
+                }
+                let glow: Light2d = this.light2d("glow");
+                if glow == null { return; }
+                glow.radius += dt;
+            }
+        }
+        "#,
+        &environment,
+    );
+    assert!(good.diagnostics.is_empty(), "{:?}", good.diagnostics);
+
+    let wrong_member = analyze_with_environment(
+        r#"script Lantern { fn update() { let halo = this.entity.light2d("halo"); if halo != null { halo.radiuss = 1.0; } } }"#,
+        &environment,
+    );
+    assert!(
+        wrong_member
+            .diagnostics
+            .iter()
+            .any(|d| d.message.contains("has no member `radiuss`")),
+        "the part is checked as its type: {:?}",
+        wrong_member.diagnostics
+    );
+
+    let wrong_argument = analyze_with_environment(
+        r"script Lantern { fn update() { let halo = this.entity.light2d(2.0); } }",
+        &environment,
+    );
+    assert!(
+        wrong_argument
+            .diagnostics
+            .iter()
+            .any(|d| d.message.contains("takes the part's name as `String`")),
+        "{:?}",
+        wrong_argument.diagnostics
+    );
+
+    let no_argument = analyze_with_environment(
+        r"script Lantern { fn update() { let halo = this.entity.light2d(); } }",
+        &environment,
+    );
+    assert!(
+        no_argument
+            .diagnostics
+            .iter()
+            .any(|d| d.message.contains("takes one argument")),
+        "{:?}",
+        no_argument.diagnostics
+    );
+}
+
+/// A value member without parts is still not callable.
+#[test]
+fn a_member_without_parts_is_not_called() {
+    let mut environment = Environment::new();
+    environment.add_type("Transform", HostType::new().with_value("x", Type::Number));
+    environment.add_this_value("transform", Type::Named("Transform".to_owned()));
+    let called = analyze_with_environment(
+        r#"script Player { fn update() { let t = this.transform("x"); } }"#,
+        &environment,
+    );
+    assert!(
+        called
+            .diagnostics
+            .iter()
+            .any(|d| d.message.contains("is a value, not a function")),
+        "{:?}",
+        called.diagnostics
+    );
+}

@@ -425,11 +425,18 @@
       "type": "Light"
     },
     {
-      "description": "The 2D light on this script's object, if it has one: its color, brightness and reach.",
+      "description": "The 2D light on this script's object, if it has one: its color, brightness and reach. Call it with a name, `light2d(\"halo\")`, for another of the object's lights, or `null` when it has none of that name.",
       "kind": "value",
       "name": "light2d",
       "read_only": false,
       "type": "Light2d"
+    },
+    {
+      "description": "The particle emitter on this script's object, if it has one: how many it throws and how fast, and `play()`, `stop()` and `emit(count)`. Call it with a name, `particles(\"surge\")`, for another of the object's emitters, or `null` when it has none of that name.",
+      "kind": "value",
+      "name": "particles",
+      "read_only": false,
+      "type": "Particles"
     },
     {
       "description": "The drawn shape on this script's object, if it has one: its colors, outline and how much of it is drawn.",
@@ -1539,11 +1546,18 @@
           "type": "Light"
         },
         {
-          "description": "The object's 2D light, if it has one.",
+          "description": "The object's 2D light, if it has one. `light2d(\"halo\")` is another of its lights by name, or `null`.",
           "kind": "value",
           "name": "light2d",
           "read_only": false,
           "type": "Light2d"
+        },
+        {
+          "description": "The object's particle emitter, if it has one. `particles(\"surge\")` is another of its emitters by name, or `null`.",
+          "kind": "value",
+          "name": "particles",
+          "read_only": false,
+          "type": "Particles"
         },
         {
           "description": "The object's drawn shape, if it has one.",
@@ -2430,6 +2444,68 @@
       "description": "A managed number tween; read with Tween.number_value.",
       "members": [],
       "name": "NumberTween"
+    },
+    {
+      "description": "A particle emitter on an object: smoke, sparks, embers. It throws `rate` particles a second while it plays. An object's own emitter is `particles`; another, named one is `particles(\"surge\")`.",
+      "members": [
+        {
+          "description": "Throws that many particles at once, whether or not it is playing, and gives how many it threw: fewer when its pool is full.",
+          "kind": "function",
+          "name": "emit",
+          "parameter_names": [
+            "count"
+          ],
+          "parameters": [
+            "number"
+          ],
+          "returns": "number"
+        },
+        {
+          "description": "How many seconds a particle lives.",
+          "kind": "value",
+          "name": "lifetime",
+          "read_only": false,
+          "type": "number"
+        },
+        {
+          "description": "Starts throwing particles. Gives 1.",
+          "kind": "function",
+          "name": "play",
+          "parameter_names": [],
+          "parameters": [],
+          "returns": "number"
+        },
+        {
+          "description": "How many particles it throws a second while it plays.",
+          "kind": "value",
+          "name": "rate",
+          "read_only": false,
+          "type": "number"
+        },
+        {
+          "description": "How big a particle is when thrown, in world units.",
+          "kind": "value",
+          "name": "size",
+          "read_only": false,
+          "type": "number"
+        },
+        {
+          "description": "How fast a particle leaves, in world units a second.",
+          "kind": "value",
+          "name": "speed",
+          "read_only": false,
+          "type": "number"
+        },
+        {
+          "description": "Stops throwing particles; those already out live on. Gives 1.",
+          "kind": "function",
+          "name": "stop",
+          "parameter_names": [],
+          "parameters": [],
+          "returns": "number"
+        }
+      ],
+      "name": "Particles"
     },
     {
       "description": "2D physics: moving objects with speed and pushes, and finding out what this script's object bumped into.",

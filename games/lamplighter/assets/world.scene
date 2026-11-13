@@ -13124,36 +13124,9 @@
         "sindri.script": {
           "source": "scripts/gloom.decay",
           "script": "Gloom",
-          "properties": {
-            "surge_name": "gloom-1-surge"
-          }
-        }
-      }
-    },
-    {
-      "id": "gloom-1-smoke",
-      "name": "gloom-1-smoke",
-      "transform_3d": {
-        "position": [
-          0,
-          0.45,
-          0
-        ],
-        "rotation": [
-          0,
-          0,
-          0,
-          1
-        ],
-        "scale": [
-          1.0,
-          1.0,
-          1
-        ]
-      },
-      "parent": "gloom-1",
-      "components": {
-        "sindri.particles": {
+          "properties": {}
+        },
+        "sindri.particles#smoke": {
           "playing": true,
           "texture": "textures/mote.png",
           "rate": 7.0,
@@ -13167,7 +13140,7 @@
           "shape": "circle",
           "offset": [
             0.0,
-            0.0
+            0.9
           ],
           "shape_size": [
             0.9,
@@ -13204,33 +13177,8 @@
           "spin": 0.0,
           "space": "world",
           "layer": 6
-        }
-      }
-    },
-    {
-      "id": "gloom-1-surge",
-      "name": "gloom-1-surge",
-      "transform_3d": {
-        "position": [
-          0,
-          0.45,
-          0
-        ],
-        "rotation": [
-          0,
-          0,
-          0,
-          1
-        ],
-        "scale": [
-          1.0,
-          1.0,
-          1
-        ]
-      },
-      "parent": "gloom-1",
-      "components": {
-        "sindri.particles": {
+        },
+        "sindri.particles#surge": {
           "playing": false,
           "texture": "textures/mote.png",
           "rate": 46.0,
@@ -13244,7 +13192,7 @@
           "shape": "circle",
           "offset": [
             0.0,
-            0.0
+            0.9
           ],
           "shape_size": [
             0.9,
@@ -13377,36 +13325,9 @@
         "sindri.script": {
           "source": "scripts/gloom.decay",
           "script": "Gloom",
-          "properties": {
-            "surge_name": "gloom-2-surge"
-          }
-        }
-      }
-    },
-    {
-      "id": "gloom-2-smoke",
-      "name": "gloom-2-smoke",
-      "transform_3d": {
-        "position": [
-          0,
-          0.45,
-          0
-        ],
-        "rotation": [
-          0,
-          0,
-          0,
-          1
-        ],
-        "scale": [
-          1.0,
-          1.0,
-          1
-        ]
-      },
-      "parent": "gloom-2",
-      "components": {
-        "sindri.particles": {
+          "properties": {}
+        },
+        "sindri.particles#smoke": {
           "playing": true,
           "texture": "textures/mote.png",
           "rate": 7.0,
@@ -13420,7 +13341,7 @@
           "shape": "circle",
           "offset": [
             0.0,
-            0.0
+            0.9
           ],
           "shape_size": [
             0.9,
@@ -13457,33 +13378,8 @@
           "spin": 0.0,
           "space": "world",
           "layer": 6
-        }
-      }
-    },
-    {
-      "id": "gloom-2-surge",
-      "name": "gloom-2-surge",
-      "transform_3d": {
-        "position": [
-          0,
-          0.45,
-          0
-        ],
-        "rotation": [
-          0,
-          0,
-          0,
-          1
-        ],
-        "scale": [
-          1.0,
-          1.0,
-          1
-        ]
-      },
-      "parent": "gloom-2",
-      "components": {
-        "sindri.particles": {
+        },
+        "sindri.particles#surge": {
           "playing": false,
           "texture": "textures/mote.png",
           "rate": 46.0,
@@ -13497,7 +13393,7 @@
           "shape": "circle",
           "offset": [
             0.0,
-            0.0
+            0.9
           ],
           "shape_size": [
             0.9,
@@ -13630,36 +13526,9 @@
         "sindri.script": {
           "source": "scripts/gloom.decay",
           "script": "Gloom",
-          "properties": {
-            "surge_name": "gloom-3-surge"
-          }
-        }
-      }
-    },
-    {
-      "id": "gloom-3-smoke",
-      "name": "gloom-3-smoke",
-      "transform_3d": {
-        "position": [
-          0,
-          0.45,
-          0
-        ],
-        "rotation": [
-          0,
-          0,
-          0,
-          1
-        ],
-        "scale": [
-          1.0,
-          1.0,
-          1
-        ]
-      },
-      "parent": "gloom-3",
-      "components": {
-        "sindri.particles": {
+          "properties": {}
+        },
+        "sindri.particles#smoke": {
           "playing": true,
           "texture": "textures/mote.png",
           "rate": 7.0,
@@ -13673,7 +13542,7 @@
           "shape": "circle",
           "offset": [
             0.0,
-            0.0
+            0.9
           ],
           "shape_size": [
             0.9,
@@ -13710,33 +13579,8 @@
           "spin": 0.0,
           "space": "world",
           "layer": 6
-        }
-      }
-    },
-    {
-      "id": "gloom-3-surge",
-      "name": "gloom-3-surge",
-      "transform_3d": {
-        "position": [
-          0,
-          0.45,
-          0
-        ],
-        "rotation": [
-          0,
-          0,
-          0,
-          1
-        ],
-        "scale": [
-          1.0,
-          1.0,
-          1
-        ]
-      },
-      "parent": "gloom-3",
-      "components": {
-        "sindri.particles": {
+        },
+        "sindri.particles#surge": {
           "playing": false,
           "texture": "textures/mote.png",
           "rate": 46.0,
@@ -13750,7 +13594,7 @@
           "shape": "circle",
           "offset": [
             0.0,
-            0.0
+            0.9
           ],
           "shape_size": [
             0.9,
@@ -13884,7 +13728,6 @@
           "source": "scripts/gloom.decay",
           "script": "Gloom",
           "properties": {
-            "surge_name": "brute-1-surge",
             "fears_light": 0.0,
             "size": 2.7,
             "health": 5.0,
@@ -13892,33 +13735,8 @@
             "wind_for": 1.1,
             "knockback": 6.0
           }
-        }
-      }
-    },
-    {
-      "id": "brute-1-smoke",
-      "name": "brute-1-smoke",
-      "transform_3d": {
-        "position": [
-          0,
-          0.45,
-          0
-        ],
-        "rotation": [
-          0,
-          0,
-          0,
-          1
-        ],
-        "scale": [
-          1.0,
-          1.0,
-          1
-        ]
-      },
-      "parent": "brute-1",
-      "components": {
-        "sindri.particles": {
+        },
+        "sindri.particles#smoke": {
           "playing": true,
           "texture": "textures/mote.png",
           "rate": 7.0,
@@ -13932,7 +13750,7 @@
           "shape": "circle",
           "offset": [
             0.0,
-            0.0
+            1.215
           ],
           "shape_size": [
             0.9,
@@ -13969,33 +13787,8 @@
           "spin": 0.0,
           "space": "world",
           "layer": 6
-        }
-      }
-    },
-    {
-      "id": "brute-1-surge",
-      "name": "brute-1-surge",
-      "transform_3d": {
-        "position": [
-          0,
-          0.45,
-          0
-        ],
-        "rotation": [
-          0,
-          0,
-          0,
-          1
-        ],
-        "scale": [
-          1.0,
-          1.0,
-          1
-        ]
-      },
-      "parent": "brute-1",
-      "components": {
-        "sindri.particles": {
+        },
+        "sindri.particles#surge": {
           "playing": false,
           "texture": "textures/mote.png",
           "rate": 46.0,
@@ -14009,7 +13802,7 @@
           "shape": "circle",
           "offset": [
             0.0,
-            0.0
+            1.215
           ],
           "shape_size": [
             0.9,

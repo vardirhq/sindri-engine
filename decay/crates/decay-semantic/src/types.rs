@@ -297,6 +297,10 @@ pub struct FunctionType {
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct HostType {
     members: HashMap<String, ExternalSymbol>,
+    /// Value members that also answer a call with a name: `light2d` is the
+    /// thing's own light, and `light2d("halo")` is another of its lights,
+    /// found by that name and possibly missing. See [`Self::with_parts`].
+    parts: std::collections::BTreeSet<String>,
 }
 
 impl HostType {
@@ -329,6 +333,32 @@ impl HostType {
     #[must_use]
     pub fn member(&self, name: &str) -> Option<&ExternalSymbol> {
         self.members.get(name)
+    }
+
+    /// Lets the value member `name` also be called with one `String`, a part's
+    /// name, answering another value of the member's type, or `null` when the
+    /// host finds no part of that name.
+    ///
+    /// For a host whose things can hold several of a kind: the member alone is
+    /// the first, and a call names another. The member must be a value; the
+    /// call is checked against its type, so `light2d("halo").radius` is as
+    /// checked as `light2d.radius`.
+    #[must_use]
+    pub fn with_parts(mut self, name: impl Into<String>) -> Self {
+        self.parts.insert(name.into());
+        self
+    }
+
+    /// Whether the value member `name` can be called with a part's name.
+    #[must_use]
+    pub fn has_parts(&self, name: &str) -> bool {
+        self.parts.contains(name)
+    }
+
+    /// Every value member that can be called with a part's name, for a host
+    /// emitting a description of itself.
+    pub fn part_members(&self) -> impl Iterator<Item = &str> {
+        self.parts.iter().map(String::as_str)
     }
 
     /// Whether the host said anything about this type at all.

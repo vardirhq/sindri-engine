@@ -53,15 +53,14 @@ script Gloom {
     @export let driven: number = 2.6;
     // How long it waits before it will wind up again.
     @export let rest_for: number = 1.0;
-    // The emitter that burns while it winds up and pounces.
-    @export let surge_name: String = "";
 
     var flinch: number = 0.0;
     var left: number = 0.0;
     var age: number = 0.0;
     var shown: number = 1.0;
     var wick: Entity = null;
-    var surge: Entity = null;
+    // The emitter that burns while it winds up and pounces: its `surge` part.
+    var surge: Particles = null;
     var hit_burst: Entity = null;
     var out_burst: Entity = null;
     var struck_for: number = 0.0;
@@ -76,7 +75,7 @@ script Gloom {
     fn start() {
         this.left = this.health;
         this.wick = World.find("Wick");
-        this.surge = World.find(this.surge_name);
+        this.surge = this.entity.particles("surge");
         this.hit_burst = World.find("fx-gloom-hit");
         this.out_burst = World.find("fx-gloom-out");
         // Each one a little out of step with the rest.
@@ -89,9 +88,9 @@ script Gloom {
         // The surge burns for the wind-up and the pounce, and goes out after.
         if this.surge != null {
             if next == "wind" || next == "lunge" {
-                Effects.play(this.surge);
+                this.surge.play();
             } else {
-                Effects.stop(this.surge);
+                this.surge.stop();
             }
         }
     }
@@ -173,7 +172,7 @@ script Gloom {
         if caught != this.burning {
             this.burning = caught;
             if this.surge != null {
-                if caught { Effects.play(this.surge); } else { Effects.stop(this.surge); }
+                if caught { this.surge.play(); } else { this.surge.stop(); }
             }
         }
 

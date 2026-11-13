@@ -347,7 +347,9 @@ the component's own field names and reads as a field; and a declared part
 (`@part let halo: Light2d = "halo"`), a new kind of declaration that does not
 by itself let one object run two scripts.
 
-The decision is recorded here before it is built, as the isolation rule above
+Built: the call form (`HostType::with_parts`, and the host's part references,
+for `light2d` and `particles`). Not built: a script attached as a part. The
+decision was recorded here before it was built, as the isolation rule above
 asks. The call form needs the analyzer to accept a call partway through a
 host path and a `Light2d` value type; several scripts on one object needs the
 host to key running scripts by object and part rather than by object. Neither

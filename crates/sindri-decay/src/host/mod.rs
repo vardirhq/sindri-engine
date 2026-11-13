@@ -26,6 +26,7 @@ mod light;
 mod lighting;
 mod map;
 mod particles;
+mod parts;
 mod peers;
 
 pub(crate) use peers::Peers;
@@ -69,6 +70,7 @@ mod tween;
 mod ui;
 mod widgets;
 
+pub use parts::PartRefs;
 pub use services::WorldServices;
 
 use std::collections::BTreeSet;
@@ -190,4 +192,7 @@ pub struct WorldHost<'a> {
     peers: Option<peers::Peers<'a>>,
     pub(crate) tweens: Option<&'a mut crate::tweens::Tweens>,
     pub(crate) actions: Option<&'a crate::actions::InputActions>,
+    /// The named part being read or written, while a script reaches one
+    /// through a part reference: component leaves use its key.
+    part: Option<String>,
 }

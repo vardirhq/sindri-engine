@@ -63,6 +63,11 @@ impl Analyzer<'_, '_> {
                     return function.return_type;
                 }
                 Some(MemberLookup::Found(
+                    ExternalSymbol::Value(ty) | ExternalSymbol::ReadOnlyValue(ty),
+                )) if self.member_has_parts(&object_type, field, is_this(object)) => {
+                    return self.part_call_type(ty, field, args, span);
+                }
+                Some(MemberLookup::Found(
                     ExternalSymbol::Value(_) | ExternalSymbol::ReadOnlyValue(_),
                 )) => {
                     self.error(
@@ -219,6 +224,53 @@ impl Analyzer<'_, '_> {
 
 /// Whether an expression is `this` itself, rather than a held reference that
 /// happens to have the same type.
+impl Analyzer<'_, '_> {
+    /// Whether `field` on a value of `object_type` is a member with named
+    /// parts, which a call with a name reaches.
+    fn member_has_parts(&self, object_type: &Type, field: &str, through_this: bool) -> bool {
+        let Type::Named(name) = object_type else {
+            return false;
+        };
+        let described = if self.is_container(name)
+            && (through_this || self.environment.get_type(name).is_none())
+        {
+            Some(self.environment.this())
+        } else {
+            self.environment.get_type(name)
+        };
+        described.is_some_and(|described| described.has_parts(field))
+    }
+
+    /// `light2d("halo")`: one argument, the part's name, and the member's own
+    /// type back, which a `Named` type already allows to be `null`.
+    fn part_call_type(&mut self, ty: Type, field: &str, args: &[Expr], span: Span) -> Type {
+        let argument_types: Vec<Type> = args
+            .iter()
+            .map(|argument| self.expr_type(argument))
+            .collect();
+        match argument_types.as_slice() {
+            [named] if self.compatible(&Type::String, named) => {}
+            [other] => self.error(
+                Code::TypeMismatch,
+                args[0].span,
+                format!(
+                    "`{field}(...)` takes the part's name as `String`, not `{}`",
+                    other.display_name()
+                ),
+            ),
+            _ => self.error(
+                Code::ArgumentCount,
+                span,
+                format!(
+                    "`{field}(...)` takes one argument, the part's name, as in `{field}(\"halo\")`; it was given {}",
+                    args.len()
+                ),
+            ),
+        }
+        ty.or_null()
+    }
+}
+
 pub(super) fn is_this(expr: &Expr) -> bool {
     matches!(&expr.kind, ExprKind::Identifier(name) if name == "this")
 }

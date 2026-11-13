@@ -48,6 +48,9 @@ pub fn environment() -> Environment {
     for (name, node) in THIS {
         environment.add_this_value(*name, describe_node(node));
     }
+    for (name, _) in crate::surface::PART_KINDS {
+        environment.add_this_parts(*name);
+    }
     for (name, ty) in collect_types() {
         environment.add_type(name, ty);
     }
@@ -540,6 +543,9 @@ pub(super) fn collect_types() -> Vec<(String, HostType)> {
             if *name == crate::surface::TRANSFORM {
                 ty = crate::surface::transform::add_calls(ty);
             }
+            if *name == crate::surface::names::PARTICLES {
+                ty = crate::surface::particles::add_calls(ty);
+            }
             into.push(((*name).to_owned(), ty));
             walk(nested, into);
         }
@@ -550,6 +556,9 @@ pub(super) fn collect_types() -> Vec<(String, HostType)> {
     let mut entity = HostType::new();
     for (field, node) in THROUGH_REFERENCE {
         entity = entity.with_value(*field, describe_node(node));
+    }
+    for (field, _) in crate::surface::PART_KINDS {
+        entity = entity.with_parts(*field);
     }
     types.push((ENTITY.to_owned(), entity));
     types

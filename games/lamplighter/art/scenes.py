@@ -208,9 +208,9 @@ def gloom(ident, x, y, variant, brute=False):
                                       'layers': {'memberships': TARGET, 'filter': WALL | WICK | TARGET},
                                       'friction': 0, 'restitution': 0},
         'sindri.script': {'source': 'scripts/gloom.decay', 'script': 'Gloom',
-                          'properties': {'surge_name': ident + '-surge'}
-                          | ({'fears_light': 0.0, 'size': size, 'health': 5.0, 'creep': 1.0, 'wind_for': 1.1,
-                              'knockback': 6.0} if brute else {})}})
+                          'properties': {'fears_light': 0.0, 'size': size, 'health': 5.0, 'creep': 1.0,
+                                         'wind_for': 1.1, 'knockback': 6.0} if brute else {}},
+        **wisps(size)})
 
 
 def motes(rate, lifetime, speed, colors, size, size_end, **more):
@@ -222,15 +222,20 @@ def motes(rate, lifetime, speed, colors, size, size_end, **more):
             'colors': colors, 'random_rotation': True, 'spin': 0.0, 'space': 'world', 'layer': 6} | more
 
 
-def wisps(ident):
-    """What hangs about a gloom: a slow smoke that rises off it, and a surge of red-edged
-    motes that only burns while it is winding up or pouncing."""
-    smoke = entity(ident + '-smoke', ident + '-smoke', at(0, 0.45, 0), ident, **{'sindri.particles': motes(
-        7.0, 1.6, 0.35, [[0.24, 0.1, 0.4, 0.0], [0.3, 0.12, 0.48, 0.5], [0.1, 0.04, 0.2, 0.0]], 0.25, 0.7)})
-    surge = entity(ident + '-surge', ident + '-surge', at(0, 0.45, 0), ident, **{'sindri.particles': motes(
-        46.0, 0.7, 1.7, [[1.0, 0.35, 0.45, 0.0], [0.95, 0.3, 0.4, 0.8], [0.4, 0.08, 0.2, 0.0]], 0.2, 0.05,
-        playing=False, spread=360.0, drag=1.6, gravity=[0.0, 0.0])})
-    return [smoke, surge]
+def wisps(size):
+    """What hangs about a gloom, as two of its emitters: a slow smoke that rises off it,
+    and a surge of red-edged motes that only burns while it is winding up or pouncing
+    (`gloom.decay` plays it). Both rise from 0.45 of a pixel-unit up its body, which an
+    emitter's offset measures in world units, so it grows with the gloom."""
+    lift = [0.0, round(0.45 * size, 4)]
+    return {
+        'sindri.particles#smoke': motes(
+            7.0, 1.6, 0.35, [[0.24, 0.1, 0.4, 0.0], [0.3, 0.12, 0.48, 0.5], [0.1, 0.04, 0.2, 0.0]], 0.25, 0.7,
+            offset=lift),
+        'sindri.particles#surge': motes(
+            46.0, 0.7, 1.7, [[1.0, 0.35, 0.45, 0.0], [0.95, 0.3, 0.4, 0.8], [0.4, 0.08, 0.2, 0.0]], 0.2, 0.05,
+            playing=False, spread=360.0, drag=1.6, gravity=[0.0, 0.0], offset=lift),
+    }
 
 
 # Where the lantern starts, out to Wick's lower left as he faces the camera: the middle of
@@ -457,9 +462,9 @@ def field():
         *lantern('lantern-1', 8, 0), *lantern('lantern-2', 17, -3), *lantern('lantern-3', 22, 8, goal=True),
         *wick(),
         *effects(),
-        gloom('gloom-1', 6.5, 0, 1), *wisps('gloom-1'), gloom('gloom-2', -5, 0, 3), *wisps('gloom-2'),
-        gloom('gloom-3', 14, 5.5, 0), *wisps('gloom-3'),
-        gloom('brute-1', 19.5, 4.5, 2, brute=True), *wisps('brute-1'),
+        gloom('gloom-1', 6.5, 0, 1), gloom('gloom-2', -5, 0, 3),
+        gloom('gloom-3', 14, 5.5, 0),
+        gloom('brute-1', 19.5, 4.5, 2, brute=True),
         *hud('village.scene'),
     ]
     return ents

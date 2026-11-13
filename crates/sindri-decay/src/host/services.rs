@@ -100,6 +100,7 @@ impl<'a> WorldHost<'a> {
             peers: None,
             tweens: None,
             actions: None,
+            part: None,
         }
     }
 }

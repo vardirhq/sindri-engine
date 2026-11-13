@@ -11,6 +11,8 @@ use std::collections::BTreeMap;
 pub struct Blackboard {
     notes: BTreeMap<String, f64>,
     signals: BTreeMap<(u64, String), f64>,
+    /// The named parts scripts have reached, which a part reference names.
+    pub(crate) parts: crate::host::PartRefs,
 }
 
 impl Blackboard {
