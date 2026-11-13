@@ -59,7 +59,7 @@ pub(super) fn heading_menu(
     }
     let copied = ui
         .ctx()
-        .data(|data| data.get_temp::<(String, Value)>(egui::Id::new(COPIED_COMPONENT)))
+        .data(|data| data.get_temp::<(String, Value)>(egui::Id::unique(COPIED_COMPONENT)))
         .filter(|(kind, _)| kind == name)
         .map(|(_, value)| value);
     let paste = ui
@@ -98,7 +98,7 @@ pub(super) fn heading_menu(
 /// "Name part": what a script calls this part by, `light2d("halo")`. Typed
 /// in place, and kept in egui's memory while the menu is open.
 fn rename_part_menu(ui: &mut egui::Ui, name: &str, asked: &mut Option<HeadingAsk>) {
-    let id = egui::Id::new(("inspector-part-name", name));
+    let id = egui::Id::unique(("inspector-part-name", name));
     let current = sindri_core::split_part(name)
         .1
         .unwrap_or_default()
@@ -133,7 +133,7 @@ pub(super) fn act_on_heading(
         HeadingAsk::Copy => {
             ui.ctx().data_mut(|data| {
                 data.insert_temp(
-                    egui::Id::new(COPIED_COMPONENT),
+                    egui::Id::unique(COPIED_COMPONENT),
                     (name.to_owned(), payload.clone()),
                 );
             });
@@ -178,7 +178,7 @@ pub(crate) fn field_menu(
     );
     let response = ui.interact(
         rect,
-        ui.id().with(("field-menu", component, path)),
+        ui.scope_id().with(("field-menu", component, path)),
         Sense::click(),
     );
     let mut written = None;

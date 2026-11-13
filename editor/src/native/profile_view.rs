@@ -84,7 +84,7 @@ fn map_editor(ui: &mut egui::Ui, values: &mut Map<String, Value>, id: &str) -> b
     let mut rename = None;
     for key in keys {
         ui.push_id((id, &key), |ui| {
-            let draft_id = ui.id().with("profile-key-draft");
+            let draft_id = ui.scope_id().with("profile-key-draft");
             let mut edited_key =
                 ui.data_mut(|data| data.get_temp_mut_or(draft_id, key.clone()).clone());
             let mut commit_key = false;

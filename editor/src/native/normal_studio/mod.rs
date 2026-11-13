@@ -170,7 +170,7 @@ impl EditorApp {
                 },
             );
             let response = ui
-                .interact(frame, ui.id().with(label), Sense::click())
+                .interact(frame, ui.scope_id().with(label), Sense::click())
                 .on_hover_text(format!("Show the {}", label.to_lowercase()));
             if response.clicked() {
                 studio.view.mode = mode;

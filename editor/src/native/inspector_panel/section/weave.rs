@@ -30,7 +30,7 @@ pub(super) fn weave_style_section(ui: &mut egui::Ui, components: &mut BTreeMap<S
     let mut remove_style = false;
     let open = section::component(
         ui,
-        egui::Id::new("inspector-weave-style"),
+        egui::Id::unique("inspector-weave-style"),
         icons::STYLESHEET,
         "Weave Style",
         |ui| {

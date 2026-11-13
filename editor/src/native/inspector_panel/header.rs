@@ -266,7 +266,7 @@ fn space_badge(ui: &mut egui::Ui, space: Option<EntitySpace>) {
 pub(super) fn transform_3d_section(ui: &mut egui::Ui, transform: &mut Transform3D) {
     let open = section::component(
         ui,
-        egui::Id::new("inspector-transform"),
+        egui::Id::unique("inspector-transform"),
         icons::TRANSFORM,
         "Transform",
         |ui| {

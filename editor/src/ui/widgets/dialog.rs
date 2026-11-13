@@ -31,7 +31,7 @@ pub fn ask<R>(
     question: &str,
     answers: impl FnOnce(&mut egui::Ui) -> R,
 ) -> R {
-    egui::Modal::new(egui::Id::new(id))
+    egui::Modal::new(egui::Id::unique(id))
         .show(context, |ui| {
             ui.set_width(DIALOG_WIDTH);
             ui.horizontal(|ui| {
@@ -76,7 +76,7 @@ pub fn form<R>(
     title: &str,
     contents: impl FnOnce(&mut egui::Ui) -> R,
 ) -> R {
-    egui::Modal::new(egui::Id::new(id))
+    egui::Modal::new(egui::Id::unique(id))
         .show(context, |ui| {
             ui.set_width(DIALOG_WIDTH);
             ui.label(

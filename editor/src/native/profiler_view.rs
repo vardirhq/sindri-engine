@@ -126,7 +126,7 @@ pub(super) fn profiler_panel(ui: &mut egui::Ui, profiler: &Profiler) -> Asked {
         );
         return asked;
     }
-    let pinned_id = ui.id().with("profiler pinned frame");
+    let pinned_id = ui.scope_id().with("profiler pinned frame");
     let mut pinned: Option<usize> = ui.data(|data| data.get_temp(pinned_id));
     if pinned.is_some_and(|at| at >= frames.len()) {
         pinned = None;

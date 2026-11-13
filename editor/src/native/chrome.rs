@@ -133,7 +133,7 @@ fn bar(
                 Vec2::new(window.width(), height),
             )
         };
-        egui::Area::new(egui::Id::new(id))
+        egui::Area::new(egui::Id::unique(id))
             .fixed_pos(rect.min)
             .order(egui::Order::Foreground)
             .interactable(true)

@@ -62,7 +62,7 @@ impl EditorApp {
         if self.styles.is_empty() || !is_ui(&self.world, entity) {
             return None;
         }
-        let open = ctx.data(|data| data.get_temp::<bool>(Id::new(SECTION)).unwrap_or(true));
+        let open = ctx.data(|data| data.get_temp::<bool>(Id::unique(SECTION)).unwrap_or(true));
         let states = sindri_weave::pointer_states(
             &self.world,
             self.screen_ui().hovered(),
@@ -140,7 +140,7 @@ fn is_ui(world: &sindri_core::World, entity: EntityId) -> bool {
 /// Draws the panel for a UI element in a styled project, and returns the
 /// value edited in it, if one was committed this frame.
 pub(in crate::native) fn styles_section(ui: &mut egui::Ui, view: &StylesView) -> Option<StyleEdit> {
-    let open = section::component(ui, Id::new(SECTION), icons::STYLESHEET, "Styles", |_| {});
+    let open = section::component(ui, Id::unique(SECTION), icons::STYLESHEET, "Styles", |_| {});
     if !open {
         return None;
     }
@@ -219,7 +219,7 @@ fn rule_block(ui: &mut egui::Ui, rule: &InspectedRule) -> Option<StyleEdit> {
             declaration(ui, property, value, *applies);
             continue;
         }
-        let id = Id::new((EDITING, &rule.origin.file, rule.origin.line, property));
+        let id = Id::unique((EDITING, &rule.origin.file, rule.origin.line, property));
         if let Some(value) = editable(ui, id, property, value, *applies) {
             edit = Some(StyleEdit {
                 file: rule.origin.file.clone(),
@@ -267,7 +267,7 @@ fn editable(
     value: &str,
     applies: bool,
 ) -> Option<String> {
-    let key = Id::new(EDITING);
+    let key = Id::unique(EDITING);
     let editing = ui
         .data(|data| data.get_temp::<Editing>(key))
         .filter(|editing| editing.declaration == id);

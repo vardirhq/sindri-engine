@@ -50,7 +50,7 @@ pub(super) fn cue_lane(
         let at = Pos2::new(lanes.x_of(cue.time), cues.lane.center().y);
         let handle = ui.interact(
             Rect::from_center_size(at, Vec2::splat(14.0)),
-            ui.id().with(("cue", index)),
+            ui.scope_id().with(("cue", index)),
             Sense::click_and_drag(),
         );
         if handle.clicked() || handle.drag_started() {
@@ -127,7 +127,7 @@ pub(super) fn track_lane(
         let at = Pos2::new(lanes.x_of(key.time), row.lane.center().y);
         let handle = ui.interact(
             Rect::from_center_size(at, Vec2::splat(14.0)),
-            ui.id().with(("key", index, key_index)),
+            ui.scope_id().with(("key", index, key_index)),
             Sense::click_and_drag(),
         );
         if handle.clicked() || handle.drag_started() {

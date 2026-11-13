@@ -1,6 +1,6 @@
 //! An Android `Surface`, as something `wgpu` can present to.
 
-use jni::JNIEnv;
+use jni::Env;
 use jni::objects::JObject;
 use ndk::native_window::NativeWindow;
 use raw_window_handle::{
@@ -14,15 +14,17 @@ pub(super) struct AndroidWindow(NativeWindow);
 
 impl AndroidWindow {
     /// The native window behind `surface`, an `android.view.Surface`.
-    pub(super) fn from_surface(env: &JNIEnv<'_>, surface: &JObject<'_>) -> Option<Self> {
+    pub(super) fn from_surface(env: &Env<'_>, surface: &JObject<'_>) -> Option<Self> {
         // SAFETY: `env` is the live JNI environment of the thread Java called
         // in on, and `surface` is a local reference to an `android.view.Surface`
         // that Java passed into that same call, so both are valid for its whole
         // duration. `ANativeWindow_fromSurface` acquires its own reference to
         // the window, which `NativeWindow` releases on drop; nothing is kept of
-        // either pointer once this returns.
+        // either pointer once this returns. `ndk` names the environment by an
+        // older `jni-sys` than `jni` does; both are the C `JNIEnv`, so the
+        // pointer is cast between their names and not changed.
         #[allow(unsafe_code)]
-        let window = unsafe { NativeWindow::from_surface(env.get_raw(), surface.as_raw()) };
+        let window = unsafe { NativeWindow::from_surface(env.get_raw().cast(), surface.as_raw()) };
         window.map(Self)
     }
 }

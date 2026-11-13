@@ -396,7 +396,7 @@ impl EditorApp {
             egui::pos2(field.center().x - width / 2.0, field.top() + OVERLAY_GUTTER),
             egui::vec2(width, metric::TOOLBAR_HEIGHT),
         );
-        egui::Area::new(egui::Id::new(id))
+        egui::Area::new(egui::Id::unique(id))
             .fixed_pos(rect.min)
             .order(egui::Order::Middle)
             .interactable(true)
@@ -496,7 +496,7 @@ impl EditorApp {
 /// a window squeezed a dock, that squeezed width was what every later frame
 /// began with.
 fn restore_size(context: &egui::Context, id: &'static str, column: bool, size: f32) {
-    let id = egui::Id::new(id);
+    let id = egui::Id::unique(id);
     let Some(mut state) = egui::containers::panel::PanelState::load(context, id) else {
         return;
     };
@@ -529,7 +529,7 @@ mod tests {
     #[test]
     fn a_squeezed_dock_is_restored_to_its_preference() {
         let context = egui::Context::default();
-        let id = egui::Id::new("dock-left");
+        let id = egui::Id::unique("dock-left");
         context.data_mut(|data| {
             data.insert_persisted(
                 id,

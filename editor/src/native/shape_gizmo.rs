@@ -98,7 +98,7 @@ impl EditorApp {
         response: &Response,
         tool_owns_primary: bool,
     ) {
-        let pick_state = egui::Id::new(SHAPE_PICK_STATE);
+        let pick_state = egui::Id::unique(SHAPE_PICK_STATE);
         if let Some(Some(entity)) =
             context.data_mut(|data| data.remove_temp::<Option<EntityId>>(pick_state))
         {
@@ -139,7 +139,10 @@ impl EditorApp {
         let painter = context
             // Background, so the floating panels stay over it; a layer of
             // its own, which egui paints after the Scene view's.
-            .layer_painter(LayerId::new(Order::Background, egui::Id::new(SHAPE_LAYER)))
+            .layer_painter(LayerId::new(
+                Order::Background,
+                egui::Id::unique(SHAPE_LAYER),
+            ))
             .with_clip_rect(rect);
         for (drawn, selected) in &drawn {
             paint(&painter, drawn, *selected);

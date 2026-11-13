@@ -114,7 +114,10 @@ impl EditorApp {
         };
         let view_projection = camera.view_projection;
         let painter = context
-            .layer_painter(LayerId::new(Order::Background, egui::Id::new(LIGHT_LAYER)))
+            .layer_painter(LayerId::new(
+                Order::Background,
+                egui::Id::unique(LIGHT_LAYER),
+            ))
             .with_clip_rect(rect);
         let components = self.scene.components();
         let lights = components
@@ -244,7 +247,7 @@ impl EditorApp {
         handles: &[Handle],
         view_projection: Mat4,
     ) -> bool {
-        let id = egui::Id::new(LIGHT_DRAG);
+        let id = egui::Id::unique(LIGHT_DRAG);
         let pointer = response.interact_pointer_pos().or(response.hover_pos());
         let pressed = context
             .input(|input| input.pointer.press_origin())

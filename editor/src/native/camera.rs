@@ -381,7 +381,7 @@ impl EditorApp {
         response: &Response,
         tool_owns_primary: bool,
     ) {
-        let pick_state = egui::Id::new(CAMERA_PICK_STATE);
+        let pick_state = egui::Id::unique(CAMERA_PICK_STATE);
         if let Some(Some(entity)) =
             context.data_mut(|data| data.remove_temp::<Option<EntityId>>(pick_state))
         {
@@ -403,7 +403,7 @@ impl EditorApp {
             // its own, which egui paints after the Scene view's.
             .layer_painter(LayerId::new(
                 Order::Background,
-                egui::Id::new(CAMERA_OVERLAY_LAYER),
+                egui::Id::unique(CAMERA_OVERLAY_LAYER),
             ))
             .with_clip_rect(response.rect);
         paint_authored_cameras(&painter, &visuals, &self.selection);

@@ -32,7 +32,7 @@ impl EditorApp {
     /// Opens the menu on a right-click in the Scene view and does what it
     /// asks.
     pub(super) fn scene_menu(&mut self, rect: Rect, response: &Response) {
-        let id = egui::Id::new(SCENE_MENU_POINT);
+        let id = egui::Id::unique(SCENE_MENU_POINT);
         // Where the click landed, kept while the menu is open: the pointer
         // moves on to the entries.
         if response.secondary_clicked()

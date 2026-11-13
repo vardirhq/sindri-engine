@@ -165,11 +165,11 @@ impl super::EditorApp {
 /// the inspector, as a browser's element picker does, instead of reaching the
 /// game. Kept with the view's other passing state rather than in the scene.
 pub(super) fn picking(context: &egui::Context) -> bool {
-    context.data(|data| data.get_temp(egui::Id::new(PICKING)).unwrap_or(false))
+    context.data(|data| data.get_temp(egui::Id::unique(PICKING)).unwrap_or(false))
 }
 
 fn set_picking(context: &egui::Context, on: bool) {
-    context.data_mut(|data| data.insert_temp(egui::Id::new(PICKING), on));
+    context.data_mut(|data| data.insert_temp(egui::Id::unique(PICKING), on));
 }
 
 const PICKING: &str = "game-view-picking";
