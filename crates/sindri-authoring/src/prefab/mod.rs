@@ -12,7 +12,7 @@ mod library;
 pub mod missing;
 mod sync;
 
-pub use follow::follow;
+pub use follow::{follow, follow_into};
 pub use library::ScenePrefabs;
 pub use sync::{reconcile, spawn_instance};
 

@@ -298,7 +298,9 @@ prefab in the object workspace beside the scene, with its own world and undo
 history. Each edit saves the prefab through `sindri-authoring` and brings every
 instance in the open scene up to date as one undo step there, keeping what
 each overrides, then saves the scene. `sindri_authoring::prefab::follow` is
-that step, shared for desktop to use as well. Only the root's parts are shown;
+that step, and desktop takes the same one when the file watcher reads a changed
+prefab and after *Apply* (`follow_into`, which lets the applied instance start
+afresh from the prefab it was just written into). Only the root's parts are shown;
 a prefab's children, and making a prefab, are desktop's for now.
 
 - **Placing.** Drag a prefab from the project browser into the Scene view: it

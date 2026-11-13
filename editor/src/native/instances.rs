@@ -20,70 +20,28 @@ use super::prefab_writes::PendingWrite;
 use super::EditorApp;
 
 impl EditorApp {
-    /// Every entity in the world that is the root of an instance.
-    fn instance_roots(&self) -> Vec<EntityId> {
-        self.world
-            .entities()
-            .filter(|(entity, data)| {
-                data.prefab.as_ref().is_some_and(|link| link.root)
-                    && self.world.instance_root(*entity) == Some(*entity)
-            })
-            .map(|(entity, _)| entity)
-            .collect()
-    }
-
-    /// Every instance as its reference, against the prefabs held now.
-    fn placed_instances(&mut self) -> Option<Vec<(EntityId, SceneEntity)>> {
-        let mut placed = Vec::new();
-        for root in self.instance_roots() {
-            match self.world.instance_entity(root, self.file.prefabs()) {
-                Ok(entity) => placed.push((root, entity)),
-                Err(error) => {
-                    self.report(error.to_string());
-                    return None;
-                }
+    /// One instance as its reference, against the prefabs held now.
+    fn placed_instance(&mut self, root: EntityId) -> Option<SceneEntity> {
+        match self.world.instance_entity(root, self.file.prefabs()) {
+            Ok(entity) => Some(entity),
+            Err(error) => {
+                self.report(error.to_string());
+                None
             }
         }
-        Some(placed)
     }
 
-    /// Makes each instance what its reference now expands to, as one step.
+    /// Applies `buffer` as one step, with the prefab file `write` made in it.
     ///
-    /// `wrote`, when the step also wrote a prefab file, is that write and the
-    /// instance it was applied from. The step is recorded even when nothing in
-    /// the scene had to change, which is usual after an Apply, so that Undo
-    /// has a step to take the file back with.
-    fn reconcile_instances(
+    /// With a write the step is recorded even when nothing in the scene had
+    /// to change, which is usual after an Apply, so that Undo has a step to
+    /// take the file back with.
+    fn commit_instances(
         &mut self,
-        placed: &[(EntityId, SceneEntity)],
+        buffer: CommandBuffer,
         label: String,
-        wrote: Option<(EntityId, PendingWrite)>,
+        write: Option<PendingWrite>,
     ) {
-        let mut rehearsal = self.world.clone();
-        let mut buffer = CommandBuffer::new();
-        let mut writes = Vec::new();
-        if let Some((anchor, write)) = wrote {
-            let link = self.world.get(anchor).and_then(|data| data.prefab.clone());
-            buffer.push(WorldCommand::SetPrefabLink {
-                entity: anchor,
-                link,
-            });
-            writes.push(write);
-        }
-        for (root, entity) in placed {
-            let members = self.world.instance_members(*root);
-            if let Err(error) = prefab::reconcile(
-                &self.world,
-                &mut rehearsal,
-                &members,
-                entity,
-                self.file.prefabs(),
-                &mut buffer,
-            ) {
-                self.report(error);
-                return;
-            }
-        }
         if buffer.is_empty() {
             return;
         }
@@ -92,16 +50,14 @@ impl EditorApp {
         if let Err(error) = self.apply_edit(buffer.into_transaction(label)) {
             self.report(error.to_string());
         }
-        self.record_prefab_writes(writes, before);
+        self.record_prefab_writes(write.into_iter().collect(), before);
         self.selection.retain_live(&self.world);
     }
 
     /// Brings every instance up to the prefabs in `changed`, keeping what
-    /// each instance overrode.
+    /// each instance overrode, through the follow both editors share
+    /// (`sindri_authoring::prefab::follow_into`).
     ///
-    /// The instances are written down against the prefabs they were made
-    /// from *before* those change, which is what makes an override survive:
-    /// it is the difference from the old prefab, carried onto the new one.
     /// `applied`, after an Apply, is the instance the change came from — whose
     /// overrides are now the prefab's — and the file the Apply wrote.
     pub(super) fn update_instances(
@@ -109,32 +65,34 @@ impl EditorApp {
         changed: Vec<(String, PrefabDocument)>,
         applied: Option<(EntityId, PendingWrite)>,
     ) {
-        let Some(mut placed) = self.placed_instances() else {
-            return;
-        };
-        if let Some((cleared, _)) = &applied {
-            for (root, entity) in &mut placed {
-                if root == cleared
-                    && let Some(instance) = &mut entity.prefab
-                {
-                    instance.overrides.clear();
-                    instance.removed.clear();
-                }
-            }
-        }
         let label = match changed.as_slice() {
             [(id, _)] if applied.is_some() => format!("Apply to {}", file_name(id)),
             [(id, _)] => format!("Update instances of {}", file_name(id)),
             _ => "Update prefab instances".to_owned(),
         };
-        for (id, document) in changed {
-            if let Err(error) = self.file.prefabs_mut().read_placed_by(&document.entities) {
-                self.report(error);
-                return;
-            }
-            self.file.prefabs_mut().replace(&id, document);
+        let mut buffer = CommandBuffer::new();
+        let (anchor, write) =
+            applied.map_or((None, None), |(root, write)| (Some(root), Some(write)));
+        if let Some(anchor) = anchor {
+            // Recorded so the step holds a command, and Undo a step to take
+            // the file back with, when no instance had to change.
+            let link = self.world.get(anchor).and_then(|data| data.prefab.clone());
+            buffer.push(WorldCommand::SetPrefabLink {
+                entity: anchor,
+                link,
+            });
         }
-        self.reconcile_instances(&placed, label, applied);
+        if let Err(error) = prefab::follow_into(
+            &self.world,
+            self.file.prefabs_mut(),
+            changed,
+            anchor,
+            &mut buffer,
+        ) {
+            self.report(error);
+            return;
+        }
+        self.commit_instances(buffer, label, write);
     }
 
     /// Follows edits to prefab files made outside this scene, once the file
@@ -158,12 +116,8 @@ impl EditorApp {
     ///
     /// Its name, place and parent stay the instance's own whatever the scope.
     pub(super) fn revert_instance(&mut self, root: EntityId, scope: Revert) {
-        let mut placed = match self.world.instance_entity(root, self.file.prefabs()) {
-            Ok(placed) => placed,
-            Err(error) => {
-                self.report(error.to_string());
-                return;
-            }
+        let Some(mut placed) = self.placed_instance(root) else {
+            return;
         };
         let Some(instance) = placed.prefab.as_mut() else {
             return;
@@ -192,7 +146,21 @@ impl EditorApp {
                 instance.removed.remove(&path);
             }
         }
-        self.reconcile_instances(&[(root, placed)], label, None);
+        let mut rehearsal = self.world.clone();
+        let mut buffer = CommandBuffer::new();
+        let members = self.world.instance_members(root);
+        if let Err(error) = prefab::reconcile(
+            &self.world,
+            &mut rehearsal,
+            &members,
+            &placed,
+            self.file.prefabs(),
+            &mut buffer,
+        ) {
+            self.report(error);
+            return;
+        }
+        self.commit_instances(buffer, label, None);
     }
 
     /// Writes what an instance overrides into its prefab, and brings every
@@ -201,12 +169,8 @@ impl EditorApp {
     /// The file is written straight away, and Undo takes it back with the
     /// instances, unless the file has been changed since.
     pub(super) fn apply_instance(&mut self, root: EntityId) {
-        let placed = match self.world.instance_entity(root, self.file.prefabs()) {
-            Ok(placed) => placed,
-            Err(error) => {
-                self.report(error.to_string());
-                return;
-            }
+        let Some(placed) = self.placed_instance(root) else {
+            return;
         };
         let Some(instance) = placed.prefab else {
             return;
