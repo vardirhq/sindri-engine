@@ -205,6 +205,12 @@ Important constraints:
   written without it. Only its `android` module may carry
   `#[allow(unsafe_code)]`, item by item, each with a `SAFETY` comment; the
   platform-neutral part follows the workspace rule.
+- Work found through the mobile editor is often work desktop needs too. When a
+  mobile change adds or changes an editor capability (a way to edit, select,
+  add or name something), decide in the same change whether desktop needs it:
+  build it there too, or record the gap in `docs/parity.md` and the plan the
+  change belongs to. Shared logic goes in `sindri-authoring` or the engine
+  crates, not in `sindri-mobile`, so both editors call the same code.
 - `decay/` is a separate Cargo workspace and may not depend on `sindri-*` crates.
   `sindri-decay` is the one-way bridge into the language.
 - Create a new crate only at a proven platform or dependency boundary.
