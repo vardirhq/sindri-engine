@@ -17,6 +17,7 @@ pub use project::Project;
 pub(crate) use project::{ON, SharedField, board_key};
 pub(crate) use run::{to_value, variant_name};
 mod run;
+mod slot;
 mod sources;
 mod timing;
 
@@ -37,6 +38,7 @@ use crate::{
 
 pub use environment::{environment, referenced_sources};
 pub use frame::ScriptFrame;
+pub use slot::ScriptSlot;
 pub use sources::{LIFECYCLE, LifecycleFunction, ScriptSources};
 
 /// How many times a pass will start what the previous round spawned.
@@ -82,15 +84,15 @@ pub(crate) struct Running {
     pub(crate) instance: ScriptInstance,
 }
 
-/// Fields set on scripts that have not started, by entity and field.
-pub(crate) type StartingValues = BTreeMap<EntityId, BTreeMap<String, decay_runtime::Value>>;
+/// Fields set on scripts that have not started, by script and field.
+pub(crate) type StartingValues = BTreeMap<ScriptSlot, BTreeMap<String, decay_runtime::Value>>;
 
 /// A call one script made on another, or an event one emitted, waiting to be
 /// delivered.
 pub(crate) struct Message {
-    /// Who it is for: one entity, or — for an event — every running script
+    /// Who it is for: one script, or — for an event — every running script
     /// with a handler for it.
-    pub(crate) to: Option<EntityId>,
+    pub(crate) to: Option<ScriptSlot>,
     pub(crate) name: String,
     pub(crate) args: Vec<decay_runtime::Value>,
 }
@@ -98,7 +100,7 @@ pub(crate) struct Message {
 #[derive(Clone, Default)]
 pub struct Scripts {
     programs: BTreeMap<String, Compiled>,
-    running: BTreeMap<EntityId, Running>,
+    running: BTreeMap<ScriptSlot, Running>,
     /// Fields another script set on one that has not started yet, applied
     /// when it does. Held here rather than written into the scene's component:
     /// they are the running game's, not the author's, and can name things only
@@ -127,8 +129,9 @@ impl Scripts {
     }
 
     #[must_use]
+    /// Whether any script on this entity, its own or a part, is running.
     pub fn is_running(&self, entity: EntityId) -> bool {
-        self.running.contains_key(&entity)
+        self.running.keys().any(|slot| slot.entity == entity)
     }
 
     /// Takes what scripts asked to play since the last call.
@@ -147,8 +150,15 @@ impl Scripts {
     }
 
     #[must_use]
+    /// A field of the entity's own script.
     pub fn field(&self, entity: EntityId, name: &str) -> Option<&Value> {
-        self.running.get(&entity)?.instance.field(name)
+        self.slot_field(&ScriptSlot::own(entity), name)
+    }
+
+    /// A field of one script, the entity's own or a part.
+    #[must_use]
+    pub fn slot_field(&self, slot: &ScriptSlot, name: &str) -> Option<&Value> {
+        self.running.get(slot)?.instance.field(name)
     }
 
     pub fn compile(
@@ -157,12 +167,12 @@ impl Scripts {
         components: &ComponentSchemaRegistry,
         sources: &ScriptSources,
     ) -> Vec<ScriptFailure> {
-        let scripted = match components.query::<ScriptComponent>(world) {
+        let scripted = match components.query_parts::<ScriptComponent>(world) {
             Ok(scripted) => scripted,
             Err(error) => return vec![ScriptFailure::Registry(error.to_string())],
         };
         let mut failures = Vec::new();
-        for (entity, component) in scripted {
+        for (entity, _, component) in scripted {
             if let Err(failure) = ensure_compiled(&mut self.programs, sources, entity, &component) {
                 failures.push(failure);
             }
@@ -272,10 +282,10 @@ impl Scripts {
             spawned: Vec::new(),
             messages: Vec::new(),
         };
-        at.started.extend(at.running.keys().copied());
+        at.started.extend(at.running.keys().map(|slot| slot.entity));
         let mut live = BTreeSet::new();
 
-        for (entity, component) in scripted {
+        for (slot, component) in scripted {
             if !component.enabled {
                 continue;
             }
@@ -285,14 +295,14 @@ impl Scripts {
             // reported a dead handle — a game clearing its enemies at the end
             // of a run would produce one failure per enemy, none of them a
             // mistake in the game. What a removed entity does is nothing.
-            if Self::lost(&at, entity) {
+            if Self::lost(&at, slot.entity) {
                 continue;
             }
-            live.insert(entity);
+            live.insert(slot.clone());
             let outcome = timed(measuring.then_some(&mut report), &component, || {
-                tick(&mut at, entity, &component, delta_seconds)
+                tick(&mut at, &slot, &component, delta_seconds)
             });
-            run::collect(&mut report, entity, outcome);
+            run::collect(&mut report, slot.entity, outcome);
         }
 
         Self::start_spawned(&mut report, &mut live, &mut at, components, delta_seconds);
@@ -307,12 +317,18 @@ impl Scripts {
         world: &World,
         components: &ComponentSchemaRegistry,
         delta_seconds: f32,
-    ) -> Result<Vec<(EntityId, ScriptComponent)>, ScriptFailure> {
+    ) -> Result<Vec<(ScriptSlot, ScriptComponent)>, ScriptFailure> {
         if !delta_seconds.is_finite() || delta_seconds < 0.0 {
             return Err(ScriptFailure::BadDelta(delta_seconds));
         }
         components
-            .query::<ScriptComponent>(world)
+            .query_parts::<ScriptComponent>(world)
+            .map(|parts| {
+                parts
+                    .into_iter()
+                    .map(|(entity, part, component)| (ScriptSlot::new(entity, part), component))
+                    .collect()
+            })
             .map_err(|error| ScriptFailure::Registry(error.to_string()))
     }
 
@@ -330,7 +346,7 @@ impl Scripts {
     /// reported rather than taking the frame with it.
     fn deliver_messages(
         report: &mut ScriptReport,
-        live: &mut BTreeSet<EntityId>,
+        live: &mut BTreeSet<ScriptSlot>,
         at: &mut TickWorld<'_>,
         components: &ComponentSchemaRegistry,
         delta_seconds: f32,
@@ -341,16 +357,18 @@ impl Scripts {
                 return;
             }
             for message in pending {
-                match message.to {
-                    Some(entity) => run::collect(report, entity, run::deliver(at, entity, message)),
+                match message.to.clone() {
+                    Some(slot) => {
+                        run::collect(report, slot.entity, run::deliver(at, &slot, message));
+                    }
                     None => {
-                        for entity in run::handlers(at, &message.name) {
+                        for slot in run::handlers(at, &message.name) {
                             let copy = Message {
-                                to: Some(entity),
+                                to: Some(slot.clone()),
                                 name: message.name.clone(),
                                 args: message.args.clone(),
                             };
-                            run::collect(report, entity, run::deliver(at, entity, copy));
+                            run::collect(report, slot.entity, run::deliver(at, &slot, copy));
                         }
                     }
                 }
@@ -378,7 +396,7 @@ impl Scripts {
     /// created, until nothing new appears.
     fn start_spawned(
         report: &mut ScriptReport,
-        live: &mut BTreeSet<EntityId>,
+        live: &mut BTreeSet<ScriptSlot>,
         at: &mut TickWorld<'_>,
         components: &ComponentSchemaRegistry,
         delta_seconds: f32,
@@ -391,9 +409,8 @@ impl Scripts {
             for entity in std::mem::take(&mut pending) {
                 // Read through the registry rather than the payload, so a
                 // spawned script is validated exactly as an authored one is.
-                let component = match components.get::<ScriptComponent>(&*at.world, entity) {
-                    Ok(Some(component)) => component,
-                    Ok(None) => continue,
+                let parts = match components.get_parts::<ScriptComponent>(&*at.world, entity) {
+                    Ok(parts) => parts,
                     Err(error) => {
                         report
                             .failures
@@ -401,11 +418,14 @@ impl Scripts {
                         continue;
                     }
                 };
-                if !component.enabled {
-                    continue;
+                for (part, component) in parts {
+                    if !component.enabled {
+                        continue;
+                    }
+                    let slot = ScriptSlot::new(entity, part);
+                    live.insert(slot.clone());
+                    run::collect(report, entity, tick(at, &slot, &component, delta_seconds));
                 }
-                live.insert(entity);
-                run::collect(report, entity, tick(at, entity, &component, delta_seconds));
             }
             pending = std::mem::take(&mut at.spawned);
             if !pending.is_empty() && round + 1 == SPAWN_ROUNDS {
@@ -434,8 +454,8 @@ impl Scripts {
         components: &ComponentSchemaRegistry,
     ) -> BTreeSet<String> {
         let mut referenced = BTreeSet::new();
-        for (_, component) in components
-            .query::<ScriptComponent>(world)
+        for (_, _, component) in components
+            .query_parts::<ScriptComponent>(world)
             .unwrap_or_default()
         {
             let Some(exports) = self.exports(&component.source, &component.script) else {
@@ -461,8 +481,8 @@ impl Scripts {
         components: &ComponentSchemaRegistry,
     ) -> BTreeSet<String> {
         let mut referenced = BTreeSet::new();
-        for (_, component) in components
-            .query::<ScriptComponent>(world)
+        for (_, _, component) in components
+            .query_parts::<ScriptComponent>(world)
             .unwrap_or_default()
         {
             let Some(exports) = self.exports(&component.source, &component.script) else {

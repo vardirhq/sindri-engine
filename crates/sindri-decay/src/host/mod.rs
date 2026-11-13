@@ -195,4 +195,8 @@ pub struct WorldHost<'a> {
     /// The named part being read or written, while a script reaches one
     /// through a part reference: component leaves use its key.
     part: Option<String>,
+    /// The part this script is attached as (`sindri.script#halo`), `None`
+    /// for the entity's own script. Its own entity's parts of that name are
+    /// what `this` reaches first.
+    script_part: Option<String>,
 }

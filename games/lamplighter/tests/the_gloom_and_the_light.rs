@@ -45,7 +45,7 @@ fn scale_x(run: &Run, id: &str) -> f32 {
 
 /// How far Wick's lantern reaches, which a scorch shrinks.
 fn lantern_radius(run: &Run) -> f64 {
-    let light = run.entity("wick-light").expect("Wick carries a light");
+    let light = run.entity("wick-lantern").expect("Wick carries a lantern");
     run.world.get(light).expect("it exists").components["sindri.light2d"]["radius"]
         .as_f64()
         .expect("a radius")
@@ -171,7 +171,7 @@ fn the_field_opens_calm_until_wick_first_moves() {
 
 /// Where the lantern's beam points, in degrees.
 fn beam_direction(run: &Run) -> f64 {
-    let light = run.entity("wick-light").expect("Wick carries a light");
+    let light = run.entity("wick-lantern").expect("Wick carries a lantern");
     run.world.get(light).expect("it exists").components["sindri.light2d"]["cone_direction"]
         .as_f64()
         .expect("a direction")

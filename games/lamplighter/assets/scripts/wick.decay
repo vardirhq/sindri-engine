@@ -67,12 +67,13 @@ script Wick {
             Game.gloom_out = 0.0;
         }
         Game.through = false;
-        // Wick's art is on his body and the lantern's on the lantern. A project
-        // copied before that change keeps them on objects of their own, so
-        // those are still found when they are there.
+        // Wick's art is on his body, and the lantern's art and lights on the
+        // lantern, its beam the lantern's own light. A project copied before
+        // those changes keeps them on objects of their own, so those are
+        // still found when they are there.
         this.sprite = World.find("wick-sprite") ?? this.entity;
-        this.beam = World.find("wick-light");
         this.lantern = World.find("wick-lantern");
+        this.beam = World.find("wick-light") ?? this.lantern;
         this.lantern_art = World.find("wick-lantern-sprite") ?? this.lantern;
         this.hurt_burst = World.find("fx-hurt");
         Game.hit = 0.0;

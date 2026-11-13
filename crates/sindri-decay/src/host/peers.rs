@@ -18,18 +18,19 @@ use std::collections::BTreeMap;
 
 use decay_ir::Path;
 use decay_runtime::{RuntimeError, Value};
-use sindri_core::{EntityId, SceneComponent};
+use sindri_core::{EntityId, SceneComponent, part_key, split_part};
 
 use super::WorldHost;
-use crate::ScriptComponent;
+use super::parts::{PartRef, SCRIPT_PART};
 use crate::scripts::{Message, Project, Running};
+use crate::{ScriptComponent, ScriptSlot};
 
 /// Everything a script needs to reach the others.
 pub(crate) struct Peers<'a> {
     /// Every other running script. The one calling is not in here: it is
     /// borrowed for the call, which is also why a script cannot message itself
     /// this way — it calls its own function by name.
-    pub(crate) running: &'a mut BTreeMap<EntityId, Running>,
+    pub(crate) running: &'a mut BTreeMap<ScriptSlot, Running>,
     /// Fields set on scripts that have not started yet.
     pub(crate) starting: &'a mut crate::scripts::StartingValues,
     pub(crate) project: &'a Project,
@@ -44,18 +45,54 @@ impl<'a> WorldHost<'a> {
         self
     }
 
-    /// Which script an entity runs, from its `sindri.script` component.
-    fn script_name(&self, entity: EntityId) -> Option<String> {
+    /// The script component of one slot.
+    fn script_payload(&self, slot: &ScriptSlot) -> Option<&serde_json::Value> {
         self.world
-            .get(entity)?
+            .get(slot.entity)?
             .components
-            .get(ScriptComponent::TYPE_NAME)?
+            .get(&part_key(ScriptComponent::TYPE_NAME, slot.part.as_deref()))
+    }
+
+    /// Which script a slot runs, from its `sindri.script` component.
+    fn script_name(&self, slot: &ScriptSlot) -> Option<String> {
+        self.script_payload(slot)?
             .get("script")?
             .as_str()
             .map(str::to_owned)
     }
 
-    /// `Bolt.on(entity)`: the entity, when it runs `Bolt`, and otherwise null.
+    /// The script a reference reaches: one attached as a part, by its part
+    /// reference, or an entity's own, by the entity.
+    fn peer_slot(&self, subject: Option<u64>) -> Option<ScriptSlot> {
+        let reference = subject?;
+        match self.blackboard.parts.get(reference) {
+            Some(part) if part.kind == SCRIPT_PART => {
+                Some(ScriptSlot::new(part.entity, Some(part.name.clone())))
+            }
+            Some(_) => None,
+            None => Some(ScriptSlot::own(EntityId::from_bits(reference))),
+        }
+    }
+
+    /// The first of an entity's scripts that runs `script`: its own, then its
+    /// parts by name.
+    fn running_as(&self, entity: EntityId, script: &str) -> Option<ScriptSlot> {
+        self.world
+            .get(entity)?
+            .components
+            .iter()
+            .find_map(|(key, payload)| {
+                let (kind, part) = split_part(key);
+                (kind == ScriptComponent::TYPE_NAME
+                    && payload.get("script").and_then(serde_json::Value::as_str) == Some(script))
+                .then(|| ScriptSlot::new(entity, part.map(str::to_owned)))
+            })
+    }
+
+    /// `Bolt.on(entity)`: the script on the entity that runs `Bolt` (its
+    /// own, else the first part that does), and otherwise null. Its own is
+    /// answered as the entity, as it always was; a part as a reference to
+    /// the part.
     pub(super) fn script_on(
         &mut self,
         script: &str,
@@ -72,21 +109,25 @@ impl<'a> WorldHost<'a> {
             Some(Value::Null) => return Ok(Some(Value::Null)),
             _ => self.entity_argument(path, args, 0, "the entity to look on")?,
         };
-        Ok(Some(
-            if self.script_name(entity).as_deref() == Some(script) {
-                Value::Reference(entity.to_bits())
-            } else {
-                Value::Null
-            },
-        ))
+        Ok(Some(match self.running_as(entity, script) {
+            None => Value::Null,
+            Some(ScriptSlot { part: None, .. }) => Value::Reference(entity.to_bits()),
+            Some(ScriptSlot {
+                part: Some(name), ..
+            }) => Value::Reference(self.blackboard.parts.intern(PartRef {
+                entity,
+                kind: SCRIPT_PART,
+                name,
+            })),
+        }))
     }
 
     /// The script an entity runs and what it declares, when a path through a
     /// reference to it names one of its fields.
-    fn declared_field(&self, subject: Option<u64>, path: &Path) -> Option<(EntityId, String)> {
+    fn declared_field(&self, subject: Option<u64>, path: &Path) -> Option<(ScriptSlot, String)> {
         let peers = self.peers.as_ref()?;
-        let entity = EntityId::from_bits(subject?);
-        let script = self.script_name(entity)?;
+        let slot = self.peer_slot(subject)?;
+        let script = self.script_name(&slot)?;
         let field = path.0.first()?;
         peers
             .project
@@ -95,7 +136,7 @@ impl<'a> WorldHost<'a> {
             .fields
             .iter()
             .any(|(name, _)| name == field)
-            .then(|| (entity, field.clone()))
+            .then(|| (slot, field.clone()))
     }
 
     /// `bolt.damage`, and `bolt.heading.x` for a component of a vector field.
@@ -104,10 +145,10 @@ impl<'a> WorldHost<'a> {
         subject: Option<u64>,
         path: &Path,
     ) -> Result<Option<Value>, RuntimeError> {
-        let Some((entity, field)) = self.declared_field(subject, path) else {
+        let Some((slot, field)) = self.declared_field(subject, path) else {
             return Ok(None);
         };
-        let value = self.peer_field(entity, &field, path)?;
+        let value = self.peer_field(&slot, &field, path)?;
         match path.0.get(1) {
             None => Ok(Some(value)),
             Some(component) => Ok(component_of(&value, component).map(Value::Number)),
@@ -116,15 +157,15 @@ impl<'a> WorldHost<'a> {
 
     fn peer_field(
         &self,
-        entity: EntityId,
+        slot: &ScriptSlot,
         field: &str,
         path: &Path,
     ) -> Result<Value, RuntimeError> {
-        if entity == self.entity {
+        if *slot == self.slot() {
             return Err(own_entity(path));
         }
         let peers = self.peers.as_ref().ok_or_else(|| own_entity(path))?;
-        if let Some(running) = peers.running.get(&entity) {
+        if let Some(running) = peers.running.get(slot) {
             return running
                 .instance
                 .field(field)
@@ -135,12 +176,12 @@ impl<'a> WorldHost<'a> {
         // what the scene authored.
         if let Some(value) = peers
             .starting
-            .get(&entity)
+            .get(slot)
             .and_then(|values| values.get(field))
         {
             return Ok(value.clone());
         }
-        self.authored(entity)
+        self.authored(slot)
             .and_then(|properties| properties.get(field).and_then(crate::scripts::to_value))
             .ok_or_else(|| {
                 RuntimeError::Host(format!(
@@ -150,13 +191,8 @@ impl<'a> WorldHost<'a> {
             })
     }
 
-    fn authored(&self, entity: EntityId) -> Option<&serde_json::Map<String, serde_json::Value>> {
-        self.world
-            .get(entity)?
-            .components
-            .get(ScriptComponent::TYPE_NAME)?
-            .get("properties")?
-            .as_object()
+    fn authored(&self, slot: &ScriptSlot) -> Option<&serde_json::Map<String, serde_json::Value>> {
+        self.script_payload(slot)?.get("properties")?.as_object()
     }
 
     /// `bolt.damage = 3.0`, and `bolt.heading.x = 1.0`.
@@ -166,13 +202,13 @@ impl<'a> WorldHost<'a> {
         path: &Path,
         value: Value,
     ) -> Result<bool, RuntimeError> {
-        let Some((entity, field)) = self.declared_field(subject, path) else {
+        let Some((slot, field)) = self.declared_field(subject, path) else {
             return Ok(false);
         };
         let value = match path.0.get(1) {
             None => value,
             Some(component) => {
-                let whole = self.peer_field(entity, &field, path)?;
+                let whole = self.peer_field(&slot, &field, path)?;
                 let index = ["x", "y", "z"]
                     .iter()
                     .position(|known| known == component)
@@ -181,11 +217,11 @@ impl<'a> WorldHost<'a> {
                     .ok_or_else(|| RuntimeError::UnknownPath(path.dotted()))?
             }
         };
-        if entity == self.entity {
+        if slot == self.slot() {
             return Err(own_entity(path));
         }
         let peers = self.peers.as_mut().ok_or_else(|| own_entity(path))?;
-        if let Some(running) = peers.running.get_mut(&entity) {
+        if let Some(running) = peers.running.get_mut(&slot) {
             // A `let` is fixed once the script has started, from outside as
             // much as from inside.
             if running.instance.is_mutable(&field) == Some(false) {
@@ -204,15 +240,16 @@ impl<'a> WorldHost<'a> {
         // what it always did while a project moves over one call at a time.
         peers
             .starting
-            .entry(entity)
+            .entry(slot.clone())
             .or_default()
             .insert(field.clone(), value.clone());
-        if self.script_exports(entity, &field)
+        let key = part_key(ScriptComponent::TYPE_NAME, slot.part.as_deref());
+        if self.script_exports(&slot, &field)
             && let Some(json) = authored_json(&value)
             && let Some(properties) = self
                 .world
-                .get_mut(entity)
-                .and_then(|data| data.components.get_mut(ScriptComponent::TYPE_NAME))
+                .get_mut(slot.entity)
+                .and_then(|data| data.components.get_mut(&key))
                 .and_then(serde_json::Value::as_object_mut)
                 .and_then(|payload| {
                     payload
@@ -227,8 +264,8 @@ impl<'a> WorldHost<'a> {
     }
 
     /// Whether the script this entity runs marks this field `@export`.
-    fn script_exports(&self, entity: EntityId, field: &str) -> bool {
-        let Some(script) = self.script_name(entity) else {
+    fn script_exports(&self, slot: &ScriptSlot, field: &str) -> bool {
+        let Some(script) = self.script_name(slot) else {
             return false;
         };
         self.peers
@@ -244,18 +281,12 @@ impl<'a> WorldHost<'a> {
         path: &Path,
         args: &[Value],
     ) -> Option<Value> {
-        let peers = self.peers.as_mut()?;
-        let entity = subject.map(EntityId::from_bits)?;
+        let slot = self.peer_slot(subject)?;
         let [name] = path.0.as_slice() else {
             return None;
         };
-        let script = self
-            .world
-            .get(entity)
-            .and_then(|data| data.components.get(ScriptComponent::TYPE_NAME))
-            .and_then(|payload| payload.get("script"))
-            .and_then(serde_json::Value::as_str)
-            .map(str::to_owned);
+        let script = self.script_name(&slot);
+        let peers = self.peers.as_mut()?;
         let declared = script
             .as_ref()
             .and_then(|script| peers.project.scripts.get(script))
@@ -264,7 +295,7 @@ impl<'a> WorldHost<'a> {
             return None;
         }
         peers.messages.push(Message {
-            to: Some(entity),
+            to: Some(slot),
             name: name.clone(),
             args: args.to_vec(),
         });

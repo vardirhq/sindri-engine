@@ -22,6 +22,12 @@ impl Host for WorldHost<'_> {
         if let Some(result) = self.as_part(subject, path, Self::load) {
             return result;
         }
+        if let Some(entity) = self.script_part_entity(subject) {
+            if let Some(value) = self.peer_load(subject, path)? {
+                return Ok(Some(value));
+            }
+            return self.load(Some(entity), path);
+        }
         let parts: Vec<&str> = path.0.iter().map(String::as_str).collect();
 
         // `Game.score`: a declared state, before any namespace the engine
@@ -94,7 +100,7 @@ impl Host for WorldHost<'_> {
 
         // A named part reads its own payload by its own key.
         if let Leaf::Component { component, pointer } = leaf {
-            let key = self.component_key(component);
+            let key = self.component_key(entity, component);
             return Ok(components
                 .and_then(|components| components.get(&key))
                 .and_then(|payload| crate::surface::follow(payload, pointer))
@@ -122,6 +128,12 @@ impl Host for WorldHost<'_> {
     ) -> Result<bool, RuntimeError> {
         if let Some((entity, reached, part)) = self.through_part(subject, path) {
             return self.serving(part, |host| host.store(Some(entity), &reached, value));
+        }
+        if let Some(entity) = self.script_part_entity(subject) {
+            if self.peer_store(subject, path, value.clone())? {
+                return Ok(true);
+            }
+            return self.store(Some(entity), path, value);
         }
         if subject.is_none() && self.shared_store(path, &value)? {
             return Ok(true);
@@ -178,7 +190,7 @@ impl Host for WorldHost<'_> {
             Leaf::Light(_) => unreachable!("handled by store_light"),
             Leaf::TransformRotation(_) => unreachable!("handled by store_rotation"),
             Leaf::Component { component, pointer } => {
-                let key = self.component_key(component);
+                let key = self.component_key(entity, component);
                 let Some(data) = self.world.get_mut(entity) else {
                     return Ok(false);
                 };
@@ -231,6 +243,12 @@ impl Host for WorldHost<'_> {
             self.as_part(subject, path, |host, at, path| host.call(at, path, args))
         {
             return result;
+        }
+        if let Some(entity) = self.script_part_entity(subject) {
+            if let Some(value) = self.peer_call(subject, path, args) {
+                return Ok(Some(value));
+            }
+            return self.call(Some(entity), path, args);
         }
         if let Some(value) = self.particles_method(subject, path, args)? {
             return Ok(Some(value));

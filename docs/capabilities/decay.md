@@ -19,6 +19,7 @@ Each entry links its tests and the projects that exercise it. Surface marks matc
 | [Typed host, compile / run / reload](#typed-host) | ✅ | 🟡 | ✅ | ✅ |
 | [Safe entity, prefab, profile references](#references) | ✅ | ✅ | ✅ | ✅ |
 | [Scripts reach each other by type](#scripts-by-type) | ✅ | ✅ | ✅ | ✅ |
+| [An object runs several scripts](#several-scripts) | 🟡 | 🟡 | 🟡 | 🟡 |
 | [Events (emit, handle anywhere)](#events) | ✅ | ✅ | ✅ | ✅ |
 | [Shared game state, declared and typed](#shared-state) | 🟡 | ✅ | 🟡 | 🟡 |
 | [Tags and queries](#tag-queries) | ✅ | ✅ | ✅ | ✅ |
@@ -197,6 +198,33 @@ wrong argument is a compile error. The editor and the exporter load every
 project script rather than only referenced ones, and the editor's preview and
 `decay-lsp` check against the whole project. Orbital Last Stand's player sets
 up each bullet it fires this way.
+
+</details>
+
+<a id="several-scripts"></a>
+
+### An object runs several scripts
+
+A script attached as a named part (`sindri.script#halo`) runs beside the object's own, and reads its own name's parts first.
+
+Engine 🟡 · Editor 🟡 · Decay 🟡 · Proof 🟡 — parity row *Several parts of one kind on an object*
+
+**Tested by:** [`crates/sindri-decay/tests/an_object_runs_several_scripts.rs`](../../crates/sindri-decay/tests/an_object_runs_several_scripts.rs)
+
+**Exercised in:** [`games/lamplighter`](../../games/lamplighter)
+
+<details markdown="1">
+<summary>Evidence</summary>
+
+A script can be attached as a named part, so one object runs several, each
+with its own fields, timers and tweens. A script attached as `#halo` reads
+`this.light2d` as the object's `light2d#halo` when it has one, so one script
+serves a lantern's beam and its halo. `Name.on(entity)` answers whichever of
+the object's scripts runs `Name`, its own first, and messages and field writes
+through it reach that script alone. Lamplighter's lantern carries both lights
+and a `Flame` for each. Desktop offers a second script in Add Component; the
+phone attaches a second created script as a part, but its Behaviour sheet
+opens only the object's own script.
 
 </details>
 

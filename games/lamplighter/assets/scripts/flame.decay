@@ -1,7 +1,8 @@
 // The lantern's flame wavers a little, so the light is a flame and not a lamp.
 // A gloom's pounce scorches it: it shrinks and gutters, and comes back as the
-// scorch wears off (`wick.decay` wears it off). The lantern is two of these, a
-// beam and a halo.
+// scorch wears off (`wick.decay` wears it off). The lantern runs two of these:
+// its own for the beam, and one attached as `#halo`, whose `this.light2d` is
+// the lantern's `#halo` light.
 script Flame {
     // How bright and how far this flame burns unscorched.
     @export let base_intensity: number = 1.3;

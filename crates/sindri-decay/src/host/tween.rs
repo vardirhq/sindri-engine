@@ -55,7 +55,7 @@ impl WorldHost<'_> {
                 "unknown easing; use linear, ease, ease-in, ease-out or ease-in-out",
             )
         })?;
-        let owner = self.entity;
+        let owner = self.slot();
         let id = self
             .tween_store(path)?
             .insert(Track::new(

@@ -471,7 +471,9 @@ impl WorldHost<'_> {
                 path.dotted()
             )));
         };
-        let entity = EntityId::from_bits(*bits);
+        // A script attached as a part stands for its entity.
+        let bits = self.script_part_entity(Some(*bits)).unwrap_or(*bits);
+        let entity = EntityId::from_bits(bits);
         self.world.get(entity).ok_or_else(|| {
             RuntimeError::Host(format!(
                 "{} was given a {role} entity that no longer exists",

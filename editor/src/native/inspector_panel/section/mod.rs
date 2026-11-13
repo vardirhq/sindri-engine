@@ -20,7 +20,7 @@ use std::collections::BTreeMap;
 
 use eframe::egui;
 use serde_json::Value;
-use sindri_core::ComponentSchemaRegistry;
+use sindri_core::{ComponentSchemaRegistry, split_part};
 
 use self::animation::animation_section;
 use self::grid::{grid_navigation_section, grid_occupant_section};
@@ -110,7 +110,8 @@ pub(super) fn components_sections(
         // script declared, which is the whole reason the language is typed.
         // The rest of the payload -- the source, the container -- follows as
         // ordinary rows.
-        if name == "sindri.script" {
+        let is_script = split_part(&name).0 == "sindri.script";
+        if is_script {
             script_choice_row(ui, payload, scripts);
             script_exports_section(ui, payload, scripts, assets);
         }
@@ -145,14 +146,7 @@ pub(super) fn components_sections(
         // Different components can name the same field (for example, both
         // model components have `asset`); their widgets must be independent.
         ui.push_id(&name, |ui| {
-            object_rows(
-                ui,
-                &name,
-                payload,
-                registry,
-                assets,
-                name == "sindri.script",
-            );
+            object_rows(ui, &name, payload, registry, assets, is_script);
         });
         ui.add_space(5.0);
     }

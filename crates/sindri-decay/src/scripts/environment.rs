@@ -566,9 +566,9 @@ pub(super) fn collect_types() -> Vec<(String, HostType)> {
 
 pub fn referenced_sources(world: &World, components: &ComponentSchemaRegistry) -> BTreeSet<String> {
     components
-        .query::<ScriptComponent>(world)
+        .query_parts::<ScriptComponent>(world)
         .unwrap_or_default()
         .into_iter()
-        .map(|(_, component)| component.source)
+        .map(|(_, _, component)| component.source)
         .collect()
 }

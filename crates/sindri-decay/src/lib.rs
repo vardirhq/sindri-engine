@@ -58,7 +58,7 @@ pub use profiles::ProfileSources;
 pub use report::{ScriptMessage, ScriptReport, ScriptTiming};
 pub use scenes::{SceneChannel, scene_links};
 pub use scripts::{
-    LIFECYCLE, LifecycleFunction, ScriptFrame, ScriptSources, Scripts, environment,
+    LIFECYCLE, LifecycleFunction, ScriptFrame, ScriptSlot, ScriptSources, Scripts, environment,
     referenced_sources,
 };
 

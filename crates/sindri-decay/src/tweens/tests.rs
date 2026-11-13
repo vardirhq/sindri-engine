@@ -2,7 +2,7 @@ use super::{LIMIT, Track, Tweens};
 use decay_runtime::Value;
 use sindri_core::{Easing, EntityData, World};
 
-fn track(owner: sindri_core::EntityId) -> Track {
+fn track(owner: crate::ScriptSlot) -> Track {
     Track::new(
         owner,
         Value::Number(0.0),
@@ -21,24 +21,24 @@ fn number(tweens: &Tweens, id: u64) -> f64 {
 
 #[test]
 fn a_delayed_yoyo_waits_then_runs_there_and_back_for_its_loops() {
-    let owner = World::default().spawn(EntityData::default());
+    let owner = crate::ScriptSlot::own(World::default().spawn(EntityData::default()));
     let mut tweens = Tweens::default();
-    let mut pulse = track(owner);
+    let mut pulse = track(owner.clone());
     pulse.delay = 0.5;
     pulse.loops = 2;
     pulse.yoyo = true;
     let id = tweens.insert(pulse).expect("insert");
-    tweens.advance(owner, 0.5);
+    tweens.advance(&owner, 0.5);
     assert!(number(&tweens, id).abs() < 1.0e-9, "held through the delay");
-    tweens.advance(owner, 0.75);
+    tweens.advance(&owner, 0.75);
     assert!((number(&tweens, id) - 0.75).abs() < 1.0e-9);
-    tweens.advance(owner, 0.5);
+    tweens.advance(&owner, 0.5);
     assert!(
         (number(&tweens, id) - 0.75).abs() < 1.0e-9,
         "on its way back"
     );
     assert!(!tweens.get(id).expect("track").done());
-    tweens.advance(owner, 10.0);
+    tweens.advance(&owner, 10.0);
     assert!(tweens.get(id).expect("track").done());
     assert!(
         number(&tweens, id).abs() < 1.0e-9,
@@ -48,63 +48,63 @@ fn a_delayed_yoyo_waits_then_runs_there_and_back_for_its_loops() {
 
 #[test]
 fn an_endless_loop_never_finishes_and_a_sequence_waits_its_turn() {
-    let owner = World::default().spawn(EntityData::default());
+    let owner = crate::ScriptSlot::own(World::default().spawn(EntityData::default()));
     let mut tweens = Tweens::default();
-    let first = tweens.insert(track(owner)).expect("insert");
-    let mut endless = track(owner);
+    let first = tweens.insert(track(owner.clone())).expect("insert");
+    let mut endless = track(owner.clone());
     endless.loops = 0;
     endless.after = Some(first);
     let second = tweens.insert(endless).expect("insert");
-    tweens.advance(owner, 0.6);
+    tweens.advance(&owner, 0.6);
     assert!(
         number(&tweens, second).abs() < 1.0e-9,
         "waits for the first"
     );
-    tweens.advance(owner, 0.6);
+    tweens.advance(&owner, 0.6);
     assert!(tweens.get(first).expect("track").done());
-    tweens.advance(owner, 0.25);
+    tweens.advance(&owner, 0.25);
     assert!((number(&tweens, second) - 0.25).abs() < 1.0e-9);
-    tweens.advance(owner, 100.0);
+    tweens.advance(&owner, 100.0);
     assert!(!tweens.get(second).expect("track").done(), "for ever");
     // A sequence whose predecessor is gone goes on without it.
-    let mut orphan = track(owner);
+    let mut orphan = track(owner.clone());
     orphan.after = Some(first);
     let orphan = tweens.insert(orphan).expect("insert");
     tweens.dispose(first);
-    tweens.advance(owner, 0.5);
+    tweens.advance(&owner, 0.5);
     assert!((number(&tweens, orphan) - 0.5).abs() < 1.0e-9);
 }
 
 #[test]
 fn owners_advance_independently_and_reclamation_never_reuses_handles() {
     let mut world = World::default();
-    let first = world.spawn(EntityData::default());
-    let second = world.spawn(EntityData::default());
+    let first = crate::ScriptSlot::own(world.spawn(EntityData::default()));
+    let second = crate::ScriptSlot::own(world.spawn(EntityData::default()));
     let mut tweens = Tweens::default();
-    let a = tweens.insert(track(first)).expect("insert");
-    let b = tweens.insert(track(second)).expect("insert");
-    tweens.advance(first, 0.5);
+    let a = tweens.insert(track(first.clone())).expect("insert");
+    let b = tweens.insert(track(second.clone())).expect("insert");
+    tweens.advance(&first, 0.5);
     assert!((tweens.get(a).expect("track").progress() - 0.5).abs() < f64::EPSILON);
     assert!(tweens.get(b).expect("track").progress().abs() < f64::EPSILON);
-    tweens.retain(|owner| owner == second);
+    tweens.retain(|owner| *owner == second);
     assert!(tweens.get(a).is_none());
-    let c = tweens.insert(track(first)).expect("insert");
+    let c = tweens.insert(track(first.clone())).expect("insert");
     assert!(c > b);
-    tweens.remove_owner(first);
+    tweens.remove_owner(&first);
     assert!(tweens.get(c).is_none());
     tweens.clear();
     assert!(tweens.get(b).is_none());
-    assert!(tweens.insert(track(second)).expect("insert") > c);
+    assert!(tweens.insert(track(second.clone())).expect("insert") > c);
 }
 
 #[test]
 fn retained_handles_are_bounded_and_disposal_reclaims_capacity() {
-    let owner = World::default().spawn(EntityData::default());
+    let owner = crate::ScriptSlot::own(World::default().spawn(EntityData::default()));
     let mut tweens = Tweens::default();
     for _ in 0..LIMIT {
-        tweens.insert(track(owner)).expect("within bound");
+        tweens.insert(track(owner.clone())).expect("within bound");
     }
-    assert!(tweens.insert(track(owner)).is_err());
+    assert!(tweens.insert(track(owner.clone())).is_err());
     tweens.dispose(1);
-    assert!(tweens.insert(track(owner)).is_ok());
+    assert!(tweens.insert(track(owner.clone())).is_ok());
 }

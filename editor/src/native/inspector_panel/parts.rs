@@ -11,9 +11,11 @@ use sindri_core::{CommandBuffer, EntityId, WorldCommand, is_part_name, part_key,
 
 use super::super::EditorApp;
 
-/// Whether `key`'s kind can have named parts.
+/// Whether `key`'s kind can have named parts: the kinds the scene draws
+/// several of, and scripts, which an object runs several of.
 pub(crate) fn has_parts(key: &str) -> bool {
-    sindri_scene::PART_KINDS.contains(&split_part(key).0)
+    let kind = split_part(key).0;
+    sindri_scene::PART_KINDS.contains(&kind) || kind == super::super::SCRIPT_COMPONENT
 }
 
 /// The first key of kind `type_name` an entity holding `taken` does not
@@ -97,6 +99,7 @@ mod tests {
     fn only_kinds_the_scene_draws_several_of_have_parts() {
         assert!(has_parts("sindri.light2d"));
         assert!(has_parts("sindri.particles#glow"));
+        assert!(has_parts("sindri.script#halo"));
         assert!(!has_parts("sindri.sprite"));
         assert!(!has_parts("sindri.light2d.occluder"));
     }

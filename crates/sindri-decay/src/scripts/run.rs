@@ -13,7 +13,7 @@ use crate::{
 };
 
 use super::sources::{START, ScriptSources, UPDATE};
-use super::{Compiled, Running};
+use super::{Compiled, Running, ScriptSlot};
 
 /// Everything a tick needs that is not about which entity it is for.
 ///
@@ -21,7 +21,7 @@ use super::{Compiled, Running};
 /// a reader can hold, and every caller passes the same things.
 pub(super) struct TickWorld<'a> {
     pub(super) programs: &'a mut BTreeMap<String, Compiled>,
-    pub(super) running: &'a mut BTreeMap<EntityId, Running>,
+    pub(super) running: &'a mut BTreeMap<ScriptSlot, Running>,
     pub(super) starting: &'a mut super::StartingValues,
     pub(super) tweens: &'a mut crate::tweens::Tweens,
     pub(super) blackboard: &'a mut Blackboard,
@@ -75,12 +75,13 @@ pub(super) struct TickWorld<'a> {
 }
 
 /// Drops instance state and signals whose owners no longer survive the pass.
-pub(super) fn retain_live(at: &mut TickWorld<'_>, live: &BTreeSet<EntityId>) {
-    at.tweens.retain(|entity| live.contains(&entity));
-    at.running.retain(|entity, _| live.contains(entity));
+pub(super) fn retain_live(at: &mut TickWorld<'_>, live: &BTreeSet<ScriptSlot>) {
+    at.tweens.retain(|slot| live.contains(slot));
+    at.running.retain(|slot, _| live.contains(slot));
     // What was waiting for something that never started goes with it.
     let world = &*at.world;
-    at.starting.retain(|entity, _| world.get(*entity).is_some());
+    at.starting
+        .retain(|slot, _| world.get(slot.entity).is_some());
     let world = &*at.world;
     at.blackboard
         .retain_signals(|bits| world.get(EntityId::from_bits(bits)).is_some());
@@ -88,10 +89,11 @@ pub(super) fn retain_live(at: &mut TickWorld<'_>, live: &BTreeSet<EntityId>) {
 
 pub(super) fn tick(
     at: &mut TickWorld<'_>,
-    entity: EntityId,
+    slot: &ScriptSlot,
     component: &ScriptComponent,
     delta_seconds: f32,
 ) -> Result<RunOutput, ScriptFailure> {
+    let entity = slot.entity;
     ensure_compiled(at.programs, at.sources, entity, component)?;
     let program = std::rc::Rc::clone(&at.programs[&component.source].program);
     let container = program
@@ -106,10 +108,10 @@ pub(super) fn tick(
 
     let elapsed_seconds = at
         .running
-        .get(&entity)
+        .get(slot)
         .map_or(0.0, |current| current.elapsed_seconds)
         + delta_seconds;
-    let fresh = !at.running.get(&entity).is_some_and(|current| {
+    let fresh = !at.running.get(slot).is_some_and(|current| {
         current.source == component.source && current.script == component.script
     });
     // Recorded before any of this script's code runs, because by then the
@@ -117,20 +119,16 @@ pub(super) fn tick(
     // properties have been decided.
     at.started.insert(entity);
     if fresh {
-        at.tweens.remove_owner(entity);
+        at.tweens.remove_owner(slot);
     } else {
-        at.tweens.advance(entity, f64::from(delta_seconds));
+        at.tweens.advance(slot, f64::from(delta_seconds));
     }
 
     // Taken out of the map for the call, so the host can lend every *other*
     // running script to this one, and put back whatever happens.
-    let mut current = if fresh {
-        None
-    } else {
-        at.running.remove(&entity)
-    };
+    let mut current = if fresh { None } else { at.running.remove(slot) };
     let mut starting_values = if fresh {
-        at.starting.remove(&entity)
+        at.starting.remove(slot)
     } else {
         None
     };
@@ -139,7 +137,7 @@ pub(super) fn tick(
         delta_seconds,
         elapsed_seconds,
     };
-    let mut runtime = Runtime::new(&program, host_for(at, entity, context));
+    let mut runtime = Runtime::new(&program, host_for(at, slot, context));
     let outcome = (|| {
         if fresh {
             let mut instance = runtime.instantiate(&component.script).map_err(|error| {
@@ -193,7 +191,7 @@ pub(super) fn tick(
     })();
     let output = RunOutput::from_host(runtime.into_host());
     if let Some(current) = current {
-        at.running.insert(entity, current);
+        at.running.insert(slot.clone(), current);
     }
     outcome.map(|()| output)
 }
@@ -206,17 +204,18 @@ pub(super) fn tick(
 /// a projectile, not a mistake to report.
 pub(super) fn deliver(
     at: &mut TickWorld<'_>,
-    entity: EntityId,
+    slot: &ScriptSlot,
     message: super::Message,
 ) -> Result<RunOutput, ScriptFailure> {
+    let entity = slot.entity;
     if at.world.get(entity).is_none() {
         return Ok(RunOutput::default());
     }
-    let Some(mut current) = at.running.remove(&entity) else {
+    let Some(mut current) = at.running.remove(slot) else {
         return Ok(RunOutput::default());
     };
     let Some(compiled) = at.programs.get(&current.source) else {
-        at.running.insert(entity, current);
+        at.running.insert(slot.clone(), current);
         return Ok(RunOutput::default());
     };
     let program = std::rc::Rc::clone(&compiled.program);
@@ -226,19 +225,19 @@ pub(super) fn deliver(
         delta_seconds: 0.0,
         elapsed_seconds: current.elapsed_seconds,
     };
-    let mut runtime = Runtime::new(&program, host_for(at, entity, context));
+    let mut runtime = Runtime::new(&program, host_for(at, slot, context));
     let outcome = runtime
         .call_instance(&mut current.instance, &message.name, message.args)
         .map(|_| ())
         .map_err(|error| ScriptFailure::runtime(entity, &script, &message.name, &error));
     let output = RunOutput::from_host(runtime.into_host());
-    at.running.insert(entity, current);
+    at.running.insert(slot.clone(), current);
     outcome.map(|()| output)
 }
 
 /// Every running script with a function of this name, in the order a pass
 /// runs them: who an event is delivered to.
-pub(super) fn handlers(at: &TickWorld<'_>, function: &str) -> Vec<EntityId> {
+pub(super) fn handlers(at: &TickWorld<'_>, function: &str) -> Vec<ScriptSlot> {
     at.running
         .iter()
         .filter(|(_, running)| {
@@ -249,7 +248,7 @@ pub(super) fn handlers(at: &TickWorld<'_>, function: &str) -> Vec<EntityId> {
                 })
             })
         })
-        .map(|(entity, _)| *entity)
+        .map(|(slot, _)| slot.clone())
         .collect()
 }
 
@@ -257,12 +256,12 @@ pub(super) fn handlers(at: &TickWorld<'_>, function: &str) -> Vec<EntityId> {
 /// script reachable through it.
 fn host_for<'b>(
     at: &'b mut TickWorld<'_>,
-    entity: EntityId,
+    slot: &ScriptSlot,
     context: ScriptContext<'b>,
 ) -> WorldHost<'b> {
     WorldHost::new(
         &mut *at.world,
-        entity,
+        slot.entity,
         context,
         &mut *at.blackboard,
         crate::HostServices {
@@ -322,6 +321,7 @@ fn host_for<'b>(
     .with_tweens(&mut *at.tweens)
     .with_actions(at.actions)
     .with_sequences(at.sequences.as_deref_mut())
+    .with_script_part(slot.part.clone())
     .with_peers(Peers {
         running: &mut *at.running,
         starting: &mut *at.starting,
