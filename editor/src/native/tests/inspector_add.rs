@@ -508,3 +508,36 @@ fn convex_model_authoring_allows_body_compounds_and_rejects_competing_owners() {
         );
     }
 }
+
+/// A second light or emitter is offered as another part of the same kind, and
+/// a second of any other kind is not.
+#[test]
+fn add_component_offers_another_light_but_not_another_sprite() {
+    let extractor = extractor();
+    let present: BTreeMap<String, Value> = [
+        ("sindri.light2d".to_owned(), serde_json::json!({})),
+        (
+            "sindri.sprite".to_owned(),
+            serde_json::json!({ "texture": "a.png" }),
+        ),
+    ]
+    .into_iter()
+    .collect();
+    let offers = addable_components(
+        extractor.components(),
+        &present,
+        ProjectDefaults::default(),
+        SceneHolds::default(),
+    );
+    let light = offers
+        .iter()
+        .find(|offer| offer.metadata.type_name == "sindri.light2d")
+        .expect("a second light is offered");
+    assert!(light.metadata.display_name.ends_with("(another)"));
+    assert!(
+        !offers
+            .iter()
+            .any(|offer| offer.metadata.type_name == "sindri.sprite"),
+        "a sprite has no parts, so not a second one"
+    );
+}

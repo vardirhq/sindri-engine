@@ -191,15 +191,25 @@ pub(crate) fn addable_components(
     let space = declared_space(present);
     components
         .registered_components()
-        .filter(|metadata| !present.contains_key(&metadata.type_name))
+        .filter(|metadata| {
+            !present.contains_key(&metadata.type_name)
+                || super::parts::has_parts(&metadata.type_name)
+        })
         .filter(|metadata| space::accepts(space, &metadata.type_name))
         .filter(|metadata| {
             components.fields(&metadata.type_name).is_some()
                 || components.default_payload(&metadata.type_name).is_some()
         })
-        .map(|metadata| Offer {
-            metadata: metadata.clone(),
-            withheld: withheld(components, metadata, present, project, scene),
+        .map(|metadata| {
+            let mut offered = metadata.clone();
+            // One already there: this adds another, as a named part.
+            if present.contains_key(&metadata.type_name) {
+                offered.display_name = format!("{} (another)", offered.display_name);
+            }
+            Offer {
+                metadata: offered,
+                withheld: withheld(components, metadata, present, project, scene),
+            }
         })
         .collect()
 }

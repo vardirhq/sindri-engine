@@ -2,6 +2,8 @@
 
 # Changelog
 
+- Add and name parts on desktop: Add Component offers a second 2D light or particle emitter once an object has one, and a part's heading menu renames it. The Scene view draws every 2D light at its offset, not at the object's origin, with a handle to move it and one to size it, each writing its own part.
+
 - Reach a named part from a script: `this.entity.light2d("halo")` and `this.entity.particles("surge")` answer that part of the object, or `null`, and a part is held and compared like an entity. Emitters gain `play()`, `stop()`, `emit(count)` and their `rate`, `speed`, `lifetime` and `size`. Lamplighter's glooms carry their smoke and surge as parts.
 
 - Give an object several components of one kind as named parts: `sindri.light2d` and `sindri.light2d#halo` are two lights on one object, and `sindri.particles#glow` a second emitter. Every part is drawn, validated by its type, labelled in the desktop inspector and edited on the phone. Lamplighter's lantern now carries its embers and glow itself. Scripts reach only the unnamed part for now.

@@ -104,7 +104,15 @@ object's own. Each gloom now carries its smoke and surge as parts.
 
 A script attached as a part (`sindri.script#halo`) is not built yet, so the
 lantern's two lights, each flickered by its own `Flame` script, stay objects
-of their own. Desktop's Scene view draws no gizmo for a named light.
+of their own.
+
+On desktop, Add Component offers a second 2D light or emitter as "(another)"
+once the object has one, added under a free name (`light-2`), and a part's
+heading menu has *Name part*, which renames it as one undo step. The kinds
+that may have parts are `sindri_scene::PART_KINDS`, so the editors cannot
+offer one the scene would not draw. The Scene view draws every light part at
+its offset, with a handle at its center to move it and one on its ring to
+size it, each writing its own part.
 
 ### Colliders
 
@@ -172,6 +180,10 @@ things, not parts.
      name's parts first; then the lantern's lights, so Wick is two objects.
 5. Collider piece names, reported by contacts and sensor events.
 6. The same part handles in desktop's Scene view, so both editors agree.
+   Started: every 2D light part is drawn at its offset and moved and sized by
+   its own handles, and parts are added and named in the inspector. Still to
+   come: handles for a sprite's size and offset, an emitter's shape and the
+   contact shadow, which the inspector edits as numbers until then.
 
 ## Open questions
 

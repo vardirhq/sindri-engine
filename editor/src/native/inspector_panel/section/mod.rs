@@ -24,7 +24,7 @@ use sindri_core::ComponentSchemaRegistry;
 
 use self::animation::animation_section;
 use self::grid::{grid_navigation_section, grid_occupant_section};
-use self::heading::{act_on_heading, heading_menu};
+use self::heading::{SectionAsk, act_on_heading, heading_menu};
 use self::script::{script_choice_row, script_exports_section};
 use self::text::text_section;
 use self::tile_volume::tile_volume_section;
@@ -54,7 +54,7 @@ pub(super) fn components_sections(
     project: &InspectorProject<'_>,
     tools: &mut InspectorTools<'_>,
     apply: &mut ApplyFrame,
-) -> Option<String> {
+) -> Option<SectionAsk> {
     let InspectorProject {
         scripts,
         assets_root,
@@ -97,9 +97,9 @@ pub(super) fn components_sections(
         let payload = components
             .get_mut(&name)
             .expect("the component name came from this map");
-        let (open, remove) = component_heading(ui, &name, payload, registry, apply);
-        if remove {
-            removed = Some(name.clone());
+        let (open, ask) = component_heading(ui, &name, payload, registry, apply);
+        if ask.is_some() {
+            removed = ask;
         }
         if !open {
             continue;
@@ -160,18 +160,18 @@ pub(super) fn components_sections(
 }
 
 /// A component's heading: its name, its remove button and pending edits, and
-/// the menu a right-click on it opens. Answers whether it is open, and whether
-/// it was asked to be removed.
+/// the menu a right-click on it opens. Answers whether it is open, and what
+/// it asked of the entity: removing it, or naming the part.
 fn component_heading(
     ui: &mut egui::Ui,
     name: &str,
     payload: &mut Value,
     registry: &ComponentSchemaRegistry,
     apply: &mut ApplyFrame,
-) -> (bool, bool) {
+) -> (bool, Option<SectionAsk>) {
     let title = component_label(name);
     let removable = inspector::is_removable(name);
-    let mut removed = false;
+    let mut removed = None;
     let mut heading = None;
     // The same icons the hierarchy gives these entities, so a row and its
     // component are recognisably the same thing.
@@ -190,7 +190,7 @@ fn component_heading(
                 )
                 .clicked()
             {
-                removed = true;
+                removed = Some(SectionAsk::Remove(name.to_owned()));
             }
             // In the header, whether or not the fields show, so edits that
             // have not reached the scene are not forgotten behind a fold,
@@ -199,8 +199,10 @@ fn component_heading(
         },
         |ui| heading_menu(ui, name, &title, removable, registry, &mut heading),
     );
-    if let Some(asked) = heading {
-        removed |= act_on_heading(ui, name, payload, asked);
+    if let Some(asked) = heading
+        && let Some(ask) = act_on_heading(ui, name, payload, asked)
+    {
+        removed = Some(ask);
     }
     (open, removed)
 }

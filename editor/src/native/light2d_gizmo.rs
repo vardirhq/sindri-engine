@@ -2,6 +2,10 @@
 //! as a circle, each occluder's outline, and handles on the selected one to
 //! size it by dragging.
 //!
+//! Every light part is drawn (`sindri.light2d#halo` beside `sindri.light2d`),
+//! each at its own `offset` from the object, with a handle at its center that
+//! moves it and one on its ring that sizes it, each writing its own part.
+//!
 //! A light's radius is a distance, and a distance typed into a field is a
 //! guess at how far it reaches until the scene is lit. Drawn, it is where the
 //! dark starts. A drag is one undo step, as a collider's is.
@@ -31,16 +35,25 @@ const CIRCLE_SEGMENTS: usize = 48;
 enum Grip {
     /// A light's radius.
     Radius,
+    /// A light's offset from its object: the handle at its center.
+    Offset,
     /// One half of a box occluder's size, along axis 0 (X) or 1 (Y). The box
     /// is centred on its entity, so it grows evenly either side.
     Size(usize),
 }
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Debug)]
 struct LightDrag {
     entity: EntityId,
+    /// The component key the handle writes: a light part's own, or the
+    /// occluder's.
+    key: String,
     grip: Grip,
 }
+
+/// A handle on screen: its entity, the component key it writes, what it
+/// sizes, where it is, and the space a dragged point is measured in.
+type Handle = (EntityId, String, Grip, Pos2, Mat4);
 
 /// The size a handle dragged to `local`, a point in the entity's own plane,
 /// asks for.
@@ -48,6 +61,7 @@ fn dragged(grip: Grip, local: [f32; 2]) -> f32 {
     match grip {
         Grip::Radius => local[0].hypot(local[1]).max(SMALLEST),
         Grip::Size(axis) => (local[axis].abs() * 2.0).max(SMALLEST),
+        Grip::Offset => 0.0,
     }
 }
 
@@ -104,15 +118,16 @@ impl EditorApp {
             .with_clip_rect(rect);
         let components = self.scene.components();
         let lights = components
-            .query::<Light2dComponent>(&self.world)
+            .query_parts::<Light2dComponent>(&self.world)
             .unwrap_or_default();
         let occluders = components
             .query::<Light2dOccluderComponent>(&self.world)
             .unwrap_or_default();
-        let mut handles: Vec<(EntityId, Grip, Pos2, Mat4)> = Vec::new();
-        for (entity, light) in &lights {
+        let mut handles: Vec<Handle> = Vec::new();
+        for (entity, part, light) in &lights {
             let matrix = self.matrix_of(*entity);
-            let center = matrix.transform_point3(Vec3::ZERO);
+            let key = sindri_core::part_key(Light2dComponent::TYPE_NAME, part.as_deref());
+            let center = matrix.transform_point3(Vec3::new(light.offset[0], light.offset[1], 0.0));
             let selected = self.selection.contains(*entity);
             let stroke = Stroke::new(
                 if selected { 1.75 } else { 1.0 },
@@ -136,10 +151,41 @@ impl EditorApp {
                     center + Vec3::new(light.radius, 0.0, 0.0),
                 )
             {
-                handles.push((*entity, Grip::Radius, at, Mat4::from_translation(center)));
+                handles.push((
+                    *entity,
+                    key.clone(),
+                    Grip::Radius,
+                    at,
+                    Mat4::from_translation(center),
+                ));
+            }
+            if selected && let Some(at) = project_point(rect, view_projection, center) {
+                handles.push((*entity, key, Grip::Offset, at, matrix));
             }
         }
-        for (entity, occluder) in &occluders {
+        self.occluder_outlines(&painter, rect, view_projection, &occluders, &mut handles);
+        for (_, _, _, at, _) in &handles {
+            painter.rect(
+                Rect::from_center_size(*at, egui::vec2(HANDLE_SIZE, HANDLE_SIZE)),
+                1.0,
+                LIGHT_AMBER,
+                Stroke::new(1.0, Color32::BLACK),
+                egui::StrokeKind::Middle,
+            );
+        }
+        self.drag_light2d_handle(context, response, blocked, &handles, view_projection)
+    }
+
+    /// Draws each occluder's outline, and the selected box's size handles.
+    fn occluder_outlines(
+        &self,
+        painter: &egui::Painter,
+        rect: Rect,
+        view_projection: Mat4,
+        occluders: &[(EntityId, Light2dOccluderComponent)],
+        handles: &mut Vec<Handle>,
+    ) {
+        for (entity, occluder) in occluders {
             if occluder.shape == OccluderShape::Tilemap {
                 continue;
             }
@@ -168,21 +214,17 @@ impl EditorApp {
                     local[axis] = occluder.size[axis] / 2.0;
                     let point = matrix.transform_point3(Vec3::new(local[0], local[1], 0.0));
                     if let Some(at) = project_point(rect, view_projection, point) {
-                        handles.push((*entity, Grip::Size(axis), at, matrix));
+                        handles.push((
+                            *entity,
+                            Light2dOccluderComponent::TYPE_NAME.to_owned(),
+                            Grip::Size(axis),
+                            at,
+                            matrix,
+                        ));
                     }
                 }
             }
         }
-        for (_, _, at, _) in &handles {
-            painter.rect(
-                Rect::from_center_size(*at, egui::vec2(HANDLE_SIZE, HANDLE_SIZE)),
-                1.0,
-                LIGHT_AMBER,
-                Stroke::new(1.0, Color32::BLACK),
-                egui::StrokeKind::Middle,
-            );
-        }
-        self.drag_light2d_handle(context, response, blocked, &handles, view_projection)
     }
 
     fn matrix_of(&self, entity: EntityId) -> Mat4 {
@@ -199,7 +241,7 @@ impl EditorApp {
         context: &egui::Context,
         response: &Response,
         blocked: bool,
-        handles: &[(EntityId, Grip, Pos2, Mat4)],
+        handles: &[Handle],
         view_projection: Mat4,
     ) -> bool {
         let id = egui::Id::new(LIGHT_DRAG);
@@ -210,26 +252,26 @@ impl EditorApp {
         let near = pressed.and_then(|pointer| {
             handles
                 .iter()
-                .find(|(_, _, at, _)| at.distance(pointer) <= HANDLE_REACH)
+                .find(|(_, _, _, at, _)| at.distance(pointer) <= HANDLE_REACH)
         });
         let mut drag = context.data(|data| data.get_temp::<LightDrag>(id));
         if drag.is_none()
             && !blocked
             && response.drag_started_by(egui::PointerButton::Primary)
-            && let Some((entity, grip, _, _)) = near
+            && let Some((entity, key, grip, _, _)) = near
         {
             drag = Some(LightDrag {
                 entity: *entity,
+                key: key.clone(),
                 grip: *grip,
             });
         }
         let Some(active) = drag else {
             return near.is_some() && !blocked;
         };
-        let Some((_, _, _, matrix)) = handles
-            .iter()
-            .find(|(entity, grip, _, _)| *entity == active.entity && *grip == active.grip)
-        else {
+        let Some((_, _, _, _, matrix)) = handles.iter().find(|(entity, key, grip, _, _)| {
+            *entity == active.entity && *key == active.key && *grip == active.grip
+        }) else {
             context.data_mut(|data| data.remove::<LightDrag>(id));
             return false;
         };
@@ -239,7 +281,7 @@ impl EditorApp {
             && let Some(world) = unproject_to_plane(response.rect, view_projection, pointer, depth)
         {
             let local = matrix.inverse().transform_point3(world);
-            self.write_light2d_size(active, dragged(active.grip, [local.x, local.y]));
+            self.write_light2d_size(&active, [local.x, local.y]);
         }
         if response.drag_stopped_by(egui::PointerButton::Primary) {
             context.data_mut(|data| data.remove::<LightDrag>(id));
@@ -249,13 +291,17 @@ impl EditorApp {
         true
     }
 
-    /// Writes the dragged size into the stored payload, keeping every other
-    /// field as authored, merged into one undo step for the whole drag.
-    fn write_light2d_size(&mut self, drag: LightDrag, size: f32) {
-        let (type_name, field, index) = match drag.grip {
-            Grip::Radius => (Light2dComponent::TYPE_NAME, "radius", None),
-            Grip::Size(axis) => (Light2dOccluderComponent::TYPE_NAME, "size", Some(axis)),
+    /// Writes where the handle was dragged to, `local` in the handle's own
+    /// space, into the stored payload of the part it belongs to, keeping every
+    /// other field as authored, merged into one undo step for the whole drag.
+    fn write_light2d_size(&mut self, drag: &LightDrag, local: [f32; 2]) {
+        let (field, index) = match drag.grip {
+            Grip::Radius => ("radius", None),
+            Grip::Offset => ("offset", None),
+            Grip::Size(axis) => ("size", Some(axis)),
         };
+        let type_name = drag.key.as_str();
+        let size = dragged(drag.grip, local);
         let Some(mut payload) = self
             .world
             .get(drag.entity)
@@ -268,6 +314,9 @@ impl EditorApp {
             return;
         };
         match index {
+            None if drag.grip == Grip::Offset => {
+                object.insert(field.to_owned(), serde_json::json!(local));
+            }
             None => {
                 object.insert(field.to_owned(), Value::from(size));
             }
@@ -286,9 +335,16 @@ impl EditorApp {
             type_name: type_name.to_owned(),
             payload,
         });
-        let transaction = buffer
-            .into_transaction("Resize 2D light")
-            .merging(format!("light2d-handle:{}", drag.entity.index()));
+        let label = if drag.grip == Grip::Offset {
+            "Move 2D light"
+        } else {
+            "Resize 2D light"
+        };
+        let transaction = buffer.into_transaction(label).merging(format!(
+            "light2d-handle:{}:{}",
+            drag.entity.index(),
+            drag.key
+        ));
         if let Err(error) = self.apply_edit(transaction) {
             self.report(error.to_string());
         }

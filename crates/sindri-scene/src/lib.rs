@@ -98,6 +98,14 @@ pub use extract::{
     voxel_space, world_camera_of,
 };
 pub use input_actions::InputActionsComponent;
+
+/// The component kinds an entity may hold several of as named parts
+/// (`sindri.light2d#halo`), because the scene draws and steps every part of
+/// them. Editors offer a second of one of these, and only these.
+pub const PART_KINDS: [&str; 2] = [
+    <Light2dComponent as sindri_core::SceneComponent>::TYPE_NAME,
+    <ParticlesComponent as sindri_core::SceneComponent>::TYPE_NAME,
+];
 pub use light_field::LightField2d;
 pub use model_collision3d::{
     ModelCollider3dComponent, ModelCollisionBindings3d, ModelCollisionGeometry3d,
