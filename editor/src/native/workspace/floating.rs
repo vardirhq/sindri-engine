@@ -55,7 +55,7 @@ impl EditorApp {
             .collect();
         let mut gesture = Gesture::None;
         let mut drawn = rect;
-        egui::Area::new(egui::Id::new(place.id()))
+        egui::Area::new(egui::Id::unique(place.id()))
             .fixed_pos(rect.min)
             // Not kept on screen by egui. A row even slightly wider than the
             // overlay grew the area past the window edge, egui moved the
@@ -78,7 +78,7 @@ impl EditorApp {
                 let handle = ui
                     .interact(
                         strip,
-                        egui::Id::new((place.id(), "move")),
+                        egui::Id::unique((place.id(), "move")),
                         Sense::click_and_drag(),
                     )
                     .on_hover_cursor(egui::CursorIcon::Grab);
@@ -125,7 +125,7 @@ impl EditorApp {
                     let sizing = ui
                         .interact(
                             grip,
-                            egui::Id::new((place.id(), "size")),
+                            egui::Id::unique((place.id(), "size")),
                             Sense::click_and_drag(),
                         )
                         .on_hover_cursor(egui::CursorIcon::ResizeNwSe);

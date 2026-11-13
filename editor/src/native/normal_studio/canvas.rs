@@ -24,7 +24,7 @@ impl EditorApp {
     pub(super) fn studio_canvas(&mut self, ui: &mut egui::Ui, canvas: Rect) {
         let response = ui.interact(
             canvas,
-            ui.id().with("normal studio canvas"),
+            ui.scope_id().with("normal studio canvas"),
             Sense::click_and_drag(),
         );
         let Some(studio) = self.normal_studio.as_mut() else {

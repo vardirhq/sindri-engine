@@ -172,7 +172,7 @@ fn sheet_canvas(
 ) {
     let response = ui.interact(
         canvas,
-        ui.id().with("sprite sheet canvas"),
+        ui.scope_id().with("sprite sheet canvas"),
         Sense::click_and_drag(),
     );
     let painter = ui.painter_at(canvas);

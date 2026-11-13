@@ -132,7 +132,7 @@ impl EditorApp {
             return;
         }
         let area = context.content_rect();
-        egui::Area::new(egui::Id::new("inspector-applying"))
+        egui::Area::new(egui::Id::unique("inspector-applying"))
             .order(egui::Order::Foreground)
             .fixed_pos(area.center())
             .pivot(egui::Align2::CENTER_CENTER)

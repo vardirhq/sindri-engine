@@ -285,7 +285,7 @@ pub(super) fn console_view(
             lazy::rows(
                 ui,
                 in_sight,
-                ui.id().with("console rows"),
+                ui.scope_id().with("console rows"),
                 metric::ROW_HEIGHT,
                 entries,
                 |_| false,

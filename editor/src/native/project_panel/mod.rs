@@ -332,7 +332,7 @@ fn asset_column(
                     lazy::rows(
                         ui,
                         in_sight,
-                        ui.id().with("asset rows"),
+                        ui.scope_id().with("asset rows"),
                         metric::ROW_HEIGHT,
                         rows.iter().map(|row| (lazy::key(&row.0.path), row)),
                         |(entry, _)| renamed.as_ref() == Some(&entry.path),

@@ -171,7 +171,7 @@ fn component_heading(
     // component are recognisably the same thing.
     let open = section::component_with_menu(
         ui,
-        egui::Id::new(("inspector-component", name)),
+        egui::Id::unique(("inspector-component", name)),
         icons::for_component(name),
         &title,
         |ui| {

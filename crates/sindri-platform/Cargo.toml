@@ -33,7 +33,7 @@ gilrs = { workspace = true, optional = true }
 # Rodio's minimp3 alternative pulls slice-ring-buffer 0.3.4, which has
 # RUSTSEC-2025-0044 (safe-API double frees) and no fixed release. The resulting
 # MPL-2.0 exception is scoped to Symphonia's MP3 dependency tree in deny.toml.
-rodio = { version = "0.22.2", optional = true, default-features = false, features = ["playback", "symphonia-mp3", "lewton", "hound"] }
+rodio = { version = "0.23.0", optional = true, default-features = false, features = ["playback", "symphonia-mp3", "lewton", "hound"] }
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 js-sys.workspace = true

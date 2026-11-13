@@ -9,9 +9,9 @@ use std::cell::RefCell;
 use std::panic::{AssertUnwindSafe, catch_unwind};
 use std::path::PathBuf;
 
-use jni::JNIEnv;
 use jni::objects::{JClass, JObject, JString};
 use jni::sys::{jint, jstring};
+use jni::{Env, EnvOutcome, EnvUnowned, Outcome};
 
 use super::Host;
 use super::window::AndroidWindow;
@@ -25,33 +25,50 @@ thread_local! {
 
 /// Runs `call` against the host, turning its error or a panic into the
 /// message Java receives, and success into `null`.
-fn guarded(
-    env: &mut JNIEnv<'_>,
-    call: impl FnOnce(&mut JNIEnv<'_>, &mut Host) -> Result<(), String>,
+fn guarded<'local>(
+    env: &mut EnvUnowned<'local>,
+    call: impl FnOnce(&mut Env<'local>, &mut Host) -> Result<(), String>,
 ) -> jstring {
-    let outcome = catch_unwind(AssertUnwindSafe(|| {
-        HOST.with(|host| call(env, &mut host.borrow_mut()))
-    }));
-    let message = match outcome {
-        Ok(Ok(())) => return std::ptr::null_mut(),
-        Ok(Err(message)) => message,
-        Err(panic) => panic
-            .downcast_ref::<&str>()
-            .map(|text| (*text).to_owned())
-            .or_else(|| panic.downcast_ref::<String>().cloned())
-            .map_or_else(
-                || "the native host panicked".to_owned(),
-                |text| format!("the native host panicked: {text}"),
-            ),
-    };
-    env.new_string(message)
-        .map_or(std::ptr::null_mut(), JString::into_raw)
+    returned(env.with_env(|env| {
+        let outcome = catch_unwind(AssertUnwindSafe(|| {
+            HOST.with(|host| call(env, &mut host.borrow_mut()))
+        }));
+        match outcome {
+            Ok(Ok(())) => Ok(std::ptr::null_mut()),
+            Ok(Err(message)) => java_string(env, message),
+            Err(panic) => java_string(env, panicked(&*panic)),
+        }
+    }))
 }
 
-fn string(env: &mut JNIEnv<'_>, value: &JString<'_>) -> Result<String, String> {
-    env.get_string(value)
-        .map(String::from)
-        .map_err(|error| error.to_string())
+/// What a panic said, as the message Java receives.
+fn panicked(panic: &(dyn std::any::Any + Send)) -> String {
+    panic
+        .downcast_ref::<&str>()
+        .map(|text| (*text).to_owned())
+        .or_else(|| panic.downcast_ref::<String>().cloned())
+        .map_or_else(
+            || "the native host panicked".to_owned(),
+            |text| format!("the native host panicked: {text}"),
+        )
+}
+
+/// `text` as a new Java string, raw for returning to Java.
+fn java_string(env: &mut Env<'_>, text: impl AsRef<str>) -> jni::errors::Result<jstring> {
+    env.new_string(text).map(JString::into_raw)
+}
+
+/// What a native method returns: its value, or `null` when making it failed
+/// or panicked, which leaves Java a pending exception or nothing to show.
+fn returned(outcome: EnvOutcome<'_, jstring, jni::errors::Error>) -> jstring {
+    match outcome.into_outcome() {
+        Outcome::Ok(value) => value,
+        Outcome::Err(_) | Outcome::Panic(_) => std::ptr::null_mut(),
+    }
+}
+
+fn string(env: &Env<'_>, value: &JString<'_>) -> Result<String, String> {
+    value.try_to_string(env).map_err(|error| error.to_string())
 }
 
 /// A pixel size from Java, which has no unsigned integers.
@@ -63,7 +80,7 @@ fn pixels(value: jint) -> u32 {
 #[allow(unsafe_code)]
 #[unsafe(no_mangle)]
 pub extern "system" fn Java_dev_sindri_mobile_NativeBridge_open<'local>(
-    mut env: JNIEnv<'local>,
+    mut env: EnvUnowned<'local>,
     _class: JClass<'local>,
     project: JString<'local>,
     scene: JString<'local>,
@@ -79,7 +96,7 @@ pub extern "system" fn Java_dev_sindri_mobile_NativeBridge_open<'local>(
 #[allow(unsafe_code)]
 #[unsafe(no_mangle)]
 pub extern "system" fn Java_dev_sindri_mobile_NativeBridge_attach<'local>(
-    mut env: JNIEnv<'local>,
+    mut env: EnvUnowned<'local>,
     _class: JClass<'local>,
     surface: JObject<'local>,
     width: jint,
@@ -96,7 +113,7 @@ pub extern "system" fn Java_dev_sindri_mobile_NativeBridge_attach<'local>(
 #[allow(unsafe_code)]
 #[unsafe(no_mangle)]
 pub extern "system" fn Java_dev_sindri_mobile_NativeBridge_resize<'local>(
-    mut env: JNIEnv<'local>,
+    mut env: EnvUnowned<'local>,
     _class: JClass<'local>,
     width: jint,
     height: jint,
@@ -111,7 +128,7 @@ pub extern "system" fn Java_dev_sindri_mobile_NativeBridge_resize<'local>(
 #[allow(unsafe_code)]
 #[unsafe(no_mangle)]
 pub extern "system" fn Java_dev_sindri_mobile_NativeBridge_detach<'local>(
-    mut env: JNIEnv<'local>,
+    mut env: EnvUnowned<'local>,
     _class: JClass<'local>,
 ) -> jstring {
     guarded(&mut env, |_, host| {
@@ -124,7 +141,7 @@ pub extern "system" fn Java_dev_sindri_mobile_NativeBridge_detach<'local>(
 #[allow(unsafe_code)]
 #[unsafe(no_mangle)]
 pub extern "system" fn Java_dev_sindri_mobile_NativeBridge_draw<'local>(
-    mut env: JNIEnv<'local>,
+    mut env: EnvUnowned<'local>,
     _class: JClass<'local>,
 ) -> jstring {
     guarded(&mut env, |_, host| host.draw())
@@ -135,7 +152,7 @@ pub extern "system" fn Java_dev_sindri_mobile_NativeBridge_draw<'local>(
 #[allow(unsafe_code)]
 #[unsafe(no_mangle)]
 pub extern "system" fn Java_dev_sindri_mobile_NativeBridge_call<'local>(
-    mut env: JNIEnv<'local>,
+    mut env: EnvUnowned<'local>,
     _class: JClass<'local>,
     command: JString<'local>,
     arguments: JString<'local>,
@@ -151,25 +168,23 @@ pub extern "system" fn Java_dev_sindri_mobile_NativeBridge_call<'local>(
 #[allow(unsafe_code)]
 #[unsafe(no_mangle)]
 pub extern "system" fn Java_dev_sindri_mobile_NativeBridge_state<'local>(
-    env: JNIEnv<'local>,
+    mut env: EnvUnowned<'local>,
     _class: JClass<'local>,
 ) -> jstring {
     let state = catch_unwind(|| HOST.with(|host| host.borrow().state())).unwrap_or_else(|_| {
         serde_json::json!({ "status": "the native host panicked" }).to_string()
     });
-    env.new_string(state)
-        .map_or(std::ptr::null_mut(), JString::into_raw)
+    returned(env.with_env(|env| java_string(env, state)))
 }
 
 /// `fun script(): String`, a JSON object or `null`; see `Host::script`.
 #[allow(unsafe_code)]
 #[unsafe(no_mangle)]
 pub extern "system" fn Java_dev_sindri_mobile_NativeBridge_script<'local>(
-    env: JNIEnv<'local>,
+    mut env: EnvUnowned<'local>,
     _class: JClass<'local>,
 ) -> jstring {
     let script = catch_unwind(|| HOST.with(|host| host.borrow().script()))
         .unwrap_or_else(|_| "null".to_owned());
-    env.new_string(script)
-        .map_or(std::ptr::null_mut(), JString::into_raw)
+    returned(env.with_env(|env| java_string(env, script)))
 }

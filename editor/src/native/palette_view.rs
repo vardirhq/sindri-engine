@@ -151,7 +151,7 @@ impl EditorApp {
         let mut clicked = None;
         // Drawn above every panel and every overlay, because it is the one
         // thing that is never part of the arrangement.
-        egui::Area::new(egui::Id::new("command-palette"))
+        egui::Area::new(egui::Id::unique("command-palette"))
             .fixed_pos(rect.min)
             .order(egui::Order::Foreground)
             .interactable(true)

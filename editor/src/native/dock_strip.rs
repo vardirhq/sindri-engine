@@ -191,7 +191,7 @@ impl EditorApp {
     pub(super) fn paint_drag(&self, context: &egui::Context, drag: &Drag) {
         let painter = context.layer_painter(egui::LayerId::new(
             egui::Order::Foreground,
-            egui::Id::new("dock-drag"),
+            egui::Id::unique("dock-drag"),
         ));
         if let Some(DropTarget { place, index }) = drag.target {
             if let Some(zone) = self.dock.zones.iter().find(|zone| zone.place == place) {

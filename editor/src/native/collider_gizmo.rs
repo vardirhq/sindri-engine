@@ -219,7 +219,7 @@ impl EditorApp {
             // its own, which egui paints after the Scene view's.
             .layer_painter(LayerId::new(
                 Order::Background,
-                egui::Id::new(COLLIDER_LAYER),
+                egui::Id::unique(COLLIDER_LAYER),
             ))
             .with_clip_rect(rect);
         for shape in &shapes {
@@ -292,7 +292,7 @@ impl EditorApp {
         depth: f32,
         view_projection: Mat4,
     ) -> bool {
-        let id = egui::Id::new(COLLIDER_DRAG);
+        let id = egui::Id::unique(COLLIDER_DRAG);
         let pointer = response.interact_pointer_pos().or(response.hover_pos());
         // A drag is only recognised once the pointer has travelled, by which
         // time it may be off the handle it was pressed on: where the press

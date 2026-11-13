@@ -130,7 +130,7 @@ impl ComposerApp {
         if ui
             .interact(
                 name_rect,
-                ui.id().with(("layer", layer)),
+                ui.scope_id().with(("layer", layer)),
                 egui::Sense::click(),
             )
             .clicked()
@@ -142,7 +142,7 @@ impl ComposerApp {
         self.paint_layer(&painter, timeline, layer);
         let response = ui.interact(
             timeline,
-            ui.id().with(("timeline", layer)),
+            ui.scope_id().with(("timeline", layer)),
             egui::Sense::click(),
         );
         if response.clicked()
@@ -192,7 +192,11 @@ impl ComposerApp {
                 if *locked { theme::FORGE } else { theme::FAINT },
             );
             if ui
-                .interact(rect, ui.id().with(("keep", layer)), egui::Sense::click())
+                .interact(
+                    rect,
+                    ui.scope_id().with(("keep", layer)),
+                    egui::Sense::click(),
+                )
                 .on_hover_text("Keep this track when generating")
                 .clicked()
             {
@@ -235,7 +239,7 @@ impl ComposerApp {
             if ui
                 .interact(
                     rect,
-                    ui.id().with(("mix", layer, index)),
+                    ui.scope_id().with(("mix", layer, index)),
                     egui::Sense::click(),
                 )
                 .clicked()

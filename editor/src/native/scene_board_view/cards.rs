@@ -173,7 +173,7 @@ fn card_view(
     let mut action = None;
     let response = ui.interact(
         rect,
-        ui.id().with(("scene card", &card.path)),
+        ui.scope_id().with(("scene card", &card.path)),
         Sense::click(),
     );
     let painter = ui.painter_at(rect.expand(2.0));
