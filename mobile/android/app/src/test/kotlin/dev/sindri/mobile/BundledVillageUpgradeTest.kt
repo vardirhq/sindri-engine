@@ -12,7 +12,7 @@ class BundledVillageUpgradeTest {
             val scene = directory.resolve("village.scene")
             val recovery = directory.resolve("recovery.json")
             val old = "original scene".toByteArray()
-            val hash = BundledVillageUpgrade.sha256(old)
+            val hash = setOf(BundledVillageUpgrade.sha256(old))
             scene.writeBytes(old)
             recovery.writeText("unsaved edits")
             BundledVillageUpgrade.replaceIfUntouched(scene, recovery, hash) { "updated".toByteArray() }
@@ -41,11 +41,12 @@ class BundledVillageUpgradeTest {
             scripts.resolve("wick.decay").writeText("old wick")
             scripts.resolve("gloom.decay").writeText("edited gloom")
             val old = mapOf(
-                "scripts/wick.decay" to BundledVillageUpgrade.sha256("old wick".toByteArray()),
-                "scripts/gloom.decay" to BundledVillageUpgrade.sha256("old gloom".toByteArray()),
+                "scripts/wick.decay" to setOf(BundledVillageUpgrade.sha256("old wick".toByteArray())),
+                "scripts/gloom.decay" to setOf(BundledVillageUpgrade.sha256("old gloom".toByteArray())),
             )
             val bundled = { path: String -> "new $path".toByteArray() }
-            val hash = BundledVillageUpgrade.sha256(oldVillage)
+            // The first release's village, and this one's.
+            val hash = setOf(BundledVillageUpgrade.sha256("first village".toByteArray()), BundledVillageUpgrade.sha256(oldVillage))
             // An edited script is kept, and so is the village it belongs with.
             BundledVillageUpgrade.apply(assets, recovery, hash, old, bundled)
             assertEquals("new scripts/wick.decay", scripts.resolve("wick.decay").readText())

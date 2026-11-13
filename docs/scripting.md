@@ -339,8 +339,16 @@ script Gloom {
 
 A part reaches the same members as the object's own (`halo.radius`,
 `halo.color.a`, `surge.rate`). Asking a part for a part is an error: ask its
-object. An object still runs one script; a script attached as a part is not
-built yet.
+object.
+
+**Several scripts on one object.** A script can be attached as a named part
+too (`sindri.script#halo`), so one object runs several, each with its own
+fields, timers and tweens. A script attached as a part reads its own name's
+parts first: the `Flame` attached as `#halo` reads `this.light2d` as the
+object's `light2d#halo` when it has one, and as its own light otherwise, so
+one script written for "my light" serves a lantern's beam and its halo,
+attached twice. `this.entity` is the object either way. An object runs its own
+script first, then its parts by name.
 
 `sprite` is the thing in the world and `ui_image` is the thing on the viewport:
 two components, so two paths. A script says which it means rather than writing
@@ -2562,7 +2570,10 @@ if hit != null {
 ```
 
 `Name.on(entity)` answers with the entity typed as that script when it runs
-it, and `null` when it does not. A script type is also an `Entity`: it reaches
+it, and `null` when it does not. An object that runs several scripts answers
+with the one that runs `Name`: its own, else the first part by name, and a
+message or field write through it reaches that script alone. Signals
+(`World.send_signal`) are addressed to the object, not to one of its scripts. A script type is also an `Entity`: it reaches
 `transform` and the rest, and goes wherever an entity does. Where a script's
 own name matches an entity's (`transform`, say), the entity's wins.
 

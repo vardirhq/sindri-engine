@@ -292,11 +292,11 @@ def wick(fresh=True):
         # him as he turns (`wick.decay` steers it, and puts it in front of him or behind),
         # and the light is its flame, so what it lights and the shadows it casts start at the
         # lantern: a beam turned to the way he faces, so the dark is behind him, and a small
-        # round halo that keeps what is at his heels from being black. The lantern carries its
-        # own drawing, at a size, and its two emitters as parts: embers that lift off the
-        # flame, and a faint glow (`#glow`) that swells and fades round it. Its two lights
-        # still hang from it, each with the script that flickers it, as an object runs one
-        # script.
+        # round halo (`#halo`) that keeps what is at his heels from being black. The lantern
+        # carries all of it as parts: its drawing, at a size; its two emitters, embers that
+        # lift off the flame and a faint glow (`#glow`) that swells and fades round it; its
+        # two lights; and a `Flame` for each, the halo's attached as `#halo` so that it
+        # flickers the halo.
         entity('wick-lantern', 'wick-lantern', at(*LANTERN_START), 'wick', **{
             'sindri.sprite': {'texture': 'textures/lantern.png', 'layer': 5, 'tint': [1.0, 1.0, 1.0, 1.0],
                               'size': [0.6, 0.8]},
@@ -305,20 +305,18 @@ def wick(fresh=True):
                 spread=60.0, offset=[0.0, 0.05], shape_size=[0.25, 0.1], gravity=[0.0, 0.9], drag=0.4, layer=6),
             'sindri.particles#glow': motes(
                 2.5, 1.4, 0.0, [[1.0, 0.7, 0.3, 0.0], [1.0, 0.7, 0.3, 0.36], [1.0, 0.6, 0.25, 0.0]], 1.4, 2.4,
-                spread=360.0, shape_size=[0.1, 0.1], gravity=[0.0, 0.0], drag=1.0, layer=4)}),
-        entity('wick-light', 'wick-light', at(0, 0, 0.1), 'wick-lantern', **{
+                spread=360.0, shape_size=[0.1, 0.1], gravity=[0.0, 0.0], drag=1.0, layer=4),
             'sindri.light2d': {'enabled': True, 'color': [1.0, 0.76, 0.42, 1.0], 'intensity': 1.5,
                                'radius': 10.0, 'falloff': 1.3, 'height': 1.0, 'shadows': True,
                                'shadow_reach': 0.6, 'shadow_source_radius': 0.3,
                                'cone_angle': 140.0, 'cone_direction': -90.0, 'cone_softness': 0.4},
+            'sindri.light2d#halo': {'enabled': True, 'color': [1.0, 0.7, 0.4, 1.0], 'intensity': 1.1,
+                                    'radius': 4.6, 'falloff': 1.6, 'height': 1.0, 'shadows': True,
+                                    'shadow_reach': 0.6, 'shadow_source_radius': 0.3},
             'sindri.script': {'source': 'scripts/flame.decay', 'script': 'Flame',
-                              'properties': {'base_intensity': 1.5, 'base_radius': 10.0}}}),
-        entity('wick-halo', 'wick-halo', at(0, 0, 0.1), 'wick-lantern', **{
-            'sindri.light2d': {'enabled': True, 'color': [1.0, 0.7, 0.4, 1.0], 'intensity': 1.1,
-                               'radius': 4.6, 'falloff': 1.6, 'height': 1.0, 'shadows': True,
-                               'shadow_reach': 0.6, 'shadow_source_radius': 0.3},
-            'sindri.script': {'source': 'scripts/flame.decay', 'script': 'Flame',
-                              'properties': {'base_intensity': 1.1, 'base_radius': 4.6}}}),
+                              'properties': {'base_intensity': 1.5, 'base_radius': 10.0}},
+            'sindri.script#halo': {'source': 'scripts/flame.decay', 'script': 'Flame',
+                                   'properties': {'base_intensity': 1.1, 'base_radius': 4.6}}}),
     ]
 
 

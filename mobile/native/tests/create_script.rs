@@ -33,7 +33,14 @@ fn new_behavior_attaches_saves_and_undo_keeps_the_file() {
         opened.world.get(entity).unwrap().components["sindri.script"]["source"].as_str(),
         Some(source.as_str())
     );
-    assert!(editing.create_script(&mut opened).is_err());
+    // A second runs beside it, as a named part.
+    let second = editing.create_script(&mut opened).unwrap();
+    assert_eq!(second, "scripts/behavior-3.decay");
+    assert_eq!(
+        opened.world.get(entity).unwrap().components["sindri.script#script-2"]["source"].as_str(),
+        Some(second.as_str())
+    );
+    editing.undo(&mut opened.world).unwrap();
     editing.undo(&mut opened.world).unwrap();
     assert!(
         !opened

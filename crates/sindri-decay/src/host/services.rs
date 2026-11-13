@@ -101,6 +101,7 @@ impl<'a> WorldHost<'a> {
             tweens: None,
             actions: None,
             part: None,
+            script_part: None,
         }
     }
 }

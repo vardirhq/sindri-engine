@@ -508,43 +508,6 @@ impl ComponentSchemaRegistry {
         self.registrations.get(split_part(key).0)
     }
 
-    /// Every part of kind `T` on every *active* entity, decoded, with each
-    /// part's name, `None` for the unnamed one.
-    ///
-    /// What a system that draws or steps every part of a kind asks, a lamp's
-    /// beam and its halo alike. [`Self::query`] still answers with the unnamed
-    /// part alone, for the many readers that mean "the entity's light".
-    pub fn query_parts<T: SceneComponent>(
-        &self,
-        world: &World,
-    ) -> Result<Vec<(EntityId, Option<String>, T)>, ComponentRegistryError> {
-        self.require_registered(T::TYPE_NAME)?;
-        let mut parts = Vec::new();
-        for (entity_id, entity) in world.entities() {
-            if !world.is_active(entity_id) {
-                continue;
-            }
-            for (key, payload) in &entity.components {
-                let (type_name, part) = split_part(key);
-                if type_name != T::TYPE_NAME {
-                    continue;
-                }
-                let component = T::deserialize(payload).map_err(|source| {
-                    ComponentRegistryError::InvalidPayload {
-                        entity: entity.source_id.as_ref().map_or_else(
-                            || format!("{entity_id:?}"),
-                            |source_id| source_id.as_str().to_owned(),
-                        ),
-                        type_name: key.clone(),
-                        source,
-                    }
-                })?;
-                parts.push((entity_id, part.map(str::to_owned), component));
-            }
-        }
-        Ok(parts)
-    }
-
     fn require_registered(&self, type_name: &'static str) -> Result<(), ComponentRegistryError> {
         self.registrations
             .contains_key(type_name)

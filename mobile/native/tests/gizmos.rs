@@ -53,9 +53,9 @@ fn the_field_marks_only_what_cannot_otherwise_be_tapped() {
     for settings in ["environment", "physics"] {
         assert!(!marked.contains(&entity(&opened, settings)), "{settings}");
     }
-    // Wick's lantern, its lights and its particles are parts of a drawn
-    // object, reached through it or Layers.
-    for part in ["wick", "wick-lantern", "wick-light", "wick-halo"] {
+    // Wick and his lantern are drawn, and the lantern's lights, particles
+    // and flames are parts of it.
+    for part in ["wick", "wick-lantern"] {
         assert!(!marked.contains(&entity(&opened, part)), "{part}");
     }
     // The lamp lights stand alone, so they keep theirs.
@@ -66,7 +66,16 @@ fn the_field_marks_only_what_cannot_otherwise_be_tapped() {
 #[test]
 fn a_selected_part_shows_its_marker_and_moves_by_it() {
     let mut opened = lamplighter("world.scene");
-    let light = entity(&opened, "wick-light");
+    // A light hung from Wick on an object of its own.
+    let light = spawn_at(&mut opened, [0.0, 0.0, 0.0]);
+    opened
+        .world
+        .get_mut(light)
+        .unwrap()
+        .components
+        .insert("sindri.light2d".to_owned(), json!({}));
+    let wick = entity(&opened, "wick");
+    opened.world.set_parent(light, Some(wick)).unwrap();
     let mut editing = Editing::for_scene(&opened).unwrap();
     assert!(marker_at(&editing, &opened, light).is_none());
     editing.selected = Some(light);

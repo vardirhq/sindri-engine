@@ -1,14 +1,17 @@
 //! Managed tween values, owned by a script runner rather than scene data.
 
 use decay_runtime::Value;
-use sindri_core::{Easing, EntityId};
+use sindri_core::Easing;
+
+use crate::ScriptSlot;
 use std::collections::{BTreeMap, BTreeSet};
 
 pub(crate) const LIMIT: usize = 8192;
 
 #[derive(Clone)]
 pub(crate) struct Track {
-    pub(crate) owner: EntityId,
+    /// The script that made it.
+    pub(crate) owner: ScriptSlot,
     pub(crate) from: Value,
     pub(crate) to: Value,
     pub(crate) duration: f64,
@@ -31,7 +34,7 @@ pub(crate) struct Track {
 
 impl Track {
     pub(crate) fn new(
-        owner: EntityId,
+        owner: ScriptSlot,
         from: Value,
         to: Value,
         duration: f64,
@@ -125,7 +128,7 @@ impl Track {
 #[derive(Clone, Default)]
 pub(crate) struct Tweens {
     tracks: BTreeMap<u64, Track>,
-    owners: BTreeMap<EntityId, BTreeSet<u64>>,
+    owners: BTreeMap<ScriptSlot, BTreeSet<u64>>,
     // Never reused, including after clear: stale handles cannot name new tracks.
     next: u64,
 }
@@ -137,7 +140,10 @@ impl Tweens {
         }
         let id = self.next.checked_add(1).ok_or("exhausted tween handles")?;
         self.next = id;
-        self.owners.entry(track.owner).or_default().insert(id);
+        self.owners
+            .entry(track.owner.clone())
+            .or_default()
+            .insert(id);
         self.tracks.insert(id, track);
         Ok(id)
     }
@@ -167,30 +173,30 @@ impl Tweens {
         self.tracks.clear();
         self.owners.clear();
     }
-    pub(crate) fn remove_owner(&mut self, owner: EntityId) {
-        for id in self.owners.remove(&owner).unwrap_or_default() {
+    pub(crate) fn remove_owner(&mut self, owner: &ScriptSlot) {
+        for id in self.owners.remove(owner).unwrap_or_default() {
             self.tracks.remove(&id);
         }
     }
-    pub(crate) fn retain(&mut self, mut keep: impl FnMut(EntityId) -> bool) {
+    pub(crate) fn retain(&mut self, mut keep: impl FnMut(&ScriptSlot) -> bool) {
         let removed: Vec<_> = self
             .owners
             .keys()
-            .copied()
-            .filter(|owner| !keep(*owner))
+            .filter(|owner| !keep(owner))
+            .cloned()
             .collect();
         for owner in removed {
-            self.remove_owner(owner);
+            self.remove_owner(&owner);
         }
     }
-    pub(crate) fn advance(&mut self, owner: EntityId, seconds: f64) {
+    pub(crate) fn advance(&mut self, owner: &ScriptSlot, seconds: f64) {
         // A tween after another holds still until that one has finished, as
         // it stood before this advance: the next one starts on the step after
         // the last ends, whichever order they were made in. One whose
         // predecessor was disposed has nothing left to wait for.
         let ready: Vec<u64> = self
             .owners
-            .get(&owner)
+            .get(owner)
             .into_iter()
             .flatten()
             .copied()

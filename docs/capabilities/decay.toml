@@ -143,6 +143,27 @@ up each bullet it fires this way.
 """
 
 [[capability]]
+id = "several-scripts"
+group = "Scripts and the host"
+title = "An object runs several scripts"
+summary = "A script attached as a named part (`sindri.script#halo`) runs beside the object's own, and reads its own name's parts first."
+status = { engine = "partial", editor = "partial", decay = "partial", proof = "partial" }
+parity = "Several parts of one kind on an object"
+tests = ["crates/sindri-decay/tests/an_object_runs_several_scripts.rs"]
+proof = ["games/lamplighter"]
+detail = """
+A script can be attached as a named part, so one object runs several, each
+with its own fields, timers and tweens. A script attached as `#halo` reads
+`this.light2d` as the object's `light2d#halo` when it has one, so one script
+serves a lantern's beam and its halo. `Name.on(entity)` answers whichever of
+the object's scripts runs `Name`, its own first, and messages and field writes
+through it reach that script alone. Lamplighter's lantern carries both lights
+and a `Flame` for each. Desktop offers a second script in Add Component; the
+phone attaches a second created script as a part, but its Behaviour sheet
+opens only the object's own script.
+"""
+
+[[capability]]
 id = "events"
 group = "Scripts and the host"
 title = "Events (emit, handle anywhere)"

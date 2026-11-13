@@ -348,9 +348,22 @@ the component's own field names and reads as a field; and a declared part
 by itself let one object run two scripts.
 
 Built: the call form (`HostType::with_parts`, and the host's part references,
-for `light2d` and `particles`). Not built: a script attached as a part. The
-decision was recorded here before it was built, as the isolation rule above
-asks. The call form needs the analyzer to accept a call partway through a
-host path and a `Light2d` value type; several scripts on one object needs the
-host to key running scripts by object and part rather than by object. Neither
-reaches into `decay/` from a `sindri-*` crate.
+for `light2d` and `particles`), and scripts attached as parts. The decision
+was recorded here before it was built, as the isolation rule above asks. The
+call form needs the analyzer to accept a call partway through a host path and
+a `Light2d` value type; several scripts on one object needed only the host,
+which keys running scripts, their starting values, tweens and messages by
+object and part (`ScriptSlot`) rather than by object. Neither reaches into
+`decay/` from a `sindri-*` crate.
+
+Decided with it, **2026-11-13**:
+
+- `Name.on(entity)` answers the object's script that runs `Name`: its own,
+  else its first part by name. Its own is answered as the entity, as before;
+  a part as a part reference that reaches that script's fields and messages,
+  and otherwise stands for the entity (`flame.transform`, `World.destroy(flame)`).
+- A script may reach a sibling on its own object (`Wick.on(this.entity)` from
+  a part); only its own fields are written through `this`.
+- Signals stay addressed to the object. A signal is a fact about the object,
+  and the script that takes it takes it for all of them.
+- An object runs its own script first, then its parts by name.

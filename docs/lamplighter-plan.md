@@ -215,10 +215,10 @@ The lantern is its own sprite (`wick-lantern`, drawn by `art/lantern.py`), not p
 Wick's: his art has empty hands in all four directions, and `wick.decay` floats the
 lantern on a circle around his hands. It rides at his right hand a little ahead of where
 he faces, swings round him as he turns, drifts a little, and is drawn in front of him on
-the near half of its circle and behind him on the far half. Two lights hang from it
-(`wick-light` and `wick-halo`): a 140 degree beam that `wick.decay` turns toward where he
-faces, and a small round halo that keeps his heels from being black. Both are `Flame`
-scripts and are scorched together.
+the near half of its circle and behind him on the far half. It carries two lights as parts:
+its own, a 140 degree beam that `wick.decay` turns toward where he faces, and `#halo`, a
+small round halo that keeps his heels from being black. Each is flickered by a `Flame`
+script on the lantern, the halo's attached as `#halo`, and they are scorched together.
 
 The gloom keep to the dark and are undone by light: a gloom caught in a strong light
 stops and burns out, and uses cover (`Lighting.visible`) to creep on and ambush. The

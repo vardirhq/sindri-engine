@@ -54,7 +54,7 @@ impl WorldHost<'_> {
             return Ok(None);
         };
         let entity = self.subject(subject, path)?;
-        let part = self.part.clone();
+        let part = self.part_of(entity, ParticlesComponent::TYPE_NAME);
         self.particles_act(entity, part.as_deref(), *call, args.first(), path)
             .map(Some)
     }

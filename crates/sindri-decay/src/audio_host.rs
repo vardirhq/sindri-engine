@@ -171,6 +171,12 @@ impl<'a> WorldHost<'a> {
         self
     }
 
+    /// Runs this host as the script attached as `part` of its entity.
+    pub(crate) fn with_script_part(mut self, part: Option<String>) -> Self {
+        self.inner = self.inner.with_script_part(part);
+        self
+    }
+
     /// Supplies independent 3D controls and the completed event snapshot.
     #[must_use]
     pub fn with_physics3d(mut self, physics: Option<crate::Physics3d<'a>>) -> Self {

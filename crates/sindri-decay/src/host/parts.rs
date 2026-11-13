@@ -28,6 +28,11 @@ use crate::surface::PART_KINDS;
 /// The bit that marks a reference as a part rather than an entity.
 const PART_BIT: u64 = 1 << 63;
 
+/// The kind of a reference to a script attached as a part, which
+/// `Flame.on(entity)` answers when the part runs `Flame`. It reaches the
+/// script's fields and messages, never a component.
+pub(crate) const SCRIPT_PART: &str = "script";
+
 /// One part a script has reached: its entity, its kind's member name and the
 /// part's name.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -129,6 +134,9 @@ impl WorldHost<'_> {
         path: &Path,
     ) -> Option<(u64, Path, String)> {
         let part = self.blackboard.parts.get(subject?)?;
+        if part.kind == SCRIPT_PART {
+            return None;
+        }
         let mut reached = Vec::with_capacity(path.0.len() + 1);
         reached.push(part.kind.to_owned());
         reached.extend(path.0.iter().cloned());
@@ -155,9 +163,56 @@ impl WorldHost<'_> {
         result
     }
 
-    /// The key a component leaf reads and writes: the part being served, or
-    /// the entity's own.
-    pub(super) fn component_key(&self, component: &str) -> String {
-        part_key(component, self.part.as_deref())
+    /// The key a component leaf on `entity` reads and writes: the part being
+    /// served; else, on this script's own entity, the part named as this
+    /// script is, when there is one; else the entity's own.
+    pub(super) fn component_key(&self, entity: EntityId, component: &str) -> String {
+        part_key(component, self.part_of(entity, component).as_deref())
+    }
+
+    /// Which part of `component` a leaf on `entity` reaches, `None` for the
+    /// entity's own.
+    ///
+    /// A script attached as `sindri.script#halo` reads `this.light2d` as
+    /// `light2d#halo` when that part exists, and as the unnamed one otherwise
+    /// (`docs/decay-direction.md`, "Named parts"): one script written for "my
+    /// light" serves a lantern's beam and its halo, attached twice.
+    pub(super) fn part_of(&self, entity: EntityId, component: &str) -> Option<String> {
+        if let Some(part) = &self.part {
+            return Some(part.clone());
+        }
+        let own = self.script_part.as_deref()?;
+        let held = entity == self.entity
+            && self.world.get(entity).is_some_and(|data| {
+                data.components
+                    .contains_key(&part_key(component, Some(own)))
+            });
+        held.then(|| own.to_owned())
+    }
+
+    /// The entity a reference to a script attached as a part stands for,
+    /// beyond its fields and messages; `None` for any other reference.
+    ///
+    /// `Flame.on(lantern)` is the lantern typed as its `Flame`, whichever of
+    /// the lantern's scripts that is, so `flame.transform` and
+    /// `World.destroy(flame)` reach the lantern as they would through its own
+    /// script.
+    pub(super) fn script_part_entity(&self, subject: Option<u64>) -> Option<u64> {
+        subject
+            .and_then(|reference| self.blackboard.parts.get(reference))
+            .filter(|part| part.kind == SCRIPT_PART)
+            .map(|part| part.entity.to_bits())
+    }
+
+    /// Runs this host as the script attached as `part` of its entity.
+    #[must_use]
+    pub(crate) fn with_script_part(mut self, part: Option<String>) -> Self {
+        self.script_part = part;
+        self
+    }
+
+    /// Which script this host is running.
+    pub(crate) fn slot(&self) -> crate::ScriptSlot {
+        crate::ScriptSlot::new(self.entity, self.script_part.clone())
     }
 }

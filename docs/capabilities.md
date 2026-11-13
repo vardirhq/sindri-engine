@@ -47,6 +47,6 @@ correct it or delete it.
 | [Hosts and rendering](capabilities/rendering.md) | 38 | 3 | 0 |
 | [Assets](capabilities/assets.md) | 5 | 0 | 0 |
 | [The editor](capabilities/editor.md) | 37 | 6 | 1 |
-| [Decay](capabilities/decay.md) | 23 | 8 | 0 |
+| [Decay](capabilities/decay.md) | 24 | 8 | 0 |
 | [Games, labs and tooling](capabilities/projects.md) | 9 | 0 | 0 |
-| **All** | **185** | **33** | **1** |
+| **All** | **186** | **33** | **1** |

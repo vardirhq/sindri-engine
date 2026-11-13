@@ -39,12 +39,13 @@ fn write_new(path: &std::path::Path, source: &str) -> Result<(), String> {
 
 impl Editing {
     /// Create and attach a fresh behavior. Undo detaches it but retains the file.
+    ///
+    /// An object that already runs a script gets the new one as a named part
+    /// (`sindri.script#script-2`; `docs/object-parts.md`), so it runs both.
     pub fn create_script(&mut self, opened: &mut OpenedScene) -> Result<String, String> {
         let entity = self.selected.ok_or("Nothing is selected")?;
         let data = opened.world.get(entity).ok_or("Object no longer exists")?;
-        if data.components.contains_key("sindri.script") {
-            return Err("This object already has a script".to_owned());
-        }
+        let key = free_script_key(&data.components);
         let assets = sindri_runtime::project::assets_root(&opened.project);
         let scripts = assets.join("scripts");
         fs::create_dir_all(&scripts).map_err(|error| error.to_string())?;
@@ -84,7 +85,7 @@ impl Editing {
             let mut commands = CommandBuffer::new();
             commands.push(WorldCommand::SetComponent {
                 entity,
-                type_name: "sindri.script".to_owned(),
+                type_name: key,
                 payload,
             });
             self.history.break_merge_run();
@@ -99,4 +100,19 @@ impl Editing {
             return Ok(asset);
         }
     }
+}
+
+/// The first script key an object does not use: its own, then
+/// `sindri.script#script-2`, `#script-3`…
+fn free_script_key(components: &std::collections::BTreeMap<String, serde_json::Value>) -> String {
+    const SCRIPT: &str = "sindri.script";
+    if !components.contains_key(SCRIPT) {
+        return SCRIPT.to_owned();
+    }
+    // An object holds a handful of scripts; the last name is answered rather
+    // than looping.
+    (2..10_000)
+        .map(|index| sindri_core::part_key(SCRIPT, Some(&format!("script-{index}"))))
+        .find(|key| !components.contains_key(key))
+        .unwrap_or_else(|| sindri_core::part_key(SCRIPT, Some("script-10000")))
 }

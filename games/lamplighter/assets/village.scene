@@ -39185,32 +39185,7 @@
           "spin": 0.0,
           "space": "world",
           "layer": 4
-        }
-      }
-    },
-    {
-      "id": "wick-light",
-      "name": "wick-light",
-      "transform_3d": {
-        "position": [
-          0,
-          0,
-          0.1
-        ],
-        "rotation": [
-          0,
-          0,
-          0,
-          1
-        ],
-        "scale": [
-          1.0,
-          1.0,
-          1
-        ]
-      },
-      "parent": "wick-lantern",
-      "components": {
+        },
         "sindri.light2d": {
           "enabled": true,
           "color": [
@@ -39230,40 +39205,7 @@
           "cone_direction": -90.0,
           "cone_softness": 0.4
         },
-        "sindri.script": {
-          "source": "scripts/flame.decay",
-          "script": "Flame",
-          "properties": {
-            "base_intensity": 1.5,
-            "base_radius": 10.0
-          }
-        }
-      }
-    },
-    {
-      "id": "wick-halo",
-      "name": "wick-halo",
-      "transform_3d": {
-        "position": [
-          0,
-          0,
-          0.1
-        ],
-        "rotation": [
-          0,
-          0,
-          0,
-          1
-        ],
-        "scale": [
-          1.0,
-          1.0,
-          1
-        ]
-      },
-      "parent": "wick-lantern",
-      "components": {
-        "sindri.light2d": {
+        "sindri.light2d#halo": {
           "enabled": true,
           "color": [
             1.0,
@@ -39280,6 +39222,14 @@
           "shadow_source_radius": 0.3
         },
         "sindri.script": {
+          "source": "scripts/flame.decay",
+          "script": "Flame",
+          "properties": {
+            "base_intensity": 1.5,
+            "base_radius": 10.0
+          }
+        },
+        "sindri.script#halo": {
           "source": "scripts/flame.decay",
           "script": "Flame",
           "properties": {

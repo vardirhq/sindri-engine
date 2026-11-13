@@ -1,9 +1,9 @@
 # Object parts and the object workspace
 
-Status: steps 1 to 3 below, and the first two parts of step 4, are built:
-sprite `size` and `offset`, light `offset`, the mobile object workspace for a
-scene object or a prefab, named parts for lights and particles, and scripts
-reaching them. The rest is not.
+Status: steps 1 to 4 below are built: sprite `size` and `offset`, light
+`offset`, the mobile object workspace for a scene object or a prefab, named
+parts for lights, particles and scripts, and scripts reaching them. Steps 5
+and 6 are not, or not all.
 
 ## The problem
 
@@ -90,8 +90,8 @@ which keeps an unknown component key as an unknown payload. Built:
 - Saving stays canonical: keys sort, so `sindri.light2d#halo` follows
   `sindri.light2d`.
 - Lamplighter's lantern carries its embers and glow as `sindri.particles` and
-  `sindri.particles#glow`, so Wick is four objects: the body, the lantern, and
-  the lantern's two lights.
+  `sindri.particles#glow`, which left Wick four objects: the body, the
+  lantern, and the lantern's two lights (two now; see below).
 
 Scripts reach a part as `docs/decay-direction.md` ("Named parts") decided:
 `this.entity.light2d("halo")` and `this.entity.particles("surge")` answer the
@@ -102,9 +102,24 @@ list of the parts scripts reach and swaps the component key while it serves
 one, so every member of the kind reaches a part by the same code as the
 object's own. Each gloom now carries its smoke and surge as parts.
 
-A script attached as a part (`sindri.script#halo`) is not built yet, so the
-lantern's two lights, each flickered by its own `Flame` script, stay objects
-of their own.
+A script is a part too: `sindri.script#halo` is a second script on the
+object, with its own fields, timers and tweens, and it reads its own name's
+parts first, so the `Flame` attached as `#halo` flickers `light2d#halo`. The
+runner keeps each running script by object and part (`ScriptSlot`).
+`Flame.on(lantern)` answers the lantern's script that runs `Flame`, its own
+first. The lantern now carries both lights and both flames, so Wick is two
+objects:
+
+```text
+wick            body, collider, script, sprite, shadow, animation
+└ wick-lantern  sprite; particles, particles#glow; light2d, light2d#halo;
+                script (Flame), script#halo (Flame)
+```
+
+Desktop's Add Component offers a second script as "(another)", and on the
+phone *Create script* on an object that has one attaches the new one as
+`sindri.script#script-2`. The phone's Behaviour sheet still opens the object's
+own script; a script part's fields are edited in the inspector.
 
 On desktop, Add Component offers a second 2D light or emitter as "(another)"
 once the object has one, added under a free name (`light-2`), and a part's
@@ -176,8 +191,9 @@ things, not parts.
    - **4b, done:** `this.light2d("halo")` and `this.particles("surge")` in
      Decay, with an emitter's own `play()`, `stop()` and `emit(count)`; the
      glooms carry their smoke and surge as parts that `gloom.decay` plays.
-   - **4c:** several scripts on one object, each a part reading its own
-     name's parts first; then the lantern's lights, so Wick is two objects.
+   - **4c, done:** several scripts on one object, each a part reading its own
+     name's parts first; the lantern carries its lights and their flames, so
+     Wick is two objects.
 5. Collider piece names, reported by contacts and sensor events.
 6. The same part handles in desktop's Scene view, so both editors agree.
    Started: every 2D light part is drawn at its offset and moved and sized by
