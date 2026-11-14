@@ -346,6 +346,11 @@ impl EditorApp {
         let light_owned =
             editing && self.light2d_overlay(context, response, painting || collider_owned);
         let collider_owned = collider_owned || light_owned;
+        // The selected objects' art, emitters and shadows, sized by their
+        // own handles.
+        let part_owned =
+            editing && self.part_overlay(context, response, painting || collider_owned);
+        let collider_owned = collider_owned || part_owned;
         let gizmo_owned = editing
             && !painting
             && !collider_owned

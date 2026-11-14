@@ -230,7 +230,7 @@ impl EditorApp {
         }
     }
 
-    fn matrix_of(&self, entity: EntityId) -> Mat4 {
+    pub(super) fn matrix_of(&self, entity: EntityId) -> Mat4 {
         let transform = self.world.world_transform(entity).unwrap_or_default();
         Mat4::from_scale_rotation_translation(
             Vec3::from_array(transform.scale),

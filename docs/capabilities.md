@@ -46,7 +46,7 @@ correct it or delete it.
 | [Grids and voxels](capabilities/grids-and-voxels.md) | 10 | 3 | 0 |
 | [Hosts and rendering](capabilities/rendering.md) | 38 | 3 | 0 |
 | [Assets](capabilities/assets.md) | 5 | 0 | 0 |
-| [The editor](capabilities/editor.md) | 37 | 6 | 1 |
+| [The editor](capabilities/editor.md) | 38 | 6 | 1 |
 | [Decay](capabilities/decay.md) | 24 | 8 | 0 |
 | [Games, labs and tooling](capabilities/projects.md) | 9 | 0 | 0 |
-| **All** | **186** | **33** | **1** |
+| **All** | **187** | **33** | **1** |

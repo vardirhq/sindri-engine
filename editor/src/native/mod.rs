@@ -66,6 +66,7 @@ mod normal_studio;
 mod occlusion_view;
 mod overlay;
 mod palette_view;
+mod part_gizmo;
 mod particle_lab;
 mod particle_preview;
 mod play_cursor;
