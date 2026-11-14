@@ -155,7 +155,17 @@ data class BehaviourUi(
     /** The selection's real script, as Decay blocks; the sample rules show without one. */
     val decay: DecayScript? = null,
     val canCreateScript: Boolean = false,
+    /**
+     * Every script the object runs, its own first and then its parts by
+     * name (`sindri.script#halo`), so one of several can be opened.
+     */
+    val scripts: List<ScriptTab> = emptyList(),
+    /** The key of the script the sheet shows. */
+    val chosen: String? = null,
 )
+
+/** One script an object runs: its component [key] and what it is called. */
+data class ScriptTab(val key: String, val label: String)
 
 data class BehaviourTemplate(val icon: Sym, val label: String, val description: String, val chosen: Boolean)
 
@@ -184,6 +194,8 @@ sealed interface EditorEvent {
     data object OpenInspector : EditorEvent
     data object OpenBehaviour : EditorEvent
     data object CreateScript : EditorEvent
+    /** Show the object's script under [key], its own or a part. */
+    data class ScriptChosen(val key: String) : EditorEvent
     data object DismissCoach : EditorEvent
     data object ToastUndo : EditorEvent
     data class Brush(val brush: dev.sindri.mobile.Brush) : EditorEvent

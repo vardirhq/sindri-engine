@@ -57,6 +57,7 @@ fun BoxScope.BehaviourSheet(sheet: EditorSheet.Behaviour, onEvent: (EditorEvent)
         }
     }
     val script = behaviour.decay
+    if (script != null) ScriptTabs(behaviour, onEvent)
     when {
         sheet.code -> CodeView(behaviour, onEvent)
         script != null && !nodes -> Box(Modifier.weight(1f).fillMaxWidth()) {
@@ -76,6 +77,24 @@ fun BoxScope.BehaviourSheet(sheet: EditorSheet.Behaviour, onEvent: (EditorEvent)
         }
         else -> BlocksView(behaviour, onEvent)
     }
+}
+
+/**
+ * The object's scripts, its own first and then its parts, one chip each, and
+ * one that adds another: a second script runs beside the first as a part.
+ */
+@Composable
+private fun ScriptTabs(behaviour: BehaviourUi, onEvent: (EditorEvent) -> Unit) = Row(
+    Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(horizontal = 12.dp, vertical = 6.dp),
+    horizontalArrangement = Arrangement.spacedBy(8.dp),
+    verticalAlignment = Alignment.CenterVertically,
+) {
+    // Named, so the row of scripts is not read as the script's own sections.
+    Text("Scripts", style = ForgeType.text(12.sp, FontWeight.Medium, Forge.TextFaint), modifier = Modifier.padding(start = 4.dp, end = 2.dp))
+    behaviour.scripts.forEach { tab ->
+        Chip(tab.label, tab.key == behaviour.chosen, { onEvent(EditorEvent.ScriptChosen(tab.key)) })
+    }
+    Chip("+ Script", false, { onEvent(EditorEvent.CreateScript) })
 }
 
 @Composable

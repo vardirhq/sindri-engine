@@ -115,6 +115,20 @@ class DesignScreens {
         ),
     )
 
+    /** An object running two scripts, its own and a part, with a chip to choose each and one to add another. */
+    @Test fun behaviourScripts() = editor(
+        "22e-behaviour-scripts",
+        lamp.copy(
+            sheet = EditorSheet.Behaviour(
+                BehaviourUi(
+                    "Lamp post", emptyList(), emptyList(), "scripts/lantern.decay", emptyList(), "", decay = lantern(),
+                    scripts = listOf(ScriptTab("sindri.script", "Lantern"), ScriptTab("sindri.script#halo", "Flame · halo")),
+                    chosen = "sindri.script",
+                ),
+            ),
+        ),
+    )
+
     private fun lantern(): DecayScript =
         checkNotNull(DecayScript.read(checkNotNull(javaClass.getResource("/decay/lantern.json")).readText()))
 

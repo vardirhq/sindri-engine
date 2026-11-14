@@ -222,9 +222,9 @@ with its own fields, timers and tweens. A script attached as `#halo` reads
 serves a lantern's beam and its halo. `Name.on(entity)` answers whichever of
 the object's scripts runs `Name`, its own first, and messages and field writes
 through it reach that script alone. Lamplighter's lantern carries both lights
-and a `Flame` for each. Desktop offers a second script in Add Component; the
-phone attaches a second created script as a part, but its Behaviour sheet
-opens only the object's own script.
+and a `Flame` for each. Desktop offers a second script in Add Component and
+shows each as its own inspector section; the phone's Behaviour sheet lists an
+object's scripts, opens the one chosen, and adds another as a part.
 
 </details>
 
