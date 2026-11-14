@@ -1,9 +1,10 @@
 # Object parts and the object workspace
 
-Status: steps 1 to 4 below are built: sprite `size` and `offset`, light
-`offset`, the mobile object workspace for a scene object or a prefab, named
-parts for lights, particles and scripts, and scripts reaching them. Steps 5
-and 6 are not, or not all.
+Status: steps 1 to 4 and 6 below are built: sprite `size` and `offset`,
+light `offset`, the mobile object workspace for a scene object or a prefab,
+named parts for lights, particles and scripts, scripts reaching them, and the
+same part handles in desktop's Scene view. Step 5, collider piece names, is
+not.
 
 ## The problem
 
@@ -195,11 +196,13 @@ things, not parts.
      name's parts first; the lantern carries its lights and their flames, so
      Wick is two objects.
 5. Collider piece names, reported by contacts and sensor events.
-6. The same part handles in desktop's Scene view, so both editors agree.
-   Started: every 2D light part is drawn at its offset and moved and sized by
-   its own handles, and parts are added and named in the inspector. Still to
-   come: handles for a sprite's size and offset, an emitter's shape and the
-   contact shadow, which the inspector edits as numbers until then.
+6. **Done:** the same part handles in desktop's Scene view, so both editors
+   agree. Every 2D light part is drawn at its offset and moved and sized by
+   its own handles (`light2d_gizmo.rs`); a selected object's art frame, each
+   emitter's shape and its contact shadow are drawn with a handle at the
+   center that moves the part and one at a corner (or, for a round emitter,
+   on its ring) that sizes it (`part_gizmo.rs`). Parts are added and named in
+   the inspector.
 
 ## Open questions
 

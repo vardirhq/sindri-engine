@@ -44,6 +44,7 @@ Each entry links its tests and the projects that exercise it. Surface marks matc
 | [Everything the Scene view draws can be clicked](#viewport-picking) | — | ✅ | — | — |
 | [Select, Move, Rotate and Scale tools with snapping](#transform-tools) | — | ✅ | — | — |
 | [Gizmos for what simulates without drawing](#simulation-gizmos) | — | ✅ | — | — |
+| [Handles for an object's parts](#part-handles) | — | ✅ | — | — |
 | [Scene and Game views](#scene-and-game-views) | — | ✅ | — | — |
 | **Play** | | | | |
 | [Play runs the session a shipped game runs](#play-runs-the-build) | ✅ | ✅ | — | ✅ |
@@ -676,6 +677,29 @@ selected character's footing, from its collider's lowest point: the steepest
 slope it walks, how high it steps and how far down it snaps; and a selected
 effect burst's reach, from its speed, spread, life and drag. Audio has no gizmo
 because a source plays at one volume wherever it is.
+
+</details>
+
+<a id="part-handles"></a>
+
+### Handles for an object's parts
+
+A selected object's art frame, emitter shapes, contact shadow and lights are moved and sized by their own handles.
+
+Engine — · Editor ✅ · Decay — · Proof —
+
+**Tested by:** [`editor/src/native/part_gizmo.rs`](../../editor/src/native/part_gizmo.rs), [`editor/src/native/light2d_gizmo.rs`](../../editor/src/native/light2d_gizmo.rs)
+
+<details markdown="1">
+<summary>Evidence</summary>
+
+The handles the phone's object workspace gives an object's parts, in the Scene
+view: the art's frame where its sheet's anchor draws it, each emitter part's
+box, circle or ring, the contact shadow's ellipse and every light part's reach,
+each with a handle at its center that moves it and one at its corner or on its
+ring that sizes it. A sprite's size and offset turn and scale with the object;
+an emitter's and a shadow's are world units from its position, as they are
+drawn. A drag is one undo step and keeps a mirrored size mirrored.
 
 </details>
 

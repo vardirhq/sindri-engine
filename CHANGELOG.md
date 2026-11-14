@@ -2,6 +2,8 @@
 
 # Changelog
 
+- Size and place an object's parts in desktop's Scene view: a selected object shows its art's frame, each particle emitter's shape and its contact shadow, each with a handle at its center to move it and one at its corner (or on a round emitter's ring) to size it, as the phone's object workspace does. A drag is one undo step, and art keeps its sheet's anchor, so a character sized from the corner stays on its feet.
+
 - Run several scripts on one object: a script attached as a named part (`sindri.script#halo`) runs beside the object's own, with its own fields, and reads its own name's parts first, so one `Flame` written for "my light" flickers a lantern's beam and, attached as `#halo`, its halo. `Flame.on(lantern)` finds whichever of the lantern's scripts runs `Flame`. Desktop offers a second script in Add Component and the phone attaches a second created script as a part. Lamplighter's lantern carries both its lights and their flames, so Wick is two objects.
 
 - Add and name parts on desktop: Add Component offers a second 2D light or particle emitter once an object has one, and a part's heading menu renames it. The Scene view draws every 2D light at its offset, not at the object's origin, with a handle to move it and one to size it, each writing its own part.

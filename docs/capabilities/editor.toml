@@ -516,6 +516,23 @@ because a source plays at one volume wherever it is.
 """
 
 [[capability]]
+id = "part-handles"
+group = "Scene view"
+title = "Handles for an object's parts"
+summary = "A selected object's art frame, emitter shapes, contact shadow and lights are moved and sized by their own handles."
+status = { engine = "n/a", editor = "yes", decay = "n/a", proof = "n/a" }
+tests = ["editor/src/native/part_gizmo.rs", "editor/src/native/light2d_gizmo.rs"]
+detail = """
+The handles the phone's object workspace gives an object's parts, in the Scene
+view: the art's frame where its sheet's anchor draws it, each emitter part's
+box, circle or ring, the contact shadow's ellipse and every light part's reach,
+each with a handle at its center that moves it and one at its corner or on its
+ring that sizes it. A sprite's size and offset turn and scale with the object;
+an emitter's and a shadow's are world units from its position, as they are
+drawn. A drag is one undo step and keeps a mirrored size mirrored.
+"""
+
+[[capability]]
 id = "scene-and-game-views"
 group = "Scene view"
 title = "Scene and Game views"
