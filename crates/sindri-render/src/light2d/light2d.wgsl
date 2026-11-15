@@ -126,7 +126,15 @@ fn sindri_light_2d_from(world: vec2<f32>, base: vec2<f32>, normal: vec3<f32>, us
         if light.cone.z > -1.5 && distance > 0.000001 {
             let across = dot(-to_light / distance, light.cone.xy);
             let t = clamp((across - light.cone.z) / (light.cone.w - light.cone.z), 0.0, 1.0);
-            amount *= t * t * (3.0 - 2.0 * t);
+            let beam = t * t * (3.0 - 2.0 * t);
+            // Light spills all round the foot of a raised light, out to about
+            // its height (`LightCone2d::on_the_ground`).
+            var spill = 0.0;
+            if light.position.z > 0.0 {
+                let s = clamp(distance / light.position.z, 0.0, 1.0);
+                spill = 1.0 - s * s * (3.0 - 2.0 * s);
+            }
+            amount *= beam + (1.0 - beam) * spill;
         }
         if use_normal {
             let toward = normalize(vec3<f32>(to_light, light.position.z));

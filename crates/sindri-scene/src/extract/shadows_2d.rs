@@ -232,7 +232,10 @@ impl CastShadows {
             .filter_map(|light| {
                 let reach = (light.position[0] - feet.x).hypot(light.position[1] - feet.y);
                 let beam = light.cone.map_or(1.0, |cone| {
-                    cone.factor([feet.x - light.position[0], feet.y - light.position[1]])
+                    cone.on_the_ground(
+                        [feet.x - light.position[0], feet.y - light.position[1]],
+                        light.height,
+                    )
                 });
                 let strength = (1.0 - reach / light.radius).max(0.0).powf(light.falloff)
                     * light.brightness
