@@ -146,6 +146,9 @@ impl Chain {
                     blur: [direction[0], direction[1], 0.0, 0.0],
                     grade: [0.0; 4],
                     tone: [0.0; 4],
+                    focus: [0.0; 4],
+                    lens: [0.0; 4],
+                    night: [0.0; 4],
                 },
             ),
             Step::Composite { target, settings } => (
@@ -156,7 +159,8 @@ impl Chain {
                     self.texel,
                     settings,
                     [0.0, 0.0, settings.bloom.intensity, 0.0],
-                ),
+                )
+                .with_lens(settings, self.width, self.height),
             ),
         };
         queue.write_buffer(&self.uniform, 0, bytemuck::bytes_of(&params));
@@ -249,6 +253,12 @@ struct Params {
     grade: [f32; 4],
     // x tone-map mode, y bloom enabled, zw reserved.
     tone: [f32; 4],
+    // x focus, y range, z falloff, w blur: the depth of field's band.
+    focus: [f32; 4],
+    // xy: one texel of the scene, in UV. z: depth of field on. w: unused.
+    lens: [f32; 4],
+    // x how bright the dark ends, y its blur, z how grey, w on.
+    night: [f32; 4],
 }
 
 impl Params {
@@ -268,6 +278,35 @@ impl Params {
                 0.0,
                 0.0,
             ],
+            focus: [0.0; 4],
+            lens: [0.0; 4],
+            night: [0.0; 4],
+        }
+    }
+
+    /// The composite's lens: the depth of field's band, the dark's blur and
+    /// grey, and the scene's own texel, since the blur reads the scene at full
+    /// size rather than the chain.
+    fn with_lens(self, settings: PostProcessSettings, width: u32, height: u32) -> Self {
+        let lens = settings.depth_of_field;
+        let night = settings.night_vision;
+        #[allow(clippy::cast_precision_loss)]
+        let texel = [1.0 / width.max(1) as f32, 1.0 / height.max(1) as f32];
+        Self {
+            focus: [lens.focus, lens.range, lens.falloff, lens.blur],
+            lens: [
+                texel[0],
+                texel[1],
+                if lens.blurs() { 1.0 } else { 0.0 },
+                0.0,
+            ],
+            night: [
+                night.threshold,
+                night.blur,
+                night.grey,
+                if night.sees() { 1.0 } else { 0.0 },
+            ],
+            ..self
         }
     }
 }

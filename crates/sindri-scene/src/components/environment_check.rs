@@ -90,6 +90,7 @@ impl EnvironmentComponent {
         self.validate_fog()?;
         self.validate_post_process()?;
         self.validate_bloom()?;
+        self.validate_lens()?;
         Ok(self)
     }
 
@@ -169,6 +170,29 @@ impl EnvironmentComponent {
             return Err(refuse("bloom.passes", "must be between 1 and 8"));
         }
         Ok(())
+    }
+
+    fn validate_lens(self) -> Result<(), EnvironmentError> {
+        const BLUR: &str = "must be between 0 and 0.02";
+        let lens = self.depth_of_field;
+        within("depth_of_field.focus", lens.focus, 0.0..=1.0, UNIT)?;
+        within("depth_of_field.range", lens.range, 0.0..=1.0, UNIT)?;
+        within(
+            "depth_of_field.falloff",
+            lens.falloff,
+            1.0e-3..=1.0,
+            "must be between 0.001 and 1",
+        )?;
+        within("depth_of_field.blur", lens.blur, 0.0..=0.02, BLUR)?;
+        let night = self.night_vision;
+        within(
+            "night_vision.threshold",
+            night.threshold,
+            1.0e-3..=1.0,
+            "must be between 0.001 and 1",
+        )?;
+        within("night_vision.blur", night.blur, 0.0..=0.02, BLUR)?;
+        within("night_vision.grey", night.grey, 0.0..=1.0, UNIT)
     }
 }
 

@@ -138,8 +138,11 @@ fn world_sprites_sort_by_distance_from_the_camera_that_draws_them() {
     };
 
     // The resting viewer camera is at (3, 2, 4), so the western sprite is further.
+    // Both views stand back along their line far enough to see both sprites:
+    // a view leaves out what it cannot see.
     let resting = alphas(CameraView {
         projection: WorldProjection::Perspective,
+        distance_scale: 4.0,
         ..CameraView::default()
     });
     assert!(close(resting[0], 0.75) && close(resting[1], 0.25));
@@ -149,6 +152,7 @@ fn world_sprites_sort_by_distance_from_the_camera_that_draws_them() {
     let orbited = alphas(CameraView {
         orbit: Vec2::new(std::f32::consts::PI, 0.0),
         projection: WorldProjection::Perspective,
+        distance_scale: 4.0,
         ..CameraView::default()
     });
     assert!(
@@ -202,6 +206,9 @@ fn sprites_draw_through_the_world_camera_with_their_full_transform() {
             CameraView {
                 orbit: Vec2::new(0.4, 0.0),
                 projection: WorldProjection::Perspective,
+                // Back along its line, so the sprite stays in a view that
+                // leaves out what it cannot see.
+                distance_scale: 4.0,
                 ..CameraView::default()
             },
             &TextureBindings::new(),

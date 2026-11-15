@@ -97,6 +97,19 @@ fn register_environment(components: &mut ComponentSchemaRegistry) -> Result<(), 
                 "intensity": 0.45,
                 "passes": 3
             },
+            "depth_of_field": {
+                "enabled": false,
+                "focus": 0.55,
+                "range": 0.12,
+                "falloff": 0.3,
+                "blur": 0.004
+            },
+            "night_vision": {
+                "enabled": false,
+                "threshold": 0.12,
+                "blur": 0.006,
+                "grey": 0.85
+            },
             "lighting_2d": {
                 "enabled": false,
                 "ambient": [0.25, 0.25, 0.3]

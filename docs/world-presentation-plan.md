@@ -96,7 +96,7 @@ Begin with a stylized transparent surface, animated distortion, depth colour, sh
 
 ### 14. Advanced cinematic effects
 
-Optional depth of field, radial/motion blur, screen distortion, heat haze, film grain, chromatic aberration, LUT grading, lens effects, and volumetric light. These come after the world fundamentals because expensive blur cannot rescue flat lighting.
+**Started.** `sindri.environment.depth_of_field` blurs the screen above and below a band in focus (tilt-shift, read from the screen rather than depth, so it suits a tilted camera over billboarded sprites that write no depth), and `night_vision` greys and blurs what is dark, judged by brightness, so a lit pool stays sharp and coloured. Both run in the composite as one variable-width disc blur over the full-size scene. Lamplighter's wilds are the proof. Still to come: depth-buffer depth of field, radial/motion blur, screen distortion, heat haze, film grain, chromatic aberration, LUT grading, lens effects, and volumetric light. These come after the world fundamentals because expensive blur cannot rescue flat lighting.
 
 ## Visual acceptance
 

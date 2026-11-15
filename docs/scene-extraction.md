@@ -63,13 +63,14 @@ their revision. See [retained meshes](retained-meshes.md).
   the [transparent draw key](rendering-transparency.md). A world sprite and a UI image never share a
   batch however much else they have in common: a batch is one draw, and the two differ in both
   projection and pipeline.
-- **Only what the view can show, under an orthographic camera.** A world sprite, a tilemap cell
-  and a cast shadow whose quad lies wholly outside the view are left out of the frame, tested
-  against the camera's own matrix on the same quad the sprite pipeline draws (no vertex stage
-  moves it), so nothing visible is dropped. A tilemap cell is tested before it is built, so a map
-  larger than the screen costs what the screen shows. Under a perspective camera every sprite is
-  still extracted: billboards and leaning 2.5D sprites face an eye a flat quad test would misjudge.
-  Lamplighter's village went from 2,519 sprite instances a frame to 240.
+- **Only what the view can show.** A world sprite, a tilemap cell and a cast shadow whose quad
+  lies wholly outside the view are left out of the frame, tested against the camera's own matrix on
+  the same quad the sprite pipeline draws (no vertex stage moves it, and a billboard's turn towards
+  the eye is part of its quad), so nothing visible is dropped. Orthographic and perspective alike;
+  a quad with a corner behind a perspective eye is kept. A tilemap cell is tested before it is
+  built, so a map larger than the screen costs what the screen shows. Lamplighter's village went
+  from 2,519 sprite instances a frame to 240, and its 2D-in-3D prototype under a tilted
+  perspective camera draws the same picture with culling as without.
 - **One explicit authored world camera.** Meshes, sprites, and tilemaps need
   an authored `sindri.camera`; drawing world content without one reports `MissingWorldCamera`, and
   more than one authored camera reports `MultipleWorldCameras` rather than relying on entity

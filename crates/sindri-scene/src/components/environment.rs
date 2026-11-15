@@ -5,7 +5,8 @@ use sindri_core::{EntityId, SceneComponent, World};
 
 use super::EnvironmentError;
 use sindri_render::{
-    BloomSettings, FogSettings, PostProcessSettings, ShadowSettings, ToneMapping, WorldLighting,
+    BloomSettings, DepthOfFieldSettings, FogSettings, NightVisionSettings, PostProcessSettings,
+    ShadowSettings, ToneMapping, WorldLighting,
 };
 
 /// Scene-wide visual environment: the sky, ambient light, shadows, fog and
@@ -25,6 +26,10 @@ pub struct EnvironmentComponent {
     pub fog: EnvironmentFog,
     pub post_process: EnvironmentPostProcess,
     pub bloom: EnvironmentBloom,
+    /// A band of the screen in focus and the picture soft above and below it.
+    pub depth_of_field: EnvironmentDepthOfField,
+    /// The dark seen as the eye sees it: grey and soft.
+    pub night_vision: EnvironmentNightVision,
     pub lighting_2d: super::EnvironmentLighting2d,
 }
 
@@ -43,6 +48,8 @@ impl Default for EnvironmentComponent {
             fog: EnvironmentFog::default(),
             post_process: EnvironmentPostProcess::default(),
             bloom: EnvironmentBloom::default(),
+            depth_of_field: EnvironmentDepthOfField::default(),
+            night_vision: EnvironmentNightVision::default(),
             lighting_2d: super::EnvironmentLighting2d::default(),
         }
     }
@@ -176,6 +183,54 @@ impl Default for EnvironmentBloom {
     }
 }
 
+/// See [`DepthOfFieldSettings`]: `focus` runs from the top of the screen (0) to
+/// the bottom (1), and `range`, `falloff` and `blur` are shares of its height.
+#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(default, deny_unknown_fields)]
+pub struct EnvironmentDepthOfField {
+    pub enabled: bool,
+    pub focus: f32,
+    pub range: f32,
+    pub falloff: f32,
+    pub blur: f32,
+}
+
+impl Default for EnvironmentDepthOfField {
+    fn default() -> Self {
+        let lens = DepthOfFieldSettings::default();
+        Self {
+            enabled: false,
+            focus: lens.focus,
+            range: lens.range,
+            falloff: lens.falloff,
+            blur: lens.blur,
+        }
+    }
+}
+
+/// See [`NightVisionSettings`]: below `threshold` a place greys by up to
+/// `grey` and blurs by up to `blur`, a share of the screen's height.
+#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(default, deny_unknown_fields)]
+pub struct EnvironmentNightVision {
+    pub enabled: bool,
+    pub threshold: f32,
+    pub blur: f32,
+    pub grey: f32,
+}
+
+impl Default for EnvironmentNightVision {
+    fn default() -> Self {
+        let night = NightVisionSettings::default();
+        Self {
+            enabled: false,
+            threshold: night.threshold,
+            blur: night.blur,
+            grey: night.grey,
+        }
+    }
+}
+
 impl EnvironmentComponent {
     /// The environment's share of the light: ambient only. The sun comes
     /// from a light entity; see `SceneExtractor::lighting`.
@@ -226,6 +281,19 @@ impl EnvironmentComponent {
                 knee: self.bloom.knee,
                 intensity: self.bloom.intensity,
                 passes: self.bloom.passes,
+            },
+            depth_of_field: DepthOfFieldSettings {
+                enabled: self.depth_of_field.enabled,
+                focus: self.depth_of_field.focus,
+                range: self.depth_of_field.range,
+                falloff: self.depth_of_field.falloff,
+                blur: self.depth_of_field.blur,
+            },
+            night_vision: NightVisionSettings {
+                enabled: self.night_vision.enabled,
+                threshold: self.night_vision.threshold,
+                blur: self.night_vision.blur,
+                grey: self.night_vision.grey,
             },
         }
     }

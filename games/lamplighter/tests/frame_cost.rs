@@ -27,6 +27,13 @@ fn measure(scene: &str) {
     };
     let (sprites, lights, seconds) = run
         .draw_with(|extractor, world, session| {
+            // The project's block sets, and the engine's own, as the editor
+            // binds them.
+            let mut tile_sets = session.tile_sets().clone();
+            for builtin in sindri_assets::builtin_tile_sets() {
+                let (id, set) = builtin.map_err(|error| error.to_string())?;
+                tile_sets.bind(id, set).map_err(|error| error.to_string())?;
+            }
             let mut sprites = 0;
             let mut lights = 0;
             let started = Instant::now();
@@ -40,6 +47,7 @@ fn measure(scene: &str) {
                         SceneRuntime {
                             animations: Some(session.animations()),
                             effects: Some(session.effects()),
+                            tile_sets: Some(&tile_sets),
                             ..SceneRuntime::default()
                         },
                     )

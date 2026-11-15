@@ -27,18 +27,14 @@ pub(super) fn aabb_in_view(min: Vec3, max: Vec3, view_projection: Mat4) -> bool 
         || clip.iter().all(|point| point.z > point.w))
 }
 
-/// The view sprites are culled against: the world camera's, when it is
-/// orthographic.
+/// The view sprites are culled against: the world camera's.
 ///
-/// A 2D game's camera, where what is outside the view is outside the screen
-/// rectangle and nothing more. Under a perspective camera every sprite is
-/// still handed to the renderer, as before, because 2.5D scenes billboard and
-/// lean sprites towards an eye whose frustum a flat quad test would misjudge
-/// near its edges.
-pub(super) fn culling_view(view_projection: Mat4) -> Option<Mat4> {
-    let w = view_projection.row(3);
-    let orthographic = w.x.abs() < 1.0e-6 && w.y.abs() < 1.0e-6 && w.z.abs() < 1.0e-6;
-    orthographic.then_some(view_projection)
+/// Orthographic or perspective alike: the test is on the quad as placed,
+/// a billboard's turn towards the eye included, and a corner behind a
+/// perspective eye keeps the quad, so nothing visible is dropped either way.
+#[allow(clippy::unnecessary_wraps)] // Kept as the one place that decides.
+pub(super) const fn culling_view(view_projection: Mat4) -> Option<Mat4> {
+    Some(view_projection)
 }
 
 /// Whether any part of a sprite's unit quad, placed by `model`, could reach

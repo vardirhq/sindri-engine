@@ -2,7 +2,7 @@
 
 The side-view platformer genre showcase: the game Lamplighter started as. Wick,
 a courier, lights a valley's lanterns at dusk. Lamplighter itself has since
-become a top-down action-adventure (see `docs/lamplighter-plan.md`); this
+become a different game (see `docs/lamplighter-plan.md`); this
 project stays as the proof of Sindri's plain 2D platformer path, with its title,
 level select, settings and pause shell and the first level, Dusk Road, built
 around the physics showcase.
