@@ -239,7 +239,13 @@ object ObjectParts {
                 "capsule" -> PartOutline.Capsule(radius, collider.number(prefix + "shape.half_height") ?: 0.5, rotation)
                 else -> PartOutline.Box(vector(collider, prefix + "shape.half_extents", Vec2(0.5, 0.5)), rotation)
             }
-            val label = if (pieces.size == 1) "Collider" else "Collider ${index + 1}"
+            // A named shape is called by its name, as scripts call it.
+            val name = (collider.value(prefix + "name") as? String)?.takeIf { it.isNotEmpty() }
+            val label = when {
+                name != null -> "Collider · $name"
+                pieces.size == 1 -> "Collider"
+                else -> "Collider ${index + 1}"
+            }
             ObjectPart("collider.$index", label, COLLIDER, prefix + "offset", offset, offset, outline)
         }
     }

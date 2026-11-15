@@ -47,6 +47,35 @@ fn sensor_events_contain_only_sindri_entities() {
         first: player,
         second: pickup,
         kind: PhysicsEventKind::SensorEntered,
+        first_piece: 0,
+        second_piece: 0,
+    }));
+}
+
+#[test]
+fn an_event_names_the_piece_of_each_collider_it_involves() {
+    let mut world = PhysicsWorld2d::new([0.0, 0.0]).unwrap();
+    let player = entity(1);
+    let gloom = entity(2);
+    world
+        .insert_body(player, RigidBody2d::default(), &[Collider2d::circle(0.5)])
+        .unwrap();
+    // A body far away and a sensor around the player: the sensor is the
+    // gloom's second piece.
+    let mut body = Collider2d::circle(0.5);
+    body.offset = [40.0, 0.0];
+    let mut reach = Collider2d::circle(2.0);
+    reach.sensor = true;
+    world
+        .insert_static_collider(gloom, PhysicsPose2d::default(), &[body, reach])
+        .unwrap();
+    let events = world.step(STEP).unwrap();
+    assert!(events.contains(&PhysicsEvent2d {
+        first: player,
+        second: gloom,
+        kind: PhysicsEventKind::SensorEntered,
+        first_piece: 0,
+        second_piece: 1,
     }));
 }
 

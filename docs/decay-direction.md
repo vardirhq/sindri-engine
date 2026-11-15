@@ -342,6 +342,17 @@ if halo != null {
 - Contacts and sensor events name the collider piece they involve, by its
   `name` (`contact.piece == "sword"`).
 
+  **Decided 2026-11-15**, how: a collider piece has an optional `name`. A
+  `Contact2d` gains `piece` (this body's piece) and `other_piece` (the other
+  body's), each its name or `""`. Each event call gains a form that asks about
+  one of this object's pieces: `Physics.sensor_entered_at("mouth")` answers
+  only what entered the sensor piece named `mouth`, and likewise
+  `sensor_exited_at`, `collision_started_at` and `collision_stopped_at`. A
+  separate name rather than an optional argument, because a host function has
+  one signature; the existing calls keep answering every piece. Physics keeps
+  pieces by index and never sees a name: the host reads the name from the
+  collider's authored `pieces[i].name`.
+
 Rejected: a part as a member (`this.light2d.halo.radius`), which competes with
 the component's own field names and reads as a field; and a declared part
 (`@part let halo: Light2d = "halo"`), a new kind of declaration that does not

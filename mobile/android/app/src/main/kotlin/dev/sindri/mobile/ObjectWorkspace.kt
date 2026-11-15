@@ -10,6 +10,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -32,6 +36,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
@@ -40,6 +45,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
@@ -341,6 +347,7 @@ private fun ColliderPieceControls(collider: Component, index: Int, count: Int, o
         PartNumber("Radius", number("shape.radius", 0.5), 0.05, 0.01) { set("shape.radius", it) }
         if (shape == "capsule") PartNumber("Half height", number("shape.half_height", 0.5), 0.05, 0.01) { set("shape.half_height", it) }
     }
+    PieceName(collider.value(prefix + "name") as? String ?: "") { set("name", it) }
     PartNumber("Friction", number("friction", 0.5), 0.1, 0.0) { set("friction", it) }
     PartNumber("Bounce", number("restitution", 0.0), 0.1, 0.0) { set("restitution", it) }
     Row(Modifier.fillMaxWidth().height(48.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
@@ -350,6 +357,30 @@ private fun ColliderPieceControls(collider: Component, index: Int, count: Int, o
     Row(Modifier.padding(top = 6.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
         Chip("+ Collider shape", false, { onEvent(EditorEvent.AddColliderPiece) })
         if (count > 1) Chip("Remove this shape", false, { onEvent(EditorEvent.RemoveColliderPiece) })
+    }
+}
+
+/**
+ * A collider piece's name, which contacts and sensor events report so a
+ * script can tell its sensor from its body (`Physics.sensor_entered_at`).
+ * Written when the keyboard's Done is pressed, as one undo step.
+ */
+@Composable
+private fun PieceName(name: String, onChange: (String) -> Unit) {
+    var text by remember(name) { mutableStateOf(name) }
+    Row(Modifier.fillMaxWidth().height(48.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        Text("Name", style = ForgeType.text(14.sp), modifier = Modifier.weight(1f))
+        BasicTextField(
+            value = text,
+            onValueChange = { next -> text = next.filter { it.isLetterOrDigit() || it == '-' || it == '_' } },
+            singleLine = true,
+            textStyle = ForgeType.text(14.sp),
+            cursorBrush = SolidColor(Forge.Metal),
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+            keyboardActions = KeyboardActions(onDone = { if (text != name) onChange(text) }),
+            modifier = Modifier.width(150.dp).background(Forge.Well, RoundedCornerShape(10.dp)).padding(10.dp).semantics { contentDescription = "Piece name" },
+            decorationBox = { field -> Box { if (text.isEmpty()) Text("unnamed", style = ForgeType.text(14.sp, color = Forge.TextFaint)); field() } },
+        )
     }
 }
 

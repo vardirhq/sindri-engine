@@ -69,6 +69,12 @@ pub(crate) enum PhysicsCall {
     /// do not push back.
     SensorEntered,
     SensorExited,
+    /// The same four, about one named piece of this entity's collider:
+    /// `Physics.sensor_entered_at("mouth")` (`docs/object-parts.md`).
+    CollisionStartedAt,
+    CollisionStoppedAt,
+    SensorEnteredAt,
+    SensorExitedAt,
 }
 
 pub(crate) const PHYSICS_CALLS: &[(&str, PhysicsCall)] = &[
@@ -125,6 +131,10 @@ pub(crate) const PHYSICS_CALLS: &[(&str, PhysicsCall)] = &[
     ("collision_stopped", PhysicsCall::CollisionStopped),
     ("sensor_entered", PhysicsCall::SensorEntered),
     ("sensor_exited", PhysicsCall::SensorExited),
+    ("collision_started_at", PhysicsCall::CollisionStartedAt),
+    ("collision_stopped_at", PhysicsCall::CollisionStoppedAt),
+    ("sensor_entered_at", PhysicsCall::SensorEnteredAt),
+    ("sensor_exited_at", PhysicsCall::SensorExitedAt),
 ];
 
 impl PhysicsCall {
@@ -136,6 +146,10 @@ impl PhysicsCall {
                 | Self::CollisionStopped
                 | Self::SensorEntered
                 | Self::SensorExited
+                | Self::CollisionStartedAt
+                | Self::CollisionStoppedAt
+                | Self::SensorEnteredAt
+                | Self::SensorExitedAt
         )
     }
 }

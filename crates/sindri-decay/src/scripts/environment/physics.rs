@@ -69,7 +69,11 @@ fn physics_params(call: PhysicsCall) -> Vec<Type> {
         PhysicsCall::MoveCharacter => vec![entity(), Type::Vec2, Type::Bool],
         PhysicsCall::ApplyForce => vec![entity(), Type::Vec2],
         PhysicsCall::ApplyImpulseAtPoint => vec![entity(), Type::Vec2, Type::Vec2],
-        PhysicsCall::Layer => vec![Type::String],
+        PhysicsCall::Layer
+        | PhysicsCall::CollisionStartedAt
+        | PhysicsCall::CollisionStoppedAt
+        | PhysicsCall::SensorEnteredAt
+        | PhysicsCall::SensorExitedAt => vec![Type::String],
         PhysicsCall::SetGravity => vec![Type::Vec2],
         PhysicsCall::Mask => vec![Type::array_of(Type::String)],
         PhysicsCall::RemoveJoint
@@ -210,6 +214,8 @@ fn add_snapshots(environment: &mut Environment) {
         (CONTACT_FIELDS[3].to_owned(), Type::Number),
         (CONTACT_FIELDS[4].to_owned(), Type::Number),
         (CONTACT_FIELDS[5].to_owned(), Type::Vec2),
+        (CONTACT_FIELDS[6].to_owned(), Type::String),
+        (CONTACT_FIELDS[7].to_owned(), Type::String),
     ];
     environment.add_struct(CONTACT, fields.clone());
     let mut contact = HostType::new();

@@ -207,12 +207,13 @@ on the forces/rotation head.
 id = "contacts-2d"
 group = "2D bodies and colliders"
 title = "Solid contact snapshots (2D)"
-summary = "Copied solver contacts: other entity, world point, push normal, normal and friction impulses, and force over the last step."
+summary = "Copied solver contacts: other entity, world point, push normal, normal and friction impulses, force over the last step, and which named piece of each collider touches."
 status = { engine = "yes", editor = "partial", decay = "yes", proof = "yes" }
 parity = "Solid contact snapshots (2D)"
 tests = [
   "crates/sindri-physics/tests/contacts.rs",
   "crates/sindri-decay/tests/contact_snapshots.rs",
+  "crates/sindri-decay/tests/a_script_tells_its_collider_pieces_apart.rs",
   "games/platformer/tests/contact_impacts.rs",
 ]
 proof = ["games/platformer"]

@@ -368,11 +368,24 @@ impl PhysicsWorld2d {
             .ok_or(PhysicsError::MissingEntity(entity))
     }
 
+    /// Which piece of its entity's collider a backend collider is: its place
+    /// in the list the entity was built from.
+    pub(crate) fn piece_of(&self, entity: EntityId, handle: r2::ColliderHandle) -> u16 {
+        self.bodies
+            .get(&entity)
+            .and_then(|record| record.colliders.iter().position(|known| *known == handle))
+            .and_then(|index| u16::try_from(index).ok())
+            .unwrap_or(0)
+    }
+
     fn normalize_event(&self, event: r2::CollisionEvent) -> Option<PhysicsEvent2d> {
         let mut first = *self.collider_entities.get(&event.collider1())?;
         let mut second = *self.collider_entities.get(&event.collider2())?;
+        let mut first_piece = self.piece_of(first, event.collider1());
+        let mut second_piece = self.piece_of(second, event.collider2());
         if second < first {
             std::mem::swap(&mut first, &mut second);
+            std::mem::swap(&mut first_piece, &mut second_piece);
         }
         let kind = match (event.started(), event.sensor()) {
             (true, false) => PhysicsEventKind::CollisionStarted,
@@ -384,6 +397,8 @@ impl PhysicsWorld2d {
             first,
             second,
             kind,
+            first_piece,
+            second_piece,
         })
     }
 }

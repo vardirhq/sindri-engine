@@ -163,9 +163,19 @@ pub(super) const PHYSICS: TypeEntry = TypeEntry {
             "The objects that started touching this script's object since the last frame, as a list.",
         ),
         call(
+            "collision_started_at",
+            &["piece"],
+            "The objects that started touching this object's collider piece named piece since the last frame, as a list.",
+        ),
+        call(
             "collision_stopped",
             &[],
             "The objects that stopped touching this script's object since the last frame, as a list.",
+        ),
+        call(
+            "collision_stopped_at",
+            &["piece"],
+            "The objects that stopped touching this object's collider piece named piece since the last frame, as a list.",
         ),
         call(
             "set_slider_motor",
@@ -269,9 +279,19 @@ pub(super) const PHYSICS: TypeEntry = TypeEntry {
             "The objects that entered this script's trigger area since the last frame. A trigger area detects things without blocking them, like a pickup.",
         ),
         call(
+            "sensor_entered_at",
+            &["piece"],
+            "The objects that entered the trigger area of this object's collider piece named piece since the last frame, as a list: a mouth told apart from a body.",
+        ),
+        call(
             "sensor_exited",
             &[],
             "The objects that left this script's trigger area since the last frame.",
+        ),
+        call(
+            "sensor_exited_at",
+            &["piece"],
+            "The objects that left the trigger area of this object's collider piece named piece since the last frame.",
         ),
         call(
             "set_velocity",

@@ -37,6 +37,9 @@ pub(super) fn register(components: &mut ComponentSchemaRegistry) -> Result<(), S
         "Collider 2D",
         serde_json::json!({
             "pieces": [{
+                // What contacts and sensor events call this piece; empty for
+                // none (`docs/object-parts.md`).
+                "name": "",
                 "shape": { "shape": "box", "half_extents": [0.5, 0.5] },
                 "offset": [0.0, 0.0],
                 "rotation": 0.0,

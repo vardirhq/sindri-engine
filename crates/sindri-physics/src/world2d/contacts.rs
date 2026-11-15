@@ -36,6 +36,8 @@ impl PhysicsWorld2d {
             let Some(rigid) = pair.rigid() else {
                 continue;
             };
+            let first_piece = self.piece_of(first, pair.collider1);
+            let second_piece = self.piece_of(second, pair.collider2);
             // Sleeping manifolds retain old solver impulses for warm starting.
             // They prove support, but are not a newly solved impact this step.
             let awake = [first, second].into_iter().any(|entity| {
@@ -73,6 +75,8 @@ impl PhysicsWorld2d {
                         normal_impulse,
                         tangent_impulse,
                         force,
+                        piece: first_piece,
+                        other_piece: second_piece,
                     });
                     self.contacts.entry(second).or_default().push(Contact2d {
                         entity: first,
@@ -81,6 +85,8 @@ impl PhysicsWorld2d {
                         normal_impulse,
                         tangent_impulse,
                         force: [-force[0], -force[1]],
+                        piece: second_piece,
+                        other_piece: first_piece,
                     });
                 }
             }
@@ -100,4 +106,5 @@ fn compare_contacts(a: &Contact2d, b: &Contact2d) -> Ordering {
         .then_with(|| a.normal[1].total_cmp(&b.normal[1]))
         .then_with(|| a.normal_impulse.total_cmp(&b.normal_impulse))
         .then_with(|| a.tangent_impulse.total_cmp(&b.tangent_impulse))
+        .then_with(|| (a.piece, a.other_piece).cmp(&(b.piece, b.other_piece)))
 }

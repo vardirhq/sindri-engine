@@ -485,6 +485,14 @@ pub(super) const TYPES: &[TypeEntry] = &[
                 "force",
                 "Total world impulse divided by the fixed step's seconds, as Vec2.",
             ),
+            value(
+                "piece",
+                "The name of the queried body's collider piece that touches, or \"\" for one with none.",
+            ),
+            value(
+                "other_piece",
+                "The name of the other body's collider piece that touches, or \"\" for one with none.",
+            ),
         ],
     },
     TypeEntry {
