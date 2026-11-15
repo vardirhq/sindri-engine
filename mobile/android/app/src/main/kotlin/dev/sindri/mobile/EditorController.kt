@@ -15,6 +15,9 @@ import androidx.compose.runtime.setValue
  * sample content until it is wired, and says so with a toast where acting on
  * it would otherwise pretend. `mobile/design.md` lists which is which.
  */
+/** The component an object's own script is, and its parts' type. */
+private const val SCRIPT = "sindri.script"
+
 class EditorController(
     private val native: Native,
     /** Where the open project's assets are among the app's own, for sprite thumbnails. */
@@ -185,14 +188,25 @@ class EditorController(
             }
             EditorEvent.ToggleDetent -> (ui.sheet as? EditorSheet.Inspector)?.let { ui = ui.copy(sheet = it.copy(full = !it.full)) }
             EditorEvent.OpenInspector -> openInspector()
-            EditorEvent.OpenBehaviour -> openBehaviour()
+            EditorEvent.OpenBehaviour -> {
+                behaviourKey = null
+                openBehaviour()
+            }
             EditorEvent.CreateScript -> {
+                val before = state.inspector?.let(::scriptTabs).orEmpty().map { it.key }
                 error = native.command("createScript", "")
                 if (error == null) {
                     if (native.state().unsaved) error = native.command("save")
                     refresh()
+                    // The new one is the key that was not there before: the
+                    // object's own, or a part beside it.
+                    behaviourKey = state.inspector?.let(::scriptTabs)?.map { it.key }?.firstOrNull { it !in before }
                     openBehaviour()
                 } else refresh()
+            }
+            is EditorEvent.ScriptChosen -> {
+                behaviourKey = event.key
+                openBehaviour()
             }
             EditorEvent.BehaviourCode -> (ui.sheet as? EditorSheet.Behaviour)?.let { ui = ui.copy(sheet = it.copy(code = true)) }
             EditorEvent.BehaviourBlocks -> (ui.sheet as? EditorSheet.Behaviour)?.let { ui = ui.copy(sheet = it.copy(code = false)) }
@@ -382,7 +396,10 @@ class EditorController(
             BarItem.Duplicate -> nativeEdit("duplicate")
             BarItem.Delete -> nativeEdit("delete")
             BarItem.Properties -> openInspector()
-            BarItem.Behaviour -> openBehaviour()
+            BarItem.Behaviour -> {
+                behaviourKey = null
+                openBehaviour()
+            }
             else -> notWired(tool.label)
         }
     }
@@ -450,10 +467,27 @@ class EditorController(
     private fun inspectorUi(inspector: Inspector): InspectorUi =
         InspectorPresenter.present(inspector, ui.sceneName, assetRoot, details).also { presented = it }.ui
 
+    /** The key of the script the Behaviour sheet shows; null for the object's first. */
+    private var behaviourKey: String? = null
+
+    /** The scripts an object runs, its own first, then its parts by name. */
+    private fun scriptTabs(inspector: Inspector): List<ScriptTab> =
+        inspector.components
+            .filter { it.type == SCRIPT || it.type.startsWith("$SCRIPT#") }
+            .sortedBy { it.type }
+            .map { component ->
+                val name = component.value("script") as? String ?: "Script"
+                val part = component.type.substringAfter('#', "")
+                ScriptTab(component.type, if (part.isEmpty()) name else "$name · $part")
+            }
+
     private fun openBehaviour() {
         if (state.selectionCount > 1) return notWired("Editing multiple objects")
         val inspector = state.inspector ?: return
-        val source = inspector.component("sindri.script")?.value("source") as? String
+        val tabs = scriptTabs(inspector)
+        val key = behaviourKey?.takeIf { chosen -> tabs.any { it.key == chosen } } ?: tabs.firstOrNull()?.key
+        behaviourKey = key
+        val source = key?.let { inspector.component(it) }?.value("source") as? String
         val script = source?.let {
             native.command("openScript", it)?.let { failed ->
                 ui = ui.copy(toast = ToastUi(failed))
@@ -498,6 +532,8 @@ class EditorController(
                 code = script.source.lines(),
                 codeNote = "The nodes are this file: a change in one is a change in the other.",
                 decay = script,
+                scripts = state.inspector?.let(::scriptTabs).orEmpty(),
+                chosen = behaviourKey,
             )
         } else {
             BehaviourUi(
@@ -507,7 +543,7 @@ class EditorController(
                 codeFile = "No script yet",
                 code = emptyList(),
                 codeNote = "Create a script to add behavior to this object.",
-                canCreateScript = state.inspector?.component("sindri.script") == null,
+                canCreateScript = state.inspector?.component(SCRIPT) == null,
             )
         }
 

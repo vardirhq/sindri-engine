@@ -117,10 +117,11 @@ wick            body, collider, script, sprite, shadow, animation
                 script (Flame), script#halo (Flame)
 ```
 
-Desktop's Add Component offers a second script as "(another)", and on the
-phone *Create script* on an object that has one attaches the new one as
-`sindri.script#script-2`. The phone's Behaviour sheet still opens the object's
-own script; a script part's fields are edited in the inspector.
+Desktop's Add Component offers a second script as "(another)", and each
+script is its own inspector section, with its file, its script and its
+exported fields. The phone's Behaviour sheet lists the object's scripts, its
+own first and then its parts ("Flame · halo"), opens the one chosen, and its
+*+ Script* attaches another as `sindri.script#script-2` and opens it.
 
 On desktop, Add Component offers a second 2D light or emitter as "(another)"
 once the object has one, added under a free name (`light-2`), and a part's

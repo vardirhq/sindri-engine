@@ -39,7 +39,13 @@ class EditorControllerTest {
                 "editScript" -> scriptEdits += if (arguments[0] == "undo") -1 else 1
                 "openPrefab" -> state = state.copy(prefab = arguments[0] as String, inspector = prefabRoot)
                 "closePrefab" -> state = state.copy(prefab = null, inspector = sceneSelection)
-                "createScript" -> state = state.copy(inspector = state.inspector?.copy(components = listOf(Component("sindri.script", "Script", emptyList(), values = mapOf("source" to "scripts/new.decay")))), unsaved = true)
+                "createScript" -> {
+                    val components = state.inspector?.components.orEmpty()
+                    // A second script is attached as a part, as the engine does.
+                    val key = if (components.any { it.type == "sindri.script" }) "sindri.script#script-2" else "sindri.script"
+                    val added = Component(key, "Script", emptyList(), values = mapOf("source" to "scripts/new.decay", "script" to "Behavior"))
+                    state = state.copy(inspector = state.inspector?.copy(components = components + added), unsaved = true)
+                }
             }
             return null
         }
@@ -63,6 +69,32 @@ class EditorControllerTest {
         assertTrue(listOf("save") in host.commands)
         assertTrue(listOf("openScript", "scripts/new.decay") in host.commands)
         assertNotNull((controller.ui.sheet as EditorSheet.Behaviour).behaviour.decay)
+    }
+
+    @Test
+    fun the_behaviour_sheet_switches_between_an_objects_scripts_and_adds_one() {
+        fun script(key: String, source: String, name: String) =
+            Component(key, "Script", emptyList(), values = mapOf("source" to source, "script" to name))
+        host.state = EditorState(
+            inspector = Inspector("Lantern", null, listOf(script("sindri.script#halo", "scripts/flame.decay", "Flame"), script("sindri.script", "scripts/beam.decay", "Beam"))),
+            selectionCount = 1,
+        )
+        controller.refresh()
+        controller.on(EditorEvent.OpenBehaviour) {}
+        val behaviour = { (controller.ui.sheet as EditorSheet.Behaviour).behaviour }
+        assertEquals(listOf("Beam", "Flame · halo"), behaviour().scripts.map { it.label })
+        assertEquals("sindri.script", behaviour().chosen)
+        assertTrue(listOf("openScript", "scripts/beam.decay") in host.commands)
+
+        controller.on(EditorEvent.ScriptChosen("sindri.script#halo")) {}
+        assertEquals("sindri.script#halo", behaviour().chosen)
+        assertEquals(listOf("openScript", "scripts/flame.decay"), host.commands.last { it.first() == "openScript" })
+
+        // Another is added beside them as a part, and opened.
+        controller.on(EditorEvent.CreateScript) {}
+        assertEquals("sindri.script#script-2", behaviour().chosen)
+        assertEquals(3, behaviour().scripts.size)
+        assertEquals(listOf("openScript", "scripts/new.decay"), host.commands.last { it.first() == "openScript" })
     }
 
     @Test
