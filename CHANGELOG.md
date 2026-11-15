@@ -2,6 +2,8 @@
 
 # Changelog
 
+- Soft biome edges on a voxel map: with `soft_edges`, where two kinds of ground meet the seam wavers, short pixel strips of each fraying a few pixels into the other along a line from the world's seed, instead of meeting on the grid's straight seam. Ground frays into water too, so riverbanks are ragged, while water never creeps onto land. Lamplighter's wilds use it.
+
 - Things in Lamplighter's wilds stand on the ground: the flat field's tricks (a depth that grows down the screen, height drawn as a step up the screen) are undone there, so Wick, the glooms, trees and lamp posts stand at ground level with their feet on it, a lamp post's flame is up its post, and Wick carries his lantern at his hands, circling him. Contact shadows are rounder, wider and darker, so what stands is seen to touch the ground. Wick's and the gloom's scripts take an `upright` property for this.
 
 - A 2D spot light held above the ground spills light all round its foot, out to about its height, so its beam meets the ground in a pool rather than a sharp point (`LightCone2d::on_the_ground`). The shader, the cast shadows and the light field a script reads all agree.

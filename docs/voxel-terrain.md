@@ -88,6 +88,18 @@ variants, the edits, and the ground scripts read. `Grid.surface` and
 what a top-down game needs. Low Tide's Basin is the worked example: a drained
 sea floor from these same settings, with its own blocks and biomes.
 
+With `"soft_edges": true`, the seams between different kinds of ground fray
+rather than running along the grid. Along each seam, short strips (an eighth of
+a square long) of one ground are drawn a few pixels (up to six sixteenths of a
+square) into the square beside it, following a wave from the world's
+`variant_seed` that is pinned to the grid at both ends, so the lines of
+neighbouring seams join. A strip wears its ground's own picture as it would
+continue across the seam and the light of the square it lies on. Ground frays
+into water, so banks are ragged too, but water never creeps onto ground, so
+what shows as water is somewhere a walker cannot stand. Only the drawing
+changes: blocks, `Grid.surface` and walking are as before. Lamplighter's wilds
+use it.
+
 ## Blocks
 
 `builtin:blocks` is the block set the engine ships, with its art compiled into

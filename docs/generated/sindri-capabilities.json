@@ -3431,6 +3431,7 @@
         ],
         "normal_maps": {},
         "render_radius": 2,
+        "soft_edges": false,
         "variant_seed": 0,
         "vertical_radius": 1,
         "view": "blocks"
@@ -3568,6 +3569,7 @@
         ],
         "normal_maps": {},
         "render_radius": 2,
+        "soft_edges": false,
         "variant_seed": 0,
         "vertical_radius": 1,
         "view": "blocks"

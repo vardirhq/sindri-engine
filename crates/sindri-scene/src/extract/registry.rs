@@ -379,7 +379,8 @@ fn register_tiles(components: &mut ComponentSchemaRegistry) -> Result<(), SceneE
             "follow_camera": false,
             "variant_seed": 0,
             "edits": [],
-            "normal_maps": {}
+            "normal_maps": {},
+            "soft_edges": false
         }),
     )?;
     Ok(())
