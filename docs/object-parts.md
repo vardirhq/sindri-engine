@@ -149,7 +149,9 @@ collider's own `name`). A `Contact2d` carries `piece` and `other_piece`, and
 `collision_started_at` and `collision_stopped_at`, answers for one named piece
 (`docs/decay-direction.md`, "Named parts"). Desktop's inspector edits a
 piece's name as a field of the piece; the phone's collider workspace has a
-*Name* field for the chosen shape.
+*Name* field for the chosen shape. Lamplighter's Wick names his pieces
+`body` and `reach`, and `wick.decay` lights a lamp post from what enters
+`reach` alone (`Physics.sensor_entered_at("reach")`).
 
 ## The object workspace
 

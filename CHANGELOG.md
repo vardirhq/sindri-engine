@@ -2,6 +2,8 @@
 
 # Changelog
 
+- Lamplighter's Wick names his collider's pieces `body` and `reach`, and a lamp post lights from what his reach touches (`Physics.sensor_entered_at("reach")`). A phone project copied earlier keeps working: its unnamed pieces are still asked about.
+
 - Tell a collider's pieces apart in a script: a piece can have a `name`, a `Contact2d` carries `piece` and `other_piece`, and `Physics.sensor_entered_at("mouth")`, `sensor_exited_at`, `collision_started_at` and `collision_stopped_at` answer for one named piece, so something entering a sensor is told from something bumping the body without splitting them into two objects. Both editors name a piece.
 
 - Choose among an object's scripts on the phone: the Behaviour sheet lists every script the object runs, its own first and then its parts ("Flame · halo"), opens the one tapped, and *+ Script* adds another beside them.
