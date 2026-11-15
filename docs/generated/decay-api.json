@@ -1432,6 +1432,20 @@
           "type": "number"
         },
         {
+          "description": "The name of the other body's collider piece that touches, or \"\" for one with none.",
+          "kind": "value",
+          "name": "other_piece",
+          "read_only": false,
+          "type": "String"
+        },
+        {
+          "description": "The name of the queried body's collider piece that touches, or \"\" for one with none.",
+          "kind": "value",
+          "name": "piece",
+          "read_only": false,
+          "type": "String"
+        },
+        {
           "description": "World-space midpoint of the two surface anchors, as Vec2.",
           "kind": "value",
           "name": "point",
@@ -2667,11 +2681,35 @@
           "returns": "List<Entity>"
         },
         {
+          "description": "The objects that started touching this object's collider piece named piece since the last frame, as a list.",
+          "kind": "function",
+          "name": "collision_started_at",
+          "parameter_names": [
+            "piece"
+          ],
+          "parameters": [
+            "String"
+          ],
+          "returns": "List<Entity>"
+        },
+        {
           "description": "The objects that stopped touching this script's object since the last frame, as a list.",
           "kind": "function",
           "name": "collision_stopped",
           "parameter_names": [],
           "parameters": [],
+          "returns": "List<Entity>"
+        },
+        {
+          "description": "The objects that stopped touching this object's collider piece named piece since the last frame, as a list.",
+          "kind": "function",
+          "name": "collision_stopped_at",
+          "parameter_names": [
+            "piece"
+          ],
+          "parameters": [
+            "String"
+          ],
           "returns": "List<Entity>"
         },
         {
@@ -2967,11 +3005,35 @@
           "returns": "List<Entity>"
         },
         {
+          "description": "The objects that entered the trigger area of this object's collider piece named piece since the last frame, as a list: a mouth told apart from a body.",
+          "kind": "function",
+          "name": "sensor_entered_at",
+          "parameter_names": [
+            "piece"
+          ],
+          "parameters": [
+            "String"
+          ],
+          "returns": "List<Entity>"
+        },
+        {
           "description": "The objects that left this script's trigger area since the last frame.",
           "kind": "function",
           "name": "sensor_exited",
           "parameter_names": [],
           "parameters": [],
+          "returns": "List<Entity>"
+        },
+        {
+          "description": "The objects that left the trigger area of this object's collider piece named piece since the last frame.",
+          "kind": "function",
+          "name": "sensor_exited_at",
+          "parameter_names": [
+            "piece"
+          ],
+          "parameters": [
+            "String"
+          ],
           "returns": "List<Entity>"
         },
         {

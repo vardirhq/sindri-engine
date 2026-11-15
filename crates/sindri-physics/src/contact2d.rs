@@ -19,4 +19,9 @@ pub struct Contact2d {
     /// Total world impulse divided by the last fixed step's seconds.
     /// Sleeping contacts remain present but report zero impulses and force.
     pub force: [f32; 2],
+    /// Which piece of the queried body's collider touches, by its place in
+    /// the list (`docs/object-parts.md`).
+    pub piece: u16,
+    /// Which piece of the other entity's collider.
+    pub other_piece: u16,
 }

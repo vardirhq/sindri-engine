@@ -295,11 +295,11 @@ on the forces/rotation head.
 
 ### Solid contact snapshots (2D)
 
-Copied solver contacts: other entity, world point, push normal, normal and friction impulses, and force over the last step.
+Copied solver contacts: other entity, world point, push normal, normal and friction impulses, force over the last step, and which named piece of each collider touches.
 
 Engine ✅ · Editor 🟡 · Decay ✅ · Proof ✅ — parity row *Solid contact snapshots (2D)*
 
-**Tested by:** [`crates/sindri-physics/tests/contacts.rs`](../../crates/sindri-physics/tests/contacts.rs), [`crates/sindri-decay/tests/contact_snapshots.rs`](../../crates/sindri-decay/tests/contact_snapshots.rs), [`games/platformer/tests/contact_impacts.rs`](../../games/platformer/tests/contact_impacts.rs)
+**Tested by:** [`crates/sindri-physics/tests/contacts.rs`](../../crates/sindri-physics/tests/contacts.rs), [`crates/sindri-decay/tests/contact_snapshots.rs`](../../crates/sindri-decay/tests/contact_snapshots.rs), [`crates/sindri-decay/tests/a_script_tells_its_collider_pieces_apart.rs`](../../crates/sindri-decay/tests/a_script_tells_its_collider_pieces_apart.rs), [`games/platformer/tests/contact_impacts.rs`](../../games/platformer/tests/contact_impacts.rs)
 
 **Exercised in:** [`games/platformer`](../../games/platformer)
 

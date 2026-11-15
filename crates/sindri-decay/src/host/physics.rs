@@ -7,7 +7,6 @@
 
 use decay_ir::Path;
 use decay_runtime::{RuntimeError, Value};
-use sindri_core::EntityId;
 use sindri_physics::PhysicsEventKind;
 
 use crate::surface::PhysicsCall;
@@ -57,7 +56,7 @@ impl WorldHost<'_> {
             return self.physics_shape_query(call, path, args);
         }
         if call.is_event() {
-            return self.physics_events(call, path);
+            return self.physics_events(call, path, args);
         }
         if super::physics_joints::is_joint_control(call) {
             return self.physics_joint_call(call, path, args);
@@ -182,16 +181,54 @@ impl WorldHost<'_> {
     /// About the entity the script is on, because an event is about a pair and
     /// the pair a script cares about is the one it is half of. The answer names
     /// the *other* half.
-    fn physics_events(&self, call: PhysicsCall, path: &Path) -> Result<Value, RuntimeError> {
+    ///
+    /// The `_at` forms answer only for the piece of this entity's collider
+    /// named by their argument.
+    fn physics_events(
+        &self,
+        call: PhysicsCall,
+        path: &Path,
+        args: &[Value],
+    ) -> Result<Value, RuntimeError> {
         let Some(physics) = self.physics.as_ref() else {
             return Err(no_physics(path));
         };
         let wanted = match call {
-            PhysicsCall::CollisionStarted => PhysicsEventKind::CollisionStarted,
-            PhysicsCall::CollisionStopped => PhysicsEventKind::CollisionStopped,
-            PhysicsCall::SensorEntered => PhysicsEventKind::SensorEntered,
-            PhysicsCall::SensorExited => PhysicsEventKind::SensorExited,
+            PhysicsCall::CollisionStarted | PhysicsCall::CollisionStartedAt => {
+                PhysicsEventKind::CollisionStarted
+            }
+            PhysicsCall::CollisionStopped | PhysicsCall::CollisionStoppedAt => {
+                PhysicsEventKind::CollisionStopped
+            }
+            PhysicsCall::SensorEntered | PhysicsCall::SensorEnteredAt => {
+                PhysicsEventKind::SensorEntered
+            }
+            PhysicsCall::SensorExited | PhysicsCall::SensorExitedAt => {
+                PhysicsEventKind::SensorExited
+            }
             _ => unreachable!("only event calls reach here"),
+        };
+        let piece = match (call, args) {
+            (
+                PhysicsCall::CollisionStartedAt
+                | PhysicsCall::CollisionStoppedAt
+                | PhysicsCall::SensorEnteredAt
+                | PhysicsCall::SensorExitedAt,
+                [Value::String(name)],
+            ) => Some(name.as_str()),
+            (
+                PhysicsCall::CollisionStartedAt
+                | PhysicsCall::CollisionStoppedAt
+                | PhysicsCall::SensorEnteredAt
+                | PhysicsCall::SensorExitedAt,
+                _,
+            ) => {
+                return Err(RuntimeError::Host(format!(
+                    "{}(...) takes the piece's name",
+                    path.dotted()
+                )));
+            }
+            _ => None,
         };
         let mine = self.entity;
         // In the order the step reported them, which is the order the backend
@@ -200,25 +237,20 @@ impl WorldHost<'_> {
             .events
             .iter()
             .filter(|event| event.kind == wanted)
-            .filter_map(|event| other_half(event.first, event.second, mine))
+            .filter_map(|event| {
+                let (other, my_piece) = if event.first == mine {
+                    (event.second, event.first_piece)
+                } else if event.second == mine {
+                    (event.first, event.second_piece)
+                } else {
+                    return None;
+                };
+                let at = piece.is_none_or(|name| self.piece_name(mine, my_piece) == name);
+                (at && other != mine).then_some(other)
+            })
             .map(|entity| Value::Reference(entity.to_bits()))
             .collect();
         Ok(Value::array(others))
-    }
-}
-
-/// The other entity in a pair, when this one is in it.
-///
-/// An event naming the same entity twice is a body touching itself, which the
-/// backend does not produce and which would answer with a script's own entity
-/// if it did.
-fn other_half(first: EntityId, second: EntityId, mine: EntityId) -> Option<EntityId> {
-    if first == mine {
-        Some(second)
-    } else if second == mine {
-        Some(first)
-    } else {
-        None
     }
 }
 

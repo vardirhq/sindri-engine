@@ -2,6 +2,8 @@
 
 # Changelog
 
+- Tell a collider's pieces apart in a script: a piece can have a `name`, a `Contact2d` carries `piece` and `other_piece`, and `Physics.sensor_entered_at("mouth")`, `sensor_exited_at`, `collision_started_at` and `collision_stopped_at` answer for one named piece, so something entering a sensor is told from something bumping the body without splitting them into two objects. Both editors name a piece.
+
 - Choose among an object's scripts on the phone: the Behaviour sheet lists every script the object runs, its own first and then its parts ("Flame · halo"), opens the one tapped, and *+ Script* adds another beside them.
 
 - Size and place an object's parts in desktop's Scene view: a selected object shows its art's frame, each particle emitter's shape and its contact shadow, each with a handle at its center to move it and one at its corner (or on a round emitter's ring) to size it, as the phone's object workspace does. A drag is one undo step, and art keeps its sheet's anchor, so a character sized from the corner stays on its feet.

@@ -125,4 +125,8 @@ pub struct PhysicsEvent2d {
     pub first: EntityId,
     pub second: EntityId,
     pub kind: PhysicsEventKind,
+    /// Which piece of `first`'s collider, by its place in the list.
+    pub first_piece: u16,
+    /// Which piece of `second`'s collider.
+    pub second_piece: u16,
 }

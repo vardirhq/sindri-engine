@@ -186,8 +186,12 @@ also selects clusters if the backend enables them in the future. Predictive
 contacts within the solver's contact reach may be present.
 
 Contacts are ordered by other entity, point, normal, normal impulse and tangent
-impulse using total float ordering. Multiple points/pieces can name the same
-entity; they are not deduplicated. Sensors are absent. Sleeping support remains
+impulse using total float ordering, then by piece. Multiple points/pieces can
+name the same entity; they are not deduplicated. Each carries `piece` and
+`other_piece`, the place in each collider's list of the piece that touches;
+`PhysicsEvent2d` carries `first_piece` and `second_piece` the same way. Physics
+never sees a piece's name: the script host reads it from the authored collider
+(`docs/object-parts.md`). Sensors are absent. Sleeping support remains
 present with zero new impulses/force, so resting geometry can grant grounding
 without replaying an old impact. Snapshots are empty before the first step;
 missing bodies fail. Invalid steps retain the previous snapshot. Teleports,

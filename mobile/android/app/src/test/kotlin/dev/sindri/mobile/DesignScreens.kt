@@ -168,7 +168,7 @@ class DesignScreens {
                 values = mapOf(
                     "pieces" to listOf(
                         mapOf("shape" to mapOf("shape" to "circle", "radius" to 0.4), "offset" to listOf(0.0, 0.45), "rotation" to 0.0, "sensor" to false),
-                        mapOf("shape" to mapOf("shape" to "circle", "radius" to 0.7), "offset" to listOf(0.0, 0.45), "rotation" to 0.0, "sensor" to true),
+                        mapOf("name" to "reach", "shape" to mapOf("shape" to "circle", "radius" to 0.7), "offset" to listOf(0.0, 0.45), "rotation" to 0.0, "sensor" to true),
                     ),
                 ),
             ),

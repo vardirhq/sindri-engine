@@ -4,6 +4,7 @@ use std::rc::Rc;
 
 use decay_ir::{Path, StructShape};
 use decay_runtime::{RuntimeError, Value};
+use sindri_core::EntityId;
 use sindri_physics::Contact2d;
 
 use super::WorldHost;
@@ -42,13 +43,42 @@ impl WorldHost<'_> {
             contacts
                 .into_iter()
                 .filter(|contact| self.world.is_active(contact.entity))
-                .map(snapshot)
+                .map(|contact| self.snapshot(entity, contact))
                 .collect(),
         ))
     }
+
+    /// The name a piece of `entity`'s collider was authored with, `""` for
+    /// one with none: physics keeps pieces by their place in the list, and
+    /// the names stay with the scene (`docs/object-parts.md`).
+    pub(super) fn piece_name(&self, entity: EntityId, piece: u16) -> String {
+        let collider = self
+            .world
+            .get(entity)
+            .and_then(|data| data.components.get("sindri.physics2d.collider"));
+        let authored = match collider.and_then(|payload| payload.get("pieces")) {
+            Some(pieces) => pieces.get(usize::from(piece)),
+            // The single form is one piece, the payload itself.
+            None if piece == 0 => collider,
+            None => None,
+        };
+        authored
+            .and_then(|piece| piece.get("name"))
+            .and_then(serde_json::Value::as_str)
+            .unwrap_or_default()
+            .to_owned()
+    }
+
+    fn snapshot(&self, entity: EntityId, contact: Contact2d) -> Value {
+        snapshot(
+            contact,
+            self.piece_name(entity, contact.piece),
+            self.piece_name(contact.entity, contact.other_piece),
+        )
+    }
 }
 
-fn snapshot(contact: Contact2d) -> Value {
+fn snapshot(contact: Contact2d, piece: String, other_piece: String) -> Value {
     Value::Struct {
         shape: Rc::new(StructShape {
             name: CONTACT.to_owned(),
@@ -61,6 +91,8 @@ fn snapshot(contact: Contact2d) -> Value {
             Value::Number(f64::from(contact.normal_impulse)),
             Value::Number(f64::from(contact.tangent_impulse)),
             Value::Vec2(contact.force.map(f64::from)),
+            Value::String(piece),
+            Value::String(other_piece),
         ]),
     }
 }

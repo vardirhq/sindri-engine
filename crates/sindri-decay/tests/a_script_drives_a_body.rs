@@ -185,6 +185,8 @@ fn a_script_is_told_what_it_touched_from_either_side_of_the_event() {
             first: if swap { target } else { bullet },
             second: if swap { bullet } else { target },
             kind: PhysicsEventKind::SensorEntered,
+            first_piece: 0,
+            second_piece: 0,
         };
 
         let report = advance(
@@ -229,16 +231,22 @@ fn each_kind_of_event_answers_only_its_own() {
             first: bullet,
             second: a,
             kind: PhysicsEventKind::SensorEntered,
+            first_piece: 0,
+            second_piece: 0,
         },
         PhysicsEvent2d {
             first: bullet,
             second: b,
             kind: PhysicsEventKind::SensorEntered,
+            first_piece: 0,
+            second_piece: 0,
         },
         PhysicsEvent2d {
             first: bullet,
             second: a,
             kind: PhysicsEventKind::CollisionStarted,
+            first_piece: 0,
+            second_piece: 0,
         },
     ];
 
@@ -286,6 +294,8 @@ fn an_event_this_entity_is_not_part_of_is_not_reported_to_it() {
             first: a,
             second: b,
             kind: PhysicsEventKind::SensorEntered,
+            first_piece: 0,
+            second_piece: 0,
         }],
     );
     let at = world
@@ -325,6 +335,8 @@ fn a_script_can_despawn_both_halves_from_inside_an_event() {
             first: bullet,
             second: target,
             kind: PhysicsEventKind::SensorEntered,
+            first_piece: 0,
+            second_piece: 0,
         }],
     );
     assert!(report.failures.is_empty(), "{:?}", report.failures);

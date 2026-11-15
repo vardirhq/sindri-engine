@@ -1,10 +1,10 @@
 # Object parts and the object workspace
 
-Status: steps 1 to 4 and 6 below are built: sprite `size` and `offset`,
-light `offset`, the mobile object workspace for a scene object or a prefab,
-named parts for lights, particles and scripts, scripts reaching them, and the
-same part handles in desktop's Scene view. Step 5, collider piece names, is
-not.
+Status: every step below is built: sprite `size` and `offset`, light
+`offset`, the mobile object workspace for a scene object or a prefab, named
+parts for lights, particles and scripts, scripts reaching them, collider piece
+names in contacts and events, and the same part handles in desktop's Scene
+view.
 
 ## The problem
 
@@ -141,6 +141,16 @@ entered my sensor" from "something bumped my body", and a game that needs to
 tell them apart still splits them into two objects. Pieces gain an optional
 `name`, and contacts and sensor events carry the names of the pieces involved.
 
+Built: physics keeps each piece by its place in the collider's list and
+reports both pieces of every event and contact; it never sees a name. The
+script host reads the name from the authored `pieces[i].name` (or a single
+collider's own `name`). A `Contact2d` carries `piece` and `other_piece`, and
+`Physics.sensor_entered_at("mouth")`, with `sensor_exited_at`,
+`collision_started_at` and `collision_stopped_at`, answers for one named piece
+(`docs/decay-direction.md`, "Named parts"). Desktop's inspector edits a
+piece's name as a field of the piece; the phone's collider workspace has a
+*Name* field for the chosen shape.
+
 ## The object workspace
 
 The mobile collider workspace already opens one object full height, shows its
@@ -196,7 +206,7 @@ things, not parts.
    - **4c, done:** several scripts on one object, each a part reading its own
      name's parts first; the lantern carries its lights and their flames, so
      Wick is two objects.
-5. Collider piece names, reported by contacts and sensor events.
+5. **Done:** collider piece names, reported by contacts and sensor events.
 6. **Done:** the same part handles in desktop's Scene view, so both editors
    agree. Every 2D light part is drawn at its offset and moved and sized by
    its own handles (`light2d_gizmo.rs`); a selected object's art frame, each

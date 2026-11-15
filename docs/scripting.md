@@ -1337,11 +1337,30 @@ independently of visual transform scale.
 | `Physics.collision_stopped()` | `List<Entity>` |
 | `Physics.sensor_entered()` | `List<Entity>` |
 | `Physics.sensor_exited()` | `List<Entity>` |
+| `Physics.collision_started_at(piece)` | `List<Entity>` |
+| `Physics.collision_stopped_at(piece)` | `List<Entity>` |
+| `Physics.sensor_entered_at(piece)` | `List<Entity>` |
+| `Physics.sensor_exited_at(piece)` | `List<Entity>` |
+
+**Which piece.** A collider's pieces may be named (`"name": "mouth"` on a
+piece, or on a single collider). The `_at` forms answer only for the piece of
+this entity's collider with that name, so something entering a sensor piece
+is told apart from something bumping the body:
+
+```rust
+for prey in Physics.sensor_entered_at("mouth") { this.bite(prey); }
+for wall in Physics.collision_started_at("body") { this.turn(); }
+```
+
+The forms without `_at` still answer every piece. A name that no piece has
+answers an empty list.
 
 `Physics.contacts(entity)` copies solid solver contacts from the last fixed
 step. A `Contact2d` contains `entity` (the other body), world `point` and
 `normal` as Vec2, `normal_impulse`, signed `tangent_impulse`, and world `force`
-as Vec2. The normal points towards the queried body; the tangent is
+as Vec2, and `piece` and `other_piece`: the names of the queried body's piece
+and the other body's that touch, `""` for one with none. The normal points
+towards the queried body; the tangent is
 `Vec2(-normal.y, normal.x)`. Force is total impulse divided by fixed-step seconds.
 Points are ordered by entity, point, normal and impulse, including multiple
 points/pieces on one entity. Sensors are excluded. Sleeping contacts keep their
