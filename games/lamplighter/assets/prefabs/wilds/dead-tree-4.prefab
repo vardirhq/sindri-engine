@@ -1,0 +1,135 @@
+{
+  "format_version": 1,
+  "metadata": {
+    "name": "dead-tree-4"
+  },
+  "entities": [
+    {
+      "id": "dead-tree-4",
+      "name": "dead-tree-4",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          4,
+          4,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/objects.png#dead-tree-4",
+          "layer": 5,
+          "billboard": true
+        },
+        "sindri.shadow2d": {
+          "contact_size": [
+            1.98,
+            1.188
+          ],
+          "contact_offset": [
+            0,
+            0
+          ],
+          "contact_opacity": 0.7,
+          "cast": true,
+          "cast_opacity": 0.35,
+          "height": 0.0,
+          "max_length": 2.2
+        },
+        "sindri.physics2d.rigid_body": {
+          "kind": "static",
+          "pose": {
+            "position": [
+              0,
+              0
+            ],
+            "rotation": 0
+          },
+          "linear_velocity": [
+            0,
+            0
+          ],
+          "angular_velocity": 0,
+          "gravity_scale": 0,
+          "linear_damping": 0,
+          "angular_damping": 0,
+          "lock_rotation": true,
+          "continuous_collision": false
+        },
+        "sindri.physics2d.collider": {
+          "shape": {
+            "shape": "circle",
+            "radius": 0.15
+          },
+          "offset": [
+            0,
+            0.125
+          ],
+          "rotation": 0,
+          "sensor": false,
+          "layers": {
+            "memberships": 1,
+            "filter": 4294967295
+          },
+          "friction": 0,
+          "restitution": 0
+        },
+        "sindri.light2d.occluder": {
+          "shape": "polygon",
+          "points": [
+            [
+              0.075,
+              0.05
+            ],
+            [
+              0.06075,
+              0.0765
+            ],
+            [
+              0.02325,
+              0.09275
+            ],
+            [
+              -0.02325,
+              0.09275
+            ],
+            [
+              -0.06075,
+              0.0765
+            ],
+            [
+              -0.075,
+              0.05
+            ],
+            [
+              -0.06075,
+              0.0235
+            ],
+            [
+              -0.02325,
+              0.00725
+            ],
+            [
+              0.02325,
+              0.00725
+            ],
+            [
+              0.06075,
+              0.0235
+            ]
+          ]
+        }
+      }
+    }
+  ]
+}

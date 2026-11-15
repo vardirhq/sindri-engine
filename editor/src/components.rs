@@ -165,6 +165,11 @@ const KNOWN: &[Known] = &[
         icon: icons::TILEMAP,
     },
     Known {
+        type_name: "sindri.scatter",
+        family: Family::Rendering,
+        icon: icons::TILEMAP,
+    },
+    Known {
         type_name: "sindri.ui.image",
         family: Family::Ui,
         icon: icons::UI_ELEMENT,

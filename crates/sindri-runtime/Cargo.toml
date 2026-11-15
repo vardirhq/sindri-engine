@@ -10,6 +10,7 @@ repository.workspace = true
 publish = false
 
 [dependencies]
+glam.workspace = true
 log.workspace = true
 sindri-assets = { path = "../sindri-assets" }
 sindri-core = { path = "../sindri-core" }
@@ -18,6 +19,7 @@ sindri-platform = { path = "../sindri-platform" }
 sindri-scene = { path = "../sindri-scene" }
 sindri-weave = { path = "../sindri-weave" }
 serde.workspace = true
+serde_json.workspace = true
 thiserror.workspace = true
 toml = "1.1"
 weave = { path = "../../weave/crates/weave" }
@@ -27,4 +29,3 @@ web-time.workspace = true
 workspace = true
 
 [dev-dependencies]
-serde_json.workspace = true

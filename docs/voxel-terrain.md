@@ -100,6 +100,28 @@ what shows as water is somewhere a walker cannot stand. Only the drawing
 changes: blocks, `Grid.surface` and walking are as before. Lamplighter's wilds
 use it.
 
+## What stands on it: scatter
+
+A voxel world may carry `sindri.scatter` to be dressed with what stands on it:
+trees in one biome, boulders in another, ground cover everywhere. Each rule
+names the blocks it grows on (`on`, by name), the prefabs it makes (one chosen
+by the seed for each place), how far apart things are (`spacing`, in squares:
+the land is cut into patches of that side and each may hold one) and how likely
+each patch is to hold one (`chance`), and whether a thing may be mirrored
+(`flip`). Where two rules choose one square, the first rule's thing stands.
+`clearings` (a column, a row and a radius, in squares) are left bare: where
+play starts, round what is placed by hand.
+
+Where each thing stands is the seed's answer, so the same land is dressed the
+same way every time and nothing about it is stored. The runtime makes the
+things within `reach` squares of play (the entity named by `around`, or the
+middle of the world camera's view) from their prefabs, and unmakes them a few
+squares further out, so a land as wide as the generator costs what is near and
+walking back finds the same trees where they stood. They are ordinary entities:
+they stop a walker, cast shadows and are lit like anything placed by hand. One
+a script despawns was taken, and the scatter remembers it in `taken` so it does
+not grow back. Lamplighter's wilds are dressed this way.
+
 ## Blocks
 
 `builtin:blocks` is the block set the engine ships, with its art compiled into

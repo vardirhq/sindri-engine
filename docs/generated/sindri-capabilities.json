@@ -1964,6 +1964,77 @@
       "addable": true,
       "apply": {},
       "default_payload": {
+        "around": "",
+        "clearings": [],
+        "reach": 24,
+        "rules": [
+          {
+            "chance": 0.5,
+            "flip": false,
+            "on": [
+              ""
+            ],
+            "prefabs": [
+              ""
+            ],
+            "spacing": 3
+          }
+        ],
+        "seed": 0,
+        "taken": []
+      },
+      "display_name": "Scatter",
+      "fields": {
+        "around": "",
+        "clearings": [],
+        "reach": 24,
+        "rules": [
+          {
+            "chance": 0.5,
+            "flip": false,
+            "on": [
+              ""
+            ],
+            "prefabs": [
+              ""
+            ],
+            "spacing": 3
+          }
+        ],
+        "seed": 0,
+        "taken": []
+      },
+      "meanings": {
+        "around": {
+          "kind": "entity"
+        },
+        "reach": {
+          "kind": "range",
+          "max": 128.0,
+          "min": 1.0
+        },
+        "rules[].chance": {
+          "kind": "range",
+          "max": 1.0,
+          "min": 0.0
+        },
+        "rules[].prefabs[]": {
+          "asset": "prefab",
+          "kind": "asset"
+        },
+        "rules[].spacing": {
+          "kind": "range",
+          "max": 64.0,
+          "min": 1.0
+        }
+      },
+      "schema_version": 1,
+      "type_name": "sindri.scatter"
+    },
+    {
+      "addable": true,
+      "apply": {},
+      "default_payload": {
         "playing": null,
         "sequences": {
           "intro": {

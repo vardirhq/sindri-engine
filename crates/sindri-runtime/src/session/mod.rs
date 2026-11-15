@@ -27,6 +27,7 @@ mod physics;
 mod profiles;
 /// Where a session's save is kept, and when it is written out.
 mod saves;
+mod scatter;
 mod scenes;
 
 /// The gameplay, which is the scripts and nothing else.
@@ -92,6 +93,8 @@ pub struct Session {
     /// a generated landscape has enough of them that doing it per frame costs
     /// more than everything else in a frame put together.
     surfaces: sindri_scene::GridSurfaces,
+    /// What each land's scatter has made near play.
+    scattered: scatter::Scattered,
     since_written: f32,
     /// Where the save actually goes.
     ///
@@ -144,6 +147,7 @@ impl Session {
             effects: sindri_scene::Effects2d::default(),
             gestures: sindri_core::Gestures::new(sindri_core::GestureLimits::default()),
             surfaces: sindri_scene::GridSurfaces::default(),
+            scattered: scatter::Scattered::default(),
             since_written: 0.0,
             save_backend: Box::new(sindri_platform::MemorySaves::new()),
             pending_audio: Vec::new(),
@@ -427,6 +431,8 @@ impl Session {
         // After the scripts, so a camera following the player follows where
         // this step left it. The voxel world keeps its own window under it.
         self.step_cameras(world, delta_seconds, viewport, &mut problems);
+        // After the camera, so what stands near play is made where play now is.
+        self.step_scatter(world, viewport, &mut problems);
         laps.lap(StepPhase::Cameras);
         // After the scripts, because a walker's depth is a consequence of where
         // this step left it, and before anything draws. Props settle on the
