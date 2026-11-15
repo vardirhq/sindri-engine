@@ -84,6 +84,29 @@ pub(super) fn register_lights(
         "Shadow 2D",
         serde_json::to_value(Shadow2dComponent::default()).expect("a shadow serializes"),
     )?;
+    components.register_with_default::<crate::ScatterComponent>(
+        "Scatter",
+        serde_json::to_value(crate::ScatterComponent::default()).expect("a scatter serializes"),
+    )?;
+    components.describe::<crate::ScatterComponent>([
+        ("around", FieldMeaning::Entity),
+        (
+            "reach",
+            FieldMeaning::Range {
+                min: 1.0,
+                max: f64::from(crate::components::MOST_SCATTER_REACH),
+            },
+        ),
+        ("rules[].prefabs[]", FieldMeaning::Asset(AssetKind::Prefab)),
+        (
+            "rules[].spacing",
+            FieldMeaning::Range {
+                min: 1.0,
+                max: f64::from(crate::components::MOST_SCATTER_SPACING),
+            },
+        ),
+        ("rules[].chance", FieldMeaning::Range { min: 0.0, max: 1.0 }),
+    ])?;
     components.register_with_default::<Sight2dComponent>(
         "Sight 2D",
         serde_json::to_value(Sight2dComponent::default()).expect("a viewer serializes"),

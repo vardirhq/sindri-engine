@@ -1,0 +1,146 @@
+{
+  "format_version": 1,
+  "metadata": {
+    "name": "bush-2"
+  },
+  "entities": [
+    {
+      "id": "bush-2",
+      "name": "bush-2",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          7.0,
+          7.0,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/village.png#bush-2",
+          "layer": 5,
+          "billboard": true
+        },
+        "sindri.shadow2d": {
+          "contact_size": [
+            1.65,
+            0.99
+          ],
+          "contact_offset": [
+            0,
+            0
+          ],
+          "contact_opacity": 0.7,
+          "cast": true,
+          "cast_opacity": 0.35,
+          "height": 0.0,
+          "max_length": 2.2
+        },
+        "sindri.physics2d.rigid_body": {
+          "kind": "static",
+          "pose": {
+            "position": [
+              0,
+              0
+            ],
+            "rotation": 0
+          },
+          "linear_velocity": [
+            0,
+            0
+          ],
+          "angular_velocity": 0,
+          "gravity_scale": 0,
+          "linear_damping": 0,
+          "angular_damping": 0,
+          "lock_rotation": true,
+          "continuous_collision": false
+        },
+        "sindri.physics2d.collider": {
+          "shape": {
+            "shape": "box",
+            "half_extents": [
+              0.07857142857142858,
+              0.049999999999999996
+            ]
+          },
+          "offset": [
+            0,
+            0.049999999999999996
+          ],
+          "rotation": 0,
+          "sensor": false,
+          "layers": {
+            "memberships": 1,
+            "filter": 4294967295
+          },
+          "friction": 0,
+          "restitution": 0
+        },
+        "sindri.light2d.occluder": {
+          "shape": "polygon",
+          "points": [
+            [
+              0.07857142857142858,
+              0.049999999999999996
+            ],
+            [
+              0.06799999999999999,
+              0.075
+            ],
+            [
+              0.03928571428571429,
+              0.09328571428571429
+            ],
+            [
+              0.0,
+              0.09999999999999999
+            ],
+            [
+              -0.03928571428571429,
+              0.09328571428571429
+            ],
+            [
+              -0.06799999999999999,
+              0.075
+            ],
+            [
+              -0.07857142857142858,
+              0.049999999999999996
+            ],
+            [
+              -0.06799999999999999,
+              0.024999999999999998
+            ],
+            [
+              -0.03928571428571429,
+              0.006714285714285714
+            ],
+            [
+              -0.0,
+              0.0
+            ],
+            [
+              0.03928571428571429,
+              0.006714285714285714
+            ],
+            [
+              0.06799999999999999,
+              0.024999999999999998
+            ]
+          ]
+        }
+      }
+    }
+  ]
+}

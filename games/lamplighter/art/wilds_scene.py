@@ -9,8 +9,12 @@ everything that stands (Wick, the gloom, the lamps, trees and boulders) is a pix
 sprite billboarded to face the camera, standing on its feet. The 2D lights,
 physics and scripts are the field's, unchanged.
 
-What stands is placed by hand around the start for now; scattering it by seed
-and biome across the land is the next step of stage 1."""
+What grows is scattered by seed (`sindri.scatter` on the ground): dead trees
+in the deadwood, oaks and bushes in the meadow, boulders in the barrens, and
+ground cover everywhere, each from a prefab this script writes to
+`assets/prefabs/wilds/`. The engine makes them near Wick and unmakes them far
+from him, so the land goes on. The lamp posts and the gloom are placed by hand,
+in clearings the scatter leaves."""
 import json
 import math
 from pathlib import Path
@@ -18,6 +22,7 @@ from pathlib import Path
 from PIL import Image
 
 import scenes
+import village_scene
 from scenes import (at, effects, entity, environment, gloom, input_actions, lantern, prop, wick)
 
 TILT = math.radians(38.0)   # how far the camera leans from straight down
@@ -51,7 +56,66 @@ def ground():
                 biome('Bog', 0.6, 0.95, 'moss', 'mud', 0.2),
                 biome('Barrens', 0.1, 0.2, 'stone', 'rock', 1.4, terraces=2),
             ]},
-        'blocks': 'blocks.tileset', 'view': 'map', 'variant_seed': 5, 'layer': -10, 'edits': [], 'soft_edges': True}})
+        'blocks': 'blocks.tileset', 'view': 'map', 'variant_seed': 5, 'layer': -10, 'edits': [], 'soft_edges': True},
+        'sindri.scatter': scatter()})
+
+
+ORIGIN = (-60.0, 60.0)   # where the ground's first square is: square (60, 60) is the world's middle
+PREFABS = Path(__file__).resolve().parent.parent / 'assets' / 'prefabs' / 'wilds'
+LAMPS = [(6, 1), (-7, 2)]
+GLOOM = [(10, 5), (-9, -5)]
+
+
+def square_of(x, y):
+    """The ground's column and row at a place in the world, as a clearing names them."""
+    return [x - ORIGIN[0], ORIGIN[1] - y]
+
+
+def scatter():
+    """What grows on the wilds, by the ground it grows on."""
+    prefab = lambda names: [f'prefabs/wilds/{name}.prefab' for name in names]
+    rule = lambda on, names, spacing, chance: {'on': on, 'prefabs': prefab(names), 'spacing': spacing,
+                                               'chance': chance, 'flip': True}
+    trees = [f'dead-tree-{n}' for n in range(5)]
+    boulders = [f'boulder-{n}' for n in range(4)]
+    clear = [square_of(0, 0) + [4.0]] + [square_of(x, y) + [2.5] for x, y in LAMPS + GLOOM]
+    return {'around': 'wick', 'reach': 22, 'seed': 17, 'clearings': clear, 'taken': [], 'rules': [
+        rule(['deadgrass'], trees, 3, 0.55),
+        rule(['grass'], ['oak-1', 'oak-2', 'oak-3', 'oak-4', 'tree-1', 'tree-2'], 7, 0.5),
+        rule(['grass'], ['bush-1', 'bush-2', 'bush-3', 'bush-4'], 5, 0.3),
+        rule(['earth'], ['bush-1', 'bush-2', 'bush-3', 'bush-4'] + boulders[:2], 5, 0.4),
+        rule(['moss', 'mud'], trees[:2], 6, 0.3),
+        rule(['stone', 'rock'], boulders, 4, 0.5),
+        rule(['grass', 'deadgrass', 'earth'], ['tufts', 'flowers', 'pebbles'], 2, 0.3),
+        rule(['moss'], ['mushrooms', 'tufts'], 2, 0.35),
+        rule(['stone', 'rock', 'sand'], ['pebbles'], 3, 0.3),
+    ]}
+
+
+def prefabs():
+    """Every prefab the scatter makes, stood up as the rest of the wilds is."""
+    made = {}
+    for n in range(5):
+        made[f'dead-tree-{n}'] = prop('tree', f'dead-tree-{n}', 0, 0, 0.6, 0.5, (0.3, 0.18, 0.2))
+    for n in range(4):
+        made[f'boulder-{n}'] = prop('boulder', f'boulder-{n}', 0, 0, 0.9, 0.7, (0.85, 0.42, 0.45))
+    blocks = {'oak': (0.45, 0.3, 0.3), 'tree': (0.3, 0.2, 0.2), 'bush': (0.55, 0.35, 0.35)}
+    for name in ['oak-1', 'oak-2', 'oak-3', 'oak-4', 'tree-1', 'tree-2', 'bush-1', 'bush-2', 'bush-3', 'bush-4']:
+        made[name] = village_scene.standing('plant', name, 0, 0, blocks[name.split('-')[0]])
+    for kind in ['tufts', 'flowers', 'pebbles', 'mushrooms']:
+        components = {'sindri.sprite': {'texture': f'textures/decor.png#{kind}', 'layer': 4}}
+        if kind == 'mushrooms':
+            components['sindri.light2d'] = {'enabled': True, 'color': [0.45, 0.85, 1.0, 1.0], 'intensity': 0.7,
+                                            'radius': 2.8, 'falloff': 1.6, 'height': 0.6, 'shadows': False}
+        made[kind] = entity('cover', 'cover', at(0, 0, 0, 1.5, 1.5), **components)
+    PREFABS.mkdir(parents=True, exist_ok=True)
+    for name, thing in made.items():
+        thing['id'] = name
+        thing['name'] = name
+        (one,) = standing_up([thing])
+        one['transform_3d']['position'] = [0.0, 0.0, 0.0]
+        doc = {'format_version': 1, 'metadata': {'name': name}, 'entities': [one]}
+        (PREFABS / f'{name}.prefab').write_text(json.dumps(doc, indent=2) + '\n')
 
 
 def biome(name, temperature, moisture, surface, under, relief, terraces=0):
@@ -155,17 +219,13 @@ def wilds():
             'sindri.input.actions': {'actions': input_actions()}}),
         ground(),
     ]
-    trees = [(-6, 4), (-3, 7), (5, 6), (9, 3), (-8, -3), (4, -6), (11, -4), (-2, -8), (14, 8), (-12, 6)]
-    ents += [prop(f'tree-{n}', f'dead-tree-{n % 5}', x, y, 0.6, 0.5, (0.3, 0.18, 0.2), flip=n % 2 == 0)
-             for n, (x, y) in enumerate(trees, 1)]
-    ents += [prop(f'boulder-{n}', f'boulder-{n % 4}', x, y, 0.9, 0.7, (0.85, 0.42, 0.45))
-             for n, (x, y) in enumerate([(2, 3), (-5, -6), (8, -2)], 1)]
-    ents += [*lantern('lantern-1', 6, 1), *lantern('lantern-2', -7, 2)]
-    ents += [*wick(), *effects(), gloom('gloom-1', 10, 5, 1), gloom('gloom-2', -9, -5, 3)]
+    ents += [e for n, (x, y) in enumerate(LAMPS, 1) for e in lantern(f'lantern-{n}', x, y)]
+    ents += [*wick(), *effects(), *[gloom(f'gloom-{n}', x, y, size) for n, ((x, y), size) in enumerate(zip(GLOOM, [1, 3]), 1)]]
     return standing_up(ents)
 
 
 def main():
+    prefabs()
     scenes.write('wilds.scene', 'The Wilds', wilds())
 
 

@@ -206,9 +206,11 @@ says what is now true.
    past the lantern's reach goes grey and soft (`night_vision`), so the night is
    truly hard to see into. Things stand on the ground with their shadows under
    them, and the seams between biomes fray (`soft_edges`) rather than following
-   the grid. Still to come: standing things
-   scattered by seed as billboards, residency so the land goes on, and the wilds
-   opened from the title. Wick walks it day-lit; a test walks him across biomes.
+   the grid. What grows is scattered by seed and ground (`sindri.scatter`): dead
+   trees, oaks, bushes, boulders and ground cover, made near Wick and unmade far
+   from him, and what is taken stays taken. Still to come: the land itself
+   generated as Wick walks (the ground is 120 squares across for now), and the
+   wilds opened from the title. Wick walks it day-lit; a test walks him across biomes.
 2. **The day and the dark.** A clock with dawn, day, dusk and night driving the
    ambient light and the sky; shortening days; the lantern burns fuel; the gloom
    come out at night and keep to the dark. A test survives one night by a fire.

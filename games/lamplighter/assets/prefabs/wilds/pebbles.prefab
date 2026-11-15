@@ -1,0 +1,37 @@
+{
+  "format_version": 1,
+  "metadata": {
+    "name": "pebbles"
+  },
+  "entities": [
+    {
+      "id": "pebbles",
+      "name": "pebbles",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#pebbles",
+          "layer": 4,
+          "billboard": true
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,146 @@
+{
+  "format_version": 1,
+  "metadata": {
+    "name": "oak-4"
+  },
+  "entities": [
+    {
+      "id": "oak-4",
+      "name": "oak-4",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          7.0,
+          7.0,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/village.png#oak-4",
+          "layer": 5,
+          "billboard": true
+        },
+        "sindri.shadow2d": {
+          "contact_size": [
+            1.35,
+            0.81
+          ],
+          "contact_offset": [
+            0,
+            0
+          ],
+          "contact_opacity": 0.7,
+          "cast": true,
+          "cast_opacity": 0.35,
+          "height": 0.0,
+          "max_length": 2.2
+        },
+        "sindri.physics2d.rigid_body": {
+          "kind": "static",
+          "pose": {
+            "position": [
+              0,
+              0
+            ],
+            "rotation": 0
+          },
+          "linear_velocity": [
+            0,
+            0
+          ],
+          "angular_velocity": 0,
+          "gravity_scale": 0,
+          "linear_damping": 0,
+          "angular_damping": 0,
+          "lock_rotation": true,
+          "continuous_collision": false
+        },
+        "sindri.physics2d.collider": {
+          "shape": {
+            "shape": "box",
+            "half_extents": [
+              0.0642857142857143,
+              0.04285714285714286
+            ]
+          },
+          "offset": [
+            0,
+            0.04285714285714286
+          ],
+          "rotation": 0,
+          "sensor": false,
+          "layers": {
+            "memberships": 1,
+            "filter": 4294967295
+          },
+          "friction": 0,
+          "restitution": 0
+        },
+        "sindri.light2d.occluder": {
+          "shape": "polygon",
+          "points": [
+            [
+              0.0642857142857143,
+              0.04285714285714286
+            ],
+            [
+              0.055714285714285716,
+              0.0642857142857143
+            ],
+            [
+              0.03214285714285715,
+              0.08
+            ],
+            [
+              0.0,
+              0.08571428571428572
+            ],
+            [
+              -0.03214285714285715,
+              0.08
+            ],
+            [
+              -0.055714285714285716,
+              0.0642857142857143
+            ],
+            [
+              -0.0642857142857143,
+              0.04285714285714286
+            ],
+            [
+              -0.055714285714285716,
+              0.02142857142857143
+            ],
+            [
+              -0.03214285714285715,
+              0.005714285714285714
+            ],
+            [
+              -0.0,
+              0.0
+            ],
+            [
+              0.03214285714285715,
+              0.005714285714285714
+            ],
+            [
+              0.055714285714285716,
+              0.02142857142857143
+            ]
+          ]
+        }
+      }
+    }
+  ]
+}

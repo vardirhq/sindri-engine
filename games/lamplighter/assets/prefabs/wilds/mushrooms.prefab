@@ -1,0 +1,51 @@
+{
+  "format_version": 1,
+  "metadata": {
+    "name": "mushrooms"
+  },
+  "entities": [
+    {
+      "id": "mushrooms",
+      "name": "mushrooms",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/decor.png#mushrooms",
+          "layer": 4,
+          "billboard": true
+        },
+        "sindri.light2d": {
+          "enabled": true,
+          "color": [
+            0.45,
+            0.85,
+            1.0,
+            1.0
+          ],
+          "intensity": 0.7,
+          "radius": 2.8,
+          "falloff": 1.6,
+          "height": 0.6,
+          "shadows": false
+        }
+      }
+    }
+  ]
+}
