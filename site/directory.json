@@ -146,7 +146,7 @@
       ],
       "about": [
         "Run and jump across a painted level, pick up the coins and reach the flag. Along the way: a plank ferry, one-way planks, a crate the wind pushes, a lantern on a tether and windmills on powered hinges.",
-        "The platformer is the side-view genre showcase, the game Lamplighter started as before it became a top-down adventure (see docs/lamplighter-plan.md). It is where Sindri's plain 2D path is proven: tilemap collision, gravity, collider authoring, camera follow and the 2D Scene view. It is also the project to copy when you start a side-view game of your own."
+        "The platformer is the side-view genre showcase, the game Lamplighter started as before it became a different game (see docs/lamplighter-plan.md). It is where Sindri's plain 2D path is proven: tilemap collision, gravity, collider authoring, camera follow and the 2D Scene view. It is also the project to copy when you start a side-view game of your own."
       ],
       "proves": [
         "Tilemap collision and one-way platforms",
@@ -185,7 +185,7 @@
     "title": "Lamplighter",
     "path": "examples/lamplighter/",
     "source": "games/lamplighter",
-    "description": "A top-down adventure in a darkening world: walk with a lantern and light the way.",
+    "description": "A survival game in a darkening world, taking shape: walk with a lantern and light the way.",
     "tags": [
       "2d",
       "lighting",
@@ -201,8 +201,8 @@
         "touch"
       ],
       "about": [
-        "Wick walks a world the fading sun has left dark, carrying a lantern and lighting the lanterns along the way. This is the first stage of a top-down action-adventure with a sword and a lantern (see docs/lamplighter-plan.md).",
-        "Lamplighter is the top-down genre showcase. It proves the walk, the carried 2D light with shadows, and a camera that follows. There is no game code: it is scenes and Decay scripts."
+        "Wick walks a world the fading sun has left dark, carrying a lantern and lighting the lanterns along the way. Lamplighter is becoming a survival game, pixel sprites standing in a generated 3D world where the night is deadly and the lantern burns what Wick finds (see docs/lamplighter-plan.md).",
+        "Lamplighter is a game rather than a showcase. What is playable today proves the walk, the carried 2D light with shadows, and a camera that follows. There is no game code: it is scenes and Decay scripts."
       ],
       "proves": [
         "A top-down walk with no gravity",

@@ -1,167 +1,133 @@
 # Lamplighter
 
-A plan for **Lamplighter**, a top-down action-adventure in the spirit of the
-classic 2D Zelda games, about a wandering lamplighter bringing light to a world
-whose sun is fading. This document is the design and the order of work; it
-moves with the game, and a stage is checked off here when its acceptance
+A plan for **Lamplighter**, a survival game about a wandering lamplighter keeping
+a light alive in a world whose sun is fading: 2D pixel art standing in a 3D
+world, a generated land of biomes, days that end in a deadly dark, and a lantern
+that burns what Wick finds. This document is the design and the order of work;
+it moves with the game, and a stage is checked off here when its acceptance
 criteria are met and its tests pass.
 
 ## What changed
 
-Lamplighter began as a plan to turn the platformer showcase into a short side-view
-game. That direction is retired. The platformer stays as it was, in
-`games/platformer` (its levels, its physics level pieces, its tests, and the title,
-level select, settings, pause and saved-progress shell built around it), as the
-proof of Sindri's plain 2D platformer path. **Lamplighter is a new project in
-`games/lamplighter`**, a top-down action-adventure. What the platformer work found
-carries over: the dusk palette, the autotiled-ground and baked-sprite art
-pipeline, `Scene.restart`, and the way a shell of scenes and `Save` values holds
-a game together.
+Lamplighter was a top-down action-adventure in the spirit of the classic 2D
+Zelda games: a hand-made field and village, lamp posts to light and a beacon to
+restore. It becomes a **survival game**, in the broad family of Don't Starve but
+its own game: what that genre and Lamplighter share is that the dark is the
+danger and light is what keeps you alive. Lamplighter never copies another game's
+characters, creatures, items, look or rules; where an idea comes from the genre
+it is reworked into Wick's world.
+
+What carries over: Wick, his lantern and his sword, the gloom and the brute,
+the lamp posts, the villagers and their houses, the pixel art and its pipeline,
+2D lighting as the core mechanic, and every system the field and the village
+proved. The field (`world.scene`), the village and the houses stay playable while
+the new world is built; the village becomes a landmark placed in the generated
+land, and the field is retired once the wilds can be played from the title.
 
 ## The game
 
-The sun no longer gives enough light to reach much of the world. Settlements
-depend on lanterns and beacons to keep paths visible and give people somewhere
-safe. Beyond those pools of light the land is nearly pitch black. **Wick** is a
-wandering lamplighter, part adventurer and part wizard-like drifter, who carries
-a sword and a lantern between isolated villages, forests, caves and forgotten
-ruins, bringing light to places left in darkness.
+The sun no longer gives enough light to reach much of the world. Each day is a
+little shorter than the last. Settlements depend on lanterns and beacons to keep
+paths visible and give people somewhere safe; beyond those pools of light the
+land is nearly pitch black, and the gloom live in it. **Wick** is a wandering
+lamplighter, part adventurer and part wizard-like drifter, who carries a sword
+and a lantern through the wilds between the last lit places.
 
 The tone is mysterious and sometimes unsettling, but not without warmth: each
-lantern Wick lights is a small refuge, and each person helped makes the world a
+light Wick keeps is a small refuge, and each person helped makes the world a
 little less empty. Why the sun is fading is for the player to discover. One
 possible ending is bittersweet: the dying sun erupts in a last display of light
 and colour before it destroys the world, which gives the journey its meaning
-even if the world cannot be saved. The light Wick brings matters to the people
-living in it now.
+even if the world cannot be saved.
 
 ### How it plays
 
-Exploration, sword combat, puzzles and light-based abilities.
-
-- **Explore** an interconnected world of villages, woods, caves and ruins.
-  Darkness hides paths, enemies and secrets until they are lit.
-- **Fight** creatures with Wick's sword. Light may reveal enemies or change how
-  they behave.
-- **Bring light.** Carry a lantern, light fixed lanterns and restore larger
-  beacons. These make lasting pools of light and make an area easier to navigate.
-- **Solve puzzles** by using light to reveal clues, trigger mechanisms and reach
-  places that first seem inaccessible.
-- **Grow** by finding abilities that widen what the lantern can do and open
-  routes through places already explored.
-
-The sword and the lantern are complementary: Wick can defend himself, but light
-is the defining tool of the adventure.
-
-### Lantern abilities (open)
-
-Possibilities: a focused beam forward; a temporary flame left behind; light
-reflected around corners; revealing hidden markings, paths or objects. Which of
-these, and in what order they are found, is decided as the world is designed.
+- **Day, dusk and night.** By day Wick explores and gathers. Dusk warns. At night
+  the land is dark beyond what Wick's lantern, a fire or a lit lamp reaches, and
+  the gloom come for anything outside a light. The days shorten as the sun fades,
+  so the nights grow: the pressure is the light running out, not a calendar.
+- **Fuel for light.** The lantern burns. Oil, wax and resin keep it lit, and a
+  fire burns wood. A light left unfed gutters and goes out. Light is a resource
+  Wick manages, not a switch, and a gloom's pounce still scorches the lantern
+  (`Game.scorch`, as now).
+- **Gather and craft.** Wick picks up what the land offers (deadwood, stone,
+  resin, wax from wild hives, glowcaps, reeds) and makes things from it: torches,
+  a campfire, a lamp post that lights a place for good, tools, traps and better
+  lanterns. An inventory and a crafting menu, both on screen UI.
+- **Survival meters.** Health, hunger, and **courage**, which drains in the dark
+  and near the gloom and returns by a fire, in company and with food. Low courage
+  makes the dark worse: the gloom bolder, the edges of the screen closing in.
+  Food is foraged, hunted and cooked over a fire.
+- **Places to keep.** Lamp posts Wick builds and lights make lasting safe ground;
+  villages are lit places with people to trade with and help. Keeping a place lit
+  through the night is the game's long-term goal, and the beacon at a village's
+  heart is still its first.
+- **Fight.** The sword is for when light is not enough. The gloom flee strong
+  light and burn out in it; the brute does not care about light and must be
+  fought.
 
 ### Open design choices
 
-- Whether Wick can **put down the carried lantern and pick it up again**. It
-  would make puzzles that need a light source left behind, but it changes
-  exploration and combat. Decided at stage 3, by playing both.
+- How death works: back to the last lit lamp with something lost, or the run ends
+  and a new world is generated. Decided by playing both at stage 4.
+- Whether Wick can put the lantern down to leave light behind (a puzzle and
+  survival tool, but it changes the night's danger).
 - The cause of the fading sun, and whether the ending is the bittersweet one.
-- How hard it is. The working assumption is gentle: the point is the light.
+- How hard it is. The working assumption is fair rather than punishing: the dark
+  is dangerous, never arbitrary.
 
-### The first area
+## How it looks: 2D in 3D space
 
-A dark village and the woods around it. Wick arrives to find the village beacon
-out and its remaining people sheltering indoors. With only the carried lantern,
-the player learns to move, explore, use the sword and light a fixed lantern.
-Restoring the beacon is the first goal. Lighting it reveals more of the village
-and the paths into the wider world: the first accomplishment is making a place
-safer, not defeating an enemy.
+The world is a 3D space seen from a tilted perspective camera behind and above
+Wick. The ground lies flat; everything that stands (Wick, the gloom, trees, rocks,
+lamp posts, houses) is a **pixel sprite standing upright as a billboard**, wearing
+the camera's rotation so every texel stays square and crisp however the camera
+leans. Near things are larger than far ones and the horizon recedes, which is the
+depth a flat top-down view lacks; the art stays pixel art at 16 pixels to a unit.
 
-## How it looks
+It is built on what Lamplighter already uses, which is why it works: the world
+stays on the plane the game plays on, so 2D physics, Decay, the 2D lights,
+`Lighting.level` and `Lighting.visible` are unchanged; only the camera tilts and
+the standing sprites set `billboard`. The darkness and the warm pools of light are
+still the 2D lighting; the lit lantern is still the one warm thing on screen.
 
-Top-down pixel art with a slightly elevated view, as in the classic 2D Zelda
-games. The world is drawn in **readable, relatively neutral colours**; the 2D
-lighting system makes the darkness and the warm pools of lantern light, so a lit
-lantern is the one warm thing on screen. The pixel grid is 16 pixels to a tile on
-a 320 by 180 logical screen (camera `vertical_size` 11.25), which is exactly three
-screen pixels to an art pixel at 960 by 540.
+**The prototype.** A scene built from the field's own pieces showed it working
+with no engine change: a `natural_terrain` voxel world drawn in map view (meadow,
+bog and heath, a river, sand and rock) under a perspective camera tilted 38° from
+straight down, with Wick, two lamp posts, dead trees, boulders and gloom as
+billboards, lit at night by his lantern. The voxel world's map view lies on the
+same plane, is lit by the same 2D lights, and is generated from one seed.
 
-- **Wick** keeps his existing look: a blue hood and a red scarf, with a warm lantern
-  that is not part of his sprite (see below).
-  The top-down version needs directional sprites (idle, walk, sword swing, hurt)
-  and the sword. Baked from a model with the Sprite Baker in top-down view with
-  each animation frame a variant of one sheet, or drawn, whichever reads better;
-  decided at stage 2.
-- **Environment art** begins with a grass-to-dirt tileset for the village
-  clearing and woodland paths (a `blob` terrain, as the platformer's ground is),
-  then trees, walls, buildings and lanterns. Drawn by deterministic scripts, with
-  normal maps read back from the tiles so light rakes across them.
-- **Type** is a font already in the repository under an open licence.
-- **Sound.** Effects and music are made in the Sound Lab and sent to the project,
-  each source beside its output so it reopens.
+### What the prototype showed is missing
 
-## What the engine has, and what to verify
+- **Lamplighter's own ground.** The prototype wore the engine's built-in blocks.
+  The world needs a block set drawn in Lamplighter's palette (grass, earth, moss,
+  bog, heath, sand, stone, water), at 16 pixels to a unit, with normal maps.
+- **Soft biome edges.** A map's biome edges are hard squares (`docs/voxel-terrain.md`,
+  "Not yet"); the field's ground uses `corners` terrains for smooth transitions.
+  The map view needs edge blending or autotiling between blocks.
+- **What stands on the ground.** The generator places voxel trees, which a map
+  draws as a top face. Lamplighter needs the land's standing things (trees, rocks,
+  bushes, hives, reeds) as billboard sprites placed by the same seed and biome,
+  and only near the camera. Engine work, general: a scatter of prefabs or sprites
+  over a voxel world, deterministic per section, spawned and despawned with the
+  view.
+- **Culling under perspective.** Extraction leaves out what is off screen only
+  under an orthographic camera (`docs/scene-extraction.md`). A large world under a
+  tilted perspective camera needs the same, for sprites, cast shadows and the
+  map's sections.
+- **A world that does not end.** Residency (generating and dropping the land as
+  Wick walks), and saving a generated world as its seed plus its edits.
 
-Present: 2D lighting (ambient, `sindri.light2d`, occluders with shadows, additive
-halos, normal maps), `blob` terrains and the brush that paints them, baked
-top-down sprite sheets, sprite animation clips, the 2D character controller and
-physics queries, camera follow and bounds, `Scene.go` and `Scene.restart` (a
-scene left is switched off, so going back finds it as it was), `Save`, `Audio`
-buses, the Weave and screen-UI components. Each stage verifies before it relies
-on one, and a missing capability is added generally, with a row in
-`docs/parity.md`.
+## The world
 
-To verify first, none assumed:
+One generated land per game, from a seed: biomes chosen for the dark (meadow,
+deadwood, bog, heath, stone barrens, old orchards), rivers and lakes, and lit
+places set into it by hand-made rules: villages (the existing village and houses
+as the first), ruined lamp posts and a beacon to restore. What Wick builds and
+what he changes is saved as edits over the seed.
 
-- **A top-down controller:** the 2D character controller and gravity set to zero,
-  with four- or eight-way movement, against tilemap and collider walls.
-- **Darkness as the mechanic:** a near-black ambient with a carried light that
-  follows Wick, and fixed lights that persist. How many lights a screen can hold.
-- **Light as a game rule:** asking whether an enemy or an object is currently lit
-  by a 2D light, so light can reveal enemies, change their behaviour and trigger
-  mechanisms. If the engine cannot answer that, it is the first gap, and it is
-  closed generally.
-- **Sword hits:** swing hitboxes through physics overlap queries, with knockback
-  and hurt states.
-- **A world of connected areas:** how areas are split into scenes, how Wick moves
-  between them and how what he has done in each persists.
-- **Integer-scale pixel camera:** a known gap (`docs/parity.md`): the engine does
-  not keep a pixel game's scale to whole multiples of the window.
-
-## Stages
-
-Each stage is one or more pull requests that leave `main` working: the project
-opens, its scripts compile, its scripted run reaches its goal, and the
-documentation says what is now true.
-
-0. **Direction.** This plan, the `AGENTS.md` amendment, and the platformer back in
-   `games/platformer`. *Done with this change.*
-1. **Seed.** `games/lamplighter` as a new project with its crate, Pages route,
-   directory entry and CI scope: a dark scene, Wick walking top-down on a placeholder
-   floor with the camera following and a carried lantern light, and the title
-   and pause shell carried over from the platformer. *Done, and went further:* the
-   field is a grass-and-dirt ground, Wick is the Pixel Lab character with a walk,
-   a sword and a gloom to swing it at, and lamp posts he lights, with trees and
-   boulders that shadow the carried light; `tests/` plays the walk, the sword, the
-   three lamps and the ground. The gloom are Pixel Lab creatures, the trees and
-   boulders come in several shapes, and glowing mushrooms, night flowers, tufts and
-   pebbles are scattered over the grass.
-2. **Art foundation.** The grass-to-dirt tileset and the village-and-woods tile
-   sets, Wick's directional sprites and sword, trees, walls, buildings and
-   lanterns, with normal maps, and a test that opens the art.
-3. **Movement, lantern and light.** The top-down controller, the carried lantern,
-   fixed lanterns Wick lights by interacting (a lasting pool of light and a place
-   to return to), beacons, and the drop-and-pick-up-the-lantern decision.
-4. **Sword combat.** The swing, one or two creature kinds that react to light,
-   health, hurt, knockback, and defeat sending Wick back to the last lit lantern.
-5. **The first area, end to end.** The dark village and woods, villagers to speak
-   to, the beacon to restore, saved progress, the first music and effects, and a
-   scripted run that plays it through.
-6. **Abilities and the wider world.** The lantern abilities, the puzzles that use
-   them, and the villages, woods, caves and ruins joined into one world with routes
-   opened by what Wick has found.
-7. **The story and polish.** The reason for the fading sun, the ending, the
-   screenshots and site entry, and `docs/parity.md` and the capability pages
-   brought level with what is played.
+The houses keep their interior scenes, entered through their doors as now.
 
 ## What the first Pixel Lab runs found
 
@@ -200,16 +166,68 @@ What came back from the real service, which the client's mock did not show:
   a standing object from its base, so its lit side is not darkened by its own
   occluder, is still to build.
 
+## What the engine has, and what to verify
+
+Present and proven by the field and the village: 2D lighting with shadows,
+normal maps, cast and contact shadows, `Lighting.level` and `Lighting.visible`,
+named parts, the 2D character controller, physics with named collider pieces,
+camera follow and shake, sprite animation, particles, screen UI, `Scene.go`,
+`Save`, `Audio`. Present and proven by Low Tide and Voxel Lab: `natural_terrain`
+voxel worlds, map view, `Grid.surface` and `Grid.height`, voxel edits. Present but
+not yet used by a game in this way: billboard sprites under a perspective camera.
+
+To verify before relying on it:
+
+- **Billboards lit and shadowed correctly** under the tilt: a standing sprite lit
+  from where it stands, its contact shadow on the ground, its cast shadow laid
+  away from the light, at every camera lean the game uses.
+- **Draw order of billboards** against each other and against the ground, from
+  the camera's distance.
+- **Screen UI for inventory and crafting** on a phone and a desktop: tapping and
+  dragging items, and the gamepad.
+- **Many lights at night:** fires, lamps, glowcaps and the lantern together within
+  the 16-light frame, chosen by what the view shows.
+
+## Stages
+
+Each stage is one or more pull requests that leave `main` working: the project
+opens, its scripts compile, its scripted run reaches its goal, and this document
+says what is now true.
+
+0. **Direction.** This plan and the `AGENTS.md` description. *Done with this change.*
+1. **The wilds.** A generated world scene opened from the title: Lamplighter's
+   block set, soft biome edges, standing things scattered by seed as billboards,
+   the tilted camera following Wick, culling under perspective, and residency so
+   the land goes on. Wick walks it day-lit; a test walks him across biomes.
+2. **The day and the dark.** A clock with dawn, day, dusk and night driving the
+   ambient light and the sky; shortening days; the lantern burns fuel; the gloom
+   come out at night and keep to the dark. A test survives one night by a fire.
+3. **Gather and craft.** Things to pick up, an inventory, a crafting menu, and
+   the first recipes: torch, campfire, lamp post, lantern oil. A test gathers and
+   builds a campfire before dusk.
+4. **Survive.** Health, hunger and courage; food, cooking and the courage effects;
+   death and what it costs. A test lives through three days.
+5. **Places.** The village set into the world with its houses, villagers to help
+   and trade with, ruined lamp posts and the beacon. Saved worlds.
+6. **The story and polish.** The fading sun, the ending, music and sound, the
+   screenshots and site entry, and `docs/parity.md` and the capability pages
+   brought level with what is played.
+
 ## Checks that hold throughout
 
-- Every area has a scripted run that plays it, and one test plays the first area
-  from the title to its beacon. An area that cannot be completed is a failing test.
+- Every stage has a scripted run that plays it; one test plays from the title
+  through the first night. A goal that cannot be reached is a failing test.
 - `scripts/preflight.py` and the typed Decay preflight on every changed script;
   no game rules in Rust; the project has no `src` beyond its test harness.
 - The sprite sheets and tile art are reproducible: re-running the art scripts and
   the baker changes nothing, and CI says so.
+- A world is the same for the same seed on every machine, and a test says so.
 - A capability gap is closed in the engine, generally, in the stage that finds it,
   with its parity row and tests.
+- Nothing is copied from another game: names, characters, creatures, items, art
+  and rules are Lamplighter's own.
+
+## Wick and the gloom, as built
 
 The lantern is its own sprite (`wick-lantern`, drawn by `art/lantern.py`), not part of
 Wick's: his art has empty hands in all four directions, and `wick.decay` floats the

@@ -1,6 +1,6 @@
 [package]
 name = "lamplighter"
-description = "The top-down action-adventure, and the harness that plays it"
+description = "The survival game, and the harness that plays it"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true

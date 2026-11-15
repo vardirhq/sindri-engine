@@ -76,23 +76,24 @@ written against the vector version it replaced.
 **The platformer is the first genre showcase.** A side-view game in
 `games/platformer`: Wick lights lanterns along Dusk Road, with a title, level
 select, settings, pause and saved progress around it. It started as the game
-Lamplighter was going to be, before that became a top-down adventure, and it
+Lamplighter was going to be, before that became a different game, and it
 stays as the proof of the plain 2D platformer path: tilemap collision, scene
 gravity, collider authoring, the character controller, one-way planks, joints,
 springs and hinges as level pieces, 2D lights, camera follow and bounds, scene
 changes and saves. It is not growing into a campaign; it finds gaps by being a
 platformer rather than a recreation, which are closed generally.
 
-**Lamplighter is the top-down action-adventure, and a game rather than a
-showcase.** Wick, a wandering lamplighter with a sword and a lantern, brings
-light to a darkening world of villages, woods, caves and ruins, in the spirit
-of the classic 2D Zelda games, in `games/lamplighter`. `docs/lamplighter-plan.md`
-is its design and the order of work. It is where the top-down 2D path is proven
-at the scale of a real game: 2D lighting as the game's core mechanic, sword
-combat, light-based puzzles and abilities, an interconnected world and saves.
-Like Causeway it is held to the standard of a game somebody would choose to
-play, and gaps it finds are closed in the engine generally, never shaped around
-it.
+**Lamplighter is the survival game, and a game rather than a showcase.**
+Wick, a wandering lamplighter with a sword and a lantern, keeps a light alive in
+a generated land whose sun is fading: days that end in a deadly dark, a lantern
+that burns what he gathers, things to craft, and pixel sprites standing in a 3D
+world under a tilted camera, in `games/lamplighter`. It belongs to the broad
+family of Don't Starve without copying it. `docs/lamplighter-plan.md` is its
+design and the order of work. It is where the 2D-in-3D path is proven at the
+scale of a real game: 2D lighting as the core mechanic, generated voxel worlds
+with billboard sprites, survival systems in Decay and screen UI, and saves. Like
+Causeway it is held to the standard of a game somebody would choose to play, and
+gaps it finds are closed in the engine generally, never shaped around it.
 
 **Scorchball is the local-multiplayer genre showcase.** A top-down couch
 football game for two to four pads, in `games/scorchball`. It is where playing
@@ -134,8 +135,8 @@ These documents govern the work:
 - `docs/scripting.md` and `decay/LANGUAGE.md` — scripting contracts.
 - `docs/decay-agent-guide.md` — mandatory preflight and runtime-contract checklist
   before changing Decay scripts or their host APIs.
-- `docs/lamplighter-plan.md` — Lamplighter, the top-down action-adventure: the
-  game, its world, its art and the stages of work. Read it before changing
+- `docs/lamplighter-plan.md` — Lamplighter, the survival game: the game, its
+  world, its 2D-in-3D look and the stages of work. Read it before changing
   `games/lamplighter`.
 - `docs/decay-lsp-modernization.md` — mandatory checklist for Decay language-server,
   editor tooling, batch preflight, structured diagnostics, and agent-tooling work.
