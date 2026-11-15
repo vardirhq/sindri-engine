@@ -42,6 +42,7 @@ impl SceneExtractor {
             // one cell escape the map's authored world layer/depth and sort as
             // though it were a separate world entity.
             let map_distance = camera_distance(camera.view, world_transform.w_axis.truncate());
+            let culling = super::frustum::culling_view(camera.view_projection);
 
             // Zero is the legacy/default authored value. When the sheet knows
             // how far its art hangs below a logical tile, let the asset say it
@@ -78,6 +79,11 @@ impl SceneExtractor {
                     Mat4::from_translation(Vec3::new(offset_x, offset_y + draw_offset_y, 0.0))
                         * Mat4::from_scale(Vec3::new(draw_size[0], draw_size[1], 1.0));
                 let model = world_transform * local;
+                // A cell off screen is left out here rather than pushed and
+                // dropped with the rest: a map is most of a level's sprites.
+                if culling.is_some_and(|view| !super::frustum::quad_in_view(model, view)) {
+                    continue;
+                }
 
                 // The map's layer and world distance place the tilemap as one
                 // object in the scene. The submission index then gives cells a

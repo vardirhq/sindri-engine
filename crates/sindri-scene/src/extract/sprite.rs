@@ -261,6 +261,13 @@ impl SceneExtractor {
                     camera.view,
                 ));
             }
+            // Its own picture is left out off screen; a shadow it casts was
+            // pushed above and is judged by where the shadow falls.
+            if super::frustum::culling_view(camera.view_projection)
+                .is_some_and(|view| !super::frustum::quad_in_view(model, view))
+            {
+                continue;
+            }
             for (model, uv) in pieces(model, rect, slicing, sprite.border_scale) {
                 batches.push(SpriteDraw {
                     mask,
@@ -320,6 +327,18 @@ impl SceneExtractor {
         cameras: &ResolvedCameras,
         frame: &mut ExtractedFrame,
     ) -> Result<(), SceneExtractError> {
+        // What lies wholly outside the view is left out: a map larger than
+        // the screen would otherwise hand the renderer every tile, tree and
+        // shadow in it each frame, to be clipped one pixel at a time.
+        if let Some(view) = cameras
+            .world
+            .and_then(|camera| super::frustum::culling_view(camera.view_projection))
+        {
+            batches.retain(|draw| {
+                draw.space != DrawSpace::World
+                    || super::frustum::quad_in_view(draw.sprite.model(), view)
+            });
+        }
         batches.sort_by_key(|draw| (draw.space, draw.order));
         let mut draws = batches.into_iter().peekable();
         while let Some(first) = draws.next() {
