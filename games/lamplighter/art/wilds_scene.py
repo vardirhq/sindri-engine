@@ -11,7 +11,11 @@ physics and scripts are the field's, unchanged.
 
 What stands is placed by hand around the start for now; scattering it by seed
 and biome across the land is the next step of stage 1."""
+import json
 import math
+from pathlib import Path
+
+from PIL import Image
 
 import scenes
 from scenes import (at, effects, entity, environment, gloom, input_actions, lantern, prop, wick)
@@ -71,12 +75,74 @@ def seen_in_the_dark():
     return env
 
 
+TEXTURES = Path(__file__).resolve().parent.parent / 'assets' / 'textures'
+HAND = 0.95     # how high Wick carries his lantern
+ROUNDER = 0.6   # a contact shadow's depth for its width: the camera foreshortens it already
+GROUNDED = 0.7  # how dark a contact shadow is: what stands has to be seen to touch the ground
+SPREAD = 1.5    # how much wider than the field's: its far half is hidden behind what stands on it
+
+
+def gap_below(reference):
+    """How much of a picture's height is empty below what is drawn in it, so a
+    picture standing on its foot can be sunk until its feet touch the ground."""
+    path, _, name = reference.partition('#')
+    image = Image.open(TEXTURES.parent / path).convert('RGBA')
+    sheet_file = (TEXTURES.parent / path).with_suffix('.sheet')
+    sheet = json.loads(sheet_file.read_text())['grid'] if sheet_file.exists() else \
+        {'columns': 1, 'rows': 1, 'names': ['']}
+    width, height = image.width // sheet['columns'], image.height // sheet['rows']
+    index = sheet['names'].index(name) if name else 0
+    x, y = (index % sheet['columns']) * width, (index // sheet['columns']) * height
+    alpha = image.crop((x, y, x + width, y + height)).getchannel('A')
+    bottom = max(row for row in range(height) if any(alpha.getpixel((c, row)) for c in range(width)))
+    return (height - 1 - bottom) / height
+
+
 def standing_up(entities):
-    """Every sprite that stands in the world faces the camera, a picture on its feet."""
+    """The field's pictures, stood up in 3D space.
+
+    The field is a flat picture, and says height and nearness the way one does:
+    what is nearer is drawn over what is further by a depth that grows down the
+    screen, and what is high (a lamp post's flame, the lantern in Wick's hand) is
+    placed a little up the screen. Standing up, the camera's distance orders what
+    is drawn and height is height: everything stands on the ground, a flame is
+    up its post, and the lantern is at Wick's hand. Every picture faces the
+    camera, sunk until its feet touch the ground, and its contact shadow is
+    rounder, since the camera now foreshortens it."""
+    by_id = {e['id']: e for e in entities}
     for e in entities:
-        sprite = e.get('components', {}).get('sindri.sprite')
+        components = e.get('components', {})
+        place = e.get('transform_3d')
+        sprite = components.get('sindri.sprite')
         if sprite is not None and sprite.get('layer', 0) >= 4:
             sprite['billboard'] = True
+            gap = gap_below(sprite['texture'])
+            # Only what stands on the ground: the lantern hangs from Wick's hand.
+            if gap > 0 and e.get('parent') is None:
+                size = sprite.get('size', [1, 1])
+                sprite['offset'] = [0.0, round(-gap * size[1], 4)]
+        shadow = components.get('sindri.shadow2d')
+        if shadow is not None:
+            width = round(shadow['contact_size'][0] * SPREAD, 3)
+            shadow['contact_size'] = [width, round(width * ROUNDER, 3)]
+            shadow['contact_opacity'] = max(shadow['contact_opacity'], GROUNDED)
+        script = components.get('sindri.script')
+        if script is not None and script['script'] in ('Wick', 'Gloom'):
+            script.setdefault('properties', {})['upright'] = True
+        if place is None or e['id'] == 'camera' or e['id'] == 'ground':
+            continue
+        if e.get('parent') == 'wick':
+            place['position'] = [place['position'][0], 0.0, HAND]
+            continue
+        if e.get('parent') is None:
+            place['position'][2] = 0.0
+        light = components.get('sindri.light2d')
+        post = by_id.get(e['id'].removesuffix('-light'))
+        if light is not None and post is not e and post is not None:
+            # A lamp post's flame: at the post, up it, rather than up the screen.
+            flame = place['position'][1] - post['transform_3d']['position'][1]
+            place['position'][1] = post['transform_3d']['position'][1]
+            light['height'] = round(flame, 3)
     return entities
 
 

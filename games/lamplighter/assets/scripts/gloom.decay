@@ -28,6 +28,9 @@ script Gloom {
     @export let health: number = 3.0;
     // How hard a blow throws it back, and how long it stays squashed by one.
     @export let knockback: number = 9.0;
+    // True where the gloom stands up in 3D space: it keeps to the ground, and
+    // the camera's distance orders what is drawn.
+    @export let upright: bool = false;
     @export let flinch_for: number = 0.12;
     // How little light it is bold in, how much light thins it, how fast it
     // creeps through the dark, and how far off it notices Wick.
@@ -96,8 +99,13 @@ script Gloom {
     }
 
     fn update(dt: number) {
-        // Drawn in front of what stands further up the screen, behind what is below.
-        this.transform.position.z = 0.5 - this.transform.world_position.y * 0.01;
+        // Drawn in front of what stands further up the screen, behind what is
+        // below; standing up, it keeps to the ground instead.
+        if this.upright {
+            this.transform.position.z = 0.0;
+        } else {
+            this.transform.position.z = 0.5 - this.transform.world_position.y * 0.01;
+        }
         this.age += dt;
         this.in_state += dt;
         this.rest = max(0.0, this.rest - dt);

@@ -72,7 +72,10 @@ impl LightField2d {
             }
             let mut amount = (1.0 - distance / light.radius).max(0.0).powf(light.falloff);
             if let Some(cone) = &light.cone {
-                amount *= cone.factor([point[0] - light.position[0], point[1] - light.position[1]]);
+                amount *= cone.on_the_ground(
+                    [point[0] - light.position[0], point[1] - light.position[1]],
+                    light.height,
+                );
             }
             if amount <= 0.0 || (light.shadow.is_some() && !self.visible(light.position, point)) {
                 continue;

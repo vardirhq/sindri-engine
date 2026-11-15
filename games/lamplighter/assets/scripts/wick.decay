@@ -31,6 +31,11 @@ script Wick {
     @export let orbit_lead: number = 60.0;
     // False in a room Wick walks into from the village: what the run has counted stays as it is.
     @export let fresh: bool = true;
+    // True where Wick stands up in 3D space (the wilds): the camera's distance
+    // orders what is drawn, so he keeps to the ground rather than stepping
+    // nearer the screen as he walks down it, and the lantern circles him at the
+    // height of his hands rather than a little up the screen.
+    @export let upright: bool = false;
 
     var vx: number = 0.0;
     var vy: number = 0.0;
@@ -101,7 +106,7 @@ script Wick {
             this.vx -= this.vx * min(1.0, dt * 9.0);
             this.vy -= this.vy * min(1.0, dt * 9.0);
             Physics.set_velocity(this.entity, this.vx, this.vy);
-            this.transform.position.z = 0.5 - this.transform.world_position.y * 0.01;
+            keep_in_depth();
             show(false);
             return;
         }
@@ -152,9 +157,7 @@ script Wick {
         this.vx += (x * pace * this.speed - this.vx) * blend;
         this.vy += (y * pace * this.speed - this.vy) * blend;
         Physics.set_velocity(this.entity, this.vx, this.vy);
-        // Further down the screen is nearer, so Wick walks behind a tree and in
-        // front of the stone below it.
-        this.transform.position.z = 0.5 - this.transform.world_position.y * 0.01;
+        keep_in_depth();
 
         show(length > 0.1);
 
@@ -201,15 +204,38 @@ script Wick {
         let round = this.orbit * 3.14159265 / 180.0;
         let near = sin(round);
         this.lantern.transform.position.x = this.orbit_out * cos(round);
+        if this.upright {
+            // A real circle round him on the ground's plane, at hand height: the
+            // camera shows its near half in front of him and its far half behind.
+            this.lantern.transform.position.y = this.orbit_out * near;
+            this.lantern.transform.position.z = 0.95 + 0.05 * sin(this.age * 3.0);
+        } else {
+            tilted_lantern(near);
+        }
+        // A scorched lantern burns dull.
+        let glow = 1.0 - 0.45 * Game.scorch;
+        this.lantern_art.sprite.tint = Color(glow, glow, glow, 1.0);
+    }
+
+    // The lantern's circle as a flat picture shows it: up the screen is further
+    // away, so the far half rides higher and is drawn behind him.
+    fn tilted_lantern(near: number) {
         this.lantern.transform.position.y = 0.95 + this.orbit_tilt * near + 0.05 * sin(this.age * 3.0);
         if near < 0.1 {
             this.lantern.transform.position.z = 0.003;
         } else {
             this.lantern.transform.position.z = -0.003;
         }
-        // A scorched lantern burns dull.
-        let glow = 1.0 - 0.45 * Game.scorch;
-        this.lantern_art.sprite.tint = Color(glow, glow, glow, 1.0);
+    }
+
+    // Further down the screen is nearer, so on a flat picture Wick walks behind a
+    // tree and in front of the stone below it. Standing up, he keeps to the ground.
+    fn keep_in_depth() {
+        if this.upright {
+            this.transform.position.z = 0.0;
+        } else {
+            this.transform.position.z = 0.5 - this.transform.world_position.y * 0.01;
+        }
     }
 
     // After a pounce lands Wick flashes red and then blinks while the grace lasts, so it

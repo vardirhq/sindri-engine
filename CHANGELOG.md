@@ -2,6 +2,10 @@
 
 # Changelog
 
+- Things in Lamplighter's wilds stand on the ground: the flat field's tricks (a depth that grows down the screen, height drawn as a step up the screen) are undone there, so Wick, the glooms, trees and lamp posts stand at ground level with their feet on it, a lamp post's flame is up its post, and Wick carries his lantern at his hands, circling him. Contact shadows are rounder, wider and darker, so what stands is seen to touch the ground. Wick's and the gloom's scripts take an `upright` property for this.
+
+- A 2D spot light held above the ground spills light all round its foot, out to about its height, so its beam meets the ground in a pool rather than a sharp point (`LightCone2d::on_the_ground`). The shader, the cast shadows and the light field a script reads all agree.
+
 - See the world through a lens: `sindri.environment.depth_of_field` keeps a band of the screen in focus and softens the picture above and below it, the tilt-shift look of a small world seen from above, and `night_vision` greys and blurs whatever is dark, as an eye sees at night, while lit places stay sharp and coloured. Lamplighter's wilds use both, under a darker night.
 
 - Leave out what a perspective camera cannot see, too: world sprites (billboards included), tilemap cells and cast shadows off screen are culled under a perspective camera as under an orthographic one, for 2D sprites standing in a 3D world.

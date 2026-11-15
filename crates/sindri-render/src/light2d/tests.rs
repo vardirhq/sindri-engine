@@ -364,3 +364,29 @@ fn what_is_out_of_sight_is_dimmed_in_the_light_that_reaches_it() {
         "{unseen} against {open}"
     );
 }
+
+/// A beam held above the ground spills all round its foot, out to about its
+/// height, so it meets the ground in a pool rather than a sharp point; past that
+/// it is the beam alone, and a light on the ground is unchanged.
+#[test]
+fn a_raised_beam_spills_round_its_foot() {
+    let beam = LightCone2d::new(0.0, 60.0, 0.0);
+    let behind = [-0.2, 0.0];
+    assert!(beam.factor(behind) < 1.0e-6, "behind the beam is dark");
+    assert!(
+        beam.on_the_ground(behind, 1.0) > 0.8,
+        "but under a raised light it is lit"
+    );
+    assert!(
+        beam.on_the_ground([-3.0, 0.0], 1.0) < 1.0e-6,
+        "further than its height behind, it is dark again"
+    );
+    assert!(
+        beam.on_the_ground(behind, 0.0) < 1.0e-6,
+        "a light on the ground spills nothing"
+    );
+    assert!(
+        (beam.on_the_ground([3.0, 0.0], 1.0) - 1.0).abs() < 1.0e-6,
+        "in the beam it is the beam"
+    );
+}

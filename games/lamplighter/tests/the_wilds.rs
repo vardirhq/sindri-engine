@@ -51,6 +51,39 @@ fn wick_walks_the_wilds_and_the_tilted_camera_follows_from_behind() {
         "behind him, looking ahead: {camera:?}"
     );
     assert!(camera[2] > 10.0, "and above: {camera:?}");
+
+    // Standing up, he keeps to the ground however far down the screen he walks,
+    // and carries his lantern at his hands rather than a little up the screen.
+    assert!(
+        north[2].abs() < 1.0e-4,
+        "Wick stands on the ground: {north:?}"
+    );
+    let lantern = position(&run, "wick-lantern");
+    assert!(
+        (0.85..1.05).contains(&(lantern[2] - north[2])),
+        "the lantern is at his hands: {lantern:?}"
+    );
+    assert!(
+        (lantern[1] - north[1]).abs() < 1.0,
+        "and round him, not up the screen: {lantern:?}"
+    );
+}
+
+#[test]
+fn a_lamp_posts_flame_is_up_its_post_not_up_the_screen() {
+    let run = Run::open_scene("wilds.scene").expect("the wilds open");
+    let post = position(&run, "lantern-1");
+    let flame = position(&run, "lantern-1-light");
+    assert!(
+        (flame[0] - post[0]).abs() < 1.0e-4 && (flame[1] - post[1]).abs() < 1.0e-4,
+        "the light is at the post: {post:?} {flame:?}"
+    );
+    let entity = run.entity("lantern-1-light").expect("its light");
+    let light = &run.world.get(entity).expect("it exists").components["sindri.light2d"];
+    assert!(
+        light["height"].as_f64().expect("a height") > 2.0,
+        "high up it"
+    );
 }
 
 #[test]

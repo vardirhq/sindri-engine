@@ -84,6 +84,23 @@ impl LightCone2d {
         let t = ((cos - self.cos_outer) / (self.cos_inner - self.cos_outer)).clamp(0.0, 1.0);
         t * t * (3.0 - 2.0 * t)
     }
+
+    /// The beam from a light `height` above the ground, at a point `away` from
+    /// it on the ground: [`Self::factor`], but light spills all round the foot of
+    /// a raised light, out to about its height, the way a lantern held up lights
+    /// the ground under it whichever way it faces. Without it a beam meets the
+    /// ground in a sharp point at the light's foot, which reads as a light lying
+    /// on the ground rather than held above it. The shader runs the same arithmetic.
+    #[must_use]
+    pub fn on_the_ground(&self, away: [f32; 2], height: f32) -> f32 {
+        let beam = self.factor(away);
+        if height <= 0.0 {
+            return beam;
+        }
+        let t = (away[0].hypot(away[1]) / height).clamp(0.0, 1.0);
+        let spill = 1.0 - t * t * (3.0 - 2.0 * t);
+        beam + (1.0 - beam) * spill
+    }
 }
 
 /// The least the cosines of a cone's edges differ by.
@@ -161,7 +178,7 @@ impl Lighting2d {
             }
             let mut amount = (1.0 - distance / light.radius).max(0.0).powf(light.falloff);
             if let Some(cone) = &light.cone {
-                amount *= cone.factor([-offset[0], -offset[1]]);
+                amount *= cone.on_the_ground([-offset[0], -offset[1]], light.height);
             }
             if let Some(shadow) = &light.shadow {
                 amount *= shadow::visibility(light.position, point, shadow);
