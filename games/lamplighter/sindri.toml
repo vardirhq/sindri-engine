@@ -11,4 +11,5 @@ scenes = [
   "assets/interior-workshop.scene",
   "assets/interior-keeper.scene",
   "assets/pause.scene",
+  "assets/wilds.scene",
 ]

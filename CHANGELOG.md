@@ -2,6 +2,8 @@
 
 # Changelog
 
+- Leave out what a perspective camera cannot see, too: world sprites (billboards included), tilemap cells and cast shadows off screen are culled under a perspective camera as under an orthographic one, for 2D sprites standing in a 3D world.
+
 - Lamplighter's direction: a survival game rather than a top-down adventure. Days that end in a deadly dark, a lantern that burns what Wick gathers, crafting, health, hunger and courage, in a world generated from a seed, drawn as pixel sprites standing in 3D space under a tilted camera. `docs/lamplighter-plan.md` is the new plan; the field and village stay playable while the wilds are built.
 
 - Draw only what a 2D view shows. Under an orthographic camera, sprites, tilemap cells and cast shadows wholly outside the view are left out of the frame (a tilemap cell before it is built); a frame's 16 2D lights go to those whose reach overlaps the view; and a shadow map is kept from frame to frame while its light and the occluder edges around it are still. Lamplighter's village went from 2,519 sprite instances and 3.2 ms of extraction a frame to 240 instances and 0.9 ms, drawing the same picture.

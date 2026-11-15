@@ -23,12 +23,14 @@ pub(crate) fn world_from(json: &str) -> World {
         .world
 }
 
+/// Far enough back along its line that what the tests place near the origin
+/// is in view: extraction leaves out what the camera cannot see.
 pub(crate) fn world_camera() -> &'static str {
     r#"
     {
       "id": "main-camera",
       "transform_3d": {
-        "position": [3.0, 2.0, 4.0],
+        "position": [15.0, 10.0, 20.0],
         "rotation": [-0.17940314, 0.31052187, 0.05980105, 0.93156564]
       },
       "components": { "sindri.camera": {

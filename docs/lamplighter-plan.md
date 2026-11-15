@@ -100,9 +100,11 @@ same plane, is lit by the same 2D lights, and is generated from one seed.
 
 ### What the prototype showed is missing
 
-- **Lamplighter's own ground.** The prototype wore the engine's built-in blocks.
-  The world needs a block set drawn in Lamplighter's palette (grass, earth, moss,
-  bog, heath, sand, stone, water), at 16 pixels to a unit, with normal maps.
+- **Lamplighter's own ground.** *Done:* `art/blocks.py` cuts the plain tile of
+  each of the game's terrain sheets (grass, dead grass, dirt, earth, soil,
+  cobble, flagstone, stone) and draws water, sand, moss, mud and rock in the same
+  palette, four variants each, into `blocks.tileset`. Normal maps are still to
+  come.
 - **Soft biome edges.** A map's biome edges are hard squares (`docs/voxel-terrain.md`,
   "Not yet"); the field's ground uses `corners` terrains for smooth transitions.
   The map view needs edge blending or autotiling between blocks.
@@ -112,10 +114,10 @@ same plane, is lit by the same 2D lights, and is generated from one seed.
   and only near the camera. Engine work, general: a scatter of prefabs or sprites
   over a voxel world, deterministic per section, spawned and despawned with the
   view.
-- **Culling under perspective.** Extraction leaves out what is off screen only
-  under an orthographic camera (`docs/scene-extraction.md`). A large world under a
-  tilted perspective camera needs the same, for sprites, cast shadows and the
-  map's sections.
+- **Culling under perspective.** *Done:* extraction leaves out sprites, tilemap
+  cells and cast shadows off screen under a perspective camera as under an
+  orthographic one (`docs/scene-extraction.md`), and the map view already works
+  out only the sections the camera sees.
 - **A world that does not end.** Residency (generating and dropping the land as
   Wick walks), and saving a generated world as its seed plus its edits.
 
@@ -195,7 +197,11 @@ opens, its scripts compile, its scripted run reaches its goal, and this document
 says what is now true.
 
 0. **Direction.** This plan and the `AGENTS.md` description. *Done with this change.*
-1. **The wilds.** A generated world scene opened from the title: Lamplighter's
+1. **The wilds.** *Started:* `wilds.scene` (`art/wilds_scene.py`) is a generated
+   land of meadow, deadwood, heath, bog and barrens in the game's own blocks,
+   with Wick, lamps, trees, boulders and gloom standing as billboards under a
+   camera tilted 38° and following him (`tests/the_wilds.rs`), and culling works
+   under perspective. Still to come: a generated world scene opened from the title: Lamplighter's
    block set, soft biome edges, standing things scattered by seed as billboards,
    the tilted camera following Wick, culling under perspective, and residency so
    the land goes on. Wick walks it day-lit; a test walks him across biomes.

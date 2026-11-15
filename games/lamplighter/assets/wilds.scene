@@ -1,0 +1,3241 @@
+{
+  "format_version": 10,
+  "metadata": {
+    "name": "The Wilds"
+  },
+  "entities": [
+    {
+      "id": "camera",
+      "name": "Camera",
+      "transform_3d": {
+        "position": [
+          0.0,
+          -13.544552457164482,
+          17.336236579347883
+        ],
+        "rotation": [
+          0.3255681544571567,
+          0.0,
+          0.0,
+          0.9455185755993168
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.camera": {
+          "projection": "perspective",
+          "vertical_fov_degrees": 40.0,
+          "near": 0.5,
+          "far": 200.0
+        },
+        "sindri.camera.behavior": {
+          "follow": {
+            "target": "wick",
+            "offset": [
+              0.0,
+              -13.544552457164482,
+              17.336236579347883
+            ],
+            "dead_zone": [
+              0.3,
+              0.3
+            ],
+            "smoothing": 8,
+            "max_speed": 30
+          }
+        }
+      }
+    },
+    {
+      "id": "environment",
+      "name": "Environment",
+      "components": {
+        "sindri.environment": {
+          "background": [
+            0.02,
+            0.02,
+            0.05,
+            1.0
+          ],
+          "shadows": {
+            "enabled": false,
+            "map_size": 1024,
+            "distance": 48.0,
+            "bias": 0.002
+          },
+          "lighting_2d": {
+            "enabled": true,
+            "ambient": [
+              0.05,
+              0.06,
+              0.12
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "physics",
+      "name": "Physics",
+      "components": {
+        "sindri.physics2d.world": {
+          "gravity": [
+            0,
+            0
+          ],
+          "layers": [
+            "wall",
+            "wick",
+            "lantern",
+            "target"
+          ]
+        },
+        "sindri.input.actions": {
+          "actions": [
+            {
+              "name": "move_x",
+              "kind": "axis",
+              "bindings": [
+                {
+                  "axis": {
+                    "negative": "key.A",
+                    "positive": "key.D"
+                  }
+                },
+                {
+                  "axis": {
+                    "negative": "key.ArrowLeft",
+                    "positive": "key.ArrowRight"
+                  }
+                },
+                "gamepad.axis.left_x",
+                {
+                  "axis": {
+                    "negative": "gamepad.dpad_left",
+                    "positive": "gamepad.dpad_right"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "move_y",
+              "kind": "axis",
+              "bindings": [
+                {
+                  "axis": {
+                    "negative": "key.S",
+                    "positive": "key.W"
+                  }
+                },
+                {
+                  "axis": {
+                    "negative": "key.ArrowDown",
+                    "positive": "key.ArrowUp"
+                  }
+                },
+                {
+                  "axis": {
+                    "negative": "gamepad.dpad_down",
+                    "positive": "gamepad.dpad_up"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "attack",
+              "kind": "button",
+              "bindings": [
+                "key.J",
+                "key.Space",
+                "gamepad.west"
+              ]
+            },
+            {
+              "name": "interact",
+              "kind": "button",
+              "bindings": [
+                "key.E",
+                "key.Enter",
+                "gamepad.south"
+              ]
+            },
+            {
+              "name": "pause",
+              "kind": "button",
+              "bindings": [
+                "key.Escape",
+                "gamepad.start"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "ground",
+      "name": "Ground",
+      "transform_3d": {
+        "position": [
+          -60.0,
+          60.0,
+          -0.05
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1
+        ]
+      },
+      "components": {
+        "sindri.voxel_world": {
+          "generator": {
+            "kind": "natural_terrain",
+            "seed": 3,
+            "sea_level": 0,
+            "relief": 12,
+            "feature_size": 48,
+            "tree_line": 400,
+            "snow_line": 500,
+            "caves": false,
+            "rivers": true,
+            "stone_voxel": "stone",
+            "water_voxel": "water",
+            "beach_voxel": "sand",
+            "sea_bed_voxel": "mud",
+            "cliff_voxel": "rock",
+            "snow_voxel": null,
+            "ice_voxel": null,
+            "trunk_voxel": null,
+            "leaves_voxel": null,
+            "biomes": [
+              {
+                "name": "Meadow",
+                "temperature": 0.55,
+                "moisture": 0.5,
+                "surface_voxel": "grass",
+                "subsurface_voxel": "dirt",
+                "subsurface_depth": 3,
+                "trees": 0.0,
+                "relief": 0.6,
+                "terraces": 0
+              },
+              {
+                "name": "Deadwood",
+                "temperature": 0.35,
+                "moisture": 0.45,
+                "surface_voxel": "deadgrass",
+                "subsurface_voxel": "dirt",
+                "subsurface_depth": 3,
+                "trees": 0.0,
+                "relief": 0.8,
+                "terraces": 0
+              },
+              {
+                "name": "Heath",
+                "temperature": 0.6,
+                "moisture": 0.15,
+                "surface_voxel": "earth",
+                "subsurface_voxel": "dirt",
+                "subsurface_depth": 3,
+                "trees": 0.0,
+                "relief": 1.0,
+                "terraces": 2
+              },
+              {
+                "name": "Bog",
+                "temperature": 0.6,
+                "moisture": 0.95,
+                "surface_voxel": "moss",
+                "subsurface_voxel": "mud",
+                "subsurface_depth": 3,
+                "trees": 0.0,
+                "relief": 0.2,
+                "terraces": 0
+              },
+              {
+                "name": "Barrens",
+                "temperature": 0.1,
+                "moisture": 0.2,
+                "surface_voxel": "stone",
+                "subsurface_voxel": "rock",
+                "subsurface_depth": 3,
+                "trees": 0.0,
+                "relief": 1.4,
+                "terraces": 2
+              }
+            ]
+          },
+          "blocks": "blocks.tileset",
+          "view": "map",
+          "variant_seed": 5,
+          "layer": -10,
+          "edits": []
+        }
+      }
+    },
+    {
+      "id": "tree-1",
+      "name": "tree-1",
+      "transform_3d": {
+        "position": [
+          -6,
+          4,
+          0.46
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          4,
+          4,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/objects.png#dead-tree-1",
+          "layer": 5,
+          "billboard": true
+        },
+        "sindri.shadow2d": {
+          "contact_size": [
+            1.32,
+            0.54
+          ],
+          "contact_offset": [
+            0,
+            0
+          ],
+          "contact_opacity": 0.35,
+          "cast": true,
+          "cast_opacity": 0.35,
+          "height": 0.0,
+          "max_length": 2.2
+        },
+        "sindri.physics2d.rigid_body": {
+          "kind": "static",
+          "pose": {
+            "position": [
+              0,
+              0
+            ],
+            "rotation": 0
+          },
+          "linear_velocity": [
+            0,
+            0
+          ],
+          "angular_velocity": 0,
+          "gravity_scale": 0,
+          "linear_damping": 0,
+          "angular_damping": 0,
+          "lock_rotation": true,
+          "continuous_collision": false
+        },
+        "sindri.physics2d.collider": {
+          "shape": {
+            "shape": "circle",
+            "radius": 0.15
+          },
+          "offset": [
+            0,
+            0.125
+          ],
+          "rotation": 0,
+          "sensor": false,
+          "layers": {
+            "memberships": 1,
+            "filter": 4294967295
+          },
+          "friction": 0,
+          "restitution": 0
+        },
+        "sindri.light2d.occluder": {
+          "shape": "polygon",
+          "points": [
+            [
+              0.075,
+              0.05
+            ],
+            [
+              0.06075,
+              0.0765
+            ],
+            [
+              0.02325,
+              0.09275
+            ],
+            [
+              -0.02325,
+              0.09275
+            ],
+            [
+              -0.06075,
+              0.0765
+            ],
+            [
+              -0.075,
+              0.05
+            ],
+            [
+              -0.06075,
+              0.0235
+            ],
+            [
+              -0.02325,
+              0.00725
+            ],
+            [
+              0.02325,
+              0.00725
+            ],
+            [
+              0.06075,
+              0.0235
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "id": "tree-2",
+      "name": "tree-2",
+      "transform_3d": {
+        "position": [
+          -3,
+          7,
+          0.43
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          -4,
+          4,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/objects.png#dead-tree-2",
+          "layer": 5,
+          "billboard": true
+        },
+        "sindri.shadow2d": {
+          "contact_size": [
+            1.32,
+            0.54
+          ],
+          "contact_offset": [
+            0,
+            0
+          ],
+          "contact_opacity": 0.35,
+          "cast": true,
+          "cast_opacity": 0.35,
+          "height": 0.0,
+          "max_length": 2.2
+        },
+        "sindri.physics2d.rigid_body": {
+          "kind": "static",
+          "pose": {
+            "position": [
+              0,
+              0
+            ],
+            "rotation": 0
+          },
+          "linear_velocity": [
+            0,
+            0
+          ],
+          "angular_velocity": 0,
+          "gravity_scale": 0,
+          "linear_damping": 0,
+          "angular_damping": 0,
+          "lock_rotation": true,
+          "continuous_collision": false
+        },
+        "sindri.physics2d.collider": {
+          "shape": {
+            "shape": "circle",
+            "radius": 0.15
+          },
+          "offset": [
+            0,
+            0.125
+          ],
+          "rotation": 0,
+          "sensor": false,
+          "layers": {
+            "memberships": 1,
+            "filter": 4294967295
+          },
+          "friction": 0,
+          "restitution": 0
+        },
+        "sindri.light2d.occluder": {
+          "shape": "polygon",
+          "points": [
+            [
+              0.075,
+              0.05
+            ],
+            [
+              0.06075,
+              0.0765
+            ],
+            [
+              0.02325,
+              0.09275
+            ],
+            [
+              -0.02325,
+              0.09275
+            ],
+            [
+              -0.06075,
+              0.0765
+            ],
+            [
+              -0.075,
+              0.05
+            ],
+            [
+              -0.06075,
+              0.0235
+            ],
+            [
+              -0.02325,
+              0.00725
+            ],
+            [
+              0.02325,
+              0.00725
+            ],
+            [
+              0.06075,
+              0.0235
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "id": "tree-3",
+      "name": "tree-3",
+      "transform_3d": {
+        "position": [
+          5,
+          6,
+          0.44
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          4,
+          4,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/objects.png#dead-tree-3",
+          "layer": 5,
+          "billboard": true
+        },
+        "sindri.shadow2d": {
+          "contact_size": [
+            1.32,
+            0.54
+          ],
+          "contact_offset": [
+            0,
+            0
+          ],
+          "contact_opacity": 0.35,
+          "cast": true,
+          "cast_opacity": 0.35,
+          "height": 0.0,
+          "max_length": 2.2
+        },
+        "sindri.physics2d.rigid_body": {
+          "kind": "static",
+          "pose": {
+            "position": [
+              0,
+              0
+            ],
+            "rotation": 0
+          },
+          "linear_velocity": [
+            0,
+            0
+          ],
+          "angular_velocity": 0,
+          "gravity_scale": 0,
+          "linear_damping": 0,
+          "angular_damping": 0,
+          "lock_rotation": true,
+          "continuous_collision": false
+        },
+        "sindri.physics2d.collider": {
+          "shape": {
+            "shape": "circle",
+            "radius": 0.15
+          },
+          "offset": [
+            0,
+            0.125
+          ],
+          "rotation": 0,
+          "sensor": false,
+          "layers": {
+            "memberships": 1,
+            "filter": 4294967295
+          },
+          "friction": 0,
+          "restitution": 0
+        },
+        "sindri.light2d.occluder": {
+          "shape": "polygon",
+          "points": [
+            [
+              0.075,
+              0.05
+            ],
+            [
+              0.06075,
+              0.0765
+            ],
+            [
+              0.02325,
+              0.09275
+            ],
+            [
+              -0.02325,
+              0.09275
+            ],
+            [
+              -0.06075,
+              0.0765
+            ],
+            [
+              -0.075,
+              0.05
+            ],
+            [
+              -0.06075,
+              0.0235
+            ],
+            [
+              -0.02325,
+              0.00725
+            ],
+            [
+              0.02325,
+              0.00725
+            ],
+            [
+              0.06075,
+              0.0235
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "id": "tree-4",
+      "name": "tree-4",
+      "transform_3d": {
+        "position": [
+          9,
+          3,
+          0.47
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          -4,
+          4,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/objects.png#dead-tree-4",
+          "layer": 5,
+          "billboard": true
+        },
+        "sindri.shadow2d": {
+          "contact_size": [
+            1.32,
+            0.54
+          ],
+          "contact_offset": [
+            0,
+            0
+          ],
+          "contact_opacity": 0.35,
+          "cast": true,
+          "cast_opacity": 0.35,
+          "height": 0.0,
+          "max_length": 2.2
+        },
+        "sindri.physics2d.rigid_body": {
+          "kind": "static",
+          "pose": {
+            "position": [
+              0,
+              0
+            ],
+            "rotation": 0
+          },
+          "linear_velocity": [
+            0,
+            0
+          ],
+          "angular_velocity": 0,
+          "gravity_scale": 0,
+          "linear_damping": 0,
+          "angular_damping": 0,
+          "lock_rotation": true,
+          "continuous_collision": false
+        },
+        "sindri.physics2d.collider": {
+          "shape": {
+            "shape": "circle",
+            "radius": 0.15
+          },
+          "offset": [
+            0,
+            0.125
+          ],
+          "rotation": 0,
+          "sensor": false,
+          "layers": {
+            "memberships": 1,
+            "filter": 4294967295
+          },
+          "friction": 0,
+          "restitution": 0
+        },
+        "sindri.light2d.occluder": {
+          "shape": "polygon",
+          "points": [
+            [
+              0.075,
+              0.05
+            ],
+            [
+              0.06075,
+              0.0765
+            ],
+            [
+              0.02325,
+              0.09275
+            ],
+            [
+              -0.02325,
+              0.09275
+            ],
+            [
+              -0.06075,
+              0.0765
+            ],
+            [
+              -0.075,
+              0.05
+            ],
+            [
+              -0.06075,
+              0.0235
+            ],
+            [
+              -0.02325,
+              0.00725
+            ],
+            [
+              0.02325,
+              0.00725
+            ],
+            [
+              0.06075,
+              0.0235
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "id": "tree-5",
+      "name": "tree-5",
+      "transform_3d": {
+        "position": [
+          -8,
+          -3,
+          0.53
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          4,
+          4,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/objects.png#dead-tree-0",
+          "layer": 5,
+          "billboard": true
+        },
+        "sindri.shadow2d": {
+          "contact_size": [
+            1.32,
+            0.54
+          ],
+          "contact_offset": [
+            0,
+            0
+          ],
+          "contact_opacity": 0.35,
+          "cast": true,
+          "cast_opacity": 0.35,
+          "height": 0.0,
+          "max_length": 2.2
+        },
+        "sindri.physics2d.rigid_body": {
+          "kind": "static",
+          "pose": {
+            "position": [
+              0,
+              0
+            ],
+            "rotation": 0
+          },
+          "linear_velocity": [
+            0,
+            0
+          ],
+          "angular_velocity": 0,
+          "gravity_scale": 0,
+          "linear_damping": 0,
+          "angular_damping": 0,
+          "lock_rotation": true,
+          "continuous_collision": false
+        },
+        "sindri.physics2d.collider": {
+          "shape": {
+            "shape": "circle",
+            "radius": 0.15
+          },
+          "offset": [
+            0,
+            0.125
+          ],
+          "rotation": 0,
+          "sensor": false,
+          "layers": {
+            "memberships": 1,
+            "filter": 4294967295
+          },
+          "friction": 0,
+          "restitution": 0
+        },
+        "sindri.light2d.occluder": {
+          "shape": "polygon",
+          "points": [
+            [
+              0.075,
+              0.05
+            ],
+            [
+              0.06075,
+              0.0765
+            ],
+            [
+              0.02325,
+              0.09275
+            ],
+            [
+              -0.02325,
+              0.09275
+            ],
+            [
+              -0.06075,
+              0.0765
+            ],
+            [
+              -0.075,
+              0.05
+            ],
+            [
+              -0.06075,
+              0.0235
+            ],
+            [
+              -0.02325,
+              0.00725
+            ],
+            [
+              0.02325,
+              0.00725
+            ],
+            [
+              0.06075,
+              0.0235
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "id": "tree-6",
+      "name": "tree-6",
+      "transform_3d": {
+        "position": [
+          4,
+          -6,
+          0.56
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          -4,
+          4,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/objects.png#dead-tree-1",
+          "layer": 5,
+          "billboard": true
+        },
+        "sindri.shadow2d": {
+          "contact_size": [
+            1.32,
+            0.54
+          ],
+          "contact_offset": [
+            0,
+            0
+          ],
+          "contact_opacity": 0.35,
+          "cast": true,
+          "cast_opacity": 0.35,
+          "height": 0.0,
+          "max_length": 2.2
+        },
+        "sindri.physics2d.rigid_body": {
+          "kind": "static",
+          "pose": {
+            "position": [
+              0,
+              0
+            ],
+            "rotation": 0
+          },
+          "linear_velocity": [
+            0,
+            0
+          ],
+          "angular_velocity": 0,
+          "gravity_scale": 0,
+          "linear_damping": 0,
+          "angular_damping": 0,
+          "lock_rotation": true,
+          "continuous_collision": false
+        },
+        "sindri.physics2d.collider": {
+          "shape": {
+            "shape": "circle",
+            "radius": 0.15
+          },
+          "offset": [
+            0,
+            0.125
+          ],
+          "rotation": 0,
+          "sensor": false,
+          "layers": {
+            "memberships": 1,
+            "filter": 4294967295
+          },
+          "friction": 0,
+          "restitution": 0
+        },
+        "sindri.light2d.occluder": {
+          "shape": "polygon",
+          "points": [
+            [
+              0.075,
+              0.05
+            ],
+            [
+              0.06075,
+              0.0765
+            ],
+            [
+              0.02325,
+              0.09275
+            ],
+            [
+              -0.02325,
+              0.09275
+            ],
+            [
+              -0.06075,
+              0.0765
+            ],
+            [
+              -0.075,
+              0.05
+            ],
+            [
+              -0.06075,
+              0.0235
+            ],
+            [
+              -0.02325,
+              0.00725
+            ],
+            [
+              0.02325,
+              0.00725
+            ],
+            [
+              0.06075,
+              0.0235
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "id": "tree-7",
+      "name": "tree-7",
+      "transform_3d": {
+        "position": [
+          11,
+          -4,
+          0.54
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          4,
+          4,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/objects.png#dead-tree-2",
+          "layer": 5,
+          "billboard": true
+        },
+        "sindri.shadow2d": {
+          "contact_size": [
+            1.32,
+            0.54
+          ],
+          "contact_offset": [
+            0,
+            0
+          ],
+          "contact_opacity": 0.35,
+          "cast": true,
+          "cast_opacity": 0.35,
+          "height": 0.0,
+          "max_length": 2.2
+        },
+        "sindri.physics2d.rigid_body": {
+          "kind": "static",
+          "pose": {
+            "position": [
+              0,
+              0
+            ],
+            "rotation": 0
+          },
+          "linear_velocity": [
+            0,
+            0
+          ],
+          "angular_velocity": 0,
+          "gravity_scale": 0,
+          "linear_damping": 0,
+          "angular_damping": 0,
+          "lock_rotation": true,
+          "continuous_collision": false
+        },
+        "sindri.physics2d.collider": {
+          "shape": {
+            "shape": "circle",
+            "radius": 0.15
+          },
+          "offset": [
+            0,
+            0.125
+          ],
+          "rotation": 0,
+          "sensor": false,
+          "layers": {
+            "memberships": 1,
+            "filter": 4294967295
+          },
+          "friction": 0,
+          "restitution": 0
+        },
+        "sindri.light2d.occluder": {
+          "shape": "polygon",
+          "points": [
+            [
+              0.075,
+              0.05
+            ],
+            [
+              0.06075,
+              0.0765
+            ],
+            [
+              0.02325,
+              0.09275
+            ],
+            [
+              -0.02325,
+              0.09275
+            ],
+            [
+              -0.06075,
+              0.0765
+            ],
+            [
+              -0.075,
+              0.05
+            ],
+            [
+              -0.06075,
+              0.0235
+            ],
+            [
+              -0.02325,
+              0.00725
+            ],
+            [
+              0.02325,
+              0.00725
+            ],
+            [
+              0.06075,
+              0.0235
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "id": "tree-8",
+      "name": "tree-8",
+      "transform_3d": {
+        "position": [
+          -2,
+          -8,
+          0.58
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          -4,
+          4,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/objects.png#dead-tree-3",
+          "layer": 5,
+          "billboard": true
+        },
+        "sindri.shadow2d": {
+          "contact_size": [
+            1.32,
+            0.54
+          ],
+          "contact_offset": [
+            0,
+            0
+          ],
+          "contact_opacity": 0.35,
+          "cast": true,
+          "cast_opacity": 0.35,
+          "height": 0.0,
+          "max_length": 2.2
+        },
+        "sindri.physics2d.rigid_body": {
+          "kind": "static",
+          "pose": {
+            "position": [
+              0,
+              0
+            ],
+            "rotation": 0
+          },
+          "linear_velocity": [
+            0,
+            0
+          ],
+          "angular_velocity": 0,
+          "gravity_scale": 0,
+          "linear_damping": 0,
+          "angular_damping": 0,
+          "lock_rotation": true,
+          "continuous_collision": false
+        },
+        "sindri.physics2d.collider": {
+          "shape": {
+            "shape": "circle",
+            "radius": 0.15
+          },
+          "offset": [
+            0,
+            0.125
+          ],
+          "rotation": 0,
+          "sensor": false,
+          "layers": {
+            "memberships": 1,
+            "filter": 4294967295
+          },
+          "friction": 0,
+          "restitution": 0
+        },
+        "sindri.light2d.occluder": {
+          "shape": "polygon",
+          "points": [
+            [
+              0.075,
+              0.05
+            ],
+            [
+              0.06075,
+              0.0765
+            ],
+            [
+              0.02325,
+              0.09275
+            ],
+            [
+              -0.02325,
+              0.09275
+            ],
+            [
+              -0.06075,
+              0.0765
+            ],
+            [
+              -0.075,
+              0.05
+            ],
+            [
+              -0.06075,
+              0.0235
+            ],
+            [
+              -0.02325,
+              0.00725
+            ],
+            [
+              0.02325,
+              0.00725
+            ],
+            [
+              0.06075,
+              0.0235
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "id": "tree-9",
+      "name": "tree-9",
+      "transform_3d": {
+        "position": [
+          14,
+          8,
+          0.42
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          4,
+          4,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/objects.png#dead-tree-4",
+          "layer": 5,
+          "billboard": true
+        },
+        "sindri.shadow2d": {
+          "contact_size": [
+            1.32,
+            0.54
+          ],
+          "contact_offset": [
+            0,
+            0
+          ],
+          "contact_opacity": 0.35,
+          "cast": true,
+          "cast_opacity": 0.35,
+          "height": 0.0,
+          "max_length": 2.2
+        },
+        "sindri.physics2d.rigid_body": {
+          "kind": "static",
+          "pose": {
+            "position": [
+              0,
+              0
+            ],
+            "rotation": 0
+          },
+          "linear_velocity": [
+            0,
+            0
+          ],
+          "angular_velocity": 0,
+          "gravity_scale": 0,
+          "linear_damping": 0,
+          "angular_damping": 0,
+          "lock_rotation": true,
+          "continuous_collision": false
+        },
+        "sindri.physics2d.collider": {
+          "shape": {
+            "shape": "circle",
+            "radius": 0.15
+          },
+          "offset": [
+            0,
+            0.125
+          ],
+          "rotation": 0,
+          "sensor": false,
+          "layers": {
+            "memberships": 1,
+            "filter": 4294967295
+          },
+          "friction": 0,
+          "restitution": 0
+        },
+        "sindri.light2d.occluder": {
+          "shape": "polygon",
+          "points": [
+            [
+              0.075,
+              0.05
+            ],
+            [
+              0.06075,
+              0.0765
+            ],
+            [
+              0.02325,
+              0.09275
+            ],
+            [
+              -0.02325,
+              0.09275
+            ],
+            [
+              -0.06075,
+              0.0765
+            ],
+            [
+              -0.075,
+              0.05
+            ],
+            [
+              -0.06075,
+              0.0235
+            ],
+            [
+              -0.02325,
+              0.00725
+            ],
+            [
+              0.02325,
+              0.00725
+            ],
+            [
+              0.06075,
+              0.0235
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "id": "tree-10",
+      "name": "tree-10",
+      "transform_3d": {
+        "position": [
+          -12,
+          6,
+          0.44
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          -4,
+          4,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/objects.png#dead-tree-0",
+          "layer": 5,
+          "billboard": true
+        },
+        "sindri.shadow2d": {
+          "contact_size": [
+            1.32,
+            0.54
+          ],
+          "contact_offset": [
+            0,
+            0
+          ],
+          "contact_opacity": 0.35,
+          "cast": true,
+          "cast_opacity": 0.35,
+          "height": 0.0,
+          "max_length": 2.2
+        },
+        "sindri.physics2d.rigid_body": {
+          "kind": "static",
+          "pose": {
+            "position": [
+              0,
+              0
+            ],
+            "rotation": 0
+          },
+          "linear_velocity": [
+            0,
+            0
+          ],
+          "angular_velocity": 0,
+          "gravity_scale": 0,
+          "linear_damping": 0,
+          "angular_damping": 0,
+          "lock_rotation": true,
+          "continuous_collision": false
+        },
+        "sindri.physics2d.collider": {
+          "shape": {
+            "shape": "circle",
+            "radius": 0.15
+          },
+          "offset": [
+            0,
+            0.125
+          ],
+          "rotation": 0,
+          "sensor": false,
+          "layers": {
+            "memberships": 1,
+            "filter": 4294967295
+          },
+          "friction": 0,
+          "restitution": 0
+        },
+        "sindri.light2d.occluder": {
+          "shape": "polygon",
+          "points": [
+            [
+              0.075,
+              0.05
+            ],
+            [
+              0.06075,
+              0.0765
+            ],
+            [
+              0.02325,
+              0.09275
+            ],
+            [
+              -0.02325,
+              0.09275
+            ],
+            [
+              -0.06075,
+              0.0765
+            ],
+            [
+              -0.075,
+              0.05
+            ],
+            [
+              -0.06075,
+              0.0235
+            ],
+            [
+              -0.02325,
+              0.00725
+            ],
+            [
+              0.02325,
+              0.00725
+            ],
+            [
+              0.06075,
+              0.0235
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "id": "boulder-1",
+      "name": "boulder-1",
+      "transform_3d": {
+        "position": [
+          2,
+          3,
+          0.47
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          4,
+          4,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/objects.png#boulder-1",
+          "layer": 5,
+          "billboard": true
+        },
+        "sindri.shadow2d": {
+          "contact_size": [
+            1.9800000000000002,
+            0.81
+          ],
+          "contact_offset": [
+            0,
+            0
+          ],
+          "contact_opacity": 0.35,
+          "cast": true,
+          "cast_opacity": 0.35,
+          "height": 0.0,
+          "max_length": 2.2
+        },
+        "sindri.physics2d.rigid_body": {
+          "kind": "static",
+          "pose": {
+            "position": [
+              0,
+              0
+            ],
+            "rotation": 0
+          },
+          "linear_velocity": [
+            0,
+            0
+          ],
+          "angular_velocity": 0,
+          "gravity_scale": 0,
+          "linear_damping": 0,
+          "angular_damping": 0,
+          "lock_rotation": true,
+          "continuous_collision": false
+        },
+        "sindri.physics2d.collider": {
+          "shape": {
+            "shape": "circle",
+            "radius": 0.225
+          },
+          "offset": [
+            0,
+            0.175
+          ],
+          "rotation": 0,
+          "sensor": false,
+          "layers": {
+            "memberships": 1,
+            "filter": 4294967295
+          },
+          "friction": 0,
+          "restitution": 0
+        },
+        "sindri.light2d.occluder": {
+          "shape": "polygon",
+          "points": [
+            [
+              0.2125,
+              0.1125
+            ],
+            [
+              0.172,
+              0.17425
+            ],
+            [
+              0.06575,
+              0.21225
+            ],
+            [
+              -0.06575,
+              0.21225
+            ],
+            [
+              -0.172,
+              0.17425
+            ],
+            [
+              -0.2125,
+              0.1125
+            ],
+            [
+              -0.172,
+              0.05075
+            ],
+            [
+              -0.06575,
+              0.01275
+            ],
+            [
+              0.06575,
+              0.01275
+            ],
+            [
+              0.172,
+              0.05075
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "id": "boulder-2",
+      "name": "boulder-2",
+      "transform_3d": {
+        "position": [
+          -5,
+          -6,
+          0.56
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          4,
+          4,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/objects.png#boulder-2",
+          "layer": 5,
+          "billboard": true
+        },
+        "sindri.shadow2d": {
+          "contact_size": [
+            1.9800000000000002,
+            0.81
+          ],
+          "contact_offset": [
+            0,
+            0
+          ],
+          "contact_opacity": 0.35,
+          "cast": true,
+          "cast_opacity": 0.35,
+          "height": 0.0,
+          "max_length": 2.2
+        },
+        "sindri.physics2d.rigid_body": {
+          "kind": "static",
+          "pose": {
+            "position": [
+              0,
+              0
+            ],
+            "rotation": 0
+          },
+          "linear_velocity": [
+            0,
+            0
+          ],
+          "angular_velocity": 0,
+          "gravity_scale": 0,
+          "linear_damping": 0,
+          "angular_damping": 0,
+          "lock_rotation": true,
+          "continuous_collision": false
+        },
+        "sindri.physics2d.collider": {
+          "shape": {
+            "shape": "circle",
+            "radius": 0.225
+          },
+          "offset": [
+            0,
+            0.175
+          ],
+          "rotation": 0,
+          "sensor": false,
+          "layers": {
+            "memberships": 1,
+            "filter": 4294967295
+          },
+          "friction": 0,
+          "restitution": 0
+        },
+        "sindri.light2d.occluder": {
+          "shape": "polygon",
+          "points": [
+            [
+              0.2125,
+              0.1125
+            ],
+            [
+              0.172,
+              0.17425
+            ],
+            [
+              0.06575,
+              0.21225
+            ],
+            [
+              -0.06575,
+              0.21225
+            ],
+            [
+              -0.172,
+              0.17425
+            ],
+            [
+              -0.2125,
+              0.1125
+            ],
+            [
+              -0.172,
+              0.05075
+            ],
+            [
+              -0.06575,
+              0.01275
+            ],
+            [
+              0.06575,
+              0.01275
+            ],
+            [
+              0.172,
+              0.05075
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "id": "boulder-3",
+      "name": "boulder-3",
+      "transform_3d": {
+        "position": [
+          8,
+          -2,
+          0.52
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          4,
+          4,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/objects.png#boulder-3",
+          "layer": 5,
+          "billboard": true
+        },
+        "sindri.shadow2d": {
+          "contact_size": [
+            1.9800000000000002,
+            0.81
+          ],
+          "contact_offset": [
+            0,
+            0
+          ],
+          "contact_opacity": 0.35,
+          "cast": true,
+          "cast_opacity": 0.35,
+          "height": 0.0,
+          "max_length": 2.2
+        },
+        "sindri.physics2d.rigid_body": {
+          "kind": "static",
+          "pose": {
+            "position": [
+              0,
+              0
+            ],
+            "rotation": 0
+          },
+          "linear_velocity": [
+            0,
+            0
+          ],
+          "angular_velocity": 0,
+          "gravity_scale": 0,
+          "linear_damping": 0,
+          "angular_damping": 0,
+          "lock_rotation": true,
+          "continuous_collision": false
+        },
+        "sindri.physics2d.collider": {
+          "shape": {
+            "shape": "circle",
+            "radius": 0.225
+          },
+          "offset": [
+            0,
+            0.175
+          ],
+          "rotation": 0,
+          "sensor": false,
+          "layers": {
+            "memberships": 1,
+            "filter": 4294967295
+          },
+          "friction": 0,
+          "restitution": 0
+        },
+        "sindri.light2d.occluder": {
+          "shape": "polygon",
+          "points": [
+            [
+              0.2125,
+              0.1125
+            ],
+            [
+              0.172,
+              0.17425
+            ],
+            [
+              0.06575,
+              0.21225
+            ],
+            [
+              -0.06575,
+              0.21225
+            ],
+            [
+              -0.172,
+              0.17425
+            ],
+            [
+              -0.2125,
+              0.1125
+            ],
+            [
+              -0.172,
+              0.05075
+            ],
+            [
+              -0.06575,
+              0.01275
+            ],
+            [
+              0.06575,
+              0.01275
+            ],
+            [
+              0.172,
+              0.05075
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "id": "lantern-1",
+      "name": "lantern-1",
+      "transform_3d": {
+        "position": [
+          6,
+          1,
+          0.49
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          4,
+          4,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/objects.png#lamp-post-unlit",
+          "layer": 5,
+          "billboard": true
+        },
+        "sindri.animation.sprite": {
+          "clips": {
+            "unlit": {
+              "frames": [
+                "lamp-post-unlit"
+              ],
+              "seconds_per_frame": 0.1,
+              "looping": false
+            },
+            "lit": {
+              "frames": [
+                "lamp-post-lit"
+              ],
+              "seconds_per_frame": 0.1,
+              "looping": false
+            }
+          },
+          "playing": "unlit",
+          "speed": 1
+        },
+        "sindri.tags": {
+          "tags": [
+            "lantern"
+          ]
+        },
+        "sindri.shadow2d": {
+          "contact_size": [
+            1.2,
+            0.5
+          ],
+          "contact_offset": [
+            0,
+            0
+          ],
+          "contact_opacity": 0.35,
+          "cast": false,
+          "cast_opacity": 0.35,
+          "height": 0.0,
+          "max_length": 2.2
+        },
+        "sindri.physics2d.collider": {
+          "shape": {
+            "shape": "circle",
+            "radius": 0.325
+          },
+          "offset": [
+            0,
+            0.15
+          ],
+          "rotation": 0,
+          "sensor": true,
+          "layers": {
+            "memberships": 4,
+            "filter": 4294967295
+          },
+          "friction": 0,
+          "restitution": 0
+        },
+        "sindri.script": {
+          "source": "scripts/lantern.decay",
+          "script": "Lantern",
+          "properties": {
+            "light_name": "lantern-1-light"
+          }
+        }
+      }
+    },
+    {
+      "id": "lantern-1-light",
+      "name": "lantern-1-light",
+      "transform_3d": {
+        "position": [
+          6,
+          3.6,
+          0.5
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1
+        ]
+      },
+      "components": {
+        "sindri.light2d": {
+          "enabled": true,
+          "color": [
+            1.0,
+            0.72,
+            0.38,
+            1.0
+          ],
+          "intensity": 0.0,
+          "radius": 9.0,
+          "falloff": 1.4,
+          "height": 1.0,
+          "shadows": true,
+          "shadow_reach": 0.6,
+          "shadow_source_radius": 0.3
+        }
+      }
+    },
+    {
+      "id": "lantern-2",
+      "name": "lantern-2",
+      "transform_3d": {
+        "position": [
+          -7,
+          2,
+          0.48
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          4,
+          4,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/objects.png#lamp-post-unlit",
+          "layer": 5,
+          "billboard": true
+        },
+        "sindri.animation.sprite": {
+          "clips": {
+            "unlit": {
+              "frames": [
+                "lamp-post-unlit"
+              ],
+              "seconds_per_frame": 0.1,
+              "looping": false
+            },
+            "lit": {
+              "frames": [
+                "lamp-post-lit"
+              ],
+              "seconds_per_frame": 0.1,
+              "looping": false
+            }
+          },
+          "playing": "unlit",
+          "speed": 1
+        },
+        "sindri.tags": {
+          "tags": [
+            "lantern"
+          ]
+        },
+        "sindri.shadow2d": {
+          "contact_size": [
+            1.2,
+            0.5
+          ],
+          "contact_offset": [
+            0,
+            0
+          ],
+          "contact_opacity": 0.35,
+          "cast": false,
+          "cast_opacity": 0.35,
+          "height": 0.0,
+          "max_length": 2.2
+        },
+        "sindri.physics2d.collider": {
+          "shape": {
+            "shape": "circle",
+            "radius": 0.325
+          },
+          "offset": [
+            0,
+            0.15
+          ],
+          "rotation": 0,
+          "sensor": true,
+          "layers": {
+            "memberships": 4,
+            "filter": 4294967295
+          },
+          "friction": 0,
+          "restitution": 0
+        },
+        "sindri.script": {
+          "source": "scripts/lantern.decay",
+          "script": "Lantern",
+          "properties": {
+            "light_name": "lantern-2-light"
+          }
+        }
+      }
+    },
+    {
+      "id": "lantern-2-light",
+      "name": "lantern-2-light",
+      "transform_3d": {
+        "position": [
+          -7,
+          4.6,
+          0.49
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1
+        ]
+      },
+      "components": {
+        "sindri.light2d": {
+          "enabled": true,
+          "color": [
+            1.0,
+            0.72,
+            0.38,
+            1.0
+          ],
+          "intensity": 0.0,
+          "radius": 9.0,
+          "falloff": 1.4,
+          "height": 1.0,
+          "shadows": true,
+          "shadow_reach": 0.6,
+          "shadow_source_radius": 0.3
+        }
+      }
+    },
+    {
+      "id": "wick",
+      "name": "Wick",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0.5
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1
+        ]
+      },
+      "components": {
+        "sindri.tags": {
+          "tags": [
+            "wick"
+          ]
+        },
+        "sindri.physics2d.rigid_body": {
+          "kind": "dynamic",
+          "pose": {
+            "position": [
+              0,
+              0
+            ],
+            "rotation": 0
+          },
+          "linear_velocity": [
+            0,
+            0
+          ],
+          "angular_velocity": 0,
+          "gravity_scale": 0,
+          "linear_damping": 0,
+          "angular_damping": 0,
+          "lock_rotation": true,
+          "continuous_collision": true
+        },
+        "sindri.physics2d.collider": {
+          "pieces": [
+            {
+              "name": "body",
+              "shape": {
+                "shape": "circle",
+                "radius": 0.4
+              },
+              "offset": [
+                0,
+                0.45
+              ],
+              "rotation": 0,
+              "sensor": false,
+              "layers": {
+                "memberships": 2,
+                "filter": 9
+              },
+              "friction": 0,
+              "restitution": 0
+            },
+            {
+              "name": "reach",
+              "shape": {
+                "shape": "circle",
+                "radius": 0.7
+              },
+              "offset": [
+                0,
+                0.45
+              ],
+              "rotation": 0,
+              "sensor": true,
+              "layers": {
+                "memberships": 2,
+                "filter": 4294967295
+              },
+              "friction": 0,
+              "restitution": 0
+            }
+          ]
+        },
+        "sindri.script": {
+          "source": "scripts/wick.decay",
+          "script": "Wick",
+          "properties": {}
+        },
+        "sindri.sprite": {
+          "texture": "textures/wick.png#idle-south",
+          "layer": 5,
+          "tint": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "size": [
+            3.0,
+            2.75
+          ],
+          "billboard": true
+        },
+        "sindri.shadow2d": {
+          "contact_size": [
+            0.9,
+            0.35
+          ],
+          "contact_offset": [
+            0,
+            0
+          ],
+          "contact_opacity": 0.35,
+          "cast": false,
+          "cast_opacity": 0.35,
+          "height": 0.0,
+          "max_length": 2.2
+        },
+        "sindri.animation.sprite": {
+          "clips": {
+            "idle-south": {
+              "frames": [
+                "idle-south"
+              ],
+              "seconds_per_frame": 0.4,
+              "looping": true
+            },
+            "walk-south": {
+              "frames": [
+                "walk-south-0",
+                "walk-south-1",
+                "walk-south-2",
+                "walk-south-3",
+                "walk-south-4",
+                "walk-south-5",
+                "walk-south-6",
+                "walk-south-7"
+              ],
+              "seconds_per_frame": 0.09,
+              "looping": true
+            },
+            "slash-south": {
+              "frames": [
+                "slash-south-0",
+                "slash-south-1",
+                "slash-south-2",
+                "slash-south-3",
+                "slash-south-4",
+                "slash-south-5",
+                "slash-south-6",
+                "slash-south-7"
+              ],
+              "seconds_per_frame": 0.07,
+              "looping": false
+            },
+            "idle-west": {
+              "frames": [
+                "idle-west"
+              ],
+              "seconds_per_frame": 0.4,
+              "looping": true
+            },
+            "walk-west": {
+              "frames": [
+                "walk-west-0",
+                "walk-west-1",
+                "walk-west-2",
+                "walk-west-3",
+                "walk-west-4",
+                "walk-west-5",
+                "walk-west-6",
+                "walk-west-7"
+              ],
+              "seconds_per_frame": 0.09,
+              "looping": true
+            },
+            "slash-west": {
+              "frames": [
+                "slash-west-0",
+                "slash-west-1",
+                "slash-west-2",
+                "slash-west-3",
+                "slash-west-4",
+                "slash-west-5",
+                "slash-west-6",
+                "slash-west-7"
+              ],
+              "seconds_per_frame": 0.07,
+              "looping": false
+            },
+            "idle-north": {
+              "frames": [
+                "idle-north"
+              ],
+              "seconds_per_frame": 0.4,
+              "looping": true
+            },
+            "walk-north": {
+              "frames": [
+                "walk-north-0",
+                "walk-north-1",
+                "walk-north-2",
+                "walk-north-3",
+                "walk-north-4",
+                "walk-north-5",
+                "walk-north-6",
+                "walk-north-7"
+              ],
+              "seconds_per_frame": 0.09,
+              "looping": true
+            },
+            "slash-north": {
+              "frames": [
+                "slash-north-0",
+                "slash-north-1",
+                "slash-north-2",
+                "slash-north-3",
+                "slash-north-4",
+                "slash-north-5",
+                "slash-north-6",
+                "slash-north-7"
+              ],
+              "seconds_per_frame": 0.07,
+              "looping": false
+            },
+            "idle-east": {
+              "frames": [
+                "idle-east"
+              ],
+              "seconds_per_frame": 0.4,
+              "looping": true
+            },
+            "walk-east": {
+              "frames": [
+                "walk-east-0",
+                "walk-east-1",
+                "walk-east-2",
+                "walk-east-3",
+                "walk-east-4",
+                "walk-east-5",
+                "walk-east-6",
+                "walk-east-7"
+              ],
+              "seconds_per_frame": 0.09,
+              "looping": true
+            },
+            "slash-east": {
+              "frames": [
+                "slash-east-0",
+                "slash-east-1",
+                "slash-east-2",
+                "slash-east-3",
+                "slash-east-4",
+                "slash-east-5",
+                "slash-east-6",
+                "slash-east-7"
+              ],
+              "seconds_per_frame": 0.07,
+              "looping": false
+            }
+          },
+          "playing": "idle-south",
+          "speed": 1
+        }
+      }
+    },
+    {
+      "id": "wick-lantern",
+      "name": "wick-lantern",
+      "transform_3d": {
+        "position": [
+          -0.736,
+          0.76,
+          0.003
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1
+        ]
+      },
+      "parent": "wick",
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/lantern.png",
+          "layer": 5,
+          "tint": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "size": [
+            0.6,
+            0.8
+          ],
+          "billboard": true
+        },
+        "sindri.particles": {
+          "playing": true,
+          "texture": "textures/mote.png",
+          "rate": 16.0,
+          "max": 80,
+          "lifetime": 1.3,
+          "lifetime_spread": 0.4,
+          "speed": 0.6,
+          "speed_spread": 0.5,
+          "direction": 90.0,
+          "spread": 60.0,
+          "shape": "circle",
+          "offset": [
+            0.0,
+            0.05
+          ],
+          "shape_size": [
+            0.25,
+            0.1
+          ],
+          "gravity": [
+            0.0,
+            0.9
+          ],
+          "drag": 0.4,
+          "size": 0.2,
+          "size_end": 0.03,
+          "colors": [
+            [
+              1.0,
+              0.8,
+              0.4,
+              0.0
+            ],
+            [
+              1.0,
+              0.65,
+              0.22,
+              1.0
+            ],
+            [
+              0.9,
+              0.3,
+              0.08,
+              0.0
+            ]
+          ],
+          "random_rotation": true,
+          "spin": 0.0,
+          "space": "world",
+          "layer": 6
+        },
+        "sindri.particles#glow": {
+          "playing": true,
+          "texture": "textures/mote.png",
+          "rate": 2.5,
+          "max": 80,
+          "lifetime": 1.4,
+          "lifetime_spread": 0.4,
+          "speed": 0.0,
+          "speed_spread": 0.5,
+          "direction": 90.0,
+          "spread": 360.0,
+          "shape": "circle",
+          "offset": [
+            0.0,
+            0.0
+          ],
+          "shape_size": [
+            0.1,
+            0.1
+          ],
+          "gravity": [
+            0.0,
+            0.0
+          ],
+          "drag": 1.0,
+          "size": 1.4,
+          "size_end": 2.4,
+          "colors": [
+            [
+              1.0,
+              0.7,
+              0.3,
+              0.0
+            ],
+            [
+              1.0,
+              0.7,
+              0.3,
+              0.36
+            ],
+            [
+              1.0,
+              0.6,
+              0.25,
+              0.0
+            ]
+          ],
+          "random_rotation": true,
+          "spin": 0.0,
+          "space": "world",
+          "layer": 4
+        },
+        "sindri.light2d": {
+          "enabled": true,
+          "color": [
+            1.0,
+            0.76,
+            0.42,
+            1.0
+          ],
+          "intensity": 1.5,
+          "radius": 10.0,
+          "falloff": 1.3,
+          "height": 1.0,
+          "shadows": true,
+          "shadow_reach": 0.6,
+          "shadow_source_radius": 0.3,
+          "cone_angle": 140.0,
+          "cone_direction": -90.0,
+          "cone_softness": 0.4
+        },
+        "sindri.light2d#halo": {
+          "enabled": true,
+          "color": [
+            1.0,
+            0.7,
+            0.4,
+            1.0
+          ],
+          "intensity": 1.1,
+          "radius": 4.6,
+          "falloff": 1.6,
+          "height": 1.0,
+          "shadows": true,
+          "shadow_reach": 0.6,
+          "shadow_source_radius": 0.3
+        },
+        "sindri.script": {
+          "source": "scripts/flame.decay",
+          "script": "Flame",
+          "properties": {
+            "base_intensity": 1.5,
+            "base_radius": 10.0
+          }
+        },
+        "sindri.script#halo": {
+          "source": "scripts/flame.decay",
+          "script": "Flame",
+          "properties": {
+            "base_intensity": 1.1,
+            "base_radius": 4.6
+          }
+        }
+      }
+    },
+    {
+      "id": "fx-hurt",
+      "name": "fx-hurt",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1
+        ]
+      },
+      "components": {
+        "sindri.effect.burst": {
+          "texture": "textures/mote.png",
+          "count": 24,
+          "speed": 6.5,
+          "spread": 0.6,
+          "lifetime": 0.55,
+          "size": 0.28,
+          "tint": [
+            1.0,
+            0.5,
+            0.18,
+            1.0
+          ],
+          "fade": true,
+          "drag": 0.06,
+          "layer": 7
+        }
+      }
+    },
+    {
+      "id": "fx-gloom-hit",
+      "name": "fx-gloom-hit",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1
+        ]
+      },
+      "components": {
+        "sindri.effect.burst": {
+          "texture": "textures/mote.png",
+          "count": 12,
+          "speed": 4.5,
+          "spread": 0.6,
+          "lifetime": 0.4,
+          "size": 0.24,
+          "tint": [
+            0.62,
+            0.3,
+            0.95,
+            1.0
+          ],
+          "fade": true,
+          "drag": 0.06,
+          "layer": 7
+        }
+      }
+    },
+    {
+      "id": "fx-gloom-out",
+      "name": "fx-gloom-out",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1
+        ]
+      },
+      "components": {
+        "sindri.effect.burst": {
+          "texture": "textures/mote.png",
+          "count": 30,
+          "speed": 5.5,
+          "spread": 0.8,
+          "lifetime": 0.8,
+          "size": 0.32,
+          "tint": [
+            0.5,
+            0.22,
+            0.85,
+            1.0
+          ],
+          "fade": true,
+          "drag": 0.06,
+          "layer": 7
+        }
+      }
+    },
+    {
+      "id": "fx-spark",
+      "name": "fx-spark",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1
+        ]
+      },
+      "components": {
+        "sindri.effect.burst": {
+          "texture": "textures/mote.png",
+          "count": 34,
+          "speed": 5.0,
+          "spread": 0.7,
+          "lifetime": 0.7,
+          "size": 0.24,
+          "tint": [
+            1.0,
+            0.82,
+            0.42,
+            1.0
+          ],
+          "fade": true,
+          "drag": 0.06,
+          "layer": 7
+        }
+      }
+    },
+    {
+      "id": "gloom-1",
+      "name": "gloom-1",
+      "transform_3d": {
+        "position": [
+          10,
+          5,
+          0.45
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          2.0,
+          2.0,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/gloom.png#gloom-1",
+          "layer": 5,
+          "tint": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "billboard": true
+        },
+        "sindri.tags": {
+          "tags": [
+            "gloom"
+          ]
+        },
+        "sindri.shadow2d": {
+          "contact_size": [
+            1.0,
+            0.4
+          ],
+          "contact_offset": [
+            0,
+            0
+          ],
+          "contact_opacity": 0.4,
+          "cast": false,
+          "cast_opacity": 0.35,
+          "height": 0.0,
+          "max_length": 2.2
+        },
+        "sindri.physics2d.rigid_body": {
+          "kind": "dynamic",
+          "pose": {
+            "position": [
+              0,
+              0
+            ],
+            "rotation": 0
+          },
+          "linear_velocity": [
+            0,
+            0
+          ],
+          "angular_velocity": 0,
+          "gravity_scale": 0,
+          "linear_damping": 7,
+          "angular_damping": 0,
+          "lock_rotation": true,
+          "continuous_collision": true
+        },
+        "sindri.physics2d.collider": {
+          "shape": {
+            "shape": "circle",
+            "radius": 0.2
+          },
+          "offset": [
+            0,
+            0.225
+          ],
+          "rotation": 0,
+          "sensor": false,
+          "layers": {
+            "memberships": 8,
+            "filter": 11
+          },
+          "friction": 0,
+          "restitution": 0
+        },
+        "sindri.script": {
+          "source": "scripts/gloom.decay",
+          "script": "Gloom",
+          "properties": {}
+        },
+        "sindri.particles#smoke": {
+          "playing": true,
+          "texture": "textures/mote.png",
+          "rate": 7.0,
+          "max": 80,
+          "lifetime": 1.6,
+          "lifetime_spread": 0.4,
+          "speed": 0.35,
+          "speed_spread": 0.5,
+          "direction": 90.0,
+          "spread": 70.0,
+          "shape": "circle",
+          "offset": [
+            0.0,
+            0.9
+          ],
+          "shape_size": [
+            0.9,
+            0.9
+          ],
+          "gravity": [
+            0.0,
+            0.25
+          ],
+          "drag": 0.6,
+          "size": 0.25,
+          "size_end": 0.7,
+          "colors": [
+            [
+              0.24,
+              0.1,
+              0.4,
+              0.0
+            ],
+            [
+              0.3,
+              0.12,
+              0.48,
+              0.5
+            ],
+            [
+              0.1,
+              0.04,
+              0.2,
+              0.0
+            ]
+          ],
+          "random_rotation": true,
+          "spin": 0.0,
+          "space": "world",
+          "layer": 6
+        },
+        "sindri.particles#surge": {
+          "playing": false,
+          "texture": "textures/mote.png",
+          "rate": 46.0,
+          "max": 80,
+          "lifetime": 0.7,
+          "lifetime_spread": 0.4,
+          "speed": 1.7,
+          "speed_spread": 0.5,
+          "direction": 90.0,
+          "spread": 360.0,
+          "shape": "circle",
+          "offset": [
+            0.0,
+            0.9
+          ],
+          "shape_size": [
+            0.9,
+            0.9
+          ],
+          "gravity": [
+            0.0,
+            0.0
+          ],
+          "drag": 1.6,
+          "size": 0.2,
+          "size_end": 0.05,
+          "colors": [
+            [
+              1.0,
+              0.35,
+              0.45,
+              0.0
+            ],
+            [
+              0.95,
+              0.3,
+              0.4,
+              0.8
+            ],
+            [
+              0.4,
+              0.08,
+              0.2,
+              0.0
+            ]
+          ],
+          "random_rotation": true,
+          "spin": 0.0,
+          "space": "world",
+          "layer": 6
+        }
+      }
+    },
+    {
+      "id": "gloom-2",
+      "name": "gloom-2",
+      "transform_3d": {
+        "position": [
+          -9,
+          -5,
+          0.55
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          2.0,
+          2.0,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/gloom.png#gloom-3",
+          "layer": 5,
+          "tint": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "billboard": true
+        },
+        "sindri.tags": {
+          "tags": [
+            "gloom"
+          ]
+        },
+        "sindri.shadow2d": {
+          "contact_size": [
+            1.0,
+            0.4
+          ],
+          "contact_offset": [
+            0,
+            0
+          ],
+          "contact_opacity": 0.4,
+          "cast": false,
+          "cast_opacity": 0.35,
+          "height": 0.0,
+          "max_length": 2.2
+        },
+        "sindri.physics2d.rigid_body": {
+          "kind": "dynamic",
+          "pose": {
+            "position": [
+              0,
+              0
+            ],
+            "rotation": 0
+          },
+          "linear_velocity": [
+            0,
+            0
+          ],
+          "angular_velocity": 0,
+          "gravity_scale": 0,
+          "linear_damping": 7,
+          "angular_damping": 0,
+          "lock_rotation": true,
+          "continuous_collision": true
+        },
+        "sindri.physics2d.collider": {
+          "shape": {
+            "shape": "circle",
+            "radius": 0.2
+          },
+          "offset": [
+            0,
+            0.225
+          ],
+          "rotation": 0,
+          "sensor": false,
+          "layers": {
+            "memberships": 8,
+            "filter": 11
+          },
+          "friction": 0,
+          "restitution": 0
+        },
+        "sindri.script": {
+          "source": "scripts/gloom.decay",
+          "script": "Gloom",
+          "properties": {}
+        },
+        "sindri.particles#smoke": {
+          "playing": true,
+          "texture": "textures/mote.png",
+          "rate": 7.0,
+          "max": 80,
+          "lifetime": 1.6,
+          "lifetime_spread": 0.4,
+          "speed": 0.35,
+          "speed_spread": 0.5,
+          "direction": 90.0,
+          "spread": 70.0,
+          "shape": "circle",
+          "offset": [
+            0.0,
+            0.9
+          ],
+          "shape_size": [
+            0.9,
+            0.9
+          ],
+          "gravity": [
+            0.0,
+            0.25
+          ],
+          "drag": 0.6,
+          "size": 0.25,
+          "size_end": 0.7,
+          "colors": [
+            [
+              0.24,
+              0.1,
+              0.4,
+              0.0
+            ],
+            [
+              0.3,
+              0.12,
+              0.48,
+              0.5
+            ],
+            [
+              0.1,
+              0.04,
+              0.2,
+              0.0
+            ]
+          ],
+          "random_rotation": true,
+          "spin": 0.0,
+          "space": "world",
+          "layer": 6
+        },
+        "sindri.particles#surge": {
+          "playing": false,
+          "texture": "textures/mote.png",
+          "rate": 46.0,
+          "max": 80,
+          "lifetime": 0.7,
+          "lifetime_spread": 0.4,
+          "speed": 1.7,
+          "speed_spread": 0.5,
+          "direction": 90.0,
+          "spread": 360.0,
+          "shape": "circle",
+          "offset": [
+            0.0,
+            0.9
+          ],
+          "shape_size": [
+            0.9,
+            0.9
+          ],
+          "gravity": [
+            0.0,
+            0.0
+          ],
+          "drag": 1.6,
+          "size": 0.2,
+          "size_end": 0.05,
+          "colors": [
+            [
+              1.0,
+              0.35,
+              0.45,
+              0.0
+            ],
+            [
+              0.95,
+              0.3,
+              0.4,
+              0.8
+            ],
+            [
+              0.4,
+              0.08,
+              0.2,
+              0.0
+            ]
+          ],
+          "random_rotation": true,
+          "spin": 0.0,
+          "space": "world",
+          "layer": 6
+        }
+      }
+    }
+  ]
+}

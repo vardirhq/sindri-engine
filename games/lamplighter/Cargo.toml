@@ -20,6 +20,7 @@ sindri-runtime = { path = "../../crates/sindri-runtime" }
 sindri-scene = { path = "../../crates/sindri-scene" }
 
 [dev-dependencies]
+sindri-assets = { path = "../../crates/sindri-assets" }
 sindri-render = { path = "../../crates/sindri-render" }
 serde_json.workspace = true
 tempfile = "3"
