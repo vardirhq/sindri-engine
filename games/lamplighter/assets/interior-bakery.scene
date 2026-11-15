@@ -1538,6 +1538,7 @@
         "sindri.physics2d.collider": {
           "pieces": [
             {
+              "name": "body",
               "shape": {
                 "shape": "circle",
                 "radius": 0.4
@@ -1556,6 +1557,7 @@
               "restitution": 0
             },
             {
+              "name": "reach",
               "shape": {
                 "shape": "circle",
                 "radius": 0.7

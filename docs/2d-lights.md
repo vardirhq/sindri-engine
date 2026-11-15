@@ -45,9 +45,16 @@ content are never lit.
 
 It is its own component rather than a kind of `sindri.light`: a 3D light shades
 surfaces by the way they face, and a 2D light lights pictures, which face only
-the viewer. A frame carries at most 16 lights (`MAX_LIGHTS_2D`): the ones whose
-reach comes nearest the camera, so a level can hold many more than it ever shows
-at once. A light that is not finite, or has no radius or falloff, is refused and
+the viewer. A frame carries at most 16 lights (`MAX_LIGHTS_2D`): those whose
+reach overlaps the view first, then the ones whose reach comes nearest the
+camera, so a level can hold many more than it ever shows at once and a light
+just behind the camera never takes a slot from one on screen.
+
+A shadow map is built only from the occluder edges within its light's reach,
+and kept from one frame to the next while its light stands where it stood,
+reaches as far and has exactly the same edges around it, so a lamp post among
+still trees costs its map once rather than every frame; a carried lantern, or
+an occluder that moves within reach, builds it again. A light that is not finite, or has no radius or falloff, is refused and
 named.
 
 A large, nearly flat light high over a level (`radius` 80, `falloff` 0.05) is a

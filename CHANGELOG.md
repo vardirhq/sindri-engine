@@ -2,6 +2,10 @@
 
 # Changelog
 
+- Draw only what a 2D view shows. Under an orthographic camera, sprites, tilemap cells and cast shadows wholly outside the view are left out of the frame (a tilemap cell before it is built); a frame's 16 2D lights go to those whose reach overlaps the view; and a shadow map is kept from frame to frame while its light and the occluder edges around it are still. Lamplighter's village went from 2,519 sprite instances and 3.2 ms of extraction a frame to 240 instances and 0.9 ms, drawing the same picture.
+
+- Lamplighter's Wick names his collider's pieces `body` and `reach`, and a lamp post lights from what his reach touches (`Physics.sensor_entered_at("reach")`). A phone project copied earlier keeps working: its unnamed pieces are still asked about.
+
 - Tell a collider's pieces apart in a script: a piece can have a `name`, a `Contact2d` carries `piece` and `other_piece`, and `Physics.sensor_entered_at("mouth")`, `sensor_exited_at`, `collision_started_at` and `collision_stopped_at` answer for one named piece, so something entering a sensor is told from something bumping the body without splitting them into two objects. Both editors name a piece.
 
 - Choose among an object's scripts on the phone: the Behaviour sheet lists every script the object runs, its own first and then its parts ("Flame · halo"), opens the one tapped, and *+ Script* adds another beside them.

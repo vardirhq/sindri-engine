@@ -30,6 +30,7 @@ pub(crate) use tile_volume::face_is_occluded;
 mod lighting;
 pub(crate) mod lighting_2d;
 pub use lighting_2d::LightingQuality;
+mod shadow_cache;
 mod shadows_2d;
 mod tilemap;
 mod tolerance;
@@ -124,6 +125,8 @@ pub struct SceneExtractor {
     last_environment: RefCell<Option<(EntityId, crate::EnvironmentComponent)>>,
     /// How much a frame's 2D lighting costs: see [`LightingQuality`].
     lighting_quality: LightingQuality,
+    /// 2D shadow maps kept while their light and its occluders stand still.
+    shadow_maps: RefCell<shadow_cache::ShadowMapCache>,
 }
 
 fn transform_matrix(transform: Transform3D) -> Mat4 {
@@ -239,6 +242,7 @@ impl SceneExtractor {
             materials: crate::RenderMaterialSources::default(),
             models: BTreeMap::new(),
             baked_volumes: RefCell::default(),
+            shadow_maps: RefCell::default(),
             retained_surfaces: RefCell::default(),
             decoded_meshes: RefCell::default(),
             voxel_worlds: voxel_world::VoxelWorldCache::default(),

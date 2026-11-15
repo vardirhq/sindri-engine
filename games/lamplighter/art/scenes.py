@@ -272,16 +272,18 @@ def wick(fresh=True):
     body = {'kind': 'dynamic', 'pose': {'position': [0, 0], 'rotation': 0}, 'linear_velocity': [0, 0],
             'angular_velocity': 0, 'gravity_scale': 0, 'linear_damping': 0, 'angular_damping': 0,
             'lock_rotation': True, 'continuous_collision': True}
-    piece = lambda radius, sensor, mask: {
-        'shape': {'shape': 'circle', 'radius': radius}, 'offset': [0, 0.45], 'rotation': 0, 'sensor': sensor,
-        'layers': {'memberships': WICK, 'filter': mask}, 'friction': 0, 'restitution': 0}
+    # Two pieces, named so `wick.decay` can tell them apart: the body that walls stop, and
+    # the wider reach that lights a lamp post it touches.
+    piece = lambda name, radius, sensor, mask: {
+        'name': name, 'shape': {'shape': 'circle', 'radius': radius}, 'offset': [0, 0.45], 'rotation': 0,
+        'sensor': sensor, 'layers': {'memberships': WICK, 'filter': mask}, 'friction': 0, 'restitution': 0}
     return [
         # The art sits on the body, sized there (one pixel of it is a sixteenth of a world
         # unit), so the collider and the lantern stay at the size they were made.
         entity('wick', 'Wick', at(0, 0, depth(0)), **{
             'sindri.tags': {'tags': ['wick']},
             'sindri.physics2d.rigid_body': body,
-            'sindri.physics2d.collider': {'pieces': [piece(0.4, False, WALL | TARGET), piece(0.7, True, ALL)]},
+            'sindri.physics2d.collider': {'pieces': [piece('body', 0.4, False, WALL | TARGET), piece('reach', 0.7, True, ALL)]},
             'sindri.script': {'source': 'scripts/wick.decay', 'script': 'Wick',
                              'properties': {} if fresh else {'fresh': False}},
             'sindri.sprite': {'texture': 'textures/wick.png#idle-south', 'layer': 5, 'tint': [1.0, 1.0, 1.0, 1.0],

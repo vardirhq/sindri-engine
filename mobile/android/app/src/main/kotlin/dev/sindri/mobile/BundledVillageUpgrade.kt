@@ -9,12 +9,14 @@ import java.security.MessageDigest
 internal object BundledVillageUpgrade {
     /**
      * Every village that shipped before the bundled one: the first, with
-     * Wick and the lantern split into objects for their parts, and the one
-     * whose lantern still hung its two lights from it.
+     * Wick and the lantern split into objects for their parts, the one whose
+     * lantern still hung its two lights from it, and the one whose Wick had
+     * his collider's pieces unnamed.
      */
     private val OLD_VILLAGES = setOf(
         "5c175266fa04448076d9d6a3810c5fd65602a33fb6bf799797756cc56d8775fd",
         "3f77381f7744d3c9af16afe5df1718e1787db790dd2b1f73cc6fd88c9b5bafc3",
+        "8089badcae3e2a817cf9e48dca5fee22ee065ba6d3b11c50616b796a12af8e22",
     )
 
     /**
@@ -28,6 +30,7 @@ internal object BundledVillageUpgrade {
         "scripts/wick.decay" to setOf(
             "34f04ef14aee7f31efd63f335275c2acebcac476e6fd59aa649d756fba26ecd5",
             "c75395f0f60f357b17a5519b26895db6bc826a4a0cab372c4ed949115bbc3757",
+            "d11382c7e24b2206759a72bab59496e12200ac7eaaf18e997656cb8af1ab7e1d",
         ),
         "scripts/gloom.decay" to setOf(
             "d44fb8655a098ed5ddad05942cc9e8c50f0f45c3c56900741aeecd38dfb6088f",

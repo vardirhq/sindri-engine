@@ -56,11 +56,27 @@ impl SceneExtractor {
         let eye = cameras
             .world
             .map_or(Vec3::ZERO, |camera| camera.view.inverse().w_axis.truncate());
+        // A light whose reach does not touch the view changes no pixel, so the
+        // frame's few slots go to those that do, nearest first; one only near
+        // the camera no longer takes a slot from one on screen.
+        let reaches_view = |light: &Light2d| {
+            cameras.world.is_none_or(|camera| {
+                let [x, y] = light.position;
+                super::frustum::rect_in_view(
+                    [x - light.radius, y - light.radius],
+                    [x + light.radius, y + light.radius],
+                    0.0,
+                    camera.view_projection,
+                )
+            })
+        };
         lights.sort_by(|a, b| {
             let near = |light: &Light2d| {
                 (light.position[0] - eye.x).hypot(light.position[1] - eye.y) - light.radius
             };
-            near(a).total_cmp(&near(b))
+            reaches_view(b)
+                .cmp(&reaches_view(a))
+                .then_with(|| near(a).total_cmp(&near(b)))
         });
         lights.truncate(MAX_LIGHTS_2D);
         if self.lighting_quality == LightingQuality::Reduced {
@@ -78,16 +94,33 @@ impl SceneExtractor {
             Vec::new()
         };
         if lights.iter().any(|light| light.shadow.is_some()) {
+            let mut cache = self.shadow_maps.borrow_mut();
             for light in &mut lights {
                 if let Some(shadow) = &mut light.shadow {
-                    shadow.map = Arc::from(shadow_maps_2d(
+                    // Only the edges within its reach: a map's worth of walls
+                    // and trees is otherwise measured for every sample of
+                    // every light.
+                    let reach = light.radius + shadow.source_radius;
+                    let near = edges_within(&edges, light.position, reach);
+                    // The same map as last frame while nothing it is built
+                    // from has moved: a lamp post's, almost always.
+                    shadow.map = cache.map(
                         light.position,
                         light.radius,
                         shadow.source_radius,
-                        &edges,
-                    ));
+                        &near,
+                        || {
+                            shadow_maps_2d(
+                                light.position,
+                                light.radius,
+                                shadow.source_radius,
+                                &near,
+                            )
+                        },
+                    );
                 }
             }
+            cache.finish_frame();
         }
         let sight = viewer.map(|(position, viewer)| {
             // A viewer that sees as far as there is still stops at what is nearer
@@ -174,6 +207,21 @@ pub(crate) type Gathered<T> = (Vec<T>, Vec<(EntityId, Light2dError)>);
 
 /// Every active, enabled light, shadows not yet cast, and the lights that
 /// could not be used.
+/// The edges any part of which could lie within `reach` of `center`: a box
+/// test, so it keeps a few that are not and never drops one that is.
+fn edges_within(edges: &[[[f32; 2]; 2]], center: [f32; 2], reach: f32) -> Vec<[[f32; 2]; 2]> {
+    edges
+        .iter()
+        .filter(|[a, b]| {
+            a[0].min(b[0]) <= center[0] + reach
+                && a[0].max(b[0]) >= center[0] - reach
+                && a[1].min(b[1]) <= center[1] + reach
+                && a[1].max(b[1]) >= center[1] - reach
+        })
+        .copied()
+        .collect()
+}
+
 pub(crate) fn gather_lights(
     components: &ComponentSchemaRegistry,
     world: &World,

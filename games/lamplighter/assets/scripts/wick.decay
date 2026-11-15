@@ -158,13 +158,23 @@ script Wick {
 
         show(length > 0.1);
 
-        for other in Physics.sensor_entered() {
-            if World.exists(other) && World.has_tag(other, "lantern") {
-                Lantern.on(other).ignite();
-            }
+        // A lamp post lights when Wick's reach touches it. A project copied
+        // before his collider's pieces were named has them unnamed, and is
+        // asked about its unnamed piece instead.
+        for other in Physics.sensor_entered_at("reach") {
+            light_if_lamp(other);
+        }
+        for other in Physics.sensor_entered_at("") {
+            light_if_lamp(other);
         }
         if Action.pressed("pause") && !Game.won {
             Scene.go("pause.scene");
+        }
+    }
+
+    fn light_if_lamp(other: Entity) {
+        if World.exists(other) && World.has_tag(other, "lantern") {
+            Lantern.on(other).ignite();
         }
     }
 
