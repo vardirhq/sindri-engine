@@ -72,7 +72,8 @@ impl Session {
                 problems.push(format!("Scatter on {entity:?}: {error}"));
                 continue;
             }
-            let Some(middle) = middle_of_play(world, &self.components, entity, &scatter, viewport)
+            let Some(middle) =
+                middle_of_play(world, &self.components, entity, &scatter.around, viewport)
             else {
                 continue;
             };
@@ -227,7 +228,7 @@ fn stand(
 }
 
 /// The land's own placing in the world, which its squares are laid out in.
-fn land_matrix(world: &World, entity: EntityId) -> Mat4 {
+pub(super) fn land_matrix(world: &World, entity: EntityId) -> Mat4 {
     world.world_transform(entity).map_or(Mat4::IDENTITY, |t| {
         Mat4::from_scale_rotation_translation(
             Vec3::from_array(t.scale),
@@ -239,15 +240,15 @@ fn land_matrix(world: &World, entity: EntityId) -> Mat4 {
 
 /// The square play is in: under the entity the scatter is `around`, or else
 /// where the middle of the world camera's view meets the land.
-fn middle_of_play(
+pub(super) fn middle_of_play(
     world: &World,
     components: &ComponentSchemaRegistry,
     land: EntityId,
-    scatter: &ScatterComponent,
+    around: &str,
     viewport: (f32, f32),
 ) -> Option<[i32; 2]> {
     let to_land = land_matrix(world, land).inverse();
-    let local = if scatter.around.trim().is_empty() {
+    let local = if around.trim().is_empty() {
         let aspect = if viewport.1 > 0.0 {
             viewport.0 / viewport.1
         } else {
@@ -264,7 +265,7 @@ fn middle_of_play(
         }
         near + (far - near) * (-near.z / along)
     } else {
-        let id = SceneEntityId::new(scatter.around.trim()).ok()?;
+        let id = SceneEntityId::new(around.trim()).ok()?;
         let around = world.entity_for_source_id(&id)?;
         let at = world.world_transform(around)?.position;
         to_land.transform_point3(Vec3::from_array(at))

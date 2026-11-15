@@ -15,9 +15,11 @@ mod camera_look_ahead;
 mod camera_orbit;
 mod environment;
 mod environment_check;
+mod floating_origin;
 mod grid;
 mod light;
 mod light2d;
+mod map_walls;
 mod material;
 mod mesh;
 mod model;
@@ -48,6 +50,7 @@ pub use environment::{
     environments_in,
 };
 pub use environment_check::EnvironmentError;
+pub use floating_origin::FloatingOriginComponent;
 pub use grid::{
     GridNavigationComponent, GridOccupantComponent, GridPlacementComponent, GridWallDocument,
 };
@@ -59,6 +62,7 @@ pub use light2d::{
     EnvironmentLighting2d, Light2dComponent, Light2dError, Light2dOccluderComponent, OccluderShape,
     outline,
 };
+pub use map_walls::{MOST_WALL_REACH, MapWallsComponent, unwalkable_runs};
 pub use material::MaterialComponent;
 pub(crate) use mesh::SurfaceMesh;
 pub use mesh::{MeshComponent, MeshPrimitive};

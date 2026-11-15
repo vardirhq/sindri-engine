@@ -116,6 +116,7 @@ fn the_wilds_grow_round_wick_and_stand_facing_the_camera() {
     let mut run = Run::open_scene("wilds.scene").expect("the wilds open");
     step(&mut run, 2);
     let grown = grown(&run);
+    let start = position(&run, "wick");
     assert!(
         grown.len() > 40,
         "a land's worth of things: {}",
@@ -130,12 +131,13 @@ fn the_wilds_grow_round_wick_and_stand_facing_the_camera() {
         let sprite = &run.world.get(*entity).expect("it exists").components["sindri.sprite"];
         assert_eq!(sprite["billboard"], true, "{kind} stands up");
         assert!(at[2].abs() < 0.1, "{kind} stands on the ground: {at:?}");
+        let (dx, dy) = (at[0] - start[0], at[1] - start[1]);
         assert!(
-            at[0].abs() <= 27.0 && at[1].abs() <= 27.0,
+            dx.abs() <= 27.0 && dy.abs() <= 27.0,
             "{kind} is near Wick: {at:?}"
         );
         assert!(
-            at[0].hypot(at[1]) > 2.5,
+            dx.hypot(dy) > 2.5,
             "Wick's start is clear: {kind} at {at:?}"
         );
     }
@@ -164,11 +166,12 @@ fn walking_on_grows_what_is_ahead_and_the_same_things_come_back() {
         placed.position[0] = x;
         data.transform_3d = Some(placed);
     };
-    set(&mut run, 60.0);
+    let start_x = position(&run, "wick")[0];
+    set(&mut run, start_x + 60.0);
     step(&mut run, 2);
     let away = grown(&run);
     assert!(
-        away.iter().all(|(_, _, at)| at[0] > 25.0),
+        away.iter().all(|(_, _, at)| at[0] > start_x + 25.0),
         "what was round the start is gone"
     );
     assert!(
@@ -176,7 +179,7 @@ fn walking_on_grows_what_is_ahead_and_the_same_things_come_back() {
         "and new land grows round him: {}",
         away.len()
     );
-    set(&mut run, 0.0);
+    set(&mut run, start_x);
     step(&mut run, 2);
     let back: Vec<_> = grown(&run)
         .into_iter()
@@ -212,9 +215,10 @@ fn what_is_taken_stays_taken() {
         placed.position[0] = x;
         data.transform_3d = Some(placed);
     };
-    move_wick(&mut run, 80.0);
+    let start_x = position(&run, "wick")[0];
+    move_wick(&mut run, start_x + 80.0);
     step(&mut run, 2);
-    move_wick(&mut run, 0.0);
+    move_wick(&mut run, start_x);
     step(&mut run, 2);
     assert!(
         !grown(&run)
@@ -222,4 +226,127 @@ fn what_is_taken_stays_taken() {
             .any(|(_, _, there)| (there[0] - at[0]).hypot(there[1] - at[1]) < 1.0e-4),
         "it does not grow back"
     );
+}
+
+/// The walls the land raises over water near Wick: each one's middle and half
+/// size.
+fn walls(run: &Run) -> Vec<([f32; 3], [f32; 2])> {
+    run.world
+        .entities()
+        .filter(|(_, data)| data.name.as_deref() == Some("Map wall"))
+        .filter_map(|(entity, data)| {
+            let half = &data.components["sindri.physics2d.collider"]["shape"]["half_extents"];
+            #[allow(clippy::cast_possible_truncation)]
+            let half = [half[0].as_f64()? as f32, half[1].as_f64()? as f32];
+            Some((run.world.world_transform(entity)?.position, half))
+        })
+        .collect()
+}
+
+/// Water stops Wick: the land raises walls over what cannot be walked on near
+/// him, wherever he is.
+#[test]
+fn water_stops_wick() {
+    let mut run = Run::open_scene("wilds.scene").expect("the wilds open");
+    step(&mut run, 2);
+    let near = walls(&run);
+    assert!(!near.is_empty(), "the wilds have water near the start");
+    let inside = |walls: &[([f32; 3], [f32; 2])], x: f32, y: f32| {
+        walls
+            .iter()
+            .any(|(at, half)| (x - at[0]).abs() <= half[0] && (y - at[1]).abs() <= half[1])
+    };
+    // A wall with open ground two squares north of its middle, to walk south from.
+    let (wall, _) = near
+        .iter()
+        .find(|(at, _)| {
+            !inside(&near, at[0], at[1] + 1.0)
+                && !inside(&near, at[0], at[1] + 2.0)
+                && !inside(&near, at[0] + 0.4, at[1] + 1.0)
+                && !inside(&near, at[0] - 0.4, at[1] + 1.0)
+        })
+        .copied()
+        .expect("a shore to stand on");
+    let wick = run.entity("wick").expect("Wick");
+    let data = run.world.get_mut(wick).expect("Wick");
+    let mut placed = data.transform_3d.expect("placed");
+    placed.position = [wall[0], wall[1] + 2.0, 0.0];
+    data.transform_3d = Some(placed);
+    step(&mut run, 2);
+    run.input.apply(InputEvent::KeyPressed(Key::S));
+    step(&mut run, 90);
+    run.input.apply(InputEvent::KeyReleased(Key::S));
+    let stopped = position(&run, "wick");
+    assert!(
+        stopped[1] > wall[1] + 0.3,
+        "Wick stops at the water's edge: the wall is at {wall:?}, he is at {stopped:?}"
+    );
+    // And far away, the walls near the start come down and stand near him.
+    let data = run.world.get_mut(wick).expect("Wick");
+    let mut placed = data.transform_3d.expect("placed");
+    placed.position = [4_000.0, -3_000.0, 0.0];
+    data.transform_3d = Some(placed);
+    step(&mut run, 2);
+    let there = position(&run, "wick");
+    assert!(
+        walls(&run)
+            .iter()
+            .all(|(at, _)| (at[0] - there[0]).abs() < 60.0 && (at[1] - there[1]).abs() < 60.0),
+        "the walls near the start came down, and any standing are near him"
+    );
+}
+
+/// However far Wick goes, the world is moved back round him: he is near the
+/// origin, the land has moved with him, and he stands on the same square.
+#[test]
+fn far_out_the_world_is_moved_back_round_wick() {
+    let mut run = Run::open_scene("wilds.scene").expect("the wilds open");
+    step(&mut run, 2);
+    let wick = run.entity("wick").expect("Wick");
+    let ground = run.entity("ground").expect("the ground");
+    let data = run.world.get_mut(wick).expect("Wick");
+    let mut placed = data.transform_3d.expect("placed");
+    placed.position = [100_000.3, -70_000.6, 0.0];
+    data.transform_3d = Some(placed);
+    let before = position(&run, "ground");
+    step(&mut run, 2);
+    let here = position(&run, "wick");
+    assert!(
+        here[0].abs() <= 512.0 && here[1].abs() <= 512.0,
+        "near the origin: {here:?}"
+    );
+    let land = position(&run, "ground");
+    let moved = [land[0] - before[0], land[1] - before[1]];
+    assert!(
+        (here[0] - (100_000.3 + moved[0])).abs() < 0.05
+            && (here[1] - (-70_000.6 + moved[1])).abs() < 0.05,
+        "he moved with the land: moved {moved:?}, he is at {here:?}"
+    );
+    let origin = &run.world.get(ground).expect("it exists").components["sindri.floating_origin"];
+    #[allow(clippy::cast_possible_truncation)]
+    let recorded = [
+        origin["moved"][0].as_f64().expect("a number") as f32,
+        origin["moved"][1].as_f64().expect("a number") as f32,
+    ];
+    assert!(
+        (recorded[0] - moved[0]).abs() < 1.0e-3 && (recorded[1] - moved[1]).abs() < 1.0e-3,
+        "and how far is kept: {recorded:?} {moved:?}"
+    );
+    assert!(!grown(&run).is_empty(), "the land is dressed out there too");
+}
+
+/// Wick starts on dry ground: no wall stands where he does.
+#[test]
+fn wick_starts_on_dry_ground() {
+    let mut run = Run::open_scene("wilds.scene").expect("the wilds open");
+    step(&mut run, 2);
+    let at = position(&run, "wick");
+    for (wall, half) in walls(&run) {
+        let clear =
+            (at[0] - wall[0]).abs() > half[0] + 1.0 || (at[1] - wall[1]).abs() > half[1] + 1.0;
+        assert!(
+            clear,
+            "no water within a square of the start: {wall:?} {half:?}"
+        );
+    }
 }

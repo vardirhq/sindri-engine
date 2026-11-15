@@ -122,6 +122,34 @@ they stop a walker, cast shadows and are lit like anything placed by hand. One
 a script despawns was taken, and the scatter remembers it in `taken` so it does
 not grow back. Lamplighter's wilds are dressed this way.
 
+## Walls where the map cannot be walked
+
+A voxel world drawn as a map is only a picture to 2D physics, so a walker would
+cross its rivers and its sea. `sindri.map_walls` puts that right near play: the
+runtime raises a static 2D box over every run of squares in a row that a walker
+cannot stand on (water, lava, nothing at all) within `reach` squares of play
+(the entity named by `around`, or the middle of the world camera's view), on the
+collision layers `memberships` and `filter` name, sixteen squares by sixteen,
+and takes a chunk down once play is a chunk past its reach. They are ordinary
+entities named "Map wall"; Lamplighter's wilds stop Wick at the water this way.
+
+## A land as wide as the generator: the floating origin
+
+The generator answers for any column, and the map, the scatter and the walls
+only work out what is near play, so a land goes on as far as anyone walks,
+costing what is near. What runs out first is precision: positions are 32-bit
+floats, good to about a hundredth of a unit a hundred thousand units out, and a
+walk's physics stutters long before that. `sindri.floating_origin` keeps play
+near the origin instead: once the entity it follows (`around`) is further than
+`distance` from it on either axis, the runtime moves the whole world back by
+whole multiples of `step`, camera and particles in flight included, and keeps
+the total in `moved`. A land's squares are counted from the land's own placing,
+which moved too, so the generator, the scatter, the walls and what was taken
+all agree, and a land as wide as the generator's integer squares (millions
+across) is as sharp at its far edge as at its start. Screen elements stay where
+they are. A script that keeps a position of its own across steps should keep it
+relative to something in the world, or add `moved` back.
+
 ## Blocks
 
 `builtin:blocks` is the block set the engine ships, with its art compiled into

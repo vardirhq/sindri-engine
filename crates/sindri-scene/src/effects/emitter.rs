@@ -47,6 +47,16 @@ pub(crate) struct EmitterState {
     last: Option<[f32; 2]>,
 }
 
+impl EmitterState {
+    /// Where it last stood, moved by `by`.
+    pub(super) fn shift(&mut self, by: [f32; 2]) {
+        if let Some(last) = &mut self.last {
+            last[0] += by[0];
+            last[1] += by[1];
+        }
+    }
+}
+
 impl Effects2d {
     /// Runs every emitter in `world` for one step of `delta`.
     ///

@@ -170,6 +170,16 @@ const KNOWN: &[Known] = &[
         icon: icons::TILEMAP,
     },
     Known {
+        type_name: "sindri.map_walls",
+        family: Family::Physics,
+        icon: icons::COLLIDER,
+    },
+    Known {
+        type_name: "sindri.floating_origin",
+        family: Family::Rendering,
+        icon: icons::CAMERA,
+    },
+    Known {
         type_name: "sindri.ui.image",
         family: Family::Ui,
         icon: icons::UI_ELEMENT,

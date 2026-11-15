@@ -2,6 +2,8 @@
 
 # Changelog
 
+- A land as wide as its generator. `sindri.map_walls` raises static 2D walls over a map's water (and anything else that cannot be walked) near play and takes them down behind it, so rivers and seas stop a walker anywhere. `sindri.floating_origin` moves the whole world back round the player once they are far from the origin, particles and camera included, so a land millions of squares across stays sharp and its physics smooth. Lamplighter's wilds use both, with bigger, higher biomes (feature size 64, relief 32) and Wick starting in a meadow between the sea, the heath and the deadwood; `tests/wilds_map.rs` prints a seed's land in letters.
+
 - Dress a generated land: `sindri.scatter` on a voxel world stands things from prefabs on it by seed, each rule naming the blocks it grows on, its prefabs, its spacing and how likely each place is. The runtime makes what is within reach of play and unmakes what is far, so the land goes on and the same trees stand where they stood; one a script removes is remembered in `taken` and does not grow back. Lamplighter's wilds grow dead trees in the deadwood, oaks and bushes in the meadow, boulders in the barrens and ground cover everywhere.
 
 - Soft biome edges on a voxel map: with `soft_edges`, where two kinds of ground meet the seam wavers, short pixel strips of each fraying a few pixels into the other along a line from the world's seed, instead of meeting on the grid's straight seam. Ground frays into water too, so riverbanks are ragged, while water never creeps onto land. Lamplighter's wilds use it.

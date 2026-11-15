@@ -230,6 +230,19 @@ impl Effects2d {
     /// One pass, in place, with a swap-remove for the dead: the order flecks are
     /// drawn in does not matter because they are all on one layer and all in one
     /// batch, which is what lets the cheapest removal be the right one.
+    /// Moves every live fleck, and where every emitter last stood, by `by`:
+    /// what a floating origin does when it moves the world, so smoke drifting
+    /// over a fire moves with the fire.
+    pub fn shift(&mut self, by: [f32; 2]) {
+        for fleck in &mut self.flecks {
+            fleck.position[0] += by[0];
+            fleck.position[1] += by[1];
+        }
+        for emitter in self.emitters.values_mut() {
+            emitter.shift(by);
+        }
+    }
+
     pub fn advance(&mut self, delta: Duration) {
         let seconds = delta.as_secs_f32();
         if seconds <= 0.0 {

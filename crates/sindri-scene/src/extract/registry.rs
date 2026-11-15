@@ -284,6 +284,7 @@ fn register_drawables(components: &mut ComponentSchemaRegistry) -> Result<(), Sc
     // absolutely nothing and read as a broken button.
     two_d::register_shapes(components)?;
     two_d::register_lights(components)?;
+    two_d::register_land(components)?;
     two_d::register_particles(components)?;
     two_d::register_sprite_mask(components)?;
     register_tiles(components)?;
