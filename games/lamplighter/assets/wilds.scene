@@ -56,9 +56,9 @@
       "components": {
         "sindri.environment": {
           "background": [
-            0.02,
-            0.02,
-            0.05,
+            0.005,
+            0.005,
+            0.012,
             1.0
           ],
           "shadows": {
@@ -70,10 +70,26 @@
           "lighting_2d": {
             "enabled": true,
             "ambient": [
-              0.05,
-              0.06,
-              0.12
+              0.025,
+              0.028,
+              0.05
             ]
+          },
+          "depth_of_field": {
+            "enabled": true,
+            "focus": 0.56,
+            "range": 0.1,
+            "falloff": 0.28,
+            "blur": 0.0045
+          },
+          "night_vision": {
+            "enabled": true,
+            "threshold": 0.14,
+            "blur": 0.007,
+            "grey": 0.9
+          },
+          "post_process": {
+            "vignette": 0.45
           }
         }
       }

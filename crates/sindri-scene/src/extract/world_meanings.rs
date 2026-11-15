@@ -83,6 +83,13 @@ fn describe_environment(components: &mut ComponentSchemaRegistry) -> Result<(), 
         ("bloom.knee", range(1.0e-4, 1.0)),
         ("bloom.intensity", at_least(0.0)),
         ("bloom.passes", range(1.0, 8.0)),
+        ("depth_of_field.focus", UNIT),
+        ("depth_of_field.range", UNIT),
+        ("depth_of_field.falloff", range(1.0e-3, 1.0)),
+        ("depth_of_field.blur", range(0.0, 0.02)),
+        ("night_vision.threshold", range(1.0e-3, 1.0)),
+        ("night_vision.blur", range(0.0, 0.02)),
+        ("night_vision.grey", UNIT),
         ("lighting_2d.ambient", COLOR),
     ])?;
     Ok(())

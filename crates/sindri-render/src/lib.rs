@@ -33,7 +33,10 @@ mod triangle;
 mod uv_rect;
 
 pub use batch_stats::BatchDrawStats;
-pub use bloom::{Bloom, BloomSettings, PostProcessSettings, ToneMapping};
+pub use bloom::{
+    Bloom, BloomSettings, DepthOfFieldSettings, NightVisionSettings, PostProcessSettings,
+    ToneMapping,
+};
 pub use camera::{
     OrthographicCamera, PerspectiveCamera, look_at, orthographic_projection, perspective_projection,
 };

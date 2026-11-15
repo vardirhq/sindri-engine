@@ -201,10 +201,12 @@ says what is now true.
    land of meadow, deadwood, heath, bog and barrens in the game's own blocks,
    with Wick, lamps, trees, boulders and gloom standing as billboards under a
    camera tilted 38° and following him (`tests/the_wilds.rs`), and culling works
-   under perspective. Still to come: a generated world scene opened from the title: Lamplighter's
-   block set, soft biome edges, standing things scattered by seed as billboards,
-   the tilted camera following Wick, culling under perspective, and residency so
-   the land goes on. Wick walks it day-lit; a test walks him across biomes.
+   under perspective. It is seen through a lens: the band where Wick walks is in
+   focus and the land above and below it softens (`depth_of_field`), and the dark
+   past the lantern's reach goes grey and soft (`night_vision`), so the night is
+   truly hard to see into. Still to come: soft biome edges, standing things
+   scattered by seed as billboards, residency so the land goes on, and the wilds
+   opened from the title. Wick walks it day-lit; a test walks him across biomes.
 2. **The day and the dark.** A clock with dawn, day, dusk and night driving the
    ambient light and the sky; shortening days; the lantern burns fuel; the gloom
    come out at night and keep to the dark. A test survives one night by a fire.

@@ -2,6 +2,8 @@
 
 # Changelog
 
+- See the world through a lens: `sindri.environment.depth_of_field` keeps a band of the screen in focus and softens the picture above and below it, the tilt-shift look of a small world seen from above, and `night_vision` greys and blurs whatever is dark, as an eye sees at night, while lit places stay sharp and coloured. Lamplighter's wilds use both, under a darker night.
+
 - Leave out what a perspective camera cannot see, too: world sprites (billboards included), tilemap cells and cast shadows off screen are culled under a perspective camera as under an orthographic one, for 2D sprites standing in a 3D world.
 
 - Lamplighter's direction: a survival game rather than a top-down adventure. Days that end in a deadly dark, a lantern that burns what Wick gathers, crafting, health, hunger and courage, in a world generated from a seed, drawn as pixel sprites standing in 3D space under a tilted camera. `docs/lamplighter-plan.md` is the new plan; the field and village stay playable while the wilds are built.

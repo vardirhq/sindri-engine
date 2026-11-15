@@ -289,6 +289,13 @@
           "passes": 3,
           "threshold": 0.65
         },
+        "depth_of_field": {
+          "blur": 0.004,
+          "enabled": false,
+          "falloff": 0.3,
+          "focus": 0.55,
+          "range": 0.12
+        },
         "fog": {
           "color": [
             0.55,
@@ -309,6 +316,12 @@
             0.3
           ],
           "enabled": false
+        },
+        "night_vision": {
+          "blur": 0.006,
+          "enabled": false,
+          "grey": 0.85,
+          "threshold": 0.12
         },
         "post_process": {
           "contrast": 1.0,
@@ -349,6 +362,13 @@
           "passes": 3,
           "threshold": 0.65
         },
+        "depth_of_field": {
+          "blur": 0.004,
+          "enabled": false,
+          "falloff": 0.3,
+          "focus": 0.55,
+          "range": 0.12
+        },
         "fog": {
           "color": [
             0.55,
@@ -369,6 +389,12 @@
             0.3
           ],
           "enabled": false
+        },
+        "night_vision": {
+          "blur": 0.006,
+          "enabled": false,
+          "grey": 0.85,
+          "threshold": 0.12
         },
         "post_process": {
           "contrast": 1.0,
@@ -421,6 +447,26 @@
           "max": null,
           "min": 0.0
         },
+        "depth_of_field.blur": {
+          "kind": "range",
+          "max": 0.02,
+          "min": 0.0
+        },
+        "depth_of_field.falloff": {
+          "kind": "range",
+          "max": 1.0,
+          "min": 0.001
+        },
+        "depth_of_field.focus": {
+          "kind": "range",
+          "max": 1.0,
+          "min": 0.0
+        },
+        "depth_of_field.range": {
+          "kind": "range",
+          "max": 1.0,
+          "min": 0.0
+        },
         "fog.color": {
           "kind": "color"
         },
@@ -446,6 +492,21 @@
         },
         "lighting_2d.ambient": {
           "kind": "color"
+        },
+        "night_vision.blur": {
+          "kind": "range",
+          "max": 0.02,
+          "min": 0.0
+        },
+        "night_vision.grey": {
+          "kind": "range",
+          "max": 1.0,
+          "min": 0.0
+        },
+        "night_vision.threshold": {
+          "kind": "range",
+          "max": 1.0,
+          "min": 0.001
         },
         "post_process.contrast": {
           "kind": "range",

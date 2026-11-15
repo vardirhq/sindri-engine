@@ -56,6 +56,21 @@ def biome(name, temperature, moisture, surface, under, relief, terraces=0):
             'terraces': terraces}
 
 
+def seen_in_the_dark():
+    """The wilds' environment: a darker night than the field's, and an eye that
+    sees it as eyes do. The band where Wick walks is in focus and the land
+    above and below it softens, and what the lantern does not reach goes grey
+    and soft, so the dark is somewhere it is truly hard to see into."""
+    env = environment([0.025, 0.028, 0.05])
+    env['components']['sindri.environment'].update({
+        'background': [0.005, 0.005, 0.012, 1.0],
+        'depth_of_field': {'enabled': True, 'focus': 0.56, 'range': 0.1, 'falloff': 0.28, 'blur': 0.0045},
+        'night_vision': {'enabled': True, 'threshold': 0.14, 'blur': 0.007, 'grey': 0.9},
+        'post_process': {'vignette': 0.45},
+    })
+    return env
+
+
 def standing_up(entities):
     """Every sprite that stands in the world faces the camera, a picture on its feet."""
     for e in entities:
@@ -68,7 +83,7 @@ def standing_up(entities):
 def wilds():
     ents = [
         tilted_camera(),
-        environment([0.05, 0.06, 0.12]),
+        seen_in_the_dark(),
         entity('physics', 'Physics', **{
             'sindri.physics2d.world': {'gravity': [0, 0], 'layers': ['wall', 'wick', 'lantern', 'target']},
             'sindri.input.actions': {'actions': input_actions()}}),
