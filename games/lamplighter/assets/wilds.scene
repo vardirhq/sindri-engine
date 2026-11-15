@@ -295,7 +295,8 @@
           "view": "map",
           "variant_seed": 5,
           "layer": -10,
-          "edits": []
+          "edits": [],
+          "soft_edges": true
         }
       }
     },

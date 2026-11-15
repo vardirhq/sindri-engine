@@ -181,6 +181,12 @@ pub struct VoxelWorldComponent {
     /// square whose texture has no entry is lit by distance alone.
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
     pub normal_maps: BTreeMap<String, String>,
+    /// Where two kinds of ground meet on a map, each frays a little into the
+    /// other along a wavering line, rather than meeting on the grid's straight
+    /// seam. Only `view: map` reads it; the blocks and what a walker stands on
+    /// are unchanged.
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub soft_edges: bool,
 }
 
 /// A map-only water surface in voxel height coordinates.

@@ -38,6 +38,7 @@ mod ui;
 mod voxel_appearance;
 mod voxel_ground;
 mod voxel_map;
+mod voxel_map_edges;
 mod voxel_source;
 mod voxel_world;
 mod world_meanings;

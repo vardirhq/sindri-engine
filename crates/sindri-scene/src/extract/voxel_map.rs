@@ -29,7 +29,7 @@ use std::rc::Rc;
 use glam::{Mat4, Vec3, Vec4Swizzles};
 use sindri_core::{EntityId, World};
 use sindri_render::{SpriteInstance, TextureId, TransparentOrder, UvRect};
-use sindri_voxel::{SECTION_EDGE, VoxelCoord, VoxelFace};
+use sindri_voxel::{SECTION_EDGE, VoxelCoord, VoxelFace, VoxelId};
 
 use crate::{
     TextureBindings, TileSetBindings, VoxelGeneratorDocument, VoxelTextureSource, VoxelView,
@@ -41,6 +41,7 @@ use super::camera::view::camera_distance;
 use super::sprite::{DrawSpace, SpriteBatches, SpriteDraw};
 use super::voxel_appearance::{Resolved, resolve_appearance};
 use super::voxel_ground::VoxelGround;
+use super::voxel_map_edges::{Ground, MapPiece, into_square};
 use super::voxel_world::definition;
 use super::{SceneExtractError, SceneExtractor, transform_matrix};
 
@@ -72,6 +73,15 @@ struct MapSquare {
     texture: TextureId,
     rect: UvRect,
     tint: [f32; 4],
+    voxel: VoxelId,
+    walkable: bool,
+}
+
+/// One chunk's squares, and with soft edges the strips frayed over them.
+#[derive(Debug, Default)]
+struct MapChunk {
+    squares: Vec<MapSquare>,
+    pieces: Vec<MapPiece>,
 }
 
 /// One map's remembered squares, and what they were worked out from.
@@ -83,7 +93,7 @@ struct MapWorld {
     ground: VoxelGround,
     resolved: Resolved,
     reference: i32,
-    chunks: HashMap<(i32, i32), Rc<Vec<MapSquare>>>,
+    chunks: HashMap<(i32, i32), Rc<MapChunk>>,
 }
 
 #[derive(Default)]
@@ -247,81 +257,155 @@ fn push_map(
         return Ok(());
     };
     let distance = camera_distance(camera.view, root.w_axis.truncate());
-    let mut index = 0_u32;
+    let mut chunks = Vec::new();
     for chunk_row in min[1].div_euclid(CHUNK)..=max[1].div_euclid(CHUNK) {
         for chunk_column in min[0].div_euclid(CHUNK)..=max[0].div_euclid(CHUNK) {
-            let squares = chunk(map, chunk_column, chunk_row);
-            for square in squares.iter() {
-                if square.column < min[0]
-                    || square.column > max[0]
-                    || square.row < min[1]
-                    || square.row > max[1]
-                {
-                    continue;
-                }
-                #[allow(clippy::cast_precision_loss)]
-                let local = Mat4::from_translation(Vec3::new(
-                    square.column as f32 + 0.5,
-                    -(square.row as f32) - 0.5,
-                    0.0,
-                ));
-                let (texture, rect, tint) =
-                    flood.filter(|(level, _, _)| square.height < *level).map_or(
-                        (square.texture, square.rect, square.tint),
-                        |(level, texture, rect)| {
-                            let light = (1.0 - (level - square.height) * DEPTH_DARK).max(0.35);
-                            (texture, rect, [light, light, light, 1.0])
-                        },
-                    );
-                let normal_map = normal_maps
-                    .iter()
-                    .find(|(drawn, _)| *drawn == texture)
-                    .map(|(_, normal_map)| *normal_map);
-                batches.push(SpriteDraw {
-                    mask: None,
-                    shader: None,
-                    normal_map,
-                    clip: None,
-                    space: DrawSpace::World,
-                    texture,
-                    order: TransparentOrder::new(layer, distance, index)?,
-                    // A map is ground, lit like a tilemap's.
-                    sprite: SpriteInstance::new(root * local, tint)
-                        .with_uv_rect(rect)
-                        .lit(true),
-                });
-                index = index.saturating_add(1);
+            chunks.push(chunk(map, chunk_column, chunk_row));
+        }
+    }
+    let seen = |column: i32, row: i32| {
+        column >= min[0] && column <= max[0] && row >= min[1] && row <= max[1]
+    };
+    let flooded = |height: f32| flood.filter(|(level, _, _)| height < *level);
+    let mut index = 0_u32;
+    let mut draw = |column: i32,
+                    row: i32,
+                    middle: [f32; 2],
+                    size: [f32; 2],
+                    (texture, rect, tint): (TextureId, UvRect, [f32; 4])|
+     -> Result<(), SceneExtractError> {
+        #[allow(clippy::cast_precision_loss)]
+        let local = Mat4::from_translation(Vec3::new(
+            column as f32 + 0.5 + middle[0],
+            -(row as f32) - 0.5 + middle[1],
+            0.0,
+        )) * Mat4::from_scale(Vec3::new(size[0], size[1], 1.0));
+        let normal_map = normal_maps
+            .iter()
+            .find(|(drawn, _)| *drawn == texture)
+            .map(|(_, normal_map)| *normal_map);
+        batches.push(SpriteDraw {
+            mask: None,
+            shader: None,
+            normal_map,
+            clip: None,
+            space: DrawSpace::World,
+            texture,
+            order: TransparentOrder::new(layer, distance, index)?,
+            // A map is ground, lit like a tilemap's.
+            sprite: SpriteInstance::new(root * local, tint)
+                .with_uv_rect(rect)
+                .lit(true),
+        });
+        index = index.saturating_add(1);
+        Ok(())
+    };
+    for chunk in &chunks {
+        for square in chunk.squares.iter().filter(|s| seen(s.column, s.row)) {
+            let look = flooded(square.height).map_or(
+                (square.texture, square.rect, square.tint),
+                |(level, texture, rect)| {
+                    let light = (1.0 - (level - square.height) * DEPTH_DARK).max(0.35);
+                    (texture, rect, [light, light, light, 1.0])
+                },
+            );
+            draw(square.column, square.row, [0.0; 2], [1.0; 2], look)?;
+        }
+    }
+    // The frayed edges go over every square, so a strip is never covered by
+    // the square it reaches into. A flooded square shows water, not its edge.
+    for chunk in &chunks {
+        for piece in chunk.pieces.iter().filter(|p| seen(p.column, p.row)) {
+            if flooded(piece.height).is_none() {
+                draw(
+                    piece.column,
+                    piece.row,
+                    piece.middle,
+                    piece.size,
+                    (piece.texture, piece.rect, piece.tint),
+                )?;
             }
         }
     }
     Ok(())
 }
 
-/// The squares of one chunk, worked out the first time it is seen.
-fn chunk(map: &mut MapWorld, chunk_column: i32, chunk_row: i32) -> Rc<Vec<MapSquare>> {
+/// The squares of one chunk, worked out the first time it is seen, and with
+/// soft edges the strips frayed over them.
+fn chunk(map: &mut MapWorld, chunk_column: i32, chunk_row: i32) -> Rc<MapChunk> {
     if let Some(known) = map.chunks.get(&(chunk_column, chunk_row)) {
         return Rc::clone(known);
     }
-    let mut squares = Vec::with_capacity((CHUNK * CHUNK) as usize);
-    for row in chunk_row * CHUNK..(chunk_row + 1) * CHUNK {
-        for column in chunk_column * CHUNK..(chunk_column + 1) * CHUNK {
+    let columns = chunk_column * CHUNK..(chunk_column + 1) * CHUNK;
+    let rows = chunk_row * CHUNK..(chunk_row + 1) * CHUNK;
+    let mut made = MapChunk::default();
+    for row in rows.clone() {
+        for column in columns.clone() {
             if let Some(square) = square(map, column, row) {
-                squares.push(square);
+                made.squares.push(square);
             }
         }
+    }
+    if map.component.soft_edges {
+        made.pieces = frayed(map, &made.squares, columns, rows);
     }
     if map.chunks.len() >= REMEMBERED_CHUNKS {
         map.chunks.clear();
     }
-    let squares = Rc::new(squares);
+    let made = Rc::new(made);
     map.chunks
-        .insert((chunk_column, chunk_row), Rc::clone(&squares));
-    squares
+        .insert((chunk_column, chunk_row), Rc::clone(&made));
+    made
+}
+
+/// The strips frayed over a chunk's squares from the ground around each,
+/// which reaches one square past the chunk on every side.
+fn frayed(
+    map: &MapWorld,
+    squares: &[MapSquare],
+    columns: std::ops::Range<i32>,
+    rows: std::ops::Range<i32>,
+) -> Vec<MapPiece> {
+    let as_ground = |square: &MapSquare| Ground {
+        voxel: square.voxel,
+        walkable: square.walkable,
+        height: square.height,
+        texture: square.texture,
+        rect: square.rect,
+        tint: square.tint,
+    };
+    let mut ground: HashMap<(i32, i32), Ground> = squares
+        .iter()
+        .map(|square| ((square.column, square.row), as_ground(square)))
+        .collect();
+    let (left, right) = (columns.start - 1, columns.end);
+    let (top, bottom) = (rows.start - 1, rows.end);
+    let border = columns
+        .clone()
+        .flat_map(|column| [(column, top), (column, bottom)])
+        .chain(rows.clone().flat_map(|row| [(left, row), (right, row)]));
+    for (column, row) in border {
+        if let Some(square) = square(map, column, row) {
+            ground.insert((column, row), as_ground(&square));
+        }
+    }
+    let mut pieces = Vec::new();
+    for row in rows {
+        for column in columns.clone() {
+            pieces.extend(into_square(
+                map.component.variant_seed,
+                column,
+                row,
+                &ground,
+            ));
+        }
+    }
+    pieces
 }
 
 /// One column as the map draws it, or nothing where nothing stands.
 fn square(map: &MapWorld, column: i32, row: i32) -> Option<MapSquare> {
-    let (level, height, _) = map.ground.surface(column, row)?;
+    let (level, height, walkable) = map.ground.surface(column, row)?;
     let voxel = map.ground.voxel([column, level, row]);
     let face = map.resolved.texture_at(
         voxel,
@@ -348,6 +432,8 @@ fn square(map: &MapWorld, column: i32, row: i32) -> Option<MapSquare> {
         texture: face.texture,
         rect: face.uv,
         tint: [light, light, light, 1.0],
+        voxel,
+        walkable,
     })
 }
 

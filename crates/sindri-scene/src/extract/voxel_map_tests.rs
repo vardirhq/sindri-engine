@@ -80,7 +80,7 @@ fn a_flood_draws_below_its_level_and_reuses_the_dry_map_chunks() {
     refresh(&mut cache, &world, entity, &component, &textures, None).unwrap();
     let map = cache.get_mut(&entity).unwrap();
     let before = chunk(map, 0, 0);
-    let height = before[0].height;
+    let height = before.squares[0].height;
     let draw = |map: &mut MapWorld, level| {
         let mut batches = Vec::new();
         push_map(

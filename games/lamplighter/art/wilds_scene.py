@@ -51,7 +51,7 @@ def ground():
                 biome('Bog', 0.6, 0.95, 'moss', 'mud', 0.2),
                 biome('Barrens', 0.1, 0.2, 'stone', 'rock', 1.4, terraces=2),
             ]},
-        'blocks': 'blocks.tileset', 'view': 'map', 'variant_seed': 5, 'layer': -10, 'edits': []}})
+        'blocks': 'blocks.tileset', 'view': 'map', 'variant_seed': 5, 'layer': -10, 'edits': [], 'soft_edges': True}})
 
 
 def biome(name, temperature, moisture, surface, under, relief, terraces=0):
