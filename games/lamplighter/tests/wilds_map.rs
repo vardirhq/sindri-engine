@@ -8,7 +8,8 @@
 //! others.
 //!
 //! `~` water, `s` sand, `.` meadow, `t` deadwood, `h` heath, `b` bog, `m` mud,
-//! `^` stone and rock, `?` anything else, `@` where Wick starts.
+//! `^` stone and rock, `?` anything else, `@` where Wick starts, `H` a hamlet's
+//! middle.
 
 use lamplighter::Run;
 use sindri_scene::{VoxelGeneratorDocument, VoxelGround, VoxelWorldComponent};
@@ -25,6 +26,10 @@ fn wilds_map() {
     let payload =
         run.world.get(ground).expect("it exists").components["sindri.voxel_world"].clone();
     let mut land: VoxelWorldComponent = serde_json::from_value(payload).expect("a world");
+    let scatter: sindri_scene::ScatterComponent = serde_json::from_value(
+        run.world.get(ground).expect("it exists").components["sindri.scatter"].clone(),
+    )
+    .expect("a scatter");
     let start = run
         .world
         .world_transform(run.entity("wick").expect("Wick"))
@@ -62,6 +67,20 @@ fn wilds_map() {
             let ground = VoxelGround::of(&land, Some(session.tile_sets()))
                 .map_err(|error| error.to_string())?;
             println!("seed {seed}, {step} squares a letter");
+            let hamlets: Vec<[i32; 2]> = sindri_scene::scatter_sites(
+                &scatter,
+                &ground,
+                [middle[0] - 40 * step, middle[1] - 25 * step],
+                [middle[0] + 40 * step, middle[1] + 25 * step],
+            )
+            .iter()
+            .map(|site| {
+                #[allow(clippy::cast_possible_truncation)]
+                let square = [site.middle[0].floor() as i32, site.middle[1].floor() as i32];
+                println!("a hamlet at {square:?}, start {middle:?}");
+                square
+            })
+            .collect();
             for row in -25..25 {
                 let line: String = (-40..40)
                     .map(|column| {
@@ -69,6 +88,15 @@ fn wilds_map() {
                             return '@';
                         }
                         let (c, r) = (middle[0] + column * step, middle[1] + row * step);
+                        let near = |at: &[i32; 2]| {
+                            (at[0] - c).abs() < step.max(1) && (at[1] - r).abs() < step.max(1)
+                        };
+                        if hamlets
+                            .iter()
+                            .any(|at| near(at) && at[0] >= c && at[1] >= r)
+                        {
+                            return 'H';
+                        }
                         match ground.surface(c, r) {
                             None | Some((_, _, false)) => '~',
                             Some((level, _, true)) => match ground.block([c, level, r]).as_str() {

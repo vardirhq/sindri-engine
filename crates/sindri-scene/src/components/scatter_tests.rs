@@ -135,3 +135,106 @@ fn a_scatter_that_places_nothing_sensible_is_refused() {
         "but it makes nothing"
     );
 }
+
+fn hamlet() -> ScatterComponent {
+    let piece = |name: &str, at: [f32; 2]| SitePiece {
+        prefabs: vec![format!("{name}.prefab")],
+        at,
+        chance: 1.0,
+    };
+    ScatterComponent {
+        sites: vec![ScatterSite {
+            name: "hamlet".to_owned(),
+            on: vec!["1".to_owned()],
+            spacing: 40,
+            chance: 1.0,
+            radius: 6.0,
+            pieces: vec![
+                piece("well", [0.0, 0.0]),
+                piece("house", [3.0, 2.0]),
+                SitePiece {
+                    chance: 0.0,
+                    ..piece("cart", [-2.0, -2.0])
+                },
+            ],
+        }],
+        ..trees(1.0)
+    }
+}
+
+/// A site stands its layout whole round a middle the seed chooses, the same
+/// way every time, and clears what the rules grow inside it.
+#[test]
+fn a_site_stands_its_layout_and_clears_round_it() {
+    let flat = ground(Vec::new());
+    let scatter = hamlet();
+    let found = crate::scatter_sites(&scatter, &flat, [0, 0], [39, 39]);
+    assert_eq!(found.len(), 1, "one to a patch, sure to be there");
+    let middle = found[0].middle;
+    let all = placements(&scatter, &flat, [0, 0], [39, 39]);
+    let pieces: Vec<_> = all.iter().filter(|p| p.key[2] < 0).collect();
+    assert_eq!(
+        pieces.len(),
+        2,
+        "the well and the house; the cart never stands"
+    );
+    let well = pieces
+        .iter()
+        .find(|p| p.prefab == "well.prefab")
+        .expect("a well");
+    #[allow(clippy::cast_precision_loss)]
+    let at = [
+        well.key[0] as f32 + 0.5 + well.offset[0],
+        well.key[1] as f32 + 0.5 - well.offset[1],
+    ];
+    assert!((at[0] - middle[0]).abs() < 1e-4 && (at[1] - middle[1]).abs() < 1e-4);
+    let house = pieces
+        .iter()
+        .find(|p| p.prefab == "house.prefab")
+        .expect("a house");
+    let east = if found[0].mirrored { -3.0 } else { 3.0 };
+    #[allow(clippy::cast_possible_truncation)]
+    let square = [
+        (middle[0] + east).floor() as i32,
+        (middle[1] - 2.0).floor() as i32,
+    ];
+    assert_eq!(
+        [house.key[0], house.key[1]],
+        square,
+        "north and east of the well"
+    );
+    #[allow(clippy::cast_precision_loss)]
+    let inside = all.iter().filter(|p| p.key[2] >= 0).any(|p| {
+        (p.key[0] as f32 + 0.5 - middle[0]).hypot(p.key[1] as f32 + 0.5 - middle[1]) < 6.0
+    });
+    assert!(!inside, "no tree grows in the hamlet");
+    assert!(all.iter().any(|p| p.key[2] >= 0), "but they grow round it");
+    assert_eq!(all, placements(&scatter, &flat, [0, 0], [39, 39]));
+    let mut taken = scatter.clone();
+    taken.taken.push(well.key);
+    let left = placements(&taken, &flat, [0, 0], [39, 39]);
+    assert!(
+        !left.iter().any(|p| p.prefab == "well.prefab"),
+        "taken stays taken"
+    );
+}
+
+/// A site is only built where all of it can be walked on.
+#[test]
+fn a_site_is_not_built_where_it_cannot_be_walked() {
+    let scatter = hamlet();
+    let mut wrong = scatter.clone();
+    wrong.sites[0].on = vec!["2".to_owned()];
+    assert!(crate::scatter_sites(&wrong, &ground(Vec::new()), [0, 0], [39, 39]).is_empty());
+    let mut tight = scatter.clone();
+    tight.sites[0].spacing = 12;
+    assert_eq!(
+        tight.validate(),
+        Err(ScatterError::Site(
+            super::super::scatter_sites::SiteError::Spacing(0)
+        ))
+    );
+    tight.sites[0].spacing = 40;
+    tight.sites[0].pieces[0].at = [7.0, 0.0];
+    assert!(tight.validate().is_err(), "a piece outside its radius");
+}

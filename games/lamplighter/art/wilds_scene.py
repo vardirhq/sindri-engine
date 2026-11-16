@@ -96,7 +96,43 @@ def scatter():
         rule(['grass', 'deadgrass', 'earth'], ['tufts', 'flowers', 'pebbles'], 2, 0.3),
         rule(['moss'], ['mushrooms', 'tufts'], 2, 0.35),
         rule(['stone', 'rock', 'sand'], ['pebbles'], 3, 0.3),
-    ]}
+    ], 'sites': [hamlet()]}
+
+
+# A hamlet's houses and what stands round them: the sprite, the footprint that
+# stops Wick (two radii and the height of its middle, in world units, as the
+# village's), and whether a lit one glows.
+HAMLET_THINGS = {
+    'well': ('well', (1.0, 0.55, 0.55)), 'woodpile': ('woodpile', (1.0, 0.5, 0.5)),
+    'barrels': ('barrels', (0.7, 0.4, 0.4)), 'crates': ('crates', (0.9, 0.5, 0.5)),
+    'cart': ('cart', (1.0, 0.5, 0.5)), 'laundry': ('laundry', None), 'notice': ('notice', (0.8, 0.3, 0.3)),
+    'scarecrow': ('scarecrow', (0.4, 0.3, 0.3)), 'garden': ('garden-cabbage', None),
+    'garden-2': ('garden-cabbage-2', None), 'bench': ('bench', (0.9, 0.4, 0.4)),
+    'graves': ('graves', (1.0, 0.4, 0.4)),
+}
+HAMLET_HOUSES = ['bakery', 'child-house', 'workshop', 'keeper']
+
+
+def hamlet():
+    """A few houses round a well, now and then, on open ground: some still
+    lived in and lit, some long dark. The seed chooses which houses stand, which
+    of them they are, and whether the whole is mirrored."""
+    def piece(names, x, y, chance=1.0):
+        return {'prefabs': [f'prefabs/wilds/hamlet/{name}.prefab' for name in names], 'at': [x, y],
+                'chance': chance}
+    houses = [f'{name}{state}' for name in HAMLET_HOUSES for state in ('', '-lit', '-lit')]
+    return {'name': 'hamlet', 'on': ['grass', 'deadgrass', 'earth'], 'spacing': 80, 'chance': 0.7,
+            'radius': 10.0, 'pieces': [
+                piece(['well'], 0.0, 0.0),
+                piece(houses, -5.5, 3.0), piece(houses, 5.5, 3.5, 0.9),
+                piece(houses, -4.5, -5.0, 0.7), piece(houses, 5.0, -5.5, 0.6),
+                piece(['woodpile', 'barrels', 'crates'], 2.2, -1.2, 0.7),
+                piece(['cart', 'bench', 'notice'], -2.6, -1.4, 0.6),
+                piece(['laundry', 'scarecrow'], 8.4, 0.2, 0.6),
+                piece(['garden', 'garden-2'], -8.6, -0.4, 0.6),
+                piece(['graves'], 0.4, 7.8, 0.4),
+                piece(['barrels', 'crates'], -1.4, -7.4, 0.5),
+            ]}
 
 
 def prefabs():
@@ -115,13 +151,26 @@ def prefabs():
             components['sindri.light2d'] = {'enabled': True, 'color': [0.45, 0.85, 1.0, 1.0], 'intensity': 0.7,
                                             'radius': 2.8, 'falloff': 1.6, 'height': 0.6, 'shadows': False}
         made[kind] = entity('cover', 'cover', at(0, 0, 0, 1.5, 1.5), **components)
-    PREFABS.mkdir(parents=True, exist_ok=True)
+    hamlet_things = {}
+    for name, (sprite, block) in HAMLET_THINGS.items():
+        hamlet_things[f'hamlet/{name}'] = village_scene.standing('thing', sprite, 0, 0, block)
+    for name in HAMLET_HOUSES:
+        hamlet_things[f'hamlet/{name}'] = village_scene.standing('house', f'{name}-unlit', 0, 0, (2.5, 1.1, 1.2))
+        lit = village_scene.standing('house', f'{name}-lit', 0, 0, (2.5, 1.1, 1.2))
+        # Someone is home: their windows light the ground in front of the door.
+        lit['components']['sindri.light2d'] = {'enabled': True, 'color': [1.0, 0.72, 0.38, 1.0],
+                                               'intensity': 1.8, 'radius': 7.0, 'falloff': 1.5, 'height': 1.0,
+                                               'offset': [0.0, -0.2],
+                                               'shadows': False}
+        hamlet_things[f'hamlet/{name}-lit'] = lit
+    made.update(hamlet_things)
+    (PREFABS / 'hamlet').mkdir(parents=True, exist_ok=True)
     for name, thing in made.items():
-        thing['id'] = name
-        thing['name'] = name
+        thing['id'] = name.replace('/', '-')
+        thing['name'] = name.rsplit('/', 1)[-1]
         (one,) = standing_up([thing])
         one['transform_3d']['position'] = [0.0, 0.0, 0.0]
-        doc = {'format_version': 1, 'metadata': {'name': name}, 'entities': [one]}
+        doc = {'format_version': 1, 'metadata': {'name': thing['name']}, 'entities': [one]}
         (PREFABS / f'{name}.prefab').write_text(json.dumps(doc, indent=2) + '\n')
 
 

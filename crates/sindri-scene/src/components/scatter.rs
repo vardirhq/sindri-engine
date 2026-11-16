@@ -16,6 +16,7 @@
 use serde::{Deserialize, Serialize};
 use sindri_core::SceneComponent;
 
+use super::scatter_sites::{self, ScatterSite, SiteError, SitePiece};
 use crate::VoxelGround;
 
 /// The land a voxel world's scatter dresses.
@@ -37,6 +38,8 @@ pub struct ScatterComponent {
     /// What has been taken away and does not come back: a square's column and
     /// row, and the rule that put it there.
     pub taken: Vec<[i32; 3]>,
+    /// Places stood whole, a layout at a time: a hamlet, a ruin, a camp.
+    pub sites: Vec<ScatterSite>,
 }
 
 impl Default for ScatterComponent {
@@ -54,6 +57,14 @@ impl Default for ScatterComponent {
             }],
             clearings: Vec::new(),
             taken: Vec::new(),
+            sites: vec![ScatterSite {
+                on: vec![String::new()],
+                pieces: vec![SitePiece {
+                    prefabs: vec![String::new()],
+                    ..SitePiece::default()
+                }],
+                ..ScatterSite::default()
+            }],
         }
     }
 }
@@ -106,6 +117,8 @@ pub enum ScatterError {
     Spacing(usize),
     #[error("rule {0}'s `chance` must be from 0 to 1")]
     Chance(usize),
+    #[error(transparent)]
+    Site(#[from] SiteError),
 }
 
 impl ScatterComponent {
@@ -125,6 +138,9 @@ impl ScatterComponent {
             if !(0.0..=1.0).contains(&rule.chance) {
                 return Err(ScatterError::Chance(index));
             }
+        }
+        for (index, site) in self.sites.iter().enumerate() {
+            site.validate(index)?;
         }
         Ok(())
     }
@@ -147,7 +163,9 @@ pub struct Placement {
 /// Everything the scatter stands on the squares from `min` to `max`
 /// (inclusive, column and row), that has not been taken.
 ///
-/// Where two rules choose one square, the first rule's thing stands there.
+/// A site's pieces stand first, and nothing a rule grows stands inside a
+/// site; where two rules choose one square, the first rule's thing stands
+/// there.
 #[must_use]
 pub fn placements(
     scatter: &ScatterComponent,
@@ -155,8 +173,16 @@ pub fn placements(
     min: [i32; 2],
     max: [i32; 2],
 ) -> Vec<Placement> {
-    let mut out: Vec<Placement> = Vec::new();
-    let mut used = std::collections::HashSet::new();
+    let widest = scatter_sites::widest(scatter);
+    let built = scatter_sites::sites(
+        scatter,
+        ground,
+        [min[0] - widest, min[1] - widest],
+        [max[0] + widest, max[1] + widest],
+    );
+    let mut out = scatter_sites::pieces(scatter, &built, min, max);
+    let mut used: std::collections::HashSet<(i32, i32)> =
+        out.iter().map(|p| (p.key[0], p.key[1])).collect();
     for (index, rule) in scatter.rules.iter().enumerate() {
         let Ok(rule_index) = i32::try_from(index) else {
             break;
@@ -184,7 +210,10 @@ pub fn placements(
                     continue;
                 }
                 let key = [column, row, rule_index];
-                if scatter.taken.contains(&key) || in_a_clearing(scatter, column, row) {
+                if scatter.taken.contains(&key)
+                    || in_a_clearing(scatter, column, row)
+                    || scatter_sites::in_a_site(scatter, &built, column, row)
+                {
                     continue;
                 }
                 if !used.insert((column, row)) {
@@ -223,10 +252,10 @@ fn in_a_clearing(scatter: &ScatterComponent, column: i32, row: i32) -> bool {
 }
 
 /// A run of numbers from a seed and a place: the same place, the same run.
-struct Roll(u64);
+pub(super) struct Roll(u64);
 
 impl Roll {
-    fn new(seed: u64, column: i32, row: i32, rule: i32) -> Self {
+    pub(super) fn new(seed: u64, column: i32, row: i32, rule: i32) -> Self {
         Self(
             seed ^ u64::from(column.cast_unsigned()).rotate_left(17)
                 ^ u64::from(row.cast_unsigned()).rotate_left(41)
@@ -234,7 +263,7 @@ impl Roll {
         )
     }
 
-    fn next(&mut self) -> u64 {
+    pub(super) fn next(&mut self) -> u64 {
         // SplitMix64.
         self.0 = self.0.wrapping_add(0x9E37_79B9_7F4A_7C15);
         let mut z = self.0;
@@ -244,14 +273,14 @@ impl Roll {
     }
 
     /// A number from 0 up to 1.
-    fn unit(&mut self) -> f32 {
+    pub(super) fn unit(&mut self) -> f32 {
         #[allow(clippy::cast_precision_loss)]
         let unit = (self.next() >> 40) as f32 / (1_u64 << 24) as f32;
         unit
     }
 
     /// A whole number from 0 up to `count`.
-    fn below(&mut self, count: i32) -> i32 {
+    pub(super) fn below(&mut self, count: i32) -> i32 {
         let count = u64::from(count.max(1).cast_unsigned());
         i32::try_from(self.next() % count).unwrap_or(0)
     }

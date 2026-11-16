@@ -24,6 +24,7 @@ mod material;
 mod mesh;
 mod model;
 mod scatter;
+mod scatter_sites;
 mod shadow2d;
 mod sight2d;
 mod sprite;
@@ -71,6 +72,7 @@ pub use scatter::{
     MOST_REACH as MOST_SCATTER_REACH, MOST_SPACING as MOST_SCATTER_SPACING, Placement,
     ScatterComponent, ScatterError, ScatterRule, placements as scatter_placements,
 };
+pub use scatter_sites::{ScatterSite, Site, SitePiece, sites as scatter_sites};
 pub use shadow2d::{Shadow2dComponent, Shadow2dError};
 pub use sight2d::Sight2dComponent;
 pub use sprite::{ImageDraw, SpriteColorTransform, SpriteComponent};

@@ -211,8 +211,10 @@ says what is now true.
    from him, and what is taken stays taken. The land goes on as far as the
    generator does: water stops Wick (`sindri.map_walls`), and the world is moved
    back round him far out (`sindri.floating_origin`), so it stays sharp millions
-   of squares away. Still to come: the wilds opened from the title, and villages
-   and other places appearing in the land at random. Wick walks it day-lit; a test walks him across biomes.
+   of squares away. Hamlets stand here and there on open ground, built whole by
+   the seed (`sites` on the scatter): a well, houses round it, some still lit.
+   Still to come: the wilds opened from the title, hamlets with people and a lamp
+   to light, and other places (ruins, camps, the beacon) appearing at random. Wick walks it day-lit; a test walks him across biomes.
 2. **The day and the dark.** A clock with dawn, day, dusk and night driving the
    ambient light and the sky; shortening days; the lantern burns fuel; the gloom
    come out at night and keep to the dark. A test survives one night by a fire.
