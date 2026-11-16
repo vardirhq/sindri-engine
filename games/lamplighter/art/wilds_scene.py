@@ -381,7 +381,7 @@ def seen_in_the_dark():
 
 
 TEXTURES = Path(__file__).resolve().parent.parent / 'assets' / 'textures'
-HAND = 0.95     # how high Wick carries his lantern
+HAND = 1.45     # how high Wick carries his lantern: his chest, as the tilted camera sees him
 ROUNDER = 0.6   # a contact shadow's depth for its width: the camera foreshortens it already
 GROUNDED = 0.7  # how dark a contact shadow is: what stands has to be seen to touch the ground
 SPREAD = 1.5    # how much wider than the field's: its far half is hidden behind what stands on it
