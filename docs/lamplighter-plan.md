@@ -1,9 +1,9 @@
 # Lamplighter
 
 A plan for **Lamplighter**, a survival game about a wandering lamplighter keeping
-a light alive in a world whose sun is fading: 2D pixel art standing in a 3D
-world, a generated land of biomes, days that end in a deadly dark, and a lantern
-that burns what Wick finds. This document is the design and the order of work;
+a light alive in a world shut under the Lid: 2D pixel art standing in a 3D
+world, a generated land of biomes, a dark broken only by what people light and
+what falls through the cracks, and a lantern that burns what Wick finds. This document is the design and the order of work;
 it moves with the game, and a stage is checked off here when its acceptance
 criteria are met and its tests pass.
 
@@ -26,26 +26,39 @@ land, and the field is retired once the wilds can be played from the title.
 
 ## The game
 
-The sun no longer gives enough light to reach much of the world. Each day is a
-little shorter than the last. Settlements depend on lanterns and beacons to keep
-paths visible and give people somewhere safe; beyond those pools of light the
-land is nearly pitch black, and the gloom live in it. **Wick** is a wandering
-lamplighter, part adventurer and part wizard-like drifter, who carries a sword
-and a lantern through the wilds between the last lit places.
+One day something settled over the sky: the **Lid**, a vast slow shell of
+plates, and nobody knows whether it is alive or made. The sun is still up there,
+and only thin cracks of it come through. There has been no day since. The land
+under it is dark beyond what people light; settlements keep lanterns and beacons
+burning so paths can be seen and people have somewhere safe, and the gloom live
+in the dark between them. **Wick** is a wandering lamplighter, part adventurer
+and part wizard-like drifter, who carries a sword and a lantern through the
+wilds between the last lit places.
+
+Three kinds of light meet under the Lid, and the game is how they meet:
+
+- **Warm light** is people's: lanterns, lamps, hearths and fires. It is steady,
+  it stays where it is lit, and it keeps the gloom off. Wick makes and keeps it.
+- **Cracklight** is the sun's, falling through the Lid in shafts of gold, the
+  **sunfalls**. A sunfall is beautiful and safe and never still: the plates shift,
+  so it drifts across the land, comes and goes. It is the only daylight there is.
+- **Red light** is the Lid's. **Seekers** come down from it and sweep the ground
+  with a circle of cold red light, looking for warmth. To be caught in one is to
+  be found: it calls them down, and the gloom with them.
 
 The tone is mysterious and sometimes unsettling, but not without warmth: each
 light Wick keeps is a small refuge, and each person helped makes the world a
-little less empty. Why the sun is fading is for the player to discover. One
-possible ending is bittersweet: the dying sun erupts in a last display of light
-and colour before it destroys the world, which gives the journey its meaning
-even if the world cannot be saved.
+little less empty. What the Lid is, and why it came, is for the player to
+discover. The ending it points to is the Lid breaking: the sun let through, a
+first day after so long.
 
 ### How it plays
 
-- **Day, dusk and night.** By day Wick explores and gathers. Dusk warns. At night
-  the land is dark beyond what Wick's lantern, a fire or a lit lamp reaches, and
-  the gloom come for anything outside a light. The days shorten as the sun fades,
-  so the nights grow: the pressure is the light running out, not a calendar.
+- **Under the Lid.** There is no day and night: the land is always dark beyond
+  what Wick's lantern, a fire, a lit lamp or a sunfall reaches, and the gloom come
+  for anything outside a light. The pressure is the light running out and the
+  Seekers sweeping, not a clock. A sunfall is a place to reach: safe while it
+  lasts, and the only light that costs nothing.
 - **Fuel for light.** The lantern burns. Oil, wax and resin keep it lit, and a
   fire burns wood. A light left unfed gutters and goes out. Light is a resource
   Wick manages, not a switch, and a gloom's pounce still scorches the lantern
@@ -60,7 +73,7 @@ even if the world cannot be saved.
   Food is foraged, hunted and cooked over a fire.
 - **Places to keep.** Lamp posts Wick builds and lights make lasting safe ground;
   villages are lit places with people to trade with and help. Keeping a place lit
-  through the night is the game's long-term goal, and the beacon at a village's
+  against the dark is the game's long-term goal, and the beacon at a village's
   heart is still its first.
 - **Fight.** The sword is for when light is not enough. The gloom flee strong
   light and burn out in it; the brute does not care about light and must be
@@ -71,8 +84,13 @@ even if the world cannot be saved.
 - How death works: back to the last lit lamp with something lost, or the run ends
   and a new world is generated. Decided by playing both at stage 4.
 - Whether Wick can put the lantern down to leave light behind (a puzzle and
-  survival tool, but it changes the night's danger).
-- The cause of the fading sun, and whether the ending is the bittersweet one.
+  survival tool, but it changes the dark's danger).
+- What the Lid is, why it came, and how breaking it plays.
+
+**Set aside.** The first premise was a fading sun: days shortening as it died, and
+a bittersweet ending in which it erupts in a last display of light and colour
+before it destroys the world. It is a good idea that does not fit a game under
+the Lid, and is kept here rather than lost.
 - How hard it is. The working assumption is fair rather than punishing: the dark
   is dangerous, never arbitrary.
 
@@ -95,7 +113,7 @@ still the 2D lighting; the lit lantern is still the one warm thing on screen.
 with no engine change: a `natural_terrain` voxel world drawn in map view (meadow,
 bog and heath, a river, sand and rock) under a perspective camera tilted 38° from
 straight down, with Wick, two lamp posts, dead trees, boulders and gloom as
-billboards, lit at night by his lantern. The voxel world's map view lies on the
+billboards, lit in the dark by his lantern. The voxel world's map view lies on the
 same plane, is lit by the same 2D lights, and is generated from one seed.
 
 ### What the prototype showed is missing
@@ -187,7 +205,7 @@ To verify before relying on it:
   the camera's distance.
 - **Screen UI for inventory and crafting** on a phone and a desktop: tapping and
   dragging items, and the gamepad.
-- **Many lights at night:** fires, lamps, glowcaps and the lantern together within
+- **Many lights in the dark:** fires, lamps, glowcaps and the lantern together within
   the 16-light frame, chosen by what the view shows.
 
 ## Stages
@@ -203,7 +221,7 @@ says what is now true.
    camera tilted 38° and following him (`tests/the_wilds.rs`), and culling works
    under perspective. It is seen through a lens: the band where Wick walks is in
    focus and the land above and below it softens (`depth_of_field`), and the dark
-   past the lantern's reach goes grey and soft (`night_vision`), so the night is
+   past the lantern's reach goes grey and soft (`night_vision`), so the dark is
    truly hard to see into. Things stand on the ground with their shadows under
    them, and the seams between biomes fray (`soft_edges`) rather than following
    the grid. What grows is scattered by seed and ground (`sindri.scatter`): dead
@@ -214,25 +232,27 @@ says what is now true.
    of squares away. Hamlets stand here and there on open ground, built whole by
    the seed (`sites` on the scatter): a well, houses round it, some still lit.
    Still to come: the wilds opened from the title, hamlets with people and a lamp
-   to light, and other places (ruins, camps, the beacon) appearing at random. Wick walks it day-lit; a test walks him across biomes.
-2. **The day and the dark.** A clock with dawn, day, dusk and night driving the
-   ambient light and the sky; shortening days; the lantern burns fuel; the gloom
-   come out at night and keep to the dark. A test survives one night by a fire.
+   to light, and other places (ruins, camps, the beacon) appearing at random. Wick walks it in the dark; a test walks him across biomes.
+2. **Under the Lid.** Sunfalls: shafts of cracklight with a gold pool and dust
+   in the beam (*started:* they stand here and there in the wilds, scattered by
+   seed), drifting and coming and going. Seekers sweeping the land with red light,
+   and what being found calls down. The lantern burns fuel; the gloom keep to the
+   dark. A test outlasts a Seeker's sweep by a fire.
 3. **Gather and craft.** Things to pick up, an inventory, a crafting menu, and
    the first recipes: torch, campfire, lamp post, lantern oil. A test gathers and
-   builds a campfire before dusk.
+   builds a campfire before his lantern runs dry.
 4. **Survive.** Health, hunger and courage; food, cooking and the courage effects;
-   death and what it costs. A test lives through three days.
+   death and what it costs. A test lives through three long dark spells.
 5. **Places.** The village set into the world with its houses, villagers to help
    and trade with, ruined lamp posts and the beacon. Saved worlds.
-6. **The story and polish.** The fading sun, the ending, music and sound, the
+6. **The story and polish.** The Lid, the ending, music and sound, the
    screenshots and site entry, and `docs/parity.md` and the capability pages
    brought level with what is played.
 
 ## Checks that hold throughout
 
 - Every stage has a scripted run that plays it; one test plays from the title
-  through the first night. A goal that cannot be reached is a failing test.
+  through the first Seeker's sweep. A goal that cannot be reached is a failing test.
 - `scripts/preflight.py` and the typed Decay preflight on every changed script;
   no game rules in Rust; the project has no `src` beyond its test harness.
 - The sprite sheets and tile art are reproducible: re-running the art scripts and

@@ -75,6 +75,7 @@ ORIGIN = (-60.0, 60.0)   # where the ground's first square is: square (60, 60) i
 PREFABS = Path(__file__).resolve().parent.parent / 'assets' / 'prefabs' / 'wilds'
 START = (10, 6)   # Wick's first step: meadow, by a river, the sea to the west
 LAMPS = [(15, 3), (4, 9)]
+SUNFALLS = [(6, 3)]   # one in sight of the start, so the first thing Wick sees is cracklight
 GLOOM = [(18, 12), (18, -4)]
 
 
@@ -105,6 +106,8 @@ def scatter():
         rule(['grass'], ['fireflies'], 6, 0.55),
         rule(['moss', 'mud'], ['mist'], 5, 0.6),
         rule(['deadgrass'], ['leaves'], 7, 0.45),
+        # Now and then a crack in the Lid lets the sun through.
+        rule(['grass', 'deadgrass', 'earth', 'moss', 'stone', 'sand'], ['sunfall'], 26, 0.35),
     ], 'sites': [hamlet()]}
 
 
@@ -165,6 +168,7 @@ def prefabs():
                                             'radius': 2.8, 'falloff': 1.6, 'height': 0.6, 'shadows': False}
         made[kind] = entity('cover', 'cover', at(0, 0, 0, 1.5, 1.5), **components)
     made.update(air())
+    made['sunfall'] = sunfall('sunfall', 0, 0)
     hamlet_things = {}
     for name, (sprite, block) in HAMLET_THINGS.items():
         hamlet_things[f'hamlet/{name}'] = village_scene.standing('thing', sprite, 0, 0, block)
@@ -216,6 +220,23 @@ def air():
                         gravity=[-0.05, -0.08], drag=0.1, layer=5, spin=140.0, max=6,
                         texture='textures/leaf.png'),
     }
+
+
+def sunfall(name, x, y, phase=0.0):
+    """Cracklight falling through the Lid: a shaft of gold standing up from where
+    it lands (`art/sunfall.py`, moved by `shaders/sunfall.wgsl`), the pool it
+    lights on the ground, and dust glinting in it. The shaft is unlit, being light
+    itself; the pool is a wide, even light that does not flicker as a flame does."""
+    gold = [1.0, 0.74, 0.36]
+    return entity(name, name, at(x, y, 0), **{
+        'sindri.sprite': {'texture': 'textures/sunfall.png#shaft', 'layer': 5, 'size': [3.0, 9.0],
+                          'tint': [1.35, 0.88, 0.34, 1.0], 'unlit': True,
+                          'shader': 'shaders/sunfall.wgsl', 'shader_params': [1.0, phase, 0.0, 0.0]},
+        'sindri.light2d': {'enabled': True, 'color': [*gold, 1.0], 'intensity': 2.0, 'radius': 4.5,
+                           'falloff': 0.9, 'height': 3.0, 'shadows': False, 'flicker': 0.0},
+        'sindri.particles': scenes.motes(1.6, 5.0, 0.12, [[*gold, 0.0], [1.6, 1.4, 0.9, 0.9], [*gold, 0.0]],
+                                         0.14, 0.1, spread=360.0, shape_size=[1.4, 1.4],
+                                         gravity=[0.0, 0.03], drag=0.4, layer=7, glow=True, max=10)})
 
 
 def biome(name, temperature, moisture, surface, under, relief, terraces=0):
@@ -328,7 +349,7 @@ def standing_up(entities):
         # A flame is never quite still.
         for name, part in components.items():
             if name.startswith('sindri.light2d') and not name.startswith('sindri.light2d.') \
-                    and part.get('color', [0, 0, 0])[2] < 0.6:
+                    and part.get('color', [0, 0, 0])[2] < 0.6 and 'flicker' not in part:
                 part['flicker'] = FLICKER
         post = by_id.get(e['id'].removesuffix('-light'))
         if light is not None and post is not e and post is not None:
@@ -349,6 +370,7 @@ def wilds():
         ground(),
     ]
     ents += [e for n, (x, y) in enumerate(LAMPS, 1) for e in lantern(f'lantern-{n}', x, y)]
+    ents += [sunfall(f'sunfall-{n}', x, y, phase=1.7 * n) for n, (x, y) in enumerate(SUNFALLS, 1)]
     ents += [*placed_at_start(wick()), *effects(), *[gloom(f'gloom-{n}', x, y, size) for n, ((x, y), size) in enumerate(zip(GLOOM, [1, 3]), 1)]]
     return standing_up(ents)
 
