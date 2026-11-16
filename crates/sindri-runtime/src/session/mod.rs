@@ -23,12 +23,14 @@ mod audio;
 mod cameras;
 mod game;
 mod input;
+/// Where a session's save is kept, and when it is written out.
+mod origin;
 mod physics;
 mod profiles;
-/// Where a session's save is kept, and when it is written out.
 mod saves;
 mod scatter;
 mod scenes;
+mod walls;
 
 /// The gameplay, which is the scripts and nothing else.
 pub struct Session {
@@ -95,6 +97,8 @@ pub struct Session {
     surfaces: sindri_scene::GridSurfaces,
     /// What each land's scatter has made near play.
     scattered: scatter::Scattered,
+    /// The walls on each map's unwalkable ground near play.
+    walls: walls::Walls,
     since_written: f32,
     /// Where the save actually goes.
     ///
@@ -148,6 +152,7 @@ impl Session {
             gestures: sindri_core::Gestures::new(sindri_core::GestureLimits::default()),
             surfaces: sindri_scene::GridSurfaces::default(),
             scattered: scatter::Scattered::default(),
+            walls: walls::Walls::default(),
             since_written: 0.0,
             save_backend: Box::new(sindri_platform::MemorySaves::new()),
             pending_audio: Vec::new(),
@@ -431,8 +436,8 @@ impl Session {
         // After the scripts, so a camera following the player follows where
         // this step left it. The voxel world keeps its own window under it.
         self.step_cameras(world, delta_seconds, viewport, &mut problems);
-        // After the camera, so what stands near play is made where play now is.
-        self.step_scatter(world, viewport, &mut problems);
+        // After the camera, so the land near play is made where play now is.
+        self.step_land(world, viewport, &mut problems);
         laps.lap(StepPhase::Cameras);
         // After the scripts, because a walker's depth is a consequence of where
         // this step left it, and before anything draws. Props settle on the

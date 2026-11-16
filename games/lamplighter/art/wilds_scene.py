@@ -34,7 +34,8 @@ def tilted_camera():
     rotation = [math.sin(half), 0.0, 0.0, math.cos(half)]
     distance = 22.0
     offset = [0.0, -distance * math.sin(TILT), distance * math.cos(TILT)]
-    return entity('camera', 'Camera', {'position': offset, 'rotation': rotation, 'scale': [1, 1, 1]}, **{
+    at = [START[0] + offset[0], START[1] + offset[1], offset[2]]
+    return entity('camera', 'Camera', {'position': at, 'rotation': rotation, 'scale': [1, 1, 1]}, **{
         'sindri.camera': {'projection': 'perspective', 'vertical_fov_degrees': 40.0, 'near': 0.5, 'far': 200.0},
         'sindri.camera.behavior': {'follow': {'target': 'wick', 'offset': offset, 'dead_zone': [0.3, 0.3],
                                               'smoothing': 8, 'max_speed': 30}}})
@@ -44,7 +45,7 @@ def ground():
     """A world of biomes from one seed, drawn flat, its top a little below where things stand."""
     return entity('ground', 'Ground', at(-60.0, 60.0, -0.05), **{'sindri.voxel_world': {
         'generator': {
-            'kind': 'natural_terrain', 'seed': 3, 'sea_level': 0, 'relief': 12, 'feature_size': 48,
+            'kind': 'natural_terrain', 'seed': 3, 'sea_level': 0, 'relief': 32, 'feature_size': 64,
             'tree_line': 400, 'snow_line': 500, 'caves': False, 'rivers': True,
             'stone_voxel': 'stone', 'water_voxel': 'water', 'beach_voxel': 'sand', 'sea_bed_voxel': 'mud',
             'cliff_voxel': 'rock', 'snow_voxel': None, 'ice_voxel': None, 'trunk_voxel': None,
@@ -57,13 +58,19 @@ def ground():
                 biome('Barrens', 0.1, 0.2, 'stone', 'rock', 1.4, terraces=2),
             ]},
         'blocks': 'blocks.tileset', 'view': 'map', 'variant_seed': 5, 'layer': -10, 'edits': [], 'soft_edges': True},
-        'sindri.scatter': scatter()})
+        'sindri.scatter': scatter(),
+        # Water stops Wick, near him, however far he goes.
+        'sindri.map_walls': {'around': 'wick', 'reach': 20, 'memberships': scenes.WALL, 'filter': scenes.ALL},
+        # The land goes on as far as Wick walks; the world is moved back round him
+        # so it stays as sharp a hundred thousand squares out as at the start.
+        'sindri.floating_origin': {'around': 'wick', 'distance': 512.0, 'step': 256.0, 'moved': [0.0, 0.0]}})
 
 
 ORIGIN = (-60.0, 60.0)   # where the ground's first square is: square (60, 60) is the world's middle
 PREFABS = Path(__file__).resolve().parent.parent / 'assets' / 'prefabs' / 'wilds'
-LAMPS = [(6, 1), (-7, 2)]
-GLOOM = [(10, 5), (-9, -5)]
+START = (10, 6)   # Wick's first step: meadow, by a river, the sea to the west
+LAMPS = [(15, 3), (4, 9)]
+GLOOM = [(18, 12), (18, -4)]
 
 
 def square_of(x, y):
@@ -78,7 +85,7 @@ def scatter():
                                                'chance': chance, 'flip': True}
     trees = [f'dead-tree-{n}' for n in range(5)]
     boulders = [f'boulder-{n}' for n in range(4)]
-    clear = [square_of(0, 0) + [4.0]] + [square_of(x, y) + [2.5] for x, y in LAMPS + GLOOM]
+    clear = [square_of(*START) + [4.0]] + [square_of(x, y) + [2.5] for x, y in LAMPS + GLOOM]
     return {'around': 'wick', 'reach': 22, 'seed': 17, 'clearings': clear, 'taken': [], 'rules': [
         rule(['deadgrass'], trees, 3, 0.55),
         rule(['grass'], ['oak-1', 'oak-2', 'oak-3', 'oak-4', 'tree-1', 'tree-2'], 7, 0.5),
@@ -162,6 +169,15 @@ def gap_below(reference):
     return (height - 1 - bottom) / height
 
 
+def placed_at_start(entities):
+    """Wick where the wilds begin: his own entity moved there, what he carries with him."""
+    for e in entities:
+        if e['id'] == 'wick':
+            e['transform_3d']['position'][0] += START[0]
+            e['transform_3d']['position'][1] += START[1]
+    return entities
+
+
 def standing_up(entities):
     """The field's pictures, stood up in 3D space.
 
@@ -220,7 +236,7 @@ def wilds():
         ground(),
     ]
     ents += [e for n, (x, y) in enumerate(LAMPS, 1) for e in lantern(f'lantern-{n}', x, y)]
-    ents += [*wick(), *effects(), *[gloom(f'gloom-{n}', x, y, size) for n, ((x, y), size) in enumerate(zip(GLOOM, [1, 3]), 1)]]
+    ents += [*placed_at_start(wick()), *effects(), *[gloom(f'gloom-{n}', x, y, size) for n, ((x, y), size) in enumerate(zip(GLOOM, [1, 3]), 1)]]
     return standing_up(ents)
 
 

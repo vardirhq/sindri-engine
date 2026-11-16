@@ -563,6 +563,46 @@
       "addable": true,
       "apply": {},
       "default_payload": {
+        "around": "",
+        "distance": 1024.0,
+        "moved": [
+          0.0,
+          0.0
+        ],
+        "step": 256.0
+      },
+      "display_name": "Floating Origin",
+      "fields": {
+        "around": "",
+        "distance": 1024.0,
+        "moved": [
+          0.0,
+          0.0
+        ],
+        "step": 256.0
+      },
+      "meanings": {
+        "around": {
+          "kind": "entity"
+        },
+        "distance": {
+          "kind": "range",
+          "max": null,
+          "min": 1.0
+        },
+        "step": {
+          "kind": "range",
+          "max": null,
+          "min": 1.0
+        }
+      },
+      "schema_version": 1,
+      "type_name": "sindri.floating_origin"
+    },
+    {
+      "addable": true,
+      "apply": {},
+      "default_payload": {
         "max_step": 1.0,
         "walls": []
       },
@@ -841,6 +881,41 @@
       },
       "schema_version": 1,
       "type_name": "sindri.light2d.occluder"
+    },
+    {
+      "addable": true,
+      "apply": {},
+      "default_payload": {
+        "around": "",
+        "filter": 4294967295,
+        "memberships": 1,
+        "reach": 24
+      },
+      "display_name": "Map Walls 2D",
+      "fields": {
+        "around": "",
+        "filter": 4294967295,
+        "memberships": 1,
+        "reach": 24
+      },
+      "meanings": {
+        "around": {
+          "kind": "entity"
+        },
+        "filter": {
+          "kind": "mask"
+        },
+        "memberships": {
+          "kind": "mask"
+        },
+        "reach": {
+          "kind": "range",
+          "max": 128.0,
+          "min": 1.0
+        }
+      },
+      "schema_version": 1,
+      "type_name": "sindri.map_walls"
     },
     {
       "addable": true,

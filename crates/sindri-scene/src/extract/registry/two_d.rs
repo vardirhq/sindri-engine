@@ -84,29 +84,6 @@ pub(super) fn register_lights(
         "Shadow 2D",
         serde_json::to_value(Shadow2dComponent::default()).expect("a shadow serializes"),
     )?;
-    components.register_with_default::<crate::ScatterComponent>(
-        "Scatter",
-        serde_json::to_value(crate::ScatterComponent::default()).expect("a scatter serializes"),
-    )?;
-    components.describe::<crate::ScatterComponent>([
-        ("around", FieldMeaning::Entity),
-        (
-            "reach",
-            FieldMeaning::Range {
-                min: 1.0,
-                max: f64::from(crate::components::MOST_SCATTER_REACH),
-            },
-        ),
-        ("rules[].prefabs[]", FieldMeaning::Asset(AssetKind::Prefab)),
-        (
-            "rules[].spacing",
-            FieldMeaning::Range {
-                min: 1.0,
-                max: f64::from(crate::components::MOST_SCATTER_SPACING),
-            },
-        ),
-        ("rules[].chance", FieldMeaning::Range { min: 0.0, max: 1.0 }),
-    ])?;
     components.register_with_default::<Sight2dComponent>(
         "Sight 2D",
         serde_json::to_value(Sight2dComponent::default()).expect("a viewer serializes"),
@@ -267,5 +244,74 @@ pub(super) fn register_sprite(
             "size": [1.0, 1.0], "offset": [0.0, 0.0]
         }),
     )?;
+    Ok(())
+}
+
+/// What makes a generated land go on near play: what stands on it, the walls
+/// on its water, and the origin kept near play.
+pub(super) fn register_land(
+    components: &mut ComponentSchemaRegistry,
+) -> Result<(), SceneExtractError> {
+    components.register_with_default::<crate::ScatterComponent>(
+        "Scatter",
+        serde_json::to_value(crate::ScatterComponent::default()).expect("a scatter serializes"),
+    )?;
+    components.describe::<crate::ScatterComponent>([
+        ("around", FieldMeaning::Entity),
+        (
+            "reach",
+            FieldMeaning::Range {
+                min: 1.0,
+                max: f64::from(crate::components::MOST_SCATTER_REACH),
+            },
+        ),
+        ("rules[].prefabs[]", FieldMeaning::Asset(AssetKind::Prefab)),
+        (
+            "rules[].spacing",
+            FieldMeaning::Range {
+                min: 1.0,
+                max: f64::from(crate::components::MOST_SCATTER_SPACING),
+            },
+        ),
+        ("rules[].chance", FieldMeaning::Range { min: 0.0, max: 1.0 }),
+    ])?;
+    components.register_with_default::<crate::MapWallsComponent>(
+        "Map Walls 2D",
+        serde_json::to_value(crate::MapWallsComponent::default()).expect("walls serialize"),
+    )?;
+    components.describe::<crate::MapWallsComponent>([
+        ("around", FieldMeaning::Entity),
+        (
+            "reach",
+            FieldMeaning::Range {
+                min: 1.0,
+                max: f64::from(crate::components::MOST_WALL_REACH),
+            },
+        ),
+        ("memberships", FieldMeaning::Mask),
+        ("filter", FieldMeaning::Mask),
+    ])?;
+    components.register_with_default::<crate::FloatingOriginComponent>(
+        "Floating Origin",
+        serde_json::to_value(crate::FloatingOriginComponent::default())
+            .expect("a floating origin serializes"),
+    )?;
+    components.describe::<crate::FloatingOriginComponent>([
+        ("around", FieldMeaning::Entity),
+        (
+            "distance",
+            FieldMeaning::Range {
+                min: 1.0,
+                max: f64::INFINITY,
+            },
+        ),
+        (
+            "step",
+            FieldMeaning::Range {
+                min: 1.0,
+                max: f64::INFINITY,
+            },
+        ),
+    ])?;
     Ok(())
 }

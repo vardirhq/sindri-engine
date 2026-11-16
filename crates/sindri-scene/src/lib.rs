@@ -84,9 +84,10 @@ pub use components::{
     update_camera_behaviors, update_camera_behaviors_with_viewport,
 };
 pub use components::{
-    EnvironmentLighting2d, Light2dComponent, Light2dError, Light2dOccluderComponent, OccluderShape,
-    Placement, ScatterComponent, ScatterError, ScatterRule, Shadow2dComponent, Shadow2dError,
-    Sight2dComponent, scatter_placements,
+    EnvironmentLighting2d, FloatingOriginComponent, Light2dComponent, Light2dError,
+    Light2dOccluderComponent, MapWallsComponent, OccluderShape, Placement, ScatterComponent,
+    ScatterError, ScatterRule, Shadow2dComponent, Shadow2dError, Sight2dComponent,
+    scatter_placements, unwalkable_runs,
 };
 pub use effects::{
     EffectBurstComponent, Effects2d, EmissionShape, Fleck, ParticleSpace, ParticlesComponent,

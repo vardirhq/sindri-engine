@@ -68,6 +68,7 @@ impl Session {
             gestures: self.gestures.clone(),
             surfaces: self.surfaces.clone(),
             scattered: self.scattered.clone(),
+            walls: self.walls.clone(),
             since_written: self.since_written,
             // A checkpoint writes no saves; `restore` hands back the host's.
             save_backend: Box::new(sindri_platform::MemorySaves::new()),

@@ -9,8 +9,8 @@
       "name": "Camera",
       "transform_3d": {
         "position": [
-          0.0,
-          -13.544552457164482,
+          10.0,
+          -7.544552457164482,
           17.336236579347883
         ],
         "rotation": [
@@ -218,8 +218,8 @@
             "kind": "natural_terrain",
             "seed": 3,
             "sea_level": 0,
-            "relief": 12,
-            "feature_size": 48,
+            "relief": 32,
+            "feature_size": 64,
             "tree_line": 400,
             "snow_line": 500,
             "caves": false,
@@ -304,28 +304,28 @@
           "seed": 17,
           "clearings": [
             [
-              60.0,
-              60.0,
+              70.0,
+              54.0,
               4.0
             ],
             [
-              66.0,
-              59.0,
+              75.0,
+              57.0,
               2.5
             ],
             [
-              53.0,
-              58.0,
-              2.5
-            ],
-            [
-              70.0,
-              55.0,
-              2.5
-            ],
-            [
+              64.0,
               51.0,
-              65.0,
+              2.5
+            ],
+            [
+              78.0,
+              48.0,
+              2.5
+            ],
+            [
+              78.0,
+              64.0,
               2.5
             ]
           ],
@@ -461,6 +461,21 @@
               "flip": true
             }
           ]
+        },
+        "sindri.map_walls": {
+          "around": "wick",
+          "reach": 20,
+          "memberships": 1,
+          "filter": 4294967295
+        },
+        "sindri.floating_origin": {
+          "around": "wick",
+          "distance": 512.0,
+          "step": 256.0,
+          "moved": [
+            0.0,
+            0.0
+          ]
         }
       }
     },
@@ -469,8 +484,8 @@
       "name": "lantern-1",
       "transform_3d": {
         "position": [
-          6,
-          1,
+          15,
+          3,
           0.0
         ],
         "rotation": [
@@ -563,8 +578,8 @@
       "name": "lantern-1-light",
       "transform_3d": {
         "position": [
-          6,
-          1,
+          15,
+          3,
           0.0
         ],
         "rotation": [
@@ -603,8 +618,8 @@
       "name": "lantern-2",
       "transform_3d": {
         "position": [
-          -7,
-          2,
+          4,
+          9,
           0.0
         ],
         "rotation": [
@@ -697,8 +712,8 @@
       "name": "lantern-2-light",
       "transform_3d": {
         "position": [
-          -7,
-          2,
+          4,
+          9,
           0.0
         ],
         "rotation": [
@@ -737,8 +752,8 @@
       "name": "Wick",
       "transform_3d": {
         "position": [
-          0,
-          0,
+          10,
+          6,
           0.0
         ],
         "rotation": [
@@ -1374,8 +1389,8 @@
       "name": "gloom-1",
       "transform_3d": {
         "position": [
-          10,
-          5,
+          18,
+          12,
           0.0
         ],
         "rotation": [
@@ -1578,8 +1593,8 @@
       "name": "gloom-2",
       "transform_3d": {
         "position": [
-          -9,
-          -5,
+          18,
+          -4,
           0.0
         ],
         "rotation": [
