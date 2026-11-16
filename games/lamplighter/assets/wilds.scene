@@ -296,7 +296,27 @@
           "variant_seed": 5,
           "layer": -10,
           "edits": [],
-          "soft_edges": true
+          "soft_edges": true,
+          "map_water": {
+            "blocks": [
+              "water"
+            ],
+            "shallow": [
+              0.1,
+              0.34,
+              0.38
+            ],
+            "deep": [
+              0.015,
+              0.05,
+              0.14
+            ],
+            "depth": 6,
+            "waves": 0.7,
+            "glints": 0.6,
+            "foam": 0.7,
+            "speed": 1.0
+          }
         },
         "sindri.scatter": {
           "around": "wick",

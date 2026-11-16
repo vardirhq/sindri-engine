@@ -42,6 +42,7 @@ use super::sprite::{DrawSpace, SpriteBatches, SpriteDraw};
 use super::voxel_appearance::{Resolved, resolve_appearance};
 use super::voxel_ground::VoxelGround;
 use super::voxel_map_edges::{Ground, MapPiece, into_square};
+use super::voxel_map_water::{Water, WaterSquare};
 use super::voxel_world::definition;
 use super::{SceneExtractError, SceneExtractor, transform_matrix};
 
@@ -82,6 +83,8 @@ struct MapSquare {
 struct MapChunk {
     squares: Vec<MapSquare>,
     pieces: Vec<MapPiece>,
+    /// With `map_water`, each water square's look, by column and row.
+    water: HashMap<(i32, i32), WaterSquare>,
 }
 
 /// One map's remembered squares, and what they were worked out from.
@@ -93,6 +96,7 @@ struct MapWorld {
     ground: VoxelGround,
     resolved: Resolved,
     reference: i32,
+    water: Option<Water>,
     chunks: HashMap<(i32, i32), Rc<MapChunk>>,
 }
 
@@ -220,6 +224,15 @@ fn refresh(
     let resolved =
         resolve_appearance(&definition.appearance, textures)?.with_seed(component.variant_seed);
     let ground = VoxelGround::of(component, tile_sets)?;
+    let water = match &component.map_water {
+        Some(water) => {
+            water
+                .validate()
+                .map_err(SceneExtractError::InvalidMapWater)?;
+            Some(Water::of(water))
+        }
+        None => None,
+    };
     cache.insert(
         entity,
         MapWorld {
@@ -230,6 +243,7 @@ fn refresh(
             ground,
             resolved,
             reference: reference_height(&component.generator),
+            water,
             chunks: HashMap::new(),
         },
     );
@@ -267,12 +281,14 @@ fn push_map(
         column >= min[0] && column <= max[0] && row >= min[1] && row <= max[1]
     };
     let flooded = |height: f32| flood.filter(|(level, _, _)| height < *level);
+    let water_shader = super::voxel_map_water::shader();
     let mut index = 0_u32;
     let mut draw = |column: i32,
                     row: i32,
                     middle: [f32; 2],
                     size: [f32; 2],
-                    (texture, rect, tint): (TextureId, UvRect, [f32; 4])|
+                    (texture, rect, tint): (TextureId, UvRect, [f32; 4]),
+                    water: Option<&WaterSquare>|
      -> Result<(), SceneExtractError> {
         #[allow(clippy::cast_precision_loss)]
         let local = Mat4::from_translation(Vec3::new(
@@ -284,18 +300,31 @@ fn push_map(
             .iter()
             .find(|(drawn, _)| *drawn == texture)
             .map(|(_, normal_map)| *normal_map);
+        // A map is ground, lit like a tilemap's.
+        let mut sprite = SpriteInstance::new(root * local, tint)
+            .with_uv_rect(rect)
+            .lit(true);
+        let mut shader = None;
+        if let (Some(water), Some(drawn)) = (water, &water_shader) {
+            // Water's colour arrives as the offset over a picture tinted
+            // to nothing, so its shader reads it as the pixel's colour.
+            let [r, g, b] = water.colour;
+            sprite = SpriteInstance::new(root * local, [0.0, 0.0, 0.0, 1.0])
+                .with_uv_rect(rect)
+                .lit(true)
+                .with_color_transform([1.0; 4], [r, g, b, 0.0])
+                .with_shader_params(water.params);
+            shader = Some(drawn.clone());
+        }
         batches.push(SpriteDraw {
             mask: None,
-            shader: None,
+            shader,
             normal_map,
             clip: None,
             space: DrawSpace::World,
             texture,
             order: TransparentOrder::new(layer, distance, index)?,
-            // A map is ground, lit like a tilemap's.
-            sprite: SpriteInstance::new(root * local, tint)
-                .with_uv_rect(rect)
-                .lit(true),
+            sprite,
         });
         index = index.saturating_add(1);
         Ok(())
@@ -309,7 +338,9 @@ fn push_map(
                     (texture, rect, [light, light, light, 1.0])
                 },
             );
-            draw(square.column, square.row, [0.0; 2], [1.0; 2], look)?;
+            let water = chunk.water.get(&(square.column, square.row));
+            let water = water.filter(|_| flooded(square.height).is_none());
+            draw(square.column, square.row, [0.0; 2], [1.0; 2], look, water)?;
         }
     }
     // The frayed edges go over every square, so a strip is never covered by
@@ -323,6 +354,7 @@ fn push_map(
                     piece.middle,
                     piece.size,
                     (piece.texture, piece.rect, piece.tint),
+                    None,
                 )?;
             }
         }
@@ -345,6 +377,9 @@ fn chunk(map: &mut MapWorld, chunk_column: i32, chunk_row: i32) -> Rc<MapChunk> 
                 made.squares.push(square);
             }
         }
+    }
+    if let Some(water) = &map.water {
+        made.water = water.squares(&map.ground, columns.clone(), rows.clone());
     }
     if map.component.soft_edges {
         made.pieces = frayed(map, &made.squares, columns, rows);

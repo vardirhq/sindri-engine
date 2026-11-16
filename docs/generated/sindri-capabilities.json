@@ -3601,6 +3601,7 @@
         },
         "layer": 0,
         "map_flood": null,
+        "map_water": null,
         "materials": [
           {
             "bottom": "procedural:checkerboard",
@@ -3739,6 +3740,7 @@
         },
         "layer": 0,
         "map_flood": null,
+        "map_water": null,
         "materials": [
           {
             "bottom": "procedural:checkerboard",

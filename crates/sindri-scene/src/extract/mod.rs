@@ -39,6 +39,7 @@ mod voxel_appearance;
 mod voxel_ground;
 mod voxel_map;
 mod voxel_map_edges;
+mod voxel_map_water;
 mod voxel_source;
 mod voxel_world;
 mod world_meanings;
@@ -229,6 +230,8 @@ pub enum SceneExtractError {
     VoxelAnimationFrame { block: String, frame: String },
     #[error("block set `{0}` holds more blocks than a voxel world can number")]
     TooManyVoxelBlocks(String),
+    #[error("{0}")]
+    InvalidMapWater(String),
     #[error("the viewport is too large for text rendering")]
     TextViewport(#[from] std::num::TryFromIntError),
 }
