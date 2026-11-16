@@ -29,6 +29,7 @@
         "sindri.sprite": {
           "texture": "textures/decor.png#flowers",
           "layer": 4,
+          "sway": 0.14,
           "billboard": true
         }
       }

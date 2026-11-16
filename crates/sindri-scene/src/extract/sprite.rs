@@ -285,6 +285,7 @@ impl SceneExtractor {
                             sprite.color_transform.offset,
                         )
                         .with_shader_params(sprite.shader_params)
+                        .swaying(sprite.sway)
                         .with_uv_rect(uv),
                 });
             }

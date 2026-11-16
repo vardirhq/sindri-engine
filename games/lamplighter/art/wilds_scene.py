@@ -168,6 +168,14 @@ def prefabs():
                                                'shadows': False}
         hamlet_things[f'hamlet/{name}-lit'] = lit
     made.update(hamlet_things)
+    # What grows moves in the wind: grass and flowers most, bushes less, a
+    # tree's crown a little, a dead tree's bare branches least.
+    sway = {'dead-tree': 0.025, 'oak': 0.035, 'tree': 0.035, 'bush': 0.06, 'tufts': 0.14, 'flowers': 0.14,
+            'mushrooms': 0.05, 'hamlet/laundry': 0.08, 'hamlet/garden': 0.06, 'hamlet/scarecrow': 0.03}
+    for name, thing in made.items():
+        kind = next((k for k in sway if name == k or name.startswith(k + '-')), None)
+        if kind is not None:
+            thing['components']['sindri.sprite']['sway'] = sway[kind]
     (PREFABS / 'hamlet').mkdir(parents=True, exist_ok=True)
     for name, thing in made.items():
         thing['id'] = name.replace('/', '-')

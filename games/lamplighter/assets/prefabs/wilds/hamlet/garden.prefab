@@ -29,6 +29,7 @@
         "sindri.sprite": {
           "texture": "textures/village.png#garden-cabbage",
           "layer": 5,
+          "sway": 0.06,
           "billboard": true
         },
         "sindri.shadow2d": {

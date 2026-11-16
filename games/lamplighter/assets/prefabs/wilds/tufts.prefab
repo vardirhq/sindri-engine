@@ -29,6 +29,7 @@
         "sindri.sprite": {
           "texture": "textures/decor.png#tufts",
           "layer": 4,
+          "sway": 0.14,
           "billboard": true
         }
       }

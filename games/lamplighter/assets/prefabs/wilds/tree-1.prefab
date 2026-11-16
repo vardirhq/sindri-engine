@@ -29,6 +29,7 @@
         "sindri.sprite": {
           "texture": "textures/village.png#tree-1",
           "layer": 5,
+          "sway": 0.035,
           "billboard": true
         },
         "sindri.shadow2d": {

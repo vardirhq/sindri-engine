@@ -163,6 +163,15 @@ impl SpriteInstance {
         self
     }
 
+    /// Lets this sprite sway in the wind by `amount`, a share of its own width
+    /// at its top: its foot stays put and its top swings to and fro, in gusts
+    /// that roll across the world, so a wood moves together but not as one.
+    #[must_use]
+    pub const fn swaying(mut self, amount: f32) -> Self {
+        self.flags[2] = amount;
+        self
+    }
+
     /// Whether this sprite is lit from where it stands.
     pub fn is_standing(self) -> bool {
         self.flags[1] > 0.5

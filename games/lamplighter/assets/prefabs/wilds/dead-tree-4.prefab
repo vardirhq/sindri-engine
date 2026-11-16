@@ -29,6 +29,7 @@
         "sindri.sprite": {
           "texture": "textures/objects.png#dead-tree-4",
           "layer": 5,
+          "sway": 0.025,
           "billboard": true
         },
         "sindri.shadow2d": {
