@@ -464,3 +464,35 @@ fn wick_leaves_footprints_as_he_walks() {
         .all(|fleck| fleck.remaining > 1.0);
     assert!(prints(&run) < walked && fresh, "the trail fades");
 }
+
+/// A sunfall stands in sight of the start: a shaft of cracklight through its
+/// own shader, which compiles, a steady pool of light under it, and dust in it.
+#[test]
+fn a_sunfall_stands_in_sight_of_the_start() {
+    let shader = std::fs::read_to_string(
+        std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("assets/shaders/sunfall.wgsl"),
+    )
+    .expect("the sunfall shader is there");
+    sindri_render::SpriteShader::new("shaders/sunfall.wgsl", &shader).expect("and compiles");
+
+    let mut run = Run::open_scene("wilds.scene").expect("the wilds open");
+    step(&mut run, 2);
+    let [x, y, _] = position(&run, "sunfall-1");
+    let [wx, wy, _] = position(&run, "wick");
+    assert!(
+        (x - wx).hypot(y - wy) < 8.0,
+        "near where Wick starts: {x}, {y}"
+    );
+    let entity = run.entity("sunfall-1").expect("the sunfall");
+    let parts = &run
+        .world
+        .get(entity)
+        .expect("it is in the world")
+        .components;
+    let sprite = &parts["sindri.sprite"];
+    assert_eq!(sprite["shader"], "shaders/sunfall.wgsl");
+    assert_eq!(sprite["unlit"], true, "the shaft is light itself");
+    let light = &parts["sindri.light2d"];
+    assert_eq!(light["flicker"], 0.0, "cracklight is steady, not a flame");
+    assert_eq!(parts["sindri.particles"]["glow"], true, "dust glints in it");
+}

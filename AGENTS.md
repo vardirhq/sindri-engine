@@ -85,8 +85,9 @@ platformer rather than a recreation, which are closed generally.
 
 **Lamplighter is the survival game, and a game rather than a showcase.**
 Wick, a wandering lamplighter with a sword and a lantern, keeps a light alive in
-a generated land whose sun is fading: days that end in a deadly dark, a lantern
-that burns what he gathers, things to craft, and pixel sprites standing in a 3D
+a generated land shut under the Lid: a dark broken only by the lights people
+keep, gold sunfalls through its cracks and the red light of what searches, a
+lantern that burns what he gathers, things to craft, and pixel sprites standing in a 3D
 world under a tilted camera, in `games/lamplighter`. It belongs to the broad
 family of Don't Starve without copying it. `docs/lamplighter-plan.md` is its
 design and the order of work. It is where the 2D-in-3D path is proven at the
