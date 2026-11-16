@@ -120,6 +120,10 @@ HAMLET_THINGS = {
     'graves': ('graves', (1.0, 0.4, 0.4)),
 }
 HAMLET_HOUSES = ['bakery', 'child-house', 'workshop', 'keeper']
+# How much bigger a hamlet's houses are than the village's: beside Wick standing
+# up, the village's came only to his shoulders at the door.
+HOUSE_SCALE = 1.6
+HOUSE_SIZE = village_scene.CELL * HOUSE_SCALE
 
 
 def hamlet():
@@ -131,16 +135,16 @@ def hamlet():
                 'chance': chance}
     houses = [f'{name}{state}' for name in HAMLET_HOUSES for state in ('', '-lit', '-lit')]
     return {'name': 'hamlet', 'on': ['grass', 'deadgrass', 'earth'], 'spacing': 80, 'chance': 0.7,
-            'radius': 10.0, 'pieces': [
+            'radius': 14.0, 'pieces': [
                 piece(['well'], 0.0, 0.0),
-                piece(houses, -5.5, 3.0), piece(houses, 5.5, 3.5, 0.9),
-                piece(houses, -4.5, -5.0, 0.7), piece(houses, 5.0, -5.5, 0.6),
-                piece(['woodpile', 'barrels', 'crates'], 2.2, -1.2, 0.7),
-                piece(['cart', 'bench', 'notice'], -2.6, -1.4, 0.6),
-                piece(['laundry', 'scarecrow'], 8.4, 0.2, 0.6),
-                piece(['garden', 'garden-2'], -8.6, -0.4, 0.6),
-                piece(['graves'], 0.4, 7.8, 0.4),
-                piece(['barrels', 'crates'], -1.4, -7.4, 0.5),
+                piece(houses, -7.5, 4.0), piece(houses, 7.5, 4.5, 0.9),
+                piece(houses, -6.5, -6.5, 0.7), piece(houses, 7.0, -7.0, 0.6),
+                piece(['woodpile', 'barrels', 'crates'], 2.4, -1.4, 0.7),
+                piece(['cart', 'bench', 'notice'], -2.8, -1.6, 0.6),
+                piece(['laundry', 'scarecrow'], 12.0, -1.0, 0.6),
+                piece(['garden', 'garden-2'], -12.0, -1.0, 0.6),
+                piece(['graves'], 0.4, 10.5, 0.4),
+                piece(['barrels', 'crates'], -1.4, -10.0, 0.5),
             ]}
 
 
@@ -165,11 +169,12 @@ def prefabs():
     for name, (sprite, block) in HAMLET_THINGS.items():
         hamlet_things[f'hamlet/{name}'] = village_scene.standing('thing', sprite, 0, 0, block)
     for name in HAMLET_HOUSES:
-        hamlet_things[f'hamlet/{name}'] = village_scene.standing('house', f'{name}-unlit', 0, 0, (2.5, 1.1, 1.2))
-        lit = village_scene.standing('house', f'{name}-lit', 0, 0, (2.5, 1.1, 1.2))
+        hamlet_things[f'hamlet/{name}'] = village_scene.standing('house', f'{name}-unlit', 0, 0, (2.5, 1.1, 1.2),
+                                                                 size=HOUSE_SIZE)
+        lit = village_scene.standing('house', f'{name}-lit', 0, 0, (2.5, 1.1, 1.2), size=HOUSE_SIZE)
         # Someone is home: their windows light the ground in front of the door.
         lit['components']['sindri.light2d'] = {'enabled': True, 'color': [1.0, 0.72, 0.38, 1.0],
-                                               'intensity': 1.8, 'radius': 7.0, 'falloff': 1.5, 'height': 1.0,
+                                               'intensity': 1.8, 'radius': 9.0, 'falloff': 1.5, 'height': 1.0,
                                                'offset': [0.0, -0.2], 'flicker': 0.3,
                                                'shadows': False}
         hamlet_things[f'hamlet/{name}-lit'] = lit

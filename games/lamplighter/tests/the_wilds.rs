@@ -353,10 +353,10 @@ fn wick_starts_on_dry_ground() {
 
 /// Now and then a hamlet stands on open ground, whole: a well, houses round
 /// it, some lit, and nothing growing in it. The seed puts the nearest one a
-/// little way east of the start.
+/// little way north-east of the start.
 #[test]
-fn a_hamlet_stands_east_of_the_start() {
-    const WELL: [f32; 2] = [76.5, 21.5];
+fn a_hamlet_stands_north_east_of_the_start() {
+    const WELL: [f32; 2] = [52.5, 37.5];
     let mut run = Run::open_scene("wilds.scene").expect("the wilds open");
     step(&mut run, 2);
     let near_well = |run: &Run, what: &str| -> Vec<[f32; 3]> {
@@ -370,7 +370,7 @@ fn a_hamlet_stands_east_of_the_start() {
                     .starts_with(what)
                     .then(|| run.world.world_transform(entity).expect("placed").position)
             })
-            .filter(|at| (at[0] - WELL[0]).hypot(at[1] - WELL[1]) < 11.0)
+            .filter(|at| (at[0] - WELL[0]).hypot(at[1] - WELL[1]) < 15.0)
             .collect()
     };
     assert!(near_well(&run, "well").is_empty(), "too far to be made yet");
@@ -398,7 +398,7 @@ fn a_hamlet_stands_east_of_the_start() {
     assert!(lit, "someone is home in one of them");
     let wild = grown(&run)
         .into_iter()
-        .filter(|(_, _, at)| (at[0] - WELL[0]).hypot(at[1] - WELL[1]) < 9.5)
+        .filter(|(_, _, at)| (at[0] - WELL[0]).hypot(at[1] - WELL[1]) < 13.5)
         .count();
     assert_eq!(wild, 0, "nothing grows in the hamlet");
 }
