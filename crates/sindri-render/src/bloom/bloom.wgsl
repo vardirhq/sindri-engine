@@ -157,32 +157,56 @@ fn in_the_dark(color: vec3<f32>) -> f32 {
 /// How much a tap of this color, from this row, counts in a blur.
 ///
 /// Taps that are sharp where they are count for less, so the band in focus
-/// keeps its edge and a lit thing keeps its outline against the dark.
+/// keeps its edge and a lit thing keeps its outline against the dark. Where
+/// the eye sees in the dark, a lit tap is sharp wherever it is.
 fn blur_weight(color: vec3<f32>, y: f32) -> f32 {
-    return 0.15 + 0.85 * max(out_of_focus(y), in_the_dark(color));
+    let dark = in_the_dark(color);
+    if (params.night.w > 0.5) {
+        return 0.15 + 0.85 * dark;
+    }
+    return 0.15 + 0.85 * max(out_of_focus(y), dark);
 }
 
 /// The scene here, as the eye sees it: blurred as far as this row is out of
 /// focus or this place is dark, and greyed as far as it is dark.
 ///
+/// Where the eye sees in the dark (`night`), light is never blurred: the lens
+/// softens only as much as a place is dark, so a lit pool is as sharp out of
+/// the band in focus as in it. Without it, the lens blurs what is out of focus
+/// whatever its light.
+///
 /// A disc rather than the bloom's separable sweep, because the blur's width
 /// changes from pixel to pixel: a sweep run once across and once down mixes
-/// widths into each other, and the sharp parts bleed.
+/// widths into each other, and the sharp parts bleed. It takes as many taps as
+/// the disc is wide, up to `LENS_TAPS`, and none where nothing blurs, which is
+/// most of what a phone's frame costs.
 fn through_the_lens(uv: vec2<f32>) -> vec4<f32> {
     let here = textureSample(source_texture, source_sampler, uv);
     if (params.lens.z < 0.5 && params.night.w < 0.5) {
         return here;
     }
     let dark = in_the_dark(here.rgb);
-    let radius = max(out_of_focus(uv.y) * params.focus.w, dark * params.night.y);
+    var focus_blur = out_of_focus(uv.y) * params.focus.w;
+    if (params.night.w > 0.5) {
+        focus_blur = focus_blur * dark;
+    }
+    let radius = max(focus_blur, dark * params.night.y);
+    // Where nothing blurs, the scene itself, untouched, and only greyed.
+    let luma_here = dot(here.rgb, vec3<f32>(0.2126, 0.7152, 0.0722));
+    if (radius < 0.0015) {
+        return vec4<f32>(mix(here.rgb, vec3<f32>(luma_here), dark * params.night.z), here.a);
+    }
     // Square on the screen: widths are measured in screen heights, so across
     // they are scaled by the screen's shape.
     let aspect = params.lens.y / params.lens.x;
     let scale = vec2<f32>(radius / aspect, radius);
+    // A tap for every pixel or so across the disc: a narrow blur needs few.
+    let across = radius / params.lens.y;
+    let taps = clamp(i32(across * 2.0), 8, LENS_TAPS);
     var total = here.rgb;
     var weight = 1.0;
-    for (var i = 1; i < LENS_TAPS; i = i + 1) {
-        let t = f32(i) / f32(LENS_TAPS);
+    for (var i = 1; i < taps; i = i + 1) {
+        let t = f32(i) / f32(taps);
         let angle = f32(i) * GOLDEN_ANGLE;
         let offset = vec2<f32>(cos(angle), sin(angle)) * sqrt(t) * scale;
         let tap = uv + offset;
@@ -191,8 +215,7 @@ fn through_the_lens(uv: vec2<f32>) -> vec4<f32> {
         total = total + color * w;
         weight = weight + w;
     }
-    // Where nothing blurs, the scene itself, untouched.
-    let blurred = mix(here.rgb, total / weight, smoothstep(0.0, 0.0015, radius));
+    let blurred = mix(here.rgb, total / weight, smoothstep(0.0015, 0.003, radius));
     // The dark takes colour before it takes light.
     let luma = dot(blurred, vec3<f32>(0.2126, 0.7152, 0.0722));
     let seen = mix(blurred, vec3<f32>(luma), dark * params.night.z);
