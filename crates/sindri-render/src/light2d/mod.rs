@@ -127,6 +127,23 @@ pub struct Lighting2d {
     pub lights: Vec<Light2d>,
     /// What the viewer can see: everything outside it is dimmed.
     pub sight: Option<Sight2d>,
+    /// Shadows of clouds drifting over the plane, which dim the ambient light
+    /// (the sky's) and not the lights.
+    pub clouds: Option<Clouds2d>,
+}
+
+/// Cloud shadows over the plane: soft patches of a few octaves of noise.
+#[derive(Clone, Copy, Debug, Default, PartialEq)]
+pub struct Clouds2d {
+    /// How much of the plane is in shadow, 0 to 1.
+    pub cover: f32,
+    /// How wide a cloud is, in world units.
+    pub size: f32,
+    /// How much of the ambient light a cloud takes away, 0 to 1.
+    pub darkness: f32,
+    /// How far the clouds have drifted, in world units: their wind times
+    /// the time.
+    pub drift: [f32; 2],
 }
 
 /// What a viewer sees of the plane: the region no occluder hides, out to a

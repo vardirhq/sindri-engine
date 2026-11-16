@@ -135,6 +135,11 @@ pub struct SpriteComponent {
     /// object's own units: it moves, turns and scales with the object.
     #[serde(default)]
     pub offset: [f32; 2],
+    /// How much it sways in the wind: a share of its width at its top, its
+    /// foot staying put. Trees and grass sway; a wall does not. 0, the
+    /// default, stands still.
+    #[serde(default)]
+    pub sway: f32,
 }
 
 const fn unit_size() -> [f32; 2] {

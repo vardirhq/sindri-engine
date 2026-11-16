@@ -127,6 +127,7 @@ pub(super) fn register_lights(
             },
         ),
         ("cone_softness", share()),
+        ("flicker", share()),
     ])?;
     components.describe::<Light2dOccluderComponent>([
         ("shape", FieldMeaning::choice(OccluderShape::NAMES)),
@@ -241,7 +242,7 @@ pub(super) fn register_sprite(
             "normal_map": "",
             "unlit": false,
             "draw": "simple", "border_scale": 1.0 / 16.0, "mask": "none", "mask_name": "",
-            "size": [1.0, 1.0], "offset": [0.0, 0.0]
+            "size": [1.0, 1.0], "offset": [0.0, 0.0], "sway": 0.0
         }),
     )?;
     Ok(())

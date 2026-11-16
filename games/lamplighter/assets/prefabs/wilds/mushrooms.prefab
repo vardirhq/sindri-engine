@@ -29,6 +29,7 @@
         "sindri.sprite": {
           "texture": "textures/decor.png#mushrooms",
           "layer": 4,
+          "sway": 0.05,
           "billboard": true
         },
         "sindri.light2d": {

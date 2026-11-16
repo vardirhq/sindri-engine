@@ -61,7 +61,8 @@ def ground():
         # Water that moves: pale in the shallows, dark in the deep, swaying,
         # glinting where a light catches it and foaming at the shore.
         'map_water': {'blocks': ['water'], 'shallow': [0.1, 0.34, 0.38], 'deep': [0.015, 0.05, 0.14], 'depth': 6,
-                      'waves': 0.7, 'glints': 0.6, 'foam': 0.7, 'speed': 1.0}},
+                      'waves': 0.7, 'glints': 0.6, 'foam': 0.7, 'speed': 1.0,
+                      'wet': 0.3, 'reflections': 0.9}},
         'sindri.scatter': scatter(),
         # Water stops Wick, near him, however far he goes.
         'sindri.map_walls': {'around': 'wick', 'reach': 20, 'memberships': scenes.WALL, 'filter': scenes.ALL},
@@ -164,10 +165,18 @@ def prefabs():
         # Someone is home: their windows light the ground in front of the door.
         lit['components']['sindri.light2d'] = {'enabled': True, 'color': [1.0, 0.72, 0.38, 1.0],
                                                'intensity': 1.8, 'radius': 7.0, 'falloff': 1.5, 'height': 1.0,
-                                               'offset': [0.0, -0.2],
+                                               'offset': [0.0, -0.2], 'flicker': 0.3,
                                                'shadows': False}
         hamlet_things[f'hamlet/{name}-lit'] = lit
     made.update(hamlet_things)
+    # What grows moves in the wind: grass and flowers most, bushes less, a
+    # tree's crown a little, a dead tree's bare branches least.
+    sway = {'dead-tree': 0.025, 'oak': 0.035, 'tree': 0.035, 'bush': 0.06, 'tufts': 0.14, 'flowers': 0.14,
+            'mushrooms': 0.05, 'hamlet/laundry': 0.08, 'hamlet/garden': 0.06, 'hamlet/scarecrow': 0.03}
+    for name, thing in made.items():
+        kind = next((k for k in sway if name == k or name.startswith(k + '-')), None)
+        if kind is not None:
+            thing['components']['sindri.sprite']['sway'] = sway[kind]
     (PREFABS / 'hamlet').mkdir(parents=True, exist_ok=True)
     for name, thing in made.items():
         thing['id'] = name.replace('/', '-')
@@ -196,6 +205,10 @@ def seen_in_the_dark():
         'night_vision': {'enabled': True, 'threshold': 0.14, 'blur': 0.007, 'grey': 0.9},
         'post_process': {'vignette': 0.45},
     })
+    # Clouds drift over the land; by night their shadows barely show, by day
+    # they will.
+    env['components']['sindri.environment']['lighting_2d']['clouds'] = {
+        'cover': 0.45, 'size': 28.0, 'darkness': 0.4, 'wind': [1.1, 0.35]}
     return env
 
 
@@ -204,6 +217,7 @@ HAND = 0.95     # how high Wick carries his lantern
 ROUNDER = 0.6   # a contact shadow's depth for its width: the camera foreshortens it already
 GROUNDED = 0.7  # how dark a contact shadow is: what stands has to be seen to touch the ground
 SPREAD = 1.5    # how much wider than the field's: its far half is hidden behind what stands on it
+FLICKER = 0.6   # how restless a flame's light is
 
 
 def gap_below(reference):
@@ -265,11 +279,19 @@ def standing_up(entities):
         if place is None or e['id'] == 'camera' or e['id'] == 'ground':
             continue
         if e.get('parent') == 'wick':
+            for name, part in components.items():
+                if name.startswith('sindri.light2d') and not name.startswith('sindri.light2d.'):
+                    part['flicker'] = FLICKER
             place['position'] = [place['position'][0], 0.0, HAND]
             continue
         if e.get('parent') is None:
             place['position'][2] = 0.0
         light = components.get('sindri.light2d')
+        # A flame is never quite still.
+        for name, part in components.items():
+            if name.startswith('sindri.light2d') and not name.startswith('sindri.light2d.') \
+                    and part.get('color', [0, 0, 0])[2] < 0.6:
+                part['flicker'] = FLICKER
         post = by_id.get(e['id'].removesuffix('-light'))
         if light is not None and post is not e and post is not None:
             # A lamp post's flame: at the post, up it, rather than up the screen.

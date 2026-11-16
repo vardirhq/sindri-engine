@@ -83,8 +83,10 @@ struct MapSquare {
 struct MapChunk {
     squares: Vec<MapSquare>,
     pieces: Vec<MapPiece>,
-    /// With `map_water`, each water square's look, by column and row.
+    /// With `map_water`, each water square's look, by column and row, and how
+    /// much each square of land at its edge is darkened, wet.
     water: HashMap<(i32, i32), WaterSquare>,
+    wet: HashMap<(i32, i32), f32>,
 }
 
 /// One map's remembered squares, and what they were worked out from.
@@ -98,6 +100,10 @@ struct MapWorld {
     reference: i32,
     water: Option<Water>,
     chunks: HashMap<(i32, i32), Rc<MapChunk>>,
+    /// Where it was last drawn, for what is mirrored in its water, and how
+    /// many mirror pieces have been drawn this frame.
+    drawn: Option<reflections::Drawn>,
+    reflected: u32,
 }
 
 #[derive(Default)]
@@ -244,6 +250,8 @@ fn refresh(
             resolved,
             reference: reference_height(&component.generator),
             water,
+            drawn: None,
+            reflected: 0,
             chunks: HashMap::new(),
         },
     );
@@ -271,6 +279,7 @@ fn push_map(
         return Ok(());
     };
     let distance = camera_distance(camera.view, root.w_axis.truncate());
+    map.drawn_at(root, layer, distance);
     let mut chunks = Vec::new();
     for chunk_row in min[1].div_euclid(CHUNK)..=max[1].div_euclid(CHUNK) {
         for chunk_column in min[0].div_euclid(CHUNK)..=max[0].div_euclid(CHUNK) {
@@ -282,7 +291,7 @@ fn push_map(
     };
     let flooded = |height: f32| flood.filter(|(level, _, _)| height < *level);
     let water_shader = super::voxel_map_water::shader();
-    let mut index = 0_u32;
+    let index = std::cell::Cell::new(0_u32);
     let mut draw = |column: i32,
                     row: i32,
                     middle: [f32; 2],
@@ -323,10 +332,10 @@ fn push_map(
             clip: None,
             space: DrawSpace::World,
             texture,
-            order: TransparentOrder::new(layer, distance, index)?,
+            order: TransparentOrder::new(layer, distance, index.get())?,
             sprite,
         });
-        index = index.saturating_add(1);
+        index.set(index.get().saturating_add(1));
         Ok(())
     };
     for chunk in &chunks {
@@ -338,6 +347,7 @@ fn push_map(
                     (texture, rect, [light, light, light, 1.0])
                 },
             );
+            let look = wetted(chunk, square.column, square.row, look);
             let water = chunk.water.get(&(square.column, square.row));
             let water = water.filter(|_| flooded(square.height).is_none());
             draw(square.column, square.row, [0.0; 2], [1.0; 2], look, water)?;
@@ -345,6 +355,8 @@ fn push_map(
     }
     // The frayed edges go over every square, so a strip is never covered by
     // the square it reaches into. A flooded square shows water, not its edge.
+    // Mirror images of what stands by the water go between the two.
+    index.set(index.get().max(reflections::FIRST_PIECE));
     for chunk in &chunks {
         for piece in chunk.pieces.iter().filter(|p| seen(p.column, p.row)) {
             if flooded(piece.height).is_none() {
@@ -353,13 +365,33 @@ fn push_map(
                     piece.row,
                     piece.middle,
                     piece.size,
-                    (piece.texture, piece.rect, piece.tint),
+                    wetted(
+                        chunk,
+                        piece.column,
+                        piece.row,
+                        (piece.texture, piece.rect, piece.tint),
+                    ),
                     None,
                 )?;
             }
         }
     }
     Ok(())
+}
+
+/// A square's look, darker where the water wets it.
+fn wetted(
+    chunk: &MapChunk,
+    column: i32,
+    row: i32,
+    (texture, rect, tint): (TextureId, UvRect, [f32; 4]),
+) -> (TextureId, UvRect, [f32; 4]) {
+    let dark = chunk.wet.get(&(column, row)).copied().unwrap_or(1.0);
+    (
+        texture,
+        rect,
+        [tint[0] * dark, tint[1] * dark, tint[2] * dark, tint[3]],
+    )
 }
 
 /// The squares of one chunk, worked out the first time it is seen, and with
@@ -379,7 +411,7 @@ fn chunk(map: &mut MapWorld, chunk_column: i32, chunk_row: i32) -> Rc<MapChunk> 
         }
     }
     if let Some(water) = &map.water {
-        made.water = water.squares(&map.ground, columns.clone(), rows.clone());
+        (made.water, made.wet) = water.squares(&map.ground, columns.clone(), rows.clone());
     }
     if map.component.soft_edges {
         made.pieces = frayed(map, &made.squares, columns, rows);
@@ -530,6 +562,24 @@ fn visible_columns(root: Mat4, camera: ResolvedCamera) -> Option<([i32; 2], [i32
     }
     Some((min, max))
 }
+
+impl SceneExtractor {
+    /// A standing picture's mirror image in every map's water near it.
+    pub(super) fn reflect(
+        &self,
+        model: Mat4,
+        texture: TextureId,
+        rect: UvRect,
+        batches: &mut SpriteBatches,
+    ) {
+        for map in self.voxel_maps.0.borrow_mut().values_mut() {
+            map.reflections(model, texture, rect, batches);
+        }
+    }
+}
+
+#[path = "voxel_map_reflections.rs"]
+mod reflections;
 
 #[cfg(test)]
 #[path = "voxel_map_tests.rs"]

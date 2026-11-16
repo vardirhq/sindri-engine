@@ -39,7 +39,7 @@ impl LightField2d {
         if !environment.lighting_2d.enabled {
             return Ok(None);
         }
-        let (lights, _) = gather_lights(components, world)?;
+        let (lights, _) = gather_lights(components, world, None)?;
         let edges = if lights.iter().any(|light| light.shadow.is_some()) {
             gather_edges(components, world)?.0
         } else {

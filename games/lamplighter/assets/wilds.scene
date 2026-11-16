@@ -73,7 +73,16 @@
               0.025,
               0.028,
               0.05
-            ]
+            ],
+            "clouds": {
+              "cover": 0.45,
+              "size": 28.0,
+              "darkness": 0.4,
+              "wind": [
+                1.1,
+                0.35
+              ]
+            }
           },
           "depth_of_field": {
             "enabled": true,
@@ -315,7 +324,9 @@
             "waves": 0.7,
             "glints": 0.6,
             "foam": 0.7,
-            "speed": 1.0
+            "speed": 1.0,
+            "wet": 0.3,
+            "reflections": 0.9
           }
         },
         "sindri.scatter": {
@@ -805,7 +816,8 @@
           "height": 2.6,
           "shadows": true,
           "shadow_reach": 0.6,
-          "shadow_source_radius": 0.3
+          "shadow_source_radius": 0.3,
+          "flicker": 0.6
         }
       }
     },
@@ -939,7 +951,8 @@
           "height": 2.6,
           "shadows": true,
           "shadow_reach": 0.6,
-          "shadow_source_radius": 0.3
+          "shadow_source_radius": 0.3,
+          "flicker": 0.6
         }
       }
     },
@@ -1380,7 +1393,8 @@
           "shadow_source_radius": 0.3,
           "cone_angle": 140.0,
           "cone_direction": -90.0,
-          "cone_softness": 0.4
+          "cone_softness": 0.4,
+          "flicker": 0.6
         },
         "sindri.light2d#halo": {
           "enabled": true,
@@ -1396,7 +1410,8 @@
           "height": 1.0,
           "shadows": true,
           "shadow_reach": 0.6,
-          "shadow_source_radius": 0.3
+          "shadow_source_radius": 0.3,
+          "flicker": 0.6
         },
         "sindri.script": {
           "source": "scripts/flame.decay",

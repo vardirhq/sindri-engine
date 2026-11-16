@@ -39,7 +39,8 @@ struct SindriVertexInput {
     // Brightness at each corner, from the quad's own [0,0] round to [0,1].
     @location(10) corner_shade: vec4<f32>,
     @location(11) shader_params: vec4<f32>,
-    // x is 1 when 2D lights light this sprite; the rest is reserved.
+    // x is 1 when 2D lights light this sprite, y when it is lit from where it
+    // stands, z how much it sways in the wind; w is reserved.
     @location(12) flags: vec4<f32>,
 }
 
@@ -59,10 +60,29 @@ struct SindriVertexOutput {
     @location(10) @interpolate(flat) axes: vec4<f32>,
 }
 
+// How far wind moves a point of a swaying sprite: nothing at its foot, most at
+// its top, along its own width. Each sprite has its own phase from where its
+// foot is, and gusts roll slowly across the world over that, so a wood sways
+// in waves rather than in step.
+fn sindri_sway(model: mat4x4<f32>, up: f32, amount: f32) -> vec3<f32> {
+    let foot = (model * vec4<f32>(0.0, -0.5, 0.0, 1.0)).xy;
+    let height = clamp(up + 0.5, 0.0, 1.0);
+    let t = sindri_uniforms.time.x;
+    let gust = 0.55 + 0.45 * sin(t * 0.45 + foot.x * 0.11 - foot.y * 0.07);
+    let swing = sin(t * 1.9 + foot.x * 0.9 + foot.y * 0.6) * 0.7
+        + sin(t * 3.1 + foot.x * 1.7) * 0.3;
+    // Its width, the same way round whether or not it is mirrored.
+    let across = model[0].xyz * sign(model[0].x + 0.0001);
+    return across * amount * height * height * swing * gust;
+}
+
 @vertex
 fn sindri_vertex(input: SindriVertexInput) -> SindriVertexOutput {
     let model = mat4x4<f32>(input.model_0, input.model_1, input.model_2, input.model_3);
-    let world = model * vec4<f32>(input.position, 1.0);
+    var world = model * vec4<f32>(input.position, 1.0);
+    if input.flags.z != 0.0 {
+        world = vec4<f32>(world.xyz + sindri_sway(model, input.position.y, input.flags.z), world.w);
+    }
     var output: SindriVertexOutput;
     output.position = sindri_uniforms.view_projection * world;
     // The quad's own coordinates run 0..1; the rect says which part of

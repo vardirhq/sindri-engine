@@ -261,6 +261,9 @@ impl SceneExtractor {
                     camera.view,
                 ));
             }
+            if sprite.billboard {
+                self.reflect(model, texture, rect, batches);
+            }
             // Its own picture is left out off screen; a shadow it casts was
             // pushed above and is judged by where the shadow falls.
             if super::frustum::culling_view(camera.view_projection)
@@ -285,6 +288,7 @@ impl SceneExtractor {
                             sprite.color_transform.offset,
                         )
                         .with_shader_params(sprite.shader_params)
+                        .swaying(sprite.sway)
                         .with_uv_rect(uv),
                 });
             }

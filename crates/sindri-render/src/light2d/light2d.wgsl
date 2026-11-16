@@ -29,6 +29,10 @@ struct SindriLights2d {
     sight: vec4<f32>,
     // x is 1 when there is a viewer, y how far past an occluding edge it sees.
     sight_edge: vec4<f32>,
+    // x how much is covered, y a cloud's width, z how dark, w 1 when there are clouds.
+    clouds: vec4<f32>,
+    // x, y how far the clouds have drifted.
+    drift: vec4<f32>,
     lights: array<SindriLight2d, 16>,
 }
 
@@ -41,6 +45,38 @@ var<uniform> sindri_lights_2d: SindriLights2d;
 // the first row. See `shadow.rs`, which builds them and which this must agree with.
 @group(0) @binding(4)
 var sindri_shadow_map_2d: texture_2d<f32>;
+
+fn sindri_cloud_hash(p: vec2<f32>) -> f32 {
+    let q = fract(p * vec2<f32>(0.1031, 0.1030));
+    let r = q + dot(q, q.yx + 33.33);
+    return fract((r.x + r.y) * r.x);
+}
+
+fn sindri_cloud_noise(p: vec2<f32>) -> f32 {
+    let cell = floor(p);
+    let f = fract(p);
+    let u = f * f * (3.0 - 2.0 * f);
+    let a = sindri_cloud_hash(cell);
+    let b = sindri_cloud_hash(cell + vec2<f32>(1.0, 0.0));
+    let c = sindri_cloud_hash(cell + vec2<f32>(0.0, 1.0));
+    let d = sindri_cloud_hash(cell + vec2<f32>(1.0, 1.0));
+    return mix(mix(a, b, u.x), mix(c, d, u.x), u.y);
+}
+
+// How much of the sky's light reaches `world` through the clouds: 1 under
+// clear sky, less under a cloud's shadow, with soft edges.
+fn sindri_cloud_shade(world: vec2<f32>) -> f32 {
+    let clouds = sindri_lights_2d.clouds;
+    if clouds.w < 0.5 {
+        return 1.0;
+    }
+    let p = (world - sindri_lights_2d.drift.xy) / clouds.y;
+    let n = sindri_cloud_noise(p) * 0.55 + sindri_cloud_noise(p * 2.1 + 7.3) * 0.3
+        + sindri_cloud_noise(p * 4.3 + 3.1) * 0.15;
+    let edge = 1.0 - clouds.x;
+    let shadow = smoothstep(edge - 0.08, edge + 0.12, n);
+    return 1.0 - clouds.z * shadow;
+}
 
 fn sindri_lighting_2d_on() -> bool {
     return sindri_lights_2d.ambient.w > 0.5;
@@ -112,7 +148,7 @@ fn sindri_light_2d(world: vec2<f32>, normal: vec3<f32>, use_normal: bool) -> vec
 // brighter than the other, but whether a shadow covers it is asked at its feet,
 // so the occluder round its own base does not darken the side facing the light.
 fn sindri_light_2d_from(world: vec2<f32>, base: vec2<f32>, normal: vec3<f32>, use_normal: bool) -> vec3<f32> {
-    var total = sindri_lights_2d.ambient.rgb;
+    var total = sindri_lights_2d.ambient.rgb * sindri_cloud_shade(base);
     let count = u32(sindri_lights_2d.header.x);
     for (var i = 0u; i < count; i++) {
         let light = sindri_lights_2d.lights[i];

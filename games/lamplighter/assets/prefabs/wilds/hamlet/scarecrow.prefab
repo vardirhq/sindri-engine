@@ -29,6 +29,7 @@
         "sindri.sprite": {
           "texture": "textures/village.png#scarecrow",
           "layer": 5,
+          "sway": 0.03,
           "billboard": true
         },
         "sindri.shadow2d": {

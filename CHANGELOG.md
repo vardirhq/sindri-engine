@@ -2,6 +2,12 @@
 
 # Changelog
 
+- Reflections: with `map_water.reflections`, everything billboarded that stands by a map's water is mirrored in it, upside down from its foot, darker and bluer, fading along its length and wavering by rows, cut along the squares so it only shows over water.
+
+- Flickering flames, wet banks and cloud shadows: a 2D light's `flicker` makes it waver (only how it looks; the light field scripts read is steady), `map_water.wet` darkens the land at the water's edge, and `lighting_2d.clouds` drifts soft cloud shadows that dim the sky's light and not the lights.
+
+- Wind: a sprite's `sway` lets its top swing in the wind while its foot stays put, each by where it stands and in gusts rolling across the world. Lamplighter's grass, flowers, bushes and tree crowns sway.
+
 - Water that moves on a voxel map: with `map_water`, water squares are drawn through a built-in water shader. They run from a shallow colour at the shore to a deep one by how much water lies under them; the surface sways and light ripples drift across it; glints flash where light catches them; and foam laps at the land. Everything moves in whole pixels of the block's own picture, and is lit by 2D lights, so at night the glints show only under a lantern. Lamplighter's wilds have rivers and a sea that move.
 
 - Places stood whole on a generated land: a scatter's `sites` build a layout of prefabs (a hamlet, a ruin, a camp) one to a patch of `spacing` squares, where the seed chooses and all of it can be walked on. The seed mirrors the layout and chooses which pieces stand and what each is; nothing a rule grows stands inside a site, and a piece taken stays taken. `sindri_scene::scatter_sites` says where sites are without making them. Lamplighter's wilds have hamlets: a well, houses round it, some still lit.

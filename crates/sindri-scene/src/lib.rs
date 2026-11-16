@@ -84,10 +84,10 @@ pub use components::{
     ui_text_template, update_camera_behaviors, update_camera_behaviors_with_viewport,
 };
 pub use components::{
-    EnvironmentLighting2d, FloatingOriginComponent, Light2dComponent, Light2dError,
-    Light2dOccluderComponent, MapWallsComponent, OccluderShape, Placement, ScatterComponent,
-    ScatterError, ScatterRule, ScatterSite, Shadow2dComponent, Shadow2dError, Sight2dComponent,
-    Site, SitePiece, scatter_placements, scatter_sites, unwalkable_runs,
+    EnvironmentClouds2d, EnvironmentLighting2d, FloatingOriginComponent, Light2dComponent,
+    Light2dError, Light2dOccluderComponent, MapWallsComponent, OccluderShape, Placement,
+    ScatterComponent, ScatterError, ScatterRule, ScatterSite, Shadow2dComponent, Shadow2dError,
+    Sight2dComponent, Site, SitePiece, scatter_placements, scatter_sites, unwalkable_runs,
 };
 pub use effects::{
     EffectBurstComponent, Effects2d, EmissionShape, Fleck, ParticleSpace, ParticlesComponent,
