@@ -289,7 +289,7 @@ pub(super) fn add_ui_surface(environment: &mut Environment) {
                     | UiCall::SetSelected => {
                         vec![entity(), Type::Number]
                     }
-                    UiCall::SetChecked => vec![entity(), Type::Bool],
+                    UiCall::SetChecked | UiCall::SetDisabled => vec![entity(), Type::Bool],
                     _ => vec![entity()],
                 },
                 return_type: match call {

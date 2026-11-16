@@ -1,0 +1,6 @@
+@use "ui/theme.weave";
+@use "ui/hud.weave";
+@use "ui/menus.weave";
+
+/* Lamplighter's screen UI: the look in one place, so the scenes only say what
+   each element is. */

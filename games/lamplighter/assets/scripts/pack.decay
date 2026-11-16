@@ -1,8 +1,8 @@
-// Wick's pack, on screen: what he has gathered, and what he can make of it.
-// Each recipe is a button (and a key): a campfire, which burns down, and a lamp,
-// which burns for good. Pressed with enough in the pack, the cost is taken and
-// the thing is built where Wick stands, a step ahead of him. A button that
-// cannot be afforded is dimmed.
+// Wick's pack, on screen: his lantern's light, what he has gathered, and what
+// he can make of it. Each recipe is a button (and a key): a campfire, which
+// burns down, and a lamp, which burns for good. Pressed with enough in the pack,
+// the cost is taken and the thing is built a step ahead of Wick. A button that
+// cannot be afforded is disabled, and `ui/hud.weave` shows it as spent.
 script Pack {
     // What each costs: wood, stone, resin.
     @export let fire_wood: number = 4.0;
@@ -22,6 +22,7 @@ script Pack {
     var resin: Entity = null;
     var fire_button: Entity = null;
     var lamp_button: Entity = null;
+    var light: Entity = null;
     var age: number = 0.0;
 
     fn start() {
@@ -31,6 +32,7 @@ script Pack {
         this.resin = World.find("pack-resin");
         this.fire_button = World.find("craft-campfire");
         this.lamp_button = World.find("craft-lamp");
+        this.light = World.find("hud-light-fill");
     }
 
     fn update(dt: number) {
@@ -41,8 +43,12 @@ script Pack {
         let fire_ok = Game.wood >= this.fire_wood && Game.stone >= this.fire_stone;
         let lamp_ok = Game.wood >= this.lamp_wood && Game.stone >= this.lamp_stone
             && Game.resin >= this.lamp_resin;
-        dim(this.fire_button, fire_ok);
-        dim(this.lamp_button, lamp_ok);
+        // What cannot be afforded cannot be pressed, and the stylesheet shows
+        // it as spent (`:disabled` in `ui/hud.weave`).
+        Ui.set_disabled(this.fire_button, !fire_ok);
+        Ui.set_disabled(this.lamp_button, !lamp_ok);
+        // How much light the lantern has left, scorched by a gloom's pounce.
+        Ui.set_fill(this.light, 1.0 - Game.scorch);
         // Wick has started by now, and faces somewhere.
         if this.age < 0.1 || Game.lost {
             return;
@@ -56,14 +62,6 @@ script Pack {
             Game.stone -= this.lamp_stone;
             Game.resin -= this.lamp_resin;
             build(this.lamp);
-        }
-    }
-
-    fn dim(button: Entity, ok: bool) {
-        if ok {
-            button.ui_image.tint = Color(0.16, 0.12, 0.06, 0.9);
-        } else {
-            button.ui_image.tint = Color(0.06, 0.06, 0.08, 0.55);
         }
     }
 

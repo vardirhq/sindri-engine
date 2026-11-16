@@ -241,7 +241,7 @@ impl Host {
         let size = [surface.width() as f32, surface.height() as f32];
         let view_camera = editing.canvas.view();
         renderer.set_lit(editing.lighting_preview);
-        let world = editing.drawn(&opened.world, size, outline);
+        let world = editing.presented(&opened.world, size, outline, opened.styles.as_ref())?;
         renderer.draw(
             &gpu.device,
             &gpu.queue,

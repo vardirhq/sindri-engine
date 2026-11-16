@@ -270,6 +270,13 @@ Colors accept `transparent`, `black`, `white`, and 3-, 4-, 6-, or 8-digit
 hex. Hex colors are authored in sRGB and converted to the renderer's linear
 space; alpha is unchanged.
 
+## Image properties
+
+`tint` targets `sindri.ui.image`: the colour its picture is multiplied by. White
+shows a picture as drawn, and a white picture (a bar, a plain panel) takes the
+colour, so a meter's fill and its well are styled like any other surface. It
+eases under `transition` like the other colours.
+
 ## Text properties
 
 `color`, `font-size`, `line-height`, `letter-spacing`, `font-weight`,
@@ -362,7 +369,9 @@ container it is inside, and `:active` matches the pressed element while the
 pointer stays on it (and a slider for as long as it is dragged), as in CSS.
 Hit-testing uses what was drawn, so a button a media query moved or resized
 is clicked where it is drawn. `:focus` follows the keyboard in the same hosts.
-`:disabled` and `:checked` come from the entity's own data.
+`:disabled` and `:checked` come from the entity's own data, and follow it as it
+changes: a script that disables a button (`Ui.set_disabled`) or checks a toggle
+restyles it, and everything inside it, on the next frame.
 
 A running game has two layers, as a page in a browser does. The stylesheet's
 rules are settled into the game's world when it starts and whenever the

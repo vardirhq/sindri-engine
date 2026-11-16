@@ -293,6 +293,16 @@ A shadow behind the element's shape.
 - **Writes:** `sindri.ui.shape` `shadow`
 - **Example:** `box-shadow: 0 4px 8px #00000080;`
 
+## Image
+
+### `tint`
+
+What the image's picture is multiplied by: white shows it as drawn, and a white picture (a bar, a panel) takes the colour.
+
+- **Values:** a color
+- **Writes:** `sindri.ui.image` `tint`
+- **Example:** `tint: #f2a65a;`
+
 ## Motion
 
 ### `transition`

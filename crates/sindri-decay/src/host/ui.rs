@@ -35,6 +35,7 @@ impl WorldHost<'_> {
             call,
             UiCall::Checked
                 | UiCall::SetChecked
+                | UiCall::SetDisabled
                 | UiCall::InputText
                 | UiCall::SetInputText
                 | UiCall::ScrollOffset
@@ -110,6 +111,7 @@ impl WorldHost<'_> {
             | UiCall::Focused
             | UiCall::Checked
             | UiCall::SetChecked
+            | UiCall::SetDisabled
             | UiCall::InputText
             | UiCall::SetInputText
             | UiCall::ScrollOffset

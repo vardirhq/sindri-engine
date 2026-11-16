@@ -7,8 +7,8 @@ use sindri_core::{
 use sindri_decay::{ScriptComponent, ScriptFrame, ScriptReport, ScriptSources, Scripts};
 use sindri_platform::InputState;
 use sindri_scene::{
-    SceneExtractor, ScreenExtent, ScreenUi, UiScrollComponent, UiTextInputComponent,
-    UiToggleComponent,
+    SceneExtractor, ScreenExtent, ScreenUi, UiButtonComponent, UiScrollComponent,
+    UiTextInputComponent, UiToggleComponent,
 };
 
 fn registry() -> ComponentSchemaRegistry {
@@ -146,5 +146,37 @@ script Form {
             .any(|failure| failure.to_string().contains(UiToggleComponent::TYPE_NAME)),
         "{:?}",
         report.failures
+    );
+}
+
+#[test]
+fn a_script_turns_a_button_off_and_on() {
+    let source = r"
+script Form {
+    fn update(dt: f32) {
+        Ui.set_disabled(this.entity, true);
+    }
+}
+";
+    let mut world = World::default();
+    let entity = form(&mut world);
+    world.get_mut(entity).expect("there").components.insert(
+        UiButtonComponent::TYPE_NAME.to_owned(),
+        json!({ "label": "Build", "disabled": false }),
+    );
+    let report = run(&mut world, source);
+    assert!(report.failures.is_empty(), "{:?}", report.failures);
+    assert_eq!(
+        world.get(entity).expect("there").components[UiButtonComponent::TYPE_NAME]["disabled"],
+        true,
+        "off"
+    );
+
+    let report = run(&mut world, &source.replace("true", "false"));
+    assert!(report.failures.is_empty(), "{:?}", report.failures);
+    assert_eq!(
+        world.get(entity).expect("there").components[UiButtonComponent::TYPE_NAME]["disabled"],
+        false,
+        "and on again"
     );
 }

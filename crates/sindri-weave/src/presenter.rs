@@ -1,10 +1,11 @@
 //! The live presentation a running game draws and hit-tests each frame.
 
-use std::collections::BTreeSet;
+use std::collections::{BTreeMap, BTreeSet};
 
 use sindri_core::{EntityId, World};
 use weave::{States, Stylesheet, Viewport};
 
+use crate::tree::component_states;
 use crate::{ApplyError, Declared, MAX_HIERARCHY_DEPTH, Pass, Transitions, UiStates, Undo, apply};
 
 /// The live presentation of a running game.
@@ -13,7 +14,11 @@ use crate::{ApplyError, Declared, MAX_HIERARCHY_DEPTH, Pass, Transitions, UiStat
 /// [settled](Self::settle) into the world when the game starts and whenever
 /// the screen changes shape: that is the world the scripts read, and a script
 /// that then writes a value keeps it, as an inline style beats a stylesheet.
-/// Entities spawned later are settled once when they first appear. Each frame,
+/// Entities spawned later are settled once when they first appear, and an
+/// element whose own data changes the state it is in (a script disabling a
+/// button, checking a toggle) is settled again with everything inside it, so
+/// `:disabled` and `:checked` follow the game as `:hover` follows the pointer.
+/// Each frame,
 /// only what the pointer's states and running transitions change is
 /// [laid over](Self::present_over) that, for the draw and the hit-test, and
 /// taken off again. A frame with nothing hovered, nothing easing and no world
@@ -26,6 +31,9 @@ pub struct Presenter {
     /// Entity handles present at the last settlement/topology check. A new
     /// handle means a runtime spawn that has never received its base style.
     known: BTreeSet<EntityId>,
+    /// The states each element's own data put it in at the last settlement:
+    /// disabled, checked, open. Only elements in one are kept.
+    data_states: BTreeMap<EntityId, States>,
     /// Whether the last frame had nothing to lay over, so this one, if it has
     /// nothing either, can be skipped.
     idle: bool,
@@ -121,12 +129,15 @@ impl Presenter {
             apply(world, stylesheet, viewport, &UiStates::new(), pass)?;
         }
         self.known = world.entities().map(|(entity, _)| entity).collect();
+        self.data_states = data_states(world);
         self.idle = true;
         Ok(())
     }
 
     /// Gives newly spawned entities their base stylesheet values without
-    /// touching entities scripts may have changed since the initial settle.
+    /// touching entities scripts may have changed since the initial settle,
+    /// and settles again an element whose own state changed, with everything
+    /// inside it: its rules may differ now, and so may its descendants'.
     ///
     /// The world is styled where it stands and every entity that was there
     /// before is put back, so only the new ones keep their styling: an
@@ -140,14 +151,29 @@ impl Presenter {
         viewport: Viewport,
     ) -> Result<(), ApplyError> {
         let current: BTreeSet<_> = world.entities().map(|(entity, _)| entity).collect();
-        if current == self.known {
+        let states = data_states(world);
+        if current == self.known && states == self.data_states {
             return Ok(());
         }
 
         for settled in &mut self.settled {
             settled.retain(|entity, _| current.contains(entity));
         }
-        let spawned: BTreeSet<_> = current.difference(&self.known).copied().collect();
+        let mut spawned: BTreeSet<_> = current.difference(&self.known).copied().collect();
+        let changed: BTreeSet<EntityId> = current
+            .intersection(&self.known)
+            .filter(|entity| self.data_states.get(entity) != states.get(entity))
+            .copied()
+            .collect();
+        if !changed.is_empty() {
+            spawned.extend(
+                current
+                    .iter()
+                    .copied()
+                    .filter(|entity| within(world, *entity, &changed)),
+            );
+        }
+        self.data_states = states;
         if spawned.is_empty() {
             self.known = current;
             return Ok(());
@@ -213,6 +239,30 @@ impl Presenter {
         self.idle = states.is_empty();
         Ok(undo)
     }
+}
+
+/// Every element in a state its own data puts it in.
+fn data_states(world: &World) -> BTreeMap<EntityId, States> {
+    world
+        .entities()
+        .map(|(entity, data)| (entity, component_states(data)))
+        .filter(|(_, states)| *states != States::NONE)
+        .collect()
+}
+
+/// Whether `entity` is one of `roots` or inside one.
+fn within(world: &World, entity: EntityId, roots: &BTreeSet<EntityId>) -> bool {
+    let mut at = Some(entity);
+    for _ in 0..MAX_HIERARCHY_DEPTH {
+        let Some(here) = at else {
+            return false;
+        };
+        if roots.contains(&here) {
+            return true;
+        }
+        at = world.get(here).and_then(|data| data.parent);
+    }
+    false
 }
 
 /// The states the pointer puts elements in: the element under it hovered,

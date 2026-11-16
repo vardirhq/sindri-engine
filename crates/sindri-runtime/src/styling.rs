@@ -167,3 +167,44 @@ impl Session {
         styles.style(world, &self.screen_ui).map(Some)
     }
 }
+
+/// A project's stylesheets for a tool that shows a world without running it,
+/// such as an editor's canvas: a screen looks the same while it is edited as
+/// when it is played.
+///
+/// Styles a copy, since what is edited is the authored world, and with no
+/// pointer states: nothing on an edited screen is hovered or pressed.
+#[derive(Clone, Debug)]
+pub struct StylePreview {
+    stylesheets: Vec<Stylesheet>,
+}
+
+impl StylePreview {
+    /// The project's stylesheets ([`crate::project::stylesheets`]), or `None`
+    /// for a project with none.
+    ///
+    /// # Errors
+    /// A manifest that will not read, or a stylesheet that will not compose.
+    pub fn load(project: &std::path::Path) -> Result<Option<Self>, String> {
+        let stylesheets = crate::project::stylesheets(project)?;
+        Ok((!stylesheets.is_empty()).then_some(Self { stylesheets }))
+    }
+
+    /// `world` styled for a screen `size` pixels across and down.
+    ///
+    /// # Errors
+    /// A declaration whose value will not apply, named.
+    pub fn present(&self, world: &World, size: [f32; 2]) -> Result<World, String> {
+        Presenter::new()
+            .present(
+                world,
+                &self.stylesheets,
+                Viewport {
+                    width: size[0],
+                    height: size[1],
+                },
+                &sindri_weave::UiStates::new(),
+            )
+            .map_err(|error| error.to_string())
+    }
+}

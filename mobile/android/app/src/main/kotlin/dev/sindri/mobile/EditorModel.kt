@@ -58,7 +58,7 @@ enum class HandleKind(val native: String) { Turn("turn"), Scale("scale") }
 data class ToastUi(val text: String, val undo: Boolean = false)
 
 /** The overflow menu's switches and actions. */
-data class MenuUi(val snap: Boolean, val lightingPreview: Boolean, val tileGrid: Boolean)
+data class MenuUi(val snap: Boolean, val lightingPreview: Boolean, val tileGrid: Boolean, val screenUi: Boolean = true)
 
 enum class Brush(val label: String) { Path("Path"), Grass("Grass"), Land("Land"), Erase("Erase") }
 
@@ -255,7 +255,7 @@ sealed interface EditorEvent {
     data class MoveNode(val key: String, val x: Float, val y: Float) : EditorEvent
 }
 
-enum class MenuItem { Snap, LightingPreview, TileGrid }
+enum class MenuItem { Snap, LightingPreview, ScreenUi, TileGrid }
 
 /** How an inspector row was changed. */
 sealed interface RowChange {

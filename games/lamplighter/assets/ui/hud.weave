@@ -1,0 +1,65 @@
+/* The wilds' HUD: the lantern's light top left, the pack bottom left, and what
+   Wick can build bottom right. Panels and bars are placed by their centre, text
+   by its anchor. On a phone held upright everything is sized to the screen's
+   width and the build cards sit above the pack. */
+
+/* The lantern's light. */
+.light-panel { width: 240px; height: 56px; x: 136px; y: -44px; anchor: top_left; }
+.light-label { width: 200px; height: 14px; x: 32px; y: -26px; anchor: top_left; }
+.meter { width: 208px; height: 10px; x: 136px; y: -56px; anchor: top_left; }
+.light-back { tint: var(--well); }
+.light-fill { tint: var(--ember); }
+
+/* The pack: one row a thing, its picture and how many. */
+.pack-panel {
+    width: 156px; height: 128px; x: 94px; y: 80px; anchor: bottom_left;
+    direction: column; gap: 2px; padding: 10px 14px;
+    justify-content: center; align-items: start;
+}
+.pack-row { background: transparent; width: 128px; height: 34px; direction: row; gap: 10px; align-items: center; justify-content: start; }
+.pack-icon { width: 30px; height: 30px; }
+.pack-count { width: 88px; height: 20px; font-size: 16px; line-height: 20px; color: var(--ink); text-align: center; }
+
+/* What he can build: a card each, lit while he can afford it and spent while
+   he cannot. */
+.craft-panel {
+    width: 300px; height: 152px; x: -166px; y: 92px; anchor: bottom_right;
+    direction: column; gap: 10px; justify-content: end; align-items: end;
+    background: transparent;
+}
+.craft {
+    width: 300px; height: 70px;
+    direction: row; gap: 12px; padding: 0px 14px; align-items: center; justify-content: start;
+    background: var(--ember-deep);
+    border-color: var(--ember);
+    border-width: 1px;
+    border-radius: 12px;
+    box-shadow: 0px 8px 22px #00000088;
+    transition: background 120ms ease-out, border-color 120ms ease-out;
+}
+.craft:hover { background: #4d3018; }
+.craft:active { background: #24160b; transition: background 40ms linear; }
+.craft:disabled { background: var(--panel); border-color: var(--panel-edge); }
+.craft-icon { width: 44px; height: 44px; }
+.craft-text { width: 190px; height: 50px; direction: column; gap: 2px; align-items: start; justify-content: center; }
+.craft-name { width: 190px; height: 22px; font-size: 18px; line-height: 22px; color: var(--ink); text-align: center; }
+.craft-cost { width: 190px; height: 16px; font-size: 12px; line-height: 15px; color: var(--muted); text-align: center; }
+.craft-key { width: 22px; height: 22px; font-size: 13px; line-height: 16px; color: var(--ember); text-align: center; }
+.craft:disabled .craft-name, .craft:disabled .craft-cost, .craft:disabled .craft-key { color: var(--faint); }
+
+@media (orientation: portrait) {
+    .light-panel { width: 56vw; height: 13vw; x: 31vw; y: -10.5vw; }
+    .light-label { width: 46vw; height: 3vw; x: 7vw; y: -6vw; font-size: 2.6vw; line-height: 3vw; }
+    .meter { width: 48vw; height: 2.4vw; x: 31vw; y: -13vw; }
+    .pack-panel { width: 34vw; height: 30vw; x: 20vw; y: 18vw; padding: 2vw 3vw; }
+    .pack-row { width: 30vw; height: 8vw; gap: 2vw; }
+    .pack-icon { width: 7vw; height: 7vw; }
+    .pack-count { width: 20vw; height: 5vw; font-size: 3.8vw; line-height: 4.6vw; }
+    .craft-panel { width: 58vw; height: 34vw; x: -32vw; y: 20vw; gap: 2vw; }
+    .craft { width: 58vw; height: 15vw; gap: 2.4vw; padding: 0px 3vw; border-radius: 3vw; }
+    .craft-icon { width: 10vw; height: 10vw; }
+    .craft-text { width: 36vw; height: 11vw; }
+    .craft-name { width: 36vw; height: 5vw; font-size: 4vw; line-height: 5vw; }
+    .craft-cost { width: 36vw; height: 3.6vw; font-size: 2.6vw; line-height: 3.4vw; }
+    .craft-key { width: 4vw; height: 4vw; font-size: 3vw; line-height: 3.6vw; }
+}

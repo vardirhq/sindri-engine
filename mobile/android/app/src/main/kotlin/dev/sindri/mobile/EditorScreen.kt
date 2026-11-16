@@ -143,6 +143,7 @@ private fun OverflowMenu(menu: MenuUi, onEvent: (EditorEvent) -> Unit, modifier:
     ) {
         MenuRow(Sym.grid_4x4, "Snap to grid", menu.snap) { onEvent(EditorEvent.MenuToggle(MenuItem.Snap)) }
         MenuRow(Sym.lightbulb, "Lighting preview", menu.lightingPreview) { onEvent(EditorEvent.MenuToggle(MenuItem.LightingPreview)) }
+        MenuRow(Sym.web_asset, "Show screen UI", menu.screenUi) { onEvent(EditorEvent.MenuToggle(MenuItem.ScreenUi)) }
         MenuRow(Sym.grid_on, "Show tile grid", menu.tileGrid) { onEvent(EditorEvent.MenuToggle(MenuItem.TileGrid)) }
         MenuRow(Sym.center_focus_strong, "Frame everything", null) { onEvent(EditorEvent.FrameAll) }
     }

@@ -96,6 +96,12 @@ pub struct Editing {
     /// light. Off by default, as the design's menu has it, so a scene that is
     /// dark on purpose can still be seen to be worked on.
     pub lighting_preview: bool,
+    /// Whether the canvas shows the screen UI (the HUD, menus) over the
+    /// world. On by default; off, the world can be worked on unobstructed.
+    pub screen_ui: bool,
+    /// The world the canvas last drew styled and with the screen UI shown or
+    /// hidden, and what it was built for (`crate::presented`).
+    pub(crate) presented: Option<(crate::presented::PresentKey, sindri_core::World)>,
     pub(crate) touch: Option<Touch>,
     /// How far from a marker's center, in surface pixels, a finger still
     /// lands on it. The host sets it from the screen's density.
@@ -123,6 +129,8 @@ impl Editing {
             selecting_more: false,
             canvas: Canvas::framing(world, extractor)?,
             lighting_preview: false,
+            screen_ui: true,
+            presented: None,
             touch: None,
             marker_radius: crate::gizmos::DEFAULT_MARKER_RADIUS,
             outline: None,

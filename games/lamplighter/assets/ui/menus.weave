@@ -1,0 +1,47 @@
+/* The title and the pause screen: one lit panel in the dark, its heading in
+   lamplight, its buttons warm and glowing brighter under the finger. */
+
+.menu-panel {
+    width: 460px; height: 380px; anchor: center;
+    padding: 36px; gap: 18px;
+    direction: column; justify-content: center; align-items: center;
+    background: var(--panel);
+    border-color: var(--panel-edge);
+    border-width: 1px;
+    border-radius: 20px;
+    box-shadow: 0px 24px 60px #000000aa;
+}
+.menu-heading {
+    width: 400px; height: 64px;
+    font-size: 52px; line-height: 60px; letter-spacing: 2px;
+    color: var(--ember); text-align: center;
+}
+.menu-tagline {
+    width: 400px; height: 24px;
+    font-size: 17px; line-height: 22px; letter-spacing: 1px;
+    color: var(--muted); text-align: center;
+}
+.menu-button {
+    width: 280px; height: 56px;
+    background: var(--ember-deep);
+    border-color: var(--ember);
+    border-width: 1px;
+    border-radius: 14px;
+    box-shadow: 0px 8px 22px #00000088;
+    transition: background 120ms ease-out;
+}
+.menu-button:hover { background: #4d3018; }
+.menu-button:active { background: #24160b; transition: background 40ms linear; }
+.menu-button-label {
+    width: 260px; height: 26px;
+    font-size: 20px; line-height: 24px; letter-spacing: 2px;
+    color: var(--ink); text-align: center; text-transform: uppercase;
+}
+
+@media (orientation: portrait) {
+    .menu-panel { width: 86vw; height: 80vw; padding: 7vw; gap: 4vw; border-radius: 5vw; }
+    .menu-heading { width: 76vw; height: 13vw; font-size: 11vw; line-height: 12vw; }
+    .menu-tagline { width: 76vw; height: 5vw; font-size: 3.8vw; line-height: 4.6vw; }
+    .menu-button { width: 64vw; height: 13vw; border-radius: 3.5vw; }
+    .menu-button-label { width: 60vw; height: 6vw; font-size: 4.6vw; line-height: 5.6vw; }
+}

@@ -69,6 +69,11 @@ pub(super) const TYPES: &[TypeEntry] = &[
                 "Sets a toggle without emitting a user-change event.",
             ),
             call(
+                "set_disabled",
+                &["button", "disabled"],
+                "Turns a button off (true) or on: a disabled button cannot be pressed, and a stylesheet shows it with `:disabled`.",
+            ),
+            call(
                 "input_text",
                 &["input"],
                 "The committed text in a single-line input.",

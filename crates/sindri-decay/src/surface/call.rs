@@ -241,6 +241,9 @@ pub(crate) enum UiCall {
     SliderChanged,
     Checked,
     SetChecked,
+    /// Turns a button off or on: a disabled button is not pressed, and a
+    /// stylesheet can show it as such (`:disabled`).
+    SetDisabled,
     InputText,
     SetInputText,
     ScrollOffset,
@@ -298,6 +301,7 @@ pub(crate) const UI_CALLS: &[(&str, UiCall)] = &[
     ("set_fill", UiCall::Fill),
     ("is_checked", UiCall::Checked),
     ("set_checked", UiCall::SetChecked),
+    ("set_disabled", UiCall::SetDisabled),
     ("input_text", UiCall::InputText),
     ("set_input_text", UiCall::SetInputText),
     ("scroll_offset", UiCall::ScrollOffset),

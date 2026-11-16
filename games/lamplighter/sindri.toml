@@ -13,3 +13,7 @@ scenes = [
   "assets/pause.scene",
   "assets/wilds.scene",
 ]
+
+# The screen UI's look (Weave): an entry stylesheet and what it uses.
+[assets]
+include = ["ui.weave"]

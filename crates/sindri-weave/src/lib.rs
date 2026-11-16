@@ -390,6 +390,16 @@ fn apply_property(
                 serde_json::json!(resolved),
             );
         }
+        "tint" => {
+            let resolved = color(value).ok_or_else(|| invalid(id, property, value))?;
+            set_component_field(
+                world,
+                entity,
+                "sindri.ui.image",
+                "tint",
+                serde_json::json!(resolved),
+            );
+        }
         "box-shadow" => shadow::apply(world, entity, id, value, viewport)?,
         "border-color" => {
             let resolved = color(value).ok_or_else(|| invalid(id, property, value))?;

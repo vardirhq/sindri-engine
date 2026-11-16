@@ -48,6 +48,8 @@ mod play;
 #[cfg(not(target_arch = "wasm32"))]
 mod prefab_edit;
 #[cfg(not(target_arch = "wasm32"))]
+mod presented;
+#[cfg(not(target_arch = "wasm32"))]
 mod recovery;
 mod renderer;
 #[cfg(not(target_arch = "wasm32"))]

@@ -70,6 +70,7 @@ class EditorController(
         this.density = density
         native.command("density", density)
         native.command("lighting", settings.lightingPreview)
+        native.command("screenUi", settings.screenUi)
         refresh()
         if (state.recovered) ui = ui.copy(toast = ToastUi("Recovered unsaved scene edits."))
     }
@@ -114,7 +115,7 @@ class EditorController(
         recoveryConflict = state.recoveryConflict
         val inspector = state.inspector
         val selection = inspector?.let { SelectionUi(InspectorPresenter.iconFor(it), it.name, if (state.selectingMore) "Tap objects to select" else "Properties", count = state.selectionCount.coerceAtLeast(1)) }
-        settings = settings.copy(lightingPreview = state.lighting)
+        settings = settings.copy(lightingPreview = state.lighting, screenUi = state.screenUi)
         val play = state.play
         val stoppedItself = play == null && ui.mode != PlayMode.Edit
         if (stoppedItself) {
@@ -316,18 +317,24 @@ class EditorController(
 
     /**
      * Flips one of the menu's switches. Lighting preview is the host's: the
-     * canvas draws the scene's 2D lights only while it is on. Snap keeps the
+     * canvas draws the scene's 2D lights only while it is on. So is the
+     * screen UI: off, the HUD and menus are not drawn over the world. Snap keeps the
      * handles to whole steps. The tile grid is not drawn yet.
      */
     private fun menuToggle(item: MenuItem) {
         settings = when (item) {
             MenuItem.Snap -> settings.copy(snap = !settings.snap)
             MenuItem.LightingPreview -> settings.copy(lightingPreview = !settings.lightingPreview)
+            MenuItem.ScreenUi -> settings.copy(screenUi = !settings.screenUi)
             MenuItem.TileGrid -> settings.copy(tileGrid = !settings.tileGrid)
         }
         when (item) {
             MenuItem.LightingPreview -> {
                 error = native.command("lighting", settings.lightingPreview)
+                refresh()
+            }
+            MenuItem.ScreenUi -> {
+                error = native.command("screenUi", settings.screenUi)
                 refresh()
             }
             MenuItem.TileGrid -> ui = ui.copy(menu = settings, toast = ToastUi("The tile grid is not drawn yet."))

@@ -27,3 +27,4 @@ pub use error::{ModelCollisionBindingError, RuntimeError};
 pub use project::{ProjectAssets, ProjectRun, STEP, scene_extractor};
 pub use report::{StepPhase, StepReport, StepTimes};
 pub use session::{Checkpoint, Session};
+pub use styling::StylePreview;
