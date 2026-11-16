@@ -59,6 +59,11 @@ struct Host {
     /// Where the finger that drives the stick landed, in surface pixels, and
     /// where it is now.
     stick: Option<([f32; 2], [f32; 2])>,
+    /// Where the last finger landed, if it landed on the game's own screen UI
+    /// (a button, a toggle), which takes it instead of the stick, and so whose
+    /// tap is not the interact key. Kept until the next finger lands, since
+    /// the tap is told after the lift.
+    ui_finger: Option<[f32; 2]>,
     /// When the last frame was drawn, which a run is advanced from.
     last_frame: Option<std::time::Instant>,
     /// Why the last run stopped by itself, until the app has seen it.
