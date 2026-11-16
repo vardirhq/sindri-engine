@@ -120,6 +120,16 @@
           "space": "world",
           "layer": 7,
           "glow": true
+        },
+        "sindri.script": {
+          "source": "scripts/sunfall.decay",
+          "script": "Sunfall",
+          "properties": {}
+        },
+        "sindri.tags": {
+          "tags": [
+            "sunfall"
+          ]
         }
       }
     }

@@ -22,6 +22,9 @@
 // while he stands in one, and one that is in one is driven out of it, brute or not,
 // and cannot wind up there.
 //
+// A Seeker that has found Wick (`Game.found`) is heard: while it holds him, a gloom
+// notices him from two and a half times as far.
+//
 // Its states: lurk, stalk, wind, lunge, recover.
 script Gloom {
     // How many blows put it out.
@@ -124,7 +127,9 @@ script Gloom {
         let level = Lighting.level(here);
         // Wick's eyes are a little above his feet, and the gloom's middle above its own.
         var covered: bool = false;
-        if apart < this.notice {
+        // A Seeker that has Wick calls the gloom from much further off.
+        let notice = this.notice * (1.0 + 1.5 * Game.found);
+        if apart < notice {
             let eyes = Vec2(this.wick.transform.world_position.x, this.wick.transform.world_position.y + 0.5);
             covered = !Lighting.visible(eyes, Vec2(here.x, here.y + 0.4));
         }
@@ -155,7 +160,7 @@ script Gloom {
                 }
             }
         }
-        let hunting = apart < this.notice && !Game.lost && !Game.won && Game.truce < 0.5 && Game.moved && !sheltered;
+        let hunting = apart < notice && !Game.lost && !Game.won && Game.truce < 0.5 && Game.moved && !sheltered;
 
         var squash_x: number = 1.0 + 0.04 * sin(this.age * 2.6);
         var squash_y: number = 1.0 / squash_x;

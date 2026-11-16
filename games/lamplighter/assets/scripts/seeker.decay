@@ -1,0 +1,147 @@
+// A Seeker: one of the things that come down from the Lid looking for warmth. It
+// hangs high over the land and sweeps the ground with a circle of cold red light,
+// round and round where it was set. Caught in that circle, Wick is found: the
+// circle locks onto him and follows, brighter and pulsing, and while he is found
+// the gloom hear it from much further off (`Game.found`, read by `gloom.decay`).
+// It is slower than Wick, so he can outrun it; a lit lamp's pool or an open
+// sunfall hides him from it at once. Lost, it hangs where it lost him a moment,
+// then goes back to sweeping.
+//
+// The entity is where the circle falls; its sprites draw the Seeker high above
+// it and the beam down to it. Its states: sweep, found, lost.
+script Seeker {
+    // How wide it sweeps round where it was set, and how fast the circle moves.
+    @export let sweep: number = 9.0;
+    @export let sweep_speed: number = 2.6;
+    // How near the circle's middle Wick must be to be found, how far he must get
+    // to be lost, and how fast it follows him.
+    @export let catch: number = 2.2;
+    @export let lose: number = 4.5;
+    @export let chase: number = 3.6;
+    // How long it hangs after losing him, and how far a lit lamp's pool reaches.
+    @export let linger_for: number = 2.5;
+    @export let pool: number = 5.0;
+    // How far an open sunfall's pool hides him, and how bright its light must be
+    // to count as open.
+    @export let sunfall_pool: number = 3.0;
+    @export let open_glow: number = 1.0;
+    // How bright its circle is sweeping, and found.
+    @export let calm: number = 2.8;
+    @export let fierce: number = 5.0;
+
+    var home_x: number = 0.0;
+    var home_y: number = 0.0;
+    var turn: number = 0.0;
+    var age: number = 0.0;
+    var state: String = "sweep";
+    var in_state: number = 0.0;
+    var wick: Entity = null;
+
+    fn start() {
+        this.home_x = this.transform.position.x;
+        this.home_y = this.transform.position.y;
+        this.wick = World.find("Wick");
+    }
+
+    fn update(dt: number) {
+        this.age += dt;
+        this.in_state += dt;
+        // The lamps it asks about have started by the second frame.
+        if this.age < 0.1 {
+            return;
+        }
+        let here_x = this.transform.position.x;
+        let here_y = this.transform.position.y;
+        var wx: number = 9999.0;
+        var wy: number = 9999.0;
+        if this.wick != null && World.exists(this.wick) {
+            wx = this.wick.transform.world_position.x;
+            wy = this.wick.transform.world_position.y;
+        }
+        let to_x = wx - here_x;
+        let to_y = wy - here_y;
+        let apart = sqrt(to_x * to_x + to_y * to_y);
+        let hidden = sheltered(wx, wy);
+
+        if this.state == "sweep" {
+            // Round and round, wavering, so its path is never quite the same.
+            this.turn += this.sweep_speed / this.sweep * dt;
+            let reach = this.sweep * (0.75 + 0.25 * sin(this.turn * 2.3));
+            let aim_x = this.home_x + reach * cos(this.turn);
+            let aim_y = this.home_y + reach * 0.7 * sin(this.turn);
+            go(aim_x, aim_y, this.sweep_speed * 1.5, dt);
+            if apart < this.catch && !hidden && !Game.lost {
+                enter("found");
+            }
+        } else if this.state == "found" {
+            go(wx, wy, this.chase, dt);
+            Game.found = 1.0;
+            if apart > this.lose || hidden || Game.lost {
+                enter("lost");
+            }
+        } else {
+            // Hanging where it lost him, then back to its round.
+            if this.in_state > this.linger_for {
+                this.turn = atan2((here_y - this.home_y) / 0.7, here_x - this.home_x);
+                enter("sweep");
+            } else if apart < this.catch * 0.8 && !hidden && !Game.lost {
+                enter("found");
+            }
+        }
+        if this.state != "found" {
+            Game.found = max(0.0, Game.found - dt * 0.4);
+        }
+
+        // Its circle: steady while it sweeps, fierce and pulsing once it has him.
+        var bright: number = this.calm + 0.15 * sin(this.age * 2.0);
+        if this.state == "found" {
+            bright = this.fierce + 0.6 * sin(this.age * 9.0);
+        } else if this.state == "lost" {
+            bright = this.calm + 0.5 * sin(this.age * 5.0);
+        }
+        this.light2d.intensity = bright;
+    }
+
+    fn enter(next: String) {
+        this.state = next;
+        this.in_state = 0.0;
+    }
+
+    // Moves the circle toward a point, no faster than `speed`.
+    fn go(x: number, y: number, speed: number, dt: number) {
+        let dx = x - this.transform.position.x;
+        let dy = y - this.transform.position.y;
+        let gap = sqrt(dx * dx + dy * dy);
+        let step = min(gap, speed * dt);
+        if gap > 0.001 {
+            this.transform.position.x += dx / gap * step;
+            this.transform.position.y += dy / gap * step;
+        }
+    }
+
+    // Whether a point is hidden from it: in a lit lamp's pool, or an open sunfall's.
+    fn sheltered(x: number, y: number) -> bool {
+        for lamp in World.with_tag("lantern") {
+            let post = Lantern.on(lamp);
+            if post != null && post.lit {
+                let dx = x - lamp.transform.world_position.x;
+                let dy = y - lamp.transform.world_position.y;
+                if sqrt(dx * dx + dy * dy) < this.pool {
+                    return true;
+                }
+            }
+        }
+        for fall in World.with_tag("sunfall") {
+            // Read from its light, which is there before its script starts: a
+            // sunfall's pool is as bright as its crack is open.
+            if fall.light2d.intensity > this.open_glow {
+                let dx = x - fall.transform.world_position.x;
+                let dy = y - fall.transform.world_position.y;
+                if sqrt(dx * dx + dy * dy) < this.sunfall_pool {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+}

@@ -307,6 +307,9 @@
           "edits": [],
           "soft_edges": true,
           "map_cliffs": true,
+          "normal_maps": {
+            "textures/blocks.png": "textures/blocks_n.png"
+          },
           "map_water": {
             "blocks": [
               "water"
@@ -1123,6 +1126,162 @@
           "space": "world",
           "layer": 7,
           "glow": true
+        },
+        "sindri.script": {
+          "source": "scripts/sunfall.decay",
+          "script": "Sunfall",
+          "properties": {}
+        },
+        "sindri.tags": {
+          "tags": [
+            "sunfall"
+          ]
+        }
+      }
+    },
+    {
+      "id": "seeker-1",
+      "name": "seeker-1",
+      "transform_3d": {
+        "position": [
+          24,
+          16,
+          0.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/seeker.png#seeker",
+          "layer": 6,
+          "size": [
+            2.0,
+            1.25
+          ],
+          "offset": [
+            0.0,
+            4.5
+          ],
+          "unlit": true,
+          "billboard": true
+        },
+        "sindri.light2d": {
+          "enabled": true,
+          "color": [
+            1.0,
+            0.16,
+            0.14,
+            1.0
+          ],
+          "intensity": 2.8,
+          "radius": 3.0,
+          "falloff": 0.4,
+          "height": 4.5,
+          "shadows": false,
+          "flicker": 0.0
+        },
+        "sindri.script": {
+          "source": "scripts/seeker.decay",
+          "script": "Seeker",
+          "properties": {}
+        }
+      }
+    },
+    {
+      "id": "seeker-1-beam",
+      "name": "seeker-1-beam",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1
+        ]
+      },
+      "parent": "seeker-1",
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/seeker-beam.png#shaft",
+          "layer": 5,
+          "size": [
+            2.6,
+            4.5
+          ],
+          "tint": [
+            2.4,
+            0.3,
+            0.26,
+            1.0
+          ],
+          "unlit": true,
+          "shader": "shaders/sunfall.wgsl",
+          "shader_params": [
+            0.9,
+            2.0,
+            0.0,
+            0.0
+          ],
+          "billboard": true
+        }
+      }
+    },
+    {
+      "id": "seeker-1-glow",
+      "name": "seeker-1-glow",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1
+        ]
+      },
+      "parent": "seeker-1",
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/mote.png",
+          "layer": -8,
+          "size": [
+            5.0,
+            5.0
+          ],
+          "tint": [
+            2.0,
+            0.12,
+            0.1,
+            0.3
+          ],
+          "unlit": true
         }
       }
     },

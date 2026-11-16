@@ -121,8 +121,8 @@ same plane, is lit by the same 2D lights, and is generated from one seed.
 - **Lamplighter's own ground.** *Done:* `art/blocks.py` cuts the plain tile of
   each of the game's terrain sheets (grass, dead grass, dirt, earth, soil,
   cobble, flagstone, stone) and draws water, sand, moss, mud and rock in the same
-  palette, four variants each, into `blocks.tileset`. Normal maps are still to
-  come.
+  palette, four variants each, into `blocks.tileset`, with a normal map of
+  their relief (`blocks_n.png`).
 - **Soft biome edges.** A map's biome edges are hard squares (`docs/voxel-terrain.md`,
   "Not yet"); the field's ground uses `corners` terrains for smooth transitions.
   The map view needs edge blending or autotiling between blocks.
@@ -233,11 +233,17 @@ says what is now true.
    the seed (`sites` on the scatter): a well, houses round it, some still lit.
    Still to come: the wilds opened from the title, hamlets with people and a lamp
    to light, and other places (ruins, camps, the beacon) appearing at random. Wick walks it in the dark; a test walks him across biomes.
-2. **Under the Lid.** Sunfalls: shafts of cracklight with a gold pool and dust
-   in the beam (*started:* they stand here and there in the wilds, scattered by
-   seed), drifting and coming and going. Seekers sweeping the land with red light,
-   and what being found calls down. The lantern burns fuel; the gloom keep to the
-   dark. A test outlasts a Seeker's sweep by a fire.
+2. **Under the Lid.** *Started.* Sunfalls: shafts of cracklight with a gold pool
+   and dust in the beam, scattered by seed, wandering round where they fell and
+   coming and going as their crack opens and shuts (`scripts/sunfall.decay`).
+   Seekers (`scripts/seeker.decay`): one hangs over the meadow north-east of the
+   start and sweeps it with a circle of red light; caught in it Wick is found,
+   the circle follows him (slower than he walks) and the gloom hear it from two
+   and a half times as far; a lit lamp's pool or an open sunfall hides him
+   (`tests/under_the_lid.rs`). The ground has relief that the lantern rakes
+   across (`blocks_n.png`). Still to come: Seekers scattered over the land and
+   what else being found calls down; the lantern burns fuel; the gloom keep to
+   the dark. A test outlasts a Seeker's sweep by a fire.
 3. **Gather and craft.** Things to pick up, an inventory, a crafting menu, and
    the first recipes: torch, campfire, lamp post, lantern oil. A test gathers and
    builds a campfire before his lantern runs dry.

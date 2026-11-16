@@ -58,6 +58,8 @@ def ground():
                 biome('Barrens', 0.1, 0.2, 'stone', 'rock', 1.4, terraces=2),
             ]},
         'blocks': 'blocks.tileset', 'view': 'map', 'variant_seed': 5, 'layer': -10, 'edits': [], 'soft_edges': True, 'map_cliffs': True,
+        # The ground has relief: a low light rakes across it.
+        'normal_maps': {'textures/blocks.png': 'textures/blocks_n.png'},
         # Water that moves: pale in the shallows, dark in the deep, swaying,
         # glinting where a light catches it and foaming at the shore.
         'map_water': {'blocks': ['water'], 'shallow': [0.1, 0.34, 0.38], 'deep': [0.015, 0.05, 0.14], 'depth': 6,
@@ -76,6 +78,7 @@ PREFABS = Path(__file__).resolve().parent.parent / 'assets' / 'prefabs' / 'wilds
 START = (10, 6)   # Wick's first step: meadow, by a river, the sea to the west
 LAMPS = [(15, 3), (4, 9)]
 SUNFALLS = [(6, 3)]   # one in sight of the start, so the first thing Wick sees is cracklight
+SEEKERS = [(24, 16)]   # one sweeping the meadow north-east of the start, past the lamps
 GLOOM = [(18, 12), (18, -4)]
 
 
@@ -236,7 +239,37 @@ def sunfall(name, x, y, phase=0.0):
                            'falloff': 0.9, 'height': 3.0, 'shadows': False, 'flicker': 0.0},
         'sindri.particles': scenes.motes(1.6, 5.0, 0.12, [[*gold, 0.0], [1.6, 1.4, 0.9, 0.9], [*gold, 0.0]],
                                          0.14, 0.1, spread=360.0, shape_size=[1.4, 1.4],
-                                         gravity=[0.0, 0.03], drag=0.4, layer=7, glow=True, max=10)})
+                                         gravity=[0.0, 0.03], drag=0.4, layer=7, glow=True, max=10),
+        # It wanders and comes and goes as the Lid's plates shift.
+        'sindri.script': {'source': 'scripts/sunfall.decay', 'script': 'Sunfall', 'properties': {}},
+        'sindri.tags': {'tags': ['sunfall']}})
+
+
+SEEKER_HEIGHT = 4.5   # how high a Seeker hangs over its circle
+
+
+def seeker(name, x, y):
+    """A Seeker (`scripts/seeker.decay`): where its red circle falls on the
+    ground, with the Seeker itself hanging high over it (`art/seeker.py`). Its
+    beam shining down (`art/sunfall.py`, through the sunfall's shader, red) and
+    a red glow over the ground, so the circle reads red on green grass, are
+    its children, so they go where it goes."""
+    return [
+        entity(name, name, at(x, y, 0), **{
+            'sindri.sprite': {'texture': 'textures/seeker.png#seeker', 'layer': 6, 'size': [2.0, 1.25],
+                              'offset': [0.0, SEEKER_HEIGHT], 'unlit': True, 'billboard': True},
+            'sindri.light2d': {'enabled': True, 'color': [1.0, 0.16, 0.14, 1.0], 'intensity': 2.8,
+                               'radius': 3.0, 'falloff': 0.4, 'height': SEEKER_HEIGHT, 'shadows': False,
+                               'flicker': 0.0},
+            'sindri.script': {'source': 'scripts/seeker.decay', 'script': 'Seeker', 'properties': {}}}),
+        entity(f'{name}-beam', f'{name}-beam', at(0, 0, 0), parent=name, **{
+            'sindri.sprite': {'texture': 'textures/seeker-beam.png#shaft', 'layer': 5,
+                              'size': [2.6, SEEKER_HEIGHT], 'tint': [2.4, 0.3, 0.26, 1.0], 'unlit': True,
+                              'shader': 'shaders/sunfall.wgsl', 'shader_params': [0.9, 2.0, 0.0, 0.0]}}),
+        entity(f'{name}-glow', f'{name}-glow', at(0, 0, 0), parent=name, **{
+            'sindri.sprite': {'texture': 'textures/mote.png', 'layer': -8, 'size': [5.0, 5.0],
+                              'tint': [2.0, 0.12, 0.1, 0.3], 'unlit': True}}),
+    ]
 
 
 def biome(name, temperature, moisture, surface, under, relief, terraces=0):
@@ -324,7 +357,7 @@ def standing_up(entities):
             sprite['billboard'] = True
             gap = gap_below(sprite['texture'])
             # Only what stands on the ground: the lantern hangs from Wick's hand.
-            if gap > 0 and e.get('parent') is None:
+            if gap > 0 and e.get('parent') is None and 'offset' not in sprite:
                 size = sprite.get('size', [1, 1])
                 sprite['offset'] = [0.0, round(-gap * size[1], 4)]
         shadow = components.get('sindri.shadow2d')
@@ -373,6 +406,7 @@ def wilds():
     # The first one breathes 6.66 seconds out of step: it came in with pull request 666,
     # and something below the Lid should remember that.
     ents += [sunfall(f'sunfall-{n}', x, y, phase=6.66 * n) for n, (x, y) in enumerate(SUNFALLS, 1)]
+    ents += [e for n, (x, y) in enumerate(SEEKERS, 1) for e in seeker(f'seeker-{n}', x, y)]
     ents += [*placed_at_start(wick()), *effects(), *[gloom(f'gloom-{n}', x, y, size) for n, ((x, y), size) in enumerate(zip(GLOOM, [1, 3]), 1)]]
     return standing_up(ents)
 

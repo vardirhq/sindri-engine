@@ -18,4 +18,7 @@ state Game {
     // Set by a door as Wick goes through it: the scene he comes back to starts its scripts again,
     // and this tells him that what the run has counted is to stay.
     var through: bool = false;
+    // How found Wick is by a Seeker, 1 while one has him and fading after: the gloom hear
+    // it from further off.
+    var found: number = 0.0;
 }

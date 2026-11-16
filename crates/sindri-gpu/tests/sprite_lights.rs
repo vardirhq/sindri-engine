@@ -68,8 +68,21 @@ enum Subject {
         lit: bool,
         normal: Option<[u8; 4]>,
         standing: bool,
+        ground: bool,
     },
     Shape,
+}
+
+/// The one sprite covering the frame, lit as asked.
+fn sprite(model: Mat4, lit: bool, standing: bool, ground: bool) -> SpriteInstance {
+    let sprite = SpriteInstance::new(model, [1.0; 4])
+        .lit(lit)
+        .standing(standing);
+    if ground {
+        sprite.ground_relief()
+    } else {
+        sprite
+    }
 }
 
 /// Draws `subject` covering the frame under `lighting`, and reads back the
@@ -114,6 +127,7 @@ fn draw(gpu: &GpuContext, lighting: Option<Lighting2d>, subject: &Subject) -> ([
             lit,
             normal,
             standing,
+            ground,
         } => {
             let normal_map = normal.map(|texel| {
                 textures.insert(
@@ -138,9 +152,7 @@ fn draw(gpu: &GpuContext, lighting: Option<Lighting2d>, subject: &Subject) -> ([
                         shader: None,
                         view_projection,
                         depth: SpriteDepth::Ignore,
-                        instances: &[SpriteInstance::new(model, [1.0; 4])
-                            .lit(*lit)
-                            .standing(*standing)],
+                        instances: &[sprite(model, *lit, *standing, *ground)],
                     },
                 )
                 .expect("the batch fits");
@@ -181,6 +193,7 @@ const LIT: Subject = Subject::Sprite {
     lit: true,
     normal: None,
     standing: false,
+    ground: false,
 };
 
 #[test]
@@ -206,6 +219,7 @@ fn an_unlit_sprite_and_a_scene_without_lighting_keep_their_color() {
         lit: false,
         normal: None,
         standing: false,
+        ground: false,
     };
     let (left, right) = draw(&gpu, Some(dim(vec![red_light(None)])), &unlit);
     assert_eq!((left, right), ([255; 4], [255; 4]));
@@ -266,6 +280,7 @@ fn a_standing_sprite_is_shadowed_where_its_feet_are_not_at_each_pixel() {
         lit: true,
         normal: None,
         standing,
+        ground: false,
     };
     let (_, pixel_by_pixel) = draw(&gpu, lit_by(red_light(None)), &on_the_ground(false));
     let (near, from_the_feet) = draw(&gpu, lit_by(red_light(None)), &on_the_ground(true));
@@ -417,6 +432,7 @@ fn a_normal_map_turns_a_surface_toward_or_away_from_the_light() {
         lit: true,
         normal: Some([x, 128, 255, 255]),
         standing: false,
+        ground: false,
     };
     let (toward, _) = draw(&gpu, lighting.clone(), &facing(240));
     let (away, _) = draw(&gpu, lighting.clone(), &facing(16));
@@ -428,6 +444,37 @@ fn a_normal_map_turns_a_surface_toward_or_away_from_the_light() {
     assert!(
         flat[0] >= toward[0],
         "no map lights by distance alone: {flat:?}"
+    );
+}
+
+/// Ground's relief: flat, it is lit exactly as with no normal map, however low
+/// the light; leaning toward the light it is brighter, and away darker.
+#[test]
+fn ground_relief_keeps_flat_ground_lit_by_distance() {
+    let Some(gpu) = gpu() else {
+        return;
+    };
+    let lighting = Some(dim(vec![Light2d {
+        position: [0.0, 0.0],
+        ..red_light(None)
+    }]));
+    let ground = |x: u8| Subject::Sprite {
+        lit: true,
+        normal: Some([x, 128, 255, 255]),
+        standing: false,
+        ground: true,
+    };
+    let (flat, _) = draw(&gpu, lighting.clone(), &ground(128));
+    let (toward, _) = draw(&gpu, lighting.clone(), &ground(240));
+    let (away, _) = draw(&gpu, lighting.clone(), &ground(16));
+    let (plain, _) = draw(&gpu, lighting, &LIT);
+    assert!(
+        flat[0].abs_diff(plain[0]) <= 3,
+        "flat ground as bright as no map: {flat:?} vs {plain:?}"
+    );
+    assert!(
+        toward[0] > flat[0] + 20 && away[0] + 20 < flat[0],
+        "relief over it: {away:?} < {flat:?} < {toward:?}"
     );
 }
 
