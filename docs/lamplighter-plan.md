@@ -239,7 +239,10 @@ says what is now true.
    Seekers (`scripts/seeker.decay`): one hangs over the meadow north-east of the
    start and sweeps it with a circle of red light; caught in it Wick is found,
    the circle follows him (slower than he walks) and the gloom hear it from two
-   and a half times as far; a lit lamp's pool or an open sunfall hides him
+   and a half times as far. It calls them: while it holds him a gloom rises out
+   of the ground near him every few seconds, and when it loses him a wave rises
+   where he was last seen (`prefabs/wilds/gloom.prefab`, never more than six
+   about). A lit lamp's pool or an open sunfall hides him
    (`tests/under_the_lid.rs`). The ground has relief that the lantern rakes
    across (`blocks_n.png`). Still to come: Seekers scattered over the land and
    what else being found calls down; the lantern burns fuel; the gloom keep to

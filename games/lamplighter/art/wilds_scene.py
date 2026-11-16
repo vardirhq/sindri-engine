@@ -172,6 +172,8 @@ def prefabs():
         made[kind] = entity('cover', 'cover', at(0, 0, 0, 1.5, 1.5), **components)
     made.update(air())
     made['sunfall'] = sunfall('sunfall', 0, 0)
+    # A gloom a Seeker calls up out of the ground.
+    made['gloom'] = gloom('gloom', 0, 0, 2)
     hamlet_things = {}
     for name, (sprite, block) in HAMLET_THINGS.items():
         hamlet_things[f'hamlet/{name}'] = village_scene.standing('thing', sprite, 0, 0, block)
@@ -261,7 +263,8 @@ def seeker(name, x, y):
             'sindri.light2d': {'enabled': True, 'color': [1.0, 0.16, 0.14, 1.0], 'intensity': 2.8,
                                'radius': 3.0, 'falloff': 0.4, 'height': SEEKER_HEIGHT, 'shadows': False,
                                'flicker': 0.0},
-            'sindri.script': {'source': 'scripts/seeker.decay', 'script': 'Seeker', 'properties': {}}}),
+            'sindri.script': {'source': 'scripts/seeker.decay', 'script': 'Seeker',
+                              'properties': {'gloom': 'prefabs/wilds/gloom.prefab'}}}),
         entity(f'{name}-beam', f'{name}-beam', at(0, 0, 0), parent=name, **{
             'sindri.sprite': {'texture': 'textures/seeker-beam.png#shaft', 'layer': 5,
                               'size': [2.6, SEEKER_HEIGHT], 'tint': [2.4, 0.3, 0.26, 1.0], 'unlit': True,

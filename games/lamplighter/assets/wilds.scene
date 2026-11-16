@@ -1193,7 +1193,9 @@
         "sindri.script": {
           "source": "scripts/seeker.decay",
           "script": "Seeker",
-          "properties": {}
+          "properties": {
+            "gloom": "prefabs/wilds/gloom.prefab"
+          }
         }
       }
     },

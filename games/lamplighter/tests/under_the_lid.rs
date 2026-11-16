@@ -108,3 +108,34 @@ fn an_open_sunfall_hides_wick_from_a_seeker() {
     step(&mut run, 30);
     assert!(run.board("found") < 0.05, "hidden in cracklight");
 }
+
+fn gloom_about(run: &Run) -> usize {
+    run.world
+        .entities()
+        .filter(|(_, data)| {
+            data.components
+                .get("sindri.tags")
+                .and_then(|tags| tags["tags"].as_array())
+                .is_some_and(|tags| tags.iter().any(|tag| tag == "gloom"))
+        })
+        .count()
+}
+
+/// A Seeker that holds Wick calls the gloom: one rises near him every few
+/// seconds, and when he gets away a wave of them rises where he was last seen.
+#[test]
+fn a_seeker_calls_the_gloom_up_round_wick() {
+    let mut run = Run::open_scene("wilds.scene").expect("the wilds open");
+    step(&mut run, 10);
+    let before = gloom_about(&run);
+    let wick = position(&run, "wick");
+    place(&mut run, "seeker-1", wick);
+    step(&mut run, 60 * 3 + 30);
+    let held = gloom_about(&run);
+    assert_eq!(held, before + 1, "one has risen while it holds him");
+
+    place(&mut run, "wick", [wick[0] + 12.0, wick[1] - 8.0]);
+    step(&mut run, 10);
+    let lost = gloom_about(&run);
+    assert_eq!(lost, held + 2, "and a wave where it lost him");
+}

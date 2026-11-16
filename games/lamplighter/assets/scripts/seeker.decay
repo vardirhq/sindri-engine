@@ -3,6 +3,9 @@
 // round and round where it was set. Caught in that circle, Wick is found: the
 // circle locks onto him and follows, brighter and pulsing, and while he is found
 // the gloom hear it from much further off (`Game.found`, read by `gloom.decay`).
+// Worse, it calls them: while it holds him a gloom rises out of the ground near
+// him every few seconds, and when it loses him a wave of them rises where he was
+// last seen, to hunt him from there. Never more than `most` gloom are about.
 // It is slower than Wick, so he can outrun it; a lit lamp's pool or an open
 // sunfall hides him from it at once. Lost, it hangs where it lost him a moment,
 // then goes back to sweeping.
@@ -28,6 +31,13 @@ script Seeker {
     // How bright its circle is sweeping, and found.
     @export let calm: number = 2.8;
     @export let fierce: number = 5.0;
+    // The gloom it calls, how often one rises while it holds him, how many rise
+    // where it loses him, how far from him they rise, and how many may be about.
+    @export let gloom: Prefab;
+    @export let call_every: number = 3.0;
+    @export let wave: number = 2.0;
+    @export let rise_at: number = 4.5;
+    @export let most: number = 6.0;
 
     var home_x: number = 0.0;
     var home_y: number = 0.0;
@@ -36,11 +46,17 @@ script Seeker {
     var state: String = "sweep";
     var in_state: number = 0.0;
     var wick: Entity = null;
+    var calling: number = 0.0;
+    // Where it last saw him.
+    var mark_x: number = 0.0;
+    var mark_y: number = 0.0;
+    var rising: Entity = null;
 
     fn start() {
         this.home_x = this.transform.position.x;
         this.home_y = this.transform.position.y;
         this.wick = World.find("Wick");
+        this.rising = World.find("fx-gloom-out");
     }
 
     fn update(dt: number) {
@@ -76,8 +92,21 @@ script Seeker {
         } else if this.state == "found" {
             go(wx, wy, this.chase, dt);
             Game.found = 1.0;
+            this.mark_x = wx;
+            this.mark_y = wy;
+            this.calling += dt;
+            if this.calling >= this.call_every {
+                this.calling = 0.0;
+                rise(wx, wy, this.age * 2.3);
+            }
             if apart > this.lose || hidden || Game.lost {
                 enter("lost");
+                // The ones it calls now hunt where he was, not where he is.
+                var n: number = 0.0;
+                while n < this.wave {
+                    rise(this.mark_x, this.mark_y, this.age + n * 6.2832 / this.wave);
+                    n += 1.0;
+                }
             }
         } else {
             // Hanging where it lost him, then back to its round.
@@ -105,6 +134,21 @@ script Seeker {
     fn enter(next: String) {
         this.state = next;
         this.in_state = 0.0;
+        this.calling = 0.0;
+    }
+
+    // A gloom rises out of the ground `rise_at` from a point, the way `turn`
+    // points, unless there are gloom enough about.
+    fn rise(x: number, y: number, turn: number) {
+        if this.gloom == null || World.with_tag("gloom").length >= this.most {
+            return;
+        }
+        let at_x = x + this.rise_at * cos(turn);
+        let at_y = y + this.rise_at * sin(turn);
+        let risen = World.spawn(this.gloom);
+        risen.transform.position.x = at_x;
+        risen.transform.position.y = at_y;
+        Effects.burst_at(this.rising, at_x, at_y + 0.5);
     }
 
     // Moves the circle toward a point, no faster than `speed`.
