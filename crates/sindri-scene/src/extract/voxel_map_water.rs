@@ -154,6 +154,11 @@ impl Water {
         by_depth.min(by_shore.min(1.0)).clamp(0.0, 1.0)
     }
 
+    /// How strongly what stands by it is mirrored in it.
+    pub(super) fn reflections(&self) -> f32 {
+        self.settings.reflections
+    }
+
     /// How fast it moves, in quarters, 0 to 15.
     fn pace(&self) -> f32 {
         (self.settings.speed * 4.0).round().clamp(0.0, 15.0)

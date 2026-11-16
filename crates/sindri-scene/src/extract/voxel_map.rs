@@ -100,6 +100,10 @@ struct MapWorld {
     reference: i32,
     water: Option<Water>,
     chunks: HashMap<(i32, i32), Rc<MapChunk>>,
+    /// Where it was last drawn, for what is mirrored in its water, and how
+    /// many mirror pieces have been drawn this frame.
+    drawn: Option<reflections::Drawn>,
+    reflected: u32,
 }
 
 #[derive(Default)]
@@ -246,6 +250,8 @@ fn refresh(
             resolved,
             reference: reference_height(&component.generator),
             water,
+            drawn: None,
+            reflected: 0,
             chunks: HashMap::new(),
         },
     );
@@ -273,6 +279,13 @@ fn push_map(
         return Ok(());
     };
     let distance = camera_distance(camera.view, root.w_axis.truncate());
+    map.drawn = Some(reflections::Drawn {
+        root,
+        layer,
+        distance,
+        strength: map.water.as_ref().map_or(0.0, Water::reflections),
+    });
+    map.reflected = 0;
     let mut chunks = Vec::new();
     for chunk_row in min[1].div_euclid(CHUNK)..=max[1].div_euclid(CHUNK) {
         for chunk_column in min[0].div_euclid(CHUNK)..=max[0].div_euclid(CHUNK) {
@@ -284,7 +297,7 @@ fn push_map(
     };
     let flooded = |height: f32| flood.filter(|(level, _, _)| height < *level);
     let water_shader = super::voxel_map_water::shader();
-    let mut index = 0_u32;
+    let index = std::cell::Cell::new(0_u32);
     let mut draw = |column: i32,
                     row: i32,
                     middle: [f32; 2],
@@ -325,10 +338,10 @@ fn push_map(
             clip: None,
             space: DrawSpace::World,
             texture,
-            order: TransparentOrder::new(layer, distance, index)?,
+            order: TransparentOrder::new(layer, distance, index.get())?,
             sprite,
         });
-        index = index.saturating_add(1);
+        index.set(index.get().saturating_add(1));
         Ok(())
     };
     for chunk in &chunks {
@@ -348,6 +361,8 @@ fn push_map(
     }
     // The frayed edges go over every square, so a strip is never covered by
     // the square it reaches into. A flooded square shows water, not its edge.
+    // Mirror images of what stands by the water go between the two.
+    index.set(index.get().max(reflections::FIRST_PIECE));
     for chunk in &chunks {
         for piece in chunk.pieces.iter().filter(|p| seen(p.column, p.row)) {
             if flooded(piece.height).is_none() {
@@ -553,6 +568,24 @@ fn visible_columns(root: Mat4, camera: ResolvedCamera) -> Option<([i32; 2], [i32
     }
     Some((min, max))
 }
+
+impl SceneExtractor {
+    /// A standing picture's mirror image in every map's water near it.
+    pub(super) fn reflect(
+        &self,
+        model: Mat4,
+        texture: TextureId,
+        rect: UvRect,
+        batches: &mut SpriteBatches,
+    ) {
+        for map in self.voxel_maps.0.borrow_mut().values_mut() {
+            map.reflections(model, texture, rect, batches);
+        }
+    }
+}
+
+#[path = "voxel_map_reflections.rs"]
+mod reflections;
 
 #[cfg(test)]
 #[path = "voxel_map_tests.rs"]

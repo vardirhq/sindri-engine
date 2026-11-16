@@ -223,6 +223,8 @@ pub struct VoxelMapWater {
     /// How much darker the land at the water's edge is drawn, wet: 0 not at
     /// all, 1 black.
     pub wet: f32,
+    /// How strongly what stands by the water is mirrored in it, 0 to 1.
+    pub reflections: f32,
 }
 
 impl Default for VoxelMapWater {
@@ -237,6 +239,7 @@ impl Default for VoxelMapWater {
             foam: 0.6,
             speed: 1.0,
             wet: 0.3,
+            reflections: 0.6,
         }
     }
 }
@@ -256,10 +259,17 @@ impl VoxelMapWater {
                 "`map_water.depth` must be from 1 to {MOST_WATER_DEPTH}"
             ));
         }
-        if self.wet > 1.0 {
-            return Err("`map_water.wet` must be from 0 to 1".to_owned());
+        if self.wet > 1.0 || self.reflections > 1.0 {
+            return Err("`map_water.wet` and `reflections` must be from 0 to 1".to_owned());
         }
-        let amounts = [self.waves, self.glints, self.foam, self.speed, self.wet];
+        let amounts = [
+            self.waves,
+            self.glints,
+            self.foam,
+            self.speed,
+            self.wet,
+            self.reflections,
+        ];
         let colours = self.shallow.iter().chain(&self.deep);
         if amounts
             .iter()

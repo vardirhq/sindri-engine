@@ -119,10 +119,19 @@ the ground, so at night glints flash only where a lantern reaches them. Only the
 drawing changes: what a walker can cross is as before. Lamplighter's wilds use
 it.
 
+The land at the water's edge is drawn darker, wet (`wet`, 0 to 1): fully beside
+the water, half at a corner of it. What stands by the water (any billboarded
+picture) is mirrored in it (`reflections`, 0 to 1): upside down from its foot,
+a little shorter than it is tall, darker and bluer, fading along its length and
+wavering a pixel by rows. The mirror image is cut along the map's squares and
+only the pieces over water are drawn, after the water and before the frayed
+banks, so it shows in the river and not on the grass.
+
 ```json
 "map_water": {"blocks": ["water"], "shallow": [0.1, 0.34, 0.38],
               "deep": [0.015, 0.05, 0.14], "depth": 6,
-              "waves": 0.7, "glints": 0.6, "foam": 0.7, "speed": 1.0}
+              "waves": 0.7, "glints": 0.6, "foam": 0.7, "speed": 1.0,
+              "wet": 0.3, "reflections": 0.9}
 ```
 
 ## What stands on it: scatter

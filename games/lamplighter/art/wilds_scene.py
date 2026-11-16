@@ -61,7 +61,8 @@ def ground():
         # Water that moves: pale in the shallows, dark in the deep, swaying,
         # glinting where a light catches it and foaming at the shore.
         'map_water': {'blocks': ['water'], 'shallow': [0.1, 0.34, 0.38], 'deep': [0.015, 0.05, 0.14], 'depth': 6,
-                      'waves': 0.7, 'glints': 0.6, 'foam': 0.7, 'speed': 1.0}},
+                      'waves': 0.7, 'glints': 0.6, 'foam': 0.7, 'speed': 1.0,
+                      'wet': 0.3, 'reflections': 0.9}},
         'sindri.scatter': scatter(),
         # Water stops Wick, near him, however far he goes.
         'sindri.map_walls': {'around': 'wick', 'reach': 20, 'memberships': scenes.WALL, 'filter': scenes.ALL},

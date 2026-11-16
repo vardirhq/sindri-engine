@@ -290,4 +290,22 @@ fn map_water_has_depth_and_a_shore() {
             .all(|draw| draw.shader.is_none()),
         "the land is not"
     );
+    // A picture two tall standing on the bank north of the pond is mirrored
+    // in the water in front of it, and only there.
+    let standing = Mat4::from_translation(Vec3::new(1.5, 0.5, 1.0))
+        * Mat4::from_rotation_x(std::f32::consts::FRAC_PI_2)
+        * Mat4::from_scale(Vec3::new(1.0, 2.0, 1.0));
+    let mut mirrored = Vec::new();
+    map.reflections(standing, TextureId::new(9), UvRect::FULL, &mut mirrored);
+    assert_eq!(
+        mirrored.len(),
+        2,
+        "over the pond's first two rows, not the bank"
+    );
+    assert!(mirrored.iter().all(|draw| draw.shader.is_some()));
+    let far_away = Mat4::from_translation(Vec3::new(40.5, 0.5, 1.0))
+        * Mat4::from_rotation_x(std::f32::consts::FRAC_PI_2);
+    let mut none = Vec::new();
+    map.reflections(far_away, TextureId::new(9), UvRect::FULL, &mut none);
+    assert!(none.is_empty(), "nothing is mirrored on dry land");
 }
