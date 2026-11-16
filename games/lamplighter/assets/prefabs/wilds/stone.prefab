@@ -1,0 +1,57 @@
+{
+  "format_version": 1,
+  "metadata": {
+    "name": "stone"
+  },
+  "entities": [
+    {
+      "id": "stone",
+      "name": "stone",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/goods.png#stone",
+          "layer": 4,
+          "size": [
+            0.85,
+            0.85
+          ],
+          "billboard": true,
+          "offset": [
+            0.0,
+            -0.1062
+          ]
+        },
+        "sindri.script": {
+          "source": "scripts/pickup.decay",
+          "script": "Pickup",
+          "properties": {
+            "kind": "stone"
+          }
+        },
+        "sindri.tags": {
+          "tags": [
+            "pickup"
+          ]
+        }
+      }
+    }
+  ]
+}

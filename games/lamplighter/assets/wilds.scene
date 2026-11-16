@@ -195,6 +195,22 @@
                 "key.Escape",
                 "gamepad.start"
               ]
+            },
+            {
+              "name": "campfire",
+              "kind": "button",
+              "bindings": [
+                "key.F",
+                "gamepad.north"
+              ]
+            },
+            {
+              "name": "lamp",
+              "kind": "button",
+              "bindings": [
+                "key.G",
+                "gamepad.east"
+              ]
             }
           ]
         }
@@ -493,6 +509,57 @@
               ],
               "spacing": 3,
               "chance": 0.3,
+              "flip": true
+            },
+            {
+              "on": [
+                "deadgrass",
+                "grass",
+                "moss"
+              ],
+              "prefabs": [
+                "prefabs/wilds/wood.prefab"
+              ],
+              "spacing": 4,
+              "chance": 0.3,
+              "flip": true
+            },
+            {
+              "on": [
+                "stone",
+                "rock",
+                "earth",
+                "sand"
+              ],
+              "prefabs": [
+                "prefabs/wilds/stone.prefab"
+              ],
+              "spacing": 4,
+              "chance": 0.35,
+              "flip": true
+            },
+            {
+              "on": [
+                "grass",
+                "earth"
+              ],
+              "prefabs": [
+                "prefabs/wilds/stone.prefab"
+              ],
+              "spacing": 7,
+              "chance": 0.25,
+              "flip": true
+            },
+            {
+              "on": [
+                "deadgrass",
+                "grass"
+              ],
+              "prefabs": [
+                "prefabs/wilds/resin.prefab"
+              ],
+              "spacing": 8,
+              "chance": 0.25,
               "flip": true
             },
             {
@@ -1284,6 +1351,376 @@
             0.3
           ],
           "unlit": true
+        }
+      }
+    },
+    {
+      "id": "pack-wood",
+      "name": "pack-wood",
+      "transform_3d": {
+        "position": [
+          0.03,
+          0.15,
+          0.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.5,
+          0.05,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.text": {
+          "anchor": "bottom_left",
+          "color": [
+            1.0,
+            0.92,
+            0.7,
+            1.0
+          ],
+          "font": "fonts/Inter.ttf",
+          "font_size": 0.036,
+          "line_height": 0.044,
+          "layer": 100,
+          "text": "Wood {}",
+          "bold": true,
+          "shadow": {
+            "offset": [
+              0,
+              -0.003
+            ],
+            "color": [
+              0,
+              0,
+              0,
+              0.6
+            ],
+            "softness": 0.002
+          }
+        }
+      }
+    },
+    {
+      "id": "pack-stone",
+      "name": "pack-stone",
+      "transform_3d": {
+        "position": [
+          0.03,
+          0.1,
+          0.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.5,
+          0.05,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.text": {
+          "anchor": "bottom_left",
+          "color": [
+            1.0,
+            0.92,
+            0.7,
+            1.0
+          ],
+          "font": "fonts/Inter.ttf",
+          "font_size": 0.036,
+          "line_height": 0.044,
+          "layer": 100,
+          "text": "Stone {}",
+          "bold": true,
+          "shadow": {
+            "offset": [
+              0,
+              -0.003
+            ],
+            "color": [
+              0,
+              0,
+              0,
+              0.6
+            ],
+            "softness": 0.002
+          }
+        }
+      }
+    },
+    {
+      "id": "pack-resin",
+      "name": "pack-resin",
+      "transform_3d": {
+        "position": [
+          0.03,
+          0.05,
+          0.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.5,
+          0.05,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.text": {
+          "anchor": "bottom_left",
+          "color": [
+            1.0,
+            0.92,
+            0.7,
+            1.0
+          ],
+          "font": "fonts/Inter.ttf",
+          "font_size": 0.036,
+          "line_height": 0.044,
+          "layer": 100,
+          "text": "Resin {}",
+          "bold": true,
+          "shadow": {
+            "offset": [
+              0,
+              -0.003
+            ],
+            "color": [
+              0,
+              0,
+              0,
+              0.6
+            ],
+            "softness": 0.002
+          }
+        }
+      }
+    },
+    {
+      "id": "craft-campfire",
+      "name": "craft-campfire",
+      "transform_3d": {
+        "position": [
+          -0.03,
+          0.135,
+          0.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.62,
+          0.075,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.image": {
+          "anchor": "bottom_right",
+          "layer": 96,
+          "texture": "textures/white.png",
+          "tint": [
+            0.06,
+            0.06,
+            0.08,
+            0.55
+          ]
+        },
+        "sindri.ui.button": {
+          "label": "Campfire  (F)  4 wood, 2 stone",
+          "autofocus": false,
+          "disabled": false
+        },
+        "sindri.ui.layout": {
+          "direction": "row",
+          "spacing": 0.0,
+          "justify": "center",
+          "align": "center"
+        }
+      }
+    },
+    {
+      "id": "craft-campfire-label",
+      "name": "craft-campfire-label",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.6,
+          0.06,
+          1
+        ]
+      },
+      "parent": "craft-campfire",
+      "components": {
+        "sindri.ui.text": {
+          "anchor": "center",
+          "color": [
+            1.0,
+            0.9,
+            0.7,
+            1.0
+          ],
+          "font": "fonts/Inter.ttf",
+          "font_size": 0.032,
+          "line_height": 0.04,
+          "layer": 98,
+          "text": "Campfire  (F)  4 wood, 2 stone",
+          "bold": true,
+          "line_align": "center",
+          "shadow": {
+            "offset": [
+              0,
+              -0.003
+            ],
+            "color": [
+              0,
+              0,
+              0,
+              0.6
+            ],
+            "softness": 0.002
+          }
+        }
+      }
+    },
+    {
+      "id": "craft-lamp",
+      "name": "craft-lamp",
+      "transform_3d": {
+        "position": [
+          -0.03,
+          0.05,
+          0.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.62,
+          0.075,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.image": {
+          "anchor": "bottom_right",
+          "layer": 96,
+          "texture": "textures/white.png",
+          "tint": [
+            0.06,
+            0.06,
+            0.08,
+            0.55
+          ]
+        },
+        "sindri.ui.button": {
+          "label": "Lamp  (G)  6 wood, 4 stone, 2 resin",
+          "autofocus": false,
+          "disabled": false
+        },
+        "sindri.ui.layout": {
+          "direction": "row",
+          "spacing": 0.0,
+          "justify": "center",
+          "align": "center"
+        }
+      }
+    },
+    {
+      "id": "craft-lamp-label",
+      "name": "craft-lamp-label",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.6,
+          0.06,
+          1
+        ]
+      },
+      "parent": "craft-lamp",
+      "components": {
+        "sindri.ui.text": {
+          "anchor": "center",
+          "color": [
+            1.0,
+            0.9,
+            0.7,
+            1.0
+          ],
+          "font": "fonts/Inter.ttf",
+          "font_size": 0.032,
+          "line_height": 0.04,
+          "layer": 98,
+          "text": "Lamp  (G)  6 wood, 4 stone, 2 resin",
+          "bold": true,
+          "line_align": "center",
+          "shadow": {
+            "offset": [
+              0,
+              -0.003
+            ],
+            "color": [
+              0,
+              0,
+              0,
+              0.6
+            ],
+            "softness": 0.002
+          }
+        }
+      }
+    },
+    {
+      "id": "pack",
+      "name": "Pack",
+      "components": {
+        "sindri.script": {
+          "source": "scripts/pack.decay",
+          "script": "Pack",
+          "properties": {
+            "campfire": "prefabs/wilds/campfire.prefab",
+            "lamp": "prefabs/wilds/lamp.prefab"
+          }
         }
       }
     },

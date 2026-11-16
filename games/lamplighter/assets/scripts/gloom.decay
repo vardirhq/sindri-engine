@@ -18,7 +18,7 @@
 // light does not burn it or thin it; only the sword puts it out. `fears_light` and
 // `size` are what set the two apart.
 //
-// A lit lamp post is a safe pool, `pool` units wide round it: a gloom will not hunt Wick
+// A lit lamp post, or a fire Wick has built while it burns, is a safe pool, `pool` units wide round it: a gloom will not hunt Wick
 // while he stands in one, and one that is in one is driven out of it, brute or not,
 // and cannot wind up there.
 //
@@ -154,6 +154,29 @@ script Gloom {
                 if this.wick != null && World.exists(this.wick) {
                     let wx = this.wick.transform.world_position.x - lamp_x;
                     let wy = this.wick.transform.world_position.y - lamp_y;
+                    if sqrt(wx * wx + wy * wy) < this.pool {
+                        sheltered = true;
+                    }
+                }
+            }
+        }
+        // A fire Wick has built is a safe pool too while it burns: read from its
+        // light, which is there before its script starts.
+        for fire in World.with_tag("fire") {
+            if this.age > 0.1 && fire.light2d.intensity > 0.5 {
+                let fire_x = fire.transform.world_position.x;
+                let fire_y = fire.transform.world_position.y;
+                let from_x = here.x - fire_x;
+                let from_y = here.y - fire_y;
+                let gap = sqrt(from_x * from_x + from_y * from_y);
+                if gap < this.pool {
+                    inside = true;
+                    out_x = from_x / max(gap, 0.01);
+                    out_y = from_y / max(gap, 0.01);
+                }
+                if this.wick != null && World.exists(this.wick) {
+                    let wx = this.wick.transform.world_position.x - fire_x;
+                    let wy = this.wick.transform.world_position.y - fire_y;
                     if sqrt(wx * wx + wy * wy) < this.pool {
                         sheltered = true;
                     }

@@ -247,9 +247,16 @@ says what is now true.
    across (`blocks_n.png`). Still to come: Seekers scattered over the land and
    what else being found calls down; the lantern burns fuel; the gloom keep to
    the dark. A test outlasts a Seeker's sweep by a fire.
-3. **Gather and craft.** Things to pick up, an inventory, a crafting menu, and
-   the first recipes: torch, campfire, lamp post, lantern oil. A test gathers and
-   builds a campfire before his lantern runs dry.
+3. **Gather and craft.** *Started.* Deadwood, flint and resin lie about the
+   wilds, scattered by seed (`scripts/pickup.decay`, `art/goods.py`); Wick takes
+   them by walking over them, and what is taken stays taken. His pack is on
+   screen with a button for each thing he can build (`scripts/pack.decay`, F and
+   G from the keyboard): a campfire (4 wood, 2 stone) that burns for a minute
+   and a half, and a lamp (6 wood, 4 stone, 2 resin) that burns for good, built a
+   step ahead of him. A fire he has built is a safe pool while it burns: the
+   gloom are driven out of it and a Seeker cannot find him by it
+   (`scripts/fire.decay`, `tests/gather_and_build.rs`). Still to come: tools,
+   torches and lantern oil, and the lantern burning fuel.
 4. **Survive.** Health, hunger and courage; food, cooking and the courage effects;
    death and what it costs. A test lives through three long dark spells.
 5. **Places.** The village set into the world with its houses, villagers to help

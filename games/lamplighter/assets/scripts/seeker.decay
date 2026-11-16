@@ -6,8 +6,8 @@
 // Worse, it calls them: while it holds him a gloom rises out of the ground near
 // him every few seconds, and when it loses him a wave of them rises where he was
 // last seen, to hunt him from there. Never more than `most` gloom are about.
-// It is slower than Wick, so he can outrun it; a lit lamp's pool or an open
-// sunfall hides him from it at once. Lost, it hangs where it lost him a moment,
+// It is slower than Wick, so he can outrun it; a lit lamp's pool, a fire he has
+// built or an open sunfall hides him from it at once. Lost, it hangs where it lost him a moment,
 // then goes back to sweeping.
 //
 // The entity is where the circle falls; its sprites draw the Seeker high above
@@ -163,13 +163,24 @@ script Seeker {
         }
     }
 
-    // Whether a point is hidden from it: in a lit lamp's pool, or an open sunfall's.
+    // Whether a point is hidden from it: in a lit lamp's pool, a burning fire's, or
+    // an open sunfall's.
     fn sheltered(x: number, y: number) -> bool {
         for lamp in World.with_tag("lantern") {
             let post = Lantern.on(lamp);
             if post != null && post.lit {
                 let dx = x - lamp.transform.world_position.x;
                 let dy = y - lamp.transform.world_position.y;
+                if sqrt(dx * dx + dy * dy) < this.pool {
+                    return true;
+                }
+            }
+        }
+        // A fire Wick has built, while it burns.
+        for fire in World.with_tag("fire") {
+            if fire.light2d.intensity > 0.5 {
+                let dx = x - fire.transform.world_position.x;
+                let dy = y - fire.transform.world_position.y;
                 if sqrt(dx * dx + dy * dy) < this.pool {
                     return true;
                 }
