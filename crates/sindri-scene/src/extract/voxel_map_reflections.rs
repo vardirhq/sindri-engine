@@ -41,6 +41,18 @@ pub(super) struct Drawn {
 }
 
 impl MapWorld {
+    /// Remembers where the map is drawn this frame, for what is mirrored in
+    /// its water, and starts the frame's mirror pieces afresh.
+    pub(super) fn drawn_at(&mut self, root: Mat4, layer: i32, distance: f32) {
+        self.drawn = Some(Drawn {
+            root,
+            layer,
+            distance,
+            strength: self.water.as_ref().map_or(0.0, super::Water::reflections),
+        });
+        self.reflected = 0;
+    }
+
     /// The pieces of a standing picture's mirror image that lie over this
     /// map's water: `model` is the picture's quad as drawn, `rect` the part
     /// of `texture` it shows.
@@ -108,9 +120,11 @@ impl MapWorld {
                     continue;
                 };
                 let flip = if mirrored { -1.0 } else { 1.0 };
-                let local =
-                    Mat4::from_translation(Vec3::new((x0 + x1) / 2.0, (y0 + y1) / 2.0, 0.0))
-                        * Mat4::from_scale(Vec3::new(flip * (x1 - x0), -(y1 - y0), 1.0));
+                let local = Mat4::from_translation(Vec3::new(
+                    f32::midpoint(x0, x1),
+                    f32::midpoint(y0, y1),
+                    0.0,
+                )) * Mat4::from_scale(Vec3::new(flip * (x1 - x0), -(y1 - y0), 1.0));
                 let index = FIRST_REFLECTION.saturating_add(self.reflected);
                 self.reflected = self
                     .reflected

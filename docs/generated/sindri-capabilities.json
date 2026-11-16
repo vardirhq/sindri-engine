@@ -754,6 +754,7 @@
         "cone_softness": 0.30000001192092896,
         "enabled": true,
         "falloff": 1.5,
+        "flicker": 0.0,
         "height": 1.0,
         "intensity": 1.0,
         "offset": [
@@ -778,6 +779,7 @@
         "cone_softness": 0.30000001192092896,
         "enabled": true,
         "falloff": 1.5,
+        "flicker": 0.0,
         "height": 1.0,
         "intensity": 1.0,
         "offset": [
@@ -812,6 +814,11 @@
           "kind": "range",
           "max": null,
           "min": 0.01
+        },
+        "flicker": {
+          "kind": "range",
+          "max": 1.0,
+          "min": 0.0
         },
         "height": {
           "kind": "range",
@@ -2403,6 +2410,7 @@
           1.0,
           1.0
         ],
+        "sway": 0.0,
         "texture": "procedural:checkerboard",
         "tint": [
           1.0,
@@ -2450,6 +2458,7 @@
           1.0,
           1.0
         ],
+        "sway": 0.0,
         "texture": "procedural:checkerboard",
         "tint": [
           1.0,

@@ -25,6 +25,9 @@ pub(super) fn shader() -> Option<SpriteShader> {
         .clone()
 }
 
+/// Something for each of a chunk's squares, by column and row.
+pub(super) type BySquare<T> = HashMap<(i32, i32), T>;
+
 /// What a map's water settings come to for its squares.
 #[derive(Clone, Debug, PartialEq)]
 pub(super) struct Water {
@@ -63,7 +66,7 @@ impl Water {
         ground: &VoxelGround,
         columns: std::ops::Range<i32>,
         rows: std::ops::Range<i32>,
-    ) -> (HashMap<(i32, i32), WaterSquare>, HashMap<(i32, i32), f32>) {
+    ) -> (BySquare<WaterSquare>, BySquare<f32>) {
         let reach = OPEN_WATER + 1;
         let mut flooded = HashMap::new();
         for row in rows.start - reach..rows.end + reach {

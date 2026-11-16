@@ -377,8 +377,8 @@ mod tests {
             flicker: 1.0,
             ..Light2dComponent::default()
         };
-        let seen: Vec<f32> = (0..60)
-            .map(|frame| flame.flickered(frame as f32 / 30.0, 7))
+        let seen: Vec<f32> = (0_u8..60)
+            .map(|frame| flame.flickered(f32::from(frame) / 30.0, 7))
             .collect();
         assert!(seen.iter().all(|b| (0.69..=1.0).contains(b)), "{seen:?}");
         let spread = seen.iter().copied().fold(f32::MAX, f32::min);

@@ -279,13 +279,7 @@ fn push_map(
         return Ok(());
     };
     let distance = camera_distance(camera.view, root.w_axis.truncate());
-    map.drawn = Some(reflections::Drawn {
-        root,
-        layer,
-        distance,
-        strength: map.water.as_ref().map_or(0.0, Water::reflections),
-    });
-    map.reflected = 0;
+    map.drawn_at(root, layer, distance);
     let mut chunks = Vec::new();
     for chunk_row in min[1].div_euclid(CHUNK)..=max[1].div_euclid(CHUNK) {
         for chunk_column in min[0].div_euclid(CHUNK)..=max[0].div_euclid(CHUNK) {

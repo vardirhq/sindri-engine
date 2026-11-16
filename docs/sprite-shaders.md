@@ -90,3 +90,11 @@ plays the scripts; `crates/sindri-gpu/tests/sprite_shaders.rs` reads drawn
 pixels back to show the shader, its per-instance parameters and the clock reach
 the screen. Low Tide draws its submerged wrecks through
 `shaders/underwater.wgsl`, bent and rippled with light by the brine above them.
+
+## Wind
+
+Any sprite can sway, shader or not: `"sway": 0.06` on `sindri.sprite` swings
+its top to and fro by that share of its width while its foot stays put. Each
+sprite's phase comes from where its foot is and slow gusts roll across the
+world over that, so a wood sways in waves rather than in step. It is done in
+the vertex stage every sprite shader shares, so a project shader sways too.

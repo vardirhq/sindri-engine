@@ -23,6 +23,21 @@ with `"unlit": true` (a glow, a pickup that should read in the dark); an
 additive shape is light itself and is never darkened. The UI and screen-space
 content are never lit.
 
+### Cloud shadows
+
+`lighting_2d.clouds` drifts soft cloud shadows over the plane:
+
+```json
+"lighting_2d": { "enabled": true, "ambient": [0.6, 0.6, 0.65],
+  "clouds": { "cover": 0.45, "size": 28, "darkness": 0.4, "wind": [1.1, 0.35] } }
+```
+
+`cover` is how much of the ground is in shadow (0 to 1), `size` how wide a
+cloud is in world units, `darkness` how much of the ambient light a shadow
+takes away, and `wind` which way and how fast they drift, in world units a
+second. They dim the ambient light, the sky's, and not the lights, so a lantern
+under a cloud is as bright as ever, and by night they barely show.
+
 ## Lights
 
 `sindri.light2d` is a point of light at its entity's world position, moved by its `offset`:
@@ -42,6 +57,7 @@ content are never lit.
 | `cone_direction` | Where the beam points, in degrees: 0 is right and 90 is up | `0` |
 | `cone_softness` | How much of the cone's width fades out at its edge: 0 is hard, 1 is brightest only along the middle | `0.3` |
 | `offset` | Where the light sits from its entity, in the entity's own units: it moves, turns and scales with it, so a lamp's glow sits at its lantern without an object of its own. Rendering, cast shadows and `Lighting.level` all read it | `[0, 0]` |
+| `flicker` | How much it wavers, 0 to 1: a flame's restless brightness, in a few unrelated rhythms and each light in its own time. Only the drawing flickers: `Lighting.level` reads the steady light | `0` |
 
 It is its own component rather than a kind of `sindri.light`: a 3D light shades
 surfaces by the way they face, and a 2D light lights pictures, which face only
