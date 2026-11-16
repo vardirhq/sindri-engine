@@ -414,7 +414,11 @@ fn chunk(map: &mut MapWorld, chunk_column: i32, chunk_row: i32) -> Rc<MapChunk> 
         (made.water, made.wet) = water.squares(&map.ground, columns.clone(), rows.clone());
     }
     if map.component.soft_edges {
-        made.pieces = frayed(map, &made.squares, columns, rows);
+        made.pieces = frayed(map, &made.squares, columns, rows.clone());
+    }
+    if map.component.map_cliffs {
+        let faces = cliffs::faces(map, &made.squares, rows.end - 1);
+        made.pieces.extend(faces);
     }
     if map.chunks.len() >= REMEMBERED_CHUNKS {
         map.chunks.clear();
@@ -578,6 +582,8 @@ impl SceneExtractor {
     }
 }
 
+#[path = "voxel_map_cliffs.rs"]
+mod cliffs;
 #[path = "voxel_map_reflections.rs"]
 mod reflections;
 

@@ -432,3 +432,28 @@ fn fireflies_glow_over_the_meadow() {
         .count();
     assert!(glowing >= 6, "and they are in the air, glowing: {glowing}");
 }
+
+/// Wick leaves footprints as he walks, as far apart however fast he goes,
+/// and none while he stands still; they fade behind him.
+#[test]
+fn wick_leaves_footprints_as_he_walks() {
+    let mut run = Run::open_scene("wilds.scene").expect("the wilds open");
+    step(&mut run, 30);
+    let prints = |run: &Run| {
+        run.effects()
+            .flecks()
+            .iter()
+            .filter(|fleck| fleck.layer == -9)
+            .count()
+    };
+    assert_eq!(prints(&run), 0, "standing still leaves none");
+    run.input.apply(InputEvent::KeyPressed(Key::W));
+    step(&mut run, 60);
+    run.input.apply(InputEvent::KeyReleased(Key::W));
+    let walked = prints(&run);
+    assert!(walked >= 3, "a trail behind him: {walked}");
+    step(&mut run, 60);
+    assert_eq!(prints(&run), walked, "and no more once he stops");
+    step(&mut run, 60 * 8);
+    assert_eq!(prints(&run), 0, "they fade");
+}

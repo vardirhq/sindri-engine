@@ -190,6 +190,18 @@ impl SceneExtractor {
         } = drawing;
         let masks = self.sprite_masks(world, drawing)?;
         let casting = self.cast_shadows(world)?;
+        // What pushes plants aside, and where: few, so each swaying sprite
+        // asks every one.
+        let wakes: Vec<([f32; 2], crate::WakeComponent)> = self
+            .components
+            .query::<crate::WakeComponent>(world)?
+            .into_iter()
+            .filter(|(entity, _)| world.is_active(*entity))
+            .filter_map(|(entity, wake)| {
+                let at = world.world_transform(entity)?.position;
+                Some(([at[0], at[1]], wake))
+            })
+            .collect();
         for (entity, sprite) in self.components.query::<SpriteComponent>(world)? {
             let reference = sprite.reference()?;
             // Inside a mask that is not there is nowhere; outside one is
@@ -271,6 +283,17 @@ impl SceneExtractor {
             {
                 continue;
             }
+            // What sways is pushed aside by what passes through it.
+            let lean = if sprite.sway > 0.0 {
+                let foot = [transform.position[0], transform.position[1]];
+                wakes
+                    .iter()
+                    .map(|(at, wake)| wake.lean([foot[0] - at[0], foot[1] - at[1]]))
+                    .sum::<f32>()
+                    .clamp(-0.6, 0.6)
+            } else {
+                0.0
+            };
             for (model, uv) in pieces(model, rect, slicing, sprite.border_scale) {
                 batches.push(SpriteDraw {
                     mask,
@@ -289,6 +312,7 @@ impl SceneExtractor {
                         )
                         .with_shader_params(sprite.shader_params)
                         .swaying(sprite.sway)
+                        .leaning(lean)
                         .with_uv_rect(uv),
                 });
             }

@@ -98,3 +98,7 @@ its top to and fro by that share of its width while its foot stays put. Each
 sprite's phase comes from where its foot is and slow gusts roll across the
 world over that, so a wood sways in waves rather than in step. It is done in
 the vertex stage every sprite shader shares, so a project shader sways too.
+
+What sways is pushed aside by an entity with `sindri.wake` (`radius` in world
+units, `strength` as a share of the plant's width): a plant within reach leans
+away from it, most at its feet, and stands back up once it has passed.

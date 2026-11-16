@@ -192,6 +192,11 @@ pub struct VoxelWorldComponent {
     /// it; left out, water is drawn as any other block.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub map_water: Option<VoxelMapWater>,
+    /// Where the ground drops towards the south, the drop's face is drawn
+    /// across the lower square, so terraces and cliffs read as height from a
+    /// camera looking north. Only `view: map` reads it.
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub map_cliffs: bool,
 }
 
 /// How a map draws its water (`map_water`).

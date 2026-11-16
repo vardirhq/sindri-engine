@@ -92,6 +92,10 @@ pub struct ParticlesComponent {
     /// however dark the scene, as fireflies and embers are. Off, they are lit
     /// like everything else.
     pub glow: bool,
+    /// Particles for every world unit the emitter moves, on top of `rate`:
+    /// footprints, a wake, the dust a wheel kicks up. Standing still throws
+    /// none of these.
+    pub per_distance: f32,
 }
 
 impl Default for ParticlesComponent {
@@ -120,6 +124,7 @@ impl Default for ParticlesComponent {
             space: ParticleSpace::World,
             layer: 0,
             glow: false,
+            per_distance: 0.0,
         }
     }
 }
@@ -142,6 +147,7 @@ impl ParticlesComponent {
         let fail = |field, expected| Err(ParticlesError { field, expected });
         let at_least_zero = [
             ("rate", self.rate),
+            ("per_distance", self.per_distance),
             ("lifetime_spread", self.lifetime_spread),
             ("speed", self.speed),
             ("speed_spread", self.speed_spread),

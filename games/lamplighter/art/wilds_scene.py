@@ -57,7 +57,7 @@ def ground():
                 biome('Bog', 0.6, 0.95, 'moss', 'mud', 0.2),
                 biome('Barrens', 0.1, 0.2, 'stone', 'rock', 1.4, terraces=2),
             ]},
-        'blocks': 'blocks.tileset', 'view': 'map', 'variant_seed': 5, 'layer': -10, 'edits': [], 'soft_edges': True,
+        'blocks': 'blocks.tileset', 'view': 'map', 'variant_seed': 5, 'layer': -10, 'edits': [], 'soft_edges': True, 'map_cliffs': True,
         # Water that moves: pale in the shallows, dark in the deep, swaying,
         # glinting where a light catches it and foaming at the shore.
         'map_water': {'blocks': ['water'], 'shallow': [0.1, 0.34, 0.38], 'deep': [0.015, 0.05, 0.14], 'depth': 6,
@@ -268,6 +268,13 @@ def placed_at_start(entities):
         if e['id'] == 'wick':
             e['transform_3d']['position'][0] += START[0]
             e['transform_3d']['position'][1] += START[1]
+            # The grass parts round him, and his steps stay a while behind him.
+            e['components']['sindri.wake'] = {'radius': 1.3, 'strength': 0.35}
+            e['components']['sindri.particles#steps'] = scenes.motes(
+                0.0, 7.0, 0.0, [[0.12, 0.09, 0.07, 0.45], [0.12, 0.09, 0.07, 0.3], [0.12, 0.09, 0.07, 0.0]],
+                0.42, 0.42, texture='textures/footprints.png', per_distance=1.4, max=24, spread=0.0,
+                shape='point', shape_size=[0.0, 0.0], gravity=[0.0, 0.0], drag=0.0, random_rotation=False,
+                lifetime_spread=0.1, speed_spread=0.0, layer=-9)
     return entities
 
 

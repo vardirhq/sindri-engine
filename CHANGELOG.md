@@ -2,6 +2,8 @@
 
 # Changelog
 
+- Cliffs, parting grass and footprints: a voxel map's `map_cliffs` draws the face of each drop of two levels or more across the lower square, so terraces and cliffs read as height. `sindri.wake` makes swaying plants lean away from whatever carries it. A particle emitter's `per_distance` throws particles for every unit it moves, which is how Wick now leaves a trail of footprints that fade behind him.
+
 - Ambient life: particles' `glow` draws them at their own colour however dark the scene. Lamplighter's wilds scatter fireflies over the meadow, mist on the bog and leaves blowing across the deadwood, each an emitter placed by seed like what grows.
 
 - Reflections: with `map_water.reflections`, everything billboarded that stands by a map's water is mirrored in it, upside down from its foot, darker and bluer, fading along its length and wavering by rows, cut along the squares so it only shows over water.

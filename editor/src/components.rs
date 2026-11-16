@@ -180,6 +180,11 @@ const KNOWN: &[Known] = &[
         icon: icons::CAMERA,
     },
     Known {
+        type_name: "sindri.wake",
+        family: Family::Rendering,
+        icon: icons::SPRITE,
+    },
+    Known {
         type_name: "sindri.ui.image",
         family: Family::Ui,
         icon: icons::UI_ELEMENT,
