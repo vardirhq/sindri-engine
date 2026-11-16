@@ -39,6 +39,15 @@ script Wick {
     // How high above the ground the lantern rides, standing up: a picture leans
     // back with the camera, so this is his chest as the camera sees him.
     @export let hand: number = 1.45;
+    // Whether Wick holds his lantern, as his art draws it: the floating lantern
+    // is not drawn, and its lights and embers ride at the one in his hand,
+    // `held_out` to his right (his left when he faces west, the art mirrored)
+    // and `held_up` above his feet as the camera sees him (`held_flat` up the
+    // screen where he is not standing up).
+    @export let held: bool = true;
+    @export let held_out: number = 0.64;
+    @export let held_up: number = 1.58;
+    @export let held_flat: number = 0.97;
 
     var vx: number = 0.0;
     var vy: number = 0.0;
@@ -199,6 +208,10 @@ script Wick {
     // is nearer the camera, and so drawn in front of him, on the near half of the
     // circle and behind him on the far half.
     fn float_the_lantern(dt: number) {
+        if this.held {
+            hold_the_lantern();
+            return;
+        }
         let want = this.aim - this.orbit_lead + 12.0 * sin(this.age * 1.3);
         var gap: number = want - this.orbit;
         if gap > 180.0 { gap -= 360.0; }
@@ -226,6 +239,24 @@ script Wick {
         // A scorched lantern burns dull.
         let glow = 1.0 - 0.45 * Game.scorch;
         this.lantern_art.sprite.tint = Color(glow, glow, glow, 1.0);
+    }
+
+    // The lantern in Wick's hand: its picture hidden, since his art draws it, and
+    // its lights and embers where his art holds it.
+    fn hold_the_lantern() {
+        var side: number = 1.0;
+        if way() == "west" {
+            side = -1.0;
+        }
+        this.lantern.transform.position.x = this.held_out * side;
+        if this.upright {
+            this.lantern.transform.position.y = 0.0;
+            this.lantern.transform.position.z = this.held_up;
+        } else {
+            this.lantern.transform.position.y = this.held_flat;
+            this.lantern.transform.position.z = -0.003;
+        }
+        this.lantern_art.sprite.tint = Color(1.0, 1.0, 1.0, 0.0);
     }
 
     // The lantern's circle as a flat picture shows it: up the screen is further

@@ -12449,7 +12449,7 @@
           "properties": {}
         },
         "sindri.sprite": {
-          "texture": "textures/wick.png#idle-south",
+          "texture": "textures/wick.png#idle-south-0",
           "layer": 5,
           "tint": [
             1.0,
@@ -12458,8 +12458,8 @@
             1.0
           ],
           "size": [
-            3.0,
-            2.75
+            2.5,
+            2.5
           ]
         },
         "sindri.shadow2d": {
@@ -12481,9 +12481,16 @@
           "clips": {
             "idle-south": {
               "frames": [
-                "idle-south"
+                "idle-south-0",
+                "idle-south-1",
+                "idle-south-2",
+                "idle-south-3",
+                "idle-south-4",
+                "idle-south-5",
+                "idle-south-6",
+                "idle-south-7"
               ],
-              "seconds_per_frame": 0.4,
+              "seconds_per_frame": 0.15,
               "looping": true
             },
             "walk-south": {
@@ -12502,23 +12509,62 @@
             },
             "slash-south": {
               "frames": [
-                "slash-south-0",
-                "slash-south-1",
-                "slash-south-2",
-                "slash-south-3",
-                "slash-south-4",
-                "slash-south-5",
-                "slash-south-6",
-                "slash-south-7"
+                "hurt-south-0",
+                "hurt-south-1",
+                "hurt-south-2",
+                "hurt-south-3",
+                "hurt-south-4",
+                "hurt-south-5",
+                "hurt-south-6",
+                "hurt-south-7"
               ],
               "seconds_per_frame": 0.07,
               "looping": false
             },
+            "hurt-south": {
+              "frames": [
+                "hurt-south-0",
+                "hurt-south-1",
+                "hurt-south-2",
+                "hurt-south-3",
+                "hurt-south-4",
+                "hurt-south-5",
+                "hurt-south-6",
+                "hurt-south-7"
+              ],
+              "seconds_per_frame": 0.08,
+              "looping": false
+            },
+            "death-south": {
+              "frames": [
+                "death-south-0",
+                "death-south-1",
+                "death-south-2",
+                "death-south-3",
+                "death-south-4",
+                "death-south-5",
+                "death-south-6",
+                "death-south-7",
+                "death-south-8",
+                "death-south-9",
+                "death-south-10",
+                "death-south-11"
+              ],
+              "seconds_per_frame": 0.1,
+              "looping": false
+            },
             "idle-west": {
               "frames": [
-                "idle-west"
+                "idle-west-0",
+                "idle-west-1",
+                "idle-west-2",
+                "idle-west-3",
+                "idle-west-4",
+                "idle-west-5",
+                "idle-west-6",
+                "idle-west-7"
               ],
-              "seconds_per_frame": 0.4,
+              "seconds_per_frame": 0.15,
               "looping": true
             },
             "walk-west": {
@@ -12537,23 +12583,62 @@
             },
             "slash-west": {
               "frames": [
-                "slash-west-0",
-                "slash-west-1",
-                "slash-west-2",
-                "slash-west-3",
-                "slash-west-4",
-                "slash-west-5",
-                "slash-west-6",
-                "slash-west-7"
+                "hurt-west-0",
+                "hurt-west-1",
+                "hurt-west-2",
+                "hurt-west-3",
+                "hurt-west-4",
+                "hurt-west-5",
+                "hurt-west-6",
+                "hurt-west-7"
               ],
               "seconds_per_frame": 0.07,
               "looping": false
             },
+            "hurt-west": {
+              "frames": [
+                "hurt-west-0",
+                "hurt-west-1",
+                "hurt-west-2",
+                "hurt-west-3",
+                "hurt-west-4",
+                "hurt-west-5",
+                "hurt-west-6",
+                "hurt-west-7"
+              ],
+              "seconds_per_frame": 0.08,
+              "looping": false
+            },
+            "death-west": {
+              "frames": [
+                "death-west-0",
+                "death-west-1",
+                "death-west-2",
+                "death-west-3",
+                "death-west-4",
+                "death-west-5",
+                "death-west-6",
+                "death-west-7",
+                "death-west-8",
+                "death-west-9",
+                "death-west-10",
+                "death-west-11"
+              ],
+              "seconds_per_frame": 0.1,
+              "looping": false
+            },
             "idle-north": {
               "frames": [
-                "idle-north"
+                "idle-north-0",
+                "idle-north-1",
+                "idle-north-2",
+                "idle-north-3",
+                "idle-north-4",
+                "idle-north-5",
+                "idle-north-6",
+                "idle-north-7"
               ],
-              "seconds_per_frame": 0.4,
+              "seconds_per_frame": 0.15,
               "looping": true
             },
             "walk-north": {
@@ -12572,23 +12657,62 @@
             },
             "slash-north": {
               "frames": [
-                "slash-north-0",
-                "slash-north-1",
-                "slash-north-2",
-                "slash-north-3",
-                "slash-north-4",
-                "slash-north-5",
-                "slash-north-6",
-                "slash-north-7"
+                "hurt-north-0",
+                "hurt-north-1",
+                "hurt-north-2",
+                "hurt-north-3",
+                "hurt-north-4",
+                "hurt-north-5",
+                "hurt-north-6",
+                "hurt-north-7"
               ],
               "seconds_per_frame": 0.07,
               "looping": false
             },
+            "hurt-north": {
+              "frames": [
+                "hurt-north-0",
+                "hurt-north-1",
+                "hurt-north-2",
+                "hurt-north-3",
+                "hurt-north-4",
+                "hurt-north-5",
+                "hurt-north-6",
+                "hurt-north-7"
+              ],
+              "seconds_per_frame": 0.08,
+              "looping": false
+            },
+            "death-north": {
+              "frames": [
+                "death-north-0",
+                "death-north-1",
+                "death-north-2",
+                "death-north-3",
+                "death-north-4",
+                "death-north-5",
+                "death-north-6",
+                "death-north-7",
+                "death-north-8",
+                "death-north-9",
+                "death-north-10",
+                "death-north-11"
+              ],
+              "seconds_per_frame": 0.1,
+              "looping": false
+            },
             "idle-east": {
               "frames": [
-                "idle-east"
+                "idle-east-0",
+                "idle-east-1",
+                "idle-east-2",
+                "idle-east-3",
+                "idle-east-4",
+                "idle-east-5",
+                "idle-east-6",
+                "idle-east-7"
               ],
-              "seconds_per_frame": 0.4,
+              "seconds_per_frame": 0.15,
               "looping": true
             },
             "walk-east": {
@@ -12607,16 +12731,48 @@
             },
             "slash-east": {
               "frames": [
-                "slash-east-0",
-                "slash-east-1",
-                "slash-east-2",
-                "slash-east-3",
-                "slash-east-4",
-                "slash-east-5",
-                "slash-east-6",
-                "slash-east-7"
+                "hurt-east-0",
+                "hurt-east-1",
+                "hurt-east-2",
+                "hurt-east-3",
+                "hurt-east-4",
+                "hurt-east-5",
+                "hurt-east-6",
+                "hurt-east-7"
               ],
               "seconds_per_frame": 0.07,
+              "looping": false
+            },
+            "hurt-east": {
+              "frames": [
+                "hurt-east-0",
+                "hurt-east-1",
+                "hurt-east-2",
+                "hurt-east-3",
+                "hurt-east-4",
+                "hurt-east-5",
+                "hurt-east-6",
+                "hurt-east-7"
+              ],
+              "seconds_per_frame": 0.08,
+              "looping": false
+            },
+            "death-east": {
+              "frames": [
+                "death-east-0",
+                "death-east-1",
+                "death-east-2",
+                "death-east-3",
+                "death-east-4",
+                "death-east-5",
+                "death-east-6",
+                "death-east-7",
+                "death-east-8",
+                "death-east-9",
+                "death-east-10",
+                "death-east-11"
+              ],
+              "seconds_per_frame": 0.1,
               "looping": false
             }
           },

@@ -185,14 +185,17 @@ def lantern(ident, x, y, goal=False, sheet='textures/objects.png', unlit='lamp-p
 
 
 def clips():
-    """An idle, a walk and a slash clip for each direction Wick faces."""
+    """Wick's clips for each direction he faces (`art/wick.py`): standing, walking,
+    hurt and falling. There is no sword swing in his art yet, so the slash plays
+    the hurt's swirl of the cloak."""
     out = {}
     for direction in ('south', 'west', 'north', 'east'):
-        out[f'idle-{direction}'] = {'frames': [f'idle-{direction}'], 'seconds_per_frame': 0.4, 'looping': True}
-        out[f'walk-{direction}'] = {'frames': [f'walk-{direction}-{n}' for n in range(8)],
-                                    'seconds_per_frame': 0.09, 'looping': True}
-        out[f'slash-{direction}'] = {'frames': [f'slash-{direction}-{n}' for n in range(8)],
-                                     'seconds_per_frame': 0.07, 'looping': False}
+        frames = lambda name, count: [f'{name}-{direction}-{n}' for n in range(count)]
+        out[f'idle-{direction}'] = {'frames': frames('idle', 8), 'seconds_per_frame': 0.15, 'looping': True}
+        out[f'walk-{direction}'] = {'frames': frames('walk', 8), 'seconds_per_frame': 0.09, 'looping': True}
+        out[f'slash-{direction}'] = {'frames': frames('hurt', 8), 'seconds_per_frame': 0.07, 'looping': False}
+        out[f'hurt-{direction}'] = {'frames': frames('hurt', 8), 'seconds_per_frame': 0.08, 'looping': False}
+        out[f'death-{direction}'] = {'frames': frames('death', 12), 'seconds_per_frame': 0.1, 'looping': False}
     return out
 
 
@@ -284,16 +287,17 @@ def wick(fresh=True):
         'name': name, 'shape': {'shape': 'circle', 'radius': radius}, 'offset': [0, 0.45], 'rotation': 0,
         'sensor': sensor, 'layers': {'memberships': WICK, 'filter': mask}, 'friction': 0, 'restitution': 0}
     return [
-        # The art sits on the body, sized there (one pixel of it is a sixteenth of a world
-        # unit), so the collider and the lantern stay at the size they were made.
+        # The art sits on the body, sized there (a 90 pixel frame is two and a half units,
+        # so he stands about as tall as he did), so the collider and the lantern stay at
+        # the size they were made.
         entity('wick', 'Wick', at(0, 0, depth(0)), **{
             'sindri.tags': {'tags': ['wick']},
             'sindri.physics2d.rigid_body': body,
             'sindri.physics2d.collider': {'pieces': [piece('body', 0.4, False, WALL | TARGET), piece('reach', 0.7, True, ALL)]},
             'sindri.script': {'source': 'scripts/wick.decay', 'script': 'Wick',
                              'properties': {} if fresh else {'fresh': False}},
-            'sindri.sprite': {'texture': 'textures/wick.png#idle-south', 'layer': 5, 'tint': [1.0, 1.0, 1.0, 1.0],
-                              'size': [3.0, 2.75]},
+            'sindri.sprite': {'texture': 'textures/wick.png#idle-south-0', 'layer': 5,
+                              'tint': [1.0, 1.0, 1.0, 1.0], 'size': [2.5, 2.5]},
             'sindri.shadow2d': shadow(0.9, 0.35),
             'sindri.animation.sprite': {'clips': clips(), 'playing': 'idle-south', 'speed': 1}}),
         # The lantern is not part of Wick's sprite. It floats about him on its own, circling
