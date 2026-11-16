@@ -45,6 +45,37 @@ fn facing_the_viewer(transform: sindri_core::Transform3D, view: Mat4) -> Mat4 {
     )
 }
 
+/// The sprite, or why its numbers cannot be drawn.
+fn usable(sprite: &SpriteComponent) -> Result<(), SceneExtractError> {
+    if !sprite.color_transform.is_finite() {
+        return Err(SceneExtractError::InvalidColorTransform);
+    }
+    if !sprite.shader_params.iter().all(|value| value.is_finite()) {
+        return Err(SceneExtractError::InvalidShaderParams);
+    }
+    if !sprite.placement_is_finite() {
+        return Err(SceneExtractError::InvalidSpritePlacement);
+    }
+    Ok(())
+}
+
+/// How far a swaying sprite standing at `foot` is pushed aside by the wakes
+/// round it, as a share of its width; one that does not sway stands firm.
+fn pushed_aside(
+    sprite: &SpriteComponent,
+    foot: [f32; 3],
+    wakes: &[([f32; 2], crate::WakeComponent)],
+) -> f32 {
+    if sprite.sway <= 0.0 {
+        return 0.0;
+    }
+    wakes
+        .iter()
+        .map(|(at, wake)| wake.lean([foot[0] - at[0], foot[1] - at[1]]))
+        .sum::<f32>()
+        .clamp(-0.6, 0.6)
+}
+
 /// Which projection and pipeline a batch of images is drawn with.
 ///
 /// Declared screen-first because it is the first half of a batch key, and the
@@ -190,18 +221,7 @@ impl SceneExtractor {
         } = drawing;
         let masks = self.sprite_masks(world, drawing)?;
         let casting = self.cast_shadows(world)?;
-        // What pushes plants aside, and where: few, so each swaying sprite
-        // asks every one.
-        let wakes: Vec<([f32; 2], crate::WakeComponent)> = self
-            .components
-            .query::<crate::WakeComponent>(world)?
-            .into_iter()
-            .filter(|(entity, _)| world.is_active(*entity))
-            .filter_map(|(entity, wake)| {
-                let at = world.world_transform(entity)?.position;
-                Some(([at[0], at[1]], wake))
-            })
-            .collect();
+        let wakes = self.wakes(world)?;
         for (entity, sprite) in self.components.query::<SpriteComponent>(world)? {
             let reference = sprite.reference()?;
             // Inside a mask that is not there is nowhere; outside one is
@@ -217,12 +237,7 @@ impl SceneExtractor {
                     None => None,
                 },
             };
-            if !sprite.color_transform.is_finite() {
-                return Err(SceneExtractError::InvalidColorTransform);
-            }
-            if !sprite.shader_params.iter().all(|value| value.is_finite()) {
-                return Err(SceneExtractError::InvalidShaderParams);
-            }
+            usable(&sprite)?;
             let transform = world.world_transform(entity).unwrap_or_default();
             let camera = cameras.world.ok_or(SceneExtractError::MissingWorldCamera)?;
             // The anchor moves the quad in its own space, so it scales and
@@ -234,9 +249,6 @@ impl SceneExtractor {
             } else {
                 transform_matrix(transform)
             };
-            if !sprite.placement_is_finite() {
-                return Err(SceneExtractError::InvalidSpritePlacement);
-            }
             // The sprite's own size and offset place the picture in the
             // object's space; the anchor then moves it within the picture.
             let model = placed
@@ -283,17 +295,7 @@ impl SceneExtractor {
             {
                 continue;
             }
-            // What sways is pushed aside by what passes through it.
-            let lean = if sprite.sway > 0.0 {
-                let foot = [transform.position[0], transform.position[1]];
-                wakes
-                    .iter()
-                    .map(|(at, wake)| wake.lean([foot[0] - at[0], foot[1] - at[1]]))
-                    .sum::<f32>()
-                    .clamp(-0.6, 0.6)
-            } else {
-                0.0
-            };
+            let lean = pushed_aside(&sprite, transform.position, &wakes);
             for (model, uv) in pieces(model, rect, slicing, sprite.border_scale) {
                 batches.push(SpriteDraw {
                     mask,
@@ -318,6 +320,24 @@ impl SceneExtractor {
             }
         }
         Ok(())
+    }
+
+    /// What pushes plants aside, and where: few, so each swaying sprite asks
+    /// every one.
+    fn wakes(
+        &self,
+        world: &World,
+    ) -> Result<Vec<([f32; 2], crate::WakeComponent)>, SceneExtractError> {
+        Ok(self
+            .components
+            .query::<crate::WakeComponent>(world)?
+            .into_iter()
+            .filter(|(entity, _)| world.is_active(*entity))
+            .filter_map(|(entity, wake)| {
+                let at = world.world_transform(entity)?.position;
+                Some(([at[0], at[1]], wake))
+            })
+            .collect())
     }
 
     /// Every sprite mask by name, placed as a sprite drawing its picture
