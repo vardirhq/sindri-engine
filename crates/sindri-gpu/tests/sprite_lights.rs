@@ -73,6 +73,18 @@ enum Subject {
     Shape,
 }
 
+/// The one sprite covering the frame, lit as asked.
+fn sprite(model: Mat4, lit: bool, standing: bool, ground: bool) -> SpriteInstance {
+    let sprite = SpriteInstance::new(model, [1.0; 4])
+        .lit(lit)
+        .standing(standing);
+    if ground {
+        sprite.ground_relief()
+    } else {
+        sprite
+    }
+}
+
 /// Draws `subject` covering the frame under `lighting`, and reads back the
 /// middle of the left and right halves.
 fn draw(gpu: &GpuContext, lighting: Option<Lighting2d>, subject: &Subject) -> ([u8; 4], [u8; 4]) {
@@ -140,16 +152,7 @@ fn draw(gpu: &GpuContext, lighting: Option<Lighting2d>, subject: &Subject) -> ([
                         shader: None,
                         view_projection,
                         depth: SpriteDepth::Ignore,
-                        instances: &[{
-                            let sprite = SpriteInstance::new(model, [1.0; 4])
-                                .lit(*lit)
-                                .standing(*standing);
-                            if *ground {
-                                sprite.ground_relief()
-                            } else {
-                                sprite
-                            }
-                        }],
+                        instances: &[sprite(model, *lit, *standing, *ground)],
                     },
                 )
                 .expect("the batch fits");
