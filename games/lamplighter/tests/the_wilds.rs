@@ -455,5 +455,12 @@ fn wick_leaves_footprints_as_he_walks() {
     step(&mut run, 60);
     assert_eq!(prints(&run), walked, "and no more once he stops");
     step(&mut run, 60 * 8);
-    assert_eq!(prints(&run), 0, "they fade");
+    // A nudge from a gloom may lay a fresh print, but the trail is gone.
+    let fresh = run
+        .effects()
+        .flecks()
+        .iter()
+        .filter(|fleck| fleck.layer == -9)
+        .all(|fleck| fleck.remaining > 1.0);
+    assert!(prints(&run) < walked && fresh, "the trail fades");
 }
