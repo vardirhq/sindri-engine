@@ -21,4 +21,10 @@ state Game {
     // How found Wick is by a Seeker, 1 while one has him and fading after: the gloom hear
     // it from further off.
     var found: number = 0.0;
+    // What Wick has gathered, in his pack, and how much he has gathered and built in all.
+    var wood: number = 0.0;
+    var stone: number = 0.0;
+    var resin: number = 0.0;
+    var gathered: number = 0.0;
+    var built: number = 0.0;
 }

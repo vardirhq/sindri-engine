@@ -105,6 +105,12 @@ def scatter():
         rule(['grass', 'deadgrass', 'earth'], ['tufts', 'flowers', 'pebbles'], 2, 0.3),
         rule(['moss'], ['mushrooms', 'tufts'], 2, 0.35),
         rule(['stone', 'rock', 'sand'], ['pebbles'], 3, 0.3),
+        # What Wick can gather: deadwood where trees die, flint where the ground is
+        # stony, resin in the deadwood and the meadow's edges.
+        rule(['deadgrass', 'grass', 'moss'], ['wood'], 4, 0.3),
+        rule(['stone', 'rock', 'earth', 'sand'], ['stone'], 4, 0.35),
+        rule(['grass', 'earth'], ['stone'], 7, 0.25),
+        rule(['deadgrass', 'grass'], ['resin'], 8, 0.25),
         # What lives in the air, last so it never keeps a thing off its square.
         rule(['grass'], ['fireflies'], 6, 0.55),
         rule(['moss', 'mud'], ['mist'], 5, 0.6),
@@ -172,6 +178,9 @@ def prefabs():
         made[kind] = entity('cover', 'cover', at(0, 0, 0, 1.5, 1.5), **components)
     made.update(air())
     made['sunfall'] = sunfall('sunfall', 0, 0)
+    # A gloom a Seeker calls up out of the ground.
+    made['gloom'] = gloom('gloom', 0, 0, 2)
+    made.update(goods())
     hamlet_things = {}
     for name, (sprite, block) in HAMLET_THINGS.items():
         hamlet_things[f'hamlet/{name}'] = village_scene.standing('thing', sprite, 0, 0, block)
@@ -225,6 +234,79 @@ def air():
     }
 
 
+GOODS = {'wood': (1.0, 0.7), 'stone': (0.85, 0.6), 'resin': (0.6, 0.5)}   # how big each is drawn
+
+
+def goods():
+    """What Wick gathers (`scripts/pickup.decay`), lying on the ground, and what he
+    builds from it (`scripts/fire.decay`): a campfire that burns down, and a lamp
+    that burns for good. A fire's light is a safe pool while it burns."""
+    made = {}
+    for kind, (size, glint) in GOODS.items():
+        made[kind] = entity(kind, kind, at(0, 0, 0), **{
+            'sindri.sprite': {'texture': f'textures/goods.png#{kind}', 'layer': 4, 'size': [size, size]},
+            'sindri.script': {'source': 'scripts/pickup.decay', 'script': 'Pickup', 'properties': {'kind': kind}},
+            'sindri.tags': {'tags': ['pickup']}})
+        # Resin catches the light, so it can be found in the dark.
+        if kind == 'resin':
+            made[kind]['components']['sindri.light2d'] = {
+                'enabled': True, 'color': [1.0, 0.6, 0.2, 1.0], 'intensity': 0.5, 'radius': 1.2,
+                'falloff': 1.5, 'height': 0.3, 'shadows': False, 'flicker': 0.0}
+    warm = [1.0, 0.66, 0.32, 1.0]
+    made['campfire'] = entity('campfire', 'campfire', at(0, 0, 0), **{
+        'sindri.sprite': {'texture': 'textures/campfire.png#campfire', 'layer': 4, 'size': [2.0, 2.0]},
+        'sindri.light2d': {'enabled': True, 'color': warm, 'intensity': 1.8, 'radius': 8.0, 'falloff': 1.3,
+                           'height': 0.8, 'shadows': False, 'flicker': 0.0},
+        'sindri.particles': scenes.motes(9.0, 1.2, 0.9, [[1.0, 0.8, 0.3, 0.0], [1.6, 0.8, 0.3, 1.0],
+                                                          [0.8, 0.2, 0.05, 0.0]], 0.14, 0.05,
+                                         spread=40.0, shape_size=[0.5, 0.2], gravity=[0.0, 0.6],
+                                         drag=0.4, layer=7, glow=True, max=24, offset=[0.0, 0.5]),
+        'sindri.script': {'source': 'scripts/fire.decay', 'script': 'Fire',
+                          'properties': {'glow': 1.8, 'burn_for': 90.0}},
+        'sindri.tags': {'tags': ['fire']}})
+    made['lamp'] = entity('lamp', 'lamp', at(0, 0, 0), **{
+        'sindri.sprite': {'texture': 'textures/objects.png#lamp-post-lit', 'layer': 5, 'size': [4.0, 4.0]},
+        'sindri.light2d': {'enabled': True, 'color': [1.0, 0.72, 0.38, 1.0], 'intensity': 1.4, 'radius': 9.0,
+                           'falloff': 1.4, 'height': 2.6, 'shadows': False, 'flicker': 0.0},
+        'sindri.script': {'source': 'scripts/fire.decay', 'script': 'Fire',
+                          'properties': {'glow': 1.4, 'burn_for': 0.0}},
+        'sindri.tags': {'tags': ['fire']}})
+    return made
+
+
+def pack():
+    """Wick's pack on screen (`scripts/pack.decay`): what he has gathered, bottom
+    left, and a button for each thing he can build, bottom right. F and G build
+    them from the keyboard, the pad's top and right buttons from a pad."""
+    def count(ident, words, y):
+        return entity(ident, ident, at(0.03, y, 0, 0.5, 0.05), **{'sindri.ui.text': {
+            'anchor': 'bottom_left', 'color': [1.0, 0.92, 0.7, 1.0], 'font': 'fonts/Inter.ttf',
+            'font_size': 0.036, 'line_height': 0.044, 'layer': 100, 'text': words, 'bold': True,
+            'shadow': {'offset': [0, -0.003], 'color': [0, 0, 0, 0.6], 'softness': 0.002}}})
+
+    def craft(ident, label, y):
+        return [
+            entity(ident, ident, at(-0.03, y, 0, 0.62, 0.075), **{
+                'sindri.ui.image': {'anchor': 'bottom_right', 'layer': 96, 'texture': 'textures/white.png',
+                                    'tint': [0.06, 0.06, 0.08, 0.55]},
+                'sindri.ui.button': {'label': label, 'autofocus': False, 'disabled': False},
+                'sindri.ui.layout': {'direction': 'row', 'spacing': 0.0, 'justify': 'center', 'align': 'center'}}),
+            entity(ident + '-label', ident + '-label', at(0, 0, 0, 0.6, 0.06), ident, **{'sindri.ui.text': {
+                'anchor': 'center', 'color': [1.0, 0.9, 0.7, 1.0], 'font': 'fonts/Inter.ttf', 'font_size': 0.032,
+                'line_height': 0.04, 'layer': 98, 'text': label, 'bold': True, 'line_align': 'center',
+                'shadow': {'offset': [0, -0.003], 'color': [0, 0, 0, 0.6], 'softness': 0.002}}})]
+    return [
+        count('pack-wood', 'Wood {}', 0.15),
+        count('pack-stone', 'Stone {}', 0.1),
+        count('pack-resin', 'Resin {}', 0.05),
+        *craft('craft-campfire', 'Campfire  (F)  4 wood, 2 stone', 0.135),
+        *craft('craft-lamp', 'Lamp  (G)  6 wood, 4 stone, 2 resin', 0.05),
+        entity('pack', 'Pack', **{'sindri.script': {
+            'source': 'scripts/pack.decay', 'script': 'Pack',
+            'properties': {'campfire': 'prefabs/wilds/campfire.prefab', 'lamp': 'prefabs/wilds/lamp.prefab'}}}),
+    ]
+
+
 def sunfall(name, x, y, phase=0.0):
     """Cracklight falling through the Lid: a shaft of gold standing up from where
     it lands (`art/sunfall.py`, moved by `shaders/sunfall.wgsl`), the pool it
@@ -261,7 +343,8 @@ def seeker(name, x, y):
             'sindri.light2d': {'enabled': True, 'color': [1.0, 0.16, 0.14, 1.0], 'intensity': 2.8,
                                'radius': 3.0, 'falloff': 0.4, 'height': SEEKER_HEIGHT, 'shadows': False,
                                'flicker': 0.0},
-            'sindri.script': {'source': 'scripts/seeker.decay', 'script': 'Seeker', 'properties': {}}}),
+            'sindri.script': {'source': 'scripts/seeker.decay', 'script': 'Seeker',
+                              'properties': {'gloom': 'prefabs/wilds/gloom.prefab'}}}),
         entity(f'{name}-beam', f'{name}-beam', at(0, 0, 0), parent=name, **{
             'sindri.sprite': {'texture': 'textures/seeker-beam.png#shaft', 'layer': 5,
                               'size': [2.6, SEEKER_HEIGHT], 'tint': [2.4, 0.3, 0.26, 1.0], 'unlit': True,
@@ -298,7 +381,7 @@ def seen_in_the_dark():
 
 
 TEXTURES = Path(__file__).resolve().parent.parent / 'assets' / 'textures'
-HAND = 0.95     # how high Wick carries his lantern
+HAND = 1.45     # how high Wick carries his lantern: his chest, as the tilted camera sees him
 ROUNDER = 0.6   # a contact shadow's depth for its width: the camera foreshortens it already
 GROUNDED = 0.7  # how dark a contact shadow is: what stands has to be seen to touch the ground
 SPREAD = 1.5    # how much wider than the field's: its far half is hidden behind what stands on it
@@ -399,7 +482,9 @@ def wilds():
         seen_in_the_dark(),
         entity('physics', 'Physics', **{
             'sindri.physics2d.world': {'gravity': [0, 0], 'layers': ['wall', 'wick', 'lantern', 'target']},
-            'sindri.input.actions': {'actions': input_actions()}}),
+            'sindri.input.actions': {'actions': input_actions() + [
+                {'name': 'campfire', 'kind': 'button', 'bindings': ['key.F', 'gamepad.north']},
+                {'name': 'lamp', 'kind': 'button', 'bindings': ['key.G', 'gamepad.east']}]}}),
         ground(),
     ]
     ents += [e for n, (x, y) in enumerate(LAMPS, 1) for e in lantern(f'lantern-{n}', x, y)]
@@ -407,6 +492,7 @@ def wilds():
     # and something below the Lid should remember that.
     ents += [sunfall(f'sunfall-{n}', x, y, phase=6.66 * n) for n, (x, y) in enumerate(SUNFALLS, 1)]
     ents += [e for n, (x, y) in enumerate(SEEKERS, 1) for e in seeker(f'seeker-{n}', x, y)]
+    ents += pack()
     ents += [*placed_at_start(wick()), *effects(), *[gloom(f'gloom-{n}', x, y, size) for n, ((x, y), size) in enumerate(zip(GLOOM, [1, 3]), 1)]]
     return standing_up(ents)
 

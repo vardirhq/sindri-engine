@@ -1,0 +1,69 @@
+{
+  "format_version": 1,
+  "metadata": {
+    "name": "lamp"
+  },
+  "entities": [
+    {
+      "id": "lamp",
+      "name": "lamp",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/objects.png#lamp-post-lit",
+          "layer": 5,
+          "size": [
+            4.0,
+            4.0
+          ],
+          "billboard": true
+        },
+        "sindri.light2d": {
+          "enabled": true,
+          "color": [
+            1.0,
+            0.72,
+            0.38,
+            1.0
+          ],
+          "intensity": 1.4,
+          "radius": 9.0,
+          "falloff": 1.4,
+          "height": 2.6,
+          "shadows": false,
+          "flicker": 0.0
+        },
+        "sindri.script": {
+          "source": "scripts/fire.decay",
+          "script": "Fire",
+          "properties": {
+            "glow": 1.4,
+            "burn_for": 0.0
+          }
+        },
+        "sindri.tags": {
+          "tags": [
+            "fire"
+          ]
+        }
+      }
+    }
+  ]
+}

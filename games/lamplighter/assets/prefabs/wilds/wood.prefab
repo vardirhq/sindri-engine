@@ -1,0 +1,57 @@
+{
+  "format_version": 1,
+  "metadata": {
+    "name": "wood"
+  },
+  "entities": [
+    {
+      "id": "wood",
+      "name": "wood",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/goods.png#wood",
+          "layer": 4,
+          "size": [
+            1.0,
+            1.0
+          ],
+          "billboard": true,
+          "offset": [
+            0.0,
+            -0.125
+          ]
+        },
+        "sindri.script": {
+          "source": "scripts/pickup.decay",
+          "script": "Pickup",
+          "properties": {
+            "kind": "wood"
+          }
+        },
+        "sindri.tags": {
+          "tags": [
+            "pickup"
+          ]
+        }
+      }
+    }
+  ]
+}

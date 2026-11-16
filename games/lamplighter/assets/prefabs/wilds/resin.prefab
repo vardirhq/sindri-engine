@@ -1,0 +1,72 @@
+{
+  "format_version": 1,
+  "metadata": {
+    "name": "resin"
+  },
+  "entities": [
+    {
+      "id": "resin",
+      "name": "resin",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/goods.png#resin",
+          "layer": 4,
+          "size": [
+            0.6,
+            0.6
+          ],
+          "billboard": true,
+          "offset": [
+            0.0,
+            -0.075
+          ]
+        },
+        "sindri.script": {
+          "source": "scripts/pickup.decay",
+          "script": "Pickup",
+          "properties": {
+            "kind": "resin"
+          }
+        },
+        "sindri.tags": {
+          "tags": [
+            "pickup"
+          ]
+        },
+        "sindri.light2d": {
+          "enabled": true,
+          "color": [
+            1.0,
+            0.6,
+            0.2,
+            1.0
+          ],
+          "intensity": 0.5,
+          "radius": 1.2,
+          "falloff": 1.5,
+          "height": 0.3,
+          "shadows": false,
+          "flicker": 0.0
+        }
+      }
+    }
+  ]
+}

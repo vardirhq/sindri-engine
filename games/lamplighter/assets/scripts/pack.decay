@@ -1,0 +1,78 @@
+// Wick's pack, on screen: what he has gathered, and what he can make of it.
+// Each recipe is a button (and a key): a campfire, which burns down, and a lamp,
+// which burns for good. Pressed with enough in the pack, the cost is taken and
+// the thing is built where Wick stands, a step ahead of him. A button that
+// cannot be afforded is dimmed.
+script Pack {
+    // What each costs: wood, stone, resin.
+    @export let fire_wood: number = 4.0;
+    @export let fire_stone: number = 2.0;
+    @export let lamp_wood: number = 6.0;
+    @export let lamp_stone: number = 4.0;
+    @export let lamp_resin: number = 2.0;
+    // What they are built from.
+    @export let campfire: Prefab;
+    @export let lamp: Prefab;
+    // How far ahead of Wick a thing is built.
+    @export let ahead: number = 1.2;
+
+    var wick: Entity = null;
+    var wood: Entity = null;
+    var stone: Entity = null;
+    var resin: Entity = null;
+    var fire_button: Entity = null;
+    var lamp_button: Entity = null;
+    var age: number = 0.0;
+
+    fn start() {
+        this.wick = World.find("Wick");
+        this.wood = World.find("pack-wood");
+        this.stone = World.find("pack-stone");
+        this.resin = World.find("pack-resin");
+        this.fire_button = World.find("craft-campfire");
+        this.lamp_button = World.find("craft-lamp");
+    }
+
+    fn update(dt: number) {
+        this.age += dt;
+        Ui.set_number(this.wood, Game.wood);
+        Ui.set_number(this.stone, Game.stone);
+        Ui.set_number(this.resin, Game.resin);
+        let fire_ok = Game.wood >= this.fire_wood && Game.stone >= this.fire_stone;
+        let lamp_ok = Game.wood >= this.lamp_wood && Game.stone >= this.lamp_stone
+            && Game.resin >= this.lamp_resin;
+        dim(this.fire_button, fire_ok);
+        dim(this.lamp_button, lamp_ok);
+        // Wick has started by now, and faces somewhere.
+        if this.age < 0.1 || Game.lost {
+            return;
+        }
+        if fire_ok && (Ui.is_pressed(this.fire_button) || Action.pressed("campfire")) {
+            Game.wood -= this.fire_wood;
+            Game.stone -= this.fire_stone;
+            build(this.campfire);
+        } else if lamp_ok && (Ui.is_pressed(this.lamp_button) || Action.pressed("lamp")) {
+            Game.wood -= this.lamp_wood;
+            Game.stone -= this.lamp_stone;
+            Game.resin -= this.lamp_resin;
+            build(this.lamp);
+        }
+    }
+
+    fn dim(button: Entity, ok: bool) {
+        if ok {
+            button.ui_image.tint = Color(0.16, 0.12, 0.06, 0.9);
+        } else {
+            button.ui_image.tint = Color(0.06, 0.06, 0.08, 0.55);
+        }
+    }
+
+    // Built a step ahead of Wick, the way he faces.
+    fn build(thing: Prefab) {
+        let walker = Wick.on(this.wick);
+        let made = World.spawn(thing);
+        made.transform.position.x = this.wick.transform.world_position.x + walker.facing_x * this.ahead;
+        made.transform.position.y = this.wick.transform.world_position.y + walker.facing_y * this.ahead;
+        Game.built += 1.0;
+    }
+}

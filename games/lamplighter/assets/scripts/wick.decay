@@ -36,6 +36,9 @@ script Wick {
     // nearer the screen as he walks down it, and the lantern circles him at the
     // height of his hands rather than a little up the screen.
     @export let upright: bool = false;
+    // How high above the ground the lantern rides, standing up: a picture leans
+    // back with the camera, so this is his chest as the camera sees him.
+    @export let hand: number = 1.45;
 
     var vx: number = 0.0;
     var vy: number = 0.0;
@@ -205,10 +208,18 @@ script Wick {
         let near = sin(round);
         this.lantern.transform.position.x = this.orbit_out * cos(round);
         if this.upright {
-            // A real circle round him on the ground's plane, at hand height: the
-            // camera shows its near half in front of him and its far half behind.
+            // A real circle round him on the ground's plane, at the height of his
+            // chest as he faces the camera. Lifted that high it is nearer the
+            // tilted camera than his feet even on the far side of him, so the
+            // distance alone would draw it in front of him all the way round:
+            // on the far half it drops a layer, and he is drawn over it.
             this.lantern.transform.position.y = this.orbit_out * near;
-            this.lantern.transform.position.z = 0.95 + 0.05 * sin(this.age * 3.0);
+            this.lantern.transform.position.z = this.hand + 0.05 * sin(this.age * 3.0);
+            if near > 0.0 {
+                this.lantern_art.sprite.layer = 4.0;
+            } else {
+                this.lantern_art.sprite.layer = 5.0;
+            }
         } else {
             tilted_lantern(near);
         }

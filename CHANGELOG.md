@@ -2,6 +2,10 @@
 
 # Changelog
 
+- Gathering and building in Lamplighter's wilds: deadwood, flint and resin lie about, scattered by seed, and go into Wick's pack when he walks over them. The pack is on screen with a button (and F and G) for each thing he can build: a campfire that burns down, and a lamp that burns for good. A fire he has built is a safe pool while it burns, from the gloom and from Seekers.
+
+- A Seeker that finds Wick calls the gloom: while it holds him one rises out of the ground near him every few seconds, and when he gets away a wave rises where he was last seen, never more than six about.
+
 - Light stays sharp: with `night_vision` on, the depth of field softens only what is dark, so a lit place is never blurred, and the lens takes no taps where nothing blurs and fewer where the blur is narrow. The phone editor draws at most sixty frames a second, asking the display for sixty where Android allows, so a 90 or 120 Hz screen no longer runs hot drawing every refresh.
 
 - Under the Lid: Lamplighter's ground has relief (`blocks_n.png`), lit as ground: a voxel map's normal maps now only add relief over distance lighting, so flat ground stays as bright as without one (`SpriteInstance::ground_relief`). Sunfalls wander and their cracks open and shut. The first Seeker hangs over the meadow and sweeps it with red light; it finds Wick, follows him and calls the gloom from further off, unless he hides in a lit lamp's pool or an open sunfall.
