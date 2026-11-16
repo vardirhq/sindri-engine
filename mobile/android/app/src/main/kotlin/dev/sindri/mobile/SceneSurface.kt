@@ -2,6 +2,8 @@ package dev.sindri.mobile
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.os.Build
+import android.view.Surface
 import android.view.Choreographer
 import android.view.GestureDetector
 import android.view.MotionEvent
@@ -24,6 +26,11 @@ import kotlin.math.hypot
  *
  * Every gesture calls [onChanged] so the overlay can refresh from the host,
  * with `true` when a finger lifts, which is when a move is finished and saved.
+ *
+ * It draws at most sixty frames a second. A phone whose screen refreshes at 90
+ * or 120 would otherwise draw on every refresh, and run hot for frames nobody
+ * needs: the surface asks the display for sixty where it can (Android 11 on),
+ * and a frame that comes sooner than that after the last one drawn is skipped.
  */
 class SceneSurface(
     context: Context,
@@ -33,6 +40,7 @@ class SceneSurface(
 
     private var attached = false
     private var scheduled = false
+    private var lastDrawn = 0L
 
     /** Where the current finger landed, until it has moved past the touch slop. */
     private var landed: Pair<Float, Float>? = null
@@ -119,6 +127,9 @@ class SceneSurface(
             return
         }
         attached = true
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            holder.surface.setFrameRate(FRAMES_A_SECOND, Surface.FRAME_RATE_COMPATIBILITY_DEFAULT)
+        }
         onChanged(false)
         schedule()
     }
@@ -131,10 +142,13 @@ class SceneSurface(
     override fun doFrame(frameTimeNanos: Long) {
         scheduled = false
         if (!attached || !running) return
-        val error = NativeBridge.draw()
-        if (error != null) {
-            onError(error)
-            return
+        if (frameTimeNanos - lastDrawn >= SHORTEST_FRAME_NANOS) {
+            lastDrawn = frameTimeNanos
+            val error = NativeBridge.draw()
+            if (error != null) {
+                onError(error)
+                return
+            }
         }
         schedule()
     }
@@ -143,5 +157,12 @@ class SceneSurface(
         if (scheduled || !attached || !running) return
         scheduled = true
         Choreographer.getInstance().postFrameCallback(this)
+    }
+
+    private companion object {
+        const val FRAMES_A_SECOND = 60f
+
+        /** A little under a sixtieth of a second, so a sixty-hertz screen skips none. */
+        const val SHORTEST_FRAME_NANOS = 15_000_000L
     }
 }

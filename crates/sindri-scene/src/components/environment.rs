@@ -209,7 +209,9 @@ impl Default for EnvironmentDepthOfField {
 }
 
 /// See [`NightVisionSettings`]: below `threshold` a place greys by up to
-/// `grey` and blurs by up to `blur`, a share of the screen's height.
+/// `grey` and blurs by up to `blur`, a share of the screen's height. With it
+/// on, what is lit is never blurred: the depth of field softens a place only
+/// as far as it is dark, so light stays sharp.
 #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(default, deny_unknown_fields)]
 pub struct EnvironmentNightVision {
