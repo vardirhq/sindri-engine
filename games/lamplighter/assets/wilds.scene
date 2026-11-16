@@ -1355,12 +1355,12 @@
       }
     },
     {
-      "id": "pack-wood",
-      "name": "pack-wood",
+      "id": "hud-light",
+      "name": "hud-light",
       "transform_3d": {
         "position": [
-          0.03,
-          0.15,
+          0,
+          0,
           0.0
         ],
         "rotation": [
@@ -1371,194 +1371,230 @@
         ],
         "scale": [
           0.5,
-          0.05,
-          1
-        ]
-      },
-      "components": {
-        "sindri.ui.text": {
-          "anchor": "bottom_left",
-          "color": [
-            1.0,
-            0.92,
-            0.7,
-            1.0
-          ],
-          "font": "fonts/Inter.ttf",
-          "font_size": 0.036,
-          "line_height": 0.044,
-          "layer": 100,
-          "text": "Wood {}",
-          "bold": true,
-          "shadow": {
-            "offset": [
-              0,
-              -0.003
-            ],
-            "color": [
-              0,
-              0,
-              0,
-              0.6
-            ],
-            "softness": 0.002
-          }
-        }
-      }
-    },
-    {
-      "id": "pack-stone",
-      "name": "pack-stone",
-      "transform_3d": {
-        "position": [
-          0.03,
           0.1,
-          0.0
-        ],
-        "rotation": [
-          0,
-          0,
-          0,
-          1
-        ],
-        "scale": [
-          0.5,
-          0.05,
           1
         ]
       },
       "components": {
-        "sindri.ui.text": {
-          "anchor": "bottom_left",
-          "color": [
-            1.0,
-            0.92,
-            0.7,
-            1.0
-          ],
-          "font": "fonts/Inter.ttf",
-          "font_size": 0.036,
-          "line_height": 0.044,
-          "layer": 100,
-          "text": "Stone {}",
-          "bold": true,
-          "shadow": {
-            "offset": [
-              0,
-              -0.003
-            ],
-            "color": [
-              0,
-              0,
-              0,
-              0.6
-            ],
-            "softness": 0.002
-          }
-        }
-      }
-    },
-    {
-      "id": "pack-resin",
-      "name": "pack-resin",
-      "transform_3d": {
-        "position": [
-          0.03,
-          0.05,
-          0.0
-        ],
-        "rotation": [
-          0,
-          0,
-          0,
-          1
-        ],
-        "scale": [
-          0.5,
-          0.05,
-          1
-        ]
-      },
-      "components": {
-        "sindri.ui.text": {
-          "anchor": "bottom_left",
-          "color": [
-            1.0,
-            0.92,
-            0.7,
-            1.0
-          ],
-          "font": "fonts/Inter.ttf",
-          "font_size": 0.036,
-          "line_height": 0.044,
-          "layer": 100,
-          "text": "Resin {}",
-          "bold": true,
-          "shadow": {
-            "offset": [
-              0,
-              -0.003
-            ],
-            "color": [
-              0,
-              0,
-              0,
-              0.6
-            ],
-            "softness": 0.002
-          }
-        }
-      }
-    },
-    {
-      "id": "craft-campfire",
-      "name": "craft-campfire",
-      "transform_3d": {
-        "position": [
-          -0.03,
-          0.135,
-          0.0
-        ],
-        "rotation": [
-          0,
-          0,
-          0,
-          1
-        ],
-        "scale": [
-          0.62,
-          0.075,
-          1
-        ]
-      },
-      "components": {
-        "sindri.ui.image": {
-          "anchor": "bottom_right",
-          "layer": 96,
-          "texture": "textures/white.png",
-          "tint": [
-            0.06,
-            0.06,
-            0.08,
-            0.55
+        "weave.style": {
+          "classes": [
+            "panel",
+            "light-panel"
           ]
         },
-        "sindri.ui.button": {
-          "label": "Campfire  (F)  4 wood, 2 stone",
-          "autofocus": false,
-          "disabled": false
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "anchor": "center",
+          "layer": 90
         },
         "sindri.ui.layout": {
-          "direction": "row",
-          "spacing": 0.0,
+          "direction": "column",
+          "spacing": 0.01,
           "justify": "center",
           "align": "center"
         }
       }
     },
     {
-      "id": "craft-campfire-label",
-      "name": "craft-campfire-label",
+      "id": "hud-light-label",
+      "name": "hud-light-label",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.2,
+          0.06,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "kicker",
+            "light-label"
+          ]
+        },
+        "sindri.ui.text": {
+          "anchor": "center",
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "font": "fonts/Inter.ttf",
+          "font_size": 0.032,
+          "line_height": 0.04,
+          "layer": 101,
+          "text": "LANTERN",
+          "bold": true,
+          "shadow": {
+            "offset": [
+              0,
+              -0.003
+            ],
+            "color": [
+              0,
+              0,
+              0,
+              0.6
+            ],
+            "softness": 0.002
+          }
+        }
+      }
+    },
+    {
+      "id": "hud-light-back",
+      "name": "hud-light-back",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.2,
+          0.06,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "meter",
+            "light-back"
+          ]
+        },
+        "sindri.ui.image": {
+          "anchor": "center",
+          "layer": 95,
+          "texture": "textures/white.png",
+          "tint": [
+            1,
+            1,
+            1,
+            1
+          ]
+        }
+      }
+    },
+    {
+      "id": "hud-light-fill",
+      "name": "hud-light-fill",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.2,
+          0.06,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "meter",
+            "light-fill"
+          ]
+        },
+        "sindri.ui.image": {
+          "anchor": "top_left",
+          "layer": 96,
+          "texture": "textures/white.png",
+          "tint": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "fill": {
+            "amount": 1.0,
+            "from": "left"
+          }
+        }
+      }
+    },
+    {
+      "id": "pack-panel",
+      "name": "pack-panel",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.4,
+          0.25,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "panel",
+            "pack-panel"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "anchor": "center",
+          "layer": 90
+        },
+        "sindri.ui.layout": {
+          "direction": "column",
+          "spacing": 0.01,
+          "justify": "center",
+          "align": "center"
+        }
+      }
+    },
+    {
+      "id": "pack-wood-row",
+      "name": "pack-wood-row",
       "transform_3d": {
         "position": [
           0,
@@ -1572,28 +1608,761 @@
           1
         ],
         "scale": [
-          0.6,
+          0.35,
           0.06,
+          1
+        ]
+      },
+      "parent": "pack-panel",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "pack-row"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "anchor": "center",
+          "layer": 91
+        },
+        "sindri.ui.layout": {
+          "direction": "row",
+          "spacing": 0.01,
+          "justify": "center",
+          "align": "center"
+        }
+      }
+    },
+    {
+      "id": "pack-wood-icon",
+      "name": "pack-wood-icon",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.05,
+          0.05,
+          1
+        ]
+      },
+      "parent": "pack-wood-row",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "pack-icon"
+          ]
+        },
+        "sindri.ui.image": {
+          "anchor": "center",
+          "layer": 101,
+          "texture": "textures/goods.png#wood",
+          "tint": [
+            1,
+            1,
+            1,
+            1
+          ]
+        }
+      }
+    },
+    {
+      "id": "pack-wood",
+      "name": "pack-wood",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.2,
+          0.06,
+          1
+        ]
+      },
+      "parent": "pack-wood-row",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "pack-count"
+          ]
+        },
+        "sindri.ui.text": {
+          "anchor": "center",
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "font": "fonts/Inter.ttf",
+          "font_size": 0.032,
+          "line_height": 0.04,
+          "layer": 101,
+          "text": "{} wood",
+          "bold": true,
+          "shadow": {
+            "offset": [
+              0,
+              -0.003
+            ],
+            "color": [
+              0,
+              0,
+              0,
+              0.6
+            ],
+            "softness": 0.002
+          }
+        }
+      }
+    },
+    {
+      "id": "pack-stone-row",
+      "name": "pack-stone-row",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.35,
+          0.06,
+          1
+        ]
+      },
+      "parent": "pack-panel",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "pack-row"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "anchor": "center",
+          "layer": 91
+        },
+        "sindri.ui.layout": {
+          "direction": "row",
+          "spacing": 0.01,
+          "justify": "center",
+          "align": "center"
+        }
+      }
+    },
+    {
+      "id": "pack-stone-icon",
+      "name": "pack-stone-icon",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.05,
+          0.05,
+          1
+        ]
+      },
+      "parent": "pack-stone-row",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "pack-icon"
+          ]
+        },
+        "sindri.ui.image": {
+          "anchor": "center",
+          "layer": 101,
+          "texture": "textures/goods.png#stone",
+          "tint": [
+            1,
+            1,
+            1,
+            1
+          ]
+        }
+      }
+    },
+    {
+      "id": "pack-stone",
+      "name": "pack-stone",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.2,
+          0.06,
+          1
+        ]
+      },
+      "parent": "pack-stone-row",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "pack-count"
+          ]
+        },
+        "sindri.ui.text": {
+          "anchor": "center",
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "font": "fonts/Inter.ttf",
+          "font_size": 0.032,
+          "line_height": 0.04,
+          "layer": 101,
+          "text": "{} stone",
+          "bold": true,
+          "shadow": {
+            "offset": [
+              0,
+              -0.003
+            ],
+            "color": [
+              0,
+              0,
+              0,
+              0.6
+            ],
+            "softness": 0.002
+          }
+        }
+      }
+    },
+    {
+      "id": "pack-resin-row",
+      "name": "pack-resin-row",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.35,
+          0.06,
+          1
+        ]
+      },
+      "parent": "pack-panel",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "pack-row"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "anchor": "center",
+          "layer": 91
+        },
+        "sindri.ui.layout": {
+          "direction": "row",
+          "spacing": 0.01,
+          "justify": "center",
+          "align": "center"
+        }
+      }
+    },
+    {
+      "id": "pack-resin-icon",
+      "name": "pack-resin-icon",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.05,
+          0.05,
+          1
+        ]
+      },
+      "parent": "pack-resin-row",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "pack-icon"
+          ]
+        },
+        "sindri.ui.image": {
+          "anchor": "center",
+          "layer": 101,
+          "texture": "textures/goods.png#resin",
+          "tint": [
+            1,
+            1,
+            1,
+            1
+          ]
+        }
+      }
+    },
+    {
+      "id": "pack-resin",
+      "name": "pack-resin",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.2,
+          0.06,
+          1
+        ]
+      },
+      "parent": "pack-resin-row",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "pack-count"
+          ]
+        },
+        "sindri.ui.text": {
+          "anchor": "center",
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "font": "fonts/Inter.ttf",
+          "font_size": 0.032,
+          "line_height": 0.04,
+          "layer": 101,
+          "text": "{} resin",
+          "bold": true,
+          "shadow": {
+            "offset": [
+              0,
+              -0.003
+            ],
+            "color": [
+              0,
+              0,
+              0,
+              0.6
+            ],
+            "softness": 0.002
+          }
+        }
+      }
+    },
+    {
+      "id": "craft-panel",
+      "name": "craft-panel",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.6,
+          0.3,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "craft-panel"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "anchor": "center",
+          "layer": 89
+        },
+        "sindri.ui.layout": {
+          "direction": "column",
+          "spacing": 0.01,
+          "justify": "center",
+          "align": "center"
+        }
+      }
+    },
+    {
+      "id": "craft-campfire",
+      "name": "craft-campfire",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.55,
+          0.12,
+          1
+        ]
+      },
+      "parent": "craft-panel",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "craft"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "anchor": "center",
+          "layer": 92
+        },
+        "sindri.ui.layout": {
+          "direction": "row",
+          "spacing": 0.01,
+          "justify": "center",
+          "align": "center"
+        },
+        "sindri.ui.button": {
+          "label": "Campfire",
+          "autofocus": false,
+          "disabled": true
+        }
+      }
+    },
+    {
+      "id": "craft-campfire-icon",
+      "name": "craft-campfire-icon",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.08,
+          0.08,
           1
         ]
       },
       "parent": "craft-campfire",
       "components": {
+        "weave.style": {
+          "classes": [
+            "craft-icon"
+          ]
+        },
+        "sindri.ui.image": {
+          "anchor": "center",
+          "layer": 97,
+          "texture": "textures/campfire.png#campfire",
+          "tint": [
+            1,
+            1,
+            1,
+            1
+          ]
+        }
+      }
+    },
+    {
+      "id": "craft-campfire-text",
+      "name": "craft-campfire-text",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.36,
+          0.1,
+          1
+        ]
+      },
+      "parent": "craft-campfire",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "craft-text"
+          ]
+        },
+        "sindri.ui.layout": {
+          "direction": "column",
+          "spacing": 0.0,
+          "justify": "center",
+          "align": "start"
+        }
+      }
+    },
+    {
+      "id": "craft-campfire-name",
+      "name": "craft-campfire-name",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.2,
+          0.06,
+          1
+        ]
+      },
+      "parent": "craft-campfire-text",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "craft-name"
+          ]
+        },
         "sindri.ui.text": {
           "anchor": "center",
           "color": [
-            1.0,
-            0.9,
-            0.7,
-            1.0
+            1,
+            1,
+            1,
+            1
           ],
           "font": "fonts/Inter.ttf",
           "font_size": 0.032,
           "line_height": 0.04,
           "layer": 98,
-          "text": "Campfire  (F)  4 wood, 2 stone",
+          "text": "Campfire",
           "bold": true,
-          "line_align": "center",
+          "shadow": {
+            "offset": [
+              0,
+              -0.003
+            ],
+            "color": [
+              0,
+              0,
+              0,
+              0.6
+            ],
+            "softness": 0.002
+          }
+        }
+      }
+    },
+    {
+      "id": "craft-campfire-cost",
+      "name": "craft-campfire-cost",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.2,
+          0.06,
+          1
+        ]
+      },
+      "parent": "craft-campfire-text",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "craft-cost"
+          ]
+        },
+        "sindri.ui.text": {
+          "anchor": "center",
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "font": "fonts/Inter.ttf",
+          "font_size": 0.032,
+          "line_height": 0.04,
+          "layer": 98,
+          "text": "4 wood \u00b7 2 stone",
+          "bold": true,
+          "shadow": {
+            "offset": [
+              0,
+              -0.003
+            ],
+            "color": [
+              0,
+              0,
+              0,
+              0.6
+            ],
+            "softness": 0.002
+          }
+        }
+      }
+    },
+    {
+      "id": "craft-campfire-key",
+      "name": "craft-campfire-key",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.05,
+          0.05,
+          1
+        ]
+      },
+      "parent": "craft-campfire",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "craft-key"
+          ]
+        },
+        "sindri.ui.text": {
+          "anchor": "center",
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "font": "fonts/Inter.ttf",
+          "font_size": 0.032,
+          "line_height": 0.04,
+          "layer": 98,
+          "text": "F",
+          "bold": true,
           "shadow": {
             "offset": [
               0,
@@ -1615,9 +2384,9 @@
       "name": "craft-lamp",
       "transform_3d": {
         "position": [
-          -0.03,
-          0.05,
-          0.0
+          0,
+          0,
+          0
         ],
         "rotation": [
           0,
@@ -1626,39 +2395,45 @@
           1
         ],
         "scale": [
-          0.62,
-          0.075,
+          0.55,
+          0.12,
           1
         ]
       },
+      "parent": "craft-panel",
       "components": {
-        "sindri.ui.image": {
-          "anchor": "bottom_right",
-          "layer": 96,
-          "texture": "textures/white.png",
-          "tint": [
-            0.06,
-            0.06,
-            0.08,
-            0.55
+        "weave.style": {
+          "classes": [
+            "craft"
           ]
         },
-        "sindri.ui.button": {
-          "label": "Lamp  (G)  6 wood, 4 stone, 2 resin",
-          "autofocus": false,
-          "disabled": false
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "anchor": "center",
+          "layer": 92
         },
         "sindri.ui.layout": {
           "direction": "row",
-          "spacing": 0.0,
+          "spacing": 0.01,
           "justify": "center",
           "align": "center"
+        },
+        "sindri.ui.button": {
+          "label": "Lamp",
+          "autofocus": false,
+          "disabled": true
         }
       }
     },
     {
-      "id": "craft-lamp-label",
-      "name": "craft-lamp-label",
+      "id": "craft-lamp-icon",
+      "name": "craft-lamp-icon",
       "transform_3d": {
         "position": [
           0,
@@ -1672,28 +2447,225 @@
           1
         ],
         "scale": [
-          0.6,
-          0.06,
+          0.08,
+          0.08,
           1
         ]
       },
       "parent": "craft-lamp",
       "components": {
+        "weave.style": {
+          "classes": [
+            "craft-icon"
+          ]
+        },
+        "sindri.ui.image": {
+          "anchor": "center",
+          "layer": 97,
+          "texture": "textures/objects.png#lamp-post-lit",
+          "tint": [
+            1,
+            1,
+            1,
+            1
+          ]
+        }
+      }
+    },
+    {
+      "id": "craft-lamp-text",
+      "name": "craft-lamp-text",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.36,
+          0.1,
+          1
+        ]
+      },
+      "parent": "craft-lamp",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "craft-text"
+          ]
+        },
+        "sindri.ui.layout": {
+          "direction": "column",
+          "spacing": 0.0,
+          "justify": "center",
+          "align": "start"
+        }
+      }
+    },
+    {
+      "id": "craft-lamp-name",
+      "name": "craft-lamp-name",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.2,
+          0.06,
+          1
+        ]
+      },
+      "parent": "craft-lamp-text",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "craft-name"
+          ]
+        },
         "sindri.ui.text": {
           "anchor": "center",
           "color": [
-            1.0,
-            0.9,
-            0.7,
-            1.0
+            1,
+            1,
+            1,
+            1
           ],
           "font": "fonts/Inter.ttf",
           "font_size": 0.032,
           "line_height": 0.04,
           "layer": 98,
-          "text": "Lamp  (G)  6 wood, 4 stone, 2 resin",
+          "text": "Lamp",
           "bold": true,
-          "line_align": "center",
+          "shadow": {
+            "offset": [
+              0,
+              -0.003
+            ],
+            "color": [
+              0,
+              0,
+              0,
+              0.6
+            ],
+            "softness": 0.002
+          }
+        }
+      }
+    },
+    {
+      "id": "craft-lamp-cost",
+      "name": "craft-lamp-cost",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.2,
+          0.06,
+          1
+        ]
+      },
+      "parent": "craft-lamp-text",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "craft-cost"
+          ]
+        },
+        "sindri.ui.text": {
+          "anchor": "center",
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "font": "fonts/Inter.ttf",
+          "font_size": 0.032,
+          "line_height": 0.04,
+          "layer": 98,
+          "text": "6 wood \u00b7 4 stone \u00b7 2 resin",
+          "bold": true,
+          "shadow": {
+            "offset": [
+              0,
+              -0.003
+            ],
+            "color": [
+              0,
+              0,
+              0,
+              0.6
+            ],
+            "softness": 0.002
+          }
+        }
+      }
+    },
+    {
+      "id": "craft-lamp-key",
+      "name": "craft-lamp-key",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.05,
+          0.05,
+          1
+        ]
+      },
+      "parent": "craft-lamp",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "craft-key"
+          ]
+        },
+        "sindri.ui.text": {
+          "anchor": "center",
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "font": "fonts/Inter.ttf",
+          "font_size": 0.032,
+          "line_height": 0.04,
+          "layer": 98,
+          "text": "G",
+          "bold": true,
           "shadow": {
             "offset": [
               0,

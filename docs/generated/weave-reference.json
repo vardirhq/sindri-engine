@@ -410,6 +410,18 @@
       "writes": "`sindri.ui.shape` `shadow`"
     },
     {
+      "example": "#f2a65a",
+      "group": "Image",
+      "inherited": false,
+      "names": [
+        "tint"
+      ],
+      "shorthand": false,
+      "summary": "What the image's picture is multiplied by: white shows it as drawn, and a white picture (a bar, a panel) takes the colour.",
+      "values": "a color",
+      "writes": "`sindri.ui.image` `tint`"
+    },
+    {
       "example": "background 150ms ease-out",
       "group": "Motion",
       "inherited": false,

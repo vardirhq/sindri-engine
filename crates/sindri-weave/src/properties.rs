@@ -32,6 +32,7 @@ const FLEX: &str = "Flex layout";
 const GRID: &str = "Grid layout";
 const TEXT: &str = "Text";
 const SHAPE: &str = "Shape";
+const IMAGE: &str = "Image";
 const MOTION: &str = "Motion";
 
 /// Every property, in the order the reference lists them.
@@ -316,6 +317,15 @@ pub const PROPERTIES: &[Property] = &[
         example: "0 4px 8px #00000080",
     },
     Property {
+        names: &["tint"],
+        group: IMAGE,
+        values: "a color",
+        writes: "`sindri.ui.image` `tint`",
+        summary: "What the image's picture is multiplied by: white shows it as drawn, and a \
+                  white picture (a bar, a panel) takes the colour.",
+        example: "#f2a65a",
+    },
+    Property {
         names: &["transition"],
         group: MOTION,
         values: "comma-separated `<property> <duration> [<delay>] [<easing>]`; a property may \
@@ -349,8 +359,8 @@ mod tests {
         height: 720.0,
     };
 
-    /// A text, a shape, a box and both layouts on one element inside a
-    /// frame, so every property has the component it writes to.
+    /// A text, a shape, an image, a box and both layouts on one element
+    /// inside a frame, so every property has the component it writes to.
     fn element() -> World {
         let document = SceneDocument::from_json(
             r#"{
@@ -364,6 +374,7 @@ mod tests {
                       "components": {
                         "sindri.ui.text": { "text": "Hi" },
                         "sindri.ui.shape": {},
+                        "sindri.ui.image": { "texture": "sindri:white" },
                         "sindri.ui.box": {},
                         "sindri.ui.layout": {},
                         "sindri.ui.grid": {}

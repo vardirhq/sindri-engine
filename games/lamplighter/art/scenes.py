@@ -54,8 +54,9 @@ def environment(ambient):
         'lighting_2d': {'enabled': True, 'ambient': ambient}}})
 
 
-def text(ident, words, size, color, parent=None, bold=False):
-    return entity(ident, ident, at(0, 0, 0, 1.4, size * 1.3), parent, **{'sindri.ui.text': {
+def text(ident, words, size, color, parent=None, bold=False, classes=None):
+    styled = {'weave.style': {'classes': classes}} if classes else {}
+    return entity(ident, ident, at(0, 0, 0, 1.4, size * 1.3), parent, **styled, **{'sindri.ui.text': {
         'anchor': 'center', 'color': color, 'font': 'fonts/Inter.ttf', 'font_size': size,
         'line_height': size * 1.2, 'layer': 100, 'text': words, 'bold': bold, 'line_align': 'center',
         'shadow': {'offset': [0.0, -0.004], 'color': [0, 0, 0, 0.55], 'softness': 0.003}}})
@@ -64,10 +65,12 @@ def text(ident, words, size, color, parent=None, bold=False):
 def button(ident, label):
     return [
         entity(ident, ident, at(0, 0, 0, 0.62, 0.095), 'menu', **{
+            'weave.style': {'classes': ['menu-button']},
             'sindri.ui.shape': {'kind': 'rect', 'fill': [0.09, 0.08, 0.2, 0.92], 'anchor': 'center', 'layer': 90},
             'sindri.ui.button': {'label': label, 'autofocus': False, 'disabled': False},
             'sindri.ui.layout': {'direction': 'row', 'spacing': 0.02, 'justify': 'center', 'align': 'center'}}),
         entity(ident + '-label', ident + '-label', at(0, 0, 0, 0.558, 0.076), ident, **{
+            'weave.style': {'classes': ['menu-button-label']},
             'sindri.ui.text': {'anchor': 'center', 'color': [0.96, 0.93, 0.84, 1.0], 'font': 'fonts/Inter.ttf',
                                'font_size': 0.05, 'line_height': 0.06, 'layer': 95, 'text': label, 'bold': True,
                                'line_align': 'center',
@@ -76,11 +79,14 @@ def button(ident, label):
 
 
 def menu(script, heading, subtitle, buttons):
-    layout = entity('menu', 'menu', at(0, 0, 0, 1.0, 1.6), **{'sindri.ui.layout': {
-        'direction': 'column', 'spacing': 0.035, 'justify': 'center', 'align': 'center'}})
+    # A panel styled by `assets/ui/menus.weave`; without it, a plain column.
+    layout = entity('menu', 'menu', at(0, 0, 0, 1.0, 1.6), **{
+        'weave.style': {'classes': ['menu-panel']},
+        'sindri.ui.shape': {'kind': 'rect', 'fill': [0.0, 0.0, 0.0, 0.0], 'anchor': 'center', 'layer': 80},
+        'sindri.ui.layout': {'direction': 'column', 'spacing': 0.035, 'justify': 'center', 'align': 'center'}})
     out = [camera(), environment([0.36, 0.34, 0.55]), layout,
-           text('heading', heading, 0.11, [1.0, 0.82, 0.45, 1.0], 'menu', True),
-           text('tagline', subtitle, 0.045, [0.62, 0.6, 0.78, 1.0], 'menu')]
+           text('heading', heading, 0.11, [1.0, 0.82, 0.45, 1.0], 'menu', True, ['menu-heading']),
+           text('tagline', subtitle, 0.045, [0.62, 0.6, 0.78, 1.0], 'menu', classes=['menu-tagline'])]
     for ident, label in buttons:
         out += button(ident, label)
     out.append(entity('shell', 'Shell', **{'sindri.script': {

@@ -426,3 +426,114 @@ fn unrelated_styles_preserve_mirrored_scale() {
     .unwrap();
     assert_eq!(styled.world().get(entity).unwrap().transform_3d, before);
 }
+
+#[test]
+fn tint_colours_an_image() {
+    let document = SceneDocument::from_json(
+        r#"{
+            "format_version": 10,
+            "metadata": { "name": "weave-tint" },
+            "entities": [{
+                "id": "bar",
+                "transform_3d": { "scale": [0.5, 0.05, 1.0] },
+                "components": {
+                    "weave.style": { "classes": ["meter"] },
+                    "sindri.ui.image": { "texture": "sindri:white", "anchor": "center", "tint": [1.0, 1.0, 1.0, 1.0] }
+                }
+            }]
+        }"#,
+    )
+    .expect("scene parses");
+    let source = World::from_scene(&document).expect("scene loads").world;
+    let sheet = parse(".meter { tint: #ff000080; }").expect("Weave parses");
+    let styled = PresentationWorld::resolve(
+        &source,
+        &sheet,
+        Viewport {
+            width: 800.0,
+            height: 600.0,
+        },
+    )
+    .expect("styles resolve");
+    let (_, entity) = styled.world().entities().next().expect("styled entity");
+    assert_color(
+        &entity.components["sindri.ui.image"]["tint"],
+        [1.0, 0.0, 0.0, f64::from(0x80_u8) / 255.0],
+    );
+}
+
+/// A script turning a button on mid-game takes it out of `:disabled`, and
+/// its label with it, though the pointer is nowhere near.
+#[test]
+fn a_button_a_script_enables_leaves_disabled_with_its_label() {
+    let mut world = World::default();
+    let button = world.spawn(sindri_core::EntityData {
+        name: Some("card".to_owned()),
+        components: [
+            (
+                "weave.style".to_owned(),
+                serde_json::json!({ "classes": ["card"] }),
+            ),
+            (
+                "sindri.ui.shape".to_owned(),
+                serde_json::json!({ "kind": "rect", "fill": [0.0, 0.0, 0.0, 1.0] }),
+            ),
+            (
+                "sindri.ui.button".to_owned(),
+                serde_json::json!({ "label": "Build", "disabled": true }),
+            ),
+        ]
+        .into_iter()
+        .collect(),
+        ..sindri_core::EntityData::default()
+    });
+    let label = world.spawn(sindri_core::EntityData {
+        parent: Some(button),
+        components: [
+            (
+                "weave.style".to_owned(),
+                serde_json::json!({ "classes": ["name"] }),
+            ),
+            (
+                "sindri.ui.text".to_owned(),
+                serde_json::json!({ "text": "Build", "font": "fonts/test.ttf" }),
+            ),
+        ]
+        .into_iter()
+        .collect(),
+        ..sindri_core::EntityData::default()
+    });
+    let sheet = parse(
+        ".card { background: #ff0000; } .card:disabled { background: #0000ff; }
+         .name { color: #ffffff; } .card:disabled .name { color: #000000; }",
+    )
+    .expect("Weave parses");
+    let viewport = Viewport {
+        width: 800.0,
+        height: 600.0,
+    };
+    let sheets = std::slice::from_ref(&sheet);
+    let mut presenter = super::Presenter::new();
+    presenter
+        .settle(&mut world, sheets, viewport)
+        .expect("settles");
+    let fill =
+        |world: &World| world.get(button).unwrap().components["sindri.ui.shape"]["fill"].clone();
+    let ink =
+        |world: &World| world.get(label).unwrap().components["sindri.ui.text"]["color"].clone();
+    assert_color(&fill(&world), [0.0, 0.0, 1.0, 1.0]);
+    assert_color(&ink(&world), [0.0, 0.0, 0.0, 1.0]);
+
+    world
+        .get_mut(button)
+        .unwrap()
+        .components
+        .get_mut("sindri.ui.button")
+        .unwrap()["disabled"] = serde_json::json!(false);
+    presenter
+        .present_over(&mut world, sheets, viewport, &super::UiStates::new())
+        .expect("presents")
+        .undo(&mut world);
+    assert_color(&fill(&world), [1.0, 0.0, 0.0, 1.0]);
+    assert_color(&ink(&world), [1.0, 1.0, 1.0, 1.0]);
+}

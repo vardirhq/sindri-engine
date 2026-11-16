@@ -85,6 +85,22 @@
         ]
       },
       "components": {
+        "weave.style": {
+          "classes": [
+            "menu-panel"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "anchor": "center",
+          "layer": 80
+        },
         "sindri.ui.layout": {
           "direction": "column",
           "spacing": 0.035,
@@ -116,6 +132,11 @@
       },
       "parent": "menu",
       "components": {
+        "weave.style": {
+          "classes": [
+            "menu-heading"
+          ]
+        },
         "sindri.ui.text": {
           "anchor": "center",
           "color": [
@@ -170,6 +191,11 @@
       },
       "parent": "menu",
       "components": {
+        "weave.style": {
+          "classes": [
+            "menu-tagline"
+          ]
+        },
         "sindri.ui.text": {
           "anchor": "center",
           "color": [
@@ -224,6 +250,11 @@
       },
       "parent": "menu",
       "components": {
+        "weave.style": {
+          "classes": [
+            "menu-button"
+          ]
+        },
         "sindri.ui.shape": {
           "kind": "rect",
           "fill": [
@@ -271,6 +302,11 @@
       },
       "parent": "resume",
       "components": {
+        "weave.style": {
+          "classes": [
+            "menu-button-label"
+          ]
+        },
         "sindri.ui.text": {
           "anchor": "center",
           "color": [
@@ -325,6 +361,11 @@
       },
       "parent": "menu",
       "components": {
+        "weave.style": {
+          "classes": [
+            "menu-button"
+          ]
+        },
         "sindri.ui.shape": {
           "kind": "rect",
           "fill": [
@@ -372,6 +413,11 @@
       },
       "parent": "title",
       "components": {
+        "weave.style": {
+          "classes": [
+            "menu-button-label"
+          ]
+        },
         "sindri.ui.text": {
           "anchor": "center",
           "color": [

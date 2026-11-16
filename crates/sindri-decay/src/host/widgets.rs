@@ -10,8 +10,8 @@ use decay_ir::Path;
 use decay_runtime::{RuntimeError, Value};
 use sindri_core::{EntityId, SceneComponent};
 use sindri_scene::{
-    UiDropdownComponent, UiScrollComponent, UiTextInputComponent, UiToggleComponent,
-    dropdown_options,
+    UiButtonComponent, UiDropdownComponent, UiScrollComponent, UiTextInputComponent,
+    UiToggleComponent, dropdown_options,
 };
 
 impl WorldHost<'_> {
@@ -24,6 +24,7 @@ impl WorldHost<'_> {
     ) -> Result<Value, RuntimeError> {
         let (component, field) = match call {
             UiCall::Checked | UiCall::SetChecked => (UiToggleComponent::TYPE_NAME, "checked"),
+            UiCall::SetDisabled => (UiButtonComponent::TYPE_NAME, "disabled"),
             UiCall::InputText | UiCall::SetInputText => (UiTextInputComponent::TYPE_NAME, "value"),
             UiCall::ScrollOffset | UiCall::SetScrollOffset => {
                 (UiScrollComponent::TYPE_NAME, "offset")
@@ -73,9 +74,12 @@ impl WorldHost<'_> {
                     .and_then(serde_json::Value::as_f64)
                     .unwrap_or(0.0),
             )),
-            UiCall::SetChecked => {
+            UiCall::SetChecked | UiCall::SetDisabled => {
                 let Some(Value::Bool(checked)) = args.get(1) else {
-                    return Err(RuntimeError::Host("set_checked needs a bool".to_owned()));
+                    return Err(RuntimeError::Host(format!(
+                        "{}: needs true or false",
+                        path.dotted()
+                    )));
                 };
                 payload[field] = serde_json::json!(checked);
                 Ok(Value::Unit)

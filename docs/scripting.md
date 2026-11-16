@@ -977,6 +977,7 @@ disqualifying for anything else.
 | `Ui.slider_changed(entity)` | `bool` |
 | `Ui.is_checked(entity)` | `bool` |
 | `Ui.set_checked(entity, checked)` | nothing |
+| `Ui.set_disabled(button, disabled)` | nothing |
 | `Ui.input_text(entity)` | `String` |
 | `Ui.set_input_text(entity, "words")` | nothing |
 | `Ui.scroll_offset(entity)` | `number` |

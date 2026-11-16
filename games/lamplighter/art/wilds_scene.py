@@ -274,37 +274,71 @@ def goods():
     return made
 
 
-def pack():
-    """Wick's pack on screen (`scripts/pack.decay`): what he has gathered, bottom
-    left, and a button for each thing he can build, bottom right. F and G build
-    them from the keyboard, the pad's top and right buttons from a pad."""
-    def count(ident, words, y):
-        return entity(ident, ident, at(0.03, y, 0, 0.5, 0.05), **{'sindri.ui.text': {
-            'anchor': 'bottom_left', 'color': [1.0, 0.92, 0.7, 1.0], 'font': 'fonts/Inter.ttf',
-            'font_size': 0.036, 'line_height': 0.044, 'layer': 100, 'text': words, 'bold': True,
-            'shadow': {'offset': [0, -0.003], 'color': [0, 0, 0, 0.6], 'softness': 0.002}}})
+def ui(ident, parent, classes, w=0.2, h=0.06, **components):
+    """A screen element styled by `assets/ui/` (Weave): its classes say what it is,
+    and the stylesheet says where it goes and how it looks, so these sizes are
+    only what it would be without one."""
+    return entity(ident, ident, at(0, 0, 0, w, h), parent,
+                  **{'weave.style': {'classes': classes}, **components})
 
-    def craft(ident, label, y):
-        return [
-            entity(ident, ident, at(-0.03, y, 0, 0.62, 0.075), **{
-                'sindri.ui.image': {'anchor': 'bottom_right', 'layer': 96, 'texture': 'textures/white.png',
-                                    'tint': [0.06, 0.06, 0.08, 0.55]},
-                'sindri.ui.button': {'label': label, 'autofocus': False, 'disabled': False},
-                'sindri.ui.layout': {'direction': 'row', 'spacing': 0.0, 'justify': 'center', 'align': 'center'}}),
-            entity(ident + '-label', ident + '-label', at(0, 0, 0, 0.6, 0.06), ident, **{'sindri.ui.text': {
-                'anchor': 'center', 'color': [1.0, 0.9, 0.7, 1.0], 'font': 'fonts/Inter.ttf', 'font_size': 0.032,
-                'line_height': 0.04, 'layer': 98, 'text': label, 'bold': True, 'line_align': 'center',
-                'shadow': {'offset': [0, -0.003], 'color': [0, 0, 0, 0.6], 'softness': 0.002}}})]
-    return [
-        count('pack-wood', 'Wood {}', 0.15),
-        count('pack-stone', 'Stone {}', 0.1),
-        count('pack-resin', 'Resin {}', 0.05),
-        *craft('craft-campfire', 'Campfire  (F)  4 wood, 2 stone', 0.135),
-        *craft('craft-lamp', 'Lamp  (G)  6 wood, 4 stone, 2 resin', 0.05),
-        entity('pack', 'Pack', **{'sindri.script': {
-            'source': 'scripts/pack.decay', 'script': 'Pack',
-            'properties': {'campfire': 'prefabs/wilds/campfire.prefab', 'lamp': 'prefabs/wilds/lamp.prefab'}}}),
+
+def words(text, layer=101):
+    return {'sindri.ui.text': {'anchor': 'center', 'color': [1, 1, 1, 1], 'font': 'fonts/Inter.ttf',
+                               'font_size': 0.032, 'line_height': 0.04, 'layer': layer, 'text': text,
+                               'bold': True, 'shadow': {'offset': [0, -0.003], 'color': [0, 0, 0, 0.6],
+                                                        'softness': 0.002}}}
+
+
+def panel(layer, direction='column'):
+    return {'sindri.ui.shape': {'kind': 'rect', 'fill': [0, 0, 0, 1], 'anchor': 'center', 'layer': layer},
+            'sindri.ui.layout': {'direction': direction, 'spacing': 0.01, 'justify': 'center', 'align': 'center'}}
+
+
+def icon(texture, layer=101):
+    return {'sindri.ui.image': {'anchor': 'center', 'layer': layer, 'texture': texture, 'tint': [1, 1, 1, 1]}}
+
+
+def pack():
+    """Wick's pack on screen (`scripts/pack.decay`, styled by `assets/ui/hud.weave`):
+    his lantern's light, top left; what he carries, bottom left, each with its
+    picture; and a card for each thing he can build, bottom right, which shows
+    as spent while he cannot afford it. F and G build them from the keyboard,
+    the pad's top and right buttons from a pad."""
+    out = [
+        ui('hud-light', None, ['panel', 'light-panel'], 0.5, 0.1, **panel(90)),
+        ui('hud-light-label', None, ['kicker', 'light-label'], **words('LANTERN')),
+        ui('hud-light-back', None, ['meter', 'light-back'], **icon('textures/white.png', 95)),
+        ui('hud-light-fill', None, ['meter', 'light-fill'],
+           **{'sindri.ui.image': {'anchor': 'top_left', 'layer': 96, 'texture': 'textures/white.png',
+                                  'tint': [1, 1, 1, 1], 'fill': {'amount': 1.0, 'from': 'left'}}}),
+        ui('pack-panel', None, ['panel', 'pack-panel'], 0.4, 0.25, **panel(90)),
     ]
+    for kind, label in [('wood', 'wood'), ('stone', 'stone'), ('resin', 'resin')]:
+        row = f'pack-{kind}-row'
+        out += [ui(row, 'pack-panel', ['pack-row'], 0.35, 0.06, **panel(91, 'row')),
+                ui(f'pack-{kind}-icon', row, ['pack-icon'], 0.05, 0.05, **icon(f'textures/goods.png#{kind}')),
+                ui(f'pack-{kind}', row, ['pack-count'], **words('{} ' + label))]
+    # A column drawn as nothing, so the stylesheet can anchor it to a corner.
+    out.append(ui('craft-panel', None, ['craft-panel'], 0.6, 0.3, **panel(89)))
+    for ident, name, cost, key, picture in [
+            ('craft-campfire', 'Campfire', '4 wood · 2 stone', 'F', 'textures/campfire.png#campfire'),
+            ('craft-lamp', 'Lamp', '6 wood · 4 stone · 2 resin', 'G', 'textures/objects.png#lamp-post-lit')]:
+        text_column = f'{ident}-text'
+        out += [
+            ui(ident, 'craft-panel', ['craft'], 0.55, 0.12, **panel(92, 'row'),
+               **{'sindri.ui.button': {'label': name, 'autofocus': False, 'disabled': True}}),
+            ui(f'{ident}-icon', ident, ['craft-icon'], 0.08, 0.08, **icon(picture, 97)),
+            ui(text_column, ident, ['craft-text'], 0.36, 0.1,
+               **{'sindri.ui.layout': {'direction': 'column', 'spacing': 0.0, 'justify': 'center',
+                                       'align': 'start'}}),
+            ui(f'{ident}-name', text_column, ['craft-name'], **words(name, 98)),
+            ui(f'{ident}-cost', text_column, ['craft-cost'], **words(cost, 98)),
+            ui(f'{ident}-key', ident, ['craft-key'], 0.05, 0.05, **words(key, 98)),
+        ]
+    out.append(entity('pack', 'Pack', **{'sindri.script': {
+        'source': 'scripts/pack.decay', 'script': 'Pack',
+        'properties': {'campfire': 'prefabs/wilds/campfire.prefab', 'lamp': 'prefabs/wilds/lamp.prefab'}}}))
+    return out
 
 
 def sunfall(name, x, y, phase=0.0):
