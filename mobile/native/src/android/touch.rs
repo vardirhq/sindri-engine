@@ -31,7 +31,10 @@ impl Host {
 
     pub(super) fn tap(&mut self, pixel: [f32; 2]) -> Result<(), String> {
         if let Some(playing) = &mut self.playing {
-            playing.tap();
+            // A tap on a button is the button's, not the interact key.
+            if self.ui_finger.is_none() {
+                playing.tap();
+            }
             return Ok(());
         }
         let size = self.size();
@@ -42,8 +45,15 @@ impl Host {
     }
 
     pub(super) fn press(&mut self, pixel: [f32; 2]) -> Result<(), String> {
-        if self.playing.is_some() {
-            self.stick = Some((pixel, pixel));
+        if let Some(playing) = &mut self.playing {
+            // A finger on the game's own buttons is theirs; anywhere else it
+            // walks.
+            self.ui_finger = playing.takes_press(pixel).then_some(pixel);
+            if self.ui_finger.is_some() {
+                playing.touch(Some(pixel));
+            } else {
+                self.stick = Some((pixel, pixel));
+            }
             return Ok(());
         }
         let size = self.size();
@@ -54,8 +64,12 @@ impl Host {
     }
 
     pub(super) fn drag(&mut self, pixel: [f32; 2]) -> Result<(), String> {
-        if self.playing.is_some() {
-            self.push_stick(pixel);
+        if let Some(playing) = &mut self.playing {
+            if self.ui_finger.is_some() {
+                playing.touch(Some(pixel));
+            } else {
+                self.push_stick(pixel);
+            }
             return Ok(());
         }
         let size = self.size();
@@ -76,8 +90,12 @@ impl Host {
 
     pub(super) fn release(&mut self) -> Result<(), String> {
         if let Some(playing) = &mut self.playing {
-            self.stick = None;
-            playing.stick(None);
+            if self.ui_finger.is_some() {
+                playing.touch(None);
+            } else {
+                self.stick = None;
+                playing.stick(None);
+            }
             return Ok(());
         }
         let (_, editing) = self.editing()?;

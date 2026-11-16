@@ -508,6 +508,14 @@ impl ScreenUi {
             .map(|(entity, _)| *entity)
     }
 
+    /// The frontmost element at `point`, in overlay units, that a press would
+    /// reach: a button, a toggle, a field. What a host asks before it decides
+    /// a finger is for the screen's UI rather than its own controls.
+    #[must_use]
+    pub fn pressable_at(&self, point: [f32; 2]) -> Option<EntityId> {
+        self.topmost_at(point)
+    }
+
     fn topmost_at(&self, point: [f32; 2]) -> Option<EntityId> {
         self.rects
             .iter()

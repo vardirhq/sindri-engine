@@ -14,7 +14,7 @@
 
 use std::path::Path;
 
-use sindri_platform::Key;
+use sindri_platform::{InputEvent, Key};
 use sindri_runtime::{ProjectRun, STEP};
 use sindri_scene::CameraView;
 
@@ -43,7 +43,21 @@ pub struct Playing {
     held: [bool; 4],
     /// The interact key went down this frame and comes up after one step.
     tapped: bool,
+    /// A finger on the game's own screen UI: whether the game has stepped
+    /// since it landed, and whether it has lifted. A lift waits for that step,
+    /// so a quick tap is seen as a press and then a release, as a click is.
+    finger: Option<Finger>,
 }
+
+/// One finger the game's screen UI is taking.
+#[derive(Clone, Copy, Debug)]
+struct Finger {
+    seen: bool,
+    lifted: bool,
+}
+
+/// The id the game knows the screen UI's finger by.
+const UI_FINGER: u64 = 1;
 
 impl Playing {
     /// The project at `project` playing `scene` (its file name, such as
@@ -60,6 +74,7 @@ impl Playing {
             paused: false,
             held: [false; 4],
             tapped: false,
+            finger: None,
         })
     }
 
@@ -87,6 +102,15 @@ impl Playing {
     pub fn step_once(&mut self) -> Result<(), String> {
         self.run.step(STEP)?;
         self.seconds += STEP;
+        if let Some(finger) = &mut self.finger {
+            finger.seen = true;
+            if finger.lifted {
+                self.finger = None;
+                self.run
+                    .input
+                    .apply(InputEvent::TouchEnded { id: UI_FINGER });
+            }
+        }
         if self.tapped {
             self.tapped = false;
             self.run.key(Key::E, false);
@@ -104,6 +128,46 @@ impl Playing {
                 self.run.key(key, want);
                 *held = want;
             }
+        }
+    }
+
+    /// Whether a finger landing at `pixel` is for the game's screen UI (a
+    /// button, a toggle) rather than the stick.
+    #[must_use]
+    pub fn takes_press(&self, pixel: [f32; 2]) -> bool {
+        self.run.takes_press(pixel)
+    }
+
+    /// A finger on the game's screen UI landed at, moved to (`Some`), or
+    /// lifted from (`None`) the screen, in surface pixels.
+    pub fn touch(&mut self, pixel: Option<[f32; 2]>) {
+        match (pixel, &mut self.finger) {
+            (Some([x, y]), None) => {
+                self.finger = Some(Finger {
+                    seen: false,
+                    lifted: false,
+                });
+                self.run.input.apply(InputEvent::TouchStarted {
+                    id: UI_FINGER,
+                    x,
+                    y,
+                });
+            }
+            (Some([x, y]), Some(_)) => {
+                self.run.input.apply(InputEvent::TouchMoved {
+                    id: UI_FINGER,
+                    x,
+                    y,
+                });
+            }
+            (None, Some(finger)) if finger.seen => {
+                self.finger = None;
+                self.run
+                    .input
+                    .apply(InputEvent::TouchEnded { id: UI_FINGER });
+            }
+            (None, Some(finger)) => finger.lifted = true,
+            (None, None) => {}
         }
     }
 

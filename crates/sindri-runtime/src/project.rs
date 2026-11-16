@@ -454,6 +454,21 @@ impl ProjectRun {
         ])
     }
 
+    /// Whether a press at `pixel` (from the top left, in the pixels the run was
+    /// sized in) lands on something on screen that takes it: a button, a
+    /// toggle, a field, as last drawn. A host with controls of its own over
+    /// the game, such as a phone's stick, asks this before taking a finger.
+    #[must_use]
+    pub fn takes_press(&self, pixel: [f32; 2]) -> bool {
+        let [width, height] = self.size;
+        let half_height = height / 2.0;
+        let point = [
+            (pixel[0] - width / 2.0) / half_height,
+            (half_height - pixel[1]) / half_height,
+        ];
+        self.session.screen_ui().pressable_at(point).is_some()
+    }
+
     /// What a script left on the shared board.
     #[must_use]
     pub fn board(&self, name: &str) -> f32 {

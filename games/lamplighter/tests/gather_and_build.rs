@@ -123,3 +123,35 @@ fn a_lamp_wick_builds_hides_him_from_a_seeker() {
     step(&mut run, 60 * 3);
     assert!(run.board("found") < 0.05, "hidden by his own light");
 }
+
+/// On a phone the build cards are tapped: a press on one is the card's (a host
+/// with a stick asks `takes_press` before taking the finger), open ground is
+/// not, and a finger's tap on the card builds the campfire.
+#[test]
+fn a_finger_on_the_campfire_card_builds_one() {
+    let mut run = Run::open_scene("wilds.scene").expect("the wilds open");
+    step(&mut run, 10);
+    run.set_board("wood", 4.0);
+    run.set_board("stone", 2.0);
+    step(&mut run, 2);
+    run.present().expect("the screen lays out");
+    let card = run
+        .on_screen(run.entity("craft-campfire").expect("the card"))
+        .expect("on screen");
+    assert!(run.takes_press(card), "the card takes a press at {card:?}");
+    let [width, height] = run.size;
+    assert!(
+        !run.takes_press([width / 2.0, height / 2.0]),
+        "open ground does not"
+    );
+
+    run.input.apply(InputEvent::TouchStarted {
+        id: 1,
+        x: card[0],
+        y: card[1],
+    });
+    step(&mut run, 1);
+    run.input.apply(InputEvent::TouchEnded { id: 1 });
+    step(&mut run, 10);
+    assert_eq!(running(&run, "Fire", None).len(), 1, "a campfire is built");
+}

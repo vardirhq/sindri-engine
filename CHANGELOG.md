@@ -2,6 +2,8 @@
 
 # Changelog
 
+- Sindri Mobile: playing, a finger that lands on the game's own buttons (a build card, a menu) reaches them as a touch rather than starting the stick, and its tap is not the interact key. `ProjectRun::takes_press` and `ScreenUi::pressable_at` answer whether a press lands on something that takes it.
+
 - Lamplighter's Wick is new art: a hooded figure in a long cloak holding his lantern low, with an idle and a walk that animate, and hurt and death clips for later, west drawn as east mirrored (`art/wick.py`). He holds his lantern, so the floating lantern is not drawn and its lights and embers ride at the one in his hand (`held` on Wick's script); the attack plays the hurt's cloak swirl until there is a swing.
 
 - Sindri Mobile: the canvas draws the screen UI styled by the project's stylesheets, as it will be played (`StylePreview`, `project::stylesheets`), and the menu's Show screen UI switch hides it to work on the world beneath. The app runs full screen, its status and navigation bars a swipe away.
