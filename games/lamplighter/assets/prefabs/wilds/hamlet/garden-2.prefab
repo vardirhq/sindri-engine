@@ -1,0 +1,52 @@
+{
+  "format_version": 1,
+  "metadata": {
+    "name": "garden-2"
+  },
+  "entities": [
+    {
+      "id": "hamlet-garden-2",
+      "name": "garden-2",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          7.0,
+          7.0,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/village.png#garden-cabbage-2",
+          "layer": 5,
+          "billboard": true
+        },
+        "sindri.shadow2d": {
+          "contact_size": [
+            2.4,
+            1.44
+          ],
+          "contact_offset": [
+            0,
+            0
+          ],
+          "contact_opacity": 0.7,
+          "cast": true,
+          "cast_opacity": 0.35,
+          "height": 0.0,
+          "max_length": 2.2
+        }
+      }
+    }
+  ]
+}

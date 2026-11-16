@@ -2056,6 +2056,29 @@
           }
         ],
         "seed": 0,
+        "sites": [
+          {
+            "chance": 0.5,
+            "name": "",
+            "on": [
+              ""
+            ],
+            "pieces": [
+              {
+                "at": [
+                  0.0,
+                  0.0
+                ],
+                "chance": 1.0,
+                "prefabs": [
+                  ""
+                ]
+              }
+            ],
+            "radius": 8.0,
+            "spacing": 96
+          }
+        ],
         "taken": []
       },
       "display_name": "Scatter",
@@ -2077,6 +2100,29 @@
           }
         ],
         "seed": 0,
+        "sites": [
+          {
+            "chance": 0.5,
+            "name": "",
+            "on": [
+              ""
+            ],
+            "pieces": [
+              {
+                "at": [
+                  0.0,
+                  0.0
+                ],
+                "chance": 1.0,
+                "prefabs": [
+                  ""
+                ]
+              }
+            ],
+            "radius": 8.0,
+            "spacing": 96
+          }
+        ],
         "taken": []
       },
       "meanings": {

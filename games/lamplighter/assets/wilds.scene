@@ -460,6 +460,182 @@
               "chance": 0.3,
               "flip": true
             }
+          ],
+          "sites": [
+            {
+              "name": "hamlet",
+              "on": [
+                "grass",
+                "deadgrass",
+                "earth"
+              ],
+              "spacing": 80,
+              "chance": 0.7,
+              "radius": 10.0,
+              "pieces": [
+                {
+                  "prefabs": [
+                    "prefabs/wilds/hamlet/well.prefab"
+                  ],
+                  "at": [
+                    0.0,
+                    0.0
+                  ],
+                  "chance": 1.0
+                },
+                {
+                  "prefabs": [
+                    "prefabs/wilds/hamlet/bakery.prefab",
+                    "prefabs/wilds/hamlet/bakery-lit.prefab",
+                    "prefabs/wilds/hamlet/bakery-lit.prefab",
+                    "prefabs/wilds/hamlet/child-house.prefab",
+                    "prefabs/wilds/hamlet/child-house-lit.prefab",
+                    "prefabs/wilds/hamlet/child-house-lit.prefab",
+                    "prefabs/wilds/hamlet/workshop.prefab",
+                    "prefabs/wilds/hamlet/workshop-lit.prefab",
+                    "prefabs/wilds/hamlet/workshop-lit.prefab",
+                    "prefabs/wilds/hamlet/keeper.prefab",
+                    "prefabs/wilds/hamlet/keeper-lit.prefab",
+                    "prefabs/wilds/hamlet/keeper-lit.prefab"
+                  ],
+                  "at": [
+                    -5.5,
+                    3.0
+                  ],
+                  "chance": 1.0
+                },
+                {
+                  "prefabs": [
+                    "prefabs/wilds/hamlet/bakery.prefab",
+                    "prefabs/wilds/hamlet/bakery-lit.prefab",
+                    "prefabs/wilds/hamlet/bakery-lit.prefab",
+                    "prefabs/wilds/hamlet/child-house.prefab",
+                    "prefabs/wilds/hamlet/child-house-lit.prefab",
+                    "prefabs/wilds/hamlet/child-house-lit.prefab",
+                    "prefabs/wilds/hamlet/workshop.prefab",
+                    "prefabs/wilds/hamlet/workshop-lit.prefab",
+                    "prefabs/wilds/hamlet/workshop-lit.prefab",
+                    "prefabs/wilds/hamlet/keeper.prefab",
+                    "prefabs/wilds/hamlet/keeper-lit.prefab",
+                    "prefabs/wilds/hamlet/keeper-lit.prefab"
+                  ],
+                  "at": [
+                    5.5,
+                    3.5
+                  ],
+                  "chance": 0.9
+                },
+                {
+                  "prefabs": [
+                    "prefabs/wilds/hamlet/bakery.prefab",
+                    "prefabs/wilds/hamlet/bakery-lit.prefab",
+                    "prefabs/wilds/hamlet/bakery-lit.prefab",
+                    "prefabs/wilds/hamlet/child-house.prefab",
+                    "prefabs/wilds/hamlet/child-house-lit.prefab",
+                    "prefabs/wilds/hamlet/child-house-lit.prefab",
+                    "prefabs/wilds/hamlet/workshop.prefab",
+                    "prefabs/wilds/hamlet/workshop-lit.prefab",
+                    "prefabs/wilds/hamlet/workshop-lit.prefab",
+                    "prefabs/wilds/hamlet/keeper.prefab",
+                    "prefabs/wilds/hamlet/keeper-lit.prefab",
+                    "prefabs/wilds/hamlet/keeper-lit.prefab"
+                  ],
+                  "at": [
+                    -4.5,
+                    -5.0
+                  ],
+                  "chance": 0.7
+                },
+                {
+                  "prefabs": [
+                    "prefabs/wilds/hamlet/bakery.prefab",
+                    "prefabs/wilds/hamlet/bakery-lit.prefab",
+                    "prefabs/wilds/hamlet/bakery-lit.prefab",
+                    "prefabs/wilds/hamlet/child-house.prefab",
+                    "prefabs/wilds/hamlet/child-house-lit.prefab",
+                    "prefabs/wilds/hamlet/child-house-lit.prefab",
+                    "prefabs/wilds/hamlet/workshop.prefab",
+                    "prefabs/wilds/hamlet/workshop-lit.prefab",
+                    "prefabs/wilds/hamlet/workshop-lit.prefab",
+                    "prefabs/wilds/hamlet/keeper.prefab",
+                    "prefabs/wilds/hamlet/keeper-lit.prefab",
+                    "prefabs/wilds/hamlet/keeper-lit.prefab"
+                  ],
+                  "at": [
+                    5.0,
+                    -5.5
+                  ],
+                  "chance": 0.6
+                },
+                {
+                  "prefabs": [
+                    "prefabs/wilds/hamlet/woodpile.prefab",
+                    "prefabs/wilds/hamlet/barrels.prefab",
+                    "prefabs/wilds/hamlet/crates.prefab"
+                  ],
+                  "at": [
+                    2.2,
+                    -1.2
+                  ],
+                  "chance": 0.7
+                },
+                {
+                  "prefabs": [
+                    "prefabs/wilds/hamlet/cart.prefab",
+                    "prefabs/wilds/hamlet/bench.prefab",
+                    "prefabs/wilds/hamlet/notice.prefab"
+                  ],
+                  "at": [
+                    -2.6,
+                    -1.4
+                  ],
+                  "chance": 0.6
+                },
+                {
+                  "prefabs": [
+                    "prefabs/wilds/hamlet/laundry.prefab",
+                    "prefabs/wilds/hamlet/scarecrow.prefab"
+                  ],
+                  "at": [
+                    8.4,
+                    0.2
+                  ],
+                  "chance": 0.6
+                },
+                {
+                  "prefabs": [
+                    "prefabs/wilds/hamlet/garden.prefab",
+                    "prefabs/wilds/hamlet/garden-2.prefab"
+                  ],
+                  "at": [
+                    -8.6,
+                    -0.4
+                  ],
+                  "chance": 0.6
+                },
+                {
+                  "prefabs": [
+                    "prefabs/wilds/hamlet/graves.prefab"
+                  ],
+                  "at": [
+                    0.4,
+                    7.8
+                  ],
+                  "chance": 0.4
+                },
+                {
+                  "prefabs": [
+                    "prefabs/wilds/hamlet/barrels.prefab",
+                    "prefabs/wilds/hamlet/crates.prefab"
+                  ],
+                  "at": [
+                    -1.4,
+                    -7.4
+                  ],
+                  "chance": 0.5
+                }
+              ]
+            }
           ]
         },
         "sindri.map_walls": {

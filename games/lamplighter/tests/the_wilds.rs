@@ -350,3 +350,55 @@ fn wick_starts_on_dry_ground() {
         );
     }
 }
+
+/// Now and then a hamlet stands on open ground, whole: a well, houses round
+/// it, some lit, and nothing growing in it. The seed puts the nearest one a
+/// little way east of the start.
+#[test]
+fn a_hamlet_stands_east_of_the_start() {
+    const WELL: [f32; 2] = [76.5, 21.5];
+    let mut run = Run::open_scene("wilds.scene").expect("the wilds open");
+    step(&mut run, 2);
+    let near_well = |run: &Run, what: &str| -> Vec<[f32; 3]> {
+        run.world
+            .entities()
+            .filter_map(|(entity, data)| {
+                let texture = data.components.get("sindri.sprite")?["texture"].as_str()?;
+                texture
+                    .split('#')
+                    .nth(1)?
+                    .starts_with(what)
+                    .then(|| run.world.world_transform(entity).expect("placed").position)
+            })
+            .filter(|at| (at[0] - WELL[0]).hypot(at[1] - WELL[1]) < 11.0)
+            .collect()
+    };
+    assert!(near_well(&run, "well").is_empty(), "too far to be made yet");
+    let wick = run.entity("wick").expect("Wick");
+    let data = run.world.get_mut(wick).expect("Wick");
+    let mut placed = data.transform_3d.expect("placed");
+    placed.position = [WELL[0], WELL[1] - 3.0, 0.0];
+    data.transform_3d = Some(placed);
+    step(&mut run, 2);
+    let wells = near_well(&run, "well");
+    assert_eq!(wells.len(), 1, "a well in the middle");
+    assert!((wells[0][0] - WELL[0]).abs() < 0.01 && (wells[0][1] - WELL[1]).abs() < 0.01);
+    let houses: usize = ["bakery", "child-house", "workshop", "keeper"]
+        .iter()
+        .map(|house| near_well(&run, house).len())
+        .sum();
+    assert!(houses >= 1, "houses round it");
+    let lit = run.world.entities().any(|(_, data)| {
+        data.components
+            .get("sindri.sprite")
+            .and_then(|sprite| sprite["texture"].as_str())
+            .is_some_and(|texture| texture.ends_with("-lit"))
+            && data.components.contains_key("sindri.light2d")
+    });
+    assert!(lit, "someone is home in one of them");
+    let wild = grown(&run)
+        .into_iter()
+        .filter(|(_, _, at)| (at[0] - WELL[0]).hypot(at[1] - WELL[1]) < 9.5)
+        .count();
+    assert_eq!(wild, 0, "nothing grows in the hamlet");
+}

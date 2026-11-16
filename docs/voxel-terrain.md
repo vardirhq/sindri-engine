@@ -122,6 +122,28 @@ they stop a walker, cast shadows and are lit like anything placed by hand. One
 a script despawns was taken, and the scatter remembers it in `taken` so it does
 not grow back. Lamplighter's wilds are dressed this way.
 
+### Sites: places stood whole
+
+A scatter's `sites` stand a layout rather than one thing: a hamlet, a ruin, a
+camp. Each names its kind (`name`), the blocks its middle stands on (`on`), how
+far apart sites are (`spacing`, in squares: one to a patch of that side at most),
+how likely a patch is to hold one (`chance`), how far it reaches from its middle
+(`radius`, in squares) and its `pieces`: each the prefabs it may be, where it
+stands from the middle (`at`, squares east and north) and how likely it is to
+stand (`chance`).
+
+The seed chooses where in a patch a site's middle is, and a middle is only taken
+where the site's own ground is under it and every piece's square and the land
+round it out to its radius can be walked, so a hamlet is not built across a
+river; a few places are tried before the patch is given up. The seed also
+chooses whether the layout is mirrored, which pieces stand and which prefab each
+is, so no two sites of one kind are quite alike. Nothing a rule grows stands
+within a site, and a piece is made, unmade and remembered as `taken` like
+anything else the scatter stands. `sindri_scene::scatter_sites` answers where
+sites are without making them, for a map or a script that wants the nearest one.
+Lamplighter's wilds build hamlets this way: a well, houses round it, some still
+lit, a woodpile, a cart.
+
 ## Walls where the map cannot be walked
 
 A voxel world drawn as a map is only a picture to 2D physics, so a walker would
