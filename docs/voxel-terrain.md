@@ -100,6 +100,31 @@ what shows as water is somewhere a walker cannot stand. Only the drawing
 changes: blocks, `Grid.surface` and walking are as before. Lamplighter's wilds
 use it.
 
+### Water that moves: `map_water`
+
+With `map_water`, a map's water is drawn through the engine's own water shader
+rather than as a still picture. A square is water when its top is one of
+`blocks` (by name, `["water"]` by default). Its colour runs from `shallow` to
+`deep` (linear RGB) by how many blocks of water lie under it, up to `depth`, and
+is paler near the land whatever is under it, so a river's banks and a sea's
+shelf read as shallows. The block's own picture shows through as the detail.
+
+The rest is movement, drawn in whole pixels of the block's picture so the water
+stays as crisp as the ground beside it: rows of the surface sway a pixel or two
+to and fro and light ripples drift across it (`waves`), a pixel here and there
+on a crest flashes and is gone (`glints`), and foam laps up and back along the
+land in each square that touches it (`foam`), each 0 for none and 1 for
+plenty, all at `speed` (1 is a calm lake's pace). Water is lit by 2D lights like
+the ground, so at night glints flash only where a lantern reaches them. Only the
+drawing changes: what a walker can cross is as before. Lamplighter's wilds use
+it.
+
+```json
+"map_water": {"blocks": ["water"], "shallow": [0.1, 0.34, 0.38],
+              "deep": [0.015, 0.05, 0.14], "depth": 6,
+              "waves": 0.7, "glints": 0.6, "foam": 0.7, "speed": 1.0}
+```
+
 ## What stands on it: scatter
 
 A voxel world may carry `sindri.scatter` to be dressed with what stands on it:

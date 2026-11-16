@@ -78,10 +78,10 @@ pub use components::{
     TileVolumeError, TileVolumeIndex, TilemapComponent, TilemapError, UiAnchor, UiFill, UiFillEdge,
     UiImageComponent, UiShapeBlend, UiShapeComponent, UiShapeKind, UiShapeShadow, UiTextAutoSize,
     UiTextCase, UiTextComponent, UiTextLineAlign, UiTextOutline, UiTextShadow, UiTextWrap,
-    VoxelBlock, VoxelEdit, VoxelGeneratorDocument, VoxelMapFlood, VoxelMaterialDocument, VoxelView,
-    VoxelWorldComponent, add_camera_trauma, cell_to_local_in, default_sun_transform,
-    environment_of, environments_in, light_direction, lights_in, sun_in, ui_text_template,
-    update_camera_behaviors, update_camera_behaviors_with_viewport,
+    VoxelBlock, VoxelEdit, VoxelGeneratorDocument, VoxelMapFlood, VoxelMapWater,
+    VoxelMaterialDocument, VoxelView, VoxelWorldComponent, add_camera_trauma, cell_to_local_in,
+    default_sun_transform, environment_of, environments_in, light_direction, lights_in, sun_in,
+    ui_text_template, update_camera_behaviors, update_camera_behaviors_with_viewport,
 };
 pub use components::{
     EnvironmentLighting2d, FloatingOriginComponent, Light2dComponent, Light2dError,

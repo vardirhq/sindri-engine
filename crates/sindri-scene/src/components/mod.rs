@@ -91,8 +91,8 @@ pub use ui_text_options::{
 };
 pub use voxel_terrain::{BiomeDocument, NaturalTerrainDocument};
 pub use voxel_world::{
-    VoxelBlock, VoxelEdit, VoxelGeneratorDocument, VoxelMapFlood, VoxelMaterialDocument, VoxelView,
-    VoxelWorldComponent,
+    VoxelBlock, VoxelEdit, VoxelGeneratorDocument, VoxelMapFlood, VoxelMapWater,
+    VoxelMaterialDocument, VoxelView, VoxelWorldComponent,
 };
 pub use world_text::TextComponent;
 

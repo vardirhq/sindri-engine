@@ -2,6 +2,8 @@
 
 # Changelog
 
+- Water that moves on a voxel map: with `map_water`, water squares are drawn through a built-in water shader. They run from a shallow colour at the shore to a deep one by how much water lies under them; the surface sways and light ripples drift across it; glints flash where light catches them; and foam laps at the land. Everything moves in whole pixels of the block's own picture, and is lit by 2D lights, so at night the glints show only under a lantern. Lamplighter's wilds have rivers and a sea that move.
+
 - Places stood whole on a generated land: a scatter's `sites` build a layout of prefabs (a hamlet, a ruin, a camp) one to a patch of `spacing` squares, where the seed chooses and all of it can be walked on. The seed mirrors the layout and chooses which pieces stand and what each is; nothing a rule grows stands inside a site, and a piece taken stays taken. `sindri_scene::scatter_sites` says where sites are without making them. Lamplighter's wilds have hamlets: a well, houses round it, some still lit.
 
 - A land as wide as its generator. `sindri.map_walls` raises static 2D walls over a map's water (and anything else that cannot be walked) near play and takes them down behind it, so rivers and seas stop a walker anywhere. `sindri.floating_origin` moves the whole world back round the player once they are far from the origin, particles and camera included, so a land millions of squares across stays sharp and its physics smooth. Lamplighter's wilds use both, with bigger, higher biomes (feature size 64, relief 32) and Wick starting in a meadow between the sea, the heath and the deadwood; `tests/wilds_map.rs` prints a seed's land in letters.

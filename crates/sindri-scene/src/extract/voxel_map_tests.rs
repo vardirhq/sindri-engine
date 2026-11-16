@@ -201,3 +201,87 @@ fn a_square_reads_the_normal_map_named_for_its_texture() {
         "an unbound normal map lights by distance alone"
     );
 }
+
+/// With `map_water`, a pond is drawn through the water shader: paler at its
+/// edge than in its deep middle, and its edge knows where the land is.
+#[test]
+fn map_water_has_depth_and_a_shore() {
+    let mut component: VoxelWorldComponent = serde_json::from_str(
+        r#"{
+        "view":"map", "generator": {"kind":"layered_terrain", "base_height":8,
+        "height_variation":0}, "materials":[
+        {"voxel":1,"top":"dry","side":"dry","bottom":"dry"},
+        {"voxel":2,"top":"water","side":"water","bottom":"water"},
+        {"voxel":3,"top":"dry","side":"dry","bottom":"dry"}],
+        "map_water": {"blocks": ["2"], "depth": 4}
+    }"#,
+    )
+    .unwrap();
+    let level = VoxelGround::of(&component, None)
+        .unwrap()
+        .surface(0, 0)
+        .unwrap()
+        .0;
+    // A pond of nine squares, one block deep but three in its middle.
+    for row in 0..3 {
+        for column in 0..3 {
+            let deep = if (column, row) == (1, 1) { 3 } else { 1 };
+            for down in 0..deep {
+                component.edits.push(crate::VoxelEdit {
+                    at: [column, level - down, row],
+                    block: crate::VoxelBlock::Material(2),
+                });
+            }
+        }
+    }
+    let mut world = World::default();
+    let entity = world.spawn(sindri_core::EntityData {
+        components: [(
+            "sindri.voxel_world".into(),
+            serde_json::to_value(&component).unwrap(),
+        )]
+        .into(),
+        ..sindri_core::EntityData::default()
+    });
+    let mut textures = TextureBindings::new();
+    textures.bind("dry", TextureId::new(1));
+    textures.bind("water", TextureId::new(2));
+    let mut cache = BTreeMap::new();
+    refresh(&mut cache, &world, entity, &component, &textures, None).unwrap();
+    let map = cache.get_mut(&entity).unwrap();
+    let pond = chunk(map, 0, 0);
+    assert_eq!(pond.water.len(), 9, "the pond and nothing else is water");
+    let middle = pond.water[&(1, 1)];
+    let corner = pond.water[&(0, 0)];
+    assert!(middle.params[0] > corner.params[0], "deeper in the middle");
+    assert!(middle.params[1].abs() < 0.5, "no land beside the middle");
+    // North 1, west 8, north-east 16, south-west 64, north-west 128.
+    assert!((corner.params[1] - (1.0 + 8.0 + 16.0 + 64.0 + 128.0)).abs() < 0.5);
+    let mut batches = Vec::new();
+    push_map(
+        map,
+        Mat4::IDENTITY,
+        above(1.5, -1.5, 3.0, 0.0),
+        0,
+        None,
+        &[],
+        &mut batches,
+    )
+    .unwrap();
+    let water: Vec<_> = batches
+        .iter()
+        .filter(|draw| draw.texture == TextureId::new(2))
+        .collect();
+    assert_eq!(water.len(), 9);
+    assert!(
+        water.iter().all(|draw| draw.shader.is_some()),
+        "drawn as water"
+    );
+    assert!(
+        batches
+            .iter()
+            .filter(|draw| draw.texture == TextureId::new(1))
+            .all(|draw| draw.shader.is_none()),
+        "the land is not"
+    );
+}

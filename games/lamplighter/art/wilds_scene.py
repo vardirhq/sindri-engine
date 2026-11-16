@@ -57,7 +57,11 @@ def ground():
                 biome('Bog', 0.6, 0.95, 'moss', 'mud', 0.2),
                 biome('Barrens', 0.1, 0.2, 'stone', 'rock', 1.4, terraces=2),
             ]},
-        'blocks': 'blocks.tileset', 'view': 'map', 'variant_seed': 5, 'layer': -10, 'edits': [], 'soft_edges': True},
+        'blocks': 'blocks.tileset', 'view': 'map', 'variant_seed': 5, 'layer': -10, 'edits': [], 'soft_edges': True,
+        # Water that moves: pale in the shallows, dark in the deep, swaying,
+        # glinting where a light catches it and foaming at the shore.
+        'map_water': {'blocks': ['water'], 'shallow': [0.1, 0.34, 0.38], 'deep': [0.015, 0.05, 0.14], 'depth': 6,
+                      'waves': 0.7, 'glints': 0.6, 'foam': 0.7, 'speed': 1.0}},
         'sindri.scatter': scatter(),
         # Water stops Wick, near him, however far he goes.
         'sindri.map_walls': {'around': 'wick', 'reach': 20, 'memberships': scenes.WALL, 'filter': scenes.ALL},

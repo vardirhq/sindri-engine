@@ -187,6 +187,84 @@ pub struct VoxelWorldComponent {
     /// are unchanged.
     #[serde(default, skip_serializing_if = "std::ops::Not::not")]
     pub soft_edges: bool,
+    /// Water on a map that moves and has depth: shallows paler than the deep,
+    /// ripples, glints and foam lapping at the shore. Only `view: map` reads
+    /// it; left out, water is drawn as any other block.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub map_water: Option<VoxelMapWater>,
+}
+
+/// How a map draws its water (`map_water`).
+///
+/// A square is water when its top is one of `blocks`. Its colour runs from
+/// `shallow` at the shore to `deep` where the water is `depth` blocks deep or
+/// more, over the block's own picture, so the picture's detail still shows.
+/// The rest is movement, drawn in whole pixels of that picture: the surface
+/// sways, light ripples drift across it, glints catch whatever lights it, and
+/// foam laps at the land. Each of those is 0 for none and 1 for plenty.
+#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+#[serde(default, deny_unknown_fields)]
+pub struct VoxelMapWater {
+    /// The blocks that are water, by name.
+    pub blocks: Vec<String>,
+    /// The colour at the shore and in the deep, linear RGB.
+    pub shallow: [f32; 3],
+    pub deep: [f32; 3],
+    /// How many blocks deep the water is when it is as dark as `deep`.
+    pub depth: u32,
+    /// How much the surface sways and ripples.
+    pub waves: f32,
+    /// How many glints catch the light.
+    pub glints: f32,
+    /// How much foam laps at the shore.
+    pub foam: f32,
+    /// How fast it all moves; 1 is a calm lake's pace.
+    pub speed: f32,
+}
+
+impl Default for VoxelMapWater {
+    fn default() -> Self {
+        Self {
+            blocks: vec!["water".to_owned()],
+            shallow: [0.55, 0.85, 0.9],
+            deep: [0.12, 0.22, 0.45],
+            depth: 6,
+            waves: 0.6,
+            glints: 0.5,
+            foam: 0.6,
+            speed: 1.0,
+        }
+    }
+}
+
+/// The deepest `map_water` measures.
+pub const MOST_WATER_DEPTH: u32 = 32;
+
+impl VoxelMapWater {
+    /// The water, or why it would draw nothing sensible.
+    ///
+    /// # Errors
+    /// A depth of nothing or past [`MOST_WATER_DEPTH`], a colour or amount
+    /// that is not a number, or one below 0.
+    pub fn validate(&self) -> Result<(), String> {
+        if self.depth == 0 || self.depth > MOST_WATER_DEPTH {
+            return Err(format!(
+                "`map_water.depth` must be from 1 to {MOST_WATER_DEPTH}"
+            ));
+        }
+        let amounts = [self.waves, self.glints, self.foam, self.speed];
+        let colours = self.shallow.iter().chain(&self.deep);
+        if amounts
+            .iter()
+            .chain(colours)
+            .any(|n| !n.is_finite() || *n < 0.0)
+        {
+            return Err(
+                "`map_water`'s colours and amounts must be numbers of 0 or more".to_owned(),
+            );
+        }
+        Ok(())
+    }
 }
 
 /// A map-only water surface in voxel height coordinates.
