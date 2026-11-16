@@ -88,6 +88,10 @@ pub struct ParticlesComponent {
     pub spin: f32,
     pub space: ParticleSpace,
     pub layer: i32,
+    /// Whether its flecks give their own light: drawn at their own colour
+    /// however dark the scene, as fireflies and embers are. Off, they are lit
+    /// like everything else.
+    pub glow: bool,
 }
 
 impl Default for ParticlesComponent {
@@ -115,6 +119,7 @@ impl Default for ParticlesComponent {
             spin: 0.0,
             space: ParticleSpace::World,
             layer: 0,
+            glow: false,
         }
     }
 }

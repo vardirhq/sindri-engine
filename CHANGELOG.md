@@ -2,6 +2,8 @@
 
 # Changelog
 
+- Ambient life: particles' `glow` draws them at their own colour however dark the scene. Lamplighter's wilds scatter fireflies over the meadow, mist on the bog and leaves blowing across the deadwood, each an emitter placed by seed like what grows.
+
 - Reflections: with `map_water.reflections`, everything billboarded that stands by a map's water is mirrored in it, upside down from its foot, darker and bluer, fading along its length and wavering by rows, cut along the squares so it only shows over water.
 
 - Flickering flames, wet banks and cloud shadows: a 2D light's `flicker` makes it waver (only how it looks; the light field scripts read is steady), `map_water.wet` darkens the land at the water's edge, and `lighting_2d.clouds` drifts soft cloud shadows that dim the sky's light and not the lights.

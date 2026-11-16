@@ -1,0 +1,85 @@
+{
+  "format_version": 1,
+  "metadata": {
+    "name": "mist"
+  },
+  "entities": [
+    {
+      "id": "mist",
+      "name": "mist",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1
+        ]
+      },
+      "components": {
+        "sindri.particles": {
+          "playing": true,
+          "texture": "textures/mote.png",
+          "rate": 0.7,
+          "max": 10,
+          "lifetime": 9.0,
+          "lifetime_spread": 0.4,
+          "speed": 0.18,
+          "speed_spread": 0.5,
+          "direction": 10.0,
+          "spread": 30.0,
+          "shape": "circle",
+          "offset": [
+            0.0,
+            0.0
+          ],
+          "shape_size": [
+            2.0,
+            1.5
+          ],
+          "gravity": [
+            0.0,
+            0.0
+          ],
+          "drag": 0.0,
+          "size": 2.2,
+          "size_end": 4.0,
+          "colors": [
+            [
+              0.62,
+              0.68,
+              0.78,
+              0.0
+            ],
+            [
+              0.62,
+              0.68,
+              0.78,
+              0.09
+            ],
+            [
+              0.62,
+              0.68,
+              0.78,
+              0.0
+            ]
+          ],
+          "random_rotation": true,
+          "spin": 0.0,
+          "space": "world",
+          "layer": 3,
+          "glow": true
+        }
+      }
+    }
+  ]
+}

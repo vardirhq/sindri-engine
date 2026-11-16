@@ -101,6 +101,10 @@ def scatter():
         rule(['grass', 'deadgrass', 'earth'], ['tufts', 'flowers', 'pebbles'], 2, 0.3),
         rule(['moss'], ['mushrooms', 'tufts'], 2, 0.35),
         rule(['stone', 'rock', 'sand'], ['pebbles'], 3, 0.3),
+        # What lives in the air, last so it never keeps a thing off its square.
+        rule(['grass'], ['fireflies'], 6, 0.55),
+        rule(['moss', 'mud'], ['mist'], 5, 0.6),
+        rule(['deadgrass'], ['leaves'], 7, 0.45),
     ], 'sites': [hamlet()]}
 
 
@@ -156,6 +160,7 @@ def prefabs():
             components['sindri.light2d'] = {'enabled': True, 'color': [0.45, 0.85, 1.0, 1.0], 'intensity': 0.7,
                                             'radius': 2.8, 'falloff': 1.6, 'height': 0.6, 'shadows': False}
         made[kind] = entity('cover', 'cover', at(0, 0, 0, 1.5, 1.5), **components)
+    made.update(air())
     hamlet_things = {}
     for name, (sprite, block) in HAMLET_THINGS.items():
         hamlet_things[f'hamlet/{name}'] = village_scene.standing('thing', sprite, 0, 0, block)
@@ -185,6 +190,27 @@ def prefabs():
         one['transform_3d']['position'] = [0.0, 0.0, 0.0]
         doc = {'format_version': 1, 'metadata': {'name': thing['name']}, 'entities': [one]}
         (PREFABS / f'{name}.prefab').write_text(json.dumps(doc, indent=2) + '\n')
+
+
+def air():
+    """What lives in the air over the land, each an emitter of its own: fireflies
+    that glow over the meadow, mist that lies on the bog, leaves blowing across
+    the deadwood."""
+    def drift(name, **particles):
+        return entity(name, name, at(0, 0, 0), **{'sindri.particles': scenes.motes(**particles)})
+    fade = lambda rgb, peak: [[*rgb, 0.0], [*rgb, peak], [*rgb, 0.0]]
+    return {
+        'fireflies': drift('fireflies', rate=2.0, lifetime=4.5, speed=0.35, colors=fade([1.6, 2.0, 0.7], 1.0),
+                           size=0.4, size_end=0.25, spread=360.0, shape_size=[2.5, 2.5], gravity=[0.0, 0.0],
+                           drag=0.3, layer=7, glow=True, max=12),
+        'mist': drift('mist', rate=0.7, lifetime=9.0, speed=0.18, colors=fade([0.62, 0.68, 0.78], 0.09),
+                      size=2.2, size_end=4.0, direction=10.0, spread=30.0, shape_size=[2.0, 1.5],
+                      gravity=[0.0, 0.0], drag=0.0, layer=3, glow=True, max=10),
+        'leaves': drift('leaves', rate=0.8, lifetime=5.0, speed=0.7, colors=fade([0.55, 0.36, 0.18], 1.0),
+                        size=0.32, size_end=0.3, direction=200.0, spread=40.0, shape_size=[2.0, 2.0],
+                        gravity=[-0.05, -0.08], drag=0.1, layer=5, spin=140.0, max=6,
+                        texture='textures/leaf.png'),
+    }
 
 
 def biome(name, temperature, moisture, surface, under, relief, terraces=0):

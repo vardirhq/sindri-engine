@@ -1,0 +1,85 @@
+{
+  "format_version": 1,
+  "metadata": {
+    "name": "fireflies"
+  },
+  "entities": [
+    {
+      "id": "fireflies",
+      "name": "fireflies",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1
+        ]
+      },
+      "components": {
+        "sindri.particles": {
+          "playing": true,
+          "texture": "textures/mote.png",
+          "rate": 2.0,
+          "max": 12,
+          "lifetime": 4.5,
+          "lifetime_spread": 0.4,
+          "speed": 0.35,
+          "speed_spread": 0.5,
+          "direction": 90.0,
+          "spread": 360.0,
+          "shape": "circle",
+          "offset": [
+            0.0,
+            0.0
+          ],
+          "shape_size": [
+            2.5,
+            2.5
+          ],
+          "gravity": [
+            0.0,
+            0.0
+          ],
+          "drag": 0.3,
+          "size": 0.4,
+          "size_end": 0.25,
+          "colors": [
+            [
+              1.6,
+              2.0,
+              0.7,
+              0.0
+            ],
+            [
+              1.6,
+              2.0,
+              0.7,
+              1.0
+            ],
+            [
+              1.6,
+              2.0,
+              0.7,
+              0.0
+            ]
+          ],
+          "random_rotation": true,
+          "spin": 0.0,
+          "space": "world",
+          "layer": 7,
+          "glow": true
+        }
+      }
+    }
+  ]
+}

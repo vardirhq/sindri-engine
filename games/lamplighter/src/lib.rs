@@ -77,6 +77,12 @@ impl Run {
     pub const fn components(&self) -> &ComponentSchemaRegistry {
         self.0.session.components()
     }
+
+    /// The particles in flight.
+    #[must_use]
+    pub const fn effects(&self) -> &sindri_scene::Effects2d {
+        self.0.session.effects()
+    }
 }
 
 impl Deref for Run {

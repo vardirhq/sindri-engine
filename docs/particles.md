@@ -30,6 +30,7 @@ can collide with. They draw like world sprites, through the same batching, and
 | `spin` | Degrees a second it turns | `0` |
 | `space` | `world`: particles stay where thrown (a trail). `local`: they move with the emitter (a halo) | `world` |
 | `layer` | The sprite layer they draw on | `0` |
+| `glow` | Whether they give their own light: drawn at their own colour however dark the scene, as fireflies and embers are. Off, 2D lights light them like everything else | `false` |
 
 An emitter owes `rate` times each step's length and throws the whole particles
 of it, carrying the remainder, so a rate of 2.5 a second really is 2.5 a second

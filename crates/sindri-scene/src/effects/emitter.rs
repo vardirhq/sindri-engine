@@ -221,6 +221,7 @@ impl Effects2d {
             gravity: particles.gravity,
             ramp: Some(ramp),
             emitter: Some(entity),
+            glow: particles.glow,
         }
     }
 

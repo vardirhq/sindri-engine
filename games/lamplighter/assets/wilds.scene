@@ -490,6 +490,40 @@
               "spacing": 3,
               "chance": 0.3,
               "flip": true
+            },
+            {
+              "on": [
+                "grass"
+              ],
+              "prefabs": [
+                "prefabs/wilds/fireflies.prefab"
+              ],
+              "spacing": 6,
+              "chance": 0.55,
+              "flip": true
+            },
+            {
+              "on": [
+                "moss",
+                "mud"
+              ],
+              "prefabs": [
+                "prefabs/wilds/mist.prefab"
+              ],
+              "spacing": 5,
+              "chance": 0.6,
+              "flip": true
+            },
+            {
+              "on": [
+                "deadgrass"
+              ],
+              "prefabs": [
+                "prefabs/wilds/leaves.prefab"
+              ],
+              "spacing": 7,
+              "chance": 0.45,
+              "flip": true
             }
           ],
           "sites": [
