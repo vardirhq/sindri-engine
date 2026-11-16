@@ -309,10 +309,10 @@ fn push_map(
             .iter()
             .find(|(drawn, _)| *drawn == texture)
             .map(|(_, normal_map)| *normal_map);
-        // A map is ground, lit like a tilemap's.
+        // A map is ground, lit like a tilemap's, its normal maps its relief.
         let mut sprite = SpriteInstance::new(root * local, tint)
             .with_uv_rect(rect)
-            .lit(true);
+            .ground_relief();
         let mut shader = None;
         if let (Some(water), Some(drawn)) = (water, &water_shader) {
             // Water's colour arrives as the offset over a picture tinted
@@ -320,7 +320,7 @@ fn push_map(
             let [r, g, b] = water.colour;
             sprite = SpriteInstance::new(root * local, [0.0, 0.0, 0.0, 1.0])
                 .with_uv_rect(rect)
-                .lit(true)
+                .ground_relief()
                 .with_color_transform([1.0; 4], [r, g, b, 0.0])
                 .with_shader_params(water.params);
             shader = Some(drawn.clone());

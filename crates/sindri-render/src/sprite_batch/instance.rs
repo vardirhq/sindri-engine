@@ -154,6 +154,18 @@ impl SpriteInstance {
         self
     }
 
+    /// Lights this sprite as ground: flat, it is lit by distance as it would
+    /// be with no normal map, and its normal map only adds relief over that,
+    /// brighter where it leans towards a light and darker where it leans away.
+    /// Without it, a normal map shades by the angle the light arrives at, which
+    /// is right for a picture facing the viewer but darkens flat ground
+    /// everywhere a low light does not stand right over it.
+    #[must_use]
+    pub const fn ground_relief(mut self) -> Self {
+        self.flags[0] = 2.0;
+        self
+    }
+
     /// Lights this sprite as something standing on the ground: its shadows are
     /// looked up where its feet are, not at each pixel, so a thing is not darkened
     /// by the occluder round its own base on the side the light is.

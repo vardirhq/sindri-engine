@@ -148,6 +148,13 @@ fn sindri_light_2d(world: vec2<f32>, normal: vec3<f32>, use_normal: bool) -> vec
 // brighter than the other, but whether a shadow covers it is asked at its feet,
 // so the occluder round its own base does not darken the side facing the light.
 fn sindri_light_2d_from(world: vec2<f32>, base: vec2<f32>, normal: vec3<f32>, use_normal: bool) -> vec3<f32> {
+    return sindri_light_2d_relief(world, base, normal, use_normal, false);
+}
+
+// The same, where `relief` says the normal map is ground's relief: flat ground
+// is lit by distance alone, and a normal only brightens or darkens that by how
+// much more or less it faces the light than flat ground does.
+fn sindri_light_2d_relief(world: vec2<f32>, base: vec2<f32>, normal: vec3<f32>, use_normal: bool, relief: bool) -> vec3<f32> {
     var total = sindri_lights_2d.ambient.rgb * sindri_cloud_shade(base);
     let count = u32(sindri_lights_2d.header.x);
     for (var i = 0u; i < count; i++) {
@@ -174,7 +181,11 @@ fn sindri_light_2d_from(world: vec2<f32>, base: vec2<f32>, normal: vec3<f32>, us
         }
         if use_normal {
             let toward = normalize(vec3<f32>(to_light, light.position.z));
-            amount *= max(dot(normal, toward), 0.0);
+            if relief {
+                amount *= clamp(1.0 + dot(normal, toward) - toward.z, 0.0, 2.0);
+            } else {
+                amount *= max(dot(normal, toward), 0.0);
+            }
         }
         if light.shadow.x > 0.5 {
             amount *= sindri_shadow_2d(i, base, light.position.xy, light.shadow.y, light.shadow.z);

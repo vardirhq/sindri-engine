@@ -47,7 +47,8 @@ fn sindri_lit(input: SindriVertexOutput, rgb: vec3<f32>) -> vec3<f32> {
         // the model's two columns, so the feet are the bottom middle.
         base = base - (input.local_uv.x - 0.5) * input.axes.xy - (1.0 - input.local_uv.y) * input.axes.zw;
     }
-    return rgb * sindri_light_2d_from(input.world_position.xy, base, normal, use_normal);
+    let relief = input.flags.x > 1.5;
+    return rgb * sindri_light_2d_relief(input.world_position.xy, base, normal, use_normal, relief);
 }
 
 // The batch's mask, or anything when it has none.

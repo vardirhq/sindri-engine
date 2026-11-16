@@ -105,6 +105,15 @@ A square whose texture has no entry, or whose normal map has not bound, is lit
 by distance alone. The flood overlay reads the normal map of the texture its
 water block draws from.
 
+A map's normal maps are its ground's relief, and light it differently from a
+sprite's: flat ground is lit by distance exactly as with no normal map, and a
+normal only brightens or darkens that by how much more or less it faces the
+light than flat ground does (`1 + n·l − flat·l`, from 0 to 2). Shaded by the
+angle alone, as a sprite is, flat ground would go dark wherever a low light
+(a carried lantern) did not stand right over it. `SpriteInstance::ground_relief`
+asks for this on any sprite. Lamplighter's `art/blocks.py` writes the wilds'
+`blocks_n.png` from each ground's brightness and lumps of its own.
+
 The platformer's `art/draw.py` writes `textures/tiles_n.png` from the same
 brick, plank and dirt layouts as `tiles.png`, as a worked example. A map need
 not be drawn: the editor's Normal map tab makes one from a sprite and lights it

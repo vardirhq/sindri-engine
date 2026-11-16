@@ -2,6 +2,8 @@
 
 # Changelog
 
+- Under the Lid: Lamplighter's ground has relief (`blocks_n.png`), lit as ground: a voxel map's normal maps now only add relief over distance lighting, so flat ground stays as bright as without one (`SpriteInstance::ground_relief`). Sunfalls wander and their cracks open and shut. The first Seeker hangs over the meadow and sweeps it with red light; it finds Wick, follows him and calls the gloom from further off, unless he hides in a lit lamp's pool or an open sunfall.
+
 - Lamplighter is set under the Lid: a shell over the sky that the sun only gets through in cracks, in place of the fading sun (`docs/lamplighter-plan.md`). The first of its lights is in the wilds: sunfalls, shafts of gold cracklight drawn through a project shader (`shaders/sunfall.wgsl`) with a steady pool of light under them and dust glinting in it, one in sight of the start and more scattered by seed.
 
 - Cliffs, parting grass and footprints: a voxel map's `map_cliffs` draws the face of each drop of two levels or more across the lower square, so terraces and cliffs read as height. `sindri.wake` makes swaying plants lean away from whatever carries it. A particle emitter's `per_distance` throws particles for every unit it moves, which is how Wick now leaves a trail of footprints that fade behind him.
