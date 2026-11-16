@@ -103,6 +103,8 @@ data class EditorState(
     val recovered: Boolean = false,
     /** Whether the canvas shows the scene's 2D lighting. */
     val lighting: Boolean = false,
+    /** Whether the canvas shows the screen UI (HUD, menus), styled as when played. */
+    val screenUi: Boolean = true,
     /** The game running from the editor, or null in the editor. */
     val play: PlayState? = null,
     /** Why the last game stopped by itself, until the app clears it. */
@@ -148,6 +150,7 @@ data class EditorState(
                 recoveryConflict = root.optBoolean("recoveryConflict"),
                 recovered = root.optBoolean("recovered"),
                 lighting = root.optBoolean("lighting"),
+                screenUi = root.optBoolean("screenUi", true),
                 play = root.optJSONObject("play")?.let { play ->
                     val stick = play.optJSONObject("stick")
                     fun point(name: String) = stick?.optJSONArray(name)?.let { it.getDouble(0).toFloat() to it.getDouble(1).toFloat() }

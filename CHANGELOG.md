@@ -2,6 +2,8 @@
 
 # Changelog
 
+- Sindri Mobile: the canvas draws the screen UI styled by the project's stylesheets, as it will be played (`StylePreview`, `project::stylesheets`), and the menu's Show screen UI switch hides it to work on the world beneath. The app runs full screen, its status and navigation bars a swipe away.
+
 - Lamplighter's screens are styled with Weave (`assets/ui.weave`): the title and pause menus, and in the wilds the lantern's light, the pack with each thing's picture, and a card for each thing Wick can build, lit while he can afford it and spent while he cannot, all resized for a phone held upright. Closing what that needed: `Ui.set_disabled` turns a button off and on from Decay; Weave's `tint` colours an image; and `:disabled` and `:checked` now follow a script's changes as they happen rather than only when styles settle.
 
 - Gathering and building in Lamplighter's wilds: deadwood, flint and resin lie about, scattered by seed, and go into Wick's pack when he walks over them. The pack is on screen with a button (and F and G) for each thing he can build: a campfire that burns down, and a lamp that burns for good. A fire he has built is a safe pool while it burns, from the gloom and from Seekers.

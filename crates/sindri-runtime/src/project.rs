@@ -116,6 +116,33 @@ struct AssetsSection {
     include: Vec<String>,
 }
 
+/// The project's stylesheets, as a run styles its screens with them: each
+/// entry `.weave` the manifest includes, composed with what it uses. An editor
+/// styles what it shows with the same ones, so a screen looks the same while
+/// it is edited as when it is played.
+///
+/// # Errors
+/// A manifest that will not read, or a stylesheet that will not compose.
+pub fn stylesheets(project: &Path) -> Result<Vec<weave::Stylesheet>, String> {
+    let (_, sheet_ids, _) = manifest(project)?;
+    compose_stylesheets(&assets_root(project), &sheet_ids)
+}
+
+fn compose_stylesheets(
+    assets: &Path,
+    sheet_ids: &[String],
+) -> Result<Vec<weave::Stylesheet>, String> {
+    let mut weave_sources = BTreeMap::new();
+    for (id, bytes) in files_under(assets, ".weave") {
+        let source = text(&id, bytes)?;
+        weave_sources.insert(id, source);
+    }
+    sheet_ids
+        .iter()
+        .map(|id| weave::compose(id, &weave_sources).map_err(|error| format!("{id}: {error}")))
+        .collect()
+}
+
 /// Reads the parts of `sindri.toml` a run needs, parsed as TOML as the export
 /// parses it, so the two cannot read one file differently.
 ///
@@ -252,17 +279,7 @@ impl ProjectRun {
                 tile_sets.bind_terrains(id, sheet.terrains);
             }
         }
-        let mut weave_sources = BTreeMap::new();
-        for (id, bytes) in files_under(&assets, ".weave") {
-            let source = text(&id, bytes)?;
-            weave_sources.insert(id, source);
-        }
-        let mut sheets = Vec::new();
-        for id in sheet_ids {
-            sheets.push(
-                weave::compose(&id, &weave_sources).map_err(|error| format!("{id}: {error}"))?,
-            );
-        }
+        let sheets = compose_stylesheets(&assets, &sheet_ids)?;
         let collision =
             crate::model_assets::collision_references(&scenes, &prefabs, scene.components())?;
         let mut session = Session::with_sources(scene.components().clone(), sources)

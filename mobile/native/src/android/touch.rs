@@ -169,6 +169,10 @@ impl Host {
             .editing
             .as_ref()
             .is_some_and(|editing| editing.lighting_preview);
+        editing.screen_ui = self
+            .editing
+            .as_ref()
+            .is_none_or(|editing| editing.screen_ui);
         if self.editing.as_ref().is_some_and(Editing::unsaved) {
             self.save()?;
         }
@@ -357,6 +361,7 @@ impl Host {
             "play": self.play_state(),
             "playError": self.play_error,
             "lighting": self.editing.as_ref().is_some_and(|editing| editing.lighting_preview),
+            "screenUi": self.editing.as_ref().is_none_or(|editing| editing.screen_ui),
         })
         .to_string()
     }
@@ -388,6 +393,18 @@ impl Host {
     /// Runs one named editing command with its JSON array of arguments, which
     /// is how every gesture and inspector edit crosses the bridge: one export
     /// for all of them keeps the unsafe surface to the few calls that need it.
+    /// The canvas's view switches: the lighting preview, and the screen UI.
+    fn set_switch(&mut self, command: &str, arguments: &[Value]) -> Result<(), String> {
+        let on = switch(command, arguments)?;
+        let editing = self.editing()?.1;
+        if command == "lighting" {
+            editing.lighting_preview = on;
+        } else {
+            editing.screen_ui = on;
+        }
+        Ok(())
+    }
+
     pub(super) fn call(&mut self, command: &str, arguments: &str) -> Result<(), String> {
         let arguments: Vec<Value> = serde_json::from_str(arguments)
             .map_err(|error| format!("{command}: arguments {arguments}: {error}"))?;
@@ -418,14 +435,7 @@ impl Host {
             "zoom" => self.zoom(number(0)?, [number(1)?, number(2)?]),
             "frameAll" => self.frame_all(),
             "deselect" => self.deselect(),
-            "lighting" => {
-                let on = arguments
-                    .first()
-                    .and_then(Value::as_bool)
-                    .ok_or_else(|| format!("{command}: argument 0 is not a switch"))?;
-                self.editing()?.1.lighting_preview = on;
-                Ok(())
-            }
+            "lighting" | "screenUi" => self.set_switch(command, &arguments),
             "handle" => {
                 let handle = Handle::named(text(0)?).ok_or_else(|| {
                     format!("{command}: no handle named {}", text(0).unwrap_or(""))
@@ -489,4 +499,12 @@ impl Host {
             other => Err(format!("unknown command {other}")),
         }
     }
+}
+
+/// A command's one argument as a switch: on or off.
+fn switch(command: &str, arguments: &[Value]) -> Result<bool, String> {
+    arguments
+        .first()
+        .and_then(Value::as_bool)
+        .ok_or_else(|| format!("{command}: argument 0 is not a switch"))
 }

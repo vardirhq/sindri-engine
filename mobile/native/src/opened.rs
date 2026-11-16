@@ -60,6 +60,11 @@ pub struct OpenedScene {
     pub assets: ProjectAssets,
     /// The schemas the scene is read and drawn with.
     pub extractor: SceneExtractor,
+    /// The project's stylesheets, which the canvas styles the screen UI with
+    /// as a run would. `None` for a project with none, or one whose stylesheet
+    /// will not compose: Play says why, and the canvas shows the screen as
+    /// authored rather than refusing to open the scene.
+    pub styles: Option<sindri_runtime::StylePreview>,
     pub(crate) sprite_hits: std::sync::Arc<crate::sprite_hits::SpriteHits>,
 }
 
@@ -77,6 +82,7 @@ impl OpenedScene {
         let world = load_world(&extractor, &file).map_err(|error| format!("{scene}: {error}"))?;
         let assets = ProjectAssets::read(project)?;
         let sprite_hits = std::sync::Arc::new(crate::sprite_hits::SpriteHits::new(&assets));
+        let styles = sindri_runtime::StylePreview::load(project).ok().flatten();
         Ok(Self {
             name: scene.to_owned(),
             project: project.to_path_buf(),
@@ -84,6 +90,7 @@ impl OpenedScene {
             file,
             assets,
             extractor,
+            styles,
             sprite_hits,
         })
     }
