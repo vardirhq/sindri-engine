@@ -2,6 +2,8 @@
 
 # Changelog
 
+- Lamplighter's Wick is new art: a hooded figure in a long cloak holding his lantern low, with an idle and a walk that animate, and hurt and death clips for later, west drawn as east mirrored (`art/wick.py`). He holds his lantern, so the floating lantern is not drawn and its lights and embers ride at the one in his hand (`held` on Wick's script); the attack plays the hurt's cloak swirl until there is a swing.
+
 - Sindri Mobile: the canvas draws the screen UI styled by the project's stylesheets, as it will be played (`StylePreview`, `project::stylesheets`), and the menu's Show screen UI switch hides it to work on the world beneath. The app runs full screen, its status and navigation bars a swipe away.
 
 - Lamplighter's screens are styled with Weave (`assets/ui.weave`): the title and pause menus, and in the wilds the lantern's light, the pack with each thing's picture, and a card for each thing Wick can build, lit while he can afford it and spent while he cannot, all resized for a phone held upright. Closing what that needed: `Ui.set_disabled` turns a button off and on from Decay; Weave's `tint` colours an image; and `:disabled` and `:checked` now follow a script's changes as they happen rather than only when styles settle.

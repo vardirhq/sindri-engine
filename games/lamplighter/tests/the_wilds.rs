@@ -53,16 +53,16 @@ fn wick_walks_the_wilds_and_the_tilted_camera_follows_from_behind() {
     assert!(camera[2] > 10.0, "and above: {camera:?}");
 
     // Standing up, he keeps to the ground however far down the screen he walks,
-    // and carries his lantern at his chest as the camera sees him, rather than a
-    // little up the screen.
+    // and his lantern's light is at the lantern in his hand as the camera sees
+    // it, rather than a little up the screen.
     assert!(
         north[2].abs() < 1.0e-4,
         "Wick stands on the ground: {north:?}"
     );
     let lantern = position(&run, "wick-lantern");
     assert!(
-        (1.35..1.55).contains(&(lantern[2] - north[2])),
-        "the lantern is at his chest: {lantern:?}"
+        (1.5..1.7).contains(&(lantern[2] - north[2])),
+        "the lantern is at his hand: {lantern:?}"
     );
     assert!(
         (lantern[1] - north[1]).abs() < 1.0,
