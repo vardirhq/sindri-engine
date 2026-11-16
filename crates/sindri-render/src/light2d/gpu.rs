@@ -29,6 +29,11 @@ struct LightsUniform {
     sight: [f32; 4],
     /// x is 1 when there is a viewer, y how far past an edge it still sees.
     sight_edge: [f32; 4],
+    /// x is how much is covered, y a cloud's width, z how dark its shadow,
+    /// w 1 when there are clouds.
+    clouds: [f32; 4],
+    /// x, y how far they have drifted.
+    drift: [f32; 4],
     lights: [LightUniform; MAX_LIGHTS_2D],
 }
 
@@ -125,6 +130,8 @@ impl Lights2dGpu {
             header: [0.0; 4],
             sight: [0.0; 4],
             sight_edge: [0.0; 4],
+            clouds: [0.0; 4],
+            drift: [0.0; 4],
             lights: [LightUniform {
                 position: [0.0; 4],
                 color: [0.0; 4],
@@ -142,6 +149,10 @@ impl Lights2dGpu {
             uniform.header[0] = count;
             if let Some(sight) = &lighting.sight {
                 write_sight(&mut uniform, &mut rows, sight);
+            }
+            if let Some(clouds) = &lighting.clouds {
+                uniform.clouds = [clouds.cover, clouds.size.max(0.001), clouds.darkness, 1.0];
+                uniform.drift = [clouds.drift[0], clouds.drift[1], 0.0, 0.0];
             }
             for (index, light) in lights.iter().enumerate() {
                 let [r, g, b] = light.color;

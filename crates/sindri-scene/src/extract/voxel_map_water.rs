@@ -56,26 +56,46 @@ impl Water {
             .is_some_and(|(level, _, _)| self.blocks.contains(&ground.block([column, level, row])))
     }
 
-    /// The look of every water square from `columns` by `rows`, by square.
+    /// The look of every water square from `columns` by `rows`, by square,
+    /// and how much darker each square of land the water wets is drawn.
     pub(super) fn squares(
         &self,
         ground: &VoxelGround,
         columns: std::ops::Range<i32>,
         rows: std::ops::Range<i32>,
-    ) -> HashMap<(i32, i32), WaterSquare> {
+    ) -> (HashMap<(i32, i32), WaterSquare>, HashMap<(i32, i32), f32>) {
         let reach = OPEN_WATER + 1;
-        let mut wet = HashMap::new();
+        let mut flooded = HashMap::new();
         for row in rows.start - reach..rows.end + reach {
             for column in columns.start - reach..columns.end + reach {
-                wet.insert((column, row), self.is_water(ground, column, row));
+                flooded.insert((column, row), self.is_water(ground, column, row));
             }
         }
-        let water = |column: i32, row: i32| wet.get(&(column, row)).copied().unwrap_or(true);
+        let water = |column: i32, row: i32| flooded.get(&(column, row)).copied().unwrap_or(true);
         let amounts = self.amounts();
         let mut out = HashMap::new();
+        let mut wet = HashMap::new();
         for row in rows {
             for column in columns.clone() {
                 if !water(column, row) {
+                    // The land at the water's edge is wet: darker beside it,
+                    // a little darker at a corner of it.
+                    let beside = [(0, -1), (1, 0), (0, 1), (-1, 0)]
+                        .iter()
+                        .any(|(dx, dy)| water(column + dx, row + dy));
+                    let corner = [(1, -1), (1, 1), (-1, 1), (-1, -1)]
+                        .iter()
+                        .any(|(dx, dy)| water(column + dx, row + dy));
+                    let share = if beside {
+                        1.0
+                    } else if corner {
+                        0.5
+                    } else {
+                        0.0
+                    };
+                    if share > 0.0 && self.settings.wet > 0.0 {
+                        wet.insert((column, row), 1.0 - self.settings.wet * share);
+                    }
                     continue;
                 }
                 let shore = (0..OPEN_WATER)
@@ -113,7 +133,7 @@ impl Water {
                 out.insert((column, row), WaterSquare { colour, params });
             }
         }
-        out
+        (out, wet)
     }
 
     /// How deep a square looks, 0 at the shore to 1 at the settings' depth:

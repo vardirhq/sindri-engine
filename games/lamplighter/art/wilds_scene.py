@@ -164,7 +164,7 @@ def prefabs():
         # Someone is home: their windows light the ground in front of the door.
         lit['components']['sindri.light2d'] = {'enabled': True, 'color': [1.0, 0.72, 0.38, 1.0],
                                                'intensity': 1.8, 'radius': 7.0, 'falloff': 1.5, 'height': 1.0,
-                                               'offset': [0.0, -0.2],
+                                               'offset': [0.0, -0.2], 'flicker': 0.3,
                                                'shadows': False}
         hamlet_things[f'hamlet/{name}-lit'] = lit
     made.update(hamlet_things)
@@ -204,6 +204,10 @@ def seen_in_the_dark():
         'night_vision': {'enabled': True, 'threshold': 0.14, 'blur': 0.007, 'grey': 0.9},
         'post_process': {'vignette': 0.45},
     })
+    # Clouds drift over the land; by night their shadows barely show, by day
+    # they will.
+    env['components']['sindri.environment']['lighting_2d']['clouds'] = {
+        'cover': 0.45, 'size': 28.0, 'darkness': 0.4, 'wind': [1.1, 0.35]}
     return env
 
 
@@ -212,6 +216,7 @@ HAND = 0.95     # how high Wick carries his lantern
 ROUNDER = 0.6   # a contact shadow's depth for its width: the camera foreshortens it already
 GROUNDED = 0.7  # how dark a contact shadow is: what stands has to be seen to touch the ground
 SPREAD = 1.5    # how much wider than the field's: its far half is hidden behind what stands on it
+FLICKER = 0.6   # how restless a flame's light is
 
 
 def gap_below(reference):
@@ -273,11 +278,19 @@ def standing_up(entities):
         if place is None or e['id'] == 'camera' or e['id'] == 'ground':
             continue
         if e.get('parent') == 'wick':
+            for name, part in components.items():
+                if name.startswith('sindri.light2d') and not name.startswith('sindri.light2d.'):
+                    part['flicker'] = FLICKER
             place['position'] = [place['position'][0], 0.0, HAND]
             continue
         if e.get('parent') is None:
             place['position'][2] = 0.0
         light = components.get('sindri.light2d')
+        # A flame is never quite still.
+        for name, part in components.items():
+            if name.startswith('sindri.light2d') and not name.startswith('sindri.light2d.') \
+                    and part.get('color', [0, 0, 0])[2] < 0.6:
+                part['flicker'] = FLICKER
         post = by_id.get(e['id'].removesuffix('-light'))
         if light is not None and post is not e and post is not None:
             # A lamp post's flame: at the post, up it, rather than up the screen.

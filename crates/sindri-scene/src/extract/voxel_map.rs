@@ -83,8 +83,10 @@ struct MapSquare {
 struct MapChunk {
     squares: Vec<MapSquare>,
     pieces: Vec<MapPiece>,
-    /// With `map_water`, each water square's look, by column and row.
+    /// With `map_water`, each water square's look, by column and row, and how
+    /// much each square of land at its edge is darkened, wet.
     water: HashMap<(i32, i32), WaterSquare>,
+    wet: HashMap<(i32, i32), f32>,
 }
 
 /// One map's remembered squares, and what they were worked out from.
@@ -338,6 +340,7 @@ fn push_map(
                     (texture, rect, [light, light, light, 1.0])
                 },
             );
+            let look = wetted(chunk, square.column, square.row, look);
             let water = chunk.water.get(&(square.column, square.row));
             let water = water.filter(|_| flooded(square.height).is_none());
             draw(square.column, square.row, [0.0; 2], [1.0; 2], look, water)?;
@@ -353,13 +356,33 @@ fn push_map(
                     piece.row,
                     piece.middle,
                     piece.size,
-                    (piece.texture, piece.rect, piece.tint),
+                    wetted(
+                        chunk,
+                        piece.column,
+                        piece.row,
+                        (piece.texture, piece.rect, piece.tint),
+                    ),
                     None,
                 )?;
             }
         }
     }
     Ok(())
+}
+
+/// A square's look, darker where the water wets it.
+fn wetted(
+    chunk: &MapChunk,
+    column: i32,
+    row: i32,
+    (texture, rect, tint): (TextureId, UvRect, [f32; 4]),
+) -> (TextureId, UvRect, [f32; 4]) {
+    let dark = chunk.wet.get(&(column, row)).copied().unwrap_or(1.0);
+    (
+        texture,
+        rect,
+        [tint[0] * dark, tint[1] * dark, tint[2] * dark, tint[3]],
+    )
 }
 
 /// The squares of one chunk, worked out the first time it is seen, and with
@@ -379,7 +402,7 @@ fn chunk(map: &mut MapWorld, chunk_column: i32, chunk_row: i32) -> Rc<MapChunk> 
         }
     }
     if let Some(water) = &map.water {
-        made.water = water.squares(&map.ground, columns.clone(), rows.clone());
+        (made.water, made.wet) = water.squares(&map.ground, columns.clone(), rows.clone());
     }
     if map.component.soft_edges {
         made.pieces = frayed(map, &made.squares, columns, rows);

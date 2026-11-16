@@ -257,6 +257,12 @@ fn map_water_has_depth_and_a_shore() {
     assert!(middle.params[1].abs() < 0.5, "no land beside the middle");
     // North 1, west 8, north-east 16, south-west 64, north-west 128.
     assert!((corner.params[1] - (1.0 + 8.0 + 16.0 + 64.0 + 128.0)).abs() < 0.5);
+    assert!(pond.wet[&(3, 1)] < 0.75, "the bank beside it is wet");
+    assert!(pond.wet[&(3, 3)] > pond.wet[&(3, 1)], "its corner less so");
+    assert!(
+        !pond.wet.contains_key(&(6, 6)),
+        "the land away from it is dry"
+    );
     let mut batches = Vec::new();
     push_map(
         map,

@@ -127,6 +127,7 @@ pub(super) fn register_lights(
             },
         ),
         ("cone_softness", share()),
+        ("flicker", share()),
     ])?;
     components.describe::<Light2dOccluderComponent>([
         ("shape", FieldMeaning::choice(OccluderShape::NAMES)),

@@ -21,6 +21,10 @@ pub struct EnvironmentLighting2d {
     pub enabled: bool,
     /// What lit content is multiplied by where no light reaches.
     pub ambient: [f32; 3],
+    /// Shadows of clouds drifting over the plane, dimming the ambient light
+    /// (the sky's) and not the lights: a sunny day's moving shade.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub clouds: Option<EnvironmentClouds2d>,
 }
 
 impl Default for EnvironmentLighting2d {
@@ -28,6 +32,32 @@ impl Default for EnvironmentLighting2d {
         Self {
             enabled: false,
             ambient: [0.25, 0.25, 0.3],
+            clouds: None,
+        }
+    }
+}
+
+/// Cloud shadows over a 2D scene (`lighting_2d.clouds`).
+#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(default, deny_unknown_fields)]
+pub struct EnvironmentClouds2d {
+    /// How much of the ground is in shadow, 0 to 1.
+    pub cover: f32,
+    /// How wide a cloud is, in world units.
+    pub size: f32,
+    /// How much of the sky's light a cloud's shadow takes away, 0 to 1.
+    pub darkness: f32,
+    /// Which way and how fast they drift, in world units a second.
+    pub wind: [f32; 2],
+}
+
+impl Default for EnvironmentClouds2d {
+    fn default() -> Self {
+        Self {
+            cover: 0.4,
+            size: 24.0,
+            darkness: 0.35,
+            wind: [1.2, 0.4],
         }
     }
 }
@@ -67,6 +97,9 @@ pub struct Light2dComponent {
     /// units: it moves, turns and scales with the object, so a lamp's glow
     /// can sit at its lantern without an object of its own.
     pub offset: [f32; 2],
+    /// How much it flickers, 0 to 1: a flame's restless brightness. Only how
+    /// it looks: what a script asks of the light field is the steady light.
+    pub flicker: f32,
 }
 
 impl SceneComponent for Light2dComponent {
@@ -89,6 +122,7 @@ impl Default for Light2dComponent {
             cone_direction: 0.0,
             cone_softness: 0.3,
             offset: [0.0, 0.0],
+            flicker: 0.0,
         }
     }
 }
@@ -148,7 +182,26 @@ impl Light2dComponent {
                 return Err(field(name, "must be a finite number above 0"));
             }
         }
+        if !self.flicker.is_finite() || !(0.0..=1.0).contains(&self.flicker) {
+            return Err(field("flicker", "must be a number from 0 to 1"));
+        }
         Ok(self)
+    }
+
+    /// How bright a flickering light is at `seconds`, as a share of its
+    /// steady brightness: a few unrelated wavers added, so it never settles
+    /// into a beat, and each light, by `seed`, flickers in its own time.
+    #[must_use]
+    pub fn flickered(self, seconds: f32, seed: u64) -> f32 {
+        if self.flicker <= 0.0 {
+            return 1.0;
+        }
+        #[allow(clippy::cast_precision_loss)]
+        let phase = (seed % 1000) as f32 * 0.731;
+        let waver = (seconds * 7.3 + phase).sin() * 0.5
+            + (seconds * 13.7 + phase * 1.7).sin() * 0.3
+            + (seconds * 23.1 + phase * 2.3).sin() * 0.2;
+        1.0 - self.flicker * 0.3 * (0.5 + 0.5 * waver)
     }
 
     /// The beam as (direction, angle, softness) in degrees and a share, or
@@ -314,5 +367,30 @@ mod tests {
             light.radiance().map(f32::to_bits),
             [1.0_f32, 0.5, 0.0].map(f32::to_bits)
         );
+    }
+
+    #[test]
+    fn a_flickering_light_wavers_below_its_steady_brightness() {
+        let steady = Light2dComponent::default();
+        assert!((steady.flickered(3.0, 7) - 1.0).abs() < f32::EPSILON);
+        let flame = Light2dComponent {
+            flicker: 1.0,
+            ..Light2dComponent::default()
+        };
+        let seen: Vec<f32> = (0..60)
+            .map(|frame| flame.flickered(frame as f32 / 30.0, 7))
+            .collect();
+        assert!(seen.iter().all(|b| (0.69..=1.0).contains(b)), "{seen:?}");
+        let spread = seen.iter().copied().fold(f32::MAX, f32::min);
+        assert!(spread < 0.9, "it wavers");
+        assert!(
+            (flame.flickered(1.0, 7) - flame.flickered(1.0, 8)).abs() > 1e-3,
+            "each in its own time"
+        );
+        let wild = Light2dComponent {
+            flicker: 2.0,
+            ..Light2dComponent::default()
+        };
+        assert!(wild.validate().is_err());
     }
 }

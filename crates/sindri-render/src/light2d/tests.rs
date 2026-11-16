@@ -27,6 +27,7 @@ fn light(position: [f32; 2]) -> Light2d {
 #[test]
 fn light_fades_with_distance_and_stops_at_its_radius() {
     let lighting = Lighting2d {
+        clouds: None,
         ambient: [0.1; 3],
         sight: None,
         lights: vec![light([0.0, 0.0])],
@@ -48,6 +49,7 @@ fn a_wall_shadows_what_is_behind_it_and_not_what_is_before_it() {
         map: Arc::from(map),
     });
     let lighting = Lighting2d {
+        clouds: None,
         ambient: [0.0; 3],
         sight: None,
         lights: vec![shadowed],
@@ -180,6 +182,7 @@ fn an_area_light_partially_illuminates_a_shadow_edge() {
         map: Arc::from(shadow_maps_2d(lamp.position, lamp.radius, 0.5, &wall)),
     });
     let lit = Lighting2d {
+        clouds: None,
         ambient: [0.0; 3],
         sight: None,
         lights: vec![lamp],
@@ -225,6 +228,7 @@ fn soft_shadows_follow_moving_lights_and_occluders() {
             map: Arc::from(shadow_maps_2d(position, 8.0, 0.5, &[wall])),
         });
         Lighting2d {
+            clouds: None,
             ambient: [0.0; 3],
             sight: None,
             lights: vec![lamp],
@@ -251,6 +255,7 @@ fn a_spot_light_lights_its_cone_and_not_what_is_behind_it() {
     let mut beam = light([0.0, 0.0]);
     beam.cone = Some(LightCone2d::new(0.0, 60.0, 0.0));
     let lighting = Lighting2d {
+        clouds: None,
         ambient: [0.0; 3],
         sight: None,
         lights: vec![beam],
@@ -349,12 +354,14 @@ fn a_viewer_with_a_radius_fades_out_at_its_edge() {
 #[test]
 fn what_is_out_of_sight_is_dimmed_in_the_light_that_reaches_it() {
     let lamp = Lighting2d {
+        clouds: None,
         ambient: [0.0; 3],
         lights: vec![light([3.0, 0.0])],
         sight: Some(viewer(0.0, 0.5, &[[[2.0, -1.0], [2.0, 1.0]]])),
     };
     let unseen = lamp.at([4.0, 0.0])[0];
     let open = Lighting2d {
+        clouds: None,
         sight: None,
         ..lamp.clone()
     }

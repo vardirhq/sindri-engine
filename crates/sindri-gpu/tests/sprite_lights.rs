@@ -55,6 +55,7 @@ fn red_light(shadow: Option<Light2dShadow>) -> Light2d {
 
 fn dim(lights: Vec<Light2d>) -> Lighting2d {
     Lighting2d {
+        clouds: None,
         ambient: [0.2, 0.2, 0.2],
         sight: None,
         lights,
@@ -324,6 +325,7 @@ fn a_viewer_dims_what_a_wall_hides_from_it() {
         map: Arc::from(shadow_map_2d([-0.25, 0.0], 100.0, &edges(wall))),
     };
     let lit = |wall: bool| Lighting2d {
+        clouds: None,
         ambient: [0.4; 3],
         lights: Vec::new(),
         sight: Some(sight(wall)),

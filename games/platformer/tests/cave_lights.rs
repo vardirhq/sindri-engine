@@ -25,6 +25,7 @@ fn lighting(run: &Run) -> Lighting2d {
 /// The same lighting with only the lights `keep` picks.
 fn only(lit: &Lighting2d, keep: impl Fn(&Light2d) -> bool) -> Lighting2d {
     Lighting2d {
+        clouds: None,
         ambient: lit.ambient,
         sight: None,
         lights: lit

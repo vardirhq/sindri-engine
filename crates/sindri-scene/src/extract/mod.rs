@@ -369,7 +369,7 @@ impl SceneExtractor {
             lighting: if unlit {
                 None
             } else {
-                self.lighting_2d(world, &cameras)?
+                self.lighting_2d(world, &cameras, seconds)?
             },
         });
         self.push_meshes(world, &cameras, textures, &mut frame)?;
@@ -443,7 +443,7 @@ impl SceneExtractor {
             lighting: if unlit {
                 None
             } else {
-                self.lighting_2d(world, &cameras)?
+                self.lighting_2d(world, &cameras, seconds)?
             },
         });
         self.push_meshes(world, &cameras, textures, &mut frame)?;

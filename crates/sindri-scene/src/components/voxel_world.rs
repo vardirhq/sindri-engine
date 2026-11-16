@@ -220,6 +220,9 @@ pub struct VoxelMapWater {
     pub foam: f32,
     /// How fast it all moves; 1 is a calm lake's pace.
     pub speed: f32,
+    /// How much darker the land at the water's edge is drawn, wet: 0 not at
+    /// all, 1 black.
+    pub wet: f32,
 }
 
 impl Default for VoxelMapWater {
@@ -233,6 +236,7 @@ impl Default for VoxelMapWater {
             glints: 0.5,
             foam: 0.6,
             speed: 1.0,
+            wet: 0.3,
         }
     }
 }
@@ -252,7 +256,10 @@ impl VoxelMapWater {
                 "`map_water.depth` must be from 1 to {MOST_WATER_DEPTH}"
             ));
         }
-        let amounts = [self.waves, self.glints, self.foam, self.speed];
+        if self.wet > 1.0 {
+            return Err("`map_water.wet` must be from 0 to 1".to_owned());
+        }
+        let amounts = [self.waves, self.glints, self.foam, self.speed, self.wet];
         let colours = self.shallow.iter().chain(&self.deep);
         if amounts
             .iter()

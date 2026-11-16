@@ -156,6 +156,7 @@
             0.0,
             -0.2
           ],
+          "flicker": 0.6,
           "shadows": false
         }
       }

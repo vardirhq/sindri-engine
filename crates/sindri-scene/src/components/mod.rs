@@ -60,8 +60,8 @@ pub use light::{
     sun_in,
 };
 pub use light2d::{
-    EnvironmentLighting2d, Light2dComponent, Light2dError, Light2dOccluderComponent, OccluderShape,
-    outline,
+    EnvironmentClouds2d, EnvironmentLighting2d, Light2dComponent, Light2dError,
+    Light2dOccluderComponent, OccluderShape, outline,
 };
 pub use map_walls::{MOST_WALL_REACH, MapWallsComponent, unwalkable_runs};
 pub use material::MaterialComponent;

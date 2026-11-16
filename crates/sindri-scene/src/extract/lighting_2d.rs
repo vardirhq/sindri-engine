@@ -11,8 +11,8 @@ use std::sync::Arc;
 use glam::{Mat4, Vec3};
 use sindri_core::{ComponentSchemaRegistry, EntityId, SceneComponent, World};
 use sindri_render::{
-    Light2d, Light2dShadow, LightCone2d, Lighting2d, MAX_LIGHTS_2D, Sight2d, shadow_map_2d,
-    shadow_maps_2d,
+    Clouds2d, Light2d, Light2dShadow, LightCone2d, Lighting2d, MAX_LIGHTS_2D, Sight2d,
+    shadow_map_2d, shadow_maps_2d,
 };
 
 use super::camera::ResolvedCameras;
@@ -44,6 +44,7 @@ impl SceneExtractor {
         &self,
         world: &World,
         cameras: &ResolvedCameras,
+        seconds: f32,
     ) -> Result<Option<Lighting2d>, SceneExtractError> {
         let Some(environment) = self.environment(world)? else {
             return Ok(None);
@@ -51,7 +52,7 @@ impl SceneExtractor {
         if !environment.lighting_2d.enabled {
             return Ok(None);
         }
-        let mut lights = self.lights_2d(world)?;
+        let mut lights = self.lights_2d(world, seconds)?;
         // The camera's own position, from the inverse of where it looks from.
         let eye = cameras
             .world
@@ -138,7 +139,14 @@ impl SceneExtractor {
                 map: Arc::from(shadow_map_2d(position, reaching, &edges)),
             }
         });
+        let clouds = environment.lighting_2d.clouds.map(|clouds| Clouds2d {
+            cover: clouds.cover.clamp(0.0, 1.0),
+            size: clouds.size.max(0.01),
+            darkness: clouds.darkness.clamp(0.0, 1.0),
+            drift: clouds.wind.map(|speed| speed * seconds),
+        });
         Ok(Some(Lighting2d {
+            clouds,
             ambient: environment.lighting_2d.ambient,
             lights,
             sight,
@@ -168,8 +176,8 @@ impl SceneExtractor {
     }
 
     /// Every active, enabled light in the world, shadows not yet cast.
-    fn lights_2d(&self, world: &World) -> Result<Vec<Light2d>, SceneExtractError> {
-        let (lights, refused) = gather_lights(&self.components, world)?;
+    fn lights_2d(&self, world: &World, seconds: f32) -> Result<Vec<Light2d>, SceneExtractError> {
+        let (lights, refused) = gather_lights(&self.components, world, Some(seconds))?;
         for (entity, error) in refused {
             self.refuse(entity, Light2dComponent::TYPE_NAME, error)?;
         }
@@ -222,9 +230,13 @@ fn edges_within(edges: &[[[f32; 2]; 2]], center: [f32; 2], reach: f32) -> Vec<[[
         .collect()
 }
 
+///
+/// At `seconds`, a flickering light is as bright as it is then; without, as
+/// bright as it steadily is.
 pub(crate) fn gather_lights(
     components: &ComponentSchemaRegistry,
     world: &World,
+    seconds: Option<f32>,
 ) -> Result<Gathered<Light2d>, SceneExtractError> {
     let mut lights = Vec::new();
     let mut refused = Vec::new();
@@ -241,12 +253,13 @@ pub(crate) fn gather_lights(
             }
         };
         let position = light.world_position(world.world_transform(entity).unwrap_or_default());
+        let bright = seconds.map_or(1.0, |at| light.flickered(at, entity.to_bits()));
         lights.push(Light2d {
             position,
             height: light.height,
             radius: light.radius,
             falloff: light.falloff,
-            color: light.radiance(),
+            color: light.radiance().map(|channel| channel * bright),
             shadow: light.shadows.then(|| Light2dShadow {
                 reach: light.shadow_reach,
                 source_radius: light.shadow_source_radius,
