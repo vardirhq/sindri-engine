@@ -1046,7 +1046,7 @@
           "shader": "shaders/sunfall.wgsl",
           "shader_params": [
             1.0,
-            1.7,
+            6.66,
             0.0,
             0.0
           ],

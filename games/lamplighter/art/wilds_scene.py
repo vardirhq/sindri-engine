@@ -370,7 +370,9 @@ def wilds():
         ground(),
     ]
     ents += [e for n, (x, y) in enumerate(LAMPS, 1) for e in lantern(f'lantern-{n}', x, y)]
-    ents += [sunfall(f'sunfall-{n}', x, y, phase=1.7 * n) for n, (x, y) in enumerate(SUNFALLS, 1)]
+    # The first one breathes 6.66 seconds out of step: it came in with pull request 666,
+    # and something below the Lid should remember that.
+    ents += [sunfall(f'sunfall-{n}', x, y, phase=6.66 * n) for n, (x, y) in enumerate(SUNFALLS, 1)]
     ents += [*placed_at_start(wick()), *effects(), *[gloom(f'gloom-{n}', x, y, size) for n, ((x, y), size) in enumerate(zip(GLOOM, [1, 3]), 1)]]
     return standing_up(ents)
 
