@@ -1050,6 +1050,7 @@
         ],
         "direction": 90.0,
         "drag": 0.0,
+        "glow": false,
         "gravity": [
           0.0,
           0.0
@@ -1062,6 +1063,7 @@
           0.0,
           0.0
         ],
+        "per_distance": 0.0,
         "playing": true,
         "random_rotation": false,
         "rate": 10.0,
@@ -1097,6 +1099,7 @@
         ],
         "direction": 90.0,
         "drag": 0.0,
+        "glow": false,
         "gravity": [
           0.0,
           0.0
@@ -1109,6 +1112,7 @@
           0.0,
           0.0
         ],
+        "per_distance": 0.0,
         "playing": true,
         "random_rotation": false,
         "rate": 10.0,
@@ -3609,6 +3613,7 @@
           "water_voxel": "water"
         },
         "layer": 0,
+        "map_cliffs": false,
         "map_flood": null,
         "map_water": null,
         "materials": [
@@ -3748,6 +3753,7 @@
           "water_voxel": "water"
         },
         "layer": 0,
+        "map_cliffs": false,
         "map_flood": null,
         "map_water": null,
         "materials": [
@@ -3992,6 +3998,33 @@
       },
       "schema_version": 1,
       "type_name": "sindri.voxel_world"
+    },
+    {
+      "addable": true,
+      "apply": {},
+      "default_payload": {
+        "radius": 1.2000000476837158,
+        "strength": 0.25
+      },
+      "display_name": "Wake",
+      "fields": {
+        "radius": 1.2000000476837158,
+        "strength": 0.25
+      },
+      "meanings": {
+        "radius": {
+          "kind": "range",
+          "max": null,
+          "min": 0.0
+        },
+        "strength": {
+          "kind": "range",
+          "max": 1.0,
+          "min": 0.0
+        }
+      },
+      "schema_version": 1,
+      "type_name": "sindri.wake"
     }
   ],
   "engine_version": "0.1.0",

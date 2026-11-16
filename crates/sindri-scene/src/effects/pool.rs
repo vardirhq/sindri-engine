@@ -38,6 +38,9 @@ pub struct Fleck {
     pub ramp: Option<usize>,
     /// The emitter that threw it, if one did rather than a burst.
     pub emitter: Option<super::EmitterId>,
+    /// Whether it gives its own light: drawn at its own colour however dark
+    /// the scene, as a firefly or an ember is.
+    pub glow: bool,
 }
 
 impl Fleck {
@@ -219,6 +222,7 @@ impl Effects2d {
                 gravity: [0.0, 0.0],
                 ramp: None,
                 emitter: None,
+                glow: false,
             });
             made += 1;
         }

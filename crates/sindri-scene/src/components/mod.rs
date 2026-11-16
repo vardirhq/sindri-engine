@@ -35,6 +35,8 @@ mod ui;
 mod ui_shape;
 mod ui_text_options;
 pub mod ui_text_template;
+mod wake;
+pub use wake::WakeComponent;
 mod voxel_terrain;
 mod voxel_world;
 mod world_text;

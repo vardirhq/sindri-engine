@@ -40,7 +40,7 @@ struct SindriVertexInput {
     @location(10) corner_shade: vec4<f32>,
     @location(11) shader_params: vec4<f32>,
     // x is 1 when 2D lights light this sprite, y when it is lit from where it
-    // stands, z how much it sways in the wind; w is reserved.
+    // stands, z how much it sways in the wind, w how far it is pushed aside.
     @location(12) flags: vec4<f32>,
 }
 
@@ -82,6 +82,12 @@ fn sindri_vertex(input: SindriVertexInput) -> SindriVertexOutput {
     var world = model * vec4<f32>(input.position, 1.0);
     if input.flags.z != 0.0 {
         world = vec4<f32>(world.xyz + sindri_sway(model, input.position.y, input.flags.z), world.w);
+    }
+    if input.flags.w != 0.0 {
+        // Pushed aside: the top leans along the world's x, the foot stays.
+        let height = clamp(input.position.y + 0.5, 0.0, 1.0);
+        let across = model[0].xyz * sign(model[0].x + 0.0001);
+        world = vec4<f32>(world.xyz + across * input.flags.w * height * height, world.w);
     }
     var output: SindriVertexOutput;
     output.position = sindri_uniforms.view_projection * world;

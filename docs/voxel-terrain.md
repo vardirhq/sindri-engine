@@ -127,6 +127,15 @@ wavering a pixel by rows. The mirror image is cut along the map's squares and
 only the pieces over water are drawn, after the water and before the frayed
 banks, so it shows in the river and not on the grass.
 
+### Drops you can see: `map_cliffs`
+
+A map is drawn flat, so a terrace or a cliff is otherwise only a darker line.
+With `map_cliffs`, where a square stands two levels or more above the one south
+of it (nearer a camera that looks north), the face of that drop is drawn as a
+band across the top of the lower square: the higher block's side, in shade, a
+little taller for each level, up to most of a square. A gentle slope that steps
+down a level at a time is left alone, so it is not striped.
+
 ```json
 "map_water": {"blocks": ["water"], "shallow": [0.1, 0.34, 0.38],
               "deep": [0.015, 0.05, 0.14], "depth": 6,

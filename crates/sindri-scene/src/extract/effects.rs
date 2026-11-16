@@ -54,7 +54,7 @@ impl SceneExtractor {
                 space: DrawSpace::World,
                 texture: textures.resolve(texture),
                 order,
-                sprite: SpriteInstance::new(model, effects.color_of(fleck)).lit(true),
+                sprite: SpriteInstance::new(model, effects.color_of(fleck)).lit(!fleck.glow),
             });
         }
         Ok(())

@@ -1,0 +1,84 @@
+{
+  "format_version": 1,
+  "metadata": {
+    "name": "leaves"
+  },
+  "entities": [
+    {
+      "id": "leaves",
+      "name": "leaves",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1
+        ]
+      },
+      "components": {
+        "sindri.particles": {
+          "playing": true,
+          "texture": "textures/leaf.png",
+          "rate": 0.8,
+          "max": 6,
+          "lifetime": 5.0,
+          "lifetime_spread": 0.4,
+          "speed": 0.7,
+          "speed_spread": 0.5,
+          "direction": 200.0,
+          "spread": 40.0,
+          "shape": "circle",
+          "offset": [
+            0.0,
+            0.0
+          ],
+          "shape_size": [
+            2.0,
+            2.0
+          ],
+          "gravity": [
+            -0.05,
+            -0.08
+          ],
+          "drag": 0.1,
+          "size": 0.32,
+          "size_end": 0.3,
+          "colors": [
+            [
+              0.55,
+              0.36,
+              0.18,
+              0.0
+            ],
+            [
+              0.55,
+              0.36,
+              0.18,
+              1.0
+            ],
+            [
+              0.55,
+              0.36,
+              0.18,
+              0.0
+            ]
+          ],
+          "random_rotation": true,
+          "spin": 140.0,
+          "space": "world",
+          "layer": 5
+        }
+      }
+    }
+  ]
+}

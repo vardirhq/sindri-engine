@@ -292,6 +292,20 @@ pub(super) fn register_land(
         ("memberships", FieldMeaning::Mask),
         ("filter", FieldMeaning::Mask),
     ])?;
+    components.register_with_default::<crate::WakeComponent>(
+        "Wake",
+        serde_json::to_value(crate::WakeComponent::default()).expect("a wake serializes"),
+    )?;
+    components.describe::<crate::WakeComponent>([
+        (
+            "radius",
+            FieldMeaning::Range {
+                min: 0.0,
+                max: f64::INFINITY,
+            },
+        ),
+        ("strength", FieldMeaning::Range { min: 0.0, max: 1.0 }),
+    ])?;
     components.register_with_default::<crate::FloatingOriginComponent>(
         "Floating Origin",
         serde_json::to_value(crate::FloatingOriginComponent::default())

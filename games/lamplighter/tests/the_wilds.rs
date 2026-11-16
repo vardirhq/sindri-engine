@@ -402,3 +402,65 @@ fn a_hamlet_stands_east_of_the_start() {
         .count();
     assert_eq!(wild, 0, "nothing grows in the hamlet");
 }
+
+/// What lives in the air is scattered like what grows: fireflies over the
+/// meadow round the start, each an emitter that glows in the dark.
+#[test]
+fn fireflies_glow_over_the_meadow() {
+    let mut run = Run::open_scene("wilds.scene").expect("the wilds open");
+    step(&mut run, 2);
+    let fireflies: Vec<_> = run
+        .world
+        .entities()
+        .filter(|(_, data)| {
+            data.components
+                .get("sindri.particles")
+                .is_some_and(|particles| particles["glow"] == true && particles["max"] == 12)
+        })
+        .collect();
+    assert!(
+        fireflies.len() >= 3,
+        "fireflies round the start: {}",
+        fireflies.len()
+    );
+    step(&mut run, 120);
+    let glowing = run
+        .effects()
+        .flecks()
+        .iter()
+        .filter(|fleck| fleck.glow)
+        .count();
+    assert!(glowing >= 6, "and they are in the air, glowing: {glowing}");
+}
+
+/// Wick leaves footprints as he walks, as far apart however fast he goes,
+/// and none while he stands still; they fade behind him.
+#[test]
+fn wick_leaves_footprints_as_he_walks() {
+    let mut run = Run::open_scene("wilds.scene").expect("the wilds open");
+    step(&mut run, 30);
+    let prints = |run: &Run| {
+        run.effects()
+            .flecks()
+            .iter()
+            .filter(|fleck| fleck.layer == -9)
+            .count()
+    };
+    assert_eq!(prints(&run), 0, "standing still leaves none");
+    run.input.apply(InputEvent::KeyPressed(Key::W));
+    step(&mut run, 60);
+    run.input.apply(InputEvent::KeyReleased(Key::W));
+    let walked = prints(&run);
+    assert!(walked >= 3, "a trail behind him: {walked}");
+    step(&mut run, 60);
+    assert_eq!(prints(&run), walked, "and no more once he stops");
+    step(&mut run, 60 * 8);
+    // A nudge from a gloom may lay a fresh print, but the trail is gone.
+    let fresh = run
+        .effects()
+        .flecks()
+        .iter()
+        .filter(|fleck| fleck.layer == -9)
+        .all(|fleck| fleck.remaining > 1.0);
+    assert!(prints(&run) < walked && fresh, "the trail fades");
+}

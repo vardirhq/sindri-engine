@@ -172,6 +172,14 @@ impl SpriteInstance {
         self
     }
 
+    /// Leans its top along its width by `amount` of it, its foot staying put:
+    /// a plant pushed aside by something passing through it.
+    #[must_use]
+    pub const fn leaning(mut self, amount: f32) -> Self {
+        self.flags[3] = amount;
+        self
+    }
+
     /// Whether this sprite is lit from where it stands.
     pub fn is_standing(self) -> bool {
         self.flags[1] > 0.5

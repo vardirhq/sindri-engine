@@ -382,7 +382,8 @@ fn register_tiles(components: &mut ComponentSchemaRegistry) -> Result<(), SceneE
             "edits": [],
             "normal_maps": {},
             "soft_edges": false,
-            "map_water": null
+            "map_water": null,
+            "map_cliffs": false
         }),
     )?;
     Ok(())

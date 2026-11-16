@@ -117,7 +117,10 @@ impl Effects2d {
                 continue;
             }
             let state = self.emitters.entry(*emitter).or_default();
-            state.carry += particles.rate * seconds;
+            // Owed by the second, and by the distance it has come: a trail of
+            // footprints is laid as far apart however fast the walker goes.
+            let travelled = moved.map_or(0.0, |moved| moved[0].hypot(moved[1]));
+            state.carry += particles.rate * seconds + particles.per_distance * travelled;
             let whole = state.carry.floor();
             state.carry -= whole;
             #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
@@ -221,6 +224,7 @@ impl Effects2d {
             gravity: particles.gravity,
             ramp: Some(ramp),
             emitter: Some(entity),
+            glow: particles.glow,
         }
     }
 
