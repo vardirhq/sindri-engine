@@ -10,9 +10,10 @@
 //! host every export ships, and keeps the offscreen tools -- the capture and
 //! the benchmark -- that play any project the way that host does.
 
-/// Any project played offscreen, for the capture and benchmark tools.
+/// Any project played offscreen, for the capture and benchmark tools. It
+/// lives in `sindri-capture` now, which the `sindri` command uses too.
 #[cfg(not(target_arch = "wasm32"))]
-pub mod project;
+pub use sindri_capture as project;
 
 pub use sindri_player::bind_builtin_textures;
 pub use sindri_runtime::Session;

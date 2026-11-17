@@ -822,22 +822,22 @@ set ahead of evidence; a read-only MCP adapter over the checks is built only if
 the benchmark shows agents without a shell falling behind. See
 `docs/agent-native-direction.md`.
 
-- [ ] `sindri project check --format json` over scenes, prefabs, Weave, Decay and `sindri.toml`, with diagnostics raised by the crate that found them, naming the file and the JSON path or source span. `SceneDocument::validate`, `ComponentSchemaRegistry::validate_scene` and `decay-lsp --check --json` already exist and are the parts it composes
-- [ ] Generate JSON Schemas for `.scene` and `.prefab` files from the component registry into `docs/generated/`, carrying the format version they describe
+- [x] `sindri project check --format json` over scenes, prefabs, Weave, Decay and `sindri.toml`, with diagnostics raised by the crate that found them, naming the file and the JSON path or source span. `SceneDocument::validate`, `ComponentSchemaRegistry::validate_scene` and `decay-lsp --check --json` already exist and are the parts it composes
+- [x] Generate JSON Schemas for `.scene` and `.prefab` files from the component registry into `docs/generated/`, carrying the format version they describe; `sindri capabilities scene` hands them out
 - [x] Generate the Weave property reference an agent can read, as `decay-api.json` is for Decay: `docs/generated/weave-reference.json` and `.md`, from the property table `sindri-weave` applies declarations by
 - [ ] Generate the rest of the Weave reference from the language's own tables: selectors, interaction states, units, colors and responsive conditions, still hand-written in `docs/weave-reference.md`
-- [ ] `sindri play --headless` with a structured per-frame log, scripted input and frame capture, generalizing the games' existing scripted-run tests and `*-capture` binaries
-- [ ] The editor reloads a scene changed on disk when it has no unsaved edits, and asks when it has; scripts, textures, prefabs and Weave styles are already watched
-- [ ] `sindri new` writes a short per-project agent guide pointing at the workflow and generated documents, also packaged as a skill for agents that load them
+- [x] `sindri play --headless` (built as `sindri play run` and `sindri render capture`) with a structured per-frame log, scripted input and frame capture, generalizing the games' existing scripted-run tests and `*-capture` binaries
+- [x] The editor reloads a scene changed on disk when it has no unsaved edits, and asks when it has; scripts, textures, prefabs and Weave styles are already watched
+- [x] `sindri project new` writes a short per-project agent guide pointing at the workflow and generated documents, also packaged as a skill for agents that load them
 - [ ] An external-agent benchmark in `tools/ai-authoring-eval`: unmodified agents given a fresh project and fixed tasks, graded by `sindri project check` and a headless run, with the pass rate per agent recorded, each agent run both with a shell and with file access only
-- [ ] If agents without a shell fall behind in the benchmark: a read-only MCP adapter exposing `sindri project check`, `sindri play --headless` (log and captured frames) and the generated documents, calling the CLI and passing its JSON through, never writing project files
+- [x] Built ahead of the benchmark as `sindri mcp`; the benchmark says whether it earns its keep: a read-only MCP adapter exposing `sindri project check`, `sindri play --headless` (log and captured frames) and the generated documents, calling the CLI and passing its JSON through, never writing project files
 - [ ] Local agent: write one Decay script from a description, through the same draft, check and bounded-repair loop as Decay repair, shown as a diff and applied on acceptance
 - [ ] Local agent: add or change components on the selected entity through the proposal protocol, validated by the same scene checks as `sindri project check`, applied as one undo step
 - [ ] Local agent: explain a `sindri project check` failure in the editor
 - [ ] A local-model column in the benchmark for the tasks the local agent is meant to do
 
 Exit gate: an unmodified external agent, given a fresh project and only what
-`sindri new` writes, completes the benchmark's tasks with every change passing
+`sindri project new` writes, completes the benchmark's tasks with every change passing
 `sindri project check` and its headless run; and the local agent passes its
 narrower tasks under the same checks.
 

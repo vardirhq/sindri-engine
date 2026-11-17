@@ -100,6 +100,7 @@ impl EditorApp {
         self.show_window(ui.ctx());
         let upkeep = std::time::Instant::now();
         self.keep_watching(ui.ctx());
+        self.follow_scene_on_disk();
         // Presentation and textures both refresh before extraction, so a saved
         // asset change is visible in the frame that first notices it.
         self.refresh_styles();

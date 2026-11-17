@@ -189,6 +189,23 @@ pub enum PrefabError {
     Entities(#[from] SceneError),
 }
 
+impl PrefabError {
+    /// The error's stable name, which tools match on.
+    #[must_use]
+    pub const fn code(&self) -> &'static str {
+        match self {
+            Self::UnsupportedVersion { .. } => "PREFAB_UNSUPPORTED_VERSION",
+            Self::NoRoot => "PREFAB_NO_ROOT",
+            Self::SeveralRoots(_) => "PREFAB_SEVERAL_ROOTS",
+            Self::Missing(_) => "PREFAB_MISSING",
+            Self::Cycle(_) => "PREFAB_CYCLE",
+            Self::TooDeep(_) => "PREFAB_TOO_DEEP",
+            Self::AmbiguousRootAlias(_) => "PREFAB_AMBIGUOUS_ROOT_ALIAS",
+            Self::Entities(error) => error.code(),
+        }
+    }
+}
+
 /// Failures raised while reading or writing serialized prefabs.
 #[derive(Debug, Error)]
 pub enum PrefabJsonError {
@@ -198,4 +215,16 @@ pub enum PrefabJsonError {
     Invalid(#[from] PrefabError),
     #[error(transparent)]
     Migration(#[from] SceneMigrationError),
+}
+
+impl PrefabJsonError {
+    /// The error's stable name: the prefab's own, or that it did not read.
+    #[must_use]
+    pub const fn code(&self) -> &'static str {
+        match self {
+            Self::Json(_) => "PREFAB_JSON",
+            Self::Invalid(error) => error.code(),
+            Self::Migration(_) => "PREFAB_MIGRATION",
+        }
+    }
 }

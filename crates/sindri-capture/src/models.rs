@@ -81,8 +81,7 @@ mod tests {
         .unwrap();
         let world = World::from_scene(&document).unwrap().world;
         let mut extractor = SceneExtractor::new().unwrap();
-        let root =
-            Path::new(env!("CARGO_MANIFEST_DIR")).join("../crates/sindri-assets/tests/fixtures");
+        let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../sindri-assets/tests/fixtures");
         bind(
             &root,
             sindri_scene::referenced_models(&world),

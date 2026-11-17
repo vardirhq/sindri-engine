@@ -19,6 +19,19 @@ Sindri offers; it is a way to fail CI.
 | `weave-reference.json` | What may a Weave stylesheet declare? | `sindri_weave::PROPERTIES`, the table the bridge applies declarations by |
 | `weave-reference.md` | The same, for a person | the same table |
 | `sindri-capabilities.json` | What may I author? | the built-in `ComponentSchemaRegistry` |
+| `sindri-scene.schema.json` | What shape is a `.scene` file? | the same registry, as JSON Schema (draft 2020-12) |
+| `sindri-prefab.schema.json` | What shape is a `.prefab` file? | the same, for a prefab's own format version |
+
+The `sindri` binary hands out each of these by name — `sindri capabilities
+scene` — so a project that does not carry this repository has them too. To
+have VS Code validate and complete scenes, point `json.schemas` at them:
+
+```json
+"json.schemas": [
+  { "fileMatch": ["*.scene"], "url": "./docs/generated/sindri-scene.schema.json" },
+  { "fileMatch": ["*.prefab"], "url": "./docs/generated/sindri-prefab.schema.json" }
+]
+```
 
 ## Why generated
 

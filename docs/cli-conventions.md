@@ -1,8 +1,8 @@
 # CLI conventions
 
-> **Status:** accepted convention, ahead of the CLI it governs. The `sindri`
-> binary in `ROADMAP.md` does not exist yet; the first generated capability
-> documents do. This page is written first on purpose — a command vocabulary
+> **Status:** accepted convention. The `sindri` binary (`crates/sindri-cli`)
+> exists, with its first command, `sindri project check`; the rest of the
+> commands here are still ahead of it. This page is written first on purpose — a command vocabulary
 > discovered one command at a time accretes, and the second command is already
 > too late to agree on the grammar.
 
@@ -127,5 +127,7 @@ What this build of the engine offers is written down by
 fails when those files disagree with the code. See
 [`docs/generated/README.md`](generated/README.md).
 
-`sindri capabilities --format json`, when it exists, serves that same model. It
+`sindri capabilities [NAME]` serves that same model: with no name the list,
+and with one (`scene`, `prefab`, `components`, `decay`, `decay-language`,
+`weave`) that document, read from the same functions that write the files. It
 does not gain a second description of the engine.

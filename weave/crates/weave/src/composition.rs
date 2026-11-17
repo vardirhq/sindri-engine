@@ -24,6 +24,21 @@ pub enum ComposeError {
     },
 }
 
+impl ComposeError {
+    /// The error's stable name, which tools match on: a parse error keeps
+    /// its own.
+    #[must_use]
+    pub const fn code(&self) -> &'static str {
+        match self {
+            Self::MissingSource(_) => "WEAVE_MISSING_SOURCE",
+            Self::InvalidUse(_) => "WEAVE_INVALID_USE",
+            Self::EscapesRoot { .. } => "WEAVE_ESCAPES_ROOT",
+            Self::Cycle(_) => "WEAVE_CYCLE",
+            Self::Parse { error, .. } => error.code(),
+        }
+    }
+}
+
 /// Returns the top-level `@use` references declared before the first rule.
 ///
 /// Weave deliberately keeps composition simple: imports are file-level and

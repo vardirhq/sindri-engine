@@ -1,0 +1,6990 @@
+{
+  "$defs": {
+    "component_overrides": {
+      "additionalProperties": false,
+      "description": "Components keyed by type name. A second of a kind is a named part: the type, `#`, and the part's name, such as `sindri.light2d#halo`.",
+      "patternProperties": {
+        "^sindri\\.animation\\.sprite#[A-Za-z0-9_-]+$": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "^sindri\\.audio\\.source#[A-Za-z0-9_-]+$": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "^sindri\\.camera#[A-Za-z0-9_-]+$": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "^sindri\\.camera\\.behavior#[A-Za-z0-9_-]+$": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "^sindri\\.camera\\.orbit#[A-Za-z0-9_-]+$": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "^sindri\\.effect\\.burst#[A-Za-z0-9_-]+$": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "^sindri\\.environment#[A-Za-z0-9_-]+$": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "^sindri\\.floating_origin#[A-Za-z0-9_-]+$": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "^sindri\\.grid\\.navigation#[A-Za-z0-9_-]+$": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "^sindri\\.grid\\.occupant#[A-Za-z0-9_-]+$": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "^sindri\\.grid\\.placement#[A-Za-z0-9_-]+$": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "^sindri\\.input\\.actions#[A-Za-z0-9_-]+$": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "^sindri\\.light#[A-Za-z0-9_-]+$": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "^sindri\\.light2d#[A-Za-z0-9_-]+$": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "^sindri\\.light2d\\.occluder#[A-Za-z0-9_-]+$": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "^sindri\\.map_walls#[A-Za-z0-9_-]+$": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "^sindri\\.material#[A-Za-z0-9_-]+$": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "^sindri\\.mesh#[A-Za-z0-9_-]+$": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "^sindri\\.model#[A-Za-z0-9_-]+$": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "^sindri\\.particles#[A-Za-z0-9_-]+$": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "^sindri\\.physics2d\\.character#[A-Za-z0-9_-]+$": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "^sindri\\.physics2d\\.collider#[A-Za-z0-9_-]+$": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "^sindri\\.physics2d\\.distance_joint#[A-Za-z0-9_-]+$": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "^sindri\\.physics2d\\.hinge_joint#[A-Za-z0-9_-]+$": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "^sindri\\.physics2d\\.material#[A-Za-z0-9_-]+$": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "^sindri\\.physics2d\\.one_way#[A-Za-z0-9_-]+$": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "^sindri\\.physics2d\\.rigid_body#[A-Za-z0-9_-]+$": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "^sindri\\.physics2d\\.slider_joint#[A-Za-z0-9_-]+$": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "^sindri\\.physics2d\\.spring_joint#[A-Za-z0-9_-]+$": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "^sindri\\.physics2d\\.tilemap_collider#[A-Za-z0-9_-]+$": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "^sindri\\.physics2d\\.world#[A-Za-z0-9_-]+$": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "^sindri\\.physics3d\\.character#[A-Za-z0-9_-]+$": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "^sindri\\.physics3d\\.collider#[A-Za-z0-9_-]+$": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "^sindri\\.physics3d\\.material#[A-Za-z0-9_-]+$": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "^sindri\\.physics3d\\.model_collider#[A-Za-z0-9_-]+$": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "^sindri\\.physics3d\\.model_convex_collider#[A-Za-z0-9_-]+$": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "^sindri\\.physics3d\\.rigid_body#[A-Za-z0-9_-]+$": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "^sindri\\.physics3d\\.voxel_collider#[A-Za-z0-9_-]+$": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "^sindri\\.physics3d\\.world#[A-Za-z0-9_-]+$": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "^sindri\\.scatter#[A-Za-z0-9_-]+$": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "^sindri\\.script#[A-Za-z0-9_-]+$": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "^sindri\\.sequence#[A-Za-z0-9_-]+$": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "^sindri\\.shadow2d#[A-Za-z0-9_-]+$": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "^sindri\\.shape#[A-Za-z0-9_-]+$": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "^sindri\\.sight2d#[A-Za-z0-9_-]+$": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "^sindri\\.sprite#[A-Za-z0-9_-]+$": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "^sindri\\.sprite_mask#[A-Za-z0-9_-]+$": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "^sindri\\.tags#[A-Za-z0-9_-]+$": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "^sindri\\.text#[A-Za-z0-9_-]+$": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "^sindri\\.tile_grid#[A-Za-z0-9_-]+$": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "^sindri\\.tile_volume#[A-Za-z0-9_-]+$": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "^sindri\\.tilemap#[A-Za-z0-9_-]+$": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "^sindri\\.ui\\.box#[A-Za-z0-9_-]+$": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "^sindri\\.ui\\.button#[A-Za-z0-9_-]+$": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "^sindri\\.ui\\.dropdown#[A-Za-z0-9_-]+$": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "^sindri\\.ui\\.grid#[A-Za-z0-9_-]+$": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "^sindri\\.ui\\.image#[A-Za-z0-9_-]+$": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "^sindri\\.ui\\.layout#[A-Za-z0-9_-]+$": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "^sindri\\.ui\\.option#[A-Za-z0-9_-]+$": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "^sindri\\.ui\\.scroll#[A-Za-z0-9_-]+$": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "^sindri\\.ui\\.shape#[A-Za-z0-9_-]+$": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "^sindri\\.ui\\.slider#[A-Za-z0-9_-]+$": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "^sindri\\.ui\\.text#[A-Za-z0-9_-]+$": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "^sindri\\.ui\\.text_input#[A-Za-z0-9_-]+$": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "^sindri\\.ui\\.toggle#[A-Za-z0-9_-]+$": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "^sindri\\.voxel_world#[A-Za-z0-9_-]+$": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "^sindri\\.wake#[A-Za-z0-9_-]+$": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "^weave\\.style#[A-Za-z0-9_-]+$": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        }
+      },
+      "properties": {
+        "sindri.animation.sprite": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "sindri.audio.source": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "sindri.camera": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "sindri.camera.behavior": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "sindri.camera.orbit": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "sindri.effect.burst": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "sindri.environment": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "sindri.floating_origin": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "sindri.grid.navigation": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "sindri.grid.occupant": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "sindri.grid.placement": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "sindri.input.actions": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "sindri.light": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "sindri.light2d": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "sindri.light2d.occluder": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "sindri.map_walls": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "sindri.material": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "sindri.mesh": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "sindri.model": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "sindri.particles": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "sindri.physics2d.character": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "sindri.physics2d.collider": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "sindri.physics2d.distance_joint": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "sindri.physics2d.hinge_joint": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "sindri.physics2d.material": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "sindri.physics2d.one_way": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "sindri.physics2d.rigid_body": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "sindri.physics2d.slider_joint": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "sindri.physics2d.spring_joint": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "sindri.physics2d.tilemap_collider": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "sindri.physics2d.world": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "sindri.physics3d.character": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "sindri.physics3d.collider": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "sindri.physics3d.material": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "sindri.physics3d.model_collider": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "sindri.physics3d.model_convex_collider": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "sindri.physics3d.rigid_body": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "sindri.physics3d.voxel_collider": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "sindri.physics3d.world": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "sindri.scatter": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "sindri.script": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "sindri.sequence": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "sindri.shadow2d": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "sindri.shape": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "sindri.sight2d": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "sindri.sprite": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "sindri.sprite_mask": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "sindri.tags": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "sindri.text": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "sindri.tile_grid": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "sindri.tile_volume": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "sindri.tilemap": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "sindri.ui.box": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "sindri.ui.button": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "sindri.ui.dropdown": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "sindri.ui.grid": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "sindri.ui.image": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "sindri.ui.layout": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "sindri.ui.option": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "sindri.ui.scroll": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "sindri.ui.shape": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "sindri.ui.slider": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "sindri.ui.text": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "sindri.ui.text_input": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "sindri.ui.toggle": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "sindri.voxel_world": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "sindri.wake": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "weave.style": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        }
+      },
+      "type": "object"
+    },
+    "components": {
+      "additionalProperties": false,
+      "description": "Components keyed by type name. A second of a kind is a named part: the type, `#`, and the part's name, such as `sindri.light2d#halo`.",
+      "patternProperties": {
+        "^sindri\\.animation\\.sprite#[A-Za-z0-9_-]+$": {
+          "$ref": "#/$defs/sindri.animation.sprite"
+        },
+        "^sindri\\.audio\\.source#[A-Za-z0-9_-]+$": {
+          "$ref": "#/$defs/sindri.audio.source"
+        },
+        "^sindri\\.camera#[A-Za-z0-9_-]+$": {
+          "$ref": "#/$defs/sindri.camera"
+        },
+        "^sindri\\.camera\\.behavior#[A-Za-z0-9_-]+$": {
+          "$ref": "#/$defs/sindri.camera.behavior"
+        },
+        "^sindri\\.camera\\.orbit#[A-Za-z0-9_-]+$": {
+          "$ref": "#/$defs/sindri.camera.orbit"
+        },
+        "^sindri\\.effect\\.burst#[A-Za-z0-9_-]+$": {
+          "$ref": "#/$defs/sindri.effect.burst"
+        },
+        "^sindri\\.environment#[A-Za-z0-9_-]+$": {
+          "$ref": "#/$defs/sindri.environment"
+        },
+        "^sindri\\.floating_origin#[A-Za-z0-9_-]+$": {
+          "$ref": "#/$defs/sindri.floating_origin"
+        },
+        "^sindri\\.grid\\.navigation#[A-Za-z0-9_-]+$": {
+          "$ref": "#/$defs/sindri.grid.navigation"
+        },
+        "^sindri\\.grid\\.occupant#[A-Za-z0-9_-]+$": {
+          "$ref": "#/$defs/sindri.grid.occupant"
+        },
+        "^sindri\\.grid\\.placement#[A-Za-z0-9_-]+$": {
+          "$ref": "#/$defs/sindri.grid.placement"
+        },
+        "^sindri\\.input\\.actions#[A-Za-z0-9_-]+$": {
+          "$ref": "#/$defs/sindri.input.actions"
+        },
+        "^sindri\\.light#[A-Za-z0-9_-]+$": {
+          "$ref": "#/$defs/sindri.light"
+        },
+        "^sindri\\.light2d#[A-Za-z0-9_-]+$": {
+          "$ref": "#/$defs/sindri.light2d"
+        },
+        "^sindri\\.light2d\\.occluder#[A-Za-z0-9_-]+$": {
+          "$ref": "#/$defs/sindri.light2d.occluder"
+        },
+        "^sindri\\.map_walls#[A-Za-z0-9_-]+$": {
+          "$ref": "#/$defs/sindri.map_walls"
+        },
+        "^sindri\\.material#[A-Za-z0-9_-]+$": {
+          "$ref": "#/$defs/sindri.material"
+        },
+        "^sindri\\.mesh#[A-Za-z0-9_-]+$": {
+          "$ref": "#/$defs/sindri.mesh"
+        },
+        "^sindri\\.model#[A-Za-z0-9_-]+$": {
+          "$ref": "#/$defs/sindri.model"
+        },
+        "^sindri\\.particles#[A-Za-z0-9_-]+$": {
+          "$ref": "#/$defs/sindri.particles"
+        },
+        "^sindri\\.physics2d\\.character#[A-Za-z0-9_-]+$": {
+          "$ref": "#/$defs/sindri.physics2d.character"
+        },
+        "^sindri\\.physics2d\\.collider#[A-Za-z0-9_-]+$": {
+          "$ref": "#/$defs/sindri.physics2d.collider"
+        },
+        "^sindri\\.physics2d\\.distance_joint#[A-Za-z0-9_-]+$": {
+          "$ref": "#/$defs/sindri.physics2d.distance_joint"
+        },
+        "^sindri\\.physics2d\\.hinge_joint#[A-Za-z0-9_-]+$": {
+          "$ref": "#/$defs/sindri.physics2d.hinge_joint"
+        },
+        "^sindri\\.physics2d\\.material#[A-Za-z0-9_-]+$": {
+          "$ref": "#/$defs/sindri.physics2d.material"
+        },
+        "^sindri\\.physics2d\\.one_way#[A-Za-z0-9_-]+$": {
+          "$ref": "#/$defs/sindri.physics2d.one_way"
+        },
+        "^sindri\\.physics2d\\.rigid_body#[A-Za-z0-9_-]+$": {
+          "$ref": "#/$defs/sindri.physics2d.rigid_body"
+        },
+        "^sindri\\.physics2d\\.slider_joint#[A-Za-z0-9_-]+$": {
+          "$ref": "#/$defs/sindri.physics2d.slider_joint"
+        },
+        "^sindri\\.physics2d\\.spring_joint#[A-Za-z0-9_-]+$": {
+          "$ref": "#/$defs/sindri.physics2d.spring_joint"
+        },
+        "^sindri\\.physics2d\\.tilemap_collider#[A-Za-z0-9_-]+$": {
+          "$ref": "#/$defs/sindri.physics2d.tilemap_collider"
+        },
+        "^sindri\\.physics2d\\.world#[A-Za-z0-9_-]+$": {
+          "$ref": "#/$defs/sindri.physics2d.world"
+        },
+        "^sindri\\.physics3d\\.character#[A-Za-z0-9_-]+$": {
+          "$ref": "#/$defs/sindri.physics3d.character"
+        },
+        "^sindri\\.physics3d\\.collider#[A-Za-z0-9_-]+$": {
+          "$ref": "#/$defs/sindri.physics3d.collider"
+        },
+        "^sindri\\.physics3d\\.material#[A-Za-z0-9_-]+$": {
+          "$ref": "#/$defs/sindri.physics3d.material"
+        },
+        "^sindri\\.physics3d\\.model_collider#[A-Za-z0-9_-]+$": {
+          "$ref": "#/$defs/sindri.physics3d.model_collider"
+        },
+        "^sindri\\.physics3d\\.model_convex_collider#[A-Za-z0-9_-]+$": {
+          "$ref": "#/$defs/sindri.physics3d.model_convex_collider"
+        },
+        "^sindri\\.physics3d\\.rigid_body#[A-Za-z0-9_-]+$": {
+          "$ref": "#/$defs/sindri.physics3d.rigid_body"
+        },
+        "^sindri\\.physics3d\\.voxel_collider#[A-Za-z0-9_-]+$": {
+          "$ref": "#/$defs/sindri.physics3d.voxel_collider"
+        },
+        "^sindri\\.physics3d\\.world#[A-Za-z0-9_-]+$": {
+          "$ref": "#/$defs/sindri.physics3d.world"
+        },
+        "^sindri\\.scatter#[A-Za-z0-9_-]+$": {
+          "$ref": "#/$defs/sindri.scatter"
+        },
+        "^sindri\\.script#[A-Za-z0-9_-]+$": {
+          "$ref": "#/$defs/sindri.script"
+        },
+        "^sindri\\.sequence#[A-Za-z0-9_-]+$": {
+          "$ref": "#/$defs/sindri.sequence"
+        },
+        "^sindri\\.shadow2d#[A-Za-z0-9_-]+$": {
+          "$ref": "#/$defs/sindri.shadow2d"
+        },
+        "^sindri\\.shape#[A-Za-z0-9_-]+$": {
+          "$ref": "#/$defs/sindri.shape"
+        },
+        "^sindri\\.sight2d#[A-Za-z0-9_-]+$": {
+          "$ref": "#/$defs/sindri.sight2d"
+        },
+        "^sindri\\.sprite#[A-Za-z0-9_-]+$": {
+          "$ref": "#/$defs/sindri.sprite"
+        },
+        "^sindri\\.sprite_mask#[A-Za-z0-9_-]+$": {
+          "$ref": "#/$defs/sindri.sprite_mask"
+        },
+        "^sindri\\.tags#[A-Za-z0-9_-]+$": {
+          "$ref": "#/$defs/sindri.tags"
+        },
+        "^sindri\\.text#[A-Za-z0-9_-]+$": {
+          "$ref": "#/$defs/sindri.text"
+        },
+        "^sindri\\.tile_grid#[A-Za-z0-9_-]+$": {
+          "$ref": "#/$defs/sindri.tile_grid"
+        },
+        "^sindri\\.tile_volume#[A-Za-z0-9_-]+$": {
+          "$ref": "#/$defs/sindri.tile_volume"
+        },
+        "^sindri\\.tilemap#[A-Za-z0-9_-]+$": {
+          "$ref": "#/$defs/sindri.tilemap"
+        },
+        "^sindri\\.ui\\.box#[A-Za-z0-9_-]+$": {
+          "$ref": "#/$defs/sindri.ui.box"
+        },
+        "^sindri\\.ui\\.button#[A-Za-z0-9_-]+$": {
+          "$ref": "#/$defs/sindri.ui.button"
+        },
+        "^sindri\\.ui\\.dropdown#[A-Za-z0-9_-]+$": {
+          "$ref": "#/$defs/sindri.ui.dropdown"
+        },
+        "^sindri\\.ui\\.grid#[A-Za-z0-9_-]+$": {
+          "$ref": "#/$defs/sindri.ui.grid"
+        },
+        "^sindri\\.ui\\.image#[A-Za-z0-9_-]+$": {
+          "$ref": "#/$defs/sindri.ui.image"
+        },
+        "^sindri\\.ui\\.layout#[A-Za-z0-9_-]+$": {
+          "$ref": "#/$defs/sindri.ui.layout"
+        },
+        "^sindri\\.ui\\.option#[A-Za-z0-9_-]+$": {
+          "$ref": "#/$defs/sindri.ui.option"
+        },
+        "^sindri\\.ui\\.scroll#[A-Za-z0-9_-]+$": {
+          "$ref": "#/$defs/sindri.ui.scroll"
+        },
+        "^sindri\\.ui\\.shape#[A-Za-z0-9_-]+$": {
+          "$ref": "#/$defs/sindri.ui.shape"
+        },
+        "^sindri\\.ui\\.slider#[A-Za-z0-9_-]+$": {
+          "$ref": "#/$defs/sindri.ui.slider"
+        },
+        "^sindri\\.ui\\.text#[A-Za-z0-9_-]+$": {
+          "$ref": "#/$defs/sindri.ui.text"
+        },
+        "^sindri\\.ui\\.text_input#[A-Za-z0-9_-]+$": {
+          "$ref": "#/$defs/sindri.ui.text_input"
+        },
+        "^sindri\\.ui\\.toggle#[A-Za-z0-9_-]+$": {
+          "$ref": "#/$defs/sindri.ui.toggle"
+        },
+        "^sindri\\.voxel_world#[A-Za-z0-9_-]+$": {
+          "$ref": "#/$defs/sindri.voxel_world"
+        },
+        "^sindri\\.wake#[A-Za-z0-9_-]+$": {
+          "$ref": "#/$defs/sindri.wake"
+        },
+        "^weave\\.style#[A-Za-z0-9_-]+$": {
+          "$ref": "#/$defs/weave.style"
+        }
+      },
+      "properties": {
+        "sindri.animation.sprite": {
+          "$ref": "#/$defs/sindri.animation.sprite"
+        },
+        "sindri.audio.source": {
+          "$ref": "#/$defs/sindri.audio.source"
+        },
+        "sindri.camera": {
+          "$ref": "#/$defs/sindri.camera"
+        },
+        "sindri.camera.behavior": {
+          "$ref": "#/$defs/sindri.camera.behavior"
+        },
+        "sindri.camera.orbit": {
+          "$ref": "#/$defs/sindri.camera.orbit"
+        },
+        "sindri.effect.burst": {
+          "$ref": "#/$defs/sindri.effect.burst"
+        },
+        "sindri.environment": {
+          "$ref": "#/$defs/sindri.environment"
+        },
+        "sindri.floating_origin": {
+          "$ref": "#/$defs/sindri.floating_origin"
+        },
+        "sindri.grid.navigation": {
+          "$ref": "#/$defs/sindri.grid.navigation"
+        },
+        "sindri.grid.occupant": {
+          "$ref": "#/$defs/sindri.grid.occupant"
+        },
+        "sindri.grid.placement": {
+          "$ref": "#/$defs/sindri.grid.placement"
+        },
+        "sindri.input.actions": {
+          "$ref": "#/$defs/sindri.input.actions"
+        },
+        "sindri.light": {
+          "$ref": "#/$defs/sindri.light"
+        },
+        "sindri.light2d": {
+          "$ref": "#/$defs/sindri.light2d"
+        },
+        "sindri.light2d.occluder": {
+          "$ref": "#/$defs/sindri.light2d.occluder"
+        },
+        "sindri.map_walls": {
+          "$ref": "#/$defs/sindri.map_walls"
+        },
+        "sindri.material": {
+          "$ref": "#/$defs/sindri.material"
+        },
+        "sindri.mesh": {
+          "$ref": "#/$defs/sindri.mesh"
+        },
+        "sindri.model": {
+          "$ref": "#/$defs/sindri.model"
+        },
+        "sindri.particles": {
+          "$ref": "#/$defs/sindri.particles"
+        },
+        "sindri.physics2d.character": {
+          "$ref": "#/$defs/sindri.physics2d.character"
+        },
+        "sindri.physics2d.collider": {
+          "$ref": "#/$defs/sindri.physics2d.collider"
+        },
+        "sindri.physics2d.distance_joint": {
+          "$ref": "#/$defs/sindri.physics2d.distance_joint"
+        },
+        "sindri.physics2d.hinge_joint": {
+          "$ref": "#/$defs/sindri.physics2d.hinge_joint"
+        },
+        "sindri.physics2d.material": {
+          "$ref": "#/$defs/sindri.physics2d.material"
+        },
+        "sindri.physics2d.one_way": {
+          "$ref": "#/$defs/sindri.physics2d.one_way"
+        },
+        "sindri.physics2d.rigid_body": {
+          "$ref": "#/$defs/sindri.physics2d.rigid_body"
+        },
+        "sindri.physics2d.slider_joint": {
+          "$ref": "#/$defs/sindri.physics2d.slider_joint"
+        },
+        "sindri.physics2d.spring_joint": {
+          "$ref": "#/$defs/sindri.physics2d.spring_joint"
+        },
+        "sindri.physics2d.tilemap_collider": {
+          "$ref": "#/$defs/sindri.physics2d.tilemap_collider"
+        },
+        "sindri.physics2d.world": {
+          "$ref": "#/$defs/sindri.physics2d.world"
+        },
+        "sindri.physics3d.character": {
+          "$ref": "#/$defs/sindri.physics3d.character"
+        },
+        "sindri.physics3d.collider": {
+          "$ref": "#/$defs/sindri.physics3d.collider"
+        },
+        "sindri.physics3d.material": {
+          "$ref": "#/$defs/sindri.physics3d.material"
+        },
+        "sindri.physics3d.model_collider": {
+          "$ref": "#/$defs/sindri.physics3d.model_collider"
+        },
+        "sindri.physics3d.model_convex_collider": {
+          "$ref": "#/$defs/sindri.physics3d.model_convex_collider"
+        },
+        "sindri.physics3d.rigid_body": {
+          "$ref": "#/$defs/sindri.physics3d.rigid_body"
+        },
+        "sindri.physics3d.voxel_collider": {
+          "$ref": "#/$defs/sindri.physics3d.voxel_collider"
+        },
+        "sindri.physics3d.world": {
+          "$ref": "#/$defs/sindri.physics3d.world"
+        },
+        "sindri.scatter": {
+          "$ref": "#/$defs/sindri.scatter"
+        },
+        "sindri.script": {
+          "$ref": "#/$defs/sindri.script"
+        },
+        "sindri.sequence": {
+          "$ref": "#/$defs/sindri.sequence"
+        },
+        "sindri.shadow2d": {
+          "$ref": "#/$defs/sindri.shadow2d"
+        },
+        "sindri.shape": {
+          "$ref": "#/$defs/sindri.shape"
+        },
+        "sindri.sight2d": {
+          "$ref": "#/$defs/sindri.sight2d"
+        },
+        "sindri.sprite": {
+          "$ref": "#/$defs/sindri.sprite"
+        },
+        "sindri.sprite_mask": {
+          "$ref": "#/$defs/sindri.sprite_mask"
+        },
+        "sindri.tags": {
+          "$ref": "#/$defs/sindri.tags"
+        },
+        "sindri.text": {
+          "$ref": "#/$defs/sindri.text"
+        },
+        "sindri.tile_grid": {
+          "$ref": "#/$defs/sindri.tile_grid"
+        },
+        "sindri.tile_volume": {
+          "$ref": "#/$defs/sindri.tile_volume"
+        },
+        "sindri.tilemap": {
+          "$ref": "#/$defs/sindri.tilemap"
+        },
+        "sindri.ui.box": {
+          "$ref": "#/$defs/sindri.ui.box"
+        },
+        "sindri.ui.button": {
+          "$ref": "#/$defs/sindri.ui.button"
+        },
+        "sindri.ui.dropdown": {
+          "$ref": "#/$defs/sindri.ui.dropdown"
+        },
+        "sindri.ui.grid": {
+          "$ref": "#/$defs/sindri.ui.grid"
+        },
+        "sindri.ui.image": {
+          "$ref": "#/$defs/sindri.ui.image"
+        },
+        "sindri.ui.layout": {
+          "$ref": "#/$defs/sindri.ui.layout"
+        },
+        "sindri.ui.option": {
+          "$ref": "#/$defs/sindri.ui.option"
+        },
+        "sindri.ui.scroll": {
+          "$ref": "#/$defs/sindri.ui.scroll"
+        },
+        "sindri.ui.shape": {
+          "$ref": "#/$defs/sindri.ui.shape"
+        },
+        "sindri.ui.slider": {
+          "$ref": "#/$defs/sindri.ui.slider"
+        },
+        "sindri.ui.text": {
+          "$ref": "#/$defs/sindri.ui.text"
+        },
+        "sindri.ui.text_input": {
+          "$ref": "#/$defs/sindri.ui.text_input"
+        },
+        "sindri.ui.toggle": {
+          "$ref": "#/$defs/sindri.ui.toggle"
+        },
+        "sindri.voxel_world": {
+          "$ref": "#/$defs/sindri.voxel_world"
+        },
+        "sindri.wake": {
+          "$ref": "#/$defs/sindri.wake"
+        },
+        "weave.style": {
+          "$ref": "#/$defs/weave.style"
+        }
+      },
+      "type": "object"
+    },
+    "editor": {
+      "description": "Editor-only state. Runtimes ignore it, and a tool may drop it.",
+      "type": "object"
+    },
+    "entity": {
+      "additionalProperties": false,
+      "properties": {
+        "components": {
+          "$ref": "#/$defs/components"
+        },
+        "disabled": {
+          "description": "Switched off: it, and everything under it, takes no part in the scene.",
+          "type": "boolean"
+        },
+        "editor": {
+          "$ref": "#/$defs/editor"
+        },
+        "id": {
+          "description": "A stable id, unique in this file. Parents, scripts and prefab overrides name an entity by it.",
+          "minLength": 1,
+          "type": "string"
+        },
+        "name": {
+          "description": "What a person calls it. Not unique.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "parent": {
+          "description": "The id of the entity this one sits under; its transform is relative to that one's.",
+          "minLength": 1,
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "prefab": {
+          "$ref": "#/$defs/prefab_instance"
+        },
+        "transform_3d": {
+          "$ref": "#/$defs/transform"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "type": "object"
+    },
+    "prefab_instance": {
+      "additionalProperties": false,
+      "description": "This entity is an instance of a prefab. It carries no components of its own: what it is made of is the prefab's, changed by its overrides.",
+      "properties": {
+        "overrides": {
+          "additionalProperties": {
+            "additionalProperties": false,
+            "properties": {
+              "components": {
+                "$ref": "#/$defs/component_overrides"
+              },
+              "disabled": {
+                "type": "boolean"
+              },
+              "editor": {
+                "$ref": "#/$defs/editor"
+              },
+              "name": {
+                "type": "string"
+              },
+              "transform_3d": {
+                "$ref": "#/$defs/transform"
+              }
+            },
+            "type": "object"
+          },
+          "description": "Changes to the prefab's entities, keyed by their id in the prefab.",
+          "type": "object"
+        },
+        "removed": {
+          "description": "Ids of the prefab's entities this instance leaves out.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "uniqueItems": true
+        },
+        "source": {
+          "description": "The prefab file, relative to the project.",
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "source"
+      ],
+      "type": "object"
+    },
+    "sindri.animation.sprite": {
+      "additionalProperties": false,
+      "properties": {
+        "clips": {
+          "default": {},
+          "properties": {},
+          "type": "object"
+        },
+        "playing": {},
+        "speed": {
+          "default": 1.0,
+          "description": "A bounded number.",
+          "minimum": 0.0,
+          "type": "number"
+        }
+      },
+      "required": [
+        "clips"
+      ],
+      "title": "Sprite Animation",
+      "type": "object"
+    },
+    "sindri.audio.source": {
+      "additionalProperties": false,
+      "properties": {
+        "autoplay": {
+          "default": false,
+          "type": "boolean"
+        },
+        "bus": {
+          "default": "",
+          "type": "string"
+        },
+        "clip": {
+          "default": "",
+          "description": "Names a audio asset, by its path in the project.",
+          "type": "string"
+        },
+        "looping": {
+          "default": false,
+          "type": "boolean"
+        },
+        "volume": {
+          "default": 1.0,
+          "description": "A bounded number.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "type": "number"
+        }
+      },
+      "required": [
+        "clip"
+      ],
+      "title": "Audio Source",
+      "type": "object"
+    },
+    "sindri.camera": {
+      "oneOf": [
+        {
+          "additionalProperties": false,
+          "properties": {
+            "far": {
+              "default": 100.0,
+              "type": "number"
+            },
+            "near": {
+              "default": 0.10000000149011612,
+              "type": "number"
+            },
+            "projection": {
+              "const": "perspective"
+            },
+            "vertical_fov_degrees": {
+              "default": 60.0,
+              "type": "number"
+            }
+          },
+          "required": [
+            "far",
+            "near",
+            "projection",
+            "vertical_fov_degrees"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "far": {
+              "default": 100.0,
+              "type": "number"
+            },
+            "fit": {
+              "default": "height",
+              "description": "One of the listed spellings.",
+              "enum": [
+                "height",
+                "shorter"
+              ],
+              "type": "string"
+            },
+            "near": {
+              "default": 0.10000000149011612,
+              "type": "number"
+            },
+            "projection": {
+              "const": "orthographic"
+            },
+            "vertical_size": {
+              "default": 6.0,
+              "type": "number"
+            }
+          },
+          "required": [
+            "far",
+            "near",
+            "projection",
+            "vertical_size"
+          ],
+          "type": "object"
+        }
+      ],
+      "title": "Camera",
+      "type": "object"
+    },
+    "sindri.camera.behavior": {
+      "additionalProperties": false,
+      "properties": {
+        "confine": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "default": {
+                "contain_view": false,
+                "max": [
+                  10.0,
+                  10.0
+                ],
+                "min": [
+                  -10.0,
+                  -10.0
+                ]
+              },
+              "properties": {
+                "contain_view": {
+                  "default": false,
+                  "type": "boolean"
+                },
+                "max": {
+                  "default": [
+                    10.0,
+                    10.0
+                  ],
+                  "items": {
+                    "default": 10.0,
+                    "type": "number"
+                  },
+                  "type": "array"
+                },
+                "min": {
+                  "default": [
+                    -10.0,
+                    -10.0
+                  ],
+                  "items": {
+                    "default": -10.0,
+                    "type": "number"
+                  },
+                  "type": "array"
+                }
+              },
+              "type": "object"
+            }
+          ],
+          "default": null
+        },
+        "follow": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "default": {
+                "dead_zone": [
+                  0.0,
+                  0.0
+                ],
+                "max_speed": 0.0,
+                "offset": [
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                "smoothing": 8.0,
+                "target": ""
+              },
+              "properties": {
+                "dead_zone": {
+                  "default": [
+                    0.0,
+                    0.0
+                  ],
+                  "items": {
+                    "default": 0.0,
+                    "type": "number"
+                  },
+                  "type": "array"
+                },
+                "max_speed": {
+                  "default": 0.0,
+                  "description": "A bounded number.",
+                  "minimum": 0.0,
+                  "type": "number"
+                },
+                "offset": {
+                  "default": [
+                    0.0,
+                    0.0,
+                    0.0
+                  ],
+                  "items": {
+                    "default": 0.0,
+                    "type": "number"
+                  },
+                  "type": "array"
+                },
+                "smoothing": {
+                  "default": 8.0,
+                  "description": "A bounded number.",
+                  "minimum": 0.0,
+                  "type": "number"
+                },
+                "target": {
+                  "default": "",
+                  "description": "Names another entity, by its id.",
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            }
+          ],
+          "default": null
+        },
+        "shake": {
+          "default": {
+            "decay": 2.8,
+            "frequency": 57.0,
+            "phase": 0.0,
+            "strength": 0.12,
+            "trauma": 0.0
+          },
+          "properties": {
+            "decay": {
+              "default": 2.8,
+              "description": "A bounded number.",
+              "minimum": 0.0,
+              "type": "number"
+            },
+            "frequency": {
+              "default": 57.0,
+              "description": "A bounded number.",
+              "minimum": 0.0,
+              "type": "number"
+            },
+            "phase": {
+              "default": 0.0,
+              "type": "number"
+            },
+            "strength": {
+              "default": 0.12,
+              "description": "A bounded number.",
+              "minimum": 0.0,
+              "type": "number"
+            },
+            "trauma": {
+              "default": 0.0,
+              "description": "A bounded number.",
+              "maximum": 1.0,
+              "minimum": 0.0,
+              "type": "number"
+            }
+          },
+          "type": "object"
+        }
+      },
+      "title": "Camera Behavior",
+      "type": "object"
+    },
+    "sindri.camera.orbit": {
+      "additionalProperties": false,
+      "properties": {
+        "collision_mask": {
+          "default": 4294967295,
+          "description": "A bounded number.",
+          "maximum": 4294967295.0,
+          "minimum": 0.0,
+          "type": "integer"
+        },
+        "collision_padding": {
+          "default": 0.2,
+          "description": "A bounded number.",
+          "minimum": 0.0,
+          "type": "number"
+        },
+        "distance": {
+          "default": 6.0,
+          "description": "A bounded number.",
+          "minimum": 0.0,
+          "type": "number"
+        },
+        "offset": {
+          "default": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "items": {
+            "default": 0.0,
+            "type": "number"
+          },
+          "type": "array"
+        },
+        "pitch": {
+          "default": 0.35,
+          "description": "An angle, in radians.",
+          "type": "number"
+        },
+        "smoothing": {
+          "default": 8.0,
+          "description": "A bounded number.",
+          "minimum": 0.0,
+          "type": "number"
+        },
+        "target": {
+          "default": "target",
+          "description": "Names another entity, by its id.",
+          "type": "string"
+        },
+        "yaw": {
+          "default": 0.0,
+          "description": "An angle, in radians.",
+          "type": "number"
+        }
+      },
+      "required": [
+        "target"
+      ],
+      "title": "Camera Orbit",
+      "type": "object"
+    },
+    "sindri.effect.burst": {
+      "additionalProperties": false,
+      "properties": {
+        "count": {
+          "default": 12,
+          "type": "integer"
+        },
+        "drag": {
+          "default": 0.25,
+          "type": "number"
+        },
+        "fade": {
+          "default": true,
+          "type": "boolean"
+        },
+        "layer": {
+          "default": 0,
+          "type": "integer"
+        },
+        "lifetime": {
+          "default": 0.5,
+          "type": "number"
+        },
+        "size": {
+          "default": 0.1,
+          "type": "number"
+        },
+        "speed": {
+          "default": 4.0,
+          "type": "number"
+        },
+        "spread": {
+          "default": 0.5,
+          "type": "number"
+        },
+        "texture": {
+          "default": "procedural:checkerboard",
+          "description": "Names a texture asset, by its path in the project.",
+          "type": "string"
+        },
+        "tint": {
+          "default": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "description": "A color: red, green, blue and, where there are four, alpha, each 0 to 1.",
+          "items": {
+            "default": 1.0,
+            "type": "number"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "texture"
+      ],
+      "title": "Effect Burst",
+      "type": "object"
+    },
+    "sindri.environment": {
+      "additionalProperties": false,
+      "properties": {
+        "ambient_color": {
+          "default": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "description": "A color: red, green, blue and, where there are four, alpha, each 0 to 1.",
+          "items": {
+            "default": 1.0,
+            "type": "number"
+          },
+          "type": "array"
+        },
+        "ambient_intensity": {
+          "default": 1.0,
+          "description": "A bounded number.",
+          "minimum": 0.0,
+          "type": "number"
+        },
+        "ambient_occlusion": {
+          "default": {
+            "enabled": true,
+            "strength": 0.65
+          },
+          "properties": {
+            "enabled": {
+              "default": true,
+              "type": "boolean"
+            },
+            "strength": {
+              "default": 0.65,
+              "description": "A bounded number.",
+              "maximum": 1.0,
+              "minimum": 0.0,
+              "type": "number"
+            }
+          },
+          "type": "object"
+        },
+        "background": {
+          "default": [
+            0.035,
+            0.045,
+            0.065,
+            1.0
+          ],
+          "description": "A color: red, green, blue and, where there are four, alpha, each 0 to 1.",
+          "items": {
+            "default": 0.035,
+            "type": "number"
+          },
+          "type": "array"
+        },
+        "bloom": {
+          "default": {
+            "enabled": false,
+            "intensity": 0.45,
+            "knee": 0.2,
+            "passes": 3,
+            "threshold": 0.65
+          },
+          "properties": {
+            "enabled": {
+              "default": false,
+              "type": "boolean"
+            },
+            "intensity": {
+              "default": 0.45,
+              "description": "A bounded number.",
+              "minimum": 0.0,
+              "type": "number"
+            },
+            "knee": {
+              "default": 0.2,
+              "description": "A bounded number.",
+              "maximum": 1.0,
+              "minimum": 0.0001,
+              "type": "number"
+            },
+            "passes": {
+              "default": 3,
+              "description": "A bounded number.",
+              "maximum": 8.0,
+              "minimum": 1.0,
+              "type": "integer"
+            },
+            "threshold": {
+              "default": 0.65,
+              "description": "A bounded number.",
+              "minimum": 0.0,
+              "type": "number"
+            }
+          },
+          "type": "object"
+        },
+        "depth_of_field": {
+          "default": {
+            "blur": 0.004,
+            "enabled": false,
+            "falloff": 0.3,
+            "focus": 0.55,
+            "range": 0.12
+          },
+          "properties": {
+            "blur": {
+              "default": 0.004,
+              "description": "A bounded number.",
+              "maximum": 0.02,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            "enabled": {
+              "default": false,
+              "type": "boolean"
+            },
+            "falloff": {
+              "default": 0.3,
+              "description": "A bounded number.",
+              "maximum": 1.0,
+              "minimum": 0.001,
+              "type": "number"
+            },
+            "focus": {
+              "default": 0.55,
+              "description": "A bounded number.",
+              "maximum": 1.0,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            "range": {
+              "default": 0.12,
+              "description": "A bounded number.",
+              "maximum": 1.0,
+              "minimum": 0.0,
+              "type": "number"
+            }
+          },
+          "type": "object"
+        },
+        "fog": {
+          "default": {
+            "color": [
+              0.55,
+              0.65,
+              0.75
+            ],
+            "density": 0.0,
+            "distance": 64.0,
+            "enabled": false,
+            "height": 0.0,
+            "height_falloff": 0.0,
+            "start": 24.0
+          },
+          "properties": {
+            "color": {
+              "default": [
+                0.55,
+                0.65,
+                0.75
+              ],
+              "description": "A color: red, green, blue and, where there are four, alpha, each 0 to 1.",
+              "items": {
+                "default": 0.55,
+                "type": "number"
+              },
+              "type": "array"
+            },
+            "density": {
+              "default": 0.0,
+              "description": "A bounded number.",
+              "maximum": 1.0,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            "distance": {
+              "default": 64.0,
+              "description": "A bounded number.",
+              "minimum": 0.01,
+              "type": "number"
+            },
+            "enabled": {
+              "default": false,
+              "type": "boolean"
+            },
+            "height": {
+              "default": 0.0,
+              "type": "number"
+            },
+            "height_falloff": {
+              "default": 0.0,
+              "description": "A bounded number.",
+              "maximum": 1.0,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            "start": {
+              "default": 24.0,
+              "description": "A bounded number.",
+              "minimum": 0.0,
+              "type": "number"
+            }
+          },
+          "type": "object"
+        },
+        "lighting_2d": {
+          "default": {
+            "ambient": [
+              0.25,
+              0.25,
+              0.3
+            ],
+            "enabled": false
+          },
+          "properties": {
+            "ambient": {
+              "default": [
+                0.25,
+                0.25,
+                0.3
+              ],
+              "description": "A color: red, green, blue and, where there are four, alpha, each 0 to 1.",
+              "items": {
+                "default": 0.25,
+                "type": "number"
+              },
+              "type": "array"
+            },
+            "enabled": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          "type": "object"
+        },
+        "night_vision": {
+          "default": {
+            "blur": 0.006,
+            "enabled": false,
+            "grey": 0.85,
+            "threshold": 0.12
+          },
+          "properties": {
+            "blur": {
+              "default": 0.006,
+              "description": "A bounded number.",
+              "maximum": 0.02,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            "enabled": {
+              "default": false,
+              "type": "boolean"
+            },
+            "grey": {
+              "default": 0.85,
+              "description": "A bounded number.",
+              "maximum": 1.0,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            "threshold": {
+              "default": 0.12,
+              "description": "A bounded number.",
+              "maximum": 1.0,
+              "minimum": 0.001,
+              "type": "number"
+            }
+          },
+          "type": "object"
+        },
+        "post_process": {
+          "default": {
+            "contrast": 1.0,
+            "exposure": 0.0,
+            "saturation": 1.0,
+            "tone_mapping": "none",
+            "vignette": 0.0
+          },
+          "properties": {
+            "contrast": {
+              "default": 1.0,
+              "description": "A bounded number.",
+              "maximum": 4.0,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            "exposure": {
+              "default": 0.0,
+              "description": "A bounded number.",
+              "maximum": 8.0,
+              "minimum": -8.0,
+              "type": "number"
+            },
+            "saturation": {
+              "default": 1.0,
+              "description": "A bounded number.",
+              "maximum": 4.0,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            "tone_mapping": {
+              "default": "none",
+              "description": "One of the listed spellings.",
+              "enum": [
+                "none",
+                "reinhard",
+                "aces"
+              ],
+              "type": "string"
+            },
+            "vignette": {
+              "default": 0.0,
+              "description": "A bounded number.",
+              "maximum": 1.0,
+              "minimum": 0.0,
+              "type": "number"
+            }
+          },
+          "type": "object"
+        },
+        "shadows": {
+          "default": {
+            "bias": 0.002,
+            "distance": 48.0,
+            "enabled": true,
+            "map_size": 1024
+          },
+          "properties": {
+            "bias": {
+              "default": 0.002,
+              "description": "A bounded number.",
+              "maximum": 0.05,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            "distance": {
+              "default": 48.0,
+              "description": "A bounded number.",
+              "minimum": 1.0,
+              "type": "number"
+            },
+            "enabled": {
+              "default": true,
+              "type": "boolean"
+            },
+            "map_size": {
+              "default": 1024,
+              "description": "One of the listed values.",
+              "enum": [
+                256,
+                512,
+                1024,
+                2048
+              ],
+              "type": "integer"
+            }
+          },
+          "type": "object"
+        }
+      },
+      "title": "Environment",
+      "type": "object"
+    },
+    "sindri.floating_origin": {
+      "additionalProperties": false,
+      "properties": {
+        "around": {
+          "default": "",
+          "description": "Names another entity, by its id.",
+          "type": "string"
+        },
+        "distance": {
+          "default": 1024.0,
+          "description": "A bounded number.",
+          "minimum": 1.0,
+          "type": "number"
+        },
+        "moved": {
+          "default": [
+            0.0,
+            0.0
+          ],
+          "items": {
+            "default": 0.0,
+            "type": "number"
+          },
+          "type": "array"
+        },
+        "step": {
+          "default": 256.0,
+          "description": "A bounded number.",
+          "minimum": 1.0,
+          "type": "number"
+        }
+      },
+      "title": "Floating Origin",
+      "type": "object"
+    },
+    "sindri.grid.navigation": {
+      "additionalProperties": false,
+      "properties": {
+        "max_step": {
+          "default": 1.0,
+          "type": "number"
+        },
+        "walls": {
+          "default": [],
+          "type": "array"
+        }
+      },
+      "title": "Grid Navigation",
+      "type": "object"
+    },
+    "sindri.grid.occupant": {
+      "additionalProperties": false,
+      "properties": {
+        "footprint": {
+          "default": [
+            [
+              0,
+              0
+            ]
+          ],
+          "items": {
+            "default": [
+              0,
+              0
+            ],
+            "items": {
+              "default": 0,
+              "type": "integer"
+            },
+            "type": "array"
+          },
+          "type": "array"
+        },
+        "grid": {
+          "default": "",
+          "description": "Names another entity, by its id.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "grid"
+      ],
+      "title": "Grid Occupant",
+      "type": "object"
+    },
+    "sindri.grid.placement": {
+      "additionalProperties": false,
+      "properties": {
+        "cell": {
+          "default": [
+            0,
+            0
+          ],
+          "items": {
+            "default": 0,
+            "type": "integer"
+          },
+          "type": "array"
+        },
+        "footprint": {
+          "default": [
+            [
+              0,
+              0
+            ]
+          ],
+          "items": {
+            "default": [
+              0,
+              0
+            ],
+            "items": {
+              "default": 0,
+              "type": "integer"
+            },
+            "type": "array"
+          },
+          "type": "array"
+        },
+        "grid": {
+          "default": "",
+          "type": "string"
+        },
+        "offset": {
+          "default": [
+            0.0,
+            0.0
+          ],
+          "items": {
+            "default": 0.0,
+            "type": "number"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "grid"
+      ],
+      "title": "Grid Placement",
+      "type": "object"
+    },
+    "sindri.input.actions": {
+      "additionalProperties": false,
+      "properties": {
+        "actions": {
+          "default": [],
+          "type": "array"
+        }
+      },
+      "title": "Input Actions",
+      "type": "object"
+    },
+    "sindri.light": {
+      "additionalProperties": false,
+      "properties": {
+        "color": {
+          "default": [
+            1.0,
+            0.949999988079071,
+            0.8600000143051147
+          ],
+          "description": "A color: red, green, blue and, where there are four, alpha, each 0 to 1.",
+          "items": {
+            "default": 1.0,
+            "type": "number"
+          },
+          "type": "array"
+        },
+        "enabled": {
+          "default": true,
+          "type": "boolean"
+        },
+        "inner_angle": {
+          "default": 0.3490658402442932,
+          "description": "An angle, in radians.",
+          "type": "number"
+        },
+        "intensity": {
+          "default": 1.0,
+          "description": "A bounded number.",
+          "minimum": 0.0,
+          "type": "number"
+        },
+        "kind": {
+          "default": "directional",
+          "description": "One of the listed spellings.",
+          "enum": [
+            "directional",
+            "point",
+            "spot"
+          ],
+          "type": "string"
+        },
+        "outer_angle": {
+          "default": 0.5235987901687622,
+          "description": "An angle, in radians.",
+          "type": "number"
+        },
+        "range": {
+          "default": 8.0,
+          "description": "A bounded number.",
+          "minimum": 0.001,
+          "type": "number"
+        }
+      },
+      "title": "Light",
+      "type": "object"
+    },
+    "sindri.light2d": {
+      "additionalProperties": false,
+      "properties": {
+        "color": {
+          "default": [
+            1.0,
+            0.8500000238418579,
+            0.6000000238418579,
+            1.0
+          ],
+          "description": "A color: red, green, blue and, where there are four, alpha, each 0 to 1.",
+          "items": {
+            "default": 1.0,
+            "type": "number"
+          },
+          "type": "array"
+        },
+        "cone_angle": {
+          "default": 360.0,
+          "description": "A bounded number.",
+          "maximum": 360.0,
+          "minimum": 1.0,
+          "type": "number"
+        },
+        "cone_direction": {
+          "default": 0.0,
+          "description": "A bounded number.",
+          "maximum": 360.0,
+          "minimum": -360.0,
+          "type": "number"
+        },
+        "cone_softness": {
+          "default": 0.30000001192092896,
+          "description": "A bounded number.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "type": "number"
+        },
+        "enabled": {
+          "default": true,
+          "type": "boolean"
+        },
+        "falloff": {
+          "default": 1.5,
+          "description": "A bounded number.",
+          "minimum": 0.01,
+          "type": "number"
+        },
+        "flicker": {
+          "default": 0.0,
+          "description": "A bounded number.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "type": "number"
+        },
+        "height": {
+          "default": 1.0,
+          "description": "A bounded number.",
+          "minimum": 0.0,
+          "type": "number"
+        },
+        "intensity": {
+          "default": 1.0,
+          "description": "A bounded number.",
+          "minimum": 0.0,
+          "type": "number"
+        },
+        "offset": {
+          "default": [
+            0.0,
+            0.0
+          ],
+          "items": {
+            "default": 0.0,
+            "type": "number"
+          },
+          "type": "array"
+        },
+        "radius": {
+          "default": 4.0,
+          "description": "A bounded number.",
+          "minimum": 0.01,
+          "type": "number"
+        },
+        "shadow_reach": {
+          "default": 0.10000000149011612,
+          "description": "A bounded number.",
+          "minimum": 0.0,
+          "type": "number"
+        },
+        "shadow_source_radius": {
+          "default": 0.0,
+          "description": "A bounded number.",
+          "minimum": 0.0,
+          "type": "number"
+        },
+        "shadows": {
+          "default": false,
+          "type": "boolean"
+        }
+      },
+      "title": "Light 2D",
+      "type": "object"
+    },
+    "sindri.light2d.occluder": {
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "default": true,
+          "type": "boolean"
+        },
+        "points": {
+          "default": [],
+          "type": "array"
+        },
+        "shape": {
+          "default": "box",
+          "description": "One of the listed spellings.",
+          "enum": [
+            "box",
+            "polygon",
+            "tilemap"
+          ],
+          "type": "string"
+        },
+        "size": {
+          "default": [
+            1.0,
+            1.0
+          ],
+          "description": "A bounded number.",
+          "items": {
+            "default": 1.0,
+            "type": "number"
+          },
+          "minimum": 0.01,
+          "type": "array"
+        }
+      },
+      "title": "Light Occluder 2D",
+      "type": "object"
+    },
+    "sindri.map_walls": {
+      "additionalProperties": false,
+      "properties": {
+        "around": {
+          "default": "",
+          "description": "Names another entity, by its id.",
+          "type": "string"
+        },
+        "filter": {
+          "default": 4294967295,
+          "description": "A collision mask: one bit a layer.",
+          "type": "integer"
+        },
+        "memberships": {
+          "default": 1,
+          "description": "A collision mask: one bit a layer.",
+          "type": "integer"
+        },
+        "reach": {
+          "default": 24,
+          "description": "A bounded number.",
+          "maximum": 128.0,
+          "minimum": 1.0,
+          "type": "integer"
+        }
+      },
+      "title": "Map Walls 2D",
+      "type": "object"
+    },
+    "sindri.material": {
+      "additionalProperties": false,
+      "properties": {
+        "base_color": {
+          "default": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "description": "A color: red, green, blue and, where there are four, alpha, each 0 to 1.",
+          "items": {
+            "default": 1.0,
+            "type": "number"
+          },
+          "type": "array"
+        },
+        "emissive": {
+          "default": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "items": {
+            "default": 0.0,
+            "type": "number"
+          },
+          "type": "array"
+        },
+        "metallic": {
+          "default": 0.0,
+          "type": "number"
+        },
+        "override_factors": {
+          "default": false,
+          "type": "boolean"
+        },
+        "override_sidedness": {
+          "default": false,
+          "type": "boolean"
+        },
+        "profile": {
+          "default": "",
+          "description": "Names a profile asset, by its path in the project.",
+          "type": "string"
+        },
+        "roughness": {
+          "default": 1.0,
+          "type": "number"
+        },
+        "sidedness": {
+          "default": "inherit",
+          "description": "One of the listed spellings.",
+          "enum": [
+            "inherit",
+            "single",
+            "double"
+          ],
+          "type": "string"
+        }
+      },
+      "title": "Material",
+      "type": "object"
+    },
+    "sindri.mesh": {
+      "additionalProperties": false,
+      "properties": {
+        "layer": {
+          "default": 0,
+          "type": "integer"
+        },
+        "primitive": {
+          "default": "cube",
+          "type": "string"
+        },
+        "surface": {},
+        "texture": {
+          "default": "procedural:checkerboard",
+          "description": "Names a texture asset, by its path in the project.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "primitive",
+        "texture"
+      ],
+      "title": "Mesh",
+      "type": "object"
+    },
+    "sindri.model": {
+      "additionalProperties": false,
+      "properties": {
+        "asset": {
+          "default": "models/model.glb",
+          "description": "Names a model asset, by its path in the project.",
+          "type": "string"
+        },
+        "layer": {
+          "default": 0,
+          "type": "integer"
+        },
+        "occluded_color": {}
+      },
+      "required": [
+        "asset"
+      ],
+      "title": "Model",
+      "type": "object"
+    },
+    "sindri.particles": {
+      "additionalProperties": false,
+      "properties": {
+        "colors": {
+          "default": [
+            [
+              1.0,
+              1.0,
+              1.0,
+              1.0
+            ],
+            [
+              1.0,
+              1.0,
+              1.0,
+              0.0
+            ]
+          ],
+          "items": {
+            "default": [
+              1.0,
+              1.0,
+              1.0,
+              1.0
+            ],
+            "items": {
+              "default": 1.0,
+              "type": "number"
+            },
+            "type": "array"
+          },
+          "type": "array"
+        },
+        "direction": {
+          "default": 90.0,
+          "type": "number"
+        },
+        "drag": {
+          "default": 0.0,
+          "description": "A bounded number.",
+          "minimum": 0.0,
+          "type": "number"
+        },
+        "glow": {
+          "default": false,
+          "type": "boolean"
+        },
+        "gravity": {
+          "default": [
+            0.0,
+            0.0
+          ],
+          "items": {
+            "default": 0.0,
+            "type": "number"
+          },
+          "type": "array"
+        },
+        "layer": {
+          "default": 0,
+          "type": "integer"
+        },
+        "lifetime": {
+          "default": 1.0,
+          "description": "A bounded number.",
+          "minimum": 0.01,
+          "type": "number"
+        },
+        "lifetime_spread": {
+          "default": 0.20000000298023224,
+          "type": "number"
+        },
+        "max": {
+          "default": 200,
+          "type": "integer"
+        },
+        "offset": {
+          "default": [
+            0.0,
+            0.0
+          ],
+          "items": {
+            "default": 0.0,
+            "type": "number"
+          },
+          "type": "array"
+        },
+        "per_distance": {
+          "default": 0.0,
+          "type": "number"
+        },
+        "playing": {
+          "default": true,
+          "type": "boolean"
+        },
+        "random_rotation": {
+          "default": false,
+          "type": "boolean"
+        },
+        "rate": {
+          "default": 10.0,
+          "description": "A bounded number.",
+          "minimum": 0.0,
+          "type": "number"
+        },
+        "shape": {
+          "default": "point",
+          "description": "One of the listed spellings.",
+          "enum": [
+            "point",
+            "circle",
+            "box",
+            "ring"
+          ],
+          "type": "string"
+        },
+        "shape_size": {
+          "default": [
+            1.0,
+            1.0
+          ],
+          "items": {
+            "default": 1.0,
+            "type": "number"
+          },
+          "type": "array"
+        },
+        "size": {
+          "default": 0.10000000149011612,
+          "description": "A bounded number.",
+          "minimum": 0.0,
+          "type": "number"
+        },
+        "size_end": {
+          "default": 0.10000000149011612,
+          "description": "A bounded number.",
+          "minimum": 0.0,
+          "type": "number"
+        },
+        "space": {
+          "default": "world",
+          "description": "One of the listed spellings.",
+          "enum": [
+            "world",
+            "local"
+          ],
+          "type": "string"
+        },
+        "speed": {
+          "default": 2.0,
+          "description": "A bounded number.",
+          "minimum": 0.0,
+          "type": "number"
+        },
+        "speed_spread": {
+          "default": 0.30000001192092896,
+          "type": "number"
+        },
+        "spin": {
+          "default": 0.0,
+          "type": "number"
+        },
+        "spread": {
+          "default": 30.0,
+          "type": "number"
+        },
+        "texture": {
+          "default": "procedural:checkerboard",
+          "description": "Names a texture asset, by its path in the project.",
+          "type": "string"
+        }
+      },
+      "title": "Particles",
+      "type": "object"
+    },
+    "sindri.physics2d.character": {
+      "additionalProperties": false,
+      "properties": {
+        "carry_platforms": {
+          "default": true,
+          "type": "boolean"
+        },
+        "max_iterations": {
+          "default": 8,
+          "type": "integer"
+        },
+        "max_slope_angle": {
+          "default": 0.7853981852531433,
+          "description": "An angle, in radians.",
+          "type": "number"
+        },
+        "skin": {
+          "default": 0.01,
+          "type": "number"
+        },
+        "snap_distance": {
+          "default": 0.0,
+          "type": "number"
+        },
+        "step_height": {
+          "default": 0.0,
+          "type": "number"
+        },
+        "up": {
+          "default": [
+            0.0,
+            1.0
+          ],
+          "items": {
+            "default": 0.0,
+            "type": "number"
+          },
+          "type": "array"
+        }
+      },
+      "title": "Character 2D",
+      "type": "object"
+    },
+    "sindri.physics2d.collider": {
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "properties": {
+            "pieces": {
+              "default": [
+                {
+                  "friction": 0.5,
+                  "layers": {
+                    "filter": 4294967295,
+                    "memberships": 4294967295
+                  },
+                  "name": "",
+                  "offset": [
+                    0.0,
+                    0.0
+                  ],
+                  "restitution": 0.0,
+                  "rotation": 0.0,
+                  "sensor": false,
+                  "shape": {
+                    "half_extents": [
+                      0.5,
+                      0.5
+                    ],
+                    "shape": "box"
+                  }
+                }
+              ],
+              "items": {
+                "default": {
+                  "friction": 0.5,
+                  "layers": {
+                    "filter": 4294967295,
+                    "memberships": 4294967295
+                  },
+                  "name": "",
+                  "offset": [
+                    0.0,
+                    0.0
+                  ],
+                  "restitution": 0.0,
+                  "rotation": 0.0,
+                  "sensor": false,
+                  "shape": {
+                    "half_extents": [
+                      0.5,
+                      0.5
+                    ],
+                    "shape": "box"
+                  }
+                },
+                "properties": {
+                  "friction": {
+                    "default": 0.5,
+                    "type": "number"
+                  },
+                  "layers": {
+                    "default": {
+                      "filter": 4294967295,
+                      "memberships": 4294967295
+                    },
+                    "properties": {
+                      "filter": {
+                        "default": 4294967295,
+                        "description": "A collision mask: one bit a layer.",
+                        "type": "integer"
+                      },
+                      "memberships": {
+                        "default": 4294967295,
+                        "description": "A collision mask: one bit a layer.",
+                        "type": "integer"
+                      }
+                    },
+                    "type": "object"
+                  },
+                  "name": {
+                    "default": "",
+                    "type": "string"
+                  },
+                  "offset": {
+                    "default": [
+                      0.0,
+                      0.0
+                    ],
+                    "items": {
+                      "default": 0.0,
+                      "type": "number"
+                    },
+                    "type": "array"
+                  },
+                  "restitution": {
+                    "default": 0.0,
+                    "description": "A bounded number.",
+                    "maximum": 1.0,
+                    "minimum": 0.0,
+                    "type": "number"
+                  },
+                  "rotation": {
+                    "default": 0.0,
+                    "description": "An angle, in radians.",
+                    "type": "number"
+                  },
+                  "sensor": {
+                    "default": false,
+                    "type": "boolean"
+                  },
+                  "shape": {
+                    "default": {
+                      "half_extents": [
+                        0.5,
+                        0.5
+                      ],
+                      "shape": "box"
+                    },
+                    "oneOf": [
+                      {
+                        "additionalProperties": false,
+                        "properties": {
+                          "half_extents": {
+                            "default": [
+                              0.5,
+                              0.5
+                            ],
+                            "items": {
+                              "default": 0.5,
+                              "type": "number"
+                            },
+                            "type": "array"
+                          },
+                          "shape": {
+                            "const": "box"
+                          }
+                        },
+                        "required": [
+                          "shape"
+                        ],
+                        "type": "object"
+                      },
+                      {
+                        "additionalProperties": false,
+                        "properties": {
+                          "radius": {
+                            "default": 0.5,
+                            "type": "number"
+                          },
+                          "shape": {
+                            "const": "circle"
+                          }
+                        },
+                        "required": [
+                          "shape"
+                        ],
+                        "type": "object"
+                      },
+                      {
+                        "additionalProperties": false,
+                        "properties": {
+                          "half_height": {
+                            "default": 0.5,
+                            "type": "number"
+                          },
+                          "radius": {
+                            "default": 0.25,
+                            "type": "number"
+                          },
+                          "shape": {
+                            "const": "capsule"
+                          }
+                        },
+                        "required": [
+                          "shape"
+                        ],
+                        "type": "object"
+                      }
+                    ],
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "friction",
+                  "layers",
+                  "offset",
+                  "restitution",
+                  "rotation",
+                  "sensor",
+                  "shape"
+                ],
+                "type": "object"
+              },
+              "type": "array"
+            }
+          },
+          "required": [
+            "pieces"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "default": {
+            "friction": 0.5,
+            "layers": {
+              "filter": 4294967295,
+              "memberships": 4294967295
+            },
+            "name": "",
+            "offset": [
+              0.0,
+              0.0
+            ],
+            "restitution": 0.0,
+            "rotation": 0.0,
+            "sensor": false,
+            "shape": {
+              "half_extents": [
+                0.5,
+                0.5
+              ],
+              "shape": "box"
+            }
+          },
+          "properties": {
+            "friction": {
+              "default": 0.5,
+              "type": "number"
+            },
+            "layers": {
+              "default": {
+                "filter": 4294967295,
+                "memberships": 4294967295
+              },
+              "properties": {
+                "filter": {
+                  "default": 4294967295,
+                  "description": "A collision mask: one bit a layer.",
+                  "type": "integer"
+                },
+                "memberships": {
+                  "default": 4294967295,
+                  "description": "A collision mask: one bit a layer.",
+                  "type": "integer"
+                }
+              },
+              "type": "object"
+            },
+            "name": {
+              "default": "",
+              "type": "string"
+            },
+            "offset": {
+              "default": [
+                0.0,
+                0.0
+              ],
+              "items": {
+                "default": 0.0,
+                "type": "number"
+              },
+              "type": "array"
+            },
+            "restitution": {
+              "default": 0.0,
+              "description": "A bounded number.",
+              "maximum": 1.0,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            "rotation": {
+              "default": 0.0,
+              "description": "An angle, in radians.",
+              "type": "number"
+            },
+            "sensor": {
+              "default": false,
+              "type": "boolean"
+            },
+            "shape": {
+              "default": {
+                "half_extents": [
+                  0.5,
+                  0.5
+                ],
+                "shape": "box"
+              },
+              "oneOf": [
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "half_extents": {
+                      "default": [
+                        0.5,
+                        0.5
+                      ],
+                      "items": {
+                        "default": 0.5,
+                        "type": "number"
+                      },
+                      "type": "array"
+                    },
+                    "shape": {
+                      "const": "box"
+                    }
+                  },
+                  "required": [
+                    "shape"
+                  ],
+                  "type": "object"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "radius": {
+                      "default": 0.5,
+                      "type": "number"
+                    },
+                    "shape": {
+                      "const": "circle"
+                    }
+                  },
+                  "required": [
+                    "shape"
+                  ],
+                  "type": "object"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "half_height": {
+                      "default": 0.5,
+                      "type": "number"
+                    },
+                    "radius": {
+                      "default": 0.25,
+                      "type": "number"
+                    },
+                    "shape": {
+                      "const": "capsule"
+                    }
+                  },
+                  "required": [
+                    "shape"
+                  ],
+                  "type": "object"
+                }
+              ],
+              "type": "object"
+            }
+          },
+          "required": [
+            "friction",
+            "layers",
+            "offset",
+            "restitution",
+            "rotation",
+            "sensor",
+            "shape"
+          ],
+          "type": "object"
+        }
+      ],
+      "title": "Collider 2D"
+    },
+    "sindri.physics2d.distance_joint": {
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "default": true,
+          "type": "boolean"
+        },
+        "first": {
+          "default": "",
+          "description": "Names another entity, by its id.",
+          "type": "string"
+        },
+        "max_distance": {
+          "default": 1.0,
+          "type": "number"
+        },
+        "second": {
+          "default": "",
+          "description": "Names another entity, by its id.",
+          "type": "string"
+        }
+      },
+      "title": "Distance Joint 2D",
+      "type": "object"
+    },
+    "sindri.physics2d.hinge_joint": {
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "default": true,
+          "type": "boolean"
+        },
+        "first": {
+          "default": "",
+          "description": "Names another entity, by its id.",
+          "type": "string"
+        },
+        "first_anchor": {
+          "default": [
+            0.0,
+            0.0
+          ],
+          "items": {
+            "default": 0.0,
+            "type": "number"
+          },
+          "type": "array"
+        },
+        "limits_enabled": {
+          "default": false,
+          "type": "boolean"
+        },
+        "lower_angle": {
+          "default": 0.0,
+          "description": "An angle, in radians.",
+          "type": "number"
+        },
+        "motor_damping": {
+          "default": 0.0,
+          "type": "number"
+        },
+        "motor_enabled": {
+          "default": false,
+          "type": "boolean"
+        },
+        "motor_max_torque": {
+          "default": 0.0,
+          "type": "number"
+        },
+        "motor_mode": {
+          "default": "velocity",
+          "description": "One of the listed spellings.",
+          "enum": [
+            "velocity",
+            "position"
+          ],
+          "type": "string"
+        },
+        "motor_stiffness": {
+          "default": 0.0,
+          "type": "number"
+        },
+        "motor_target_angle": {
+          "default": 0.0,
+          "description": "An angle, in radians.",
+          "type": "number"
+        },
+        "motor_velocity": {
+          "default": 0.0,
+          "type": "number"
+        },
+        "second": {
+          "default": "",
+          "description": "Names another entity, by its id.",
+          "type": "string"
+        },
+        "second_anchor": {
+          "default": [
+            0.0,
+            0.0
+          ],
+          "items": {
+            "default": 0.0,
+            "type": "number"
+          },
+          "type": "array"
+        },
+        "upper_angle": {
+          "default": 0.0,
+          "description": "An angle, in radians.",
+          "type": "number"
+        }
+      },
+      "title": "Hinge Joint 2D",
+      "type": "object"
+    },
+    "sindri.physics2d.material": {
+      "additionalProperties": false,
+      "properties": {
+        "friction": {
+          "default": 0.5,
+          "type": "number"
+        },
+        "override_friction": {
+          "default": false,
+          "type": "boolean"
+        },
+        "override_restitution": {
+          "default": false,
+          "type": "boolean"
+        },
+        "profile": {
+          "default": "",
+          "description": "Names a profile asset, by its path in the project.",
+          "type": "string"
+        },
+        "restitution": {
+          "default": 0.0,
+          "type": "number"
+        }
+      },
+      "title": "Physics Material 2D",
+      "type": "object"
+    },
+    "sindri.physics2d.one_way": {
+      "additionalProperties": false,
+      "properties": {
+        "angle": {
+          "default": 0.7853981852531433,
+          "description": "An angle, in radians.",
+          "type": "number"
+        },
+        "normal": {
+          "default": [
+            0.0,
+            1.0
+          ],
+          "items": {
+            "default": 0.0,
+            "type": "number"
+          },
+          "type": "array"
+        }
+      },
+      "title": "One-Way Platform 2D",
+      "type": "object"
+    },
+    "sindri.physics2d.rigid_body": {
+      "additionalProperties": false,
+      "properties": {
+        "angular_damping": {
+          "default": 0.0,
+          "type": "number"
+        },
+        "angular_velocity": {
+          "default": 0.0,
+          "type": "number"
+        },
+        "continuous_collision": {
+          "default": false,
+          "type": "boolean"
+        },
+        "gravity_scale": {
+          "default": 1.0,
+          "type": "number"
+        },
+        "kind": {
+          "default": "dynamic",
+          "description": "One of the listed spellings.",
+          "enum": [
+            "static",
+            "dynamic",
+            "kinematic_position",
+            "kinematic_velocity"
+          ],
+          "type": "string"
+        },
+        "linear_damping": {
+          "default": 0.0,
+          "type": "number"
+        },
+        "linear_velocity": {
+          "default": [
+            0.0,
+            0.0
+          ],
+          "items": {
+            "default": 0.0,
+            "type": "number"
+          },
+          "type": "array"
+        },
+        "lock_rotation": {
+          "default": false,
+          "type": "boolean"
+        },
+        "pose": {
+          "default": {
+            "position": [
+              0.0,
+              0.0
+            ],
+            "rotation": 0.0
+          },
+          "properties": {
+            "position": {
+              "default": [
+                0.0,
+                0.0
+              ],
+              "items": {
+                "default": 0.0,
+                "type": "number"
+              },
+              "type": "array"
+            },
+            "rotation": {
+              "default": 0.0,
+              "description": "An angle, in radians.",
+              "type": "number"
+            }
+          },
+          "type": "object"
+        }
+      },
+      "required": [
+        "angular_damping",
+        "angular_velocity",
+        "gravity_scale",
+        "kind",
+        "linear_damping",
+        "linear_velocity",
+        "lock_rotation",
+        "pose"
+      ],
+      "title": "Rigid Body 2D",
+      "type": "object"
+    },
+    "sindri.physics2d.slider_joint": {
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "default": true,
+          "type": "boolean"
+        },
+        "first": {
+          "default": "",
+          "description": "Names another entity, by its id.",
+          "type": "string"
+        },
+        "first_anchor": {
+          "default": [
+            0.0,
+            0.0
+          ],
+          "items": {
+            "default": 0.0,
+            "type": "number"
+          },
+          "type": "array"
+        },
+        "first_axis": {
+          "default": [
+            1.0,
+            0.0
+          ],
+          "items": {
+            "default": 1.0,
+            "type": "number"
+          },
+          "type": "array"
+        },
+        "limits_enabled": {
+          "default": false,
+          "type": "boolean"
+        },
+        "lower_distance": {
+          "default": 0.0,
+          "type": "number"
+        },
+        "motor_damping": {
+          "default": 0.0,
+          "type": "number"
+        },
+        "motor_enabled": {
+          "default": false,
+          "type": "boolean"
+        },
+        "motor_max_force": {
+          "default": 0.0,
+          "type": "number"
+        },
+        "motor_mode": {
+          "default": "velocity",
+          "description": "One of the listed spellings.",
+          "enum": [
+            "velocity",
+            "position"
+          ],
+          "type": "string"
+        },
+        "motor_stiffness": {
+          "default": 0.0,
+          "type": "number"
+        },
+        "motor_target_distance": {
+          "default": 0.0,
+          "type": "number"
+        },
+        "motor_velocity": {
+          "default": 0.0,
+          "type": "number"
+        },
+        "second": {
+          "default": "",
+          "description": "Names another entity, by its id.",
+          "type": "string"
+        },
+        "second_anchor": {
+          "default": [
+            0.0,
+            0.0
+          ],
+          "items": {
+            "default": 0.0,
+            "type": "number"
+          },
+          "type": "array"
+        },
+        "second_axis": {
+          "default": [
+            1.0,
+            0.0
+          ],
+          "items": {
+            "default": 1.0,
+            "type": "number"
+          },
+          "type": "array"
+        },
+        "upper_distance": {
+          "default": 0.0,
+          "type": "number"
+        }
+      },
+      "title": "Slider Joint 2D",
+      "type": "object"
+    },
+    "sindri.physics2d.spring_joint": {
+      "additionalProperties": false,
+      "properties": {
+        "damping": {
+          "default": 1.0,
+          "type": "number"
+        },
+        "enabled": {
+          "default": true,
+          "type": "boolean"
+        },
+        "first": {
+          "default": "",
+          "description": "Names another entity, by its id.",
+          "type": "string"
+        },
+        "first_anchor": {
+          "default": [
+            0.0,
+            0.0
+          ],
+          "items": {
+            "default": 0.0,
+            "type": "number"
+          },
+          "type": "array"
+        },
+        "rest_length": {
+          "default": 1.0,
+          "type": "number"
+        },
+        "second": {
+          "default": "",
+          "description": "Names another entity, by its id.",
+          "type": "string"
+        },
+        "second_anchor": {
+          "default": [
+            0.0,
+            0.0
+          ],
+          "items": {
+            "default": 0.0,
+            "type": "number"
+          },
+          "type": "array"
+        },
+        "stiffness": {
+          "default": 10.0,
+          "type": "number"
+        }
+      },
+      "title": "Spring Joint 2D",
+      "type": "object"
+    },
+    "sindri.physics2d.tilemap_collider": {
+      "additionalProperties": false,
+      "properties": {
+        "friction": {
+          "default": 0.5,
+          "type": "number"
+        },
+        "layers": {
+          "default": {
+            "filter": 4294967295,
+            "memberships": 4294967295
+          },
+          "properties": {
+            "filter": {
+              "default": 4294967295,
+              "description": "A collision mask: one bit a layer.",
+              "type": "integer"
+            },
+            "memberships": {
+              "default": 4294967295,
+              "description": "A collision mask: one bit a layer.",
+              "type": "integer"
+            }
+          },
+          "type": "object"
+        },
+        "passable": {
+          "default": [],
+          "type": "array"
+        },
+        "restitution": {
+          "default": 0.0,
+          "description": "A bounded number.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "type": "number"
+        }
+      },
+      "title": "Tilemap Collider 2D",
+      "type": "object"
+    },
+    "sindri.physics2d.world": {
+      "additionalProperties": false,
+      "properties": {
+        "gravity": {
+          "default": [
+            0.0,
+            -9.81
+          ],
+          "items": {
+            "default": 0.0,
+            "type": "number"
+          },
+          "type": "array"
+        },
+        "layers": {
+          "default": [],
+          "type": "array"
+        }
+      },
+      "title": "Physics 2D World",
+      "type": "object"
+    },
+    "sindri.physics3d.character": {
+      "additionalProperties": false,
+      "properties": {
+        "carry_platforms": {
+          "default": true,
+          "type": "boolean"
+        },
+        "max_slope_angle": {
+          "default": 0.7853981852531433,
+          "description": "An angle, in radians.",
+          "type": "number"
+        },
+        "min_slide_angle": {
+          "default": 0.7853981852531433,
+          "description": "An angle, in radians.",
+          "type": "number"
+        },
+        "skin": {
+          "default": 0.009999999776482582,
+          "type": "number"
+        },
+        "slide": {
+          "default": true,
+          "type": "boolean"
+        },
+        "snap_distance": {
+          "default": 0.0,
+          "type": "number"
+        },
+        "step_dynamic_bodies": {
+          "default": false,
+          "type": "boolean"
+        },
+        "step_height": {
+          "default": 0.0,
+          "type": "number"
+        },
+        "step_min_width": {
+          "default": 0.10000000149011612,
+          "type": "number"
+        },
+        "up": {
+          "default": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "items": {
+            "default": 0.0,
+            "type": "number"
+          },
+          "type": "array"
+        }
+      },
+      "title": "Character 3D",
+      "type": "object"
+    },
+    "sindri.physics3d.collider": {
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "properties": {
+            "pieces": {
+              "default": [
+                {
+                  "friction": 0.5,
+                  "layers": {
+                    "filter": 4294967295,
+                    "memberships": 4294967295
+                  },
+                  "offset": [
+                    0.0,
+                    0.0,
+                    0.0
+                  ],
+                  "restitution": 0.0,
+                  "rotation": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    1.0
+                  ],
+                  "sensor": false,
+                  "shape": {
+                    "half_extents": [
+                      0.5,
+                      0.5,
+                      0.5
+                    ],
+                    "shape": "box"
+                  }
+                }
+              ],
+              "items": {
+                "default": {
+                  "friction": 0.5,
+                  "layers": {
+                    "filter": 4294967295,
+                    "memberships": 4294967295
+                  },
+                  "offset": [
+                    0.0,
+                    0.0,
+                    0.0
+                  ],
+                  "restitution": 0.0,
+                  "rotation": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    1.0
+                  ],
+                  "sensor": false,
+                  "shape": {
+                    "half_extents": [
+                      0.5,
+                      0.5,
+                      0.5
+                    ],
+                    "shape": "box"
+                  }
+                },
+                "properties": {
+                  "friction": {
+                    "default": 0.5,
+                    "type": "number"
+                  },
+                  "layers": {
+                    "default": {
+                      "filter": 4294967295,
+                      "memberships": 4294967295
+                    },
+                    "properties": {
+                      "filter": {
+                        "default": 4294967295,
+                        "type": "integer"
+                      },
+                      "memberships": {
+                        "default": 4294967295,
+                        "type": "integer"
+                      }
+                    },
+                    "type": "object"
+                  },
+                  "offset": {
+                    "default": [
+                      0.0,
+                      0.0,
+                      0.0
+                    ],
+                    "items": {
+                      "default": 0.0,
+                      "type": "number"
+                    },
+                    "type": "array"
+                  },
+                  "restitution": {
+                    "default": 0.0,
+                    "type": "number"
+                  },
+                  "rotation": {
+                    "default": [
+                      0.0,
+                      0.0,
+                      0.0,
+                      1.0
+                    ],
+                    "items": {
+                      "default": 0.0,
+                      "type": "number"
+                    },
+                    "type": "array"
+                  },
+                  "sensor": {
+                    "default": false,
+                    "type": "boolean"
+                  },
+                  "shape": {
+                    "default": {
+                      "half_extents": [
+                        0.5,
+                        0.5,
+                        0.5
+                      ],
+                      "shape": "box"
+                    },
+                    "properties": {
+                      "half_extents": {
+                        "default": [
+                          0.5,
+                          0.5,
+                          0.5
+                        ],
+                        "items": {
+                          "default": 0.5,
+                          "type": "number"
+                        },
+                        "type": "array"
+                      },
+                      "shape": {
+                        "default": "box",
+                        "type": "string"
+                      }
+                    },
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "friction",
+                  "layers",
+                  "offset",
+                  "restitution",
+                  "rotation",
+                  "sensor",
+                  "shape"
+                ],
+                "type": "object"
+              },
+              "type": "array"
+            }
+          },
+          "required": [
+            "pieces"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "default": {
+            "friction": 0.5,
+            "layers": {
+              "filter": 4294967295,
+              "memberships": 4294967295
+            },
+            "offset": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "restitution": 0.0,
+            "rotation": [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ],
+            "sensor": false,
+            "shape": {
+              "half_extents": [
+                0.5,
+                0.5,
+                0.5
+              ],
+              "shape": "box"
+            }
+          },
+          "properties": {
+            "friction": {
+              "default": 0.5,
+              "type": "number"
+            },
+            "layers": {
+              "default": {
+                "filter": 4294967295,
+                "memberships": 4294967295
+              },
+              "properties": {
+                "filter": {
+                  "default": 4294967295,
+                  "type": "integer"
+                },
+                "memberships": {
+                  "default": 4294967295,
+                  "type": "integer"
+                }
+              },
+              "type": "object"
+            },
+            "offset": {
+              "default": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "items": {
+                "default": 0.0,
+                "type": "number"
+              },
+              "type": "array"
+            },
+            "restitution": {
+              "default": 0.0,
+              "type": "number"
+            },
+            "rotation": {
+              "default": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ],
+              "items": {
+                "default": 0.0,
+                "type": "number"
+              },
+              "type": "array"
+            },
+            "sensor": {
+              "default": false,
+              "type": "boolean"
+            },
+            "shape": {
+              "default": {
+                "half_extents": [
+                  0.5,
+                  0.5,
+                  0.5
+                ],
+                "shape": "box"
+              },
+              "properties": {
+                "half_extents": {
+                  "default": [
+                    0.5,
+                    0.5,
+                    0.5
+                  ],
+                  "items": {
+                    "default": 0.5,
+                    "type": "number"
+                  },
+                  "type": "array"
+                },
+                "shape": {
+                  "default": "box",
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            }
+          },
+          "required": [
+            "friction",
+            "layers",
+            "offset",
+            "restitution",
+            "rotation",
+            "sensor",
+            "shape"
+          ],
+          "type": "object"
+        }
+      ],
+      "title": "Collider 3D"
+    },
+    "sindri.physics3d.material": {
+      "additionalProperties": false,
+      "properties": {
+        "friction": {
+          "default": 0.5,
+          "type": "number"
+        },
+        "override_friction": {
+          "default": false,
+          "type": "boolean"
+        },
+        "override_restitution": {
+          "default": false,
+          "type": "boolean"
+        },
+        "profile": {
+          "default": "",
+          "description": "Names a profile asset, by its path in the project.",
+          "type": "string"
+        },
+        "restitution": {
+          "default": 0.0,
+          "type": "number"
+        }
+      },
+      "title": "Physics Material 3D",
+      "type": "object"
+    },
+    "sindri.physics3d.model_collider": {
+      "additionalProperties": false,
+      "properties": {
+        "asset": {
+          "default": "models/collision.glb",
+          "description": "Names a model asset, by its path in the project.",
+          "type": "string"
+        },
+        "friction": {
+          "default": 0.5,
+          "type": "number"
+        },
+        "layers": {
+          "default": {
+            "filter": 4294967295,
+            "memberships": 4294967295
+          },
+          "properties": {
+            "filter": {
+              "default": 4294967295,
+              "type": "integer"
+            },
+            "memberships": {
+              "default": 4294967295,
+              "type": "integer"
+            }
+          },
+          "type": "object"
+        },
+        "restitution": {
+          "default": 0.0,
+          "type": "number"
+        },
+        "sensor": {
+          "default": false,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "asset"
+      ],
+      "title": "Static Model Collider 3D",
+      "type": "object"
+    },
+    "sindri.physics3d.model_convex_collider": {
+      "additionalProperties": false,
+      "properties": {
+        "asset": {
+          "default": "models/collision.glb",
+          "description": "Names a model asset, by its path in the project.",
+          "type": "string"
+        },
+        "friction": {
+          "default": 0.5,
+          "type": "number"
+        },
+        "layers": {
+          "default": {
+            "filter": 4294967295,
+            "memberships": 4294967295
+          },
+          "properties": {
+            "filter": {
+              "default": 4294967295,
+              "type": "integer"
+            },
+            "memberships": {
+              "default": 4294967295,
+              "type": "integer"
+            }
+          },
+          "type": "object"
+        },
+        "restitution": {
+          "default": 0.0,
+          "type": "number"
+        },
+        "sensor": {
+          "default": false,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "asset"
+      ],
+      "title": "Convex Model Collider 3D",
+      "type": "object"
+    },
+    "sindri.physics3d.rigid_body": {
+      "additionalProperties": false,
+      "properties": {
+        "angular_damping": {
+          "default": 0.0,
+          "type": "number"
+        },
+        "angular_velocity": {
+          "default": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "items": {
+            "default": 0.0,
+            "type": "number"
+          },
+          "type": "array"
+        },
+        "gravity_scale": {
+          "default": 1.0,
+          "type": "number"
+        },
+        "kind": {
+          "default": "dynamic",
+          "description": "One of the listed spellings.",
+          "enum": [
+            "static",
+            "dynamic",
+            "kinematic_position",
+            "kinematic_velocity"
+          ],
+          "type": "string"
+        },
+        "linear_damping": {
+          "default": 0.0,
+          "type": "number"
+        },
+        "linear_velocity": {
+          "default": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "items": {
+            "default": 0.0,
+            "type": "number"
+          },
+          "type": "array"
+        },
+        "lock_rotation": {
+          "default": false,
+          "type": "boolean"
+        },
+        "position": {
+          "default": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "items": {
+            "default": 0.0,
+            "type": "number"
+          },
+          "type": "array"
+        },
+        "rotation": {
+          "default": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "items": {
+            "default": 0.0,
+            "type": "number"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "angular_damping",
+        "angular_velocity",
+        "gravity_scale",
+        "kind",
+        "linear_damping",
+        "linear_velocity",
+        "lock_rotation",
+        "position",
+        "rotation"
+      ],
+      "title": "Rigid Body 3D",
+      "type": "object"
+    },
+    "sindri.physics3d.voxel_collider": {
+      "additionalProperties": false,
+      "properties": {
+        "friction": {
+          "default": 0.5,
+          "type": "number"
+        },
+        "layers": {
+          "default": {
+            "filter": 4294967295,
+            "memberships": 4294967295
+          },
+          "properties": {
+            "filter": {
+              "default": 4294967295,
+              "type": "integer"
+            },
+            "memberships": {
+              "default": 4294967295,
+              "type": "integer"
+            }
+          },
+          "type": "object"
+        },
+        "margin": {
+          "default": 2.0,
+          "type": "number"
+        },
+        "restitution": {
+          "default": 0.0,
+          "type": "number"
+        }
+      },
+      "title": "Voxel Collider 3D",
+      "type": "object"
+    },
+    "sindri.physics3d.world": {
+      "additionalProperties": false,
+      "properties": {
+        "gravity": {
+          "default": [
+            0.0,
+            -9.81,
+            0.0
+          ],
+          "items": {
+            "default": 0.0,
+            "type": "number"
+          },
+          "type": "array"
+        },
+        "layers": {
+          "default": [],
+          "type": "array"
+        }
+      },
+      "title": "Physics 3D World",
+      "type": "object"
+    },
+    "sindri.scatter": {
+      "additionalProperties": false,
+      "properties": {
+        "around": {
+          "default": "",
+          "description": "Names another entity, by its id.",
+          "type": "string"
+        },
+        "clearings": {
+          "default": [],
+          "type": "array"
+        },
+        "reach": {
+          "default": 24,
+          "description": "A bounded number.",
+          "maximum": 128.0,
+          "minimum": 1.0,
+          "type": "integer"
+        },
+        "rules": {
+          "default": [
+            {
+              "chance": 0.5,
+              "flip": false,
+              "on": [
+                ""
+              ],
+              "prefabs": [
+                ""
+              ],
+              "spacing": 3
+            }
+          ],
+          "items": {
+            "default": {
+              "chance": 0.5,
+              "flip": false,
+              "on": [
+                ""
+              ],
+              "prefabs": [
+                ""
+              ],
+              "spacing": 3
+            },
+            "properties": {
+              "chance": {
+                "default": 0.5,
+                "description": "A bounded number.",
+                "maximum": 1.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              "flip": {
+                "default": false,
+                "type": "boolean"
+              },
+              "on": {
+                "default": [
+                  ""
+                ],
+                "items": {
+                  "default": "",
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "prefabs": {
+                "default": [
+                  ""
+                ],
+                "items": {
+                  "default": "",
+                  "description": "Names a prefab asset, by its path in the project.",
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "spacing": {
+                "default": 3,
+                "description": "A bounded number.",
+                "maximum": 64.0,
+                "minimum": 1.0,
+                "type": "integer"
+              }
+            },
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "seed": {
+          "default": 0,
+          "type": "integer"
+        },
+        "sites": {
+          "default": [
+            {
+              "chance": 0.5,
+              "name": "",
+              "on": [
+                ""
+              ],
+              "pieces": [
+                {
+                  "at": [
+                    0.0,
+                    0.0
+                  ],
+                  "chance": 1.0,
+                  "prefabs": [
+                    ""
+                  ]
+                }
+              ],
+              "radius": 8.0,
+              "spacing": 96
+            }
+          ],
+          "items": {
+            "default": {
+              "chance": 0.5,
+              "name": "",
+              "on": [
+                ""
+              ],
+              "pieces": [
+                {
+                  "at": [
+                    0.0,
+                    0.0
+                  ],
+                  "chance": 1.0,
+                  "prefabs": [
+                    ""
+                  ]
+                }
+              ],
+              "radius": 8.0,
+              "spacing": 96
+            },
+            "properties": {
+              "chance": {
+                "default": 0.5,
+                "type": "number"
+              },
+              "name": {
+                "default": "",
+                "type": "string"
+              },
+              "on": {
+                "default": [
+                  ""
+                ],
+                "items": {
+                  "default": "",
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "pieces": {
+                "default": [
+                  {
+                    "at": [
+                      0.0,
+                      0.0
+                    ],
+                    "chance": 1.0,
+                    "prefabs": [
+                      ""
+                    ]
+                  }
+                ],
+                "items": {
+                  "default": {
+                    "at": [
+                      0.0,
+                      0.0
+                    ],
+                    "chance": 1.0,
+                    "prefabs": [
+                      ""
+                    ]
+                  },
+                  "properties": {
+                    "at": {
+                      "default": [
+                        0.0,
+                        0.0
+                      ],
+                      "items": {
+                        "default": 0.0,
+                        "type": "number"
+                      },
+                      "type": "array"
+                    },
+                    "chance": {
+                      "default": 1.0,
+                      "type": "number"
+                    },
+                    "prefabs": {
+                      "default": [
+                        ""
+                      ],
+                      "items": {
+                        "default": "",
+                        "type": "string"
+                      },
+                      "type": "array"
+                    }
+                  },
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              "radius": {
+                "default": 8.0,
+                "type": "number"
+              },
+              "spacing": {
+                "default": 96,
+                "type": "integer"
+              }
+            },
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "taken": {
+          "default": [],
+          "type": "array"
+        }
+      },
+      "title": "Scatter",
+      "type": "object"
+    },
+    "sindri.script": {
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "default": true,
+          "type": "boolean"
+        },
+        "properties": {
+          "description": "Values for the script's declared properties, by name.",
+          "type": "object"
+        },
+        "script": {
+          "description": "The script container in that file this entity runs.",
+          "minLength": 1,
+          "type": "string"
+        },
+        "source": {
+          "description": "The Decay file, relative to the project. sindri.toml must list it under scripts.",
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "source",
+        "script"
+      ],
+      "title": "Script",
+      "type": "object"
+    },
+    "sindri.sequence": {
+      "additionalProperties": false,
+      "properties": {
+        "playing": {},
+        "sequences": {
+          "default": {
+            "intro": {
+              "cues": [],
+              "duration": 2.0,
+              "looping": false,
+              "tracks": []
+            }
+          },
+          "properties": {
+            "intro": {
+              "default": {
+                "cues": [],
+                "duration": 2.0,
+                "looping": false,
+                "tracks": []
+              },
+              "properties": {
+                "cues": {
+                  "default": [],
+                  "type": "array"
+                },
+                "duration": {
+                  "default": 2.0,
+                  "type": "number"
+                },
+                "looping": {
+                  "default": false,
+                  "type": "boolean"
+                },
+                "tracks": {
+                  "default": [],
+                  "type": "array"
+                }
+              },
+              "type": "object"
+            }
+          },
+          "type": "object"
+        },
+        "speed": {
+          "default": 1.0,
+          "type": "number"
+        }
+      },
+      "required": [
+        "sequences"
+      ],
+      "title": "Sequence",
+      "type": "object"
+    },
+    "sindri.shadow2d": {
+      "additionalProperties": false,
+      "properties": {
+        "cast": {
+          "default": false,
+          "type": "boolean"
+        },
+        "cast_opacity": {
+          "default": 0.44999998807907104,
+          "description": "A bounded number.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "type": "number"
+        },
+        "contact_offset": {
+          "default": [
+            0.0,
+            0.0
+          ],
+          "items": {
+            "default": 0.0,
+            "type": "number"
+          },
+          "type": "array"
+        },
+        "contact_opacity": {
+          "default": 0.3499999940395355,
+          "description": "A bounded number.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "type": "number"
+        },
+        "contact_size": {
+          "default": [
+            1.0,
+            0.4000000059604645
+          ],
+          "items": {
+            "default": 1.0,
+            "type": "number"
+          },
+          "type": "array"
+        },
+        "height": {
+          "default": 0.0,
+          "description": "A bounded number.",
+          "minimum": 0.0,
+          "type": "number"
+        },
+        "lit_from_base": {
+          "default": true,
+          "type": "boolean"
+        },
+        "max_length": {
+          "default": 2.5,
+          "description": "A bounded number.",
+          "minimum": 0.0,
+          "type": "number"
+        }
+      },
+      "title": "Shadow 2D",
+      "type": "object"
+    },
+    "sindri.shape": {
+      "additionalProperties": false,
+      "properties": {
+        "blend": {
+          "default": "over",
+          "description": "One of the listed spellings.",
+          "enum": [
+            "over",
+            "add"
+          ],
+          "type": "string"
+        },
+        "corner_radius": {
+          "default": 0.0,
+          "type": "number"
+        },
+        "count": {
+          "default": 6.0,
+          "type": "number"
+        },
+        "dash_duty": {
+          "default": 0.5,
+          "type": "number"
+        },
+        "dashes": {
+          "default": 0.0,
+          "type": "number"
+        },
+        "fill": {
+          "default": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "description": "A color: red, green, blue and, where there are four, alpha, each 0 to 1.",
+          "items": {
+            "default": 0.0,
+            "type": "number"
+          },
+          "type": "array"
+        },
+        "kind": {
+          "default": "rect",
+          "description": "One of the listed spellings.",
+          "enum": [
+            "rect",
+            "ellipse",
+            "polygon",
+            "grid"
+          ],
+          "type": "string"
+        },
+        "layer": {
+          "default": 0,
+          "type": "integer"
+        },
+        "points": {
+          "description": "A polygon's own corners, x and y, instead of a regular one's.",
+          "items": {
+            "items": {
+              "type": "number"
+            },
+            "maxItems": 2,
+            "minItems": 2,
+            "type": "array"
+          },
+          "type": "array"
+        },
+        "stroke": {
+          "default": [
+            0.49,
+            1.0,
+            0.77,
+            1.0
+          ],
+          "description": "A color: red, green, blue and, where there are four, alpha, each 0 to 1.",
+          "items": {
+            "default": 0.49,
+            "type": "number"
+          },
+          "type": "array"
+        },
+        "stroke_width": {
+          "default": 0.06,
+          "type": "number"
+        },
+        "sweep_start": {
+          "default": 0.0,
+          "description": "An angle, in radians.",
+          "type": "number"
+        },
+        "sweep_turns": {
+          "default": 1.0,
+          "type": "number"
+        }
+      },
+      "title": "Shape",
+      "type": "object"
+    },
+    "sindri.sight2d": {
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "default": true,
+          "type": "boolean"
+        },
+        "radius": {
+          "default": 0.0,
+          "description": "A bounded number.",
+          "minimum": 0.0,
+          "type": "number"
+        },
+        "reach": {
+          "default": 0.30000001192092896,
+          "description": "A bounded number.",
+          "minimum": 0.0,
+          "type": "number"
+        },
+        "unseen": {
+          "default": 0.30000001192092896,
+          "description": "A bounded number.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "type": "number"
+        }
+      },
+      "title": "Sight 2D",
+      "type": "object"
+    },
+    "sindri.sprite": {
+      "additionalProperties": false,
+      "properties": {
+        "billboard": {
+          "default": false,
+          "type": "boolean"
+        },
+        "border_scale": {
+          "default": 0.0625,
+          "type": "number"
+        },
+        "color_transform": {
+          "default": {
+            "multiply": [
+              1.0,
+              1.0,
+              1.0,
+              1.0
+            ],
+            "offset": [
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          },
+          "properties": {
+            "multiply": {
+              "default": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+              ],
+              "items": {
+                "default": 1.0,
+                "type": "number"
+              },
+              "type": "array"
+            },
+            "offset": {
+              "default": [
+                0.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              "items": {
+                "default": 0.0,
+                "type": "number"
+              },
+              "type": "array"
+            }
+          },
+          "type": "object"
+        },
+        "draw": {
+          "default": "simple",
+          "description": "One of the listed spellings.",
+          "enum": [
+            "simple",
+            "sliced"
+          ],
+          "type": "string"
+        },
+        "layer": {
+          "default": 0,
+          "type": "integer"
+        },
+        "mask": {
+          "default": "none",
+          "description": "One of the listed spellings.",
+          "enum": [
+            "none",
+            "inside",
+            "outside"
+          ],
+          "type": "string"
+        },
+        "mask_name": {
+          "default": "",
+          "type": "string"
+        },
+        "normal_map": {
+          "default": "",
+          "description": "Names a texture asset, by its path in the project.",
+          "type": "string"
+        },
+        "offset": {
+          "default": [
+            0.0,
+            0.0
+          ],
+          "items": {
+            "default": 0.0,
+            "type": "number"
+          },
+          "type": "array"
+        },
+        "shader": {
+          "default": "",
+          "description": "Names a shader asset, by its path in the project.",
+          "type": "string"
+        },
+        "shader_params": {
+          "default": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "items": {
+            "default": 0.0,
+            "type": "number"
+          },
+          "type": "array"
+        },
+        "size": {
+          "default": [
+            1.0,
+            1.0
+          ],
+          "items": {
+            "default": 1.0,
+            "type": "number"
+          },
+          "type": "array"
+        },
+        "sway": {
+          "default": 0.0,
+          "type": "number"
+        },
+        "texture": {
+          "default": "procedural:checkerboard",
+          "description": "Names a texture asset, by its path in the project.",
+          "type": "string"
+        },
+        "tint": {
+          "default": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "description": "A color: red, green, blue and, where there are four, alpha, each 0 to 1.",
+          "items": {
+            "default": 1.0,
+            "type": "number"
+          },
+          "type": "array"
+        },
+        "unlit": {
+          "default": false,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "texture"
+      ],
+      "title": "Sprite",
+      "type": "object"
+    },
+    "sindri.sprite_mask": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "default": "",
+          "type": "string"
+        },
+        "texture": {
+          "default": "procedural:checkerboard",
+          "description": "Names a texture asset, by its path in the project.",
+          "type": "string"
+        }
+      },
+      "title": "Sprite Mask",
+      "type": "object"
+    },
+    "sindri.tags": {
+      "additionalProperties": false,
+      "properties": {
+        "tags": {
+          "default": [],
+          "type": "array"
+        }
+      },
+      "title": "Tags",
+      "type": "object"
+    },
+    "sindri.text": {
+      "additionalProperties": false,
+      "properties": {
+        "anchor": {
+          "default": "center",
+          "description": "One of the listed spellings.",
+          "enum": [
+            "center",
+            "top",
+            "bottom",
+            "left",
+            "right",
+            "top_left",
+            "top_right",
+            "bottom_left",
+            "bottom_right"
+          ],
+          "type": "string"
+        },
+        "auto_size": {
+          "default": {
+            "enabled": false,
+            "min": 0.1
+          },
+          "properties": {
+            "enabled": {
+              "default": false,
+              "type": "boolean"
+            },
+            "min": {
+              "default": 0.1,
+              "type": "number"
+            }
+          },
+          "type": "object"
+        },
+        "bold": {
+          "default": false,
+          "type": "boolean"
+        },
+        "bounds": {
+          "default": [
+            0.0,
+            0.0
+          ],
+          "items": {
+            "default": 0.0,
+            "type": "number"
+          },
+          "type": "array"
+        },
+        "case": {
+          "default": "as_written",
+          "description": "One of the listed spellings.",
+          "enum": [
+            "as_written",
+            "upper",
+            "lower"
+          ],
+          "type": "string"
+        },
+        "color": {
+          "default": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "description": "A color: red, green, blue and, where there are four, alpha, each 0 to 1.",
+          "items": {
+            "default": 1.0,
+            "type": "number"
+          },
+          "type": "array"
+        },
+        "follow_rotation": {
+          "default": false,
+          "type": "boolean"
+        },
+        "font": {
+          "default": "",
+          "description": "Names a font asset, by its path in the project.",
+          "type": "string"
+        },
+        "font_size": {
+          "default": 0.5,
+          "type": "number"
+        },
+        "italic": {
+          "default": false,
+          "type": "boolean"
+        },
+        "layer": {
+          "default": 0,
+          "type": "integer"
+        },
+        "letter_spacing": {
+          "default": 0.0,
+          "type": "number"
+        },
+        "line_align": {
+          "default": "follow",
+          "description": "One of the listed spellings.",
+          "enum": [
+            "follow",
+            "left",
+            "center",
+            "right",
+            "justify"
+          ],
+          "type": "string"
+        },
+        "line_height": {
+          "default": 0.6,
+          "type": "number"
+        },
+        "outline": {
+          "default": {
+            "color": [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ],
+            "width": 0.0
+          },
+          "properties": {
+            "color": {
+              "default": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ],
+              "description": "A color: red, green, blue and, where there are four, alpha, each 0 to 1.",
+              "items": {
+                "default": 0.0,
+                "type": "number"
+              },
+              "type": "array"
+            },
+            "width": {
+              "default": 0.0,
+              "type": "number"
+            }
+          },
+          "type": "object"
+        },
+        "rich": {
+          "default": false,
+          "type": "boolean"
+        },
+        "shadow": {
+          "default": {
+            "color": [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ],
+            "offset": [
+              0.0,
+              0.0
+            ],
+            "softness": 0.0
+          },
+          "properties": {
+            "color": {
+              "default": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ],
+              "description": "A color: red, green, blue and, where there are four, alpha, each 0 to 1.",
+              "items": {
+                "default": 0.0,
+                "type": "number"
+              },
+              "type": "array"
+            },
+            "offset": {
+              "default": [
+                0.0,
+                0.0
+              ],
+              "items": {
+                "default": 0.0,
+                "type": "number"
+              },
+              "type": "array"
+            },
+            "softness": {
+              "default": 0.0,
+              "type": "number"
+            }
+          },
+          "type": "object"
+        },
+        "text": {
+          "default": "Text",
+          "type": "string"
+        },
+        "values": {
+          "default": [],
+          "type": "array"
+        },
+        "visible": {
+          "default": -1.0,
+          "type": "number"
+        },
+        "wrap": {
+          "default": "none",
+          "description": "One of the listed spellings.",
+          "enum": [
+            "none",
+            "word",
+            "glyph"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "font",
+        "text"
+      ],
+      "title": "Text",
+      "type": "object"
+    },
+    "sindri.tile_grid": {
+      "additionalProperties": false,
+      "properties": {
+        "cell_height": {
+          "default": 1.0,
+          "type": "number"
+        },
+        "cell_size": {
+          "default": [
+            1.0,
+            1.0
+          ],
+          "items": {
+            "default": 1.0,
+            "type": "number"
+          },
+          "type": "array"
+        },
+        "columns": {
+          "default": 1,
+          "type": "integer"
+        },
+        "depth_step": {
+          "default": 0.0,
+          "type": "number"
+        },
+        "level_step": {
+          "default": [
+            0.0,
+            0.5
+          ],
+          "items": {
+            "default": 0.0,
+            "type": "number"
+          },
+          "type": "array"
+        },
+        "projection": {
+          "default": "orthogonal",
+          "description": "One of the listed spellings.",
+          "enum": [
+            "orthogonal",
+            "isometric"
+          ],
+          "type": "string"
+        },
+        "rows": {
+          "default": 1,
+          "type": "integer"
+        },
+        "space": {
+          "default": "projected",
+          "type": "string"
+        }
+      },
+      "required": [
+        "columns",
+        "rows"
+      ],
+      "title": "Tile Grid",
+      "type": "object"
+    },
+    "sindri.tile_volume": {
+      "additionalProperties": false,
+      "properties": {
+        "cells": {
+          "default": [],
+          "type": "array"
+        },
+        "layer": {
+          "default": 0,
+          "type": "integer"
+        },
+        "tileset": {
+          "default": "",
+          "description": "Names a tile set asset, by its path in the project.",
+          "type": "string"
+        },
+        "variant_seed": {
+          "default": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "tileset"
+      ],
+      "title": "Tile Volume",
+      "type": "object"
+    },
+    "sindri.tilemap": {
+      "additionalProperties": false,
+      "properties": {
+        "columns": {
+          "default": 1,
+          "type": "integer"
+        },
+        "layer": {
+          "default": 0,
+          "type": "integer"
+        },
+        "normal_map": {
+          "default": "",
+          "description": "Names a texture asset, by its path in the project.",
+          "type": "string"
+        },
+        "palette": {
+          "default": [],
+          "type": "array"
+        },
+        "projection": {
+          "default": "orthogonal",
+          "description": "One of the listed spellings.",
+          "enum": [
+            "orthogonal",
+            "isometric"
+          ],
+          "type": "string"
+        },
+        "rows": {
+          "default": 1,
+          "type": "integer"
+        },
+        "texture": {
+          "default": "procedural:checkerboard",
+          "description": "Names a texture asset, by its path in the project.",
+          "type": "string"
+        },
+        "tile_overhang": {
+          "default": 0.0,
+          "type": "number"
+        },
+        "tile_size": {
+          "default": [
+            1.0,
+            1.0
+          ],
+          "items": {
+            "default": 1.0,
+            "type": "number"
+          },
+          "type": "array"
+        },
+        "tiles": {
+          "default": [
+            null
+          ],
+          "items": {},
+          "type": "array"
+        },
+        "tint": {
+          "default": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "description": "A color: red, green, blue and, where there are four, alpha, each 0 to 1.",
+          "items": {
+            "default": 1.0,
+            "type": "number"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "columns",
+        "palette",
+        "rows",
+        "texture",
+        "tiles"
+      ],
+      "title": "Tilemap",
+      "type": "object"
+    },
+    "sindri.ui.box": {
+      "additionalProperties": false,
+      "properties": {
+        "absolute": {
+          "default": false,
+          "type": "boolean"
+        },
+        "align_self": {
+          "default": "auto",
+          "description": "One of the listed spellings.",
+          "enum": [
+            "auto",
+            "start",
+            "center",
+            "end",
+            "stretch"
+          ],
+          "type": "string"
+        },
+        "basis": {
+          "default": -1.0,
+          "type": "number"
+        },
+        "fit_content": {
+          "default": [
+            false,
+            false
+          ],
+          "items": {
+            "default": false,
+            "type": "boolean"
+          },
+          "type": "array"
+        },
+        "grid_column": {
+          "default": [
+            0,
+            0
+          ],
+          "items": {
+            "default": 0,
+            "type": "integer"
+          },
+          "type": "array"
+        },
+        "grid_row": {
+          "default": [
+            0,
+            0
+          ],
+          "items": {
+            "default": 0,
+            "type": "integer"
+          },
+          "type": "array"
+        },
+        "grow": {
+          "default": 0.0,
+          "type": "number"
+        },
+        "margin": {
+          "default": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "items": {
+            "default": 0.0,
+            "type": "number"
+          },
+          "type": "array"
+        },
+        "max_size": {
+          "default": [
+            0.0,
+            0.0
+          ],
+          "items": {
+            "default": 0.0,
+            "type": "number"
+          },
+          "type": "array"
+        },
+        "min_size": {
+          "default": [
+            0.0,
+            0.0
+          ],
+          "items": {
+            "default": 0.0,
+            "type": "number"
+          },
+          "type": "array"
+        },
+        "order": {
+          "default": 0,
+          "type": "integer"
+        },
+        "padding": {
+          "default": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "items": {
+            "default": 0.0,
+            "type": "number"
+          },
+          "type": "array"
+        },
+        "shrink": {
+          "default": 1.0,
+          "type": "number"
+        }
+      },
+      "title": "UI Box",
+      "type": "object"
+    },
+    "sindri.ui.button": {
+      "additionalProperties": false,
+      "properties": {
+        "autofocus": {
+          "default": false,
+          "type": "boolean"
+        },
+        "disabled": {
+          "default": false,
+          "type": "boolean"
+        },
+        "label": {
+          "default": "",
+          "type": "string"
+        }
+      },
+      "title": "UI Button",
+      "type": "object"
+    },
+    "sindri.ui.dropdown": {
+      "additionalProperties": false,
+      "properties": {
+        "autofocus": {
+          "default": false,
+          "type": "boolean"
+        },
+        "disabled": {
+          "default": false,
+          "type": "boolean"
+        },
+        "label": {
+          "default": "",
+          "type": "string"
+        },
+        "open": {
+          "default": false,
+          "type": "boolean"
+        },
+        "selected": {
+          "default": 0,
+          "type": "integer"
+        }
+      },
+      "title": "UI Dropdown",
+      "type": "object"
+    },
+    "sindri.ui.grid": {
+      "additionalProperties": false,
+      "properties": {
+        "align_items": {
+          "default": "stretch",
+          "description": "One of the listed spellings.",
+          "enum": [
+            "start",
+            "center",
+            "end",
+            "stretch"
+          ],
+          "type": "string"
+        },
+        "columns": {
+          "default": [
+            "1fr",
+            "1fr"
+          ],
+          "items": {
+            "default": "1fr",
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "fit_content": {
+          "default": [
+            false,
+            false
+          ],
+          "items": {
+            "default": false,
+            "type": "boolean"
+          },
+          "type": "array"
+        },
+        "gap": {
+          "default": [
+            0.05,
+            0.05
+          ],
+          "items": {
+            "default": 0.05,
+            "type": "number"
+          },
+          "type": "array"
+        },
+        "justify_items": {
+          "default": "stretch",
+          "description": "One of the listed spellings.",
+          "enum": [
+            "start",
+            "center",
+            "end",
+            "stretch"
+          ],
+          "type": "string"
+        },
+        "rows": {
+          "default": [],
+          "type": "array"
+        }
+      },
+      "title": "UI Grid",
+      "type": "object"
+    },
+    "sindri.ui.image": {
+      "additionalProperties": false,
+      "properties": {
+        "anchor": {
+          "default": "center",
+          "description": "One of the listed spellings.",
+          "enum": [
+            "center",
+            "top",
+            "bottom",
+            "left",
+            "right",
+            "top_left",
+            "top_right",
+            "bottom_left",
+            "bottom_right"
+          ],
+          "type": "string"
+        },
+        "border_scale": {
+          "default": 0.002777777777777778,
+          "type": "number"
+        },
+        "draw": {
+          "default": "simple",
+          "description": "One of the listed spellings.",
+          "enum": [
+            "simple",
+            "sliced"
+          ],
+          "type": "string"
+        },
+        "fill": {
+          "default": {
+            "amount": 1.0,
+            "from": "left"
+          },
+          "properties": {
+            "amount": {
+              "default": 1.0,
+              "type": "number"
+            },
+            "from": {
+              "default": "left",
+              "type": "string"
+            }
+          },
+          "type": "object"
+        },
+        "layer": {
+          "default": 0,
+          "type": "integer"
+        },
+        "texture": {
+          "default": "procedural:checkerboard",
+          "description": "Names a texture asset, by its path in the project.",
+          "type": "string"
+        },
+        "tint": {
+          "default": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "description": "A color: red, green, blue and, where there are four, alpha, each 0 to 1.",
+          "items": {
+            "default": 1.0,
+            "type": "number"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "texture"
+      ],
+      "title": "UI Image",
+      "type": "object"
+    },
+    "sindri.ui.layout": {
+      "additionalProperties": false,
+      "properties": {
+        "align": {
+          "default": "center",
+          "description": "One of the listed spellings.",
+          "enum": [
+            "start",
+            "center",
+            "end",
+            "stretch"
+          ],
+          "type": "string"
+        },
+        "direction": {
+          "default": "column",
+          "description": "One of the listed spellings.",
+          "enum": [
+            "column",
+            "row"
+          ],
+          "type": "string"
+        },
+        "fit_content": {
+          "default": [
+            false,
+            false
+          ],
+          "items": {
+            "default": false,
+            "type": "boolean"
+          },
+          "type": "array"
+        },
+        "justify": {
+          "default": "center",
+          "description": "One of the listed spellings.",
+          "enum": [
+            "start",
+            "center",
+            "end",
+            "space_between",
+            "space_around",
+            "space_evenly"
+          ],
+          "type": "string"
+        },
+        "spacing": {
+          "default": 0.25,
+          "type": "number"
+        },
+        "wrap": {
+          "default": false,
+          "type": "boolean"
+        }
+      },
+      "title": "UI Layout",
+      "type": "object"
+    },
+    "sindri.ui.option": {
+      "additionalProperties": false,
+      "properties": {
+        "checked": {
+          "default": false,
+          "type": "boolean"
+        },
+        "disabled": {
+          "default": false,
+          "type": "boolean"
+        },
+        "label": {
+          "default": "",
+          "type": "string"
+        }
+      },
+      "title": "UI Option",
+      "type": "object"
+    },
+    "sindri.ui.scroll": {
+      "additionalProperties": false,
+      "properties": {
+        "content_height": {
+          "default": 2.0,
+          "type": "number"
+        },
+        "disabled": {
+          "default": false,
+          "type": "boolean"
+        },
+        "label": {
+          "default": "",
+          "type": "string"
+        },
+        "offset": {
+          "default": 0.0,
+          "type": "number"
+        }
+      },
+      "title": "UI Scroll",
+      "type": "object"
+    },
+    "sindri.ui.shape": {
+      "additionalProperties": false,
+      "properties": {
+        "anchor": {
+          "default": "center",
+          "description": "One of the listed spellings.",
+          "enum": [
+            "center",
+            "top",
+            "bottom",
+            "left",
+            "right",
+            "top_left",
+            "top_right",
+            "bottom_left",
+            "bottom_right"
+          ],
+          "type": "string"
+        },
+        "blend": {
+          "default": "over",
+          "description": "One of the listed spellings.",
+          "enum": [
+            "over",
+            "add"
+          ],
+          "type": "string"
+        },
+        "corner_radius": {
+          "default": 0.0,
+          "type": "number"
+        },
+        "count": {
+          "default": 6.0,
+          "type": "number"
+        },
+        "dash_duty": {
+          "default": 0.5,
+          "type": "number"
+        },
+        "dashes": {
+          "default": 0.0,
+          "type": "number"
+        },
+        "fill": {
+          "default": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "description": "A color: red, green, blue and, where there are four, alpha, each 0 to 1.",
+          "items": {
+            "default": 0.0,
+            "type": "number"
+          },
+          "type": "array"
+        },
+        "kind": {
+          "default": "rect",
+          "description": "One of the listed spellings.",
+          "enum": [
+            "rect",
+            "ellipse",
+            "polygon",
+            "grid"
+          ],
+          "type": "string"
+        },
+        "layer": {
+          "default": 0,
+          "type": "integer"
+        },
+        "shadow": {
+          "default": {
+            "blur": 0.0,
+            "color": [
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "offset": [
+              0.0,
+              0.0
+            ],
+            "spread": 0.0
+          },
+          "properties": {
+            "blur": {
+              "default": 0.0,
+              "type": "number"
+            },
+            "color": {
+              "default": [
+                0.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              "description": "A color: red, green, blue and, where there are four, alpha, each 0 to 1.",
+              "items": {
+                "default": 0.0,
+                "type": "number"
+              },
+              "type": "array"
+            },
+            "offset": {
+              "default": [
+                0.0,
+                0.0
+              ],
+              "items": {
+                "default": 0.0,
+                "type": "number"
+              },
+              "type": "array"
+            },
+            "spread": {
+              "default": 0.0,
+              "type": "number"
+            }
+          },
+          "type": "object"
+        },
+        "stroke": {
+          "default": [
+            0.49,
+            1.0,
+            0.77,
+            1.0
+          ],
+          "description": "A color: red, green, blue and, where there are four, alpha, each 0 to 1.",
+          "items": {
+            "default": 0.49,
+            "type": "number"
+          },
+          "type": "array"
+        },
+        "stroke_width": {
+          "default": 0.04,
+          "type": "number"
+        },
+        "sweep_start": {
+          "default": 0.0,
+          "description": "An angle, in radians.",
+          "type": "number"
+        },
+        "sweep_turns": {
+          "default": 1.0,
+          "type": "number"
+        }
+      },
+      "title": "UI Shape",
+      "type": "object"
+    },
+    "sindri.ui.slider": {
+      "additionalProperties": false,
+      "properties": {
+        "autofocus": {
+          "default": false,
+          "type": "boolean"
+        },
+        "disabled": {
+          "default": false,
+          "type": "boolean"
+        },
+        "label": {
+          "default": "",
+          "type": "string"
+        },
+        "max": {
+          "default": 1.0,
+          "type": "number"
+        },
+        "min": {
+          "default": 0.0,
+          "type": "number"
+        },
+        "orientation": {
+          "default": "horizontal",
+          "description": "One of the listed spellings.",
+          "enum": [
+            "horizontal",
+            "vertical"
+          ],
+          "type": "string"
+        },
+        "step": {
+          "default": 0.0,
+          "type": "number"
+        },
+        "value": {
+          "default": 0.0,
+          "type": "number"
+        }
+      },
+      "title": "UI Slider",
+      "type": "object"
+    },
+    "sindri.ui.text": {
+      "additionalProperties": false,
+      "properties": {
+        "anchor": {
+          "default": "center",
+          "description": "One of the listed spellings.",
+          "enum": [
+            "center",
+            "top",
+            "bottom",
+            "left",
+            "right",
+            "top_left",
+            "top_right",
+            "bottom_left",
+            "bottom_right"
+          ],
+          "type": "string"
+        },
+        "auto_size": {
+          "default": {
+            "enabled": false,
+            "min": 0.02
+          },
+          "properties": {
+            "enabled": {
+              "default": false,
+              "type": "boolean"
+            },
+            "min": {
+              "default": 0.02,
+              "type": "number"
+            }
+          },
+          "type": "object"
+        },
+        "bold": {
+          "default": false,
+          "type": "boolean"
+        },
+        "bounds": {
+          "default": [
+            0.0,
+            0.0
+          ],
+          "items": {
+            "default": 0.0,
+            "type": "number"
+          },
+          "type": "array"
+        },
+        "case": {
+          "default": "as_written",
+          "description": "One of the listed spellings.",
+          "enum": [
+            "as_written",
+            "upper",
+            "lower"
+          ],
+          "type": "string"
+        },
+        "color": {
+          "default": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "description": "A color: red, green, blue and, where there are four, alpha, each 0 to 1.",
+          "items": {
+            "default": 1.0,
+            "type": "number"
+          },
+          "type": "array"
+        },
+        "font": {
+          "default": "",
+          "description": "Names a font asset, by its path in the project.",
+          "type": "string"
+        },
+        "font_size": {
+          "default": 0.0667,
+          "type": "number"
+        },
+        "italic": {
+          "default": false,
+          "type": "boolean"
+        },
+        "layer": {
+          "default": 0,
+          "type": "integer"
+        },
+        "letter_spacing": {
+          "default": 0.0,
+          "type": "number"
+        },
+        "line_align": {
+          "default": "follow",
+          "description": "One of the listed spellings.",
+          "enum": [
+            "follow",
+            "left",
+            "center",
+            "right",
+            "justify"
+          ],
+          "type": "string"
+        },
+        "line_height": {
+          "default": 0.0833,
+          "type": "number"
+        },
+        "outline": {
+          "default": {
+            "color": [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ],
+            "width": 0.0
+          },
+          "properties": {
+            "color": {
+              "default": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ],
+              "description": "A color: red, green, blue and, where there are four, alpha, each 0 to 1.",
+              "items": {
+                "default": 0.0,
+                "type": "number"
+              },
+              "type": "array"
+            },
+            "width": {
+              "default": 0.0,
+              "type": "number"
+            }
+          },
+          "type": "object"
+        },
+        "rich": {
+          "default": false,
+          "type": "boolean"
+        },
+        "shadow": {
+          "default": {
+            "color": [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ],
+            "offset": [
+              0.0,
+              0.0
+            ],
+            "softness": 0.0
+          },
+          "properties": {
+            "color": {
+              "default": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ],
+              "description": "A color: red, green, blue and, where there are four, alpha, each 0 to 1.",
+              "items": {
+                "default": 0.0,
+                "type": "number"
+              },
+              "type": "array"
+            },
+            "offset": {
+              "default": [
+                0.0,
+                0.0
+              ],
+              "items": {
+                "default": 0.0,
+                "type": "number"
+              },
+              "type": "array"
+            },
+            "softness": {
+              "default": 0.0,
+              "type": "number"
+            }
+          },
+          "type": "object"
+        },
+        "text": {
+          "default": "Text",
+          "type": "string"
+        },
+        "values": {
+          "default": [],
+          "type": "array"
+        },
+        "visible": {
+          "default": -1.0,
+          "type": "number"
+        },
+        "wrap": {
+          "default": "none",
+          "description": "One of the listed spellings.",
+          "enum": [
+            "none",
+            "word",
+            "glyph"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "font",
+        "text"
+      ],
+      "title": "UI Text",
+      "type": "object"
+    },
+    "sindri.ui.text_input": {
+      "additionalProperties": false,
+      "properties": {
+        "autofocus": {
+          "default": false,
+          "type": "boolean"
+        },
+        "disabled": {
+          "default": false,
+          "type": "boolean"
+        },
+        "label": {
+          "default": "",
+          "type": "string"
+        },
+        "max_length": {
+          "default": 128,
+          "type": "integer"
+        },
+        "placeholder": {
+          "default": "",
+          "type": "string"
+        },
+        "value": {
+          "default": "",
+          "type": "string"
+        }
+      },
+      "title": "UI Text Input",
+      "type": "object"
+    },
+    "sindri.ui.toggle": {
+      "additionalProperties": false,
+      "properties": {
+        "autofocus": {
+          "default": false,
+          "type": "boolean"
+        },
+        "checked": {
+          "default": false,
+          "type": "boolean"
+        },
+        "disabled": {
+          "default": false,
+          "type": "boolean"
+        },
+        "group": {
+          "default": "",
+          "type": "string"
+        },
+        "label": {
+          "default": "",
+          "type": "string"
+        }
+      },
+      "title": "UI Toggle",
+      "type": "object"
+    },
+    "sindri.voxel_world": {
+      "additionalProperties": false,
+      "properties": {
+        "blocks": {
+          "default": "builtin:blocks",
+          "description": "Names a tile set asset, by its path in the project.",
+          "type": "string"
+        },
+        "edits": {
+          "default": [],
+          "type": "array"
+        },
+        "focus": {
+          "default": [
+            0,
+            0,
+            0
+          ],
+          "items": {
+            "default": 0,
+            "type": "integer"
+          },
+          "type": "array"
+        },
+        "follow_camera": {
+          "default": false,
+          "type": "boolean"
+        },
+        "generator": {
+          "default": {
+            "beach_voxel": "sand",
+            "biomes": [
+              {
+                "moisture": 0.4000000059604645,
+                "name": "Grassland",
+                "relief": 0.800000011920929,
+                "subsurface_depth": 3,
+                "subsurface_voxel": "dirt",
+                "surface_voxel": "grass",
+                "temperature": 0.550000011920929,
+                "terraces": 0,
+                "trees": 0.05999999865889549
+              },
+              {
+                "moisture": 0.7200000286102295,
+                "name": "Forest",
+                "relief": 1.0,
+                "subsurface_depth": 3,
+                "subsurface_voxel": "dirt",
+                "surface_voxel": "grass",
+                "temperature": 0.550000011920929,
+                "terraces": 0,
+                "trees": 0.550000011920929
+              },
+              {
+                "moisture": 0.9200000166893005,
+                "name": "Swamp",
+                "relief": 0.30000001192092896,
+                "subsurface_depth": 3,
+                "subsurface_voxel": "mud",
+                "surface_voxel": "mud",
+                "temperature": 0.75,
+                "terraces": 0,
+                "trees": 0.20000000298023224
+              },
+              {
+                "moisture": 0.11999999731779099,
+                "name": "Desert",
+                "relief": 0.6000000238418579,
+                "subsurface_depth": 5,
+                "subsurface_voxel": "sand",
+                "surface_voxel": "sand",
+                "temperature": 0.9200000166893005,
+                "terraces": 0,
+                "trees": 0.0
+              },
+              {
+                "moisture": 0.3499999940395355,
+                "name": "Badlands",
+                "relief": 1.399999976158142,
+                "subsurface_depth": 6,
+                "subsurface_voxel": "clay",
+                "surface_voxel": "clay",
+                "temperature": 0.8500000238418579,
+                "terraces": 3,
+                "trees": 0.0
+              },
+              {
+                "moisture": 0.6499999761581421,
+                "name": "Taiga",
+                "relief": 1.100000023841858,
+                "subsurface_depth": 3,
+                "subsurface_voxel": "dirt",
+                "surface_voxel": "moss",
+                "temperature": 0.2800000011920929,
+                "terraces": 0,
+                "trees": 0.44999998807907104
+              },
+              {
+                "moisture": 0.30000001192092896,
+                "name": "Tundra",
+                "relief": 0.699999988079071,
+                "subsurface_depth": 2,
+                "subsurface_voxel": "dirt",
+                "surface_voxel": "snow",
+                "temperature": 0.10000000149011612,
+                "terraces": 0,
+                "trees": 0.029999999329447746
+              }
+            ],
+            "caves": true,
+            "cliff_voxel": "rock",
+            "feature_size": 64,
+            "ice_voxel": "ice",
+            "kind": "natural_terrain",
+            "leaves_voxel": "leaves",
+            "relief": 40,
+            "rivers": true,
+            "sea_bed_voxel": "gravel",
+            "sea_level": 0,
+            "seed": 0,
+            "snow_line": 30,
+            "snow_voxel": "snow",
+            "stone_voxel": "stone",
+            "tree_line": 22,
+            "trunk_voxel": "log",
+            "water_voxel": "water"
+          },
+          "oneOf": [
+            {
+              "additionalProperties": false,
+              "properties": {
+                "base_height": {
+                  "default": 3,
+                  "type": "integer"
+                },
+                "deep_voxel": {
+                  "default": 3,
+                  "description": "Names a block of the tile set `blocks` names, or, without one, an item by its `materials[].voxel`.",
+                  "type": [
+                    "string",
+                    "integer"
+                  ]
+                },
+                "height_variation": {
+                  "default": 6,
+                  "description": "A bounded number.",
+                  "maximum": 4096.0,
+                  "minimum": 0.0,
+                  "type": "integer"
+                },
+                "kind": {
+                  "const": "layered_terrain"
+                },
+                "seed": {
+                  "default": 0,
+                  "description": "A bounded number.",
+                  "minimum": 0.0,
+                  "type": "integer"
+                },
+                "subsurface_depth": {
+                  "default": 3,
+                  "description": "A bounded number.",
+                  "minimum": 0.0,
+                  "type": "integer"
+                },
+                "subsurface_voxel": {
+                  "default": 2,
+                  "description": "Names a block of the tile set `blocks` names, or, without one, an item by its `materials[].voxel`.",
+                  "type": [
+                    "string",
+                    "integer"
+                  ]
+                },
+                "surface_voxel": {
+                  "default": 1,
+                  "description": "Names a block of the tile set `blocks` names, or, without one, an item by its `materials[].voxel`.",
+                  "type": [
+                    "string",
+                    "integer"
+                  ]
+                }
+              },
+              "required": [
+                "kind"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "beach_voxel": {},
+                "biomes": {
+                  "default": [
+                    {
+                      "moisture": 0.5,
+                      "name": "Grassland",
+                      "relief": 1.0,
+                      "subsurface_depth": 3,
+                      "subsurface_voxel": 2,
+                      "surface_voxel": 1,
+                      "temperature": 0.5,
+                      "terraces": 0,
+                      "trees": 0.0
+                    }
+                  ],
+                  "items": {
+                    "default": {
+                      "moisture": 0.5,
+                      "name": "Grassland",
+                      "relief": 1.0,
+                      "subsurface_depth": 3,
+                      "subsurface_voxel": 2,
+                      "surface_voxel": 1,
+                      "temperature": 0.5,
+                      "terraces": 0,
+                      "trees": 0.0
+                    },
+                    "properties": {
+                      "moisture": {
+                        "default": 0.5,
+                        "description": "A bounded number.",
+                        "maximum": 1.0,
+                        "minimum": 0.0,
+                        "type": "number"
+                      },
+                      "name": {
+                        "default": "Grassland",
+                        "type": "string"
+                      },
+                      "relief": {
+                        "default": 1.0,
+                        "description": "A bounded number.",
+                        "maximum": 4.0,
+                        "minimum": 0.0,
+                        "type": "number"
+                      },
+                      "subsurface_depth": {
+                        "default": 3,
+                        "description": "A bounded number.",
+                        "maximum": 256.0,
+                        "minimum": 0.0,
+                        "type": "integer"
+                      },
+                      "subsurface_voxel": {
+                        "default": 2,
+                        "description": "Names a block of the tile set `blocks` names, or, without one, an item by its `materials[].voxel`.",
+                        "type": [
+                          "string",
+                          "integer"
+                        ]
+                      },
+                      "surface_voxel": {
+                        "default": 1,
+                        "description": "Names a block of the tile set `blocks` names, or, without one, an item by its `materials[].voxel`.",
+                        "type": [
+                          "string",
+                          "integer"
+                        ]
+                      },
+                      "temperature": {
+                        "default": 0.5,
+                        "description": "A bounded number.",
+                        "maximum": 1.0,
+                        "minimum": 0.0,
+                        "type": "number"
+                      },
+                      "terraces": {
+                        "default": 0,
+                        "description": "A bounded number.",
+                        "maximum": 64.0,
+                        "minimum": 0.0,
+                        "type": "integer"
+                      },
+                      "trees": {
+                        "default": 0.0,
+                        "description": "A bounded number.",
+                        "maximum": 1.0,
+                        "minimum": 0.0,
+                        "type": "number"
+                      }
+                    },
+                    "type": "object"
+                  },
+                  "type": "array"
+                },
+                "caves": {
+                  "default": true,
+                  "type": "boolean"
+                },
+                "cliff_voxel": {},
+                "feature_size": {
+                  "default": 64,
+                  "description": "A bounded number.",
+                  "maximum": 4096.0,
+                  "minimum": 8.0,
+                  "type": "integer"
+                },
+                "ice_voxel": {},
+                "kind": {
+                  "const": "natural_terrain"
+                },
+                "leaves_voxel": {},
+                "relief": {
+                  "default": 40,
+                  "description": "A bounded number.",
+                  "maximum": 1024.0,
+                  "minimum": 1.0,
+                  "type": "integer"
+                },
+                "rivers": {
+                  "default": true,
+                  "type": "boolean"
+                },
+                "sea_bed_voxel": {},
+                "sea_level": {
+                  "default": 0,
+                  "type": "integer"
+                },
+                "seed": {
+                  "default": 0,
+                  "description": "A bounded number.",
+                  "minimum": 0.0,
+                  "type": "integer"
+                },
+                "snow_line": {
+                  "default": 30,
+                  "type": "integer"
+                },
+                "snow_voxel": {},
+                "stone_voxel": {
+                  "default": 3,
+                  "description": "Names a block of the tile set `blocks` names, or, without one, an item by its `materials[].voxel`.",
+                  "type": [
+                    "string",
+                    "integer"
+                  ]
+                },
+                "tree_line": {
+                  "default": 22,
+                  "type": "integer"
+                },
+                "trunk_voxel": {},
+                "water_voxel": {}
+              },
+              "required": [
+                "kind"
+              ],
+              "type": "object"
+            }
+          ],
+          "type": "object"
+        },
+        "layer": {
+          "default": 0,
+          "type": "integer"
+        },
+        "map_cliffs": {
+          "default": false,
+          "type": "boolean"
+        },
+        "map_flood": {},
+        "map_water": {},
+        "materials": {
+          "default": [
+            {
+              "bottom": "procedural:checkerboard",
+              "side": "procedural:checkerboard",
+              "top": "procedural:checkerboard",
+              "voxel": 1
+            },
+            {
+              "bottom": "procedural:checkerboard",
+              "side": "procedural:checkerboard",
+              "top": "procedural:checkerboard",
+              "voxel": 2
+            },
+            {
+              "bottom": "procedural:checkerboard",
+              "side": "procedural:checkerboard",
+              "top": "procedural:checkerboard",
+              "voxel": 3
+            }
+          ],
+          "items": {
+            "default": {
+              "bottom": "procedural:checkerboard",
+              "side": "procedural:checkerboard",
+              "top": "procedural:checkerboard",
+              "voxel": 1
+            },
+            "properties": {
+              "bottom": {
+                "default": "procedural:checkerboard",
+                "description": "Names a texture asset, by its path in the project.",
+                "type": "string"
+              },
+              "side": {
+                "default": "procedural:checkerboard",
+                "description": "Names a texture asset, by its path in the project.",
+                "type": "string"
+              },
+              "top": {
+                "default": "procedural:checkerboard",
+                "description": "Names a texture asset, by its path in the project.",
+                "type": "string"
+              },
+              "voxel": {
+                "default": 1,
+                "description": "This item's key: unique in its list, named by other fields.",
+                "type": "integer"
+              }
+            },
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "normal_maps": {
+          "default": {},
+          "properties": {},
+          "type": "object"
+        },
+        "render_radius": {
+          "default": 2,
+          "description": "A bounded number.",
+          "maximum": 8.0,
+          "minimum": 0.0,
+          "type": "integer"
+        },
+        "soft_edges": {
+          "default": false,
+          "type": "boolean"
+        },
+        "variant_seed": {
+          "default": 0,
+          "type": "integer"
+        },
+        "vertical_radius": {
+          "default": 1,
+          "description": "A bounded number.",
+          "maximum": 8.0,
+          "minimum": 0.0,
+          "type": "integer"
+        },
+        "view": {
+          "default": "blocks",
+          "description": "One of the listed spellings.",
+          "enum": [
+            "blocks",
+            "map"
+          ],
+          "type": "string"
+        }
+      },
+      "title": "Voxel World",
+      "type": "object"
+    },
+    "sindri.wake": {
+      "additionalProperties": false,
+      "properties": {
+        "radius": {
+          "default": 1.2000000476837158,
+          "description": "A bounded number.",
+          "minimum": 0.0,
+          "type": "number"
+        },
+        "strength": {
+          "default": 0.25,
+          "description": "A bounded number.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "type": "number"
+        }
+      },
+      "title": "Wake",
+      "type": "object"
+    },
+    "transform": {
+      "additionalProperties": false,
+      "description": "Where the entity is, relative to its parent. Any field left out is the identity's.",
+      "properties": {
+        "position": {
+          "description": "x, y, z. In 2D, z is the layer.",
+          "items": {
+            "type": "number"
+          },
+          "maxItems": 3,
+          "minItems": 3,
+          "type": "array"
+        },
+        "rotation": {
+          "description": "A quaternion, in x, y, z, w order.",
+          "items": {
+            "type": "number"
+          },
+          "maxItems": 4,
+          "minItems": 4,
+          "type": "array"
+        },
+        "scale": {
+          "description": "x, y, z.",
+          "items": {
+            "type": "number"
+          },
+          "maxItems": 3,
+          "minItems": 3,
+          "type": "array"
+        },
+        "z_locked": {
+          "description": "Declares that this entity stays on the layer it is on.",
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "weave.style": {
+      "description": "Weave styling for this entity: its classes, id and inline declarations, read by sindri-weave."
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "A Sindri `.scene` file: a flat list of entities, each with an id, an optional parent, a transform and components keyed by type name. Older format versions are migrated when opened. Generated by `cargo run -p sindri-capabilities -- --write` from the component registry; edits here are overwritten.",
+  "properties": {
+    "entities": {
+      "items": {
+        "$ref": "#/$defs/entity"
+      },
+      "type": "array"
+    },
+    "format_version": {
+      "default": 10,
+      "description": "The format this file is written in. 10 is current; an older one is migrated when the file is opened.",
+      "maximum": 10,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "metadata": {
+      "additionalProperties": false,
+      "properties": {
+        "editor": {
+          "$ref": "#/$defs/editor"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    }
+  },
+  "required": [
+    "format_version"
+  ],
+  "title": "Sindri scene",
+  "type": "object"
+}

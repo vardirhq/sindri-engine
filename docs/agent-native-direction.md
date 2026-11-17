@@ -119,11 +119,22 @@ popularity, and it makes a wrong document worse than none.
 | What may I author, and what does each field mean? | `docs/generated/sindri-capabilities.json` | Exists |
 | What gameplay code may I write? | `docs/generated/decay-api.json` / `.md` | Exists |
 | What is the Decay language? | `docs/generated/decay-language.json` | Exists |
-| What shape is a `.scene` or `.prefab` file? | JSON Schema generated from the component registry | Missing |
+| What shape is a `.scene` or `.prefab` file? | `docs/generated/sindri-scene.schema.json` / `sindri-prefab.schema.json`, from the component registry | Exists |
 | What may a Weave stylesheet say? | `docs/generated/weave-reference.json` / `.md` | Exists for properties; selectors, states and units are still hand-written |
 
 The JSON Schemas are the cheapest large win: an agent reads them, and a person
 editing a scene in VS Code gets validation and completion from the same file.
+A component's own fields are closed, so a misspelled one is an error rather
+than a field serde quietly ignores; objects inside a component are typed but
+open, because a template cannot tell a struct from a map keyed by name; a
+choice with variants is a `oneOf` over them. A test validates every scene and
+prefab in the repository against them.
+
+A project does not carry this repository, so the binary hands every one of
+these out itself: `sindri capabilities` lists them, and `sindri capabilities
+scene` (or `prefab`, `components`, `decay`, `decay-language`, `weave`) prints
+one, byte for byte what `docs/generated/` holds. `sindri mcp` serves the same
+as its `capabilities` tool.
 
 **Hand-written only for what cannot be generated:** where things belong
 (gameplay in Decay, interface in Weave, engine capability in Rust), the
@@ -136,7 +147,7 @@ hand-written `ENGINE_REFERENCE.md` is the failure this rule exists to prevent.
 **Shipped with projects, not only the repository.** A game made with Sindri
 does not contain this repository's `AGENTS.md`. A new project needs its own
 short agent guide — the workflow and where to find the generated documents —
-written by `sindri new`, and packaged as a skill for the agents that support
+written by `sindri project new`, and packaged as a skill for the agents that support
 one. It stays thin: discovery and checks, not API facts.
 
 **Packed for chat models.** A model with no shell and no repository, such as
@@ -152,7 +163,8 @@ person. Decay is already covered: `decay-lsp --check --json` compiles scripts
 against the real host environment with structured diagnostics. Everything else
 is checked only when the editor or a game loads it.
 
-The target is one command over a whole project:
+`sindri project check` (the `sindri` binary, `crates/sindri-cli`) is now that
+one command over a whole project:
 
 ```bash
 sindri project check --format json
@@ -195,14 +207,13 @@ makes it a check rather than an anecdote.
 ## The editor and the agent at the same time
 
 An agent will edit files while the editor has them open. Scripts, textures,
-prefabs and Weave styles are already watched and reloaded. The open scene is
-not: reloading is manual and discards unsaved edits along with their history
-(see [`editor-architecture.md`](editor-architecture.md)).
-
-The editor should reload a scene changed on disk when it has no unsaved edits,
-and when it does, say so and offer the choice rather than letting the next save
-overwrite the agent's work. That is the one editor change this direction
-requires.
+prefabs and Weave styles are watched and reloaded, and so is the open scene:
+the editor compares its file with what it last read or wrote once a second
+(`SceneFile::on_disk`, a `stat` while nothing has changed), reads it again
+when it has no unsaved edits, and when it has some, asks rather than letting
+the next save overwrite the agent's work. Keeping its own edits is a choice
+made once, not asked again every second. Not while the scene plays: the look
+waits for Stop.
 
 Because canonical serialization reproduces an untouched scene byte for byte,
 the editor and an agent already produce diffs that do not fight. That property
@@ -245,7 +256,17 @@ every agent has one. Chat and IDE agents often reach tools only through MCP;
 shell. For them `sindri project check` and `sindri play --headless` do not
 exist, and the foundation is reduced to its docs.
 
-So once those commands exist, a thin MCP server may expose them:
+`sindri mcp` is that server, built at the project owner's ask ahead of the
+benchmark below: it serves `project_check`, `play_run` and `capture` over
+MCP's stdio transport, each answering with exactly its command's JSON from the
+same functions, and `play_run`'s shots and `capture`'s picture as inline
+images, so an agent looks at the result rather than at a path. Register it with an MCP client as a command, for example:
+
+```bash
+claude mcp add sindri -- /path/to/sindri-engine/target/release/sindri mcp
+```
+
+It was planned as follows, and keeps to it:
 
 - `project_check`, returning the command's JSON unchanged;
 - `play_headless`, returning its per-frame log and any captured frames as
@@ -277,15 +298,33 @@ also shows whether the MCP adapter above is worth building.
 
 ## Order of work
 
-1. `sindri project check` with JSON output, over scenes, prefabs, Weave, Decay
-   and `sindri.toml`.
-2. JSON Schemas for scenes and prefabs, generated from the component registry.
-3. `sindri play --headless` with structured logs, scripted input and capture.
-4. The editor reloads a scene changed on disk.
-5. A per-project agent guide written by `sindri new`, packaged as a skill.
+1. *Done:* `sindri project check` with JSON output, over scenes, prefabs,
+   Weave, Decay and `sindri.toml`, reporting every problem with the code the
+   crate that raised it gives (`SceneError::code`, `PrefabError::code`,
+   `ComponentRegistryError::code`, Weave's `ParseError::code`).
+2. *Done:* JSON Schemas for scenes and prefabs, generated from the component
+   registry into `docs/generated/`, and every generated document served by
+   `sindri capabilities [NAME]` and the MCP `capabilities` tool.
+3. *Done:* `sindri play run [PATH] [--scene] [--steps "wait:1 hold:D … shot"]
+   [--track ID] [--shots DIR] [--size WxH]`, headless at a fixed step with
+   scripted input (keys, clicks on laid-out elements, typing, board values,
+   moving an entity), styled and laid out as it is drawn, reporting the shared
+   board, where tracked entities ended up, the pictures `shot` steps took, and
+   what scripts printed and failed, per frame. `sindri render capture --out`
+   is the same run ending in one picture. The player behind it is
+   `crates/sindri-capture`, which Causeway's `project-capture` uses too.
+4. *Done:* the editor reloads a scene changed on disk, and asks first when it
+   has unsaved edits.
+5. *Done:* `sindri project new PATH [--name]` makes the editor's project
+   (one blank scene, `sindri_authoring::blank_scene`, shared with the
+   editor's New Scene) with `AGENTS.md`, a `CLAUDE.md` pointing at it, the
+   same guide as a skill in `.claude/skills/sindri/`, the scene and prefab
+   schemas in `.sindri/`, and VS Code settings that use them. The guide is
+   discovery and checks only: every fact it needs it asks `sindri
+   capabilities` for.
 6. The external-agent benchmark, after which its failures order the rest.
-   Among the candidates it decides: the read-only MCP adapter, if agents
-   without a shell fall behind.
+   It also says whether the read-only MCP adapter (`sindri mcp`, already built)
+   closes the gap for agents without a shell.
 7. The local agent on the same checks: writing one script from a description,
    then selected-entity edits through the proposal protocol, then explaining a
    check failure. The benchmark gains a local-model column for the tasks the

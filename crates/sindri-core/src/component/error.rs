@@ -116,3 +116,32 @@ pub enum ComponentRegistryError {
     #[error(transparent)]
     InvalidScene(#[from] SceneError),
 }
+
+impl ComponentRegistryError {
+    /// The error's stable name, which tools match on.
+    #[must_use]
+    pub const fn code(&self) -> &'static str {
+        match self {
+            Self::InvalidPartName { .. } => "COMPONENT_INVALID_PART_NAME",
+            Self::InvalidTypeName(_) => "COMPONENT_INVALID_TYPE_NAME",
+            Self::EmptyDisplayName => "COMPONENT_EMPTY_DISPLAY_NAME",
+            Self::AlreadyRegistered(_) => "COMPONENT_ALREADY_REGISTERED",
+            Self::NotRegistered(_) => "COMPONENT_NOT_REGISTERED",
+            Self::InvalidFields(_) => "COMPONENT_INVALID_FIELDS",
+            Self::DescribedWithoutFields(_) => "COMPONENT_DESCRIBED_WITHOUT_FIELDS",
+            Self::UnknownFieldPath { .. } => "COMPONENT_UNKNOWN_FIELD_PATH",
+            Self::VariantsWithoutChoice { .. } => "COMPONENT_VARIANTS_WITHOUT_CHOICE",
+            Self::UnknownVariant { .. } => "COMPONENT_UNKNOWN_VARIANT",
+            Self::UndescribedVariant { .. } => "COMPONENT_UNDESCRIBED_VARIANT",
+            Self::InvalidVariantTemplate { .. } => "COMPONENT_INVALID_VARIANT_TEMPLATE",
+            Self::VariantMismatch { .. } => "COMPONENT_VARIANT_MISMATCH",
+            Self::TemplateMismatch { .. } => "COMPONENT_TEMPLATE_MISMATCH",
+            Self::NotOptional { .. } => "COMPONENT_NOT_OPTIONAL",
+            Self::OptionalMismatch { .. } => "COMPONENT_OPTIONAL_MISMATCH",
+            Self::InvalidDefault { .. } => "COMPONENT_INVALID_DEFAULT",
+            Self::UnknownComponent { .. } => "COMPONENT_UNKNOWN",
+            Self::InvalidPayload { .. } => "COMPONENT_INVALID_PAYLOAD",
+            Self::InvalidScene(error) => error.code(),
+        }
+    }
+}

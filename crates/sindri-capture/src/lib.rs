@@ -2,9 +2,14 @@
 //! session, the same Weave styling for the viewport, the same draw, with
 //! clicks, keys and wheel delivered as a host delivers them.
 //!
-//! What `project-capture` photographs and `project-benchmark` times. It reads
+//! What `sindri play` photographs, and what Causeway's `project-capture` and
+//! `project-benchmark` drive (Causeway re-exports it as `project`). It reads
 //! a project from its directory rather than from what the native game embeds,
 //! so any project in the repository can be opened, not only Causeway.
+
+// Offscreen, with a GPU and a file system: a native tool, as it was inside
+// Causeway. In the browser it is empty rather than a build failure.
+#![cfg(not(target_arch = "wasm32"))]
 
 use std::{collections::BTreeMap, error::Error, fs, io::BufWriter, path::Path, time::Duration};
 
@@ -16,7 +21,7 @@ use sindri_runtime::ProjectRun;
 use sindri_runtime::project::{assets_root, files_under};
 use sindri_scene::{SceneExtractor, TileSetBindings, measure_ui_text};
 
-use crate::Session;
+use sindri_runtime::Session;
 
 mod draw;
 mod models;
@@ -51,6 +56,9 @@ pub struct ProjectPlayer {
     pub tile_sets: TileSetBindings,
     /// How long it has played, which sprite shaders read as their clock.
     pub seconds: f32,
+    /// Each step's report, by frame, while a caller is collecting them
+    /// ([`Self::collecting`]); otherwise they are logged.
+    collected: Option<Vec<(u32, sindri_runtime::StepReport)>>,
 }
 
 impl ProjectPlayer {
@@ -63,7 +71,46 @@ impl ProjectPlayer {
 
     /// One fixed step and one draw's worth of styling, as a host runs.
     pub fn step(&mut self) -> Result<(), Box<dyn Error>> {
-        self.advance()?;
+        let frame = self.frame();
+        let report = self.step_reported()?;
+        match &mut self.collected {
+            Some(collected) => collected.push((frame, report)),
+            None => report.log(),
+        }
+        Ok(())
+    }
+
+    /// How many fixed steps it has played.
+    #[must_use]
+    pub fn frame(&self) -> u32 {
+        #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
+        let frame = (self.seconds / STEP).round() as u32;
+        frame
+    }
+
+    /// Keeps each step's report from now on, for [`Self::take_reports`],
+    /// instead of logging it.
+    pub fn collecting(&mut self) {
+        self.collected.get_or_insert_with(Vec::new);
+    }
+
+    /// The reports kept since the last call, each with its frame.
+    pub fn take_reports(&mut self) -> Vec<(u32, sindri_runtime::StepReport)> {
+        self.collected
+            .as_mut()
+            .map(std::mem::take)
+            .unwrap_or_default()
+    }
+
+    /// [`Self::step`], answering what the scripts printed and what failed
+    /// rather than logging it: what a tool reporting a run reads.
+    pub fn step_reported(&mut self) -> Result<sindri_runtime::StepReport, Box<dyn Error>> {
+        let viewport = (self.size[0], self.size[1]);
+        let report = self
+            .session
+            .step(&mut self.world, &self.input, viewport, STEP)?;
+        self.input.begin_frame(Duration::from_secs_f32(STEP));
+        self.seconds += STEP;
         let view = self.viewport();
         let undo = self.session.style(&mut self.world, view)?;
         let sizes = measure_ui_text(&self.world, self.scene.components(), &mut self.text)?;
@@ -71,7 +118,7 @@ impl ProjectPlayer {
         if let Some(undo) = undo {
             undo.undo(&mut self.world);
         }
-        Ok(())
+        Ok(report)
     }
 
     /// One fixed step of gameplay and nothing drawn: what a host's update
@@ -114,7 +161,7 @@ impl ProjectPlayer {
     fn point_at(&mut self, name: &str) -> Result<(), Box<dyn Error>> {
         let [x, y] = pixel_of(&self.session, &self.world, name, self.size)
             .ok_or_else(|| format!("{name} is not laid out on screen"))?;
-        println!("{name} at ({x:.0}, {y:.0})");
+        eprintln!("{name} at ({x:.0}, {y:.0})");
         self.input.apply(InputEvent::PointerMoved { x, y });
         Ok(())
     }
@@ -209,7 +256,7 @@ impl ProjectPlayer {
                     .world_transform(found)
                     .ok_or("it has no place")?
                     .position;
-                println!("{target} at ({:.1}, {:.1})", at[0], at[1]);
+                eprintln!("{target} at ({:.1}, {:.1})", at[0], at[1]);
                 self.put(name, [at[0], at[1] - 0.8])?;
                 self.step()?;
             }
@@ -279,6 +326,7 @@ fn open_on(
         size,
         tile_sets,
         seconds: 0.0,
+        collected: None,
     };
     Ok(OpenedProject {
         player,
@@ -294,27 +342,72 @@ pub async fn photograph(
     size: (u32, u32),
     path: &Path,
 ) -> Result<(), Box<dyn Error>> {
-    let instance = wgpu::Instance::default();
-    let gpu = GpuContext::request(&instance, None, &GpuRequestOptions::default()).await?;
-    let mut renderer = ProjectRenderer::new(&gpu, &opened.images, &opened.sheets, size)?;
-    renderer.bind_shaders(&opened.shaders)?;
-    renderer.draw(&mut opened.player, &gpu)?;
-    let mut encoder = gpu
-        .device
-        .create_command_encoder(&wgpu::CommandEncoderDescriptor {
-            label: Some("project capture readback"),
-        });
-    let readback = renderer
-        .target()
-        .copy_to_buffer(&gpu.device, &mut encoder)?;
-    gpu.queue.submit([encoder.finish()]);
-    let pixels = readback.read_rgba8(&gpu.device)?;
-    if let Some(parent) = path.parent() {
-        fs::create_dir_all(parent)?;
+    let mut photographer = Photographer::new(opened, size).await?;
+    photographer.shoot(&mut opened.player, path)
+}
+
+/// A GPU and a renderer kept for a run's photographs, so a run that takes
+/// several pays for the device once.
+pub struct Photographer {
+    gpu: GpuContext,
+    renderer: ProjectRenderer,
+    size: (u32, u32),
+}
+
+impl Photographer {
+    /// A renderer for `opened`'s pictures, `size` pixels.
+    ///
+    /// # Errors
+    /// No GPU adapter, or the project's pictures or shaders do not load.
+    pub async fn new(opened: &OpenedProject, size: (u32, u32)) -> Result<Self, Box<dyn Error>> {
+        let instance = wgpu::Instance::default();
+        let gpu = GpuContext::request(&instance, None, &GpuRequestOptions::default()).await?;
+        let mut renderer = ProjectRenderer::new(&gpu, &opened.images, &opened.sheets, size)?;
+        renderer.bind_shaders(&opened.shaders)?;
+        Ok(Self {
+            gpu,
+            renderer,
+            size,
+        })
     }
-    let mut png = png::Encoder::new(BufWriter::new(fs::File::create(path)?), size.0, size.1);
-    png.set_color(png::ColorType::Rgba);
-    png.set_depth(png::BitDepth::Eight);
-    png.write_header()?.write_image_data(&pixels)?;
-    Ok(())
+
+    /// The player's world as it is now, as RGBA rows.
+    ///
+    /// # Errors
+    /// The draw or the readback fails.
+    pub fn pixels(&mut self, player: &mut ProjectPlayer) -> Result<Vec<u8>, Box<dyn Error>> {
+        self.renderer.draw(player, &self.gpu)?;
+        let mut encoder = self
+            .gpu
+            .device
+            .create_command_encoder(&wgpu::CommandEncoderDescriptor {
+                label: Some("project capture readback"),
+            });
+        let readback = self
+            .renderer
+            .target()
+            .copy_to_buffer(&self.gpu.device, &mut encoder)?;
+        self.gpu.queue.submit([encoder.finish()]);
+        Ok(readback.read_rgba8(&self.gpu.device)?)
+    }
+
+    /// The player's world as it is now, written to `path` as a PNG.
+    ///
+    /// # Errors
+    /// The draw, the readback or the write fails.
+    pub fn shoot(&mut self, player: &mut ProjectPlayer, path: &Path) -> Result<(), Box<dyn Error>> {
+        let pixels = self.pixels(player)?;
+        if let Some(parent) = path.parent() {
+            fs::create_dir_all(parent)?;
+        }
+        let mut png = png::Encoder::new(
+            BufWriter::new(fs::File::create(path)?),
+            self.size.0,
+            self.size.1,
+        );
+        png.set_color(png::ColorType::Rgba);
+        png.set_depth(png::BitDepth::Eight);
+        png.write_header()?.write_image_data(&pixels)?;
+        Ok(())
+    }
 }

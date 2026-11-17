@@ -22,6 +22,10 @@ use crate::prefab::ScenePrefabs;
 use crate::prefab::document::{asset_root_for, is_prefab_path, prefab_text, read_as_scene};
 use crate::prefab::missing::{restore, stand_in};
 
+mod disk;
+
+pub use disk::OnDisk;
+
 /// A scene document together with the file it belongs to.
 ///
 /// The file may be a prefab instead, opened to be edited: it is worked on as a
@@ -38,6 +42,8 @@ pub struct SceneFile {
     /// Prefabs this document places that could not be read, and why. Their
     /// instances are placeholders until the scene is opened again.
     missing: Vec<(String, String)>,
+    /// What the file held when this last read or wrote it.
+    seen: Option<disk::Stamp>,
 }
 
 impl SceneFile {
@@ -74,6 +80,7 @@ impl SceneFile {
             prefabs,
             anchor: Some(anchor),
             missing,
+            seen: disk::Stamp::of(path),
         })
     }
 
@@ -108,6 +115,7 @@ impl SceneFile {
             prefabs: ScenePrefabs::default(),
             anchor: None,
             missing: Vec::new(),
+            seen: None,
         }
     }
 
@@ -193,6 +201,7 @@ impl SceneFile {
         }
         self.path = Some(path.to_path_buf());
         self.document = document;
+        self.seen = disk::Stamp::of(path);
         Ok(())
     }
 
@@ -219,6 +228,27 @@ impl SceneFile {
         if !is_prefab_path(path) {
             self.anchor = Some(path.to_path_buf());
             self.prefabs.move_beside(path);
+        }
+        self.seen = disk::Stamp::of(path);
+    }
+
+    /// Whether the file has changed since this last read or wrote it.
+    ///
+    /// Cheap while nothing has: a `stat`, and the bytes only when its size or
+    /// time moved.
+    pub fn on_disk(&mut self) -> OnDisk {
+        match &self.path {
+            Some(path) => disk::look(path, &mut self.seen),
+            None => OnDisk::Same,
+        }
+    }
+
+    /// Agrees with the file as it is now, without reading it in: the choice
+    /// to keep what is in memory over a change made on disk, which the next
+    /// save then writes over.
+    pub fn keep_over_disk(&mut self) {
+        if let Some(path) = &self.path {
+            self.seen = disk::Stamp::of(path);
         }
     }
 
@@ -484,6 +514,38 @@ mod tests {
         assert!(
             error.to_string().contains("definitely/not/here.scene"),
             "{error}"
+        );
+    }
+
+    /// A change made on disk while the scene is open is seen, and the editor's
+    /// own saves and a rewrite with the same bytes are not.
+    #[test]
+    fn a_change_on_disk_is_noticed_and_the_editor_s_own_save_is_not() {
+        let directory = tempfile::tempdir().unwrap();
+        let path = written(directory.path(), &authored_json());
+        let mut file = SceneFile::open(&path).unwrap();
+        assert_eq!(file.on_disk(), OnDisk::Same);
+
+        std::fs::write(&path, authored_json()).unwrap();
+        assert_eq!(file.on_disk(), OnDisk::Same, "the same bytes again");
+
+        let changed = authored_json().replace("cube", "ball");
+        std::fs::write(&path, changed).unwrap();
+        assert_eq!(file.on_disk(), OnDisk::Changed);
+        assert_eq!(file.on_disk(), OnDisk::Changed, "until it is dealt with");
+        file.keep_over_disk();
+        assert_eq!(file.on_disk(), OnDisk::Same);
+
+        let world = World::from_scene(file.document()).unwrap().world;
+        file.save(&world, &ComponentSchemaRegistry::default())
+            .unwrap();
+        assert_eq!(file.on_disk(), OnDisk::Same, "the editor's own save");
+
+        std::fs::remove_file(&path).unwrap();
+        assert_eq!(file.on_disk(), OnDisk::Gone);
+        assert_eq!(
+            SceneFile::detached(SceneDocument::default()).on_disk(),
+            OnDisk::Same
         );
     }
 }

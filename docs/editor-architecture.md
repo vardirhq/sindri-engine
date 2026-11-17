@@ -394,6 +394,15 @@ edited reproduces the file byte for byte, so a review sees the edit and nothing
 else. Reloading re-reads the file and discards unsaved edits along with their
 history, because every runtime handle is replaced.
 
+The editor also reloads by itself when something else writes the open scene.
+`SceneFile` remembers the file's size, time and a hash of its bytes as it last
+read or wrote them, and `SceneFile::on_disk` compares, once a second, at the
+cost of a `stat` while nothing has changed. A scene with no unsaved edits is
+read again; one with unsaved edits raises the same question as Reload, and
+Cancel keeps the edits for good (`keep_over_disk`), so the next save writes
+over the file knowingly rather than the question returning every second.
+Nothing is looked at while the scene plays.
+
 Which is why nothing throws that work away without asking. Opening another
 scene, reloading, discarding changes, and closing the window each raise the same
 question, named after the loss they are about to cause, with saving offered as

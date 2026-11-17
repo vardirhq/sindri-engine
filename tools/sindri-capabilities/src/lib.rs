@@ -27,6 +27,7 @@ mod decay;
 mod decay_language;
 mod entries;
 mod markdown;
+mod scene_schema;
 mod weave_properties;
 
 use std::{fmt, path::Path};
@@ -136,6 +137,14 @@ pub fn documents() -> Result<Vec<GeneratedDocument>, CapabilitiesError> {
             contents: to_json(&capabilities)?,
         },
         GeneratedDocument {
+            path: "docs/generated/sindri-scene.schema.json".to_owned(),
+            contents: to_json(&scene_schema::describe(scene_schema::Document::Scene)?)?,
+        },
+        GeneratedDocument {
+            path: "docs/generated/sindri-prefab.schema.json".to_owned(),
+            contents: to_json(&scene_schema::describe(scene_schema::Document::Prefab)?)?,
+        },
+        GeneratedDocument {
             path: "docs/generated/weave-reference.json".to_owned(),
             contents: to_json(&weave_properties::describe())?,
         },
@@ -149,6 +158,47 @@ pub fn documents() -> Result<Vec<GeneratedDocument>, CapabilitiesError> {
         contents: page.contents,
     }));
     Ok(documents)
+}
+
+/// The references a tool can ask this build for by name, with what each
+/// answers: the same documents `docs/generated/` holds, for a project that
+/// does not carry this repository.
+pub const REFERENCES: &[(&str, &str)] = &[
+    ("scene", "JSON Schema for a .scene file"),
+    ("prefab", "JSON Schema for a .prefab file"),
+    (
+        "components",
+        "every component, its fields, defaults and what they mean",
+    ),
+    (
+        "decay",
+        "the Decay host API: every namespace, call and member, with types",
+    ),
+    (
+        "decay-language",
+        "the Decay language: keywords, operators, statements",
+    ),
+    (
+        "weave",
+        "every Weave property, what it takes and applies to",
+    ),
+];
+
+/// The reference named `name`, one of [`REFERENCES`]; `None` for any other.
+///
+/// # Errors
+/// The built-in components did not register, which is the engine refusing to
+/// start rather than a failure of this crate.
+pub fn reference(name: &str) -> Result<Option<serde_json::Value>, CapabilitiesError> {
+    Ok(Some(match name {
+        "scene" => scene_schema::describe(scene_schema::Document::Scene)?,
+        "prefab" => scene_schema::describe(scene_schema::Document::Prefab)?,
+        "components" => components::describe()?,
+        "decay" => decay::describe().to_json(),
+        "decay-language" => decay_language::describe(),
+        "weave" => weave_properties::describe(),
+        _ => return Ok(None),
+    }))
 }
 
 /// The workspace root, from where Cargo put this crate rather than from the
