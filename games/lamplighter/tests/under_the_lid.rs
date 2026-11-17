@@ -168,18 +168,23 @@ fn seekers_hang_over_the_land_far_from_the_start() {
         let apart = (seeker[0] - start[0]).hypot(seeker[1] - start[1]);
         assert!(apart > 12.0, "a Seeker {apart} from the start");
     }
-    let mut seen = std::collections::BTreeSet::new();
-    for ring in 1..=6 {
+    // Each Seeker once, however many places it was seen from.
+    let mut seen: Vec<[f32; 2]> = Vec::new();
+    for reach in [40.0_f32, 80.0, 120.0, 160.0, 200.0, 240.0] {
         for (dx, dy) in [(1.0, 0.0), (0.0, 1.0), (-1.0, 0.0), (0.0, -1.0)] {
-            let reach = 40.0 * ring as f32;
             place(
                 &mut run,
                 "wick",
                 [start[0] + dx * reach, start[1] + dy * reach],
             );
             step(&mut run, 3);
-            for [x, y] in seekers(&run) {
-                seen.insert(((x / 4.0).round() as i32, (y / 4.0).round() as i32));
+            for at in seekers(&run) {
+                if seen
+                    .iter()
+                    .all(|old| (old[0] - at[0]).hypot(old[1] - at[1]) > 20.0)
+                {
+                    seen.push(at);
+                }
             }
         }
     }

@@ -9,7 +9,7 @@ script Drifter {
     @export let touch_damage: number = 1.0;
     @export let elite: number = 0.0;
     @export let elite_trait: number = 0.0;
-    @export let hazard_damage: number = 0.0;
+    @export var hazard_damage: number = 0.0;
     @export let core: Prefab;
     @export let death_burst: Prefab;
     @export let shot: Prefab;

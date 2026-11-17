@@ -7,7 +7,7 @@ script Leviathan {
     @export let core: Prefab;
     @export let drop_roll: Prefab;
     @export let death_burst: Prefab;
-    @export let hazard_damage: number = 0.0;
+    @export var hazard_damage: number = 0.0;
 
     var hp: number = 0.0;
     var phase: number = 1.0;

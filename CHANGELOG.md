@@ -2,6 +2,8 @@
 
 # Changelog
 
+- Decay refuses `this.field = …` on a field declared with `let` when the script is checked, rather than failing with `Immutable` at runtime. Orbital Last Stand's enemies declared `hazard_damage` with `let` and cleared it, which had only not failed because nothing ever set it; it is `var` now.
+
 - Weave reads `min()`, `max()` and `clamp()` wherever a length goes, nested in `calc()` and in each other, chosen once the screen is known: `width: clamp(240px, 40vw, 360px)`.
 
 - Lamplighter's lantern burns: out in the wilds its oil runs down, it gutters low and is an ember dry, and standing by a lit lamp or a fire tops it up. A Feed lantern card (and R) pours a resin into it. More Seekers hang over the open heath and barrens, far apart. Wick has courage: it ebbs in the dark and returns by warm light, and afraid, the screen closes in, the world greys, the gloom grow bolder and his walk falters.
