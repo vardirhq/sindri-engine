@@ -6,7 +6,7 @@ use super::*;
 
 const SCRIPT: &str = "\
 script Lamp {
-    @export let glow: number = 1.5;
+    @export var glow: number = 1.5;
     var lit: bool = false;
 
     fn start() {
@@ -351,7 +351,7 @@ fn a_script_gains_variables_functions_and_events_where_its_code_keeps_them() {
     })
     .expect("a new number");
     assert!(
-        variable.starts_with("script Lamp {\n    var speed: number = 0;\n    @export let glow")
+        variable.starts_with("script Lamp {\n    var speed: number = 0;\n    @export var glow")
     );
 
     let function = add(Member::Function {
