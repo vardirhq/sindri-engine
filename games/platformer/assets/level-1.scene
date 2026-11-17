@@ -5853,7 +5853,17 @@
                 "walk-7"
               ],
               "seconds_per_frame": 0.09,
-              "looping": true
+              "looping": true,
+              "events": [
+                {
+                  "frame": 1,
+                  "name": "step"
+                },
+                {
+                  "frame": 5,
+                  "name": "step"
+                }
+              ]
             },
             "jump": {
               "frames": [

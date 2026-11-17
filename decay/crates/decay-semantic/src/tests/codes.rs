@@ -43,3 +43,22 @@ fn a_syntax_diagnostic_carries_its_own_code() {
         "{found:?}"
     );
 }
+
+#[test]
+fn a_let_field_cannot_be_assigned_through_this() {
+    for body in [
+        "let speed: number = 1.0; fn update(dt: number) { this.speed = 2.0; }",
+        "@export let speed: number = 1.0; fn update(dt: number) { this.speed += dt; }",
+        "let speed: number = 1.0; fn update(dt: number) { speed = 2.0; }",
+    ] {
+        let source = format!("script Probe {{ {body} }}");
+        assert!(
+            codes(&source).contains(&(DiagnosticPhase::Semantic, "immutable")),
+            "`{source}` should be refused: {:?}",
+            codes(&source)
+        );
+    }
+    let fine =
+        "script Probe { var speed: number = 1.0; fn update(dt: number) { this.speed = 2.0; } }";
+    assert!(codes(fine).is_empty(), "{:?}", codes(fine));
+}

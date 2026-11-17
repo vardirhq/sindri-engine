@@ -3,16 +3,22 @@
    by its anchor. On a phone held upright everything is sized to the screen's
    width and the build cards sit above the pack. */
 
-/* The lantern's light. */
-.light-panel { width: 240px; height: 56px; x: 136px; y: -44px; anchor: top_left; }
+/* The lantern's light, and Wick's courage under it. */
+.light-panel { width: 240px; height: 136px; x: 136px; y: -84px; anchor: top_left; }
 .light-label { width: 200px; height: 14px; x: 32px; y: -26px; anchor: top_left; }
 .meter { width: 208px; height: 10px; x: 136px; y: -56px; anchor: top_left; }
+.courage-label { y: -76px; }
+.meter.courage { y: -96px; }
+.food-label { y: -116px; }
+.meter.food { y: -136px; }
 .light-back { tint: var(--well); }
 .light-fill { tint: var(--ember); }
+.courage-fill { tint: #b9c6e4; }
+.food-fill { tint: #c7546f; }
 
 /* The pack: one row a thing, its picture and how many. */
 .pack-panel {
-    width: 156px; height: 128px; x: 94px; y: 80px; anchor: bottom_left;
+    width: 156px; height: 164px; x: 94px; y: 98px; anchor: bottom_left;
     direction: column; gap: 2px; padding: 10px 14px;
     justify-content: center; align-items: start;
 }
@@ -23,7 +29,7 @@
 /* What he can build: a card each, lit while he can afford it and spent while
    he cannot. */
 .craft-panel {
-    width: 300px; height: 152px; x: -166px; y: 92px; anchor: bottom_right;
+    width: 300px; height: 230px; x: -166px; y: 131px; anchor: bottom_right;
     direction: column; gap: 10px; justify-content: end; align-items: end;
     background: transparent;
 }
@@ -48,14 +54,18 @@
 .craft:disabled .craft-name, .craft:disabled .craft-cost, .craft:disabled .craft-key { color: var(--faint); }
 
 @media (orientation: portrait) {
-    .light-panel { width: 56vw; height: 13vw; x: 31vw; y: -10.5vw; }
+    .light-panel { width: 56vw; height: 34vw; x: 31vw; y: -21vw; }
     .light-label { width: 46vw; height: 3vw; x: 7vw; y: -6vw; font-size: 2.6vw; line-height: 3vw; }
     .meter { width: 48vw; height: 2.4vw; x: 31vw; y: -13vw; }
-    .pack-panel { width: 34vw; height: 30vw; x: 20vw; y: 18vw; padding: 2vw 3vw; }
+    .courage-label { y: -17vw; }
+    .meter.courage { y: -23.5vw; }
+    .food-label { y: -28vw; }
+    .meter.food { y: -34.5vw; }
+    .pack-panel { width: 34vw; height: 39vw; x: 20vw; y: 22.5vw; padding: 2vw 3vw; }
     .pack-row { width: 30vw; height: 8vw; gap: 2vw; }
     .pack-icon { width: 7vw; height: 7vw; }
     .pack-count { width: 20vw; height: 5vw; font-size: 3.8vw; line-height: 4.6vw; }
-    .craft-panel { width: 58vw; height: 34vw; x: -32vw; y: 20vw; gap: 2vw; }
+    .craft-panel { width: 58vw; height: 51vw; x: -32vw; y: 28.5vw; gap: 2vw; }
     .craft { width: 58vw; height: 15vw; gap: 2.4vw; padding: 0px 3vw; border-radius: 3vw; }
     .craft-icon { width: 10vw; height: 10vw; }
     .craft-text { width: 36vw; height: 11vw; }
@@ -76,4 +86,10 @@
     50% { background: #3a0e0bd9; border-color: #e0614a; }
 }
 .light-panel.found { animation: found 900ms ease-in-out infinite; }
+
+/* The lantern running dry: its meter flickers between ember and ash. */
+@keyframes low {
+    50% { border-color: #8a5a2a; }
+}
+.light-panel.low { animation: low 600ms ease-in-out infinite; }
 

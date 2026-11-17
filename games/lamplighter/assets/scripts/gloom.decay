@@ -127,8 +127,8 @@ script Gloom {
         let level = Lighting.level(here);
         // Wick's eyes are a little above his feet, and the gloom's middle above its own.
         var covered: bool = false;
-        // A Seeker that has Wick calls the gloom from much further off.
-        let notice = this.notice * (1.0 + 1.5 * Game.found);
+        // Heard further off while a Seeker has him, and bolder while he is afraid.
+        let notice = this.notice * (1.0 + 1.5 * Game.found) * (1.0 + 0.4 * Game.fear);
         if apart < notice {
             let eyes = Vec2(this.wick.transform.world_position.x, this.wick.transform.world_position.y + 0.5);
             covered = !Lighting.visible(eyes, Vec2(here.x, here.y + 0.4));

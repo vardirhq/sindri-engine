@@ -210,6 +210,23 @@ impl Analyzer<'_, '_> {
             ExprKind::Member { object, field } => {
                 let object_type = self.expr_type(object);
                 self.check_host_member_write(object, &object_type, field, target.span);
+                // `this.speed = 2.0` on a `let speed` passed here and failed at
+                // runtime with `Immutable`; a field's own declaration says it
+                // cannot change, so the checker says so before Play.
+                if super::call::is_this(object)
+                    && let Some(symbol) = self.scopes.first().and_then(|scope| scope.get(field))
+                    && symbol.function.is_none()
+                    && !symbol.mutable
+                {
+                    self.error(
+                        Code::Immutable,
+                        target.span,
+                        format!(
+                            "cannot assign to `this.{field}`: it is declared with `let`. \
+                             Declare it with `var` to change it"
+                        ),
+                    );
+                }
                 if ((object_type.dimensions().is_some() || object_type == Type::Color)
                     && self.value_rooted(object))
                     || self.is_struct(&object_type)

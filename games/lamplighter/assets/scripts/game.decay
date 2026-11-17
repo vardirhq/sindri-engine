@@ -27,4 +27,32 @@ state Game {
     var resin: number = 0.0;
     var gathered: number = 0.0;
     var built: number = 0.0;
+    // How much oil is in Wick's lantern, 0 to 1. Where the lantern burns
+    // (`burn` on Wick), it runs down; resin from the pack feeds it, and a lit
+    // lamp or a fire tops it up. Low, the flame gutters; empty, it is an ember.
+    var oil: number = 1.0;
+    // How many times he has fed it.
+    var fed: number = 0.0;
+    // Wick's courage, 0 to 1, and how afraid that leaves him, 0 to 1
+    // (`courage.decay`). Where nothing runs it, he is never afraid.
+    var courage: number = 1.0;
+    var fear: number = 0.0;
+    // How fed Wick is, 0 to 1, and the berries in his pack. Where he hungers
+    // (`hunger` on Wick) it runs down, and he eats a berry when it is below
+    // half; empty, he is starving.
+    var food: number = 1.0;
+    var berries: number = 0.0;
+    var eaten: number = 0.0;
+    // How many brutes Seekers have called down on him.
+    var brutes: number = 0.0;
+    // How many hamlet folk have come out to thank Wick for their lamp.
+    var helped: number = 0.0;
+    // Where the pause screen goes back to.
+    var paused_in: Place = Place.Fields;
+}
+
+// The places a run is played in, which the pause screen returns to.
+enum Place {
+    Fields,
+    Wilds,
 }

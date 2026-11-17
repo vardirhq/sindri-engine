@@ -193,3 +193,80 @@ fn legacy_collider_is_shown_and_compound_edits_undo() {
         Some("circle")
     );
 }
+
+#[test]
+fn a_collider_fits_its_sprite_as_one_undo_step() {
+    let project = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../games/lamplighter");
+    let mut opened = OpenedScene::open(&project, "world.scene").unwrap();
+    let mut editing = Editing::for_scene(&opened).unwrap();
+    let entity = editing.add_basic(&mut opened.world, "empty").unwrap();
+    let kind = "sindri.physics2d.collider";
+    let root = sindri_runtime::project::assets_root(&opened.project);
+    // Nothing to fit to without a sprite and a collider.
+    assert!(
+        editing
+            .fit_collider(&mut opened.world, &root, true)
+            .is_err()
+    );
+    editing
+        .set_sprite(&mut opened, "textures/objects.png")
+        .unwrap();
+    editing
+        .set_field(
+            &mut opened.world,
+            &opened.extractor,
+            "sindri.sprite",
+            "texture",
+            serde_json::json!("textures/objects.png#dead-tree-2"),
+            false,
+        )
+        .unwrap();
+    editing
+        .add_component(&mut opened.world, &opened.extractor, kind)
+        .unwrap();
+    let before = opened.world.get(entity).unwrap().components[kind].clone();
+    editing
+        .fit_collider(&mut opened.world, &root, true)
+        .unwrap();
+    let fitted = &opened.world.get(entity).unwrap().components[kind];
+    assert_ne!(fitted, &before);
+    let shape = &fitted["pieces"][0]["shape"]["shape"];
+    assert!(shape == "capsule" || shape == "circle", "{fitted}");
+    editing.undo(&mut opened.world).unwrap();
+    assert_eq!(opened.world.get(entity).unwrap().components[kind], before);
+}
+
+#[test]
+fn a_clip_event_is_written_through_its_path_and_undone() {
+    let project = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../games/lamplighter");
+    let mut opened = OpenedScene::open(&project, "world.scene").unwrap();
+    let mut editing = Editing::for_scene(&opened).unwrap();
+    let kind = "sindri.animation.sprite";
+    let (wick, before) = opened
+        .world
+        .entities()
+        .find_map(|(entity, data)| {
+            let clips = data.components.get(kind)?;
+            clips["clips"]
+                .get("walk-east")
+                .map(|_| (entity, clips.clone()))
+        })
+        .expect("Wick's sprite has a walk");
+    editing.selected = Some(wick);
+    editing
+        .set_field(
+            &mut opened.world,
+            &opened.extractor,
+            kind,
+            "clips.walk-east.events",
+            serde_json::json!([{ "frame": 2, "name": "strike" }]),
+            false,
+        )
+        .unwrap();
+    assert_eq!(
+        opened.world.get(wick).unwrap().components[kind]["clips"]["walk-east"]["events"][0]["name"],
+        "strike"
+    );
+    editing.undo(&mut opened.world).unwrap();
+    assert_eq!(opened.world.get(wick).unwrap().components[kind], before);
+}

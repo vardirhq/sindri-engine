@@ -1,0 +1,57 @@
+{
+  "format_version": 1,
+  "metadata": {
+    "name": "berries"
+  },
+  "entities": [
+    {
+      "id": "berries",
+      "name": "berries",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/goods.png#berries",
+          "layer": 4,
+          "size": [
+            0.8,
+            0.8
+          ],
+          "billboard": true,
+          "offset": [
+            0.0,
+            -0.05
+          ]
+        },
+        "sindri.script": {
+          "source": "scripts/pickup.decay",
+          "script": "Pickup",
+          "properties": {
+            "kind": "berries"
+          }
+        },
+        "sindri.tags": {
+          "tags": [
+            "pickup"
+          ]
+        }
+      }
+    }
+  ]
+}

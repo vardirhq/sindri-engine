@@ -116,18 +116,22 @@ These are defects or sources of actively misleading tooling.
   - [x] Offer the project's enums as completions, complete `Enum.` with its
         variants, show them on hover, and list a file's enums and their
         variants as document symbols.
-  - [ ] Keep project-index results deterministic.
-- [ ] Fix completion insertion for functions.
+  - [x] Keep project-index results deterministic: every result is kept in a
+        sorted set (`the_index_is_the_same_whatever_order_files_are_listed_in`).
+- [x] Fix completion insertion for functions.
   - [x] Generate zero placeholders for zero-argument functions.
   - [x] Generate one placeholder per required parameter.
   - [x] Preserve useful signature/detail text.
-  - [ ] Test host and user-defined functions with 0, 1, and multiple arguments.
-- [ ] Audit LSP position handling against the protocol's negotiated encoding.
+  - [x] Test host and user-defined functions with 0, 1, and multiple arguments
+        (`a_completed_call_has_a_placeholder_for_each_argument`).
+- [x] Audit LSP position handling against the protocol's negotiated encoding.
   - [x] Prove non-ASCII text before the cursor maps to the correct Decay byte
         offset and diagnostic range.
-  - [ ] Either negotiate UTF-8 positions or correctly translate the client's
-        UTF-16 positions.
-  - [ ] Add Unicode regression tests.
+  - [x] Either negotiate UTF-8 positions or correctly translate the client's
+        UTF-16 positions: they are translated, in `support::offset_at` and
+        `position_at`.
+  - [x] Add Unicode regression tests
+        (`positions_after_an_emoji_are_counted_in_utf16`).
 - [x] Return proper JSON-RPC/LSP errors for malformed or unsupported requests
       where the protocol requires an error instead of silently returning null:
       parse error for a body that is not JSON, invalid request for a message
@@ -159,7 +163,7 @@ The LSP must stop relying on manual VS Code use as proof.
 - [ ] Cover document symbols.
 - [ ] Cover project-aware string completion.
 - [ ] Cover watched project file creation/change/deletion.
-- [ ] Cover Unicode positions.
+- [x] Cover Unicode positions.
 - [x] Cover malformed/unknown requests without crashing the server.
 - [ ] Add a VS Code extension smoke test or equivalent client integration test
       that launches the real server and proves synchronization + one language
@@ -199,15 +203,19 @@ shared foundation instead of re-rendering the same compiler result repeatedly.
 The batch checker currently finds runtime-contract reminders using substring
 search. Keep the reminders, remove the false-positive-prone implementation.
 
-- [ ] Detect `World.set_property` and `World.property_number` calls from the
-      parsed/semantic representation, not `source.find`.
-- [ ] Report every relevant call, not only the first occurrence.
-- [ ] Do not trigger on comments or string literals.
-- [ ] Tolerate normal whitespace/formatting differences.
-- [ ] Attach the reminder to the actual call span.
-- [ ] Give reminders stable diagnostic codes.
-- [ ] Keep reminders non-fatal until a rule can be statically proven invalid.
-- [ ] Add tests for real calls, multiple calls, comments, strings, and near-name
+- [x] Detect `World.set_property` and `World.property_number` calls from the
+      lexer's tokens, not `source.find`: a call is `World`, `.`, the name and
+      `(`, which comments and strings never produce. (The tokens rather than
+      the tree: the pattern is fixed, and it needs no walker over every
+      expression kind.)
+- [x] Report every relevant call, not only the first occurrence.
+- [x] Do not trigger on comments or string literals.
+- [x] Tolerate normal whitespace/formatting differences.
+- [x] Attach the reminder to the actual call span.
+- [x] Give reminders stable diagnostic codes (`runtime-property-write`,
+      `authored-property-read`).
+- [x] Keep reminders non-fatal until a rule can be statically proven invalid.
+- [x] Add tests for real calls, multiple calls, comments, strings, and near-name
       false positives.
 
 ## P1 — semantic query model

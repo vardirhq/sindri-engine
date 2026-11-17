@@ -9,7 +9,7 @@ ignored.
 
 The language itself (selectors, the cascade, `var()`, lengths, colors and responsive
 rules) is described in [`docs/weave-reference.md`](../weave-reference.md). A length is
-`px`, `vw`, `vh`, `%`, a plain number in overlay units, or `calc(…)`; a color is
+`px`, `vw`, `vh`, `%`, a plain number in overlay units, `calc(…)`, `min(…)`, `max(…)` or `clamp(…)`; a color is
 `#rgb`, `#rgba`, `#rrggbb`, `#rrggbbaa`, `transparent`, `black` or `white`.
 
 The machine-readable form of this page is

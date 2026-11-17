@@ -1,0 +1,109 @@
+// Wick's courage (`Game.courage`, 0 to 1): it drains in the dark and comes back
+// by warm light, and the less of it he has the worse the dark is. Runs on the
+// wilds' environment, whose grade it darkens.
+//
+// By a lit lamp, a fire he has built or an open sunfall it comes back. Away
+// from them, with his lantern burning, it ebbs slowly; with the lantern dry it
+// goes fast, and faster for every gloom near him, while a Seeker has him and
+// while he is starving.
+// Afraid (below `afraid`), the edges of the screen close in and the world
+// greys, the gloom notice him from further off (`gloom.decay`), and his walk
+// falters (`wick.decay`); both read `Game.fear`.
+script Courage {
+    // How fast it comes back by warm light, and how fast it ebbs: in the dark
+    // with a lantern, with the lantern dry, for each gloom within `near`, and
+    // while found.
+    @export let warm: number = 0.1;
+    @export let ebb: number = 0.004;
+    @export let dry: number = 0.025;
+    @export let gloom: number = 0.02;
+    @export let found: number = 0.03;
+    // And starving.
+    @export let starving: number = 0.02;
+    @export let near: number = 6.0;
+    // How far a lit lamp's or a fire's warmth reaches, and a sunfall's.
+    @export let by_light: number = 4.5;
+    @export let by_sunfall: number = 3.0;
+    // Below this, Wick is afraid.
+    @export let afraid: number = 0.5;
+
+    var wick: Entity = null;
+    var age: number = 0.0;
+    // The grade as the scene authored it, which is the grade at no fear.
+    var vignette: number = 0.0;
+    var saturation: number = 1.0;
+
+    fn start() {
+        this.wick = World.find("Wick");
+        // The wilds' music: a slow, uneasy song from the Sound Lab.
+        Audio.loop("audio/under-the-lid.ogg", 0.3);
+        if !Game.through {
+            Game.courage = 1.0;
+            Game.fear = 0.0;
+        }
+        this.saturation = this.environment.post_process.saturation;
+        this.vignette = this.environment.post_process.vignette;
+    }
+
+    fn update(dt: number) {
+        // A lamp's script starts with the rest; what it says is read from then.
+        this.age += dt;
+        if this.age < 0.1 || this.wick == null || !World.exists(this.wick) {
+            return;
+        }
+        let here = Vec2(this.wick.transform.world_position.x, this.wick.transform.world_position.y);
+        if by_warm_light(here) {
+            Game.courage = min(1.0, Game.courage + this.warm * dt);
+        } else {
+            var loss: number = this.ebb;
+            if Game.oil <= 0.0 {
+                loss += this.dry;
+            }
+            loss += this.gloom * gloom_near(here);
+            loss += this.found * Game.found;
+            if Game.food <= 0.0 {
+                loss += this.starving;
+            }
+            Game.courage = max(0.0, Game.courage - loss * dt);
+        }
+        Game.fear = clamp(1.0 - Game.courage / this.afraid, 0.0, 1.0);
+        this.environment.post_process.vignette = this.vignette + (0.95 - this.vignette) * Game.fear;
+        this.environment.post_process.saturation = this.saturation * (1.0 - 0.6 * Game.fear);
+    }
+
+    fn by_warm_light(here: Vec2) -> bool {
+        for lamp in World.with_tag("lantern") {
+            let post = Lantern.on(lamp);
+            if post != null && post.lit && within(here, lamp, this.by_light) {
+                return true;
+            }
+        }
+        for fire in World.with_tag("fire") {
+            if fire.light2d.intensity > 0.5 && within(here, fire, this.by_light) {
+                return true;
+            }
+        }
+        for fall in World.with_tag("sunfall") {
+            if fall.light2d.intensity > 1.0 && within(here, fall, this.by_sunfall) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    fn gloom_near(here: Vec2) -> number {
+        var count: number = 0.0;
+        for one in World.with_tag("gloom") {
+            if within(here, one, this.near) {
+                count += 1.0;
+            }
+        }
+        return count;
+    }
+
+    fn within(here: Vec2, thing: Entity, reach: number) -> bool {
+        let x = thing.transform.world_position.x - here.x;
+        let y = thing.transform.world_position.y - here.y;
+        return x * x + y * y < reach * reach;
+    }
+}

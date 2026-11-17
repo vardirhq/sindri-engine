@@ -6,6 +6,8 @@
 // Worse, it calls them: while it holds him a gloom rises out of the ground near
 // him every few seconds, and when it loses him a wave of them rises where he was
 // last seen, to hunt him from there. Never more than `most` gloom are about.
+// Held for `brute_after` seconds at a stretch, it calls down a brute, which does
+// not fear light, once each time it finds him (`Game.brutes`).
 // It is slower than Wick, so he can outrun it; a lit lamp's pool, a fire he has
 // built or an open sunfall hides him from it at once. Lost, it hangs where it lost him a moment,
 // then goes back to sweeping.
@@ -38,6 +40,10 @@ script Seeker {
     @export let wave: number = 2.0;
     @export let rise_at: number = 4.5;
     @export let most: number = 6.0;
+    // And held that long without a break, it calls down a brute, which does
+    // not fear light: once each time it finds him.
+    @export let brute: Prefab;
+    @export let brute_after: number = 8.0;
 
     var home_x: number = 0.0;
     var home_y: number = 0.0;
@@ -51,6 +57,9 @@ script Seeker {
     var mark_x: number = 0.0;
     var mark_y: number = 0.0;
     var rising: Entity = null;
+    // How long it has held him this time, and whether this finding's brute has come.
+    var held_for: number = 0.0;
+    var brute_called: bool = false;
 
     fn start() {
         this.home_x = this.transform.position.x;
@@ -95,6 +104,11 @@ script Seeker {
             this.mark_x = wx;
             this.mark_y = wy;
             this.calling += dt;
+            this.held_for += dt;
+            if this.held_for >= this.brute_after && !this.brute_called {
+                this.brute_called = true;
+                call_brute(wx, wy);
+            }
             if this.calling >= this.call_every {
                 this.calling = 0.0;
                 rise(wx, wy, this.age * 2.3);
@@ -131,7 +145,31 @@ script Seeker {
         this.light2d.intensity = bright;
     }
 
+    // A brute comes down near him, out of the circle's light.
+    fn call_brute(x: number, y: number) {
+        if this.brute == null {
+            return;
+        }
+        let at = this.age * 1.7;
+        let come = World.spawn(this.brute);
+        come.transform.position.x = x + this.rise_at * cos(at);
+        come.transform.position.y = y + this.rise_at * sin(at);
+        Game.brutes += 1.0;
+        Camera.add_trauma(0.3);
+        if this.rising != null {
+            Effects.burst_at(this.rising, come.transform.position.x, come.transform.position.y);
+        }
+    }
+
     fn enter(next: String) {
+        if next == "found" && this.state != "found" {
+            this.held_for = 0.0;
+            this.brute_called = false;
+        }
+        // Being found is heard: a cold call from above.
+        if next == "found" && this.state != "found" {
+            Audio.play("audio/found.wav", 0.35);
+        }
         this.state = next;
         this.in_state = 0.0;
         this.calling = 0.0;

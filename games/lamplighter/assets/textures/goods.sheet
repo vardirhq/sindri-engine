@@ -2,12 +2,13 @@
   "format_version": 1,
   "anchor": "bottom",
   "grid": {
-    "columns": 3,
+    "columns": 4,
     "rows": 1,
     "names": [
       "wood",
       "stone",
-      "resin"
+      "resin",
+      "berries"
     ]
   }
 }

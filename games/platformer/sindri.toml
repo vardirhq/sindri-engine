@@ -19,5 +19,5 @@ include = [
   "audio/coin.wav",
   "audio/land.wav",
   "audio/goal.wav",
-  "audio/dusk-road.ogg",
+  "audio/dusk-road.ogg", "audio/step.wav",
 ]

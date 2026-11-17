@@ -139,3 +139,79 @@ fn a_seeker_calls_the_gloom_up_round_wick() {
     let lost = gloom_about(&run);
     assert_eq!(lost, held + 2, "and a wave where it lost him");
 }
+
+/// Every Seeker in the world, and where its circle falls.
+fn seekers(run: &Run) -> Vec<[f32; 2]> {
+    run.world
+        .entities()
+        .filter(|(_, data)| {
+            data.components
+                .get("sindri.script")
+                .is_some_and(|script| script["script"] == "Seeker")
+        })
+        .map(|(entity, _)| {
+            let at = run.world.world_transform(entity).expect("a place").position;
+            [at[0], at[1]]
+        })
+        .collect()
+}
+
+/// Seekers are scattered over the open heath and barrens by the seed, far
+/// apart: walking out finds more than the one over the meadow, but none of
+/// them sweeps the start.
+#[test]
+fn seekers_hang_over_the_land_far_from_the_start() {
+    let mut run = Run::open_scene("wilds.scene").expect("the wilds open");
+    step(&mut run, 10);
+    let start = position(&run, "wick");
+    for seeker in seekers(&run) {
+        let apart = (seeker[0] - start[0]).hypot(seeker[1] - start[1]);
+        assert!(apart > 12.0, "a Seeker {apart} from the start");
+    }
+    // Each Seeker once, however many places it was seen from.
+    let mut seen: Vec<[f32; 2]> = Vec::new();
+    for reach in [40.0_f32, 80.0, 120.0, 160.0, 200.0, 240.0] {
+        for (dx, dy) in [(1.0, 0.0), (0.0, 1.0), (-1.0, 0.0), (0.0, -1.0)] {
+            place(
+                &mut run,
+                "wick",
+                [start[0] + dx * reach, start[1] + dy * reach],
+            );
+            step(&mut run, 3);
+            for at in seekers(&run) {
+                if seen
+                    .iter()
+                    .all(|old| (old[0] - at[0]).hypot(old[1] - at[1]) > 20.0)
+                {
+                    seen.push(at);
+                }
+            }
+        }
+    }
+    assert!(seen.len() >= 3, "Seekers about the land: {seen:?}");
+}
+
+/// Held too long, a Seeker calls down a brute, which light does not stop:
+/// once each time it finds him.
+#[test]
+fn a_seeker_that_holds_wick_too_long_calls_a_brute() {
+    let mut run = Run::open_scene("wilds.scene").expect("the wilds open");
+    run.set_board("truce", 1.0);
+    step(&mut run, 10);
+    for _ in 0..(60 * 10) {
+        let wick = position(&run, "wick");
+        place(&mut run, "seeker-1", wick);
+        step(&mut run, 1);
+    }
+    assert!(
+        (run.board("brutes") - 1.0).abs() < 1e-3,
+        "one brute: {}",
+        run.board("brutes")
+    );
+    let brutes = run
+        .world
+        .entities()
+        .filter(|(_, data)| data.name.as_deref() == Some("brute"))
+        .count();
+    assert_eq!(brutes, 1, "and it is in the wilds");
+}

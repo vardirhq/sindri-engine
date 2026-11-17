@@ -100,6 +100,11 @@
           "post_process": {
             "vignette": 0.45
           }
+        },
+        "sindri.script": {
+          "source": "scripts/courage.decay",
+          "script": "Courage",
+          "properties": {}
         }
       }
     },
@@ -210,6 +215,14 @@
               "bindings": [
                 "key.G",
                 "gamepad.east"
+              ]
+            },
+            {
+              "name": "feed",
+              "kind": "button",
+              "bindings": [
+                "key.R",
+                "gamepad.right_bumper"
               ]
             }
           ]
@@ -564,6 +577,18 @@
             },
             {
               "on": [
+                "grass",
+                "moss"
+              ],
+              "prefabs": [
+                "prefabs/wilds/berries.prefab"
+              ],
+              "spacing": 7,
+              "chance": 0.3,
+              "flip": true
+            },
+            {
+              "on": [
                 "grass"
               ],
               "prefabs": [
@@ -611,6 +636,20 @@
               "spacing": 26,
               "chance": 0.35,
               "flip": true
+            },
+            {
+              "on": [
+                "deadgrass",
+                "earth",
+                "stone",
+                "rock"
+              ],
+              "prefabs": [
+                "prefabs/wilds/seeker.prefab"
+              ],
+              "spacing": 48,
+              "chance": 0.45,
+              "flip": true
             }
           ],
           "sites": [
@@ -632,6 +671,29 @@
                   "at": [
                     0.0,
                     0.0
+                  ],
+                  "chance": 1.0
+                },
+                {
+                  "prefabs": [
+                    "prefabs/wilds/hamlet/lamp-post.prefab"
+                  ],
+                  "at": [
+                    0.0,
+                    4.4
+                  ],
+                  "chance": 1.0
+                },
+                {
+                  "prefabs": [
+                    "prefabs/wilds/hamlet/villager-baker.prefab",
+                    "prefabs/wilds/hamlet/villager-child.prefab",
+                    "prefabs/wilds/hamlet/villager-mender.prefab",
+                    "prefabs/wilds/hamlet/villager-elder.prefab"
+                  ],
+                  "at": [
+                    1.4,
+                    3.6
                   ],
                   "chance": 1.0
                 },
@@ -896,7 +958,8 @@
           "source": "scripts/lantern.decay",
           "script": "Lantern",
           "properties": {
-            "light_name": "lantern-1-light"
+            "light_name": "lantern-1-light",
+            "ends": false
           }
         }
       }
@@ -1031,7 +1094,8 @@
           "source": "scripts/lantern.decay",
           "script": "Lantern",
           "properties": {
-            "light_name": "lantern-2-light"
+            "light_name": "lantern-2-light",
+            "ends": false
           }
         }
       }
@@ -1261,7 +1325,8 @@
           "source": "scripts/seeker.decay",
           "script": "Seeker",
           "properties": {
-            "gloom": "prefabs/wilds/gloom.prefab"
+            "gloom": "prefabs/wilds/gloom.prefab",
+            "brute": "prefabs/wilds/brute.prefab"
           }
         }
       }
@@ -1526,6 +1591,300 @@
           "classes": [
             "meter",
             "light-fill"
+          ]
+        },
+        "sindri.ui.image": {
+          "anchor": "top_left",
+          "layer": 96,
+          "texture": "textures/white.png",
+          "tint": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "fill": {
+            "amount": 1.0,
+            "from": "left"
+          }
+        }
+      }
+    },
+    {
+      "id": "hud-courage-label",
+      "name": "hud-courage-label",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.2,
+          0.06,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "kicker",
+            "light-label",
+            "courage-label"
+          ]
+        },
+        "sindri.ui.text": {
+          "anchor": "center",
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "font": "fonts/Inter.ttf",
+          "font_size": 0.032,
+          "line_height": 0.04,
+          "layer": 101,
+          "text": "COURAGE",
+          "bold": true,
+          "shadow": {
+            "offset": [
+              0,
+              -0.003
+            ],
+            "color": [
+              0,
+              0,
+              0,
+              0.6
+            ],
+            "softness": 0.002
+          }
+        }
+      }
+    },
+    {
+      "id": "hud-courage-back",
+      "name": "hud-courage-back",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.2,
+          0.06,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "meter",
+            "courage",
+            "light-back"
+          ]
+        },
+        "sindri.ui.image": {
+          "anchor": "center",
+          "layer": 95,
+          "texture": "textures/white.png",
+          "tint": [
+            1,
+            1,
+            1,
+            1
+          ]
+        }
+      }
+    },
+    {
+      "id": "hud-courage-fill",
+      "name": "hud-courage-fill",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.2,
+          0.06,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "meter",
+            "courage",
+            "courage-fill"
+          ]
+        },
+        "sindri.ui.image": {
+          "anchor": "top_left",
+          "layer": 96,
+          "texture": "textures/white.png",
+          "tint": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "fill": {
+            "amount": 1.0,
+            "from": "left"
+          }
+        }
+      }
+    },
+    {
+      "id": "hud-food-label",
+      "name": "hud-food-label",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.2,
+          0.06,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "kicker",
+            "light-label",
+            "food-label"
+          ]
+        },
+        "sindri.ui.text": {
+          "anchor": "center",
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "font": "fonts/Inter.ttf",
+          "font_size": 0.032,
+          "line_height": 0.04,
+          "layer": 101,
+          "text": "FOOD",
+          "bold": true,
+          "shadow": {
+            "offset": [
+              0,
+              -0.003
+            ],
+            "color": [
+              0,
+              0,
+              0,
+              0.6
+            ],
+            "softness": 0.002
+          }
+        }
+      }
+    },
+    {
+      "id": "hud-food-back",
+      "name": "hud-food-back",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.2,
+          0.06,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "meter",
+            "food",
+            "light-back"
+          ]
+        },
+        "sindri.ui.image": {
+          "anchor": "center",
+          "layer": 95,
+          "texture": "textures/white.png",
+          "tint": [
+            1,
+            1,
+            1,
+            1
+          ]
+        }
+      }
+    },
+    {
+      "id": "hud-food-fill",
+      "name": "hud-food-fill",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.2,
+          0.06,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "meter",
+            "food",
+            "food-fill"
           ]
         },
         "sindri.ui.image": {
@@ -2013,6 +2372,152 @@
           "line_height": 0.04,
           "layer": 101,
           "text": "{} resin",
+          "bold": true,
+          "shadow": {
+            "offset": [
+              0,
+              -0.003
+            ],
+            "color": [
+              0,
+              0,
+              0,
+              0.6
+            ],
+            "softness": 0.002
+          }
+        }
+      }
+    },
+    {
+      "id": "pack-berries-row",
+      "name": "pack-berries-row",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.35,
+          0.06,
+          1
+        ]
+      },
+      "parent": "pack-panel",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "pack-row"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "anchor": "center",
+          "layer": 91
+        },
+        "sindri.ui.layout": {
+          "direction": "row",
+          "spacing": 0.01,
+          "justify": "center",
+          "align": "center"
+        }
+      }
+    },
+    {
+      "id": "pack-berries-icon",
+      "name": "pack-berries-icon",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.05,
+          0.05,
+          1
+        ]
+      },
+      "parent": "pack-berries-row",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "pack-icon"
+          ]
+        },
+        "sindri.ui.image": {
+          "anchor": "center",
+          "layer": 101,
+          "texture": "textures/goods.png#berries",
+          "tint": [
+            1,
+            1,
+            1,
+            1
+          ]
+        }
+      }
+    },
+    {
+      "id": "pack-berries",
+      "name": "pack-berries",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.2,
+          0.06,
+          1
+        ]
+      },
+      "parent": "pack-berries-row",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "pack-count"
+          ]
+        },
+        "sindri.ui.text": {
+          "anchor": "center",
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "font": "fonts/Inter.ttf",
+          "font_size": 0.032,
+          "line_height": 0.04,
+          "layer": 101,
+          "text": "{} berries",
           "bold": true,
           "shadow": {
             "offset": [
@@ -2683,6 +3188,309 @@
       }
     },
     {
+      "id": "craft-oil",
+      "name": "craft-oil",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.55,
+          0.12,
+          1
+        ]
+      },
+      "parent": "craft-panel",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "craft"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "anchor": "center",
+          "layer": 92
+        },
+        "sindri.ui.layout": {
+          "direction": "row",
+          "spacing": 0.01,
+          "justify": "center",
+          "align": "center"
+        },
+        "sindri.ui.button": {
+          "label": "Feed lantern",
+          "autofocus": false,
+          "disabled": true
+        }
+      }
+    },
+    {
+      "id": "craft-oil-icon",
+      "name": "craft-oil-icon",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.08,
+          0.08,
+          1
+        ]
+      },
+      "parent": "craft-oil",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "craft-icon"
+          ]
+        },
+        "sindri.ui.image": {
+          "anchor": "center",
+          "layer": 97,
+          "texture": "textures/lantern.png",
+          "tint": [
+            1,
+            1,
+            1,
+            1
+          ]
+        }
+      }
+    },
+    {
+      "id": "craft-oil-text",
+      "name": "craft-oil-text",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.36,
+          0.1,
+          1
+        ]
+      },
+      "parent": "craft-oil",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "craft-text"
+          ]
+        },
+        "sindri.ui.layout": {
+          "direction": "column",
+          "spacing": 0.0,
+          "justify": "center",
+          "align": "start"
+        }
+      }
+    },
+    {
+      "id": "craft-oil-name",
+      "name": "craft-oil-name",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.2,
+          0.06,
+          1
+        ]
+      },
+      "parent": "craft-oil-text",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "craft-name"
+          ]
+        },
+        "sindri.ui.text": {
+          "anchor": "center",
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "font": "fonts/Inter.ttf",
+          "font_size": 0.032,
+          "line_height": 0.04,
+          "layer": 98,
+          "text": "Feed lantern",
+          "bold": true,
+          "shadow": {
+            "offset": [
+              0,
+              -0.003
+            ],
+            "color": [
+              0,
+              0,
+              0,
+              0.6
+            ],
+            "softness": 0.002
+          }
+        }
+      }
+    },
+    {
+      "id": "craft-oil-cost",
+      "name": "craft-oil-cost",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.2,
+          0.06,
+          1
+        ]
+      },
+      "parent": "craft-oil-text",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "craft-cost"
+          ]
+        },
+        "sindri.ui.text": {
+          "anchor": "center",
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "font": "fonts/Inter.ttf",
+          "font_size": 0.032,
+          "line_height": 0.04,
+          "layer": 98,
+          "text": "1 resin",
+          "bold": true,
+          "shadow": {
+            "offset": [
+              0,
+              -0.003
+            ],
+            "color": [
+              0,
+              0,
+              0,
+              0.6
+            ],
+            "softness": 0.002
+          }
+        }
+      }
+    },
+    {
+      "id": "craft-oil-key",
+      "name": "craft-oil-key",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.05,
+          0.05,
+          1
+        ]
+      },
+      "parent": "craft-oil",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "craft-key"
+          ]
+        },
+        "sindri.ui.text": {
+          "anchor": "center",
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "font": "fonts/Inter.ttf",
+          "font_size": 0.032,
+          "line_height": 0.04,
+          "layer": 98,
+          "text": "R",
+          "bold": true,
+          "shadow": {
+            "offset": [
+              0,
+              -0.003
+            ],
+            "color": [
+              0,
+              0,
+              0,
+              0.6
+            ],
+            "softness": 0.002
+          }
+        }
+      }
+    },
+    {
       "id": "pack",
       "name": "Pack",
       "components": {
@@ -2789,6 +3597,8 @@
           "source": "scripts/wick.decay",
           "script": "Wick",
           "properties": {
+            "burn": 0.005556,
+            "hunger": 0.003333,
             "upright": true
           }
         },
@@ -2854,7 +3664,17 @@
                 "walk-south-7"
               ],
               "seconds_per_frame": 0.09,
-              "looping": true
+              "looping": true,
+              "events": [
+                {
+                  "frame": 0,
+                  "name": "step"
+                },
+                {
+                  "frame": 4,
+                  "name": "step"
+                }
+              ]
             },
             "slash-south": {
               "frames": [
@@ -2928,7 +3748,17 @@
                 "walk-west-7"
               ],
               "seconds_per_frame": 0.09,
-              "looping": true
+              "looping": true,
+              "events": [
+                {
+                  "frame": 0,
+                  "name": "step"
+                },
+                {
+                  "frame": 4,
+                  "name": "step"
+                }
+              ]
             },
             "slash-west": {
               "frames": [
@@ -3002,7 +3832,17 @@
                 "walk-north-7"
               ],
               "seconds_per_frame": 0.09,
-              "looping": true
+              "looping": true,
+              "events": [
+                {
+                  "frame": 0,
+                  "name": "step"
+                },
+                {
+                  "frame": 4,
+                  "name": "step"
+                }
+              ]
             },
             "slash-north": {
               "frames": [
@@ -3076,7 +3916,17 @@
                 "walk-east-7"
               ],
               "seconds_per_frame": 0.09,
-              "looping": true
+              "looping": true,
+              "events": [
+                {
+                  "frame": 0,
+                  "name": "step"
+                },
+                {
+                  "frame": 4,
+                  "name": "step"
+                }
+              ]
             },
             "slash-east": {
               "frames": [

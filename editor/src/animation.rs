@@ -309,6 +309,7 @@ mod tests {
             frames: vec!["a".to_owned(), "b".to_owned()],
             seconds_per_frame: 0.1,
             looping: false,
+            events: Vec::new(),
         };
         let mut tool = AnimationTool::default();
         tool.set_previewing(true);
@@ -326,6 +327,7 @@ mod tests {
             frames: vec!["a".to_owned(), "b".to_owned(), "c".to_owned()],
             seconds_per_frame: 1.0,
             looping: true,
+            events: Vec::new(),
         };
         let mut tool = AnimationTool::default();
         tool.set_previewing(true);

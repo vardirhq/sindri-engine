@@ -496,7 +496,9 @@ impl Host {
             "recoveryDiscard" => self.discard_recovery(),
             "save" => self.save(),
             "addPrefab" | "addBasic" | "addComponent" | "addSprite" | "createScript"
-            | "setSprite" | "colliderAdd" | "colliderRemove" => self.add_command(command, text(0)?),
+            | "setSprite" | "colliderAdd" | "colliderRemove" | "colliderFit" => {
+                self.add_command(command, text(0)?)
+            }
             "reloadAssets" => self.reload_assets(),
             "selectMore" | "duplicate" | "delete" => self.selection_command(command),
             "undo" => self.undo(),

@@ -69,3 +69,44 @@ impl Editing {
         Ok(())
     }
 }
+
+impl Editing {
+    /// Lays the selection's collider -- and its light occluder, if it has
+    /// one -- over the picture its sprite draws, as one undo step. `footing`
+    /// fits where the picture meets the ground rather than all of it.
+    pub fn fit_collider(
+        &mut self,
+        world: &mut World,
+        assets_root: &std::path::Path,
+        footing: bool,
+    ) -> Result<(), String> {
+        use sindri_authoring::fit::{FitTo, fit_components};
+        let entity = self.selected.ok_or("Nothing is selected")?;
+        let before = world
+            .get(entity)
+            .map(|data| data.components.clone())
+            .ok_or("Nothing is selected")?;
+        let mut after = before.clone();
+        let to = if footing {
+            FitTo::Footing
+        } else {
+            FitTo::Outline
+        };
+        fit_components(assets_root, &mut after, to).map_err(|error| error.to_string())?;
+        let mut commands = CommandBuffer::new();
+        for (type_name, payload) in after {
+            if before.get(&type_name) != Some(&payload) {
+                commands.push(WorldCommand::SetComponent {
+                    entity,
+                    type_name,
+                    payload,
+                });
+            }
+        }
+        self.history.break_merge_run();
+        self.history
+            .apply(commands.into_transaction("Fit collider to picture"), world)
+            .map_err(|error| error.to_string())?;
+        Ok(())
+    }
+}

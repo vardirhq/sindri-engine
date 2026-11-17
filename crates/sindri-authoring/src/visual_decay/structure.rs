@@ -113,7 +113,8 @@ pub fn palette(script: &VisualScript) -> Vec<(String, String)> {
     let mut choices = Vec::new();
     for container in &script.containers {
         for field in &container.fields {
-            if field.value.is_some() {
+            // A `let` cannot be set, so the menu does not offer to.
+            if field.value.is_some() && field.mutable {
                 choices.push((format!("set:{}", field.name), format!("Set {}", field.name)));
             }
             if field.ty.as_deref() == Some("bool") {

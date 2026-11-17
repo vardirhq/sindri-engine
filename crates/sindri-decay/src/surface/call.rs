@@ -361,6 +361,9 @@ pub(crate) enum AnimationCall {
     /// this namespace unblocks anything: without it a script can start a clip
     /// and never learn that it ended.
     Finished,
+    /// Whether the clip fired a named event (a frame authored with it was
+    /// shown) in the last step: a foot landing, a blade striking.
+    Fired,
     /// Which frame of the clip is showing, counted within the clip.
     Frame,
     /// The clip playing, or an empty string when none is.
@@ -375,6 +378,7 @@ pub(crate) const ANIMATION_CALLS: &[(&str, AnimationCall)] = &[
     ("restart", AnimationCall::Restart),
     ("stop", AnimationCall::Stop),
     ("is_finished", AnimationCall::Finished),
+    ("fired", AnimationCall::Fired),
     ("frame", AnimationCall::Frame),
     ("clip", AnimationCall::Clip),
     ("set_speed", AnimationCall::Speed),

@@ -53,7 +53,8 @@ fn animated(world: &mut World, script: &str, playing: &serde_json::Value) -> Ent
                         "walk": {
                             "frames": ["walk-0", "walk-1"],
                             "seconds_per_frame": STEP,
-                            "looping": true
+                            "looping": true,
+                            "events": [{ "frame": 1, "name": "step" }]
                         },
                         "die": {
                             "frames": ["die-0", "die-1"],
@@ -343,4 +344,32 @@ fn a_call_that_changes_nothing_leaves_the_payload_alone() {
         .and_then(|data| data.components.get(SpriteAnimationComponent::TYPE_NAME))
         .cloned();
     assert_eq!(before, after, "the payload is byte for byte what it was");
+}
+
+/// A clip's named moment reaches the script for the one step it fired in: the
+/// walk's foot lands on its second frame, every other step.
+#[test]
+fn a_script_hears_a_foot_land() {
+    let script = "script Hero {
+        var steps: number = 0.0;
+        fn update(dt: number) {
+            if Animation.fired(this.entity, \"step\") {
+                this.steps += 1.0;
+            }
+            this.transform.position.x = this.steps;
+        }
+    }";
+    let mut world = World::default();
+    let hero = animated(&mut world, "Hero", &json!("walk"));
+    let sources = sources(script);
+    let mut scripts = Scripts::new();
+    let mut animations = SpriteAnimations::new();
+    for _ in 0..9 {
+        let report = step(&mut scripts, &mut world, &sources, &mut animations);
+        assert!(report.failures.is_empty(), "{:?}", report.failures);
+    }
+    let steps = world.get(hero).unwrap().transform_3d.unwrap().position[0];
+    // Nine advances of a two-frame walk land the foot four times; the script
+    // has heard all but the last, which it reads on the next step.
+    assert!((steps - 4.0).abs() < 1e-6, "{steps}");
 }

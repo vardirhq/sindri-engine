@@ -339,6 +339,117 @@
       }
     },
     {
+      "id": "fields",
+      "name": "fields",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.62,
+          0.095,
+          1
+        ]
+      },
+      "parent": "menu",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "menu-button"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.09,
+            0.08,
+            0.2,
+            0.92
+          ],
+          "anchor": "center",
+          "layer": 90
+        },
+        "sindri.ui.button": {
+          "label": "The Dim Fields",
+          "autofocus": false,
+          "disabled": false
+        },
+        "sindri.ui.layout": {
+          "direction": "row",
+          "spacing": 0.02,
+          "justify": "center",
+          "align": "center"
+        }
+      }
+    },
+    {
+      "id": "fields-label",
+      "name": "fields-label",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.558,
+          0.076,
+          1
+        ]
+      },
+      "parent": "fields",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "menu-button-label"
+          ]
+        },
+        "sindri.ui.text": {
+          "anchor": "center",
+          "color": [
+            0.96,
+            0.93,
+            0.84,
+            1.0
+          ],
+          "font": "fonts/Inter.ttf",
+          "font_size": 0.05,
+          "line_height": 0.06,
+          "layer": 95,
+          "text": "The Dim Fields",
+          "bold": true,
+          "line_align": "center",
+          "shadow": {
+            "offset": [
+              0.0,
+              -0.004
+            ],
+            "color": [
+              0,
+              0,
+              0,
+              0.55
+            ],
+            "softness": 0.003
+          }
+        }
+      }
+    },
+    {
       "id": "shell",
       "name": "Shell",
       "components": {

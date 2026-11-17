@@ -33,6 +33,10 @@ impl Host {
                     command == "colliderAdd",
                 )?;
             }
+            "colliderFit" => {
+                let root = sindri_runtime::project::assets_root(&opened.project);
+                editing.fit_collider(&mut opened.world, &root, value == "footing")?;
+            }
             "createScript" => {
                 editing.create_script(opened)?;
             }

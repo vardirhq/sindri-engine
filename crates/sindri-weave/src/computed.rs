@@ -9,24 +9,25 @@ use std::collections::BTreeMap;
 
 use weave::Viewport;
 
-use crate::calc::{self, Mix};
+use crate::calc::{self, Calc, Mix};
 
 /// A length with its authored unit preserved until the viewport is known.
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub(super) enum Length {
     Overlay(f32),
     Pixels(f32),
     ViewWidth(f32),
     ViewHeight(f32),
     Percent(f32),
-    /// Several units at once, from a `calc()`.
-    Calc(Mix),
+    /// Several units at once, or a choice between lengths: from a `calc()`,
+    /// `min()`, `max()` or `clamp()`.
+    Calc(Calc),
 }
 
 impl Length {
     pub(super) fn parse(value: &str) -> Option<Self> {
         let value = value.trim();
-        if value.starts_with("calc(") {
+        if calc::is_function(value) {
             return calc::parse(value).map(Self::Calc);
         }
         let (number, make): (&str, fn(f32) -> Self) = if let Some(number) = value.strip_suffix('%')
@@ -46,8 +47,8 @@ impl Length {
     }
 
     #[must_use]
-    pub(super) fn resolve(self, viewport: Viewport, percent_basis: Option<f32>) -> Option<f32> {
-        match self {
+    pub(super) fn resolve(&self, viewport: Viewport, percent_basis: Option<f32>) -> Option<f32> {
+        match *self {
             Self::Overlay(value) => Some(value),
             Self::Pixels(value) => Some(value * 2.0 / viewport.height.max(1.0)),
             Self::ViewWidth(value) => {
@@ -55,23 +56,25 @@ impl Length {
             }
             Self::ViewHeight(value) => Some((value / 100.0) * 2.0),
             Self::Percent(value) => Some((value / 100.0) * percent_basis?),
-            Self::Calc(mix) => {
-                let percent = if mix.relative {
-                    (mix.percent / 100.0) * percent_basis?
-                } else {
-                    0.0
-                };
-                let parts = [
-                    Self::Overlay(mix.overlay),
-                    Self::Pixels(mix.pixels),
-                    Self::ViewWidth(mix.view_width),
-                    Self::ViewHeight(mix.view_height),
-                ];
-                let sum: f32 = parts
-                    .into_iter()
-                    .filter_map(|part| part.resolve(viewport, None))
-                    .sum();
-                let total = sum + percent;
+            Self::Calc(ref calc) => {
+                let total = calc.resolve(&|mix: Mix| {
+                    let percent = if mix.relative {
+                        (mix.percent / 100.0) * percent_basis?
+                    } else {
+                        0.0
+                    };
+                    let parts = [
+                        Self::Overlay(mix.overlay),
+                        Self::Pixels(mix.pixels),
+                        Self::ViewWidth(mix.view_width),
+                        Self::ViewHeight(mix.view_height),
+                    ];
+                    let sum: f32 = parts
+                        .into_iter()
+                        .filter_map(|part| part.resolve(viewport, None))
+                        .sum();
+                    Some(sum + percent)
+                })?;
                 total.is_finite().then_some(total)
             }
         }
@@ -148,8 +151,8 @@ impl ComputedStyle {
     /// phase that consumes it.
     pub(super) fn length(&self, property: &str) -> Option<Result<Length, &str>> {
         let declaration = self.declarations.get(property)?;
-        match declaration.value {
-            ComputedValue::Length(Some(length)) => Some(Ok(length)),
+        match &declaration.value {
+            ComputedValue::Length(Some(length)) => Some(Ok(length.clone())),
             ComputedValue::Length(None) => Some(Err(declaration.authored.as_str())),
             ComputedValue::Raw => None,
         }

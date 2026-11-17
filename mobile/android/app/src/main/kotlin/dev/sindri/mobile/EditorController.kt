@@ -261,6 +261,7 @@ class EditorController(
                 nativeEdit("colliderAdd", (sheet.part?.let(ObjectParts::colliderPiece) ?: 0).toString())
                 (ui.sheet as? EditorSheet.Parts)?.let { ui = ui.copy(sheet = it.copy(part = "collider.$pieces")) }
             }
+            is EditorEvent.FitCollider -> nativeEdit("colliderFit", if (event.footing) "footing" else "picture")
             EditorEvent.RemoveColliderPiece -> (ui.sheet as? EditorSheet.Parts)?.let { sheet ->
                 nativeEdit("colliderRemove", (sheet.part?.let(ObjectParts::colliderPiece) ?: 0).toString())
                 (ui.sheet as? EditorSheet.Parts)?.let { ui = ui.copy(sheet = it.copy(part = "collider.0")) }

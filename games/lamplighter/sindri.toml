@@ -16,4 +16,4 @@ scenes = [
 
 # The screen UI's look (Weave): an entry stylesheet and what it uses.
 [assets]
-include = ["ui.weave"]
+include = ["ui.weave", "audio/gather.wav", "audio/build.wav", "audio/feed.wav", "audio/light.wav", "audio/pounce.wav", "audio/found.wav", "audio/step.wav", "audio/under-the-lid.ogg"]

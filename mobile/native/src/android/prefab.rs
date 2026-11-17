@@ -11,8 +11,9 @@ use super::Host;
 use crate::PrefabSession;
 
 /// The commands a prefab session takes while it is open.
-const ROUTED: [&str; 7] = [
+const ROUTED: [&str; 8] = [
     "setField",
+    "colliderFit",
     "settle",
     "colliderAdd",
     "colliderRemove",
@@ -105,6 +106,10 @@ impl Host {
                 let index = text(0)?.parse::<usize>().unwrap_or(0);
                 editing.edit_collider_pieces(world, extractor, index, command == "colliderAdd")
             })(),
+            "colliderFit" => {
+                let root = sindri_runtime::project::assets_root(&self.opened.as_ref()?.project);
+                editing.fit_collider(world, &root, text(0).is_ok_and(|how| how == "footing"))
+            }
             "undo" => editing.undo(world),
             "redo" => editing.redo(world),
             _ => Err(format!("unknown command {command}")),

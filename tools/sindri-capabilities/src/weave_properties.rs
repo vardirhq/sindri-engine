@@ -61,7 +61,7 @@ pub(crate) fn render() -> String {
          listed here is\nignored.\n\n\
          The language itself (selectors, the cascade, `var()`, lengths, colors and \
          responsive\nrules) is described in [`docs/weave-reference.md`](../weave-reference.md). \
-         A length is\n`px`, `vw`, `vh`, `%`, a plain number in overlay units, or `calc(…)`; a \
+         A length is\n`px`, `vw`, `vh`, `%`, a plain number in overlay units, `calc(…)`, `min(…)`, `max(…)` or `clamp(…)`; a \
          color is\n`#rgb`, `#rgba`, `#rrggbb`, `#rrggbbaa`, `transparent`, `black` or `white`.\n\n\
          The machine-readable form of this page is\n\
          [`weave-reference.json`](weave-reference.json).\n",

@@ -177,7 +177,7 @@ world. Its selectors are CSS's: element names (`text`, `button`, with the long
 specificity and source order deciding conflicts. Selectors include the
 structural pseudo-classes (`:first-child`, `:nth-child(2n+1)`, `:root` and the
 rest), `:not()`, `:is()`, `:where()`, and the `+` and `~` sibling combinators,
-matched in scene order; lengths take `calc()`. The cascade is CSS's too: text
+matched in scene order; lengths take `calc()`, `min()`, `max()` and `clamp()`. The cascade is CSS's too: text
 properties inherit from the containing entity, `inherit`, `initial` and `unset`
 do what they do in CSS, and custom properties (`--accent`) inherit and
 substitute through `var()` with fallbacks, so a theme's tokens live in one

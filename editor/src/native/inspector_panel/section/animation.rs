@@ -293,6 +293,7 @@ pub(super) fn animation_section(
     if let Some(sprite) = appended {
         let _ = animation::push_frame(payload, &selected, &sprite);
     }
+    super::clip_events::clip_events(ui, payload, &selected, &clip);
 
     if let Ok(updated) = animation::component(payload)
         && let Some(clip) = updated.clips.get(&selected)

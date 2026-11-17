@@ -11,7 +11,9 @@
 //! over an element, `wheel:<entity>:<pixels>` scrolls over one (positive is
 //! down the list), `key:<Key>` taps a key, `hold:<Key>` and `release:<Key>`
 //! press one across the steps between, `type:<text>` commits characters,
-//! `set:<name>=<value>` writes a shared board value, `move:<x>,<y>` puts the
+//! `set:<name>=<value>` writes a shared board value, `place:<entity>=<x>,<y>`
+//! puts an entity at a place in the world and `near:<entity>=<name>` just in
+//! front of the first thing of that name, `move:<x>,<y>` puts the
 //! pointer at a pixel, `down` and `up` press and release the left button
 //! there, and `wait:<seconds>` plays on. Each prints what it hit, so a picture of the
 //! wrong thing says why.

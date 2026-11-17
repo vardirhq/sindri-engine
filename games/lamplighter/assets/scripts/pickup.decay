@@ -1,9 +1,9 @@
-// Something on the ground worth taking: deadwood, a flint, a drop of resin.
-// Wick takes it by walking over it, and it goes into his pack (`Game.wood`,
-// `Game.stone`, `Game.resin`). Taken, it is gone for good: the scatter that
+// Something on the ground worth taking: deadwood, a flint, a drop of resin, a
+// sprig of berries. Wick takes it by walking over it, and it goes into his pack
+// (`Game.wood`, `Game.stone`, `Game.resin`, `Game.berries`). Taken, it is gone for good: the scatter that
 // made it remembers.
 script Pickup {
-    // What it is ("wood", "stone" or "resin"), how many it is worth, and how
+    // What it is ("wood", "stone", "resin" or "berries"), how many it is worth, and how
     // near Wick must come to take it.
     @export let kind: String = "wood";
     @export let worth: number = 1.0;
@@ -28,10 +28,13 @@ script Pickup {
             Game.wood += this.worth;
         } else if this.kind == "stone" {
             Game.stone += this.worth;
+        } else if this.kind == "berries" {
+            Game.berries += this.worth;
         } else {
             Game.resin += this.worth;
         }
         Game.gathered += this.worth;
+        Audio.play("audio/gather.wav", 0.3);
         World.despawn(this.entity);
     }
 }

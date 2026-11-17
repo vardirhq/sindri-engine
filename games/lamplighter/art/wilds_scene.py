@@ -112,12 +112,17 @@ def scatter():
         rule(['stone', 'rock', 'earth', 'sand'], ['stone'], 4, 0.35),
         rule(['grass', 'earth'], ['stone'], 7, 0.25),
         rule(['deadgrass', 'grass'], ['resin'], 8, 0.25),
+        # Berries on the meadow and the moss, for eating.
+        rule(['grass', 'moss'], ['berries'], 7, 0.3),
         # What lives in the air, last so it never keeps a thing off its square.
         rule(['grass'], ['fireflies'], 6, 0.55),
         rule(['moss', 'mud'], ['mist'], 5, 0.6),
         rule(['deadgrass'], ['leaves'], 7, 0.45),
         # Now and then a crack in the Lid lets the sun through.
         rule(['grass', 'deadgrass', 'earth', 'moss', 'stone', 'sand'], ['sunfall'], 26, 0.35),
+        # And now and then a Seeker hangs over the open heath and the barrens,
+        # far apart: the land between lights is never quite safe.
+        rule(['deadgrass', 'earth', 'stone', 'rock'], ['seeker'], 48, 0.45),
     ], 'sites': [hamlet()]}
 
 
@@ -137,6 +142,8 @@ HAMLET_HOUSES = ['bakery', 'child-house', 'workshop', 'keeper']
 # up, the village's came only to his shoulders at the door.
 HOUSE_SCALE = 1.6
 HOUSE_SIZE = village_scene.CELL * HOUSE_SCALE
+# Who might live in a hamlet, drawn as the village's folk are.
+HAMLET_FOLK = ['baker', 'child', 'mender', 'elder']
 
 
 def hamlet():
@@ -150,6 +157,10 @@ def hamlet():
     return {'name': 'hamlet', 'on': ['grass', 'deadgrass', 'earth'], 'spacing': 80, 'chance': 0.7,
             'radius': 14.0, 'pieces': [
                 piece(['well'], 0.0, 0.0),
+                # Its lamp, long dark: Wick can light it, and it is a safe place.
+                piece(['lamp-post'], 0.0, 4.4),
+                # Someone who comes out when it is lit, and thanks Wick.
+                piece([f'villager-{person}' for person in HAMLET_FOLK], 1.4, 3.6),
                 piece(houses, -7.5, 4.0), piece(houses, 7.5, 4.5, 0.9),
                 piece(houses, -6.5, -6.5, 0.7), piece(houses, 7.0, -7.0, 0.6),
                 piece(['woodpile', 'barrels', 'crates'], 2.4, -1.4, 0.7),
@@ -183,6 +194,9 @@ def prefabs():
     made['sunfall'] = sunfall('sunfall', 0, 0)
     # A gloom a Seeker calls up out of the ground.
     made['gloom'] = gloom('gloom', 0, 0, 2)
+    # What a Seeker calls down when it holds Wick too long: a brute, which
+    # does not fear light.
+    made['brute'] = gloom('brute', 0, 0, 2, brute=True)
     made.update(goods())
     hamlet_things = {}
     for name, (sprite, block) in HAMLET_THINGS.items():
@@ -216,6 +230,31 @@ def prefabs():
         one['transform_3d']['position'] = [0.0, 0.0, 0.0]
         doc = {'format_version': 1, 'metadata': {'name': thing['name']}, 'entities': [one]}
         (PREFABS / f'{name}.prefab').write_text(json.dumps(doc, indent=2) + '\n')
+    # A hamlet's lamp post, dark until Wick lights it, carrying its own light.
+    post, light = lantern('lamp-post', 0, 0)
+    post['components']['sindri.light2d'] = light['components']['sindri.light2d']
+    post['components']['sindri.script']['properties'] = {'light_name': '', 'ends': False}
+    post['id'] = post['name'] = 'lamp-post'
+    (one,) = standing_up([post])
+    one['components']['sindri.light2d']['height'] = 2.6
+    one['transform_3d']['position'] = [0.0, 0.0, 0.0]
+    doc = {'format_version': 1, 'metadata': {'name': 'lamp-post'}, 'entities': [one]}
+    (PREFABS / 'hamlet' / 'lamp-post.prefab').write_text(json.dumps(doc, indent=2) + '\n')
+    # Its folk: out of sight until the lamp is lit, then thankful.
+    for person in HAMLET_FOLK:
+        folk = village_scene.villager(person, '', None, (0.0, 0.0))
+        folk['components']['sindri.script']['properties'] = {'lamp_name': '', 'gives': True}
+        folk['id'] = folk['name'] = f'villager-{person}'
+        (one,) = standing_up([folk])
+        one['transform_3d']['position'] = [0.0, 0.0, 0.0]
+        doc = {'format_version': 1, 'metadata': {'name': person}, 'entities': [one]}
+        (PREFABS / 'hamlet' / f'villager-{person}.prefab').write_text(json.dumps(doc, indent=2) + '\n')
+    # A Seeker is three things, its beam and glow children of where its circle
+    # falls, so it is a prefab of its own shape.
+    parts = standing_up(seeker('seeker', 0, 0))
+    parts[0]['transform_3d']['position'] = [0.0, 0.0, 0.0]
+    doc = {'format_version': 1, 'metadata': {'name': 'seeker'}, 'entities': parts}
+    (PREFABS / 'seeker.prefab').write_text(json.dumps(doc, indent=2) + '\n')
 
 
 def air():
@@ -239,7 +278,7 @@ def air():
     }
 
 
-GOODS = {'wood': (1.0, 0.7), 'stone': (0.85, 0.6), 'resin': (0.6, 0.5)}   # how big each is drawn
+GOODS = {'wood': (1.0, 0.7), 'stone': (0.85, 0.6), 'resin': (0.6, 0.5), 'berries': (0.8, 0.0)}   # how big each is drawn
 
 
 def goods():
@@ -316,9 +355,19 @@ def pack():
         ui('hud-light-fill', None, ['meter', 'light-fill'],
            **{'sindri.ui.image': {'anchor': 'top_left', 'layer': 96, 'texture': 'textures/white.png',
                                   'tint': [1, 1, 1, 1], 'fill': {'amount': 1.0, 'from': 'left'}}}),
+        ui('hud-courage-label', None, ['kicker', 'light-label', 'courage-label'], **words('COURAGE')),
+        ui('hud-courage-back', None, ['meter', 'courage', 'light-back'], **icon('textures/white.png', 95)),
+        ui('hud-courage-fill', None, ['meter', 'courage', 'courage-fill'],
+           **{'sindri.ui.image': {'anchor': 'top_left', 'layer': 96, 'texture': 'textures/white.png',
+                                  'tint': [1, 1, 1, 1], 'fill': {'amount': 1.0, 'from': 'left'}}}),
+        ui('hud-food-label', None, ['kicker', 'light-label', 'food-label'], **words('FOOD')),
+        ui('hud-food-back', None, ['meter', 'food', 'light-back'], **icon('textures/white.png', 95)),
+        ui('hud-food-fill', None, ['meter', 'food', 'food-fill'],
+           **{'sindri.ui.image': {'anchor': 'top_left', 'layer': 96, 'texture': 'textures/white.png',
+                                  'tint': [1, 1, 1, 1], 'fill': {'amount': 1.0, 'from': 'left'}}}),
         ui('pack-panel', None, ['panel', 'pack-panel'], 0.4, 0.25, **panel(90)),
     ]
-    for kind, label in [('wood', 'wood'), ('stone', 'stone'), ('resin', 'resin')]:
+    for kind, label in [('wood', 'wood'), ('stone', 'stone'), ('resin', 'resin'), ('berries', 'berries')]:
         row = f'pack-{kind}-row'
         out += [ui(row, 'pack-panel', ['pack-row'], 0.35, 0.06, **panel(91, 'row')),
                 ui(f'pack-{kind}-icon', row, ['pack-icon'], 0.05, 0.05, **icon(f'textures/goods.png#{kind}')),
@@ -327,7 +376,8 @@ def pack():
     out.append(ui('craft-panel', None, ['craft-panel'], 0.6, 0.3, **panel(89)))
     for ident, name, cost, key, picture in [
             ('craft-campfire', 'Campfire', '4 wood · 2 stone', 'F', 'textures/campfire.png#campfire'),
-            ('craft-lamp', 'Lamp', '6 wood · 4 stone · 2 resin', 'G', 'textures/objects.png#lamp-post-lit')]:
+            ('craft-lamp', 'Lamp', '6 wood · 4 stone · 2 resin', 'G', 'textures/objects.png#lamp-post-lit'),
+            ('craft-oil', 'Feed lantern', '1 resin', 'R', 'textures/lantern.png')]:
         text_column = f'{ident}-text'
         out += [
             ui(ident, 'craft-panel', ['craft'], 0.55, 0.12, **panel(92, 'row'),
@@ -385,7 +435,8 @@ def seeker(name, x, y):
                                'radius': 3.0, 'falloff': 0.4, 'height': SEEKER_HEIGHT, 'shadows': False,
                                'flicker': 0.0},
             'sindri.script': {'source': 'scripts/seeker.decay', 'script': 'Seeker',
-                              'properties': {'gloom': 'prefabs/wilds/gloom.prefab'}}}),
+                              'properties': {'gloom': 'prefabs/wilds/gloom.prefab',
+                                             'brute': 'prefabs/wilds/brute.prefab'}}}),
         entity(f'{name}-beam', f'{name}-beam', at(0, 0, 0), parent=name, **{
             'sindri.sprite': {'texture': 'textures/seeker-beam.png#shaft', 'layer': 5,
                               'size': [2.6, SEEKER_HEIGHT], 'tint': [2.4, 0.3, 0.26, 1.0], 'unlit': True,
@@ -418,6 +469,9 @@ def seen_in_the_dark():
     # they will.
     env['components']['sindri.environment']['lighting_2d']['clouds'] = {
         'cover': 0.45, 'size': 28.0, 'darkness': 0.4, 'wind': [1.1, 0.35]}
+    # Wick's courage darkens this grade as it fails (`scripts/courage.decay`).
+    env['components']['sindri.script'] = {'source': 'scripts/courage.decay', 'script': 'Courage',
+                                          'properties': {}}
     return env
 
 
@@ -453,6 +507,10 @@ def placed_at_start(entities):
             e['transform_3d']['position'][1] += START[1]
             # The grass parts round him, and his steps stay a while behind him.
             e['components']['sindri.wake'] = {'radius': 1.3, 'strength': 0.35}
+            # Out here the lantern burns: a full one lasts three minutes away
+            # from any other light; and he hungers, full to starving in five.
+            e['components']['sindri.script']['properties']['burn'] = round(1 / 180, 6)
+            e['components']['sindri.script']['properties']['hunger'] = round(1 / 300, 6)
             e['components']['sindri.particles#steps'] = scenes.motes(
                 0.0, 7.0, 0.0, [[0.12, 0.09, 0.07, 0.45], [0.12, 0.09, 0.07, 0.3], [0.12, 0.09, 0.07, 0.0]],
                 0.42, 0.42, texture='textures/footprints.png', per_distance=1.4, max=24, spread=0.0,
@@ -525,10 +583,16 @@ def wilds():
             'sindri.physics2d.world': {'gravity': [0, 0], 'layers': ['wall', 'wick', 'lantern', 'target']},
             'sindri.input.actions': {'actions': input_actions() + [
                 {'name': 'campfire', 'kind': 'button', 'bindings': ['key.F', 'gamepad.north']},
-                {'name': 'lamp', 'kind': 'button', 'bindings': ['key.G', 'gamepad.east']}]}}),
+                {'name': 'lamp', 'kind': 'button', 'bindings': ['key.G', 'gamepad.east']},
+                {'name': 'feed', 'kind': 'button', 'bindings': ['key.R', 'gamepad.right_bumper']}]}}),
         ground(),
     ]
-    ents += [e for n, (x, y) in enumerate(LAMPS, 1) for e in lantern(f'lantern-{n}', x, y)]
+    lamps = [e for n, (x, y) in enumerate(LAMPS, 1) for e in lantern(f'lantern-{n}', x, y)]
+    for lamp in lamps:
+        # Out here lighting lamps makes safe places; it does not end the run.
+        if 'sindri.script' in lamp['components']:
+            lamp['components']['sindri.script']['properties']['ends'] = False
+    ents += lamps
     # The first one breathes 6.66 seconds out of step: it came in with pull request 666,
     # and something below the Lid should remember that.
     ents += [sunfall(f'sunfall-{n}', x, y, phase=6.66 * n) for n, (x, y) in enumerate(SUNFALLS, 1)]

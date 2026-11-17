@@ -11,7 +11,7 @@ script Warden {
     @export let volley_gap: number = 2.4;
     @export let approach: number = 0.9;
     @export let dash_speed: number = 7.0;
-    @export let hazard_damage: number = 0.0;
+    @export var hazard_damage: number = 0.0;
     @export let shot: Prefab;
     @export let minion: Prefab;
     @export let drop_roll: Prefab;

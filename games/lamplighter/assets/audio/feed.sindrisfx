@@ -1,0 +1,27 @@
+{
+  "format": 1,
+  "kind": "power_up",
+  "seed": 2,
+  "sound": {
+    "wave": "saw",
+    "attack": 0.0,
+    "sustain": 0.3695,
+    "punch": 0.2197,
+    "decay": 0.154,
+    "frequency": 343.9144,
+    "cutoff": 0.0,
+    "slide": 2.4503,
+    "accel": 0.0,
+    "vibrato_depth": 0.0,
+    "vibrato_rate": 14.2117,
+    "arp_semitones": 0.0,
+    "arp_delay": 0.0,
+    "duty": 0.4974,
+    "duty_sweep": 0.0,
+    "repeat": 0.151,
+    "low_pass": 20000.0,
+    "high_pass": 0.0,
+    "crush": 1,
+    "volume": 0.6
+  }
+}

@@ -1,0 +1,104 @@
+{
+  "format_version": 1,
+  "metadata": {
+    "name": "elder"
+  },
+  "entities": [
+    {
+      "id": "villager-elder",
+      "name": "villager-elder",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          3.0,
+          2.75,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/villagers.png#elder-south",
+          "layer": 5,
+          "tint": [
+            1.0,
+            1.0,
+            1.0,
+            0.0
+          ],
+          "billboard": true,
+          "offset": [
+            0.0,
+            -0.0682
+          ]
+        },
+        "sindri.shadow2d": {
+          "contact_size": [
+            1.35,
+            0.81
+          ],
+          "contact_offset": [
+            0,
+            0
+          ],
+          "contact_opacity": 0.7,
+          "cast": false,
+          "cast_opacity": 0.35,
+          "height": 0.0,
+          "max_length": 2.2
+        },
+        "sindri.animation.sprite": {
+          "clips": {
+            "south": {
+              "frames": [
+                "elder-south"
+              ],
+              "seconds_per_frame": 0.1,
+              "looping": false
+            },
+            "west": {
+              "frames": [
+                "elder-west"
+              ],
+              "seconds_per_frame": 0.1,
+              "looping": false
+            },
+            "north": {
+              "frames": [
+                "elder-north"
+              ],
+              "seconds_per_frame": 0.1,
+              "looping": false
+            },
+            "east": {
+              "frames": [
+                "elder-east"
+              ],
+              "seconds_per_frame": 0.1,
+              "looping": false
+            }
+          },
+          "playing": "south",
+          "speed": 1
+        },
+        "sindri.script": {
+          "source": "scripts/villager.decay",
+          "script": "Villager",
+          "properties": {
+            "lamp_name": "",
+            "gives": true
+          }
+        }
+      }
+    }
+  ]
+}

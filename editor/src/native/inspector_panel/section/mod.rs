@@ -6,6 +6,8 @@
 //! `components_sections`.
 
 pub(super) mod animation;
+mod clip_events;
+pub(super) mod collider;
 pub(super) mod grid;
 pub(crate) mod heading;
 pub(super) mod script;
@@ -88,6 +90,8 @@ pub(super) fn components_sections(
             .then_with(|| left.cmp(right))
     });
     let mut removed = None;
+    let has_sprite = collider::has_sprite(components);
+    let mut fit = None;
     for name in names {
         // Drawn above as presentation metadata rather than as an opaque
         // component with an uneditable array readout.
@@ -134,6 +138,9 @@ pub(super) fn components_sections(
                 solid_blocks,
             );
         }
+        if name == collider::TYPE_NAME {
+            fit = fit.or(collider::fit_buttons(ui, has_sprite));
+        }
         if name == GRID_NAVIGATION_COMPONENT {
             grid_navigation_section(ui, payload, grid_size);
         }
@@ -149,6 +156,11 @@ pub(super) fn components_sections(
             object_rows(ui, &name, payload, registry, assets, is_script);
         });
         ui.add_space(5.0);
+    }
+    // After the loop, because a fit writes the occluder as well as the
+    // collider, and the loop holds one component at a time.
+    if let Some(to) = fit {
+        collider::apply_fit(ui, components, assets_root, to);
     }
     removed
 }

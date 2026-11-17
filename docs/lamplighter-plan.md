@@ -231,8 +231,11 @@ says what is now true.
    back round him far out (`sindri.floating_origin`), so it stays sharp millions
    of squares away. Hamlets stand here and there on open ground, built whole by
    the seed (`sites` on the scatter): a well, houses round it, some still lit.
-   Still to come: the wilds opened from the title, hamlets with people and a lamp
-   to light, and other places (ruins, camps, the beacon) appearing at random. Wick walks it in the dark; a test walks him across biomes.
+   Each hamlet has a lamp post by its well, dark until Wick lights it, and lit
+   it is a safe place; out in the wilds lighting lamps ends nothing
+   (`tests/a_hamlet_lamp.rs`). The title's Play opens the wilds, the Dim Fields
+   a button below it, and pausing resumes where Wick was
+   (`tests/the_title_opens_the_wilds.rs`). Still to come: hamlets with people, and other places (ruins, camps, the beacon) appearing at random. Wick walks it in the dark; a test walks him across biomes.
 2. **Under the Lid.** *Started.* Sunfalls: shafts of cracklight with a gold pool
    and dust in the beam, scattered by seed, wandering round where they fell and
    coming and going as their crack opens and shuts (`scripts/sunfall.decay`).
@@ -244,9 +247,14 @@ says what is now true.
    where he was last seen (`prefabs/wilds/gloom.prefab`, never more than six
    about). A lit lamp's pool or an open sunfall hides him
    (`tests/under_the_lid.rs`). The ground has relief that the lantern rakes
-   across (`blocks_n.png`). Still to come: Seekers scattered over the land and
-   what else being found calls down; the lantern burns fuel; the gloom keep to
-   the dark. A test outlasts a Seeker's sweep by a fire.
+   across (`blocks_n.png`). The lantern burns: a full one lasts three minutes
+   away from other light, gutters in its last fifth and is an ember dry, and
+   standing by a lit lamp or a fire tops it up (`Game.oil`, `burn` on Wick,
+   `tests/the_lantern_burns.rs`). More Seekers hang over the open heath and
+   barrens, scattered far apart by the seed (`prefabs/wilds/seeker.prefab`),
+   none near the start. Held for eight seconds at a stretch, a Seeker calls down
+   a brute, which light does not stop. Still to come: the gloom keep to the
+   dark. A test outlasts a Seeker's sweep by a fire.
 3. **Gather and craft.** *Started.* Deadwood, flint and resin lie about the
    wilds, scattered by seed (`scripts/pickup.decay`, `art/goods.py`); Wick takes
    them by walking over them, and what is taken stays taken. His pack is on
@@ -255,13 +263,28 @@ says what is now true.
    and a half, and a lamp (6 wood, 4 stone, 2 resin) that burns for good, built a
    step ahead of him. A fire he has built is a safe pool while it burns: the
    gloom are driven out of it and a Seeker cannot find him by it
-   (`scripts/fire.decay`, `tests/gather_and_build.rs`). Still to come: tools,
-   torches and lantern oil, and the lantern burning fuel.
-4. **Survive.** Health, hunger and courage; food, cooking and the courage effects;
-   death and what it costs. A test lives through three long dark spells.
+   (`scripts/fire.decay`, `tests/gather_and_build.rs`). Resin feeds the
+   lantern: a card (and R) pours one in for half a lantern. Still to come:
+   tools, torches, and oil and wax as better fuel than resin.
+4. **Survive.** *Started.* Courage (`scripts/courage.decay`, on the HUD under
+   the lantern): it ebbs slowly in the dark, fast with the lantern dry, for
+   each gloom near and while a Seeker has him, and comes back by a lit lamp, a
+   fire or an open sunfall. Afraid, below half, the screen's edges close in and
+   the world greys, the gloom notice him from further off and his walk falters
+   (`tests/courage.rs`). Hunger: being fed runs down from full to starving in
+   five minutes; berries grow on the meadow and the moss, and Wick eats one
+   from his pack once he is below half fed, a cooked one by a fire going twice
+   as far. Starving, his lantern's scorch does not mend and his courage drains
+   (`tests/hunger.rs`). Still to come: more to eat and cooking proper; death
+   and what it costs. A test lives through three long dark spells.
 5. **Places.** The village set into the world with its houses, villagers to help
    and trade with, ruined lamp posts and the beacon. Saved worlds.
-6. **The story and polish.** The Lid, the ending, music and sound, the
+6. **The story and polish.** *Started:* the wilds are heard, in Sound Lab
+   effects the project ships: Wick's footsteps as his walk's `step` events land
+   them, gathering, building, feeding the lantern, lighting a lamp, a gloom's
+   pounce and a Seeker finding him, under a slow, uneasy song
+   (`audio/under-the-lid.sindrisong`; `tests/the_wilds_are_heard.rs`). Still to
+   come: the Lid, the ending, ambience, the
    screenshots and site entry, and `docs/parity.md` and the capability pages
    brought level with what is played.
 

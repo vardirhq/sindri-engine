@@ -192,7 +192,9 @@ def clips():
     for direction in ('south', 'west', 'north', 'east'):
         frames = lambda name, count: [f'{name}-{direction}-{n}' for n in range(count)]
         out[f'idle-{direction}'] = {'frames': frames('idle', 8), 'seconds_per_frame': 0.15, 'looping': True}
-        out[f'walk-{direction}'] = {'frames': frames('walk', 8), 'seconds_per_frame': 0.09, 'looping': True}
+        # A foot lands on the widest strides, which `wick.decay` hears.
+        out[f'walk-{direction}'] = {'frames': frames('walk', 8), 'seconds_per_frame': 0.09, 'looping': True,
+                                    'events': [{'frame': 0, 'name': 'step'}, {'frame': 4, 'name': 'step'}]}
         out[f'slash-{direction}'] = {'frames': frames('hurt', 8), 'seconds_per_frame': 0.07, 'looping': False}
         out[f'hurt-{direction}'] = {'frames': frames('hurt', 8), 'seconds_per_frame': 0.08, 'looping': False}
         out[f'death-{direction}'] = {'frames': frames('death', 12), 'seconds_per_frame': 0.1, 'looping': False}
@@ -482,7 +484,7 @@ def field():
 
 def main():
     write('title.scene', 'Lamplighter title', menu(
-        'Title', 'Lamplighter', 'Keep the way home lit.', [('play', 'Play')]))
+        'Title', 'Lamplighter', 'Keep the way home lit.', [('play', 'Play'), ('fields', 'The Dim Fields')]))
     write('pause.scene', 'Lamplighter pause', menu(
         'Pause', 'Paused', 'The light waits for you.', [('resume', 'Resume'), ('title', 'Title')]))
     write('world.scene', 'The Dim Fields', field())

@@ -71,6 +71,19 @@ impl WorldHost<'_> {
                     path,
                 )
             }
+            AnimationCall::Fired => {
+                let Some(Value::String(name)) = args.get(1) else {
+                    return Err(RuntimeError::Host(format!(
+                        "{} names its event with text",
+                        path.dotted()
+                    )));
+                };
+                Ok(Value::Bool(
+                    self.animations
+                        .as_ref()
+                        .is_some_and(|animations| animations.fired(target, name)),
+                ))
+            }
             AnimationCall::Finished => Ok(Value::Bool(
                 self.animations
                     .as_ref()

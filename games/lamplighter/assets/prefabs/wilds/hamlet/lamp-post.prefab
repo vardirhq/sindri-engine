@@ -1,0 +1,120 @@
+{
+  "format_version": 1,
+  "metadata": {
+    "name": "lamp-post"
+  },
+  "entities": [
+    {
+      "id": "lamp-post",
+      "name": "lamp-post",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          4,
+          4,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/objects.png#lamp-post-unlit",
+          "layer": 5,
+          "billboard": true
+        },
+        "sindri.animation.sprite": {
+          "clips": {
+            "unlit": {
+              "frames": [
+                "lamp-post-unlit"
+              ],
+              "seconds_per_frame": 0.1,
+              "looping": false
+            },
+            "lit": {
+              "frames": [
+                "lamp-post-lit"
+              ],
+              "seconds_per_frame": 0.1,
+              "looping": false
+            }
+          },
+          "playing": "unlit",
+          "speed": 1
+        },
+        "sindri.tags": {
+          "tags": [
+            "lantern"
+          ]
+        },
+        "sindri.shadow2d": {
+          "contact_size": [
+            1.8,
+            1.08
+          ],
+          "contact_offset": [
+            0,
+            0
+          ],
+          "contact_opacity": 0.7,
+          "cast": false,
+          "cast_opacity": 0.35,
+          "height": 0.0,
+          "max_length": 2.2
+        },
+        "sindri.physics2d.collider": {
+          "shape": {
+            "shape": "circle",
+            "radius": 0.325
+          },
+          "offset": [
+            0,
+            0.15
+          ],
+          "rotation": 0,
+          "sensor": true,
+          "layers": {
+            "memberships": 4,
+            "filter": 4294967295
+          },
+          "friction": 0,
+          "restitution": 0
+        },
+        "sindri.script": {
+          "source": "scripts/lantern.decay",
+          "script": "Lantern",
+          "properties": {
+            "light_name": "",
+            "ends": false
+          }
+        },
+        "sindri.light2d": {
+          "enabled": true,
+          "color": [
+            1.0,
+            0.72,
+            0.38,
+            1.0
+          ],
+          "intensity": 0.0,
+          "radius": 9.0,
+          "falloff": 1.4,
+          "height": 2.6,
+          "shadows": true,
+          "shadow_reach": 0.6,
+          "shadow_source_radius": 0.3,
+          "flicker": 0.6
+        }
+      }
+    }
+  ]
+}

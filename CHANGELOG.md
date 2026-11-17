@@ -2,6 +2,26 @@
 
 # Changelog
 
+- Lamplighter is heard: Sound Lab effects for Wick's footsteps (fired by his walk's `step` events), gathering, building, feeding the lantern, lighting a lamp, a gloom's pounce and a Seeker finding him, under a slow, uneasy Sound Lab song.
+
+- Animation events: a sprite clip names moments by frame (`"events": [{ "frame": 1, "name": "step" }]`, edited under the clip's frames in the inspector, and on the phone in a new Animation section that also picks the clip, its frame time and loop), and `Animation.fired(entity, "step")` is true for the step after one is shown. The platformer's hero plays a footstep, made in the Sound Lab, on its run's widest strides.
+
+- Decay: a field another script declares as a plain literal (`var lit: bool = false`) can be read before that script has started, rather than failing as if it had no value. Lamplighter's wilds starting over after the lantern goes out tripped on it.
+
+- Lamplighter's title opens the wilds with Play, the Dim Fields a button below, and Pause resumes whichever was paused.
+
+- Lamplighter: each hamlet in the wilds has a lamp post by its well for Wick to light, a safe place once lit. Lighting the two lamps by the start no longer counts as winning, which had stopped the gloom hunting for good.
+
+- Lamplighter: when the lantern goes out in the wilds, the wilds start over (with an empty pack) rather than the field the game used to begin in.
+
+- Decay refuses `this.field = …` on a field declared with `let` when the script is checked, rather than failing with `Immutable` at runtime. Orbital Last Stand's enemies declared `hazard_damage` with `let` and cleared it, which had only not failed because nothing ever set it; it is `var` now.
+
+- Weave reads `min()`, `max()` and `clamp()` wherever a length goes, nested in `calc()` and in each other, chosen once the screen is known: `width: clamp(240px, 40vw, 360px)`.
+
+- Lamplighter's lantern burns: out in the wilds its oil runs down, it gutters low and is an ember dry, and standing by a lit lamp or a fire tops it up. A Feed lantern card (and R) pours a resin into it. More Seekers hang over the open heath and barrens, far apart, and one that holds Wick for eight seconds calls down a brute. Wick has courage: it ebbs in the dark and returns by warm light, and afraid, the screen closes in, the world greys, the gloom grow bolder and his walk falters. He hungers too: berries grow on the meadow and the moss, he eats one when half fed (cooked by a fire it goes twice as far), and starving, his lantern does not mend.
+
+- The desktop and phone editors fit a 2D collider to the object's sprite: Fit to picture, a box around what is drawn, or Fit to footing, a footprint where it meets the ground. A light occluder on the object takes the same outline (`sindri_authoring::fit`).
+
 - Lamplighter: Wick goes behind flowers, tufts and pebbles as he goes behind anything that stands, and what stops him is fitted to where each thing meets the ground, read from its picture (`art/fit.py`): a tree by its trunk, a bush and a boulder by their base, a house by its walls' foot, with its shadow cast from the same footprint.
 
 - Weave plays `@keyframes` animations (`animation: name 450ms ease-out infinite alternate`), restarted when the declaration changes; `Ui.set_class(element, class, on)` gives an element a stylesheet class from Decay, which restyles it on the next frame. Lamplighter's pack rows shine when Wick gathers, and the lantern's panel pulses red while a Seeker has him.

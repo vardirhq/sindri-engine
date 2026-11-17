@@ -77,4 +77,53 @@ class InspectorPresenterTest {
         assertEquals("lamp-3", facts["Stable ID"])
         assertEquals("sindri.light2d", facts["Light 2D"])
     }
+
+    @Test
+    fun a_sprite_s_clips_are_chosen_timed_and_given_events() {
+        val walker = EngineSamples.lamp.copy(
+            components = listOf(
+                Component(
+                    "sindri.animation.sprite", "Sprite Animation", emptyList(),
+                    values = mapOf(
+                        "playing" to "walk",
+                        "speed" to 1.0,
+                        "clips" to mapOf(
+                            "idle" to mapOf("frames" to listOf("a"), "seconds_per_frame" to 0.2, "looping" to true),
+                            "walk" to mapOf(
+                                "frames" to listOf("a", "b", "c", "d"), "seconds_per_frame" to 0.1, "looping" to true,
+                                "events" to listOf(mapOf("frame" to 1, "name" to "step")),
+                            ),
+                        ),
+                    ),
+                ),
+            ),
+        )
+        val shown = InspectorPresenter.present(walker, "world.scene", "", details = false)
+        val rows = shown.ui.sections.first { it.title == "Animation" }.rows
+        assertEquals("walk", (rows.first { it.label == "Clip" } as RowUi.Stepper).value)
+        assertEquals(
+            NativeEdit("setField", listOf("sindri.animation.sprite", "playing", "idle", false)),
+            shown.binding("Animation", "Clip")!!.edit(RowChange.Plus),
+        )
+        assertEquals(
+            NativeEdit("setField", listOf("sindri.animation.sprite", "clips.walk.seconds_per_frame", 0.11, false)),
+            shown.binding("Animation", "Frame time")!!.edit(RowChange.Plus),
+        )
+        assertEquals("2 of 4", (rows.first { it.label == "“step” on frame" } as RowUi.Stepper).value)
+        assertEquals(
+            NativeEdit("setField", listOf("sindri.animation.sprite", "clips.walk.events", listOf(mapOf("frame" to 2, "name" to "step")), false)),
+            shown.binding("Animation", "“step” on frame")!!.edit(RowChange.Plus),
+        )
+        assertEquals(
+            NativeEdit(
+                "setField",
+                listOf("sindri.animation.sprite", "clips.walk.events", listOf(mapOf("frame" to 1, "name" to "step"), mapOf("frame" to 0, "name" to "strike")), false),
+            ),
+            shown.binding("Animation", "Add a “strike” event")!!.edit(RowChange.Open),
+        )
+        assertEquals(
+            NativeEdit("setField", listOf("sindri.animation.sprite", "clips.walk.events", emptyList<Any>(), false)),
+            shown.binding("Animation", "Remove the last event")!!.edit(RowChange.Open),
+        )
+    }
 }

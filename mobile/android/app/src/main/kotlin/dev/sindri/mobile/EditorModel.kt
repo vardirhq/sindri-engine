@@ -230,6 +230,8 @@ sealed interface EditorEvent {
     data class PartField(val edit: PartEdit) : EditorEvent
     data class ColliderField(val path: String, val value: Any) : EditorEvent
     data object AddColliderPiece : EditorEvent
+    /** Lays the collider over the sprite: all of it, or where it meets the ground. */
+    data class FitCollider(val footing: Boolean) : EditorEvent
     data object RemoveColliderPiece : EditorEvent
     data object ToggleActive : EditorEvent
     data object AddComponent : EditorEvent
