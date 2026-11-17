@@ -2,6 +2,8 @@
 
 # Changelog
 
+- The `sindri` command: `sindri project check [PATH] [--format json]` reads every scene, prefab, Decay script and Weave stylesheet, and `sindri.toml`, as a run reads them, and reports every problem with a stable code, a path, a line and an entity where it has one: unknown components (with the nearest real name), scripts a scene names but no file declares, missing textures, and missing scenes and stylesheets. Scene, prefab, component and Weave errors now carry their own `code()`.
+
 - Lamplighter is heard: Sound Lab effects for Wick's footsteps (fired by his walk's `step` events), gathering, building, feeding the lantern, lighting a lamp, a gloom's pounce and a Seeker finding him, under a slow, uneasy Sound Lab song.
 
 - Animation events: a sprite clip names moments by frame (`"events": [{ "frame": 1, "name": "step" }]`, edited under the clip's frames in the inspector, and on the phone in a new Animation section that also picks the clip, its frame time and loop), and `Animation.fired(entity, "step")` is true for the step after one is shown. The platformer's hero plays a footstep, made in the Sound Lab, on its run's widest strides.

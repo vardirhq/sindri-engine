@@ -152,7 +152,8 @@ person. Decay is already covered: `decay-lsp --check --json` compiles scripts
 against the real host environment with structured diagnostics. Everything else
 is checked only when the editor or a game loads it.
 
-The target is one command over a whole project:
+`sindri project check` (the `sindri` binary, `crates/sindri-cli`) is now that
+one command over a whole project:
 
 ```bash
 sindri project check --format json
@@ -277,8 +278,10 @@ also shows whether the MCP adapter above is worth building.
 
 ## Order of work
 
-1. `sindri project check` with JSON output, over scenes, prefabs, Weave, Decay
-   and `sindri.toml`.
+1. *Done:* `sindri project check` with JSON output, over scenes, prefabs,
+   Weave, Decay and `sindri.toml`, reporting every problem with the code the
+   crate that raised it gives (`SceneError::code`, `PrefabError::code`,
+   `ComponentRegistryError::code`, Weave's `ParseError::code`).
 2. JSON Schemas for scenes and prefabs, generated from the component registry.
 3. `sindri play --headless` with structured logs, scripted input and capture.
 4. The editor reloads a scene changed on disk.

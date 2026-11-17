@@ -1,8 +1,8 @@
 # CLI conventions
 
-> **Status:** accepted convention, ahead of the CLI it governs. The `sindri`
-> binary in `ROADMAP.md` does not exist yet; the first generated capability
-> documents do. This page is written first on purpose — a command vocabulary
+> **Status:** accepted convention. The `sindri` binary (`crates/sindri-cli`)
+> exists, with its first command, `sindri project check`; the rest of the
+> commands here are still ahead of it. This page is written first on purpose — a command vocabulary
 > discovered one command at a time accretes, and the second command is already
 > too late to agree on the grammar.
 

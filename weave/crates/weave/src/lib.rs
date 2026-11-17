@@ -92,6 +92,23 @@ pub enum ParseError {
     InvalidKeyframe(String),
 }
 
+impl ParseError {
+    /// The error's stable name, which tools match on.
+    #[must_use]
+    pub const fn code(&self) -> &'static str {
+        match self {
+            Self::MissingBlock(_) => "WEAVE_MISSING_BLOCK",
+            Self::MissingColon(_) => "WEAVE_MISSING_COLON",
+            Self::MissingClose => "WEAVE_MISSING_CLOSE",
+            Self::UnsupportedMedia(_) => "WEAVE_UNSUPPORTED_MEDIA",
+            Self::InvalidMediaWidth(_) => "WEAVE_INVALID_MEDIA_WIDTH",
+            Self::InvalidSelector(_) => "WEAVE_INVALID_SELECTOR",
+            Self::UnsupportedPseudoClass(_) => "WEAVE_UNSUPPORTED_PSEUDO_CLASS",
+            Self::InvalidKeyframe(_) => "WEAVE_INVALID_KEYFRAME",
+        }
+    }
+}
+
 pub fn parse(source: &str) -> Result<Stylesheet, ParseError> {
     let stripped = strip_comments(source);
     let mut source = Source {

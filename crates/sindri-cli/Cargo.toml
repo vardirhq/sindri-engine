@@ -1,0 +1,30 @@
+[package]
+name = "sindri-cli"
+description = "The sindri command: checking, playing and capturing a project from a shell, with JSON as the contract"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+# Depends on the independently versioned Weave and Decay workspaces.
+publish = false
+
+[[bin]]
+name = "sindri"
+path = "src/main.rs"
+
+[dependencies]
+decay-semantic = { path = "../../decay/crates/decay-semantic" }
+serde.workspace = true
+serde_json.workspace = true
+sindri-core = { path = "../sindri-core" }
+sindri-decay = { path = "../sindri-decay" }
+sindri-runtime = { path = "../sindri-runtime" }
+sindri-scene = { path = "../sindri-scene" }
+weave = { path = "../../weave/crates/weave" }
+
+[dev-dependencies]
+tempfile = "3"
+
+[lints]
+workspace = true
