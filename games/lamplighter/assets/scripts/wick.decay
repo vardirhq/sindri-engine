@@ -121,6 +121,10 @@ script Wick {
         this.age += dt;
         tend_the_oil(dt);
         go_hungry(dt);
+        // His feet on the ground, as his walk's `step` events land them.
+        if Animation.fired(this.sprite, "step") {
+            Audio.play("audio/step.wav", 0.12);
+        }
         turn_the_beam(dt);
         float_the_lantern(dt);
         show_the_hit();
@@ -401,6 +405,7 @@ script Wick {
         Camera.add_trauma(0.75);
         Effects.burst_at(this.hurt_burst, this.transform.world_position.x, this.transform.world_position.y + 0.8);
         Game.scorch = min(1.0, Game.scorch + 0.45);
+        Audio.play("audio/pounce.wav", 0.5);
         Game.scorched += 1.0;
         if Game.scorch >= 1.0 {
             Game.lost = true;

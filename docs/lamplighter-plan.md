@@ -278,7 +278,12 @@ says what is now true.
    and what it costs. A test lives through three long dark spells.
 5. **Places.** The village set into the world with its houses, villagers to help
    and trade with, ruined lamp posts and the beacon. Saved worlds.
-6. **The story and polish.** The Lid, the ending, music and sound, the
+6. **The story and polish.** *Started:* the wilds are heard, in Sound Lab
+   effects the project ships: Wick's footsteps as his walk's `step` events land
+   them, gathering, building, feeding the lantern, lighting a lamp, a gloom's
+   pounce and a Seeker finding him, under a slow, uneasy song
+   (`audio/under-the-lid.sindrisong`; `tests/the_wilds_are_heard.rs`). Still to
+   come: the Lid, the ending, ambience, the
    screenshots and site entry, and `docs/parity.md` and the capability pages
    brought level with what is played.
 

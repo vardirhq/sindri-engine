@@ -1641,7 +1641,17 @@
                 "walk-south-7"
               ],
               "seconds_per_frame": 0.09,
-              "looping": true
+              "looping": true,
+              "events": [
+                {
+                  "frame": 0,
+                  "name": "step"
+                },
+                {
+                  "frame": 4,
+                  "name": "step"
+                }
+              ]
             },
             "slash-south": {
               "frames": [
@@ -1715,7 +1725,17 @@
                 "walk-west-7"
               ],
               "seconds_per_frame": 0.09,
-              "looping": true
+              "looping": true,
+              "events": [
+                {
+                  "frame": 0,
+                  "name": "step"
+                },
+                {
+                  "frame": 4,
+                  "name": "step"
+                }
+              ]
             },
             "slash-west": {
               "frames": [
@@ -1789,7 +1809,17 @@
                 "walk-north-7"
               ],
               "seconds_per_frame": 0.09,
-              "looping": true
+              "looping": true,
+              "events": [
+                {
+                  "frame": 0,
+                  "name": "step"
+                },
+                {
+                  "frame": 4,
+                  "name": "step"
+                }
+              ]
             },
             "slash-north": {
               "frames": [
@@ -1863,7 +1893,17 @@
                 "walk-east-7"
               ],
               "seconds_per_frame": 0.09,
-              "looping": true
+              "looping": true,
+              "events": [
+                {
+                  "frame": 0,
+                  "name": "step"
+                },
+                {
+                  "frame": 4,
+                  "name": "step"
+                }
+              ]
             },
             "slash-east": {
               "frames": [

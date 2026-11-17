@@ -21,6 +21,8 @@ sindri-scene = { path = "../../crates/sindri-scene" }
 
 [dev-dependencies]
 sindri-assets = { path = "../../crates/sindri-assets" }
+# What a test hears the scripts ask to play.
+sindri-decay = { path = "../../crates/sindri-decay" }
 sindri-render = { path = "../../crates/sindri-render" }
 serde_json.workspace = true
 tempfile = "3"

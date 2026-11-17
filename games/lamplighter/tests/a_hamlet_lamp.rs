@@ -1,6 +1,7 @@
 //! A hamlet's lamp (`docs/lamplighter-plan.md`, stage 1): each hamlet the seed
 //! builds has a lamp post by its well, dark until Wick lights it; lit, it is a
-//! safe place, and out in the wilds lighting lamps does not end the run.
+//! safe place, and out in the wilds lighting lamps does not end the run. Its
+//! folk come out once it is lit, and thank Wick with what they can spare.
 
 use lamplighter::Run;
 use sindri_core::EntityId;
@@ -90,6 +91,17 @@ fn wick_lights_a_hamlets_lamp_and_it_shelters_him() {
     );
     assert!(run.board("won") < 0.5, "but ends nothing out here");
     run.set_board("courage", 0.3);
+    let berries = run.board("berries");
     step(&mut run, 60 * 2);
     assert!(run.board("courage") > 0.4, "its light gives him courage");
+    assert!(
+        (run.board("helped") - 1.0).abs() < 1e-3,
+        "someone comes out"
+    );
+    assert!(
+        run.board("berries") >= berries + 2.0 - 1e-3 || run.board("eaten") > 0.0,
+        "and gives him food"
+    );
+    step(&mut run, 60);
+    assert!((run.board("helped") - 1.0).abs() < 1e-3, "once");
 }

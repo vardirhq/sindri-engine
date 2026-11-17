@@ -35,6 +35,8 @@ script Courage {
 
     fn start() {
         this.wick = World.find("Wick");
+        // The wilds' music: a slow, uneasy song from the Sound Lab.
+        Audio.loop("audio/under-the-lid.ogg", 0.3);
         if !Game.through {
             Game.courage = 1.0;
             Game.fear = 0.0;

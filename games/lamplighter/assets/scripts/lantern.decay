@@ -45,6 +45,7 @@ script Lantern {
         // Sparks off the flame, and a small shake: it caught.
         Effects.burst_at(this.sparks, this.transform.world_position.x, this.transform.world_position.y + 2.6);
         Camera.add_trauma(0.18);
+        Audio.play("audio/light.wav", 0.45);
         Game.lit += 1.0;
         if this.ends && (World.has_tag(this.entity, "goal") || Game.lit >= Game.total) {
             Game.won = true;

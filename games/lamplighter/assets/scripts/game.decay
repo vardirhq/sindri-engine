@@ -43,6 +43,8 @@ state Game {
     var food: number = 1.0;
     var berries: number = 0.0;
     var eaten: number = 0.0;
+    // How many hamlet folk have come out to thank Wick for their lamp.
+    var helped: number = 0.0;
     // Where the pause screen goes back to.
     var paused_in: Place = Place.Fields;
 }

@@ -142,6 +142,8 @@ HAMLET_HOUSES = ['bakery', 'child-house', 'workshop', 'keeper']
 # up, the village's came only to his shoulders at the door.
 HOUSE_SCALE = 1.6
 HOUSE_SIZE = village_scene.CELL * HOUSE_SCALE
+# Who might live in a hamlet, drawn as the village's folk are.
+HAMLET_FOLK = ['baker', 'child', 'mender', 'elder']
 
 
 def hamlet():
@@ -157,6 +159,8 @@ def hamlet():
                 piece(['well'], 0.0, 0.0),
                 # Its lamp, long dark: Wick can light it, and it is a safe place.
                 piece(['lamp-post'], -2.6, 1.4),
+                # Someone who comes out when it is lit, and thanks Wick.
+                piece([f'villager-{person}' for person in HAMLET_FOLK], -1.4, 0.4),
                 piece(houses, -7.5, 4.0), piece(houses, 7.5, 4.5, 0.9),
                 piece(houses, -6.5, -6.5, 0.7), piece(houses, 7.0, -7.0, 0.6),
                 piece(['woodpile', 'barrels', 'crates'], 2.4, -1.4, 0.7),
@@ -233,6 +237,15 @@ def prefabs():
     one['transform_3d']['position'] = [0.0, 0.0, 0.0]
     doc = {'format_version': 1, 'metadata': {'name': 'lamp-post'}, 'entities': [one]}
     (PREFABS / 'hamlet' / 'lamp-post.prefab').write_text(json.dumps(doc, indent=2) + '\n')
+    # Its folk: out of sight until the lamp is lit, then thankful.
+    for person in HAMLET_FOLK:
+        folk = village_scene.villager(person, '', None, (0.0, 0.0))
+        folk['components']['sindri.script']['properties'] = {'lamp_name': '', 'gives': True}
+        folk['id'] = folk['name'] = f'villager-{person}'
+        (one,) = standing_up([folk])
+        one['transform_3d']['position'] = [0.0, 0.0, 0.0]
+        doc = {'format_version': 1, 'metadata': {'name': person}, 'entities': [one]}
+        (PREFABS / 'hamlet' / f'villager-{person}.prefab').write_text(json.dumps(doc, indent=2) + '\n')
     # A Seeker is three things, its beam and glow children of where its circle
     # falls, so it is a prefab of its own shape.
     parts = standing_up(seeker('seeker', 0, 0))

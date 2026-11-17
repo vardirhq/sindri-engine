@@ -132,6 +132,10 @@ script Seeker {
     }
 
     fn enter(next: String) {
+        // Being found is heard: a cold call from above.
+        if next == "found" && this.state != "found" {
+            Audio.play("audio/found.wav", 0.35);
+        }
         this.state = next;
         this.in_state = 0.0;
         this.calling = 0.0;

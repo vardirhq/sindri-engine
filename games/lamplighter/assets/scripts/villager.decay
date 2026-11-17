@@ -1,8 +1,14 @@
 // A villager. They stay out of sight until their lamp is lit, then fade in at their door and
 // stand there, turning to face Wick when he comes near.
+//
+// Out in the wilds a hamlet's villager has no lamp name to find (every hamlet
+// is the same prefab), so takes the nearest lamp; and the first time Wick
+// comes near after lighting it they give him what they can spare (`gives`).
 script Villager {
-    // The lamp that brings this villager out.
+    // The lamp that brings this villager out, or empty for the nearest.
     @export let lamp_name: String = "";
+    // Whether they thank Wick with a little food and resin, once.
+    @export let gives: bool = false;
     // How near Wick must be for them to turn to him, and how long they take to appear.
     @export let notice: number = 5.0;
     @export let appear_for: number = 1.2;
@@ -13,15 +19,40 @@ script Villager {
     var shown: number = 0.0;
     var facing: String = "south";
     var age: number = 0.0;
+    var given: bool = false;
 
     fn start() {
-        this.lamp = World.find(this.lamp_name);
+        if this.lamp_name != "" {
+            this.lamp = World.find(this.lamp_name);
+        }
         this.wick = World.find("Wick");
+    }
+
+    // The lamp post nearest them: their hamlet's own.
+    fn nearest_lamp() -> Entity {
+        var best: Entity = null;
+        var best_gap: number = 12.0;
+        for lamp in World.with_tag("lantern") {
+            let dx = lamp.transform.world_position.x - this.transform.world_position.x;
+            let dy = lamp.transform.world_position.y - this.transform.world_position.y;
+            let gap = sqrt(dx * dx + dy * dy);
+            if gap < best_gap {
+                best_gap = gap;
+                best = lamp;
+            }
+        }
+        return best;
     }
 
     fn update(dt: number) {
         // The lamps start on the first frame, so a villager waits a moment to ask one.
         this.age += dt;
+        if this.lamp == null && this.age > 0.1 {
+            this.lamp = nearest_lamp();
+        }
+        if this.lamp == null {
+            return;
+        }
         let post = Lantern.on(this.lamp);
         if !this.out && this.age > 0.1 && post != null && post.lit {
             this.out = true;
@@ -36,6 +67,13 @@ script Villager {
             let dy = this.wick.transform.world_position.y - this.transform.world_position.y;
             var want: String = "south";
             if sqrt(dx * dx + dy * dy) < this.notice {
+                if this.gives && !this.given && this.shown >= 1.0 {
+                    this.given = true;
+                    Game.berries += 2.0;
+                    Game.resin += 1.0;
+                    Game.helped += 1.0;
+                    Audio.play("audio/gather.wav", 0.4);
+                }
                 if abs(dx) >= abs(dy) {
                     if dx > 0.0 { want = "east"; } else { want = "west"; }
                 } else {

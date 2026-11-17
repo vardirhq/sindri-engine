@@ -114,6 +114,7 @@ script Pack {
             Game.resin -= this.feed_resin;
             Game.oil = min(1.0, Game.oil + this.feed_oil);
             Game.fed += 1.0;
+            Audio.play("audio/feed.wav", 0.35);
         }
     }
 
@@ -136,5 +137,6 @@ script Pack {
         made.transform.position.x = this.wick.transform.world_position.x + walker.facing_x * this.ahead;
         made.transform.position.y = this.wick.transform.world_position.y + walker.facing_y * this.ahead;
         Game.built += 1.0;
+        Audio.play("audio/build.wav", 0.5);
     }
 }
