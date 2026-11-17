@@ -235,3 +235,38 @@ fn a_collider_fits_its_sprite_as_one_undo_step() {
     editing.undo(&mut opened.world).unwrap();
     assert_eq!(opened.world.get(entity).unwrap().components[kind], before);
 }
+
+#[test]
+fn a_clip_event_is_written_through_its_path_and_undone() {
+    let project = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../games/lamplighter");
+    let mut opened = OpenedScene::open(&project, "world.scene").unwrap();
+    let mut editing = Editing::for_scene(&opened).unwrap();
+    let kind = "sindri.animation.sprite";
+    let (wick, before) = opened
+        .world
+        .entities()
+        .find_map(|(entity, data)| {
+            let clips = data.components.get(kind)?;
+            clips["clips"]
+                .get("walk-east")
+                .map(|_| (entity, clips.clone()))
+        })
+        .expect("Wick's sprite has a walk");
+    editing.selected = Some(wick);
+    editing
+        .set_field(
+            &mut opened.world,
+            &opened.extractor,
+            kind,
+            "clips.walk-east.events",
+            serde_json::json!([{ "frame": 2, "name": "strike" }]),
+            false,
+        )
+        .unwrap();
+    assert_eq!(
+        opened.world.get(wick).unwrap().components[kind]["clips"]["walk-east"]["events"][0]["name"],
+        "strike"
+    );
+    editing.undo(&mut opened.world).unwrap();
+    assert_eq!(opened.world.get(wick).unwrap().components[kind], before);
+}

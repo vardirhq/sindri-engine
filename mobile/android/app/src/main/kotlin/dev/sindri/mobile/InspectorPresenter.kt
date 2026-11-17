@@ -39,9 +39,10 @@ object InspectorPresenter {
     private const val OCCLUDER = "sindri.light2d.occluder"
     private const val SCRIPT = "sindri.script"
     private const val TAGS = "sindri.tags"
+    private const val ANIMATION = "sindri.animation.sprite"
 
     /** The components given sections of their own, in the order they are shown. */
-    private val presented = setOf(LIGHT, SPRITE, COLLIDER, BODY, SHADOW, OCCLUDER, SCRIPT, TAGS)
+    private val presented = setOf(LIGHT, SPRITE, COLLIDER, BODY, SHADOW, OCCLUDER, SCRIPT, TAGS, ANIMATION)
 
     /**
      * [inspector] as the design's sections. [assetRoot] is where the project's
@@ -62,6 +63,7 @@ object InspectorPresenter {
             inspector.component(BODY)?.let { body(it).done() },
             inspector.component(SHADOW)?.let { shadow(it).done() },
             inspector.component(OCCLUDER)?.let { occluder(it).done() },
+            inspector.component(ANIMATION)?.let { animation(it)?.done() },
         ) + inspector.components.filter { it.type !in presented }.mapNotNull { plain(it)?.done() } +
             listOfNotNull(inspector.component(SCRIPT)?.let { behaviour(it).done() }, details(inspector, details).done())
 
@@ -218,6 +220,45 @@ object InspectorPresenter {
     }
 
     /** A component with no presentation of its own: its numbers, switches and short choices. */
+    /**
+     * A sprite's clips: which plays, which is also the one edited, its frame
+     * time and whether it loops, and its events, each a frame that fires a
+     * name a script hears (`Animation.fired`).
+     */
+    private fun animation(animation: Component): SectionBuilder? {
+        @Suppress("UNCHECKED_CAST")
+        val clips = (animation.value("clips") as? Map<String, Any?>)?.keys?.sorted().orEmpty()
+        if (clips.isEmpty()) return null
+        val playing = (animation.value("playing") as? String)?.takeIf { it in clips } ?: clips.first()
+        val section = SectionBuilder(Sym.image, "Animation", "${clips.size} clips")
+        section.add(RowUi.Stepper("Clip", "", Forge.TextFaint, playing), RowBinding.ClipCycle(ANIMATION, clips, playing))
+        val at = "clips.$playing"
+        val frames = (animation.value("$at.frames") as? List<*>)?.size ?: 0
+        val seconds = animation.number("$at.seconds_per_frame") ?: 0.1
+        section.add(
+            RowUi.Stepper("Frame time", "", Forge.TextFaint, "${format(seconds)} s"),
+            RowBinding.FieldStep(ANIMATION, "$at.seconds_per_frame", seconds, 0.01, false, min = 0.01),
+        )
+        section.add(RowUi.Toggle("Loop", animation.value("$at.looping") as? Boolean ?: true), RowBinding.FieldSwitch(ANIMATION, "$at.looping"))
+        val speed = animation.number("speed") ?: 1.0
+        section.add(RowUi.Stepper("Speed", "", Forge.TextFaint, "${format(speed)}×"), RowBinding.FieldStep(ANIMATION, "speed", speed, 0.1, false, min = 0.0))
+        val events = ((animation.value("$at.events") as? List<*>).orEmpty()).mapNotNull { event ->
+            val fields = event as? Map<*, *> ?: return@mapNotNull null
+            ClipEvent(((fields["frame"] as? Number)?.toInt() ?: 0), fields["name"] as? String ?: "")
+        }
+        events.forEachIndexed { index, event ->
+            section.add(
+                RowUi.Stepper("“${event.name}” on frame", "", Forge.TextFaint, "${event.frame + 1} of $frames"),
+                RowBinding.ClipEventFrame(ANIMATION, "$at.events", events, index, frames),
+            )
+        }
+        listOf("step", "strike").forEach { name ->
+            section.add(RowUi.More("Add a “$name” event", false), RowBinding.ClipEventAdd(ANIMATION, "$at.events", events, name))
+        }
+        if (events.isNotEmpty()) section.add(RowUi.More("Remove the last event", false), RowBinding.ClipEventRemove(ANIMATION, "$at.events", events))
+        return section
+    }
+
     private fun plain(component: Component): SectionBuilder? {
         val section = SectionBuilder(Sym.extension, component.display, component.type)
         component.values.forEach { (name, value) ->
@@ -295,6 +336,11 @@ data class SliderScale(val min: Double, val max: Double) {
 
 /** One native edit: a host command and its arguments. */
 data class NativeEdit(val command: String, val arguments: List<Any?>)
+
+/** A named moment in a sprite clip: the frame that fires it, counted from zero. */
+data class ClipEvent(val frame: Int, val name: String) {
+    val json: Map<String, Any> get() = mapOf("frame" to frame, "name" to name)
+}
 
 /**
  * What an inspector row edits. [edit] turns a change to the row into the
@@ -381,6 +427,47 @@ sealed interface RowBinding {
     data class FieldChoice(val type: String, val path: String, val values: List<Any?>) : RowBinding {
         override fun edit(change: RowChange) = (change as? RowChange.Choose)?.let { chosen ->
             values.getOrNull(chosen.index)?.let { NativeEdit("setField", listOf(type, path, it, false)) }
+        }
+    }
+
+    /** The next or previous clip plays, and is the one the section edits. */
+    data class ClipCycle(val type: String, val clips: List<String>, val playing: String) : RowBinding {
+        override fun edit(change: RowChange): NativeEdit? {
+            val step = when (change) {
+                RowChange.Minus -> -1
+                RowChange.Plus -> 1
+                else -> return null
+            }
+            val at = clips.indexOf(playing).coerceAtLeast(0)
+            val next = clips[Math.floorMod(at + step, clips.size)]
+            return NativeEdit("setField", listOf(type, "playing", next, false))
+        }
+    }
+
+    /** One event moved a frame earlier or later; the list is written whole. */
+    data class ClipEventFrame(val type: String, val path: String, val events: List<ClipEvent>, val index: Int, val frames: Int) : RowBinding {
+        override fun edit(change: RowChange): NativeEdit? {
+            val step = when (change) {
+                RowChange.Minus -> -1
+                RowChange.Plus -> 1
+                else -> return null
+            }
+            val moved = events.mapIndexed { at, event ->
+                if (at == index) event.copy(frame = (event.frame + step).coerceIn(0, maxOf(0, frames - 1))) else event
+            }
+            return NativeEdit("setField", listOf(type, path, moved.map(ClipEvent::json), false))
+        }
+    }
+
+    data class ClipEventAdd(val type: String, val path: String, val events: List<ClipEvent>, val name: String) : RowBinding {
+        override fun edit(change: RowChange) = (change as? RowChange.Open)?.let {
+            NativeEdit("setField", listOf(type, path, (events + ClipEvent(0, name)).map(ClipEvent::json), false))
+        }
+    }
+
+    data class ClipEventRemove(val type: String, val path: String, val events: List<ClipEvent>) : RowBinding {
+        override fun edit(change: RowChange) = (change as? RowChange.Open)?.let {
+            NativeEdit("setField", listOf(type, path, events.dropLast(1).map(ClipEvent::json), false))
         }
     }
 

@@ -4,7 +4,7 @@
 
 - Lamplighter is heard: Sound Lab effects for Wick's footsteps (fired by his walk's `step` events), gathering, building, feeding the lantern, lighting a lamp, a gloom's pounce and a Seeker finding him, under a slow, uneasy Sound Lab song.
 
-- Animation events: a sprite clip names moments by frame (`"events": [{ "frame": 1, "name": "step" }]`, edited under the clip's frames in the inspector), and `Animation.fired(entity, "step")` is true for the step after one is shown. The platformer's hero plays a footstep, made in the Sound Lab, on its run's widest strides.
+- Animation events: a sprite clip names moments by frame (`"events": [{ "frame": 1, "name": "step" }]`, edited under the clip's frames in the inspector, and on the phone in a new Animation section that also picks the clip, its frame time and loop), and `Animation.fired(entity, "step")` is true for the step after one is shown. The platformer's hero plays a footstep, made in the Sound Lab, on its run's widest strides.
 
 - Decay: a field another script declares as a plain literal (`var lit: bool = false`) can be read before that script has started, rather than failing as if it had no value. Lamplighter's wilds starting over after the lantern goes out tripped on it.
 
