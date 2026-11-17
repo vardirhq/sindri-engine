@@ -7,6 +7,10 @@
 //! a project from its directory rather than from what the native game embeds,
 //! so any project in the repository can be opened, not only Causeway.
 
+// Offscreen, with a GPU and a file system: a native tool, as it was inside
+// Causeway. In the browser it is empty rather than a build failure.
+#![cfg(not(target_arch = "wasm32"))]
+
 use std::{collections::BTreeMap, error::Error, fs, io::BufWriter, path::Path, time::Duration};
 
 use sindri_assets::{AssetBytes, AssetDecoder, FontAssetDecoder};
