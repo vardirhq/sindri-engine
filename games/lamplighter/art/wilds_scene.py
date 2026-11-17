@@ -21,6 +21,7 @@ from pathlib import Path
 
 from PIL import Image
 
+import fit
 import scenes
 import village_scene
 from scenes import (at, effects, entity, environment, gloom, input_actions, lantern, prop, wick)
@@ -171,7 +172,9 @@ def prefabs():
     for name in ['oak-1', 'oak-2', 'oak-3', 'oak-4', 'tree-1', 'tree-2', 'bush-1', 'bush-2', 'bush-3', 'bush-4']:
         made[name] = village_scene.standing('plant', name, 0, 0, blocks[name.split('-')[0]])
     for kind in ['tufts', 'flowers', 'pebbles', 'mushrooms']:
-        components = {'sindri.sprite': {'texture': f'textures/decor.png#{kind}', 'layer': 4}}
+        # On the layer what stands is on, so the camera's distance orders it
+        # against Wick: in front of him when he is behind it.
+        components = {'sindri.sprite': {'texture': f'textures/decor.png#{kind}', 'layer': 5}}
         if kind == 'mushrooms':
             components['sindri.light2d'] = {'enabled': True, 'color': [0.45, 0.85, 1.0, 1.0], 'intensity': 0.7,
                                             'radius': 2.8, 'falloff': 1.6, 'height': 0.6, 'shadows': False}
@@ -208,6 +211,8 @@ def prefabs():
         thing['id'] = name.replace('/', '-')
         thing['name'] = name.rsplit('/', 1)[-1]
         (one,) = standing_up([thing])
+        # Blocked where it meets the ground, read from its picture.
+        fit.fitted(one)
         one['transform_3d']['position'] = [0.0, 0.0, 0.0]
         doc = {'format_version': 1, 'metadata': {'name': thing['name']}, 'entities': [one]}
         (PREFABS / f'{name}.prefab').write_text(json.dumps(doc, indent=2) + '\n')
