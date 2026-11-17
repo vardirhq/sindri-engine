@@ -3,12 +3,15 @@
    by its anchor. On a phone held upright everything is sized to the screen's
    width and the build cards sit above the pack. */
 
-/* The lantern's light. */
-.light-panel { width: 240px; height: 56px; x: 136px; y: -44px; anchor: top_left; }
+/* The lantern's light, and Wick's courage under it. */
+.light-panel { width: 240px; height: 96px; x: 136px; y: -64px; anchor: top_left; }
 .light-label { width: 200px; height: 14px; x: 32px; y: -26px; anchor: top_left; }
 .meter { width: 208px; height: 10px; x: 136px; y: -56px; anchor: top_left; }
+.courage-label { y: -76px; }
+.meter.courage { y: -96px; }
 .light-back { tint: var(--well); }
 .light-fill { tint: var(--ember); }
+.courage-fill { tint: #b9c6e4; }
 
 /* The pack: one row a thing, its picture and how many. */
 .pack-panel {
@@ -48,9 +51,11 @@
 .craft:disabled .craft-name, .craft:disabled .craft-cost, .craft:disabled .craft-key { color: var(--faint); }
 
 @media (orientation: portrait) {
-    .light-panel { width: 56vw; height: 13vw; x: 31vw; y: -10.5vw; }
+    .light-panel { width: 56vw; height: 22vw; x: 31vw; y: -15vw; }
     .light-label { width: 46vw; height: 3vw; x: 7vw; y: -6vw; font-size: 2.6vw; line-height: 3vw; }
     .meter { width: 48vw; height: 2.4vw; x: 31vw; y: -13vw; }
+    .courage-label { y: -17vw; }
+    .meter.courage { y: -23.5vw; }
     .pack-panel { width: 34vw; height: 30vw; x: 20vw; y: 18vw; padding: 2vw 3vw; }
     .pack-row { width: 30vw; height: 8vw; gap: 2vw; }
     .pack-icon { width: 7vw; height: 7vw; }

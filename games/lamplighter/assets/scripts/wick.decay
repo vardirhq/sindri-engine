@@ -175,8 +175,10 @@ script Wick {
             Game.moved = true;
         }
         let blend = min(1.0, dt * this.ease);
-        this.vx += (x * pace * this.speed - this.vx) * blend;
-        this.vy += (y * pace * this.speed - this.vy) * blend;
+        // Afraid, his walk falters.
+        let nerve = 1.0 - 0.25 * Game.fear;
+        this.vx += (x * pace * this.speed * nerve - this.vx) * blend;
+        this.vy += (y * pace * this.speed * nerve - this.vy) * blend;
         Physics.set_velocity(this.entity, this.vx, this.vy);
         keep_in_depth();
 
@@ -206,7 +208,8 @@ script Wick {
     // lamp or a fire: a flame lit from a flame. Read from the fire's light,
     // which is there before its script starts.
     fn tend_the_oil(dt: number) {
-        if this.burn <= 0.0 {
+        // A lamp's script starts with the rest; what it says is read from then.
+        if this.burn <= 0.0 || this.age < 0.1 {
             return;
         }
         let here = Vec2(this.transform.world_position.x, this.transform.world_position.y);

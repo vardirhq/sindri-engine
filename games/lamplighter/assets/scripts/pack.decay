@@ -29,6 +29,7 @@ script Pack {
     var feed_button: Entity = null;
     var light: Entity = null;
     var light_panel: Entity = null;
+    var courage: Entity = null;
     // What the pack held last frame, and how long each row has shone since it
     // gained (`gained` in `ui/hud.weave`).
     var had_wood: number = 0.0;
@@ -49,6 +50,7 @@ script Pack {
         this.feed_button = World.find("craft-oil");
         this.light = World.find("hud-light-fill");
         this.light_panel = World.find("hud-light");
+        this.courage = World.find("hud-courage-fill");
     }
 
     fn update(dt: number) {
@@ -72,6 +74,9 @@ script Pack {
         // pounce has scorched; and the panel pulsing red while a Seeker has him.
         Ui.set_fill(this.light, Game.oil * (1.0 - Game.scorch));
         Ui.set_class(this.light_panel, "low", Game.oil < 0.2);
+        if this.courage != null {
+            Ui.set_fill(this.courage, Game.courage);
+        }
         Ui.set_class(this.light_panel, "found", Game.found > 0.5);
         // A row shines for a moment when what it counts goes up.
         this.wood_shone = shine("pack-wood-row", Game.wood > this.had_wood, this.wood_shone, dt);

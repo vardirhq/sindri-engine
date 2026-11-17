@@ -325,6 +325,11 @@ def pack():
         ui('hud-light-fill', None, ['meter', 'light-fill'],
            **{'sindri.ui.image': {'anchor': 'top_left', 'layer': 96, 'texture': 'textures/white.png',
                                   'tint': [1, 1, 1, 1], 'fill': {'amount': 1.0, 'from': 'left'}}}),
+        ui('hud-courage-label', None, ['kicker', 'light-label', 'courage-label'], **words('COURAGE')),
+        ui('hud-courage-back', None, ['meter', 'courage', 'light-back'], **icon('textures/white.png', 95)),
+        ui('hud-courage-fill', None, ['meter', 'courage', 'courage-fill'],
+           **{'sindri.ui.image': {'anchor': 'top_left', 'layer': 96, 'texture': 'textures/white.png',
+                                  'tint': [1, 1, 1, 1], 'fill': {'amount': 1.0, 'from': 'left'}}}),
         ui('pack-panel', None, ['panel', 'pack-panel'], 0.4, 0.25, **panel(90)),
     ]
     for kind, label in [('wood', 'wood'), ('stone', 'stone'), ('resin', 'resin')]:
@@ -428,6 +433,9 @@ def seen_in_the_dark():
     # they will.
     env['components']['sindri.environment']['lighting_2d']['clouds'] = {
         'cover': 0.45, 'size': 28.0, 'darkness': 0.4, 'wind': [1.1, 0.35]}
+    # Wick's courage darkens this grade as it fails (`scripts/courage.decay`).
+    env['components']['sindri.script'] = {'source': 'scripts/courage.decay', 'script': 'Courage',
+                                          'properties': {}}
     return env
 
 

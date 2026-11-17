@@ -262,7 +262,12 @@ says what is now true.
    (`scripts/fire.decay`, `tests/gather_and_build.rs`). Resin feeds the
    lantern: a card (and R) pours one in for half a lantern. Still to come:
    tools, torches, and oil and wax as better fuel than resin.
-4. **Survive.** Health, hunger and courage; food, cooking and the courage effects;
+4. **Survive.** *Started.* Courage (`scripts/courage.decay`, on the HUD under
+   the lantern): it ebbs slowly in the dark, fast with the lantern dry, for
+   each gloom near and while a Seeker has him, and comes back by a lit lamp, a
+   fire or an open sunfall. Afraid, below half, the screen's edges close in and
+   the world greys, the gloom notice him from further off and his walk falters
+   (`tests/courage.rs`). Still to come: health and hunger; food and cooking;
    death and what it costs. A test lives through three long dark spells.
 5. **Places.** The village set into the world with its houses, villagers to help
    and trade with, ruined lamp posts and the beacon. Saved worlds.

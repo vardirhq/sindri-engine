@@ -100,6 +100,11 @@
           "post_process": {
             "vignette": 0.45
           }
+        },
+        "sindri.script": {
+          "source": "scripts/courage.decay",
+          "script": "Courage",
+          "properties": {}
         }
       }
     },
@@ -1548,6 +1553,153 @@
           "classes": [
             "meter",
             "light-fill"
+          ]
+        },
+        "sindri.ui.image": {
+          "anchor": "top_left",
+          "layer": 96,
+          "texture": "textures/white.png",
+          "tint": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "fill": {
+            "amount": 1.0,
+            "from": "left"
+          }
+        }
+      }
+    },
+    {
+      "id": "hud-courage-label",
+      "name": "hud-courage-label",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.2,
+          0.06,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "kicker",
+            "light-label",
+            "courage-label"
+          ]
+        },
+        "sindri.ui.text": {
+          "anchor": "center",
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "font": "fonts/Inter.ttf",
+          "font_size": 0.032,
+          "line_height": 0.04,
+          "layer": 101,
+          "text": "COURAGE",
+          "bold": true,
+          "shadow": {
+            "offset": [
+              0,
+              -0.003
+            ],
+            "color": [
+              0,
+              0,
+              0,
+              0.6
+            ],
+            "softness": 0.002
+          }
+        }
+      }
+    },
+    {
+      "id": "hud-courage-back",
+      "name": "hud-courage-back",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.2,
+          0.06,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "meter",
+            "courage",
+            "light-back"
+          ]
+        },
+        "sindri.ui.image": {
+          "anchor": "center",
+          "layer": 95,
+          "texture": "textures/white.png",
+          "tint": [
+            1,
+            1,
+            1,
+            1
+          ]
+        }
+      }
+    },
+    {
+      "id": "hud-courage-fill",
+      "name": "hud-courage-fill",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.2,
+          0.06,
+          1
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "meter",
+            "courage",
+            "courage-fill"
           ]
         },
         "sindri.ui.image": {
