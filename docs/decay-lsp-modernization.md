@@ -199,15 +199,19 @@ shared foundation instead of re-rendering the same compiler result repeatedly.
 The batch checker currently finds runtime-contract reminders using substring
 search. Keep the reminders, remove the false-positive-prone implementation.
 
-- [ ] Detect `World.set_property` and `World.property_number` calls from the
-      parsed/semantic representation, not `source.find`.
-- [ ] Report every relevant call, not only the first occurrence.
-- [ ] Do not trigger on comments or string literals.
-- [ ] Tolerate normal whitespace/formatting differences.
-- [ ] Attach the reminder to the actual call span.
-- [ ] Give reminders stable diagnostic codes.
-- [ ] Keep reminders non-fatal until a rule can be statically proven invalid.
-- [ ] Add tests for real calls, multiple calls, comments, strings, and near-name
+- [x] Detect `World.set_property` and `World.property_number` calls from the
+      lexer's tokens, not `source.find`: a call is `World`, `.`, the name and
+      `(`, which comments and strings never produce. (The tokens rather than
+      the tree: the pattern is fixed, and it needs no walker over every
+      expression kind.)
+- [x] Report every relevant call, not only the first occurrence.
+- [x] Do not trigger on comments or string literals.
+- [x] Tolerate normal whitespace/formatting differences.
+- [x] Attach the reminder to the actual call span.
+- [x] Give reminders stable diagnostic codes (`runtime-property-write`,
+      `authored-property-read`).
+- [x] Keep reminders non-fatal until a rule can be statically proven invalid.
+- [x] Add tests for real calls, multiple calls, comments, strings, and near-name
       false positives.
 
 ## P1 — semantic query model

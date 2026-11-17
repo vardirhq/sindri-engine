@@ -126,21 +126,46 @@ fn collect_decay_files(path: &Path, files: &mut BTreeSet<PathBuf>) -> io::Result
     Ok(())
 }
 
+/// The runtime-contract reminders a source earns: one for every call of
+/// `World.set_property` and `World.property_number`, at the call.
+///
+/// Read from the lexer's tokens rather than by searching the text, so a call
+/// in a comment or a string is not one, `World . set_property (` is, and a
+/// name that merely starts the same (`set_property_later`) is not.
 fn contract_reminders(source: &str) -> Vec<ContractReminder> {
+    use decay_syntax::TokenKind;
+    let tokens = decay_syntax::lex(source).tokens;
     let mut reminders = Vec::new();
-    if let Some(offset) = source.find("World.set_property(") {
-        reminders.push(ContractReminder {
-            offset,
-            code: "runtime-property-write",
-            message: "World.set_property only authors a newly spawned entity before its script starts; write the field through the script's type instead (`Name.on(entity).field = value`), which reaches a running script too",
-        });
-    }
-    if let Some(offset) = source.find("World.property_number(") {
-        reminders.push(ContractReminder {
-            offset,
-            code: "authored-property-read",
-            message: "World.property_number reads the scene-authored property, not the target script's current runtime field; read it through the script's type instead (`Name.on(entity).field`)",
-        });
+    for window in tokens.windows(4) {
+        let [world, dot, name, open] = window else {
+            continue;
+        };
+        let (
+            TokenKind::Identifier(world_name),
+            TokenKind::Dot,
+            TokenKind::Identifier(call),
+            TokenKind::LeftParen,
+        ) = (&world.kind, &dot.kind, &name.kind, &open.kind)
+        else {
+            continue;
+        };
+        if world_name != "World" {
+            continue;
+        }
+        let reminder = match call.as_str() {
+            "set_property" => ContractReminder {
+                offset: world.span.start,
+                code: "runtime-property-write",
+                message: "World.set_property only authors a newly spawned entity before its script starts; write the field through the script's type instead (`Name.on(entity).field = value`), which reaches a running script too",
+            },
+            "property_number" => ContractReminder {
+                offset: world.span.start,
+                code: "authored-property-read",
+                message: "World.property_number reads the scene-authored property, not the target script's current runtime field; read it through the script's type instead (`Name.on(entity).field`)",
+            },
+            _ => continue,
+        };
+        reminders.push(reminder);
     }
     reminders
 }
@@ -191,15 +216,40 @@ mod tests {
     use super::{contract_reminders, line_column};
 
     #[test]
-    fn reports_each_runtime_contract_once_per_file() {
+    fn reports_every_real_call_where_it_is() {
         let source = "World.set_property(entity, \"speed\", 2.0);\n\
                       World.set_property(other, \"speed\", 3.0);\n\
                       let speed = World.property_number(entity, \"speed\");";
         let reminders = contract_reminders(source);
+        let codes: Vec<_> = reminders.iter().map(|reminder| reminder.code).collect();
+        assert_eq!(
+            codes,
+            [
+                "runtime-property-write",
+                "runtime-property-write",
+                "authored-property-read"
+            ]
+        );
+        assert_eq!(reminders[0].offset, 0);
+        assert_eq!(
+            reminders[1].offset,
+            source.find("World.set_property(other").unwrap()
+        );
+    }
 
-        assert_eq!(reminders.len(), 2);
-        assert_eq!(reminders[0].code, "runtime-property-write");
-        assert_eq!(reminders[1].code, "authored-property-read");
+    #[test]
+    fn comments_strings_and_near_names_are_not_calls() {
+        let source = "// World.set_property(entity, \"speed\", 2.0);\n\
+                      let note = \"World.property_number(entity, x)\";\n\
+                      World.set_property_later(entity);\n\
+                      Other.set_property(entity, \"speed\", 1.0);";
+        assert!(contract_reminders(source).is_empty());
+    }
+
+    #[test]
+    fn spacing_does_not_hide_a_call() {
+        let source = "World . set_property ( entity, \"speed\", 2.0 );";
+        assert_eq!(contract_reminders(source).len(), 1);
     }
 
     #[test]
