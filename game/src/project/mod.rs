@@ -95,6 +95,22 @@ impl ProjectPlayer {
         Ok(())
     }
 
+    /// Moves the entity with source ID `name` to `at` in the world.
+    fn put(&mut self, name: &str, at: [f32; 2]) -> Result<(), Box<dyn Error>> {
+        let entity = self
+            .world
+            .entity_for_source_id(&SceneEntityId::new(name)?)
+            .ok_or_else(|| format!("no entity {name}"))?;
+        let place = self
+            .world
+            .get_mut(entity)
+            .and_then(|data| data.transform_3d.as_mut())
+            .ok_or_else(|| format!("{name} has no place"))?;
+        place.position[0] = at[0];
+        place.position[1] = at[1];
+        Ok(())
+    }
+
     fn point_at(&mut self, name: &str) -> Result<(), Box<dyn Error>> {
         let [x, y] = pixel_of(&self.session, &self.world, name, self.size)
             .ok_or_else(|| format!("{name} is not laid out on screen"))?;
@@ -168,6 +184,33 @@ impl ProjectPlayer {
             "set" => {
                 let (name, value) = rest.split_once('=').ok_or("set:<name>=<value>")?;
                 self.session.set_board(name, value.parse()?);
+                self.step()?;
+            }
+            // An entity put at a place in the world: somewhere a walk would
+            // take too long to reach.
+            "place" => {
+                let (name, at) = rest.split_once('=').ok_or("place:<entity>=<x>,<y>")?;
+                let (x, y) = at.split_once(',').ok_or("place:<entity>=<x>,<y>")?;
+                self.put(name, [x.parse()?, y.parse()?])?;
+                self.step()?;
+            }
+            // An entity put just in front of the first thing of a name that
+            // has been made: a hamlet's lamp, say, once the scatter grew it.
+            "near" => {
+                let (name, target) = rest.split_once('=').ok_or("near:<entity>=<name>")?;
+                let found = self
+                    .world
+                    .entities()
+                    .find(|(_, data)| data.name.as_deref() == Some(target))
+                    .map(|(entity, _)| entity)
+                    .ok_or_else(|| format!("nothing named {target} has been made"))?;
+                let at = self
+                    .world
+                    .world_transform(found)
+                    .ok_or("it has no place")?
+                    .position;
+                println!("{target} at ({:.1}, {:.1})", at[0], at[1]);
+                self.put(name, [at[0], at[1] - 0.8])?;
                 self.step()?;
             }
             _ => return Err(format!("unknown step {action}").into()),

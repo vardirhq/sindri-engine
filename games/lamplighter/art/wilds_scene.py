@@ -158,9 +158,9 @@ def hamlet():
             'radius': 14.0, 'pieces': [
                 piece(['well'], 0.0, 0.0),
                 # Its lamp, long dark: Wick can light it, and it is a safe place.
-                piece(['lamp-post'], -2.6, 1.4),
+                piece(['lamp-post'], 0.0, 4.4),
                 # Someone who comes out when it is lit, and thanks Wick.
-                piece([f'villager-{person}' for person in HAMLET_FOLK], -1.4, 0.4),
+                piece([f'villager-{person}' for person in HAMLET_FOLK], 1.4, 3.6),
                 piece(houses, -7.5, 4.0), piece(houses, 7.5, 4.5, 0.9),
                 piece(houses, -6.5, -6.5, 0.7), piece(houses, 7.0, -7.0, 0.6),
                 piece(['woodpile', 'barrels', 'crates'], 2.4, -1.4, 0.7),

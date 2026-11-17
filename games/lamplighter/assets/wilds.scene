@@ -679,8 +679,8 @@
                     "prefabs/wilds/hamlet/lamp-post.prefab"
                   ],
                   "at": [
-                    -2.6,
-                    1.4
+                    0.0,
+                    4.4
                   ],
                   "chance": 1.0
                 },
@@ -692,8 +692,8 @@
                     "prefabs/wilds/hamlet/villager-elder.prefab"
                   ],
                   "at": [
-                    -1.4,
-                    0.4
+                    1.4,
+                    3.6
                   ],
                   "chance": 1.0
                 },
