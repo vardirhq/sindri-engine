@@ -3505,6 +3505,141 @@
       }
     },
     {
+      "id": "vision-watcher",
+      "name": "vision-watcher",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/apparitions.png#watcher",
+          "layer": 5,
+          "size": [
+            4.0,
+            4.0
+          ],
+          "tint": [
+            1.0,
+            1.0,
+            1.0,
+            0.0
+          ],
+          "unlit": true,
+          "billboard": true
+        }
+      }
+    },
+    {
+      "id": "vision-tall",
+      "name": "vision-tall",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/apparitions.png#tall",
+          "layer": 5,
+          "size": [
+            6.0,
+            6.0
+          ],
+          "tint": [
+            1.0,
+            1.0,
+            1.0,
+            0.0
+          ],
+          "unlit": true,
+          "billboard": true
+        }
+      }
+    },
+    {
+      "id": "vision-wick",
+      "name": "vision-wick",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/apparitions.png#wick",
+          "layer": 5,
+          "size": [
+            4.0,
+            4.0
+          ],
+          "tint": [
+            1.0,
+            1.0,
+            1.0,
+            0.0
+          ],
+          "unlit": true,
+          "billboard": true,
+          "offset": [
+            0.0,
+            -0.0631
+          ]
+        }
+      }
+    },
+    {
+      "id": "apparitions",
+      "name": "Apparitions",
+      "components": {
+        "sindri.script": {
+          "source": "scripts/apparitions.decay",
+          "script": "Apparitions",
+          "properties": {}
+        }
+      }
+    },
+    {
       "id": "wick",
       "name": "Wick",
       "transform_3d": {

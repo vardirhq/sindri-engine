@@ -2,15 +2,11 @@
 // scene, and a scene that is left is switched off rather than unloaded, so
 // pausing freezes the world where it is and resuming finds it as it was.
 //
-// Play opens the wilds, the game as it is now; the Dim Fields, where it began,
-// are still there to walk. Pause goes back to whichever was paused.
+// Play opens the wilds. Pause goes back to whichever scene was paused.
 script Title {
     fn update(dt: number) {
         if Ui.is_pressed(World.find("play")) {
             Scene.restart("wilds.scene");
-        }
-        if Ui.is_pressed(World.find("fields")) {
-            Scene.restart("world.scene");
         }
     }
 }
