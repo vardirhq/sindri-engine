@@ -139,3 +139,49 @@ fn a_seeker_calls_the_gloom_up_round_wick() {
     let lost = gloom_about(&run);
     assert_eq!(lost, held + 2, "and a wave where it lost him");
 }
+
+/// Every Seeker in the world, and where its circle falls.
+fn seekers(run: &Run) -> Vec<[f32; 2]> {
+    run.world
+        .entities()
+        .filter(|(_, data)| {
+            data.components
+                .get("sindri.script")
+                .is_some_and(|script| script["script"] == "Seeker")
+        })
+        .map(|(entity, _)| {
+            let at = run.world.world_transform(entity).expect("a place").position;
+            [at[0], at[1]]
+        })
+        .collect()
+}
+
+/// Seekers are scattered over the open heath and barrens by the seed, far
+/// apart: walking out finds more than the one over the meadow, but none of
+/// them sweeps the start.
+#[test]
+fn seekers_hang_over_the_land_far_from_the_start() {
+    let mut run = Run::open_scene("wilds.scene").expect("the wilds open");
+    step(&mut run, 10);
+    let start = position(&run, "wick");
+    for seeker in seekers(&run) {
+        let apart = (seeker[0] - start[0]).hypot(seeker[1] - start[1]);
+        assert!(apart > 12.0, "a Seeker {apart} from the start");
+    }
+    let mut seen = std::collections::BTreeSet::new();
+    for ring in 1..=6 {
+        for (dx, dy) in [(1.0, 0.0), (0.0, 1.0), (-1.0, 0.0), (0.0, -1.0)] {
+            let reach = 40.0 * ring as f32;
+            place(
+                &mut run,
+                "wick",
+                [start[0] + dx * reach, start[1] + dy * reach],
+            );
+            step(&mut run, 3);
+            for [x, y] in seekers(&run) {
+                seen.insert(((x / 4.0).round() as i32, (y / 4.0).round() as i32));
+            }
+        }
+    }
+    assert!(seen.len() >= 3, "Seekers about the land: {seen:?}");
+}

@@ -619,6 +619,20 @@
               "spacing": 26,
               "chance": 0.35,
               "flip": true
+            },
+            {
+              "on": [
+                "deadgrass",
+                "earth",
+                "stone",
+                "rock"
+              ],
+              "prefabs": [
+                "prefabs/wilds/seeker.prefab"
+              ],
+              "spacing": 48,
+              "chance": 0.45,
+              "flip": true
             }
           ],
           "sites": [

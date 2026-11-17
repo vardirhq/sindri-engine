@@ -247,8 +247,10 @@ says what is now true.
    across (`blocks_n.png`). The lantern burns: a full one lasts three minutes
    away from other light, gutters in its last fifth and is an ember dry, and
    standing by a lit lamp or a fire tops it up (`Game.oil`, `burn` on Wick,
-   `tests/the_lantern_burns.rs`). Still to come: Seekers scattered over the
-   land and what else being found calls down; the gloom keep to the dark. A test outlasts a Seeker's sweep by a fire.
+   `tests/the_lantern_burns.rs`). More Seekers hang over the open heath and
+   barrens, scattered far apart by the seed (`prefabs/wilds/seeker.prefab`),
+   none near the start. Still to come: what else being found calls down; the
+   gloom keep to the dark. A test outlasts a Seeker's sweep by a fire.
 3. **Gather and craft.** *Started.* Deadwood, flint and resin lie about the
    wilds, scattered by seed (`scripts/pickup.decay`, `art/goods.py`); Wick takes
    them by walking over them, and what is taken stays taken. His pack is on

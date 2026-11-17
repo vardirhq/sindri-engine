@@ -118,6 +118,9 @@ def scatter():
         rule(['deadgrass'], ['leaves'], 7, 0.45),
         # Now and then a crack in the Lid lets the sun through.
         rule(['grass', 'deadgrass', 'earth', 'moss', 'stone', 'sand'], ['sunfall'], 26, 0.35),
+        # And now and then a Seeker hangs over the open heath and the barrens,
+        # far apart: the land between lights is never quite safe.
+        rule(['deadgrass', 'earth', 'stone', 'rock'], ['seeker'], 48, 0.45),
     ], 'sites': [hamlet()]}
 
 
@@ -216,6 +219,12 @@ def prefabs():
         one['transform_3d']['position'] = [0.0, 0.0, 0.0]
         doc = {'format_version': 1, 'metadata': {'name': thing['name']}, 'entities': [one]}
         (PREFABS / f'{name}.prefab').write_text(json.dumps(doc, indent=2) + '\n')
+    # A Seeker is three things, its beam and glow children of where its circle
+    # falls, so it is a prefab of its own shape.
+    parts = standing_up(seeker('seeker', 0, 0))
+    parts[0]['transform_3d']['position'] = [0.0, 0.0, 0.0]
+    doc = {'format_version': 1, 'metadata': {'name': 'seeker'}, 'entities': parts}
+    (PREFABS / 'seeker.prefab').write_text(json.dumps(doc, indent=2) + '\n')
 
 
 def air():
