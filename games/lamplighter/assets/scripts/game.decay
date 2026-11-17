@@ -27,4 +27,10 @@ state Game {
     var resin: number = 0.0;
     var gathered: number = 0.0;
     var built: number = 0.0;
+    // How much oil is in Wick's lantern, 0 to 1. Where the lantern burns
+    // (`burn` on Wick), it runs down; resin from the pack feeds it, and a lit
+    // lamp or a fire tops it up. Low, the flame gutters; empty, it is an ember.
+    var oil: number = 1.0;
+    // How many times he has fed it.
+    var fed: number = 0.0;
 }

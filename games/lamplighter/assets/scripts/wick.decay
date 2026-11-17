@@ -48,6 +48,12 @@ script Wick {
     @export let held_out: number = 0.64;
     @export let held_up: number = 1.58;
     @export let held_flat: number = 0.97;
+    // How much of the lantern's oil burns a second, zero where it never runs
+    // out; how fast a lit lamp or a fire tops it up while Wick stands by it;
+    // and how near is by it.
+    @export let burn: number = 0.0;
+    @export let refill: number = 0.1;
+    @export let by_light: number = 3.5;
 
     var vx: number = 0.0;
     var vy: number = 0.0;
@@ -82,6 +88,8 @@ script Wick {
             Game.won = false;
             Game.gloom_hits = 0.0;
             Game.gloom_out = 0.0;
+            Game.oil = 1.0;
+            Game.fed = 0.0;
         }
         Game.through = false;
         // Wick's art is on his body, and the lantern's art and lights on the
@@ -100,6 +108,7 @@ script Wick {
         this.grace = max(0.0, this.grace - dt);
         Game.scorch = max(0.0, Game.scorch - this.mend * dt);
         this.age += dt;
+        tend_the_oil(dt);
         turn_the_beam(dt);
         float_the_lantern(dt);
         show_the_hit();
@@ -191,6 +200,39 @@ script Wick {
         if World.exists(other) && World.has_tag(other, "lantern") {
             Lantern.on(other).ignite();
         }
+    }
+
+    // The lantern burns its oil, and is topped up while Wick stands by a lit
+    // lamp or a fire: a flame lit from a flame. Read from the fire's light,
+    // which is there before its script starts.
+    fn tend_the_oil(dt: number) {
+        if this.burn <= 0.0 {
+            return;
+        }
+        let here = Vec2(this.transform.world_position.x, this.transform.world_position.y);
+        var by: bool = false;
+        for lamp in World.with_tag("lantern") {
+            let post = Lantern.on(lamp);
+            if post != null && post.lit && near(here, lamp) {
+                by = true;
+            }
+        }
+        for fire in World.with_tag("fire") {
+            if fire.light2d.intensity > 0.5 && near(here, fire) {
+                by = true;
+            }
+        }
+        if by {
+            Game.oil = min(1.0, Game.oil + this.refill * dt);
+        } else {
+            Game.oil = max(0.0, Game.oil - this.burn * dt);
+        }
+    }
+
+    fn near(here: Vec2, light: Entity) -> bool {
+        let x = light.transform.world_position.x - here.x;
+        let y = light.transform.world_position.y - here.y;
+        return x * x + y * y < this.by_light * this.by_light;
     }
 
     // The lantern's beam turns to the way Wick faces, the short way round.

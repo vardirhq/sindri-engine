@@ -23,7 +23,7 @@
 /* What he can build: a card each, lit while he can afford it and spent while
    he cannot. */
 .craft-panel {
-    width: 300px; height: 152px; x: -166px; y: 92px; anchor: bottom_right;
+    width: 300px; height: 230px; x: -166px; y: 131px; anchor: bottom_right;
     direction: column; gap: 10px; justify-content: end; align-items: end;
     background: transparent;
 }
@@ -55,7 +55,7 @@
     .pack-row { width: 30vw; height: 8vw; gap: 2vw; }
     .pack-icon { width: 7vw; height: 7vw; }
     .pack-count { width: 20vw; height: 5vw; font-size: 3.8vw; line-height: 4.6vw; }
-    .craft-panel { width: 58vw; height: 34vw; x: -32vw; y: 20vw; gap: 2vw; }
+    .craft-panel { width: 58vw; height: 51vw; x: -32vw; y: 28.5vw; gap: 2vw; }
     .craft { width: 58vw; height: 15vw; gap: 2.4vw; padding: 0px 3vw; border-radius: 3vw; }
     .craft-icon { width: 10vw; height: 10vw; }
     .craft-text { width: 36vw; height: 11vw; }
@@ -76,4 +76,10 @@
     50% { background: #3a0e0bd9; border-color: #e0614a; }
 }
 .light-panel.found { animation: found 900ms ease-in-out infinite; }
+
+/* The lantern running dry: its meter flickers between ember and ash. */
+@keyframes low {
+    50% { border-color: #8a5a2a; }
+}
+.light-panel.low { animation: low 600ms ease-in-out infinite; }
 

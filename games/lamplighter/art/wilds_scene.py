@@ -327,7 +327,8 @@ def pack():
     out.append(ui('craft-panel', None, ['craft-panel'], 0.6, 0.3, **panel(89)))
     for ident, name, cost, key, picture in [
             ('craft-campfire', 'Campfire', '4 wood · 2 stone', 'F', 'textures/campfire.png#campfire'),
-            ('craft-lamp', 'Lamp', '6 wood · 4 stone · 2 resin', 'G', 'textures/objects.png#lamp-post-lit')]:
+            ('craft-lamp', 'Lamp', '6 wood · 4 stone · 2 resin', 'G', 'textures/objects.png#lamp-post-lit'),
+            ('craft-oil', 'Feed lantern', '1 resin', 'R', 'textures/lantern.png')]:
         text_column = f'{ident}-text'
         out += [
             ui(ident, 'craft-panel', ['craft'], 0.55, 0.12, **panel(92, 'row'),
@@ -453,6 +454,9 @@ def placed_at_start(entities):
             e['transform_3d']['position'][1] += START[1]
             # The grass parts round him, and his steps stay a while behind him.
             e['components']['sindri.wake'] = {'radius': 1.3, 'strength': 0.35}
+            # Out here the lantern burns: a full one lasts three minutes away
+            # from any other light.
+            e['components']['sindri.script']['properties']['burn'] = round(1 / 180, 6)
             e['components']['sindri.particles#steps'] = scenes.motes(
                 0.0, 7.0, 0.0, [[0.12, 0.09, 0.07, 0.45], [0.12, 0.09, 0.07, 0.3], [0.12, 0.09, 0.07, 0.0]],
                 0.42, 0.42, texture='textures/footprints.png', per_distance=1.4, max=24, spread=0.0,
@@ -525,7 +529,8 @@ def wilds():
             'sindri.physics2d.world': {'gravity': [0, 0], 'layers': ['wall', 'wick', 'lantern', 'target']},
             'sindri.input.actions': {'actions': input_actions() + [
                 {'name': 'campfire', 'kind': 'button', 'bindings': ['key.F', 'gamepad.north']},
-                {'name': 'lamp', 'kind': 'button', 'bindings': ['key.G', 'gamepad.east']}]}}),
+                {'name': 'lamp', 'kind': 'button', 'bindings': ['key.G', 'gamepad.east']},
+                {'name': 'feed', 'kind': 'button', 'bindings': ['key.R', 'gamepad.right_bumper']}]}}),
         ground(),
     ]
     ents += [e for n, (x, y) in enumerate(LAMPS, 1) for e in lantern(f'lantern-{n}', x, y)]

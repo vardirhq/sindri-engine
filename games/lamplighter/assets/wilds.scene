@@ -211,6 +211,14 @@
                 "key.G",
                 "gamepad.east"
               ]
+            },
+            {
+              "name": "feed",
+              "kind": "button",
+              "bindings": [
+                "key.R",
+                "gamepad.right_bumper"
+              ]
             }
           ]
         }
@@ -2683,6 +2691,309 @@
       }
     },
     {
+      "id": "craft-oil",
+      "name": "craft-oil",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.55,
+          0.12,
+          1
+        ]
+      },
+      "parent": "craft-panel",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "craft"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "anchor": "center",
+          "layer": 92
+        },
+        "sindri.ui.layout": {
+          "direction": "row",
+          "spacing": 0.01,
+          "justify": "center",
+          "align": "center"
+        },
+        "sindri.ui.button": {
+          "label": "Feed lantern",
+          "autofocus": false,
+          "disabled": true
+        }
+      }
+    },
+    {
+      "id": "craft-oil-icon",
+      "name": "craft-oil-icon",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.08,
+          0.08,
+          1
+        ]
+      },
+      "parent": "craft-oil",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "craft-icon"
+          ]
+        },
+        "sindri.ui.image": {
+          "anchor": "center",
+          "layer": 97,
+          "texture": "textures/lantern.png",
+          "tint": [
+            1,
+            1,
+            1,
+            1
+          ]
+        }
+      }
+    },
+    {
+      "id": "craft-oil-text",
+      "name": "craft-oil-text",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.36,
+          0.1,
+          1
+        ]
+      },
+      "parent": "craft-oil",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "craft-text"
+          ]
+        },
+        "sindri.ui.layout": {
+          "direction": "column",
+          "spacing": 0.0,
+          "justify": "center",
+          "align": "start"
+        }
+      }
+    },
+    {
+      "id": "craft-oil-name",
+      "name": "craft-oil-name",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.2,
+          0.06,
+          1
+        ]
+      },
+      "parent": "craft-oil-text",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "craft-name"
+          ]
+        },
+        "sindri.ui.text": {
+          "anchor": "center",
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "font": "fonts/Inter.ttf",
+          "font_size": 0.032,
+          "line_height": 0.04,
+          "layer": 98,
+          "text": "Feed lantern",
+          "bold": true,
+          "shadow": {
+            "offset": [
+              0,
+              -0.003
+            ],
+            "color": [
+              0,
+              0,
+              0,
+              0.6
+            ],
+            "softness": 0.002
+          }
+        }
+      }
+    },
+    {
+      "id": "craft-oil-cost",
+      "name": "craft-oil-cost",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.2,
+          0.06,
+          1
+        ]
+      },
+      "parent": "craft-oil-text",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "craft-cost"
+          ]
+        },
+        "sindri.ui.text": {
+          "anchor": "center",
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "font": "fonts/Inter.ttf",
+          "font_size": 0.032,
+          "line_height": 0.04,
+          "layer": 98,
+          "text": "1 resin",
+          "bold": true,
+          "shadow": {
+            "offset": [
+              0,
+              -0.003
+            ],
+            "color": [
+              0,
+              0,
+              0,
+              0.6
+            ],
+            "softness": 0.002
+          }
+        }
+      }
+    },
+    {
+      "id": "craft-oil-key",
+      "name": "craft-oil-key",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.05,
+          0.05,
+          1
+        ]
+      },
+      "parent": "craft-oil",
+      "components": {
+        "weave.style": {
+          "classes": [
+            "craft-key"
+          ]
+        },
+        "sindri.ui.text": {
+          "anchor": "center",
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "font": "fonts/Inter.ttf",
+          "font_size": 0.032,
+          "line_height": 0.04,
+          "layer": 98,
+          "text": "R",
+          "bold": true,
+          "shadow": {
+            "offset": [
+              0,
+              -0.003
+            ],
+            "color": [
+              0,
+              0,
+              0,
+              0.6
+            ],
+            "softness": 0.002
+          }
+        }
+      }
+    },
+    {
       "id": "pack",
       "name": "Pack",
       "components": {
@@ -2789,6 +3100,7 @@
           "source": "scripts/wick.decay",
           "script": "Wick",
           "properties": {
+            "burn": 0.005556,
             "upright": true
           }
         },

@@ -2,7 +2,9 @@
 // he can make of it. Each recipe is a button (and a key): a campfire, which
 // burns down, and a lamp, which burns for good. Pressed with enough in the pack,
 // the cost is taken and the thing is built a step ahead of Wick. A button that
-// cannot be afforded is disabled, and `ui/hud.weave` shows it as spent.
+// cannot be afforded is disabled, and `ui/hud.weave` shows it as spent. Resin
+// also feeds the lantern: a card (and R) pours one into it for `feed_oil` of a
+// lantern's worth.
 script Pack {
     // What each costs: wood, stone, resin.
     @export let fire_wood: number = 4.0;
@@ -10,6 +12,8 @@ script Pack {
     @export let lamp_wood: number = 6.0;
     @export let lamp_stone: number = 4.0;
     @export let lamp_resin: number = 2.0;
+    @export let feed_resin: number = 1.0;
+    @export let feed_oil: number = 0.5;
     // What they are built from.
     @export let campfire: Prefab;
     @export let lamp: Prefab;
@@ -22,6 +26,7 @@ script Pack {
     var resin: Entity = null;
     var fire_button: Entity = null;
     var lamp_button: Entity = null;
+    var feed_button: Entity = null;
     var light: Entity = null;
     var light_panel: Entity = null;
     // What the pack held last frame, and how long each row has shone since it
@@ -41,6 +46,7 @@ script Pack {
         this.resin = World.find("pack-resin");
         this.fire_button = World.find("craft-campfire");
         this.lamp_button = World.find("craft-lamp");
+        this.feed_button = World.find("craft-oil");
         this.light = World.find("hud-light-fill");
         this.light_panel = World.find("hud-light");
     }
@@ -57,9 +63,15 @@ script Pack {
         // it as spent (`:disabled` in `ui/hud.weave`).
         Ui.set_disabled(this.fire_button, !fire_ok);
         Ui.set_disabled(this.lamp_button, !lamp_ok);
-        // How much light the lantern has left, scorched by a gloom's pounce,
-        // and the panel pulsing red while a Seeker has him.
-        Ui.set_fill(this.light, 1.0 - Game.scorch);
+        // Nothing to feed a full lantern.
+        let feed_ok = Game.resin >= this.feed_resin && Game.oil < 0.95;
+        if this.feed_button != null {
+            Ui.set_disabled(this.feed_button, !feed_ok);
+        }
+        // How much light the lantern has left: its oil, less what a gloom's
+        // pounce has scorched; and the panel pulsing red while a Seeker has him.
+        Ui.set_fill(this.light, Game.oil * (1.0 - Game.scorch));
+        Ui.set_class(this.light_panel, "low", Game.oil < 0.2);
         Ui.set_class(this.light_panel, "found", Game.found > 0.5);
         // A row shines for a moment when what it counts goes up.
         this.wood_shone = shine("pack-wood-row", Game.wood > this.had_wood, this.wood_shone, dt);
@@ -81,6 +93,10 @@ script Pack {
             Game.stone -= this.lamp_stone;
             Game.resin -= this.lamp_resin;
             build(this.lamp);
+        } else if feed_ok && ((this.feed_button != null && Ui.is_pressed(this.feed_button)) || Action.pressed("feed")) {
+            Game.resin -= this.feed_resin;
+            Game.oil = min(1.0, Game.oil + this.feed_oil);
+            Game.fed += 1.0;
         }
     }
 
