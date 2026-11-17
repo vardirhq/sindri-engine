@@ -1,5 +1,4 @@
-//! The title's Play opens the wilds, the game as it is now; the Dim Fields are
-//! still a button away; and pausing in the wilds resumes the wilds.
+//! The title opens the wilds, and pausing there resumes the wilds.
 
 use lamplighter::Run;
 use sindri_platform::{InputEvent, Key};
@@ -56,9 +55,7 @@ fn play_opens_the_wilds_and_pause_resumes_them() {
 }
 
 #[test]
-fn the_dim_fields_are_a_button_away() {
-    let mut run = Run::open_title().expect("the title opens");
-    step(&mut run, 3);
-    tap(&mut run, "fields");
-    assert_eq!(run.session.scene(), Some("world.scene"));
+fn the_title_has_no_dim_fields_button() {
+    let run = Run::open_title().expect("the title opens");
+    assert!(run.entity("fields").is_none());
 }
