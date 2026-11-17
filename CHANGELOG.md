@@ -18,7 +18,7 @@
 
 - Weave reads `min()`, `max()` and `clamp()` wherever a length goes, nested in `calc()` and in each other, chosen once the screen is known: `width: clamp(240px, 40vw, 360px)`.
 
-- Lamplighter's lantern burns: out in the wilds its oil runs down, it gutters low and is an ember dry, and standing by a lit lamp or a fire tops it up. A Feed lantern card (and R) pours a resin into it. More Seekers hang over the open heath and barrens, far apart. Wick has courage: it ebbs in the dark and returns by warm light, and afraid, the screen closes in, the world greys, the gloom grow bolder and his walk falters. He hungers too: berries grow on the meadow and the moss, he eats one when half fed (cooked by a fire it goes twice as far), and starving, his lantern does not mend.
+- Lamplighter's lantern burns: out in the wilds its oil runs down, it gutters low and is an ember dry, and standing by a lit lamp or a fire tops it up. A Feed lantern card (and R) pours a resin into it. More Seekers hang over the open heath and barrens, far apart, and one that holds Wick for eight seconds calls down a brute. Wick has courage: it ebbs in the dark and returns by warm light, and afraid, the screen closes in, the world greys, the gloom grow bolder and his walk falters. He hungers too: berries grow on the meadow and the moss, he eats one when half fed (cooked by a fire it goes twice as far), and starving, his lantern does not mend.
 
 - The desktop and phone editors fit a 2D collider to the object's sprite: Fit to picture, a box around what is drawn, or Fit to footing, a footprint where it meets the ground. A light occluder on the object takes the same outline (`sindri_authoring::fit`).
 

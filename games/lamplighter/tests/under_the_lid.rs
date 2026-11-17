@@ -190,3 +190,28 @@ fn seekers_hang_over_the_land_far_from_the_start() {
     }
     assert!(seen.len() >= 3, "Seekers about the land: {seen:?}");
 }
+
+/// Held too long, a Seeker calls down a brute, which light does not stop:
+/// once each time it finds him.
+#[test]
+fn a_seeker_that_holds_wick_too_long_calls_a_brute() {
+    let mut run = Run::open_scene("wilds.scene").expect("the wilds open");
+    run.set_board("truce", 1.0);
+    step(&mut run, 10);
+    for _ in 0..(60 * 10) {
+        let wick = position(&run, "wick");
+        place(&mut run, "seeker-1", wick);
+        step(&mut run, 1);
+    }
+    assert!(
+        (run.board("brutes") - 1.0).abs() < 1e-3,
+        "one brute: {}",
+        run.board("brutes")
+    );
+    let brutes = run
+        .world
+        .entities()
+        .filter(|(_, data)| data.name.as_deref() == Some("brute"))
+        .count();
+    assert_eq!(brutes, 1, "and it is in the wilds");
+}

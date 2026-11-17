@@ -194,6 +194,9 @@ def prefabs():
     made['sunfall'] = sunfall('sunfall', 0, 0)
     # A gloom a Seeker calls up out of the ground.
     made['gloom'] = gloom('gloom', 0, 0, 2)
+    # What a Seeker calls down when it holds Wick too long: a brute, which
+    # does not fear light.
+    made['brute'] = gloom('brute', 0, 0, 2, brute=True)
     made.update(goods())
     hamlet_things = {}
     for name, (sprite, block) in HAMLET_THINGS.items():
@@ -432,7 +435,8 @@ def seeker(name, x, y):
                                'radius': 3.0, 'falloff': 0.4, 'height': SEEKER_HEIGHT, 'shadows': False,
                                'flicker': 0.0},
             'sindri.script': {'source': 'scripts/seeker.decay', 'script': 'Seeker',
-                              'properties': {'gloom': 'prefabs/wilds/gloom.prefab'}}}),
+                              'properties': {'gloom': 'prefabs/wilds/gloom.prefab',
+                                             'brute': 'prefabs/wilds/brute.prefab'}}}),
         entity(f'{name}-beam', f'{name}-beam', at(0, 0, 0), parent=name, **{
             'sindri.sprite': {'texture': 'textures/seeker-beam.png#shaft', 'layer': 5,
                               'size': [2.6, SEEKER_HEIGHT], 'tint': [2.4, 0.3, 0.26, 1.0], 'unlit': True,

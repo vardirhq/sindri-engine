@@ -345,7 +345,8 @@ fn positions_after_an_emoji_are_counted_in_utf16() {
 
     // And completion after one, on the same line, still finds the call.
     let completing = "        let label = \"🚀\"; Scene.";
-    let source = format!("script Rocket {{\n    fn update(dt: number) {{\n{completing}\n    }}\n}}");
+    let source =
+        format!("script Rocket {{\n    fn update(dt: number) {{\n{completing}\n    }}\n}}");
     let character = completing.encode_utf16().count();
     let (_, messages) = run(&[
         initialize(),

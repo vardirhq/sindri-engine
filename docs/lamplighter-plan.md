@@ -252,8 +252,9 @@ says what is now true.
    standing by a lit lamp or a fire tops it up (`Game.oil`, `burn` on Wick,
    `tests/the_lantern_burns.rs`). More Seekers hang over the open heath and
    barrens, scattered far apart by the seed (`prefabs/wilds/seeker.prefab`),
-   none near the start. Still to come: what else being found calls down; the
-   gloom keep to the dark. A test outlasts a Seeker's sweep by a fire.
+   none near the start. Held for eight seconds at a stretch, a Seeker calls down
+   a brute, which light does not stop. Still to come: the gloom keep to the
+   dark. A test outlasts a Seeker's sweep by a fire.
 3. **Gather and craft.** *Started.* Deadwood, flint and resin lie about the
    wilds, scattered by seed (`scripts/pickup.decay`, `art/goods.py`); Wick takes
    them by walking over them, and what is taken stays taken. His pack is on

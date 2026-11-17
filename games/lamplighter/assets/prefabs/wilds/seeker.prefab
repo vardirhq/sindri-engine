@@ -59,7 +59,8 @@
           "source": "scripts/seeker.decay",
           "script": "Seeker",
           "properties": {
-            "gloom": "prefabs/wilds/gloom.prefab"
+            "gloom": "prefabs/wilds/gloom.prefab",
+            "brute": "prefabs/wilds/brute.prefab"
           }
         }
       }
