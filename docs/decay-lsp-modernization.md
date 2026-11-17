@@ -116,7 +116,8 @@ These are defects or sources of actively misleading tooling.
   - [x] Offer the project's enums as completions, complete `Enum.` with its
         variants, show them on hover, and list a file's enums and their
         variants as document symbols.
-  - [ ] Keep project-index results deterministic.
+  - [x] Keep project-index results deterministic: every result is kept in a
+        sorted set (`the_index_is_the_same_whatever_order_files_are_listed_in`).
 - [x] Fix completion insertion for functions.
   - [x] Generate zero placeholders for zero-argument functions.
   - [x] Generate one placeholder per required parameter.
