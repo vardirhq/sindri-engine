@@ -1491,6 +1491,9 @@
           "type": "number"
         }
       },
+      "required": [
+        "clips"
+      ],
       "title": "Sprite Animation",
       "type": "object"
     },
@@ -1522,6 +1525,9 @@
           "type": "number"
         }
       },
+      "required": [
+        "clip"
+      ],
       "title": "Audio Source",
       "type": "object"
     },
@@ -1547,7 +1553,10 @@
             }
           },
           "required": [
-            "projection"
+            "far",
+            "near",
+            "projection",
+            "vertical_fov_degrees"
           ],
           "type": "object"
         },
@@ -1580,7 +1589,10 @@
             }
           },
           "required": [
-            "projection"
+            "far",
+            "near",
+            "projection",
+            "vertical_size"
           ],
           "type": "object"
         }
@@ -1809,6 +1821,9 @@
           "type": "number"
         }
       },
+      "required": [
+        "target"
+      ],
       "title": "Camera Orbit",
       "type": "object"
     },
@@ -1867,6 +1882,9 @@
           "type": "array"
         }
       },
+      "required": [
+        "texture"
+      ],
       "title": "Effect Burst",
       "type": "object"
     },
@@ -2315,6 +2333,9 @@
           "type": "string"
         }
       },
+      "required": [
+        "grid"
+      ],
       "title": "Grid Occupant",
       "type": "object"
     },
@@ -2368,6 +2389,9 @@
           "type": "array"
         }
       },
+      "required": [
+        "grid"
+      ],
       "title": "Grid Placement",
       "type": "object"
     },
@@ -2691,6 +2715,10 @@
           "type": "string"
         }
       },
+      "required": [
+        "primitive",
+        "texture"
+      ],
       "title": "Mesh",
       "type": "object"
     },
@@ -2708,6 +2736,9 @@
         },
         "occluded_color": {}
       },
+      "required": [
+        "asset"
+      ],
       "title": "Model",
       "type": "object"
     },
@@ -3109,11 +3140,23 @@
                     "type": "object"
                   }
                 },
+                "required": [
+                  "friction",
+                  "layers",
+                  "offset",
+                  "restitution",
+                  "rotation",
+                  "sensor",
+                  "shape"
+                ],
                 "type": "object"
               },
               "type": "array"
             }
           },
+          "required": [
+            "pieces"
+          ],
           "type": "object"
         },
         {
@@ -3267,6 +3310,15 @@
               "type": "object"
             }
           },
+          "required": [
+            "friction",
+            "layers",
+            "offset",
+            "restitution",
+            "rotation",
+            "sensor",
+            "shape"
+          ],
           "type": "object"
         }
       ],
@@ -3517,6 +3569,16 @@
           "type": "object"
         }
       },
+      "required": [
+        "angular_damping",
+        "angular_velocity",
+        "gravity_scale",
+        "kind",
+        "linear_damping",
+        "linear_velocity",
+        "lock_rotation",
+        "pose"
+      ],
       "title": "Rigid Body 2D",
       "type": "object"
     },
@@ -3955,11 +4017,23 @@
                     "type": "object"
                   }
                 },
+                "required": [
+                  "friction",
+                  "layers",
+                  "offset",
+                  "restitution",
+                  "rotation",
+                  "sensor",
+                  "shape"
+                ],
                 "type": "object"
               },
               "type": "array"
             }
           },
+          "required": [
+            "pieces"
+          ],
           "type": "object"
         },
         {
@@ -4077,6 +4151,15 @@
               "type": "object"
             }
           },
+          "required": [
+            "friction",
+            "layers",
+            "offset",
+            "restitution",
+            "rotation",
+            "sensor",
+            "shape"
+          ],
           "type": "object"
         }
       ],
@@ -4148,6 +4231,9 @@
           "type": "boolean"
         }
       },
+      "required": [
+        "asset"
+      ],
       "title": "Static Model Collider 3D",
       "type": "object"
     },
@@ -4189,6 +4275,9 @@
           "type": "boolean"
         }
       },
+      "required": [
+        "asset"
+      ],
       "title": "Convex Model Collider 3D",
       "type": "object"
     },
@@ -4272,6 +4361,17 @@
           "type": "array"
         }
       },
+      "required": [
+        "angular_damping",
+        "angular_velocity",
+        "gravity_scale",
+        "kind",
+        "linear_damping",
+        "linear_velocity",
+        "lock_rotation",
+        "position",
+        "rotation"
+      ],
       "title": "Rigid Body 3D",
       "type": "object"
     },
@@ -4647,6 +4747,9 @@
           "type": "number"
         }
       },
+      "required": [
+        "sequences"
+      ],
       "title": "Sequence",
       "type": "object"
     },
@@ -4999,6 +5102,9 @@
           "type": "boolean"
         }
       },
+      "required": [
+        "texture"
+      ],
       "title": "Sprite",
       "type": "object"
     },
@@ -5251,6 +5357,10 @@
           "type": "string"
         }
       },
+      "required": [
+        "font",
+        "text"
+      ],
       "title": "Text",
       "type": "object"
     },
@@ -5309,6 +5419,10 @@
           "type": "string"
         }
       },
+      "required": [
+        "columns",
+        "rows"
+      ],
       "title": "Tile Grid",
       "type": "object"
     },
@@ -5333,6 +5447,9 @@
           "type": "integer"
         }
       },
+      "required": [
+        "tileset"
+      ],
       "title": "Tile Volume",
       "type": "object"
     },
@@ -5411,6 +5528,13 @@
           "type": "array"
         }
       },
+      "required": [
+        "columns",
+        "palette",
+        "rows",
+        "texture",
+        "tiles"
+      ],
       "title": "Tilemap",
       "type": "object"
     },
@@ -5719,6 +5843,9 @@
           "type": "array"
         }
       },
+      "required": [
+        "texture"
+      ],
       "title": "UI Image",
       "type": "object"
     },
@@ -6241,6 +6368,10 @@
           "type": "string"
         }
       },
+      "required": [
+        "font",
+        "text"
+      ],
       "title": "UI Text",
       "type": "object"
     },

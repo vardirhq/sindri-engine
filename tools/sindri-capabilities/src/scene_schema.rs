@@ -336,9 +336,36 @@ fn payload(registry: &ComponentSchemaRegistry, type_name: &str, display_name: &s
         schema["properties"][field] = extra;
     }
     if SINGLE_PIECE.contains(&type_name) {
-        let piece = schema["properties"]["pieces"]["items"].clone();
-        let mut single = piece;
+        let mut single = schema["properties"]["pieces"]["items"].clone();
         single["additionalProperties"] = json!(false);
+        // What the one piece cannot do without, asked of the engine as the
+        // component's own fields are.
+        let piece = template
+            .and_then(|template| template.get("pieces"))
+            .and_then(Value::as_array)
+            .and_then(|pieces| pieces.first())
+            .and_then(Value::as_object);
+        if let Some(piece) = piece {
+            let decodes = |payload: &Map<String, Value>| {
+                registry
+                    .validate_payload(type_name, &Value::Object(payload.clone()))
+                    .is_ok()
+            };
+            if decodes(piece) {
+                let required: Vec<&String> = piece
+                    .keys()
+                    .filter(|name| {
+                        let mut without = piece.clone();
+                        without.remove(*name);
+                        !decodes(&without)
+                    })
+                    .collect();
+                if !required.is_empty() {
+                    single["required"] = json!(required);
+                    schema["properties"]["pieces"]["items"]["required"] = json!(required);
+                }
+            }
+        }
         schema = json!({ "anyOf": [schema, single] });
     }
     if let Value::Object(object) = &mut schema {
@@ -419,22 +446,54 @@ fn object(
         }
         schema
     };
+    // At the top, the engine says which fields it cannot do without: the
+    // whole as written decodes, and the whole without one field does not.
+    let needed = |whole: &Map<String, Value>| -> Vec<String> {
+        let decodes = |payload: Map<String, Value>| {
+            registry
+                .validate_payload(type_name, &Value::Object(payload))
+                .is_ok()
+        };
+        if !closed || !decodes(whole.clone()) {
+            return Vec::new();
+        }
+        whole
+            .keys()
+            .filter(|name| {
+                let mut without = whole.clone();
+                without.remove(*name);
+                !decodes(without)
+            })
+            .cloned()
+            .collect()
+    };
     let tagged = fields.keys().find_map(|name| {
         registry
             .variants(type_name, &field_path(name))
             .map(|variants| (name, variants))
     });
     let Some((tag, variants)) = tagged else {
-        return plain(fields);
+        let mut schema = plain(fields);
+        let required = needed(fields);
+        if !required.is_empty() {
+            schema["required"] = json!(required);
+        }
+        return schema;
     };
     let options = variants
         .iter()
         .map(|(word, template)| {
-            let mut fields = template.as_object().cloned().unwrap_or_default();
+            let mut whole = template.as_object().cloned().unwrap_or_default();
+            whole.insert(tag.clone(), json!(word));
+            let mut required = needed(&whole);
+            if !required.contains(tag) {
+                required.insert(0, tag.clone());
+            }
+            let mut fields = whole;
             fields.remove(tag);
             let mut schema = plain(&fields);
             schema["properties"][tag] = json!({ "const": word });
-            schema["required"] = json!([tag]);
+            schema["required"] = json!(required);
             // A variant names every field its spelling has, so a field it
             // does not name is a mistake: a box given a radius.
             schema["additionalProperties"] = json!(false);

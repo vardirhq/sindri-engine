@@ -280,14 +280,20 @@ fn what_an_engine_would_quietly_ignore_it_refuses() {
     assert!(components(&json!({ "sindri.sprite": { "texture": "a.png" } })).is_empty());
     assert!(
         components(&json!({
-            "sindri.camera": { "projection": "orthographic", "vertical_size": 6.0 }
+            "sindri.camera": {
+            "projection": "orthographic", "vertical_size": 6.0, "near": 0.1, "far": 100.0
+        }
         }))
         .is_empty()
     );
     assert!(components(&json!({ "sindri.light2d#halo": { "radius": 2.0 } })).is_empty());
     assert!(
         components(&json!({
-            "sindri.physics2d.collider": { "shape": { "shape": "circle", "radius": 1.0 } }
+            "sindri.physics2d.collider": {
+            "shape": { "shape": "circle", "radius": 1.0 }, "offset": [0.0, 0.0], "rotation": 0.0,
+            "friction": 0.5, "restitution": 0.0, "sensor": false,
+            "layers": { "memberships": 1, "filter": 1 }
+        }
         }))
         .is_empty()
     );
@@ -296,11 +302,14 @@ fn what_an_engine_would_quietly_ignore_it_refuses() {
         json!({ "sindri.sprit": {} }),
         json!({ "sindri.sprite": { "textur": "a.png" } }),
         json!({ "sindri.camera": { "projection": "fisheye" } }),
+        // The engine refuses a camera without its clipping planes.
+        json!({ "sindri.camera": { "projection": "orthographic", "vertical_size": 6.0 } }),
         json!({ "sindri.light2d#halo": { "radius": "big" } }),
         json!({ "sindri.physics2d.collider": {
             "pieces": [{ "shape": { "shape": "box", "radius": 1.0 } }]
         } }),
         json!({ "sindri.script": { "source": "a.decay" } }),
+        json!({ "sindri.physics2d.collider": { "shape": { "shape": "circle", "radius": 1.0 } } }),
         json!({ "sindri.audio.source": { "volume": 3.0 } }),
     ] {
         assert!(!components(&mistake).is_empty(), "{mistake} was accepted");

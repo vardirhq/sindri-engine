@@ -11,8 +11,8 @@ use std::path::Path;
 
 use serde_json::Value;
 use sindri_core::{
-    ComponentSchemaRegistry, PrefabDocument, SceneDocument, SceneEntity, UnknownComponentPolicy,
-    split_part,
+    ComponentRegistryError, ComponentSchemaRegistry, PrefabDocument, SceneDocument, SceneEntity,
+    UnknownComponentPolicy, split_part,
 };
 use sindri_decay::{CheckPhase, ScriptSources, check_source_in};
 use sindri_runtime::project::{assets_root, files_under, manifest, scene_extractor};
@@ -54,8 +54,10 @@ pub fn check(project: &Path) -> CheckReport {
         .iter()
         .flat_map(|suffix| files_under(&assets, suffix).into_keys())
         .collect();
+    let fields = component_fields();
     let refs = References {
         registry: &registry,
+        fields: &fields,
         declared: &declared,
         images: &images,
     };
@@ -186,6 +188,8 @@ fn screaming(code: &str) -> String {
 /// What a scene's entities may refer to.
 struct References<'a> {
     registry: &'a ComponentSchemaRegistry,
+    /// Each component's own field names, where the scene schema closes them.
+    fields: &'a BTreeMap<String, BTreeSet<String>>,
     declared: &'a BTreeMap<String, Vec<String>>,
     images: &'a BTreeSet<String>,
 }
@@ -208,6 +212,9 @@ fn check_scene(path: &str, text: &str, refs: &References<'_>, diagnostics: &mut 
         && let Err(error) = refs
             .registry
             .validate_scene(&document, UnknownComponentPolicy::Preserve)
+        // A payload that does not decode is reported per entity below, with
+        // serde's reason; the scene check stops at the first one.
+        && !matches!(error, ComponentRegistryError::InvalidPayload { .. })
     {
         diagnostics.push(Diagnostic::error(error.code(), path, error.to_string()));
     }
@@ -225,16 +232,6 @@ fn check_prefab(path: &str, text: &str, refs: &References<'_>, diagnostics: &mut
         }
     };
     for entity in &document.entities {
-        for (type_name, payload) in &entity.components {
-            if refs.registry.metadata(split_part(type_name).0).is_none() {
-                continue;
-            }
-            if let Err(error) = refs.registry.validate_payload(type_name, payload) {
-                diagnostics.push(
-                    Diagnostic::error(error.code(), path, error.to_string()).on(entity.id.as_str()),
-                );
-            }
-        }
         check_entity(path, entity, refs, diagnostics);
     }
 }
@@ -268,6 +265,19 @@ fn check_entity(
             );
             continue;
         }
+        if let Err(ComponentRegistryError::InvalidPayload { source, .. }) =
+            refs.registry.validate_payload(type_name, payload)
+        {
+            diagnostics.push(
+                Diagnostic::error(
+                    "COMPONENT_INVALID_PAYLOAD",
+                    path,
+                    format!("its {type_name} is not one the engine can read: {source}"),
+                )
+                .on(id),
+            );
+        }
+        check_fields(path, id, type_name, payload, refs, diagnostics);
         if base == SCRIPT {
             check_script_reference(path, id, payload, refs, diagnostics);
         }
@@ -341,6 +351,73 @@ fn check_picture(
         )
         .on(id),
     );
+}
+
+/// A field the component does not have: serde ignores it, so the scene
+/// quietly does less than its author meant. A warning, as the engine runs the
+/// scene regardless.
+fn check_fields(
+    path: &str,
+    id: &str,
+    type_name: &str,
+    payload: &Value,
+    refs: &References<'_>,
+    diagnostics: &mut Vec<Diagnostic>,
+) {
+    let (Some(known), Some(written)) = (
+        refs.fields.get(split_part(type_name).0),
+        payload.as_object(),
+    ) else {
+        return;
+    };
+    for field in written.keys().filter(|field| !known.contains(*field)) {
+        let hint = known
+            .iter()
+            .map(|name| (distance(field, name), name))
+            .filter(|(distance, _)| *distance <= 3)
+            .min()
+            .map(|(_, name)| format!("; did you mean {name}?"))
+            .unwrap_or_default();
+        diagnostics.push(
+            Diagnostic::warning(
+                "COMPONENT_UNKNOWN_FIELD",
+                path,
+                format!("{type_name} has no field {field}, so it is ignored{hint}"),
+            )
+            .on(id),
+        );
+    }
+}
+
+/// Each component's own field names, read from the generated scene schema so
+/// the check and an editor validating against the schema cannot disagree. A
+/// component the schema leaves open in any of its forms is left out.
+fn component_fields() -> BTreeMap<String, BTreeSet<String>> {
+    let Ok(Some(schema)) = sindri_capabilities::reference("scene") else {
+        return BTreeMap::new();
+    };
+    let Some(definitions) = schema.get("$defs").and_then(Value::as_object) else {
+        return BTreeMap::new();
+    };
+    definitions
+        .iter()
+        .filter_map(|(name, definition)| {
+            let forms: Vec<&Value> = ["anyOf", "oneOf"]
+                .iter()
+                .filter_map(|key| definition.get(*key).and_then(Value::as_array))
+                .flatten()
+                .chain(definition.get("properties").map(|_| definition))
+                .collect();
+            let mut names = BTreeSet::new();
+            for form in &forms {
+                if form.get("additionalProperties") != Some(&Value::Bool(false)) {
+                    return None;
+                }
+                names.extend(form.get("properties")?.as_object()?.keys().cloned());
+            }
+            (!forms.is_empty()).then(|| (name.clone(), names))
+        })
+        .collect()
 }
 
 /// The registered component nearest `name`, if one is near enough to be a typo.

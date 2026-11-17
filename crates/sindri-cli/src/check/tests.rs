@@ -142,3 +142,57 @@ fn the_json_carries_its_schema_version() {
     assert_eq!(json["ok"], true);
     assert!(json["diagnostics"].as_array().unwrap().is_empty());
 }
+
+#[test]
+fn a_misspelled_field_is_named_with_the_one_meant() {
+    let dir = project(&[(
+        "main.scene",
+        &scene(
+            r#"{"id": "lamp", "components": {
+                "sindri.audio.source#hum": {"clip": "hum.ogg", "volme": 0.5},
+                "sindri.camera": {"projection": "orthographic", "vertical_size": 6.0, "near": 0.1, "far": 100.0}
+            }}"#,
+        ),
+    )]);
+    let report = check(dir.path());
+    assert_eq!(
+        codes(&report),
+        ["COMPONENT_UNKNOWN_FIELD"],
+        "{:?}",
+        report.diagnostics
+    );
+    let found = &report.diagnostics[0];
+    assert!(
+        found.message.contains("volme") && found.message.contains("did you mean volume"),
+        "{}",
+        found.message
+    );
+    assert_eq!(found.entity.as_deref(), Some("lamp"));
+    assert!(report.ok, "a warning: the scene still runs");
+}
+
+#[test]
+fn a_payload_the_engine_cannot_read_says_why_and_on_which_entity() {
+    let dir = project(&[(
+        "main.scene",
+        &scene(
+            r#"{"id": "eye", "components": {"sindri.camera": {"projection": "orthographic", "vertical_size": 6.0}}},
+               {"id": "ear", "components": {"sindri.audio.source": {"volume": "loud"}}}"#,
+        ),
+    )]);
+    let report = check(dir.path());
+    let invalid: Vec<_> = report
+        .diagnostics
+        .iter()
+        .filter(|found| found.code == "COMPONENT_INVALID_PAYLOAD")
+        .collect();
+    assert_eq!(invalid.len(), 2, "both, not only the first: {invalid:?}");
+    let on = |id: &str| {
+        invalid
+            .iter()
+            .find(|found| found.entity.as_deref() == Some(id))
+            .unwrap_or_else(|| panic!("nothing on {id}"))
+    };
+    assert!(on("eye").message.contains("near"), "{}", on("eye").message);
+    on("ear");
+}
