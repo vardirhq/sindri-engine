@@ -7,16 +7,18 @@
 //! (`docs/agent-native-direction.md`).
 
 mod check;
+mod play;
 mod report;
 
 use std::path::PathBuf;
 use std::process::ExitCode;
 
-const HELP: &str = "\
-sindri: check a Sindri project from a shell.
+const HELP: &str = r#"sindri: check a Sindri project from a shell.
 
 USAGE
   sindri project check [PATH] [--format human|json]
+  sindri play run [PATH] [--scene NAME] [--steps "STEP ..."] [--track ID]...
+                  [--format human|json]
 
   PATH is the project folder, the one holding sindri.toml (default: here).
 
@@ -26,10 +28,22 @@ COMMANDS
                   problem with a stable code. Exits 1 when there are errors;
                   warnings do not fail it.
 
+  play run        Play the project headless at 60 steps a second, from its
+                  main scene or --scene, doing --steps in order, and report
+                  the shared board, where each --track entity ended up, what
+                  scripts printed and what failed. Exits 1 when a script
+                  failed. A step is one of:
+                    wait:<seconds>       play on
+                    key:<Key>            tap a key (key:Space, key:F)
+                    hold:<Key>           press a key until its release
+                    release:<Key>
+                    set:<name>=<number>  write a board value (set:wood=4)
+                  for example: --steps "wait:0.5 hold:D wait:1 release:D"
+
   help            This text.
 
 --format json writes one JSON document with schema_version; it is the
-contract. --format human, the default, is rendered from it.";
+contract. --format human, the default, is rendered from it."#;
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 enum Format {
@@ -51,21 +65,54 @@ fn main() -> ExitCode {
 fn run(args: &[String]) -> Result<ExitCode, String> {
     let mut format = Format::Human;
     let mut words = Vec::new();
+    let mut scene = None;
+    let mut steps = Vec::new();
+    let mut track = Vec::new();
     let mut rest = args.iter();
     while let Some(arg) = rest.next() {
+        let mut value = |flag: &str| {
+            rest.next()
+                .cloned()
+                .ok_or_else(|| format!("{flag} wants a value"))
+        };
         match arg.as_str() {
             "--format" => {
-                format = match rest.next().map(String::as_str) {
-                    Some("json") => Format::Json,
-                    Some("human") => Format::Human,
-                    other => return Err(format!("--format takes human or json, not {other:?}")),
+                format = match value("--format")?.as_str() {
+                    "json" => Format::Json,
+                    "human" => Format::Human,
+                    other => return Err(format!("--format takes human or json, not {other}")),
                 };
             }
+            "--scene" => scene = Some(value("--scene")?),
+            "--steps" => steps.extend(value("--steps")?.split_whitespace().map(str::to_owned)),
+            "--track" => track.push(value("--track")?),
             "-h" | "--help" => words.insert(0, "help".to_owned()),
             flag if flag.starts_with('-') => return Err(format!("unknown flag {flag}")),
             word => words.push(word.to_owned()),
         }
     }
+    let project = |target: &[&str]| -> Result<PathBuf, String> {
+        let project = match target {
+            [] => PathBuf::from("."),
+            [path] => PathBuf::from(path),
+            _ => return Err("give one project folder".to_owned()),
+        };
+        if project.join("sindri.toml").is_file() {
+            Ok(project)
+        } else {
+            Err(format!(
+                "{} holds no sindri.toml; give the project folder",
+                project.display()
+            ))
+        }
+    };
+    let exit = |ok: bool| {
+        if ok {
+            ExitCode::SUCCESS
+        } else {
+            ExitCode::from(1)
+        }
+    };
     match words
         .iter()
         .map(String::as_str)
@@ -77,31 +124,31 @@ fn run(args: &[String]) -> Result<ExitCode, String> {
             Ok(ExitCode::SUCCESS)
         }
         ["project", "check", target @ ..] => {
-            let project = match target {
-                [] => PathBuf::from("."),
-                [path] => PathBuf::from(path),
-                _ => return Err("project check takes one project folder".to_owned()),
-            };
-            if !project.join("sindri.toml").is_file() {
-                return Err(format!(
-                    "{} holds no sindri.toml; give the project folder",
-                    project.display()
-                ));
-            }
-            let report = check::check(&project);
+            let report = check::check(&project(target)?);
             match format {
-                Format::Json => println!(
-                    "{}",
-                    serde_json::to_string_pretty(&report).map_err(|error| error.to_string())?
-                ),
+                Format::Json => println!("{}", json(&report)?),
                 Format::Human => print!("{}", report.human()),
             }
-            Ok(if report.ok {
-                ExitCode::SUCCESS
-            } else {
-                ExitCode::from(1)
-            })
+            Ok(exit(report.ok))
+        }
+        ["play", "run", target @ ..] => {
+            let project = project(target)?;
+            let report = play::play(&play::Play {
+                project: &project,
+                scene: scene.as_deref(),
+                steps: &steps,
+                track: &track,
+            })?;
+            match format {
+                Format::Json => println!("{}", json(&report)?),
+                Format::Human => print!("{}", report.human()),
+            }
+            Ok(exit(report.ok))
         }
         other => Err(format!("unknown command {}", other.join(" "))),
     }
+}
+
+fn json(value: &impl serde::Serialize) -> Result<String, String> {
+    serde_json::to_string_pretty(value).map_err(|error| error.to_string())
 }

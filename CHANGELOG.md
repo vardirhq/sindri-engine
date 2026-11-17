@@ -2,7 +2,7 @@
 
 # Changelog
 
-- The `sindri` command: `sindri project check [PATH] [--format json]` reads every scene, prefab, Decay script and Weave stylesheet, and `sindri.toml`, as a run reads them, and reports every problem with a stable code, a path, a line and an entity where it has one: unknown components (with the nearest real name), scripts a scene names but no file declares, missing textures, and missing scenes and stylesheets. Scene, prefab, component and Weave errors now carry their own `code()`.
+- The `sindri` command: `sindri project check [PATH] [--format json]` reads every scene, prefab, Decay script and Weave stylesheet, and `sindri.toml`, as a run reads them, and reports every problem with a stable code, a path, a line and an entity where it has one: unknown components (with the nearest real name), scripts a scene names but no file declares, missing textures, and missing scenes and stylesheets. Scene, prefab, component and Weave errors now carry their own `code()`. And `sindri play run [PATH] --steps "wait:0.5 hold:D wait:1 release:D key:F" --track wick` plays a project headless with scripted input and reports the shared board, where tracked entities ended up and what scripts printed and failed.
 
 - Lamplighter is heard: Sound Lab effects for Wick's footsteps (fired by his walk's `step` events), gathering, building, feeding the lantern, lighting a lamp, a gloom's pounce and a Seeker finding him, under a slow, uneasy Sound Lab song.
 

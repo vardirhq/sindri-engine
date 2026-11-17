@@ -283,7 +283,10 @@ also shows whether the MCP adapter above is worth building.
    crate that raised it gives (`SceneError::code`, `PrefabError::code`,
    `ComponentRegistryError::code`, Weave's `ParseError::code`).
 2. JSON Schemas for scenes and prefabs, generated from the component registry.
-3. `sindri play --headless` with structured logs, scripted input and capture.
+3. *Started:* `sindri play run [PATH] [--scene] [--steps "wait:1 hold:D …"]
+   [--track ID]`, headless at a fixed step with scripted input, reporting the
+   shared board, where tracked entities ended up, and what scripts printed and
+   failed, per frame. Capture is still `project-capture`, outside the CLI.
 4. The editor reloads a scene changed on disk.
 5. A per-project agent guide written by `sindri new`, packaged as a skill.
 6. The external-agent benchmark, after which its failures order the rest.
