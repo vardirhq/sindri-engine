@@ -2,9 +2,16 @@
 // the light up at the lantern flares and burns on. The goal lamp is the last:
 // lighting it opens the way. A lit lamp is also a safe pool: the gloom will not hunt
 // Wick while he stands in it, and are driven out of it (`gloom.decay` reads `lit`).
+//
+// Out in the wilds no lamp ends anything (`ends` false): each one lit is
+// another safe place, and a hamlet's lamp carries its light itself, since a
+// name would be shared by every hamlet made from the same prefab.
 script Lantern {
-    // The name of the entity that carries this lamp's light, up at the lantern.
+    // The name of the entity that carries this lamp's light, up at the lantern,
+    // or empty when the lamp carries it itself.
     @export let light_name: String = "";
+    // Whether lighting it, or the last of them, wins the run.
+    @export let ends: bool = true;
 
     var lit: bool = false;
     var flare: number = 0.0;
@@ -12,7 +19,11 @@ script Lantern {
     var sparks: Entity = null;
 
     fn start() {
-        this.light = World.find(this.light_name);
+        if this.light_name == "" {
+            this.light = this.entity;
+        } else {
+            this.light = World.find(this.light_name);
+        }
         this.sparks = World.find("fx-spark");
     }
 
@@ -35,7 +46,7 @@ script Lantern {
         Effects.burst_at(this.sparks, this.transform.world_position.x, this.transform.world_position.y + 2.6);
         Camera.add_trauma(0.18);
         Game.lit += 1.0;
-        if World.has_tag(this.entity, "goal") || Game.lit >= Game.total {
+        if this.ends && (World.has_tag(this.entity, "goal") || Game.lit >= Game.total) {
             Game.won = true;
         }
     }

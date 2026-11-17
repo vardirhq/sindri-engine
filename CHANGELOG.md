@@ -4,6 +4,8 @@
 
 - Decay: a field another script declares as a plain literal (`var lit: bool = false`) can be read before that script has started, rather than failing as if it had no value. Lamplighter's wilds starting over after the lantern goes out tripped on it.
 
+- Lamplighter: each hamlet in the wilds has a lamp post by its well for Wick to light, a safe place once lit. Lighting the two lamps by the start no longer counts as winning, which had stopped the gloom hunting for good.
+
 - Lamplighter: when the lantern goes out in the wilds, the wilds start over (with an empty pack) rather than the field the game used to begin in.
 
 - Decay refuses `this.field = …` on a field declared with `let` when the script is checked, rather than failing with `Immutable` at runtime. Orbital Last Stand's enemies declared `hazard_damage` with `let` and cleared it, which had only not failed because nothing ever set it; it is `var` now.

@@ -676,6 +676,16 @@
                 },
                 {
                   "prefabs": [
+                    "prefabs/wilds/hamlet/lamp-post.prefab"
+                  ],
+                  "at": [
+                    -2.6,
+                    1.4
+                  ],
+                  "chance": 1.0
+                },
+                {
+                  "prefabs": [
                     "prefabs/wilds/hamlet/bakery.prefab",
                     "prefabs/wilds/hamlet/bakery-lit.prefab",
                     "prefabs/wilds/hamlet/bakery-lit.prefab",
@@ -935,7 +945,8 @@
           "source": "scripts/lantern.decay",
           "script": "Lantern",
           "properties": {
-            "light_name": "lantern-1-light"
+            "light_name": "lantern-1-light",
+            "ends": false
           }
         }
       }
@@ -1070,7 +1081,8 @@
           "source": "scripts/lantern.decay",
           "script": "Lantern",
           "properties": {
-            "light_name": "lantern-2-light"
+            "light_name": "lantern-2-light",
+            "ends": false
           }
         }
       }

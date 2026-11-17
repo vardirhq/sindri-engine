@@ -70,6 +70,9 @@ def fitted(thing):
     sprite, collider = parts.get('sindri.sprite'), parts.get('sindri.physics2d.collider')
     if sprite is None or collider is None or 'shape' not in collider:
         return thing
+    # A sensor is a reach to touch, not a body to stop.
+    if collider.get('sensor'):
+        return thing
     # Only what stands still: a creature's body is its own business.
     if parts.get('sindri.physics2d.rigid_body', {}).get('kind', 'static') != 'static':
         return thing

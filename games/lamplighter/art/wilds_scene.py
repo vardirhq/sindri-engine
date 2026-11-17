@@ -155,6 +155,8 @@ def hamlet():
     return {'name': 'hamlet', 'on': ['grass', 'deadgrass', 'earth'], 'spacing': 80, 'chance': 0.7,
             'radius': 14.0, 'pieces': [
                 piece(['well'], 0.0, 0.0),
+                # Its lamp, long dark: Wick can light it, and it is a safe place.
+                piece(['lamp-post'], -2.6, 1.4),
                 piece(houses, -7.5, 4.0), piece(houses, 7.5, 4.5, 0.9),
                 piece(houses, -6.5, -6.5, 0.7), piece(houses, 7.0, -7.0, 0.6),
                 piece(['woodpile', 'barrels', 'crates'], 2.4, -1.4, 0.7),
@@ -221,6 +223,16 @@ def prefabs():
         one['transform_3d']['position'] = [0.0, 0.0, 0.0]
         doc = {'format_version': 1, 'metadata': {'name': thing['name']}, 'entities': [one]}
         (PREFABS / f'{name}.prefab').write_text(json.dumps(doc, indent=2) + '\n')
+    # A hamlet's lamp post, dark until Wick lights it, carrying its own light.
+    post, light = lantern('lamp-post', 0, 0)
+    post['components']['sindri.light2d'] = light['components']['sindri.light2d']
+    post['components']['sindri.script']['properties'] = {'light_name': '', 'ends': False}
+    post['id'] = post['name'] = 'lamp-post'
+    (one,) = standing_up([post])
+    one['components']['sindri.light2d']['height'] = 2.6
+    one['transform_3d']['position'] = [0.0, 0.0, 0.0]
+    doc = {'format_version': 1, 'metadata': {'name': 'lamp-post'}, 'entities': [one]}
+    (PREFABS / 'hamlet' / 'lamp-post.prefab').write_text(json.dumps(doc, indent=2) + '\n')
     # A Seeker is three things, its beam and glow children of where its circle
     # falls, so it is a prefab of its own shape.
     parts = standing_up(seeker('seeker', 0, 0))
@@ -558,7 +570,12 @@ def wilds():
                 {'name': 'feed', 'kind': 'button', 'bindings': ['key.R', 'gamepad.right_bumper']}]}}),
         ground(),
     ]
-    ents += [e for n, (x, y) in enumerate(LAMPS, 1) for e in lantern(f'lantern-{n}', x, y)]
+    lamps = [e for n, (x, y) in enumerate(LAMPS, 1) for e in lantern(f'lantern-{n}', x, y)]
+    for lamp in lamps:
+        # Out here lighting lamps makes safe places; it does not end the run.
+        if 'sindri.script' in lamp['components']:
+            lamp['components']['sindri.script']['properties']['ends'] = False
+    ents += lamps
     # The first one breathes 6.66 seconds out of step: it came in with pull request 666,
     # and something below the Lid should remember that.
     ents += [sunfall(f'sunfall-{n}', x, y, phase=6.66 * n) for n, (x, y) in enumerate(SUNFALLS, 1)]

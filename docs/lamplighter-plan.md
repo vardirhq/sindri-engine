@@ -231,8 +231,10 @@ says what is now true.
    back round him far out (`sindri.floating_origin`), so it stays sharp millions
    of squares away. Hamlets stand here and there on open ground, built whole by
    the seed (`sites` on the scatter): a well, houses round it, some still lit.
-   Still to come: the wilds opened from the title, hamlets with people and a lamp
-   to light, and other places (ruins, camps, the beacon) appearing at random. Wick walks it in the dark; a test walks him across biomes.
+   Each hamlet has a lamp post by its well, dark until Wick lights it, and lit
+   it is a safe place; out in the wilds lighting lamps ends nothing
+   (`tests/a_hamlet_lamp.rs`). Still to come: the wilds opened from the title,
+   hamlets with people, and other places (ruins, camps, the beacon) appearing at random. Wick walks it in the dark; a test walks him across biomes.
 2. **Under the Lid.** *Started.* Sunfalls: shafts of cracklight with a gold pool
    and dust in the beam, scattered by seed, wandering round where they fell and
    coming and going as their crack opens and shuts (`scripts/sunfall.decay`).
