@@ -211,3 +211,31 @@ fn the_mcp_capture_tool_answers_with_the_picture() {
         "base64 of a PNG"
     );
 }
+
+#[test]
+fn the_capabilities_it_hands_out_are_the_ones_the_repository_holds() {
+    let run = |name: &str| {
+        let output = Command::new(env!("CARGO_BIN_EXE_sindri"))
+            .args(["capabilities", name])
+            .output()
+            .expect("sindri runs");
+        assert!(output.status.success(), "capabilities {name}");
+        serde_json::from_slice::<serde_json::Value>(&output.stdout).expect("the output is JSON")
+    };
+    let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../docs/generated");
+    for (name, file) in [
+        ("scene", "sindri-scene.schema.json"),
+        ("prefab", "sindri-prefab.schema.json"),
+        ("components", "sindri-capabilities.json"),
+        ("decay", "decay-api.json"),
+    ] {
+        let written: serde_json::Value =
+            serde_json::from_str(&std::fs::read_to_string(root.join(file)).unwrap()).unwrap();
+        assert_eq!(run(name), written, "{name} is {file}");
+    }
+    let unknown = Command::new(env!("CARGO_BIN_EXE_sindri"))
+        .args(["capabilities", "gossip"])
+        .output()
+        .expect("sindri runs");
+    assert_eq!(unknown.status.code(), Some(2));
+}

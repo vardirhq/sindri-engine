@@ -119,11 +119,22 @@ popularity, and it makes a wrong document worse than none.
 | What may I author, and what does each field mean? | `docs/generated/sindri-capabilities.json` | Exists |
 | What gameplay code may I write? | `docs/generated/decay-api.json` / `.md` | Exists |
 | What is the Decay language? | `docs/generated/decay-language.json` | Exists |
-| What shape is a `.scene` or `.prefab` file? | JSON Schema generated from the component registry | Missing |
+| What shape is a `.scene` or `.prefab` file? | `docs/generated/sindri-scene.schema.json` / `sindri-prefab.schema.json`, from the component registry | Exists |
 | What may a Weave stylesheet say? | `docs/generated/weave-reference.json` / `.md` | Exists for properties; selectors, states and units are still hand-written |
 
 The JSON Schemas are the cheapest large win: an agent reads them, and a person
 editing a scene in VS Code gets validation and completion from the same file.
+A component's own fields are closed, so a misspelled one is an error rather
+than a field serde quietly ignores; objects inside a component are typed but
+open, because a template cannot tell a struct from a map keyed by name; a
+choice with variants is a `oneOf` over them. A test validates every scene and
+prefab in the repository against them.
+
+A project does not carry this repository, so the binary hands every one of
+these out itself: `sindri capabilities` lists them, and `sindri capabilities
+scene` (or `prefab`, `components`, `decay`, `decay-language`, `weave`) prints
+one, byte for byte what `docs/generated/` holds. `sindri mcp` serves the same
+as its `capabilities` tool.
 
 **Hand-written only for what cannot be generated:** where things belong
 (gameplay in Decay, interface in Weave, engine capability in Rust), the
@@ -292,7 +303,9 @@ also shows whether the MCP adapter above is worth building.
    Weave, Decay and `sindri.toml`, reporting every problem with the code the
    crate that raised it gives (`SceneError::code`, `PrefabError::code`,
    `ComponentRegistryError::code`, Weave's `ParseError::code`).
-2. JSON Schemas for scenes and prefabs, generated from the component registry.
+2. *Done:* JSON Schemas for scenes and prefabs, generated from the component
+   registry into `docs/generated/`, and every generated document served by
+   `sindri capabilities [NAME]` and the MCP `capabilities` tool.
 3. *Done:* `sindri play run [PATH] [--scene] [--steps "wait:1 hold:D … shot"]
    [--track ID] [--shots DIR] [--size WxH]`, headless at a fixed step with
    scripted input (keys, clicks on laid-out elements, typing, board values,

@@ -127,5 +127,7 @@ What this build of the engine offers is written down by
 fails when those files disagree with the code. See
 [`docs/generated/README.md`](generated/README.md).
 
-`sindri capabilities --format json`, when it exists, serves that same model. It
+`sindri capabilities [NAME]` serves that same model: with no name the list,
+and with one (`scene`, `prefab`, `components`, `decay`, `decay-language`,
+`weave`) that document, read from the same functions that write the files. It
 does not gain a second description of the engine.

@@ -24,3 +24,6 @@ weave = { path = "../../weave/crates/weave" }
 
 [lints]
 workspace = true
+
+[dev-dependencies]
+regex = "1"

@@ -20,6 +20,7 @@ serde.workspace = true
 serde_json.workspace = true
 sindri-capture = { path = "../sindri-capture" }
 sindri-core = { path = "../sindri-core" }
+sindri-capabilities = { path = "../../tools/sindri-capabilities" }
 sindri-decay = { path = "../sindri-decay" }
 sindri-runtime = { path = "../sindri-runtime" }
 sindri-scene = { path = "../sindri-scene" }

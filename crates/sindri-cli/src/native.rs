@@ -2,6 +2,7 @@
 
 use crate::{check, mcp, play};
 
+use std::fmt::Write as _;
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
@@ -13,6 +14,7 @@ USAGE
                   [--shots DIR] [--size WxH] [--format human|json]
   sindri render capture [PATH] --out FILE.png [--scene NAME] [--steps "..."]
                   [--size WxH] [--format human|json]
+  sindri capabilities [NAME]
   sindri mcp
 
   PATH is the project folder, the one holding sindri.toml (default: here).
@@ -32,8 +34,15 @@ COMMANDS
 
   render capture  The same run, then one picture written to --out.
 
-  mcp             Serve project_check, play_run and capture as MCP tools on
-                  standard input and output, for an agent with no shell.
+  capabilities    What this build can be told, as JSON: with no NAME, the
+                  list; scene and prefab are JSON Schemas for those files
+                  (point an editor's json.schemas at them), components every
+                  component's fields and meanings, decay the script API,
+                  decay-language the language, weave every style property.
+
+  mcp             Serve project_check, play_run, capture and capabilities
+                  as MCP tools on standard input and output, for an agent
+                  with no shell.
                   Read-only: the tools answer with the commands' own JSON,
                   and capture with the pictures themselves.
 
@@ -189,6 +198,35 @@ fn run(args: &[String]) -> Result<ExitCode, String> {
         ["project", "check", target @ ..] => {
             let report = check::check(&project(target)?);
             options.report(&report, &report.human(), report.ok)
+        }
+        ["capabilities"] => {
+            let names: Vec<_> = sindri_capabilities::REFERENCES
+                .iter()
+                .map(|(name, about)| serde_json::json!({ "name": name, "about": about }))
+                .collect();
+            let human = sindri_capabilities::REFERENCES.iter().fold(
+                String::new(),
+                |mut human, (name, about)| {
+                    let _ = writeln!(human, "{name:<16}{about}");
+                    human
+                },
+            );
+            let listed = serde_json::json!({ "schema_version": 1, "capabilities": names });
+            options.report(&listed, &human, true)
+        }
+        ["capabilities", name] => {
+            let reference = sindri_capabilities::reference(name)
+                .map_err(|error| error.to_string())?
+                .ok_or_else(|| {
+                    format!("no capability document {name}; `sindri capabilities` lists them")
+                })?;
+            // The document is JSON whatever the format: a schema rendered
+            // for a person is no longer a schema.
+            // Written rather than printed, so a reader that stops early,
+            // such as `head`, ends the command instead of panicking it.
+            let text = json(&reference)? + "\n";
+            let _ = std::io::Write::write_all(&mut std::io::stdout(), text.as_bytes());
+            Ok(ExitCode::SUCCESS)
         }
         ["mcp"] => {
             mcp::serve();

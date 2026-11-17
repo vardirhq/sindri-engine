@@ -49,10 +49,11 @@ pub fn answer(line: &str) -> Option<Value> {
             "protocolVersion": PROTOCOL,
             "capabilities": { "tools": {} },
             "serverInfo": { "name": "sindri", "version": env!("CARGO_PKG_VERSION") },
-            "instructions": "Checks and plays a Sindri project; it never changes one. \
+            "instructions": "Checks, plays and photographs a Sindri project; it never changes one. \
                              Change a project by editing its files (scenes and prefabs are JSON, \
                              behaviour is Decay, UI is Weave), then call project_check, and \
-                             play_run to see what the change did.",
+                             play_run or capture to see what the change did. Before writing a \
+                             file, read its shape from capabilities rather than guessing.",
         }),
         "ping" => json!({}),
         "tools/list" => json!({ "tools": tools() }),
@@ -99,6 +100,21 @@ fn tools() -> Value {
                     }
                 },
                 "required": ["project"]
+            }
+        },
+        {
+            "name": "capabilities",
+            "description": "What this engine build can be told, as JSON, generated from the engine itself so it is never out of date. Read these instead of guessing: scene and prefab are the JSON Schemas for .scene and .prefab files; components lists every component with its fields, defaults and what each field means; decay is the script API with types; decay-language is the language; weave is every style property. Answers `sindri capabilities NAME`.",
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "enum": sindri_capabilities::REFERENCES.iter().map(|(name, _)| *name).collect::<Vec<_>>(),
+                        "description": "Which document."
+                    }
+                },
+                "required": ["name"]
             }
         },
         {
@@ -150,6 +166,18 @@ fn call(params: &Value) -> Value {
             .map(str::to_owned)
             .collect()
     };
+    if params.get("name").and_then(Value::as_str) == Some("capabilities") {
+        let name = text("name").unwrap_or_default();
+        return match sindri_capabilities::reference(&name) {
+            Ok(Some(document)) => json!({
+                "content": [{ "type": "text", "text": document.to_string() }],
+                "structuredContent": document,
+                "isError": false,
+            }),
+            Ok(None) => failed(&format!("no capability document {name:?}")),
+            Err(error) => failed(&error.to_string()),
+        };
+    }
     let Some(project) = text("project").map(PathBuf::from) else {
         return failed("give the project folder as `project`");
     };
@@ -272,7 +300,7 @@ mod tests {
     }
 
     #[test]
-    fn it_introduces_itself_and_lists_its_two_tools() {
+    fn it_introduces_itself_and_lists_its_tools() {
         let hello = ask(&json!({"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {}}));
         assert_eq!(hello["result"]["protocolVersion"], PROTOCOL);
         assert!(answer(r#"{"jsonrpc":"2.0","method":"notifications/initialized"}"#).is_none());
@@ -283,7 +311,10 @@ mod tests {
             .iter()
             .map(|tool| tool["name"].as_str().unwrap())
             .collect();
-        assert_eq!(names, ["project_check", "play_run", "capture"]);
+        assert_eq!(
+            names,
+            ["project_check", "play_run", "capabilities", "capture"]
+        );
     }
 
     #[test]
@@ -297,6 +328,20 @@ mod tests {
         let played = ask(&json!({"jsonrpc": "2.0", "id": 4, "method": "tools/call",
             "params": {"name": "play_run", "arguments": {"project": project, "steps": ["wait:0.2"]}}}));
         assert_eq!(played["result"]["structuredContent"]["frames"], 12);
+    }
+
+    #[test]
+    fn it_hands_out_the_schemas_the_engine_writes() {
+        let schema = ask(&json!({"jsonrpc": "2.0", "id": 7, "method": "tools/call",
+            "params": {"name": "capabilities", "arguments": {"name": "scene"}}}));
+        assert_eq!(schema["result"]["isError"], false);
+        assert_eq!(
+            schema["result"]["structuredContent"]["title"],
+            "Sindri scene"
+        );
+        let nothing = ask(&json!({"jsonrpc": "2.0", "id": 8, "method": "tools/call",
+            "params": {"name": "capabilities", "arguments": {"name": "gossip"}}}));
+        assert_eq!(nothing["result"]["isError"], true);
     }
 
     #[test]
