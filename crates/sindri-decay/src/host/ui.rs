@@ -56,6 +56,7 @@ impl WorldHost<'_> {
             return self.layout_read(call, path, entity);
         }
         match call {
+            UiCall::SetClass => self.set_class(path, args, entity),
             UiCall::Text => {
                 let Some(Value::String(text)) = args.get(1) else {
                     return Err(RuntimeError::Host(format!(

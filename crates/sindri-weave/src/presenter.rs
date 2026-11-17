@@ -15,9 +15,11 @@ use crate::{ApplyError, Declared, MAX_HIERARCHY_DEPTH, Pass, Transitions, UiStat
 /// the screen changes shape: that is the world the scripts read, and a script
 /// that then writes a value keeps it, as an inline style beats a stylesheet.
 /// Entities spawned later are settled once when they first appear, and an
-/// element whose own data changes the state it is in (a script disabling a
-/// button, checking a toggle) is settled again with everything inside it, so
-/// `:disabled` and `:checked` follow the game as `:hover` follows the pointer.
+/// element whose own data changes what its rules match (a script disabling a
+/// button, checking a toggle, giving it a class) is settled again with
+/// everything inside it, so `:disabled`, `:checked` and classes follow the
+/// game as `:hover` follows the pointer, and an animation a class starts
+/// plays.
 /// Each frame,
 /// only what the pointer's states and running transitions change is
 /// [laid over](Self::present_over) that, for the draw and the hit-test, and
@@ -31,9 +33,10 @@ pub struct Presenter {
     /// Entity handles present at the last settlement/topology check. A new
     /// handle means a runtime spawn that has never received its base style.
     known: BTreeSet<EntityId>,
-    /// The states each element's own data put it in at the last settlement:
-    /// disabled, checked, open. Only elements in one are kept.
-    data_states: BTreeMap<EntityId, States>,
+    /// What each element's own data matched with at the last settlement: the
+    /// states it put it in (disabled, checked, open) and its classes. Only
+    /// elements with either are kept.
+    data_states: BTreeMap<EntityId, (States, Vec<String>)>,
     /// Whether the last frame had nothing to lay over, so this one, if it has
     /// nothing either, can be skipped.
     idle: bool,
@@ -178,6 +181,9 @@ impl Presenter {
             self.known = current;
             return Ok(());
         }
+        // What it settles may start an animation or a transition, which the
+        // next overlay plays even with nothing under the pointer.
+        self.idle = false;
 
         let mut undo = Undo::default();
         let mut recorded = vec![Declared::new(); stylesheets.len()];
@@ -241,12 +247,27 @@ impl Presenter {
     }
 }
 
-/// Every element in a state its own data puts it in.
-fn data_states(world: &World) -> BTreeMap<EntityId, States> {
+/// Every element in a state its own data puts it in, or with classes, and
+/// what they are.
+fn data_states(world: &World) -> BTreeMap<EntityId, (States, Vec<String>)> {
     world
         .entities()
-        .map(|(entity, data)| (entity, component_states(data)))
-        .filter(|(_, states)| *states != States::NONE)
+        .map(|(entity, data)| {
+            let classes: Vec<String> = data
+                .components
+                .get("weave.style")
+                .and_then(|style| style.get("classes"))
+                .and_then(serde_json::Value::as_array)
+                .map(|classes| {
+                    classes
+                        .iter()
+                        .filter_map(|class| class.as_str().map(str::to_owned))
+                        .collect()
+                })
+                .unwrap_or_default();
+            (entity, (component_states(data), classes))
+        })
+        .filter(|(_, (states, classes))| *states != States::NONE || !classes.is_empty())
         .collect()
 }
 

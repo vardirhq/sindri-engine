@@ -422,6 +422,18 @@
       "writes": "`sindri.ui.image` `tint`"
     },
     {
+      "example": "pop 300ms ease-out",
+      "group": "Motion",
+      "inherited": false,
+      "names": [
+        "animation"
+      ],
+      "shorthand": false,
+      "summary": "Plays an `@keyframes` animation from when the declaration appears; a changed declaration starts it again.",
+      "values": "a `@keyframes` name and a duration, then in any order an easing, a delay, an iteration count (or `infinite`) and a direction (`alternate`, `reverse`, `alternate-reverse`)",
+      "writes": "the properties its keyframes name, as they play"
+    },
+    {
       "example": "background 150ms ease-out",
       "group": "Motion",
       "inherited": false,

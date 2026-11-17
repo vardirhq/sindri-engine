@@ -55,7 +55,7 @@ fn parse_transitions(value: &str) -> BTreeMap<String, Timing> {
     timings
 }
 
-fn time(word: &str) -> Option<f32> {
+pub(crate) fn time(word: &str) -> Option<f32> {
     let seconds = if let Some(ms) = word.strip_suffix("ms") {
         ms.parse::<f32>().ok()? / 1000.0
     } else {
@@ -66,7 +66,7 @@ fn time(word: &str) -> Option<f32> {
 
 /// A value that can be part way between two others.
 #[derive(Clone, Copy, Debug, PartialEq)]
-enum Mixable {
+pub(crate) enum Mixable {
     /// sRGB channels and alpha, 0 to 1, as written.
     Color([f32; 4]),
     /// A number and the unit it was written in.
@@ -74,7 +74,7 @@ enum Mixable {
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
-enum Unit {
+pub(crate) enum Unit {
     None,
     Pixels,
     ViewWidth,
@@ -83,7 +83,7 @@ enum Unit {
 }
 
 impl Mixable {
-    fn parse(value: &str) -> Option<Self> {
+    pub(crate) fn parse(value: &str) -> Option<Self> {
         let value = value.trim();
         if let Some(color) = color(value) {
             return Some(Self::Color(color));
@@ -101,7 +101,7 @@ impl Mixable {
         value.parse().ok().map(|n| Self::Length(n, Unit::None))
     }
 
-    fn mix(self, other: Self, t: f32) -> Option<Self> {
+    pub(crate) fn mix(self, other: Self, t: f32) -> Option<Self> {
         let lerp = |a: f32, b: f32| a + (b - a) * t;
         match (self, other) {
             (Self::Color(a), Self::Color(b)) => Some(Self::Color([
@@ -117,7 +117,7 @@ impl Mixable {
         }
     }
 
-    fn write(self) -> String {
+    pub(crate) fn write(self) -> String {
         match self {
             Self::Color(channels) => {
                 let byte = |channel: f32| {
@@ -209,6 +209,8 @@ pub struct Transitions {
     /// property: the stylesheet's value, before any easing.
     last: BTreeMap<(usize, EntityId, String), String>,
     running: BTreeMap<(usize, EntityId, String), Track>,
+    /// The `@keyframes` animations playing, on the same clock.
+    animations: crate::animation::Animations,
 }
 
 impl Transitions {
@@ -223,16 +225,19 @@ impl Transitions {
     /// change knows to keep drawing.
     #[must_use]
     pub fn animating(&self) -> bool {
-        !self.running.is_empty()
+        !self.running.is_empty() || self.animations.animating(self.now)
     }
 
     /// Replaces each declaration that is easing with where it has got to,
     /// and starts easing any transitioned property whose value changed.
+    /// Then lays the element's `@keyframes` animation, if it plays one, over
+    /// what that leaves (`crate::animation`).
     pub(crate) fn ease(
         &mut self,
         sheet: usize,
         entity: EntityId,
         declarations: &mut BTreeMap<String, String>,
+        keyframes: &BTreeMap<String, weave::Keyframes>,
     ) {
         let timings = declarations
             .get("transition")
@@ -283,6 +288,8 @@ impl Transitions {
                 }
             }
         }
+        self.animations
+            .play(now, (sheet, entity), declarations, keyframes);
     }
 }
 
@@ -302,7 +309,7 @@ mod tests {
                 "background 100ms linear".to_owned(),
             ),
         ]);
-        transitions.ease(0, entity, &mut declarations);
+        transitions.ease(0, entity, &mut declarations, &BTreeMap::new());
         declarations["background"].clone()
     }
 
@@ -349,7 +356,7 @@ mod tests {
                 ("anchor".to_owned(), anchor.to_owned()),
                 ("transition".to_owned(), "all 1s linear".to_owned()),
             ]);
-            transitions.ease(0, panel, &mut declarations);
+            transitions.ease(0, panel, &mut declarations, &BTreeMap::new());
             (
                 declarations["width"].clone(),
                 declarations["anchor"].clone(),

@@ -361,6 +361,32 @@ and plain numbers ease; other values change at once. As in CSS, the
 transition that applies is the one on the rule being changed *to*, and an
 interrupted transition starts again from the value it had reached.
 
+## Animations
+
+`@keyframes` names an animation's values along its run, and `animation` plays
+it on an element, as in CSS:
+
+```css
+@keyframes gained { 25% { background: #6b4320d9; } }
+.pack-row.gained { animation: gained 450ms ease-out; }
+```
+
+A stop is `from`, `to` or a percentage, or a comma-separated list of them. A
+stop that leaves a property out takes the element's own value there, so the
+row above shines and returns to whatever background its rules give it.
+`animation` takes the name and a duration, then in any order an easing, a
+delay, an iteration count (`infinite` for ever) and a direction (`alternate`,
+`reverse`, `alternate-reverse`). The easing applies within each step between
+two stops. Colours, lengths and plain numbers animate. One animation an
+element: a comma-separated list plays its first. A finished animation leaves
+the element as its rules have it.
+
+An animation starts when its declaration appears on an element and starts
+again when the declaration changes. A script starts one by giving the element
+a class (`Ui.set_class(row, "gained", true)`) and plays it again by taking the
+class away and giving it back. Keyframe values are used as written: `var()`
+is not resolved inside them.
+
 ## Pointer states in the running game
 
 `:hover` and `:active` follow the pointer in the editor's Play, native games
@@ -370,8 +396,9 @@ pointer stays on it (and a slider for as long as it is dragged), as in CSS.
 Hit-testing uses what was drawn, so a button a media query moved or resized
 is clicked where it is drawn. `:focus` follows the keyboard in the same hosts.
 `:disabled` and `:checked` come from the entity's own data, and follow it as it
-changes: a script that disables a button (`Ui.set_disabled`) or checks a toggle
-restyles it, and everything inside it, on the next frame.
+changes: a script that disables a button (`Ui.set_disabled`), checks a toggle or
+gives it a class (`Ui.set_class`) restyles it, and everything inside it, on the
+next frame.
 
 A running game has two layers, as a page in a browser does. The stylesheet's
 rules are settled into the game's world when it starts and whenever the
@@ -446,7 +473,6 @@ The following CSS concepts are not implemented:
 - attribute selectors, and the `-of-type` pseudo-classes
 - `:focus` in the running game: nothing takes focus until keyboard and
   gamepad navigation land
-- `@keyframes` animation
 - accessibility mapping
 - integrated stylesheet source editing and named viewport preset controls
 

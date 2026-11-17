@@ -305,6 +305,14 @@ What the image's picture is multiplied by: white shows it as drawn, and a white 
 
 ## Motion
 
+### `animation`
+
+Plays an `@keyframes` animation from when the declaration appears; a changed declaration starts it again.
+
+- **Values:** a `@keyframes` name and a duration, then in any order an easing, a delay, an iteration count (or `infinite`) and a direction (`alternate`, `reverse`, `alternate-reverse`)
+- **Writes:** the properties its keyframes name, as they play
+- **Example:** `animation: pop 300ms ease-out;`
+
 ### `transition`
 
 Eases a property to a new value instead of jumping, for example on `:hover`. Colors, lengths and plain numbers ease; anything else changes at once.

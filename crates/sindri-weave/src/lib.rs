@@ -11,6 +11,7 @@ use sindri_core::{EntityId, Transform3D, World};
 use thiserror::Error;
 use weave::{Computed, States, Stylesheet, Viewport};
 
+mod animation;
 mod box_model;
 mod calc;
 mod computed;
@@ -125,7 +126,7 @@ pub(crate) fn apply(
         computed.push(style);
         let (entity, id) = (node.entity, node.id.as_str());
         if let Some((transitions, sheet)) = pass.transitions.as_mut() {
-            transitions.ease(*sheet, entity, &mut declarations);
+            transitions.ease(*sheet, entity, &mut declarations, &stylesheet.keyframes);
         }
         if let Some(record) = pass.record.as_mut() {
             record.insert(entity, declarations.clone());

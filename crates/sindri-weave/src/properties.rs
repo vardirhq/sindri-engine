@@ -326,6 +326,17 @@ pub const PROPERTIES: &[Property] = &[
         example: "#f2a65a",
     },
     Property {
+        names: &["animation"],
+        group: MOTION,
+        values: "a `@keyframes` name and a duration, then in any order an easing, a delay, an \
+                 iteration count (or `infinite`) and a direction (`alternate`, `reverse`, \
+                 `alternate-reverse`)",
+        writes: "the properties its keyframes name, as they play",
+        summary: "Plays an `@keyframes` animation from when the declaration appears; a changed \
+                  declaration starts it again.",
+        example: "pop 300ms ease-out",
+    },
+    Property {
         names: &["transition"],
         group: MOTION,
         values: "comma-separated `<property> <duration> [<delay>] [<easing>]`; a property may \
@@ -407,9 +418,10 @@ mod tests {
         for entry in PROPERTIES {
             for name in entry.names {
                 let world = styled(&format!("#el {{ {name}: {}; }}", entry.example));
-                // A transition changes nothing until a value it names does;
+                // A transition or an animation changes nothing until a value
+                // it names does, or a keyframe names one;
                 // its own tests in `transition.rs` cover that.
-                if *name == "transition" {
+                if *name == "transition" || *name == "animation" {
                     continue;
                 }
                 assert!(

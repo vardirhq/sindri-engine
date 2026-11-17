@@ -180,3 +180,26 @@ script Form {
         "and on again"
     );
 }
+
+#[test]
+fn a_script_gives_an_element_a_class_and_takes_it_away() {
+    let source = r#"
+script Form {
+    fn update(dt: f32) {
+        Ui.set_class(this.entity, "gained", true);
+        Ui.set_class(this.entity, "gained", true);
+        Ui.set_class(this.entity, "spent", true);
+        Ui.set_class(this.entity, "spent", false);
+    }
+}
+"#;
+    let mut world = World::default();
+    let entity = form(&mut world);
+    let report = run(&mut world, source);
+    assert!(report.failures.is_empty(), "{:?}", report.failures);
+    assert_eq!(
+        world.get(entity).expect("there").components["weave.style"]["classes"],
+        json!(["gained"]),
+        "given once, and the one taken away is gone"
+    );
+}

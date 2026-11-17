@@ -156,3 +156,49 @@ fn option_index(path: &Path, args: &[Value], options: usize) -> Result<usize, Ru
     #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
     Ok((requested as usize).min(options.saturating_sub(1)))
 }
+
+impl WorldHost<'_> {
+    /// `Ui.set_class(element, class, on)`: the element's `weave.style`
+    /// classes, with `class` added or taken away. An element with no classes
+    /// yet is given the component.
+    pub(super) fn set_class(
+        &mut self,
+        path: &Path,
+        args: &[Value],
+        entity: EntityId,
+    ) -> Result<Value, RuntimeError> {
+        let (Some(Value::String(class)), Some(Value::Bool(on))) = (args.get(1), args.get(2)) else {
+            return Err(RuntimeError::Host(format!(
+                "{}: needs a class name and true or false",
+                path.dotted()
+            )));
+        };
+        if class.is_empty() || class.contains(char::is_whitespace) {
+            return Err(RuntimeError::Host(format!(
+                "{}: `{class}` is not a class name",
+                path.dotted()
+            )));
+        }
+        let data = self.world.get_mut(entity).ok_or_else(|| {
+            RuntimeError::Host(format!("{}: entity no longer exists", path.dotted()))
+        })?;
+        let style = data
+            .components
+            .entry("weave.style".to_owned())
+            .or_insert_with(|| serde_json::json!({ "classes": [] }));
+        if !style
+            .get("classes")
+            .is_some_and(serde_json::Value::is_array)
+        {
+            style["classes"] = serde_json::json!([]);
+        }
+        let classes = style["classes"].as_array_mut().expect("just made an array");
+        let has = classes.iter().any(|existing| existing == class.as_str());
+        if *on && !has {
+            classes.push(serde_json::json!(class));
+        } else if !*on && has {
+            classes.retain(|existing| existing != class.as_str());
+        }
+        Ok(Value::Unit)
+    }
+}

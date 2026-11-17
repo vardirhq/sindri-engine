@@ -2,6 +2,8 @@
 
 # Changelog
 
+- Weave plays `@keyframes` animations (`animation: name 450ms ease-out infinite alternate`), restarted when the declaration changes; `Ui.set_class(element, class, on)` gives an element a stylesheet class from Decay, which restyles it on the next frame. Lamplighter's pack rows shine when Wick gathers, and the lantern's panel pulses red while a Seeker has him.
+
 - Sindri Mobile's play controls keep off the game's screen: Stop, Pause and the clock sit at the top middle, which a HUD tends to leave clear, and the hint on how to walk fades after a few seconds or once walking starts. In Lamplighter a sunfall's shaft is drawn under what stands, so Wick in one is lit by it rather than hazed over.
 
 - Sindri Mobile: playing, a finger that lands on the game's own buttons (a build card, a menu) reaches them as a touch rather than starting the stick, and its tap is not the interact key. `ProjectRun::takes_press` and `ScreenUi::pressable_at` answer whether a press lands on something that takes it.
