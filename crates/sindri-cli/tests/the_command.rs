@@ -239,3 +239,59 @@ fn the_capabilities_it_hands_out_are_the_ones_the_repository_holds() {
         .expect("sindri runs");
     assert_eq!(unknown.status.code(), Some(2));
 }
+
+#[test]
+fn a_new_project_checks_clean_plays_and_carries_its_guide() {
+    let folder = tempfile::tempdir().unwrap();
+    let root = folder.path().join("moth-garden");
+    let made = Command::new(env!("CARGO_BIN_EXE_sindri"))
+        .args(["project", "new"])
+        .arg(&root)
+        .args(["--format", "json"])
+        .output()
+        .expect("sindri runs");
+    assert!(
+        made.status.success(),
+        "{}",
+        String::from_utf8_lossy(&made.stderr)
+    );
+    let report: serde_json::Value = serde_json::from_slice(&made.stdout).unwrap();
+    assert_eq!(report["name"], "moth-garden");
+    for file in [
+        "sindri.toml",
+        "main.scene",
+        "AGENTS.md",
+        "CLAUDE.md",
+        ".claude/skills/sindri/SKILL.md",
+        ".sindri/scene.schema.json",
+        ".vscode/settings.json",
+    ] {
+        assert!(root.join(file).is_file(), "{file} was written");
+    }
+    let guide = std::fs::read_to_string(root.join("AGENTS.md")).unwrap();
+    assert!(guide.starts_with("# moth-garden\n"));
+    assert!(guide.contains("sindri project check"));
+
+    let (ok, checked) = check(&root);
+    assert!(ok, "a new project checks clean: {checked}");
+    assert_eq!(checked["diagnostics"], serde_json::json!([]));
+    let played = Command::new(env!("CARGO_BIN_EXE_sindri"))
+        .args(["play", "run"])
+        .arg(&root)
+        .args(["--steps", "wait:0.1", "--format", "json"])
+        .output()
+        .expect("sindri runs");
+    assert!(
+        played.status.success(),
+        "{}",
+        String::from_utf8_lossy(&played.stdout)
+    );
+
+    // A second time over the same folder is refused, not a silent overwrite.
+    let again = Command::new(env!("CARGO_BIN_EXE_sindri"))
+        .args(["project", "new"])
+        .arg(&root)
+        .output()
+        .expect("sindri runs");
+    assert_eq!(again.status.code(), Some(2));
+}

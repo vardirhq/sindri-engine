@@ -828,7 +828,7 @@ the benchmark shows agents without a shell falling behind. See
 - [ ] Generate the rest of the Weave reference from the language's own tables: selectors, interaction states, units, colors and responsive conditions, still hand-written in `docs/weave-reference.md`
 - [x] `sindri play --headless` (built as `sindri play run` and `sindri render capture`) with a structured per-frame log, scripted input and frame capture, generalizing the games' existing scripted-run tests and `*-capture` binaries
 - [ ] The editor reloads a scene changed on disk when it has no unsaved edits, and asks when it has; scripts, textures, prefabs and Weave styles are already watched
-- [ ] `sindri new` writes a short per-project agent guide pointing at the workflow and generated documents, also packaged as a skill for agents that load them
+- [x] `sindri project new` writes a short per-project agent guide pointing at the workflow and generated documents, also packaged as a skill for agents that load them
 - [ ] An external-agent benchmark in `tools/ai-authoring-eval`: unmodified agents given a fresh project and fixed tasks, graded by `sindri project check` and a headless run, with the pass rate per agent recorded, each agent run both with a shell and with file access only
 - [x] Built ahead of the benchmark as `sindri mcp`; the benchmark says whether it earns its keep: a read-only MCP adapter exposing `sindri project check`, `sindri play --headless` (log and captured frames) and the generated documents, calling the CLI and passing its JSON through, never writing project files
 - [ ] Local agent: write one Decay script from a description, through the same draft, check and bounded-repair loop as Decay repair, shown as a diff and applied on acceptance
@@ -837,7 +837,7 @@ the benchmark shows agents without a shell falling behind. See
 - [ ] A local-model column in the benchmark for the tasks the local agent is meant to do
 
 Exit gate: an unmodified external agent, given a fresh project and only what
-`sindri new` writes, completes the benchmark's tasks with every change passing
+`sindri project new` writes, completes the benchmark's tasks with every change passing
 `sindri project check` and its headless run; and the local agent passes its
 narrower tasks under the same checks.
 

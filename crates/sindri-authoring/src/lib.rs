@@ -16,6 +16,7 @@
 //! engine's checked commands in between.
 
 mod atomic_write;
+pub mod blank_scene;
 pub mod duplicate;
 pub mod fit;
 pub mod prefab;
@@ -23,5 +24,6 @@ pub mod scene_file;
 pub mod visual_decay;
 mod world;
 
+pub use blank_scene::blank_scene;
 pub use scene_file::{SceneFile, SceneFileError, scene_path};
 pub use world::{load_document, load_world};

@@ -18,6 +18,8 @@ mod mcp;
 #[cfg(not(target_arch = "wasm32"))]
 mod native;
 #[cfg(not(target_arch = "wasm32"))]
+mod new;
+#[cfg(not(target_arch = "wasm32"))]
 mod play;
 #[cfg(not(target_arch = "wasm32"))]
 mod report;

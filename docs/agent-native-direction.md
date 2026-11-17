@@ -147,7 +147,7 @@ hand-written `ENGINE_REFERENCE.md` is the failure this rule exists to prevent.
 **Shipped with projects, not only the repository.** A game made with Sindri
 does not contain this repository's `AGENTS.md`. A new project needs its own
 short agent guide — the workflow and where to find the generated documents —
-written by `sindri new`, and packaged as a skill for the agents that support
+written by `sindri project new`, and packaged as a skill for the agents that support
 one. It stays thin: discovery and checks, not API facts.
 
 **Packed for chat models.** A model with no shell and no repository, such as
@@ -315,7 +315,13 @@ also shows whether the MCP adapter above is worth building.
    is the same run ending in one picture. The player behind it is
    `crates/sindri-capture`, which Causeway's `project-capture` uses too.
 4. The editor reloads a scene changed on disk.
-5. A per-project agent guide written by `sindri new`, packaged as a skill.
+5. *Done:* `sindri project new PATH [--name]` makes the editor's project
+   (one blank scene, `sindri_authoring::blank_scene`, shared with the
+   editor's New Scene) with `AGENTS.md`, a `CLAUDE.md` pointing at it, the
+   same guide as a skill in `.claude/skills/sindri/`, the scene and prefab
+   schemas in `.sindri/`, and VS Code settings that use them. The guide is
+   discovery and checks only: every fact it needs it asks `sindri
+   capabilities` for.
 6. The external-agent benchmark, after which its failures order the rest.
    It also says whether the read-only MCP adapter (`sindri mcp`, already built)
    closes the gap for agents without a shell.

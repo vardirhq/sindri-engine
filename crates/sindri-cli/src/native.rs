@@ -1,6 +1,6 @@
 //! The command itself, natively.
 
-use crate::{check, mcp, play};
+use crate::{check, mcp, new, play};
 
 use std::fmt::Write as _;
 use std::path::{Path, PathBuf};
@@ -9,6 +9,7 @@ use std::process::ExitCode;
 const HELP: &str = r#"sindri: check, play and photograph a Sindri project from a shell.
 
 USAGE
+  sindri project new PATH [--name NAME] [--format human|json]
   sindri project check [PATH] [--format human|json]
   sindri play run [PATH] [--scene NAME] [--steps "STEP ..."] [--track ID]...
                   [--shots DIR] [--size WxH] [--format human|json]
@@ -20,6 +21,11 @@ USAGE
   PATH is the project folder, the one holding sindri.toml (default: here).
 
 COMMANDS
+  project new     Make a project in PATH, as the editor makes one, with a
+                  guide for coding agents beside it (AGENTS.md, CLAUDE.md and
+                  a skill), the scene and prefab schemas in .sindri/, and VS
+                  Code settings that validate scenes against them.
+
   project check   Read every scene, prefab, Decay script and Weave stylesheet,
                   and sindri.toml, the way a run reads them, and report every
                   problem with a stable code. Exits 1 when there are errors;
@@ -93,6 +99,7 @@ struct Options {
     shots: PathBuf,
     out: Option<PathBuf>,
     size: [u32; 2],
+    name: Option<String>,
 }
 
 impl Options {
@@ -106,6 +113,7 @@ impl Options {
             shots: PathBuf::from("."),
             out: None,
             size: [1280, 720],
+            name: None,
         };
         let mut rest = args.iter();
         while let Some(arg) = rest.next() {
@@ -130,6 +138,7 @@ impl Options {
                 "--shots" => options.shots = PathBuf::from(value("--shots")?),
                 "--out" => options.out = Some(PathBuf::from(value("--out")?)),
                 "--size" => options.size = parse_size(&value("--size")?)?,
+                "--name" => options.name = Some(value("--name")?),
                 "-h" | "--help" => options.words.insert(0, "help".to_owned()),
                 flag if flag.starts_with('-') => return Err(format!("unknown flag {flag}")),
                 word => options.words.push(word.to_owned()),
@@ -194,6 +203,14 @@ fn run(args: &[String]) -> Result<ExitCode, String> {
         [] | ["help", ..] => {
             println!("{HELP}");
             Ok(ExitCode::SUCCESS)
+        }
+        ["project", "new", rest @ ..] => {
+            if rest.len() > 1 {
+                return Err("project new takes one folder".to_owned());
+            }
+            let (root, name) = new::target(rest.first().copied(), options.name.as_deref())?;
+            let report = new::new(&root, &name)?;
+            options.report(&report, &report.human(), true)
         }
         ["project", "check", target @ ..] => {
             let report = check::check(&project(target)?);
