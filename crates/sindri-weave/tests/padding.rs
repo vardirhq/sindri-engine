@@ -234,3 +234,58 @@ fn calc_mixes_units_in_sizes_and_sides() {
         .expect("a side");
     assert!((top - 0.1).abs() < 1.0e-6, "{top}");
 }
+
+/// The width `clamp(MIN, VAL, MAX)` gives one panel on a screen `width`
+/// pixels across and 800 high, in overlay units (400 pixels to a unit).
+fn clamped_width(width: f32) -> f32 {
+    let document = SceneDocument::from_json(
+        r#"{
+            "format_version": 10,
+            "metadata": { "name": "weave-clamp" },
+            "entities": [
+                { "id": "card", "name": "card",
+                  "components": { "sindri.ui.shape": { "kind": "rect" } } }
+            ]
+        }"#,
+    )
+    .expect("scene parses");
+    let source = World::from_scene(&document).expect("scene loads").world;
+    let sheet = parse(
+        r"
+            :root { --least: 200px; }
+            #card { width: clamp(var(--least), 40vw, 400px); height: min(10vh, 60px); }
+        ",
+    )
+    .expect("Weave parses");
+    let styled = PresentationWorld::resolve(
+        &source,
+        &sheet,
+        Viewport {
+            width,
+            height: 800.0,
+        },
+    )
+    .expect("styles resolve");
+    let (_, card) = styled.world().entities().next().expect("the card");
+    let size = card.transform_3d.expect("sized").scale_2d();
+    // 10vh is 80px here, so min() picks 60px: 0.15 units.
+    assert!((size[1] - 0.15).abs() < 1.0e-5, "{size:?}");
+    size[0] * 400.0
+}
+
+#[test]
+fn clamp_keeps_a_card_between_its_bounds_on_any_screen() {
+    // 40vw of a phone, a tablet and a monitor: 160, 320 and 768 pixels.
+    assert!(
+        (clamped_width(400.0) - 200.0).abs() < 1.0e-2,
+        "held at its least"
+    );
+    assert!(
+        (clamped_width(800.0) - 320.0).abs() < 1.0e-2,
+        "a share of the screen"
+    );
+    assert!(
+        (clamped_width(1920.0) - 400.0).abs() < 1.0e-2,
+        "held at its most"
+    );
+}

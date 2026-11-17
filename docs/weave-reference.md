@@ -182,7 +182,10 @@ covering the outer border.
 `calc()` mixes units wherever a length goes: `width: calc(100% - 40px)`,
 `padding: calc(var(--gap) * 2) 8px`. Lengths add and subtract, and multiply
 or divide by plain numbers; `u` names the overlay's own unit inside one.
-`min()`, `max()` and `clamp()` are not read yet.
+`min()`, `max()` and `clamp(MIN, VAL, MAX)` choose between lengths once the
+screen is known, and nest in `calc()` and each other: `width: clamp(240px,
+40vw, 360px)` is 40% of the screen but never narrower than 240 pixels or wider
+than 360, which often saves a media query.
 
 ## Layout properties
 

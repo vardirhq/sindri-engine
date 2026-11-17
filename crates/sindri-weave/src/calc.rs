@@ -1,12 +1,17 @@
-//! `calc()`: arithmetic on lengths, as CSS does it.
+//! `calc()`, `min()`, `max()` and `clamp()`: arithmetic on lengths, as CSS
+//! does it.
 //!
 //! Lengths can be added and subtracted, and multiplied or divided by plain
-//! numbers, so whatever a `calc()` says reduces to so many overlay units, so
-//! many pixels, so much of the viewport's width and height, and so much of
-//! the containing box. That mix is what is kept, and it is resolved when the
-//! viewport and the box are known, exactly as a single length is.
+//! numbers, so the linear part of whatever is written reduces to so many
+//! overlay units, so many pixels, so much of the viewport's width and height,
+//! and so much of the containing box: a [`Mix`]. `min()`, `max()` and
+//! `clamp()` are not linear, so they are kept as nodes over their arguments and
+//! chosen between when the viewport and the box are known, as a single length
+//! is resolved then. `clamp(MIN, VAL, MAX)` is `max(MIN, min(VAL, MAX))`.
 //!
-//! `min()`, `max()` and `clamp()` are not linear and are not read yet.
+//! That is what a responsive size needs without a media query:
+//! `width: clamp(240px, 40vw, 360px)` is 40% of the screen, never narrower
+//! than a thumb's reach or wider than a card should be.
 
 /// A length made of several units at once: what a `calc()` comes to.
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
@@ -45,28 +50,117 @@ impl Mix {
 }
 
 /// One side of an operation: a plain number, or a length.
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 enum Term {
     Number(f32),
-    Length(Mix),
+    Length(Calc),
 }
 
-/// `calc(...)`, read into its mix of units. `None` for anything CSS would
-/// not accept: an unknown unit, two lengths multiplied, division by a length
-/// or by zero, or a bare number where a length belongs.
-pub(crate) fn parse(text: &str) -> Option<Mix> {
-    let inner = text.trim().strip_prefix("calc(")?.strip_suffix(')')?;
-    let tokens = tokenize(inner)?;
+/// What a `calc()` and its kin come to: a linear mix of units where it can,
+/// and a choice between such mixes where `min()`, `max()` or `clamp()` asks
+/// for one.
+#[derive(Clone, Debug, PartialEq)]
+pub(crate) enum Calc {
+    Linear(Mix),
+    /// Several lengths added: needed only once one of them is a choice.
+    Sum(Vec<Calc>),
+    /// A choice, scaled by a number.
+    Scaled(Box<Calc>, f32),
+    Min(Vec<Calc>),
+    Max(Vec<Calc>),
+}
+
+impl Calc {
+    /// The length in overlay units, given how each linear mix resolves.
+    /// `None` when a mix cannot be resolved, such as a percentage with no box.
+    pub(crate) fn resolve(&self, mix: &impl Fn(Mix) -> Option<f32>) -> Option<f32> {
+        match self {
+            Self::Linear(linear) => mix(*linear),
+            Self::Sum(parts) => parts.iter().map(|part| part.resolve(mix)).sum(),
+            Self::Scaled(inner, by) => Some(inner.resolve(mix)? * by),
+            Self::Min(parts) => parts
+                .iter()
+                .map(|part| part.resolve(mix))
+                .try_fold(f32::INFINITY, |least, value| Some(least.min(value?))),
+            Self::Max(parts) => parts
+                .iter()
+                .map(|part| part.resolve(mix))
+                .try_fold(f32::NEG_INFINITY, |most, value| Some(most.max(value?))),
+        }
+    }
+
+    fn plus(self, other: Self) -> Self {
+        match (self, other) {
+            (Self::Linear(a), Self::Linear(b)) => Self::Linear(a.plus(b)),
+            (Self::Sum(mut parts), other) => {
+                parts.push(other);
+                Self::Sum(parts)
+            }
+            (one, other) => Self::Sum(vec![one, other]),
+        }
+    }
+
+    fn scaled(self, by: f32) -> Self {
+        match self {
+            Self::Linear(mix) => Self::Linear(mix.scaled(by)),
+            Self::Sum(parts) => Self::Sum(parts.into_iter().map(|part| part.scaled(by)).collect()),
+            Self::Scaled(inner, was) => Self::Scaled(inner, was * by),
+            choice => Self::Scaled(Box::new(choice), by),
+        }
+    }
+}
+
+/// `calc(...)`, `min(...)`, `max(...)` or `clamp(...)`, read. `None` for
+/// anything CSS would not accept: an unknown unit, two lengths multiplied,
+/// division by a length or by zero, a bare number where a length belongs, a
+/// number and a length compared, or `clamp()` without its three arguments.
+pub(crate) fn parse(text: &str) -> Option<Calc> {
+    let tokens = tokenize(text.trim())?;
     let mut position = 0;
-    let term = sum(&tokens, &mut position)?;
-    if position != tokens.len() {
+    let term = operand(&tokens, &mut position)?;
+    if position != tokens.len() || !matches!(tokens.first(), Some(Token::Function(_))) {
         return None;
     }
     match term {
-        Term::Length(mix) => Some(mix),
+        Term::Length(calc) => Some(calc),
         // `calc(0)` is a length of nothing, as a bare `0` is.
-        Term::Number(0.0) => Some(Mix::default()),
+        Term::Number(0.0) => Some(Calc::Linear(Mix::default())),
         Term::Number(_) => None,
+    }
+}
+
+/// Whether `text` is written as one of the functions this reads.
+pub(crate) fn is_function(text: &str) -> bool {
+    let text = text.trim_start();
+    FUNCTIONS.iter().any(|function| {
+        text.strip_prefix(function.name())
+            .is_some_and(|rest| rest.starts_with('('))
+    })
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum Function {
+    Calc,
+    Min,
+    Max,
+    Clamp,
+}
+
+const FUNCTIONS: [Function; 4] = [
+    Function::Calc,
+    Function::Min,
+    Function::Max,
+    Function::Clamp,
+];
+
+impl Function {
+    const fn name(self) -> &'static str {
+        match self {
+            Self::Calc => "calc",
+            Self::Min => "min",
+            Self::Max => "max",
+            Self::Clamp => "clamp",
+        }
     }
 }
 
@@ -78,6 +172,9 @@ enum Token {
     Times,
     Divide,
     Open,
+    /// A function's name and its `(`.
+    Function(Function),
+    Comma,
     Close,
 }
 
@@ -118,15 +215,23 @@ fn tokenize(text: &str) -> Option<Vec<Token>> {
                 tokens.push(Token::Close);
                 at += 1;
             }
+            ',' => {
+                tokens.push(Token::Comma);
+                at += 1;
+            }
             _ if c.is_ascii_digit() || c == '.' => {
                 let (term, next) = value(&chars, at)?;
                 tokens.push(Token::Value(term));
                 at = next;
             }
-            // A nested `calc(` is only parentheses.
-            'c' if chars[at..].starts_with(&['c', 'a', 'l', 'c', '(']) => {
-                tokens.push(Token::Open);
-                at += 5;
+            _ if c.is_ascii_alphabetic() => {
+                let rest: String = chars[at..].iter().take(6).collect();
+                let function = FUNCTIONS.into_iter().find(|function| {
+                    rest.strip_prefix(function.name())
+                        .is_some_and(|after| after.starts_with('('))
+                })?;
+                tokens.push(Token::Function(function));
+                at += function.name().len() + 1;
             }
             _ => return None,
         }
@@ -170,7 +275,7 @@ fn value(chars: &[char], at: usize) -> Option<(Term, usize)> {
         end += 1;
     }
     let unit: String = chars[unit_start..end].iter().collect();
-    let length = |mix: Mix| Term::Length(mix);
+    let length = |mix: Mix| Term::Length(Calc::Linear(mix));
     let term = match unit.as_str() {
         "" => Term::Number(number),
         "px" => length(Mix {
@@ -239,9 +344,9 @@ fn operand(tokens: &[Token], at: &mut usize) -> Option<Term> {
     match tokens.get(*at)? {
         Token::Value(term) => {
             *at += 1;
-            Some(*term)
+            Some(term.clone())
         }
-        Token::Open => {
+        Token::Open | Token::Function(Function::Calc) => {
             *at += 1;
             let inner = sum(tokens, at)?;
             (tokens.get(*at) == Some(&Token::Close)).then(|| {
@@ -249,8 +354,64 @@ fn operand(tokens: &[Token], at: &mut usize) -> Option<Term> {
                 inner
             })
         }
+        Token::Function(function) => {
+            let function = *function;
+            *at += 1;
+            let mut arguments = vec![sum(tokens, at)?];
+            while tokens.get(*at) == Some(&Token::Comma) {
+                *at += 1;
+                arguments.push(sum(tokens, at)?);
+            }
+            if tokens.get(*at) != Some(&Token::Close) {
+                return None;
+            }
+            *at += 1;
+            choose(function, arguments)
+        }
         _ => None,
     }
+}
+
+/// `min()`, `max()` or `clamp()` over its arguments, which must all be
+/// numbers or all lengths. Numbers are chosen between at once.
+fn choose(function: Function, arguments: Vec<Term>) -> Option<Term> {
+    if function == Function::Clamp && arguments.len() != 3 {
+        return None;
+    }
+    if arguments.iter().all(|term| matches!(term, Term::Number(_))) {
+        let numbers: Vec<f32> = arguments
+            .iter()
+            .map(|term| match term {
+                Term::Number(number) => *number,
+                Term::Length(_) => unreachable!("all numbers"),
+            })
+            .collect();
+        let least = |values: &[f32]| values.iter().copied().fold(f32::INFINITY, f32::min);
+        let most = |values: &[f32]| values.iter().copied().fold(f32::NEG_INFINITY, f32::max);
+        return Some(Term::Number(match function {
+            Function::Min => least(&numbers),
+            Function::Max => most(&numbers),
+            Function::Clamp => numbers[0].max(numbers[1].min(numbers[2])),
+            Function::Calc => return None,
+        }));
+    }
+    let lengths = arguments
+        .into_iter()
+        .map(|term| match term {
+            Term::Length(calc) => Some(calc),
+            Term::Number(_) => None,
+        })
+        .collect::<Option<Vec<Calc>>>()?;
+    Some(Term::Length(match function {
+        Function::Min => Calc::Min(lengths),
+        Function::Max => Calc::Max(lengths),
+        Function::Clamp => {
+            let mut lengths = lengths.into_iter();
+            let (low, value, high) = (lengths.next()?, lengths.next()?, lengths.next()?);
+            Calc::Max(vec![low, Calc::Min(vec![value, high])])
+        }
+        Function::Calc => return None,
+    }))
 }
 
 fn scale(term: Term, by: f32) -> Term {
@@ -261,45 +422,4 @@ fn scale(term: Term, by: f32) -> Term {
 }
 
 #[cfg(test)]
-mod tests {
-    use super::{Mix, parse};
-
-    #[test]
-    fn lengths_add_and_scale_as_css_does() {
-        let mix = parse("calc(100% - 2 * 20px + 5vw)").expect("a length");
-        assert_eq!(
-            mix,
-            Mix {
-                percent: 100.0,
-                pixels: -40.0,
-                view_width: 5.0,
-                relative: true,
-                ..Mix::default()
-            }
-        );
-        let halved = parse("calc((50vh + 10px) / 2)").expect("a length");
-        assert_eq!(halved.view_height, 25.0);
-        assert_eq!(halved.pixels, 5.0);
-        assert!(!halved.relative);
-        assert_eq!(
-            parse("calc(-10px + 30px)").map(|mix| mix.pixels),
-            Some(20.0)
-        );
-        assert_eq!(
-            parse("calc(calc(10px) * 3)").map(|mix| mix.pixels),
-            Some(30.0)
-        );
-    }
-
-    #[test]
-    fn what_css_refuses_is_refused() {
-        assert_eq!(parse("calc(10px * 10px)"), None);
-        assert_eq!(parse("calc(10px / 0)"), None);
-        assert_eq!(parse("calc(10px / 2px)"), None);
-        assert_eq!(parse("calc(10px + 2)"), None);
-        assert_eq!(parse("calc(3)"), None);
-        assert_eq!(parse("calc(10em)"), None);
-        assert_eq!(parse("calc(10px"), None);
-        assert_eq!(parse("calc(0)"), Some(Mix::default()));
-    }
-}
+mod tests;

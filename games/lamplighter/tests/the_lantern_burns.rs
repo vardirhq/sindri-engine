@@ -43,7 +43,11 @@ fn the_lantern_runs_down_and_resin_feeds_it() {
 
     run.set_board("oil", 0.0);
     step(&mut run, 2);
-    assert!(beam(&run) < 0.45 * full, "dry, it is an ember: {}", beam(&run));
+    assert!(
+        beam(&run) < 0.45 * full,
+        "dry, it is an ember: {}",
+        beam(&run)
+    );
 
     // Nothing to feed it with: R does nothing.
     press(&mut run, Key::R);
@@ -58,7 +62,11 @@ fn the_lantern_runs_down_and_resin_feeds_it() {
     assert!(run.board("resin").abs() < 1e-3, "and is spent");
     assert!((run.board("fed") - 1.0).abs() < 1e-3);
     step(&mut run, 30);
-    assert!(beam(&run) > 0.7 * full, "and it burns again: {}", beam(&run));
+    assert!(
+        beam(&run) > 0.7 * full,
+        "and it burns again: {}",
+        beam(&run)
+    );
 }
 
 #[test]
