@@ -348,7 +348,9 @@ def sunfall(name, x, y, phase=0.0):
     itself; the pool is a wide, even light that does not flicker as a flame does."""
     gold = [1.0, 0.74, 0.36]
     return entity(name, name, at(x, y, 0), **{
-        'sindri.sprite': {'texture': 'textures/sunfall.png#shaft', 'layer': 5, 'size': [3.0, 9.0],
+        # A layer under what stands, so a figure in the shaft is drawn over it,
+        # lit by it, rather than hazed over by it.
+        'sindri.sprite': {'texture': 'textures/sunfall.png#shaft', 'layer': 4, 'size': [3.0, 9.0],
                           'tint': [1.35, 0.88, 0.34, 1.0], 'unlit': True,
                           'shader': 'shaders/sunfall.wgsl', 'shader_params': [1.0, phase, 0.0, 0.0]},
         'sindri.light2d': {'enabled': True, 'color': [*gold, 1.0], 'intensity': 2.0, 'radius': 4.5,

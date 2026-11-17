@@ -28,7 +28,7 @@
       "components": {
         "sindri.sprite": {
           "texture": "textures/sunfall.png#shaft",
-          "layer": 5,
+          "layer": 4,
           "size": [
             3.0,
             9.0

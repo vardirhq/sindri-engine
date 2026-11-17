@@ -1,5 +1,8 @@
 package dev.sindri.mobile
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -22,6 +25,11 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -33,15 +41,31 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.delay
 
-/** While the game runs: stop, pause and the clock, and how many edits were made. */
+/**
+ * While the game runs: stop, pause and the clock, and how many edits were made.
+ *
+ * Kept off the game's own screen: the controls sit at the top middle, which a
+ * game's HUD tends to leave clear (its corners are where readings go), and the
+ * hint on how to walk fades once it has been read or the first walk starts.
+ */
 @Composable
 fun BoxScope.PlayChrome(play: PlayUi, onEvent: (EditorEvent) -> Unit) {
     play.stick?.let { Stick(it) }
+    var hinted by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        delay(HINT_MILLIS)
+        hinted = true
+    }
+    val walking = play.stick != null
+    LaunchedEffect(walking) {
+        if (walking) hinted = true
+    }
     Box(Modifier.fillMaxSize().statusBarsPadding()) {
         Row(
             Modifier
-                .align(Alignment.TopStart)
+                .align(Alignment.TopCenter)
                 .padding(10.dp)
                 .height(52.dp)
                 .clip(RoundedCornerShape(18.dp))
@@ -73,17 +97,24 @@ fun BoxScope.PlayChrome(play: PlayUi, onEvent: (EditorEvent) -> Unit) {
             }
         }
     }
-    Text(
-        "Drag anywhere to walk · pause to tune",
-        style = ForgeType.text(13.sp, color = Forge.TextMuted),
-        modifier = Modifier
-            .align(Alignment.BottomCenter)
-            .navigationBarsPadding()
-            .padding(bottom = 40.dp)
-            .background(Color(0xCC0B0E12), RoundedCornerShape(14.dp))
-            .padding(horizontal = 16.dp, vertical = 10.dp),
-    )
+    AnimatedVisibility(
+        visible = !hinted,
+        enter = fadeIn(),
+        exit = fadeOut(),
+        modifier = Modifier.align(Alignment.BottomCenter).navigationBarsPadding().padding(bottom = 40.dp),
+    ) {
+        Text(
+            "Drag anywhere to walk · pause to tune",
+            style = ForgeType.text(13.sp, color = Forge.TextMuted),
+            modifier = Modifier
+                .background(Color(0xCC0B0E12), RoundedCornerShape(14.dp))
+                .padding(horizontal = 16.dp, vertical = 10.dp),
+        )
+    }
 }
+
+/** How long the hint on how to walk stays, unless walking starts first. */
+private const val HINT_MILLIS = 4_000L
 
 /** Paused: scrub back through what just ran, step, or resume; tap anything to tune it. */
 @Composable
