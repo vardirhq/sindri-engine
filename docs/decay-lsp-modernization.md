@@ -117,11 +117,12 @@ These are defects or sources of actively misleading tooling.
         variants, show them on hover, and list a file's enums and their
         variants as document symbols.
   - [ ] Keep project-index results deterministic.
-- [ ] Fix completion insertion for functions.
+- [x] Fix completion insertion for functions.
   - [x] Generate zero placeholders for zero-argument functions.
   - [x] Generate one placeholder per required parameter.
   - [x] Preserve useful signature/detail text.
-  - [ ] Test host and user-defined functions with 0, 1, and multiple arguments.
+  - [x] Test host and user-defined functions with 0, 1, and multiple arguments
+        (`a_completed_call_has_a_placeholder_for_each_argument`).
 - [ ] Audit LSP position handling against the protocol's negotiated encoding.
   - [x] Prove non-ASCII text before the cursor maps to the correct Decay byte
         offset and diagnostic range.

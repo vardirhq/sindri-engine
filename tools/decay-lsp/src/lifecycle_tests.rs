@@ -264,3 +264,50 @@ fn completion_and_hover_offer_every_reserved_keyword() {
         "`while` · Decay keyword"
     );
 }
+
+/// What completing `prefix` at the end of a line of `update` offers for
+/// `label`: its insert text.
+fn completes(prefix: &str, label: &str) -> Option<String> {
+    let uri = "file:///calls.decay";
+    let source = format!(
+        "script Calls {{\n    fn helper() {{ }}\n    fn heal(amount: number) {{ }}\n    fn mix(a: number, b: bool, c: String) {{ }}\n    fn update(dt: number) {{\n        {prefix}\n    }}\n}}"
+    );
+    let character = 8 + prefix.len();
+    let (_, messages) = run(&[
+        initialize(),
+        notification(
+            "textDocument/didOpen",
+            &json!({"textDocument":{"uri":uri,"text":source,"version":1}}),
+        ),
+        request(
+            2,
+            "textDocument/completion",
+            &json!({"textDocument":{"uri":uri},"position":{"line":5,"character":character}}),
+        ),
+    ]);
+    reply(&messages, 2)["result"]
+        .as_array()?
+        .iter()
+        .find(|item| item["label"] == label)
+        .map(|item| {
+            item["insertText"]
+                .as_str()
+                .unwrap_or_else(|| item["label"].as_str().unwrap())
+                .to_owned()
+        })
+}
+
+#[test]
+fn a_completed_call_has_a_placeholder_for_each_argument() {
+    // The host's own functions: none, one and two arguments.
+    assert_eq!(completes("Scene.", "current").as_deref(), Some("current()"));
+    assert_eq!(completes("World.", "find").as_deref(), Some("find($1)"));
+    assert_eq!(
+        completes("Animation.", "fired").as_deref(),
+        Some("fired($1, $2)")
+    );
+    // The script's own functions, completed by name where they are called.
+    assert_eq!(completes("hel", "helper").as_deref(), Some("helper()"));
+    assert_eq!(completes("hea", "heal").as_deref(), Some("heal($1)"));
+    assert_eq!(completes("mi", "mix").as_deref(), Some("mix($1, $2, $3)"));
+}
