@@ -7,6 +7,7 @@
 //! (`docs/agent-native-direction.md`).
 
 mod check;
+mod mcp;
 mod play;
 mod report;
 
@@ -17,6 +18,7 @@ const HELP: &str = r#"sindri: check a Sindri project from a shell.
 
 USAGE
   sindri project check [PATH] [--format human|json]
+  sindri mcp
   sindri play run [PATH] [--scene NAME] [--steps "STEP ..."] [--track ID]...
                   [--format human|json]
 
@@ -39,6 +41,10 @@ COMMANDS
                     release:<Key>
                     set:<name>=<number>  write a board value (set:wood=4)
                   for example: --steps "wait:0.5 hold:D wait:1 release:D"
+
+  mcp             Serve project check and play run as MCP tools on standard
+                  input and output, for an agent with no shell. Read-only:
+                  the tools answer with the commands' own JSON.
 
   help            This text.
 
@@ -130,6 +136,10 @@ fn run(args: &[String]) -> Result<ExitCode, String> {
                 Format::Human => print!("{}", report.human()),
             }
             Ok(exit(report.ok))
+        }
+        ["mcp"] => {
+            mcp::serve();
+            Ok(ExitCode::SUCCESS)
         }
         ["play", "run", target @ ..] => {
             let project = project(target)?;

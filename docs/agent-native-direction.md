@@ -246,7 +246,16 @@ every agent has one. Chat and IDE agents often reach tools only through MCP;
 shell. For them `sindri project check` and `sindri play --headless` do not
 exist, and the foundation is reduced to its docs.
 
-So once those commands exist, a thin MCP server may expose them:
+`sindri mcp` is that server, built at the project owner's ask ahead of the
+benchmark below: it serves `project_check` and `play_run` over MCP's stdio
+transport, each answering with exactly its command's JSON from the same
+functions. Register it with an MCP client as a command, for example:
+
+```bash
+claude mcp add sindri -- /path/to/sindri-engine/target/release/sindri mcp
+```
+
+It was planned as follows, and keeps to it:
 
 - `project_check`, returning the command's JSON unchanged;
 - `play_headless`, returning its per-frame log and any captured frames as
@@ -290,8 +299,8 @@ also shows whether the MCP adapter above is worth building.
 4. The editor reloads a scene changed on disk.
 5. A per-project agent guide written by `sindri new`, packaged as a skill.
 6. The external-agent benchmark, after which its failures order the rest.
-   Among the candidates it decides: the read-only MCP adapter, if agents
-   without a shell fall behind.
+   It also says whether the read-only MCP adapter (`sindri mcp`, already built)
+   closes the gap for agents without a shell.
 7. The local agent on the same checks: writing one script from a description,
    then selected-entity edits through the proposal protocol, then explaining a
    check failure. The benchmark gains a local-model column for the tasks the
