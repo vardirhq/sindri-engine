@@ -68,7 +68,12 @@ impl ProjectRenderer {
     ) -> Result<Self, Box<dyn Error>> {
         let mut textures = TextureRegistry::new(&gpu.device, &gpu.queue);
         let mut bindings = TextureBindings::new();
-        crate::bind_builtin_textures(&gpu.device, &gpu.queue, &mut textures, &mut bindings)?;
+        sindri_player::bind_builtin_textures(
+            &gpu.device,
+            &gpu.queue,
+            &mut textures,
+            &mut bindings,
+        )?;
         for (id, bytes) in images {
             let Ok(asset) =
                 TextureAssetDecoder.decode(AssetBytes::new(id.parse::<AssetId>()?, bytes.clone()))

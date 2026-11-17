@@ -1,4 +1,5 @@
-//! `sindri mcp`: the CLI's checks, served over MCP for an agent with no shell.
+//! `sindri mcp`: the CLI's checks, runs and pictures, served over MCP for an
+//! agent with no shell.
 //!
 //! An adapter, not an interface (`docs/agent-native-direction.md`): read-only,
 //! it never writes a project file, and each tool answers with exactly the
@@ -80,7 +81,7 @@ fn tools() -> Value {
         },
         {
             "name": "play_run",
-            "description": "Play a Sindri project headless at 60 steps a second with scripted input. Answers `sindri play run --format json`: the shared board (Game state), where each tracked entity ended up, and what scripts printed and failed, by frame.",
+            "description": "Play a Sindri project headless at 60 steps a second with scripted input, styled and laid out as it is drawn. Answers `sindri play run --format json`: the shared board (Game state), where each tracked entity ended up, and what scripts printed and failed, by frame; and each `shot` step's picture, inline.",
             "inputSchema": {
                 "type": "object",
                 "properties": {
@@ -89,7 +90,7 @@ fn tools() -> Value {
                     "steps": {
                         "type": "array",
                         "items": { "type": "string" },
-                        "description": "In order: wait:<seconds>, key:<Key> (a tap), hold:<Key>, release:<Key>, set:<name>=<number>. Keys by name: D, Space, ArrowLeft, F."
+                        "description": STEPS
                     },
                     "track": {
                         "type": "array",
@@ -99,9 +100,36 @@ fn tools() -> Value {
                 },
                 "required": ["project"]
             }
+        },
+        {
+            "name": "capture",
+            "description": "A picture of a Sindri project as a player would see it: opened at its main scene or `scene`, played through `steps`, then photographed. Answers the picture inline, and the run's report as `sindri render capture --format json` does.",
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "project": { "type": "string", "description": "The project folder, holding sindri.toml." },
+                    "scene": { "type": "string", "description": "A scene to start in, by file name, instead of the main one." },
+                    "steps": {
+                        "type": "array",
+                        "items": { "type": "string" },
+                        "description": STEPS
+                    },
+                    "track": {
+                        "type": "array",
+                        "items": { "type": "string" },
+                        "description": "Stable IDs of entities whose final position to report."
+                    },
+                    "width": { "type": "integer", "description": "Pixels across; 1280 unless given." },
+                    "height": { "type": "integer", "description": "Pixels down; 720 unless given." }
+                },
+                "required": ["project"]
+            }
         }
     ])
 }
+
+/// What a step may be, as the tools describe it.
+const STEPS: &str = "In order: wait:<seconds>; key:<Key> (a tap: Space, F, ArrowLeft); hold:<Key> and release:<Key>; set:<name>=<number> (a shared board value); click:<entity> (a laid-out UI element, by ID); type:<text>; place:<entity>=<x>,<y>; near:<entity>=<name> (in front of the first thing of that name); shot or shot:<name> (a picture, answered inline).";
 
 /// A tool's answer: its command's JSON as text, and whether it went wrong.
 fn call(params: &Value) -> Value {
@@ -133,19 +161,36 @@ fn call(params: &Value) -> Value {
             let report = check::check(&project);
             serde_json::to_value(&report).map(|value| (value, !report.ok))
         }
-        Some("play_run") => {
+        Some(tool @ ("play_run" | "capture")) => {
             let scene = text("scene");
-            let steps = list("steps");
+            let mut steps = list("steps");
+            if tool == "capture" {
+                steps.push("shot:capture".to_owned());
+            }
             let track = list("track");
-            match play::play(&play::Play {
+            let pixels = |key: &str, fallback: u32| {
+                arguments
+                    .get(key)
+                    .and_then(Value::as_u64)
+                    .and_then(|pixels| u32::try_from(pixels).ok())
+                    .unwrap_or(fallback)
+                    .clamp(16, 4096)
+            };
+            let shots = scratch();
+            let played = play::play(&play::Play {
                 project: &project,
                 scene: scene.as_deref(),
                 steps: &steps,
                 track: &track,
-            }) {
-                Ok(report) => serde_json::to_value(&report).map(|value| (value, !report.ok)),
-                Err(message) => return failed(&message),
-            }
+                shots: &shots,
+                size: [pixels("width", 1280), pixels("height", 720)],
+            });
+            let answer = match played {
+                Ok(report) => pictured(&report),
+                Err(message) => failed(&message),
+            };
+            let _ = std::fs::remove_dir_all(&shots);
+            return answer;
         }
         other => return failed(&format!("no tool {other:?}")),
     };
@@ -157,6 +202,61 @@ fn call(params: &Value) -> Value {
         }),
         Err(error) => failed(&error.to_string()),
     }
+}
+
+/// A run's answer: its report as text and structured content, then each
+/// picture it took, inline, so an agent sees it rather than a path.
+fn pictured(report: &play::PlayReport) -> Value {
+    let Ok(value) = serde_json::to_value(report) else {
+        return failed("the report would not serialize");
+    };
+    let mut content = vec![json!({ "type": "text", "text": value.to_string() })];
+    for shot in &report.shots {
+        match std::fs::read(&shot.path) {
+            Ok(png) => content.push(json!({
+                "type": "image",
+                "data": base64(&png),
+                "mimeType": "image/png",
+            })),
+            Err(error) => content.push(json!({
+                "type": "text",
+                "text": format!("frame {}: the picture would not read: {error}", shot.frame),
+            })),
+        }
+    }
+    json!({ "content": content, "structuredContent": value, "isError": !report.ok })
+}
+
+/// A folder of its own for one call's pictures.
+fn scratch() -> PathBuf {
+    use std::sync::atomic::{AtomicU32, Ordering};
+    static CALLS: AtomicU32 = AtomicU32::new(0);
+    std::env::temp_dir().join(format!(
+        "sindri-mcp-{}-{}",
+        std::process::id(),
+        CALLS.fetch_add(1, Ordering::Relaxed)
+    ))
+}
+
+/// Standard base64, which MCP carries images in.
+fn base64(bytes: &[u8]) -> String {
+    const ALPHABET: &[u8; 64] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    let mut out = String::with_capacity(bytes.len().div_ceil(3) * 4);
+    for chunk in bytes.chunks(3) {
+        let triple = chunk.iter().enumerate().fold(0_u32, |all, (index, byte)| {
+            all | u32::from(*byte) << (16 - 8 * index)
+        });
+        for place in 0..4 {
+            if place <= chunk.len() {
+                out.push(char::from(
+                    ALPHABET[(triple >> (18 - 6 * place) & 63) as usize],
+                ));
+            } else {
+                out.push('=');
+            }
+        }
+    }
+    out
 }
 
 fn failed(message: &str) -> Value {
@@ -183,7 +283,7 @@ mod tests {
             .iter()
             .map(|tool| tool["name"].as_str().unwrap())
             .collect();
-        assert_eq!(names, ["project_check", "play_run"]);
+        assert_eq!(names, ["project_check", "play_run", "capture"]);
     }
 
     #[test]
@@ -197,6 +297,16 @@ mod tests {
         let played = ask(&json!({"jsonrpc": "2.0", "id": 4, "method": "tools/call",
             "params": {"name": "play_run", "arguments": {"project": project, "steps": ["wait:0.2"]}}}));
         assert_eq!(played["result"]["structuredContent"]["frames"], 12);
+    }
+
+    #[test]
+    fn pictures_travel_as_base64() {
+        assert_eq!(base64(b""), "");
+        assert_eq!(base64(b"f"), "Zg==");
+        assert_eq!(base64(b"fo"), "Zm8=");
+        assert_eq!(base64(b"foo"), "Zm9v");
+        assert_eq!(base64(b"foobar"), "Zm9vYmFy");
+        assert_eq!(base64(&[0xFF, 0xEE]), "/+4=");
     }
 
     #[test]

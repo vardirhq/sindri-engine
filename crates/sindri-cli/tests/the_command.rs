@@ -127,5 +127,87 @@ fn a_step_that_does_not_read_is_a_usage_error() {
         .output()
         .unwrap();
     assert_eq!(output.status.code(), Some(2));
-    assert!(String::from_utf8_lossy(&output.stderr).contains("a step is wait:"));
+    assert!(String::from_utf8_lossy(&output.stderr).contains("a step is one of"));
+}
+
+/// Whether a run could not take its picture for want of a GPU, which a
+/// machine without one may say; CI sets `SINDRI_REQUIRE_GPU` so it may not.
+fn no_gpu(report: &serde_json::Value) -> bool {
+    let wanting = report["stopped"]
+        .as_str()
+        .is_some_and(|why| why.contains("needs a GPU adapter"));
+    if wanting {
+        assert!(
+            std::env::var_os("SINDRI_REQUIRE_GPU").is_none(),
+            "SINDRI_REQUIRE_GPU is set but a shot found no adapter: {report}"
+        );
+        eprintln!("skipping the picture: no GPU adapter");
+    }
+    wanting
+}
+
+/// `render capture` writes the picture a player would see, at the size
+/// asked, and says where.
+#[test]
+fn a_capture_is_a_picture_at_the_size_asked() {
+    let flappy = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../games/flappy");
+    let dir = tempfile::tempdir().unwrap();
+    let out = dir.path().join("title.png");
+    let output = Command::new(env!("CARGO_BIN_EXE_sindri"))
+        .args(["render", "capture"])
+        .arg(&flappy)
+        .arg("--out")
+        .arg(&out)
+        .args([
+            "--size", "320x240", "--steps", "wait:0.2", "--format", "json",
+        ])
+        .output()
+        .unwrap();
+    let report: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    if no_gpu(&report) {
+        return;
+    }
+    assert!(output.status.success(), "{report}");
+    assert_eq!(report["shots"][0]["path"], out.display().to_string());
+    let png = std::fs::read(&out).expect("the picture is written");
+    assert_eq!(&png[..8], b"\x89PNG\r\n\x1a\n");
+    // Width and height, big-endian, in the IHDR chunk.
+    assert_eq!(u32::from_be_bytes(png[16..20].try_into().unwrap()), 320);
+    assert_eq!(u32::from_be_bytes(png[20..24].try_into().unwrap()), 240);
+}
+
+/// The MCP `capture` tool answers with the picture itself, inline.
+#[test]
+fn the_mcp_capture_tool_answers_with_the_picture() {
+    use std::io::Write as _;
+    let flappy = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../games/flappy");
+    let mut child = Command::new(env!("CARGO_BIN_EXE_sindri"))
+        .arg("mcp")
+        .stdin(std::process::Stdio::piped())
+        .stdout(std::process::Stdio::piped())
+        .stderr(std::process::Stdio::null())
+        .spawn()
+        .unwrap();
+    let call = serde_json::json!({"jsonrpc": "2.0", "id": 1, "method": "tools/call",
+        "params": {"name": "capture", "arguments": {"project": flappy, "width": 160, "height": 120}}});
+    writeln!(child.stdin.take().unwrap(), "{call}").unwrap();
+    let output = child.wait_with_output().unwrap();
+    let reply: serde_json::Value =
+        serde_json::from_slice(output.stdout.split(|b| *b == b'\n').next().unwrap()).unwrap();
+    let result = &reply["result"];
+    if no_gpu(&result["structuredContent"]) {
+        return;
+    }
+    assert_eq!(result["isError"], false, "{result}");
+    let image = result["content"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|part| part["type"] == "image")
+        .expect("an image");
+    assert_eq!(image["mimeType"], "image/png");
+    assert!(
+        image["data"].as_str().unwrap().starts_with("iVBORw0KGgo"),
+        "base64 of a PNG"
+    );
 }

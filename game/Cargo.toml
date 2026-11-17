@@ -31,6 +31,7 @@ wgpu.workspace = true
 env_logger = "0.11"
 pollster.workspace = true
 sindri-gpu = { path = "../crates/sindri-gpu" }
+sindri-capture = { path = "../crates/sindri-capture" }
 png = "0.18"
 
 [lints]

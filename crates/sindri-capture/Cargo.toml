@@ -1,0 +1,28 @@
+[package]
+name = "sindri-capture"
+description = "Any Sindri project played and photographed offscreen, as the browser plays it: the capture behind sindri play and project-capture"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+# Depends on the independently versioned Weave workspace.
+publish = false
+
+[dependencies]
+log.workspace = true
+png = "0.18"
+sindri = { path = "../sindri" }
+sindri-assets = { path = "../sindri-assets" }
+sindri-core = { path = "../sindri-core" }
+sindri-gpu = { path = "../sindri-gpu" }
+sindri-platform = { path = "../sindri-platform" }
+sindri-player = { path = "../sindri-player" }
+sindri-render = { path = "../sindri-render" }
+sindri-runtime = { path = "../sindri-runtime" }
+sindri-scene = { path = "../sindri-scene" }
+weave = { path = "../../weave/crates/weave" }
+wgpu.workspace = true
+
+[lints]
+workspace = true

@@ -1,25 +1,24 @@
 //! `sindri play run`: a project played headless, at a fixed step, with
-//! scripted input, and what happened reported as JSON.
+//! scripted input, reported as JSON, with pictures when asked.
 //!
 //! What it gives an agent is the one thing files cannot: whether the change
 //! did what was meant. Press D for a second and read where the player went;
-//! press F and read whether the board says a fire was built. The fixed step
-//! makes a run reproducible, so it is a check rather than an anecdote
-//! (`docs/agent-native-direction.md`, section 3).
+//! press F and read whether the board says a fire was built; take a shot and
+//! look. The fixed step makes a run reproducible, so it is a check rather
+//! than an anecdote (`docs/agent-native-direction.md`, section 3).
+//!
+//! It plays through `sindri-capture`'s player, the one the browser's draw is
+//! mirrored by: a styled game is styled and laid out every step, so a click
+//! lands where a person's would and a picture is what they would see.
 
 use std::collections::BTreeMap;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 use serde::Serialize;
-use sindri_platform::{InputEvent, Key};
-use sindri_runtime::project::ProjectRun;
+use sindri_capture::{OpenedProject, Photographer, open, open_scene};
+use sindri_core::SceneEntityId;
 
 use crate::report::SCHEMA_VERSION;
-
-/// One fixed step: sixty to the second, as every game's test plays.
-const STEP: f32 = 1.0 / 60.0;
-/// A screen to lay a styled game out on, as a phone held sideways.
-const SCREEN: [f32; 2] = [1280.0, 720.0];
 
 /// What `sindri play run` answers.
 #[derive(Debug, Serialize)]
@@ -38,6 +37,8 @@ pub struct PlayReport {
     pub board: BTreeMap<String, f64>,
     /// Where each tracked entity was at the end, by stable ID.
     pub tracked: BTreeMap<String, Option<[f32; 2]>>,
+    /// The pictures taken, in order.
+    pub shots: Vec<Shot>,
     /// What scripts printed, what failed in them and what else went wrong,
     /// each with the frame it happened on.
     pub printed: Vec<Event>,
@@ -54,52 +55,73 @@ pub struct Event {
     pub message: String,
 }
 
-/// What to play: where, for how long, pressing what, watching whom.
+#[derive(Debug, Serialize)]
+pub struct Shot {
+    pub frame: u32,
+    pub path: String,
+}
+
+/// What to play: where, for how long, pressing what, watching whom, and
+/// where pictures go.
 pub struct Play<'a> {
     pub project: &'a Path,
     pub scene: Option<&'a str>,
     pub steps: &'a [String],
     pub track: &'a [String],
+    /// The folder `shot` steps write to.
+    pub shots: &'a Path,
+    /// The screen it is played and photographed at, in pixels.
+    pub size: [u32; 2],
 }
+
+/// The verbs a step may start with; checked before anything is opened, so a
+/// typo is a usage error rather than a run that stops halfway.
+const VERBS: [&str; 13] = [
+    "wait", "key", "hold", "release", "set", "click", "wheel", "type", "move", "down", "up",
+    "place", "near",
+];
 
 /// Plays the project.
 ///
 /// # Errors
 /// A project that will not open, or a step that does not read.
 pub fn play(request: &Play<'_>) -> Result<PlayReport, String> {
-    let steps = request
-        .steps
-        .iter()
-        .map(|step| parse_step(step))
-        .collect::<Result<Vec<_>, _>>()?;
-    let run = match request.scene {
-        Some(scene) => ProjectRun::open_scene(request.project, scene, SCREEN),
-        None => ProjectRun::open(request.project, SCREEN),
-    }?;
-    let mut player = Player {
-        scene: run.session.scene().map(str::to_owned),
-        run,
-        frame: 0,
+    for step in request.steps {
+        let verb = step.split_once(':').map_or(step.as_str(), |(verb, _)| verb);
+        if verb != "shot" && !VERBS.contains(&verb) {
+            return Err(format!(
+                "{step}: a step is one of shot, {}",
+                VERBS.join(", ")
+            ));
+        }
+    }
+    #[allow(clippy::cast_precision_loss)]
+    let screen = [request.size[0] as f32, request.size[1] as f32];
+    let mut opened = match request.scene {
+        Some(scene) => open_scene(request.project, scene, screen),
+        None => open(request.project, screen),
+    }
+    .map_err(|error| error.to_string())?;
+    opened.player.collecting();
+    let scene = opened.player.session.scene().map(str::to_owned);
+    let mut run = Run {
+        opened,
+        photographer: None,
         printed: Vec::new(),
         failures: Vec::new(),
         problems: Vec::new(),
+        shots: Vec::new(),
     };
     let mut stopped = None;
-    for step in &steps {
-        if let Err(error) = player.perform(step) {
-            stopped = Some(error);
+    for (index, step) in request.steps.iter().enumerate() {
+        if let Err(error) = run.perform(step, index, request) {
+            stopped = Some(format!("{step}: {error}"));
             break;
         }
     }
-    let Player {
-        run,
-        frame,
-        printed,
-        failures,
-        problems,
-        scene,
-    } = player;
-    let board = run
+    run.gather();
+    let player = &run.opened.player;
+    let board = player
         .session
         .scripts()
         .blackboard()
@@ -110,28 +132,102 @@ pub fn play(request: &Play<'_>) -> Result<PlayReport, String> {
         .track
         .iter()
         .map(|id| {
-            (
-                id.clone(),
-                run.entity(id).map(|entity| run.position(entity)),
-            )
+            let at = SceneEntityId::new(id.clone())
+                .ok()
+                .and_then(|id| player.world.entity_for_source_id(&id))
+                .and_then(|entity| player.world.world_transform(entity))
+                .map(|place| [place.position[0], place.position[1]]);
+            (id.clone(), at)
         })
         .collect();
     Ok(PlayReport {
         schema_version: SCHEMA_VERSION,
         project: request.project.display().to_string(),
-        ok: failures.is_empty() && stopped.is_none(),
+        ok: run.failures.is_empty() && stopped.is_none(),
         scene,
-        ended_in: run.session.scene().map(str::to_owned),
-        frames: frame,
-        #[allow(clippy::cast_precision_loss)]
-        seconds: frame as f32 * STEP,
+        ended_in: player.session.scene().map(str::to_owned),
+        frames: player.frame(),
+        seconds: player.seconds,
         board,
         tracked,
-        printed,
-        failures,
-        problems,
+        shots: run.shots,
+        printed: run.printed,
+        failures: run.failures,
+        problems: run.problems,
         stopped,
     })
+}
+
+struct Run {
+    opened: OpenedProject,
+    /// Made at the first `shot`, so a run that takes none needs no GPU.
+    photographer: Option<Photographer>,
+    printed: Vec<Event>,
+    failures: Vec<Event>,
+    problems: Vec<Event>,
+    shots: Vec<Shot>,
+}
+
+impl Run {
+    fn perform(&mut self, step: &str, index: usize, request: &Play<'_>) -> Result<(), String> {
+        let (verb, name) = step.split_once(':').unwrap_or((step, ""));
+        if verb != "shot" {
+            let done = self
+                .opened
+                .player
+                .perform(step)
+                .map_err(|error| error.to_string());
+            self.gather();
+            return done;
+        }
+        if self.photographer.is_none() {
+            let photographer = pollster::block_on(Photographer::new(
+                &self.opened,
+                (request.size[0], request.size[1]),
+            ))
+            .map_err(|error| format!("a shot needs a GPU adapter: {error}"))?;
+            self.photographer = Some(photographer);
+        }
+        let file = if name.is_empty() {
+            format!("shot-{}.png", index + 1)
+        } else {
+            format!("{name}.png")
+        };
+        let path: PathBuf = request.shots.join(file);
+        self.photographer
+            .as_mut()
+            .expect("made above")
+            .shoot(&mut self.opened.player, &path)
+            .map_err(|error| error.to_string())?;
+        self.shots.push(Shot {
+            frame: self.opened.player.frame(),
+            path: path.display().to_string(),
+        });
+        Ok(())
+    }
+
+    /// The steps' reports since the last call, sorted into what was printed,
+    /// what failed and what else went wrong.
+    fn gather(&mut self) {
+        for (frame, report) in self.opened.player.take_reports() {
+            let event = |message: String| Event { frame, message };
+            self.printed.extend(
+                report
+                    .scripts
+                    .printed
+                    .into_iter()
+                    .map(|printed| event(printed.message)),
+            );
+            self.failures.extend(
+                report
+                    .scripts
+                    .failures
+                    .into_iter()
+                    .map(|failure| event(failure.to_string())),
+            );
+            self.problems.extend(report.problems.into_iter().map(event));
+        }
+    }
 }
 
 impl PlayReport {
@@ -157,6 +253,9 @@ impl PlayReport {
                 let _ = writeln!(out, "  frame {}: {kind}: {}", event.frame, event.message);
             }
         }
+        for shot in &self.shots {
+            let _ = writeln!(out, "  frame {}: shot {}", shot.frame, shot.path);
+        }
         for (id, at) in &self.tracked {
             match at {
                 Some([x, y]) => {
@@ -181,124 +280,5 @@ impl PlayReport {
         }
         let _ = writeln!(out, "{}", if self.ok { "ok" } else { "failed" });
         out
-    }
-}
-
-/// One thing to do: `wait:<seconds>`, `key:<Key>` (tapped), `hold:<Key>` and
-/// `release:<Key>` (held across what follows), `set:<name>=<value>` (a board
-/// value, as a test asks a game for a state).
-#[derive(Debug, PartialEq)]
-enum Step {
-    Wait(u32),
-    Tap(Key),
-    Hold(Key),
-    Release(Key),
-    Set(String, f32),
-}
-
-fn parse_step(text: &str) -> Result<Step, String> {
-    let (verb, rest) = text.split_once(':').unwrap_or((text, ""));
-    let key = || Key::from_name(rest).ok_or_else(|| format!("{text}: no key named {rest}"));
-    Ok(match verb {
-        "wait" => {
-            let seconds: f32 = rest
-                .parse()
-                .map_err(|_| format!("{text}: wait takes seconds"))?;
-            if !seconds.is_finite() || seconds < 0.0 {
-                return Err(format!("{text}: wait takes a positive number of seconds"));
-            }
-            #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
-            Step::Wait((seconds / STEP).round() as u32)
-        }
-        "key" => Step::Tap(key()?),
-        "hold" => Step::Hold(key()?),
-        "release" => Step::Release(key()?),
-        "set" => {
-            let (name, value) = rest
-                .split_once('=')
-                .ok_or_else(|| format!("{text}: set takes <name>=<value>"))?;
-            let value = value
-                .parse()
-                .map_err(|_| format!("{text}: {value} is not a number"))?;
-            Step::Set(name.to_owned(), value)
-        }
-        _ => {
-            return Err(format!(
-                "{text}: a step is wait:<seconds>, key:<Key>, hold:<Key>, release:<Key> or set:<name>=<value>"
-            ));
-        }
-    })
-}
-
-struct Player {
-    run: ProjectRun,
-    scene: Option<String>,
-    frame: u32,
-    printed: Vec<Event>,
-    failures: Vec<Event>,
-    problems: Vec<Event>,
-}
-
-impl Player {
-    fn perform(&mut self, step: &Step) -> Result<(), String> {
-        match step {
-            Step::Wait(frames) => {
-                for _ in 0..*frames {
-                    self.tick()?;
-                }
-            }
-            Step::Tap(key) => {
-                self.run.input.apply(InputEvent::KeyPressed(*key));
-                self.tick()?;
-                self.run.input.apply(InputEvent::KeyReleased(*key));
-                self.tick()?;
-            }
-            Step::Hold(key) => self.run.input.apply(InputEvent::KeyPressed(*key)),
-            Step::Release(key) => self.run.input.apply(InputEvent::KeyReleased(*key)),
-            Step::Set(name, value) => self.run.set_board(name, *value),
-        }
-        Ok(())
-    }
-
-    fn tick(&mut self) -> Result<(), String> {
-        let report = self.run.step(STEP)?;
-        let frame = self.frame;
-        self.frame += 1;
-        let event = |message: String| Event { frame, message };
-        self.printed.extend(
-            report
-                .scripts
-                .printed
-                .into_iter()
-                .map(|printed| event(printed.message)),
-        );
-        self.failures.extend(
-            report
-                .scripts
-                .failures
-                .into_iter()
-                .map(|failure| event(failure.to_string())),
-        );
-        self.problems.extend(report.problems.into_iter().map(event));
-        Ok(())
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn steps_read_as_written() {
-        assert_eq!(parse_step("wait:1"), Ok(Step::Wait(60)));
-        assert_eq!(parse_step("hold:D"), Ok(Step::Hold(Key::D)));
-        assert_eq!(parse_step("key:Space"), Ok(Step::Tap(Key::Space)));
-        assert_eq!(
-            parse_step("set:wood=4"),
-            Ok(Step::Set("wood".to_owned(), 4.0))
-        );
-        assert!(parse_step("wait:-1").is_err());
-        assert!(parse_step("hold:Nope").is_err());
-        assert!(parse_step("jump").is_err());
     }
 }

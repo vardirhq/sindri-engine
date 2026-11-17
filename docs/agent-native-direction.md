@@ -247,9 +247,10 @@ shell. For them `sindri project check` and `sindri play --headless` do not
 exist, and the foundation is reduced to its docs.
 
 `sindri mcp` is that server, built at the project owner's ask ahead of the
-benchmark below: it serves `project_check` and `play_run` over MCP's stdio
-transport, each answering with exactly its command's JSON from the same
-functions. Register it with an MCP client as a command, for example:
+benchmark below: it serves `project_check`, `play_run` and `capture` over
+MCP's stdio transport, each answering with exactly its command's JSON from the
+same functions, and `play_run`'s shots and `capture`'s picture as inline
+images, so an agent looks at the result rather than at a path. Register it with an MCP client as a command, for example:
 
 ```bash
 claude mcp add sindri -- /path/to/sindri-engine/target/release/sindri mcp
@@ -292,10 +293,14 @@ also shows whether the MCP adapter above is worth building.
    crate that raised it gives (`SceneError::code`, `PrefabError::code`,
    `ComponentRegistryError::code`, Weave's `ParseError::code`).
 2. JSON Schemas for scenes and prefabs, generated from the component registry.
-3. *Started:* `sindri play run [PATH] [--scene] [--steps "wait:1 hold:D …"]
-   [--track ID]`, headless at a fixed step with scripted input, reporting the
-   shared board, where tracked entities ended up, and what scripts printed and
-   failed, per frame. Capture is still `project-capture`, outside the CLI.
+3. *Done:* `sindri play run [PATH] [--scene] [--steps "wait:1 hold:D … shot"]
+   [--track ID] [--shots DIR] [--size WxH]`, headless at a fixed step with
+   scripted input (keys, clicks on laid-out elements, typing, board values,
+   moving an entity), styled and laid out as it is drawn, reporting the shared
+   board, where tracked entities ended up, the pictures `shot` steps took, and
+   what scripts printed and failed, per frame. `sindri render capture --out`
+   is the same run ending in one picture. The player behind it is
+   `crates/sindri-capture`, which Causeway's `project-capture` uses too.
 4. The editor reloads a scene changed on disk.
 5. A per-project agent guide written by `sindri new`, packaged as a skill.
 6. The external-agent benchmark, after which its failures order the rest.

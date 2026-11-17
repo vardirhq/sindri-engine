@@ -4,6 +4,7 @@ members = [
     "crates/sindri",
     "crates/sindri-assets",
     "crates/sindri-authoring",
+    "crates/sindri-capture",
     "crates/sindri-cli",
     "crates/sindri-core",
     "crates/sindri-decay",
