@@ -183,6 +183,18 @@ impl<'a> WorldHost<'a> {
         }
         self.authored(slot)
             .and_then(|properties| properties.get(field).and_then(crate::scripts::to_value))
+            // Then what its declaration starts it as, where that is a literal.
+            .or_else(|| {
+                let script = self.script_name(slot)?;
+                peers
+                    .project
+                    .scripts
+                    .get(&script)?
+                    .literals
+                    .iter()
+                    .find(|(name, _)| name == field)
+                    .map(|(_, value)| value.clone())
+            })
             .ok_or_else(|| {
                 RuntimeError::Host(format!(
                     "`{field}` cannot be read yet: that script has not started, and nothing \

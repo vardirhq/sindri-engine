@@ -2607,6 +2607,10 @@ as another entity. This is what `World.set_property` did by name, and the
 typed form checks the name and the type. So that a project can move over one
 call at a time, a starting value written to an `@export` field is also what
 `World.property_number` reads, exactly as `World.set_property` made it.
+Reading a field of a script that has not started gives what was set for it to
+start with, else what the scene authored, else what its declaration starts it
+as when that is a plain literal (`var lit: bool = false`); a field worked out
+from anything else cannot be read until the script starts.
 
 **A call is a message.** It is not run when it is made: it is queued, and
 delivered once the pass has run, in the order sent. A message returns nothing,

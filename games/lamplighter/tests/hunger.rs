@@ -78,3 +78,25 @@ fn starving_a_scorch_does_not_mend() {
     step(&mut run, 60 * 3);
     assert!(run.board("scorch") < 0.4, "fed, it mends");
 }
+
+/// Out in the wilds a lantern put out starts the wilds over, not the field the
+/// game used to begin in, and what Wick carried is gone.
+#[test]
+fn a_lantern_put_out_in_the_wilds_starts_the_wilds_over() {
+    let mut run = Run::open_scene("wilds.scene").expect("the wilds open");
+    step(&mut run, 10);
+    run.set_board("berries", 3.0);
+    run.set_board("lost", 1.0);
+    let mut again = false;
+    for _ in 0..300 {
+        step(&mut run, 1);
+        if run.board("lost") < 0.5 {
+            again = true;
+            break;
+        }
+    }
+    assert!(again, "it starts again");
+    assert_eq!(run.session.scene(), Some("wilds.scene"), "in the wilds");
+    step(&mut run, 2);
+    assert!(run.board("berries").abs() < 1e-3, "with an empty pack");
+}

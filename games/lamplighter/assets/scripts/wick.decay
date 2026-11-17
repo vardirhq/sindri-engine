@@ -125,11 +125,12 @@ script Wick {
         float_the_lantern(dt);
         show_the_hit();
         if Game.lost {
-            // The lantern is out: Wick stands in the dark a moment, then the field starts over.
+            // The lantern is out: Wick stands in the dark a moment, then where he
+            // is starts over, and what he carried is lost with it.
             Physics.set_velocity(this.entity, 0.0, 0.0);
             this.lost_for += dt;
             if this.lost_for >= 1.6 {
-                Scene.restart("world.scene");
+                Scene.restart(Scene.current());
             }
             return;
         }

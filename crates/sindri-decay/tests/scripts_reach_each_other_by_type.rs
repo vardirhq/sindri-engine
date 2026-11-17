@@ -207,3 +207,23 @@ fn a_script_is_reached_straight_from_the_lookup_and_from_a_field() {
     assert!((x - 2.0).abs() < 1e-6, "{x}");
     assert!((y - 2.0).abs() < 1e-6, "{y}");
 }
+
+/// A script that runs before another has started can still read a field that
+/// other declares as a plain literal: `armour` starts as 2.0 whatever happens,
+/// so there is nothing to wait for.
+#[test]
+fn a_literal_field_is_read_before_its_script_starts() {
+    let mut world = World::default();
+    let tower = scripted(&mut world, "Turret", "turret.decay", "Turret");
+    scripted(&mut world, "Bolt", "bolt.decay", "Bolt");
+    let mut sources = ScriptSources::new();
+    sources.insert("bolt.decay", BOLT);
+    sources.insert(
+        "turret.decay",
+        "script Turret { fn start() { let bolt = Bolt.on(World.find(\"Bolt\")); \
+         this.transform.position.x = bolt.armour; } }",
+    );
+    let failures = frames(&mut world, &sources, 1);
+    assert!(failures.is_empty(), "{failures:?}");
+    assert!((position(&world, tower)[0] - 2.0).abs() < 1e-6);
+}

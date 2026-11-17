@@ -2,6 +2,10 @@
 
 # Changelog
 
+- Decay: a field another script declares as a plain literal (`var lit: bool = false`) can be read before that script has started, rather than failing as if it had no value. Lamplighter's wilds starting over after the lantern goes out tripped on it.
+
+- Lamplighter: when the lantern goes out in the wilds, the wilds start over (with an empty pack) rather than the field the game used to begin in.
+
 - Decay refuses `this.field = …` on a field declared with `let` when the script is checked, rather than failing with `Immutable` at runtime. Orbital Last Stand's enemies declared `hazard_damage` with `let` and cleared it, which had only not failed because nothing ever set it; it is `var` now.
 
 - Weave reads `min()`, `max()` and `clamp()` wherever a length goes, nested in `calc()` and in each other, chosen once the screen is known: `width: clamp(240px, 40vw, 360px)`.

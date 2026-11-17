@@ -130,6 +130,9 @@ pub(crate) struct Declared {
     pub messages: Vec<(String, Vec<Type>)>,
     /// The fields marked `@export`, which a scene may author.
     pub exported: Vec<String>,
+    /// What each field written as a plain literal starts as (`var lit: bool =
+    /// false`), so another script can read it before this one has started.
+    pub literals: Vec<(String, decay_runtime::Value)>,
 }
 
 /// A name neither an engine type nor an engine global, so a project's
@@ -369,6 +372,9 @@ impl Declared {
                         .as_ref()
                         .map_or_else(|| literal_type(field.initializer.as_ref()), Type::from_ref);
                     declared.fields.push((field.name.clone(), ty));
+                    if let Some(value) = field.initializer.as_ref().and_then(literal_value) {
+                        declared.literals.push((field.name.clone(), value));
+                    }
                     if field
                         .attributes
                         .iter()
@@ -552,5 +558,27 @@ fn literal_type(initializer: Option<&decay_syntax::Expr>) -> Type {
 
 mod constants;
 mod kinds;
+/// A field's starting value when its initializer is a plain literal: a
+/// number (negated or not), text, true or false, or `null`. Anything else is
+/// worked out when the script starts.
+fn literal_value(expr: &decay_syntax::Expr) -> Option<decay_runtime::Value> {
+    use decay_runtime::Value;
+    use decay_syntax::{ExprKind, UnaryOp};
+    match &expr.kind {
+        ExprKind::Number(number) => Some(Value::Number(*number)),
+        ExprKind::String(text) => Some(Value::String(text.clone())),
+        ExprKind::Bool(flag) => Some(Value::Bool(*flag)),
+        ExprKind::Null => Some(Value::Null),
+        ExprKind::Unary {
+            op: UnaryOp::Negate,
+            expr,
+        } => match expr.kind {
+            ExprKind::Number(number) => Some(Value::Number(-number)),
+            _ => None,
+        },
+        _ => None,
+    }
+}
+
 #[cfg(test)]
 mod tests;
