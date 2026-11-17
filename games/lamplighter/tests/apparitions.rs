@@ -18,7 +18,8 @@ fn visible(run: &Run) -> usize {
             let data = run.world.get(entity).expect("vision data");
             data.components["sindri.sprite"]["tint"][3]
                 .as_f64()
-                .expect("opacity") > 0.01
+                .expect("opacity")
+                > 0.01
         })
         .count()
 }
