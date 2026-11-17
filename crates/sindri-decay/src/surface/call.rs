@@ -244,6 +244,10 @@ pub(crate) enum UiCall {
     /// Turns a button off or on: a disabled button is not pressed, and a
     /// stylesheet can show it as such (`:disabled`).
     SetDisabled,
+    /// Gives an element a stylesheet class, or takes it away: what its rules
+    /// match, and so how it looks, changes on the next frame, and an
+    /// animation the class names starts.
+    SetClass,
     InputText,
     SetInputText,
     ScrollOffset,
@@ -302,6 +306,7 @@ pub(crate) const UI_CALLS: &[(&str, UiCall)] = &[
     ("is_checked", UiCall::Checked),
     ("set_checked", UiCall::SetChecked),
     ("set_disabled", UiCall::SetDisabled),
+    ("set_class", UiCall::SetClass),
     ("input_text", UiCall::InputText),
     ("set_input_text", UiCall::SetInputText),
     ("scroll_offset", UiCall::ScrollOffset),

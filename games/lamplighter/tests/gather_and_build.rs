@@ -155,3 +155,37 @@ fn a_finger_on_the_campfire_card_builds_one() {
     step(&mut run, 10);
     assert_eq!(running(&run, "Fire", None).len(), 1, "a campfire is built");
 }
+
+/// The fill a screen element is drawn with this frame: styled, animations
+/// and all, as a host draws it.
+fn drawn_fill(run: &mut Run, id: &str) -> serde_json::Value {
+    let entity = run.entity(id).expect("the element");
+    run.draw_with(|_, world, _| {
+        let fill = world.get(entity).expect("drawn").components["sindri.ui.shape"]["fill"].clone();
+        Ok((fill, sindri_scene::UiTextSizes::new()))
+    })
+    .expect("it draws")
+}
+
+/// A row of the pack shines for a moment when it gains, and goes back.
+#[test]
+fn the_pack_row_shines_when_wick_gathers() {
+    let mut run = Run::open_scene("wilds.scene").expect("the wilds open");
+    step(&mut run, 10);
+    let resting = drawn_fill(&mut run, "pack-wood-row");
+    run.set_board("wood", 1.0);
+    step(&mut run, 2);
+    drawn_fill(&mut run, "pack-wood-row");
+    step(&mut run, 6);
+    let shining = drawn_fill(&mut run, "pack-wood-row");
+    assert_ne!(shining, resting, "it shines: {shining} against {resting}");
+    for _ in 0..60 {
+        step(&mut run, 1);
+        drawn_fill(&mut run, "pack-wood-row");
+    }
+    assert_eq!(
+        drawn_fill(&mut run, "pack-wood-row"),
+        resting,
+        "and goes back"
+    );
+}

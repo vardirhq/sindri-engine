@@ -23,6 +23,15 @@ script Pack {
     var fire_button: Entity = null;
     var lamp_button: Entity = null;
     var light: Entity = null;
+    var light_panel: Entity = null;
+    // What the pack held last frame, and how long each row has shone since it
+    // gained (`gained` in `ui/hud.weave`).
+    var had_wood: number = 0.0;
+    var had_stone: number = 0.0;
+    var had_resin: number = 0.0;
+    var wood_shone: number = 9.0;
+    var stone_shone: number = 9.0;
+    var resin_shone: number = 9.0;
     var age: number = 0.0;
 
     fn start() {
@@ -33,6 +42,7 @@ script Pack {
         this.fire_button = World.find("craft-campfire");
         this.lamp_button = World.find("craft-lamp");
         this.light = World.find("hud-light-fill");
+        this.light_panel = World.find("hud-light");
     }
 
     fn update(dt: number) {
@@ -47,8 +57,17 @@ script Pack {
         // it as spent (`:disabled` in `ui/hud.weave`).
         Ui.set_disabled(this.fire_button, !fire_ok);
         Ui.set_disabled(this.lamp_button, !lamp_ok);
-        // How much light the lantern has left, scorched by a gloom's pounce.
+        // How much light the lantern has left, scorched by a gloom's pounce,
+        // and the panel pulsing red while a Seeker has him.
         Ui.set_fill(this.light, 1.0 - Game.scorch);
+        Ui.set_class(this.light_panel, "found", Game.found > 0.5);
+        // A row shines for a moment when what it counts goes up.
+        this.wood_shone = shine("pack-wood-row", Game.wood > this.had_wood, this.wood_shone, dt);
+        this.stone_shone = shine("pack-stone-row", Game.stone > this.had_stone, this.stone_shone, dt);
+        this.resin_shone = shine("pack-resin-row", Game.resin > this.had_resin, this.resin_shone, dt);
+        this.had_wood = Game.wood;
+        this.had_stone = Game.stone;
+        this.had_resin = Game.resin;
         // Wick has started by now, and faces somewhere.
         if this.age < 0.1 || Game.lost {
             return;
@@ -63,6 +82,18 @@ script Pack {
             Game.resin -= this.lamp_resin;
             build(this.lamp);
         }
+    }
+
+    // A row given `gained` when it goes up, and the class taken back once its
+    // animation has played, so the next gain plays it again. Answers how long
+    // it has shone.
+    fn shine(row: String, gained: bool, shone: number, dt: number) -> number {
+        var since: number = shone + dt;
+        if gained {
+            since = 0.0;
+        }
+        Ui.set_class(World.find(row), "gained", since < 0.5);
+        return since;
     }
 
     // Built a step ahead of Wick, the way he faces.

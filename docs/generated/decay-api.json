@@ -5369,6 +5369,22 @@
           "returns": "unit"
         },
         {
+          "description": "Gives an element a stylesheet class (true) or takes it away: it is restyled on the next frame, and an animation the class names starts.",
+          "kind": "function",
+          "name": "set_class",
+          "parameter_names": [
+            "element",
+            "class",
+            "on"
+          ],
+          "parameters": [
+            "Entity",
+            "String",
+            "bool"
+          ],
+          "returns": "unit"
+        },
+        {
           "description": "Turns a button off (true) or on: a disabled button cannot be pressed, and a stylesheet shows it with `:disabled`.",
           "kind": "function",
           "name": "set_disabled",

@@ -69,6 +69,11 @@ pub(super) const TYPES: &[TypeEntry] = &[
                 "Sets a toggle without emitting a user-change event.",
             ),
             call(
+                "set_class",
+                &["element", "class", "on"],
+                "Gives an element a stylesheet class (true) or takes it away: it is restyled on the next frame, and an animation the class names starts.",
+            ),
+            call(
                 "set_disabled",
                 &["button", "disabled"],
                 "Turns a button off (true) or on: a disabled button cannot be pressed, and a stylesheet shows it with `:disabled`.",

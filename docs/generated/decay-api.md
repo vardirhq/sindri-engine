@@ -803,6 +803,7 @@ The interface drawn over the game: changing text and bars, and checking buttons 
 - `selection_end(input: Entity)` → `number` — Where a text field's selection ends, in characters; the caret when nothing is selected.
 - `selection_start(input: Entity)` → `number` — Where a text field's selection begins, in characters; the caret when nothing is selected.
 - `set_checked(toggle: Entity, checked: bool)` → `unit` — Sets a toggle without emitting a user-change event.
+- `set_class(element: Entity, class: String, on: bool)` → `unit` — Gives an element a stylesheet class (true) or takes it away: it is restyled on the next frame, and an animation the class names starts.
 - `set_disabled(button: Entity, disabled: bool)` → `unit` — Turns a button off (true) or on: a disabled button cannot be pressed, and a stylesheet shows it with `:disabled`.
 - `set_fill(bar: Entity, amount: number)` → `unit` — Shows part of an image, from 0 (none) to 1 (all). This is how health and progress bars work: `Ui.set_fill(bar, hp / max_hp)`.
 - `set_input_text(input: Entity, text: String)` → `unit` — Writes text using the input's Unicode length limit.

@@ -13,6 +13,7 @@ use thiserror::Error;
 mod cascade;
 mod composition;
 mod edit;
+mod keyframes;
 mod media;
 mod parse_selector;
 mod selector;
@@ -22,6 +23,7 @@ mod structural;
 pub use cascade::{Computed, INHERITED, Matched, cascade, matched};
 pub use composition::{ComposeError, compose, compose_all, imports, resolve_import};
 pub use edit::{EditError, set_declaration};
+pub use keyframes::Keyframes;
 pub use media::{MediaCondition, MediaQuery};
 pub use selector::{
     Combinator, Compound, Element, ListKind, Position, Selector, Specificity, States, Structural,
@@ -31,6 +33,8 @@ pub use selector::{
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct Stylesheet {
     pub rules: Vec<Rule>,
+    /// Each `@keyframes` animation, by name: what an `animation` plays.
+    pub keyframes: BTreeMap<String, Keyframes>,
 }
 
 /// One selector and what it declares.
@@ -84,6 +88,8 @@ pub enum ParseError {
         "`:{0}` is not a state Weave knows; it knows :hover, :active (or :pressed), :focus, :disabled, :checked and :open"
     )]
     UnsupportedPseudoClass(String),
+    #[error("`{0}` is not a keyframe; a keyframe is `from`, `to` or a percentage from 0% to 100%")]
+    InvalidKeyframe(String),
 }
 
 pub fn parse(source: &str) -> Result<Stylesheet, ParseError> {
@@ -181,6 +187,16 @@ fn parse_rules<'a>(
             rest = &after[end + 1..];
             continue;
         }
+        if let Some(after) = rest.strip_prefix("@keyframes") {
+            let open = after
+                .find('{')
+                .ok_or_else(|| ParseError::MissingBlock("@keyframes".into()))?;
+            let name = after[..open].trim().to_owned();
+            let (body, tail) = take_block(&after[open + 1..])?;
+            stylesheet.keyframes.insert(name, keyframes::parse(body)?);
+            rest = tail;
+            continue;
+        }
         if let Some(after_media) = rest.strip_prefix("@media") {
             let open = after_media
                 .find('{')
@@ -191,6 +207,7 @@ fn parse_rules<'a>(
             conditions.push(media::parse_query(query)?);
             let nested = parse_rules(source, body, &conditions)?;
             stylesheet.rules.extend(nested.rules);
+            stylesheet.keyframes.extend(nested.keyframes);
             rest = tail;
             continue;
         }
@@ -200,24 +217,7 @@ fn parse_rules<'a>(
         let selector_text = rest[..open].trim();
         let (file, line) = source.locate(rest);
         let (body, tail) = take_block(&rest[open + 1..])?;
-        let mut declarations = BTreeMap::new();
-        for raw in body
-            .split(';')
-            .map(str::trim)
-            .filter(|line| !line.is_empty())
-        {
-            let Some((name, value)) = raw.split_once(':') else {
-                return Err(ParseError::MissingColon(raw.to_owned()));
-            };
-            let (name, value) = (name.trim(), value.trim());
-            if let Some(longhands) = shorthand::expand(name, value) {
-                for (longhand, side) in longhands {
-                    declarations.insert(longhand.to_owned(), side);
-                }
-            } else {
-                declarations.insert(name.to_owned(), value.to_owned());
-            }
-        }
+        let declarations = parse_declarations(body)?;
         for (written, selector) in parse_selector::parse_list_written(selector_text)? {
             stylesheet.rules.push(Rule {
                 selector,
@@ -235,7 +235,30 @@ fn parse_rules<'a>(
     Ok(stylesheet)
 }
 
-fn take_block(source: &str) -> Result<(&str, &str), ParseError> {
+/// A block's `name: value;` declarations, shorthands expanded.
+pub(crate) fn parse_declarations(body: &str) -> Result<BTreeMap<String, String>, ParseError> {
+    let mut declarations = BTreeMap::new();
+    for raw in body
+        .split(';')
+        .map(str::trim)
+        .filter(|line| !line.is_empty())
+    {
+        let Some((name, value)) = raw.split_once(':') else {
+            return Err(ParseError::MissingColon(raw.to_owned()));
+        };
+        let (name, value) = (name.trim(), value.trim());
+        if let Some(longhands) = shorthand::expand(name, value) {
+            for (longhand, side) in longhands {
+                declarations.insert(longhand.to_owned(), side);
+            }
+        } else {
+            declarations.insert(name.to_owned(), value.to_owned());
+        }
+    }
+    Ok(declarations)
+}
+
+pub(crate) fn take_block(source: &str) -> Result<(&str, &str), ParseError> {
     let mut depth = 1usize;
     for (index, ch) in source.char_indices() {
         match ch {

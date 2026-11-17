@@ -209,7 +209,8 @@ fn locate_parse_error(source: &str, start: usize, error: &ParseError) -> (usize,
         | ParseError::UnsupportedMedia(value)
         | ParseError::InvalidMediaWidth(value)
         | ParseError::InvalidSelector(value)
-        | ParseError::UnsupportedPseudoClass(value) => Some(value.as_str()),
+        | ParseError::UnsupportedPseudoClass(value)
+        | ParseError::InvalidKeyframe(value) => Some(value.as_str()),
         ParseError::MissingClose => None,
     };
     let offset = needle

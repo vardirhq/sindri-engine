@@ -978,6 +978,7 @@ disqualifying for anything else.
 | `Ui.is_checked(entity)` | `bool` |
 | `Ui.set_checked(entity, checked)` | nothing |
 | `Ui.set_disabled(button, disabled)` | nothing |
+| `Ui.set_class(element, class, on)` | nothing |
 | `Ui.input_text(entity)` | `String` |
 | `Ui.set_input_text(entity, "words")` | nothing |
 | `Ui.scroll_offset(entity)` | `number` |
