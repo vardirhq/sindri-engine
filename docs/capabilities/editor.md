@@ -44,6 +44,7 @@ Each entry links its tests and the projects that exercise it. Surface marks matc
 | [Everything the Scene view draws can be clicked](#viewport-picking) | — | ✅ | — | — |
 | [Select, Move, Rotate and Scale tools with snapping](#transform-tools) | — | ✅ | — | — |
 | [Gizmos for what simulates without drawing](#simulation-gizmos) | — | ✅ | — | — |
+| [Colliders fitted to the picture](#collider-fit) | — | ✅ | — | ✅ |
 | [Handles for an object's parts](#part-handles) | — | ✅ | — | — |
 | [Scene and Game views](#scene-and-game-views) | — | ✅ | — | — |
 | **Play** | | | | |
@@ -677,6 +678,36 @@ selected character's footing, from its collider's lowest point: the steepest
 slope it walks, how high it steps and how far down it snaps; and a selected
 effect burst's reach, from its speed, spread, life and drag. Audio has no gizmo
 because a source plays at one volume wherever it is.
+
+</details>
+
+<a id="collider-fit"></a>
+
+### Colliders fitted to the picture
+
+One press lays a 2D collider, and its light occluder, over what the object's sprite draws: a box around it, or a footprint where it meets the ground.
+
+Engine — · Editor ✅ · Decay — · Proof ✅
+
+**Tested by:** [`crates/sindri-authoring/src/fit/tests.rs`](../../crates/sindri-authoring/src/fit/tests.rs), [`mobile/native/tests/add_component.rs`](../../mobile/native/tests/add_component.rs)
+
+**Exercised in:** [`game`](../../game), [`games/lamplighter`](../../games/lamplighter)
+
+<details markdown="1">
+<summary>Evidence</summary>
+
+The inspector's 2D collider, on an object that draws a sprite, offers *Fit to
+picture* and *Fit to footing*, and the phone's collider workspace offers the
+same two on its first shape. The picture is read from the project's assets,
+through its sheet's frame and anchor and the sprite's size and offset. Fit to
+picture is a box around every drawn pixel, for a side view. Fit to footing is
+the lowest band of what is drawn, its solid columns laid down as a capsule on
+its side, for a picture standing up in a tilted world: a tree blocks by its
+trunk, so whoever walks behind it passes under its crown. An occluder on the
+same object takes the same outline, so what blocks also casts the shadow. Only
+the first piece of a compound collider is fitted, as one undo step;
+`sindri_authoring::fit` is shared by both editors. Lamplighter's wilds were
+fitted the same way by its art script.
 
 </details>
 

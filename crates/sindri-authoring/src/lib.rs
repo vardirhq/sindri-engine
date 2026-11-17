@@ -17,6 +17,7 @@
 
 mod atomic_write;
 pub mod duplicate;
+pub mod fit;
 pub mod prefab;
 pub mod scene_file;
 pub mod visual_decay;

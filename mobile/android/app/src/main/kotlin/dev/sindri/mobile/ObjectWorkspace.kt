@@ -354,6 +354,11 @@ private fun ColliderPieceControls(collider: Component, index: Int, count: Int, o
         Text("Sensor (trigger)", style = ForgeType.text(14.sp))
         Toggle(collider.value(prefix + "sensor") == true, { set("sensor", it) }, "Sensor")
     }
+    // Only the first shape is fitted: the others are the author's own.
+    if (index == 0) Row(Modifier.padding(top = 6.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+        Chip("Fit to picture", false, { onEvent(EditorEvent.FitCollider(false)) })
+        Chip("Fit to footing", false, { onEvent(EditorEvent.FitCollider(true)) })
+    }
     Row(Modifier.padding(top = 6.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
         Chip("+ Collider shape", false, { onEvent(EditorEvent.AddColliderPiece) })
         if (count > 1) Chip("Remove this shape", false, { onEvent(EditorEvent.RemoveColliderPiece) })
