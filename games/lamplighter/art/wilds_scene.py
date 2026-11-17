@@ -112,6 +112,8 @@ def scatter():
         rule(['stone', 'rock', 'earth', 'sand'], ['stone'], 4, 0.35),
         rule(['grass', 'earth'], ['stone'], 7, 0.25),
         rule(['deadgrass', 'grass'], ['resin'], 8, 0.25),
+        # Berries on the meadow and the moss, for eating.
+        rule(['grass', 'moss'], ['berries'], 7, 0.3),
         # What lives in the air, last so it never keeps a thing off its square.
         rule(['grass'], ['fireflies'], 6, 0.55),
         rule(['moss', 'mud'], ['mist'], 5, 0.6),
@@ -248,7 +250,7 @@ def air():
     }
 
 
-GOODS = {'wood': (1.0, 0.7), 'stone': (0.85, 0.6), 'resin': (0.6, 0.5)}   # how big each is drawn
+GOODS = {'wood': (1.0, 0.7), 'stone': (0.85, 0.6), 'resin': (0.6, 0.5), 'berries': (0.8, 0.0)}   # how big each is drawn
 
 
 def goods():
@@ -330,9 +332,14 @@ def pack():
         ui('hud-courage-fill', None, ['meter', 'courage', 'courage-fill'],
            **{'sindri.ui.image': {'anchor': 'top_left', 'layer': 96, 'texture': 'textures/white.png',
                                   'tint': [1, 1, 1, 1], 'fill': {'amount': 1.0, 'from': 'left'}}}),
+        ui('hud-food-label', None, ['kicker', 'light-label', 'food-label'], **words('FOOD')),
+        ui('hud-food-back', None, ['meter', 'food', 'light-back'], **icon('textures/white.png', 95)),
+        ui('hud-food-fill', None, ['meter', 'food', 'food-fill'],
+           **{'sindri.ui.image': {'anchor': 'top_left', 'layer': 96, 'texture': 'textures/white.png',
+                                  'tint': [1, 1, 1, 1], 'fill': {'amount': 1.0, 'from': 'left'}}}),
         ui('pack-panel', None, ['panel', 'pack-panel'], 0.4, 0.25, **panel(90)),
     ]
-    for kind, label in [('wood', 'wood'), ('stone', 'stone'), ('resin', 'resin')]:
+    for kind, label in [('wood', 'wood'), ('stone', 'stone'), ('resin', 'resin'), ('berries', 'berries')]:
         row = f'pack-{kind}-row'
         out += [ui(row, 'pack-panel', ['pack-row'], 0.35, 0.06, **panel(91, 'row')),
                 ui(f'pack-{kind}-icon', row, ['pack-icon'], 0.05, 0.05, **icon(f'textures/goods.png#{kind}')),
@@ -472,8 +479,9 @@ def placed_at_start(entities):
             # The grass parts round him, and his steps stay a while behind him.
             e['components']['sindri.wake'] = {'radius': 1.3, 'strength': 0.35}
             # Out here the lantern burns: a full one lasts three minutes away
-            # from any other light.
+            # from any other light; and he hungers, full to starving in five.
             e['components']['sindri.script']['properties']['burn'] = round(1 / 180, 6)
+            e['components']['sindri.script']['properties']['hunger'] = round(1 / 300, 6)
             e['components']['sindri.particles#steps'] = scenes.motes(
                 0.0, 7.0, 0.0, [[0.12, 0.09, 0.07, 0.45], [0.12, 0.09, 0.07, 0.3], [0.12, 0.09, 0.07, 0.0]],
                 0.42, 0.42, texture='textures/footprints.png', per_distance=1.4, max=24, spread=0.0,

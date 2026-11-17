@@ -4,7 +4,8 @@
 //
 // By a lit lamp, a fire he has built or an open sunfall it comes back. Away
 // from them, with his lantern burning, it ebbs slowly; with the lantern dry it
-// goes fast, and faster for every gloom near him and while a Seeker has him.
+// goes fast, and faster for every gloom near him, while a Seeker has him and
+// while he is starving.
 // Afraid (below `afraid`), the edges of the screen close in and the world
 // greys, the gloom notice him from further off (`gloom.decay`), and his walk
 // falters (`wick.decay`); both read `Game.fear`.
@@ -17,6 +18,8 @@ script Courage {
     @export let dry: number = 0.025;
     @export let gloom: number = 0.02;
     @export let found: number = 0.03;
+    // And starving.
+    @export let starving: number = 0.02;
     @export let near: number = 6.0;
     // How far a lit lamp's or a fire's warmth reaches, and a sunfall's.
     @export let by_light: number = 4.5;
@@ -56,6 +59,9 @@ script Courage {
             }
             loss += this.gloom * gloom_near(here);
             loss += this.found * Game.found;
+            if Game.food <= 0.0 {
+                loss += this.starving;
+            }
             Game.courage = max(0.0, Game.courage - loss * dt);
         }
         Game.fear = clamp(1.0 - Game.courage / this.afraid, 0.0, 1.0);

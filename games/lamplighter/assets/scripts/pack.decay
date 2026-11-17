@@ -30,6 +30,10 @@ script Pack {
     var light: Entity = null;
     var light_panel: Entity = null;
     var courage: Entity = null;
+    var food: Entity = null;
+    var berries: Entity = null;
+    var had_berries: number = 0.0;
+    var berries_shone: number = 9.0;
     // What the pack held last frame, and how long each row has shone since it
     // gained (`gained` in `ui/hud.weave`).
     var had_wood: number = 0.0;
@@ -51,6 +55,8 @@ script Pack {
         this.light = World.find("hud-light-fill");
         this.light_panel = World.find("hud-light");
         this.courage = World.find("hud-courage-fill");
+        this.food = World.find("hud-food-fill");
+        this.berries = World.find("pack-berries");
     }
 
     fn update(dt: number) {
@@ -76,6 +82,12 @@ script Pack {
         Ui.set_class(this.light_panel, "low", Game.oil < 0.2);
         if this.courage != null {
             Ui.set_fill(this.courage, Game.courage);
+        }
+        if this.food != null {
+            Ui.set_fill(this.food, Game.food);
+            Ui.set_number(this.berries, Game.berries);
+            this.berries_shone = shine("pack-berries-row", Game.berries > this.had_berries, this.berries_shone, dt);
+            this.had_berries = Game.berries;
         }
         Ui.set_class(this.light_panel, "found", Game.found > 0.5);
         // A row shines for a moment when what it counts goes up.

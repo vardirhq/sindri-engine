@@ -37,4 +37,10 @@ state Game {
     // (`courage.decay`). Where nothing runs it, he is never afraid.
     var courage: number = 1.0;
     var fear: number = 0.0;
+    // How fed Wick is, 0 to 1, and the berries in his pack. Where he hungers
+    // (`hunger` on Wick) it runs down, and he eats a berry when it is below
+    // half; empty, he is starving.
+    var food: number = 1.0;
+    var berries: number = 0.0;
+    var eaten: number = 0.0;
 }

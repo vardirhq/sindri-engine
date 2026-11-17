@@ -54,6 +54,11 @@ script Wick {
     @export let burn: number = 0.0;
     @export let refill: number = 0.1;
     @export let by_light: number = 3.5;
+    // How much of being fed goes a second, zero where he never hungers; what
+    // a berry gives back, and how much more one eaten by a fire, cooked.
+    @export let hunger: number = 0.0;
+    @export let berry: number = 0.25;
+    @export let cooked: number = 2.0;
 
     var vx: number = 0.0;
     var vy: number = 0.0;
@@ -90,6 +95,9 @@ script Wick {
             Game.gloom_out = 0.0;
             Game.oil = 1.0;
             Game.fed = 0.0;
+            Game.food = 1.0;
+            Game.berries = 0.0;
+            Game.eaten = 0.0;
         }
         Game.through = false;
         // Wick's art is on his body, and the lantern's art and lights on the
@@ -106,9 +114,13 @@ script Wick {
 
     fn update(dt: number) {
         this.grace = max(0.0, this.grace - dt);
-        Game.scorch = max(0.0, Game.scorch - this.mend * dt);
+        // Starving, a scorch does not mend.
+        if Game.food > 0.0 || this.hunger <= 0.0 {
+            Game.scorch = max(0.0, Game.scorch - this.mend * dt);
+        }
         this.age += dt;
         tend_the_oil(dt);
+        go_hungry(dt);
         turn_the_beam(dt);
         float_the_lantern(dt);
         show_the_hit();
@@ -230,6 +242,34 @@ script Wick {
         } else {
             Game.oil = max(0.0, Game.oil - this.burn * dt);
         }
+    }
+
+    // He hungers, and eats a berry from his pack once he is below half fed:
+    // cooked by a fire, it goes further.
+    fn go_hungry(dt: number) {
+        if this.hunger <= 0.0 || this.age < 0.1 {
+            return;
+        }
+        Game.food = max(0.0, Game.food - this.hunger * dt);
+        if Game.food < 0.5 && Game.berries >= 1.0 {
+            Game.berries -= 1.0;
+            Game.eaten += 1.0;
+            var worth: number = this.berry;
+            if by_a_fire() {
+                worth = this.berry * this.cooked;
+            }
+            Game.food = min(1.0, Game.food + worth);
+        }
+    }
+
+    fn by_a_fire() -> bool {
+        let here = Vec2(this.transform.world_position.x, this.transform.world_position.y);
+        for fire in World.with_tag("fire") {
+            if fire.light2d.intensity > 0.5 && near(here, fire) {
+                return true;
+            }
+        }
+        return false;
     }
 
     fn near(here: Vec2, light: Entity) -> bool {

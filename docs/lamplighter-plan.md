@@ -267,8 +267,12 @@ says what is now true.
    each gloom near and while a Seeker has him, and comes back by a lit lamp, a
    fire or an open sunfall. Afraid, below half, the screen's edges close in and
    the world greys, the gloom notice him from further off and his walk falters
-   (`tests/courage.rs`). Still to come: health and hunger; food and cooking;
-   death and what it costs. A test lives through three long dark spells.
+   (`tests/courage.rs`). Hunger: being fed runs down from full to starving in
+   five minutes; berries grow on the meadow and the moss, and Wick eats one
+   from his pack once he is below half fed, a cooked one by a fire going twice
+   as far. Starving, his lantern's scorch does not mend and his courage drains
+   (`tests/hunger.rs`). Still to come: more to eat and cooking proper; death
+   and what it costs. A test lives through three long dark spells.
 5. **Places.** The village set into the world with its houses, villagers to help
    and trade with, ruined lamp posts and the beacon. Saved worlds.
 6. **The story and polish.** The Lid, the ending, music and sound, the

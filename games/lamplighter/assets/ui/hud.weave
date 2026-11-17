@@ -4,18 +4,21 @@
    width and the build cards sit above the pack. */
 
 /* The lantern's light, and Wick's courage under it. */
-.light-panel { width: 240px; height: 96px; x: 136px; y: -64px; anchor: top_left; }
+.light-panel { width: 240px; height: 136px; x: 136px; y: -84px; anchor: top_left; }
 .light-label { width: 200px; height: 14px; x: 32px; y: -26px; anchor: top_left; }
 .meter { width: 208px; height: 10px; x: 136px; y: -56px; anchor: top_left; }
 .courage-label { y: -76px; }
 .meter.courage { y: -96px; }
+.food-label { y: -116px; }
+.meter.food { y: -136px; }
 .light-back { tint: var(--well); }
 .light-fill { tint: var(--ember); }
 .courage-fill { tint: #b9c6e4; }
+.food-fill { tint: #c7546f; }
 
 /* The pack: one row a thing, its picture and how many. */
 .pack-panel {
-    width: 156px; height: 128px; x: 94px; y: 80px; anchor: bottom_left;
+    width: 156px; height: 164px; x: 94px; y: 98px; anchor: bottom_left;
     direction: column; gap: 2px; padding: 10px 14px;
     justify-content: center; align-items: start;
 }
@@ -51,12 +54,14 @@
 .craft:disabled .craft-name, .craft:disabled .craft-cost, .craft:disabled .craft-key { color: var(--faint); }
 
 @media (orientation: portrait) {
-    .light-panel { width: 56vw; height: 22vw; x: 31vw; y: -15vw; }
+    .light-panel { width: 56vw; height: 34vw; x: 31vw; y: -21vw; }
     .light-label { width: 46vw; height: 3vw; x: 7vw; y: -6vw; font-size: 2.6vw; line-height: 3vw; }
     .meter { width: 48vw; height: 2.4vw; x: 31vw; y: -13vw; }
     .courage-label { y: -17vw; }
     .meter.courage { y: -23.5vw; }
-    .pack-panel { width: 34vw; height: 30vw; x: 20vw; y: 18vw; padding: 2vw 3vw; }
+    .food-label { y: -28vw; }
+    .meter.food { y: -34.5vw; }
+    .pack-panel { width: 34vw; height: 39vw; x: 20vw; y: 22.5vw; padding: 2vw 3vw; }
     .pack-row { width: 30vw; height: 8vw; gap: 2vw; }
     .pack-icon { width: 7vw; height: 7vw; }
     .pack-count { width: 20vw; height: 5vw; font-size: 3.8vw; line-height: 4.6vw; }
