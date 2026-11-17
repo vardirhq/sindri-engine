@@ -2,6 +2,8 @@
 
 # Changelog
 
+- The editor follows the open scene on disk: when an agent, a script or another tool writes it, the editor reads it again, and when the scene has unsaved edits it asks rather than letting the next save write over the change. Its own saves, and a rewrite with the same bytes, are not news.
+
 - `sindri project new PATH [--name NAME]` makes a project as the editor does, with a guide for coding agents beside it: `AGENTS.md` (where things belong, learning the shapes from `sindri capabilities`, and checking and looking at every change), a `CLAUDE.md` pointing at it, the same guide as a skill, the scene and prefab schemas in `.sindri/`, and VS Code settings that validate scenes against them. The editor and the command start a project from the same blank scene, now `sindri_authoring::blank_scene`.
 
 - JSON Schemas for `.scene` and `.prefab` files, generated from the component registry into `docs/generated/sindri-scene.schema.json` and `sindri-prefab.schema.json`: every component and named part, each field's type, default, choices and bounds, variants such as a camera's projection or a collider piece's shape, and a misspelled field or component is an error. Every scene and prefab in the repository is checked against them. `sindri capabilities [NAME]` prints them, and the component, Decay and Weave references, from the binary itself, and `sindri mcp` serves them as its `capabilities` tool, so an agent in a project without this repository reads the shapes rather than guessing.

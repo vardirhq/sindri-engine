@@ -11,6 +11,7 @@ use crate::{scene_file::SceneFile, scripts::SceneScripts, textures::SceneTexture
 
 use super::EditorApp;
 use super::runtime::{PLAYING_TIP, initialized_lifecycle};
+use super::unsaved::Discarding;
 
 /// One rendered view of the world, and the egui texture it is drawn through.
 /// Everything a frame is derived from: the world, the schemas that read it, and
@@ -187,6 +188,37 @@ impl EditorApp {
                 self.remember_open_scene();
             }
             Err(error) => self.report(error),
+        }
+    }
+
+    /// Follows the open scene's file when something else writes it: an agent,
+    /// a script, another editor.
+    ///
+    /// With no unsaved edits the scene is read again, as the editor already
+    /// does for scripts, textures, prefabs and styles. With some, it asks
+    /// rather than choosing, because either way loses someone's work. Not
+    /// while the scene plays: the run is of the scene as it was, and Stop
+    /// returns to it, so the look waits for Stop.
+    pub(super) fn follow_scene_on_disk(&mut self) {
+        const LOOK_EVERY: std::time::Duration = std::time::Duration::from_secs(1);
+        if self.scene_looked_at.elapsed() < LOOK_EVERY
+            || self.confirming.is_some()
+            || !self.authoring_enabled()
+        {
+            return;
+        }
+        self.scene_looked_at = std::time::Instant::now();
+        if self.file.on_disk() != sindri_authoring::OnDisk::Changed {
+            return;
+        }
+        if self.unsaved() {
+            self.confirming = Some(Discarding::ChangedOnDisk);
+        } else {
+            self.reload();
+            self.console.info(format!(
+                "Read {} again: it changed on disk",
+                self.file.label()
+            ));
         }
     }
 

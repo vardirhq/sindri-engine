@@ -25,5 +25,5 @@ pub mod visual_decay;
 mod world;
 
 pub use blank_scene::blank_scene;
-pub use scene_file::{SceneFile, SceneFileError, scene_path};
+pub use scene_file::{OnDisk, SceneFile, SceneFileError, scene_path};
 pub use world::{load_document, load_world};

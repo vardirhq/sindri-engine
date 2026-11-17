@@ -207,14 +207,13 @@ makes it a check rather than an anecdote.
 ## The editor and the agent at the same time
 
 An agent will edit files while the editor has them open. Scripts, textures,
-prefabs and Weave styles are already watched and reloaded. The open scene is
-not: reloading is manual and discards unsaved edits along with their history
-(see [`editor-architecture.md`](editor-architecture.md)).
-
-The editor should reload a scene changed on disk when it has no unsaved edits,
-and when it does, say so and offer the choice rather than letting the next save
-overwrite the agent's work. That is the one editor change this direction
-requires.
+prefabs and Weave styles are watched and reloaded, and so is the open scene:
+the editor compares its file with what it last read or wrote once a second
+(`SceneFile::on_disk`, a `stat` while nothing has changed), reads it again
+when it has no unsaved edits, and when it has some, asks rather than letting
+the next save overwrite the agent's work. Keeping its own edits is a choice
+made once, not asked again every second. Not while the scene plays: the look
+waits for Stop.
 
 Because canonical serialization reproduces an untouched scene byte for byte,
 the editor and an agent already produce diffs that do not fight. That property
@@ -314,7 +313,8 @@ also shows whether the MCP adapter above is worth building.
    what scripts printed and failed, per frame. `sindri render capture --out`
    is the same run ending in one picture. The player behind it is
    `crates/sindri-capture`, which Causeway's `project-capture` uses too.
-4. The editor reloads a scene changed on disk.
+4. *Done:* the editor reloads a scene changed on disk, and asks first when it
+   has unsaved edits.
 5. *Done:* `sindri project new PATH [--name]` makes the editor's project
    (one blank scene, `sindri_authoring::blank_scene`, shared with the
    editor's New Scene) with `AGENTS.md`, a `CLAUDE.md` pointing at it, the

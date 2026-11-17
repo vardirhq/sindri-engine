@@ -155,9 +155,9 @@ fn skill(name: &str) -> String {
 const GUIDE: &str = r#"A game made with the Sindri engine. Everything in it is a file: there is no
 hidden editor state, so you change the game by editing files, and the
 `sindri` command tells you whether the change works and shows you what it
-did. If the Sindri editor has this project open, it picks up the scripts,
-pictures, prefabs and styles you change; reopen a scene there after you
-change it.
+did. If the Sindri editor has this project open, it picks up what you
+change, the open scene included; if that scene has unsaved edits there, the
+editor asks its user before reading your version.
 
 ## Where things belong
 

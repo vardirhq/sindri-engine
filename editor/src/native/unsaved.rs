@@ -31,6 +31,8 @@ pub(super) enum Discarding {
     /// along with everything around it.
     OpenProject(PathBuf),
     Reload,
+    /// The open scene's file changed on disk, under unsaved edits here.
+    ChangedOnDisk,
     Reset,
     Close,
 }
@@ -46,6 +48,10 @@ impl Discarding {
                 "Open another scene and discard the changes to this one?"
             }
             Self::Reload => "Re-read this scene from disk and discard the changes?",
+            Self::ChangedOnDisk => {
+                "This scene was changed on disk, and has unsaved changes here. Discard them and \
+                 read the file again?"
+            }
             Self::Reset => "Discard the changes and go back to the scene as it was saved?",
             Self::Close => "Close the editor and discard the changes?",
         }
@@ -55,7 +61,7 @@ impl Discarding {
         match self {
             Self::NewScene => "Make one anyway",
             Self::OpenAnother | Self::OpenPath(_) | Self::OpenProject(_) => "Open anyway",
-            Self::Reload => "Reload anyway",
+            Self::Reload | Self::ChangedOnDisk => "Reload anyway",
             Self::Reset => "Discard",
             Self::Close => "Close anyway",
         }
@@ -93,7 +99,7 @@ impl EditorApp {
             Discarding::OpenAnother => self.open_scene(),
             Discarding::OpenPath(path) => self.open_path(&path),
             Discarding::OpenProject(root) => self.open_project_at(&root),
-            Discarding::Reload => self.reload(),
+            Discarding::Reload | Discarding::ChangedOnDisk => self.reload(),
             Discarding::Reset => self.reset_to_authored(),
             // Agreeing to close is not closing. The request that raised the
             // question was cancelled, so nothing is asking the window to go any
@@ -171,7 +177,14 @@ impl EditorApp {
         );
         match answered {
             None => {}
-            Some(Answer::Cancel) => self.confirming = None,
+            Some(Answer::Cancel) => {
+                // Keeping what is here over the change on disk is a choice,
+                // made once: asked again every second it would be a trap.
+                if action == Discarding::ChangedOnDisk {
+                    self.file.keep_over_disk();
+                }
+                self.confirming = None;
+            }
             Some(Answer::Discard) => self.discard(action, context),
             Some(Answer::Save) => {
                 self.save();

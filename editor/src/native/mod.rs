@@ -418,6 +418,9 @@ struct EditorApp {
     benchmark: Option<benchmark::BenchmarkRun>,
     /// Wakes the editor at rest when a file in the open project changes.
     disk_watch: wake::DiskWatch,
+    /// When the open scene's file was last compared with what the editor
+    /// read, so the comparison costs one `stat` a second.
+    scene_looked_at: std::time::Instant,
     /// Edits made while the scene plays, for Stop to offer back.
     run_edits: crate::run_edits::RunEdits,
     /// The offer, once Stop has made it and until it is answered.

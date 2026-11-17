@@ -130,6 +130,7 @@ fn each_discarding_action_says_what_it_is_about_to_do() {
         Discarding::OpenAnother,
         Discarding::OpenPath(PathBuf::from("other.scene")),
         Discarding::Reload,
+        Discarding::ChangedOnDisk,
         Discarding::Reset,
         Discarding::Close,
     ] {

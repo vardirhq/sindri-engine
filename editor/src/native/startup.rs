@@ -217,6 +217,7 @@ impl EditorApp {
                 super::benchmark::BenchmarkRun::new(plan, opened)
             }),
             disk_watch: super::wake::DiskWatch::start(context.egui_ctx.clone()),
+            scene_looked_at: std::time::Instant::now(),
             run_edits: crate::run_edits::RunEdits::default(),
             stop_review: None,
             recording: None,
