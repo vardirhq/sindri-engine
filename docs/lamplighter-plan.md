@@ -233,8 +233,9 @@ says what is now true.
    the seed (`sites` on the scatter): a well, houses round it, some still lit.
    Each hamlet has a lamp post by its well, dark until Wick lights it, and lit
    it is a safe place; out in the wilds lighting lamps ends nothing
-   (`tests/a_hamlet_lamp.rs`). Still to come: the wilds opened from the title,
-   hamlets with people, and other places (ruins, camps, the beacon) appearing at random. Wick walks it in the dark; a test walks him across biomes.
+   (`tests/a_hamlet_lamp.rs`). The title's Play opens the wilds, the Dim Fields
+   a button below it, and pausing resumes where Wick was
+   (`tests/the_title_opens_the_wilds.rs`). Still to come: hamlets with people, and other places (ruins, camps, the beacon) appearing at random. Wick walks it in the dark; a test walks him across biomes.
 2. **Under the Lid.** *Started.* Sunfalls: shafts of cracklight with a gold pool
    and dust in the beam, scattered by seed, wandering round where they fell and
    coming and going as their crack opens and shuts (`scripts/sunfall.decay`).

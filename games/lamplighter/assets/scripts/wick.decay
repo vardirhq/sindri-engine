@@ -207,6 +207,11 @@ script Wick {
             light_if_lamp(other);
         }
         if Action.pressed("pause") && !Game.won {
+            if Scene.current() == "wilds.scene" {
+                Game.paused_in = Place.Wilds;
+            } else {
+                Game.paused_in = Place.Fields;
+            }
             Scene.go("pause.scene");
         }
     }

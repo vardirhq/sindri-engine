@@ -482,7 +482,7 @@ def field():
 
 def main():
     write('title.scene', 'Lamplighter title', menu(
-        'Title', 'Lamplighter', 'Keep the way home lit.', [('play', 'Play')]))
+        'Title', 'Lamplighter', 'Keep the way home lit.', [('play', 'Play'), ('fields', 'The Dim Fields')]))
     write('pause.scene', 'Lamplighter pause', menu(
         'Pause', 'Paused', 'The light waits for you.', [('resume', 'Resume'), ('title', 'Title')]))
     write('world.scene', 'The Dim Fields', field())
