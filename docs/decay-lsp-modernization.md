@@ -123,12 +123,14 @@ These are defects or sources of actively misleading tooling.
   - [x] Preserve useful signature/detail text.
   - [x] Test host and user-defined functions with 0, 1, and multiple arguments
         (`a_completed_call_has_a_placeholder_for_each_argument`).
-- [ ] Audit LSP position handling against the protocol's negotiated encoding.
+- [x] Audit LSP position handling against the protocol's negotiated encoding.
   - [x] Prove non-ASCII text before the cursor maps to the correct Decay byte
         offset and diagnostic range.
-  - [ ] Either negotiate UTF-8 positions or correctly translate the client's
-        UTF-16 positions.
-  - [ ] Add Unicode regression tests.
+  - [x] Either negotiate UTF-8 positions or correctly translate the client's
+        UTF-16 positions: they are translated, in `support::offset_at` and
+        `position_at`.
+  - [x] Add Unicode regression tests
+        (`positions_after_an_emoji_are_counted_in_utf16`).
 - [x] Return proper JSON-RPC/LSP errors for malformed or unsupported requests
       where the protocol requires an error instead of silently returning null:
       parse error for a body that is not JSON, invalid request for a message
@@ -160,7 +162,7 @@ The LSP must stop relying on manual VS Code use as proof.
 - [ ] Cover document symbols.
 - [ ] Cover project-aware string completion.
 - [ ] Cover watched project file creation/change/deletion.
-- [ ] Cover Unicode positions.
+- [x] Cover Unicode positions.
 - [x] Cover malformed/unknown requests without crashing the server.
 - [ ] Add a VS Code extension smoke test or equivalent client integration test
       that launches the real server and proves synchronization + one language

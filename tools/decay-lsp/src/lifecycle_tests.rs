@@ -311,3 +311,59 @@ fn a_completed_call_has_a_placeholder_for_each_argument() {
     assert_eq!(completes("hea", "heal").as_deref(), Some("heal($1)"));
     assert_eq!(completes("mi", "mix").as_deref(), Some("mix($1, $2, $3)"));
 }
+
+/// Positions are UTF-16 code units, as LSP's default encoding has them: a
+/// rocket before the cursor is two of them, though four bytes in the source.
+#[test]
+fn positions_after_an_emoji_are_counted_in_utf16() {
+    let uri = "file:///rocket.decay";
+    let line = "        let label = \"🚀\"; let bad: bool = 1;";
+    let source = format!("script Rocket {{\n    fn update(dt: number) {{\n{line}\n    }}\n}}");
+    let (_, messages) = run(&[
+        initialize(),
+        notification(
+            "textDocument/didOpen",
+            &json!({"textDocument":{"uri":uri,"text":source,"version":1}}),
+        ),
+    ]);
+    let diagnostics = messages
+        .iter()
+        .find(|message| message["method"] == "textDocument/publishDiagnostics")
+        .expect("diagnostics are published")["params"]["diagnostics"]
+        .as_array()
+        .unwrap()
+        .clone();
+    let mismatch = diagnostics
+        .iter()
+        .find(|diagnostic| diagnostic["range"]["start"]["line"] == 2)
+        .expect("the bad binding is reported on its line");
+    let column = mismatch["range"]["start"]["character"].as_u64().unwrap();
+    let before = &line[..line.find("let bad").unwrap()];
+    let utf16 = before.encode_utf16().count() as u64;
+    assert_eq!(column, utf16, "{mismatch}");
+    assert_ne!(column, before.len() as u64, "not bytes");
+
+    // And completion after one, on the same line, still finds the call.
+    let completing = "        let label = \"🚀\"; Scene.";
+    let source = format!("script Rocket {{\n    fn update(dt: number) {{\n{completing}\n    }}\n}}");
+    let character = completing.encode_utf16().count();
+    let (_, messages) = run(&[
+        initialize(),
+        notification(
+            "textDocument/didOpen",
+            &json!({"textDocument":{"uri":uri,"text":source,"version":1}}),
+        ),
+        request(
+            2,
+            "textDocument/completion",
+            &json!({"textDocument":{"uri":uri},"position":{"line":2,"character":character}}),
+        ),
+    ]);
+    let labels = reply(&messages, 2)["result"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|item| item["label"].as_str().unwrap().to_owned())
+        .collect::<Vec<_>>();
+    assert!(labels.iter().any(|label| label == "current"), "{labels:?}");
+}
