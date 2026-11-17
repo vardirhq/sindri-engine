@@ -28,7 +28,7 @@
       "components": {
         "sindri.sprite": {
           "texture": "textures/decor.png#pebbles",
-          "layer": 4,
+          "layer": 5,
           "billboard": true
         }
       }
