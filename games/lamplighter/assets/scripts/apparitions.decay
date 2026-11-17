@@ -1,0 +1,62 @@
+// The things Wick thinks he sees when his lantern and courage are both gone.
+// They are pictures only: they cannot touch him or be mistaken for gloom that
+// hunts. One appears at a time, and vanishes as soon as he finds light.
+script Apparitions {
+    var wick: Entity = null;
+    var watcher: Entity = null;
+    var tall: Entity = null;
+    var wrong_wick: Entity = null;
+    var vision: Entity = null;
+    var wait: number = 0.0;
+    var shown_for: number = 0.0;
+    var was_dark: bool = false;
+
+    fn start() {
+        this.wick = World.find("Wick");
+        this.watcher = World.find("vision-watcher");
+        this.tall = World.find("vision-tall");
+        this.wrong_wick = World.find("vision-wick");
+        this.wait = Random.range(12.0, 20.0);
+    }
+
+    fn update(dt: number) {
+        if this.wick == null || this.watcher == null || this.tall == null || this.wrong_wick == null {
+            return;
+        }
+        if Game.oil > 0.0 || Game.courage > 0.0 {
+            if this.vision != null {
+                this.vision.sprite.tint = Color(1.0, 1.0, 1.0, 0.0);
+                this.vision = null;
+            }
+            if this.was_dark {
+                this.wait = Random.range(12.0, 20.0);
+                this.was_dark = false;
+            }
+            return;
+        }
+        this.was_dark = true;
+        if this.vision == null {
+            this.wait -= dt;
+            if this.wait > 0.0 { return; }
+            let choice = Random.int(0.0, 2.0);
+            this.vision = this.watcher;
+            if choice == 1.0 { this.vision = this.tall; }
+            if choice == 2.0 { this.vision = this.wrong_wick; }
+            let side = Random.int(0.0, 1.0);
+            var across: number = -4.0;
+            if side == 1.0 { across = 4.0; }
+            this.vision.transform.position.x = this.wick.transform.world_position.x + across;
+            this.vision.transform.position.y = this.wick.transform.world_position.y + 5.0;
+            this.shown_for = 0.0;
+        }
+        this.shown_for += dt;
+        let fade_in = min(1.0, this.shown_for / 0.8);
+        let fade_out = min(1.0, max(0.0, (4.0 - this.shown_for) / 1.2));
+        this.vision.sprite.tint = Color(1.0, 1.0, 1.0, 0.7 * fade_in * fade_out);
+        if this.shown_for >= 4.0 {
+            this.vision.sprite.tint = Color(1.0, 1.0, 1.0, 0.0);
+            this.vision = null;
+            this.wait = Random.range(25.0, 45.0);
+        }
+    }
+}

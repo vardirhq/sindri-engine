@@ -575,6 +575,19 @@ def standing_up(entities):
     return entities
 
 
+def apparitions():
+    """Faint shapes at the edge of sight, seen only in Wick's deepest fear."""
+    visions = []
+    for name, size in [('watcher', 4.0), ('tall', 6.0), ('wick', 4.0)]:
+        visions.append(entity(f'vision-{name}', f'vision-{name}', at(0, 0, 0), **{
+            'sindri.sprite': {'texture': f'textures/apparitions.png#{name}', 'layer': 5,
+                              'size': [size, size], 'tint': [1.0, 1.0, 1.0, 0.0],
+                              'unlit': True}}))
+    visions.append(entity('apparitions', 'Apparitions', **{'sindri.script': {
+        'source': 'scripts/apparitions.decay', 'script': 'Apparitions', 'properties': {}}}))
+    return visions
+
+
 def wilds():
     ents = [
         tilted_camera(),
@@ -598,6 +611,7 @@ def wilds():
     ents += [sunfall(f'sunfall-{n}', x, y, phase=6.66 * n) for n, (x, y) in enumerate(SUNFALLS, 1)]
     ents += [e for n, (x, y) in enumerate(SEEKERS, 1) for e in seeker(f'seeker-{n}', x, y)]
     ents += pack()
+    ents += apparitions()
     ents += [*placed_at_start(wick()), *effects(), *[gloom(f'gloom-{n}', x, y, size) for n, ((x, y), size) in enumerate(zip(GLOOM, [1, 3]), 1)]]
     return standing_up(ents)
 
