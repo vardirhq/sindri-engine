@@ -15,6 +15,20 @@ fn walk() -> SpriteAnimationComponent {
                 ],
                 seconds_per_frame: 0.1,
                 looping: true,
+                events: vec![
+                    ClipEvent {
+                        frame: 1,
+                        name: "step".to_owned(),
+                    },
+                    ClipEvent {
+                        frame: 3,
+                        name: "step".to_owned(),
+                    },
+                    ClipEvent {
+                        frame: 0,
+                        name: "lift".to_owned(),
+                    },
+                ],
             },
         )]),
         playing: Some("walk".to_owned()),
@@ -29,6 +43,8 @@ fn cursor() -> Playback {
         elapsed: 0.0,
         finished: false,
         sprite: "0".to_owned(),
+        entered: Vec::new(),
+        fired: Vec::new(),
     }
 }
 
@@ -158,6 +174,7 @@ fn a_frame_names_the_sprite_its_clip_names() {
                 frames: vec!["lift".to_owned(), "plant".to_owned()],
                 seconds_per_frame: 0.1,
                 looping: true,
+                events: Vec::new(),
             },
         )]),
         ..walk()
@@ -176,4 +193,69 @@ fn a_frame_names_the_sprite_its_clip_names() {
         SpriteAnimationComponent::frame_sprite(clip, 2),
         Err(AnimationError::OutsideClip { .. })
     ));
+}
+
+#[test]
+fn a_frame_fires_its_events_as_it_is_shown() {
+    let animation = walk();
+    let (_, clip) = animation.playing_clip().unwrap().expect("walk is playing");
+    let mut playback = cursor();
+    step(&mut playback, clip, 0.05);
+    assert!(playback.entered.is_empty(), "nothing new is shown");
+    step(&mut playback, clip, 0.05);
+    assert_eq!(playback.entered, [1], "frame one is");
+    playback.entered.clear();
+    // Two and a half frames: three, then round to zero.
+    step(&mut playback, clip, 0.3);
+    assert_eq!(playback.entered, [2, 3, 0]);
+    playback.entered.clear();
+    // A stall longer than the clip shows each frame once.
+    step(&mut playback, clip, 10.0);
+    assert_eq!(playback.entered.len(), 4);
+}
+
+#[test]
+fn a_clip_that_does_not_loop_fires_up_to_its_end_and_no_more() {
+    let mut animation = walk();
+    animation.clips.get_mut("walk").unwrap().looping = false;
+    let (_, clip) = animation.playing_clip().unwrap().expect("walk is playing");
+    let mut playback = cursor();
+    step(&mut playback, clip, 1.0);
+    assert_eq!(playback.entered, [1, 2, 3]);
+    playback.entered.clear();
+    step(&mut playback, clip, 1.0);
+    assert!(playback.entered.is_empty(), "held at its end");
+}
+
+#[test]
+fn events_are_asked_for_by_name_for_the_step_they_fired_in() {
+    let mut world = World::default();
+    let mut registry = ComponentSchemaRegistry::default();
+    registry
+        .register::<SpriteAnimationComponent>("Sprite Animation")
+        .unwrap();
+    let payload = serde_json::json!({
+        "clips": { "walk": { "frames": ["0", "1", "2", "3"], "seconds_per_frame": 0.1,
+                             "events": [{ "frame": 1, "name": "step" }, { "frame": 0, "name": "lift" }] } },
+        "playing": "walk",
+        "speed": 1.0
+    });
+    let entity = world.spawn(sindri_core::EntityData {
+        components: [(SpriteAnimationComponent::TYPE_NAME.to_owned(), payload)]
+            .into_iter()
+            .collect(),
+        ..sindri_core::EntityData::default()
+    });
+    let mut animations = SpriteAnimations::new();
+    animations.advance(&world, &registry, 0.01).unwrap();
+    assert!(
+        animations.fired(entity, "lift"),
+        "starting shows frame zero"
+    );
+    assert!(!animations.fired(entity, "step"));
+    animations.advance(&world, &registry, 0.1).unwrap();
+    assert!(animations.fired(entity, "step"), "frame one lands");
+    assert!(!animations.fired(entity, "lift"), "and the lift is past");
+    animations.advance(&world, &registry, 0.01).unwrap();
+    assert!(!animations.fired(entity, "step"), "for one step only");
 }

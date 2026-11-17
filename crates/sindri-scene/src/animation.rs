@@ -47,6 +47,20 @@ pub struct AnimationClip {
     /// frame. Looping is the default because most clips do.
     #[serde(default = "looping_by_default")]
     pub looping: bool,
+    /// Named moments in the clip: a foot landing, a blade striking. Each fires
+    /// as its frame is shown, so a script asks `Animation.fired(entity,
+    /// "step")` rather than counting frames itself, and the moment stays with
+    /// the art when the clip is retimed.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub events: Vec<ClipEvent>,
+}
+
+/// A name a clip fires when it shows one of its frames.
+#[derive(Clone, Debug, Deserialize, serde::Serialize, PartialEq, Eq)]
+pub struct ClipEvent {
+    /// The frame, counted within the clip from zero.
+    pub frame: usize,
+    pub name: String,
 }
 
 const fn looping_by_default() -> bool {
@@ -152,6 +166,11 @@ struct Playback {
     elapsed: f32,
     finished: bool,
     sprite: String,
+    /// The frames shown for the first time since the last advance, in order:
+    /// what its events fire from.
+    entered: Vec<usize>,
+    /// The events those frames fired, by name.
+    fired: Vec<String>,
 }
 
 impl SpriteAnimations {
@@ -186,15 +205,25 @@ impl SpriteAnimations {
                 // number the last one had reached, which would be a frame of the
                 // new clip chosen by the length of the old one.
                 Some(playback) if playback.clip == name => playback,
+                // A clip that starts shows its first frame, which fires too.
                 _ => Playback {
                     clip: name.to_owned(),
                     frame: 0,
                     elapsed: 0.0,
                     finished: false,
                     sprite: SpriteAnimationComponent::frame_sprite(clip, 0)?.to_owned(),
+                    entered: vec![0],
+                    fired: Vec::new(),
                 },
             };
             step(&mut playback, clip, delta_seconds * animation.speed);
+            playback.fired = clip
+                .events
+                .iter()
+                .filter(|event| playback.entered.contains(&event.frame))
+                .map(|event| event.name.clone())
+                .collect();
+            playback.entered.clear();
             SpriteAnimationComponent::frame_sprite(clip, playback.frame)?
                 .clone_into(&mut playback.sprite);
             live.insert(entity, playback);
@@ -228,6 +257,15 @@ impl SpriteAnimations {
             .is_some_and(|playback| playback.finished)
     }
 
+    /// Whether an entity's clip fired the event `name` in the last advance:
+    /// a frame carrying it was shown. True for that one step, as a key is
+    /// pressed for one.
+    pub fn fired(&self, entity: EntityId, name: &str) -> bool {
+        self.playback
+            .get(&entity)
+            .is_some_and(|playback| playback.fired.iter().any(|fired| fired == name))
+    }
+
     /// Plays an entity's clip again from its first frame.
     ///
     /// Which clip plays is authored, so switching clips is a change to the
@@ -238,6 +276,8 @@ impl SpriteAnimations {
             playback.frame = 0;
             playback.elapsed = 0.0;
             playback.finished = false;
+            // Its first frame is shown again, and fires again.
+            playback.entered = vec![0];
         }
     }
 }
@@ -266,13 +306,25 @@ fn step(playback: &mut Playback, clip: &AnimationClip, seconds: f32) {
     } else {
         steps as usize
     };
-    let reached = playback.frame.saturating_add(steps);
-    if reached < clip.frames.len() {
+    let length = clip.frames.len();
+    let from = playback.frame;
+    let reached = from.saturating_add(steps);
+    // Every frame passed through is shown, if only for an instant, so each
+    // fires its events; a step longer than the whole clip shows each once.
+    let passed = if clip.looping {
+        steps.min(length)
+    } else {
+        reached.min(length - 1).saturating_sub(from)
+    };
+    playback
+        .entered
+        .extend((1..=passed).map(|ahead| (from + ahead) % length));
+    if reached < length {
         playback.frame = reached;
     } else if clip.looping {
-        playback.frame = reached % clip.frames.len();
+        playback.frame = reached % length;
     } else {
-        playback.frame = clip.frames.len() - 1;
+        playback.frame = length - 1;
         playback.elapsed = 0.0;
         playback.finished = true;
     }

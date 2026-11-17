@@ -121,6 +121,11 @@ fn a_player_running_and_jumping_reaches_the_beacon() {
         if run.board("won") > 0.0 {
             assert!(run.board("falls") < 1.0, "it never fell");
             assert!(run.board("coins") >= 3.0, "and picked up coins on the way");
+            assert!(
+                run.board("steps") >= 4.0,
+                "its feet were heard landing: {}",
+                run.board("steps")
+            );
             // The sounds made in the Sound Lab: each one heard, and each one
             // a file the project ships rather than one only the editor finds.
             assert!(
@@ -134,6 +139,8 @@ fn a_player_running_and_jumping_reaches_the_beacon() {
                 "audio/land.wav",
                 "audio/coin.wav",
                 "audio/goal.wav",
+                // The run's footfalls, fired by its clip's `step` events.
+                "audio/step.wav",
             ] {
                 assert!(heard.contains(clip), "{clip} was played: {heard:?}");
                 assert!(platformer::project().join("assets").join(clip).is_file());

@@ -146,6 +146,7 @@ Which block in a 3D block world the mouse or finger is pointing at, for building
 Playing an object's animations, such as walk or jump, set up for it in the scene.
 
 - `clip(entity: Entity)` → `String` — The name of the animation an object is playing.
+- `fired(entity: Entity, event: String)` → `bool` — Whether an object's animation reached a moment named in it, such as `"step"` as a foot lands or `"strike"` as a blade hits, since the last frame. True for that one frame.
 - `frame(entity: Entity)` → `number` — Which picture of its animation an object is showing, counting from the start of the animation.
 - `is_finished(entity: Entity)` → `bool` — Whether an animation that plays once, such as an attack, has finished.
 - `play(entity: Entity, clip: String)` → `unit` — Plays one of an object's animations by name, such as `"walk"`. Calling it again with the animation already playing does nothing, so it is safe to call every frame.

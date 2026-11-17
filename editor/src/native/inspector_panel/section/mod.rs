@@ -6,6 +6,7 @@
 //! `components_sections`.
 
 pub(super) mod animation;
+mod clip_events;
 pub(super) mod collider;
 pub(super) mod grid;
 pub(crate) mod heading;

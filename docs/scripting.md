@@ -1914,12 +1914,18 @@ can replace the pair later without exposing tilemap storage to gameplay code.
 | `Animation.stop(entity)` | nothing |
 | `Animation.restart(entity)` | nothing |
 | `Animation.is_finished(entity)` | `bool` |
+| `Animation.fired(entity, event)` | `bool` |
 | `Animation.frame(entity)` | `number` |
 | `Animation.clip(entity)` | `String` |
 | `Animation.set_speed(entity, speed)` | nothing |
 
 `clip` names one of the clips the entity's `sindri.animation.sprite` already
-holds. A script picks from what the scene authored and cannot build one, which
+holds. A clip can name moments in it, `"events": [{ "frame": 1, "name":
+"step" }]`, authored under the clip's frames in the inspector; `fired` is true
+for the one step after such a frame is shown, however far a long step jumped,
+so a footfall or a blade's strike is heard where the art puts it rather than
+counted out in a script. The platformer's hero plays a footstep on its run's
+widest strides this way. A script picks from what the scene authored and cannot build one, which
 is what keeps the editor's clip list the whole record of what an entity can do.
 
 The two halves of animation live in two places, and this surface keeps them

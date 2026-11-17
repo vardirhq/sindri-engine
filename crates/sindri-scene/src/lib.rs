@@ -48,7 +48,9 @@ mod tilesets;
 mod voxel_collision3d;
 mod voxel_render;
 
-pub use animation::{AnimationClip, AnimationError, SpriteAnimationComponent, SpriteAnimations};
+pub use animation::{
+    AnimationClip, AnimationError, ClipEvent, SpriteAnimationComponent, SpriteAnimations,
+};
 pub use audio::AudioSourceComponent;
 pub use camera_control::{
     clear_camera_bounds, clear_camera_follow, raise_camera_trauma, set_camera_bounds,

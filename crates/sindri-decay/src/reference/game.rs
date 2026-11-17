@@ -156,6 +156,11 @@ pub(super) const TYPES: &[TypeEntry] = &[
                 "The name of the animation an object is playing.",
             ),
             call(
+                "fired",
+                &["entity", "event"],
+                "Whether an object's animation reached a moment named in it, such as `\"step\"` as a foot lands or `\"strike\"` as a blade hits, since the last frame. True for that one frame.",
+            ),
+            call(
                 "frame",
                 &["entity"],
                 "Which picture of its animation an object is showing, counting from the start of the animation.",

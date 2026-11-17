@@ -218,12 +218,12 @@ pub(super) fn add_animation_surface(environment: &mut Environment) {
             *name,
             FunctionType {
                 params: match call {
-                    AnimationCall::Play => vec![entity(), Type::String],
+                    AnimationCall::Play | AnimationCall::Fired => vec![entity(), Type::String],
                     AnimationCall::Speed => vec![entity(), Type::Number],
                     _ => vec![entity()],
                 },
                 return_type: match call {
-                    AnimationCall::Finished => Type::Bool,
+                    AnimationCall::Finished | AnimationCall::Fired => Type::Bool,
                     AnimationCall::Frame => Type::Number,
                     AnimationCall::Clip => Type::String,
                     AnimationCall::Play

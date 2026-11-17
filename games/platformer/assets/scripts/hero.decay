@@ -55,6 +55,11 @@ script Hero {
 
     fn update(dt: number) {
         this.drop_left = max(0.0, this.drop_left - dt);
+        // A foot lands on the run's widest strides (the clip's `step` events).
+        if Animation.fired(this.sprite_entity, "step") {
+            Audio.play("audio/step.wav", 0.18);
+            Game.steps += 1.0;
+        }
         if Touch.count > 0.0 { Game.touch = true; }
         if !Stick.held {
             this.touch_stick_checked = false;

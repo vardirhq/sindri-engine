@@ -2,6 +2,8 @@
 
 # Changelog
 
+- Animation events: a sprite clip names moments by frame (`"events": [{ "frame": 1, "name": "step" }]`, edited under the clip's frames in the inspector), and `Animation.fired(entity, "step")` is true for the step after one is shown. The platformer's hero plays a footstep, made in the Sound Lab, on its run's widest strides.
+
 - Decay: a field another script declares as a plain literal (`var lit: bool = false`) can be read before that script has started, rather than failing as if it had no value. Lamplighter's wilds starting over after the lantern goes out tripped on it.
 
 - Lamplighter's title opens the wilds with Play, the Dim Fields a button below, and Pause resumes whichever was paused.

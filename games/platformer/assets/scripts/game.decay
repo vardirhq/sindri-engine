@@ -3,6 +3,8 @@ state Game {
     var coins: number = 0.0;
     var coins_total: number = 0.0;
     var falls: number = 0.0;
+    // Footfalls heard on the run, from its `step` events.
+    var steps: number = 0.0;
     var won: bool = false;
     var ground_found: bool = false;
     var ground_clearance: number = 0.0;
