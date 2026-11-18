@@ -16,13 +16,14 @@ runs:
     # action rather than the same thirty lines copied into four jobs.
     #
     # The image does not name a mirror in its sources at all: it points them
-    # at a mirrorlist, and Azure's mirror is the first entry in it. When that
-    # mirror stops answering — 502 for an hour, then nothing — every index
-    # request is ignored, apt sits on the retries, and a step that takes
-    # fifteen seconds is still going when something kills it. Dropping that
-    # one entry leaves the public archive, which answered in about a second
-    # throughout, and costs the few seconds a mirror outside the datacentre
-    # does.
+    # at a mirrorlist, and a cloud region's mirror is the first entry in it.
+    # When that mirror stops answering — Azure's: 502 for an hour, then
+    # nothing — every index request is ignored, apt sits on the retries, and
+    # a step that takes fifteen seconds is still going when something kills
+    # it. When it answers slowly — us-east-2.ec2's: 10 MB in three minutes —
+    # the install outlives its cap. Dropping every regional entry leaves the
+    # public archive, which answered in about a second throughout, and costs
+    # the few seconds a mirror outside the datacentre does.
     #
     # The rest is about failing rather than hanging. apt waits on the dpkg
     # lock forever by default and on a stalled download for a long time; the
@@ -36,7 +37,7 @@ runs:
       run: |
         mirrors=/etc/apt/apt-mirrors.txt
         if [ -f "$mirrors" ]; then
-          sudo sed -i '/azure\.archive\.ubuntu\.com/d' "$mirrors"
+          sudo sed -i -E '/(azure|[a-z0-9-]+\.ec2)\.archive\.ubuntu\.com/d' "$mirrors"
           # Never leave apt with no mirror at all, whatever the list held.
           if ! grep -q . "$mirrors"; then
             echo 'http://archive.ubuntu.com/ubuntu/' | sudo tee "$mirrors" > /dev/null
@@ -45,7 +46,7 @@ runs:
         # An image that names the host directly rather than through a list.
         for list in /etc/apt/sources.list /etc/apt/sources.list.d/ubuntu.sources; do
           if [ -f "$list" ]; then
-            sudo sed -i 's|://azure.archive.ubuntu.com/|://archive.ubuntu.com/|g' "$list"
+            sudo sed -i -E 's#://(azure|[a-z0-9-]+\.ec2)\.archive\.ubuntu\.com/#://archive.ubuntu.com/#g' "$list"
           fi
         done
         # What apt was actually asked for, so the next mirror failure names
