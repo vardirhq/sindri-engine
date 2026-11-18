@@ -2,6 +2,8 @@
 
 # Changelog
 
+- Debug views draw every collider physics has: a tilemap's solid tiles as physics merges them, and 3D collider pieces as wireframes (a box's edges, a sphere's great circles, a capsule's rings and caps) through the frame's own camera, scale included; 2D outlines sit on their entity's layer, so a perspective camera draws them where the sprites are. A probe finds a tilemap's ground too.
+
 - Decay and Weave from the `sindri` command and as MCP tools. `sindri script check --file` (`check_script`) compiles a draft against the project's API and every other script in it before it is saved; `sindri script api Physics.mask` (`decay_api`) answers one name in the host API with its signature, or the nearest names. `sindri style show --id` (`style_show`) lists every Weave rule reaching an element, strongest first, with file, line, specificity and which declarations apply; `sindri style match --selector` (`style_match`) says which elements a selector reaches, by the engine's own cascade; `sindri style unused` (`style_unused`) lists rules nothing reaches at rest.
 
 - Debug views in a headless run: after `debug:colliders`, `debug:ui` or `debug:all`, shots and films draw every 2D collider piece where physics has it (green, a sensor yellow) and every laid-out UI element (magenta, cyan where it takes presses), through the camera the frame was drawn with; `probe:<x>,<y>` reports what is at a pixel (the element, the one a press reaches, the world point, the colliders holding it) and needs no GPU. And `sindri capabilities decay-guide` / `weave-guide` (the MCP `capabilities` tool too) hand out how to write Decay and Weave, the language manual and the Weave reference, from the binary.

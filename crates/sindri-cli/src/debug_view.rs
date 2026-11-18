@@ -17,7 +17,12 @@ use glam::{Vec3, Vec4};
 use serde::Serialize;
 use sindri_capture::ProjectPlayer;
 use sindri_core::{EntityId, World};
-use sindri_scene::{CameraView, Collider2dComponent, ColliderShape2d};
+use sindri_scene::{
+    CameraView, Collider2d, Collider2dComponent, ColliderShape2d, TilemapCollider2dComponent,
+    TilemapComponent,
+};
+
+mod solid;
 
 /// Which overlays later pictures carry.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
@@ -93,20 +98,32 @@ pub fn draw(pixels: &mut [u8], size: [u32; 2], player: &ProjectPlayer, layers: L
             let points: Option<Vec<[f32; 2]>> = outline
                 .points
                 .iter()
-                .map(|point| world_pixel(player, *point))
+                .map(|&[x, y]| project(player, Vec3::new(x, y, outline.z)))
                 .collect();
             if let Some(points) = points {
                 canvas.polygon(&points, if outline.sensor { SENSOR } else { COLLIDER });
             }
         }
+        for (sensor, lines) in solid::wireframes(player) {
+            for line in lines {
+                let points: Vec<Option<[f32; 2]>> =
+                    line.iter().map(|point| project(player, *point)).collect();
+                for pair in points.windows(2) {
+                    if let [Some(from), Some(to)] = pair {
+                        canvas.line(*from, *to, if sensor { SENSOR } else { COLLIDER });
+                    }
+                }
+            }
+        }
     }
 }
 
-/// One collider piece, in world units.
+/// One collider piece, in world units, on the layer its entity is on.
 struct Outline {
     entity: EntityId,
     sensor: bool,
     points: Vec<[f32; 2]>,
+    z: f32,
 }
 
 /// Every 2D collider piece on an active entity, placed where physics places
@@ -115,15 +132,26 @@ fn outlines(player: &ProjectPlayer) -> Vec<Outline> {
     let registry = player.scene.components();
     let mut found = Vec::new();
     for (entity, _) in player.world.entities() {
-        let Ok(parts) = registry.get_parts::<Collider2dComponent>(&player.world, entity) else {
-            continue;
-        };
         let Some(place) = player.world.world_transform(entity) else {
             continue;
         };
+        // Its own pieces, and a tilemap's solid tiles as physics merges them.
+        let mut pieces: Vec<Collider2d> = registry
+            .get_parts::<Collider2dComponent>(&player.world, entity)
+            .unwrap_or_default()
+            .into_iter()
+            .flat_map(|(_, Collider2dComponent(pieces))| pieces)
+            .collect();
+        if let (Ok(Some(collider)), Ok(Some(tilemap))) = (
+            registry.get::<TilemapCollider2dComponent>(&player.world, entity),
+            registry.get::<TilemapComponent>(&player.world, entity),
+        ) && let Ok(tiles) = collider.pieces(&tilemap, place.scale_2d())
+        {
+            pieces.extend(tiles);
+        }
         let turn = 2.0 * place.rotation[2].atan2(place.rotation[3]);
         let at = [place.position[0], place.position[1]];
-        for (_, Collider2dComponent(pieces)) in parts {
+        {
             for piece in pieces {
                 let local = shape(&piece.shape);
                 let points = local
@@ -139,6 +167,7 @@ fn outlines(player: &ProjectPlayer) -> Vec<Outline> {
                     entity,
                     sensor: piece.sensor,
                     points,
+                    z: place.position[2],
                 });
             }
         }
@@ -180,15 +209,16 @@ fn rotate([x, y]: [f32; 2], angle: f32) -> [f32; 2] {
     [x * cos - y * sin, x * sin + y * cos]
 }
 
-/// A world point's pixel, through the camera the frame was drawn with.
-fn world_pixel(player: &ProjectPlayer, [x, y]: [f32; 2]) -> Option<[f32; 2]> {
+/// A world point's pixel, through the camera the frame was drawn with;
+/// `None` behind the camera.
+fn project(player: &ProjectPlayer, point: Vec3) -> Option<[f32; 2]> {
     let [width, height] = player.size;
     let camera = player
         .scene
         .world_camera_for_viewport(&player.world, width / height, CameraView::default())
         .ok()??;
-    let clip = camera.view_projection * Vec4::new(x, y, 0.0, 1.0);
-    if clip.w.abs() < f32::EPSILON {
+    let clip = camera.view_projection * point.extend(1.0);
+    if clip.w <= f32::EPSILON {
         return None;
     }
     let ndc = clip.truncate() / clip.w;

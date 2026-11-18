@@ -43,6 +43,8 @@ How to search this pack:
   there does not exist. Never use an API from memory.
 - **The exact name and fields of a component** (`sindri.sprite`,
   `sindri.physics2d.collider`): search `04-components.md` for the type name.
+- **Whether a scene file is shaped right** (which fields are required, which
+  spellings a field takes): `15-scene-schema.md`, the file's JSON Schema.
 - **How to do a thing** ("jump", "spawn", "score", "sound", "button"): search
   the examples (`12-`, `13-`, `14-`) for a script that already does it, then
   `03-scripting-guide.md`.
@@ -186,14 +188,17 @@ they are Decay.
    and Rust installed, these work from the repository folder:
 
    ```bash
-   cargo run --quiet --package decay-lsp -- --check path/to/my-game   # checks every script
-   cargo editor path/to/my-game                                       # opens it in the editor
-   cargo run --release --package sindri-player -- path/to/my-game     # plays it in a window
+   cargo run --quiet --package sindri-cli -- project check path/to/my-game   # checks everything
+   cargo run --quiet --package sindri-cli -- render capture path/to/my-game --out shot.png
+   cargo editor path/to/my-game                                               # opens it in the editor
    ```
 
-   The checker's errors carry a stable code such as
-   `decay-semantic/unknown-name`; `01-decay-language.md` lists them all. Fix
-   every error, then check again; do not stop after the first.
+   `project check` reads every scene, prefab, script and stylesheet as the
+   game does and reports each problem with a stable code, its file, and its
+   line or entity, such as `DECAY_UNKNOWN_NAME` or `COMPONENT_UNKNOWN_FIELD`
+   ("has no field tnit; did you mean tint?"). Ask the user to paste its whole
+   output, fix every error, then check again; do not stop after the first.
+   `render capture` writes a picture of the game the user can show you.
 
 ## Decay: things models get wrong
 
