@@ -11,8 +11,14 @@ python site/build_knowledge_pack.py target/pages/knowledge-pack
 
 Pages builds it on every run and publishes the files, an index page and
 `sindri-knowledge-pack.zip` at `https://sindri.vardir.no/knowledge-pack/`.
-To use it, upload the fifteen `.md` files as the model's knowledge and tell it
+To use it, upload the sixteen `.md` files as the model's knowledge and tell it
 to read `00-start-here.md` first.
+
+**A model keeps the copy it was given.** The published pack follows every
+change to `main`, but a custom GPT or chat project holds the files that were
+uploaded to it, and nothing replaces them. After an engine update, download
+the zip again and replace the model's knowledge files, or it will describe
+the engine as it was.
 
 ## What is in it
 

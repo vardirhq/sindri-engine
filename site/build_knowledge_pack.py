@@ -151,6 +151,15 @@ COMPONENTS_FILE = (
     "and a real use from an example project.",
 )
 
+SCHEMA_FILE = (
+    "15-scene-schema.md",
+    "Scene and prefab file schema (generated)",
+    "The exact shape of a `.scene` and a `.prefab` file as JSON Schema, generated "
+    "from the engine's component registry: every component, its fields and their "
+    "types, which are required, the allowed spellings and bounds. Check a scene "
+    "against it before handing it over.",
+)
+
 # Feature examples: each shows one capability, is small, and is exported to the
 # site by CI, so it is known to load. They are the patterns to copy.
 EXAMPLE_FILES = [
@@ -513,6 +522,63 @@ def build_components_file():
     return "\n".join(out) + "\n"
 
 
+def build_schema_file():
+    """The scene schema whole, and the prefab schema by how it differs.
+
+    The two are the same but for the format version a file declares and their
+    titles, so writing both out would double the file for one number. A prefab
+    schema that differs anywhere else fails the build rather than being
+    described wrongly.
+    """
+    scene = json.loads(read("docs/generated/sindri-scene.schema.json"))
+    prefab = json.loads(read("docs/generated/sindri-prefab.schema.json"))
+    differs = ("title", "description")
+
+    def rest(schema):
+        copy = {k: v for k, v in schema.items() if k not in differs}
+        copy["properties"] = {
+            k: v for k, v in schema["properties"].items() if k != "format_version"
+        }
+        return copy
+
+    if rest(scene) != rest(prefab):
+        fail("the prefab schema differs from the scene schema beyond its format version")
+    name, title, answers = SCHEMA_FILE
+    contents = ["How to read it", "How a prefab differs", "The schema"]
+    prefab_version = prefab["properties"]["format_version"].get("const")
+    scene_version = scene["properties"]["format_version"].get("maximum")
+    reading = f"""
+## How to read it
+
+- The top level is the file: `format_version`, `metadata`, `entities`.
+- `$defs.entity` is one entity; `$defs.components` lists every component a
+  scene may carry, and each component's own shape is `$defs.<type name>`, such
+  as `$defs["sindri.sprite"]`.
+- `required` lists the fields a component cannot do without: leave one out and
+  the engine refuses the scene. Every other field may be left out, and then
+  has its `default`.
+- `"additionalProperties": false` on a component means it has exactly the
+  fields listed: a misspelled or invented field is an error, not ignored.
+- `enum` lists the only spellings a field accepts; `minimum` and `maximum`
+  bound a number; `oneOf` with a `const` field means the object's other fields
+  depend on that field (a camera's `projection`, a collider shape's `shape`).
+- A second component of one kind is a named part: `sindri.light2d#halo`,
+  matched by `patternProperties`.
+
+## How a prefab differs
+
+A `.prefab` file has the same shape, but its `format_version` is always {prefab_version};
+a scene's is at most {scene_version}, and an older one is migrated when it is opened.
+
+## The schema
+
+```json
+{compact_json(scene)}
+```
+"""
+    return header(name, title, answers, contents) + reading
+
+
 def pack_rows():
     """Every pack file and what it answers, in reading order."""
     rows = [("00-start-here.md", "Read first: the workflow, project layout, rules and traps.")]
@@ -520,6 +586,7 @@ def pack_rows():
     rows.append((COMPONENTS_FILE[0], COMPONENTS_FILE[2]))
     rows += [(n, a) for n, _, a, _ in DOC_FILES[3:]]
     rows += [(n, a) for n, _, a, _ in EXAMPLE_FILES]
+    rows.append((SCHEMA_FILE[0], SCHEMA_FILE[2]))
     return rows
 
 
@@ -640,6 +707,7 @@ def main():
     files[COMPONENTS_FILE[0]] = build_components_file()
     for name, title, answers, projects in EXAMPLE_FILES:
         files[name] = build_example_file(name, title, answers, projects)
+    files[SCHEMA_FILE[0]] = build_schema_file()
     for name, text in sorted(files.items()):
         (OUT / name).write_text(text, encoding="utf-8")
     with zipfile.ZipFile(OUT / "sindri-knowledge-pack.zip", "w", zipfile.ZIP_DEFLATED) as archive:
