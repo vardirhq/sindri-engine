@@ -185,6 +185,8 @@ sindri capabilities scene           # JSON Schema for a .scene (prefab: .prefab)
 sindri capabilities decay           # the script API, with types
 sindri capabilities decay-language  # the language itself
 sindri capabilities weave           # every style property
+sindri capabilities decay-guide     # how to write Decay, with examples: read before the first script
+sindri capabilities weave-guide     # how to write Weave: selectors, cascade, layout, animation
 ```
 
 `.sindri/scene.schema.json` and `.sindri/prefab.schema.json` are the same

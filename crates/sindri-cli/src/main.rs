@@ -14,6 +14,8 @@ fn main() {}
 #[cfg(not(target_arch = "wasm32"))]
 mod check;
 #[cfg(not(target_arch = "wasm32"))]
+mod debug_view;
+#[cfg(not(target_arch = "wasm32"))]
 mod expect;
 #[cfg(not(target_arch = "wasm32"))]
 mod film;

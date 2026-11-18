@@ -182,6 +182,41 @@ pub const REFERENCES: &[(&str, &str)] = &[
         "weave",
         "every Weave property, what it takes and applies to",
     ),
+    (
+        "decay-guide",
+        "how to write Decay: the language manual with examples, what surprises, what does not exist, and authored properties versus live state",
+    ),
+    (
+        "weave-guide",
+        "how to write Weave: selectors, the cascade, lengths, layout, text, responsive rules, states, transitions and animations",
+    ),
+];
+
+/// The hand-written guides the binary carries, for what the generated
+/// references cannot say: how the pieces are meant to be used. Built in, so
+/// a project far from this repository has the same words, and read from the
+/// files themselves, so they cannot drift from them.
+const GUIDES: &[(&str, &[(&str, &str)])] = &[
+    (
+        "decay-guide",
+        &[
+            (
+                "decay/LANGUAGE.md",
+                include_str!("../../../decay/LANGUAGE.md"),
+            ),
+            (
+                "docs/decay-agent-guide.md",
+                include_str!("../../../docs/decay-agent-guide.md"),
+            ),
+        ],
+    ),
+    (
+        "weave-guide",
+        &[(
+            "docs/weave-reference.md",
+            include_str!("../../../docs/weave-reference.md"),
+        )],
+    ),
 ];
 
 /// The reference named `name`, one of [`REFERENCES`]; `None` for any other.
@@ -197,7 +232,15 @@ pub fn reference(name: &str) -> Result<Option<serde_json::Value>, CapabilitiesEr
         "decay" => decay::describe().to_json(),
         "decay-language" => decay_language::describe(),
         "weave" => weave_properties::describe(),
-        _ => return Ok(None),
+        guide => match GUIDES.iter().find(|(name, _)| *name == guide) {
+            Some((_, parts)) => serde_json::json!({
+                "schema_version": SCHEMA_VERSION,
+                "name": guide,
+                "sources": parts.iter().map(|(path, _)| *path).collect::<Vec<_>>(),
+                "markdown": parts.iter().map(|(_, text)| *text).collect::<Vec<_>>().join("\n\n---\n\n"),
+            }),
+            None => return Ok(None),
+        },
     }))
 }
 
