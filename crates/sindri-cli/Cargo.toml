@@ -25,6 +25,7 @@ sindri-core = { path = "../sindri-core" }
 sindri-authoring = { path = "../sindri-authoring" }
 sindri-capabilities = { path = "../../tools/sindri-capabilities" }
 sindri-decay = { path = "../sindri-decay" }
+sindri-physics = { path = "../sindri-physics" }
 sindri-runtime = { path = "../sindri-runtime" }
 sindri-scene = { path = "../sindri-scene" }
 sindri-weave = { path = "../sindri-weave" }
