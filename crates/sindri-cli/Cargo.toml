@@ -27,6 +27,7 @@ sindri-capabilities = { path = "../../tools/sindri-capabilities" }
 sindri-decay = { path = "../sindri-decay" }
 sindri-runtime = { path = "../sindri-runtime" }
 sindri-scene = { path = "../sindri-scene" }
+sindri-weave = { path = "../sindri-weave" }
 weave = { path = "../../weave/crates/weave" }
 
 [dev-dependencies]
