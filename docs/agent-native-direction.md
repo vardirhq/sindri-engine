@@ -317,7 +317,9 @@ also shows whether the MCP adapter above is worth building.
    scripted input (keys, clicks on laid-out elements, typing, board values,
    moving an entity), styled and laid out as it is drawn, reporting the shared
    board, where tracked entities ended up, the pictures `shot` steps took, and
-   what scripts printed and failed, per frame. `sindri render capture --out`
+   what scripts printed and failed, per frame; `expect:` steps make a run a
+   test the agent wrote, and `film:` steps show motion as one sheet of frames.
+   `sindri render capture --out`
    is the same run ending in one picture. The player behind it is
    `crates/sindri-capture`, which Causeway's `project-capture` uses too.
 4. *Done:* the editor reloads a scene changed on disk, and asks first when it

@@ -18,6 +18,8 @@ use serde::Serialize;
 use sindri_capture::{OpenedProject, Photographer, open, open_scene};
 use sindri_core::SceneEntityId;
 
+use crate::expect::{self, Checked};
+use crate::film::{self, Film};
 use crate::report::SCHEMA_VERSION;
 
 /// What `sindri play run` answers.
@@ -44,6 +46,8 @@ pub struct PlayReport {
     pub printed: Vec<Event>,
     pub failures: Vec<Event>,
     pub problems: Vec<Event>,
+    /// Each `expect:` step, where it was reached and what was there.
+    pub expectations: Vec<Checked>,
     /// Why the run stopped early, if it did.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub stopped: Option<String>,
@@ -59,6 +63,10 @@ pub struct Event {
 pub struct Shot {
     pub frame: u32,
     pub path: String,
+    /// For a `film:` sheet, the frame each picture on it was taken at, in
+    /// order; empty for a single shot.
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub frames: Vec<u32>,
 }
 
 /// What to play: where, for how long, pressing what, watching whom, and
@@ -87,12 +95,22 @@ const VERBS: [&str; 13] = [
 /// A project that will not open, or a step that does not read.
 pub fn play(request: &Play<'_>) -> Result<PlayReport, String> {
     for step in request.steps {
-        let verb = step.split_once(':').map_or(step.as_str(), |(verb, _)| verb);
-        if verb != "shot" && !VERBS.contains(&verb) {
-            return Err(format!(
-                "{step}: a step is one of shot, {}",
-                VERBS.join(", ")
-            ));
+        let (verb, rest) = step.split_once(':').unwrap_or((step.as_str(), ""));
+        match verb {
+            "shot" => {}
+            "expect" => {
+                expect::parse(rest)?;
+            }
+            "film" => {
+                Film::parse(rest)?;
+            }
+            verb if VERBS.contains(&verb) => {}
+            _ => {
+                return Err(format!(
+                    "{step}: a step is one of shot, film, expect, {}",
+                    VERBS.join(", ")
+                ));
+            }
         }
     }
     #[allow(clippy::cast_precision_loss)]
@@ -111,6 +129,7 @@ pub fn play(request: &Play<'_>) -> Result<PlayReport, String> {
         failures: Vec::new(),
         problems: Vec::new(),
         shots: Vec::new(),
+        expectations: Vec::new(),
     };
     let mut stopped = None;
     for (index, step) in request.steps.iter().enumerate() {
@@ -143,7 +162,9 @@ pub fn play(request: &Play<'_>) -> Result<PlayReport, String> {
     Ok(PlayReport {
         schema_version: SCHEMA_VERSION,
         project: request.project.display().to_string(),
-        ok: run.failures.is_empty() && stopped.is_none(),
+        ok: run.failures.is_empty()
+            && stopped.is_none()
+            && run.expectations.iter().all(|checked| checked.passed),
         scene,
         ended_in: player.session.scene().map(str::to_owned),
         frames: player.frame(),
@@ -154,6 +175,7 @@ pub fn play(request: &Play<'_>) -> Result<PlayReport, String> {
         printed: run.printed,
         failures: run.failures,
         problems: run.problems,
+        expectations: run.expectations,
         stopped,
     })
 }
@@ -166,11 +188,26 @@ struct Run {
     failures: Vec<Event>,
     problems: Vec<Event>,
     shots: Vec<Shot>,
+    expectations: Vec<Checked>,
 }
 
 impl Run {
     fn perform(&mut self, step: &str, index: usize, request: &Play<'_>) -> Result<(), String> {
         let (verb, name) = step.split_once(':').unwrap_or((step, ""));
+        if verb == "expect" {
+            self.gather();
+            let (passed, actual) = expect::parse(name)?.check(&*self);
+            self.expectations.push(Checked {
+                frame: self.opened.player.frame(),
+                step: step.to_owned(),
+                passed,
+                actual,
+            });
+            return Ok(());
+        }
+        if verb == "film" {
+            return self.film(&Film::parse(name)?, index, request);
+        }
         if verb != "shot" {
             let done = self
                 .opened
@@ -180,14 +217,7 @@ impl Run {
             self.gather();
             return done;
         }
-        if self.photographer.is_none() {
-            let photographer = pollster::block_on(Photographer::new(
-                &self.opened,
-                (request.size[0], request.size[1]),
-            ))
-            .map_err(|error| format!("a shot needs a GPU adapter: {error}"))?;
-            self.photographer = Some(photographer);
-        }
+        self.camera(request)?;
         let file = if name.is_empty() {
             format!("shot-{}.png", index + 1)
         } else {
@@ -202,6 +232,58 @@ impl Run {
         self.shots.push(Shot {
             frame: self.opened.player.frame(),
             path: path.display().to_string(),
+            frames: Vec::new(),
+        });
+        Ok(())
+    }
+
+    /// The photographer, made at the first picture, so a run that takes
+    /// none needs no GPU.
+    fn camera(&mut self, request: &Play<'_>) -> Result<(), String> {
+        if self.photographer.is_none() {
+            let photographer = pollster::block_on(Photographer::new(
+                &self.opened,
+                (request.size[0], request.size[1]),
+            ))
+            .map_err(|error| format!("a picture needs a GPU adapter: {error}"))?;
+            self.photographer = Some(photographer);
+        }
+        Ok(())
+    }
+
+    /// A `film:` step: frames taken across its span while the run plays on,
+    /// written as one sheet.
+    fn film(&mut self, film: &Film, index: usize, request: &Play<'_>) -> Result<(), String> {
+        self.camera(request)?;
+        let mut pixels = Vec::new();
+        let mut frames = Vec::new();
+        for taken in 0..film.count {
+            if taken > 0 {
+                self.opened
+                    .player
+                    .perform(&format!("wait:{}", film.between()))
+                    .map_err(|error| error.to_string())?;
+                self.gather();
+            }
+            frames.push(self.opened.player.frame());
+            pixels.push(
+                self.photographer
+                    .as_mut()
+                    .expect("made above")
+                    .pixels(&mut self.opened.player)
+                    .map_err(|error| error.to_string())?,
+            );
+        }
+        let sheet = film.name.as_ref().map_or_else(
+            || format!("film-{}.png", index + 1),
+            |name| format!("{name}.png"),
+        );
+        let path = request.shots.join(sheet);
+        film::write(pixels, request.size, &path)?;
+        self.shots.push(Shot {
+            frame: frames[0],
+            path: path.display().to_string(),
+            frames,
         });
         Ok(())
     }
@@ -230,6 +312,38 @@ impl Run {
     }
 }
 
+/// What an expectation is checked against: the run as it is now.
+impl expect::State for Run {
+    fn board(&self, name: &str) -> Option<f64> {
+        self.opened
+            .player
+            .session
+            .scripts()
+            .blackboard()
+            .notes()
+            .find(|(noted, _)| *noted == name)
+            .map(|(_, value)| value)
+    }
+
+    fn position(&self, entity: &str) -> Option<[f32; 2]> {
+        let world = &self.opened.player.world;
+        let id = SceneEntityId::new(entity.to_owned()).ok()?;
+        let place = world.world_transform(world.entity_for_source_id(&id)?)?;
+        Some([place.position[0], place.position[1]])
+    }
+
+    fn scene(&self) -> Option<String> {
+        self.opened.player.session.scene().map(str::to_owned)
+    }
+
+    fn printed(&self) -> Vec<String> {
+        self.printed
+            .iter()
+            .map(|event| event.message.clone())
+            .collect()
+    }
+}
+
 impl PlayReport {
     /// The report as a person reads it.
     #[must_use]
@@ -254,7 +368,19 @@ impl PlayReport {
             }
         }
         for shot in &self.shots {
-            let _ = writeln!(out, "  frame {}: shot {}", shot.frame, shot.path);
+            if shot.frames.is_empty() {
+                let _ = writeln!(out, "  frame {}: shot {}", shot.frame, shot.path);
+            } else {
+                let _ = writeln!(out, "  frames {:?}: film {}", shot.frames, shot.path);
+            }
+        }
+        for checked in &self.expectations {
+            let mark = if checked.passed { "pass" } else { "FAIL" };
+            let _ = writeln!(
+                out,
+                "  frame {}: {mark} {} (was {})",
+                checked.frame, checked.step, checked.actual
+            );
         }
         for (id, at) in &self.tracked {
             match at {

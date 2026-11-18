@@ -145,7 +145,7 @@ fn tools() -> Value {
 }
 
 /// What a step may be, as the tools describe it.
-const STEPS: &str = "In order: wait:<seconds>; key:<Key> (a tap: Space, F, ArrowLeft); hold:<Key> and release:<Key>; set:<name>=<number> (a shared board value); click:<entity> (a laid-out UI element, by ID); type:<text>; place:<entity>=<x>,<y>; near:<entity>=<name> (in front of the first thing of that name); shot or shot:<name> (a picture, answered inline).";
+const STEPS: &str = "In order: wait:<seconds>; key:<Key> (a tap: Space, F, ArrowLeft); hold:<Key> and release:<Key>; set:<name>=<number> (a shared board value); click:<entity> (a laid-out UI element, by ID); type:<text>; place:<entity>=<x>,<y>; near:<entity>=<name> (in front of the first thing of that name); shot or shot:<name> (a picture, answered inline); film:<seconds>x<count> (that many frames across that span, as one picture, answered inline: a jump's arc, a walk, a fade); expect:<what><op><value>, op one of = != < <= > >=, checked where it stands and failing the run when it does not hold: a board value (expect:score>=1), an entity's place by ID (expect:player.x>3), the scene playing (expect:scene=level2) or a printed line (expect:printed=Game over). Write the expectations a change should meet, then play_run them: ok is false and expectations says which failed and what was there instead.";
 
 /// A tool's answer: its command's JSON as text, and whether it went wrong.
 fn call(params: &Value) -> Value {

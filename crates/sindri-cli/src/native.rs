@@ -77,7 +77,13 @@ STEPS
                         that name, once something has made it
   shot                  a picture, to --shots (default .), as shot-N.png
   shot:<name>           the same, as <name>.png
-  for example: --steps "wait:0.5 hold:D wait:1 release:D shot:walked"
+  film:<seconds>x<count>  <count> frames across <seconds>, as one picture
+                        (film-N.png, or film:<name>=1x6 as <name>.png)
+  expect:<what><op><value>  checked where it stands; a failed one fails the
+                        run and is reported with what was there. <what> is a
+                        board value, <entity>.x or .y, scene or printed; <op>
+                        is = != < <= > >= (scene and printed: = and != only)
+  for example: --steps "wait:0.5 hold:D wait:1 release:D expect:hero.x>3 shot:walked"
 
 --format json writes one JSON document with schema_version; it is the
 contract. --format human, the default, is rendered from it."#;

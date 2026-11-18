@@ -14,6 +14,10 @@ fn main() {}
 #[cfg(not(target_arch = "wasm32"))]
 mod check;
 #[cfg(not(target_arch = "wasm32"))]
+mod expect;
+#[cfg(not(target_arch = "wasm32"))]
+mod film;
+#[cfg(not(target_arch = "wasm32"))]
 mod install;
 #[cfg(not(target_arch = "wasm32"))]
 mod mcp;

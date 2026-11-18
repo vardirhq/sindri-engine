@@ -378,3 +378,89 @@ fn the_mcp_tools_default_to_the_folder_the_server_started_in() {
     assert_eq!(reply["result"]["isError"], false, "{reply}");
     assert_eq!(reply["result"]["structuredContent"]["ok"], true);
 }
+
+#[test]
+fn expectations_pass_and_fail_where_they_stand() {
+    let lamplighter = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../games/lamplighter");
+    let run = |steps: &str| {
+        let output = Command::new(env!("CARGO_BIN_EXE_sindri"))
+            .args(["play", "run"])
+            .arg(&lamplighter)
+            .args([
+                "--scene",
+                "wilds.scene",
+                "--format",
+                "json",
+                "--steps",
+                steps,
+            ])
+            .output()
+            .expect("sindri runs");
+        let report: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap_or_default();
+        (output.status.code(), report)
+    };
+    let (code, report) = run(
+        "expect:wick.x<11 wait:0.3 hold:D wait:1 release:D expect:wick.x>13 \
+         set:wood=4 set:stone=2 key:F wait:0.2 expect:built=1 expect:wood=0 expect:scene=wilds",
+    );
+    assert_eq!(code, Some(0), "{report}");
+    let checked = report["expectations"].as_array().unwrap();
+    assert_eq!(checked.len(), 5);
+    assert!(
+        checked.iter().all(|checked| checked["passed"] == true),
+        "{report}"
+    );
+
+    // A failed one fails the run, says what was there, and the run goes on
+    // to check the rest.
+    let (code, report) = run("expect:built=1 wait:0.1 expect:scene=village expect:wick.x<11");
+    assert_eq!(code, Some(1));
+    assert_eq!(report["ok"], false);
+    let checked = report["expectations"].as_array().unwrap();
+    assert_eq!(
+        checked
+            .iter()
+            .map(|c| c["passed"].clone())
+            .collect::<Vec<_>>(),
+        [false, false, true]
+    );
+    assert_eq!(checked[1]["actual"], "wilds.scene");
+
+    let (code, _) = run("expect:built");
+    assert_eq!(code, Some(2), "a step that does not read is a usage error");
+}
+
+#[test]
+fn a_film_is_one_sheet_of_frames_across_its_span() {
+    let lamplighter = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../games/lamplighter");
+    let out = tempfile::tempdir().unwrap();
+    let output = Command::new(env!("CARGO_BIN_EXE_sindri"))
+        .args(["play", "run"])
+        .arg(&lamplighter)
+        .args([
+            "--scene",
+            "wilds.scene",
+            "--format",
+            "json",
+            "--size",
+            "320x180",
+        ])
+        .args(["--steps", "hold:D film:walk=1x4"])
+        .arg("--shots")
+        .arg(out.path())
+        .output()
+        .expect("sindri runs");
+    let report: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap_or_default();
+    if no_gpu(&report) {
+        return;
+    }
+    assert!(output.status.success(), "{report}");
+    let film = &report["shots"][0];
+    assert_eq!(
+        film["frames"],
+        serde_json::json!([1, 21, 41, 61]),
+        "{report}"
+    );
+    let png = std::fs::read(out.path().join("walk.png")).unwrap();
+    assert_eq!(&png[16..24], &[0, 0, 1, 64, 0, 0, 0, 180], "320x180");
+}

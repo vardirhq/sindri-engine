@@ -2,6 +2,8 @@
 
 # Changelog
 
+- `sindri play run` (and the MCP `play_run` and `capture` tools) takes `expect:` steps, an agent's own pass/fail test: `expect:score>=1`, `expect:player.x>3`, `expect:scene=level2`, `expect:printed=Game over`, checked where each stands in the run, reported with what was there instead, and failing the run when one does not hold. A `film:1.5x6` step takes six frames across a second and a half as one picture, so motion can be seen: a jump's arc, a walk, a fade.
+
 - `sindri mcp install` registers the MCP server with an agent by the binary's own path, so it runs from any folder: Claude Code (through `claude mcp add`, the default), Claude Desktop, Cursor, VS Code and Codex, for every project (`--scope user`) or one (`--scope project`), merging into existing settings rather than writing over them; `--dry-run` says what it would do. The MCP tools now default to the project the agent started the server in, so one registration serves every project.
 
 - `sindri project check` warns about a component field the engine would ignore (`COMPONENT_UNKNOWN_FIELD`, with the field meant: "has no field volme; did you mean volume?"), read from the scene schema so the check and an editor validating against it agree, and reports every payload the engine cannot read, on its entity and with serde's reason ("missing field `near`"), rather than the first. The schemas mark the fields a component cannot do without, asked of the engine by decoding its template with each field left out.
