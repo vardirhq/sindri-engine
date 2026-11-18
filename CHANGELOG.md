@@ -2,6 +2,8 @@
 
 # Changelog
 
+- Debug views in a headless run: after `debug:colliders`, `debug:ui` or `debug:all`, shots and films draw every 2D collider piece where physics has it (green, a sensor yellow) and every laid-out UI element (magenta, cyan where it takes presses), through the camera the frame was drawn with; `probe:<x>,<y>` reports what is at a pixel (the element, the one a press reaches, the world point, the colliders holding it) and needs no GPU. And `sindri capabilities decay-guide` / `weave-guide` (the MCP `capabilities` tool too) hand out how to write Decay and Weave, the language manual and the Weave reference, from the binary.
+
 - Questions about a project, from the `sindri` command and as MCP tools, so an agent finds its way without reading every file: `sindri project overview` (scenes and prefabs with their sizes, each script file and what it declares, components in use, files by kind), `sindri scene outline` (a scene as a tree, one line an entity), `sindri entity find` (by component, name, script or prefab, across every scene and prefab), `sindri entity show` (one entity as written, with its children) and `sindri asset uses` (every component field, prefab instance, script and stylesheet line naming a file, a picture's regions included).
 
 - `sindri play run` (and the MCP `play_run` and `capture` tools) takes `expect:` steps, an agent's own pass/fail test: `expect:score>=1`, `expect:player.x>3`, `expect:scene=level2`, `expect:printed=Game over`, checked where each stands in the run, reported with what was there instead, and failing the run when one does not hold. A `film:1.5x6` step takes six frames across a second and a half as one picture, so motion can be seen: a jump's arc, a walk, a fade.

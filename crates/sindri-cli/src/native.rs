@@ -67,7 +67,8 @@ COMMANDS
                   list; scene and prefab are JSON Schemas for those files
                   (point an editor's json.schemas at them), components every
                   component's fields and meanings, decay the script API,
-                  decay-language the language, weave every style property.
+                  decay-language the language, weave every style property;
+                  decay-guide and weave-guide how to write each, as markdown.
 
   mcp             Serve project_check, play_run, capture and capabilities
                   as MCP tools on standard input and output, for an agent
@@ -101,6 +102,11 @@ STEPS
   shot:<name>           the same, as <name>.png
   film:<seconds>x<count>  <count> frames across <seconds>, as one picture
                         (film-N.png, or film:<name>=1x6 as <name>.png)
+  debug:<layers>        later pictures carry overlays: colliders (green, a
+                        sensor yellow), ui (laid-out elements magenta, ones
+                        that take presses cyan), all, or off
+  probe:<x>,<y>         report what is at a pixel: the element, the one a
+                        press reaches, the world point, colliders holding it
   expect:<what><op><value>  checked where it stands; a failed one fails the
                         run and is reported with what was there. <what> is a
                         board value, <entity>.x or .y, scene or printed; <op>
@@ -354,11 +360,18 @@ fn run(args: &[String]) -> Result<ExitCode, String> {
                 .ok_or_else(|| {
                     format!("no capability document {name}; `sindri capabilities` lists them")
                 })?;
-            // The document is JSON whatever the format: a schema rendered
-            // for a person is no longer a schema.
+            // A reference is JSON whatever the format: a schema rendered for
+            // a person is no longer a schema. A guide is read as written,
+            // unless JSON is asked for.
             // Written rather than printed, so a reader that stops early,
             // such as `head`, ends the command instead of panicking it.
-            let text = json(&reference)? + "\n";
+            let text = match reference
+                .get("markdown")
+                .and_then(serde_json::Value::as_str)
+            {
+                Some(markdown) if options.format == Format::Human => markdown.to_owned(),
+                _ => json(&reference)? + "\n",
+            };
             let _ = std::io::Write::write_all(&mut std::io::stdout(), text.as_bytes());
             Ok(ExitCode::SUCCESS)
         }

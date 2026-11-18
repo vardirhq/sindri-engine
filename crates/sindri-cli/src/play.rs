@@ -18,6 +18,7 @@ use serde::Serialize;
 use sindri_capture::{OpenedProject, Photographer, open, open_scene};
 use sindri_core::SceneEntityId;
 
+use crate::debug_view::{self, Layers, Probe};
 use crate::expect::{self, Checked};
 use crate::film::{self, Film};
 use crate::report::SCHEMA_VERSION;
@@ -48,6 +49,9 @@ pub struct PlayReport {
     pub problems: Vec<Event>,
     /// Each `expect:` step, where it was reached and what was there.
     pub expectations: Vec<Checked>,
+    /// Each `probe:` step: what was at that pixel.
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub probes: Vec<Probe>,
     /// Why the run stopped early, if it did.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub stopped: Option<String>,
@@ -104,10 +108,16 @@ pub fn play(request: &Play<'_>) -> Result<PlayReport, String> {
             "film" => {
                 Film::parse(rest)?;
             }
+            "debug" => {
+                Layers::parse(rest)?;
+            }
+            "probe" => {
+                debug_view::parse_pixel(rest)?;
+            }
             verb if VERBS.contains(&verb) => {}
             _ => {
                 return Err(format!(
-                    "{step}: a step is one of shot, film, expect, {}",
+                    "{step}: a step is one of shot, film, expect, debug, probe, {}",
                     VERBS.join(", ")
                 ));
             }
@@ -130,6 +140,8 @@ pub fn play(request: &Play<'_>) -> Result<PlayReport, String> {
         problems: Vec::new(),
         shots: Vec::new(),
         expectations: Vec::new(),
+        debug: Layers::default(),
+        probes: Vec::new(),
     };
     let mut stopped = None;
     for (index, step) in request.steps.iter().enumerate() {
@@ -176,6 +188,7 @@ pub fn play(request: &Play<'_>) -> Result<PlayReport, String> {
         failures: run.failures,
         problems: run.problems,
         expectations: run.expectations,
+        probes: run.probes,
         stopped,
     })
 }
@@ -189,6 +202,9 @@ struct Run {
     problems: Vec<Event>,
     shots: Vec<Shot>,
     expectations: Vec<Checked>,
+    /// The overlays pictures carry from here on.
+    debug: Layers,
+    probes: Vec<Probe>,
 }
 
 impl Run {
@@ -203,6 +219,19 @@ impl Run {
                 passed,
                 actual,
             });
+            return Ok(());
+        }
+        if verb == "debug" {
+            self.debug = Layers::parse(name)?;
+            return Ok(());
+        }
+        if verb == "probe" {
+            let pixel = debug_view::parse_pixel(name)?;
+            self.probes.push(debug_view::probe(
+                &self.opened.player,
+                pixel,
+                self.opened.player.frame(),
+            ));
             return Ok(());
         }
         if verb == "film" {
@@ -224,17 +253,38 @@ impl Run {
             format!("{name}.png")
         };
         let path: PathBuf = request.shots.join(file);
-        self.photographer
-            .as_mut()
-            .expect("made above")
-            .shoot(&mut self.opened.player, &path)
-            .map_err(|error| error.to_string())?;
+        let pixels = self.picture()?;
+        let image = image::RgbaImage::from_raw(request.size[0], request.size[1], pixels)
+            .ok_or("the picture was not the size of the run")?;
+        if let Some(parent) = path.parent() {
+            std::fs::create_dir_all(parent).map_err(|error| error.to_string())?;
+        }
+        image.save(&path).map_err(|error| error.to_string())?;
         self.shots.push(Shot {
             frame: self.opened.player.frame(),
             path: path.display().to_string(),
             frames: Vec::new(),
         });
         Ok(())
+    }
+
+    /// The frame as it is now, with the debug overlays asked for drawn on it.
+    fn picture(&mut self) -> Result<Vec<u8>, String> {
+        let mut pixels = self
+            .photographer
+            .as_mut()
+            .expect("made before any picture")
+            .pixels(&mut self.opened.player)
+            .map_err(|error| error.to_string())?;
+        if self.debug.any() {
+            #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
+            let size = [
+                self.opened.player.size[0] as u32,
+                self.opened.player.size[1] as u32,
+            ];
+            debug_view::draw(&mut pixels, size, &self.opened.player, self.debug);
+        }
+        Ok(pixels)
     }
 
     /// The photographer, made at the first picture, so a run that takes
@@ -266,13 +316,7 @@ impl Run {
                 self.gather();
             }
             frames.push(self.opened.player.frame());
-            pixels.push(
-                self.photographer
-                    .as_mut()
-                    .expect("made above")
-                    .pixels(&mut self.opened.player)
-                    .map_err(|error| error.to_string())?,
-            );
+            pixels.push(self.picture()?);
         }
         let sheet = film.name.as_ref().map_or_else(
             || format!("film-{}.png", index + 1),

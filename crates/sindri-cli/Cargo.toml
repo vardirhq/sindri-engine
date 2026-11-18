@@ -15,6 +15,7 @@ path = "src/main.rs"
 
 [dependencies]
 decay-semantic = { path = "../../decay/crates/decay-semantic" }
+glam.workspace = true
 image.workspace = true
 pollster.workspace = true
 serde.workspace = true
@@ -29,6 +30,7 @@ sindri-scene = { path = "../sindri-scene" }
 weave = { path = "../../weave/crates/weave" }
 
 [dev-dependencies]
+image.workspace = true
 tempfile = "3"
 
 [lints]

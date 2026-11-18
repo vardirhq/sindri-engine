@@ -186,7 +186,7 @@ fn command_tools() -> Vec<Value> {
         },
         {
             "name": "capabilities",
-            "description": "What this engine build can be told, as JSON, generated from the engine itself so it is never out of date. Read these instead of guessing: scene and prefab are the JSON Schemas for .scene and .prefab files; components lists every component with its fields, defaults and what each field means; decay is the script API with types; decay-language is the language; weave is every style property. Answers `sindri capabilities NAME`.",
+            "description": "What this engine build can be told, as JSON, generated from the engine itself so it is never out of date. Read these instead of guessing: scene and prefab are the JSON Schemas for .scene and .prefab files; components lists every component with its fields, defaults and what each field means; decay is the script API with types; decay-language is the language; weave is every style property; decay-guide and weave-guide are how to write each, with examples, what surprises and what does not exist. Read the guide before writing your first script or stylesheet in a project. Answers `sindri capabilities NAME`.",
             "inputSchema": {
                 "type": "object",
                 "properties": {
@@ -238,7 +238,7 @@ const PROJECT_ABOUT: &str =
     "The project folder, holding sindri.toml. The folder the server was started in unless given.";
 
 /// What a step may be, as the tools describe it.
-const STEPS: &str = "In order: wait:<seconds>; key:<Key> (a tap: Space, F, ArrowLeft); hold:<Key> and release:<Key>; set:<name>=<number> (a shared board value); click:<entity> (a laid-out UI element, by ID); type:<text>; place:<entity>=<x>,<y>; near:<entity>=<name> (in front of the first thing of that name); shot or shot:<name> (a picture, answered inline); film:<seconds>x<count> (that many frames across that span, as one picture, answered inline: a jump's arc, a walk, a fade); expect:<what><op><value>, op one of = != < <= > >=, checked where it stands and failing the run when it does not hold: a board value (expect:score>=1), an entity's place by ID (expect:player.x>3), the scene playing (expect:scene=level2) or a printed line (expect:printed=Game over). Write the expectations a change should meet, then play_run them: ok is false and expectations says which failed and what was there instead.";
+const STEPS: &str = "In order: wait:<seconds>; key:<Key> (a tap: Space, F, ArrowLeft); hold:<Key> and release:<Key>; set:<name>=<number> (a shared board value); click:<entity> (a laid-out UI element, by ID); type:<text>; place:<entity>=<x>,<y>; near:<entity>=<name> (in front of the first thing of that name); shot or shot:<name> (a picture, answered inline); film:<seconds>x<count> (that many frames across that span, as one picture, answered inline: a jump's arc, a walk, a fade); debug:colliders, debug:ui, debug:all or debug:off (later pictures draw every 2D collider piece, green or yellow for a sensor, and every laid-out UI element, magenta or cyan where it takes presses: why something fell through or a click missed); probe:<x>,<y> (what is at that pixel: the UI element, the one a press reaches, the world point, the colliders holding it; needs no picture); expect:<what><op><value>, op one of = != < <= > >=, checked where it stands and failing the run when it does not hold: a board value (expect:score>=1), an entity's place by ID (expect:player.x>3), the scene playing (expect:scene=level2) or a printed line (expect:printed=Game over). Write the expectations a change should meet, then play_run them: ok is false and expectations says which failed and what was there instead.";
 
 /// A tool's answer: its command's JSON as text, and whether it went wrong.
 fn call(params: &Value) -> Value {
@@ -263,7 +263,11 @@ fn call(params: &Value) -> Value {
         let name = text("name").unwrap_or_default();
         return match sindri_capabilities::reference(&name) {
             Ok(Some(document)) => json!({
-                "content": [{ "type": "text", "text": document.to_string() }],
+                // A guide is read as written; a reference is its JSON.
+                "content": [{ "type": "text", "text": document
+                    .get("markdown")
+                    .and_then(Value::as_str)
+                    .map_or_else(|| document.to_string(), str::to_owned) }],
                 "structuredContent": document,
                 "isError": false,
             }),
