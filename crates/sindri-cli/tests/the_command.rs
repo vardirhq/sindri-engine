@@ -295,3 +295,86 @@ fn a_new_project_checks_clean_plays_and_carries_its_guide() {
         .expect("sindri runs");
     assert_eq!(again.status.code(), Some(2));
 }
+
+#[test]
+fn mcp_install_registers_this_binary_by_its_own_path_from_anywhere() {
+    let project = tempfile::tempdir().unwrap();
+    let home = tempfile::tempdir().unwrap();
+    let install = |args: &[&str]| {
+        Command::new(env!("CARGO_BIN_EXE_sindri"))
+            .args(["mcp", "install"])
+            .args(args)
+            .args(["--format", "json"])
+            .current_dir(project.path())
+            .env("HOME", home.path())
+            .output()
+            .expect("sindri runs")
+    };
+    let exe = std::fs::canonicalize(env!("CARGO_BIN_EXE_sindri")).unwrap();
+
+    let cursor = install(&["--client", "cursor", "--scope", "project"]);
+    assert!(
+        cursor.status.success(),
+        "{}",
+        String::from_utf8_lossy(&cursor.stderr)
+    );
+    let written: serde_json::Value = serde_json::from_str(
+        &std::fs::read_to_string(project.path().join(".cursor/mcp.json")).unwrap(),
+    )
+    .unwrap();
+    assert_eq!(
+        written["mcpServers"]["sindri"]["command"],
+        exe.display().to_string()
+    );
+    assert_eq!(
+        written["mcpServers"]["sindri"]["args"],
+        serde_json::json!(["mcp"])
+    );
+
+    assert!(install(&["--client", "vscode"]).status.success());
+    let vscode = std::fs::read_to_string(project.path().join(".vscode/mcp.json")).unwrap();
+    assert!(vscode.contains("\"servers\"") && vscode.contains("\"stdio\""));
+
+    assert!(install(&["--client", "codex"]).status.success());
+    let codex = std::fs::read_to_string(home.path().join(".codex/config.toml")).unwrap();
+    assert!(
+        codex.starts_with("[mcp_servers.sindri]\ncommand = "),
+        "{codex}"
+    );
+
+    // A dry run says what it would do and writes nothing.
+    let dry = install(&["--client", "claude", "--dry-run"]);
+    assert!(dry.status.success());
+    let said: serde_json::Value = serde_json::from_slice(&dry.stdout).unwrap();
+    assert_eq!(said["dry_run"], true);
+    assert!(
+        said["registered_in"]
+            .as_str()
+            .unwrap()
+            .starts_with("claude mcp add --scope user sindri -- /")
+    );
+
+    assert_eq!(install(&["--client", "notepad"]).status.code(), Some(2));
+}
+
+#[test]
+fn the_mcp_tools_default_to_the_folder_the_server_started_in() {
+    use std::io::Write;
+    let project = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../games/flappy");
+    let mut server = Command::new(env!("CARGO_BIN_EXE_sindri"))
+        .arg("mcp")
+        .current_dir(&project)
+        .stdin(std::process::Stdio::piped())
+        .stdout(std::process::Stdio::piped())
+        .spawn()
+        .expect("sindri runs");
+    writeln!(
+        server.stdin.take().unwrap(),
+        r#"{{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{{"name":"project_check","arguments":{{}}}}}}"#
+    )
+    .unwrap();
+    let output = server.wait_with_output().unwrap();
+    let reply: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    assert_eq!(reply["result"]["isError"], false, "{reply}");
+    assert_eq!(reply["result"]["structuredContent"]["ok"], true);
+}

@@ -75,9 +75,9 @@ fn tools() -> Value {
             "inputSchema": {
                 "type": "object",
                 "properties": {
-                    "project": { "type": "string", "description": "The project folder, holding sindri.toml." }
+                    "project": { "type": "string", "description": "The project folder, holding sindri.toml. The folder the server was started in unless given." }
                 },
-                "required": ["project"]
+                "required": []
             }
         },
         {
@@ -86,7 +86,7 @@ fn tools() -> Value {
             "inputSchema": {
                 "type": "object",
                 "properties": {
-                    "project": { "type": "string", "description": "The project folder, holding sindri.toml." },
+                    "project": { "type": "string", "description": "The project folder, holding sindri.toml. The folder the server was started in unless given." },
                     "scene": { "type": "string", "description": "A scene to start in, by file name, instead of the main one." },
                     "steps": {
                         "type": "array",
@@ -99,7 +99,7 @@ fn tools() -> Value {
                         "description": "Stable IDs of entities whose final position to report."
                     }
                 },
-                "required": ["project"]
+                "required": []
             }
         },
         {
@@ -123,7 +123,7 @@ fn tools() -> Value {
             "inputSchema": {
                 "type": "object",
                 "properties": {
-                    "project": { "type": "string", "description": "The project folder, holding sindri.toml." },
+                    "project": { "type": "string", "description": "The project folder, holding sindri.toml. The folder the server was started in unless given." },
                     "scene": { "type": "string", "description": "A scene to start in, by file name, instead of the main one." },
                     "steps": {
                         "type": "array",
@@ -138,7 +138,7 @@ fn tools() -> Value {
                     "width": { "type": "integer", "description": "Pixels across; 1280 unless given." },
                     "height": { "type": "integer", "description": "Pixels down; 720 unless given." }
                 },
-                "required": ["project"]
+                "required": []
             }
         }
     ])
@@ -178,11 +178,20 @@ fn call(params: &Value) -> Value {
             Err(error) => failed(&error.to_string()),
         };
     }
-    let Some(project) = text("project").map(PathBuf::from) else {
+    // The folder the agent started the server in when none is named: an
+    // agent opens a project and starts its servers there, so one
+    // registration serves every project.
+    let Some(project) = text("project")
+        .map(PathBuf::from)
+        .or_else(|| std::env::current_dir().ok())
+    else {
         return failed("give the project folder as `project`");
     };
     if !project.join("sindri.toml").is_file() {
-        return failed(&format!("{} holds no sindri.toml", project.display()));
+        return failed(&format!(
+            "{} holds no sindri.toml; name the project folder as `project`",
+            project.display()
+        ));
     }
     let answered = match params.get("name").and_then(Value::as_str) {
         Some("project_check") => {

@@ -14,6 +14,8 @@ fn main() {}
 #[cfg(not(target_arch = "wasm32"))]
 mod check;
 #[cfg(not(target_arch = "wasm32"))]
+mod install;
+#[cfg(not(target_arch = "wasm32"))]
 mod mcp;
 #[cfg(not(target_arch = "wasm32"))]
 mod native;

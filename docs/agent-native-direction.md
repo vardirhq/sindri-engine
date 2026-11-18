@@ -260,11 +260,18 @@ exist, and the foundation is reduced to its docs.
 benchmark below: it serves `project_check`, `play_run` and `capture` over
 MCP's stdio transport, each answering with exactly its command's JSON from the
 same functions, and `play_run`'s shots and `capture`'s picture as inline
-images, so an agent looks at the result rather than at a path. Register it with an MCP client as a command, for example:
+images, so an agent looks at the result rather than at a path, and
+`capabilities` for the generated references. Register it from anywhere with
 
 ```bash
-claude mcp add sindri -- /path/to/sindri-engine/target/release/sindri mcp
+sindri mcp install                       # Claude Code, every project
+sindri mcp install --client cursor       # or claude-desktop, vscode, codex
+sindri mcp install --scope project       # this project's own config only
 ```
+
+which registers the binary by its own absolute path and merges into the
+client's existing settings. The tools default to the folder the agent starts
+the server in, so one registration serves every project.
 
 It was planned as follows, and keeps to it:
 

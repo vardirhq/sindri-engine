@@ -228,7 +228,9 @@ what you meant is on the screen.
 
 ## Without a shell
 
-`sindri mcp` serves the same commands as read-only MCP tools
+`sindri mcp install` registers it with your agent (`--client claude`,
+`claude-desktop`, `cursor`, `vscode` or `codex`). `sindri mcp` serves the
+same commands as read-only MCP tools
 (`project_check`, `play_run`, `capture`, `capabilities`), answering with the
 same JSON and with pictures inline.
 "#;

@@ -1,6 +1,6 @@
 //! The command itself, natively.
 
-use crate::{check, mcp, new, play};
+use crate::{check, install, mcp, new, play};
 
 use std::fmt::Write as _;
 use std::path::{Path, PathBuf};
@@ -17,6 +17,7 @@ USAGE
                   [--size WxH] [--format human|json]
   sindri capabilities [NAME]
   sindri mcp
+  sindri mcp install [PATH] [--client NAME] [--scope user|project] [--dry-run]
 
   PATH is the project folder, the one holding sindri.toml (default: here).
 
@@ -51,6 +52,15 @@ COMMANDS
                   with no shell.
                   Read-only: the tools answer with the commands' own JSON,
                   and capture with the pictures themselves.
+
+  mcp install     Register `sindri mcp` with an agent, by this binary's own
+                  path, so it runs from anywhere. --client is claude (the
+                  default; Claude Code), claude-desktop, cursor, vscode or
+                  codex. --scope user (the default) serves every project;
+                  --scope project writes the project's own config (.mcp.json,
+                  .cursor/mcp.json, .vscode/mcp.json) in PATH or here.
+                  --dry-run says what it would do. Run it again after the
+                  binary moves.
 
   help            This text.
 
@@ -100,6 +110,9 @@ struct Options {
     out: Option<PathBuf>,
     size: [u32; 2],
     name: Option<String>,
+    client: Option<String>,
+    scope: Option<String>,
+    dry_run: bool,
 }
 
 impl Options {
@@ -114,6 +127,9 @@ impl Options {
             out: None,
             size: [1280, 720],
             name: None,
+            client: None,
+            scope: None,
+            dry_run: false,
         };
         let mut rest = args.iter();
         while let Some(arg) = rest.next() {
@@ -139,6 +155,9 @@ impl Options {
                 "--out" => options.out = Some(PathBuf::from(value("--out")?)),
                 "--size" => options.size = parse_size(&value("--size")?)?,
                 "--name" => options.name = Some(value("--name")?),
+                "--client" => options.client = Some(value("--client")?),
+                "--scope" => options.scope = Some(value("--scope")?),
+                "--dry-run" => options.dry_run = true,
                 "-h" | "--help" => options.words.insert(0, "help".to_owned()),
                 flag if flag.starts_with('-') => return Err(format!("unknown flag {flag}")),
                 word => options.words.push(word.to_owned()),
@@ -244,6 +263,23 @@ fn run(args: &[String]) -> Result<ExitCode, String> {
             let text = json(&reference)? + "\n";
             let _ = std::io::Write::write_all(&mut std::io::stdout(), text.as_bytes());
             Ok(ExitCode::SUCCESS)
+        }
+        ["mcp", "install", target @ ..] => {
+            if target.len() > 1 {
+                return Err("mcp install takes at most one folder".to_owned());
+            }
+            let client = options.client.as_deref().unwrap_or("claude");
+            let scope = match &options.scope {
+                Some(scope) => install::Scope::parse(scope)?,
+                None => install::default_scope(client),
+            };
+            let exe = std::env::current_exe()
+                .and_then(std::fs::canonicalize)
+                .map_err(|error| format!("could not find this binary: {error}"))?;
+            let project = std::fs::canonicalize(target.first().copied().unwrap_or("."))
+                .map_err(|error| format!("could not find the folder: {error}"))?;
+            let report = install::install(client, scope, &exe, &project, options.dry_run)?;
+            options.report(&report, &report.human(), true)
         }
         ["mcp"] => {
             mcp::serve();
