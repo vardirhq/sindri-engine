@@ -2,6 +2,12 @@
 
 # Changelog
 
+- Questions about a project, from the `sindri` command and as MCP tools, so an agent finds its way without reading every file: `sindri project overview` (scenes and prefabs with their sizes, each script file and what it declares, components in use, files by kind), `sindri scene outline` (a scene as a tree, one line an entity), `sindri entity find` (by component, name, script or prefab, across every scene and prefab), `sindri entity show` (one entity as written, with its children) and `sindri asset uses` (every component field, prefab instance, script and stylesheet line naming a file, a picture's regions included).
+
+- `sindri play run` (and the MCP `play_run` and `capture` tools) takes `expect:` steps, an agent's own pass/fail test: `expect:score>=1`, `expect:player.x>3`, `expect:scene=level2`, `expect:printed=Game over`, checked where each stands in the run, reported with what was there instead, and failing the run when one does not hold. A `film:1.5x6` step takes six frames across a second and a half as one picture, so motion can be seen: a jump's arc, a walk, a fade.
+
+- `sindri mcp install` registers the MCP server with an agent by the binary's own path, so it runs from any folder: Claude Code (through `claude mcp add`, the default), Claude Desktop, Cursor, VS Code and Codex, for every project (`--scope user`) or one (`--scope project`), merging into existing settings rather than writing over them; `--dry-run` says what it would do. The MCP tools now default to the project the agent started the server in, so one registration serves every project.
+
 - `sindri project check` warns about a component field the engine would ignore (`COMPONENT_UNKNOWN_FIELD`, with the field meant: "has no field volme; did you mean volume?"), read from the scene schema so the check and an editor validating against it agree, and reports every payload the engine cannot read, on its entity and with serde's reason ("missing field `near`"), rather than the first. The schemas mark the fields a component cannot do without, asked of the engine by decoding its template with each field left out.
 
 - The editor follows the open scene on disk: when an agent, a script or another tool writes it, the editor reads it again, and when the scene has unsaved edits it asks rather than letting the next save write over the change. Its own saves, and a rewrite with the same bytes, are not news.

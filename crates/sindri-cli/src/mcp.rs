@@ -14,7 +14,7 @@ use std::path::PathBuf;
 
 use serde_json::{Value, json};
 
-use crate::{check, play};
+use crate::{check, play, query};
 
 /// The MCP revision this speaks.
 const PROTOCOL: &str = "2025-06-18";
@@ -49,11 +49,15 @@ pub fn answer(line: &str) -> Option<Value> {
             "protocolVersion": PROTOCOL,
             "capabilities": { "tools": {} },
             "serverInfo": { "name": "sindri", "version": env!("CARGO_PKG_VERSION") },
-            "instructions": "Checks, plays and photographs a Sindri project; it never changes one. \
+            "instructions": "Checks, plays, photographs and answers questions about a Sindri project; it never changes one. \
                              Change a project by editing its files (scenes and prefabs are JSON, \
-                             behaviour is Decay, UI is Weave), then call project_check, and \
-                             play_run or capture to see what the change did. Before writing a \
-                             file, read its shape from capabilities rather than guessing.",
+                             behaviour is Decay, UI is Weave). In a project you have not seen, start \
+                             with project_overview, and read a scene through scene_outline, \
+                             find_entities and show_entity rather than whole. Before writing a file, \
+                             read its shape from capabilities rather than guessing; before renaming \
+                             or removing one, ask asset_uses. After a change, call project_check, then \
+                             play_run with expect: steps for what the change should do, and capture or \
+                             film: steps to look at it.",
         }),
         "ping" => json!({}),
         "tools/list" => json!({ "tools": tools() }),
@@ -68,16 +72,94 @@ fn error(id: &Value, code: i64, message: &str) -> Value {
 }
 
 fn tools() -> Value {
-    json!([
+    let mut tools = command_tools();
+    // The questions go after the check and the run, before the references
+    // and the picture, which is the order an agent meets them in.
+    let rest = tools.split_off(2);
+    tools.extend(query_tools());
+    tools.extend(rest);
+    Value::Array(tools)
+}
+
+/// The tools that read the project as a whole: lookups, not runs.
+fn query_tools() -> Vec<Value> {
+    let Value::Array(tools) = json!([
+        {
+            "name": "project_overview",
+            "description": "What a Sindri project holds, without reading it: its scenes and prefabs with their entity counts (and any that do not read), each Decay file and the scripts it declares, its stylesheets, how many entities use each component, and its other files by kind. Start here in a project you have not seen. Answers `sindri project overview --format json`.",
+            "inputSchema": { "type": "object", "properties": { "project": project_property() }, "required": [] }
+        },
+        {
+            "name": "scene_outline",
+            "description": "A scene or prefab as a tree of entities: each one's ID, name, components (a script as sindri.script(Name)), the prefab it is an instance of, and whether it is switched off. Far smaller than the file; read it before editing a scene, then read or edit only the entities you need. Answers `sindri scene outline --format json`.",
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "project": project_property(),
+                    "scene": { "type": "string", "description": "The scene or prefab: its file name (wilds, wilds.scene, lamp.prefab) or asset ID. The main scene unless given." }
+                },
+                "required": []
+            }
+        },
+        {
+            "name": "find_entities",
+            "description": "Entities across every scene and prefab matching all the filters given, each with its scene, ID, name, parent, component keys and prefab. Answers `sindri entity find --format json`; lists at most 200 and says how many more matched.",
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "project": project_property(),
+                    "component": { "type": "string", "description": "A component type, such as sindri.sprite; matches its named parts too." },
+                    "name": { "type": "string", "description": "Part of the entity's name or ID, ignoring case." },
+                    "script": { "type": "string", "description": "A script it runs, by container name (Hero) or source file (hero.decay)." },
+                    "prefab": { "type": "string", "description": "A prefab it is an instance of, by file name or asset ID." },
+                    "scene": { "type": "string", "description": "Only this scene or prefab." }
+                },
+                "required": []
+            }
+        },
+        {
+            "name": "show_entity",
+            "description": "One entity exactly as its file has it (every component and field), the scene it is in, and the IDs of its children. Answers `sindri entity show --id ID`.",
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "project": project_property(),
+                    "id": { "type": "string", "description": "The entity's stable ID." },
+                    "scene": { "type": "string", "description": "The scene or prefab it is in, when the ID is in more than one." }
+                },
+                "required": ["id"]
+            }
+        },
+        {
+            "name": "asset_uses",
+            "description": "Everything that names a file: each entity and component field (as a path, like sindri.sprite.texture) and each prefab instance, across every scene and prefab. Ask before renaming, moving or removing a file. Answers `sindri asset uses --asset FILE --format json`.",
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "project": project_property(),
+                    "asset": { "type": "string", "description": "The file, by asset ID (textures/hero.png) or with assets/ in front." }
+                },
+                "required": ["asset"]
+            }
+        }
+    ]) else {
+        unreachable!("a literal array")
+    };
+    tools
+}
+
+/// The tools that answer a command: check, run, references, picture.
+fn command_tools() -> Vec<Value> {
+    let Value::Array(tools) = json!([
         {
             "name": "project_check",
             "description": "Check a Sindri project the way a run reads it: every scene, prefab, Decay script, Weave stylesheet and sindri.toml. Answers `sindri project check --format json`: every problem with a stable code, its file, and its line or entity. ok is false when there are errors.",
             "inputSchema": {
                 "type": "object",
                 "properties": {
-                    "project": { "type": "string", "description": "The project folder, holding sindri.toml." }
+                    "project": { "type": "string", "description": "The project folder, holding sindri.toml. The folder the server was started in unless given." }
                 },
-                "required": ["project"]
+                "required": []
             }
         },
         {
@@ -86,7 +168,7 @@ fn tools() -> Value {
             "inputSchema": {
                 "type": "object",
                 "properties": {
-                    "project": { "type": "string", "description": "The project folder, holding sindri.toml." },
+                    "project": { "type": "string", "description": "The project folder, holding sindri.toml. The folder the server was started in unless given." },
                     "scene": { "type": "string", "description": "A scene to start in, by file name, instead of the main one." },
                     "steps": {
                         "type": "array",
@@ -99,7 +181,7 @@ fn tools() -> Value {
                         "description": "Stable IDs of entities whose final position to report."
                     }
                 },
-                "required": ["project"]
+                "required": []
             }
         },
         {
@@ -123,7 +205,7 @@ fn tools() -> Value {
             "inputSchema": {
                 "type": "object",
                 "properties": {
-                    "project": { "type": "string", "description": "The project folder, holding sindri.toml." },
+                    "project": { "type": "string", "description": "The project folder, holding sindri.toml. The folder the server was started in unless given." },
                     "scene": { "type": "string", "description": "A scene to start in, by file name, instead of the main one." },
                     "steps": {
                         "type": "array",
@@ -138,14 +220,25 @@ fn tools() -> Value {
                     "width": { "type": "integer", "description": "Pixels across; 1280 unless given." },
                     "height": { "type": "integer", "description": "Pixels down; 720 unless given." }
                 },
-                "required": ["project"]
+                "required": []
             }
         }
-    ])
+    ]) else {
+        unreachable!("a literal array")
+    };
+    tools
 }
 
+/// A tool's `project` argument.
+fn project_property() -> Value {
+    json!({ "type": "string", "description": PROJECT_ABOUT })
+}
+
+const PROJECT_ABOUT: &str =
+    "The project folder, holding sindri.toml. The folder the server was started in unless given.";
+
 /// What a step may be, as the tools describe it.
-const STEPS: &str = "In order: wait:<seconds>; key:<Key> (a tap: Space, F, ArrowLeft); hold:<Key> and release:<Key>; set:<name>=<number> (a shared board value); click:<entity> (a laid-out UI element, by ID); type:<text>; place:<entity>=<x>,<y>; near:<entity>=<name> (in front of the first thing of that name); shot or shot:<name> (a picture, answered inline).";
+const STEPS: &str = "In order: wait:<seconds>; key:<Key> (a tap: Space, F, ArrowLeft); hold:<Key> and release:<Key>; set:<name>=<number> (a shared board value); click:<entity> (a laid-out UI element, by ID); type:<text>; place:<entity>=<x>,<y>; near:<entity>=<name> (in front of the first thing of that name); shot or shot:<name> (a picture, answered inline); film:<seconds>x<count> (that many frames across that span, as one picture, answered inline: a jump's arc, a walk, a fade); expect:<what><op><value>, op one of = != < <= > >=, checked where it stands and failing the run when it does not hold: a board value (expect:score>=1), an entity's place by ID (expect:player.x>3), the scene playing (expect:scene=level2) or a printed line (expect:printed=Game over). Write the expectations a change should meet, then play_run them: ok is false and expectations says which failed and what was there instead.";
 
 /// A tool's answer: its command's JSON as text, and whether it went wrong.
 fn call(params: &Value) -> Value {
@@ -178,17 +271,30 @@ fn call(params: &Value) -> Value {
             Err(error) => failed(&error.to_string()),
         };
     }
-    let Some(project) = text("project").map(PathBuf::from) else {
+    // The folder the agent started the server in when none is named: an
+    // agent opens a project and starts its servers there, so one
+    // registration serves every project.
+    let Some(project) = text("project")
+        .map(PathBuf::from)
+        .or_else(|| std::env::current_dir().ok())
+    else {
         return failed("give the project folder as `project`");
     };
     if !project.join("sindri.toml").is_file() {
-        return failed(&format!("{} holds no sindri.toml", project.display()));
+        return failed(&format!(
+            "{} holds no sindri.toml; name the project folder as `project`",
+            project.display()
+        ));
     }
     let answered = match params.get("name").and_then(Value::as_str) {
         Some("project_check") => {
             let report = check::check(&project);
             serde_json::to_value(&report).map(|value| (value, !report.ok))
         }
+        Some(
+            tool @ ("project_overview" | "scene_outline" | "find_entities" | "show_entity"
+            | "asset_uses"),
+        ) => return query_call(tool, &project, &arguments),
         Some(tool @ ("play_run" | "capture")) => {
             let scene = text("scene");
             let mut steps = list("steps");
@@ -229,6 +335,64 @@ fn call(params: &Value) -> Value {
             "isError": is_error,
         }),
         Err(error) => failed(&error.to_string()),
+    }
+}
+
+/// A query tool's answer: its command's JSON, from the project as it reads.
+fn query_call(tool: &str, project: &std::path::Path, arguments: &Value) -> Value {
+    let text = |key: &str| {
+        arguments
+            .get(key)
+            .and_then(Value::as_str)
+            .map(str::to_owned)
+    };
+
+    let read = query::Project::read(project);
+    let scene = text("scene");
+    let answered = match tool {
+        "project_overview" => {
+            serde_json::to_value(query::overview(&read)).map_err(|e| e.to_string())
+        }
+        "scene_outline" => query::outline(&read, scene.as_deref())
+            .and_then(|outline| serde_json::to_value(outline).map_err(|e| e.to_string())),
+        "find_entities" => {
+            let (component, name, script, prefab) = (
+                text("component"),
+                text("name"),
+                text("script"),
+                text("prefab"),
+            );
+            serde_json::to_value(query::find(
+                &read,
+                &query::Filter {
+                    component: component.as_deref(),
+                    name: name.as_deref(),
+                    script: script.as_deref(),
+                    prefab: prefab.as_deref(),
+                    scene: scene.as_deref(),
+                },
+            ))
+            .map_err(|e| e.to_string())
+        }
+        "show_entity" => match text("id") {
+            Some(id) => query::show(&read, &id, scene.as_deref())
+                .and_then(|shown| serde_json::to_value(shown).map_err(|e| e.to_string())),
+            None => Err("give the entity's ID as `id`".to_owned()),
+        },
+        _ => match text("asset") {
+            Some(asset) => {
+                serde_json::to_value(query::uses(&read, &asset)).map_err(|e| e.to_string())
+            }
+            None => Err("give the file as `asset`".to_owned()),
+        },
+    };
+    match answered {
+        Ok(value) => json!({
+            "content": [{ "type": "text", "text": value.to_string() }],
+            "structuredContent": value,
+            "isError": false,
+        }),
+        Err(message) => failed(&message),
     }
 }
 
@@ -313,7 +477,17 @@ mod tests {
             .collect();
         assert_eq!(
             names,
-            ["project_check", "play_run", "capabilities", "capture"]
+            [
+                "project_check",
+                "play_run",
+                "project_overview",
+                "scene_outline",
+                "find_entities",
+                "show_entity",
+                "asset_uses",
+                "capabilities",
+                "capture"
+            ]
         );
     }
 
@@ -342,6 +516,38 @@ mod tests {
         let nothing = ask(&json!({"jsonrpc": "2.0", "id": 8, "method": "tools/call",
             "params": {"name": "capabilities", "arguments": {"name": "gossip"}}}));
         assert_eq!(nothing["result"]["isError"], true);
+    }
+
+    #[test]
+    fn the_questions_answer_with_their_command_s_json() {
+        let project = concat!(env!("CARGO_MANIFEST_DIR"), "/../../games/flappy");
+        let ask_tool = |name: &str, arguments: Value| {
+            let mut arguments = arguments;
+            arguments["project"] = json!(project);
+            ask(&json!({"jsonrpc": "2.0", "id": 9, "method": "tools/call",
+                "params": {"name": name, "arguments": arguments}}))["result"]
+                .clone()
+        };
+        let overview = ask_tool("project_overview", json!({}));
+        assert_eq!(overview["structuredContent"]["main_scene"], "flappy.scene");
+        let outline = ask_tool("scene_outline", json!({}));
+        assert!(outline["structuredContent"]["entities"].as_u64().unwrap() > 5);
+        let birds = ask_tool("find_entities", json!({"script": "Bird"}));
+        let bird = birds["structuredContent"]["found"][0]["id"]
+            .as_str()
+            .unwrap()
+            .to_owned();
+        let shown = ask_tool("show_entity", json!({"id": bird}));
+        assert_eq!(shown["isError"], false, "{shown}");
+        let missing = ask_tool("show_entity", json!({}));
+        assert_eq!(missing["isError"], true);
+        let uses = ask_tool("asset_uses", json!({"asset": "scripts/bird.decay"}));
+        assert!(
+            !uses["structuredContent"]["uses"]
+                .as_array()
+                .unwrap()
+                .is_empty()
+        );
     }
 
     #[test]

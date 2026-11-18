@@ -14,6 +14,12 @@ fn main() {}
 #[cfg(not(target_arch = "wasm32"))]
 mod check;
 #[cfg(not(target_arch = "wasm32"))]
+mod expect;
+#[cfg(not(target_arch = "wasm32"))]
+mod film;
+#[cfg(not(target_arch = "wasm32"))]
+mod install;
+#[cfg(not(target_arch = "wasm32"))]
 mod mcp;
 #[cfg(not(target_arch = "wasm32"))]
 mod native;
@@ -21,6 +27,8 @@ mod native;
 mod new;
 #[cfg(not(target_arch = "wasm32"))]
 mod play;
+#[cfg(not(target_arch = "wasm32"))]
+mod query;
 #[cfg(not(target_arch = "wasm32"))]
 mod report;
 

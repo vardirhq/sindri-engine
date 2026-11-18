@@ -295,3 +295,172 @@ fn a_new_project_checks_clean_plays_and_carries_its_guide() {
         .expect("sindri runs");
     assert_eq!(again.status.code(), Some(2));
 }
+
+#[test]
+fn mcp_install_registers_this_binary_by_its_own_path_from_anywhere() {
+    let project = tempfile::tempdir().unwrap();
+    let home = tempfile::tempdir().unwrap();
+    let install = |args: &[&str]| {
+        Command::new(env!("CARGO_BIN_EXE_sindri"))
+            .args(["mcp", "install"])
+            .args(args)
+            .args(["--format", "json"])
+            .current_dir(project.path())
+            .env("HOME", home.path())
+            .output()
+            .expect("sindri runs")
+    };
+    let exe = std::fs::canonicalize(env!("CARGO_BIN_EXE_sindri")).unwrap();
+
+    let cursor = install(&["--client", "cursor", "--scope", "project"]);
+    assert!(
+        cursor.status.success(),
+        "{}",
+        String::from_utf8_lossy(&cursor.stderr)
+    );
+    let written: serde_json::Value = serde_json::from_str(
+        &std::fs::read_to_string(project.path().join(".cursor/mcp.json")).unwrap(),
+    )
+    .unwrap();
+    assert_eq!(
+        written["mcpServers"]["sindri"]["command"],
+        exe.display().to_string()
+    );
+    assert_eq!(
+        written["mcpServers"]["sindri"]["args"],
+        serde_json::json!(["mcp"])
+    );
+
+    assert!(install(&["--client", "vscode"]).status.success());
+    let vscode = std::fs::read_to_string(project.path().join(".vscode/mcp.json")).unwrap();
+    assert!(vscode.contains("\"servers\"") && vscode.contains("\"stdio\""));
+
+    assert!(install(&["--client", "codex"]).status.success());
+    let codex = std::fs::read_to_string(home.path().join(".codex/config.toml")).unwrap();
+    assert!(
+        codex.starts_with("[mcp_servers.sindri]\ncommand = "),
+        "{codex}"
+    );
+
+    // A dry run says what it would do and writes nothing.
+    let dry = install(&["--client", "claude", "--dry-run"]);
+    assert!(dry.status.success());
+    let said: serde_json::Value = serde_json::from_slice(&dry.stdout).unwrap();
+    assert_eq!(said["dry_run"], true);
+    assert!(
+        said["registered_in"]
+            .as_str()
+            .unwrap()
+            .starts_with("claude mcp add --scope user sindri -- /")
+    );
+
+    assert_eq!(install(&["--client", "notepad"]).status.code(), Some(2));
+}
+
+#[test]
+fn the_mcp_tools_default_to_the_folder_the_server_started_in() {
+    use std::io::Write;
+    let project = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../games/flappy");
+    let mut server = Command::new(env!("CARGO_BIN_EXE_sindri"))
+        .arg("mcp")
+        .current_dir(&project)
+        .stdin(std::process::Stdio::piped())
+        .stdout(std::process::Stdio::piped())
+        .spawn()
+        .expect("sindri runs");
+    writeln!(
+        server.stdin.take().unwrap(),
+        r#"{{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{{"name":"project_check","arguments":{{}}}}}}"#
+    )
+    .unwrap();
+    let output = server.wait_with_output().unwrap();
+    let reply: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    assert_eq!(reply["result"]["isError"], false, "{reply}");
+    assert_eq!(reply["result"]["structuredContent"]["ok"], true);
+}
+
+#[test]
+fn expectations_pass_and_fail_where_they_stand() {
+    let lamplighter = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../games/lamplighter");
+    let run = |steps: &str| {
+        let output = Command::new(env!("CARGO_BIN_EXE_sindri"))
+            .args(["play", "run"])
+            .arg(&lamplighter)
+            .args([
+                "--scene",
+                "wilds.scene",
+                "--format",
+                "json",
+                "--steps",
+                steps,
+            ])
+            .output()
+            .expect("sindri runs");
+        let report: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap_or_default();
+        (output.status.code(), report)
+    };
+    let (code, report) = run(
+        "expect:wick.x<11 wait:0.3 hold:D wait:1 release:D expect:wick.x>13 \
+         set:wood=4 set:stone=2 key:F wait:0.2 expect:built=1 expect:wood=0 expect:scene=wilds",
+    );
+    assert_eq!(code, Some(0), "{report}");
+    let checked = report["expectations"].as_array().unwrap();
+    assert_eq!(checked.len(), 5);
+    assert!(
+        checked.iter().all(|checked| checked["passed"] == true),
+        "{report}"
+    );
+
+    // A failed one fails the run, says what was there, and the run goes on
+    // to check the rest.
+    let (code, report) = run("expect:built=1 wait:0.1 expect:scene=village expect:wick.x<11");
+    assert_eq!(code, Some(1));
+    assert_eq!(report["ok"], false);
+    let checked = report["expectations"].as_array().unwrap();
+    assert_eq!(
+        checked
+            .iter()
+            .map(|c| c["passed"].clone())
+            .collect::<Vec<_>>(),
+        [false, false, true]
+    );
+    assert_eq!(checked[1]["actual"], "wilds.scene");
+
+    let (code, _) = run("expect:built");
+    assert_eq!(code, Some(2), "a step that does not read is a usage error");
+}
+
+#[test]
+fn a_film_is_one_sheet_of_frames_across_its_span() {
+    let lamplighter = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../games/lamplighter");
+    let out = tempfile::tempdir().unwrap();
+    let output = Command::new(env!("CARGO_BIN_EXE_sindri"))
+        .args(["play", "run"])
+        .arg(&lamplighter)
+        .args([
+            "--scene",
+            "wilds.scene",
+            "--format",
+            "json",
+            "--size",
+            "320x180",
+        ])
+        .args(["--steps", "hold:D film:walk=1x4"])
+        .arg("--shots")
+        .arg(out.path())
+        .output()
+        .expect("sindri runs");
+    let report: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap_or_default();
+    if no_gpu(&report) {
+        return;
+    }
+    assert!(output.status.success(), "{report}");
+    let film = &report["shots"][0];
+    assert_eq!(
+        film["frames"],
+        serde_json::json!([1, 21, 41, 61]),
+        "{report}"
+    );
+    let png = std::fs::read(out.path().join("walk.png")).unwrap();
+    assert_eq!(&png[16..24], &[0, 0, 1, 64, 0, 0, 0, 180], "320x180");
+}

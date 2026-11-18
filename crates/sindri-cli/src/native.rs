@@ -1,6 +1,6 @@
 //! The command itself, natively.
 
-use crate::{check, mcp, new, play};
+use crate::{check, install, mcp, new, play, query};
 
 use std::fmt::Write as _;
 use std::path::{Path, PathBuf};
@@ -11,12 +11,19 @@ const HELP: &str = r#"sindri: check, play and photograph a Sindri project from a
 USAGE
   sindri project new PATH [--name NAME] [--format human|json]
   sindri project check [PATH] [--format human|json]
+  sindri project overview [PATH]
+  sindri scene outline [PATH] [--scene NAME]
+  sindri entity find [PATH] [--component TYPE] [--name TEXT] [--script NAME]
+                  [--prefab FILE] [--scene NAME]
+  sindri entity show [PATH] --id ID [--scene NAME]
+  sindri asset uses [PATH] --asset FILE
   sindri play run [PATH] [--scene NAME] [--steps "STEP ..."] [--track ID]...
                   [--shots DIR] [--size WxH] [--format human|json]
   sindri render capture [PATH] --out FILE.png [--scene NAME] [--steps "..."]
                   [--size WxH] [--format human|json]
   sindri capabilities [NAME]
   sindri mcp
+  sindri mcp install [PATH] [--client NAME] [--scope user|project] [--dry-run]
 
   PATH is the project folder, the one holding sindri.toml (default: here).
 
@@ -30,6 +37,22 @@ COMMANDS
                   and sindri.toml, the way a run reads them, and report every
                   problem with a stable code. Exits 1 when there are errors;
                   warnings do not fail it.
+
+  project overview  What the project holds: its scenes and prefabs with
+                  their sizes, its scripts and what each declares, its
+                  stylesheets, how often each component is used, its files.
+
+  scene outline   A scene or prefab (the main scene unless --scene) as a
+                  tree, one line an entity: its ID, name and components.
+
+  entity find     Entities in every scene and prefab that match all the
+                  filters given: a component type, part of a name or ID, a
+                  script by name or file, a prefab they are instances of.
+
+  entity show     One entity as the file has it, with its children.
+
+  asset uses      Everything that names a file: component fields and
+                  prefab instances, before the file is renamed or removed.
 
   play run        Play the project headless at 60 steps a second, from its
                   main scene or --scene, styled and laid out as it is drawn,
@@ -52,6 +75,15 @@ COMMANDS
                   Read-only: the tools answer with the commands' own JSON,
                   and capture with the pictures themselves.
 
+  mcp install     Register `sindri mcp` with an agent, by this binary's own
+                  path, so it runs from anywhere. --client is claude (the
+                  default; Claude Code), claude-desktop, cursor, vscode or
+                  codex. --scope user (the default) serves every project;
+                  --scope project writes the project's own config (.mcp.json,
+                  .cursor/mcp.json, .vscode/mcp.json) in PATH or here.
+                  --dry-run says what it would do. Run it again after the
+                  binary moves.
+
   help            This text.
 
 STEPS
@@ -67,7 +99,13 @@ STEPS
                         that name, once something has made it
   shot                  a picture, to --shots (default .), as shot-N.png
   shot:<name>           the same, as <name>.png
-  for example: --steps "wait:0.5 hold:D wait:1 release:D shot:walked"
+  film:<seconds>x<count>  <count> frames across <seconds>, as one picture
+                        (film-N.png, or film:<name>=1x6 as <name>.png)
+  expect:<what><op><value>  checked where it stands; a failed one fails the
+                        run and is reported with what was there. <what> is a
+                        board value, <entity>.x or .y, scene or printed; <op>
+                        is = != < <= > >= (scene and printed: = and != only)
+  for example: --steps "wait:0.5 hold:D wait:1 release:D expect:hero.x>3 shot:walked"
 
 --format json writes one JSON document with schema_version; it is the
 contract. --format human, the default, is rendered from it."#;
@@ -100,6 +138,14 @@ struct Options {
     out: Option<PathBuf>,
     size: [u32; 2],
     name: Option<String>,
+    client: Option<String>,
+    scope: Option<String>,
+    dry_run: bool,
+    component: Option<String>,
+    script: Option<String>,
+    prefab: Option<String>,
+    id: Option<String>,
+    asset: Option<String>,
 }
 
 impl Options {
@@ -114,6 +160,14 @@ impl Options {
             out: None,
             size: [1280, 720],
             name: None,
+            client: None,
+            scope: None,
+            dry_run: false,
+            component: None,
+            script: None,
+            prefab: None,
+            id: None,
+            asset: None,
         };
         let mut rest = args.iter();
         while let Some(arg) = rest.next() {
@@ -139,6 +193,14 @@ impl Options {
                 "--out" => options.out = Some(PathBuf::from(value("--out")?)),
                 "--size" => options.size = parse_size(&value("--size")?)?,
                 "--name" => options.name = Some(value("--name")?),
+                "--client" => options.client = Some(value("--client")?),
+                "--scope" => options.scope = Some(value("--scope")?),
+                "--dry-run" => options.dry_run = true,
+                "--component" => options.component = Some(value("--component")?),
+                "--script" => options.script = Some(value("--script")?),
+                "--prefab" => options.prefab = Some(value("--prefab")?),
+                "--id" => options.id = Some(value("--id")?),
+                "--asset" => options.asset = Some(value("--asset")?),
                 "-h" | "--help" => options.words.insert(0, "help".to_owned()),
                 flag if flag.starts_with('-') => return Err(format!("unknown flag {flag}")),
                 word => options.words.push(word.to_owned()),
@@ -196,9 +258,64 @@ fn project(target: &[&str]) -> Result<PathBuf, String> {
     }
 }
 
+/// The questions about a project: `None` when `words` asks something else.
+fn query(words: &[&str], options: &Options) -> Option<Result<ExitCode, String>> {
+    let answer = |target: &[&str]| -> Result<ExitCode, String> {
+        let read = query::Project::read(&project(target)?);
+        match words {
+            ["project", "overview", ..] => {
+                let report = query::overview(&read);
+                options.report(&report, &report.human(), true)
+            }
+            ["scene", "outline", ..] => {
+                let report = query::outline(&read, options.scene.as_deref())?;
+                options.report(&report, &report.human(), true)
+            }
+            ["entity", "find", ..] => {
+                let report = query::find(
+                    &read,
+                    &query::Filter {
+                        component: options.component.as_deref(),
+                        name: options.name.as_deref(),
+                        script: options.script.as_deref(),
+                        prefab: options.prefab.as_deref(),
+                        scene: options.scene.as_deref(),
+                    },
+                );
+                options.report(&report, &report.human(), true)
+            }
+            ["entity", "show", ..] => {
+                let id = options.id.as_deref().ok_or("entity show needs --id ID")?;
+                let report = query::show(&read, id, options.scene.as_deref())?;
+                // The entity is JSON whatever the format: it is what the file says.
+                println!("{}", json(&report)?);
+                Ok(ExitCode::SUCCESS)
+            }
+            _ => {
+                let asset = options
+                    .asset
+                    .as_deref()
+                    .ok_or("asset uses needs --asset FILE")?;
+                let report = query::uses(&read, asset);
+                options.report(&report, &report.human(), true)
+            }
+        }
+    };
+    match words {
+        ["project", "overview", target @ ..]
+        | ["scene", "outline", target @ ..]
+        | ["entity", "find" | "show", target @ ..]
+        | ["asset", "uses", target @ ..] => Some(answer(target)),
+        _ => None,
+    }
+}
+
 fn run(args: &[String]) -> Result<ExitCode, String> {
     let options = Options::parse(args)?;
     let words: Vec<&str> = options.words.iter().map(String::as_str).collect();
+    if let Some(answered) = query(&words, &options) {
+        return answered;
+    }
     match words.as_slice() {
         [] | ["help", ..] => {
             println!("{HELP}");
@@ -244,6 +361,23 @@ fn run(args: &[String]) -> Result<ExitCode, String> {
             let text = json(&reference)? + "\n";
             let _ = std::io::Write::write_all(&mut std::io::stdout(), text.as_bytes());
             Ok(ExitCode::SUCCESS)
+        }
+        ["mcp", "install", target @ ..] => {
+            if target.len() > 1 {
+                return Err("mcp install takes at most one folder".to_owned());
+            }
+            let client = options.client.as_deref().unwrap_or("claude");
+            let scope = match &options.scope {
+                Some(scope) => install::Scope::parse(scope)?,
+                None => install::default_scope(client),
+            };
+            let exe = std::env::current_exe()
+                .and_then(std::fs::canonicalize)
+                .map_err(|error| format!("could not find this binary: {error}"))?;
+            let project = std::fs::canonicalize(target.first().copied().unwrap_or("."))
+                .map_err(|error| format!("could not find the folder: {error}"))?;
+            let report = install::install(client, scope, &exe, &project, options.dry_run)?;
+            options.report(&report, &report.human(), true)
         }
         ["mcp"] => {
             mcp::serve();
