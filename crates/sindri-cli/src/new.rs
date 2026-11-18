@@ -206,6 +206,15 @@ sindri entity show --id player                # one entity exactly as written
 sindri asset uses --asset textures/hero.png   # everything naming a file, before moving it
 ```
 
+## Write Decay and Weave against the engine
+
+```bash
+sindri script api Physics                     # one name in the API, with its members
+sindri script check --file draft.decay        # compile a draft against this project
+sindri style match --selector ".hud .button"  # what a selector reaches
+sindri style show --id score                  # why an element looks as it does
+```
+
 ## Check, then look
 
 After every change:

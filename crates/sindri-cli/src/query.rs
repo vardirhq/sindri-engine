@@ -23,6 +23,8 @@ use sindri_runtime::project::{assets_root, files_under, manifest};
 use crate::report::SCHEMA_VERSION;
 
 mod outline;
+pub mod script;
+pub mod style;
 
 pub use outline::outline;
 

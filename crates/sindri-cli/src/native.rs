@@ -17,6 +17,11 @@ USAGE
                   [--prefab FILE] [--scene NAME]
   sindri entity show [PATH] --id ID [--scene NAME]
   sindri asset uses [PATH] --asset FILE
+  sindri style show [PATH] --id ID [--scene NAME] [--size WxH]
+  sindri style match [PATH] --selector SELECTOR [--size WxH]
+  sindri style unused [PATH] [--size WxH]
+  sindri script check [PATH] --file FILE.decay
+  sindri script api NAME
   sindri play run [PATH] [--scene NAME] [--steps "STEP ..."] [--track ID]...
                   [--shots DIR] [--size WxH] [--format human|json]
   sindri render capture [PATH] --out FILE.png [--scene NAME] [--steps "..."]
@@ -53,6 +58,24 @@ COMMANDS
 
   asset uses      Everything that names a file: component fields and
                   prefab instances, before the file is renamed or removed.
+
+  style show      How a UI element is styled and why: each Weave rule that
+                  reaches it, strongest first, with file, line, selector,
+                  specificity and which declarations apply; then the result.
+
+  style match     Which elements, in every scene and prefab, a selector
+                  reaches, matched by the engine's own cascade.
+
+  style unused    Rules nothing reaches at rest. A class a script adds while
+                  the game runs shows here too: a list to look at.
+
+  script check    Compile a Decay file, a draft or a change, against this
+                  project's API and every other script in it, before it is
+                  saved there. Exits 1 when it does not compile.
+
+  script api      One name in the Decay host API: a global with its members,
+                  a type, or a member (Physics.mask, this.entity), with
+                  the nearest names when there is no such name.
 
   play run        Play the project headless at 60 steps a second, from its
                   main scene or --scene, styled and laid out as it is drawn,
@@ -152,6 +175,8 @@ struct Options {
     prefab: Option<String>,
     id: Option<String>,
     asset: Option<String>,
+    selector: Option<String>,
+    file: Option<String>,
 }
 
 impl Options {
@@ -174,6 +199,8 @@ impl Options {
             prefab: None,
             id: None,
             asset: None,
+            selector: None,
+            file: None,
         };
         let mut rest = args.iter();
         while let Some(arg) = rest.next() {
@@ -207,6 +234,8 @@ impl Options {
                 "--prefab" => options.prefab = Some(value("--prefab")?),
                 "--id" => options.id = Some(value("--id")?),
                 "--asset" => options.asset = Some(value("--asset")?),
+                "--selector" => options.selector = Some(value("--selector")?),
+                "--file" => options.file = Some(value("--file")?),
                 "-h" | "--help" => options.words.insert(0, "help".to_owned()),
                 flag if flag.starts_with('-') => return Err(format!("unknown flag {flag}")),
                 word => options.words.push(word.to_owned()),
@@ -266,54 +295,128 @@ fn project(target: &[&str]) -> Result<PathBuf, String> {
 
 /// The questions about a project: `None` when `words` asks something else.
 fn query(words: &[&str], options: &Options) -> Option<Result<ExitCode, String>> {
-    let answer = |target: &[&str]| -> Result<ExitCode, String> {
-        let read = query::Project::read(&project(target)?);
-        match words {
-            ["project", "overview", ..] => {
-                let report = query::overview(&read);
-                options.report(&report, &report.human(), true)
-            }
-            ["scene", "outline", ..] => {
-                let report = query::outline(&read, options.scene.as_deref())?;
-                options.report(&report, &report.human(), true)
-            }
-            ["entity", "find", ..] => {
-                let report = query::find(
-                    &read,
-                    &query::Filter {
-                        component: options.component.as_deref(),
-                        name: options.name.as_deref(),
-                        script: options.script.as_deref(),
-                        prefab: options.prefab.as_deref(),
-                        scene: options.scene.as_deref(),
-                    },
-                );
-                options.report(&report, &report.human(), true)
-            }
-            ["entity", "show", ..] => {
-                let id = options.id.as_deref().ok_or("entity show needs --id ID")?;
-                let report = query::show(&read, id, options.scene.as_deref())?;
-                // The entity is JSON whatever the format: it is what the file says.
-                println!("{}", json(&report)?);
-                Ok(ExitCode::SUCCESS)
-            }
-            _ => {
-                let asset = options
-                    .asset
-                    .as_deref()
-                    .ok_or("asset uses needs --asset FILE")?;
-                let report = query::uses(&read, asset);
-                options.report(&report, &report.human(), true)
-            }
-        }
-    };
-    match words {
-        ["project", "overview", target @ ..]
-        | ["scene", "outline", target @ ..]
-        | ["entity", "find" | "show", target @ ..]
-        | ["asset", "uses", target @ ..] => Some(answer(target)),
-        _ => None,
+    // The one question that needs no project: the host API.
+    if let ["script", "api", name] = words {
+        let report = query::script::api(name);
+        let found = !report.found.is_empty();
+        return Some(options.report(&report, &report.human(), found));
     }
+    let (["project", "overview", target @ ..]
+    | ["scene", "outline", target @ ..]
+    | ["entity", "find" | "show", target @ ..]
+    | ["asset", "uses", target @ ..]
+    | ["style", "show" | "match" | "unused", target @ ..]
+    | ["script", "check", target @ ..]) = words
+    else {
+        return None;
+    };
+    // A question that names something not there is answered, not refused:
+    // it fails with what was not found, and the usage is not printed at it.
+    Some(match answer(&words[..2], target, options) {
+        Err(message) if !message.contains(" needs --") => {
+            eprintln!("sindri: {message}");
+            Ok(ExitCode::from(1))
+        }
+        answered => answered,
+    })
+}
+
+/// A question about the project in `target`.
+fn answer(question: &[&str], target: &[&str], options: &Options) -> Result<ExitCode, String> {
+    let root = project(target)?;
+    let read = query::Project::read(&root);
+    #[allow(clippy::cast_precision_loss)]
+    let viewport = weave::Viewport {
+        width: options.size[0] as f32,
+        height: options.size[1] as f32,
+    };
+    match question {
+        ["project", "overview"] => {
+            let report = query::overview(&read);
+            options.report(&report, &report.human(), true)
+        }
+        ["scene", "outline"] => {
+            let report = query::outline(&read, options.scene.as_deref())?;
+            options.report(&report, &report.human(), true)
+        }
+        ["entity", "find"] => {
+            let report = query::find(
+                &read,
+                &query::Filter {
+                    component: options.component.as_deref(),
+                    name: options.name.as_deref(),
+                    script: options.script.as_deref(),
+                    prefab: options.prefab.as_deref(),
+                    scene: options.scene.as_deref(),
+                },
+            );
+            options.report(&report, &report.human(), true)
+        }
+        ["entity", "show"] => {
+            let id = options.id.as_deref().ok_or("entity show needs --id ID")?;
+            let report = query::show(&read, id, options.scene.as_deref())?;
+            // The entity is JSON whatever the format: it is what the file says.
+            println!("{}", json(&report)?);
+            Ok(ExitCode::SUCCESS)
+        }
+        ["asset", "uses"] => {
+            let asset = options
+                .asset
+                .as_deref()
+                .ok_or("asset uses needs --asset FILE")?;
+            let report = query::uses(&read, asset);
+            options.report(&report, &report.human(), true)
+        }
+        ["style", "show"] => {
+            let id = options.id.as_deref().ok_or("style show needs --id ID")?;
+            let sheets = query::style::stylesheets(&root)?;
+            let report =
+                query::style::show(&read, &sheets, id, options.scene.as_deref(), viewport)?;
+            options.report(&report, &report.human(), true)
+        }
+        ["style", "match"] => {
+            let selector = options
+                .selector
+                .as_deref()
+                .ok_or("style match needs --selector SELECTOR")?;
+            let report = query::style::matching(&read, selector, viewport)?;
+            options.report(&report, &report.human(), true)
+        }
+        ["style", "unused"] => {
+            let sheets = query::style::stylesheets(&root)?;
+            let report = query::style::Unused::of(&read, &sheets, viewport);
+            options.report(&report, &report.human(), true)
+        }
+        _ => {
+            let file = options
+                .file
+                .as_deref()
+                .ok_or("script check needs --file FILE.decay")?;
+            let source = std::fs::read_to_string(file)
+                .map_err(|error| format!("{file} does not read: {error}"))?;
+            let report = query::script::check(&read, &script_id(&root, file), &source);
+            options.report(&report, &report.human(), report.ok)
+        }
+    }
+}
+
+/// A script file's asset ID: its path under the project's assets, or its
+/// own name for a draft kept elsewhere.
+fn script_id(root: &Path, file: &str) -> String {
+    let assets = sindri_runtime::project::assets_root(root);
+    let full = std::fs::canonicalize(file).unwrap_or_else(|_| PathBuf::from(file));
+    std::fs::canonicalize(&assets)
+        .ok()
+        .and_then(|assets| full.strip_prefix(assets).ok().map(Path::to_path_buf))
+        .map_or_else(
+            || {
+                Path::new(file).file_name().map_or_else(
+                    || file.to_owned(),
+                    |name| name.to_string_lossy().into_owned(),
+                )
+            },
+            |relative| relative.to_string_lossy().replace('\\', "/"),
+        )
 }
 
 fn run(args: &[String]) -> Result<ExitCode, String> {
