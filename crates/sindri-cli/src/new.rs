@@ -192,6 +192,18 @@ schemas, so an editor validates scenes as you write them. After upgrading
 Sindri, write them again with `sindri capabilities scene >
 .sindri/scene.schema.json` (and `prefab`).
 
+## Find your way without reading everything
+
+Scenes are long files. Ask about them instead of reading them whole:
+
+```bash
+sindri project overview                       # scenes, prefabs, scripts, components in use
+sindri scene outline --scene main             # a scene as a tree, one line an entity
+sindri entity find --component sindri.sprite  # or --name, --script, --prefab, --scene
+sindri entity show --id player                # one entity exactly as written
+sindri asset uses --asset textures/hero.png   # everything naming a file, before moving it
+```
+
 ## Check, then look
 
 After every change:

@@ -261,7 +261,9 @@ benchmark below: it serves `project_check`, `play_run` and `capture` over
 MCP's stdio transport, each answering with exactly its command's JSON from the
 same functions, and `play_run`'s shots and `capture`'s picture as inline
 images, so an agent looks at the result rather than at a path, and
-`capabilities` for the generated references. Register it from anywhere with
+`capabilities` for the generated references, and five questions that save
+reading whole files: `project_overview`, `scene_outline`, `find_entities`,
+`show_entity` and `asset_uses` (each a `sindri` command too). Register it from anywhere with
 
 ```bash
 sindri mcp install                       # Claude Code, every project

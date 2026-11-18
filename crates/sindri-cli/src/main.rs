@@ -28,6 +28,8 @@ mod new;
 #[cfg(not(target_arch = "wasm32"))]
 mod play;
 #[cfg(not(target_arch = "wasm32"))]
+mod query;
+#[cfg(not(target_arch = "wasm32"))]
 mod report;
 
 #[cfg(not(target_arch = "wasm32"))]

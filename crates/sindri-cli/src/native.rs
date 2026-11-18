@@ -1,6 +1,6 @@
 //! The command itself, natively.
 
-use crate::{check, install, mcp, new, play};
+use crate::{check, install, mcp, new, play, query};
 
 use std::fmt::Write as _;
 use std::path::{Path, PathBuf};
@@ -11,6 +11,12 @@ const HELP: &str = r#"sindri: check, play and photograph a Sindri project from a
 USAGE
   sindri project new PATH [--name NAME] [--format human|json]
   sindri project check [PATH] [--format human|json]
+  sindri project overview [PATH]
+  sindri scene outline [PATH] [--scene NAME]
+  sindri entity find [PATH] [--component TYPE] [--name TEXT] [--script NAME]
+                  [--prefab FILE] [--scene NAME]
+  sindri entity show [PATH] --id ID [--scene NAME]
+  sindri asset uses [PATH] --asset FILE
   sindri play run [PATH] [--scene NAME] [--steps "STEP ..."] [--track ID]...
                   [--shots DIR] [--size WxH] [--format human|json]
   sindri render capture [PATH] --out FILE.png [--scene NAME] [--steps "..."]
@@ -31,6 +37,22 @@ COMMANDS
                   and sindri.toml, the way a run reads them, and report every
                   problem with a stable code. Exits 1 when there are errors;
                   warnings do not fail it.
+
+  project overview  What the project holds: its scenes and prefabs with
+                  their sizes, its scripts and what each declares, its
+                  stylesheets, how often each component is used, its files.
+
+  scene outline   A scene or prefab (the main scene unless --scene) as a
+                  tree, one line an entity: its ID, name and components.
+
+  entity find     Entities in every scene and prefab that match all the
+                  filters given: a component type, part of a name or ID, a
+                  script by name or file, a prefab they are instances of.
+
+  entity show     One entity as the file has it, with its children.
+
+  asset uses      Everything that names a file: component fields and
+                  prefab instances, before the file is renamed or removed.
 
   play run        Play the project headless at 60 steps a second, from its
                   main scene or --scene, styled and laid out as it is drawn,
@@ -119,6 +141,11 @@ struct Options {
     client: Option<String>,
     scope: Option<String>,
     dry_run: bool,
+    component: Option<String>,
+    script: Option<String>,
+    prefab: Option<String>,
+    id: Option<String>,
+    asset: Option<String>,
 }
 
 impl Options {
@@ -136,6 +163,11 @@ impl Options {
             client: None,
             scope: None,
             dry_run: false,
+            component: None,
+            script: None,
+            prefab: None,
+            id: None,
+            asset: None,
         };
         let mut rest = args.iter();
         while let Some(arg) = rest.next() {
@@ -164,6 +196,11 @@ impl Options {
                 "--client" => options.client = Some(value("--client")?),
                 "--scope" => options.scope = Some(value("--scope")?),
                 "--dry-run" => options.dry_run = true,
+                "--component" => options.component = Some(value("--component")?),
+                "--script" => options.script = Some(value("--script")?),
+                "--prefab" => options.prefab = Some(value("--prefab")?),
+                "--id" => options.id = Some(value("--id")?),
+                "--asset" => options.asset = Some(value("--asset")?),
                 "-h" | "--help" => options.words.insert(0, "help".to_owned()),
                 flag if flag.starts_with('-') => return Err(format!("unknown flag {flag}")),
                 word => options.words.push(word.to_owned()),
@@ -221,9 +258,64 @@ fn project(target: &[&str]) -> Result<PathBuf, String> {
     }
 }
 
+/// The questions about a project: `None` when `words` asks something else.
+fn query(words: &[&str], options: &Options) -> Option<Result<ExitCode, String>> {
+    let answer = |target: &[&str]| -> Result<ExitCode, String> {
+        let read = query::Project::read(&project(target)?);
+        match words {
+            ["project", "overview", ..] => {
+                let report = query::overview(&read);
+                options.report(&report, &report.human(), true)
+            }
+            ["scene", "outline", ..] => {
+                let report = query::outline(&read, options.scene.as_deref())?;
+                options.report(&report, &report.human(), true)
+            }
+            ["entity", "find", ..] => {
+                let report = query::find(
+                    &read,
+                    &query::Filter {
+                        component: options.component.as_deref(),
+                        name: options.name.as_deref(),
+                        script: options.script.as_deref(),
+                        prefab: options.prefab.as_deref(),
+                        scene: options.scene.as_deref(),
+                    },
+                );
+                options.report(&report, &report.human(), true)
+            }
+            ["entity", "show", ..] => {
+                let id = options.id.as_deref().ok_or("entity show needs --id ID")?;
+                let report = query::show(&read, id, options.scene.as_deref())?;
+                // The entity is JSON whatever the format: it is what the file says.
+                println!("{}", json(&report)?);
+                Ok(ExitCode::SUCCESS)
+            }
+            _ => {
+                let asset = options
+                    .asset
+                    .as_deref()
+                    .ok_or("asset uses needs --asset FILE")?;
+                let report = query::uses(&read, asset);
+                options.report(&report, &report.human(), true)
+            }
+        }
+    };
+    match words {
+        ["project", "overview", target @ ..]
+        | ["scene", "outline", target @ ..]
+        | ["entity", "find" | "show", target @ ..]
+        | ["asset", "uses", target @ ..] => Some(answer(target)),
+        _ => None,
+    }
+}
+
 fn run(args: &[String]) -> Result<ExitCode, String> {
     let options = Options::parse(args)?;
     let words: Vec<&str> = options.words.iter().map(String::as_str).collect();
+    if let Some(answered) = query(&words, &options) {
+        return answered;
+    }
     match words.as_slice() {
         [] | ["help", ..] => {
             println!("{HELP}");
