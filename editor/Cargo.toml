@@ -30,7 +30,7 @@ weave = { path = "../weave/crates/weave" }
 serde.workspace = true
 serde_json.workspace = true
 thiserror.workspace = true
-rfd = { version = "0.17.2", default-features = false, features = ["xdg-portal"] }
+rfd = { version = "0.18.0", default-features = false, features = ["xdg-portal"] }
 toml = "1.1"
 # Writes the manifest by editing it in place, so a comment or a table this
 # build does not model survives the editor saving.
