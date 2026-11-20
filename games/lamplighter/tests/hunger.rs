@@ -48,10 +48,15 @@ fn a_berry_by_a_fire_is_cooked_and_goes_further() {
     step(&mut run, 10);
     run.set_board("wood", 4.0);
     run.set_board("stone", 2.0);
-    run.input.apply(InputEvent::KeyPressed(Key::F));
-    step(&mut run, 2);
-    run.input.apply(InputEvent::KeyReleased(Key::F));
-    step(&mut run, 10);
+    // Chosen, then set down: two presses.
+    for _ in 0..2 {
+        run.input.apply(InputEvent::KeyPressed(Key::F));
+        step(&mut run, 2);
+        run.input.apply(InputEvent::KeyReleased(Key::F));
+        step(&mut run, 2);
+    }
+    // Let it catch.
+    step(&mut run, 60 * 3);
     run.set_board("berries", 1.0);
     run.set_board("food", 0.2);
     step(&mut run, 2);

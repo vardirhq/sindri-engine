@@ -41,6 +41,9 @@ state Game {
     // (`hunger` on Wick) it runs down, and he eats a berry when it is below
     // half; empty, he is starving.
     var food: number = 1.0;
+    // Whether Wick has stood by a fire long enough for the screen to let go
+    // of him (`pack.decay`).
+    var resting: bool = false;
     var berries: number = 0.0;
     var eaten: number = 0.0;
     // How many brutes Seekers have called down on him.

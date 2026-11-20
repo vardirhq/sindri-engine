@@ -257,22 +257,27 @@ says what is now true.
    dark. A test outlasts a Seeker's sweep by a fire.
 3. **Gather and craft.** *Started.* Deadwood, flint and resin lie about the
    wilds, scattered by seed (`scripts/pickup.decay`, `art/goods.py`); Wick takes
-   them by walking over them, and what is taken stays taken. His pack is on
-   screen with a button for each thing he can build (`scripts/pack.decay`, F and
-   G from the keyboard): a campfire (4 wood, 2 stone) that burns for a minute
-   and a half, and a lamp (6 wood, 4 stone, 2 resin) that burns for good, built a
-   step ahead of him. A fire he has built is a safe pool while it burns: the
-   gloom are driven out of it and a Seeker cannot find him by it
-   (`scripts/fire.decay`, `tests/gather_and_build.rs`). Resin feeds the
-   lantern: a card (and R) pours one in for half a lantern. Still to come:
+   them by walking over them, and what is taken stays taken; each find is said
+   once on screen and fades. His pack is not on screen while he walks: his
+   satchel (Tab, I) opens it, showing what he carries and a plate for each thing
+   he can make (`scripts/pack.decay`): a campfire (4 wood, 2 stone) that burns
+   for a minute and a half, and a lamp (6 wood, 4 stone, 2 resin) that burns for
+   good. Making is placing: a plate, or F and G, puts a ghost of the thing ahead
+   of Wick, he walks it where he wants it, and the same key or Place sets it
+   down; it kindles over a few seconds, the dark drawing back as it catches. A
+   fire he has built is a safe pool while it burns: the gloom are driven out of
+   it and a Seeker cannot find him by it (`scripts/fire.decay`,
+   `tests/gather_and_build.rs`), and standing by one the screen fades away
+   until he walks on. Resin feeds the lantern: pressing the lantern on screen
+   (or R) pours one in for half a lantern. Still to come:
    tools, torches, and oil and wax as better fuel than resin.
-4. **Survive.** *Started.* Courage (`scripts/courage.decay`, on the HUD under
-   the lantern): it ebbs slowly in the dark, fast with the lantern dry, for
+4. **Survive.** *Started.* Courage (`scripts/courage.decay`, never a bar on
+   screen, only felt): it ebbs slowly in the dark, fast with the lantern dry, for
    each gloom near and while a Seeker has him, and comes back by a lit lamp, a
    fire or an open sunfall. Afraid, below half, the screen's edges close in and
    the world greys, the gloom notice him from further off and his walk falters
    (`tests/courage.rs`). Hunger: being fed runs down from full to starving in
-   five minutes; berries grow on the meadow and the moss, and Wick eats one
+   five minutes, shown beside the lantern only once he is hungry; berries grow on the meadow and the moss, and Wick eats one
    from his pack once he is below half fed, a cooked one by a fire going twice
    as far. Starving, his lantern's scorch does not mend and his courage drains
    (`tests/hunger.rs`). Still to come: more to eat and cooking proper; death
@@ -301,6 +306,17 @@ says what is now true.
   with its parity row and tests.
 - Nothing is copied from another game: names, characters, creatures, items, art
   and rules are Lamplighter's own.
+
+## The screen
+
+The HUD is kept small so the dark can be seen (`ui/hud.weave`): the lantern
+and its oil, top left, and the satchel, bottom left, and nothing else until it
+matters. Panels are a worn slate in a sliced brass rim and the words are a pixel
+face (`art/hud.py`, Pixelify Sans under the OFL, its ligatures removed because
+the text shaper drew them wrong), so the screen belongs to the same pixels as
+the world. A phone held upright has its own layout and its hints say what to
+tap. Still to come: the title and pause screens in the same frame, and a
+gamepad's way round the pack's plates.
 
 ## Wick and the gloom, as built
 

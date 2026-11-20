@@ -1,10 +1,20 @@
-// Wick's pack, on screen: his lantern's light, what he has gathered, and what
-// he can make of it. Each recipe is a button (and a key): a campfire, which
-// burns down, and a lamp, which burns for good. Pressed with enough in the pack,
-// the cost is taken and the thing is built a step ahead of Wick. A button that
-// cannot be afforded is disabled, and `ui/hud.weave` shows it as spent. Resin
-// also feeds the lantern: a card (and R) pours one into it for `feed_oil` of a
-// lantern's worth.
+// Wick's pack, and the little of it that is on screen while he walks.
+//
+// The lantern, top left, shows its oil, gutters when it runs low and goes red
+// while a Seeker has him; pressed (or R), it is fed a resin for `feed_oil` of a
+// lantern. Berries show beside it only once he is hungry. What he picks up is
+// said once, bottom left, and fades. His satchel (or Tab, I) opens the pack:
+// what he carries, and a plate for each thing he can make, a campfire that
+// burns down and a lamp that burns for good. A plate that cannot be afforded is
+// disabled, and `ui/hud.weave` shows it as spent.
+//
+// Making a thing is placing it. A plate (or F and G straight from the world)
+// puts a ghost of it a step ahead of Wick, which goes where he walks; the same
+// key again, or Place, sets it down there and takes its cost, and Tab or Cancel
+// thinks better of it. A fire set down kindles slowly (`fire.decay`).
+//
+// Standing by a fire that burns, the screen lets go: after `settle` seconds
+// there the lantern and the satchel fade, and come back when he walks off.
 script Pack {
     // What each costs: wood, stone, resin.
     @export let fire_wood: number = 4.0;
@@ -17,53 +27,89 @@ script Pack {
     // What they are built from.
     @export let campfire: Prefab;
     @export let lamp: Prefab;
-    // How far ahead of Wick a thing is built.
-    @export let ahead: number = 1.2;
+    // How far ahead of Wick a thing is placed.
+    @export let ahead: number = 1.6;
+    // How near a fire, and how long there, before the screen lets go.
+    @export let by_fire: number = 4.5;
+    @export let settle: number = 1.5;
+    // How long a line saying what he picked up stays.
+    @export let say_for: number = 1.8;
 
     var wick: Entity = null;
-    var wood: Entity = null;
-    var stone: Entity = null;
-    var resin: Entity = null;
     var fire_button: Entity = null;
     var lamp_button: Entity = null;
-    var feed_button: Entity = null;
+    var badge: Entity = null;
     var light: Entity = null;
-    var light_panel: Entity = null;
-    var courage: Entity = null;
-    var food: Entity = null;
-    var berries: Entity = null;
-    var had_berries: number = 0.0;
-    var berries_shone: number = 9.0;
+    var screen: Entity = null;
+    var hint: Entity = null;
+    var satchel: Entity = null;
+    var bar: Entity = null;
+    var what: Entity = null;
+    var confirm: Entity = null;
+    var cancel: Entity = null;
+    var ghost_fire: Entity = null;
+    var ghost_lamp: Entity = null;
+    var gained: Entity = null;
+    // Whether the pack is open, and what is being placed: 0 nothing, 1 a
+    // campfire, 2 a lamp.
+    var open: bool = false;
+    var placing: number = 0.0;
     // What the pack held last frame, and how long each row has shone since it
     // gained (`gained` in `ui/hud.weave`).
     var had_wood: number = 0.0;
     var had_stone: number = 0.0;
     var had_resin: number = 0.0;
+    var had_berries: number = 0.0;
     var wood_shone: number = 9.0;
     var stone_shone: number = 9.0;
     var resin_shone: number = 9.0;
+    var berries_shone: number = 9.0;
+    var said_for: number = 9.0;
+    var rested: number = 0.0;
     var age: number = 0.0;
 
     fn start() {
         this.wick = World.find("Wick");
-        this.wood = World.find("pack-wood");
-        this.stone = World.find("pack-stone");
-        this.resin = World.find("pack-resin");
         this.fire_button = World.find("craft-campfire");
         this.lamp_button = World.find("craft-lamp");
-        this.feed_button = World.find("craft-oil");
+        this.badge = World.find("hud-lantern");
         this.light = World.find("hud-light-fill");
-        this.light_panel = World.find("hud-light");
-        this.courage = World.find("hud-courage-fill");
-        this.food = World.find("hud-food-fill");
-        this.berries = World.find("pack-berries");
+        this.screen = World.find("pack-screen");
+        this.hint = World.find("pack-hint");
+        this.satchel = World.find("hud-satchel");
+        this.bar = World.find("place-bar");
+        this.what = World.find("place-what");
+        this.confirm = World.find("place-confirm");
+        this.cancel = World.find("place-cancel");
+        this.ghost_fire = World.find("ghost-campfire");
+        this.ghost_lamp = World.find("ghost-lamp");
+        this.gained = World.find("hud-gained");
+        this.had_wood = Game.wood;
+        this.had_stone = Game.stone;
+        this.had_resin = Game.resin;
+        this.had_berries = Game.berries;
+        show();
+    }
+
+    // A screen held upright is a phone's, played by touch, so the hints say
+    // what to tap rather than which key to press.
+    fn hints() {
+        if Viewport.aspect < 1.0 {
+            Ui.set_text(World.find("hud-feed-hint"), "Tap to feed the lantern");
+            Ui.set_text(this.hint, "Tap the satchel to close");
+        } else {
+            Ui.set_text(World.find("hud-feed-hint"), "R  feed the lantern");
+            Ui.set_text(this.hint, "Tab closes the pack");
+        }
     }
 
     fn update(dt: number) {
         this.age += dt;
-        Ui.set_number(this.wood, Game.wood);
-        Ui.set_number(this.stone, Game.stone);
-        Ui.set_number(this.resin, Game.resin);
+        hints();
+        Ui.set_number(World.find("pack-wood"), Game.wood);
+        Ui.set_number(World.find("pack-stone"), Game.stone);
+        Ui.set_number(World.find("pack-resin"), Game.resin);
+        Ui.set_number(World.find("pack-berries"), Game.berries);
         let fire_ok = Game.wood >= this.fire_wood && Game.stone >= this.fire_stone;
         let lamp_ok = Game.wood >= this.lamp_wood && Game.stone >= this.lamp_stone
             && Game.resin >= this.lamp_resin;
@@ -73,49 +119,170 @@ script Pack {
         Ui.set_disabled(this.lamp_button, !lamp_ok);
         // Nothing to feed a full lantern.
         let feed_ok = Game.resin >= this.feed_resin && Game.oil < 0.95;
-        if this.feed_button != null {
-            Ui.set_disabled(this.feed_button, !feed_ok);
-        }
-        // How much light the lantern has left: its oil, less what a gloom's
-        // pounce has scorched; and the panel pulsing red while a Seeker has him.
-        Ui.set_fill(this.light, Game.oil * (1.0 - Game.scorch));
-        Ui.set_class(this.light_panel, "low", Game.oil < 0.2);
-        if this.courage != null {
-            Ui.set_fill(this.courage, Game.courage);
-        }
-        if this.food != null {
-            Ui.set_fill(this.food, Game.food);
-            Ui.set_number(this.berries, Game.berries);
-            this.berries_shone = shine("pack-berries-row", Game.berries > this.had_berries, this.berries_shone, dt);
-            this.had_berries = Game.berries;
-        }
-        Ui.set_class(this.light_panel, "found", Game.found > 0.5);
-        // A row shines for a moment when what it counts goes up.
-        this.wood_shone = shine("pack-wood-row", Game.wood > this.had_wood, this.wood_shone, dt);
-        this.stone_shone = shine("pack-stone-row", Game.stone > this.had_stone, this.stone_shone, dt);
-        this.resin_shone = shine("pack-resin-row", Game.resin > this.had_resin, this.resin_shone, dt);
-        this.had_wood = Game.wood;
-        this.had_stone = Game.stone;
-        this.had_resin = Game.resin;
+        lantern(feed_ok);
+        hunger();
+        said(dt);
+        rest(dt);
         // Wick has started by now, and faces somewhere.
         if this.age < 0.1 || Game.lost {
             return;
         }
-        if fire_ok && (Ui.is_pressed(this.fire_button) || Action.pressed("campfire")) {
-            Game.wood -= this.fire_wood;
-            Game.stone -= this.fire_stone;
-            build(this.campfire);
-        } else if lamp_ok && (Ui.is_pressed(this.lamp_button) || Action.pressed("lamp")) {
-            Game.wood -= this.lamp_wood;
-            Game.stone -= this.lamp_stone;
-            Game.resin -= this.lamp_resin;
-            build(this.lamp);
-        } else if feed_ok && ((this.feed_button != null && Ui.is_pressed(this.feed_button)) || Action.pressed("feed")) {
+        if this.placing > 0.0 {
+            choosing(fire_ok, lamp_ok);
+        } else if Action.pressed("pack") || Ui.is_pressed(this.satchel) {
+            this.open = !this.open;
+            show();
+        } else if fire_ok && (Action.pressed("campfire") || (this.open && Ui.is_pressed(this.fire_button))) {
+            begin(1.0);
+        } else if lamp_ok && (Action.pressed("lamp") || (this.open && Ui.is_pressed(this.lamp_button))) {
+            begin(2.0);
+        } else if feed_ok && (Action.pressed("feed") || Ui.is_pressed(this.badge)) {
             Game.resin -= this.feed_resin;
             Game.oil = min(1.0, Game.oil + this.feed_oil);
             Game.fed += 1.0;
             Audio.play("audio/feed.wav", 0.35);
         }
+    }
+
+    // The lantern on screen: how much light it has left, its oil less what a
+    // gloom's pounce has scorched; guttering when low; red while found; and a
+    // word on feeding it when it is wanted and there is resin to do it.
+    fn lantern(feed_ok: bool) {
+        Ui.set_fill(this.light, Game.oil * (1.0 - Game.scorch));
+        let low = Game.oil < 0.2;
+        Ui.set_class(World.find("hud-lantern-icon"), "low", low);
+        Ui.set_class(this.light, "low", low);
+        Ui.set_class(this.badge, "found", Game.found > 0.5);
+        Ui.set_class(World.find("hud-feed-hint"), "shown", feed_ok && Game.oil < 0.6 && !this.open);
+    }
+
+    // Berries beside the lantern only once he is hungry, fading as he starves.
+    fn hunger() {
+        let hungry = Game.food < 0.5;
+        Ui.set_fill(World.find("hud-food-fill"), Game.food * 2.0);
+        Ui.set_class(World.find("hud-food-icon"), "hungry", hungry);
+        Ui.set_class(World.find("hud-food-well"), "hungry", hungry);
+        Ui.set_class(World.find("hud-food-fill"), "hungry", hungry);
+        Ui.set_class(World.find("hud-food-icon"), "starving", Game.food < 0.1);
+    }
+
+    // What he has just picked up, said once; and the pack's row shining.
+    fn said(dt: number) {
+        this.said_for += dt;
+        if Game.wood > this.had_wood {
+            say("+" + (Game.wood - this.had_wood).fixed(0) + " deadwood");
+        }
+        if Game.stone > this.had_stone {
+            say("+" + (Game.stone - this.had_stone).fixed(0) + " flint");
+        }
+        if Game.resin > this.had_resin {
+            say("+" + (Game.resin - this.had_resin).fixed(0) + " resin");
+        }
+        if Game.berries > this.had_berries {
+            say("+" + (Game.berries - this.had_berries).fixed(0) + " berries");
+        }
+        Ui.set_class(this.gained, "shown", this.said_for < this.say_for);
+        this.wood_shone = shine("pack-wood-row", Game.wood > this.had_wood, this.wood_shone, dt);
+        this.stone_shone = shine("pack-stone-row", Game.stone > this.had_stone, this.stone_shone, dt);
+        this.resin_shone = shine("pack-resin-row", Game.resin > this.had_resin, this.resin_shone, dt);
+        this.berries_shone = shine("pack-berries-row", Game.berries > this.had_berries, this.berries_shone, dt);
+        this.had_wood = Game.wood;
+        this.had_stone = Game.stone;
+        this.had_resin = Game.resin;
+        this.had_berries = Game.berries;
+    }
+
+    fn say(words: String) {
+        Ui.set_text(this.gained, words);
+        this.said_for = 0.0;
+    }
+
+    // By a burning fire, and nothing open, the screen lets go of him.
+    fn rest(dt: number) {
+        if by_a_fire() && !this.open && this.placing == 0.0 {
+            this.rested += dt;
+        } else {
+            this.rested = 0.0;
+        }
+        let resting = this.rested > this.settle;
+        Game.resting = resting;
+        for name in ["hud-lantern", "hud-lantern-icon", "hud-light-well", "hud-light-fill",
+                     "hud-satchel", "hud-satchel-icon", "hud-satchel-key"] {
+            Ui.set_class(World.find(name), "rest", resting);
+        }
+    }
+
+    fn by_a_fire() -> bool {
+        if this.wick == null || !World.exists(this.wick) {
+            return false;
+        }
+        let here = this.wick.transform.world_position;
+        for fire in World.with_tag("fire") {
+            let x = fire.transform.world_position.x - here.x;
+            let y = fire.transform.world_position.y - here.y;
+            if fire.light2d.intensity > 0.5 && x * x + y * y < this.by_fire * this.by_fire {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // A ghost of the thing goes ahead of Wick until it is set down or put away.
+    fn begin(kind: number) {
+        this.placing = kind;
+        this.open = false;
+        if kind == 1.0 {
+            Ui.set_text(this.what, "Campfire");
+        } else {
+            Ui.set_text(this.what, "Lamp");
+        }
+        show();
+        follow();
+    }
+
+    fn choosing(fire_ok: bool, lamp_ok: bool) {
+        follow();
+        let again = (this.placing == 1.0 && Action.pressed("campfire"))
+            || (this.placing == 2.0 && Action.pressed("lamp"));
+        if again || Ui.is_pressed(this.confirm) {
+            if this.placing == 1.0 && fire_ok {
+                Game.wood -= this.fire_wood;
+                Game.stone -= this.fire_stone;
+                build(this.campfire);
+            } else if this.placing == 2.0 && lamp_ok {
+                Game.wood -= this.lamp_wood;
+                Game.stone -= this.lamp_stone;
+                Game.resin -= this.lamp_resin;
+                build(this.lamp);
+            }
+            this.placing = 0.0;
+            show();
+        } else if Action.pressed("pack") || Ui.is_pressed(this.cancel) {
+            this.placing = 0.0;
+            show();
+        } else if this.placing == 1.0 && Action.pressed("lamp") && lamp_ok {
+            begin(2.0);
+        } else if this.placing == 2.0 && Action.pressed("campfire") && fire_ok {
+            begin(1.0);
+        }
+    }
+
+    // A step ahead of Wick, the way he faces.
+    fn follow() {
+        let walker = Wick.on(this.wick);
+        for ghost in [this.ghost_fire, this.ghost_lamp] {
+            ghost.transform.position.x = this.wick.transform.world_position.x + walker.facing_x * this.ahead;
+            ghost.transform.position.y = this.wick.transform.world_position.y + walker.facing_y * this.ahead;
+        }
+    }
+
+    // What is open shows, and nothing else.
+    fn show() {
+        World.set_active(this.screen, this.open);
+        World.set_active(this.hint, this.open);
+        World.set_active(this.bar, this.placing > 0.0);
+        World.set_active(this.ghost_fire, this.placing == 1.0);
+        World.set_active(this.ghost_lamp, this.placing == 2.0);
     }
 
     // A row given `gained` when it goes up, and the class taken back once its
@@ -130,12 +297,11 @@ script Pack {
         return since;
     }
 
-    // Built a step ahead of Wick, the way he faces.
+    // Set down where the ghost stands.
     fn build(thing: Prefab) {
-        let walker = Wick.on(this.wick);
         let made = World.spawn(thing);
-        made.transform.position.x = this.wick.transform.world_position.x + walker.facing_x * this.ahead;
-        made.transform.position.y = this.wick.transform.world_position.y + walker.facing_y * this.ahead;
+        made.transform.position.x = this.ghost_fire.transform.position.x;
+        made.transform.position.y = this.ghost_fire.transform.position.y;
         Game.built += 1.0;
         Audio.play("audio/build.wav", 0.5);
     }

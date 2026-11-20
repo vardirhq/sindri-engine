@@ -55,10 +55,15 @@ fn a_fire_brings_courage_back() {
     run.set_board("courage", 0.2);
     run.set_board("wood", 4.0);
     run.set_board("stone", 2.0);
-    run.input.apply(InputEvent::KeyPressed(Key::F));
-    step(&mut run, 2);
-    run.input.apply(InputEvent::KeyReleased(Key::F));
-    step(&mut run, 60 * 4);
+    // Chosen, then set down: two presses.
+    for _ in 0..2 {
+        run.input.apply(InputEvent::KeyPressed(Key::F));
+        step(&mut run, 2);
+        run.input.apply(InputEvent::KeyReleased(Key::F));
+        step(&mut run, 2);
+    }
+    // It takes a moment to catch.
+    step(&mut run, 60 * 6);
     let back = run.board("courage");
     assert!(back > 0.5, "by the fire it returns: {back}");
     assert!(run.board("fear") < 0.01, "and the fear with it");

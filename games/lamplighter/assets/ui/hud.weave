@@ -1,95 +1,186 @@
-/* The wilds' HUD: the lantern's light top left, the pack bottom left, and what
-   Wick can build bottom right. Panels and bars are placed by their centre, text
-   by its anchor. On a phone held upright everything is sized to the screen's
-   width and the build cards sit above the pack. */
+/* The wilds' HUD. Almost nothing is on screen while Wick walks: the lantern,
+   small, top left, and its oil under it; his satchel, bottom left. The rest
+   comes when it matters and goes when it does not. Hunger shows only once he
+   is hungry; courage is never a bar, the world itself greys and closes in
+   (`scripts/courage.decay`); what he gathers is said once and fades; and what
+   he carries and can make is in the pack, opened from the satchel (Tab, I).
+   Standing by a fire he has lit, even that fades, and there is only the fire.
 
-/* The lantern's light, and Wick's courage under it. */
-.light-panel { width: 240px; height: 136px; x: 136px; y: -84px; anchor: top_left; }
-.light-label { width: 200px; height: 14px; x: 32px; y: -26px; anchor: top_left; }
-.meter { width: 208px; height: 10px; x: 136px; y: -56px; anchor: top_left; }
-.courage-label { y: -76px; }
-.meter.courage { y: -96px; }
-.food-label { y: -116px; }
-.meter.food { y: -136px; }
-.light-back { tint: var(--well); }
-.light-fill { tint: var(--ember); }
-.courage-fill { tint: #b9c6e4; }
-.food-fill { tint: #c7546f; }
+   Panels are a worn slate in a thin brass rim (`textures/hud-frame.png`,
+   sliced), and words are set in a pixel face, so the screen is drawn in the
+   same pixels as the world. Panels and bars are placed by their centre, text
+   by its anchor. */
 
-/* The pack: one row a thing, its picture and how many. */
-.pack-panel {
-    width: 156px; height: 164px; x: 94px; y: 98px; anchor: bottom_left;
-    direction: column; gap: 2px; padding: 10px 14px;
+/* -- The lantern ---------------------------------------------------------- */
+
+.badge { width: 64px; height: 84px; x: 52px; y: -62px; anchor: top_left; tint: #ffffff; }
+.badge:hover { tint: #ffe6b8; }
+.badge-icon { width: 36px; height: 48px; x: 52px; y: -50px; anchor: top_left; }
+.fuel-well { width: 46px; height: 10px; x: 52px; y: -88px; anchor: top_left; }
+.fuel { width: 40px; height: 4px; x: 52px; y: -88px; anchor: top_left; tint: var(--ember); }
+.feed-hint {
+    width: 120px; height: 14px; x: 20px; y: -112px; anchor: top_left;
+    font-size: 12px; line-height: 14px; text-align: start; color: #f2a65a00;
+    transition: color 300ms ease-out;
+}
+.feed-hint.shown { color: var(--ember); }
+
+/* Running dry, the flame gutters and the rim warms to say so. */
+@keyframes gutter {
+    0% { tint: #ffffff; }
+    30% { tint: #8a6a4a; }
+    45% { tint: #ffe2b0; }
+    70% { tint: #5a4636; }
+    100% { tint: #ffffff; }
+}
+.badge-icon.low { animation: gutter 900ms ease-in-out infinite; }
+@keyframes ember-low {
+    50% { tint: #e0614a; }
+}
+.fuel.low { animation: ember-low 600ms ease-in-out infinite; }
+
+/* Found by a Seeker: the rim goes red. */
+@keyframes found {
+    50% { tint: #ff5a44; }
+}
+.badge.found { animation: found 900ms ease-in-out infinite; }
+
+/* -- Hunger, only once he is hungry --------------------------------------- */
+
+.food-icon { width: 32px; height: 32px; x: 112px; y: -44px; anchor: top_left; tint: #ffffff00; }
+.food-well { width: 36px; height: 10px; x: 112px; y: -70px; anchor: top_left; tint: #ffffff00; }
+.food-fill { width: 30px; height: 4px; x: 112px; y: -70px; anchor: top_left; tint: #c7546f00; }
+.food-icon, .food-well, .food-fill { transition: tint 600ms ease-out; }
+.food-icon.hungry, .food-well.hungry { tint: #ffffff; }
+.food-fill.hungry { tint: #c7546f; }
+@keyframes starving {
+    50% { tint: #ffffff40; }
+}
+.food-icon.starving { animation: starving 1200ms ease-in-out infinite; }
+
+/* -- What he has just picked up, said once -------------------------------- */
+
+.pickup-line {
+    width: 260px; height: 18px; x: 92px; y: 58px; anchor: bottom_left;
+    font-size: 14px; line-height: 18px; text-align: start;
+    color: #f4e7c800; transition: color 500ms ease-out;
+}
+.pickup-line.shown { color: var(--ink); transition: color 80ms linear; }
+
+/* -- The satchel ---------------------------------------------------------- */
+
+.satchel { width: 60px; height: 60px; x: 50px; y: 50px; anchor: bottom_left; tint: #ffffff; }
+.satchel:hover { tint: #ffe6b8; }
+.satchel-icon { width: 32px; height: 32px; x: 50px; y: 51px; anchor: bottom_left; tint: #ffffff; }
+.satchel-key {
+    width: 60px; height: 14px; x: 92px; y: 34px; anchor: bottom_left;
+    font-size: 11px; line-height: 14px; text-align: start; color: var(--faint);
+}
+
+/* By a fire, the screen lets go. */
+.badge, .badge-icon, .fuel-well, .satchel, .satchel-icon { transition: tint 1200ms ease-in-out; }
+.satchel-key { transition: color 1200ms ease-in-out; }
+.badge.rest, .badge-icon.rest, .fuel-well.rest, .satchel.rest, .satchel-icon.rest { tint: #ffffff00; }
+.fuel.rest { tint: #f2a65a00; transition: tint 1200ms ease-in-out; }
+.satchel-key.rest { color: #6b635500; }
+
+/* -- The pack ------------------------------------------------------------- */
+
+.pack-screen {
+    width: 600px; height: 300px; x: 0px; y: 20px; anchor: center;
+    direction: row; gap: 28px; padding: 28px 30px;
     justify-content: center; align-items: start;
 }
-.pack-row { background: transparent; width: 128px; height: 34px; direction: row; gap: 10px; align-items: center; justify-content: start; }
-.pack-icon { width: 30px; height: 30px; }
-.pack-count { width: 88px; height: 20px; font-size: 16px; line-height: 20px; color: var(--ink); text-align: center; }
-
-/* What he can build: a card each, lit while he can afford it and spent while
-   he cannot. */
-.craft-panel {
-    width: 300px; height: 230px; x: -166px; y: 131px; anchor: bottom_right;
-    direction: column; gap: 10px; justify-content: end; align-items: end;
-    background: transparent;
+.pack-column { direction: column; gap: 6px; align-items: start; justify-content: start; }
+.pack-goods { width: 170px; height: 244px; }
+.pack-recipes { width: 330px; height: 244px; gap: 10px; }
+.pack-heading {
+    width: 170px; height: 18px; font-size: 12px; line-height: 14px;
+    letter-spacing: 2px; color: var(--muted); text-align: start;
 }
-.craft {
-    width: 300px; height: 70px;
-    direction: row; gap: 12px; padding: 0px 14px; align-items: center; justify-content: start;
-    background: var(--ember-deep);
-    border-color: var(--ember);
-    border-width: 1px;
-    border-radius: 12px;
-    box-shadow: 0px 8px 22px #00000088;
-    transition: background 120ms ease-out, border-color 120ms ease-out;
-}
-.craft:hover { background: #4d3018; }
-.craft:active { background: #24160b; transition: background 40ms linear; }
-.craft:disabled { background: var(--panel); border-color: var(--panel-edge); }
-.craft-icon { width: 44px; height: 44px; }
-.craft-text { width: 190px; height: 50px; direction: column; gap: 2px; align-items: start; justify-content: center; }
-.craft-name { width: 190px; height: 22px; font-size: 18px; line-height: 22px; color: var(--ink); text-align: center; }
-.craft-cost { width: 190px; height: 16px; font-size: 12px; line-height: 15px; color: var(--muted); text-align: center; }
-.craft-key { width: 22px; height: 22px; font-size: 13px; line-height: 16px; color: var(--ember); text-align: center; }
-.craft:disabled .craft-name, .craft:disabled .craft-cost, .craft:disabled .craft-key { color: var(--faint); }
-
-@media (orientation: portrait) {
-    .light-panel { width: 56vw; height: 34vw; x: 31vw; y: -21vw; }
-    .light-label { width: 46vw; height: 3vw; x: 7vw; y: -6vw; font-size: 2.6vw; line-height: 3vw; }
-    .meter { width: 48vw; height: 2.4vw; x: 31vw; y: -13vw; }
-    .courage-label { y: -17vw; }
-    .meter.courage { y: -23.5vw; }
-    .food-label { y: -28vw; }
-    .meter.food { y: -34.5vw; }
-    .pack-panel { width: 34vw; height: 39vw; x: 20vw; y: 22.5vw; padding: 2vw 3vw; }
-    .pack-row { width: 30vw; height: 8vw; gap: 2vw; }
-    .pack-icon { width: 7vw; height: 7vw; }
-    .pack-count { width: 20vw; height: 5vw; font-size: 3.8vw; line-height: 4.6vw; }
-    .craft-panel { width: 58vw; height: 51vw; x: -32vw; y: 28.5vw; gap: 2vw; }
-    .craft { width: 58vw; height: 15vw; gap: 2.4vw; padding: 0px 3vw; border-radius: 3vw; }
-    .craft-icon { width: 10vw; height: 10vw; }
-    .craft-text { width: 36vw; height: 11vw; }
-    .craft-name { width: 36vw; height: 5vw; font-size: 4vw; line-height: 5vw; }
-    .craft-cost { width: 36vw; height: 3.6vw; font-size: 2.6vw; line-height: 3.4vw; }
-    .craft-key { width: 4vw; height: 4vw; font-size: 3vw; line-height: 3.6vw; }
+.pack-recipes .pack-heading { width: 330px; }
+.pack-row { background: transparent; width: 170px; height: 40px; direction: row; gap: 12px; align-items: center; justify-content: start; }
+.pack-icon { width: 32px; height: 32px; }
+.pack-count { width: 120px; height: 20px; font-size: 18px; line-height: 20px; color: var(--ink); text-align: start; }
+.pack-hint {
+    width: 600px; height: 16px; x: 0px; y: -152px; anchor: center;
+    font-size: 12px; line-height: 14px; color: var(--muted); text-align: center;
 }
 
-/* Feedback: a row of the pack shines amber for a moment when it gains, and the
-   lantern's panel pulses red while a Seeker has Wick. `pack.decay` gives the
-   classes. */
+/* A row shines for a moment when what it counts goes up. */
 @keyframes gained {
-    25% { background: #6b4320d9; }
+    25% { background: #6b432099; }
 }
 .pack-row.gained { animation: gained 450ms ease-out; }
 
-@keyframes found {
-    50% { background: #3a0e0bd9; border-color: #e0614a; }
+/* What he can make: a plate each, lit while he can afford it. */
+.craft {
+    width: 330px; height: 92px;
+    direction: row; gap: 14px; padding: 0px 16px; align-items: center; justify-content: start;
+    background: var(--ember-deep);
+    border-color: var(--brass);
+    border-width: 2px;
+    border-radius: 0px;
+    transition: background 120ms ease-out, border-color 120ms ease-out;
 }
-.light-panel.found { animation: found 900ms ease-in-out infinite; }
+.craft:hover { background: #4d3018; border-color: var(--brass-lit); }
+.craft:active { background: #24160b; transition: background 40ms linear; }
+.craft:disabled { background: #0a0b12cc; border-color: var(--panel-edge); }
+.craft-icon { width: 56px; height: 56px; }
+.craft:disabled .craft-icon { tint: #ffffff66; }
+.craft-text { width: 200px; height: 60px; direction: column; gap: 4px; align-items: start; justify-content: center; }
+.craft-name { width: 200px; height: 22px; font-size: 20px; line-height: 22px; color: var(--ink); text-align: start; }
+.craft-blurb { width: 200px; height: 14px; font-size: 12px; line-height: 14px; color: var(--muted); text-align: start; }
+.craft-cost { width: 200px; height: 14px; font-size: 12px; line-height: 14px; color: var(--ember); text-align: start; }
+.craft-key { width: 22px; height: 20px; font-size: 14px; line-height: 18px; color: var(--ember); text-align: center; }
+.craft:disabled .craft-name, .craft:disabled .craft-cost, .craft:disabled .craft-blurb,
+.craft:disabled .craft-key { color: var(--faint); }
 
-/* The lantern running dry: its meter flickers between ember and ash. */
-@keyframes low {
-    50% { border-color: #8a5a2a; }
+/* -- Choosing where to put it --------------------------------------------- */
+
+.place-bar {
+    width: 440px; height: 64px; x: 0px; y: 64px; anchor: bottom;
+    direction: row; gap: 12px; padding: 0px 16px; align-items: center; justify-content: center;
 }
-.light-panel.low { animation: low 600ms ease-in-out infinite; }
+.place-what { width: 150px; height: 20px; font-size: 16px; line-height: 20px; color: var(--ink); text-align: start; }
+.place-button {
+    width: 120px; height: 40px; direction: row; align-items: center; justify-content: center;
+    background: var(--ember-deep); border-color: var(--brass); border-width: 2px; border-radius: 0px;
+    transition: background 120ms ease-out;
+}
+.place-button:hover { background: #4d3018; }
+.place-button.quiet { background: #0a0b12cc; border-color: var(--panel-edge); }
+.place-label { width: 112px; height: 18px; font-size: 14px; line-height: 18px; color: var(--ink); text-align: center; }
 
+@media (orientation: portrait) {
+    .badge { width: 15vw; height: 20vw; x: 12vw; y: -14vw; }
+    .badge-icon { width: 8.4vw; height: 11.2vw; x: 12vw; y: -11.4vw; }
+    .fuel-well { width: 11vw; height: 2.4vw; x: 12vw; y: -20.4vw; }
+    .fuel { width: 9.6vw; height: 1vw; x: 12vw; y: -20.4vw; }
+    .feed-hint { width: 30vw; height: 3.4vw; x: 4.6vw; y: -26vw; font-size: 3vw; line-height: 3.4vw; }
+    .food-icon { width: 7.6vw; height: 7.6vw; x: 26vw; y: -10vw; }
+    .food-well { width: 8.6vw; height: 2.4vw; x: 26vw; y: -16vw; }
+    .food-fill { width: 7.2vw; height: 1vw; x: 26vw; y: -16vw; }
+    .satchel { width: 15vw; height: 15vw; x: 12vw; y: 12vw; }
+    .satchel-icon { width: 8vw; height: 8vw; x: 12vw; y: 12.2vw; }
+    .satchel-key { width: 0vw; height: 0vw; font-size: 0.1vw; }
+    .pickup-line { width: 60vw; height: 4.4vw; x: 23vw; y: 13vw; font-size: 3.6vw; line-height: 4.4vw; }
+    .pack-screen { width: 92vw; height: 132vw; y: 4vw; direction: column; gap: 4vw; padding: 5vw; align-items: center; }
+    .pack-goods { width: 80vw; height: 44vw; }
+    .pack-recipes { width: 80vw; height: 66vw; gap: 2.4vw; }
+    .pack-heading, .pack-recipes .pack-heading { width: 80vw; height: 4vw; font-size: 3vw; line-height: 3.6vw; }
+    .pack-row { width: 80vw; height: 9vw; gap: 3vw; }
+    .pack-icon { width: 8vw; height: 8vw; }
+    .pack-count { width: 60vw; height: 5vw; font-size: 4.4vw; line-height: 5vw; }
+    .pack-hint { width: 92vw; height: 4vw; y: -71vw; font-size: 3vw; line-height: 3.6vw; }
+    .craft { width: 80vw; height: 24vw; gap: 3vw; padding: 0px 3.6vw; }
+    .craft-icon { width: 13vw; height: 13vw; }
+    .craft-text { width: 52vw; height: 16vw; gap: 1vw; }
+    .craft-name { width: 52vw; height: 5.4vw; font-size: 5vw; line-height: 5.4vw; }
+    .craft-blurb, .craft-cost { width: 52vw; height: 3.6vw; font-size: 3vw; line-height: 3.6vw; }
+    .craft-key { width: 0vw; height: 0vw; font-size: 0.1vw; }
+    .place-bar { width: 92vw; height: 16vw; y: 20vw; gap: 3vw; padding: 0px 3vw; }
+    .place-what { width: 30vw; height: 5vw; font-size: 4vw; line-height: 5vw; }
+    .place-button { width: 26vw; height: 11vw; }
+    .place-label { width: 24vw; height: 5vw; font-size: 3.6vw; line-height: 4.6vw; }
+}
