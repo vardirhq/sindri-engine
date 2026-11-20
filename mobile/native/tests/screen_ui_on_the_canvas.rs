@@ -17,9 +17,9 @@ fn the_wilds_hud_is_drawn_styled_and_can_be_hidden() {
     let pack = opened
         .world
         .entities()
-        .find(|(_, data)| data.name.as_deref() == Some("pack-panel"))
+        .find(|(_, data)| data.name.as_deref() == Some("craft-campfire"))
         .map(|(entity, _)| entity)
-        .expect("the pack's panel");
+        .expect("the pack's campfire plate");
     let size = [390.0, 844.0];
     let authored = opened.world.get(pack).unwrap().clone();
 
@@ -30,7 +30,7 @@ fn the_wilds_hud_is_drawn_styled_and_can_be_hidden() {
     assert_ne!(
         styled.components["sindri.ui.shape"]["fill"],
         authored.components["sindri.ui.shape"]["fill"],
-        "the panel takes the stylesheet's colour"
+        "the plate takes the stylesheet's colour"
     );
     assert_eq!(
         opened.world.get(pack).unwrap(),

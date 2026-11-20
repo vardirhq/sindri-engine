@@ -102,7 +102,7 @@ fn a_headless_run_reports_the_board_and_where_things_went() {
         ])
         .args([
             "--steps",
-            "wait:0.3 hold:D wait:1 release:D set:wood=4 set:stone=2 key:F wait:0.2",
+            "wait:0.3 hold:D wait:1 release:D set:wood=4 set:stone=2 key:F wait:0.2 key:F wait:0.2",
         ])
         .output()
         .expect("sindri runs");
@@ -389,7 +389,7 @@ fn expectations_pass_and_fail_where_they_stand() {
     };
     let (code, report) = run(
         "expect:wick.x<11 wait:0.3 hold:D wait:1 release:D expect:wick.x>13 \
-         set:wood=4 set:stone=2 key:F wait:0.2 expect:built=1 expect:wood=0 expect:scene=wilds",
+         set:wood=4 set:stone=2 key:F wait:0.2 key:F wait:0.2 expect:built=1 expect:wood=0 expect:scene=wilds",
     );
     assert_eq!(code, Some(0), "{report}");
     let checked = report["expectations"].as_array().unwrap();
