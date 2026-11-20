@@ -48,6 +48,7 @@ fn wick_is_heard_walking_gathering_and_building() {
     run.set_board("wood", 4.0);
     run.set_board("stone", 2.0);
     press(&mut run, Key::F, &mut heard);
+    press(&mut run, Key::F, &mut heard);
     assert!(heard.contains("audio/build.wav"), "a fire built: {heard:?}");
 
     run.set_board("resin", 1.0);

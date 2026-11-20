@@ -76,6 +76,8 @@ fn a_fire_tops_the_lantern_up() {
     run.set_board("oil", 0.3);
     run.set_board("wood", 4.0);
     run.set_board("stone", 2.0);
+    // Chosen, then set down where Wick stands facing.
+    press(&mut run, Key::F);
     press(&mut run, Key::F);
     step(&mut run, 60 * 3);
     let topped = run.board("oil");

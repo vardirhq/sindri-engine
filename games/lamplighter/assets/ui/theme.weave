@@ -10,6 +10,8 @@
     --panel: #0c0e18d9;
     --panel-edge: #3b3426;
     --well: #05060ccc;
+    --brass: #866030;
+    --brass-lit: #d6ac68;
     --danger: #e0614a;
 }
 
@@ -17,7 +19,7 @@
     background: var(--panel);
     border-color: var(--panel-edge);
     border-width: 1px;
-    border-radius: 12px;
+    border-radius: 0px;
     box-shadow: 0px 8px 22px #00000088;
 }
 

@@ -326,11 +326,14 @@ def ui(ident, parent, classes, w=0.2, h=0.06, **components):
                   **{'weave.style': {'classes': classes}, **components})
 
 
+FONT = 'fonts/PixelifySans.ttf'   # a pixel face, so the words are drawn as the world is
+
+
 def words(text, layer=101):
-    return {'sindri.ui.text': {'anchor': 'center', 'color': [1, 1, 1, 1], 'font': 'fonts/Inter.ttf',
+    return {'sindri.ui.text': {'anchor': 'center', 'color': [1, 1, 1, 1], 'font': FONT,
                                'font_size': 0.032, 'line_height': 0.04, 'layer': layer, 'text': text,
-                               'bold': True, 'shadow': {'offset': [0, -0.003], 'color': [0, 0, 0, 0.6],
-                                                        'softness': 0.002}}}
+                               'bold': False, 'shadow': {'offset': [0, -0.003], 'color': [0, 0, 0, 0.7],
+                                                         'softness': 0.0}}}
 
 
 def panel(layer, direction='column'):
@@ -342,54 +345,112 @@ def icon(texture, layer=101):
     return {'sindri.ui.image': {'anchor': 'center', 'layer': layer, 'texture': texture, 'tint': [1, 1, 1, 1]}}
 
 
+def framed(layer, direction=None):
+    """The worn slate in its brass rim (`art/hud.py`), sliced so any size keeps
+    its rim, two screen pixels to a pixel of the art at 720 pixels tall."""
+    made = {'sindri.ui.image': {'anchor': 'center', 'layer': layer, 'texture': 'textures/hud-frame.png',
+                                'tint': [1, 1, 1, 1], 'draw': 'sliced', 'border_scale': 4.0 / 720.0}}
+    if direction is not None:
+        made['sindri.ui.layout'] = {'direction': direction, 'spacing': 0.01, 'justify': 'center',
+                                    'align': 'center'}
+    return made
+
+
+def well(layer):
+    return {'sindri.ui.image': {'anchor': 'center', 'layer': layer, 'texture': 'textures/hud-well.png',
+                                'tint': [1, 1, 1, 1], 'draw': 'sliced', 'border_scale': 2.0 / 720.0}}
+
+
+def bar(layer):
+    return {'sindri.ui.image': {'anchor': 'top_left', 'layer': layer, 'texture': 'textures/white.png',
+                                'tint': [1, 1, 1, 1], 'fill': {'amount': 1.0, 'from': 'left'}}}
+
+
+def button(label):
+    return {'sindri.ui.button': {'label': label, 'autofocus': False, 'disabled': False}}
+
+
+GOODS_NAMES = [('wood', 'deadwood'), ('stone', 'flint'), ('resin', 'resin'), ('berries', 'berries')]
+
+
 def pack():
-    """Wick's pack on screen (`scripts/pack.decay`, styled by `assets/ui/hud.weave`):
-    his lantern's light, top left; what he carries, bottom left, each with its
-    picture; and a card for each thing he can build, bottom right, which shows
-    as spent while he cannot afford it. F and G build them from the keyboard,
-    the pad's top and right buttons from a pad."""
+    """Wick's pack on screen (`scripts/pack.decay`, styled by `assets/ui/hud.weave`).
+
+    While he walks there is only his lantern, top left, with its oil under it,
+    which a press (or R) feeds with resin; berries beside it once he is hungry;
+    a line saying what he has just picked up; and his satchel, bottom left. The
+    satchel (or Tab, I, the pad's select) opens the pack: what he carries, and a
+    plate for each thing he can make. A plate, or F and G straight from the
+    world, puts a ghost of the thing a step ahead of him, and he walks it to
+    where he wants it and sets it down (the same key again, or Place)."""
     out = [
-        ui('hud-light', None, ['panel', 'light-panel'], 0.5, 0.1, **panel(90)),
-        ui('hud-light-label', None, ['kicker', 'light-label'], **words('LANTERN')),
-        ui('hud-light-back', None, ['meter', 'light-back'], **icon('textures/white.png', 95)),
-        ui('hud-light-fill', None, ['meter', 'light-fill'],
-           **{'sindri.ui.image': {'anchor': 'top_left', 'layer': 96, 'texture': 'textures/white.png',
-                                  'tint': [1, 1, 1, 1], 'fill': {'amount': 1.0, 'from': 'left'}}}),
-        ui('hud-courage-label', None, ['kicker', 'light-label', 'courage-label'], **words('COURAGE')),
-        ui('hud-courage-back', None, ['meter', 'courage', 'light-back'], **icon('textures/white.png', 95)),
-        ui('hud-courage-fill', None, ['meter', 'courage', 'courage-fill'],
-           **{'sindri.ui.image': {'anchor': 'top_left', 'layer': 96, 'texture': 'textures/white.png',
-                                  'tint': [1, 1, 1, 1], 'fill': {'amount': 1.0, 'from': 'left'}}}),
-        ui('hud-food-label', None, ['kicker', 'light-label', 'food-label'], **words('FOOD')),
-        ui('hud-food-back', None, ['meter', 'food', 'light-back'], **icon('textures/white.png', 95)),
-        ui('hud-food-fill', None, ['meter', 'food', 'food-fill'],
-           **{'sindri.ui.image': {'anchor': 'top_left', 'layer': 96, 'texture': 'textures/white.png',
-                                  'tint': [1, 1, 1, 1], 'fill': {'amount': 1.0, 'from': 'left'}}}),
-        ui('pack-panel', None, ['panel', 'pack-panel'], 0.4, 0.25, **panel(90)),
+        ui('hud-lantern', None, ['badge'], 0.18, 0.24, **framed(90), **button('Lantern')),
+        ui('hud-lantern-icon', None, ['badge-icon'], 0.1, 0.13, **icon('textures/lantern.png', 95)),
+        ui('hud-light-well', None, ['fuel-well'], 0.13, 0.03, **well(95)),
+        ui('hud-light-fill', None, ['fuel'], 0.11, 0.012, **bar(96)),
+        ui('hud-feed-hint', None, ['feed-hint'], **words('R  feed the lantern')),
+        ui('hud-food-icon', None, ['food-icon'], 0.09, 0.09, **icon('textures/goods.png#berries', 95)),
+        ui('hud-food-well', None, ['food-well'], 0.1, 0.03, **well(95)),
+        ui('hud-food-fill', None, ['food-fill'], 0.08, 0.012, **bar(96)),
+        ui('hud-gained', None, ['pickup-line'], **words('')),
+        ui('hud-satchel', None, ['satchel'], 0.17, 0.17, **framed(90), **button('Pack')),
+        ui('hud-satchel-icon', None, ['satchel-icon'], 0.09, 0.09, **icon('textures/hud-icons.png#satchel', 95)),
+        ui('hud-satchel-key', None, ['satchel-key'], **words('TAB')),
+        # The pack, shut until it is opened.
+        ui('pack-screen', None, ['pack-screen'], 1.6, 0.8, **framed(110, 'row')),
+        ui('pack-goods', 'pack-screen', ['pack-column', 'pack-goods'], 0.45, 0.65,
+           **{'sindri.ui.layout': {'direction': 'column', 'spacing': 0.0, 'justify': 'start', 'align': 'start'}}),
+        ui('pack-goods-heading', 'pack-goods', ['pack-heading'], **words('CARRIED', 112)),
     ]
-    for kind, label in [('wood', 'wood'), ('stone', 'stone'), ('resin', 'resin'), ('berries', 'berries')]:
+    for kind, label in GOODS_NAMES:
         row = f'pack-{kind}-row'
-        out += [ui(row, 'pack-panel', ['pack-row'], 0.35, 0.06, **panel(91, 'row')),
-                ui(f'pack-{kind}-icon', row, ['pack-icon'], 0.05, 0.05, **icon(f'textures/goods.png#{kind}')),
-                ui(f'pack-{kind}', row, ['pack-count'], **words('{} ' + label))]
-    # A column drawn as nothing, so the stylesheet can anchor it to a corner.
-    out.append(ui('craft-panel', None, ['craft-panel'], 0.6, 0.3, **panel(89)))
-    for ident, name, cost, key, picture in [
-            ('craft-campfire', 'Campfire', '4 wood · 2 stone', 'F', 'textures/campfire.png#campfire'),
-            ('craft-lamp', 'Lamp', '6 wood · 4 stone · 2 resin', 'G', 'textures/objects.png#lamp-post-lit'),
-            ('craft-oil', 'Feed lantern', '1 resin', 'R', 'textures/lantern.png')]:
+        out += [ui(row, 'pack-goods', ['pack-row'], 0.45, 0.1, **panel(111, 'row')),
+                ui(f'pack-{kind}-icon', row, ['pack-icon'], 0.08, 0.08, **icon(f'textures/goods.png#{kind}', 112)),
+                ui(f'pack-{kind}', row, ['pack-count'], **words('{} ' + label, 112))]
+    out += [
+        ui('pack-recipes', 'pack-screen', ['pack-column', 'pack-recipes'], 0.9, 0.65,
+           **{'sindri.ui.layout': {'direction': 'column', 'spacing': 0.0, 'justify': 'start', 'align': 'start'}}),
+        ui('pack-recipes-heading', 'pack-recipes', ['pack-heading'], **words('MAKE', 112)),
+    ]
+    for ident, name, blurb, cost, key, picture in [
+            ('craft-campfire', 'Campfire', 'Burns a while. Rest by it.', '4 deadwood  2 flint', 'F',
+             'textures/campfire.png#campfire'),
+            ('craft-lamp', 'Lamp', 'Burns for good.', '6 deadwood  4 flint  2 resin', 'G',
+             'textures/objects.png#lamp-post-lit')]:
         text_column = f'{ident}-text'
         out += [
-            ui(ident, 'craft-panel', ['craft'], 0.55, 0.12, **panel(92, 'row'),
+            ui(ident, 'pack-recipes', ['craft'], 0.9, 0.25, **panel(112, 'row'),
                **{'sindri.ui.button': {'label': name, 'autofocus': False, 'disabled': True}}),
-            ui(f'{ident}-icon', ident, ['craft-icon'], 0.08, 0.08, **icon(picture, 97)),
-            ui(text_column, ident, ['craft-text'], 0.36, 0.1,
+            ui(f'{ident}-icon', ident, ['craft-icon'], 0.15, 0.15, **icon(picture, 114)),
+            ui(text_column, ident, ['craft-text'], 0.55, 0.16,
                **{'sindri.ui.layout': {'direction': 'column', 'spacing': 0.0, 'justify': 'center',
                                        'align': 'start'}}),
-            ui(f'{ident}-name', text_column, ['craft-name'], **words(name, 98)),
-            ui(f'{ident}-cost', text_column, ['craft-cost'], **words(cost, 98)),
-            ui(f'{ident}-key', ident, ['craft-key'], 0.05, 0.05, **words(key, 98)),
+            ui(f'{ident}-name', text_column, ['craft-name'], **words(name, 114)),
+            ui(f'{ident}-blurb', text_column, ['craft-blurb'], **words(blurb, 114)),
+            ui(f'{ident}-cost', text_column, ['craft-cost'], **words(cost, 114)),
+            ui(f'{ident}-key', ident, ['craft-key'], 0.05, 0.05, **words(key, 114)),
         ]
+    out.append(ui('pack-hint', None, ['pack-hint'], **words('Tab closes the pack', 112)))
+    # Choosing where a thing goes: what it is, and set it down or think better of it.
+    out += [
+        ui('place-bar', None, ['place-bar'], 1.2, 0.18, **framed(105, 'row')),
+        ui('place-what', 'place-bar', ['place-what'], **words('Campfire', 107)),
+        ui('place-confirm', 'place-bar', ['place-button'], 0.33, 0.11, **panel(106, 'row'), **button('Place')),
+        ui('place-confirm-label', 'place-confirm', ['place-label'], **words('Place', 107)),
+        ui('place-cancel', 'place-bar', ['place-button', 'quiet'], 0.33, 0.11, **panel(106, 'row'),
+           **button('Cancel')),
+        ui('place-cancel-label', 'place-cancel', ['place-label'], **words('Cancel', 107)),
+    ]
+    # The ghost of what is being placed, standing where it would go.
+    ghost = [1.0, 0.86, 0.62, 0.55]
+    out += [
+        entity('ghost-campfire', 'ghost-campfire', at(0, 0, 0), **{'sindri.sprite': {
+            'texture': 'textures/campfire.png#campfire', 'layer': 4, 'size': [2.0, 2.0], 'tint': ghost,
+            'unlit': True}}),
+        entity('ghost-lamp', 'ghost-lamp', at(0, 0, 0), **{'sindri.sprite': {
+            'texture': 'textures/objects.png#lamp-post-unlit', 'layer': 5, 'size': [4.0, 4.0], 'tint': ghost,
+            'unlit': True}}),
+    ]
     out.append(entity('pack', 'Pack', **{'sindri.script': {
         'source': 'scripts/pack.decay', 'script': 'Pack',
         'properties': {'campfire': 'prefabs/wilds/campfire.prefab', 'lamp': 'prefabs/wilds/lamp.prefab'}}}))
@@ -597,7 +658,8 @@ def wilds():
             'sindri.input.actions': {'actions': input_actions() + [
                 {'name': 'campfire', 'kind': 'button', 'bindings': ['key.F', 'gamepad.north']},
                 {'name': 'lamp', 'kind': 'button', 'bindings': ['key.G', 'gamepad.east']},
-                {'name': 'feed', 'kind': 'button', 'bindings': ['key.R', 'gamepad.right_bumper']}]}}),
+                {'name': 'feed', 'kind': 'button', 'bindings': ['key.R', 'gamepad.right_bumper']},
+                {'name': 'pack', 'kind': 'button', 'bindings': ['key.Tab', 'key.I', 'gamepad.select']}]}}),
         ground(),
     ]
     lamps = [e for n, (x, y) in enumerate(LAMPS, 1) for e in lantern(f'lantern-{n}', x, y)]

@@ -2,13 +2,15 @@
 // good. While it burns its light is a safe pool, as a lit lamp post's is: the
 // gloom will not hunt Wick in it and are driven out of it, and a Seeker cannot
 // find him there (`gloom.decay` and `seeker.decay` read how bright its light is,
-// which is there before this script starts). A campfire fades over its last
-// moments and goes out, and its embers with it.
+// which is there before this script starts). A fire set down kindles: its light
+// grows over `kindle` seconds, and the dark draws back as it does. A campfire
+// fades over its last moments and goes out, and its embers with it.
 script Fire {
     // How bright it burns, and how long; zero burns for good.
     @export let glow: number = 1.8;
     @export let burn_for: number = 90.0;
     @export let fade_for: number = 10.0;
+    @export let kindle: number = 2.5;
 
     var age: number = 0.0;
     var out: bool = false;
@@ -18,6 +20,11 @@ script Fire {
         var left: number = 1.0;
         if this.burn_for > 0.0 {
             left = clamp((this.burn_for - this.age) / this.fade_for, 0.0, 1.0);
+        }
+        // Caught, it takes, and then it burns up.
+        if this.kindle > 0.0 {
+            let caught = clamp(this.age / this.kindle, 0.0, 1.0);
+            left *= caught * caught * (3.0 - 2.0 * caught);
         }
         // A flame is never still.
         let flicker = 0.08 * sin(this.age * 9.0) + 0.05 * sin(this.age * 23.0);
