@@ -1,13 +1,22 @@
-// The diver in zero gravity: six degrees of freedom, real momentum, handholds.
+// The diver: walking aboard the ship, floating outside it.
 //
-// The diver's body is a sphere that physics moves but never turns. Which way
-// they face is the Eye's (the camera under the body), kept as a quaternion and
-// turned about its own axes, so there is no "up" outside a gravity field and
-// looking past straight up never flips the view.
+// The diver's body is an upright capsule that physics moves but never turns.
+// Which way they face is the Eye's (the camera under the body), kept as a
+// quaternion. Inside the ship's hull its gravity holds: the diver walks, and
+// the view rights itself and keeps the deck below. Outside there is no up: the
+// view turns about its own axes, so looking past straight up never flips it,
+// and the diver moves by thrusters, handholds and momentum. The same body does
+// both, so stepping through the outer door is the whole change.
 //
-// Controls:
+// The suit carries oxygen and power. Both drain in vacuum and refill in the
+// ship's air; out of air, the diver blacks out and wakes in the cabin.
+//
+// Controls, aboard:
 //   mouse            look (click to capture the cursor)
-//   Q / E            roll
+//   W / S, A / D     walk; Space jumps
+//   E                at an airlock panel, cycle the airlock
+// Outside:
+//   Q / E            roll (E works the airlock at a panel)
 //   W / S, A / D     thrust forward/back, left/right
 //   Space / C        thrust up/down (Space pushes off while holding on)
 //   X                brake: thrust against the drift
@@ -22,6 +31,29 @@ fn qmul(a: Quat, b: Quat) -> Quat {
         z: a.w * b.z + a.x * b.y - a.y * b.x + a.z * b.w,
         w: a.w * b.w - a.x * b.x - a.y * b.y - a.z * b.z,
     );
+}
+
+// Partway from a to b, the short way round; the transform normalizes it.
+fn qblend(a: Quat, b: Quat, t: number) -> Quat {
+    var sign = 1.0;
+    if a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w < 0.0 {
+        sign = -1.0;
+    }
+    return Quat(
+        x: a.x + (b.x * sign - a.x) * t,
+        y: a.y + (b.y * sign - a.y) * t,
+        z: a.z + (b.z * sign - a.z) * t,
+        w: a.w + (b.w * sign - a.w) * t,
+    );
+}
+
+// Whether a point is inside a zone: an entity whose scale is its box.
+fn inside(zone: Entity, point: Vec3) -> bool {
+    let centre = zone.transform.world_position;
+    let half = zone.transform.scale * 0.5;
+    return abs(point.x - centre.x) <= half.x
+        && abs(point.y - centre.y) <= half.y
+        && abs(point.z - centre.z) <= half.z;
 }
 
 // A turn of `angle` radians about a unit axis.
@@ -42,6 +74,17 @@ script Diver {
     @export let roll_speed: number = 1.6;
     // Propellant, as a percentage of a full tank, and how fast thrusting burns it.
     @export let burn_rate: number = 4.0;
+    // Aboard: walking speed in m/s, how fast feet take it up, jump speed, gravity.
+    @export let walk_speed: number = 2.6;
+    @export let footing: number = 12.0;
+    @export let jump_speed: number = 3.2;
+    @export let gravity: number = 9.81;
+    // Suit oxygen and power use in vacuum, and refill aboard, in % per second.
+    @export let breathe_rate: number = 0.8;
+    @export let power_rate: number = 0.3;
+    @export let refill_rate: number = 12.0;
+    // How near an airlock panel a hand must be to work it.
+    @export let panel_reach: number = 1.6;
 
     var propellant: number = 100.0;
     var eye: Entity = null;
@@ -52,29 +95,71 @@ script Diver {
     var anchor: Vec3 = Vec3(0.0, 0.0, 0.0);
     var warned_low: bool = false;
     var warned_empty: bool = false;
+    var oxygen: number = 100.0;
+    var power: number = 100.0;
+    var warned_air: bool = false;
+    var spawn: Vec3 = Vec3(0.0, 0.0, 0.0);
+    // Aboard, the view is a heading and a tilt, kept upright.
+    var yaw: number = 0.0;
+    var pitch: number = 0.0;
+    var aboard: bool = true;
 
     fn start() {
         this.eye = World.find("Eye");
-        // The diver wakes holding the aft handhold.
-        grab(World.find("StartHold"));
-        print("Drift: floating in the hold");
+        // Where the diver wakes after a blackout: by the bunk, whatever the start.
+        this.spawn = World.find("Spawn").transform.world_position;
+        place();
+        if this.aboard {
+            print("Drift: awake in the cabin");
+        } else {
+            print("Drift: floating in the hold");
+            // Starting by the aft handhold, the diver is already holding on.
+            let start = World.find("StartHold");
+            if start.transform.world_position.distance(this.eye.transform.world_position) <= this.reach {
+                grab(start);
+            }
+        }
+        upright_from_view();
     }
 
     fn update(dt: number) {
         if Pointer.just_pressed("Left") && !Pointer.locked {
             Pointer.lock();
         }
-        look(dt);
+        let was_aboard = this.aboard;
+        place();
+        if this.aboard && !was_aboard {
+            upright_from_view();
+            this.hold = null;
+            print("Drift: gravity");
+        }
+        if !this.aboard && was_aboard {
+            // Feet leave the deck with the walk's speed, not the push of the
+            // floor holding them up against gravity a moment ago.
+            var velocity = Physics3d.velocity(this.entity);
+            if abs(velocity.y) < 1.0 {
+                velocity.y = 0.0;
+                Physics3d.set_velocity(this.entity, velocity);
+            }
+            print("Drift: weightless");
+        }
         let reached = nearest_hold();
-        if this.hold != null {
-            holding(reached);
+        if this.aboard {
+            look_upright(dt);
+            walk(dt);
         } else {
-            if wants_hold() && reached != null {
-                grab(reached);
+            look(dt);
+            if this.hold != null {
+                holding(reached);
             } else {
-                fly(dt);
+                if wants_hold() && reached != null {
+                    grab(reached);
+                } else {
+                    fly(dt);
+                }
             }
         }
+        suit(dt);
         if this.left_behind != null && this.left_behind != reached {
             let away = this.left_behind.transform.world_position - this.eye.transform.world_position;
             if away.length > this.reach * 1.5 {
@@ -98,11 +183,110 @@ script Diver {
         if delta.y != 0.0 {
             turn = qmul(turn, qturn(1.0, 0.0, 0.0, -delta.y * this.look_speed));
         }
-        let roll = Input.Keyboard.axis("E", "Q");
+        var roll = Input.Keyboard.axis("E", "Q");
+        // At an airlock panel, E works the airlock rather than rolling.
+        if at_panel() && Input.Keyboard.is_down("E") {
+            roll = 0.0;
+        }
         if roll != 0.0 {
             turn = qmul(turn, qturn(0.0, 0.0, 1.0, roll * this.roll_speed * dt));
         }
         this.eye.transform.rotation = turn;
+    }
+
+    // Where the diver is: in the ship's gravity, and in its air.
+    fn place() {
+        let at = this.transform.world_position;
+        let in_cabin = inside(World.find("CabinZone"), at);
+        let in_chamber = inside(World.find("ChamberZone"), at);
+        this.aboard = in_cabin || in_chamber;
+        Ship.in_gravity = this.aboard;
+        Ship.pressurized = in_cabin || in_chamber && Ship.chamber_pressure > 0.5;
+    }
+
+    fn at_panel() -> bool {
+        let hand = this.eye.transform.world_position;
+        return World.within_radius("airlock-panel", hand, this.panel_reach).len > 0;
+    }
+
+    // The heading and tilt that keep the present view, with the deck below.
+    fn upright_from_view() {
+        let f = this.eye.transform.forward;
+        this.yaw = atan2(-f.x, -f.z);
+        this.pitch = atan2(f.y, sqrt(f.x * f.x + f.z * f.z));
+    }
+
+    // Aboard, the mouse turns the heading about the ship's up and tilts the
+    // view, which rights itself over a moment after coming in from outside.
+    fn look_upright(dt: number) {
+        let delta = Pointer.delta;
+        this.yaw -= delta.x * this.look_speed;
+        this.pitch = clamp(this.pitch - delta.y * this.look_speed, -1.45, 1.45);
+        let upright = qmul(qturn(0.0, 1.0, 0.0, this.yaw), qturn(1.0, 0.0, 0.0, this.pitch));
+        let settle = 1.0 - exp(-10.0 * dt);
+        this.eye.transform.rotation = qblend(this.eye.transform.rotation, upright, settle);
+    }
+
+    // Aboard: feet on the deck, gravity down, walking where the view faces.
+    fn walk(dt: number) {
+        var velocity = Physics3d.velocity(this.entity);
+        let down = Vec3(0.0, -1.0, 0.0);
+        let ground = Physics3d.raycast(this.transform.world_position, down, 0.86, 1, false, this.entity);
+        let grounded = ground != null;
+        var forward = Vec3(-sin(this.yaw), 0.0, -cos(this.yaw));
+        var right = Vec3(cos(this.yaw), 0.0, -sin(this.yaw));
+        var wanted = forward * Input.Keyboard.axis("S", "W") + right * Input.Keyboard.axis("A", "D");
+        if wanted.length > 0.001 {
+            wanted = wanted.normalized * this.walk_speed;
+        }
+        var grip = 1.5;
+        if grounded {
+            grip = this.footing;
+        }
+        let take = min(1.0, grip * dt);
+        velocity.x += (wanted.x - velocity.x) * take;
+        velocity.z += (wanted.z - velocity.z) * take;
+        velocity.y -= this.gravity * dt;
+        if grounded && Input.Keyboard.just_pressed("Space") {
+            velocity.y = this.jump_speed;
+        }
+        Physics3d.set_velocity(this.entity, velocity);
+    }
+
+    // The suit: air and power run down in vacuum and fill up in the ship's air.
+    fn suit(dt: number) {
+        if Ship.pressurized {
+            this.oxygen = min(100.0, this.oxygen + this.refill_rate * dt);
+            this.power = min(100.0, this.power + this.refill_rate * dt);
+            this.propellant = min(100.0, this.propellant + this.refill_rate * dt);
+            this.warned_air = false;
+            this.warned_low = false;
+            this.warned_empty = false;
+        } else {
+            this.oxygen = max(0.0, this.oxygen - this.breathe_rate * dt);
+            this.power = max(0.0, this.power - this.power_rate * dt);
+        }
+        World.find("HelmetLamp").light.enabled = this.power > 0.0;
+        if this.oxygen < 25.0 && !this.warned_air {
+            this.warned_air = true;
+            print("Drift: oxygen low");
+        }
+        if this.oxygen <= 0.0 {
+            blackout();
+        }
+    }
+
+    // Out of air: the diver blacks out and wakes in the cabin, the suit refilled.
+    fn blackout() {
+        print("Drift: out of air");
+        this.hold = null;
+        this.transform.world_position = this.spawn;
+        Physics3d.set_velocity(this.entity, Vec3(0.0, 0.0, 0.0));
+        this.oxygen = 100.0;
+        this.power = 100.0;
+        this.warned_air = false;
+        this.aboard = true;
+        upright_from_view();
     }
 
     fn wants_hold() -> bool {
@@ -194,10 +378,20 @@ script Diver {
 
     fn hud(reached: Entity?) {
         Ui.set_number(World.find("hud-propellant"), round(this.propellant));
+        Ui.set_number(World.find("hud-oxygen"), round(this.oxygen));
+        Ui.set_number(World.find("hud-power"), round(this.power));
+        let alert = World.find("hud-alert");
+        if this.oxygen < 25.0 {
+            Ui.set_text(alert, "OXYGEN LOW");
+        } else {
+            Ui.set_text(alert, "");
+        }
         let speed = Physics3d.velocity(this.entity).length;
         Ui.set_number(World.find("hud-velocity"), round(speed * 10.0) / 10.0);
         let prompt = World.find("hud-prompt");
-        if this.hold != null {
+        if at_panel() {
+            Ui.set_text(prompt, "E  cycle airlock");
+        } else if this.hold != null {
             Ui.set_text(prompt, "SPACE  push off");
         } else {
             if reached != null {

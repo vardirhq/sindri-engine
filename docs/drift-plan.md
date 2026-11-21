@@ -206,10 +206,30 @@ says what is now true.
    contract), and a chain of light links needs an absorber to feel like webbing
    rather than elastic. Still to come: portable anchors that re-root the line,
    longer tethers as upgrades, a tug sound and jolt, and a person flying it.
-3. **The airlock.** The *Tern*'s interior with gravity and the grounded walker,
-   an airlock that cycles, and the handover to zero-g outside (gap 3). Oxygen,
-   suit power and propellant in Decay, with a HUD in Weave. A test walks into the
-   airlock, cycles it, floats out, returns and cycles back in.
+3. **The airlock.** *Started.* The *Tern* now has a cabin and an airlock
+   chamber aft of the hold (`art/hold.py`), and the hold is the outside: vacuum
+   and no gravity. The diver wakes standing by the bunk. Aboard, the ship's
+   gravity holds: the diver walks (W/S, A/D, Space to jump) and the view keeps
+   the deck below, righting itself over a moment on coming in from outside.
+   Outside, the view turns about its own axes as before. The airlock
+   (`scripts/airlock.decay`) has two sliding pressure doors and is only ever
+   open to one side: E at any of its three panels closes the open door, pumps
+   the chamber down or up over three seconds and opens the other, with its lamp
+   green, amber or red for the pressure. The suit carries oxygen and power that
+   drain in vacuum and refill in the ship's air, with propellant; out of air,
+   the diver blacks out and wakes in the cabin. The HUD shows all three and the
+   airlock's cycle. The tether now starts unclipped at the aft handhold, just
+   outside the outer door. `tests/airlock.rs` walks from the cabin into the
+   chamber, cycles out, steps out weightless and drifts on at walking speed,
+   thrusts back in under gravity and cycles in; checks a cycle waits for each
+   door and the pressure; and runs out of air outside and wakes aboard. Gap 3
+   is answered without engine work: rather than handing over between the
+   kinematic character controller and a dynamic body, the diver is one dynamic
+   body throughout, and the ship's gravity, footing and walking are the diver
+   script's inside the hull. Stepping through the outer door is then the whole
+   change, momentum and all. Still to come: a door that will not close on the
+   diver, sound (the hiss of the pump, footsteps, breath), and a person
+   walking it.
 4. **The wreckage.** A small field of derelict and debris outside, built from
    repeated GLBs with instancing and culling (gap 4). Salvageable objects to
    find, pick up and carry back; convex-hull props that tumble when struck.

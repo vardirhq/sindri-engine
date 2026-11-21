@@ -7,7 +7,7 @@ use sindri_platform::Key;
 
 #[test]
 fn a_push_off_crosses_the_hold_to_the_far_handhold() {
-    let mut game = Run::open().expect("DRIFT opens");
+    let mut game = Run::open_in_hold().expect("DRIFT opens");
     game.wait(0.5);
     assert!(
         game.has_said("Drift: floating in the hold"),
@@ -36,7 +36,7 @@ fn a_push_off_crosses_the_hold_to_the_far_handhold() {
         "momentum carries the diver down the hold: {held:?} {drifting:?}"
     );
     assert!(
-        drifting[1].abs() < 0.05 && drifting[2].abs() < 0.05,
+        (drifting[1] - held[1]).abs() < 0.05 && (drifting[2] - held[2]).abs() < 0.05,
         "nothing pulls the diver off the line in zero gravity: {drifting:?}"
     );
     assert!(
@@ -65,7 +65,7 @@ fn a_push_off_crosses_the_hold_to_the_far_handhold() {
 
 #[test]
 fn thrusters_burn_propellant_and_momentum_stays_after_they_stop() {
-    let mut game = Run::open().expect("DRIFT opens");
+    let mut game = Run::open_in_hold().expect("DRIFT opens");
     game.wait(0.2);
     game.tap(Key::Space);
     game.wait(0.2);

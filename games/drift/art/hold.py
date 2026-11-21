@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Builds `assets/hold.scene` and its textures: the *Tern*'s cargo hold.
+"""Builds `assets/hold.scene` and its textures: the *Tern*, cabin, airlock and hold.
+
+Stage 3 adds the cabin and the airlock chamber aft of the hold; the hold
+itself stays as stage 1 left it, and is now the outside.
+
 
 Stage 1 of `docs/drift-plan.md`, "Floating". A long box of a room in zero
 gravity, lit by a few work lamps and one red emergency light, with yellow
@@ -79,6 +83,18 @@ def line_texture(path: Path) -> None:
     draw = ImageDraw.Draw(image)
     for y in range(0, size, 4):
         draw.line([(0, y), (size, y)], fill=(200, 80, 20))
+    image.save(path, optimize=True)
+
+
+def door_texture(path: Path) -> None:
+    """A pressure door: dark plate with a yellow-and-black edge and a window slot."""
+    size = 128
+    image = Image.new("RGB", (size, size), (70, 76, 84))
+    draw = ImageDraw.Draw(image)
+    for offset in range(-size, size * 2, 20):
+        draw.polygon([(offset, 0), (offset + 10, 0), (offset + 10 - 12, 12), (offset - 12, 12)], fill=(220, 170, 30))
+        draw.polygon([(offset, size - 12), (offset + 10, size - 12), (offset - 2, size), (offset - 12, size)], fill=(220, 170, 30))
+    draw.rectangle([44, 30, 84, 46], fill=(20, 26, 34))
     image.save(path, optimize=True)
 
 
@@ -269,7 +285,8 @@ def tether(anchor, diver):
         )
         out.append(link)
     for i in range(TETHER_LINKS + 1):
-        joint = {"first": names[i], "second": names[i + 1], "enabled": True,
+        # The diver's end starts unclipped: they clip on at the loose end.
+        joint = {"first": names[i], "second": names[i + 1], "enabled": i < TETHER_LINKS,
                  "max_distance": round(segment, 4), "first_anchor": [0, 0, 0], "second_anchor": [0, 0, 0]}
         out.append({"id": f"tether-joint-{i}", "name": f"tether-joint-{i}", "parent": "tether",
                     "components": {"sindri.physics3d.distance_joint": joint,
@@ -279,6 +296,144 @@ def tether(anchor, diver):
             **{"sindri.mesh": {"primitive": "cube", "texture": "textures/line.png"},
                "sindri.tags": {"tags": ["tether-strand"]}},
         ))
+    return out
+
+
+# The ship aft of the hold, inside its walls. The hold is outside: vacuum and
+# no gravity. The airlock chamber joins it to the cabin, where the ship's
+# gravity holds. Every door is the same opening: across z, up from the deck.
+DOOR_Z = (0.9, 2.1)
+DOOR_TOP = -0.5
+DECK = -2.5
+CHAMBER = ((-9.6, DECK, 0.6), (-7.4, -0.1, 2.4))
+CABIN = ((-16.0, DECK, -1.0), (-10.0, 0.1, 2.4))
+# The diver's capsule is 1.6 m tall; the eye sits 0.6 m above its middle.
+EYE_HEIGHT = 0.6
+SPAWN = (-14.2, DECK + 0.82, sum(DOOR_Z) / 2)
+# Where a test puts the diver to start at the aft handhold, eye level with it.
+HOLD_START = (-6.3, -EYE_HEIGHT, 0.0)
+
+
+def slab(id_, lo, hi):
+    """A solid plated box from its two corners."""
+    centre = tuple((a + b) / 2 for a, b in zip(lo, hi))
+    size = tuple(b - a for a, b in zip(lo, hi))
+    return wall(id_, centre, size)
+
+
+def wall_with_door(id_, lo, hi):
+    """A wall across x with the door opening cut out of it."""
+    (x0, y0, z0), (x1, y1, z1) = lo, hi
+    pieces = []
+    pieces += slab(f"{id_}-port", (x0, y0, z0), (x1, y1, DOOR_Z[0]))
+    pieces += slab(f"{id_}-starboard", (x0, y0, DOOR_Z[1]), (x1, y1, z1))
+    pieces += slab(f"{id_}-lintel", (x0, DOOR_TOP, DOOR_Z[0]), (x1, y1, DOOR_Z[1]))
+    if y0 < DECK:
+        pieces += slab(f"{id_}-sill", (x0, y0, DOOR_Z[0]), (x1, DECK, DOOR_Z[1]))
+    return pieces
+
+
+def zone(id_, bounds):
+    """An invisible box the scripts ask whether the diver is inside."""
+    lo, hi = bounds
+    centre = tuple((a + b) / 2 for a, b in zip(lo, hi))
+    size = tuple(b - a for a, b in zip(lo, hi))
+    return entity(id_, position=centre, scale=size, **{"sindri.tags": {"tags": ["zone"]}})
+
+
+def door(id_, x):
+    """A sliding pressure door filling the opening at `x`; scripts move it."""
+    return entity(
+        id_, position=(x, (DECK + DOOR_TOP) / 2, sum(DOOR_Z) / 2),
+        scale=(0.15, DOOR_TOP - DECK, DOOR_Z[1] - DOOR_Z[0]),
+        **{
+            "sindri.mesh": {"primitive": "cube", "texture": "textures/door.png"},
+            "sindri.material": {"base_color": [1, 1, 1, 1], "metallic": 0.4, "roughness": 0.5, "override_factors": True},
+            "sindri.physics3d.collider": {"pieces": [box_piece()]},
+        },
+    )
+
+
+def panel(id_, position):
+    """An airlock control: a lit plate the diver presses E at."""
+    return entity(
+        id_, position=position, scale=(0.08, 0.3, 0.22),
+        **{
+            "sindri.mesh": {"primitive": "cube", "texture": "textures/panel.png"},
+            "sindri.material": {"base_color": [0.15, 0.2, 0.18, 1], "emissive": [0.2, 0.9, 0.5],
+                                "override_factors": True},
+            "sindri.tags": {"tags": ["airlock-panel"]},
+        },
+    )
+
+
+def furniture(id_, lo, hi, color, emissive=(0, 0, 0)):
+    """A solid piece of the cabin's fittings."""
+    centre = tuple((a + b) / 2 for a, b in zip(lo, hi))
+    size = tuple(b - a for a, b in zip(lo, hi))
+    return entity(
+        id_, position=centre, scale=size,
+        **{
+            "sindri.mesh": {"primitive": "cube", "texture": "textures/panel.png"},
+            "sindri.material": {"base_color": [*color, 1.0], "emissive": list(emissive),
+                                "metallic": 0.2, "roughness": 0.7, "override_factors": True},
+            "sindri.physics3d.collider": {"pieces": [box_piece()]},
+        },
+    )
+
+
+def ship():
+    """The cabin and the airlock chamber, aft of the hold."""
+    out = []
+    w = WALL
+    (cx0, cy0, cz0), (cx1, cy1, cz1) = CHAMBER
+    # The chamber: deck, overhead and two side walls; the bulkheads close its ends.
+    out += slab("chamber-deck", (cx0, cy0 - w, cz0 - w), (cx1, cy0, cz1 + w))
+    out += slab("chamber-overhead", (cx0, cy1, cz0 - w), (cx1, cy1 + w, cz1 + w))
+    out += slab("chamber-port", (cx0, cy0, cz0 - w), (cx1, cy1, cz0))
+    out += slab("chamber-starboard", (cx0, cy0, cz1), (cx1, cy1, cz1 + w))
+    (kx0, ky0, kz0), (kx1, ky1, kz1) = CABIN
+    # The inner bulkhead between cabin and chamber, with the inner door through it.
+    out += wall_with_door("inner-bulkhead", (kx1, ky0 - w, kz0 - w), (cx0, ky1 + w, kz1 + w))
+    # The cabin: deck, overhead, both sides and the aft wall.
+    out += slab("cabin-deck", (kx0 - w, ky0 - w, kz0 - w), (kx1, ky0, kz1 + w))
+    out += slab("cabin-overhead", (kx0 - w, ky1, kz0 - w), (kx1, ky1 + w, kz1 + w))
+    out += slab("cabin-port", (kx0 - w, ky0, kz0 - w), (kx1, ky1, kz0))
+    out += slab("cabin-starboard", (kx0 - w, ky0, kz1), (kx1, ky1, kz1 + w))
+    out += slab("cabin-aft", (kx0 - w, ky0 - w, kz0 - w), (kx0, ky1 + w, kz1 + w))
+    # Fittings: a bunk along the port side, a console and the oxygen recycler.
+    out += [
+        furniture("bunk", (kx0, DECK, kz0), (kx0 + 2.0, DECK + 0.55, kz0 + 0.8), (0.35, 0.4, 0.5)),
+        furniture("console", (kx0 + 3.5, DECK, kz0), (kx0 + 4.7, DECK + 1.0, kz0 + 0.6),
+                  (0.25, 0.28, 0.3), (0.05, 0.25, 0.35)),
+        furniture("recycler", (kx0, DECK, kz1 - 0.9), (kx0 + 0.9, DECK + 1.8, kz1),
+                  (0.4, 0.42, 0.38), (0.4, 0.08, 0.02)),
+    ]
+    out[-1]["name"] = "Recycler"
+    # Doors, the airlock and its controls: one in the chamber and one by each door.
+    out += [
+        door("inner-door", (kx1 + cx0) / 2),
+        door("outer-door", cx1 + w / 2),
+        entity("airlock", "Airlock", **{
+            "sindri.script": {"source": "scripts/airlock.decay", "script": "Airlock"}}),
+        panel("airlock-panel", ((cx0 + cx1) / 2, -1.1, cz1 - 0.05)),
+        panel("cabin-panel", (kx1 - 0.05, -1.1, DOOR_Z[1] + 0.3)),
+        panel("hold-panel", (cx1 + w + 0.05, -1.1, DOOR_Z[0] - 0.3)),
+        zone("cabin-zone", CABIN),
+        # The chamber's air and gravity reach through the inner doorway to the
+        # cabin's, so walking between them never passes through neither.
+        zone("chamber-zone", ((CABIN[1][0], CHAMBER[0][1], CHAMBER[0][2]), CHAMBER[1])),
+        entity("spawn", "Spawn", position=SPAWN),
+    ]
+    out[-3]["name"] = "CabinZone"
+    out[-2]["name"] = "ChamberZone"
+    # Light: warm in the cabin; the chamber's lamp shows its pressure.
+    out += [
+        lamp("cabin-lamp-0", (kx0 + 1.5, ky1 - 0.05, (kz0 + kz1) / 2), (1.0, 0.8, 0.6), 1.2, 5.0),
+        lamp("cabin-lamp-1", (kx1 - 1.5, ky1 - 0.05, (kz0 + kz1) / 2), (1.0, 0.8, 0.6), 1.2, 5.0),
+        lamp("airlock-lamp", ((cx0 + cx1) / 2, cy1 - 0.05, (cz0 + cz1) / 2), (0.3, 1.0, 0.45), 1.2, 3.5),
+    ]
+    out[-1]["name"] = "AirlockLamp"
     return out
 
 
@@ -302,7 +457,9 @@ def scene():
                **{"sindri.light": {"kind": "directional", "color": [0.7, 0.78, 1.0], "intensity": 0.15}}),
     ]
     # The hold's six walls.
-    entities += wall("aft-bulkhead", (-half_l - t, 0, 0), (WALL, outer_h, outer_w))
+    # The aft bulkhead, with the airlock's outer door through it.
+    entities += wall_with_door("aft-bulkhead", (-half_l - WALL, -half_h - WALL, -half_w - WALL),
+                               (-half_l, half_h + WALL, half_w + WALL))
     entities += wall("forward-bulkhead", (half_l + t, 0, 0), (WALL, outer_h, outer_w))
     entities += wall("deck", (0, -half_h - t, 0), (outer_l, WALL, outer_w))
     entities += wall("overhead", (0, half_h + t, 0), (outer_l, WALL, outer_w))
@@ -330,13 +487,15 @@ def scene():
         entities.append(lamp(f"lamp-{i}", (x, half_h - 0.05, 0), (1.0, 0.86, 0.66), 1.4, 7.0))
     entities.append(lamp("emergency", (half_l - 0.05, 1.8, 0), (1.0, 0.12, 0.08), 1.6, 6.0))
     entities[-1]["transform_3d"]["scale"] = [0.08, 0.3, 0.5]
-    # The diver: a dynamic sphere that physics never turns, with the eye under it
-    # carrying the camera and the helmet lamp. Turning is the eye's.
+    entities += ship()
+    # The diver: a dynamic upright capsule that physics never turns, with the
+    # eye under it carrying the camera and the helmet lamp. Turning is the
+    # eye's. They wake in the cabin, standing by the bunk.
     diver = entity(
-        "diver", "Diver", position=(-half_l + 0.7, 0, 0),
+        "diver", "Diver", position=SPAWN,
         **{
             "sindri.physics3d.collider": {"pieces": [{
-                "shape": {"shape": "sphere", "radius": 0.35},
+                "shape": {"shape": "capsule", "half_height": 0.5, "radius": 0.3},
                 "offset": [0, 0, 0], "rotation": [0, 0, 0, 1], "sensor": False,
                 "layers": DIVER, "friction": 0.4, "restitution": 0.15,
             }]},
@@ -345,7 +504,7 @@ def scene():
         },
     )
     eye = entity(
-        "eye", "Eye", parent="diver", rotation=yaw_quat(-math.pi / 2),
+        "eye", "Eye", parent="diver", position=(0, EYE_HEIGHT, 0), rotation=yaw_quat(-math.pi / 2),
         **{"sindri.camera": {"projection": "perspective", "vertical_fov_degrees": 72, "near": 0.05, "far": 120}},
     )
     helmet = entity(
@@ -372,8 +531,12 @@ def scene():
         text("hud-prompt", (0, -0.2, 0), "", 0.035, (1.0, 0.85, 0.3, 1.0)),
         text("hud-tether", (0, -0.88, 0), "TETHER {} / {} M", 0.04),
         text("hud-tether-state", (0, -0.78, 0), "", 0.035, (1.0, 0.55, 0.25, 1.0)),
+        text("hud-oxygen", (-1.25, -0.68, 0), "O2 {}%", 0.04),
+        text("hud-power", (-1.25, -0.78, 0), "SUIT {}%", 0.04),
+        text("hud-alert", (0, 0.3, 0), "", 0.05, (1.0, 0.3, 0.2, 1.0)),
+        text("hud-airlock", (1.25, -0.78, 0), "", 0.035, (0.6, 1.0, 0.7, 1.0)),
     ]
-    return {"format_version": 10, "metadata": {"name": "The Hold"}, "entities": entities}
+    return {"format_version": 10, "metadata": {"name": "The Tern"}, "entities": entities}
 
 
 def main():
@@ -382,6 +545,7 @@ def main():
     grip_texture(ASSETS / "textures" / "grip.png")
     crate_texture(ASSETS / "textures" / "crate.png")
     line_texture(ASSETS / "textures" / "line.png")
+    door_texture(ASSETS / "textures" / "door.png")
     (ASSETS / "hold.scene").write_text(json.dumps(scene(), indent=2) + "\n")
 
 

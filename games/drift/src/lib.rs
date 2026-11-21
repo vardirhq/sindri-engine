@@ -15,6 +15,10 @@ pub fn project() -> PathBuf {
     Path::new(env!("CARGO_MANIFEST_DIR")).to_path_buf()
 }
 
+/// Where `open_in_hold` puts the diver: eye level with the aft handhold.
+/// `art/hold.py` names the same place `HOLD_START`.
+pub const HOLD_START: [f32; 3] = [-6.3, -0.6, 0.0];
+
 /// How many fixed steps make up about `seconds` of game time.
 fn steps(seconds: f32) -> u32 {
     let count = (seconds.max(0.0) / STEP).ceil();
@@ -43,6 +47,27 @@ impl Run {
             run: Box::new(run),
             said: Vec::new(),
         })
+    }
+
+    /// Opens the project with the diver by the aft handhold in the hold,
+    /// rather than waking in the cabin: where the floating and tether tests
+    /// start. The diver holds on and clips on there, as at any loose end.
+    ///
+    /// # Errors
+    /// As [`Run::open`].
+    ///
+    /// # Panics
+    /// If the scene has no diver.
+    pub fn open_in_hold() -> Result<Self, String> {
+        let mut game = Self::open()?;
+        let diver = game.run.entity("diver").expect("the scene has a diver");
+        game.run
+            .world
+            .get_mut(diver)
+            .and_then(|data| data.transform_3d.as_mut())
+            .expect("the diver has a transform")
+            .position = HOLD_START;
+        Ok(game)
     }
 
     /// One fixed step.

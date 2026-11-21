@@ -2,6 +2,8 @@
 
 # Changelog
 
+- DRIFT stage 3, the airlock: the *Tern* gains a cabin and an airlock chamber aft of the hold, which is now the outside. The diver wakes in the cabin and walks under the ship's gravity, with a view that keeps the deck below; through the airlock they step out weightless, carrying their walking speed on as drift. The airlock is only ever open to one side: E at a panel closes one door, pumps the chamber over three seconds and opens the other. The suit's oxygen and power drain in vacuum and refill aboard; out of air, the diver wakes in the cabin.
+
 - 3D distance joints. `sindri.physics3d.distance_joint` ties body-local anchors on two 3D bodies with a rope that slackens but never stretches past its length, owned by its own entity like the 2D distance joint: unchanged frames keep the constraint, length edits retune it in place, missing or inactive endpoints suspend it, and an invalid length fails the step before anything moves. `Physics3d.set_distance`, `Physics3d.set_joint_enabled` and `Physics3d.joint_enabled` drive it from Decay.
 
 - DRIFT stage 2, the tether: a line of sixteen links on those joints from the aft handhold to the diver. It goes taut at 10 m and holds them there with a tug rather than a bounce, catches on a new stanchion and draws the diver round it, reels in on R and unclips and clips back on with U. The HUD shows how much line is out and when it is taut.

@@ -1,0 +1,10 @@
+// What the ship's scripts share: the airlock's pressure, and where the diver
+// is. The airlock writes the pressure; the diver writes where they are.
+state Ship {
+    // The airlock chamber's pressure: 1 is the cabin's, 0 is vacuum.
+    var chamber_pressure: number = 1.0;
+    // Whether the diver is in the ship's gravity, and whether they breathe
+    // the ship's air.
+    var in_gravity: bool = true;
+    var pressurized: bool = true;
+}
