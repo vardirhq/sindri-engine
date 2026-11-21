@@ -46,6 +46,8 @@ Each entry links its tests and the projects that exercise it. Surface marks matc
 | [Voxel ambient occlusion / contact depth](#voxel-ao) | 🟡 | 🟡 | ❌ | 🟡 |
 | [Post-processing stack](#post-processing) | 🟡 | 🟡 | ✅ | ✅ |
 | [Authored fog/AO/post stack in shipped project hosts](#project-host-fog-post) | ✅ | — | ✅ | ✅ |
+| **3D** | | | | |
+| [3D view culling](#view-culling-3d) | 🟡 | — | — | ✅ |
 | **3D models** | | | | |
 | [glTF / model import](#glb-models) | 🟡 | ❌ | ❌ | ✅ |
 | **Not yet** | | | | |
@@ -939,6 +941,46 @@ beacon this way. Decay reaches the same settings while a game runs:
 `this.environment.fog`, `.post_process` and `.bloom` read and write each field,
 checked as the scene's own values are, and Causeway eases every island's fog,
 grade and bloom from one mood to the next, flashing them for lightning.
+
+</details>
+
+## 3D
+
+<a id="view-culling-3d"></a>
+
+### 3D view culling
+
+Cubes and imported models wholly out of the camera's view, and out of the light's shadow view while shadows are on, are not drawn.
+
+Engine 🟡 · Editor — · Decay — · Proof ✅ — parity row *3D view culling*
+
+**Tested by:** [`crates/sindri-scene/tests/extraction/culling.rs`](../../crates/sindri-scene/tests/extraction/culling.rs), [`games/drift/tests/culling.rs`](../../games/drift/tests/culling.rs)
+
+**Exercised in:** [`games/drift`](../../games/drift)
+
+**See:** [`docs/drift-plan.md`](../../docs/drift-plan.md)
+
+**Limits:**
+
+- Frustum culling only: geometry hidden behind walls is still drawn. Surface meshes are not culled, and draws are neither batched nor instanced.
+
+<details markdown="1">
+<summary>Evidence</summary>
+
+At extraction, each cube mesh (the unit box) and each imported model (its
+model-space box, computed once from every vertex in its node placement) is
+placed by its world transform and tested against the world camera's frustum.
+One wholly outside is skipped. While the environment's directional shadows are
+on, the same box is also tested against the light's shadow view, computed by
+the renderer's own `light_view_projection`, so an object out of sight that can
+still cast into the view keeps casting. The test is conservative: a box is
+dropped only when all its corners lie beyond one plane. A frame whose
+environment or light cannot be read culls nothing.
+
+DRIFT is the proof. Its ship and wreckage are 165 drawn pieces; looking out of
+the cargo hatch draws 32 of them, and facing aft in the cabin fewer than a
+quarter. Looking forward down the cabin still draws almost all of them, behind
+the bulkheads, which occlusion culling would answer.
 
 </details>
 

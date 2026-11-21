@@ -2,6 +2,10 @@
 
 # Changelog
 
+- 3D view culling: cube meshes and imported models wholly outside the camera's view are no longer drawn, unless shadows are on and they lie in the light's shadow view, where they may still cast into it. A model's box is worked out once when it loads, from its vertices where its nodes place them, so its geometry decides rather than its origin.
+
+- DRIFT stage 4, the wreckage: the *Tern*'s forward bulkhead is an open cargo hatch onto a derelict survey module, a field of drifting plates and girders that tumble when struck, three salvage canisters and the stars. G takes salvage; it is stowed once the diver is back in the ship's air. Looking out of the hatch draws 32 of the scene's 165 pieces.
+
 - DRIFT stage 3, the airlock: the *Tern* gains a cabin and an airlock chamber aft of the hold, which is now the outside. The diver wakes in the cabin and walks under the ship's gravity, with a view that keeps the deck below; through the airlock they step out weightless, carrying their walking speed on as drift. The airlock is only ever open to one side: E at a panel closes one door, pumps the chamber over three seconds and opens the other. The suit's oxygen and power drain in vacuum and refill aboard; out of air, the diver wakes in the cabin.
 
 - 3D distance joints. `sindri.physics3d.distance_joint` ties body-local anchors on two 3D bodies with a rope that slackens but never stretches past its length, owned by its own entity like the 2D distance joint: unchanged frames keep the constraint, length edits retune it in place, missing or inactive endpoints suspend it, and an invalid length fails the step before anything moves. `Physics3d.set_distance`, `Physics3d.set_joint_enabled` and `Physics3d.joint_enabled` drive it from Decay.

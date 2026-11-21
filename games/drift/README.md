@@ -7,6 +7,11 @@ work; this is a game rather than a showcase (`AGENTS.md`).
 
 ## What plays now
 
+Stage 4, **the wreckage**: past the hold's forward cargo hatch lies a derelict
+module, a field of drifting debris that tumbles when you hit it, three salvage
+canisters and the stars. G takes salvage in reach; it is stowed when you are
+back aboard. The wreck is past the tether's reach: unclip to go.
+
 Stage 3, **the airlock**: you wake in the *Tern*'s cabin under the ship's
 gravity and walk to the airlock. E at a panel cycles it: one door closes, the
 chamber pumps down, the other opens. Past the outer door is the hold, in
@@ -37,6 +42,7 @@ hold at the handhold on the forward bulkhead.
 | Space or left mouse, holding on | Push off the way you look |
 | R (hold) | Reel the tether in; let go and it pays out again |
 | U | Unclip from the tether; near its loose end, clip back on |
+| G | Take the salvage in reach |
 
 Stage 2, **the tether**: a 10 m line of physics links from the aft handhold
 to the diver. It goes taut at its length and holds them there, catches on the
@@ -55,7 +61,8 @@ cargo run -p sindri-player -- games/drift
 
 ## How it is made
 
-There is no game code in Rust. The scene is written by `art/hold.py`, which
+There is no game code in Rust. The wreckage's models are made by
+`art/wreck.py` with the repository's GLB writer. The scene is written by `art/hold.py`, which
 also draws the textures; re-running it changes nothing. The diver is
 `assets/scripts/diver.decay`, the airlock `assets/scripts/airlock.decay`
 (sharing `Ship` in `assets/scripts/ship.decay`), the tether `assets/scripts/tether.decay`
@@ -68,6 +75,8 @@ cargo run --quiet --package decay-lsp -- --check games/drift/assets/scripts/dive
 cargo test -p drift
 ```
 
+`tests/wreckage.rs` takes salvage and stows it, knocks debris away and flies
+into the derelict; `tests/culling.rs` measures what a frame draws.
 `tests/airlock.rs` walks out through the airlock and back, checks a cycle
 waits for each door and the pressure, and runs out of air outside.
 `tests/tether.rs` is stopped by the line, reeled home, caught on the

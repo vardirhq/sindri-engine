@@ -89,7 +89,12 @@ impl ShadowMap {
     }
 }
 
-pub(crate) fn light_view_projection(
+/// The directional light's view of the world for one frame's shadow map:
+/// what the renderer draws shadow casters through, for a camera, light and
+/// shadow settings. A caller deciding what may cast a shadow into the view
+/// tests against this.
+#[must_use]
+pub fn light_view_projection(
     camera_view_projection: Mat4,
     lighting: &WorldLighting,
     settings: ShadowSettings,

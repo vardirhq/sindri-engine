@@ -94,6 +94,8 @@ pub struct ModelData {
 pub struct RenderModel {
     data: ModelData,
     instances: Vec<ModelNodeInstance>,
+    /// Model-space box around every drawn vertex, in each node's placement.
+    bounds: Option<(glam::Vec3, glam::Vec3)>,
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -108,7 +110,21 @@ impl RenderModel {
     pub fn new(data: ModelData) -> Result<Self, ModelRenderError> {
         validate::data(&data)?;
         let instances = validate::hierarchy(&data)?;
-        Ok(Self { data, instances })
+        let bounds = model_bounds(&data, &instances);
+        Ok(Self {
+            data,
+            instances,
+            bounds,
+        })
+    }
+
+    /// The model-space box around everything the model draws, each mesh
+    /// placed by its node exactly as the renderer places it: what a caller
+    /// tests against a view to skip a model nothing of which can be seen.
+    /// `None` for a model with no vertices.
+    #[must_use]
+    pub const fn bounds(&self) -> Option<(glam::Vec3, glam::Vec3)> {
+        self.bounds
     }
 
     pub const fn data(&self) -> &ModelData {
@@ -135,4 +151,24 @@ pub struct ModelCacheStats {
     pub resident_models: usize,
     pub uploads: u64,
     pub draws: u64,
+}
+
+fn model_bounds(
+    data: &ModelData,
+    instances: &[ModelNodeInstance],
+) -> Option<(glam::Vec3, glam::Vec3)> {
+    let mut bounds: Option<(glam::Vec3, glam::Vec3)> = None;
+    for instance in instances {
+        for primitive in &data.meshes[instance.mesh] {
+            for vertex in &primitive.vertices {
+                let point = instance
+                    .transform
+                    .transform_point3(glam::Vec3::from_array(vertex.position));
+                bounds = Some(bounds.map_or((point, point), |(min, max)| {
+                    (min.min(point), max.max(point))
+                }));
+            }
+        }
+    }
+    bounds
 }

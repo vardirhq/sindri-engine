@@ -682,13 +682,13 @@
       }
     },
     {
-      "id": "forward-bulkhead-0-0",
-      "name": "forward-bulkhead-0-0",
+      "id": "forward-bulkhead-port-0-0",
+      "name": "forward-bulkhead-port-0-0",
       "transform_3d": {
         "position": [
           7.2,
           -1.45,
-          -1.45
+          -2.2
         ],
         "rotation": [
           0,
@@ -699,7 +699,7 @@
         "scale": [
           0.4,
           2.9,
-          2.9
+          1.4
         ]
       },
       "components": {
@@ -753,13 +753,84 @@
       }
     },
     {
-      "id": "forward-bulkhead-0-1",
-      "name": "forward-bulkhead-0-1",
+      "id": "forward-bulkhead-port-1-0",
+      "name": "forward-bulkhead-port-1-0",
+      "transform_3d": {
+        "position": [
+          7.2,
+          1.45,
+          -2.2
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.4,
+          2.9,
+          1.4
+        ]
+      },
+      "components": {
+        "sindri.mesh": {
+          "primitive": "cube",
+          "texture": "textures/panel.png"
+        },
+        "sindri.material": {
+          "base_color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallic": 0.3,
+          "roughness": 0.7,
+          "override_factors": true
+        },
+        "sindri.physics3d.collider": {
+          "pieces": [
+            {
+              "shape": {
+                "shape": "box",
+                "half_extents": [
+                  0.5,
+                  0.5,
+                  0.5
+                ]
+              },
+              "offset": [
+                0,
+                0,
+                0
+              ],
+              "rotation": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "sensor": false,
+              "layers": {
+                "memberships": 1,
+                "filter": 4294967295
+              },
+              "friction": 0.6,
+              "restitution": 0.1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "forward-bulkhead-starboard-0-0",
+      "name": "forward-bulkhead-starboard-0-0",
       "transform_3d": {
         "position": [
           7.2,
           -1.45,
-          1.45
+          2.2
         ],
         "rotation": [
           0,
@@ -770,7 +841,7 @@
         "scale": [
           0.4,
           2.9,
-          2.9
+          1.4
         ]
       },
       "components": {
@@ -824,13 +895,13 @@
       }
     },
     {
-      "id": "forward-bulkhead-1-0",
-      "name": "forward-bulkhead-1-0",
+      "id": "forward-bulkhead-starboard-1-0",
+      "name": "forward-bulkhead-starboard-1-0",
       "transform_3d": {
         "position": [
           7.2,
           1.45,
-          -1.45
+          2.2
         ],
         "rotation": [
           0,
@@ -841,7 +912,7 @@
         "scale": [
           0.4,
           2.9,
-          2.9
+          1.4
         ]
       },
       "components": {
@@ -895,13 +966,13 @@
       }
     },
     {
-      "id": "forward-bulkhead-1-1",
-      "name": "forward-bulkhead-1-1",
+      "id": "forward-bulkhead-top-0-0",
+      "name": "forward-bulkhead-top-0-0",
       "transform_3d": {
         "position": [
           7.2,
-          1.45,
-          1.45
+          2.2,
+          0.0
         ],
         "rotation": [
           0,
@@ -911,8 +982,79 @@
         ],
         "scale": [
           0.4,
-          2.9,
-          2.9
+          1.4,
+          3.0
+        ]
+      },
+      "components": {
+        "sindri.mesh": {
+          "primitive": "cube",
+          "texture": "textures/panel.png"
+        },
+        "sindri.material": {
+          "base_color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallic": 0.3,
+          "roughness": 0.7,
+          "override_factors": true
+        },
+        "sindri.physics3d.collider": {
+          "pieces": [
+            {
+              "shape": {
+                "shape": "box",
+                "half_extents": [
+                  0.5,
+                  0.5,
+                  0.5
+                ]
+              },
+              "offset": [
+                0,
+                0,
+                0
+              ],
+              "rotation": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "sensor": false,
+              "layers": {
+                "memberships": 1,
+                "filter": 4294967295
+              },
+              "friction": 0.6,
+              "restitution": 0.1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "forward-bulkhead-bottom-0-0",
+      "name": "forward-bulkhead-bottom-0-0",
+      "transform_3d": {
+        "position": [
+          7.2,
+          -2.2,
+          0.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.4,
+          1.4,
+          3.0
         ]
       },
       "components": {
@@ -4472,7 +4614,7 @@
         "scale": [
           0.12,
           0.12,
-          0.7
+          3.0
         ]
       },
       "components": {
@@ -8549,6 +8691,1934 @@
       }
     },
     {
+      "id": "stars",
+      "name": "stars",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.model": {
+          "asset": "models/stars.glb"
+        }
+      }
+    },
+    {
+      "id": "wreck",
+      "name": "Wreck",
+      "transform_3d": {
+        "position": [
+          24.0,
+          0.5,
+          3.0
+        ],
+        "rotation": [
+          0.0,
+          0.121869,
+          0.0,
+          0.992546
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.model": {
+          "asset": "models/wreck.glb"
+        },
+        "sindri.physics3d.model_collider": {
+          "asset": "models/wreck.glb",
+          "friction": 0.6,
+          "restitution": 0.1,
+          "layers": {
+            "memberships": 1,
+            "filter": 4294967295
+          },
+          "sensor": false
+        }
+      }
+    },
+    {
+      "id": "wreck-lamp",
+      "name": "WreckLamp",
+      "transform_3d": {
+        "position": [
+          24.5,
+          -1.1,
+          3.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.light": {
+          "kind": "point",
+          "color": [
+            1.0,
+            0.2,
+            0.1
+          ],
+          "intensity": 1.6,
+          "range": 7.0
+        }
+      }
+    },
+    {
+      "id": "hatch-lamp",
+      "name": "hatch-lamp",
+      "transform_3d": {
+        "position": [
+          7.0,
+          1.8,
+          0.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.5,
+          0.08,
+          0.3
+        ]
+      },
+      "components": {
+        "sindri.mesh": {
+          "primitive": "cube",
+          "texture": "textures/panel.png"
+        },
+        "sindri.material": {
+          "base_color": [
+            0.2,
+            0.2,
+            0.2,
+            1
+          ],
+          "emissive": [
+            1.7,
+            1.8,
+            2.0
+          ],
+          "override_factors": true
+        },
+        "sindri.light": {
+          "kind": "point",
+          "color": [
+            0.85,
+            0.9,
+            1.0
+          ],
+          "intensity": 1.4,
+          "range": 9.0
+        }
+      }
+    },
+    {
+      "id": "debris-0",
+      "name": "debris-0",
+      "transform_3d": {
+        "position": [
+          34.0465,
+          5.3833,
+          7.1714
+        ],
+        "rotation": [
+          -0.007487,
+          -0.03768,
+          -0.006074,
+          0.999243
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.model": {
+          "asset": "models/girder.glb"
+        },
+        "sindri.physics3d.model_convex_collider": {
+          "asset": "models/girder.glb",
+          "friction": 0.5,
+          "restitution": 0.2,
+          "layers": {
+            "memberships": 1,
+            "filter": 4294967295
+          },
+          "sensor": false
+        },
+        "sindri.physics3d.rigid_body": {
+          "kind": "dynamic",
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotation": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "linear_velocity": [
+            0.003,
+            -0.037,
+            -0.031
+          ],
+          "angular_velocity": [
+            -0.208,
+            0.046,
+            -0.038
+          ],
+          "gravity_scale": 0.0,
+          "linear_damping": 0.0,
+          "angular_damping": 0.0,
+          "lock_rotation": false
+        },
+        "sindri.tags": {
+          "tags": [
+            "debris"
+          ]
+        }
+      }
+    },
+    {
+      "id": "debris-1",
+      "name": "debris-1",
+      "transform_3d": {
+        "position": [
+          23.3285,
+          2.8105,
+          -1.8971
+        ],
+        "rotation": [
+          -0.333605,
+          0.631644,
+          -0.319281,
+          0.62273
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.model": {
+          "asset": "models/plate.glb"
+        },
+        "sindri.physics3d.model_convex_collider": {
+          "asset": "models/plate.glb",
+          "friction": 0.5,
+          "restitution": 0.2,
+          "layers": {
+            "memberships": 1,
+            "filter": 4294967295
+          },
+          "sensor": false
+        },
+        "sindri.physics3d.rigid_body": {
+          "kind": "dynamic",
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotation": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "linear_velocity": [
+            0.016,
+            0.012,
+            0.047
+          ],
+          "angular_velocity": [
+            -0.221,
+            0.142,
+            0.045
+          ],
+          "gravity_scale": 0.0,
+          "linear_damping": 0.0,
+          "angular_damping": 0.0,
+          "lock_rotation": false
+        },
+        "sindri.tags": {
+          "tags": [
+            "debris"
+          ]
+        }
+      }
+    },
+    {
+      "id": "debris-2",
+      "name": "debris-2",
+      "transform_3d": {
+        "position": [
+          27.1738,
+          -2.2273,
+          -6.5425
+        ],
+        "rotation": [
+          -0.200861,
+          -0.110339,
+          0.19737,
+          0.953166
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.model": {
+          "asset": "models/plate.glb"
+        },
+        "sindri.physics3d.model_convex_collider": {
+          "asset": "models/plate.glb",
+          "friction": 0.5,
+          "restitution": 0.2,
+          "layers": {
+            "memberships": 1,
+            "filter": 4294967295
+          },
+          "sensor": false
+        },
+        "sindri.physics3d.rigid_body": {
+          "kind": "dynamic",
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotation": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "linear_velocity": [
+            -0.005,
+            0.014,
+            -0.032
+          ],
+          "angular_velocity": [
+            -0.013,
+            0.109,
+            0.045
+          ],
+          "gravity_scale": 0.0,
+          "linear_damping": 0.0,
+          "angular_damping": 0.0,
+          "lock_rotation": false
+        },
+        "sindri.tags": {
+          "tags": [
+            "debris"
+          ]
+        }
+      }
+    },
+    {
+      "id": "debris-3",
+      "name": "debris-3",
+      "transform_3d": {
+        "position": [
+          12.9718,
+          -4.8167,
+          -7.3381
+        ],
+        "rotation": [
+          -0.224816,
+          0.319678,
+          0.056423,
+          0.918738
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.model": {
+          "asset": "models/girder.glb"
+        },
+        "sindri.physics3d.model_convex_collider": {
+          "asset": "models/girder.glb",
+          "friction": 0.5,
+          "restitution": 0.2,
+          "layers": {
+            "memberships": 1,
+            "filter": 4294967295
+          },
+          "sensor": false
+        },
+        "sindri.physics3d.rigid_body": {
+          "kind": "dynamic",
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotation": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "linear_velocity": [
+            -0.017,
+            -0.013,
+            -0.021
+          ],
+          "angular_velocity": [
+            -0.112,
+            0.036,
+            0.16
+          ],
+          "gravity_scale": 0.0,
+          "linear_damping": 0.0,
+          "angular_damping": 0.0,
+          "lock_rotation": false
+        },
+        "sindri.tags": {
+          "tags": [
+            "debris"
+          ]
+        }
+      }
+    },
+    {
+      "id": "debris-4",
+      "name": "debris-4",
+      "transform_3d": {
+        "position": [
+          12.7853,
+          3.4057,
+          4.0214
+        ],
+        "rotation": [
+          -0.277057,
+          0.395515,
+          -0.369764,
+          0.793777
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.model": {
+          "asset": "models/plate.glb"
+        },
+        "sindri.physics3d.model_convex_collider": {
+          "asset": "models/plate.glb",
+          "friction": 0.5,
+          "restitution": 0.2,
+          "layers": {
+            "memberships": 1,
+            "filter": 4294967295
+          },
+          "sensor": false
+        },
+        "sindri.physics3d.rigid_body": {
+          "kind": "dynamic",
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotation": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "linear_velocity": [
+            0.042,
+            0.009,
+            0.045
+          ],
+          "angular_velocity": [
+            0.164,
+            -0.131,
+            0.023
+          ],
+          "gravity_scale": 0.0,
+          "linear_damping": 0.0,
+          "angular_damping": 0.0,
+          "lock_rotation": false
+        },
+        "sindri.tags": {
+          "tags": [
+            "debris"
+          ]
+        }
+      }
+    },
+    {
+      "id": "debris-5",
+      "name": "debris-5",
+      "transform_3d": {
+        "position": [
+          10.6074,
+          3.7148,
+          3.6825
+        ],
+        "rotation": [
+          -0.089563,
+          0.276152,
+          -0.071601,
+          0.954249
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.model": {
+          "asset": "models/plate.glb"
+        },
+        "sindri.physics3d.model_convex_collider": {
+          "asset": "models/plate.glb",
+          "friction": 0.5,
+          "restitution": 0.2,
+          "layers": {
+            "memberships": 1,
+            "filter": 4294967295
+          },
+          "sensor": false
+        },
+        "sindri.physics3d.rigid_body": {
+          "kind": "dynamic",
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotation": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "linear_velocity": [
+            0.004,
+            0.049,
+            0.025
+          ],
+          "angular_velocity": [
+            0.237,
+            0.152,
+            0.224
+          ],
+          "gravity_scale": 0.0,
+          "linear_damping": 0.0,
+          "angular_damping": 0.0,
+          "lock_rotation": false
+        },
+        "sindri.tags": {
+          "tags": [
+            "debris"
+          ]
+        }
+      }
+    },
+    {
+      "id": "debris-6",
+      "name": "debris-6",
+      "transform_3d": {
+        "position": [
+          11.9728,
+          -0.4085,
+          -4.657
+        ],
+        "rotation": [
+          0.06696,
+          0.479928,
+          -0.378824,
+          0.788466
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.model": {
+          "asset": "models/girder.glb"
+        },
+        "sindri.physics3d.model_convex_collider": {
+          "asset": "models/girder.glb",
+          "friction": 0.5,
+          "restitution": 0.2,
+          "layers": {
+            "memberships": 1,
+            "filter": 4294967295
+          },
+          "sensor": false
+        },
+        "sindri.physics3d.rigid_body": {
+          "kind": "dynamic",
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotation": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "linear_velocity": [
+            -0.04,
+            0.003,
+            -0.033
+          ],
+          "angular_velocity": [
+            0.217,
+            0.225,
+            -0.142
+          ],
+          "gravity_scale": 0.0,
+          "linear_damping": 0.0,
+          "angular_damping": 0.0,
+          "lock_rotation": false
+        },
+        "sindri.tags": {
+          "tags": [
+            "debris"
+          ]
+        }
+      }
+    },
+    {
+      "id": "debris-7",
+      "name": "debris-7",
+      "transform_3d": {
+        "position": [
+          33.4226,
+          -0.6637,
+          -2.1728
+        ],
+        "rotation": [
+          0.332693,
+          0.140728,
+          -0.263855,
+          0.894367
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.model": {
+          "asset": "models/plate.glb"
+        },
+        "sindri.physics3d.model_convex_collider": {
+          "asset": "models/plate.glb",
+          "friction": 0.5,
+          "restitution": 0.2,
+          "layers": {
+            "memberships": 1,
+            "filter": 4294967295
+          },
+          "sensor": false
+        },
+        "sindri.physics3d.rigid_body": {
+          "kind": "dynamic",
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotation": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "linear_velocity": [
+            0.019,
+            -0.009,
+            0.019
+          ],
+          "angular_velocity": [
+            0.196,
+            0.157,
+            0.198
+          ],
+          "gravity_scale": 0.0,
+          "linear_damping": 0.0,
+          "angular_damping": 0.0,
+          "lock_rotation": false
+        },
+        "sindri.tags": {
+          "tags": [
+            "debris"
+          ]
+        }
+      }
+    },
+    {
+      "id": "debris-8",
+      "name": "debris-8",
+      "transform_3d": {
+        "position": [
+          24.2984,
+          3.9185,
+          -6.1564
+        ],
+        "rotation": [
+          -0.355374,
+          0.052301,
+          0.035261,
+          0.932593
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.model": {
+          "asset": "models/plate.glb"
+        },
+        "sindri.physics3d.model_convex_collider": {
+          "asset": "models/plate.glb",
+          "friction": 0.5,
+          "restitution": 0.2,
+          "layers": {
+            "memberships": 1,
+            "filter": 4294967295
+          },
+          "sensor": false
+        },
+        "sindri.physics3d.rigid_body": {
+          "kind": "dynamic",
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotation": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "linear_velocity": [
+            0.034,
+            -0.025,
+            0.045
+          ],
+          "angular_velocity": [
+            0.066,
+            -0.084,
+            0.03
+          ],
+          "gravity_scale": 0.0,
+          "linear_damping": 0.0,
+          "angular_damping": 0.0,
+          "lock_rotation": false
+        },
+        "sindri.tags": {
+          "tags": [
+            "debris"
+          ]
+        }
+      }
+    },
+    {
+      "id": "debris-9",
+      "name": "debris-9",
+      "transform_3d": {
+        "position": [
+          28.6779,
+          -5.9527,
+          -1.588
+        ],
+        "rotation": [
+          -0.105385,
+          -0.161063,
+          -0.869681,
+          0.454541
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.model": {
+          "asset": "models/girder.glb"
+        },
+        "sindri.physics3d.model_convex_collider": {
+          "asset": "models/girder.glb",
+          "friction": 0.5,
+          "restitution": 0.2,
+          "layers": {
+            "memberships": 1,
+            "filter": 4294967295
+          },
+          "sensor": false
+        },
+        "sindri.physics3d.rigid_body": {
+          "kind": "dynamic",
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotation": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "linear_velocity": [
+            -0.03,
+            0.018,
+            -0.033
+          ],
+          "angular_velocity": [
+            0.143,
+            -0.179,
+            0.184
+          ],
+          "gravity_scale": 0.0,
+          "linear_damping": 0.0,
+          "angular_damping": 0.0,
+          "lock_rotation": false
+        },
+        "sindri.tags": {
+          "tags": [
+            "debris"
+          ]
+        }
+      }
+    },
+    {
+      "id": "debris-10",
+      "name": "debris-10",
+      "transform_3d": {
+        "position": [
+          24.4526,
+          0.3135,
+          -2.9375
+        ],
+        "rotation": [
+          0.287002,
+          0.173946,
+          -0.344955,
+          0.876572
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.model": {
+          "asset": "models/plate.glb"
+        },
+        "sindri.physics3d.model_convex_collider": {
+          "asset": "models/plate.glb",
+          "friction": 0.5,
+          "restitution": 0.2,
+          "layers": {
+            "memberships": 1,
+            "filter": 4294967295
+          },
+          "sensor": false
+        },
+        "sindri.physics3d.rigid_body": {
+          "kind": "dynamic",
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotation": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "linear_velocity": [
+            0.036,
+            -0.0,
+            0.028
+          ],
+          "angular_velocity": [
+            0.199,
+            -0.207,
+            0.188
+          ],
+          "gravity_scale": 0.0,
+          "linear_damping": 0.0,
+          "angular_damping": 0.0,
+          "lock_rotation": false
+        },
+        "sindri.tags": {
+          "tags": [
+            "debris"
+          ]
+        }
+      }
+    },
+    {
+      "id": "debris-11",
+      "name": "debris-11",
+      "transform_3d": {
+        "position": [
+          19.0839,
+          -2.3739,
+          8.3149
+        ],
+        "rotation": [
+          -0.155242,
+          -0.140901,
+          -0.260883,
+          0.942331
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.model": {
+          "asset": "models/plate.glb"
+        },
+        "sindri.physics3d.model_convex_collider": {
+          "asset": "models/plate.glb",
+          "friction": 0.5,
+          "restitution": 0.2,
+          "layers": {
+            "memberships": 1,
+            "filter": 4294967295
+          },
+          "sensor": false
+        },
+        "sindri.physics3d.rigid_body": {
+          "kind": "dynamic",
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotation": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "linear_velocity": [
+            0.032,
+            -0.002,
+            0.005
+          ],
+          "angular_velocity": [
+            -0.079,
+            -0.056,
+            -0.04
+          ],
+          "gravity_scale": 0.0,
+          "linear_damping": 0.0,
+          "angular_damping": 0.0,
+          "lock_rotation": false
+        },
+        "sindri.tags": {
+          "tags": [
+            "debris"
+          ]
+        }
+      }
+    },
+    {
+      "id": "debris-12",
+      "name": "debris-12",
+      "transform_3d": {
+        "position": [
+          16.8611,
+          4.2272,
+          0.542
+        ],
+        "rotation": [
+          -0.486401,
+          0.708934,
+          -0.509982,
+          0.027306
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.model": {
+          "asset": "models/girder.glb"
+        },
+        "sindri.physics3d.model_convex_collider": {
+          "asset": "models/girder.glb",
+          "friction": 0.5,
+          "restitution": 0.2,
+          "layers": {
+            "memberships": 1,
+            "filter": 4294967295
+          },
+          "sensor": false
+        },
+        "sindri.physics3d.rigid_body": {
+          "kind": "dynamic",
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotation": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "linear_velocity": [
+            0.007,
+            -0.006,
+            0.036
+          ],
+          "angular_velocity": [
+            -0.195,
+            -0.019,
+            -0.19
+          ],
+          "gravity_scale": 0.0,
+          "linear_damping": 0.0,
+          "angular_damping": 0.0,
+          "lock_rotation": false
+        },
+        "sindri.tags": {
+          "tags": [
+            "debris"
+          ]
+        }
+      }
+    },
+    {
+      "id": "debris-13",
+      "name": "debris-13",
+      "transform_3d": {
+        "position": [
+          26.4887,
+          -5.4878,
+          5.722
+        ],
+        "rotation": [
+          -0.043637,
+          0.075093,
+          -0.086598,
+          0.99245
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.model": {
+          "asset": "models/plate.glb"
+        },
+        "sindri.physics3d.model_convex_collider": {
+          "asset": "models/plate.glb",
+          "friction": 0.5,
+          "restitution": 0.2,
+          "layers": {
+            "memberships": 1,
+            "filter": 4294967295
+          },
+          "sensor": false
+        },
+        "sindri.physics3d.rigid_body": {
+          "kind": "dynamic",
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotation": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "linear_velocity": [
+            0.034,
+            -0.041,
+            0.024
+          ],
+          "angular_velocity": [
+            -0.112,
+            -0.069,
+            -0.177
+          ],
+          "gravity_scale": 0.0,
+          "linear_damping": 0.0,
+          "angular_damping": 0.0,
+          "lock_rotation": false
+        },
+        "sindri.tags": {
+          "tags": [
+            "debris"
+          ]
+        }
+      }
+    },
+    {
+      "id": "debris-14",
+      "name": "debris-14",
+      "transform_3d": {
+        "position": [
+          33.7944,
+          1.857,
+          -5.1154
+        ],
+        "rotation": [
+          0.576628,
+          -0.077395,
+          0.519868,
+          0.625498
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.model": {
+          "asset": "models/plate.glb"
+        },
+        "sindri.physics3d.model_convex_collider": {
+          "asset": "models/plate.glb",
+          "friction": 0.5,
+          "restitution": 0.2,
+          "layers": {
+            "memberships": 1,
+            "filter": 4294967295
+          },
+          "sensor": false
+        },
+        "sindri.physics3d.rigid_body": {
+          "kind": "dynamic",
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotation": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "linear_velocity": [
+            -0.048,
+            0.011,
+            -0.036
+          ],
+          "angular_velocity": [
+            0.238,
+            0.206,
+            -0.159
+          ],
+          "gravity_scale": 0.0,
+          "linear_damping": 0.0,
+          "angular_damping": 0.0,
+          "lock_rotation": false
+        },
+        "sindri.tags": {
+          "tags": [
+            "debris"
+          ]
+        }
+      }
+    },
+    {
+      "id": "debris-15",
+      "name": "debris-15",
+      "transform_3d": {
+        "position": [
+          30.0384,
+          3.8595,
+          2.2494
+        ],
+        "rotation": [
+          -0.236416,
+          -0.589949,
+          0.385164,
+          0.669115
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.model": {
+          "asset": "models/girder.glb"
+        },
+        "sindri.physics3d.model_convex_collider": {
+          "asset": "models/girder.glb",
+          "friction": 0.5,
+          "restitution": 0.2,
+          "layers": {
+            "memberships": 1,
+            "filter": 4294967295
+          },
+          "sensor": false
+        },
+        "sindri.physics3d.rigid_body": {
+          "kind": "dynamic",
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotation": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "linear_velocity": [
+            -0.041,
+            0.036,
+            -0.029
+          ],
+          "angular_velocity": [
+            0.046,
+            -0.087,
+            -0.183
+          ],
+          "gravity_scale": 0.0,
+          "linear_damping": 0.0,
+          "angular_damping": 0.0,
+          "lock_rotation": false
+        },
+        "sindri.tags": {
+          "tags": [
+            "debris"
+          ]
+        }
+      }
+    },
+    {
+      "id": "debris-16",
+      "name": "debris-16",
+      "transform_3d": {
+        "position": [
+          32.335,
+          -0.7675,
+          -1.8476
+        ],
+        "rotation": [
+          0.729359,
+          -0.560665,
+          -0.181274,
+          0.347606
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.model": {
+          "asset": "models/plate.glb"
+        },
+        "sindri.physics3d.model_convex_collider": {
+          "asset": "models/plate.glb",
+          "friction": 0.5,
+          "restitution": 0.2,
+          "layers": {
+            "memberships": 1,
+            "filter": 4294967295
+          },
+          "sensor": false
+        },
+        "sindri.physics3d.rigid_body": {
+          "kind": "dynamic",
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotation": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "linear_velocity": [
+            -0.019,
+            0.039,
+            0.048
+          ],
+          "angular_velocity": [
+            0.076,
+            0.122,
+            0.213
+          ],
+          "gravity_scale": 0.0,
+          "linear_damping": 0.0,
+          "angular_damping": 0.0,
+          "lock_rotation": false
+        },
+        "sindri.tags": {
+          "tags": [
+            "debris"
+          ]
+        }
+      }
+    },
+    {
+      "id": "debris-17",
+      "name": "debris-17",
+      "transform_3d": {
+        "position": [
+          31.6067,
+          -5.5258,
+          -1.2839
+        ],
+        "rotation": [
+          -0.388741,
+          -0.153185,
+          0.681106,
+          0.601256
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.model": {
+          "asset": "models/plate.glb"
+        },
+        "sindri.physics3d.model_convex_collider": {
+          "asset": "models/plate.glb",
+          "friction": 0.5,
+          "restitution": 0.2,
+          "layers": {
+            "memberships": 1,
+            "filter": 4294967295
+          },
+          "sensor": false
+        },
+        "sindri.physics3d.rigid_body": {
+          "kind": "dynamic",
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotation": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "linear_velocity": [
+            -0.029,
+            -0.009,
+            -0.044
+          ],
+          "angular_velocity": [
+            0.112,
+            0.129,
+            0.018
+          ],
+          "gravity_scale": 0.0,
+          "linear_damping": 0.0,
+          "angular_damping": 0.0,
+          "lock_rotation": false
+        },
+        "sindri.tags": {
+          "tags": [
+            "debris"
+          ]
+        }
+      }
+    },
+    {
+      "id": "debris-18",
+      "name": "debris-18",
+      "transform_3d": {
+        "position": [
+          20.7735,
+          -3.0488,
+          -2.6403
+        ],
+        "rotation": [
+          0.201677,
+          0.682148,
+          -0.401036,
+          0.577209
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.model": {
+          "asset": "models/girder.glb"
+        },
+        "sindri.physics3d.model_convex_collider": {
+          "asset": "models/girder.glb",
+          "friction": 0.5,
+          "restitution": 0.2,
+          "layers": {
+            "memberships": 1,
+            "filter": 4294967295
+          },
+          "sensor": false
+        },
+        "sindri.physics3d.rigid_body": {
+          "kind": "dynamic",
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotation": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "linear_velocity": [
+            0.032,
+            0.008,
+            0.047
+          ],
+          "angular_velocity": [
+            0.085,
+            -0.027,
+            -0.163
+          ],
+          "gravity_scale": 0.0,
+          "linear_damping": 0.0,
+          "angular_damping": 0.0,
+          "lock_rotation": false
+        },
+        "sindri.tags": {
+          "tags": [
+            "debris"
+          ]
+        }
+      }
+    },
+    {
+      "id": "debris-19",
+      "name": "debris-19",
+      "transform_3d": {
+        "position": [
+          33.8897,
+          5.7755,
+          3.2362
+        ],
+        "rotation": [
+          -0.634526,
+          -0.149092,
+          0.646591,
+          0.396318
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.model": {
+          "asset": "models/plate.glb"
+        },
+        "sindri.physics3d.model_convex_collider": {
+          "asset": "models/plate.glb",
+          "friction": 0.5,
+          "restitution": 0.2,
+          "layers": {
+            "memberships": 1,
+            "filter": 4294967295
+          },
+          "sensor": false
+        },
+        "sindri.physics3d.rigid_body": {
+          "kind": "dynamic",
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotation": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "linear_velocity": [
+            -0.011,
+            -0.012,
+            -0.044
+          ],
+          "angular_velocity": [
+            -0.035,
+            -0.219,
+            0.17
+          ],
+          "gravity_scale": 0.0,
+          "linear_damping": 0.0,
+          "angular_damping": 0.0,
+          "lock_rotation": false
+        },
+        "sindri.tags": {
+          "tags": [
+            "debris"
+          ]
+        }
+      }
+    },
+    {
+      "id": "debris-20",
+      "name": "debris-20",
+      "transform_3d": {
+        "position": [
+          28.4289,
+          2.0214,
+          -3.3612
+        ],
+        "rotation": [
+          -0.149179,
+          -0.170349,
+          -0.010545,
+          0.973969
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.model": {
+          "asset": "models/plate.glb"
+        },
+        "sindri.physics3d.model_convex_collider": {
+          "asset": "models/plate.glb",
+          "friction": 0.5,
+          "restitution": 0.2,
+          "layers": {
+            "memberships": 1,
+            "filter": 4294967295
+          },
+          "sensor": false
+        },
+        "sindri.physics3d.rigid_body": {
+          "kind": "dynamic",
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotation": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "linear_velocity": [
+            0.009,
+            0.001,
+            0.004
+          ],
+          "angular_velocity": [
+            -0.166,
+            0.051,
+            -0.218
+          ],
+          "gravity_scale": 0.0,
+          "linear_damping": 0.0,
+          "angular_damping": 0.0,
+          "lock_rotation": false
+        },
+        "sindri.tags": {
+          "tags": [
+            "debris"
+          ]
+        }
+      }
+    },
+    {
+      "id": "debris-21",
+      "name": "debris-21",
+      "transform_3d": {
+        "position": [
+          29.5055,
+          1.2772,
+          1.0369
+        ],
+        "rotation": [
+          0.127942,
+          0.809472,
+          -0.570071,
+          0.058357
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.model": {
+          "asset": "models/girder.glb"
+        },
+        "sindri.physics3d.model_convex_collider": {
+          "asset": "models/girder.glb",
+          "friction": 0.5,
+          "restitution": 0.2,
+          "layers": {
+            "memberships": 1,
+            "filter": 4294967295
+          },
+          "sensor": false
+        },
+        "sindri.physics3d.rigid_body": {
+          "kind": "dynamic",
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotation": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "linear_velocity": [
+            -0.023,
+            -0.022,
+            -0.001
+          ],
+          "angular_velocity": [
+            -0.151,
+            -0.076,
+            0.239
+          ],
+          "gravity_scale": 0.0,
+          "linear_damping": 0.0,
+          "angular_damping": 0.0,
+          "lock_rotation": false
+        },
+        "sindri.tags": {
+          "tags": [
+            "debris"
+          ]
+        }
+      }
+    },
+    {
+      "id": "salvage-0",
+      "name": "salvage-0",
+      "transform_3d": {
+        "position": [
+          11.5,
+          -0.8,
+          0.6
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.model": {
+          "asset": "models/canister.glb"
+        },
+        "sindri.physics3d.model_convex_collider": {
+          "asset": "models/canister.glb",
+          "friction": 0.5,
+          "restitution": 0.3,
+          "layers": {
+            "memberships": 1,
+            "filter": 4294967295
+          },
+          "sensor": false
+        },
+        "sindri.physics3d.rigid_body": {
+          "kind": "dynamic",
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotation": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "linear_velocity": [
+            0,
+            0,
+            0
+          ],
+          "angular_velocity": [
+            0.0,
+            0.15,
+            0.05
+          ],
+          "gravity_scale": 0.0,
+          "linear_damping": 0.0,
+          "angular_damping": 0.0,
+          "lock_rotation": false
+        },
+        "sindri.tags": {
+          "tags": [
+            "salvage"
+          ]
+        }
+      }
+    },
+    {
+      "id": "salvage-1",
+      "name": "salvage-1",
+      "transform_3d": {
+        "position": [
+          18.8,
+          2.3,
+          2.0
+        ],
+        "rotation": [
+          0.153046,
+          0.0,
+          0.153046,
+          0.976296
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.model": {
+          "asset": "models/canister.glb"
+        },
+        "sindri.physics3d.model_convex_collider": {
+          "asset": "models/canister.glb",
+          "friction": 0.5,
+          "restitution": 0.3,
+          "layers": {
+            "memberships": 1,
+            "filter": 4294967295
+          },
+          "sensor": false
+        },
+        "sindri.physics3d.rigid_body": {
+          "kind": "dynamic",
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotation": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "linear_velocity": [
+            0,
+            0,
+            0
+          ],
+          "angular_velocity": [
+            0.0,
+            0.15,
+            0.05
+          ],
+          "gravity_scale": 0.0,
+          "linear_damping": 0.0,
+          "angular_damping": 0.0,
+          "lock_rotation": false
+        },
+        "sindri.tags": {
+          "tags": [
+            "salvage"
+          ]
+        }
+      }
+    },
+    {
+      "id": "salvage-2",
+      "name": "salvage-2",
+      "transform_3d": {
+        "position": [
+          25.2,
+          -0.1,
+          3.0
+        ],
+        "rotation": [
+          0.298836,
+          0.0,
+          0.298836,
+          0.906308
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.model": {
+          "asset": "models/canister.glb"
+        },
+        "sindri.physics3d.model_convex_collider": {
+          "asset": "models/canister.glb",
+          "friction": 0.5,
+          "restitution": 0.3,
+          "layers": {
+            "memberships": 1,
+            "filter": 4294967295
+          },
+          "sensor": false
+        },
+        "sindri.physics3d.rigid_body": {
+          "kind": "dynamic",
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotation": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "linear_velocity": [
+            0,
+            0,
+            0
+          ],
+          "angular_velocity": [
+            0.0,
+            0.15,
+            0.05
+          ],
+          "gravity_scale": 0.0,
+          "linear_damping": 0.0,
+          "angular_damping": 0.0,
+          "lock_rotation": false
+        },
+        "sindri.tags": {
+          "tags": [
+            "salvage"
+          ]
+        }
+      }
+    },
+    {
+      "id": "salvage",
+      "name": "Salvage",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.script": {
+          "source": "scripts/salvage.decay",
+          "script": "Salvage"
+        }
+      }
+    },
+    {
       "id": "diver",
       "name": "Diver",
       "transform_3d": {
@@ -8659,7 +10729,7 @@
           "projection": "perspective",
           "vertical_fov_degrees": 72,
           "near": 0.05,
-          "far": 120
+          "far": 220
         }
       },
       "parent": "diver"
@@ -11618,6 +13688,45 @@
           "font": "fonts/ChakraPetch-Regular.ttf",
           "font_size": 0.035,
           "line_height": 0.042,
+          "layer": 200,
+          "text": "",
+          "letter_spacing": 0.004
+        }
+      }
+    },
+    {
+      "id": "hud-salvage",
+      "name": "hud-salvage",
+      "transform_3d": {
+        "position": [
+          1.25,
+          -0.68,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.text": {
+          "anchor": "center",
+          "color": [
+            1.0,
+            0.75,
+            0.4,
+            1.0
+          ],
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.04,
+          "line_height": 0.048,
           "layer": 200,
           "text": "",
           "letter_spacing": 0.004

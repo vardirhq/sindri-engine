@@ -73,7 +73,7 @@ pub use model::{
 };
 pub use offscreen::{OffscreenError, OffscreenReadback, OffscreenTarget};
 pub use retained_mesh::{MeshGeometryError, RenderMesh};
-pub use shadow::ShadowSettings;
+pub use shadow::{ShadowSettings, light_view_projection};
 pub use shape::{
     MAX_POLYGON_POINTS, Shape, ShapeBlend, ShapeDrawError, ShapeInstance, ShapeRenderer,
 };

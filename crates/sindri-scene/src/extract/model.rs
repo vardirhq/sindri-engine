@@ -51,6 +51,7 @@ impl SceneExtractor {
         &self,
         world: &World,
         cameras: &ResolvedCameras,
+        culling: Option<&super::frustum::Culling>,
         frame: &mut ExtractedFrame,
     ) -> Result<(), SceneExtractError> {
         for (entity, component) in self.components.query::<ModelComponent>(world)? {
@@ -73,6 +74,13 @@ impl SceneExtractor {
                     continue;
                 }
                 return Err(error.into());
+            }
+            // A model wholly out of view, and out of the light's while shadows
+            // are on, is not drawn. Its silhouette goes with it.
+            if let (Some(culling), Some((min, max))) = (culling, asset.bounds())
+                && !culling.keeps(model, min, max)
+            {
+                continue;
             }
             let mut pass = FramePass::new(
                 RenderStage::Opaque3d,
@@ -101,5 +109,23 @@ impl SceneExtractor {
             frame.push(pass);
         }
         Ok(())
+    }
+}
+
+impl SceneExtractor {
+    /// What this frame's cubes and models are culled against, or `None` to
+    /// draw them all: with no world camera, or an environment or light the
+    /// frame cannot read, nothing is dropped and the draws report the error.
+    pub(super) fn culling(
+        &self,
+        world: &World,
+        cameras: &ResolvedCameras,
+    ) -> Option<super::frustum::Culling> {
+        let camera = cameras.world?.view_projection;
+        let settings = self.world_settings(world).ok()?;
+        let shadow = settings.shadows.enabled.then(|| {
+            sindri_render::light_view_projection(camera, &settings.lighting, settings.shadows)
+        });
+        Some(super::frustum::Culling::new(camera, shadow))
     }
 }

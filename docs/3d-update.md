@@ -181,6 +181,11 @@ The yaw/pitch/roll convention remains radians, Y-up, -Z forward and YXZ order.
   deduplication, instancing and in-tree game adoption remain open.
 - [ ] Frustum culling of meshes and models at extraction, from cached
   bounds.
+  - [x] Cube meshes and imported models, by world-space boxes from the unit
+    cube and a model's load-time vertex bounds, kept while they may cast into
+    the view through the directional shadow map. Extraction regressions and
+    DRIFT's wreckage (32 of 165 pieces drawn out of the cargo hatch) prove it.
+    Surface meshes remain uncull'd.
 - [ ] Models cast and receive shadows, and are fogged.
   - [x] Shared directional shadow reception and renderer fog shading; GPU tests
     exercise resize/disable/cache reuse and all three fog terms. Native/browser

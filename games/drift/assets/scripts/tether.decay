@@ -101,6 +101,7 @@ script Tether {
             }
         } else {
             this.taut = false;
+            Ui.set_text(this.label, "");
             let loose = points[points.len - 2];
             if loose.distance(this.eye.transform.world_position) <= this.reach {
                 Ui.set_text(this.state, "UNTETHERED  -  U to clip on");

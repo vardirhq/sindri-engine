@@ -75,6 +75,50 @@ fn rect_in_clip(clip: &[glam::Vec4; 4]) -> bool {
         || clip.iter().all(|point| point.y > point.w))
 }
 
+/// What one frame's cubes and models are culled against: the world camera's
+/// view, and, while directional shadows are on, the light's shadow view, so a
+/// thing out of sight that still casts a shadow into it keeps casting.
+pub(super) struct Culling {
+    camera: Mat4,
+    shadow: Option<Mat4>,
+}
+
+impl Culling {
+    pub(super) const fn new(camera: Mat4, shadow: Option<Mat4>) -> Self {
+        Self { camera, shadow }
+    }
+
+    /// Whether a box `min`..`max` in an object's own space, placed by
+    /// `model`, could show or cast a shadow. Conservative: the test is on the
+    /// world-space box around the placed one, against each view's planes.
+    pub(super) fn keeps(&self, model: Mat4, min: Vec3, max: Vec3) -> bool {
+        let Some((low, high)) = world_box(model, min, max) else {
+            return true;
+        };
+        aabb_in_view(low, high, self.camera)
+            || self
+                .shadow
+                .is_some_and(|shadow| aabb_in_view(low, high, shadow))
+    }
+}
+
+/// The world-space box around a local box placed by `model`, or `None` when
+/// the placement is not finite and the caller should keep the object.
+fn world_box(model: Mat4, min: Vec3, max: Vec3) -> Option<(Vec3, Vec3)> {
+    let mut low = Vec3::splat(f32::INFINITY);
+    let mut high = Vec3::splat(f32::NEG_INFINITY);
+    for x in [min.x, max.x] {
+        for y in [min.y, max.y] {
+            for z in [min.z, max.z] {
+                let point = model.transform_point3(Vec3::new(x, y, z));
+                low = low.min(point);
+                high = high.max(point);
+            }
+        }
+    }
+    (low.is_finite() && high.is_finite()).then_some((low, high))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

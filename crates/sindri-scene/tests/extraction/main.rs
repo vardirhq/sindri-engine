@@ -9,6 +9,7 @@ mod assets;
 mod baked_volume;
 mod cameras;
 mod canvas;
+mod culling;
 mod lights_2d;
 mod material;
 mod material_profiles;

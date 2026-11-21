@@ -230,10 +230,24 @@ says what is now true.
    change, momentum and all. Still to come: a door that will not close on the
    diver, sound (the hiss of the pump, footsteps, breath), and a person
    walking it.
-4. **The wreckage.** A small field of derelict and debris outside, built from
-   repeated GLBs with instancing and culling (gap 4). Salvageable objects to
-   find, pick up and carry back; convex-hull props that tumble when struck.
-   Viewports and visor through the transparent pass (gap 5).
+4. **The wreckage.** *Started.* The forward bulkhead is now an open cargo
+   hatch with a safety bar across it, and beyond it is the wreckage
+   (`art/wreck.py`, models made by the repository's GLB writer): a derelict
+   survey module torn open at its far end, solid to fly into, with a red lamp
+   still burning inside; twenty-two bent plates and truss girders drifting and
+   turning, dynamic bodies on convex colliders that the diver knocks away; three
+   salvage canisters; and a starfield, one model and so one draw. G takes a
+   canister in reach into the pack; what the diver carries is stowed once they
+   are back in the ship's air (`scripts/salvage.decay`). Sindri gains view
+   culling (gap 4, the culling half): cubes and models wholly out of the
+   camera's view, and out of the light's shadow view while shadows are on, are
+   not drawn. Looking out of the hatch draws 32 of the scene's 165 pieces.
+   `tests/wreckage.rs` takes salvage outside and stows it aboard, knocks a plate
+   away and flies into the derelict; `tests/culling.rs` measures the draws.
+   Still to come: batching and instancing of repeated geometry (the other half
+   of gap 4: every girder is still its own draw), occlusion culling, the
+   transparent pass and mipmaps (gap 5), a portable anchor so the wreck can be
+   reached on a line, and carrying salvage in hand rather than in a count.
 5. **First playable.** The milestone, end to end: wake aboard the *Tern*;
    discover the failing recycler; suit up and clip on; go out; recover the
    replacement component from the wreck; return; repair the recycler; detect
