@@ -1,0 +1,230 @@
+{
+  "format_version": 1,
+  "tiles": {
+    "hull": {
+      "faces": {
+        "top": {
+          "sprite": "textures/blocks/hull.png",
+          "size": [
+            1.0,
+            1.0
+          ]
+        },
+        "bottom": {
+          "sprite": "textures/blocks/hull.png",
+          "size": [
+            1.0,
+            1.0
+          ]
+        },
+        "south": {
+          "sprite": "textures/blocks/hull.png",
+          "size": [
+            1.0,
+            1.0
+          ]
+        },
+        "east": {
+          "sprite": "textures/blocks/hull.png",
+          "size": [
+            1.0,
+            1.0
+          ]
+        }
+      }
+    },
+    "hull-stripe": {
+      "faces": {
+        "top": {
+          "sprite": "textures/blocks/hull-stripe.png",
+          "size": [
+            1.0,
+            1.0
+          ]
+        },
+        "bottom": {
+          "sprite": "textures/blocks/hull-stripe.png",
+          "size": [
+            1.0,
+            1.0
+          ]
+        },
+        "south": {
+          "sprite": "textures/blocks/hull-stripe.png",
+          "size": [
+            1.0,
+            1.0
+          ]
+        },
+        "east": {
+          "sprite": "textures/blocks/hull-stripe.png",
+          "size": [
+            1.0,
+            1.0
+          ]
+        }
+      }
+    },
+    "deck": {
+      "faces": {
+        "top": {
+          "sprite": "textures/blocks/deck.png",
+          "size": [
+            1.0,
+            1.0
+          ]
+        },
+        "bottom": {
+          "sprite": "textures/blocks/deck.png",
+          "size": [
+            1.0,
+            1.0
+          ]
+        },
+        "south": {
+          "sprite": "textures/blocks/deck.png",
+          "size": [
+            1.0,
+            1.0
+          ]
+        },
+        "east": {
+          "sprite": "textures/blocks/deck.png",
+          "size": [
+            1.0,
+            1.0
+          ]
+        }
+      }
+    },
+    "bulkhead": {
+      "faces": {
+        "top": {
+          "sprite": "textures/blocks/bulkhead.png",
+          "size": [
+            1.0,
+            1.0
+          ]
+        },
+        "bottom": {
+          "sprite": "textures/blocks/bulkhead.png",
+          "size": [
+            1.0,
+            1.0
+          ]
+        },
+        "south": {
+          "sprite": "textures/blocks/bulkhead.png",
+          "size": [
+            1.0,
+            1.0
+          ]
+        },
+        "east": {
+          "sprite": "textures/blocks/bulkhead.png",
+          "size": [
+            1.0,
+            1.0
+          ]
+        }
+      }
+    },
+    "frame": {
+      "faces": {
+        "top": {
+          "sprite": "textures/blocks/frame.png",
+          "size": [
+            1.0,
+            1.0
+          ]
+        },
+        "bottom": {
+          "sprite": "textures/blocks/frame.png",
+          "size": [
+            1.0,
+            1.0
+          ]
+        },
+        "south": {
+          "sprite": "textures/blocks/frame.png",
+          "size": [
+            1.0,
+            1.0
+          ]
+        },
+        "east": {
+          "sprite": "textures/blocks/frame.png",
+          "size": [
+            1.0,
+            1.0
+          ]
+        }
+      }
+    },
+    "hazard": {
+      "faces": {
+        "top": {
+          "sprite": "textures/blocks/hazard.png",
+          "size": [
+            1.0,
+            1.0
+          ]
+        },
+        "bottom": {
+          "sprite": "textures/blocks/hazard.png",
+          "size": [
+            1.0,
+            1.0
+          ]
+        },
+        "south": {
+          "sprite": "textures/blocks/hazard.png",
+          "size": [
+            1.0,
+            1.0
+          ]
+        },
+        "east": {
+          "sprite": "textures/blocks/hazard.png",
+          "size": [
+            1.0,
+            1.0
+          ]
+        }
+      }
+    },
+    "light": {
+      "faces": {
+        "top": {
+          "sprite": "textures/blocks/light.png",
+          "size": [
+            1.0,
+            1.0
+          ]
+        },
+        "bottom": {
+          "sprite": "textures/blocks/light.png",
+          "size": [
+            1.0,
+            1.0
+          ]
+        },
+        "south": {
+          "sprite": "textures/blocks/light.png",
+          "size": [
+            1.0,
+            1.0
+          ]
+        },
+        "east": {
+          "sprite": "textures/blocks/light.png",
+          "size": [
+            1.0,
+            1.0
+          ]
+        }
+      },
+      "glow": 1.0
+    }
+  }
+}

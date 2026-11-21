@@ -53,7 +53,8 @@ pub(super) fn prepare(
         );
     }
     for (entity, voxel_body) in components.query::<crate::VoxelBody3dComponent>(world)? {
-        if let Some(authored) = prepare_voxel_body(world, components, physics, entity, &voxel_body)? {
+        if let Some(authored) = prepare_voxel_body(world, components, physics, entity, &voxel_body)?
+        {
             plan.insert(entity, authored);
         }
     }

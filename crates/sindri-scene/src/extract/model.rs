@@ -77,9 +77,11 @@ impl SceneExtractor {
             }
             // A model wholly out of view, and out of the light's while shadows
             // are on, is not drawn. Its silhouette goes with it.
-            if let (Some(culling), Some((min, max))) = (culling, asset.bounds())
-                && !culling.keeps(model, min, max)
-            {
+            let culled = match (culling, asset.bounds()) {
+                (Some(culling), Some((min, max))) => culling.decide(model, min, max),
+                _ => super::frustum::Culled::Seen,
+            };
+            if culled == super::frustum::Culled::Dropped {
                 continue;
             }
             let mut pass = FramePass::new(
@@ -95,6 +97,12 @@ impl SceneExtractor {
                 },
             );
             if !self.apply_material(world, entity, &mut pass)? {
+                continue;
+            }
+            if culled == super::frustum::Culled::ShadowOnly {
+                // Out of sight: it only casts, and has no silhouette to draw.
+                pass.shadow_only = true;
+                frame.push(pass);
                 continue;
             }
             if let Some(color) = component.occluded_color {

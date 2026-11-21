@@ -71,9 +71,8 @@ pub fn voxel_body_pieces(
     if !matches!(world.generator, VoxelGeneratorDocument::Built {}) {
         return Err("a voxel body is a built world: its generator must be `built`");
     }
-    if !(body.friction.is_finite() && body.friction >= 0.0)
-        || !(body.restitution.is_finite() && body.restitution >= 0.0)
-    {
+    let usable = |value: f32| value.is_finite() && value >= 0.0;
+    if !usable(body.friction) || !usable(body.restitution) {
         return Err("a voxel body's friction and restitution must be numbers of 0 or more");
     }
     let mut left = solid_blocks(world);

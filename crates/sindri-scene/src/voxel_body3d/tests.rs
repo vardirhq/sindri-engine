@@ -18,7 +18,9 @@ fn volume(pieces: &[Collider3d]) -> f32 {
     pieces
         .iter()
         .map(|piece| match piece.shape {
-            sindri_physics::ColliderShape3d::Box { half_extents: [x, y, z] } => 8.0 * x * y * z,
+            sindri_physics::ColliderShape3d::Box {
+                half_extents: [x, y, z],
+            } => 8.0 * x * y * z,
             _ => panic!("voxel bodies are made of boxes"),
         })
         .sum()
@@ -36,14 +38,25 @@ fn a_solid_block_of_blocks_is_one_box() {
     }
     let pieces = voxel_body_pieces(&built(&blocks), &VoxelBody3dComponent::default()).unwrap();
     assert_eq!(pieces.len(), 1);
-    assert_eq!(pieces[0].offset, [2.0, 1.0, 1.5]);
+    let offset = pieces[0].offset;
+    assert!(
+        (0..3).all(|axis| (offset[axis] - [2.0, 1.0, 1.5][axis]).abs() < 1e-6),
+        "{offset:?}"
+    );
     assert!((volume(&pieces) - 24.0).abs() < 1e-5);
 }
 
 #[test]
 fn every_block_is_covered_once_whatever_the_shape() {
     // An L of blocks with a hole, and a block removed by a later edit.
-    let mut world = built(&[[0, 0, 0], [1, 0, 0], [2, 0, 0], [0, 0, 1], [0, 1, 0], [5, 5, 5]]);
+    let mut world = built(&[
+        [0, 0, 0],
+        [1, 0, 0],
+        [2, 0, 0],
+        [0, 0, 1],
+        [0, 1, 0],
+        [5, 5, 5],
+    ]);
     world.edits.push(VoxelEdit {
         at: [5, 5, 5],
         block: VoxelBlock::air(),

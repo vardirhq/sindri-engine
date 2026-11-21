@@ -465,7 +465,11 @@ fn a_built_world_is_only_its_placed_blocks() {
     let empty = extractor
         .extract(&world, VIEWPORT, CameraView::default(), &textures)
         .expect("an empty built world extracts");
-    assert_eq!(uploads(&empty), 0, "nothing is generated, so nothing is drawn");
+    assert_eq!(
+        uploads(&empty),
+        0,
+        "nothing is generated, so nothing is drawn"
+    );
 
     edited(
         &mut world,
