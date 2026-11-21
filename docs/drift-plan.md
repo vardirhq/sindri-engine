@@ -185,10 +185,27 @@ says what is now true.
    collision jolt and sound; and a person playing it to judge whether floating
    is fun. *This stage decides whether the game is worth making: if floating is
    not fun, nothing later saves it.*
-2. **The tether.** 3D joints in the engine (gap 1), then a tether from an anchor
-   to the player: length limit, taut stop, snagging on a pillar, reeling in,
-   unclipping and re-clipping. A test drifts out to the tether's end, is stopped,
-   and is reeled home around an obstacle.
+2. **The tether.** *Started.* Sindri gains 3D distance joints (gap 1, the
+   rope kind): `sindri.physics3d.distance_joint` between body-local anchors,
+   owned by its own entity like the 2D one, with `Physics3d.set_distance`,
+   `set_joint_enabled` and `joint_enabled` (`docs/physics.md`). The tether
+   (`scripts/tether.decay`) is sixteen link bodies on seventeen of them, from
+   the aft handhold to the diver: the links touch the hold and what is in it,
+   never each other or the diver, so the line slackens, goes taut at 10 m and
+   catches on what it is drawn across. A lanyard absorber in Decay takes out
+   motion along a taut line, so coming up short is a tug rather than a
+   rebound. R reels in (the line shortens, drawing the diver home, and pays out
+   again when let go); U unclips, and clips back on only within reach of the
+   loose end. Thin strands drawn between the links show the line, meeting the
+   diver at the waist. A stanchion part way down the hold gives it something
+   to catch on. `tests/tether.rs` drifts out to the line's end, is stopped
+   without a rebound and reeled home; passes the stanchion, crosses behind it
+   and is drawn round it when reeled; and unclips, clips back on at the loose
+   end, and drifts free past the line's length. Two things it taught: a link
+   scaled to size its mesh is scaled in mass too (now in the physics
+   contract), and a chain of light links needs an absorber to feel like webbing
+   rather than elastic. Still to come: portable anchors that re-root the line,
+   longer tethers as upgrades, a tug sound and jolt, and a person flying it.
 3. **The airlock.** The *Tern*'s interior with gravity and the grounded walker,
    an airlock that cycles, and the handover to zero-g outside (gap 3). Oxygen,
    suit power and propellant in Decay, with a HUD in Weave. A test walks into the

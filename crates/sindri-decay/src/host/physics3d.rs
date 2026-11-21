@@ -20,6 +20,14 @@ impl WorldHost<'_> {
         ) {
             return self.physics3d_character(call, path, args);
         }
+        if matches!(
+            call,
+            Physics3dCall::SetDistance
+                | Physics3dCall::SetJointEnabled
+                | Physics3dCall::JointEnabled
+        ) {
+            return self.physics3d_joint(call, path, args);
+        }
         if matches!(call, Physics3dCall::Layer | Physics3dCall::Mask) {
             return self.physics3d_layers(call, path, args);
         }

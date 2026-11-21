@@ -160,6 +160,21 @@ pub(super) const TYPES: &[TypeEntry] = &[
                 &[],
                 "Sorted unique other active entities that left sensor contact with this script's entity in the last successful 3D step. Removed or inactive handles are filtered; the snapshot is not drained.",
             ),
+            call(
+                "set_distance",
+                &["joint", "max_distance"],
+                "Tunes the length of an authored 3D distance joint (a rope) for the next fixed synchronization: shorten it step by step to reel a body in. Distance must be finite and positive. Works while suspended or before endpoints are built; keeps the solver constraint, its anchors and body motion. Requires 3D physics and a sindri.physics3d.distance_joint on the owner.",
+            ),
+            call(
+                "set_joint_enabled",
+                &["joint", "enabled"],
+                "Suspends or reconnects an authored 3D distance joint at the next fixed synchronization: let go of a rope, then catch on it again. Keeps the owner, endpoints, length, anchors and body motion. Requires 3D physics and a sindri.physics3d.distance_joint on the owner.",
+            ),
+            call(
+                "joint_enabled",
+                &["joint"],
+                "Reads the authored enabled flag of a 3D distance joint, including before synchronization. True does not guarantee live endpoints: missing, inactive or bodiless endpoints still suspend the constraint. Requires 3D physics and a sindri.physics3d.distance_joint on the owner.",
+            ),
         ],
     },
     TypeEntry {

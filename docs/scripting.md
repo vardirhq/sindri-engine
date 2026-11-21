@@ -1222,6 +1222,14 @@ a person who has not clicked yet.
 | `Physics3d.collision_stopped()` | `List<Entity>` |
 | `Physics3d.sensor_entered()` | `List<Entity>` |
 | `Physics3d.sensor_exited()` | `List<Entity>` |
+| `Physics3d.set_distance(joint, max_distance)` | nothing |
+| `Physics3d.set_joint_enabled(joint, enabled: bool)` | nothing |
+| `Physics3d.joint_enabled(joint)` | `bool` |
+
+`set_distance`, `set_joint_enabled` and `joint_enabled` edit and read an
+authored `sindri.physics3d.distance_joint` on the owner entity, validated
+before writing and applied at the next fixed synchronization, as the 2D joint
+controls are; see `docs/physics.md`.
 
 `layer(name)` selects a named bit from the active authored
 `sindri.physics3d.world`; `mask(names)` combines those bits with OR. The first

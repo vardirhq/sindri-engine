@@ -55,6 +55,7 @@ pub struct ScenePhysics3d {
     voxels: SceneVoxelCollision3d,
     characters: crate::characters3d::SceneCharacters3d,
     pub(crate) models: crate::ModelCollisionBindings3d,
+    joints: crate::physics_joints3d::SceneJoints3d,
 }
 
 #[derive(Clone, PartialEq)]
@@ -77,6 +78,7 @@ impl ScenePhysics3d {
             voxels: SceneVoxelCollision3d::default(),
             characters: crate::characters3d::SceneCharacters3d::default(),
             models: crate::ModelCollisionBindings3d::default(),
+            joints: crate::physics_joints3d::SceneJoints3d::default(),
         })
     }
     /// Replaces host-resolved coefficients; active references validate next step.
@@ -174,6 +176,7 @@ impl ScenePhysics3d {
         )?;
         materials::apply(world, components, &self.materials, &mut plan)?;
         let characters = crate::characters3d::SceneCharacters3d::plan(world, components)?;
+        let joints = self.joints.plan(world, components)?;
         let mut reaches = self.reaches(world, &plan, gravity, delta.as_secs_f32());
         reaches.extend(self.characters.reaches(world, &characters)?);
         let voxels = self.voxels.plan_authored(
@@ -188,6 +191,7 @@ impl ScenePhysics3d {
         self.synchronize(world, plan)?;
         self.characters.commit(characters);
         self.voxels.commit(&mut self.world, voxels)?;
+        self.joints.commit(world, &mut self.world, joints)?;
         self.world.finish_synchronize();
         self.characters.hold(world, &mut self.world)?;
         self.events = self.world.step(delta)?;

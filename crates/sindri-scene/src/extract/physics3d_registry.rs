@@ -10,6 +10,14 @@ use crate::{
 };
 
 pub(super) fn register(components: &mut ComponentSchemaRegistry) -> Result<(), SceneExtractError> {
+    components.register_with_default::<crate::DistanceJoint3dComponent>(
+        "Distance Joint 3D",
+        serde_json::json!(crate::DistanceJoint3dComponent::default()),
+    )?;
+    components.describe::<crate::DistanceJoint3dComponent>([
+        ("first", FieldMeaning::Entity),
+        ("second", FieldMeaning::Entity),
+    ])?;
     components.register_with_default::<RigidBody3dComponent>(
         "Rigid Body 3D",
         serde_json::json!(RigidBody3d::default()),

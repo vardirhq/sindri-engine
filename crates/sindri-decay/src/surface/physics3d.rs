@@ -28,6 +28,9 @@ pub(crate) enum Physics3dCall {
     CollisionStopped,
     SensorEntered,
     SensorExited,
+    SetDistance,
+    SetJointEnabled,
+    JointEnabled,
 }
 
 pub(crate) const CALLS: &[(&str, Physics3dCall)] = &[
@@ -51,6 +54,9 @@ pub(crate) const CALLS: &[(&str, Physics3dCall)] = &[
     ("collision_stopped", Physics3dCall::CollisionStopped),
     ("sensor_entered", Physics3dCall::SensorEntered),
     ("sensor_exited", Physics3dCall::SensorExited),
+    ("set_distance", Physics3dCall::SetDistance),
+    ("set_joint_enabled", Physics3dCall::SetJointEnabled),
+    ("joint_enabled", Physics3dCall::JointEnabled),
 ];
 
 pub(crate) fn add_surface(environment: &mut Environment) {
@@ -91,6 +97,9 @@ pub(crate) fn add_surface(environment: &mut Environment) {
             Physics3dCall::SetVelocity
             | Physics3dCall::SetAngularVelocity
             | Physics3dCall::ApplyImpulse => (vec![entity(), Type::Vec3], Type::Unit),
+            Physics3dCall::SetDistance => (vec![entity(), Type::Number], Type::Unit),
+            Physics3dCall::SetJointEnabled => (vec![entity(), Type::Bool], Type::Unit),
+            Physics3dCall::JointEnabled => (vec![entity()], Type::Bool),
             _ => (vec![], Type::array_of(entity())),
         };
         physics = physics.with_function(

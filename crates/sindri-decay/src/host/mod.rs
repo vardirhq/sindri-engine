@@ -37,6 +37,7 @@ mod physics;
 mod physics3d;
 mod physics3d_character;
 mod physics3d_character_snapshot;
+mod physics3d_joints;
 mod physics3d_layers;
 mod physics3d_motion;
 mod physics3d_query;

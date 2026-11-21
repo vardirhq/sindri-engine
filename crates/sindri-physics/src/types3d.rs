@@ -2,6 +2,9 @@
 
 use serde::{Deserialize, Serialize};
 
+use sindri_core::EntityId;
+
+use crate::PhysicsError;
 use crate::shared::{CollisionLayers, RigidBodyKind};
 
 /// The 3D body model uses XYZ vectors and `[x, y, z, w]` unit quaternions.
@@ -106,5 +109,46 @@ impl Collider3d {
             },
             ..Self::sphere(1.0)
         }
+    }
+}
+
+/// A hard maximum-distance constraint between anchors on two 3D bodies: a rope.
+///
+/// The anchors may come closer and the bodies turn freely, but the solver will
+/// not let the anchors separate beyond `max_distance`. Anchors are body-local
+/// world units without transform scale; zero is the body's origin.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct DistanceJoint3d {
+    pub first: EntityId,
+    pub second: EntityId,
+    pub max_distance: f32,
+    pub first_anchor: [f32; 3],
+    pub second_anchor: [f32; 3],
+}
+
+impl DistanceJoint3d {
+    /// A rope between the two bodies' origins.
+    pub const fn new(first: EntityId, second: EntityId, max_distance: f32) -> Self {
+        Self {
+            first,
+            second,
+            max_distance,
+            first_anchor: [0.0; 3],
+            second_anchor: [0.0; 3],
+        }
+    }
+
+    /// Checks the joint without needing a world.
+    ///
+    /// # Errors
+    /// Identical endpoints, a non-positive or non-finite distance, or a
+    /// non-finite anchor.
+    pub fn validate(&self) -> Result<(), PhysicsError> {
+        if self.first == self.second {
+            return Err(PhysicsError::JointToSelf(self.first));
+        }
+        crate::validate::positive("distance_joint_max_distance", self.max_distance)?;
+        crate::world3d::finite3("distance_joint_first_anchor", self.first_anchor)?;
+        crate::world3d::finite3("distance_joint_second_anchor", self.second_anchor)
     }
 }
