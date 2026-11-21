@@ -752,6 +752,8 @@ Where an object is, how it is turned and how big it is. For an object attached t
 - `rotation`: `Quat` — Parent-relative Quat in x/y/z/w order. Reads copy the stored rotation; whole writes normalize finite nonzero values atomically and preserve position, scale and Z lock. Stored components are readable; change components on a local var and assign it back. Zero/non-finite writes fail without mutation.
 - `rotation_z`: `number` — How far the object is turned, in radians. A full turn is `TAU`. This is the turn of a flat object in a 2D game; it replaces any 3D turn.
 - `scale`: `Vec3` — How big the object is on each axis; 1 is its normal size.
+- `to_local(point: Vec3)` → `Vec3` — A world-space Vec3 point measured in this object's own space: its position subtracted, its world rotation undone and its world scale divided out. What a point on a moving, turning ship is in the ship's own blocks. Reads only; zero scale is an error.
+- `to_world(point: Vec3)` → `Vec3` — A Vec3 point in this object's own space placed in the world: scaled, turned and moved by the object's world transform, parents included. The inverse of `to_local`. Reads only.
 - `up`: `Vec3` (read-only) — Read-only unit world-space +Y direction, with parent rotation included and scale ignored.
 - `world_position`: `Vec3` — Where the object is in the world, even when it is attached to a parent. Use it to compare positions of objects in different places.
 - `yaw`: `number` — Which way a 3D object faces on the ground, in radians: a turn about the up (Y) axis. At zero it faces -Z, and positive turns it left. It moves along `Vec3(-sin(yaw), 0.0, -cos(yaw))`, and faces a point `d` away with `atan2(-d.x, -d.z)`. Changing it keeps its pitch and roll.

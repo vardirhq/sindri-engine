@@ -363,3 +363,46 @@ fn an_orbit_under_a_singular_parent_is_refused_without_mutation() {
     assert!(failures.contains("zero scale"), "{failures}");
     assert_eq!(world.get(actor).unwrap().transform_3d, Some(original));
 }
+
+/// `to_local` and `to_world` measure points in the entity's own space,
+/// turn and scale included, and undo each other.
+#[test]
+fn a_script_measures_points_in_a_turned_scaled_entitys_own_space() {
+    let mut placed = Transform3D {
+        position: [4.0, -1.0, 2.0],
+        scale: [0.5, 0.5, 0.5],
+        ..Transform3D::default()
+    };
+    // A quarter turn left: its own -Z (forward) faces world -X.
+    placed.set_yaw_pitch_roll_radians([std::f32::consts::FRAC_PI_2, 0.0, 0.0]);
+    let (mut world, actor, registry) = fixture(placed);
+    let failures = run(
+        &mut world,
+        &registry,
+        r#"
+        // Two blocks forward of the origin, in half-metre blocks: one metre
+        // along world -X.
+        let ahead = this.transform.to_world(Vec3(0.0, 0.0, -2.0));
+        if abs(ahead.x - 3.0) > 0.0001 || abs(ahead.y + 1.0) > 0.0001 || abs(ahead.z - 2.0) > 0.0001 {
+            print("to_world " + ahead.x + " " + ahead.y + " " + ahead.z);
+        }
+        let back = this.transform.to_local(ahead);
+        if abs(back.z + 2.0) > 0.0001 || abs(back.x) > 0.0001 || abs(back.y) > 0.0001 {
+            print("to_local " + back.x + " " + back.y + " " + back.z);
+        }
+        "#,
+    );
+    assert!(failures.is_empty(), "{failures}");
+    near(
+        world.world_transform(actor).unwrap().position,
+        [4.0, -1.0, 2.0],
+    );
+}
+
+#[test]
+fn to_local_and_to_world_typecheck_as_vec3() {
+    let result = check_source(
+        "script S { fn update(dt: number) { let p: Vec3 = this.transform.to_local(Vec3(1.0, 2.0, 3.0)); let q: Vec3 = this.transform.to_world(p); } }",
+    );
+    assert!(result.compiles(), "{:?}", result.diagnostics);
+}

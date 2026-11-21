@@ -405,6 +405,11 @@ def wreckage():
             },
             "sindri.physics3d.voxel_body": {"friction": 0.6, "restitution": 0.1, "layers": SOLID},
             "sindri.physics3d.rigid_body": body("dynamic", angular=(0.0, 0.01, 0.0)),
+            # Its gravity holds inside, measured in its own blocks; it is open
+            # at both ends, so there is no air.
+            "sindri.tags": {"tags": ["hull"]},
+            "sindri.script": hull_script(min_x=1.0, max_x=23.0, min_y=1.0, max_y=7.0,
+                                         min_z=1.0, max_z=9.0, air=False),
         },
     ))
     out.append(entity("salvage", "Salvage", **{
@@ -431,12 +436,21 @@ def wall_with_door(id_, lo, hi):
     return pieces
 
 
-def zone(id_, bounds):
-    """An invisible box the scripts ask whether the diver is inside."""
+def hull_script(**properties):
+    """A `Hull` (`scripts/hull.decay`): an interior the diver can be aboard."""
+    return {"source": "scripts/hull.decay", "script": "Hull", "properties": properties}
+
+
+def zone(id_, bounds, airlock=False):
+    """An invisible box in the world that is a hull: the ship's gravity and
+    air inside it. The chamber's air follows the airlock's pressure."""
     lo, hi = bounds
     centre = tuple((a + b) / 2 for a, b in zip(lo, hi))
     size = tuple(b - a for a, b in zip(lo, hi))
-    return entity(id_, position=centre, scale=size, **{"sindri.tags": {"tags": ["zone"]}})
+    return entity(id_, position=centre, scale=size, **{
+        "sindri.tags": {"tags": ["zone", "hull"]},
+        "sindri.script": hull_script(airlock=airlock),
+    })
 
 
 def door(id_, x):
@@ -520,7 +534,7 @@ def ship():
         zone("cabin-zone", CABIN),
         # The chamber's air and gravity reach through the inner doorway to the
         # cabin's, so walking between them never passes through neither.
-        zone("chamber-zone", ((CABIN[1][0], CHAMBER[0][1], CHAMBER[0][2]), CHAMBER[1])),
+        zone("chamber-zone", ((CABIN[1][0], CHAMBER[0][1], CHAMBER[0][2]), CHAMBER[1]), airlock=True),
         entity("spawn", "Spawn", position=SPAWN),
     ]
     out[-3]["name"] = "CabinZone"

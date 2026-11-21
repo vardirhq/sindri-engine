@@ -6,11 +6,15 @@ use decay_semantic::{FunctionType, HostType, Type};
 pub(crate) enum TransformCall {
     LookAt,
     RotateAround,
+    ToLocal,
+    ToWorld,
 }
 
 pub(crate) const CALLS: &[(&str, TransformCall)] = &[
     ("look_at", TransformCall::LookAt),
     ("rotate_around", TransformCall::RotateAround),
+    ("to_local", TransformCall::ToLocal),
+    ("to_world", TransformCall::ToWorld),
 ];
 
 pub(crate) fn add_calls(mut ty: HostType) -> HostType {
@@ -19,10 +23,15 @@ pub(crate) fn add_calls(mut ty: HostType) -> HostType {
             *name,
             FunctionType {
                 params: match call {
-                    TransformCall::LookAt => vec![Type::Vec3],
+                    TransformCall::LookAt | TransformCall::ToLocal | TransformCall::ToWorld => {
+                        vec![Type::Vec3]
+                    }
                     TransformCall::RotateAround => vec![Type::Vec3, Type::Vec3, Type::Number],
                 },
-                return_type: Type::Unit,
+                return_type: match call {
+                    TransformCall::ToLocal | TransformCall::ToWorld => Type::Vec3,
+                    TransformCall::LookAt | TransformCall::RotateAround => Type::Unit,
+                },
             },
         );
     }

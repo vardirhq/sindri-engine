@@ -32,6 +32,33 @@ impl WorldHost<'_> {
             .get(entity)
             .and_then(|data| data.transform_3d)
             .ok_or_else(|| error("entity has no transform"))?;
+        if matches!(call, TransformCall::ToLocal | TransformCall::ToWorld) {
+            let placed = self
+                .world
+                .world_transform(entity)
+                .ok_or_else(|| error("entity has no transform"))?;
+            let [point] = args else {
+                return Err(error("takes one Vec3 point"));
+            };
+            let point = vector(path, point)?;
+            let out = if matches!(call, TransformCall::ToWorld) {
+                let scaled = [0, 1, 2].map(|axis| point[axis] * placed.scale[axis]);
+                let turned = rotate(placed.rotation, scaled);
+                [0, 1, 2].map(|axis| placed.position[axis] + turned[axis])
+            } else {
+                if placed.scale.iter().any(|axis| axis.abs() <= f32::EPSILON) {
+                    return Err(error("cannot measure from an entity with zero scale"));
+                }
+                let [x, y, z, w] = placed.rotation;
+                let offset = [0, 1, 2].map(|axis| point[axis] - placed.position[axis]);
+                let turned = rotate([-x, -y, -z, w], offset);
+                [0, 1, 2].map(|axis| turned[axis] / placed.scale[axis])
+            };
+            if !out.iter().all(|axis| axis.is_finite()) {
+                return Err(error("the point is out of range"));
+            }
+            return Ok(Some(Value::Vec3(out.map(f64::from))));
+        }
         let parent = self.world.parent_space(entity);
         if matches!(call, TransformCall::RotateAround)
             && parent.scale.iter().any(|v| v.abs() <= f32::EPSILON)
@@ -142,4 +169,28 @@ impl WorldHost<'_> {
         data.transform_3d = Some(transform);
         Ok(true)
     }
+}
+
+/// A vector turned by a quaternion in `[x, y, z, w]` order, normalized first.
+// x, y, z, w and t are the quaternion formula's own names.
+#[allow(clippy::many_single_char_names)]
+fn rotate(rotation: [f32; 4], vector: [f32; 3]) -> [f32; 3] {
+    let length = rotation.iter().map(|part| part * part).sum::<f32>().sqrt();
+    let [x, y, z, w] = if length > f32::EPSILON {
+        rotation.map(|part| part / length)
+    } else {
+        [0.0, 0.0, 0.0, 1.0]
+    };
+    let [vx, vy, vz] = vector;
+    // t = 2 (q.xyz x v); v' = v + w t + q.xyz x t
+    let t = [
+        2.0 * (y * vz - z * vy),
+        2.0 * (z * vx - x * vz),
+        2.0 * (x * vy - y * vx),
+    ];
+    [
+        vx + w * t[0] + (y * t[2] - z * t[1]),
+        vy + w * t[1] + (z * t[0] - x * t[2]),
+        vz + w * t[2] + (x * t[1] - y * t[0]),
+    ]
 }
