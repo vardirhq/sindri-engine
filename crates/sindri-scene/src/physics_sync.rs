@@ -39,6 +39,8 @@ pub enum PhysicsSyncError {
     MissingModelCollision(EntityId, sindri_core::AssetId),
     #[error("model collider entity {0:?}: {1}")]
     InvalidModelCollider(EntityId, &'static str),
+    #[error("voxel body entity {0:?}: {1}")]
+    InvalidVoxelBody(EntityId, &'static str),
     #[error("model collider entity {0:?}: {1}")]
     ModelCollisionGeometry(EntityId, sindri_physics::TriangleMeshError3d),
     #[error("convex model collider entity {0:?}: {1}")]

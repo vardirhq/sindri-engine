@@ -5,8 +5,9 @@
 use drift::Run;
 use sindri_assets::{AssetBytes, AssetDecoder, ModelAssetDecoder};
 use sindri_core::AssetId;
+use sindri_core::TileSetDocument;
 use sindri_render::{FrameCommand, Viewport};
-use sindri_scene::{CameraView, TextureBindings, referenced_models};
+use sindri_scene::{CameraView, SceneRuntime, TextureBindings, TileSetBindings, referenced_models};
 
 /// Loads every model the scene names and binds it for drawing, as a host does
 /// before its first frame; a headless run only loads what collides.
@@ -38,22 +39,34 @@ fn drawn(game: &mut Run) -> (usize, usize) {
     let passes = game
         .run
         .draw_with(|scene, world, _| {
+            // The ships' block set, bound as a host binds it.
+            let mut tile_sets = TileSetBindings::new();
+            let blocks = std::fs::read_to_string(drift::project().join("assets/blocks.tileset"))
+                .map_err(|error| error.to_string())?;
+            tile_sets
+                .bind(
+                    "blocks.tileset",
+                    TileSetDocument::from_json(&blocks).map_err(|error| error.to_string())?,
+                )
+                .map_err(|error| error.to_string())?;
             let frame = scene
-                .extract(
+                .extract_animated(
                     world,
                     Viewport::new(1280, 720),
                     CameraView::default(),
                     &TextureBindings::new(),
+                    SceneRuntime::default().with_tile_sets(&tile_sets),
                 )
                 .map_err(|error| error.to_string())?;
             let drawn = frame
                 .passes()
                 .iter()
                 .filter(|pass| {
-                    matches!(
-                        pass.command,
-                        FrameCommand::TexturedCube { .. } | FrameCommand::Model { .. }
-                    )
+                    !pass.shadow_only
+                        && matches!(
+                            pass.command,
+                            FrameCommand::TexturedCube { .. } | FrameCommand::Model { .. }
+                        )
                 })
                 .count();
             Ok((drawn, sindri_scene::UiTextSizes::new()))

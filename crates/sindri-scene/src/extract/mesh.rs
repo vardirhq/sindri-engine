@@ -30,11 +30,13 @@ impl SceneExtractor {
             let model = transform_matrix(transform);
             // A cube is the unit box about its origin; one wholly out of view,
             // and out of the light's while shadows are on, is not drawn.
-            if mesh.primitive == MeshPrimitive::Cube
-                && culling.is_some_and(|culling| {
-                    !culling.keeps(model, glam::Vec3::splat(-0.5), glam::Vec3::splat(0.5))
-                })
-            {
+            let culled = match (mesh.primitive, culling) {
+                (MeshPrimitive::Cube, Some(culling)) => {
+                    culling.decide(model, glam::Vec3::splat(-0.5), glam::Vec3::splat(0.5))
+                }
+                _ => super::frustum::Culled::Seen,
+            };
+            if culled == super::frustum::Culled::Dropped {
                 continue;
             }
             let command = match mesh.primitive {
@@ -75,6 +77,7 @@ impl SceneExtractor {
             if !self.apply_material(world, entity, &mut pass)? {
                 continue;
             }
+            pass.shadow_only = culled == super::frustum::Culled::ShadowOnly;
             frame.push(pass);
         }
         cache.retain(&live);

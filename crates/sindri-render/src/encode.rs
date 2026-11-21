@@ -325,7 +325,7 @@ fn encode_passes<'p>(
         textures,
     } = renderers;
     for pass in passes {
-        if pass.clip.is_some_and(|[_, _, w, h]| w == 0 || h == 0) {
+        if pass.shadow_only || pass.clip.is_some_and(|[_, _, w, h]| w == 0 || h == 0) {
             continue;
         }
         sprite_renderer.set_clip(pass.clip);

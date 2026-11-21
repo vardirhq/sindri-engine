@@ -215,6 +215,15 @@ across) is as sharp at its far edge as at its start. Screen elements stay where
 they are. A script that keeps a position of its own across steps should keep it
 relative to something in the world, or add `moved` back.
 
+## Built worlds
+
+`"generator": { "kind": "built" }` generates nothing: the world is only the
+blocks placed in it, its `edits`, so a ship, a station or a wreck is written
+block by block. It draws, collides and is edited like any other voxel world,
+and its entity's transform places, turns and scales it: at a scale of 0.5 its
+blocks are half a metre. With `sindri.physics3d.voxel_body` beside it, the
+whole structure is one rigid body (`docs/physics.md`).
+
 ## Blocks
 
 `builtin:blocks` is the block set the engine ships, with its art compiled into

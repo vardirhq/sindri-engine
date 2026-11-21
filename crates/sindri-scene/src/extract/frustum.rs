@@ -75,6 +75,17 @@ fn rect_in_clip(clip: &[glam::Vec4; 4]) -> bool {
         || clip.iter().all(|point| point.y > point.w))
 }
 
+/// What culling makes of one cube or model.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(super) enum Culled {
+    /// In the camera's view: drawn.
+    Seen,
+    /// Out of view, but able to cast a shadow into it: shadow map only.
+    ShadowOnly,
+    /// Neither: not drawn at all.
+    Dropped,
+}
+
 /// What one frame's cubes and models are culled against: the world camera's
 /// view, and, while directional shadows are on, the light's shadow view, so a
 /// thing out of sight that still casts a shadow into it keeps casting.
@@ -88,17 +99,24 @@ impl Culling {
         Self { camera, shadow }
     }
 
-    /// Whether a box `min`..`max` in an object's own space, placed by
-    /// `model`, could show or cast a shadow. Conservative: the test is on the
-    /// world-space box around the placed one, against each view's planes.
-    pub(super) fn keeps(&self, model: Mat4, min: Vec3, max: Vec3) -> bool {
+    /// What becomes of a box `min`..`max` in an object's own space, placed by
+    /// `model`: seen, only casting a shadow into the view, or neither.
+    /// Conservative: the test is on the world-space box around the placed
+    /// one, against each view's planes.
+    pub(super) fn decide(&self, model: Mat4, min: Vec3, max: Vec3) -> Culled {
         let Some((low, high)) = world_box(model, min, max) else {
-            return true;
+            return Culled::Seen;
         };
-        aabb_in_view(low, high, self.camera)
-            || self
-                .shadow
-                .is_some_and(|shadow| aabb_in_view(low, high, shadow))
+        if aabb_in_view(low, high, self.camera) {
+            Culled::Seen
+        } else if self
+            .shadow
+            .is_some_and(|shadow| aabb_in_view(low, high, shadow))
+        {
+            Culled::ShadowOnly
+        } else {
+            Culled::Dropped
+        }
     }
 }
 

@@ -758,8 +758,9 @@ model-space box, computed once from every vertex in its node placement) is
 placed by its world transform and tested against the world camera's frustum.
 One wholly outside is skipped. While the environment's directional shadows are
 on, the same box is also tested against the light's shadow view, computed by
-the renderer's own `light_view_projection`, so an object out of sight that can
-still cast into the view keeps casting. The test is conservative: a box is
+the renderer's own `light_view_projection`: an object out of sight but inside
+it is kept as a shadow-only pass (`FramePass::shadow_only`), drawn into the
+shadow map and skipped by the colour pass, so it still casts into the view. The test is conservative: a box is
 dropped only when all its corners lie beyond one plane. A frame whose
 environment or light cannot be read culls nothing.
 

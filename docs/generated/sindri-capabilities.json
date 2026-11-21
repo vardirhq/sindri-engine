@@ -2052,6 +2052,30 @@
           "filter": 4294967295,
           "memberships": 4294967295
         },
+        "restitution": 0.0
+      },
+      "display_name": "Voxel Body 3D",
+      "fields": {
+        "friction": 0.5,
+        "layers": {
+          "filter": 4294967295,
+          "memberships": 4294967295
+        },
+        "restitution": 0.0
+      },
+      "meanings": {},
+      "schema_version": 1,
+      "type_name": "sindri.physics3d.voxel_body"
+    },
+    {
+      "addable": true,
+      "apply": {},
+      "default_payload": {
+        "friction": 0.5,
+        "layers": {
+          "filter": 4294967295,
+          "memberships": 4294967295
+        },
         "margin": 2.0,
         "restitution": 0.0
       },
@@ -3909,9 +3933,11 @@
           "kind": "choice",
           "options": [
             "layered_terrain",
-            "natural_terrain"
+            "natural_terrain",
+            "built"
           ],
           "variants": {
+            "built": {},
             "layered_terrain": {
               "base_height": 3,
               "deep_voxel": 3,

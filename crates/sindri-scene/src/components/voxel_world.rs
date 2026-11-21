@@ -34,11 +34,14 @@ pub enum VoxelGeneratorDocument {
         subsurface_depth: u32,
     },
     NaturalTerrain(NaturalTerrainDocument),
+    /// Nothing generated: the world is only the blocks placed in it, its
+    /// `edits`. What a structure is made as: a ship, a station, a wreck.
+    Built {},
 }
 
 impl VoxelGeneratorDocument {
     /// Every spelling of `kind`, in the order a picker offers them.
-    pub const KINDS: [&'static str; 2] = ["layered_terrain", "natural_terrain"];
+    pub const KINDS: [&'static str; 3] = ["layered_terrain", "natural_terrain", "built"];
 }
 
 impl Default for VoxelGeneratorDocument {

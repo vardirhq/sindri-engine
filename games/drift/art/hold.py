@@ -22,6 +22,8 @@ from pathlib import Path
 
 from PIL import Image, ImageDraw
 
+import ship as ships
+
 HERE = Path(__file__).resolve().parent
 ASSETS = HERE.parent / "assets"
 
@@ -392,6 +394,19 @@ def wreckage():
             "sindri.physics3d.rigid_body": body("dynamic", angular=(0.0, 0.15, 0.05)),
             "sindri.tags": {"tags": ["salvage"]},
         }))
+    # A shuttle of half-metre blocks, parked off to port: one rigid body.
+    edits = ships.shuttle()
+    out.append(entity(
+        "shuttle", "Shuttle", position=(13.0, -2.0, -17.0), scale=(0.5, 0.5, 0.5),
+        **{
+            "sindri.voxel_world": {
+                "generator": {"kind": "built"}, "blocks": "blocks.tileset", "edits": edits,
+                "focus": [0, 0, 0], "render_radius": 1, "vertical_radius": 1, "layer": 0,
+            },
+            "sindri.physics3d.voxel_body": {"friction": 0.6, "restitution": 0.1, "layers": SOLID},
+            "sindri.physics3d.rigid_body": body("dynamic", angular=(0.0, 0.01, 0.0)),
+        },
+    ))
     out.append(entity("salvage", "Salvage", **{
         "sindri.script": {"source": "scripts/salvage.decay", "script": "Salvage"}}))
     return out
@@ -535,9 +550,11 @@ def scene():
             "ambient_color": [0.55, 0.65, 0.85],
             "ambient_intensity": 0.18,
             "bloom": {"enabled": True, "intensity": 0.6, "knee": 0.2, "passes": 4, "threshold": 0.8},
+            # A near star: hard light and hard shadow, the way sunlight is in vacuum.
+            "shadows": {"enabled": True, "map_size": 2048, "distance": 40.0, "bias": 0.002},
         }}),
         entity("sun", "Starlight", rotation=(-0.25, 0.35, 0.0, 0.9),
-               **{"sindri.light": {"kind": "directional", "color": [0.7, 0.78, 1.0], "intensity": 0.15}}),
+               **{"sindri.light": {"kind": "directional", "color": [1.0, 0.96, 0.9], "intensity": 1.3}}),
     ]
     # The hold's six walls.
     # The aft bulkhead, with the airlock's outer door through it.

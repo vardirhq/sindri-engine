@@ -64,6 +64,9 @@ struct Authored {
     pieces: Vec<Collider3d>,
     model: Option<crate::model_collision3d::PreparedModelCollider3d>,
     convex: Option<crate::model_convex_collision3d::PreparedModelConvex3d>,
+    /// A voxel body keeps its motion when its blocks change and its
+    /// colliders are rebuilt; other bodies restart from their authored motion.
+    keeps_motion: bool,
 }
 
 impl ScenePhysics3d {
@@ -246,6 +249,14 @@ impl ScenePhysics3d {
                 }
                 continue;
             }
+            let motion = (authored.keeps_motion && self.world.contains(entity))
+                .then(|| {
+                    Some((
+                        self.world.linear_velocity(entity).ok()?,
+                        self.world.angular_velocity(entity).ok()?,
+                    ))
+                })
+                .flatten();
             if self.world.contains(entity) {
                 self.remove(entity);
             }
@@ -262,6 +273,12 @@ impl ScenePhysics3d {
                 )?;
             } else {
                 self.world.insert_body(entity, body, &authored.pieces)?;
+            }
+            if let Some((linear, angular)) = motion
+                && body.kind != RigidBodyKind::Static
+            {
+                self.world.set_linear_velocity(entity, linear)?;
+                self.world.set_angular_velocity(entity, angular)?;
             }
             self.registered.insert(entity, authored);
             self.agreed.insert(entity, pose);

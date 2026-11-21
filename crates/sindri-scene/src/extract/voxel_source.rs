@@ -31,6 +31,8 @@ const TERRAIN_SAMPLE_SCALE: i32 = 8;
 pub(super) enum SceneTerrain {
     Layered(LayeredTerrain),
     Natural(NaturalTerrain),
+    /// Air everywhere: a built world is its edits alone.
+    Built,
 }
 
 impl VoxelSource for SceneTerrain {
@@ -38,6 +40,7 @@ impl VoxelSource for SceneTerrain {
         match self {
             Self::Layered(terrain) => terrain.voxel(coord),
             Self::Natural(terrain) => terrain.voxel(coord),
+            Self::Built => VoxelId::AIR,
         }
     }
 
@@ -45,6 +48,7 @@ impl VoxelSource for SceneTerrain {
         match self {
             Self::Layered(terrain) => terrain.generate_section(section),
             Self::Natural(terrain) => terrain.generate_section(section),
+            Self::Built => VoxelSection::default(),
         }
     }
 }
@@ -117,6 +121,7 @@ pub(super) fn terrain_source(
         }
         VoxelGeneratorDocument::NaturalTerrain(document) => natural(document, &defined)
             .map(|settings| SceneTerrain::Natural(NaturalTerrain::new(settings))),
+        VoxelGeneratorDocument::Built {} => Ok(SceneTerrain::Built),
     }
 }
 

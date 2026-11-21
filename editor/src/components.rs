@@ -365,6 +365,11 @@ const KNOWN: &[Known] = &[
         icon: icons::PHYSICS,
     },
     Known {
+        type_name: "sindri.physics3d.voxel_body",
+        family: Family::Physics,
+        icon: icons::PHYSICS,
+    },
+    Known {
         type_name: "sindri.physics3d.distance_joint",
         family: Family::Physics,
         icon: icons::PHYSICS,

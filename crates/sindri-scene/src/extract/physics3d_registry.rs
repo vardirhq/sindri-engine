@@ -10,6 +10,10 @@ use crate::{
 };
 
 pub(super) fn register(components: &mut ComponentSchemaRegistry) -> Result<(), SceneExtractError> {
+    components.register_with_default::<crate::VoxelBody3dComponent>(
+        "Voxel Body 3D",
+        serde_json::json!(crate::VoxelBody3dComponent::default()),
+    )?;
     components.register_with_default::<crate::DistanceJoint3dComponent>(
         "Distance Joint 3D",
         serde_json::json!(crate::DistanceJoint3dComponent::default()),

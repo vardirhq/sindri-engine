@@ -151,7 +151,7 @@ const BLOCK: FieldMeaning = FieldMeaning::Block {
 /// What each generator holds, so switching one to the other writes the
 /// fields the arriving one needs and drops the ones it does not.
 fn describe_generators(components: &mut ComponentSchemaRegistry) -> Result<(), SceneExtractError> {
-    let [layered, natural] = VoxelGeneratorDocument::KINDS;
+    let [layered, natural, built] = VoxelGeneratorDocument::KINDS;
     let fields = |generator: VoxelGeneratorDocument| {
         let mut value = serde_json::to_value(generator).expect("a generator serializes");
         if let Some(object) = value.as_object_mut() {
@@ -169,6 +169,7 @@ fn describe_generators(components: &mut ComponentSchemaRegistry) -> Result<(), S
                     NaturalTerrainDocument::default(),
                 )),
             ),
+            (built, fields(VoxelGeneratorDocument::Built {})),
         ],
     )?;
     Ok(())

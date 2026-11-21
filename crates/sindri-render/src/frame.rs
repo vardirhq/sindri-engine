@@ -165,6 +165,9 @@ pub struct FramePass {
     pub sidedness: crate::MaterialSidedness,
     /// Imported-model silhouette RGBA; finite channels in 0..=1.
     pub occluded_color: Option<[f32; 4]>,
+    /// Drawn into the directional shadow map only: out of the view, but where
+    /// it may cast a shadow into it. The colour pass skips it.
+    pub shadow_only: bool,
 }
 
 impl FramePass {
@@ -190,6 +193,7 @@ impl FramePass {
             material: None,
             occluded_color: None,
             sidedness: crate::MaterialSidedness::Inherit,
+            shadow_only: false,
         }
     }
 }
