@@ -164,6 +164,16 @@ pub(super) const TYPES: &[TypeEntry] = &[
                 "Faces a world-space Vec3 target with Y up and zero world roll; preserves position and scale, including under a parent. Vertical targets use yaw zero. Coincident/non-finite targets are errors with no mutation.",
             ),
             call(
+                "to_local",
+                &["point"],
+                "A world-space Vec3 point measured in this object's own space: its position subtracted, its world rotation undone and its world scale divided out. What a point on a moving, turning ship is in the ship's own blocks. Reads only; zero scale is an error.",
+            ),
+            call(
+                "to_world",
+                &["point"],
+                "A Vec3 point in this object's own space placed in the world: scaled, turned and moved by the object's world transform, parents included. The inverse of `to_local`. Reads only.",
+            ),
+            call(
                 "rotate_around",
                 &["pivot", "axis", "radians"],
                 "Rotates position and orientation around a world-space Vec3 pivot and nonzero Vec3 axis by radians. Normalizes the axis and preserves scale. Invalid input/output, a singular parent scale, or movement off a Z-locked layer is an error with no mutation.",

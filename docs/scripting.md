@@ -145,6 +145,8 @@ interprets, and `WorldHost` is the only place that gives them a meaning.
 | `this.transform.up.{x,y,z}` | `number` | yes | no |
 | `this.transform.look_at(target)` | unit | call | — |
 | `this.transform.rotate_around(pivot, axis, radians)` | unit | call | — |
+| `this.transform.to_local(point)` | `Vec3` | call | — |
+| `this.transform.to_world(point)` | `Vec3` | call | — |
 
 **A vector member is reached whole or one component at a time.**
 `this.transform.position` is a `Vec3` a script can hold, add to and store back
@@ -210,6 +212,13 @@ axis is refused. Inputs must be finite and fit the engine's `f32` range; invalid
 non-finite output, or an orbit that changes a Z-locked layer leaves the transform
 unchanged. These calls change the world immediately, with physics following
 its normal synchronization boundary.
+
+`transform.to_local(point: Vec3)` measures a world point in the entity's own
+space (its world position subtracted, its world rotation undone, its world
+scale divided out) and `transform.to_world(point: Vec3)` places a point in its
+own space back in the world; each is the other's inverse. They read only. A
+script asks where on a moving, turning ship something is, or where a spot on
+the ship now lies, with them. A zero scale axis makes `to_local` an error.
 
 ```decay
 this.transform.look_at(goal.transform.world_position);
@@ -422,6 +431,8 @@ table above lists, reaching the same numbers.
 | `this.entity.transform.up.{x,y,z}` | `number` | yes | no |
 | `this.entity.transform.look_at(target)` | unit | call | — |
 | `this.entity.transform.rotate_around(pivot, axis, radians)` | unit | call | — |
+| `this.entity.transform.to_local(point)` | `Vec3` | call | — |
+| `this.entity.transform.to_world(point)` | `Vec3` | call | — |
 | `this.entity.sprite.{tint,color_multiply,color_offset}` | `Color` | yes | yes |
 | `this.entity.sprite.tint.{r,g,b,a}` | `number` | yes | yes |
 | `this.entity.sprite.color_multiply.{r,g,b,a}` | `number` | yes | yes |

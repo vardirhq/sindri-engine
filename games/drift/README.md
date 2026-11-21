@@ -7,6 +7,11 @@ work; this is a game rather than a showcase (`AGENTS.md`).
 
 ## What plays now
 
+Ships are becoming **block-built and drivable** (see the plan's *Block-built
+ships*): a 12 m shuttle of half-metre blocks floats off the wreckage as one
+rigid body, and you can stand and walk aboard it while it flies and turns.
+Every place with gravity is a *hull* (`assets/scripts/hull.decay`).
+
 Stage 4, **the wreckage**: past the hold's forward cargo hatch lies a derelict
 module, a field of drifting debris that tumbles when you hit it, three salvage
 canisters and the stars. G takes salvage in reach; it is stowed when you are

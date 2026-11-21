@@ -1,0 +1,24 @@
+// A hull: somewhere the diver can be aboard.
+//
+// An entity tagged "hull" with this script holds an interior: a box in its own
+// space, from `min` to `max` along each axis. Inside it, the hull's gravity
+// pulls the diver towards its own floor, its air fills their suit, and they
+// walk carried along with it however it moves and turns. A zone fixed in the
+// world is a hull; so is a ship that flies, its interior measured in its blocks.
+// The diver reads these fields; the hull itself does nothing.
+
+script Hull {
+    // The interior, in the hull's own space: a zone's unit box by default.
+    @export let min_x: number = -0.5;
+    @export let min_y: number = -0.5;
+    @export let min_z: number = -0.5;
+    @export let max_x: number = 0.5;
+    @export let max_y: number = 0.5;
+    @export let max_z: number = 0.5;
+    // Whether its gravity holds inside, and whether it holds air: always, or
+    // only while the airlock chamber is at pressure.
+    @export let gravity: bool = true;
+    @export let air: bool = true;
+    @export let airlock: bool = false;
+
+}

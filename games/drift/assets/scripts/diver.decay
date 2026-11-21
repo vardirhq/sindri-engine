@@ -47,13 +47,23 @@ fn qblend(a: Quat, b: Quat, t: number) -> Quat {
     );
 }
 
-// Whether a point is inside a zone: an entity whose scale is its box.
-fn inside(zone: Entity, point: Vec3) -> bool {
-    let centre = zone.transform.world_position;
-    let half = zone.transform.scale * 0.5;
-    return abs(point.x - centre.x) <= half.x
-        && abs(point.y - centre.y) <= half.y
-        && abs(point.z - centre.z) <= half.z;
+// A vector turned by a unit quaternion.
+fn qrot(q: Quat, v: Vec3) -> Vec3 {
+    let t = Vec3(
+        2.0 * (q.y * v.z - q.z * v.y),
+        2.0 * (q.z * v.x - q.x * v.z),
+        2.0 * (q.x * v.y - q.y * v.x)
+    );
+    return Vec3(
+        v.x + q.w * t.x + (q.y * t.z - q.z * t.y),
+        v.y + q.w * t.y + (q.z * t.x - q.x * t.z),
+        v.z + q.w * t.z + (q.x * t.y - q.y * t.x)
+    );
+}
+
+// The opposite turn.
+fn qinv(q: Quat) -> Quat {
+    return Quat(x: -q.x, y: -q.y, z: -q.z, w: q.w);
 }
 
 // A turn of `angle` radians about a unit axis.
@@ -103,6 +113,15 @@ script Diver {
     var yaw: number = 0.0;
     var pitch: number = 0.0;
     var aboard: bool = true;
+    // The hull the diver is aboard, and where they stood in its own space and
+    // in the world at the last step: how far that spot has moved since is how
+    // the hull carries them, its spin included.
+    var hull: Entity = null;
+    var held_local: Vec3 = Vec3(0.0, 0.0, 0.0);
+    var held_world: Vec3 = Vec3(0.0, 0.0, 0.0);
+    var frame_velocity: Vec3 = Vec3(0.0, 0.0, 0.0);
+    // Whether `held_local` and `held_world` were taken last step.
+    var held: bool = false;
 
     fn start() {
         this.eye = World.find("Eye");
@@ -127,19 +146,25 @@ script Diver {
             Pointer.lock();
         }
         let was_aboard = this.aboard;
+        let was_hull = this.hull;
         place();
+        carried(dt, was_hull);
         if this.aboard && !was_aboard {
             upright_from_view();
             this.hold = null;
             print("Drift: gravity");
         }
         if !this.aboard && was_aboard {
-            // Feet leave the deck with the walk's speed, not the push of the
-            // floor holding them up against gravity a moment ago.
-            var velocity = Physics3d.velocity(this.entity);
-            if abs(velocity.y) < 1.0 {
-                velocity.y = 0.0;
-                Physics3d.set_velocity(this.entity, velocity);
+            // Feet leave the deck with the walk's speed and the hull's own
+            // motion, not the push of the floor holding them up a moment ago.
+            if was_hull != null {
+                let up = was_hull.transform.up;
+                let velocity = Physics3d.velocity(this.entity);
+                let relative = velocity - this.frame_velocity;
+                let lift = relative.dot(up);
+                if abs(lift) < 1.0 {
+                    Physics3d.set_velocity(this.entity, velocity - up * lift);
+                }
             }
             print("Drift: weightless");
         }
@@ -194,14 +219,52 @@ script Diver {
         this.eye.transform.rotation = turn;
     }
 
-    // Where the diver is: in the ship's gravity, and in its air.
+    // Where the diver is: which hull, if any, and whether in its air.
     fn place() {
         let at = this.transform.world_position;
-        let in_cabin = inside(World.find("CabinZone"), at);
-        let in_chamber = inside(World.find("ChamberZone"), at);
-        this.aboard = in_cabin || in_chamber;
+        this.hull = null;
+        var breathable = false;
+        for candidate in World.with_tag("hull") {
+            let hull = Hull.on(candidate);
+            let local = candidate.transform.to_local(at);
+            let within = local.x >= hull.min_x && local.x <= hull.max_x
+                && local.y >= hull.min_y && local.y <= hull.max_y
+                && local.z >= hull.min_z && local.z <= hull.max_z;
+            if within && this.hull == null {
+                this.hull = candidate;
+                if hull.airlock {
+                    breathable = Ship.chamber_pressure > 0.5;
+                } else {
+                    breathable = hull.air;
+                }
+                if !hull.gravity {
+                    this.hull = null;
+                }
+            }
+        }
+        this.aboard = this.hull != null;
         Ship.in_gravity = this.aboard;
-        Ship.pressurized = in_cabin || in_chamber && Ship.chamber_pressure > 0.5;
+        Ship.pressurized = breathable;
+    }
+
+    // How the hull is moving where the diver stands: the spot they stood on
+    // last step, carried to where the hull has put it now.
+    fn carried(dt: number, was_hull: Entity?) {
+        let at = this.transform.world_position;
+        if this.hull == null || dt <= 0.0 {
+            this.frame_velocity = Vec3(0.0, 0.0, 0.0);
+            this.held = false;
+            return;
+        }
+        if was_hull == this.hull && this.held {
+            let moved = this.hull.transform.to_world(this.held_local) - this.held_world;
+            this.frame_velocity = moved / dt;
+        } else {
+            this.frame_velocity = Vec3(0.0, 0.0, 0.0);
+        }
+        this.held_local = this.hull.transform.to_local(at);
+        this.held_world = at;
+        this.held = true;
     }
 
     fn at_panel() -> bool {
@@ -209,32 +272,44 @@ script Diver {
         return World.within_radius("airlock-panel", hand, this.panel_reach).len > 0;
     }
 
-    // The heading and tilt that keep the present view, with the deck below.
+    // The hull's turn in the world: none outside one.
+    fn hull_turn() -> Quat {
+        if this.hull == null {
+            return Quat(x: 0.0, y: 0.0, z: 0.0, w: 1.0);
+        }
+        return this.hull.transform.rotation;
+    }
+
+    // The heading and tilt, in the hull's own space, that keep the present
+    // view, with the hull's deck below.
     fn upright_from_view() {
-        let f = this.eye.transform.forward;
+        let f = qrot(qinv(hull_turn()), this.eye.transform.forward);
         this.yaw = atan2(-f.x, -f.z);
         this.pitch = atan2(f.y, sqrt(f.x * f.x + f.z * f.z));
     }
 
-    // Aboard, the mouse turns the heading about the ship's up and tilts the
-    // view, which rights itself over a moment after coming in from outside.
+    // Aboard, the mouse turns the heading about the hull's up and tilts the
+    // view, which rights itself over a moment after coming in from outside,
+    // and turns with the hull as it turns.
     fn look_upright(dt: number) {
         let delta = Pointer.delta;
         this.yaw -= delta.x * this.look_speed;
         this.pitch = clamp(this.pitch - delta.y * this.look_speed, -1.45, 1.45);
-        let upright = qmul(qturn(0.0, 1.0, 0.0, this.yaw), qturn(1.0, 0.0, 0.0, this.pitch));
+        let local = qmul(qturn(0.0, 1.0, 0.0, this.yaw), qturn(1.0, 0.0, 0.0, this.pitch));
+        let upright = qmul(hull_turn(), local);
         let settle = 1.0 - exp(-10.0 * dt);
         this.eye.transform.rotation = qblend(this.eye.transform.rotation, upright, settle);
     }
 
-    // Aboard: feet on the deck, gravity down, walking where the view faces.
+    // Aboard: feet on the hull's deck, its gravity down, walking where the
+    // view faces, all relative to the hull as it moves and turns.
     fn walk(dt: number) {
-        var velocity = Physics3d.velocity(this.entity);
-        let down = Vec3(0.0, -1.0, 0.0);
-        let ground = Physics3d.raycast(this.transform.world_position, down, 0.86, 1, false, this.entity);
+        let turn = hull_turn();
+        let up = qrot(turn, Vec3(0.0, 1.0, 0.0));
+        let ground = Physics3d.raycast(this.transform.world_position, up * -1.0, 0.86, 1, false, this.entity);
         let grounded = ground != null;
-        var forward = Vec3(-sin(this.yaw), 0.0, -cos(this.yaw));
-        var right = Vec3(cos(this.yaw), 0.0, -sin(this.yaw));
+        let forward = qrot(turn, Vec3(-sin(this.yaw), 0.0, -cos(this.yaw)));
+        let right = qrot(turn, Vec3(cos(this.yaw), 0.0, -sin(this.yaw)));
         var wanted = forward * Input.Keyboard.axis("S", "W") + right * Input.Keyboard.axis("A", "D");
         if wanted.length > 0.001 {
             wanted = wanted.normalized * this.walk_speed;
@@ -244,13 +319,17 @@ script Diver {
             grip = this.footing;
         }
         let take = min(1.0, grip * dt);
-        velocity.x += (wanted.x - velocity.x) * take;
-        velocity.z += (wanted.z - velocity.z) * take;
-        velocity.y -= this.gravity * dt;
+        // Everything is worked out relative to the hull, then the hull's own
+        // motion where the diver stands is added back.
+        let relative = Physics3d.velocity(this.entity) - this.frame_velocity;
+        var lift = relative.dot(up);
+        let across = relative - up * lift;
+        let walked = across + (wanted - across) * take;
+        lift -= this.gravity * dt;
         if grounded && Input.Keyboard.just_pressed("Space") {
-            velocity.y = this.jump_speed;
+            lift = this.jump_speed;
         }
-        Physics3d.set_velocity(this.entity, velocity);
+        Physics3d.set_velocity(this.entity, this.frame_velocity + walked + up * lift);
     }
 
     // The suit: air and power run down in vacuum and fill up in the ship's air.
@@ -281,6 +360,7 @@ script Diver {
         print("Drift: out of air");
         this.hold = null;
         this.transform.world_position = this.spawn;
+        this.held = false;
         Physics3d.set_velocity(this.entity, Vec3(0.0, 0.0, 0.0));
         this.oxygen = 100.0;
         this.power = 100.0;

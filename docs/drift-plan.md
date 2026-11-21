@@ -160,6 +160,43 @@ capability evidence and tests.
 Not needed for the first playable: terrain, foliage, skeletal animation, an orbit
 camera, editor drag-in of models (useful, not blocking).
 
+## Block-built ships
+
+DRIFT's ships are built of blocks: half-metre voxel blocks for hull, deck,
+frame and bulkhead, which the player cuts apart as salvage and places to build,
+with detailed models for doors, windows, consoles, lights and thrusters
+snapped to the same grid. A ship is drivable: one rigid body that flies, turns
+and carries the people walking inside it, and a wreck is the same thing
+adrift. It is the genre of block-built spacecraft, made as DRIFT's own: its
+look aims at worn, engineered metal rather than toy cubes.
+
+Engine work, each step general, in order:
+
+1. **Built voxel worlds.** *Done.* A voxel world that is only its placed
+   blocks, scaled by its entity (`docs/voxel-terrain.md`).
+2. **Voxel bodies.** *Done.* `sindri.physics3d.voxel_body`: a built world's
+   blocks merged into exact boxes as one rigid body, rebuilt on edits with its
+   motion kept (`docs/physics.md`).
+3. **Riding a moving ship.** *Started.* Decay's `transform.to_local` and
+   `to_world` measure points in an entity's own space. Every region the diver
+   can be aboard is a hull (`scripts/hull.decay`): an entity tagged `hull`
+   with an interior box in its own space and whether it has gravity and air.
+   The *Tern*'s cabin and chamber are hulls fixed in the world; the shuttle is
+   a hull that flies. Aboard one, the diver falls towards its own floor, walks
+   relative to it and keeps the view upright to it, carried by how far the spot
+   they stood on moved since the last step, so a turning ship's spin carries
+   them with no need to know its centre of mass (`tests/riding.rs`).
+4. **Flying it.** A cockpit block to sit in; thruster blocks that push from
+   where they are mounted, so how a ship is built is how it flies.
+5. **Realism.** Normal, roughness and occlusion maps for block faces and
+   models; detailed models on the grid; then shadows from the helmet lamp.
+6. **The *Tern* rebuilt in blocks**, wrecks as floating voxel bodies, salvage as
+   cutting blocks out and repair as placing them.
+
+The block set is `art/blocks.py` (worn painted hull plate, hull with stripe,
+tread deck, vented bulkhead, frame, hazard, light panel); ships are written by
+`art/ship.py`. The first is a 12 m shuttle floating off the wreckage.
+
 ## Stages
 
 Each stage is one or more pull requests that leave `main` working: the project

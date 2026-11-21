@@ -2,6 +2,12 @@
 
 # Changelog
 
+- Decay's `transform.to_local(point)` and `transform.to_world(point)` measure a point in an entity's own space (its world position, rotation and scale undone) and place one back, so a script asks where on a moving, turning ship something is.
+
+- Built voxel worlds and voxel bodies: `"generator": { "kind": "built" }` is a voxel world that is only its placed blocks, and `sindri.physics3d.voxel_body` makes one a single rigid body, its blocks merged into exact boxes and rebuilt on edits with its motion kept. Culling keeps out-of-view shadow casters as shadow-only passes rather than drawing them.
+
+- DRIFT's ships begin to be built of half-metre blocks: a worn-metal block set, a 12 m block-built shuttle that flies as one body, and riding it. Aboard any hull (the *Tern*'s cabin and airlock, or the shuttle as it flies and turns) the diver stands on its own deck, walks along it and is carried with it.
+
 - 3D view culling: cube meshes and imported models wholly outside the camera's view are no longer drawn, unless shadows are on and they lie in the light's shadow view, where they may still cast into it. A model's box is worked out once when it loads, from its vertices where its nodes place them, so its geometry decides rather than its origin.
 
 - DRIFT stage 4, the wreckage: the *Tern*'s forward bulkhead is an open cargo hatch onto a derelict survey module, a field of drifting plates and girders that tumble when struck, three salvage canisters and the stars. G takes salvage; it is stowed once the diver is back in the ship's air. Looking out of the hatch draws 32 of the scene's 165 pieces.

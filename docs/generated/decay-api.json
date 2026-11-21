@@ -4919,6 +4919,30 @@
           "type": "Vec3"
         },
         {
+          "description": "A world-space Vec3 point measured in this object's own space: its position subtracted, its world rotation undone and its world scale divided out. What a point on a moving, turning ship is in the ship's own blocks. Reads only; zero scale is an error.",
+          "kind": "function",
+          "name": "to_local",
+          "parameter_names": [
+            "point"
+          ],
+          "parameters": [
+            "Vec3"
+          ],
+          "returns": "Vec3"
+        },
+        {
+          "description": "A Vec3 point in this object's own space placed in the world: scaled, turned and moved by the object's world transform, parents included. The inverse of `to_local`. Reads only.",
+          "kind": "function",
+          "name": "to_world",
+          "parameter_names": [
+            "point"
+          ],
+          "parameters": [
+            "Vec3"
+          ],
+          "returns": "Vec3"
+        },
+        {
           "description": "Read-only unit world-space +Y direction, with parent rotation included and scale ignored.",
           "kind": "value",
           "name": "up",

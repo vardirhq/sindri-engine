@@ -18,6 +18,8 @@ sindri-platform = { path = "../../crates/sindri-platform", default-features = fa
 sindri-runtime = { path = "../../crates/sindri-runtime" }
 
 [dev-dependencies]
+glam.workspace = true
+serde_json.workspace = true
 sindri = { path = "../../crates/sindri" }
 sindri-assets = { path = "../../crates/sindri-assets" }
 sindri-core = { path = "../../crates/sindri-core" }
