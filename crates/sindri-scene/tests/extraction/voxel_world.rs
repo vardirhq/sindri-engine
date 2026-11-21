@@ -444,3 +444,42 @@ fn a_late_material_profile_does_not_consume_the_first_voxel_upload() {
     }
     assert!(sections > 0);
 }
+
+/// A built world generates nothing: it draws only the blocks placed in it.
+#[test]
+fn a_built_world_is_only_its_placed_blocks() {
+    let extractor = SceneExtractor::new().unwrap();
+    let mut world = world_from(&scene(
+        r#",
+        { "id": "ship", "transform_3d": {}, "components": {
+          "sindri.voxel_world": {
+            "generator": { "kind": "built" },
+            "materials": [
+              { "voxel": 3, "top": "stone.png", "side": "stone.png", "bottom": "stone.png" }
+            ],
+            "focus": [0, 0, 0], "render_radius": 1, "vertical_radius": 1, "layer": 0
+          }
+        } }"#,
+    ));
+    let textures = textures();
+    let empty = extractor
+        .extract(&world, VIEWPORT, CameraView::default(), &textures)
+        .expect("an empty built world extracts");
+    assert_eq!(uploads(&empty), 0, "nothing is generated, so nothing is drawn");
+
+    edited(
+        &mut world,
+        serde_json::json!([
+            { "at": [8, 8, 8], "block": 3 },
+            { "at": [9, 8, 8], "block": 3 }
+        ]),
+    );
+    let placed = extractor
+        .extract(&world, VIEWPORT, CameraView::default(), &textures)
+        .expect("the placed blocks extract");
+    assert_eq!(
+        sections_uploaded(&placed),
+        1,
+        "the one section holding the blocks is compiled and drawn"
+    );
+}

@@ -73,6 +73,8 @@ impl GeneratedTerrain {
     fn ceiling(&self, x: i32, z: i32) -> i32 {
         match &self.key.source {
             SceneTerrain::Layered(terrain) => terrain.highest(),
+            // Nothing is generated: below the floor, so no column is walked.
+            SceneTerrain::Built => -1,
             SceneTerrain::Natural(terrain) => {
                 terrain.ground(x, z).max(terrain.settings().sea_level) + ABOVE_GROUND
             }
@@ -82,7 +84,7 @@ impl GeneratedTerrain {
     /// The lowest voxel a column's surface is looked for in.
     fn floor(&self, x: i32, z: i32) -> i32 {
         match &self.key.source {
-            SceneTerrain::Layered(_) => 0,
+            SceneTerrain::Layered(_) | SceneTerrain::Built => 0,
             SceneTerrain::Natural(terrain) => {
                 terrain.ground(x, z).min(terrain.settings().sea_level) - ABOVE_GROUND
             }

@@ -263,6 +263,7 @@ const fn reference_height(generator: &VoxelGeneratorDocument) -> i32 {
     match generator {
         VoxelGeneratorDocument::LayeredTerrain { base_height, .. } => *base_height,
         VoxelGeneratorDocument::NaturalTerrain(natural) => natural.sea_level,
+        VoxelGeneratorDocument::Built {} => 0,
     }
 }
 

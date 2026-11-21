@@ -1173,6 +1173,34 @@ body scaled to size a mesh is scaled in mass by the cube of that scale, and a
 chain of such links is far too light to hold a heavier body: size joint links
 by their collider and leave them unscaled.
 
+## Voxel bodies
+
+`sindri.physics3d.voxel_body` on an entity with a built `sindri.voxel_world`
+(`"generator": { "kind": "built" }`) makes the world's placed blocks the
+colliders of that entity's body, so the whole structure moves, turns and
+collides as one:
+
+```json
+"sindri.physics3d.voxel_body": { "friction": 0.5, "restitution": 0.0,
+  "layers": { "memberships": 4294967295, "filter": 4294967295 } }
+```
+
+The blocks are merged greedily, along X, then Z, then up, into as few boxes as
+cover them exactly, each block in exactly one; the same blocks always make the
+same boxes. Boxes are made in the world's voxel space and scaled with the
+entity like any collider, so mass follows the boxes' volume at the scaled size.
+A `sindri.physics3d.rigid_body` beside it says the kind: dynamic to fly, and
+without one the body is static. A world with no blocks has no body.
+
+Placing or removing a block changes the boxes and rebuilds the body, which
+keeps its live velocity and spin, unlike other bodies' structural rebuilds,
+which restart from authored motion: a ship being built or cut apart in flight
+keeps flying. A voxel body is the entity's only collision: a collider, model
+collider, voxel collider or character on the same entity fails the step, as
+does a world that is not built. Every block is a full solid cube; per-block
+bounds, density and splitting a cut structure into separate bodies are not
+yet done.
+
 ## Live 3D collision coefficients
 
 `PhysicsWorld3d::materials(entity)` returns copied `PhysicsMaterial` values.

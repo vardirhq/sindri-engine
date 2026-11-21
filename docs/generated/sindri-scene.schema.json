@@ -270,6 +270,13 @@
             "null"
           ]
         },
+        "^sindri\\.physics3d\\.voxel_body#[A-Za-z0-9_-]+$": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
         "^sindri\\.physics3d\\.voxel_collider#[A-Za-z0-9_-]+$": {
           "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
           "type": [
@@ -749,6 +756,13 @@
           ]
         },
         "sindri.physics3d.rigid_body": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "sindri.physics3d.voxel_body": {
           "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
           "type": [
             "object",
@@ -1093,6 +1107,9 @@
         "^sindri\\.physics3d\\.rigid_body#[A-Za-z0-9_-]+$": {
           "$ref": "#/$defs/sindri.physics3d.rigid_body"
         },
+        "^sindri\\.physics3d\\.voxel_body#[A-Za-z0-9_-]+$": {
+          "$ref": "#/$defs/sindri.physics3d.voxel_body"
+        },
         "^sindri\\.physics3d\\.voxel_collider#[A-Za-z0-9_-]+$": {
           "$ref": "#/$defs/sindri.physics3d.voxel_collider"
         },
@@ -1301,6 +1318,9 @@
         },
         "sindri.physics3d.rigid_body": {
           "$ref": "#/$defs/sindri.physics3d.rigid_body"
+        },
+        "sindri.physics3d.voxel_body": {
+          "$ref": "#/$defs/sindri.physics3d.voxel_body"
         },
         "sindri.physics3d.voxel_collider": {
           "$ref": "#/$defs/sindri.physics3d.voxel_collider"
@@ -4444,6 +4464,38 @@
       "title": "Rigid Body 3D",
       "type": "object"
     },
+    "sindri.physics3d.voxel_body": {
+      "additionalProperties": false,
+      "properties": {
+        "friction": {
+          "default": 0.5,
+          "type": "number"
+        },
+        "layers": {
+          "default": {
+            "filter": 4294967295,
+            "memberships": 4294967295
+          },
+          "properties": {
+            "filter": {
+              "default": 4294967295,
+              "type": "integer"
+            },
+            "memberships": {
+              "default": 4294967295,
+              "type": "integer"
+            }
+          },
+          "type": "object"
+        },
+        "restitution": {
+          "default": 0.0,
+          "type": "number"
+        }
+      },
+      "title": "Voxel Body 3D",
+      "type": "object"
+    },
     "sindri.physics3d.voxel_collider": {
       "additionalProperties": false,
       "properties": {
@@ -6846,6 +6898,18 @@
                 },
                 "trunk_voxel": {},
                 "water_voxel": {}
+              },
+              "required": [
+                "kind"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "kind": {
+                  "const": "built"
+                }
               },
               "required": [
                 "kind"

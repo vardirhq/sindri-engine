@@ -48,8 +48,14 @@ pub(super) fn prepare(
                 pieces,
                 model: None,
                 convex: None,
+                keeps_motion: false,
             },
         );
+    }
+    for (entity, voxel_body) in components.query::<crate::VoxelBody3dComponent>(world)? {
+        if let Some(authored) = prepare_voxel_body(world, components, physics, entity, &voxel_body)? {
+            plan.insert(entity, authored);
+        }
     }
     for (entity, component) in components.query::<crate::ModelCollider3dComponent>(world)? {
         let model = prepare_model(
@@ -69,6 +75,7 @@ pub(super) fn prepare(
                 pieces: Vec::new(),
                 model: Some(model),
                 convex: None,
+                keeps_motion: false,
             },
         );
     }
@@ -175,5 +182,63 @@ fn prepare_convex(
         pieces,
         model: None,
         convex: Some(convex),
+        keeps_motion: false,
     })
+}
+
+/// A built voxel world's blocks as its entity's body; nothing while it has no
+/// blocks, since a body cannot be made of nothing.
+fn prepare_voxel_body(
+    world: &World,
+    components: &ComponentSchemaRegistry,
+    physics: &PhysicsWorld3d,
+    entity: EntityId,
+    voxel_body: &crate::VoxelBody3dComponent,
+) -> Result<Option<Authored>, PhysicsSyncError> {
+    use sindri_core::SceneComponent;
+    let data = world
+        .get(entity)
+        .ok_or(sindri_physics::PhysicsError::MissingEntity(entity))?;
+    if [
+        Collider3dComponent::TYPE_NAME,
+        Character3dComponent::TYPE_NAME,
+        crate::VoxelCollider3dComponent::TYPE_NAME,
+        crate::ModelCollider3dComponent::TYPE_NAME,
+        crate::ModelConvexCollider3dComponent::TYPE_NAME,
+    ]
+    .iter()
+    .any(|name| data.components.contains_key(*name))
+    {
+        return Err(PhysicsSyncError::InvalidVoxelBody(
+            entity,
+            "a voxel body's blocks are its colliders; remove competing 3D colliders",
+        ));
+    }
+    let voxels = components
+        .get::<crate::VoxelWorldComponent>(world, entity)?
+        .ok_or(PhysicsSyncError::InvalidVoxelBody(
+            entity,
+            "a voxel body needs a `sindri.voxel_world` on the same entity",
+        ))?;
+    let pieces = crate::voxel_body_pieces(&voxels, voxel_body)
+        .map_err(|reason| PhysicsSyncError::InvalidVoxelBody(entity, reason))?;
+    if pieces.is_empty() {
+        return Ok(None);
+    }
+    let body = components
+        .get::<RigidBody3dComponent>(world, entity)?
+        .map(|value| value.0);
+    let placed = body_at(body, pose_of(world, entity, body));
+    let scale = world.world_transform(entity).unwrap_or_default().scale;
+    let pieces = Collider3dComponent(pieces)
+        .scaled(scale)
+        .map_err(|error| PhysicsSyncError::ColliderScale3d(entity, error))?;
+    physics.validate_insertion(entity, placed, &pieces)?;
+    Ok(Some(Authored {
+        body,
+        pieces,
+        model: None,
+        convex: None,
+        keeps_motion: true,
+    }))
 }
