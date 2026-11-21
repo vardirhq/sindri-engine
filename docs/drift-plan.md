@@ -186,8 +186,18 @@ Engine work, each step general, in order:
    relative to it and keeps the view upright to it, carried by how far the spot
    they stood on moved since the last step, so a turning ship's spin carries
    them with no need to know its centre of mass (`tests/riding.rs`).
-4. **Flying it.** A cockpit block to sit in; thruster blocks that push from
-   where they are mounted, so how a ship is built is how it flies.
+4. **Flying it.** *Started.* Sindri's 3D physics gains `apply_impulse_at`,
+   an impulse through a point. The shuttle's functional parts are models on its
+   grid (`art/parts.py`): twelve thrusters (mains, retros and pairs on its
+   flanks, keel and roof) with flames that show while they fire, and a pilot's
+   seat with a console. F at the seat sits at the controls (`scripts/pilot.decay`):
+   W/S, A/D and Space/C fire every thruster whose push points the way asked,
+   each through where it is mounted, X brakes against the drift with them, and
+   a gyroscope turns the ship to the mouse and Q/E and otherwise holds it
+   steady. A ship that loses a main engine turns when it burns. The pilot rides
+   in the seat, and standing up in flight keeps the ship's speed
+   (`tests/flying.rs`). Still to come: a cockpit with glass, thrusters as parts
+   a player places, and flying the *Tern* itself.
 5. **Realism.** Normal, roughness and occlusion maps for block faces and
    models; detailed models on the grid; then shadows from the helmet lamp.
 6. **The *Tern* rebuilt in blocks**, wrecks as floating voxel bodies, salvage as

@@ -2,6 +2,10 @@
 
 # Changelog
 
+- `Physics3d.apply_impulse_at(entity, impulse, point)`: an impulse through a world-space point, which turns a 3D body as well as pushing it when the point is off its centre of mass. `project-capture`'s `place:` step takes an optional third coordinate, for 3D scenes.
+
+- DRIFT's shuttle flies: twelve thrusters mounted on its hull, each pushing through where it sits, flames that show while they fire, a gyroscope for turning and holding steady, and a pilot's seat. F sits at the controls; a ship that loses an engine turns when it burns.
+
 - Decay's `transform.to_local(point)` and `transform.to_world(point)` measure a point in an entity's own space (its world position, rotation and scale undone) and place one back, so a script asks where on a moving, turning ship something is.
 
 - Built voxel worlds and voxel bodies: `"generator": { "kind": "built" }` is a voxel world that is only its placed blocks, and `sindri.physics3d.voxel_body` makes one a single rigid body, its blocks merged into exact boxes and rebuilt on edits with its motion kept. Culling keeps out-of-view shadow casters as shadow-only passes rather than drawing them.

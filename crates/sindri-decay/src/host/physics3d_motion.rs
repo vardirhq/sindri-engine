@@ -25,7 +25,12 @@ impl WorldHost<'_> {
             call,
             Physics3dCall::Velocity | Physics3dCall::AngularVelocity
         );
-        if args.len() != if read { 1 } else { 2 } {
+        let expected = match call {
+            _ if read => 1,
+            Physics3dCall::ApplyImpulseAt => 3,
+            _ => 2,
+        };
+        if args.len() != expected {
             return Err(error("incorrect argument count"));
         }
         let entity = self.entity_argument(path, args, 0, "the 3D body")?;
@@ -84,6 +89,10 @@ impl WorldHost<'_> {
             Physics3dCall::SetVelocity => BodyControl3d::LinearVelocity(value),
             Physics3dCall::SetAngularVelocity => BodyControl3d::AngularVelocity(value),
             Physics3dCall::ApplyImpulse => BodyControl3d::Impulse(value),
+            Physics3dCall::ApplyImpulseAt => BodyControl3d::ImpulseAt {
+                impulse: value,
+                point: vector(path, &args[2])?,
+            },
             _ => unreachable!("only motion controls reach here"),
         };
         let outcome = if let Some(body) = authored {

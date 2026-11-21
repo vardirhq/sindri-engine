@@ -3297,6 +3297,22 @@
           "returns": "unit"
         },
         {
+          "description": "Applies a finite world-space Vec3 impulse through a finite world-space Vec3 point on an active dynamic body: off its centre of mass it turns the body as well as pushing it, the way a thruster mounted at one end of a ship does. Queues before synchronization like apply_impulse and resolves in call order; invalid input or body kind fails before mutation.",
+          "kind": "function",
+          "name": "apply_impulse_at",
+          "parameter_names": [
+            "entity",
+            "impulse",
+            "point"
+          ],
+          "parameters": [
+            "Entity",
+            "Vec3",
+            "Vec3"
+          ],
+          "returns": "unit"
+        },
+        {
           "description": "Indexed active 3D shape query. Positive Vec3 half-extents define the box. Sweeps return copied RayHit3d or null with fixed orientation and nonzero normalized direction; travel is non-negative and the endpoint finite. Finite f32-range values are required. A nonzero Vec3 rotation_axis is normalized and rotation_angle is radians about it using the right-hand rule. Uses the ray membership mask, sensor opt-in and whole-entity exclusion. Overlaps are sorted unique copied Entity lists; casts retain initial-overlap and deterministic tie semantics. Does not step physics.",
           "kind": "function",
           "name": "cast_box",

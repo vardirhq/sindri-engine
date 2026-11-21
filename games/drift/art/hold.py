@@ -412,8 +412,42 @@ def wreckage():
                                          min_z=1.0, max_z=9.0, air=False),
         },
     ))
+    out += shuttle_parts()
     out.append(entity("salvage", "Salvage", **{
         "sindri.script": {"source": "scripts/salvage.decay", "script": "Salvage"}}))
+    return out
+
+
+def shuttle_parts():
+    """The shuttle's thrusters, their flames and its pilot's seat and controls.
+
+    Parts are children of the ship, placed in its blocks and scaled back up to
+    a metre to the block. The pilot script lives on its own entity so the
+    shuttle's own script stays its `Hull`."""
+    out = []
+    for i, (at, facing) in enumerate(ships.shuttle_thrusters()):
+        out.append(entity(
+            f"shuttle-thruster-{i}", parent="shuttle", position=at, rotation=ships.FACING[facing],
+            scale=(2.0, 2.0, 2.0),
+            **{"sindri.model": {"asset": "models/thruster.glb"},
+               "sindri.tags": {"tags": ["shuttle-thruster"]}},
+        ))
+        flame = entity(
+            f"shuttle-flame-{i}", parent=f"shuttle-thruster-{i}",
+            **{"sindri.model": {"asset": "models/flame.glb"},
+               "sindri.tags": {"tags": ["shuttle-flame"]}},
+        )
+        flame["disabled"] = True
+        out.append(flame)
+    out.append(entity(
+        "shuttle-seat", "Seat", parent="shuttle", position=ships.SHUTTLE_SEAT,
+        rotation=ships.FACING["-x"], scale=(2.0, 2.0, 2.0),
+        **{"sindri.model": {"asset": "models/seat.glb"}},
+    ))
+    out.append(entity("shuttle-pilot", "Pilot", **{
+        "sindri.script": {"source": "scripts/pilot.decay", "script": "Pilot",
+                          "properties": {}},
+    }))
     return out
 
 

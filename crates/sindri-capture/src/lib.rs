@@ -143,7 +143,7 @@ impl ProjectPlayer {
     }
 
     /// Moves the entity with source ID `name` to `at` in the world.
-    fn put(&mut self, name: &str, at: [f32; 2]) -> Result<(), Box<dyn Error>> {
+    fn put(&mut self, name: &str, at: [f32; 2], z: Option<f32>) -> Result<(), Box<dyn Error>> {
         let entity = self
             .world
             .entity_for_source_id(&SceneEntityId::new(name)?)
@@ -155,6 +155,9 @@ impl ProjectPlayer {
             .ok_or_else(|| format!("{name} has no place"))?;
         place.position[0] = at[0];
         place.position[1] = at[1];
+        if let Some(z) = z {
+            place.position[2] = z;
+        }
         Ok(())
     }
 
@@ -236,9 +239,12 @@ impl ProjectPlayer {
             // An entity put at a place in the world: somewhere a walk would
             // take too long to reach.
             "place" => {
-                let (name, at) = rest.split_once('=').ok_or("place:<entity>=<x>,<y>")?;
-                let (x, y) = at.split_once(',').ok_or("place:<entity>=<x>,<y>")?;
-                self.put(name, [x.parse()?, y.parse()?])?;
+                let (name, at) = rest.split_once('=').ok_or("place:<entity>=<x>,<y>[,<z>]")?;
+                let parts: Vec<f32> = at.split(',').map(str::parse).collect::<Result<_, _>>()?;
+                let [x, y, rest @ ..] = parts.as_slice() else {
+                    return Err("place:<entity>=<x>,<y>[,<z>]".into());
+                };
+                self.put(name, [*x, *y], rest.first().copied())?;
                 self.step()?;
             }
             // An entity put just in front of the first thing of a name that
@@ -257,7 +263,7 @@ impl ProjectPlayer {
                     .ok_or("it has no place")?
                     .position;
                 eprintln!("{target} at ({:.1}, {:.1})", at[0], at[1]);
-                self.put(name, [at[0], at[1] - 0.8])?;
+                self.put(name, [at[0], at[1] - 0.8], None)?;
                 self.step()?;
             }
             _ => return Err(format!("unknown step {action}").into()),
