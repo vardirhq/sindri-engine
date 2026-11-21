@@ -1125,8 +1125,53 @@ and landing. Native editor interaction is exercised in
 [the native review](physics-voxel-editor-review.md), and authored voxel
 collision (below) supplies the occupied/resident/edited world proof. Typed
 rotated probes are exercised as described above. CCD controls,
-contacts, force/torque, materials, joints and character controllers also have no
-3D authoring/Decay surface yet. The 2D API remains unchanged.
+contacts, force/torque, materials and character controllers also have no
+3D authoring/Decay surface yet; 3D distance joints have one (below). The 2D API remains unchanged.
+
+## Scene-authored 3D distance joints
+
+`sindri.physics3d.distance_joint` lives on a separate owner entity, as the 2D
+distance joint does:
+
+```json
+"sindri.physics3d.distance_joint": {
+  "first": "start-hold", "second": "tether-link-0", "enabled": true,
+  "max_distance": 0.59, "first_anchor": [0, 0, 0], "second_anchor": [0, 0, 0]
+}
+```
+
+It is a rope: the two anchors may come closer and the bodies turn freely, but
+the solver will not let the anchors separate beyond `max_distance`. Anchors are
+body-local world units without transform scale, defaulting to the body
+origins. The backend is Rapier's 3D rope joint with contacts between the two
+bodies left enabled; callers see only `DistanceJoint3d` and entities.
+
+`PhysicsWorld3d::set_distance_joint(owner, joint)` validates before mutation.
+An unchanged request keeps the solver constraint and its warm start; a new
+length or anchors on the same endpoints retune it in place, keeping body
+motion; new endpoints replace it. `remove_owned_joint(owner)` releases it,
+and removing either body drops it with the body. `distance_joint(owner)` reads
+the live joint. Copied worlds keep their constraints.
+
+`ScenePhysics3d` reads and validates every authored 3D joint before any body
+changes, so a non-positive or non-finite length or a non-finite anchor fails
+the whole step. After bodies, voxels and characters synchronize, each owner's
+endpoints resolve through the shared entity-reference rules: an endpoint that
+is empty, missing, inactive or has no body, an inactive owner, or `enabled:
+false` suspends the constraint until all are usable again. Removing the
+component or its owner releases it.
+
+Decay edits the authored component, applied at the next fixed
+synchronization: `Physics3d.set_distance(joint, length)` retunes it and
+`Physics3d.set_joint_enabled(joint, on)` suspends or reconnects it, both
+validated before writing; `Physics3d.joint_enabled(joint)` reads the flag.
+Typed creation, retargeting and removal, the other joint kinds and an editor
+gizmo are not yet built in 3D.
+
+Collider dimensions follow composed transform scale, mass included. A link
+body scaled to size a mesh is scaled in mass by the cube of that scale, and a
+chain of such links is far too light to hold a heavier body: size joint links
+by their collider and leave them unscaled.
 
 ## Live 3D collision coefficients
 

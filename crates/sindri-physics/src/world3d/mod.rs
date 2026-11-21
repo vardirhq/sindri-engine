@@ -6,6 +6,7 @@ mod controls;
 mod convex_hull;
 mod ground;
 mod grounded;
+mod joints;
 mod materials;
 mod pending;
 mod query;
@@ -29,7 +30,8 @@ use crate::{
     RigidBodyKind,
 };
 pub use pending::BodyControl3d;
-use validation::{finite3, validate_body, validate_colliders};
+pub(crate) use validation::finite3;
+use validation::{validate_body, validate_colliders};
 
 #[derive(Clone)]
 struct BodyRecord {
@@ -49,6 +51,7 @@ pub struct PhysicsWorld3d {
     spatial: spatial::SpatialIndex,
     pending_controls: HashMap<EntityId, Vec<BodyControl3d>>,
     materials_changed: bool,
+    owned_joints: BTreeMap<EntityId, joints::OwnedJoint3d>,
 }
 
 /// A copy that goes on exactly as this world would: what recording a run
@@ -62,6 +65,7 @@ impl Clone for PhysicsWorld3d {
             spatial: self.spatial.clone(),
             pending_controls: self.pending_controls.clone(),
             materials_changed: self.materials_changed,
+            owned_joints: self.owned_joints.clone(),
         }
     }
 }
@@ -78,6 +82,7 @@ impl PhysicsWorld3d {
             spatial: spatial::SpatialIndex::default(),
             pending_controls: HashMap::new(),
             materials_changed: false,
+            owned_joints: BTreeMap::new(),
         })
     }
 

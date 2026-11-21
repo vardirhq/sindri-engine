@@ -23,6 +23,8 @@ fn a_push_off_crosses_the_hold_to_the_far_handhold() {
         "holding on keeps the diver still: {start:?} {held:?}"
     );
 
+    // The far bulkhead is past the tether's length: go unclipped.
+    game.tap(Key::U);
     game.tap(Key::Space);
     assert!(game.has_said("Drift: pushed off"), "{:?}", game.said);
     // Hold F the whole way across, to catch whatever comes in reach.

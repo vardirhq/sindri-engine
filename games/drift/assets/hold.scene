@@ -5653,6 +5653,2539 @@
       "parent": "eye"
     },
     {
+      "id": "tether",
+      "name": "Tether",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.script": {
+          "source": "scripts/tether.decay",
+          "script": "Tether",
+          "properties": {
+            "links": 16,
+            "length": 10.0
+          }
+        }
+      }
+    },
+    {
+      "id": "tether-link-0",
+      "name": "tether-link-0",
+      "transform_3d": {
+        "position": [
+          -6.63,
+          0.0,
+          0.25
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.physics3d.collider": {
+          "pieces": [
+            {
+              "shape": {
+                "shape": "sphere",
+                "radius": 0.08
+              },
+              "offset": [
+                0,
+                0,
+                0
+              ],
+              "rotation": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "sensor": false,
+              "layers": {
+                "memberships": 4,
+                "filter": 1
+              },
+              "friction": 0.3,
+              "restitution": 0.0
+            }
+          ]
+        },
+        "sindri.physics3d.rigid_body": {
+          "kind": "dynamic",
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotation": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "linear_velocity": [
+            0,
+            0,
+            0
+          ],
+          "angular_velocity": [
+            0,
+            0,
+            0
+          ],
+          "gravity_scale": 0.0,
+          "linear_damping": 1.0,
+          "angular_damping": 1.0,
+          "lock_rotation": false
+        },
+        "sindri.tags": {
+          "tags": [
+            "tether-link"
+          ]
+        }
+      },
+      "parent": "tether"
+    },
+    {
+      "id": "tether-link-1",
+      "name": "tether-link-1",
+      "transform_3d": {
+        "position": [
+          -6.61,
+          0.1958,
+          0.1554
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.physics3d.collider": {
+          "pieces": [
+            {
+              "shape": {
+                "shape": "sphere",
+                "radius": 0.08
+              },
+              "offset": [
+                0,
+                0,
+                0
+              ],
+              "rotation": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "sensor": false,
+              "layers": {
+                "memberships": 4,
+                "filter": 1
+              },
+              "friction": 0.3,
+              "restitution": 0.0
+            }
+          ]
+        },
+        "sindri.physics3d.rigid_body": {
+          "kind": "dynamic",
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotation": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "linear_velocity": [
+            0,
+            0,
+            0
+          ],
+          "angular_velocity": [
+            0,
+            0,
+            0
+          ],
+          "gravity_scale": 0.0,
+          "linear_damping": 1.0,
+          "angular_damping": 1.0,
+          "lock_rotation": false
+        },
+        "sindri.tags": {
+          "tags": [
+            "tether-link"
+          ]
+        }
+      },
+      "parent": "tether"
+    },
+    {
+      "id": "tether-link-2",
+      "name": "tether-link-2",
+      "transform_3d": {
+        "position": [
+          -6.59,
+          0.2435,
+          -0.0568
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.physics3d.collider": {
+          "pieces": [
+            {
+              "shape": {
+                "shape": "sphere",
+                "radius": 0.08
+              },
+              "offset": [
+                0,
+                0,
+                0
+              ],
+              "rotation": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "sensor": false,
+              "layers": {
+                "memberships": 4,
+                "filter": 1
+              },
+              "friction": 0.3,
+              "restitution": 0.0
+            }
+          ]
+        },
+        "sindri.physics3d.rigid_body": {
+          "kind": "dynamic",
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotation": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "linear_velocity": [
+            0,
+            0,
+            0
+          ],
+          "angular_velocity": [
+            0,
+            0,
+            0
+          ],
+          "gravity_scale": 0.0,
+          "linear_damping": 1.0,
+          "angular_damping": 1.0,
+          "lock_rotation": false
+        },
+        "sindri.tags": {
+          "tags": [
+            "tether-link"
+          ]
+        }
+      },
+      "parent": "tether"
+    },
+    {
+      "id": "tether-link-3",
+      "name": "tether-link-3",
+      "transform_3d": {
+        "position": [
+          -6.57,
+          0.1068,
+          -0.226
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.physics3d.collider": {
+          "pieces": [
+            {
+              "shape": {
+                "shape": "sphere",
+                "radius": 0.08
+              },
+              "offset": [
+                0,
+                0,
+                0
+              ],
+              "rotation": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "sensor": false,
+              "layers": {
+                "memberships": 4,
+                "filter": 1
+              },
+              "friction": 0.3,
+              "restitution": 0.0
+            }
+          ]
+        },
+        "sindri.physics3d.rigid_body": {
+          "kind": "dynamic",
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotation": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "linear_velocity": [
+            0,
+            0,
+            0
+          ],
+          "angular_velocity": [
+            0,
+            0,
+            0
+          ],
+          "gravity_scale": 0.0,
+          "linear_damping": 1.0,
+          "angular_damping": 1.0,
+          "lock_rotation": false
+        },
+        "sindri.tags": {
+          "tags": [
+            "tether-link"
+          ]
+        }
+      },
+      "parent": "tether"
+    },
+    {
+      "id": "tether-link-4",
+      "name": "tether-link-4",
+      "transform_3d": {
+        "position": [
+          -6.55,
+          -0.1106,
+          -0.2242
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.physics3d.collider": {
+          "pieces": [
+            {
+              "shape": {
+                "shape": "sphere",
+                "radius": 0.08
+              },
+              "offset": [
+                0,
+                0,
+                0
+              ],
+              "rotation": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "sensor": false,
+              "layers": {
+                "memberships": 4,
+                "filter": 1
+              },
+              "friction": 0.3,
+              "restitution": 0.0
+            }
+          ]
+        },
+        "sindri.physics3d.rigid_body": {
+          "kind": "dynamic",
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotation": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "linear_velocity": [
+            0,
+            0,
+            0
+          ],
+          "angular_velocity": [
+            0,
+            0,
+            0
+          ],
+          "gravity_scale": 0.0,
+          "linear_damping": 1.0,
+          "angular_damping": 1.0,
+          "lock_rotation": false
+        },
+        "sindri.tags": {
+          "tags": [
+            "tether-link"
+          ]
+        }
+      },
+      "parent": "tether"
+    },
+    {
+      "id": "tether-link-5",
+      "name": "tether-link-5",
+      "transform_3d": {
+        "position": [
+          -6.53,
+          -0.2444,
+          -0.0527
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.physics3d.collider": {
+          "pieces": [
+            {
+              "shape": {
+                "shape": "sphere",
+                "radius": 0.08
+              },
+              "offset": [
+                0,
+                0,
+                0
+              ],
+              "rotation": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "sensor": false,
+              "layers": {
+                "memberships": 4,
+                "filter": 1
+              },
+              "friction": 0.3,
+              "restitution": 0.0
+            }
+          ]
+        },
+        "sindri.physics3d.rigid_body": {
+          "kind": "dynamic",
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotation": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "linear_velocity": [
+            0,
+            0,
+            0
+          ],
+          "angular_velocity": [
+            0,
+            0,
+            0
+          ],
+          "gravity_scale": 0.0,
+          "linear_damping": 1.0,
+          "angular_damping": 1.0,
+          "lock_rotation": false
+        },
+        "sindri.tags": {
+          "tags": [
+            "tether-link"
+          ]
+        }
+      },
+      "parent": "tether"
+    },
+    {
+      "id": "tether-link-6",
+      "name": "tether-link-6",
+      "transform_3d": {
+        "position": [
+          -6.51,
+          -0.1932,
+          0.1587
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.physics3d.collider": {
+          "pieces": [
+            {
+              "shape": {
+                "shape": "sphere",
+                "radius": 0.08
+              },
+              "offset": [
+                0,
+                0,
+                0
+              ],
+              "rotation": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "sensor": false,
+              "layers": {
+                "memberships": 4,
+                "filter": 1
+              },
+              "friction": 0.3,
+              "restitution": 0.0
+            }
+          ]
+        },
+        "sindri.physics3d.rigid_body": {
+          "kind": "dynamic",
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotation": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "linear_velocity": [
+            0,
+            0,
+            0
+          ],
+          "angular_velocity": [
+            0,
+            0,
+            0
+          ],
+          "gravity_scale": 0.0,
+          "linear_damping": 1.0,
+          "angular_damping": 1.0,
+          "lock_rotation": false
+        },
+        "sindri.tags": {
+          "tags": [
+            "tether-link"
+          ]
+        }
+      },
+      "parent": "tether"
+    },
+    {
+      "id": "tether-link-7",
+      "name": "tether-link-7",
+      "transform_3d": {
+        "position": [
+          -6.49,
+          0.0042,
+          0.25
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.physics3d.collider": {
+          "pieces": [
+            {
+              "shape": {
+                "shape": "sphere",
+                "radius": 0.08
+              },
+              "offset": [
+                0,
+                0,
+                0
+              ],
+              "rotation": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "sensor": false,
+              "layers": {
+                "memberships": 4,
+                "filter": 1
+              },
+              "friction": 0.3,
+              "restitution": 0.0
+            }
+          ]
+        },
+        "sindri.physics3d.rigid_body": {
+          "kind": "dynamic",
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotation": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "linear_velocity": [
+            0,
+            0,
+            0
+          ],
+          "angular_velocity": [
+            0,
+            0,
+            0
+          ],
+          "gravity_scale": 0.0,
+          "linear_damping": 1.0,
+          "angular_damping": 1.0,
+          "lock_rotation": false
+        },
+        "sindri.tags": {
+          "tags": [
+            "tether-link"
+          ]
+        }
+      },
+      "parent": "tether"
+    },
+    {
+      "id": "tether-link-8",
+      "name": "tether-link-8",
+      "transform_3d": {
+        "position": [
+          -6.47,
+          0.1984,
+          0.1521
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.physics3d.collider": {
+          "pieces": [
+            {
+              "shape": {
+                "shape": "sphere",
+                "radius": 0.08
+              },
+              "offset": [
+                0,
+                0,
+                0
+              ],
+              "rotation": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "sensor": false,
+              "layers": {
+                "memberships": 4,
+                "filter": 1
+              },
+              "friction": 0.3,
+              "restitution": 0.0
+            }
+          ]
+        },
+        "sindri.physics3d.rigid_body": {
+          "kind": "dynamic",
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotation": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "linear_velocity": [
+            0,
+            0,
+            0
+          ],
+          "angular_velocity": [
+            0,
+            0,
+            0
+          ],
+          "gravity_scale": 0.0,
+          "linear_damping": 1.0,
+          "angular_damping": 1.0,
+          "lock_rotation": false
+        },
+        "sindri.tags": {
+          "tags": [
+            "tether-link"
+          ]
+        }
+      },
+      "parent": "tether"
+    },
+    {
+      "id": "tether-link-9",
+      "name": "tether-link-9",
+      "transform_3d": {
+        "position": [
+          -6.45,
+          0.2425,
+          -0.0609
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.physics3d.collider": {
+          "pieces": [
+            {
+              "shape": {
+                "shape": "sphere",
+                "radius": 0.08
+              },
+              "offset": [
+                0,
+                0,
+                0
+              ],
+              "rotation": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "sensor": false,
+              "layers": {
+                "memberships": 4,
+                "filter": 1
+              },
+              "friction": 0.3,
+              "restitution": 0.0
+            }
+          ]
+        },
+        "sindri.physics3d.rigid_body": {
+          "kind": "dynamic",
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotation": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "linear_velocity": [
+            0,
+            0,
+            0
+          ],
+          "angular_velocity": [
+            0,
+            0,
+            0
+          ],
+          "gravity_scale": 0.0,
+          "linear_damping": 1.0,
+          "angular_damping": 1.0,
+          "lock_rotation": false
+        },
+        "sindri.tags": {
+          "tags": [
+            "tether-link"
+          ]
+        }
+      },
+      "parent": "tether"
+    },
+    {
+      "id": "tether-link-10",
+      "name": "tether-link-10",
+      "transform_3d": {
+        "position": [
+          -6.43,
+          0.103,
+          -0.2278
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.physics3d.collider": {
+          "pieces": [
+            {
+              "shape": {
+                "shape": "sphere",
+                "radius": 0.08
+              },
+              "offset": [
+                0,
+                0,
+                0
+              ],
+              "rotation": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "sensor": false,
+              "layers": {
+                "memberships": 4,
+                "filter": 1
+              },
+              "friction": 0.3,
+              "restitution": 0.0
+            }
+          ]
+        },
+        "sindri.physics3d.rigid_body": {
+          "kind": "dynamic",
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotation": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "linear_velocity": [
+            0,
+            0,
+            0
+          ],
+          "angular_velocity": [
+            0,
+            0,
+            0
+          ],
+          "gravity_scale": 0.0,
+          "linear_damping": 1.0,
+          "angular_damping": 1.0,
+          "lock_rotation": false
+        },
+        "sindri.tags": {
+          "tags": [
+            "tether-link"
+          ]
+        }
+      },
+      "parent": "tether"
+    },
+    {
+      "id": "tether-link-11",
+      "name": "tether-link-11",
+      "transform_3d": {
+        "position": [
+          -6.41,
+          -0.1144,
+          -0.2223
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.physics3d.collider": {
+          "pieces": [
+            {
+              "shape": {
+                "shape": "sphere",
+                "radius": 0.08
+              },
+              "offset": [
+                0,
+                0,
+                0
+              ],
+              "rotation": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "sensor": false,
+              "layers": {
+                "memberships": 4,
+                "filter": 1
+              },
+              "friction": 0.3,
+              "restitution": 0.0
+            }
+          ]
+        },
+        "sindri.physics3d.rigid_body": {
+          "kind": "dynamic",
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotation": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "linear_velocity": [
+            0,
+            0,
+            0
+          ],
+          "angular_velocity": [
+            0,
+            0,
+            0
+          ],
+          "gravity_scale": 0.0,
+          "linear_damping": 1.0,
+          "angular_damping": 1.0,
+          "lock_rotation": false
+        },
+        "sindri.tags": {
+          "tags": [
+            "tether-link"
+          ]
+        }
+      },
+      "parent": "tether"
+    },
+    {
+      "id": "tether-link-12",
+      "name": "tether-link-12",
+      "transform_3d": {
+        "position": [
+          -6.39,
+          -0.2452,
+          -0.0486
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.physics3d.collider": {
+          "pieces": [
+            {
+              "shape": {
+                "shape": "sphere",
+                "radius": 0.08
+              },
+              "offset": [
+                0,
+                0,
+                0
+              ],
+              "rotation": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "sensor": false,
+              "layers": {
+                "memberships": 4,
+                "filter": 1
+              },
+              "friction": 0.3,
+              "restitution": 0.0
+            }
+          ]
+        },
+        "sindri.physics3d.rigid_body": {
+          "kind": "dynamic",
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotation": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "linear_velocity": [
+            0,
+            0,
+            0
+          ],
+          "angular_velocity": [
+            0,
+            0,
+            0
+          ],
+          "gravity_scale": 0.0,
+          "linear_damping": 1.0,
+          "angular_damping": 1.0,
+          "lock_rotation": false
+        },
+        "sindri.tags": {
+          "tags": [
+            "tether-link"
+          ]
+        }
+      },
+      "parent": "tether"
+    },
+    {
+      "id": "tether-link-13",
+      "name": "tether-link-13",
+      "transform_3d": {
+        "position": [
+          -6.37,
+          -0.1905,
+          0.1619
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.physics3d.collider": {
+          "pieces": [
+            {
+              "shape": {
+                "shape": "sphere",
+                "radius": 0.08
+              },
+              "offset": [
+                0,
+                0,
+                0
+              ],
+              "rotation": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "sensor": false,
+              "layers": {
+                "memberships": 4,
+                "filter": 1
+              },
+              "friction": 0.3,
+              "restitution": 0.0
+            }
+          ]
+        },
+        "sindri.physics3d.rigid_body": {
+          "kind": "dynamic",
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotation": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "linear_velocity": [
+            0,
+            0,
+            0
+          ],
+          "angular_velocity": [
+            0,
+            0,
+            0
+          ],
+          "gravity_scale": 0.0,
+          "linear_damping": 1.0,
+          "angular_damping": 1.0,
+          "lock_rotation": false
+        },
+        "sindri.tags": {
+          "tags": [
+            "tether-link"
+          ]
+        }
+      },
+      "parent": "tether"
+    },
+    {
+      "id": "tether-link-14",
+      "name": "tether-link-14",
+      "transform_3d": {
+        "position": [
+          -6.35,
+          0.0084,
+          0.2499
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.physics3d.collider": {
+          "pieces": [
+            {
+              "shape": {
+                "shape": "sphere",
+                "radius": 0.08
+              },
+              "offset": [
+                0,
+                0,
+                0
+              ],
+              "rotation": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "sensor": false,
+              "layers": {
+                "memberships": 4,
+                "filter": 1
+              },
+              "friction": 0.3,
+              "restitution": 0.0
+            }
+          ]
+        },
+        "sindri.physics3d.rigid_body": {
+          "kind": "dynamic",
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotation": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "linear_velocity": [
+            0,
+            0,
+            0
+          ],
+          "angular_velocity": [
+            0,
+            0,
+            0
+          ],
+          "gravity_scale": 0.0,
+          "linear_damping": 1.0,
+          "angular_damping": 1.0,
+          "lock_rotation": false
+        },
+        "sindri.tags": {
+          "tags": [
+            "tether-link"
+          ]
+        }
+      },
+      "parent": "tether"
+    },
+    {
+      "id": "tether-link-15",
+      "name": "tether-link-15",
+      "transform_3d": {
+        "position": [
+          -6.33,
+          0.2009,
+          0.1487
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.physics3d.collider": {
+          "pieces": [
+            {
+              "shape": {
+                "shape": "sphere",
+                "radius": 0.08
+              },
+              "offset": [
+                0,
+                0,
+                0
+              ],
+              "rotation": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "sensor": false,
+              "layers": {
+                "memberships": 4,
+                "filter": 1
+              },
+              "friction": 0.3,
+              "restitution": 0.0
+            }
+          ]
+        },
+        "sindri.physics3d.rigid_body": {
+          "kind": "dynamic",
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotation": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "linear_velocity": [
+            0,
+            0,
+            0
+          ],
+          "angular_velocity": [
+            0,
+            0,
+            0
+          ],
+          "gravity_scale": 0.0,
+          "linear_damping": 1.0,
+          "angular_damping": 1.0,
+          "lock_rotation": false
+        },
+        "sindri.tags": {
+          "tags": [
+            "tether-link"
+          ]
+        }
+      },
+      "parent": "tether"
+    },
+    {
+      "id": "tether-joint-0",
+      "name": "tether-joint-0",
+      "parent": "tether",
+      "components": {
+        "sindri.physics3d.distance_joint": {
+          "first": "start-hold",
+          "second": "tether-link-0",
+          "enabled": true,
+          "max_distance": 0.5882,
+          "first_anchor": [
+            0,
+            0,
+            0
+          ],
+          "second_anchor": [
+            0,
+            0,
+            0
+          ]
+        },
+        "sindri.tags": {
+          "tags": [
+            "tether-joint"
+          ]
+        }
+      }
+    },
+    {
+      "id": "tether-strand-0",
+      "name": "tether-strand-0",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.015,
+          0.015,
+          0.5882
+        ]
+      },
+      "components": {
+        "sindri.mesh": {
+          "primitive": "cube",
+          "texture": "textures/line.png"
+        },
+        "sindri.tags": {
+          "tags": [
+            "tether-strand"
+          ]
+        }
+      },
+      "parent": "tether"
+    },
+    {
+      "id": "tether-joint-1",
+      "name": "tether-joint-1",
+      "parent": "tether",
+      "components": {
+        "sindri.physics3d.distance_joint": {
+          "first": "tether-link-0",
+          "second": "tether-link-1",
+          "enabled": true,
+          "max_distance": 0.5882,
+          "first_anchor": [
+            0,
+            0,
+            0
+          ],
+          "second_anchor": [
+            0,
+            0,
+            0
+          ]
+        },
+        "sindri.tags": {
+          "tags": [
+            "tether-joint"
+          ]
+        }
+      }
+    },
+    {
+      "id": "tether-strand-1",
+      "name": "tether-strand-1",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.015,
+          0.015,
+          0.5882
+        ]
+      },
+      "components": {
+        "sindri.mesh": {
+          "primitive": "cube",
+          "texture": "textures/line.png"
+        },
+        "sindri.tags": {
+          "tags": [
+            "tether-strand"
+          ]
+        }
+      },
+      "parent": "tether"
+    },
+    {
+      "id": "tether-joint-2",
+      "name": "tether-joint-2",
+      "parent": "tether",
+      "components": {
+        "sindri.physics3d.distance_joint": {
+          "first": "tether-link-1",
+          "second": "tether-link-2",
+          "enabled": true,
+          "max_distance": 0.5882,
+          "first_anchor": [
+            0,
+            0,
+            0
+          ],
+          "second_anchor": [
+            0,
+            0,
+            0
+          ]
+        },
+        "sindri.tags": {
+          "tags": [
+            "tether-joint"
+          ]
+        }
+      }
+    },
+    {
+      "id": "tether-strand-2",
+      "name": "tether-strand-2",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.015,
+          0.015,
+          0.5882
+        ]
+      },
+      "components": {
+        "sindri.mesh": {
+          "primitive": "cube",
+          "texture": "textures/line.png"
+        },
+        "sindri.tags": {
+          "tags": [
+            "tether-strand"
+          ]
+        }
+      },
+      "parent": "tether"
+    },
+    {
+      "id": "tether-joint-3",
+      "name": "tether-joint-3",
+      "parent": "tether",
+      "components": {
+        "sindri.physics3d.distance_joint": {
+          "first": "tether-link-2",
+          "second": "tether-link-3",
+          "enabled": true,
+          "max_distance": 0.5882,
+          "first_anchor": [
+            0,
+            0,
+            0
+          ],
+          "second_anchor": [
+            0,
+            0,
+            0
+          ]
+        },
+        "sindri.tags": {
+          "tags": [
+            "tether-joint"
+          ]
+        }
+      }
+    },
+    {
+      "id": "tether-strand-3",
+      "name": "tether-strand-3",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.015,
+          0.015,
+          0.5882
+        ]
+      },
+      "components": {
+        "sindri.mesh": {
+          "primitive": "cube",
+          "texture": "textures/line.png"
+        },
+        "sindri.tags": {
+          "tags": [
+            "tether-strand"
+          ]
+        }
+      },
+      "parent": "tether"
+    },
+    {
+      "id": "tether-joint-4",
+      "name": "tether-joint-4",
+      "parent": "tether",
+      "components": {
+        "sindri.physics3d.distance_joint": {
+          "first": "tether-link-3",
+          "second": "tether-link-4",
+          "enabled": true,
+          "max_distance": 0.5882,
+          "first_anchor": [
+            0,
+            0,
+            0
+          ],
+          "second_anchor": [
+            0,
+            0,
+            0
+          ]
+        },
+        "sindri.tags": {
+          "tags": [
+            "tether-joint"
+          ]
+        }
+      }
+    },
+    {
+      "id": "tether-strand-4",
+      "name": "tether-strand-4",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.015,
+          0.015,
+          0.5882
+        ]
+      },
+      "components": {
+        "sindri.mesh": {
+          "primitive": "cube",
+          "texture": "textures/line.png"
+        },
+        "sindri.tags": {
+          "tags": [
+            "tether-strand"
+          ]
+        }
+      },
+      "parent": "tether"
+    },
+    {
+      "id": "tether-joint-5",
+      "name": "tether-joint-5",
+      "parent": "tether",
+      "components": {
+        "sindri.physics3d.distance_joint": {
+          "first": "tether-link-4",
+          "second": "tether-link-5",
+          "enabled": true,
+          "max_distance": 0.5882,
+          "first_anchor": [
+            0,
+            0,
+            0
+          ],
+          "second_anchor": [
+            0,
+            0,
+            0
+          ]
+        },
+        "sindri.tags": {
+          "tags": [
+            "tether-joint"
+          ]
+        }
+      }
+    },
+    {
+      "id": "tether-strand-5",
+      "name": "tether-strand-5",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.015,
+          0.015,
+          0.5882
+        ]
+      },
+      "components": {
+        "sindri.mesh": {
+          "primitive": "cube",
+          "texture": "textures/line.png"
+        },
+        "sindri.tags": {
+          "tags": [
+            "tether-strand"
+          ]
+        }
+      },
+      "parent": "tether"
+    },
+    {
+      "id": "tether-joint-6",
+      "name": "tether-joint-6",
+      "parent": "tether",
+      "components": {
+        "sindri.physics3d.distance_joint": {
+          "first": "tether-link-5",
+          "second": "tether-link-6",
+          "enabled": true,
+          "max_distance": 0.5882,
+          "first_anchor": [
+            0,
+            0,
+            0
+          ],
+          "second_anchor": [
+            0,
+            0,
+            0
+          ]
+        },
+        "sindri.tags": {
+          "tags": [
+            "tether-joint"
+          ]
+        }
+      }
+    },
+    {
+      "id": "tether-strand-6",
+      "name": "tether-strand-6",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.015,
+          0.015,
+          0.5882
+        ]
+      },
+      "components": {
+        "sindri.mesh": {
+          "primitive": "cube",
+          "texture": "textures/line.png"
+        },
+        "sindri.tags": {
+          "tags": [
+            "tether-strand"
+          ]
+        }
+      },
+      "parent": "tether"
+    },
+    {
+      "id": "tether-joint-7",
+      "name": "tether-joint-7",
+      "parent": "tether",
+      "components": {
+        "sindri.physics3d.distance_joint": {
+          "first": "tether-link-6",
+          "second": "tether-link-7",
+          "enabled": true,
+          "max_distance": 0.5882,
+          "first_anchor": [
+            0,
+            0,
+            0
+          ],
+          "second_anchor": [
+            0,
+            0,
+            0
+          ]
+        },
+        "sindri.tags": {
+          "tags": [
+            "tether-joint"
+          ]
+        }
+      }
+    },
+    {
+      "id": "tether-strand-7",
+      "name": "tether-strand-7",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.015,
+          0.015,
+          0.5882
+        ]
+      },
+      "components": {
+        "sindri.mesh": {
+          "primitive": "cube",
+          "texture": "textures/line.png"
+        },
+        "sindri.tags": {
+          "tags": [
+            "tether-strand"
+          ]
+        }
+      },
+      "parent": "tether"
+    },
+    {
+      "id": "tether-joint-8",
+      "name": "tether-joint-8",
+      "parent": "tether",
+      "components": {
+        "sindri.physics3d.distance_joint": {
+          "first": "tether-link-7",
+          "second": "tether-link-8",
+          "enabled": true,
+          "max_distance": 0.5882,
+          "first_anchor": [
+            0,
+            0,
+            0
+          ],
+          "second_anchor": [
+            0,
+            0,
+            0
+          ]
+        },
+        "sindri.tags": {
+          "tags": [
+            "tether-joint"
+          ]
+        }
+      }
+    },
+    {
+      "id": "tether-strand-8",
+      "name": "tether-strand-8",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.015,
+          0.015,
+          0.5882
+        ]
+      },
+      "components": {
+        "sindri.mesh": {
+          "primitive": "cube",
+          "texture": "textures/line.png"
+        },
+        "sindri.tags": {
+          "tags": [
+            "tether-strand"
+          ]
+        }
+      },
+      "parent": "tether"
+    },
+    {
+      "id": "tether-joint-9",
+      "name": "tether-joint-9",
+      "parent": "tether",
+      "components": {
+        "sindri.physics3d.distance_joint": {
+          "first": "tether-link-8",
+          "second": "tether-link-9",
+          "enabled": true,
+          "max_distance": 0.5882,
+          "first_anchor": [
+            0,
+            0,
+            0
+          ],
+          "second_anchor": [
+            0,
+            0,
+            0
+          ]
+        },
+        "sindri.tags": {
+          "tags": [
+            "tether-joint"
+          ]
+        }
+      }
+    },
+    {
+      "id": "tether-strand-9",
+      "name": "tether-strand-9",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.015,
+          0.015,
+          0.5882
+        ]
+      },
+      "components": {
+        "sindri.mesh": {
+          "primitive": "cube",
+          "texture": "textures/line.png"
+        },
+        "sindri.tags": {
+          "tags": [
+            "tether-strand"
+          ]
+        }
+      },
+      "parent": "tether"
+    },
+    {
+      "id": "tether-joint-10",
+      "name": "tether-joint-10",
+      "parent": "tether",
+      "components": {
+        "sindri.physics3d.distance_joint": {
+          "first": "tether-link-9",
+          "second": "tether-link-10",
+          "enabled": true,
+          "max_distance": 0.5882,
+          "first_anchor": [
+            0,
+            0,
+            0
+          ],
+          "second_anchor": [
+            0,
+            0,
+            0
+          ]
+        },
+        "sindri.tags": {
+          "tags": [
+            "tether-joint"
+          ]
+        }
+      }
+    },
+    {
+      "id": "tether-strand-10",
+      "name": "tether-strand-10",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.015,
+          0.015,
+          0.5882
+        ]
+      },
+      "components": {
+        "sindri.mesh": {
+          "primitive": "cube",
+          "texture": "textures/line.png"
+        },
+        "sindri.tags": {
+          "tags": [
+            "tether-strand"
+          ]
+        }
+      },
+      "parent": "tether"
+    },
+    {
+      "id": "tether-joint-11",
+      "name": "tether-joint-11",
+      "parent": "tether",
+      "components": {
+        "sindri.physics3d.distance_joint": {
+          "first": "tether-link-10",
+          "second": "tether-link-11",
+          "enabled": true,
+          "max_distance": 0.5882,
+          "first_anchor": [
+            0,
+            0,
+            0
+          ],
+          "second_anchor": [
+            0,
+            0,
+            0
+          ]
+        },
+        "sindri.tags": {
+          "tags": [
+            "tether-joint"
+          ]
+        }
+      }
+    },
+    {
+      "id": "tether-strand-11",
+      "name": "tether-strand-11",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.015,
+          0.015,
+          0.5882
+        ]
+      },
+      "components": {
+        "sindri.mesh": {
+          "primitive": "cube",
+          "texture": "textures/line.png"
+        },
+        "sindri.tags": {
+          "tags": [
+            "tether-strand"
+          ]
+        }
+      },
+      "parent": "tether"
+    },
+    {
+      "id": "tether-joint-12",
+      "name": "tether-joint-12",
+      "parent": "tether",
+      "components": {
+        "sindri.physics3d.distance_joint": {
+          "first": "tether-link-11",
+          "second": "tether-link-12",
+          "enabled": true,
+          "max_distance": 0.5882,
+          "first_anchor": [
+            0,
+            0,
+            0
+          ],
+          "second_anchor": [
+            0,
+            0,
+            0
+          ]
+        },
+        "sindri.tags": {
+          "tags": [
+            "tether-joint"
+          ]
+        }
+      }
+    },
+    {
+      "id": "tether-strand-12",
+      "name": "tether-strand-12",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.015,
+          0.015,
+          0.5882
+        ]
+      },
+      "components": {
+        "sindri.mesh": {
+          "primitive": "cube",
+          "texture": "textures/line.png"
+        },
+        "sindri.tags": {
+          "tags": [
+            "tether-strand"
+          ]
+        }
+      },
+      "parent": "tether"
+    },
+    {
+      "id": "tether-joint-13",
+      "name": "tether-joint-13",
+      "parent": "tether",
+      "components": {
+        "sindri.physics3d.distance_joint": {
+          "first": "tether-link-12",
+          "second": "tether-link-13",
+          "enabled": true,
+          "max_distance": 0.5882,
+          "first_anchor": [
+            0,
+            0,
+            0
+          ],
+          "second_anchor": [
+            0,
+            0,
+            0
+          ]
+        },
+        "sindri.tags": {
+          "tags": [
+            "tether-joint"
+          ]
+        }
+      }
+    },
+    {
+      "id": "tether-strand-13",
+      "name": "tether-strand-13",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.015,
+          0.015,
+          0.5882
+        ]
+      },
+      "components": {
+        "sindri.mesh": {
+          "primitive": "cube",
+          "texture": "textures/line.png"
+        },
+        "sindri.tags": {
+          "tags": [
+            "tether-strand"
+          ]
+        }
+      },
+      "parent": "tether"
+    },
+    {
+      "id": "tether-joint-14",
+      "name": "tether-joint-14",
+      "parent": "tether",
+      "components": {
+        "sindri.physics3d.distance_joint": {
+          "first": "tether-link-13",
+          "second": "tether-link-14",
+          "enabled": true,
+          "max_distance": 0.5882,
+          "first_anchor": [
+            0,
+            0,
+            0
+          ],
+          "second_anchor": [
+            0,
+            0,
+            0
+          ]
+        },
+        "sindri.tags": {
+          "tags": [
+            "tether-joint"
+          ]
+        }
+      }
+    },
+    {
+      "id": "tether-strand-14",
+      "name": "tether-strand-14",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.015,
+          0.015,
+          0.5882
+        ]
+      },
+      "components": {
+        "sindri.mesh": {
+          "primitive": "cube",
+          "texture": "textures/line.png"
+        },
+        "sindri.tags": {
+          "tags": [
+            "tether-strand"
+          ]
+        }
+      },
+      "parent": "tether"
+    },
+    {
+      "id": "tether-joint-15",
+      "name": "tether-joint-15",
+      "parent": "tether",
+      "components": {
+        "sindri.physics3d.distance_joint": {
+          "first": "tether-link-14",
+          "second": "tether-link-15",
+          "enabled": true,
+          "max_distance": 0.5882,
+          "first_anchor": [
+            0,
+            0,
+            0
+          ],
+          "second_anchor": [
+            0,
+            0,
+            0
+          ]
+        },
+        "sindri.tags": {
+          "tags": [
+            "tether-joint"
+          ]
+        }
+      }
+    },
+    {
+      "id": "tether-strand-15",
+      "name": "tether-strand-15",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.015,
+          0.015,
+          0.5882
+        ]
+      },
+      "components": {
+        "sindri.mesh": {
+          "primitive": "cube",
+          "texture": "textures/line.png"
+        },
+        "sindri.tags": {
+          "tags": [
+            "tether-strand"
+          ]
+        }
+      },
+      "parent": "tether"
+    },
+    {
+      "id": "tether-joint-16",
+      "name": "tether-joint-16",
+      "parent": "tether",
+      "components": {
+        "sindri.physics3d.distance_joint": {
+          "first": "tether-link-15",
+          "second": "diver",
+          "enabled": true,
+          "max_distance": 0.5882,
+          "first_anchor": [
+            0,
+            0,
+            0
+          ],
+          "second_anchor": [
+            0,
+            0,
+            0
+          ]
+        },
+        "sindri.tags": {
+          "tags": [
+            "tether-joint"
+          ]
+        }
+      }
+    },
+    {
+      "id": "tether-strand-16",
+      "name": "tether-strand-16",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.015,
+          0.015,
+          0.5882
+        ]
+      },
+      "components": {
+        "sindri.mesh": {
+          "primitive": "cube",
+          "texture": "textures/line.png"
+        },
+        "sindri.tags": {
+          "tags": [
+            "tether-strand"
+          ]
+        }
+      },
+      "parent": "tether"
+    },
+    {
+      "id": "stanchion",
+      "name": "Stanchion",
+      "transform_3d": {
+        "position": [
+          -2.5,
+          0,
+          1.1
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.35,
+          5.0,
+          0.35
+        ]
+      },
+      "components": {
+        "sindri.mesh": {
+          "primitive": "cube",
+          "texture": "textures/grip.png"
+        },
+        "sindri.material": {
+          "base_color": [
+            0.55,
+            0.55,
+            0.55,
+            1
+          ],
+          "metallic": 0.4,
+          "roughness": 0.6,
+          "override_factors": true
+        },
+        "sindri.physics3d.collider": {
+          "pieces": [
+            {
+              "shape": {
+                "shape": "box",
+                "half_extents": [
+                  0.5,
+                  0.5,
+                  0.5
+                ]
+              },
+              "offset": [
+                0,
+                0,
+                0
+              ],
+              "rotation": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "sensor": false,
+              "layers": {
+                "memberships": 1,
+                "filter": 4294967295
+              },
+              "friction": 0.6,
+              "restitution": 0.1
+            }
+          ]
+        }
+      }
+    },
+    {
       "id": "hud-reticle",
       "name": "hud-reticle",
       "transform_3d": {
@@ -5797,6 +8330,84 @@
             1.0,
             0.85,
             0.3,
+            1.0
+          ],
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.035,
+          "line_height": 0.042,
+          "layer": 200,
+          "text": "",
+          "letter_spacing": 0.004
+        }
+      }
+    },
+    {
+      "id": "hud-tether",
+      "name": "hud-tether",
+      "transform_3d": {
+        "position": [
+          0,
+          -0.88,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.text": {
+          "anchor": "center",
+          "color": [
+            0.85,
+            0.92,
+            1.0,
+            1.0
+          ],
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.04,
+          "line_height": 0.048,
+          "layer": 200,
+          "text": "TETHER {} / {} M",
+          "letter_spacing": 0.004
+        }
+      }
+    },
+    {
+      "id": "hud-tether-state",
+      "name": "hud-tether-state",
+      "transform_3d": {
+        "position": [
+          0,
+          -0.78,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.text": {
+          "anchor": "center",
+          "color": [
+            1.0,
+            0.55,
+            0.25,
             1.0
           ],
           "font": "fonts/ChakraPetch-Regular.ttf",

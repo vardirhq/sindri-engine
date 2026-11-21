@@ -20,6 +20,14 @@ aft handhold, looking down the hold at the one on the forward bulkhead.
 | X | Brake: thrust against the drift |
 | F or right mouse | Hold on to a handhold in reach; keep holding to catch the next one |
 | Space or left mouse, holding on | Push off the way you look |
+| R (hold) | Reel the tether in; let go and it pays out again |
+| U | Unclip from the tether; near its loose end, clip back on |
+
+Stage 2, **the tether**: a 10 m line of physics links from the aft handhold
+to the diver. It goes taut at its length and holds them there, catches on the
+stanchion part way down the hold, and reels them home. The far bulkhead is past
+the line's reach: unclip to get there, and come back to the loose end to clip
+on again.
 
 Thrusters burn propellant (shown bottom left); pushing off and catching
 handholds is free, so moving well means moving hand to hand. Looking turns
@@ -34,7 +42,8 @@ cargo run -p sindri-player -- games/drift
 
 There is no game code in Rust. The scene is written by `art/hold.py`, which
 also draws the textures; re-running it changes nothing. The movement is
-`assets/scripts/diver.decay`. `src/lib.rs` is a test harness that plays the
+`assets/scripts/diver.decay`, the tether `assets/scripts/tether.decay`
+on the engine's 3D distance joints. `src/lib.rs` is a test harness that plays the
 project the way every host does.
 
 ```sh
@@ -43,7 +52,8 @@ cargo run --quiet --package decay-lsp -- --check games/drift/assets/scripts/dive
 cargo test -p drift
 ```
 
-`tests/floating.rs` pushes off the aft handhold, drifts the length of the hold
+`tests/tether.rs` is stopped by the line, reeled home, caught on the
+stanchion, and unclips and clips back on. `tests/floating.rs` unclips, pushes off the aft handhold, drifts the length of the hold
 and catches the forward one, and checks that thrust is kept when the thrusters
 stop and that the brake takes it out again. The editor's
 `play_matches_the_build` test plays it the same in the editor as in a build.

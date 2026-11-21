@@ -3407,6 +3407,18 @@
           "returns": "List<Entity>"
         },
         {
+          "description": "Reads the authored enabled flag of a 3D distance joint, including before synchronization. True does not guarantee live endpoints: missing, inactive or bodiless endpoints still suspend the constraint. Requires 3D physics and a sindri.physics3d.distance_joint on the owner.",
+          "kind": "function",
+          "name": "joint_enabled",
+          "parameter_names": [
+            "joint"
+          ],
+          "parameters": [
+            "Entity"
+          ],
+          "returns": "bool"
+        },
+        {
           "description": "Query mask bit for a text name in the active authored 3D world's first 32 layer labels. Empty labels cannot be selected; duplicate names select the first bit. Reads current authoring without stepping; ignores inactive settings and never reads 2D names. Unknown names, malformed or multiple active world settings and missing 3D host fail.",
           "kind": "function",
           "name": "layer",
@@ -3565,6 +3577,34 @@
           "parameters": [
             "Entity",
             "Vec3"
+          ],
+          "returns": "unit"
+        },
+        {
+          "description": "Tunes the length of an authored 3D distance joint (a rope) for the next fixed synchronization: shorten it step by step to reel a body in. Distance must be finite and positive. Works while suspended or before endpoints are built; keeps the solver constraint, its anchors and body motion. Requires 3D physics and a sindri.physics3d.distance_joint on the owner.",
+          "kind": "function",
+          "name": "set_distance",
+          "parameter_names": [
+            "joint",
+            "max_distance"
+          ],
+          "parameters": [
+            "Entity",
+            "number"
+          ],
+          "returns": "unit"
+        },
+        {
+          "description": "Suspends or reconnects an authored 3D distance joint at the next fixed synchronization: let go of a rope, then catch on it again. Keeps the owner, endpoints, length, anchors and body motion. Requires 3D physics and a sindri.physics3d.distance_joint on the owner.",
+          "kind": "function",
+          "name": "set_joint_enabled",
+          "parameter_names": [
+            "joint",
+            "enabled"
+          ],
+          "parameters": [
+            "Entity",
+            "bool"
           ],
           "returns": "unit"
         },

@@ -1,0 +1,182 @@
+// The safety tether: a line of links from the aft handhold to the diver.
+//
+// Physics does the line. Each link is a small body that the hold's walls and
+// props stop, and each segment between two links is an authored
+// sindri.physics3d.distance_joint: it slackens freely but never stretches, so
+// the line goes taut at its length, catches on what it is drawn across, and
+// drags the diver when it does. This script reels it in, clips and unclips the
+// diver's end, lays a drawn strand along each segment, and tells the HUD.
+//
+// Controls:
+//   R (hold)   reel in: the line shortens and draws the diver home; let go
+//              and it pays out again
+//   U          unclip from the line; near its loose end, clip back on
+
+script Tether {
+    // How many links, and the length of the whole line, in metres.
+    @export let links: number = 16.0;
+    @export let length: number = 10.0;
+    // How fast the reel takes up line, in m/s, and the least it leaves out.
+    @export let reel_speed: number = 1.4;
+    @export let shortest: number = 1.0;
+    // How fast the absorber takes out motion along a taut line, per second.
+    @export let absorb_rate: number = 10.0;
+    // How far a hand reaches for the line's loose end.
+    @export let reach: number = 1.1;
+
+    var out: number = 10.0;
+    var clipped: bool = true;
+    var taut: bool = false;
+    var reeling: bool = false;
+    var diver: Entity = null;
+    var eye: Entity = null;
+    var anchor: Entity = null;
+    var label: Entity = null;
+    var state: Entity = null;
+
+    fn start() {
+        this.out = this.length;
+        this.diver = World.find("Diver");
+        this.eye = World.find("Eye");
+        this.anchor = World.find("StartHold");
+        this.label = World.find("hud-tether");
+        this.state = World.find("hud-tether-state");
+        print("Drift: tether clipped on");
+    }
+
+    fn update(dt: number) {
+        let joints = World.with_tag("tether-joint");
+        let strands = World.with_tag("tether-strand");
+        let points = line_points();
+        if Input.Keyboard.just_pressed("U") {
+            toggle_clip(joints, points);
+        }
+        reel(dt, joints);
+        // Drawn, the line meets the diver at the waist rather than the eye,
+        // so it is seen running away below the view instead of through it.
+        var drawn = points;
+        if this.clipped {
+            drawn[drawn.len - 1] = this.eye.transform.world_position
+                - this.eye.transform.up * 0.4
+                + this.eye.transform.forward * 0.15;
+        }
+        lay_strands(drawn, strands);
+        let path = path_length(points);
+        if this.clipped {
+            // Taut near full length, slack again only well short of it, so a
+            // line fluttering at its end is not taut and slack by turns.
+            if !this.taut && path >= this.out * 0.97 {
+                this.taut = true;
+                print("Drift: tether taut");
+            }
+            if this.taut && path < this.out * 0.9 {
+                this.taut = false;
+            }
+            if this.taut && !this.reeling {
+                absorb(dt, points);
+            }
+            Ui.set_numbers(this.label, round(path * 10.0) / 10.0, round(this.out * 10.0) / 10.0);
+            if this.taut {
+                Ui.set_text(this.state, "TAUT  -  R to reel in");
+            } else {
+                Ui.set_text(this.state, "");
+            }
+        } else {
+            this.taut = false;
+            let loose = points[points.len - 2];
+            if loose.distance(this.eye.transform.world_position) <= this.reach {
+                Ui.set_text(this.state, "UNTETHERED  -  U to clip on");
+            } else {
+                Ui.set_text(this.state, "UNTETHERED");
+            }
+        }
+    }
+
+    // The lanyard's energy absorber: while the line is taut, motion along its
+    // last segment dies away instead of rebounding, and swing across it is
+    // kept, so coming up short on the line is a tug rather than a bounce.
+    fn absorb(dt: number, points: List<Vec3>) {
+        let along = points[points.len - 1] - points[points.len - 2];
+        if along.length < 0.001 {
+            return;
+        }
+        let direction = along.normalized;
+        let velocity = Physics3d.velocity(this.diver);
+        let radial = velocity.dot(direction);
+        let keep = exp(-this.absorb_rate * dt);
+        Physics3d.set_velocity(this.diver, velocity - direction * (radial * (1.0 - keep)));
+    }
+
+    // The handhold, every link in order, then the diver.
+    fn line_points() -> List<Vec3> {
+        var points: List<Vec3> = [this.anchor.transform.world_position];
+        for link in World.with_tag("tether-link") {
+            points.push(link.transform.world_position);
+        }
+        points.push(this.diver.transform.world_position);
+        return points;
+    }
+
+    // Along the line from the handhold to the diver, segment by segment.
+    fn path_length(points: List<Vec3>) -> number {
+        var total = 0.0;
+        var i = 1;
+        while i < points.len {
+            total += points[i].distance(points[i - 1]);
+            i += 1;
+        }
+        return total;
+    }
+
+    fn toggle_clip(joints: List<Entity>, points: List<Vec3>) {
+        let last = joints[joints.len - 1];
+        if this.clipped {
+            this.clipped = false;
+            Physics3d.set_joint_enabled(last, false);
+            print("Drift: unclipped");
+            return;
+        }
+        let loose = points[points.len - 2];
+        if loose.distance(this.eye.transform.world_position) <= this.reach {
+            this.clipped = true;
+            Physics3d.set_joint_enabled(last, true);
+            print("Drift: tether clipped on");
+        }
+    }
+
+    fn reel(dt: number, joints: List<Entity>) {
+        let wanted = Input.Keyboard.is_down("R") && this.clipped;
+        var next = this.length;
+        if wanted {
+            next = max(this.shortest, this.out - this.reel_speed * dt);
+            if !this.reeling {
+                print("Drift: reeling in");
+            }
+        }
+        this.reeling = wanted;
+        if next == this.out {
+            return;
+        }
+        this.out = next;
+        let segment = this.out / (this.links + 1.0);
+        for joint in joints {
+            Physics3d.set_distance(joint, segment);
+        }
+    }
+
+    // Each drawn strand stretched between its two ends.
+    fn lay_strands(points: List<Vec3>, strands: List<Entity>) {
+        var i = 0;
+        for strand in strands {
+            let from = points[i];
+            let to = points[i + 1];
+            let span = to.distance(from);
+            strand.transform.world_position = (from + to) * 0.5;
+            if span > 0.001 {
+                strand.transform.look_at(to);
+            }
+            strand.transform.scale = Vec3(0.015, 0.015, max(span, 0.01));
+            i += 1;
+        }
+    }
+}

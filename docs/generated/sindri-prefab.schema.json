@@ -235,6 +235,13 @@
             "null"
           ]
         },
+        "^sindri\\.physics3d\\.distance_joint#[A-Za-z0-9_-]+$": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
         "^sindri\\.physics3d\\.material#[A-Za-z0-9_-]+$": {
           "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
           "type": [
@@ -707,6 +714,13 @@
           ]
         },
         "sindri.physics3d.collider": {
+          "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "sindri.physics3d.distance_joint": {
           "description": "A merge patch over the prefab's payload: a field replaces, null removes.",
           "type": [
             "object",
@@ -1064,6 +1078,9 @@
         "^sindri\\.physics3d\\.collider#[A-Za-z0-9_-]+$": {
           "$ref": "#/$defs/sindri.physics3d.collider"
         },
+        "^sindri\\.physics3d\\.distance_joint#[A-Za-z0-9_-]+$": {
+          "$ref": "#/$defs/sindri.physics3d.distance_joint"
+        },
         "^sindri\\.physics3d\\.material#[A-Za-z0-9_-]+$": {
           "$ref": "#/$defs/sindri.physics3d.material"
         },
@@ -1269,6 +1286,9 @@
         },
         "sindri.physics3d.collider": {
           "$ref": "#/$defs/sindri.physics3d.collider"
+        },
+        "sindri.physics3d.distance_joint": {
+          "$ref": "#/$defs/sindri.physics3d.distance_joint"
         },
         "sindri.physics3d.material": {
           "$ref": "#/$defs/sindri.physics3d.material"
@@ -4164,6 +4184,55 @@
         }
       ],
       "title": "Collider 3D"
+    },
+    "sindri.physics3d.distance_joint": {
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "default": true,
+          "type": "boolean"
+        },
+        "first": {
+          "default": "",
+          "description": "Names another entity, by its id.",
+          "type": "string"
+        },
+        "first_anchor": {
+          "default": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "items": {
+            "default": 0.0,
+            "type": "number"
+          },
+          "type": "array"
+        },
+        "max_distance": {
+          "default": 1.0,
+          "type": "number"
+        },
+        "second": {
+          "default": "",
+          "description": "Names another entity, by its id.",
+          "type": "string"
+        },
+        "second_anchor": {
+          "default": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "items": {
+            "default": 0.0,
+            "type": "number"
+          },
+          "type": "array"
+        }
+      },
+      "title": "Distance Joint 3D",
+      "type": "object"
     },
     "sindri.physics3d.material": {
       "additionalProperties": false,

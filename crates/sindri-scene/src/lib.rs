@@ -28,6 +28,7 @@ mod occlusion;
 mod physics;
 mod physics3d;
 mod physics_joints;
+mod physics_joints3d;
 mod physics_material;
 mod physics_reads;
 mod physics_sync;
@@ -127,6 +128,7 @@ pub use physics::{
 pub use physics_joints::{
     DistanceJoint2dComponent, HingeJoint2dComponent, SliderJoint2dComponent, SpringJoint2dComponent,
 };
+pub use physics_joints3d::DistanceJoint3dComponent;
 pub use physics_material::{
     PhysicsMaterial2dComponent, PhysicsMaterial3dComponent, PhysicsMaterialError,
     PhysicsMaterialSources, physics_material_profile, referenced_physics_materials,

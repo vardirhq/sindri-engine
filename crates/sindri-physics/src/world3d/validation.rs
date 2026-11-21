@@ -3,7 +3,7 @@
 use crate::validate::{finite, non_negative, normalized, positive};
 use crate::{Collider3d, ColliderShape3d, PhysicsError, PhysicsPose3d, RigidBody3d};
 
-pub(super) fn finite3(name: &'static str, value: [f32; 3]) -> Result<(), PhysicsError> {
+pub(crate) fn finite3(name: &'static str, value: [f32; 3]) -> Result<(), PhysicsError> {
     if value.into_iter().all(f32::is_finite) {
         Ok(())
     } else {

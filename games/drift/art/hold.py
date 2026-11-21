@@ -29,6 +29,14 @@ WALL = 0.4
 
 SOLID = {"memberships": 1, "filter": 4294967295}
 DIVER = {"memberships": 2, "filter": 4294967295}
+# The tether's links touch the hold and what is in it, never each other or the diver.
+LINK = {"memberships": 4, "filter": 1}
+
+# The tether: links between the aft handhold and the diver, as many segments
+# as links plus one, each a rope that may slacken but never stretch.
+TETHER_LENGTH = 10.0
+TETHER_LINKS = 16
+LINK_RADIUS = 0.08
 
 
 # --- textures ---------------------------------------------------------------
@@ -61,6 +69,16 @@ def grip_texture(path: Path) -> None:
     draw = ImageDraw.Draw(image)
     for offset in range(-size, size * 2, 16):
         draw.polygon([(offset, 0), (offset + 8, 0), (offset + 8 - size, size), (offset - size, size)], fill=(26, 24, 20))
+    image.save(path, optimize=True)
+
+
+def line_texture(path: Path) -> None:
+    """High-visibility orange webbing, so the tether reads against the dark."""
+    size = 16
+    image = Image.new("RGB", (size, size), (240, 110, 30))
+    draw = ImageDraw.Draw(image)
+    for y in range(0, size, 4):
+        draw.line([(0, y), (size, y)], fill=(200, 80, 20))
     image.save(path, optimize=True)
 
 
@@ -218,6 +236,52 @@ def text(id_, position, words, size, color=(0.85, 0.92, 1.0, 1.0)):
     )
 
 
+def tether(anchor, diver):
+    """The safety line, coiled loosely between the handhold and the diver.
+
+    Each link is a small body that the hold's walls and props stop; each
+    segment between two of them is an owned `sindri.physics3d.distance_joint`.
+    The strands are only drawn: `scripts/tether.decay` lays each one between
+    its two links every frame."""
+    segment = TETHER_LENGTH / (TETHER_LINKS + 1)
+    out = [entity("tether", "Tether", **{
+        "sindri.script": {"source": "scripts/tether.decay", "script": "Tether",
+                          "properties": {"links": TETHER_LINKS, "length": TETHER_LENGTH}},
+    })]
+    names = ["start-hold"] + [f"tether-link-{i}" for i in range(TETHER_LINKS)] + ["diver"]
+    for i in range(TETHER_LINKS):
+        # A loose coil in the space between the handhold and the diver.
+        turn = i * 0.9
+        position = (anchor[0] + 0.25 + 0.02 * i, 0.25 * math.sin(turn), 0.25 * math.cos(turn))
+        link = entity(
+            names[i + 1], parent="tether", position=position,
+            # Unscaled and undrawn: a collider takes its entity's scale, and the
+            # strands already draw the line.
+            **{
+                "sindri.physics3d.collider": {"pieces": [{
+                    "shape": {"shape": "sphere", "radius": LINK_RADIUS},
+                    "offset": [0, 0, 0], "rotation": [0, 0, 0, 1], "sensor": False,
+                    "layers": LINK, "friction": 0.3, "restitution": 0.0,
+                }]},
+                "sindri.physics3d.rigid_body": dict(body("dynamic"), linear_damping=1.0, angular_damping=1.0),
+                "sindri.tags": {"tags": ["tether-link"]},
+            },
+        )
+        out.append(link)
+    for i in range(TETHER_LINKS + 1):
+        joint = {"first": names[i], "second": names[i + 1], "enabled": True,
+                 "max_distance": round(segment, 4), "first_anchor": [0, 0, 0], "second_anchor": [0, 0, 0]}
+        out.append({"id": f"tether-joint-{i}", "name": f"tether-joint-{i}", "parent": "tether",
+                    "components": {"sindri.physics3d.distance_joint": joint,
+                                   "sindri.tags": {"tags": ["tether-joint"]}}})
+        out.append(entity(
+            f"tether-strand-{i}", parent="tether", scale=(0.015, 0.015, segment),
+            **{"sindri.mesh": {"primitive": "cube", "texture": "textures/line.png"},
+               "sindri.tags": {"tags": ["tether-strand"]}},
+        ))
+    return out
+
+
 def yaw_quat(radians):
     return (0.0, math.sin(radians / 2), 0.0, math.cos(radians / 2))
 
@@ -290,12 +354,24 @@ def scene():
                             "inner_angle": 0.25, "outer_angle": 0.5}},
     )
     entities += [diver, eye, helmet]
+    entities += tether((-half_l + 0.12, 0, 0), (-half_l + 0.7, 0, 0))
+    # A stanchion part way down the hold, for the tether to catch on.
+    entities.append(entity(
+        "stanchion", "Stanchion", position=(-2.5, 0, 1.1), scale=(0.35, HEIGHT, 0.35),
+        **{
+            "sindri.mesh": {"primitive": "cube", "texture": "textures/grip.png"},
+            "sindri.material": {"base_color": [0.55, 0.55, 0.55, 1], "metallic": 0.4, "roughness": 0.6, "override_factors": True},
+            "sindri.physics3d.collider": {"pieces": [box_piece()]},
+        },
+    ))
     # The HUD: a reticle, the propellant gauge and a prompt for what can be grabbed.
     entities += [
         text("hud-reticle", (0, 0, 0), "+", 0.05, (0.85, 0.92, 1.0, 0.6)),
         text("hud-propellant", (-1.25, -0.88, 0), "PROPELLANT {}%", 0.04),
         text("hud-velocity", (1.25, -0.88, 0), "{} M/S", 0.04),
         text("hud-prompt", (0, -0.2, 0), "", 0.035, (1.0, 0.85, 0.3, 1.0)),
+        text("hud-tether", (0, -0.88, 0), "TETHER {} / {} M", 0.04),
+        text("hud-tether-state", (0, -0.78, 0), "", 0.035, (1.0, 0.55, 0.25, 1.0)),
     ]
     return {"format_version": 10, "metadata": {"name": "The Hold"}, "entities": entities}
 
@@ -305,6 +381,7 @@ def main():
     panel_texture(ASSETS / "textures" / "panel.png")
     grip_texture(ASSETS / "textures" / "grip.png")
     crate_texture(ASSETS / "textures" / "crate.png")
+    line_texture(ASSETS / "textures" / "line.png")
     (ASSETS / "hold.scene").write_text(json.dumps(scene(), indent=2) + "\n")
 
 

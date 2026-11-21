@@ -1851,6 +1851,53 @@
       "addable": true,
       "apply": {},
       "default_payload": {
+        "enabled": true,
+        "first": "",
+        "first_anchor": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "max_distance": 1.0,
+        "second": "",
+        "second_anchor": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "display_name": "Distance Joint 3D",
+      "fields": {
+        "enabled": true,
+        "first": "",
+        "first_anchor": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "max_distance": 1.0,
+        "second": "",
+        "second_anchor": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "meanings": {
+        "first": {
+          "kind": "entity"
+        },
+        "second": {
+          "kind": "entity"
+        }
+      },
+      "schema_version": 1,
+      "type_name": "sindri.physics3d.distance_joint"
+    },
+    {
+      "addable": true,
+      "apply": {},
+      "default_payload": {
         "friction": 0.5,
         "override_friction": false,
         "override_restitution": false,

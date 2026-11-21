@@ -40,7 +40,7 @@ correct it or delete it.
 | --- | :-: | :-: | :-: |
 | [Engine core](capabilities/core.md) | 7 | 1 | 0 |
 | [Input and audio](capabilities/input-and-audio.md) | 9 | 2 | 0 |
-| [Physics](capabilities/physics.md) | 36 | 8 | 0 |
+| [Physics](capabilities/physics.md) | 37 | 8 | 0 |
 | [Effects, saves and randomness](capabilities/runtime.md) | 4 | 1 | 0 |
 | [Screen UI and Weave](capabilities/ui.md) | 7 | 1 | 0 |
 | [Grids and voxels](capabilities/grids-and-voxels.md) | 10 | 3 | 0 |
@@ -49,4 +49,4 @@ correct it or delete it.
 | [The editor](capabilities/editor.md) | 39 | 6 | 1 |
 | [Decay](capabilities/decay.md) | 24 | 8 | 0 |
 | [Games, labs and tooling](capabilities/projects.md) | 9 | 0 | 0 |
-| **All** | **188** | **33** | **1** |
+| **All** | **189** | **33** | **1** |

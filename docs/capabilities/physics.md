@@ -43,6 +43,8 @@ Each entry links its tests and the projects that exercise it. Surface marks matc
 | [Hinge and slider position motors](#joint-position-motors) | ✅ | ✅ | ✅ | ✅ |
 | [Authored joint references in prefabs](#joint-prefab-references) | 🟡 | — | 🟡 | ✅ |
 | [Saved spawned-prefab reference remapping](#saved-reference-remapping) | ✅ | ✅ | — | ✅ |
+| **3D joints** | | | | |
+| [3D distance joints](#joints-3d) | 🟡 | ❌ | 🟡 | ✅ |
 | **3D** | | | | |
 | [Standalone 3D physics world](#world-3d) | ✅ | — | — | ❌ |
 | [3D physics in scenes](#scene-physics-3d) | ✅ | 🟡 | 🟡 | ❌ |
@@ -878,6 +880,47 @@ isolated instances of every joint kind, reuse saved subtrees and reject invalid
 saves without changing disk or the agreed document. The platformer's real Decay
 setup script spawns a nested windmill that editor Save As reopens with its
 fixed axle and reversing motor.
+
+</details>
+
+## 3D joints
+
+<a id="joints-3d"></a>
+
+### 3D distance joints
+
+A scene-authored 3D rope between body-local anchors, owned by its own entity, tuned and suspended from Decay.
+
+Engine 🟡 · Editor ❌ · Decay 🟡 · Proof ✅ — parity row *3D joints*
+
+**Tested by:** [`crates/sindri-physics/tests/distance_joint3d.rs`](../../crates/sindri-physics/tests/distance_joint3d.rs), [`crates/sindri-scene/src/physics_joints3d/tests.rs`](../../crates/sindri-scene/src/physics_joints3d/tests.rs), [`games/drift/tests/tether.rs`](../../games/drift/tests/tether.rs)
+
+**Exercised in:** [`games/drift`](../../games/drift)
+
+**See:** [`docs/physics.md`](../../docs/physics.md), [`docs/drift-plan.md`](../../docs/drift-plan.md)
+
+**Limits:**
+
+- Only the maximum-distance joint exists in 3D: hinges, sliders, springs and spherical joints, typed creation, retargeting and removal, and editor gizmos and review remain absent.
+
+<details markdown="1">
+<summary>Evidence</summary>
+
+`sindri.physics3d.distance_joint` is the 3D counterpart of the 2D distance
+joint: a rope between `first_anchor` on the first body and `second_anchor` on
+the second, which may slacken but never stretch past `max_distance`. A
+separate owner entity holds it, so several meet at one body; endpoints are
+stable scene IDs or prefab paths. Unchanged frames keep the solver constraint
+and its warm start, edits to length or anchors retune it in place without
+touching body motion, and an endpoint that is missing, inactive or has no
+body suspends it. Invalid lengths fail the step before any body changes.
+
+`Physics3d.set_distance`, `Physics3d.set_joint_enabled` and
+`Physics3d.joint_enabled` edit and read the authored component, applied at
+the next fixed synchronization. DRIFT's tether is sixteen link bodies on
+seventeen of these joints: it stops the diver at its length without a
+rebound, catches on a stanchion and draws the diver round it when reeled, and
+unclips and clips back on at its loose end.
 
 </details>
 
