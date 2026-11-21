@@ -31,7 +31,7 @@ fn from_hold(game: &Run) -> f32 {
 
 #[test]
 fn the_line_stops_the_diver_at_its_length_and_reels_them_home() {
-    let mut game = Run::open().expect("DRIFT opens");
+    let mut game = Run::open_in_hold().expect("DRIFT opens");
     game.wait(0.3);
     assert!(game.has_said("Drift: tether clipped on"), "{:?}", game.said);
     game.tap(Key::Space);
@@ -78,12 +78,12 @@ fn the_line_stops_the_diver_at_its_length_and_reels_them_home() {
 
 #[test]
 fn the_line_catches_on_the_stanchion_and_draws_the_diver_round_it() {
-    let mut game = Run::open().expect("DRIFT opens");
+    let mut game = Run::open_in_hold().expect("DRIFT opens");
     game.wait(0.3);
     // Down the hold past the stanchion, across behind it, and back towards
     // the start on its far side, braking at each turn.
     game.tap(Key::Space);
-    game.wait(1.8);
+    game.wait(1.3);
     for (key, burn, coast) in [(Key::D, 0.6, 1.0), (Key::S, 0.6, 2.0)] {
         game.press(Key::X);
         game.wait(1.5);
@@ -127,7 +127,7 @@ fn the_line_catches_on_the_stanchion_and_draws_the_diver_round_it() {
 
 #[test]
 fn unclipped_the_diver_is_free_and_clips_back_on_only_at_the_loose_end() {
-    let mut game = Run::open().expect("DRIFT opens");
+    let mut game = Run::open_in_hold().expect("DRIFT opens");
     game.wait(0.3);
     game.tap(Key::U);
     assert!(game.has_said("Drift: unclipped"), "{:?}", game.said);

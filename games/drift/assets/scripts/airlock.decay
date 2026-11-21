@@ -1,0 +1,117 @@
+// The airlock between the cabin and the hold.
+//
+// Two pressure doors and a chamber. Only one door is ever open, and it opens
+// only once the chamber matches the side it opens onto: cycling out closes the
+// inner door, pumps the chamber down to vacuum, then opens the outer door;
+// cycling in does the reverse. E at any of its three panels cycles it: the one
+// in the chamber, or the one beside each door.
+
+script Airlock {
+    // Seconds a door takes to slide, and to pump the chamber down or up.
+    @export let door_time: number = 1.0;
+    @export let pump_time: number = 3.0;
+    // How far a door slides into the wall, and how near a panel a hand must be.
+    @export let slide: number = 1.25;
+    @export let reach: number = 1.6;
+
+    // "in": inner open, chamber at pressure. "out": outer open, chamber empty.
+    // Between them, the steps of a cycle: "closing", "pumping", "opening".
+    var phase: String = "in";
+    var outward: bool = true;
+    var inner_open: number = 1.0;
+    var outer_open: number = 0.0;
+    var inner: Entity = null;
+    var outer: Entity = null;
+    var lamp: Entity = null;
+    var inner_closed: Vec3 = Vec3(0.0, 0.0, 0.0);
+    var outer_closed: Vec3 = Vec3(0.0, 0.0, 0.0);
+
+    fn start() {
+        this.inner = World.find("inner-door");
+        this.outer = World.find("outer-door");
+        this.lamp = World.find("AirlockLamp");
+        this.inner_closed = this.inner.transform.world_position;
+        this.outer_closed = this.outer.transform.world_position;
+        Ship.chamber_pressure = 1.0;
+    }
+
+    fn update(dt: number) {
+        if Input.Keyboard.just_pressed("E") && at_panel() {
+            request();
+        }
+        let door_step = dt / this.door_time;
+        if this.phase == "closing" {
+            if this.outward {
+                this.inner_open = max(0.0, this.inner_open - door_step);
+                if this.inner_open <= 0.0 { this.phase = "pumping"; }
+            } else {
+                this.outer_open = max(0.0, this.outer_open - door_step);
+                if this.outer_open <= 0.0 { this.phase = "pumping"; }
+            }
+        } else if this.phase == "pumping" {
+            let pump_step = dt / this.pump_time;
+            if this.outward {
+                Ship.chamber_pressure = max(0.0, Ship.chamber_pressure - pump_step);
+                if Ship.chamber_pressure <= 0.0 { this.phase = "opening"; }
+            } else {
+                Ship.chamber_pressure = min(1.0, Ship.chamber_pressure + pump_step);
+                if Ship.chamber_pressure >= 1.0 { this.phase = "opening"; }
+            }
+        } else if this.phase == "opening" {
+            if this.outward {
+                this.outer_open = min(1.0, this.outer_open + door_step);
+                if this.outer_open >= 1.0 {
+                    this.phase = "out";
+                    print("Drift: outer door open");
+                }
+            } else {
+                this.inner_open = min(1.0, this.inner_open + door_step);
+                if this.inner_open >= 1.0 {
+                    this.phase = "in";
+                    print("Drift: inner door open");
+                }
+            }
+        }
+        this.inner.transform.world_position = this.inner_closed - Vec3(0.0, 0.0, this.slide * this.inner_open);
+        this.outer.transform.world_position = this.outer_closed - Vec3(0.0, 0.0, this.slide * this.outer_open);
+        show();
+    }
+
+    // Whether the diver's hand is at one of the airlock's panels.
+    fn at_panel() -> bool {
+        let hand = World.find("Eye").transform.world_position;
+        return World.within_radius("airlock-panel", hand, this.reach).len > 0;
+    }
+
+    // A press starts a cycle towards whichever side the airlock is not open to.
+    fn request() {
+        if this.phase == "in" {
+            this.outward = true;
+            this.phase = "closing";
+            print("Drift: airlock cycling out");
+        } else if this.phase == "out" {
+            this.outward = false;
+            this.phase = "closing";
+            print("Drift: airlock cycling in");
+        }
+    }
+
+    // The chamber's lamp shows its pressure: green full, red empty, amber between.
+    fn show() {
+        let p = Ship.chamber_pressure;
+        var colour = Color(1.0, 0.6, 0.15, 1.0);
+        var words = "AIRLOCK CYCLING";
+        if this.phase == "in" {
+            colour = Color(0.3, 1.0, 0.45, 1.0);
+            words = "";
+        } else if this.phase == "out" {
+            colour = Color(1.0, 0.15, 0.1, 1.0);
+            words = "";
+        }
+        this.lamp.light.color = colour;
+        if words != "" {
+            words = words + "  " + round(p * 100.0) + "%";
+        }
+        Ui.set_text(World.find("hud-airlock"), words);
+    }
+}

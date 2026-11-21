@@ -1,7 +1,7 @@
 {
   "format_version": 10,
   "metadata": {
-    "name": "The Hold"
+    "name": "The Tern"
   },
   "entities": [
     {
@@ -114,13 +114,13 @@
       }
     },
     {
-      "id": "aft-bulkhead-0-0",
-      "name": "aft-bulkhead-0-0",
+      "id": "aft-bulkhead-port-0-0",
+      "name": "aft-bulkhead-port-0-0",
       "transform_3d": {
         "position": [
           -7.2,
           -1.45,
-          -1.45
+          -1.95
         ],
         "rotation": [
           0,
@@ -131,7 +131,7 @@
         "scale": [
           0.4,
           2.9,
-          2.9
+          1.9
         ]
       },
       "components": {
@@ -185,13 +185,13 @@
       }
     },
     {
-      "id": "aft-bulkhead-0-1",
-      "name": "aft-bulkhead-0-1",
+      "id": "aft-bulkhead-port-0-1",
+      "name": "aft-bulkhead-port-0-1",
       "transform_3d": {
         "position": [
           -7.2,
           -1.45,
-          1.45
+          -0.05
         ],
         "rotation": [
           0,
@@ -202,7 +202,7 @@
         "scale": [
           0.4,
           2.9,
-          2.9
+          1.9
         ]
       },
       "components": {
@@ -256,13 +256,13 @@
       }
     },
     {
-      "id": "aft-bulkhead-1-0",
-      "name": "aft-bulkhead-1-0",
+      "id": "aft-bulkhead-port-1-0",
+      "name": "aft-bulkhead-port-1-0",
       "transform_3d": {
         "position": [
           -7.2,
           1.45,
-          -1.45
+          -1.95
         ],
         "rotation": [
           0,
@@ -273,7 +273,7 @@
         "scale": [
           0.4,
           2.9,
-          2.9
+          1.9
         ]
       },
       "components": {
@@ -327,13 +327,13 @@
       }
     },
     {
-      "id": "aft-bulkhead-1-1",
-      "name": "aft-bulkhead-1-1",
+      "id": "aft-bulkhead-port-1-1",
+      "name": "aft-bulkhead-port-1-1",
       "transform_3d": {
         "position": [
           -7.2,
           1.45,
-          1.45
+          -0.05
         ],
         "rotation": [
           0,
@@ -344,7 +344,291 @@
         "scale": [
           0.4,
           2.9,
-          2.9
+          1.9
+        ]
+      },
+      "components": {
+        "sindri.mesh": {
+          "primitive": "cube",
+          "texture": "textures/panel.png"
+        },
+        "sindri.material": {
+          "base_color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallic": 0.3,
+          "roughness": 0.7,
+          "override_factors": true
+        },
+        "sindri.physics3d.collider": {
+          "pieces": [
+            {
+              "shape": {
+                "shape": "box",
+                "half_extents": [
+                  0.5,
+                  0.5,
+                  0.5
+                ]
+              },
+              "offset": [
+                0,
+                0,
+                0
+              ],
+              "rotation": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "sensor": false,
+              "layers": {
+                "memberships": 1,
+                "filter": 4294967295
+              },
+              "friction": 0.6,
+              "restitution": 0.1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "aft-bulkhead-starboard-0-0",
+      "name": "aft-bulkhead-starboard-0-0",
+      "transform_3d": {
+        "position": [
+          -7.2,
+          -1.45,
+          2.5
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.4,
+          2.9,
+          0.8
+        ]
+      },
+      "components": {
+        "sindri.mesh": {
+          "primitive": "cube",
+          "texture": "textures/panel.png"
+        },
+        "sindri.material": {
+          "base_color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallic": 0.3,
+          "roughness": 0.7,
+          "override_factors": true
+        },
+        "sindri.physics3d.collider": {
+          "pieces": [
+            {
+              "shape": {
+                "shape": "box",
+                "half_extents": [
+                  0.5,
+                  0.5,
+                  0.5
+                ]
+              },
+              "offset": [
+                0,
+                0,
+                0
+              ],
+              "rotation": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "sensor": false,
+              "layers": {
+                "memberships": 1,
+                "filter": 4294967295
+              },
+              "friction": 0.6,
+              "restitution": 0.1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "aft-bulkhead-starboard-1-0",
+      "name": "aft-bulkhead-starboard-1-0",
+      "transform_3d": {
+        "position": [
+          -7.2,
+          1.45,
+          2.5
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.4,
+          2.9,
+          0.8
+        ]
+      },
+      "components": {
+        "sindri.mesh": {
+          "primitive": "cube",
+          "texture": "textures/panel.png"
+        },
+        "sindri.material": {
+          "base_color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallic": 0.3,
+          "roughness": 0.7,
+          "override_factors": true
+        },
+        "sindri.physics3d.collider": {
+          "pieces": [
+            {
+              "shape": {
+                "shape": "box",
+                "half_extents": [
+                  0.5,
+                  0.5,
+                  0.5
+                ]
+              },
+              "offset": [
+                0,
+                0,
+                0
+              ],
+              "rotation": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "sensor": false,
+              "layers": {
+                "memberships": 1,
+                "filter": 4294967295
+              },
+              "friction": 0.6,
+              "restitution": 0.1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "aft-bulkhead-lintel-0-0",
+      "name": "aft-bulkhead-lintel-0-0",
+      "transform_3d": {
+        "position": [
+          -7.2,
+          1.2,
+          1.5
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.4,
+          3.4,
+          1.2
+        ]
+      },
+      "components": {
+        "sindri.mesh": {
+          "primitive": "cube",
+          "texture": "textures/panel.png"
+        },
+        "sindri.material": {
+          "base_color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallic": 0.3,
+          "roughness": 0.7,
+          "override_factors": true
+        },
+        "sindri.physics3d.collider": {
+          "pieces": [
+            {
+              "shape": {
+                "shape": "box",
+                "half_extents": [
+                  0.5,
+                  0.5,
+                  0.5
+                ]
+              },
+              "offset": [
+                0,
+                0,
+                0
+              ],
+              "rotation": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "sensor": false,
+              "layers": {
+                "memberships": 1,
+                "filter": 4294967295
+              },
+              "friction": 0.6,
+              "restitution": 0.1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "aft-bulkhead-sill-0-0",
+      "name": "aft-bulkhead-sill-0-0",
+      "transform_3d": {
+        "position": [
+          -7.2,
+          -2.7,
+          1.5
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.4,
+          0.4,
+          1.2
         ]
       },
       "components": {
@@ -5501,13 +5785,2777 @@
       }
     },
     {
+      "id": "chamber-deck-0-0",
+      "name": "chamber-deck-0-0",
+      "transform_3d": {
+        "position": [
+          -8.5,
+          -2.7,
+          1.5
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          2.2,
+          0.4,
+          2.6
+        ]
+      },
+      "components": {
+        "sindri.mesh": {
+          "primitive": "cube",
+          "texture": "textures/panel.png"
+        },
+        "sindri.material": {
+          "base_color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallic": 0.3,
+          "roughness": 0.7,
+          "override_factors": true
+        },
+        "sindri.physics3d.collider": {
+          "pieces": [
+            {
+              "shape": {
+                "shape": "box",
+                "half_extents": [
+                  0.5,
+                  0.5,
+                  0.5
+                ]
+              },
+              "offset": [
+                0,
+                0,
+                0
+              ],
+              "rotation": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "sensor": false,
+              "layers": {
+                "memberships": 1,
+                "filter": 4294967295
+              },
+              "friction": 0.6,
+              "restitution": 0.1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "chamber-overhead-0-0",
+      "name": "chamber-overhead-0-0",
+      "transform_3d": {
+        "position": [
+          -8.5,
+          0.1,
+          1.5
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          2.2,
+          0.4,
+          2.6
+        ]
+      },
+      "components": {
+        "sindri.mesh": {
+          "primitive": "cube",
+          "texture": "textures/panel.png"
+        },
+        "sindri.material": {
+          "base_color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallic": 0.3,
+          "roughness": 0.7,
+          "override_factors": true
+        },
+        "sindri.physics3d.collider": {
+          "pieces": [
+            {
+              "shape": {
+                "shape": "box",
+                "half_extents": [
+                  0.5,
+                  0.5,
+                  0.5
+                ]
+              },
+              "offset": [
+                0,
+                0,
+                0
+              ],
+              "rotation": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "sensor": false,
+              "layers": {
+                "memberships": 1,
+                "filter": 4294967295
+              },
+              "friction": 0.6,
+              "restitution": 0.1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "chamber-port-0-0",
+      "name": "chamber-port-0-0",
+      "transform_3d": {
+        "position": [
+          -8.5,
+          -1.3,
+          0.4
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          2.2,
+          2.4,
+          0.4
+        ]
+      },
+      "components": {
+        "sindri.mesh": {
+          "primitive": "cube",
+          "texture": "textures/panel.png"
+        },
+        "sindri.material": {
+          "base_color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallic": 0.3,
+          "roughness": 0.7,
+          "override_factors": true
+        },
+        "sindri.physics3d.collider": {
+          "pieces": [
+            {
+              "shape": {
+                "shape": "box",
+                "half_extents": [
+                  0.5,
+                  0.5,
+                  0.5
+                ]
+              },
+              "offset": [
+                0,
+                0,
+                0
+              ],
+              "rotation": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "sensor": false,
+              "layers": {
+                "memberships": 1,
+                "filter": 4294967295
+              },
+              "friction": 0.6,
+              "restitution": 0.1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "chamber-starboard-0-0",
+      "name": "chamber-starboard-0-0",
+      "transform_3d": {
+        "position": [
+          -8.5,
+          -1.3,
+          2.6
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          2.2,
+          2.4,
+          0.4
+        ]
+      },
+      "components": {
+        "sindri.mesh": {
+          "primitive": "cube",
+          "texture": "textures/panel.png"
+        },
+        "sindri.material": {
+          "base_color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallic": 0.3,
+          "roughness": 0.7,
+          "override_factors": true
+        },
+        "sindri.physics3d.collider": {
+          "pieces": [
+            {
+              "shape": {
+                "shape": "box",
+                "half_extents": [
+                  0.5,
+                  0.5,
+                  0.5
+                ]
+              },
+              "offset": [
+                0,
+                0,
+                0
+              ],
+              "rotation": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "sensor": false,
+              "layers": {
+                "memberships": 1,
+                "filter": 4294967295
+              },
+              "friction": 0.6,
+              "restitution": 0.1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "inner-bulkhead-port-0-0",
+      "name": "inner-bulkhead-port-0-0",
+      "transform_3d": {
+        "position": [
+          -9.8,
+          -1.2,
+          -0.25
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.4,
+          3.4,
+          2.3
+        ]
+      },
+      "components": {
+        "sindri.mesh": {
+          "primitive": "cube",
+          "texture": "textures/panel.png"
+        },
+        "sindri.material": {
+          "base_color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallic": 0.3,
+          "roughness": 0.7,
+          "override_factors": true
+        },
+        "sindri.physics3d.collider": {
+          "pieces": [
+            {
+              "shape": {
+                "shape": "box",
+                "half_extents": [
+                  0.5,
+                  0.5,
+                  0.5
+                ]
+              },
+              "offset": [
+                0,
+                0,
+                0
+              ],
+              "rotation": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "sensor": false,
+              "layers": {
+                "memberships": 1,
+                "filter": 4294967295
+              },
+              "friction": 0.6,
+              "restitution": 0.1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "inner-bulkhead-starboard-0-0",
+      "name": "inner-bulkhead-starboard-0-0",
+      "transform_3d": {
+        "position": [
+          -9.8,
+          -1.2,
+          2.45
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.4,
+          3.4,
+          0.7
+        ]
+      },
+      "components": {
+        "sindri.mesh": {
+          "primitive": "cube",
+          "texture": "textures/panel.png"
+        },
+        "sindri.material": {
+          "base_color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallic": 0.3,
+          "roughness": 0.7,
+          "override_factors": true
+        },
+        "sindri.physics3d.collider": {
+          "pieces": [
+            {
+              "shape": {
+                "shape": "box",
+                "half_extents": [
+                  0.5,
+                  0.5,
+                  0.5
+                ]
+              },
+              "offset": [
+                0,
+                0,
+                0
+              ],
+              "rotation": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "sensor": false,
+              "layers": {
+                "memberships": 1,
+                "filter": 4294967295
+              },
+              "friction": 0.6,
+              "restitution": 0.1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "inner-bulkhead-lintel-0-0",
+      "name": "inner-bulkhead-lintel-0-0",
+      "transform_3d": {
+        "position": [
+          -9.8,
+          0.0,
+          1.5
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.4,
+          1.0,
+          1.2
+        ]
+      },
+      "components": {
+        "sindri.mesh": {
+          "primitive": "cube",
+          "texture": "textures/panel.png"
+        },
+        "sindri.material": {
+          "base_color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallic": 0.3,
+          "roughness": 0.7,
+          "override_factors": true
+        },
+        "sindri.physics3d.collider": {
+          "pieces": [
+            {
+              "shape": {
+                "shape": "box",
+                "half_extents": [
+                  0.5,
+                  0.5,
+                  0.5
+                ]
+              },
+              "offset": [
+                0,
+                0,
+                0
+              ],
+              "rotation": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "sensor": false,
+              "layers": {
+                "memberships": 1,
+                "filter": 4294967295
+              },
+              "friction": 0.6,
+              "restitution": 0.1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "inner-bulkhead-sill-0-0",
+      "name": "inner-bulkhead-sill-0-0",
+      "transform_3d": {
+        "position": [
+          -9.8,
+          -2.7,
+          1.5
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.4,
+          0.4,
+          1.2
+        ]
+      },
+      "components": {
+        "sindri.mesh": {
+          "primitive": "cube",
+          "texture": "textures/panel.png"
+        },
+        "sindri.material": {
+          "base_color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallic": 0.3,
+          "roughness": 0.7,
+          "override_factors": true
+        },
+        "sindri.physics3d.collider": {
+          "pieces": [
+            {
+              "shape": {
+                "shape": "box",
+                "half_extents": [
+                  0.5,
+                  0.5,
+                  0.5
+                ]
+              },
+              "offset": [
+                0,
+                0,
+                0
+              ],
+              "rotation": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "sensor": false,
+              "layers": {
+                "memberships": 1,
+                "filter": 4294967295
+              },
+              "friction": 0.6,
+              "restitution": 0.1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cabin-deck-0-0",
+      "name": "cabin-deck-0-0",
+      "transform_3d": {
+        "position": [
+          -15.3333,
+          -2.7,
+          -0.35
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          2.1333,
+          0.4,
+          2.1
+        ]
+      },
+      "components": {
+        "sindri.mesh": {
+          "primitive": "cube",
+          "texture": "textures/panel.png"
+        },
+        "sindri.material": {
+          "base_color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallic": 0.3,
+          "roughness": 0.7,
+          "override_factors": true
+        },
+        "sindri.physics3d.collider": {
+          "pieces": [
+            {
+              "shape": {
+                "shape": "box",
+                "half_extents": [
+                  0.5,
+                  0.5,
+                  0.5
+                ]
+              },
+              "offset": [
+                0,
+                0,
+                0
+              ],
+              "rotation": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "sensor": false,
+              "layers": {
+                "memberships": 1,
+                "filter": 4294967295
+              },
+              "friction": 0.6,
+              "restitution": 0.1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cabin-deck-0-1",
+      "name": "cabin-deck-0-1",
+      "transform_3d": {
+        "position": [
+          -15.3333,
+          -2.7,
+          1.75
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          2.1333,
+          0.4,
+          2.1
+        ]
+      },
+      "components": {
+        "sindri.mesh": {
+          "primitive": "cube",
+          "texture": "textures/panel.png"
+        },
+        "sindri.material": {
+          "base_color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallic": 0.3,
+          "roughness": 0.7,
+          "override_factors": true
+        },
+        "sindri.physics3d.collider": {
+          "pieces": [
+            {
+              "shape": {
+                "shape": "box",
+                "half_extents": [
+                  0.5,
+                  0.5,
+                  0.5
+                ]
+              },
+              "offset": [
+                0,
+                0,
+                0
+              ],
+              "rotation": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "sensor": false,
+              "layers": {
+                "memberships": 1,
+                "filter": 4294967295
+              },
+              "friction": 0.6,
+              "restitution": 0.1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cabin-deck-1-0",
+      "name": "cabin-deck-1-0",
+      "transform_3d": {
+        "position": [
+          -13.2,
+          -2.7,
+          -0.35
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          2.1333,
+          0.4,
+          2.1
+        ]
+      },
+      "components": {
+        "sindri.mesh": {
+          "primitive": "cube",
+          "texture": "textures/panel.png"
+        },
+        "sindri.material": {
+          "base_color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallic": 0.3,
+          "roughness": 0.7,
+          "override_factors": true
+        },
+        "sindri.physics3d.collider": {
+          "pieces": [
+            {
+              "shape": {
+                "shape": "box",
+                "half_extents": [
+                  0.5,
+                  0.5,
+                  0.5
+                ]
+              },
+              "offset": [
+                0,
+                0,
+                0
+              ],
+              "rotation": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "sensor": false,
+              "layers": {
+                "memberships": 1,
+                "filter": 4294967295
+              },
+              "friction": 0.6,
+              "restitution": 0.1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cabin-deck-1-1",
+      "name": "cabin-deck-1-1",
+      "transform_3d": {
+        "position": [
+          -13.2,
+          -2.7,
+          1.75
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          2.1333,
+          0.4,
+          2.1
+        ]
+      },
+      "components": {
+        "sindri.mesh": {
+          "primitive": "cube",
+          "texture": "textures/panel.png"
+        },
+        "sindri.material": {
+          "base_color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallic": 0.3,
+          "roughness": 0.7,
+          "override_factors": true
+        },
+        "sindri.physics3d.collider": {
+          "pieces": [
+            {
+              "shape": {
+                "shape": "box",
+                "half_extents": [
+                  0.5,
+                  0.5,
+                  0.5
+                ]
+              },
+              "offset": [
+                0,
+                0,
+                0
+              ],
+              "rotation": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "sensor": false,
+              "layers": {
+                "memberships": 1,
+                "filter": 4294967295
+              },
+              "friction": 0.6,
+              "restitution": 0.1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cabin-deck-2-0",
+      "name": "cabin-deck-2-0",
+      "transform_3d": {
+        "position": [
+          -11.0667,
+          -2.7,
+          -0.35
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          2.1333,
+          0.4,
+          2.1
+        ]
+      },
+      "components": {
+        "sindri.mesh": {
+          "primitive": "cube",
+          "texture": "textures/panel.png"
+        },
+        "sindri.material": {
+          "base_color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallic": 0.3,
+          "roughness": 0.7,
+          "override_factors": true
+        },
+        "sindri.physics3d.collider": {
+          "pieces": [
+            {
+              "shape": {
+                "shape": "box",
+                "half_extents": [
+                  0.5,
+                  0.5,
+                  0.5
+                ]
+              },
+              "offset": [
+                0,
+                0,
+                0
+              ],
+              "rotation": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "sensor": false,
+              "layers": {
+                "memberships": 1,
+                "filter": 4294967295
+              },
+              "friction": 0.6,
+              "restitution": 0.1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cabin-deck-2-1",
+      "name": "cabin-deck-2-1",
+      "transform_3d": {
+        "position": [
+          -11.0667,
+          -2.7,
+          1.75
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          2.1333,
+          0.4,
+          2.1
+        ]
+      },
+      "components": {
+        "sindri.mesh": {
+          "primitive": "cube",
+          "texture": "textures/panel.png"
+        },
+        "sindri.material": {
+          "base_color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallic": 0.3,
+          "roughness": 0.7,
+          "override_factors": true
+        },
+        "sindri.physics3d.collider": {
+          "pieces": [
+            {
+              "shape": {
+                "shape": "box",
+                "half_extents": [
+                  0.5,
+                  0.5,
+                  0.5
+                ]
+              },
+              "offset": [
+                0,
+                0,
+                0
+              ],
+              "rotation": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "sensor": false,
+              "layers": {
+                "memberships": 1,
+                "filter": 4294967295
+              },
+              "friction": 0.6,
+              "restitution": 0.1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cabin-overhead-0-0",
+      "name": "cabin-overhead-0-0",
+      "transform_3d": {
+        "position": [
+          -15.3333,
+          0.3,
+          -0.35
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          2.1333,
+          0.4,
+          2.1
+        ]
+      },
+      "components": {
+        "sindri.mesh": {
+          "primitive": "cube",
+          "texture": "textures/panel.png"
+        },
+        "sindri.material": {
+          "base_color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallic": 0.3,
+          "roughness": 0.7,
+          "override_factors": true
+        },
+        "sindri.physics3d.collider": {
+          "pieces": [
+            {
+              "shape": {
+                "shape": "box",
+                "half_extents": [
+                  0.5,
+                  0.5,
+                  0.5
+                ]
+              },
+              "offset": [
+                0,
+                0,
+                0
+              ],
+              "rotation": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "sensor": false,
+              "layers": {
+                "memberships": 1,
+                "filter": 4294967295
+              },
+              "friction": 0.6,
+              "restitution": 0.1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cabin-overhead-0-1",
+      "name": "cabin-overhead-0-1",
+      "transform_3d": {
+        "position": [
+          -15.3333,
+          0.3,
+          1.75
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          2.1333,
+          0.4,
+          2.1
+        ]
+      },
+      "components": {
+        "sindri.mesh": {
+          "primitive": "cube",
+          "texture": "textures/panel.png"
+        },
+        "sindri.material": {
+          "base_color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallic": 0.3,
+          "roughness": 0.7,
+          "override_factors": true
+        },
+        "sindri.physics3d.collider": {
+          "pieces": [
+            {
+              "shape": {
+                "shape": "box",
+                "half_extents": [
+                  0.5,
+                  0.5,
+                  0.5
+                ]
+              },
+              "offset": [
+                0,
+                0,
+                0
+              ],
+              "rotation": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "sensor": false,
+              "layers": {
+                "memberships": 1,
+                "filter": 4294967295
+              },
+              "friction": 0.6,
+              "restitution": 0.1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cabin-overhead-1-0",
+      "name": "cabin-overhead-1-0",
+      "transform_3d": {
+        "position": [
+          -13.2,
+          0.3,
+          -0.35
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          2.1333,
+          0.4,
+          2.1
+        ]
+      },
+      "components": {
+        "sindri.mesh": {
+          "primitive": "cube",
+          "texture": "textures/panel.png"
+        },
+        "sindri.material": {
+          "base_color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallic": 0.3,
+          "roughness": 0.7,
+          "override_factors": true
+        },
+        "sindri.physics3d.collider": {
+          "pieces": [
+            {
+              "shape": {
+                "shape": "box",
+                "half_extents": [
+                  0.5,
+                  0.5,
+                  0.5
+                ]
+              },
+              "offset": [
+                0,
+                0,
+                0
+              ],
+              "rotation": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "sensor": false,
+              "layers": {
+                "memberships": 1,
+                "filter": 4294967295
+              },
+              "friction": 0.6,
+              "restitution": 0.1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cabin-overhead-1-1",
+      "name": "cabin-overhead-1-1",
+      "transform_3d": {
+        "position": [
+          -13.2,
+          0.3,
+          1.75
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          2.1333,
+          0.4,
+          2.1
+        ]
+      },
+      "components": {
+        "sindri.mesh": {
+          "primitive": "cube",
+          "texture": "textures/panel.png"
+        },
+        "sindri.material": {
+          "base_color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallic": 0.3,
+          "roughness": 0.7,
+          "override_factors": true
+        },
+        "sindri.physics3d.collider": {
+          "pieces": [
+            {
+              "shape": {
+                "shape": "box",
+                "half_extents": [
+                  0.5,
+                  0.5,
+                  0.5
+                ]
+              },
+              "offset": [
+                0,
+                0,
+                0
+              ],
+              "rotation": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "sensor": false,
+              "layers": {
+                "memberships": 1,
+                "filter": 4294967295
+              },
+              "friction": 0.6,
+              "restitution": 0.1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cabin-overhead-2-0",
+      "name": "cabin-overhead-2-0",
+      "transform_3d": {
+        "position": [
+          -11.0667,
+          0.3,
+          -0.35
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          2.1333,
+          0.4,
+          2.1
+        ]
+      },
+      "components": {
+        "sindri.mesh": {
+          "primitive": "cube",
+          "texture": "textures/panel.png"
+        },
+        "sindri.material": {
+          "base_color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallic": 0.3,
+          "roughness": 0.7,
+          "override_factors": true
+        },
+        "sindri.physics3d.collider": {
+          "pieces": [
+            {
+              "shape": {
+                "shape": "box",
+                "half_extents": [
+                  0.5,
+                  0.5,
+                  0.5
+                ]
+              },
+              "offset": [
+                0,
+                0,
+                0
+              ],
+              "rotation": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "sensor": false,
+              "layers": {
+                "memberships": 1,
+                "filter": 4294967295
+              },
+              "friction": 0.6,
+              "restitution": 0.1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cabin-overhead-2-1",
+      "name": "cabin-overhead-2-1",
+      "transform_3d": {
+        "position": [
+          -11.0667,
+          0.3,
+          1.75
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          2.1333,
+          0.4,
+          2.1
+        ]
+      },
+      "components": {
+        "sindri.mesh": {
+          "primitive": "cube",
+          "texture": "textures/panel.png"
+        },
+        "sindri.material": {
+          "base_color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallic": 0.3,
+          "roughness": 0.7,
+          "override_factors": true
+        },
+        "sindri.physics3d.collider": {
+          "pieces": [
+            {
+              "shape": {
+                "shape": "box",
+                "half_extents": [
+                  0.5,
+                  0.5,
+                  0.5
+                ]
+              },
+              "offset": [
+                0,
+                0,
+                0
+              ],
+              "rotation": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "sensor": false,
+              "layers": {
+                "memberships": 1,
+                "filter": 4294967295
+              },
+              "friction": 0.6,
+              "restitution": 0.1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cabin-port-0-0",
+      "name": "cabin-port-0-0",
+      "transform_3d": {
+        "position": [
+          -15.3333,
+          -1.2,
+          -1.2
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          2.1333,
+          2.6,
+          0.4
+        ]
+      },
+      "components": {
+        "sindri.mesh": {
+          "primitive": "cube",
+          "texture": "textures/panel.png"
+        },
+        "sindri.material": {
+          "base_color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallic": 0.3,
+          "roughness": 0.7,
+          "override_factors": true
+        },
+        "sindri.physics3d.collider": {
+          "pieces": [
+            {
+              "shape": {
+                "shape": "box",
+                "half_extents": [
+                  0.5,
+                  0.5,
+                  0.5
+                ]
+              },
+              "offset": [
+                0,
+                0,
+                0
+              ],
+              "rotation": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "sensor": false,
+              "layers": {
+                "memberships": 1,
+                "filter": 4294967295
+              },
+              "friction": 0.6,
+              "restitution": 0.1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cabin-port-1-0",
+      "name": "cabin-port-1-0",
+      "transform_3d": {
+        "position": [
+          -13.2,
+          -1.2,
+          -1.2
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          2.1333,
+          2.6,
+          0.4
+        ]
+      },
+      "components": {
+        "sindri.mesh": {
+          "primitive": "cube",
+          "texture": "textures/panel.png"
+        },
+        "sindri.material": {
+          "base_color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallic": 0.3,
+          "roughness": 0.7,
+          "override_factors": true
+        },
+        "sindri.physics3d.collider": {
+          "pieces": [
+            {
+              "shape": {
+                "shape": "box",
+                "half_extents": [
+                  0.5,
+                  0.5,
+                  0.5
+                ]
+              },
+              "offset": [
+                0,
+                0,
+                0
+              ],
+              "rotation": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "sensor": false,
+              "layers": {
+                "memberships": 1,
+                "filter": 4294967295
+              },
+              "friction": 0.6,
+              "restitution": 0.1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cabin-port-2-0",
+      "name": "cabin-port-2-0",
+      "transform_3d": {
+        "position": [
+          -11.0667,
+          -1.2,
+          -1.2
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          2.1333,
+          2.6,
+          0.4
+        ]
+      },
+      "components": {
+        "sindri.mesh": {
+          "primitive": "cube",
+          "texture": "textures/panel.png"
+        },
+        "sindri.material": {
+          "base_color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallic": 0.3,
+          "roughness": 0.7,
+          "override_factors": true
+        },
+        "sindri.physics3d.collider": {
+          "pieces": [
+            {
+              "shape": {
+                "shape": "box",
+                "half_extents": [
+                  0.5,
+                  0.5,
+                  0.5
+                ]
+              },
+              "offset": [
+                0,
+                0,
+                0
+              ],
+              "rotation": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "sensor": false,
+              "layers": {
+                "memberships": 1,
+                "filter": 4294967295
+              },
+              "friction": 0.6,
+              "restitution": 0.1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cabin-starboard-0-0",
+      "name": "cabin-starboard-0-0",
+      "transform_3d": {
+        "position": [
+          -15.3333,
+          -1.2,
+          2.6
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          2.1333,
+          2.6,
+          0.4
+        ]
+      },
+      "components": {
+        "sindri.mesh": {
+          "primitive": "cube",
+          "texture": "textures/panel.png"
+        },
+        "sindri.material": {
+          "base_color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallic": 0.3,
+          "roughness": 0.7,
+          "override_factors": true
+        },
+        "sindri.physics3d.collider": {
+          "pieces": [
+            {
+              "shape": {
+                "shape": "box",
+                "half_extents": [
+                  0.5,
+                  0.5,
+                  0.5
+                ]
+              },
+              "offset": [
+                0,
+                0,
+                0
+              ],
+              "rotation": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "sensor": false,
+              "layers": {
+                "memberships": 1,
+                "filter": 4294967295
+              },
+              "friction": 0.6,
+              "restitution": 0.1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cabin-starboard-1-0",
+      "name": "cabin-starboard-1-0",
+      "transform_3d": {
+        "position": [
+          -13.2,
+          -1.2,
+          2.6
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          2.1333,
+          2.6,
+          0.4
+        ]
+      },
+      "components": {
+        "sindri.mesh": {
+          "primitive": "cube",
+          "texture": "textures/panel.png"
+        },
+        "sindri.material": {
+          "base_color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallic": 0.3,
+          "roughness": 0.7,
+          "override_factors": true
+        },
+        "sindri.physics3d.collider": {
+          "pieces": [
+            {
+              "shape": {
+                "shape": "box",
+                "half_extents": [
+                  0.5,
+                  0.5,
+                  0.5
+                ]
+              },
+              "offset": [
+                0,
+                0,
+                0
+              ],
+              "rotation": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "sensor": false,
+              "layers": {
+                "memberships": 1,
+                "filter": 4294967295
+              },
+              "friction": 0.6,
+              "restitution": 0.1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cabin-starboard-2-0",
+      "name": "cabin-starboard-2-0",
+      "transform_3d": {
+        "position": [
+          -11.0667,
+          -1.2,
+          2.6
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          2.1333,
+          2.6,
+          0.4
+        ]
+      },
+      "components": {
+        "sindri.mesh": {
+          "primitive": "cube",
+          "texture": "textures/panel.png"
+        },
+        "sindri.material": {
+          "base_color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallic": 0.3,
+          "roughness": 0.7,
+          "override_factors": true
+        },
+        "sindri.physics3d.collider": {
+          "pieces": [
+            {
+              "shape": {
+                "shape": "box",
+                "half_extents": [
+                  0.5,
+                  0.5,
+                  0.5
+                ]
+              },
+              "offset": [
+                0,
+                0,
+                0
+              ],
+              "rotation": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "sensor": false,
+              "layers": {
+                "memberships": 1,
+                "filter": 4294967295
+              },
+              "friction": 0.6,
+              "restitution": 0.1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cabin-aft-0-0",
+      "name": "cabin-aft-0-0",
+      "transform_3d": {
+        "position": [
+          -16.2,
+          -1.2,
+          -0.35
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.4,
+          3.4,
+          2.1
+        ]
+      },
+      "components": {
+        "sindri.mesh": {
+          "primitive": "cube",
+          "texture": "textures/panel.png"
+        },
+        "sindri.material": {
+          "base_color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallic": 0.3,
+          "roughness": 0.7,
+          "override_factors": true
+        },
+        "sindri.physics3d.collider": {
+          "pieces": [
+            {
+              "shape": {
+                "shape": "box",
+                "half_extents": [
+                  0.5,
+                  0.5,
+                  0.5
+                ]
+              },
+              "offset": [
+                0,
+                0,
+                0
+              ],
+              "rotation": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "sensor": false,
+              "layers": {
+                "memberships": 1,
+                "filter": 4294967295
+              },
+              "friction": 0.6,
+              "restitution": 0.1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cabin-aft-0-1",
+      "name": "cabin-aft-0-1",
+      "transform_3d": {
+        "position": [
+          -16.2,
+          -1.2,
+          1.75
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.4,
+          3.4,
+          2.1
+        ]
+      },
+      "components": {
+        "sindri.mesh": {
+          "primitive": "cube",
+          "texture": "textures/panel.png"
+        },
+        "sindri.material": {
+          "base_color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallic": 0.3,
+          "roughness": 0.7,
+          "override_factors": true
+        },
+        "sindri.physics3d.collider": {
+          "pieces": [
+            {
+              "shape": {
+                "shape": "box",
+                "half_extents": [
+                  0.5,
+                  0.5,
+                  0.5
+                ]
+              },
+              "offset": [
+                0,
+                0,
+                0
+              ],
+              "rotation": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "sensor": false,
+              "layers": {
+                "memberships": 1,
+                "filter": 4294967295
+              },
+              "friction": 0.6,
+              "restitution": 0.1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "bunk",
+      "name": "bunk",
+      "transform_3d": {
+        "position": [
+          -15.0,
+          -2.225,
+          -0.6
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          2.0,
+          0.55,
+          0.8
+        ]
+      },
+      "components": {
+        "sindri.mesh": {
+          "primitive": "cube",
+          "texture": "textures/panel.png"
+        },
+        "sindri.material": {
+          "base_color": [
+            0.35,
+            0.4,
+            0.5,
+            1.0
+          ],
+          "emissive": [
+            0,
+            0,
+            0
+          ],
+          "metallic": 0.2,
+          "roughness": 0.7,
+          "override_factors": true
+        },
+        "sindri.physics3d.collider": {
+          "pieces": [
+            {
+              "shape": {
+                "shape": "box",
+                "half_extents": [
+                  0.5,
+                  0.5,
+                  0.5
+                ]
+              },
+              "offset": [
+                0,
+                0,
+                0
+              ],
+              "rotation": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "sensor": false,
+              "layers": {
+                "memberships": 1,
+                "filter": 4294967295
+              },
+              "friction": 0.6,
+              "restitution": 0.1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "console",
+      "name": "console",
+      "transform_3d": {
+        "position": [
+          -11.9,
+          -2.0,
+          -0.7
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.2,
+          1.0,
+          0.6
+        ]
+      },
+      "components": {
+        "sindri.mesh": {
+          "primitive": "cube",
+          "texture": "textures/panel.png"
+        },
+        "sindri.material": {
+          "base_color": [
+            0.25,
+            0.28,
+            0.3,
+            1.0
+          ],
+          "emissive": [
+            0.05,
+            0.25,
+            0.35
+          ],
+          "metallic": 0.2,
+          "roughness": 0.7,
+          "override_factors": true
+        },
+        "sindri.physics3d.collider": {
+          "pieces": [
+            {
+              "shape": {
+                "shape": "box",
+                "half_extents": [
+                  0.5,
+                  0.5,
+                  0.5
+                ]
+              },
+              "offset": [
+                0,
+                0,
+                0
+              ],
+              "rotation": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "sensor": false,
+              "layers": {
+                "memberships": 1,
+                "filter": 4294967295
+              },
+              "friction": 0.6,
+              "restitution": 0.1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "recycler",
+      "name": "Recycler",
+      "transform_3d": {
+        "position": [
+          -15.55,
+          -1.6,
+          1.95
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.9,
+          1.8,
+          0.9
+        ]
+      },
+      "components": {
+        "sindri.mesh": {
+          "primitive": "cube",
+          "texture": "textures/panel.png"
+        },
+        "sindri.material": {
+          "base_color": [
+            0.4,
+            0.42,
+            0.38,
+            1.0
+          ],
+          "emissive": [
+            0.4,
+            0.08,
+            0.02
+          ],
+          "metallic": 0.2,
+          "roughness": 0.7,
+          "override_factors": true
+        },
+        "sindri.physics3d.collider": {
+          "pieces": [
+            {
+              "shape": {
+                "shape": "box",
+                "half_extents": [
+                  0.5,
+                  0.5,
+                  0.5
+                ]
+              },
+              "offset": [
+                0,
+                0,
+                0
+              ],
+              "rotation": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "sensor": false,
+              "layers": {
+                "memberships": 1,
+                "filter": 4294967295
+              },
+              "friction": 0.6,
+              "restitution": 0.1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "inner-door",
+      "name": "inner-door",
+      "transform_3d": {
+        "position": [
+          -9.8,
+          -1.5,
+          1.5
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.15,
+          2.0,
+          1.2
+        ]
+      },
+      "components": {
+        "sindri.mesh": {
+          "primitive": "cube",
+          "texture": "textures/door.png"
+        },
+        "sindri.material": {
+          "base_color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallic": 0.4,
+          "roughness": 0.5,
+          "override_factors": true
+        },
+        "sindri.physics3d.collider": {
+          "pieces": [
+            {
+              "shape": {
+                "shape": "box",
+                "half_extents": [
+                  0.5,
+                  0.5,
+                  0.5
+                ]
+              },
+              "offset": [
+                0,
+                0,
+                0
+              ],
+              "rotation": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "sensor": false,
+              "layers": {
+                "memberships": 1,
+                "filter": 4294967295
+              },
+              "friction": 0.6,
+              "restitution": 0.1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "outer-door",
+      "name": "outer-door",
+      "transform_3d": {
+        "position": [
+          -7.2,
+          -1.5,
+          1.5
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.15,
+          2.0,
+          1.2
+        ]
+      },
+      "components": {
+        "sindri.mesh": {
+          "primitive": "cube",
+          "texture": "textures/door.png"
+        },
+        "sindri.material": {
+          "base_color": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallic": 0.4,
+          "roughness": 0.5,
+          "override_factors": true
+        },
+        "sindri.physics3d.collider": {
+          "pieces": [
+            {
+              "shape": {
+                "shape": "box",
+                "half_extents": [
+                  0.5,
+                  0.5,
+                  0.5
+                ]
+              },
+              "offset": [
+                0,
+                0,
+                0
+              ],
+              "rotation": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "sensor": false,
+              "layers": {
+                "memberships": 1,
+                "filter": 4294967295
+              },
+              "friction": 0.6,
+              "restitution": 0.1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "airlock",
+      "name": "Airlock",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.script": {
+          "source": "scripts/airlock.decay",
+          "script": "Airlock"
+        }
+      }
+    },
+    {
+      "id": "airlock-panel",
+      "name": "airlock-panel",
+      "transform_3d": {
+        "position": [
+          -8.5,
+          -1.1,
+          2.35
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.08,
+          0.3,
+          0.22
+        ]
+      },
+      "components": {
+        "sindri.mesh": {
+          "primitive": "cube",
+          "texture": "textures/panel.png"
+        },
+        "sindri.material": {
+          "base_color": [
+            0.15,
+            0.2,
+            0.18,
+            1
+          ],
+          "emissive": [
+            0.2,
+            0.9,
+            0.5
+          ],
+          "override_factors": true
+        },
+        "sindri.tags": {
+          "tags": [
+            "airlock-panel"
+          ]
+        }
+      }
+    },
+    {
+      "id": "cabin-panel",
+      "name": "cabin-panel",
+      "transform_3d": {
+        "position": [
+          -10.05,
+          -1.1,
+          2.4
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.08,
+          0.3,
+          0.22
+        ]
+      },
+      "components": {
+        "sindri.mesh": {
+          "primitive": "cube",
+          "texture": "textures/panel.png"
+        },
+        "sindri.material": {
+          "base_color": [
+            0.15,
+            0.2,
+            0.18,
+            1
+          ],
+          "emissive": [
+            0.2,
+            0.9,
+            0.5
+          ],
+          "override_factors": true
+        },
+        "sindri.tags": {
+          "tags": [
+            "airlock-panel"
+          ]
+        }
+      }
+    },
+    {
+      "id": "hold-panel",
+      "name": "hold-panel",
+      "transform_3d": {
+        "position": [
+          -6.95,
+          -1.1,
+          0.6
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.08,
+          0.3,
+          0.22
+        ]
+      },
+      "components": {
+        "sindri.mesh": {
+          "primitive": "cube",
+          "texture": "textures/panel.png"
+        },
+        "sindri.material": {
+          "base_color": [
+            0.15,
+            0.2,
+            0.18,
+            1
+          ],
+          "emissive": [
+            0.2,
+            0.9,
+            0.5
+          ],
+          "override_factors": true
+        },
+        "sindri.tags": {
+          "tags": [
+            "airlock-panel"
+          ]
+        }
+      }
+    },
+    {
+      "id": "cabin-zone",
+      "name": "CabinZone",
+      "transform_3d": {
+        "position": [
+          -13.0,
+          -1.2,
+          0.7
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          6.0,
+          2.6,
+          3.4
+        ]
+      },
+      "components": {
+        "sindri.tags": {
+          "tags": [
+            "zone"
+          ]
+        }
+      }
+    },
+    {
+      "id": "chamber-zone",
+      "name": "ChamberZone",
+      "transform_3d": {
+        "position": [
+          -8.7,
+          -1.3,
+          1.5
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          2.6,
+          2.4,
+          1.8
+        ]
+      },
+      "components": {
+        "sindri.tags": {
+          "tags": [
+            "zone"
+          ]
+        }
+      }
+    },
+    {
+      "id": "spawn",
+      "name": "Spawn",
+      "transform_3d": {
+        "position": [
+          -14.2,
+          -1.68,
+          1.5
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {}
+    },
+    {
+      "id": "cabin-lamp-0",
+      "name": "cabin-lamp-0",
+      "transform_3d": {
+        "position": [
+          -14.5,
+          0.05,
+          0.7
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.5,
+          0.08,
+          0.3
+        ]
+      },
+      "components": {
+        "sindri.mesh": {
+          "primitive": "cube",
+          "texture": "textures/panel.png"
+        },
+        "sindri.material": {
+          "base_color": [
+            0.2,
+            0.2,
+            0.2,
+            1
+          ],
+          "emissive": [
+            2.0,
+            1.6,
+            1.2
+          ],
+          "override_factors": true
+        },
+        "sindri.light": {
+          "kind": "point",
+          "color": [
+            1.0,
+            0.8,
+            0.6
+          ],
+          "intensity": 1.2,
+          "range": 5.0
+        }
+      }
+    },
+    {
+      "id": "cabin-lamp-1",
+      "name": "cabin-lamp-1",
+      "transform_3d": {
+        "position": [
+          -11.5,
+          0.05,
+          0.7
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.5,
+          0.08,
+          0.3
+        ]
+      },
+      "components": {
+        "sindri.mesh": {
+          "primitive": "cube",
+          "texture": "textures/panel.png"
+        },
+        "sindri.material": {
+          "base_color": [
+            0.2,
+            0.2,
+            0.2,
+            1
+          ],
+          "emissive": [
+            2.0,
+            1.6,
+            1.2
+          ],
+          "override_factors": true
+        },
+        "sindri.light": {
+          "kind": "point",
+          "color": [
+            1.0,
+            0.8,
+            0.6
+          ],
+          "intensity": 1.2,
+          "range": 5.0
+        }
+      }
+    },
+    {
+      "id": "airlock-lamp",
+      "name": "AirlockLamp",
+      "transform_3d": {
+        "position": [
+          -8.5,
+          -0.15,
+          1.5
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.5,
+          0.08,
+          0.3
+        ]
+      },
+      "components": {
+        "sindri.mesh": {
+          "primitive": "cube",
+          "texture": "textures/panel.png"
+        },
+        "sindri.material": {
+          "base_color": [
+            0.2,
+            0.2,
+            0.2,
+            1
+          ],
+          "emissive": [
+            0.6,
+            2.0,
+            0.9
+          ],
+          "override_factors": true
+        },
+        "sindri.light": {
+          "kind": "point",
+          "color": [
+            0.3,
+            1.0,
+            0.45
+          ],
+          "intensity": 1.2,
+          "range": 3.5
+        }
+      }
+    },
+    {
       "id": "diver",
       "name": "Diver",
       "transform_3d": {
         "position": [
-          -6.3,
-          0,
-          0
+          -14.2,
+          -1.68,
+          1.5
         ],
         "rotation": [
           0,
@@ -5526,8 +8574,9 @@
           "pieces": [
             {
               "shape": {
-                "shape": "sphere",
-                "radius": 0.35
+                "shape": "capsule",
+                "half_height": 0.5,
+                "radius": 0.3
               },
               "offset": [
                 0,
@@ -5590,7 +8639,7 @@
       "transform_3d": {
         "position": [
           0,
-          0,
+          0.6,
           0
         ],
         "rotation": [
@@ -8060,7 +11109,7 @@
         "sindri.physics3d.distance_joint": {
           "first": "tether-link-15",
           "second": "diver",
-          "enabled": true,
+          "enabled": false,
           "max_distance": 0.5882,
           "first_anchor": [
             0,
@@ -8408,6 +11457,162 @@
             1.0,
             0.55,
             0.25,
+            1.0
+          ],
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.035,
+          "line_height": 0.042,
+          "layer": 200,
+          "text": "",
+          "letter_spacing": 0.004
+        }
+      }
+    },
+    {
+      "id": "hud-oxygen",
+      "name": "hud-oxygen",
+      "transform_3d": {
+        "position": [
+          -1.25,
+          -0.68,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.text": {
+          "anchor": "center",
+          "color": [
+            0.85,
+            0.92,
+            1.0,
+            1.0
+          ],
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.04,
+          "line_height": 0.048,
+          "layer": 200,
+          "text": "O2 {}%",
+          "letter_spacing": 0.004
+        }
+      }
+    },
+    {
+      "id": "hud-power",
+      "name": "hud-power",
+      "transform_3d": {
+        "position": [
+          -1.25,
+          -0.78,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.text": {
+          "anchor": "center",
+          "color": [
+            0.85,
+            0.92,
+            1.0,
+            1.0
+          ],
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.04,
+          "line_height": 0.048,
+          "layer": 200,
+          "text": "SUIT {}%",
+          "letter_spacing": 0.004
+        }
+      }
+    },
+    {
+      "id": "hud-alert",
+      "name": "hud-alert",
+      "transform_3d": {
+        "position": [
+          0,
+          0.3,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.text": {
+          "anchor": "center",
+          "color": [
+            1.0,
+            0.3,
+            0.2,
+            1.0
+          ],
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.05,
+          "line_height": 0.06,
+          "layer": 200,
+          "text": "",
+          "letter_spacing": 0.004
+        }
+      }
+    },
+    {
+      "id": "hud-airlock",
+      "name": "hud-airlock",
+      "transform_3d": {
+        "position": [
+          1.25,
+          -0.78,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.text": {
+          "anchor": "center",
+          "color": [
+            0.6,
+            1.0,
+            0.7,
             1.0
           ],
           "font": "fonts/ChakraPetch-Regular.ttf",

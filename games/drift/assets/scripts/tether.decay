@@ -25,7 +25,7 @@ script Tether {
     @export let reach: number = 1.1;
 
     var out: number = 10.0;
-    var clipped: bool = true;
+    var clipped: bool = false;
     var taut: bool = false;
     var reeling: bool = false;
     var diver: Entity = null;
@@ -41,7 +41,15 @@ script Tether {
         this.anchor = World.find("StartHold");
         this.label = World.find("hud-tether");
         this.state = World.find("hud-tether-state");
-        print("Drift: tether clipped on");
+        // The diver's end is authored unclipped; a diver who starts at the
+        // loose end starts clipped on.
+        let points = line_points();
+        if points[points.len - 2].distance(this.eye.transform.world_position) <= this.reach {
+            this.clipped = true;
+            let joints = World.with_tag("tether-joint");
+            Physics3d.set_joint_enabled(joints[joints.len - 1], true);
+            print("Drift: tether clipped on");
+        }
     }
 
     fn update(dt: number) {
@@ -55,13 +63,23 @@ script Tether {
         // Drawn, the line meets the diver at the waist rather than the eye,
         // so it is seen running away below the view instead of through it.
         var drawn = points;
-        if this.clipped {
+        if !this.clipped {
+            // Unclipped, the last strand lies on the loose end.
+            drawn[drawn.len - 1] = points[points.len - 2];
+        } else {
             drawn[drawn.len - 1] = this.eye.transform.world_position
                 - this.eye.transform.up * 0.4
                 + this.eye.transform.forward * 0.15;
         }
         lay_strands(drawn, strands);
         let path = path_length(points);
+        // Aboard, the line is not the diver's business.
+        if Ship.in_gravity && !this.clipped {
+            Ui.set_text(this.label, "");
+            Ui.set_text(this.state, "");
+            return;
+        }
+        Ui.set_text(this.label, "TETHER {} / {} M");
         if this.clipped {
             // Taut near full length, slack again only well short of it, so a
             // line fluttering at its end is not taut and slack by turns.

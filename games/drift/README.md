@@ -7,11 +7,26 @@ work; this is a game rather than a showcase (`AGENTS.md`).
 
 ## What plays now
 
-Stage 1, **floating**: the *Tern*'s cargo hold, with no gravity. The diver is a
-physics body that keeps whatever momentum they give it. They wake holding the
-aft handhold, looking down the hold at the one on the forward bulkhead.
+Stage 3, **the airlock**: you wake in the *Tern*'s cabin under the ship's
+gravity and walk to the airlock. E at a panel cycles it: one door closes, the
+chamber pumps down, the other opens. Past the outer door is the hold, in
+vacuum and zero gravity. The suit's oxygen and power run down outside and fill
+up aboard; run out of air and you wake back in the cabin.
 
-| Input | Does |
+| Aboard | Does |
+| --- | --- |
+| Mouse | Look |
+| W / S, A / D | Walk |
+| Space | Jump |
+| E at a panel | Cycle the airlock |
+
+
+Stage 1, **floating**: the *Tern*'s cargo hold, with no gravity. The diver is a
+physics body that keeps whatever momentum they give it. Just outside the outer
+door is the aft handhold, where the tether's loose end waits, looking down the
+hold at the handhold on the forward bulkhead.
+
+| Outside | Does |
 | --- | --- |
 | Mouse | Look (click first to capture the cursor) |
 | Q / E | Roll |
@@ -41,8 +56,9 @@ cargo run -p sindri-player -- games/drift
 ## How it is made
 
 There is no game code in Rust. The scene is written by `art/hold.py`, which
-also draws the textures; re-running it changes nothing. The movement is
-`assets/scripts/diver.decay`, the tether `assets/scripts/tether.decay`
+also draws the textures; re-running it changes nothing. The diver is
+`assets/scripts/diver.decay`, the airlock `assets/scripts/airlock.decay`
+(sharing `Ship` in `assets/scripts/ship.decay`), the tether `assets/scripts/tether.decay`
 on the engine's 3D distance joints. `src/lib.rs` is a test harness that plays the
 project the way every host does.
 
@@ -52,6 +68,8 @@ cargo run --quiet --package decay-lsp -- --check games/drift/assets/scripts/dive
 cargo test -p drift
 ```
 
+`tests/airlock.rs` walks out through the airlock and back, checks a cycle
+waits for each door and the pressure, and runs out of air outside.
 `tests/tether.rs` is stopped by the line, reeled home, caught on the
 stanchion, and unclips and clips back on. `tests/floating.rs` unclips, pushes off the aft handhold, drifts the length of the hold
 and catches the forward one, and checks that thrust is kept when the thrusters
