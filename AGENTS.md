@@ -96,6 +96,18 @@ with billboard sprites, survival systems in Decay and screen UI, and saves. Like
 Causeway it is held to the standard of a game somebody would choose to play, and
 gaps it finds are closed in the engine generally, never shaped around it.
 
+**DRIFT is the first-person game, and a game rather than a showcase.** A
+survival and exploration game in zero gravity, in `games/drift`: a damaged ship
+adrift in the dark, a safety tether as the player's lifeline, and wreckage
+outside worth the risk of reaching. It belongs to the broad family of
+Subnautica without copying it. `docs/drift-plan.md` is its design and the order
+of work. It is where first-person 3D, zero-gravity rigid-body movement and 3D
+constraints are proven at the scale of a real game: six-degree-of-freedom
+movement with momentum, handholds, the tether, airlocks between gravity and
+none, and survival systems in Decay. Like Lamplighter it is held to the
+standard of a game somebody would choose to play, and gaps it finds are closed
+in the engine generally, never shaped around it.
+
 **Scorchball is the local-multiplayer genre showcase.** A top-down couch
 football game for two to four pads, in `games/scorchball`. It is where playing
 together on one screen is proven: pads read by player slot, joining and
@@ -139,6 +151,9 @@ These documents govern the work:
 - `docs/lamplighter-plan.md` — Lamplighter, the survival game: the game, its
   world, its 2D-in-3D look and the stages of work. Read it before changing
   `games/lamplighter`.
+- `docs/drift-plan.md` — DRIFT, the first-person zero-gravity game: the game,
+  the engine gaps it closes and the stages of work. Read it before changing
+  `games/drift`.
 - `docs/decay-lsp-modernization.md` — mandatory checklist for Decay language-server,
   editor tooling, batch preflight, structured diagnostics, and agent-tooling work.
 - `docs/capabilities.md` — detailed evidence for what actually works, generated

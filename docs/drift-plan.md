@@ -166,14 +166,25 @@ Each stage is one or more pull requests that leave `main` working: the project
 opens, its scripts compile, its scripted run reaches its goal, and this document
 says what is now true.
 
-0. **Direction.** This plan. The `AGENTS.md` description follows when the
-   project is created in stage 1.
-1. **Floating.** `games/drift` with a single box room in zero gravity, a
-   first-person dynamic body, mouse look, thrusters on propellant, grab and
-   push-off from surfaces and handholds found by ray. A test pushes off from one
-   wall, crosses the room and grabs a handhold on the far side. *This stage
-   decides whether the game is worth making: if floating is not fun, nothing
-   later saves it.*
+0. **Direction.** This plan and the `AGENTS.md` description. *Done.*
+1. **Floating.** *Started.* `games/drift` opens in the *Tern*'s cargo hold
+   (`art/hold.py`): 14 m of plated room with no gravity, work lamps and a red
+   emergency light, yellow handholds down the bulkheads, walls and overhead, and
+   three crates drifting and turning in it. The diver (`scripts/diver.decay`) is
+   a dynamic sphere that physics never turns; the view is the Eye under it, kept
+   as a quaternion and turned about its own axes by the mouse and Q/E, so there
+   is no up and no flip past vertical. W/S, A/D, Space/C thrust along the view
+   on a propellant tank, X brakes against the drift. F or the right mouse holds
+   on to a handhold in reach (held, it catches the next one); Space or the left
+   mouse pushes off along the view. A HUD shows propellant, speed and what a
+   hand can do. `tests/floating.rs` pushes off the aft handhold, drifts the
+   length of the hold and catches the forward one, and checks momentum kept and
+   braked away; the editor plays it the same as the build. Per-step velocity
+   changes made thrust smooth enough that continuous 3D force (gap 2) is not
+   needed yet. Still to come: grabbing any surface, not only handholds; a
+   collision jolt and sound; and a person playing it to judge whether floating
+   is fun. *This stage decides whether the game is worth making: if floating is
+   not fun, nothing later saves it.*
 2. **The tether.** 3D joints in the engine (gap 1), then a tether from an anchor
    to the player: length limit, taut stop, snagging on a pillar, reeling in,
    unclipping and re-clipping. A test drifts out to the tether's end, is stopped,
