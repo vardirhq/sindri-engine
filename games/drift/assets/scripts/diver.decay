@@ -1,0 +1,210 @@
+// The diver in zero gravity: six degrees of freedom, real momentum, handholds.
+//
+// The diver's body is a sphere that physics moves but never turns. Which way
+// they face is the Eye's (the camera under the body), kept as a quaternion and
+// turned about its own axes, so there is no "up" outside a gravity field and
+// looking past straight up never flips the view.
+//
+// Controls:
+//   mouse            look (click to capture the cursor)
+//   Q / E            roll
+//   W / S, A / D     thrust forward/back, left/right
+//   Space / C        thrust up/down (Space pushes off while holding on)
+//   X                brake: thrust against the drift
+//   F or right mouse hold on to a handhold in reach; keep holding to catch the next
+//   Space or left mouse, while holding on: push off the way you look
+
+// Quaternion product a * b: b's turn, then a's.
+fn qmul(a: Quat, b: Quat) -> Quat {
+    return Quat(
+        x: a.w * b.x + a.x * b.w + a.y * b.z - a.z * b.y,
+        y: a.w * b.y - a.x * b.z + a.y * b.w + a.z * b.x,
+        z: a.w * b.z + a.x * b.y - a.y * b.x + a.z * b.w,
+        w: a.w * b.w - a.x * b.x - a.y * b.y - a.z * b.z,
+    );
+}
+
+// A turn of `angle` radians about a unit axis.
+fn qturn(x: number, y: number, z: number, angle: number) -> Quat {
+    let s = sin(angle * 0.5);
+    return Quat(x: x * s, y: y * s, z: z * s, w: cos(angle * 0.5));
+}
+
+script Diver {
+    // How fast the suit's thrusters change the diver's speed, in m/s².
+    @export let thrust: number = 2.2;
+    // How fast a push off a handhold sends the diver, in m/s.
+    @export let push_speed: number = 3.2;
+    // How far a hand reaches from the eye, in metres.
+    @export let reach: number = 1.1;
+    // Radians of turn per unit of pointer movement, and per second of roll.
+    @export let look_speed: number = 0.0025;
+    @export let roll_speed: number = 1.6;
+    // Propellant, as a percentage of a full tank, and how fast thrusting burns it.
+    @export let burn_rate: number = 4.0;
+
+    var propellant: number = 100.0;
+    var eye: Entity = null;
+    var hold: Entity = null;
+    // The handhold last pushed off from: not caught again until out of reach.
+    var left_behind: Entity = null;
+    // Where the diver's body hangs while holding on.
+    var anchor: Vec3 = Vec3(0.0, 0.0, 0.0);
+    var warned_low: bool = false;
+    var warned_empty: bool = false;
+
+    fn start() {
+        this.eye = World.find("Eye");
+        // The diver wakes holding the aft handhold.
+        grab(World.find("StartHold"));
+        print("Drift: floating in the hold");
+    }
+
+    fn update(dt: number) {
+        if Pointer.just_pressed("Left") && !Pointer.locked {
+            Pointer.lock();
+        }
+        look(dt);
+        let reached = nearest_hold();
+        if this.hold != null {
+            holding(reached);
+        } else {
+            if wants_hold() && reached != null {
+                grab(reached);
+            } else {
+                fly(dt);
+            }
+        }
+        if this.left_behind != null && this.left_behind != reached {
+            let away = this.left_behind.transform.world_position - this.eye.transform.world_position;
+            if away.length > this.reach * 1.5 {
+                this.left_behind = null;
+            }
+        }
+        for other in Physics3d.collision_started() {
+            if World.has_tag(other, "cargo") {
+                print("Drift: bumped cargo");
+            }
+        }
+        hud(reached);
+    }
+
+    fn look(dt: number) {
+        let delta = Pointer.delta;
+        var turn = this.eye.transform.rotation;
+        if delta.x != 0.0 {
+            turn = qmul(turn, qturn(0.0, 1.0, 0.0, -delta.x * this.look_speed));
+        }
+        if delta.y != 0.0 {
+            turn = qmul(turn, qturn(1.0, 0.0, 0.0, -delta.y * this.look_speed));
+        }
+        let roll = Input.Keyboard.axis("E", "Q");
+        if roll != 0.0 {
+            turn = qmul(turn, qturn(0.0, 0.0, 1.0, roll * this.roll_speed * dt));
+        }
+        this.eye.transform.rotation = turn;
+    }
+
+    fn wants_hold() -> bool {
+        return Input.Keyboard.is_down("F") || Pointer.is_down("Right");
+    }
+
+    // The closest handhold a hand can reach, other than the one just pushed off.
+    fn nearest_hold() -> Entity? {
+        let from = this.eye.transform.world_position;
+        for candidate in World.within_radius("handhold", from, this.reach) {
+            if candidate != this.left_behind {
+                return candidate;
+            }
+        }
+        return null;
+    }
+
+    fn grab(handhold: Entity) {
+        this.hold = handhold;
+        this.anchor = this.transform.world_position;
+        Physics3d.set_velocity(this.entity, Vec3(0.0, 0.0, 0.0));
+        if handhold == World.find("FarHold") {
+            print("Drift: caught the far handhold");
+        } else {
+            print("Drift: holding on");
+        }
+    }
+
+    fn holding(reached: Entity?) {
+        let push = Input.Keyboard.just_pressed("Space") || Pointer.just_pressed("Left") && Pointer.locked;
+        if push {
+            this.left_behind = this.hold;
+            this.hold = null;
+            Physics3d.set_velocity(this.entity, this.eye.transform.forward * this.push_speed);
+            print("Drift: pushed off");
+            return;
+        }
+        if !wants_hold() && !holds_by_itself() {
+            this.hold = null;
+            print("Drift: let go");
+            return;
+        }
+        // The arm takes up the slack: drawn back to where the hand closed.
+        let pull = (this.anchor - this.transform.world_position) * 6.0;
+        Physics3d.set_velocity(this.entity, pull);
+    }
+
+    // At the start the diver is already holding on without a key held.
+    fn holds_by_itself() -> bool {
+        return this.hold == World.find("StartHold") && this.left_behind == null;
+    }
+
+    fn fly(dt: number) {
+        var push = Vec3(0.0, 0.0, 0.0);
+        let forward = this.eye.transform.forward;
+        let right = this.eye.transform.right;
+        let up = this.eye.transform.up;
+        push = push + forward * Input.Keyboard.axis("S", "W");
+        push = push + right * Input.Keyboard.axis("A", "D");
+        push = push + up * Input.Keyboard.axis("C", "Space");
+        var velocity = Physics3d.velocity(this.entity);
+        if Input.Keyboard.is_down("X") && velocity.length > 0.01 {
+            push = push - velocity.normalized;
+        }
+        if push.length < 0.001 {
+            return;
+        }
+        if this.propellant <= 0.0 {
+            if !this.warned_empty {
+                this.warned_empty = true;
+                print("Drift: propellant empty");
+            }
+            return;
+        }
+        let change = push.normalized * this.thrust * dt;
+        // A brake never overshoots into thrusting the other way.
+        if Input.Keyboard.is_down("X") && change.length > velocity.length && push.length < 1.01 {
+            velocity = Vec3(0.0, 0.0, 0.0);
+        } else {
+            velocity = velocity + change;
+        }
+        Physics3d.set_velocity(this.entity, velocity);
+        this.propellant = max(0.0, this.propellant - this.burn_rate * dt);
+        if this.propellant < 20.0 && !this.warned_low {
+            this.warned_low = true;
+            print("Drift: propellant low");
+        }
+    }
+
+    fn hud(reached: Entity?) {
+        Ui.set_number(World.find("hud-propellant"), round(this.propellant));
+        let speed = Physics3d.velocity(this.entity).length;
+        Ui.set_number(World.find("hud-velocity"), round(speed * 10.0) / 10.0);
+        let prompt = World.find("hud-prompt");
+        if this.hold != null {
+            Ui.set_text(prompt, "SPACE  push off");
+        } else {
+            if reached != null {
+                Ui.set_text(prompt, "F  hold on");
+            } else {
+                Ui.set_text(prompt, "");
+            }
+        }
+    }
+}

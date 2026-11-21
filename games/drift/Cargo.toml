@@ -1,0 +1,21 @@
+[package]
+name = "drift"
+description = "DRIFT, a first-person zero-gravity survival game, and the harness that plays it"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish = false
+
+# No game code. The game is its scenes and its Decay, a project rather than a
+# crate. What lives here is the harness that plays it, with keys and a mouse a
+# test can press.
+[lib]
+path = "src/lib.rs"
+
+[dependencies]
+sindri-platform = { path = "../../crates/sindri-platform", default-features = false }
+sindri-runtime = { path = "../../crates/sindri-runtime" }
+
+[lints]
+workspace = true

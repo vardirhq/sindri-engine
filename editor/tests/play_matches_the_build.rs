@@ -268,6 +268,11 @@ fn scorchball_plays_the_same_in_the_editor_and_the_build() {
 }
 
 #[test]
+fn drift_plays_the_same_in_the_editor_and_the_build() {
+    plays_the_same("drift");
+}
+
+#[test]
 fn low_tide_plays_the_same_in_the_editor_and_the_build() {
     plays_the_same("low-tide");
 }

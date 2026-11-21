@@ -62,7 +62,7 @@ const MIN_SIZE: [f32; 2] = [820.0, 520.0];
 /// Projects only. The cube example is a scene and a texture rather than
 /// something anyone would work in, and the Weave proof of concept is a test
 /// bed for one subsystem rather than something to learn the engine from.
-const SHIPPED: [(&str, &str); 9] = [
+const SHIPPED: [(&str, &str); 10] = [
     ("game", "Companion adventure"),
     ("games/platformer", "The 2D platformer"),
     ("games/lamplighter", "Top-down lantern adventure"),
@@ -70,6 +70,7 @@ const SHIPPED: [(&str, &str); 9] = [
     ("games/orbital-baked", "Arena action, baked 3D sprites"),
     ("games/voxel-lab", "3D voxel terrain"),
     ("games/low-tide", "Top-down moving-home game"),
+    ("games/drift", "First-person zero-g survival"),
     ("games/flappy", "One-button arcade"),
     ("games/shapes-lab", "Zero-art visual proving ground"),
 ];
