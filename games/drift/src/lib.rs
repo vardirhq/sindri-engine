@@ -59,15 +59,42 @@ impl Run {
     /// # Panics
     /// If the scene has no diver.
     pub fn open_in_hold() -> Result<Self, String> {
+        Self::open_at(HOLD_START)
+    }
+
+    /// Opens the project with the diver's body starting at `at`, before
+    /// anything has run: free, holding nothing and clipped to nothing unless
+    /// that is where the aft handhold and the tether's loose end are.
+    ///
+    /// # Errors
+    /// As [`Run::open`].
+    pub fn open_at(at: [f32; 3]) -> Result<Self, String> {
         let mut game = Self::open()?;
-        let diver = game.run.entity("diver").expect("the scene has a diver");
-        game.run
-            .world
-            .get_mut(diver)
-            .and_then(|data| data.transform_3d.as_mut())
-            .expect("the diver has a transform")
-            .position = HOLD_START;
+        game.place("diver", at);
         Ok(game)
+    }
+
+    /// Moves a scene entity to a world position before the next step; for a
+    /// physics body, a teleport that keeps its velocity.
+    ///
+    /// # Panics
+    /// If there is no such entity, or it has no transform.
+    pub fn place(&mut self, id: &str, at: [f32; 3]) {
+        let entity = self.run.entity(id).expect("the entity exists");
+        self.run
+            .world
+            .get_mut(entity)
+            .and_then(|data| data.transform_3d.as_mut())
+            .expect("the entity has a transform")
+            .position = at;
+    }
+
+    /// Whether a scene entity is still in the world.
+    #[must_use]
+    pub fn exists(&self, id: &str) -> bool {
+        self.run
+            .entity(id)
+            .is_some_and(|entity| self.run.world.get(entity).is_some())
     }
 
     /// One fixed step.

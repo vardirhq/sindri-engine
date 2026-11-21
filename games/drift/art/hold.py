@@ -187,10 +187,10 @@ def wall(id_, position, scale):
     return plates
 
 
-def handhold(id_, position, along):
+def handhold(id_, position, along, length=0.7):
     """A grab bar standing a little proud of a surface, long along `along`."""
     scale = [0.12, 0.12, 0.12]
-    scale["xyz".index(along)] = 0.7
+    scale["xyz".index(along)] = length
     return entity(
         id_,
         position=position,
@@ -312,6 +312,89 @@ EYE_HEIGHT = 0.6
 SPAWN = (-14.2, DECK + 0.82, sum(DOOR_Z) / 2)
 # Where a test puts the diver to start at the aft handhold, eye level with it.
 HOLD_START = (-6.3, -EYE_HEIGHT, 0.0)
+
+
+# The cargo hatch through the forward bulkhead, and what lies beyond it.
+HATCH_Y = (-1.5, 1.5)
+HATCH_Z = (-1.5, 1.5)
+# The derelict module: where it floats and how it lies.
+WRECK_AT = (24.0, 0.5, 3.0)
+WRECK_YAW = 14.0
+
+
+def wall_with_opening(id_, lo, hi, y_range, z_range):
+    """A wall across x with a rectangular opening through it."""
+    (x0, y0, z0), (x1, y1, z1) = lo, hi
+    pieces = []
+    pieces += slab(f"{id_}-port", (x0, y0, z0), (x1, y1, z_range[0]))
+    pieces += slab(f"{id_}-starboard", (x0, y0, z_range[1]), (x1, y1, z1))
+    pieces += slab(f"{id_}-top", (x0, y_range[1], z_range[0]), (x1, y1, z_range[1]))
+    pieces += slab(f"{id_}-bottom", (x0, y0, z_range[0]), (x1, y_range[0], z_range[1]))
+    return pieces
+
+
+def model(id_, asset, position, rotation=(0, 0, 0, 1), **components):
+    """An imported model, by its path under `assets/`."""
+    return entity(id_, position=position, rotation=rotation,
+                  **{"sindri.model": {"asset": f"models/{asset}.glb"}}, **components)
+
+
+def quat(axis, degrees):
+    half = math.radians(degrees) / 2
+    length = math.sqrt(sum(a * a for a in axis)) or 1.0
+    x, y, z = (a / length * math.sin(half) for a in axis)
+    return (x, y, z, math.cos(half))
+
+
+def convex(asset, restitution=0.2):
+    return {"asset": f"models/{asset}.glb", "friction": 0.5, "restitution": restitution,
+            "layers": SOLID, "sensor": False}
+
+
+def wreckage():
+    """Outside the hatch: the derelict, a field of debris, salvage, the stars."""
+    rng = random.Random(23)
+    out = [model("stars", "stars", (0, 0, 0))]
+    out.append(model("wreck", "wreck", WRECK_AT, quat((0, 1, 0), WRECK_YAW), **{
+        "sindri.physics3d.model_collider": {"asset": "models/wreck.glb", "friction": 0.6, "restitution": 0.1,
+                                            "layers": SOLID, "sensor": False},
+    }))
+    out[-1]["name"] = "Wreck"
+    # A red lamp still burning in the wreck, and a work light on the hatch rim.
+    out.append(entity("wreck-lamp", "WreckLamp", position=(WRECK_AT[0] + 0.5, WRECK_AT[1] - 1.6, WRECK_AT[2]),
+                      **{"sindri.light": {"kind": "point", "color": [1.0, 0.2, 0.1], "intensity": 1.6, "range": 7.0}}))
+    out.append(lamp("hatch-lamp", (7.0, HATCH_Y[1] + 0.3, 0.0), (0.85, 0.9, 1.0), 1.4, 9.0))
+    # Debris: plates and girders drifting and turning slowly, clear of the
+    # hatch and of the wreck itself.
+    placed = 0
+    while placed < 22:
+        at = (rng.uniform(10.0, 36.0), rng.uniform(-6.0, 6.0), rng.uniform(-8.0, 9.0))
+        near_wreck = all(abs(at[i] - WRECK_AT[i]) < (5.5, 3.6, 3.6)[i] for i in range(3))
+        near_hatch = at[0] < 13.0 and abs(at[1]) < 3.0 and abs(at[2]) < 3.0
+        if near_wreck or near_hatch:
+            continue
+        kind = "girder" if placed % 3 == 0 else "plate"
+        spin = [round(rng.uniform(-0.25, 0.25), 3) for _ in range(3)]
+        drift = [round(rng.uniform(-0.05, 0.05), 3) for _ in range(3)]
+        axis = (rng.uniform(-1, 1), rng.uniform(-1, 1), rng.uniform(-1, 1))
+        out.append(model(f"debris-{placed}", kind, at, quat(axis, rng.uniform(0, 180)), **{
+            "sindri.physics3d.model_convex_collider": convex(kind),
+            "sindri.physics3d.rigid_body": body("dynamic", linear=drift, angular=spin),
+            "sindri.tags": {"tags": ["debris"]},
+        }))
+        placed += 1
+    # Salvage: one just outside the hatch, one by the wreck, one inside it.
+    for i, at in enumerate(((11.5, -0.8, 0.6),
+                            (WRECK_AT[0] - 5.2, WRECK_AT[1] + 1.8, WRECK_AT[2] - 1.0),
+                            (WRECK_AT[0] + 1.2, WRECK_AT[1] - 0.6, WRECK_AT[2]))):
+        out.append(model(f"salvage-{i}", "canister", at, quat((1, 0, 1), 25 * i), **{
+            "sindri.physics3d.model_convex_collider": convex("canister", 0.3),
+            "sindri.physics3d.rigid_body": body("dynamic", angular=(0.0, 0.15, 0.05)),
+            "sindri.tags": {"tags": ["salvage"]},
+        }))
+    out.append(entity("salvage", "Salvage", **{
+        "sindri.script": {"source": "scripts/salvage.decay", "script": "Salvage"}}))
+    return out
 
 
 def slab(id_, lo, hi):
@@ -460,7 +543,9 @@ def scene():
     # The aft bulkhead, with the airlock's outer door through it.
     entities += wall_with_door("aft-bulkhead", (-half_l - WALL, -half_h - WALL, -half_w - WALL),
                                (-half_l, half_h + WALL, half_w + WALL))
-    entities += wall("forward-bulkhead", (half_l + t, 0, 0), (WALL, outer_h, outer_w))
+    # The forward bulkhead is the cargo hatch, open to space.
+    entities += wall_with_opening("forward-bulkhead", (half_l, -half_h - WALL, -half_w - WALL),
+                                  (half_l + WALL, half_h + WALL, half_w + WALL), HATCH_Y, HATCH_Z)
     entities += wall("deck", (0, -half_h - t, 0), (outer_l, WALL, outer_w))
     entities += wall("overhead", (0, half_h + t, 0), (outer_l, WALL, outer_w))
     entities += wall("port-wall", (0, 0, -half_w - t), (outer_l, outer_h, WALL))
@@ -468,7 +553,8 @@ def scene():
     entities += [
         # Handholds: one on each bulkhead at the diver's height, and a run down each side.
         handhold("start-hold", (-half_l + 0.12, 0, 0), "z"),
-        handhold("far-hold", (half_l - 0.12, 0, 0), "z"),
+        # A safety bar across the open hatch: the last thing to hold before outside.
+        handhold("far-hold", (half_l - 0.12, 0, 0), "z", HATCH_Z[1] - HATCH_Z[0]),
     ]
     entities[-2]["name"] = "StartHold"
     entities[-1]["name"] = "FarHold"
@@ -488,6 +574,7 @@ def scene():
     entities.append(lamp("emergency", (half_l - 0.05, 1.8, 0), (1.0, 0.12, 0.08), 1.6, 6.0))
     entities[-1]["transform_3d"]["scale"] = [0.08, 0.3, 0.5]
     entities += ship()
+    entities += wreckage()
     # The diver: a dynamic upright capsule that physics never turns, with the
     # eye under it carrying the camera and the helmet lamp. Turning is the
     # eye's. They wake in the cabin, standing by the bunk.
@@ -505,7 +592,7 @@ def scene():
     )
     eye = entity(
         "eye", "Eye", parent="diver", position=(0, EYE_HEIGHT, 0), rotation=yaw_quat(-math.pi / 2),
-        **{"sindri.camera": {"projection": "perspective", "vertical_fov_degrees": 72, "near": 0.05, "far": 120}},
+        **{"sindri.camera": {"projection": "perspective", "vertical_fov_degrees": 72, "near": 0.05, "far": 220}},
     )
     helmet = entity(
         "helmet-lamp", "HelmetLamp", parent="eye", position=(0.15, 0.1, 0),
@@ -535,6 +622,7 @@ def scene():
         text("hud-power", (-1.25, -0.78, 0), "SUIT {}%", 0.04),
         text("hud-alert", (0, 0.3, 0), "", 0.05, (1.0, 0.3, 0.2, 1.0)),
         text("hud-airlock", (1.25, -0.78, 0), "", 0.035, (0.6, 1.0, 0.7, 1.0)),
+        text("hud-salvage", (1.25, -0.68, 0), "", 0.04, (1.0, 0.75, 0.4, 1.0)),
     ]
     return {"format_version": 10, "metadata": {"name": "The Tern"}, "entities": entities}
 

@@ -17,6 +17,7 @@ impl SceneExtractor {
         world: &World,
         cameras: &ResolvedCameras,
         textures: &TextureBindings,
+        culling: Option<&super::frustum::Culling>,
         frame: &mut ExtractedFrame,
     ) -> Result<(), SceneExtractError> {
         let mut cache = self.retained_surfaces.borrow_mut();
@@ -27,6 +28,15 @@ impl SceneExtractor {
         for (entity, mesh) in decoded.query(&self.components, world)? {
             let transform = world.world_transform(entity).unwrap_or_default();
             let model = transform_matrix(transform);
+            // A cube is the unit box about its origin; one wholly out of view,
+            // and out of the light's while shadows are on, is not drawn.
+            if mesh.primitive == MeshPrimitive::Cube
+                && culling.is_some_and(|culling| {
+                    !culling.keeps(model, glam::Vec3::splat(-0.5), glam::Vec3::splat(0.5))
+                })
+            {
+                continue;
+            }
             let command = match mesh.primitive {
                 MeshPrimitive::Cube => FrameCommand::TexturedCube {
                     model,

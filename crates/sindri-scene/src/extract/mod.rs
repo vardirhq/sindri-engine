@@ -372,8 +372,9 @@ impl SceneExtractor {
                 self.lighting_2d(world, &cameras, seconds)?
             },
         });
-        self.push_meshes(world, &cameras, textures, &mut frame)?;
-        self.push_models(world, &cameras, &mut frame)?;
+        let culling = self.culling(world, &cameras);
+        self.push_meshes(world, &cameras, textures, culling.as_ref(), &mut frame)?;
+        self.push_models(world, &cameras, culling.as_ref(), &mut frame)?;
         self.push_voxel_worlds(world, &cameras, textures, tile_sets, seconds, &mut frame)?;
         let resting = SpriteAnimations::new();
         let animations = animations.unwrap_or(&resting);
@@ -446,8 +447,9 @@ impl SceneExtractor {
                 self.lighting_2d(world, &cameras, seconds)?
             },
         });
-        self.push_meshes(world, &cameras, textures, &mut frame)?;
-        self.push_models(world, &cameras, &mut frame)?;
+        let culling = self.culling(world, &cameras);
+        self.push_meshes(world, &cameras, textures, culling.as_ref(), &mut frame)?;
+        self.push_models(world, &cameras, culling.as_ref(), &mut frame)?;
         self.push_voxel_worlds(world, &cameras, textures, tile_sets, seconds, &mut frame)?;
         let resting = SpriteAnimations::new();
         let animations = animations.unwrap_or(&resting);

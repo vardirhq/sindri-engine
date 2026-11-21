@@ -1,0 +1,47 @@
+// Salvage: what is worth going outside for.
+//
+// Canisters tagged "salvage" float among the wreckage. G takes one within
+// reach into the diver's pack; what the diver carries is stowed once they are
+// back in the ship's air, and counts towards what the ship has.
+//
+// Controls:
+//   G   take the salvage in reach
+
+script Salvage {
+    // How far a hand reaches for salvage, from the eye.
+    @export let reach: number = 1.4;
+
+    var carried: number = 0.0;
+    var stowed: number = 0.0;
+    var total: number = 0.0;
+
+    fn start() {
+        this.total = World.with_tag("salvage").len;
+    }
+
+    fn update(dt: number) {
+        let eye = World.find("Eye").transform.world_position;
+        let near = World.within_radius("salvage", eye, this.reach);
+        if near.len > 0 && Input.Keyboard.just_pressed("G") {
+            World.despawn(near[0]);
+            this.carried += 1.0;
+            print("Drift: took salvage");
+        }
+        if this.carried > 0.0 && Ship.pressurized {
+            this.stowed += this.carried;
+            this.carried = 0.0;
+            print("Drift: stowed salvage");
+        }
+        let label = World.find("hud-salvage");
+        if this.carried > 0.0 {
+            Ui.set_text(label, "CARRYING " + round(this.carried));
+        } else if this.stowed > 0.0 {
+            Ui.set_text(label, "STOWED " + round(this.stowed) + " / " + round(this.total));
+        } else {
+            Ui.set_text(label, "");
+        }
+        if near.len > 0 {
+            Ui.set_text(World.find("hud-prompt"), "G  take salvage");
+        }
+    }
+}

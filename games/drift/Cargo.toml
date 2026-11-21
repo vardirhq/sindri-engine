@@ -17,5 +17,12 @@ path = "src/lib.rs"
 sindri-platform = { path = "../../crates/sindri-platform", default-features = false }
 sindri-runtime = { path = "../../crates/sindri-runtime" }
 
+[dev-dependencies]
+sindri = { path = "../../crates/sindri" }
+sindri-assets = { path = "../../crates/sindri-assets" }
+sindri-core = { path = "../../crates/sindri-core" }
+sindri-render = { path = "../../crates/sindri-render" }
+sindri-scene = { path = "../../crates/sindri-scene" }
+
 [lints]
 workspace = true
