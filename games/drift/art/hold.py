@@ -624,6 +624,10 @@ def scene():
     ]
     entities[-2]["name"] = "StartHold"
     entities[-1]["name"] = "FarHold"
+    # The bar crosses the middle of the way out, so it is not solid: a hand
+    # closes on it by reach, and a diver flying out passes it rather than
+    # stopping dead against it.
+    del entities[-1]["components"]["sindri.physics3d.collider"]
     for i, x in enumerate((-4.0, 0.0, 4.0)):
         entities.append(handhold(f"port-hold-{i}", (x, 0.6, -half_w + 0.12), "x"))
         entities.append(handhold(f"starboard-hold-{i}", (x, -0.6, half_w - 0.12), "x"))

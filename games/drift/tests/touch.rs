@@ -180,3 +180,19 @@ fn thumbs_alone_walk_out_through_the_airlock() {
     game.slide(1, [ring[0], ring[1] - 200.0]);
     assert!(game.until("Drift: weightless", 6.0), "{:?}", game.said);
 }
+
+#[test]
+fn the_hatch_bar_does_not_stop_a_diver_flying_out() {
+    let mut game = Run::open_in_hold().expect("DRIFT opens");
+    game.wait(0.5);
+    game.tap(Key::U);
+    tap(&mut game, "touch-up");
+    assert!(game.has_said("Drift: pushed off"), "{:?}", game.said);
+    // Straight down the hold, at eye height, through the cargo hatch.
+    game.wait(8.0);
+    let out = game.position("diver");
+    assert!(
+        out[0] > 7.5,
+        "out through the hatch into open space: {out:?}"
+    );
+}
