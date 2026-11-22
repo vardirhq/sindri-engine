@@ -102,7 +102,11 @@ fn eye_stays_above_the_diver_in_a_rolling_ship() {
     body["angular_velocity"] = json!([0.65, 0.0, 0.0]);
     game.wait(1.5);
 
-    let transform = game.run.world.world_transform(shuttle).expect("ship transform");
+    let transform = game
+        .run
+        .world
+        .world_transform(shuttle)
+        .expect("ship transform");
     let rotation = Quat::from_array(transform.rotation).normalize();
     assert!(
         (rotation * Vec3::Y).dot(Vec3::Y) < 0.8,
@@ -112,5 +116,8 @@ fn eye_stays_above_the_diver_in_a_rolling_ship() {
     let eye = in_shuttle(&game, game.position("eye"));
     let offset = eye - diver;
     assert!(offset.y > 1.0, "eye stays above the diver: {offset:?}");
-    assert!(offset.x.abs() < 0.2 && offset.z.abs() < 0.2, "eye follows ship up: {offset:?}");
+    assert!(
+        offset.x.abs() < 0.2 && offset.z.abs() < 0.2,
+        "eye follows ship up: {offset:?}"
+    );
 }
