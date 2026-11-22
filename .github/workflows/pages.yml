@@ -289,7 +289,8 @@ jobs:
             "games/platformer:platformer" \
             "games/lamplighter:lamplighter" \
             "games/scorchball:scorchball" \
-            "games/low-tide:low-tide"; do
+            "games/low-tide:low-tide" \
+            "games/drift:drift"; do
             src="${project%%:*}"
             route="${project##*:}"
             cargo run --quiet --package sindri-export --bin sindri-export -- \
@@ -388,7 +389,7 @@ jobs:
           CHECK
           test -f target/pages/docs/scripting/index.html
           test -f target/pages/docs/language/index.html
-          for route in physics ui spatial camera tween transform orbit character3d model-collision lighting3d daynight causeway flappy orbital-baked shapes-lab weave-poc platformer lamplighter scorchball low-tide; do
+          for route in physics ui spatial camera tween transform orbit character3d model-collision lighting3d daynight causeway flappy orbital-baked shapes-lab weave-poc platformer lamplighter scorchball low-tide drift; do
             test -f "target/pages/examples/$route/index.html"
             test -f "target/pages/examples/$route/assets/sindri.manifest"
             test -f "target/pages/examples/$route/pkg/sindri_player.js"
