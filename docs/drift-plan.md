@@ -77,6 +77,41 @@ grid-aligned models. Prefer reproducible assets with documented rights; validate
 walkable surfaces and collision independently of their appearance. Detailed
 assets and an explorable level are still needed.
 
+### Modeled voxel blocks: implementation track
+
+A custom block model is an engine feature, not a DRIFT-only renderer. The first
+slice should support opaque, static GLB geometry contained within one voxel;
+ordinary textured box blocks keep working. This is a proposal, not an implemented
+capability. Animated models, transparent materials, automatic corner shapes,
+per-block rotation, precise modeled collision, and player construction are
+separate follow-ups.
+
+- Extend the block-set asset and validation to optionally reference a model;
+  define its units, origin, allowed bounds and how missing or invalid assets
+  are reported. Preserve existing block sets and ordinary face-textured boxes.
+- Discover model dependencies through referenced block sets in every host and
+  exporter, not only through entities carrying a model component. Include the
+  model's material and texture dependencies and invalidate affected content on
+  reload. Verify native, editor and browser export using the same project.
+- Keep `sindri-voxel` independent of assets and renderer types. At the scene
+  boundary resolve prepared model geometry and compile it into section-local
+  batches by compatible material. The current face compiler assumes each face
+  is two triangles; custom geometry needs a distinct path. Keep section cache
+  revisions, release, owner transforms and culling correct after an edit.
+- Define conservative internal-face behavior before optimizing it: arbitrary
+  geometry cannot safely use box-face occlusion without an authored boundary
+  contract. Never silently remove visible parts of a model. Retain full-cell
+  collision for voxel bodies in the first slice and make that limitation clear.
+- Prove one detailed block beside ordinary blocks in a small built DRIFT
+  structure. Test adjacent cells, a section boundary, edits and removal, moved
+  and scaled owners, repeated models, asset reload, export and missing assets.
+  Capture native/editor/browser output and measure draws and geometry count;
+  the block must not create one scene entity per voxel.
+- Connected trim is a later general rule layer: select render variants from the
+  neighborhood without changing the player's chosen block identity. Specify
+  directions, rotations and cross-section invalidation, and test edge and corner
+  edits before claiming seamless connections.
+
 ## What kind of project this is
 
 DRIFT is **a game rather than a showcase**, on the same terms as Lamplighter
