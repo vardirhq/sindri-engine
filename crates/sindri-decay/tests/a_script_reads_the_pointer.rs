@@ -444,3 +444,37 @@ fn a_failed_script_does_not_forward_capture_intent() {
     assert_eq!(report.failures.len(), 1);
     assert!(report.pointer_lock_request.is_none());
 }
+
+/// A finger has no cursor to capture: a tap reads as a left click, and a game
+/// that captures the cursor on a click must not lock the pointer from a phone,
+/// where the browser would then report every finger's travel as mouse look.
+#[test]
+fn a_tap_does_not_capture_the_cursor() {
+    let (mut world, _, sources) = world(
+        r#"
+        script Reader {
+            fn update(dt: f32) {
+                if Pointer.just_pressed("Left") { Pointer.lock(); }
+            }
+        }
+    "#,
+    );
+    let mut scripts = Scripts::new();
+    let mut input = InputState::default();
+    input.apply(InputEvent::TouchStarted {
+        id: 1,
+        x: 10.0,
+        y: 10.0,
+    });
+    let report = advance(&mut scripts, &mut world, &sources, &input);
+    assert!(report.failures.is_empty(), "{report:?}");
+    assert!(report.pointer_lock_request.is_none(), "{report:?}");
+
+    // A mouse click still captures it.
+    let mut input = InputState::default();
+    input.apply(InputEvent::ButtonPressed(
+        sindri_platform::MouseButton::Left,
+    ));
+    let report = advance(&mut scripts, &mut world, &sources, &input);
+    assert_eq!(report.pointer_lock_request, Some(true));
+}

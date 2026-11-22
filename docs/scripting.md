@@ -3293,6 +3293,12 @@ script invocations are collected in execution order, last request winning,
 and Session drains the latest request once after the host advances gameplay.
 A failed invocation does not forward its pending capture request.
 
+A `lock()` made while a finger is on the screen, or touched it this frame, is
+ignored: a tap reads as a left click, but a finger has no cursor to capture,
+and a browser that captured one would report every finger's travel as mouse
+motion, so a steering thumb would turn the view. Touch games look with
+`Ui.drag` instead.
+
 In a browser, request capture after a player click. Security policy, lack of
 user activation, or platform support can deny it. Browser success is polled
 from the document's actual locked element; synchronous exceptions and rejected

@@ -140,6 +140,14 @@ impl WorldHost<'_> {
                     path.dotted()
                 )));
             }
+            // A finger has no cursor to capture. On a touch screen a tap
+            // reads as a left click, so a game that captures the cursor on a
+            // click would otherwise lock the pointer from a phone, and the
+            // browser then reports every finger's travel as mouse motion: the
+            // steering thumb would turn the view.
+            if query == PointerQuery::Lock && self.context.input.touching() {
+                return Ok(Value::Unit);
+            }
             self.pointer_lock_request = Some(query == PointerQuery::Lock);
             return Ok(Value::Unit);
         }
