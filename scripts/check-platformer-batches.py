@@ -5,13 +5,13 @@ import json
 import sys
 from pathlib import Path
 
-# The settled level has six non-sprite batches: the four it had, and the pause
-# button's box and its "II". Their payload is 2,912 bytes smaller than storing
-# every instance as a sprite.
+# The settled level has seven non-sprite batches: the four it had, the pause
+# button's box and its "II", and the touch controls, which are always drawn.
+# Their payload is 2,864 bytes smaller than storing every instance as a sprite.
 # Sprite counts vary with particle lifetime: standalone advances one fixed step
 # per draw, whereas the editor advances however many steps its clock owes.
-NON_SPRITE_BATCHES = 6
-NON_SPRITE_BYTE_SAVING = 2912
+NON_SPRITE_BATCHES = 7
+NON_SPRITE_BYTE_SAVING = 2864
 SPRITE_BYTES = 176
 
 for path in sys.argv[1:]:
