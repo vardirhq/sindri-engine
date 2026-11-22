@@ -954,6 +954,9 @@ jobs:
           cargo run --quiet --package sindri-export --bin sindri-export -- \
             games/low-tide target/dist/low-tide --base /examples/low-tide/
           cp -R crates/sindri-player/pkg/. target/dist/low-tide/pkg/
+          cargo run --quiet --package sindri-export --bin sindri-export -- \
+            games/drift target/dist/drift --base /examples/drift/
+          cp -R crates/sindri-player/pkg/. target/dist/drift/pkg/
           for project in sprite-shaders sprite-masks; do
             cargo run --quiet --package sindri-export --bin sindri-export -- \
               examples/$project target/dist/$project --base /examples/$project/
@@ -1190,6 +1193,11 @@ jobs:
             SINDRI_BASE_PATH=/examples/low-tide/ \
             SINDRI_VIEWPORT_WIDTH=390 SINDRI_VIEWPORT_HEIGHT=844 \
             node scripts/browser/smoke.mjs target/dist/low-tide target/render-artifacts/browser-low-tide-phone.png
+          # DRIFT is played held sideways, so its phone is landscape.
+          SINDRI_EXPECT_ASSETS=1 \
+            SINDRI_BASE_PATH=/examples/drift/ \
+            SINDRI_VIEWPORT_WIDTH=844 SINDRI_VIEWPORT_HEIGHT=390 \
+            node scripts/browser/smoke.mjs target/dist/drift target/render-artifacts/browser-drift-phone.png
           SINDRI_EXPECT_ASSETS=1 SINDRI_PLATFORMER_GOAL=1 \
             SINDRI_BASE_PATH=/examples/platformer/ \
             node scripts/browser/smoke.mjs target/dist/platformer-goal target/render-artifacts/browser-platformer-goal.png

@@ -86,6 +86,8 @@ $C games/platformer site/screenshots/platformer.png 1440 900 \
   hold:ArrowRight wait:1.4 release:ArrowRight wait:0.4
 convert site/screenshots/low-tide.png -resize 1200x750 -quality 82 site/screenshots/low-tide.jpg
 convert site/screenshots/voxel-lab.png -resize 1200x750 -quality 82 site/screenshots/voxel-lab.jpg
+$C games/drift site/screenshots/drift.png 1440 900 place:diver=4,0,-8 wait:3
+convert site/screenshots/drift.png -resize 1200x750 -quality 82 site/screenshots/drift.jpg
 ```
 
 Scorchball is photographed on its title screen: a match starts only when a

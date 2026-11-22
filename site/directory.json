@@ -174,8 +174,8 @@
           "Toss the crate"
         ],
         [
-          "First finger · second finger",
-          "Touch stick · jump"
+          "Left thumb · jump button",
+          "Touch: steer · jump, either first"
         ]
       ]
     }
@@ -334,6 +334,75 @@
           "Keep the map north-up"
         ]
       ]
+    }
+  },
+  {
+    "category": "games",
+    "title": "DRIFT",
+    "path": "examples/drift/",
+    "source": "games/drift",
+    "description": "Float through a damaged ship adrift in the dark, on a tether, salvaging what you can.",
+    "tags": [
+      "3d",
+      "first-person",
+      "physics",
+      "voxel",
+      "game"
+    ],
+    "play": {
+      "kind": "Genre showcase",
+      "shot": "drift.jpg",
+      "input": [
+        "keyboard",
+        "mouse",
+        "touch"
+      ],
+      "about": [
+        "The Tern is adrift and dark. In a suit with limited air and a tank of propellant, you push off handholds, clip a tether to the hull and drift out to the wreckage for salvage, then find your way back before the oxygen runs out. A small shuttle built of blocks floats nearby; sit at its controls and fly it.",
+        "DRIFT is the first-person game, and a game rather than a showcase, still early: the hold, the tether, the airlock, the wreckage and a flyable block-built shuttle are in. There is no game code: it is a scene and Decay scripts, on Sindri's 3D physics and voxel engine."
+      ],
+      "proves": [
+        "Zero-gravity movement on 3D physics",
+        "A tether of jointed links that catches on things",
+        "Ships built of voxel blocks that fly as one body",
+        "Walking inside a moving, turning ship",
+        "Twin-thumb phone controls with a look pad"
+      ],
+      "controls": [
+        [
+          "Mouse · drag the right half",
+          "Look (click to capture the cursor)"
+        ],
+        [
+          "WASD · left thumb",
+          "Thrust or walk"
+        ],
+        [
+          "Space / C · UP / DOWN",
+          "Up and down, push off, jump"
+        ],
+        [
+          "F / right mouse · GRAB",
+          "Hold on to a handhold"
+        ],
+        [
+          "X · BRAKE",
+          "Brake"
+        ],
+        [
+          "E / G · USE",
+          "Airlock panel, salvage, pilot's seat"
+        ],
+        [
+          "R · REEL  ·  U · CLIP",
+          "Reel the tether in · clip on or off"
+        ],
+        [
+          "Q / E · ROLL",
+          "Roll"
+        ]
+      ],
+      "note": "Early in development. Best held sideways on a phone."
     }
   },
   {
