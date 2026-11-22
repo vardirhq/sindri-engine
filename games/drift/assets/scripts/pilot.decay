@@ -1,0 +1,93 @@
+// Flying the shuttle: thrusters where they are mounted, and a gyroscope.
+//
+// While the diver sits at the shuttle's controls, the keys ask for a push in
+// the ship's own axes (its nose is its -X) and every thruster whose push points
+// that way fires, through the point where it is mounted: a ship pushed off its
+// centre turns as well as moves, so how it is built is how it flies, and a
+// thruster lost is felt. The gyroscope turns the ship as the mouse and Q/E
+// ask, at most `turn_rate`, and otherwise holds it steady against spin.
+//
+// Controls, seated:
+//   W / S       forward / back          A / D     left / right
+//   Space / C   up / down               X         brake against the drift
+//   mouse       pitch and yaw           Q / E     roll
+
+script Pilot {
+    // The push of one thruster, in newtons, and how near its push must point
+    // to the one asked for to fire.
+    @export let force: number = 120.0;
+    @export let aim: number = 0.7;
+    // How fast the gyroscope turns the ship at full stick, in radians a second,
+    // how much pointer movement is full stick, and how fast it gets there.
+    @export let turn_rate: number = 0.8;
+    @export let mouse_full: number = 12.0;
+    @export let gyro: number = 3.0;
+
+    var ship: Entity = null;
+    var firing: bool = false;
+
+    fn start() {
+        this.ship = World.find("Shuttle");
+    }
+
+    fn update(dt: number) {
+        let thrusters = World.with_tag("shuttle-thruster");
+        if !Ship.piloting {
+            if this.firing {
+                flames(thrusters, Vec3(0.0, 0.0, 0.0));
+                this.firing = false;
+            }
+            return;
+        }
+        let origin = this.ship.transform.to_world(Vec3(0.0, 0.0, 0.0));
+        let ship_x = (this.ship.transform.to_world(Vec3(1.0, 0.0, 0.0)) - origin).normalized;
+        let ship_y = (this.ship.transform.to_world(Vec3(0.0, 1.0, 0.0)) - origin).normalized;
+        let ship_z = (this.ship.transform.to_world(Vec3(0.0, 0.0, 1.0)) - origin).normalized;
+        // Its nose is -X and its right, facing that way, is -Z.
+        var wanted = ship_x * -Input.Keyboard.axis("S", "W")
+            + ship_z * -Input.Keyboard.axis("A", "D")
+            + ship_y * Input.Keyboard.axis("C", "Space");
+        let drift = Physics3d.velocity(this.ship);
+        if Input.Keyboard.is_down("X") && drift.length > 0.05 {
+            wanted = drift * -1.0;
+        }
+        flames(thrusters, wanted);
+        this.firing = wanted.length > 0.001;
+        if this.firing {
+            let towards = wanted.normalized;
+            for thruster in thrusters {
+                let push = thruster.transform.forward * -1.0;
+                if push.dot(towards) > this.aim {
+                    Physics3d.apply_impulse_at(this.ship, push * (this.force * dt), thruster.transform.world_position);
+                }
+            }
+        }
+        // The gyroscope: roll about the nose's axis, yaw about the ship's up,
+        // pitch about its right; everything else it damps away.
+        let delta = Pointer.delta;
+        let roll = Input.Keyboard.axis("Q", "E");
+        let yaw = clamp(-delta.x / this.mouse_full, -1.0, 1.0);
+        let pitch = clamp(-delta.y / this.mouse_full, -1.0, 1.0);
+        let asked = (ship_x * -roll + ship_y * yaw + ship_z * -pitch) * this.turn_rate;
+        let spin = Physics3d.angular_velocity(this.ship);
+        let take = min(1.0, this.gyro * dt);
+        Physics3d.set_angular_velocity(this.ship, spin + (asked - spin) * take);
+    }
+
+    // Each thruster's flame shows while it pushes the way asked.
+    fn flames(thrusters: List<Entity>, wanted: Vec3) {
+        var i = 0;
+        for thruster in thrusters {
+            var on = false;
+            if wanted.length > 0.001 {
+                let push = thruster.transform.forward * -1.0;
+                on = push.dot(wanted.normalized) > this.aim;
+            }
+            let flame = World.find("shuttle-flame-" + i);
+            if flame != null {
+                World.set_active(flame, on);
+            }
+            i += 1;
+        }
+    }
+}

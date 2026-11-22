@@ -66,6 +66,37 @@ impl PhysicsWorld3d {
         Ok(())
     }
 
+    /// Applies a world-space impulse through a world-space point on a dynamic
+    /// body: the push of a thruster mounted off the body's centre of mass,
+    /// which turns the body as well as moving it.
+    ///
+    /// # Errors
+    /// A non-finite impulse or point, a missing body, or one not dynamic.
+    pub fn apply_impulse_at(
+        &mut self,
+        entity: EntityId,
+        impulse: [f32; 3],
+        point: [f32; 3],
+    ) -> Result<(), PhysicsError> {
+        finite3("impulse", impulse)?;
+        finite3("impulse_point", point)?;
+        let record = self.record(entity)?;
+        if record.kind != RigidBodyKind::Dynamic {
+            return Err(PhysicsError::WrongBodyKind(
+                entity,
+                "apply impulse",
+                record.kind,
+            ));
+        }
+        let handle = record.body;
+        self.backend.bodies[handle].apply_impulse_at_point(
+            r3::Vector::from_array(impulse),
+            r3::Vector::from_array(point),
+            true,
+        );
+        Ok(())
+    }
+
     pub fn set_kinematic_target(
         &mut self,
         entity: EntityId,

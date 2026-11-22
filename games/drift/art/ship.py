@@ -52,3 +52,37 @@ def shuttle():
         for z in range(3, width - 3):
             blocks.pop((length - 1, y, z), None)
     return [{"at": [x, y, z], "block": block} for (x, y, z), block in sorted(blocks.items())]
+
+
+# Which way a part's own -Z points, as the quaternion that turns -Z there.
+_HALF = 0.7071068
+FACING = {
+    "+x": (0.0, -_HALF, 0.0, _HALF),
+    "-x": (0.0, _HALF, 0.0, _HALF),
+    "+z": (0.0, 1.0, 0.0, 0.0),
+    "-z": (0.0, 0.0, 0.0, 1.0),
+    "+y": (_HALF, 0.0, 0.0, _HALF),
+    "-y": (-_HALF, 0.0, 0.0, _HALF),
+}
+
+
+def shuttle_thrusters():
+    """The shuttle's thrusters: (where, in blocks; which way the nozzle points).
+
+    A thruster pushes the ship opposite to its nozzle, through where it is
+    mounted. Main engines at the stern push it forward (towards -X, its nose);
+    retros by the nose push it back; pairs on each flank, the keel and the roof
+    push it sideways, up and down. Paired fore and aft, so pushing sideways
+    does not turn it unless one of a pair is lost."""
+    return [
+        ((24.9, 3.5, 3.0), "+x"), ((24.9, 3.5, 7.0), "+x"),
+        ((4.0, 4.5, -0.9), "-x"), ((4.0, 4.5, 10.9), "-x"),
+        ((7.0, 4.5, -0.9), "-z"), ((17.0, 4.5, -0.9), "-z"),
+        ((7.0, 4.5, 10.9), "+z"), ((17.0, 4.5, 10.9), "+z"),
+        ((7.0, -0.9, 5.0), "-y"), ((17.0, -0.9, 5.0), "-y"),
+        ((7.0, 8.9, 5.0), "+y"), ((17.0, 8.9, 5.0), "+y"),
+    ]
+
+
+# The pilot's seat, in blocks, on the cockpit deck facing the nose.
+SHUTTLE_SEAT = (2.8, 1.0, 5.0)

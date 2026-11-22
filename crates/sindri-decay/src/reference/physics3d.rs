@@ -161,6 +161,11 @@ pub(super) const TYPES: &[TypeEntry] = &[
                 "Sorted unique other active entities that left sensor contact with this script's entity in the last successful 3D step. Removed or inactive handles are filtered; the snapshot is not drained.",
             ),
             call(
+                "apply_impulse_at",
+                &["entity", "impulse", "point"],
+                "Applies a finite world-space Vec3 impulse through a finite world-space Vec3 point on an active dynamic body: off its centre of mass it turns the body as well as pushing it, the way a thruster mounted at one end of a ship does. Queues before synchronization like apply_impulse and resolves in call order; invalid input or body kind fails before mutation.",
+            ),
+            call(
                 "set_distance",
                 &["joint", "max_distance"],
                 "Tunes the length of an authored 3D distance joint (a rope) for the next fixed synchronization: shorten it step by step to reel a body in. Distance must be finite and positive. Works while suspended or before endpoints are built; keeps the solver constraint, its anchors and body motion. Requires 3D physics and a sindri.physics3d.distance_joint on the owner.",

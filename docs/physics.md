@@ -912,7 +912,11 @@ surface remains `Physics`; the independent 3D surface is `Physics3d`.
 `Physics3d.velocity(entity)` and `angular_velocity(entity)` return copied Vec3
 values. `set_velocity(entity, velocity: Vec3)`,
 `set_angular_velocity(entity, velocity: Vec3)` and
-`apply_impulse(entity, impulse: Vec3)` act on active 3D bodies.
+`apply_impulse(entity, impulse: Vec3)` act on active 3D bodies, and
+`apply_impulse_at(entity, impulse: Vec3, point: Vec3)` applies an impulse
+through a world-space point: off the centre of mass it turns the body as well
+as pushing it, the way a thruster mounted at one end of a ship does
+(`PhysicsWorld3d::apply_impulse_at`, `BodyControl3d::ImpulseAt`).
 Vectors must be finite and fit engine f32 values. Velocity controls accept dynamic
 and velocity-kinematic bodies; impulses require dynamic bodies. Rotation locking
 keeps angular velocity zero. Invalid arguments/body kinds fail before mutation.

@@ -1,0 +1,74 @@
+#!/usr/bin/env python3
+"""Builds DRIFT's ship parts: `assets/models/thruster.glb`, `flame.glb`, `seat.glb`.
+
+Functional parts of a block-built ship are models snapped to its grid rather
+than blocks: a thruster, the flame it shows while it fires, and the pilot's
+seat. They are made at one metre to the block, half-metre blocks' parts are
+placed at half scale by their ship. A thruster's nozzle points along its own
+-Z: it pushes the ship the other way. Everything is drawn from fixed numbers,
+so re-running this changes nothing.
+"""
+import pathlib
+import sys
+
+TOOLS = pathlib.Path(__file__).resolve().parents[3] / "tools"
+sys.path.insert(0, str(TOOLS))
+
+from glb import Material, Mesh  # noqa: E402
+
+MODELS = pathlib.Path(__file__).resolve().parent.parent / "assets" / "models"
+
+MATERIALS = {
+    "housing": Material("#5e636b", roughness=0.55, metallic=0.7),
+    "dark": Material("#25282d", roughness=0.7, metallic=0.5),
+    "nozzle": Material("#3a3632", roughness=0.4, metallic=0.85),
+    "inner": Material("#120c08", roughness=0.9),
+    "band": Material("#d9a21e", roughness=0.6),
+    "flame": Material("#2a4cff", emissive="#9fc6ff", strength=1.0),
+    "flame-core": Material("#ffffff", emissive="#ffffff", strength=1.0),
+    "cushion": Material("#3b3f47", roughness=0.95),
+    "frame": Material("#6d727a", roughness=0.5, metallic=0.6),
+    "screen": Material("#06141a", emissive="#38d0ff", strength=1.0),
+}
+
+
+def thruster():
+    """A housing on a mounting plate, with a bell nozzle pointing along -Z."""
+    mesh = Mesh()
+    mesh.box("dark", (0, 0, 0.42), (0.9, 0.9, 0.16), bevel=0.04)
+    mesh.cylinder("housing", (0, 0, 0.18), 0.32, 0.36, segments=12, rotation=(90, 0, 0))
+    mesh.cylinder("band", (0, 0, 0.02), 0.33, 0.06, segments=12, rotation=(90, 0, 0))
+    mesh.cylinder("nozzle", (0, 0, -0.2), 0.16, 0.4, top=0.34, segments=12, rotation=(90, 0, 0))
+    mesh.cylinder("inner", (0, 0, -0.39), 0.3, 0.02, segments=12, rotation=(90, 0, 0))
+    mesh.write(MODELS / "thruster.glb", MATERIALS, name="thruster")
+
+
+def flame():
+    """The exhaust: a glowing cone beyond the nozzle, shown while firing."""
+    mesh = Mesh()
+    mesh.cylinder("flame", (0, 0, -0.75), 0.3, 0.7, top=0.04, segments=10, rotation=(90, 0, 0))
+    mesh.cylinder("flame-core", (0, 0, -0.6), 0.16, 0.4, top=0.02, segments=8, rotation=(90, 0, 0))
+    mesh.write(MODELS / "flame.glb", MATERIALS, name="flame")
+
+
+def seat():
+    """The pilot's seat, facing -Z, with a small lit console before it."""
+    mesh = Mesh()
+    mesh.box("frame", (0, 0.2, 0), (0.6, 0.08, 0.6), bevel=0.02)
+    mesh.box("cushion", (0, 0.29, 0), (0.54, 0.1, 0.54), bevel=0.03)
+    mesh.box("cushion", (0, 0.75, 0.26), (0.54, 0.8, 0.1), bevel=0.03)
+    mesh.box("frame", (0, 0.08, 0), (0.12, 0.16, 0.12))
+    mesh.box("dark", (0, 0.7, -0.62), (0.8, 0.5, 0.12), rotation=(-25, 0, 0), bevel=0.02)
+    mesh.box("screen", (0, 0.73, -0.71), (0.6, 0.32, 0.02), rotation=(-25, 0, 0))
+    mesh.write(MODELS / "seat.glb", MATERIALS, name="seat")
+
+
+def main():
+    MODELS.mkdir(parents=True, exist_ok=True)
+    thruster()
+    flame()
+    seat()
+
+
+if __name__ == "__main__":
+    main()

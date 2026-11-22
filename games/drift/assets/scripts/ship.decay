@@ -7,4 +7,6 @@ state Ship {
     // the ship's air.
     var in_gravity: bool = true;
     var pressurized: bool = true;
+    // Whether the diver is at the shuttle's controls.
+    var piloting: bool = false;
 }

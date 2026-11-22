@@ -12,6 +12,12 @@ pub enum BodyControl3d {
     LinearVelocity([f32; 3]),
     AngularVelocity([f32; 3]),
     Impulse([f32; 3]),
+    /// An impulse through a world-space point: off the centre of mass it
+    /// turns the body as well as pushing it.
+    ImpulseAt {
+        impulse: [f32; 3],
+        point: [f32; 3],
+    },
 }
 
 impl BodyControl3d {
@@ -20,9 +26,13 @@ impl BodyControl3d {
             Self::LinearVelocity(value) => ("linear_velocity", value),
             Self::AngularVelocity(value) => ("angular_velocity", value),
             Self::Impulse(value) => ("impulse", value),
+            Self::ImpulseAt { impulse, point } => {
+                finite3("impulse_point", point)?;
+                ("impulse", impulse)
+            }
         };
         finite3(name, value)?;
-        let velocity = !matches!(self, Self::Impulse(_));
+        let velocity = !matches!(self, Self::Impulse(_) | Self::ImpulseAt { .. });
         if kind != RigidBodyKind::Dynamic && !(velocity && kind == RigidBodyKind::KinematicVelocity)
         {
             return Err(PhysicsError::WrongBodyKind(entity, "motion control", kind));
@@ -42,6 +52,9 @@ impl PhysicsWorld3d {
             BodyControl3d::LinearVelocity(value) => self.set_linear_velocity(entity, value),
             BodyControl3d::AngularVelocity(value) => self.set_angular_velocity(entity, value),
             BodyControl3d::Impulse(value) => self.apply_impulse(entity, value),
+            BodyControl3d::ImpulseAt { impulse, point } => {
+                self.apply_impulse_at(entity, impulse, point)
+            }
         }
     }
 

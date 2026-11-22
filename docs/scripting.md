@@ -1229,6 +1229,7 @@ a person who has not clicked yet.
 | `Physics3d.angular_velocity(entity)` | `Vec3` |
 | `Physics3d.set_angular_velocity(entity, velocity: Vec3)` | nothing |
 | `Physics3d.apply_impulse(entity, impulse: Vec3)` | nothing |
+| `Physics3d.apply_impulse_at(entity, impulse: Vec3, point: Vec3)` | nothing |
 | `Physics3d.collision_started()` | `List<Entity>` |
 | `Physics3d.collision_stopped()` | `List<Entity>` |
 | `Physics3d.sensor_entered()` | `List<Entity>` |

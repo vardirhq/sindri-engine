@@ -122,6 +122,8 @@ script Diver {
     var frame_velocity: Vec3 = Vec3(0.0, 0.0, 0.0);
     // Whether `held_local` and `held_world` were taken last step.
     var held: bool = false;
+    // Seated at a ship's controls: the keys fly the ship, not the diver.
+    var seated: bool = false;
 
     fn start() {
         this.eye = World.find("Eye");
@@ -169,7 +171,10 @@ script Diver {
             print("Drift: weightless");
         }
         let reached = nearest_hold();
-        if this.aboard {
+        seat(dt);
+        if this.seated {
+            sit();
+        } else if this.aboard {
             look_upright(dt);
             walk(dt);
         } else {
@@ -330,6 +335,43 @@ script Diver {
             lift = this.jump_speed;
         }
         Physics3d.set_velocity(this.entity, this.frame_velocity + walked + up * lift);
+    }
+
+    // F at a ship's seat sits at its controls; F again stands up.
+    fn seat(dt: number) {
+        let chair = World.find("Seat");
+        if chair == null || !Input.Keyboard.just_pressed("F") {
+            return;
+        }
+        if this.seated {
+            this.seated = false;
+            Ship.piloting = false;
+            print("Drift: left the controls");
+            return;
+        }
+        let near = chair.transform.world_position.distance(this.transform.world_position) < 1.6;
+        if this.aboard && near {
+            this.seated = true;
+            Ship.piloting = true;
+            this.hold = null;
+            print("Drift: at the controls");
+        }
+    }
+
+    // Seated: held in the seat as the ship moves, looking over the console at
+    // its nose. The mouse and keys are the pilot's.
+    fn sit() {
+        let chair = World.find("Seat");
+        let up = chair.transform.up;
+        this.transform.world_position = chair.transform.world_position + up * 0.75;
+        // Moving with the ship: the spot under the seat keeps being measured,
+        // so standing up mid-flight keeps the ship's speed.
+        Physics3d.set_velocity(this.entity, this.frame_velocity);
+        // Facing the ship's nose (its -X): a quarter turn of heading.
+        this.yaw = 1.5707963;
+        this.pitch = -0.1;
+        let local = qmul(qturn(0.0, 1.0, 0.0, this.yaw), qturn(1.0, 0.0, 0.0, this.pitch));
+        this.eye.transform.rotation = qmul(hull_turn(), local);
     }
 
     // The suit: air and power run down in vacuum and fill up in the ship's air.

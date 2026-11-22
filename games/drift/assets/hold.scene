@@ -16835,6 +16835,867 @@
       }
     },
     {
+      "id": "shuttle-thruster-0",
+      "name": "shuttle-thruster-0",
+      "transform_3d": {
+        "position": [
+          24.9,
+          3.5,
+          3.0
+        ],
+        "rotation": [
+          0.0,
+          -0.707107,
+          0.0,
+          0.707107
+        ],
+        "scale": [
+          2.0,
+          2.0,
+          2.0
+        ]
+      },
+      "components": {
+        "sindri.model": {
+          "asset": "models/thruster.glb"
+        },
+        "sindri.tags": {
+          "tags": [
+            "shuttle-thruster"
+          ]
+        }
+      },
+      "parent": "shuttle"
+    },
+    {
+      "id": "shuttle-flame-0",
+      "name": "shuttle-flame-0",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.model": {
+          "asset": "models/flame.glb"
+        },
+        "sindri.tags": {
+          "tags": [
+            "shuttle-flame"
+          ]
+        }
+      },
+      "parent": "shuttle-thruster-0",
+      "disabled": true
+    },
+    {
+      "id": "shuttle-thruster-1",
+      "name": "shuttle-thruster-1",
+      "transform_3d": {
+        "position": [
+          24.9,
+          3.5,
+          7.0
+        ],
+        "rotation": [
+          0.0,
+          -0.707107,
+          0.0,
+          0.707107
+        ],
+        "scale": [
+          2.0,
+          2.0,
+          2.0
+        ]
+      },
+      "components": {
+        "sindri.model": {
+          "asset": "models/thruster.glb"
+        },
+        "sindri.tags": {
+          "tags": [
+            "shuttle-thruster"
+          ]
+        }
+      },
+      "parent": "shuttle"
+    },
+    {
+      "id": "shuttle-flame-1",
+      "name": "shuttle-flame-1",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.model": {
+          "asset": "models/flame.glb"
+        },
+        "sindri.tags": {
+          "tags": [
+            "shuttle-flame"
+          ]
+        }
+      },
+      "parent": "shuttle-thruster-1",
+      "disabled": true
+    },
+    {
+      "id": "shuttle-thruster-2",
+      "name": "shuttle-thruster-2",
+      "transform_3d": {
+        "position": [
+          4.0,
+          4.5,
+          -0.9
+        ],
+        "rotation": [
+          0.0,
+          0.707107,
+          0.0,
+          0.707107
+        ],
+        "scale": [
+          2.0,
+          2.0,
+          2.0
+        ]
+      },
+      "components": {
+        "sindri.model": {
+          "asset": "models/thruster.glb"
+        },
+        "sindri.tags": {
+          "tags": [
+            "shuttle-thruster"
+          ]
+        }
+      },
+      "parent": "shuttle"
+    },
+    {
+      "id": "shuttle-flame-2",
+      "name": "shuttle-flame-2",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.model": {
+          "asset": "models/flame.glb"
+        },
+        "sindri.tags": {
+          "tags": [
+            "shuttle-flame"
+          ]
+        }
+      },
+      "parent": "shuttle-thruster-2",
+      "disabled": true
+    },
+    {
+      "id": "shuttle-thruster-3",
+      "name": "shuttle-thruster-3",
+      "transform_3d": {
+        "position": [
+          4.0,
+          4.5,
+          10.9
+        ],
+        "rotation": [
+          0.0,
+          0.707107,
+          0.0,
+          0.707107
+        ],
+        "scale": [
+          2.0,
+          2.0,
+          2.0
+        ]
+      },
+      "components": {
+        "sindri.model": {
+          "asset": "models/thruster.glb"
+        },
+        "sindri.tags": {
+          "tags": [
+            "shuttle-thruster"
+          ]
+        }
+      },
+      "parent": "shuttle"
+    },
+    {
+      "id": "shuttle-flame-3",
+      "name": "shuttle-flame-3",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.model": {
+          "asset": "models/flame.glb"
+        },
+        "sindri.tags": {
+          "tags": [
+            "shuttle-flame"
+          ]
+        }
+      },
+      "parent": "shuttle-thruster-3",
+      "disabled": true
+    },
+    {
+      "id": "shuttle-thruster-4",
+      "name": "shuttle-thruster-4",
+      "transform_3d": {
+        "position": [
+          7.0,
+          4.5,
+          -0.9
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "scale": [
+          2.0,
+          2.0,
+          2.0
+        ]
+      },
+      "components": {
+        "sindri.model": {
+          "asset": "models/thruster.glb"
+        },
+        "sindri.tags": {
+          "tags": [
+            "shuttle-thruster"
+          ]
+        }
+      },
+      "parent": "shuttle"
+    },
+    {
+      "id": "shuttle-flame-4",
+      "name": "shuttle-flame-4",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.model": {
+          "asset": "models/flame.glb"
+        },
+        "sindri.tags": {
+          "tags": [
+            "shuttle-flame"
+          ]
+        }
+      },
+      "parent": "shuttle-thruster-4",
+      "disabled": true
+    },
+    {
+      "id": "shuttle-thruster-5",
+      "name": "shuttle-thruster-5",
+      "transform_3d": {
+        "position": [
+          17.0,
+          4.5,
+          -0.9
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "scale": [
+          2.0,
+          2.0,
+          2.0
+        ]
+      },
+      "components": {
+        "sindri.model": {
+          "asset": "models/thruster.glb"
+        },
+        "sindri.tags": {
+          "tags": [
+            "shuttle-thruster"
+          ]
+        }
+      },
+      "parent": "shuttle"
+    },
+    {
+      "id": "shuttle-flame-5",
+      "name": "shuttle-flame-5",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.model": {
+          "asset": "models/flame.glb"
+        },
+        "sindri.tags": {
+          "tags": [
+            "shuttle-flame"
+          ]
+        }
+      },
+      "parent": "shuttle-thruster-5",
+      "disabled": true
+    },
+    {
+      "id": "shuttle-thruster-6",
+      "name": "shuttle-thruster-6",
+      "transform_3d": {
+        "position": [
+          7.0,
+          4.5,
+          10.9
+        ],
+        "rotation": [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          2.0,
+          2.0,
+          2.0
+        ]
+      },
+      "components": {
+        "sindri.model": {
+          "asset": "models/thruster.glb"
+        },
+        "sindri.tags": {
+          "tags": [
+            "shuttle-thruster"
+          ]
+        }
+      },
+      "parent": "shuttle"
+    },
+    {
+      "id": "shuttle-flame-6",
+      "name": "shuttle-flame-6",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.model": {
+          "asset": "models/flame.glb"
+        },
+        "sindri.tags": {
+          "tags": [
+            "shuttle-flame"
+          ]
+        }
+      },
+      "parent": "shuttle-thruster-6",
+      "disabled": true
+    },
+    {
+      "id": "shuttle-thruster-7",
+      "name": "shuttle-thruster-7",
+      "transform_3d": {
+        "position": [
+          17.0,
+          4.5,
+          10.9
+        ],
+        "rotation": [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          2.0,
+          2.0,
+          2.0
+        ]
+      },
+      "components": {
+        "sindri.model": {
+          "asset": "models/thruster.glb"
+        },
+        "sindri.tags": {
+          "tags": [
+            "shuttle-thruster"
+          ]
+        }
+      },
+      "parent": "shuttle"
+    },
+    {
+      "id": "shuttle-flame-7",
+      "name": "shuttle-flame-7",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.model": {
+          "asset": "models/flame.glb"
+        },
+        "sindri.tags": {
+          "tags": [
+            "shuttle-flame"
+          ]
+        }
+      },
+      "parent": "shuttle-thruster-7",
+      "disabled": true
+    },
+    {
+      "id": "shuttle-thruster-8",
+      "name": "shuttle-thruster-8",
+      "transform_3d": {
+        "position": [
+          7.0,
+          -0.9,
+          5.0
+        ],
+        "rotation": [
+          -0.707107,
+          0.0,
+          0.0,
+          0.707107
+        ],
+        "scale": [
+          2.0,
+          2.0,
+          2.0
+        ]
+      },
+      "components": {
+        "sindri.model": {
+          "asset": "models/thruster.glb"
+        },
+        "sindri.tags": {
+          "tags": [
+            "shuttle-thruster"
+          ]
+        }
+      },
+      "parent": "shuttle"
+    },
+    {
+      "id": "shuttle-flame-8",
+      "name": "shuttle-flame-8",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.model": {
+          "asset": "models/flame.glb"
+        },
+        "sindri.tags": {
+          "tags": [
+            "shuttle-flame"
+          ]
+        }
+      },
+      "parent": "shuttle-thruster-8",
+      "disabled": true
+    },
+    {
+      "id": "shuttle-thruster-9",
+      "name": "shuttle-thruster-9",
+      "transform_3d": {
+        "position": [
+          17.0,
+          -0.9,
+          5.0
+        ],
+        "rotation": [
+          -0.707107,
+          0.0,
+          0.0,
+          0.707107
+        ],
+        "scale": [
+          2.0,
+          2.0,
+          2.0
+        ]
+      },
+      "components": {
+        "sindri.model": {
+          "asset": "models/thruster.glb"
+        },
+        "sindri.tags": {
+          "tags": [
+            "shuttle-thruster"
+          ]
+        }
+      },
+      "parent": "shuttle"
+    },
+    {
+      "id": "shuttle-flame-9",
+      "name": "shuttle-flame-9",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.model": {
+          "asset": "models/flame.glb"
+        },
+        "sindri.tags": {
+          "tags": [
+            "shuttle-flame"
+          ]
+        }
+      },
+      "parent": "shuttle-thruster-9",
+      "disabled": true
+    },
+    {
+      "id": "shuttle-thruster-10",
+      "name": "shuttle-thruster-10",
+      "transform_3d": {
+        "position": [
+          7.0,
+          8.9,
+          5.0
+        ],
+        "rotation": [
+          0.707107,
+          0.0,
+          0.0,
+          0.707107
+        ],
+        "scale": [
+          2.0,
+          2.0,
+          2.0
+        ]
+      },
+      "components": {
+        "sindri.model": {
+          "asset": "models/thruster.glb"
+        },
+        "sindri.tags": {
+          "tags": [
+            "shuttle-thruster"
+          ]
+        }
+      },
+      "parent": "shuttle"
+    },
+    {
+      "id": "shuttle-flame-10",
+      "name": "shuttle-flame-10",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.model": {
+          "asset": "models/flame.glb"
+        },
+        "sindri.tags": {
+          "tags": [
+            "shuttle-flame"
+          ]
+        }
+      },
+      "parent": "shuttle-thruster-10",
+      "disabled": true
+    },
+    {
+      "id": "shuttle-thruster-11",
+      "name": "shuttle-thruster-11",
+      "transform_3d": {
+        "position": [
+          17.0,
+          8.9,
+          5.0
+        ],
+        "rotation": [
+          0.707107,
+          0.0,
+          0.0,
+          0.707107
+        ],
+        "scale": [
+          2.0,
+          2.0,
+          2.0
+        ]
+      },
+      "components": {
+        "sindri.model": {
+          "asset": "models/thruster.glb"
+        },
+        "sindri.tags": {
+          "tags": [
+            "shuttle-thruster"
+          ]
+        }
+      },
+      "parent": "shuttle"
+    },
+    {
+      "id": "shuttle-flame-11",
+      "name": "shuttle-flame-11",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.model": {
+          "asset": "models/flame.glb"
+        },
+        "sindri.tags": {
+          "tags": [
+            "shuttle-flame"
+          ]
+        }
+      },
+      "parent": "shuttle-thruster-11",
+      "disabled": true
+    },
+    {
+      "id": "shuttle-seat",
+      "name": "Seat",
+      "transform_3d": {
+        "position": [
+          2.8,
+          1.0,
+          5.0
+        ],
+        "rotation": [
+          0.0,
+          0.707107,
+          0.0,
+          0.707107
+        ],
+        "scale": [
+          2.0,
+          2.0,
+          2.0
+        ]
+      },
+      "components": {
+        "sindri.model": {
+          "asset": "models/seat.glb"
+        }
+      },
+      "parent": "shuttle"
+    },
+    {
+      "id": "shuttle-pilot",
+      "name": "Pilot",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.script": {
+          "source": "scripts/pilot.decay",
+          "script": "Pilot",
+          "properties": {}
+        }
+      }
+    },
+    {
       "id": "salvage",
       "name": "Salvage",
       "transform_3d": {

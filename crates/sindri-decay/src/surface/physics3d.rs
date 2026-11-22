@@ -24,6 +24,7 @@ pub(crate) enum Physics3dCall {
     AngularVelocity,
     SetAngularVelocity,
     ApplyImpulse,
+    ApplyImpulseAt,
     CollisionStarted,
     CollisionStopped,
     SensorEntered,
@@ -50,6 +51,7 @@ pub(crate) const CALLS: &[(&str, Physics3dCall)] = &[
     ("angular_velocity", Physics3dCall::AngularVelocity),
     ("set_angular_velocity", Physics3dCall::SetAngularVelocity),
     ("apply_impulse", Physics3dCall::ApplyImpulse),
+    ("apply_impulse_at", Physics3dCall::ApplyImpulseAt),
     ("collision_started", Physics3dCall::CollisionStarted),
     ("collision_stopped", Physics3dCall::CollisionStopped),
     ("sensor_entered", Physics3dCall::SensorEntered),
@@ -97,6 +99,7 @@ pub(crate) fn add_surface(environment: &mut Environment) {
             Physics3dCall::SetVelocity
             | Physics3dCall::SetAngularVelocity
             | Physics3dCall::ApplyImpulse => (vec![entity(), Type::Vec3], Type::Unit),
+            Physics3dCall::ApplyImpulseAt => (vec![entity(), Type::Vec3, Type::Vec3], Type::Unit),
             Physics3dCall::SetDistance => (vec![entity(), Type::Number], Type::Unit),
             Physics3dCall::SetJointEnabled => (vec![entity(), Type::Bool], Type::Unit),
             Physics3dCall::JointEnabled => (vec![entity()], Type::Bool),
