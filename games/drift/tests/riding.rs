@@ -86,3 +86,31 @@ fn walking_aboard_a_turning_ship_moves_along_its_deck() {
         "straight along it: {start:?} {now:?}"
     );
 }
+
+#[test]
+fn eye_stays_above_the_diver_in_a_rolling_ship() {
+    let mut game = aboard_a_flying_shuttle();
+    let shuttle = game.run.entity("shuttle").expect("the shuttle");
+    let body = game
+        .run
+        .world
+        .get_mut(shuttle)
+        .unwrap()
+        .components
+        .get_mut("sindri.physics3d.rigid_body")
+        .unwrap();
+    body["angular_velocity"] = json!([0.65, 0.0, 0.0]);
+    game.wait(1.5);
+
+    let transform = game.run.world.world_transform(shuttle).expect("ship transform");
+    let rotation = Quat::from_array(transform.rotation).normalize();
+    assert!(
+        (rotation * Vec3::Y).dot(Vec3::Y) < 0.8,
+        "the ship actually rolled"
+    );
+    let diver = in_shuttle(&game, game.position("diver"));
+    let eye = in_shuttle(&game, game.position("eye"));
+    let offset = eye - diver;
+    assert!(offset.y > 1.0, "eye stays above the diver: {offset:?}");
+    assert!(offset.x.abs() < 0.2 && offset.z.abs() < 0.2, "eye follows ship up: {offset:?}");
+}
