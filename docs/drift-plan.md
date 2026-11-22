@@ -7,6 +7,76 @@ document is the design and the order of work; it moves with the game, and a
 stage is checked off here when its acceptance criteria are met and its tests
 pass.
 
+## New direction: the compartment and the ruins
+
+The player wakes with almost no memory in a small, cell-like compartment. It
+floats apart from a much larger ruined structure, connected only by cables;
+what happened there and the compartment's original purpose are unknown. The
+compartment is the player's first refuge and, through salvage and construction,
+becomes their own small ship. The separate flyable shuttle in the current build
+is a prototype to retire from the playable scene once its proof tests and
+capabilities have a new home.
+
+The sections below describe the current build and earlier stages. They are
+historical and implementation evidence where they conflict with this direction,
+not a claim that the new opening already exists.
+
+### Intended player journey
+
+1. **Wake and survive.** Learn movement and the airlock in the compartment;
+   communicate that air and power are fragile. Its original purpose is unclear.
+2. **Reach the ruin.** Cables visibly lead from the refuge to the structure.
+   Make a safe, readable route before making cable climbing or power transfer
+   promises; these are future mechanics, not current behavior.
+3. **Make salvage matter.** Recover a recognizable component and use it for a
+   visible first repair at home. Show what was recovered and what it can repair.
+4. **Build a ship.** Unlock tools, structural repairs, a seat and thrusters in
+   stages; fit them to the starting compartment. Detaching and flying are a
+   later milestone, after the first rescue and repair loop is enjoyable.
+5. **Uncover the past.** Environmental details and fragments gradually raise
+   questions about the structure and the player. No answer is committed yet.
+
+### First implementation slices
+
+- **Block art exploration:** prototype a small family of detailed, half-meter
+  modular blocks and inspect them together as walls, corners, and floors before
+  building a level. Compare texture-only blocks with actual modeled details.
+- **Opening and connection:** establish the compartment as a separate refuge,
+  place a navigable ruined structure and visible connecting cables, and verify
+  the route with collision, lighting, native/browser captures and a playtest.
+- **Useful salvage:** choose and communicate a specific part and repair; test
+  pickup, carrying, installation, feedback, and repeated interaction. Until
+  then the existing canister counter has no crafting use.
+- **Emergency return:** prototype a deliberate oxygen-powered emergency push,
+  readable before use and constrained by the remaining oxygen. Verify that
+  direction, cost, zero oxygen, and recovery feel fair on desktop and touch.
+- **Retire the shuttle:** remove it from the playable scene while keeping the
+  general engine features. Move or replace the existing flying/riding tests so
+  they continue to prove those capabilities without an unexplained second ship.
+- **Home becomes flyable:** implement construction and ship controls only after
+  the preceding loop works. A seated view must inherit the ship's rotation;
+  disembarking must preserve sensible velocity relative to it and provide a
+  way back. Test translating and rotating ships and playtest the camera.
+
+Art target: a worn, readable industrial ruin built from half-meter blocks, with
+a broken large-scale silhouette, exposed ribs, open rooms and restrained lights.
+Blocks should have convincing depth and engineered detail: recessed panels,
+seams, fasteners, vents and occasional pipes or lights. The image reference is
+an inspiration for material and depth, not a requirement to put all those
+features on every block. Keep ordinary hull blocks relatively quiet and reserve
+strong features for accent blocks so repeated walls do not become noisy.
+Adjacent blocks must meet cleanly; stripes, trim and edge details should line up
+across a row, and corner and edge variants should work as a set. Check repeated
+patterns and first-person scale on a small test wall and room.
+
+The current block tileset provides face textures on voxel cubes, not individually
+modeled recessed or protruding geometry. Evaluate texture and material support
+against the desired look, and prove any general engine changes needed for modeled
+block shapes before relying on them. Functional equipment can remain separate
+grid-aligned models. Prefer reproducible assets with documented rights; validate
+walkable surfaces and collision independently of their appearance. Detailed
+assets and an explorable level are still needed.
+
 ## What kind of project this is
 
 DRIFT is **a game rather than a showcase**, on the same terms as Lamplighter
