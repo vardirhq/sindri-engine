@@ -59,6 +59,27 @@ impl Host for WorldHost<'_> {
             return Ok(Some(value));
         }
 
+        // `Stick.anchor.x`: a component of a frame fact that is a vector, read
+        // in place as the checker allows, rather than only through a local.
+        if subject.is_none()
+            && let [prefix @ .., axis @ ("x" | "y" | "z")] = parts.as_slice()
+            && let Some(value) = self.frame_value(prefix)
+        {
+            let index = match *axis {
+                "x" => 0,
+                "y" => 1,
+                _ => 2,
+            };
+            let component = match value {
+                Value::Vec2(vector) => vector.get(index).copied(),
+                Value::Vec3(vector) => vector.get(index).copied(),
+                _ => None,
+            };
+            if let Some(component) = component {
+                return Ok(Some(Value::Number(component)));
+            }
+        }
+
         let Some(under) = Self::addressed(subject, path) else {
             return Ok(None);
         };

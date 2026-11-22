@@ -22,7 +22,7 @@ script Salvage {
     fn update(dt: number) {
         let eye = World.find("Eye").transform.world_position;
         let near = World.within_radius("salvage", eye, this.reach);
-        if near.len > 0 && Input.Keyboard.just_pressed("G") {
+        if near.len > 0 && (Input.Keyboard.just_pressed("G") || Controls.use_pressed) {
             World.despawn(near[0]);
             this.carried += 1.0;
             print("Drift: took salvage");

@@ -1,0 +1,119 @@
+// The phone's controls, held sideways: the left thumb steers with the engine's
+// stick, the right thumb drags the look pad over the right half, and buttons
+// on the edges stand in for the keys. Always on screen.
+//
+// This script only reads them into `Controls`; the diver, the pilot, the
+// airlock, the tether and the salvage read `Controls` beside their keys, so a
+// key and a button are the same request.
+
+// How far a look-pad drag turns, as mouse pixels per overlay unit: a thumb
+// drawn half the screen's height turns the view a little over seventy degrees.
+const LOOK_PIXELS: number = 500.0;
+// How far the knob travels from the middle of the ring, in overlay units.
+const KNOB_TRAVEL: number = 0.16;
+// Where the ring rests, in from the left edge, while no thumb is on it.
+const REST_IN: number = 0.62;
+const REST_Y: number = -0.38;
+
+state Controls {
+    // The stick: right and forward positive, -1 to 1.
+    var move_x: number = 0.0;
+    var move_y: number = 0.0;
+    // This frame's look, as `Pointer.delta` reads: right and down positive.
+    var look_x: number = 0.0;
+    var look_y: number = 0.0;
+    // Held, as a key is.
+    var up: bool = false;
+    var down: bool = false;
+    var grab: bool = false;
+    var brake: bool = false;
+    var reel: bool = false;
+    // Rolling right positive, -1 to 1.
+    var roll: number = 0.0;
+    // Pressed this frame, as a key's just_pressed is.
+    var up_pressed: bool = false;
+    var grab_pressed: bool = false;
+    var use_pressed: bool = false;
+    var clip_pressed: bool = false;
+}
+
+script TouchControls {
+    var look: Entity = null;
+    var ring: Entity = null;
+    var knob: Entity = null;
+    var up: Entity = null;
+    var down: Entity = null;
+    var grab: Entity = null;
+    var brake: Entity = null;
+    var reel: Entity = null;
+    var use: Entity = null;
+    var clip: Entity = null;
+    var roll_left: Entity = null;
+    var roll_right: Entity = null;
+
+    fn start() {
+        this.look = World.find("touch-look");
+        this.ring = World.find("touch-stick-ring");
+        this.knob = World.find("touch-stick-knob");
+        this.up = World.find("touch-up");
+        this.down = World.find("touch-down");
+        this.grab = World.find("touch-grab");
+        this.brake = World.find("touch-brake");
+        this.reel = World.find("touch-reel");
+        this.use = World.find("touch-use");
+        this.clip = World.find("touch-clip");
+        this.roll_left = World.find("touch-roll-left");
+        this.roll_right = World.find("touch-roll-right");
+    }
+
+    fn update(dt: number) {
+        // The look pad fills the right half, whatever shape the screen is.
+        let half = Viewport.aspect * 0.5;
+        this.look.transform.position = Vec3(half, 0.0, 0.0);
+        this.look.transform.scale = Vec3(half * 2.0, 2.0, 1.0);
+
+        // The stick steers from a thumb on the left half; the right half is
+        // the look pad's, so a thumb landing there never reaches the stick.
+        let steering = Stick.held && Stick.anchor.x < 0.0;
+        if steering {
+            Controls.move_x = Stick.x;
+            Controls.move_y = -Stick.y;
+        } else {
+            Controls.move_x = 0.0;
+            Controls.move_y = 0.0;
+        }
+        let dragged = Ui.drag(this.look);
+        Controls.look_x = dragged.x * LOOK_PIXELS;
+        Controls.look_y = -dragged.y * LOOK_PIXELS;
+
+        let up = Ui.is_held(this.up);
+        let grab = Ui.is_held(this.grab);
+        Controls.up_pressed = up && !Controls.up;
+        Controls.grab_pressed = grab && !Controls.grab;
+        Controls.up = up;
+        Controls.grab = grab;
+        Controls.down = Ui.is_held(this.down);
+        Controls.brake = Ui.is_held(this.brake);
+        Controls.reel = Ui.is_held(this.reel);
+        Controls.use_pressed = Ui.is_pressed(this.use);
+        Controls.clip_pressed = Ui.is_pressed(this.clip);
+        var roll = 0.0;
+        if Ui.is_held(this.roll_right) { roll += 1.0; }
+        if Ui.is_held(this.roll_left) { roll -= 1.0; }
+        Controls.roll = roll;
+
+        draw_stick(steering);
+    }
+
+    // The ring rests in the corner and moves to where the left thumb landed.
+    fn draw_stick(steering: bool) {
+        var at = Vec2(REST_IN - Viewport.aspect, REST_Y);
+        var push = Vec2(0.0, 0.0);
+        if steering {
+            at = Stick.anchor;
+            push = Vec2(Stick.x, -Stick.y) * KNOB_TRAVEL;
+        }
+        this.ring.transform.position = Vec3(at.x, at.y, 0.0);
+        this.knob.transform.position = Vec3(at.x + push.x, at.y + push.y, 0.0);
+    }
+}

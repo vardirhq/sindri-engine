@@ -10,7 +10,12 @@ pub(super) const TYPES: &[TypeEntry] = &[
             call(
                 "is_held",
                 &["button"],
-                "Whether a button is being held down right now.",
+                "Whether a button is being held down right now, by any finger: a thumb on a button counts while another thumb steers.",
+            ),
+            call(
+                "drag",
+                &["element"],
+                "How far the finger that landed on an element moved this frame, as a Vec2 in overlay units, even once it slides off: a look pad is an element a thumb drags across. Zero when nothing is on it.",
             ),
             call(
                 "is_hovered",

@@ -23,6 +23,7 @@ from pathlib import Path
 from PIL import Image, ImageDraw
 
 import ship as ships
+import touch
 
 HERE = Path(__file__).resolve().parent
 ASSETS = HERE.parent / "assets"
@@ -678,17 +679,18 @@ def scene():
     # The HUD: a reticle, the propellant gauge and a prompt for what can be grabbed.
     entities += [
         text("hud-reticle", (0, 0, 0), "+", 0.05, (0.85, 0.92, 1.0, 0.6)),
-        text("hud-propellant", (-1.25, -0.88, 0), "PROPELLANT {}%", 0.04),
-        text("hud-velocity", (1.25, -0.88, 0), "{} M/S", 0.04),
+        text("hud-propellant", (-0.8, -0.88, 0), "PROPELLANT {}%", 0.04),
+        text("hud-velocity", (0.8, -0.88, 0), "{} M/S", 0.04),
         text("hud-prompt", (0, -0.2, 0), "", 0.035, (1.0, 0.85, 0.3, 1.0)),
         text("hud-tether", (0, -0.88, 0), "TETHER {} / {} M", 0.04),
         text("hud-tether-state", (0, -0.78, 0), "", 0.035, (1.0, 0.55, 0.25, 1.0)),
-        text("hud-oxygen", (-1.25, -0.68, 0), "O2 {}%", 0.04),
-        text("hud-power", (-1.25, -0.78, 0), "SUIT {}%", 0.04),
+        text("hud-oxygen", (-0.8, -0.68, 0), "O2 {}%", 0.04),
+        text("hud-power", (-0.8, -0.78, 0), "SUIT {}%", 0.04),
         text("hud-alert", (0, 0.3, 0), "", 0.05, (1.0, 0.3, 0.2, 1.0)),
-        text("hud-airlock", (1.25, -0.78, 0), "", 0.035, (0.6, 1.0, 0.7, 1.0)),
-        text("hud-salvage", (1.25, -0.68, 0), "", 0.04, (1.0, 0.75, 0.4, 1.0)),
+        text("hud-airlock", (0.8, -0.78, 0), "", 0.035, (0.6, 1.0, 0.7, 1.0)),
+        text("hud-salvage", (0.8, -0.68, 0), "", 0.04, (1.0, 0.75, 0.4, 1.0)),
     ]
+    entities += touch.controls()
     return {"format_version": 10, "metadata": {"name": "The Tern"}, "entities": entities}
 
 

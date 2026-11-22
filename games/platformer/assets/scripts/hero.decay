@@ -37,8 +37,6 @@ script Hero {
     var shown: number = 0.0;
     var touch_jump_button: Entity = null;
     var sprite_entity: Entity = null;
-    var touch_stick_checked: bool = false;
-    var touch_stick_allowed: bool = false;
 
     fn start() {
         Game.coins = 0.0;
@@ -48,7 +46,6 @@ script Hero {
         Game.checkpoint_x = this.spawn_x;
         Game.checkpoint_y = this.spawn_y;
         Game.checkpoint_index = 0.0;
-        Game.touch = false;
         this.touch_jump_button = World.find("touch-jump");
         this.sprite_entity = World.find("wick-sprite");
     }
@@ -59,16 +56,6 @@ script Hero {
         if Animation.fired(this.sprite_entity, "step") {
             Audio.play("audio/step.wav", 0.18);
             Game.steps += 1.0;
-        }
-        if Touch.count > 0.0 { Game.touch = true; }
-        if !Stick.held {
-            this.touch_stick_checked = false;
-            this.touch_stick_allowed = false;
-        } else if !this.touch_stick_checked {
-            // Pointer positions are in screen units; Stick.anchor_x is raw
-            // pixels. Remember which side the stick began on before jump lands.
-            this.touch_stick_checked = true;
-            this.touch_stick_allowed = Pointer.overlay_x < 0.0;
         }
         touch();
         probe_ground();
@@ -83,22 +70,15 @@ script Hero {
             return;
         }
 
-        // Keyboard and gamepad input comes from the scene's actions. Once
-        // touch is detected, the left stick and right jump button take over.
+        // Keyboard and gamepad input comes from the scene's actions, and a
+        // phone's from the stick and the jump button, all at once. The stick
+        // steers from a thumb on the left half; a thumb on the jump button is
+        // the button's, whichever thumb went down first.
         var run: number = Action.axis("run");
-        var touch_jump: bool = false;
-        if Game.touch {
-            run = 0.0;
-            if this.touch_stick_allowed { run = Stick.x; }
-            touch_jump = Ui.is_held(this.touch_jump_button);
-            // Screen UI follows one primary pointer, so read the second finger
-            // directly while the first finger owns the movement stick.
-            if Touch.count > 1.0 && Touch.x(1.0) > Stick.anchor_x {
-                touch_jump = true;
-            }
-        } else if Stick.held && abs(Stick.x) > abs(run) {
+        if Stick.held && Stick.anchor.x < 0.0 && abs(Stick.x) > abs(run) {
             run = Stick.x;
         }
+        let touch_jump = Ui.is_held(this.touch_jump_button);
         run = max(-1.0, min(1.0, run));
         let holding_jump = Action.held("jump") || touch_jump;
         let pressed_jump = Action.pressed("jump") || (touch_jump && !this.jump_held);
@@ -129,7 +109,7 @@ script Hero {
             this.since_ground = 1.0;
         }
         // Letting go early cuts the rise short, so a tap is a hop on every
-        // input device, including lifting the second touch finger.
+        // input device, including lifting the thumb off the jump button.
         if this.jump_held && !holding_jump && rise > 0.0 {
             rise = rise * 0.45;
         }

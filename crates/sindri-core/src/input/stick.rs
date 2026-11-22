@@ -88,6 +88,17 @@ impl VirtualStick {
     /// fire should not snatch the steering away mid-turn, which is what makes
     /// a two-thumb layout possible at all.
     pub fn update(&mut self, presses: &Presses) {
+        self.update_where(presses, |_| true);
+    }
+
+    /// Reads this frame's presses, taking up a new one only if `free` says it
+    /// is not already someone else's.
+    ///
+    /// A thumb that lands on a button is pressing the button: a stick that
+    /// took it as well would steer every time the player jumped, and a stick
+    /// already held by the jump thumb could not be taken up by the thumb meant
+    /// for it. Whatever is drawing the buttons says which presses they took.
+    pub fn update_where(&mut self, presses: &Presses, free: impl Fn(&Press) -> bool) {
         let driving = self
             .owner
             .and_then(|id| presses.get(id))
@@ -97,7 +108,9 @@ impl VirtualStick {
                 // `began` rather than any live press, or releasing the stick
                 // while another finger happened to be down would hand the
                 // stick straight to that finger.
-                presses.began().find(|press| press.phase().is_live())
+                presses
+                    .began()
+                    .find(|press| press.phase().is_live() && free(press))
             });
 
         if let Some(press) = driving {

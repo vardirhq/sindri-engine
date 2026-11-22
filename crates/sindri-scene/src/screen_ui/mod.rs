@@ -11,6 +11,7 @@ mod editing;
 mod flex;
 mod grid;
 mod hierarchy;
+mod holds;
 mod layout;
 mod layout_pass;
 mod measure;
@@ -26,7 +27,7 @@ use crate::{UiAnchor, UiImageComponent, UiShapeComponent, UiTextComponent};
 use serde::Deserialize;
 use sindri_core::{
     ComponentRegistryError, ComponentSchemaRegistry, EntityId, PressId, PressPhase, Presses,
-    SceneComponent, World,
+    SceneComponent, VirtualStick, World,
 };
 
 pub use box_model::{UiAlignSelf, UiBoxComponent, UiSides};
@@ -63,7 +64,13 @@ pub struct ScreenUi {
     viewport_half: [f32; 2],
     rects: BTreeMap<EntityId, Element>,
     hovered: Option<EntityId>,
-    pressing: Option<EntityId>,
+    /// Each press holding a button: what it landed on, and whether it is over
+    /// it now.
+    holds: BTreeMap<PressId, holds::Hold>,
+    /// The stick a thumb makes anywhere on screen it lands off the buttons.
+    thumb_stick: VirtualStick,
+    /// What the last presses were read against, to place a stick's anchor.
+    extent: Option<ScreenExtent>,
     clicked: Option<EntityId>,
     pointer_overlay: Option<[f32; 2]>,
     slider_drag: Option<(EntityId, PressId)>,
@@ -175,10 +182,26 @@ impl ScreenUi {
     /// stylesheet's `:active` means.
     #[must_use]
     pub fn active(&self) -> Option<EntityId> {
-        self.slider_drag.map(|(dragged, _)| dragged).or_else(|| {
-            self.pressing
-                .filter(|pressing| self.hovered == Some(*pressing))
-        })
+        self.slider_drag
+            .map(|(dragged, _)| dragged)
+            .or_else(|| self.held_element())
+    }
+
+    /// The stick a thumb makes, from presses that landed off every button.
+    ///
+    /// The one to read where there is a screen: the input's own stick takes
+    /// whatever finger lands first, the jump thumb included.
+    #[must_use]
+    pub const fn stick(&self) -> &VirtualStick {
+        &self.thumb_stick
+    }
+
+    /// Where the screen's stick was anchored, in overlay units, like every
+    /// other position a script places UI with.
+    #[must_use]
+    pub fn stick_anchor(&self, presses: &Presses) -> Option<[f32; 2]> {
+        let anchor = self.thumb_stick.anchor(presses)?;
+        self.extent?.pointer(anchor)
     }
 
     #[must_use]
@@ -220,7 +243,7 @@ impl ScreenUi {
     pub fn is_held(&self, entity: EntityId) -> bool {
         self.slider_drag
             .is_some_and(|(dragged, _)| dragged == entity)
-            || (self.pressing == Some(entity) && self.hovered == Some(entity))
+            || self.is_held_by_press(entity)
     }
 
     #[must_use]
@@ -359,6 +382,15 @@ impl ScreenUi {
     }
 
     fn read_presses(&mut self, world: &mut World, extent: ScreenExtent, presses: &Presses) {
+        self.extent = Some(extent);
+        self.read_screen_presses(world, extent, presses);
+        // After the buttons, so a thumb a button just took is not the stick's.
+        let mut stick = std::mem::take(&mut self.thumb_stick);
+        stick.update_where(presses, |press| !self.holds_press(press.id()));
+        self.thumb_stick = stick;
+    }
+
+    fn read_screen_presses(&mut self, world: &mut World, extent: ScreenExtent, presses: &Presses) {
         // The pointer pass is the first thing in a step, so the step's
         // changes start here: a drag's change must survive to the scripts.
         self.changed.clear();
@@ -373,8 +405,9 @@ impl ScreenUi {
             .pointer_overlay
             .and_then(|point| self.topmost_at(point));
 
-        if self.read_scroll_drag(world, extent, presses) {
-            self.pressing = None;
+        let scrolling = self.read_scroll_drag(world, extent, presses);
+        self.read_holds(world, extent, presses);
+        if scrolling {
             return;
         }
 
@@ -414,41 +447,15 @@ impl ScreenUi {
             let Some(entity) = self.topmost_at(point) else {
                 continue;
             };
-            let is_slider = world
-                .get(entity)
-                .and_then(|data| data.components.get(UiSliderComponent::TYPE_NAME))
-                .and_then(|payload| {
-                    serde_json::from_value::<UiSliderComponent>(payload.clone()).ok()
-                })
-                .is_some_and(|slider| !slider.disabled);
-            if !is_slider {
+            if !Self::is_slider(world, entity) {
                 continue;
             }
             self.slider_drag = Some((entity, press.id()));
-            self.pressing = None;
             self.update_slider(world, entity, point);
             if press.phase() != PressPhase::Live {
                 self.slider_drag = None;
             }
             return;
-        }
-
-        let Some(press) = presses.primary() else {
-            self.pressing = None;
-            return;
-        };
-        if press.began_now() {
-            self.pressing = self.hovered;
-        }
-        match press.phase() {
-            PressPhase::Live => {}
-            PressPhase::Ended => {
-                if self.pressing.is_some() && self.pressing == self.hovered {
-                    self.clicked = self.pressing;
-                }
-                self.pressing = None;
-            }
-            PressPhase::Cancelled => self.pressing = None,
         }
     }
 

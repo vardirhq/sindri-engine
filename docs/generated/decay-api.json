@@ -151,7 +151,7 @@
       "type": "Sequence"
     },
     {
-      "description": "A virtual joystick for touch screens: wherever a thumb lands becomes the centre, and dragging from there steers.",
+      "description": "A virtual joystick for touch screens: wherever a thumb lands becomes the centre, and dragging from there steers. A thumb that lands on an on-screen button presses the button instead, so the stick waits for one that lands off them.",
       "kind": "value",
       "name": "Stick",
       "read_only": false,
@@ -4743,8 +4743,15 @@
       "name": "Sprite"
     },
     {
-      "description": "A virtual joystick for touch screens: wherever a thumb lands becomes the centre, and dragging from there steers.",
+      "description": "A virtual joystick for touch screens: wherever a thumb lands becomes the centre, and dragging from there steers. A thumb that lands on an on-screen button presses the button instead, so the stick waits for one that lands off them.",
       "members": [
+        {
+          "description": "Where the thumb first landed, as a Vec2 in overlay units like `Ui.position`: 0 is the middle, one unit is half the screen's height, up positive. The one to draw the joystick's ring at, and to ask which side of the screen it is on.",
+          "kind": "value",
+          "name": "anchor",
+          "read_only": false,
+          "type": "Vec2"
+        },
         {
           "description": "Where the thumb first landed, sideways. Use it to draw the joystick.",
           "kind": "value",
@@ -5305,6 +5312,18 @@
           "returns": "bool"
         },
         {
+          "description": "How far the finger that landed on an element moved this frame, as a Vec2 in overlay units, even once it slides off: a look pad is an element a thumb drags across. Zero when nothing is on it.",
+          "kind": "function",
+          "name": "drag",
+          "parameter_names": [
+            "element"
+          ],
+          "parameters": [
+            "Entity"
+          ],
+          "returns": "Vec2"
+        },
+        {
           "description": "The committed text in a single-line input.",
           "kind": "function",
           "name": "input_text",
@@ -5341,7 +5360,7 @@
           "returns": "bool"
         },
         {
-          "description": "Whether a button is being held down right now.",
+          "description": "Whether a button is being held down right now, by any finger: a thumb on a button counts while another thumb steers.",
           "kind": "function",
           "name": "is_held",
           "parameter_names": [

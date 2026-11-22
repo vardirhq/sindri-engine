@@ -1005,6 +1005,15 @@ disqualifying for anything else.
 | `Ui.is_focused(entity)` | `bool` |
 | `Ui.position(entity)` | `Vec2` |
 | `Ui.size(entity)` | `Vec2` |
+| `Ui.drag(entity)` | `Vec2` |
+
+**Fingers.** Every finger holds what it lands on: `is_held` and `is_pressed`
+answer to a second thumb on a button while the first steers, not only to the
+first finger down. A finger holds what it *landed* on, so sliding onto a button
+does not press it, and sliding off lets go without a click. `Ui.drag` is how far
+the finger that landed on an element moved this frame, in overlay units, and
+keeps answering once it slides past the element's edge: a look pad is an
+element a thumb drags across, often invisible, covering half the screen.
 
 **Layout.** `Ui.position` and `Ui.size` read where an element was laid out and
 how big, in overlay units: 0 is the middle of the screen, one unit is half its
@@ -2463,6 +2472,7 @@ one however convincing it looks.
 | `Stick.anchor_x` | `number` |
 | `Stick.anchor_y` | `number` |
 | `Stick.direction` | `Vec2` |
+| `Stick.anchor` | `Vec2` |
 
 `Stick` is a joystick made out of whichever finger is steering. It anchors
 where that finger landed, and `x`/`y` are how far it has been pulled from
@@ -2477,11 +2487,22 @@ second, and steering towards `Pointer` instead gives the ship a lunge every time
 a thumb lands, no way to ask for gently-left, and a thumb parked over the part
 of the screen the player is trying to watch.
 
+A thumb that lands on an on-screen button presses the button and is never the
+stick's, so the stick waits for a thumb that lands off them. On a phone held
+sideways, the steering thumb is down first and the jump thumb lands on its
+button, and each gets its own control; and the jump thumb landing first does
+not make the stick read it. Every button answers to any finger, not only the
+first one down: `Ui.is_held` and `Ui.is_pressed` are true for a thumb on a
+button while another thumb steers.
+
 `held` is not the same as a non-zero reading: a thumb resting inside the dead
 zone reads centred but is still holding the stick, which is what a game drawing
 the control needs to know. `anchor_x`/`anchor_y` are where the thumb landed, so
 a game that wants to draw the ring draws it from the same numbers the input came
-from rather than from a second guess at where the stick is.
+from rather than from a second guess at where the stick is. `anchor_x` and `anchor_y` are
+pixels, as `Touch` is; `anchor` is the same point in overlay units, as
+`Ui.position` is, which is the one to draw a ring at and to ask which half of the
+screen the thumb landed in.
 
 **This page used to say there was no drag abstraction, deliberately** — that a
 game's deadzone and radius are tuning, and that baking one game's numbers into

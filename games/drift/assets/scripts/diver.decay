@@ -205,7 +205,7 @@ script Diver {
     }
 
     fn look(dt: number) {
-        let delta = Pointer.delta;
+        let delta = Pointer.delta + Vec2(Controls.look_x, Controls.look_y);
         var turn = this.eye.transform.rotation;
         if delta.x != 0.0 {
             turn = qmul(turn, qturn(0.0, 1.0, 0.0, -delta.x * this.look_speed));
@@ -213,7 +213,7 @@ script Diver {
         if delta.y != 0.0 {
             turn = qmul(turn, qturn(1.0, 0.0, 0.0, -delta.y * this.look_speed));
         }
-        var roll = Input.Keyboard.axis("E", "Q");
+        var roll = Input.Keyboard.axis("E", "Q") - Controls.roll;
         // At an airlock panel, E works the airlock rather than rolling.
         if at_panel() && Input.Keyboard.is_down("E") {
             roll = 0.0;
@@ -297,7 +297,7 @@ script Diver {
     // view, which rights itself over a moment after coming in from outside,
     // and turns with the hull as it turns.
     fn look_upright(dt: number) {
-        let delta = Pointer.delta;
+        let delta = Pointer.delta + Vec2(Controls.look_x, Controls.look_y);
         this.yaw -= delta.x * this.look_speed;
         this.pitch = clamp(this.pitch - delta.y * this.look_speed, -1.45, 1.45);
         let local = qmul(qturn(0.0, 1.0, 0.0, this.yaw), qturn(1.0, 0.0, 0.0, this.pitch));
@@ -315,10 +315,13 @@ script Diver {
         let grounded = ground != null;
         let forward = qrot(turn, Vec3(-sin(this.yaw), 0.0, -cos(this.yaw)));
         let right = qrot(turn, Vec3(cos(this.yaw), 0.0, -sin(this.yaw)));
-        var wanted = forward * Input.Keyboard.axis("S", "W") + right * Input.Keyboard.axis("A", "D");
-        if wanted.length > 0.001 {
-            wanted = wanted.normalized * this.walk_speed;
+        var wanted = forward * (Input.Keyboard.axis("S", "W") + Controls.move_y)
+            + right * (Input.Keyboard.axis("A", "D") + Controls.move_x);
+        // A key is all the way; a thumb on the stick can ask for a stroll.
+        if wanted.length > 1.0 {
+            wanted = wanted.normalized;
         }
+        wanted = wanted * this.walk_speed;
         var grip = 1.5;
         if grounded {
             grip = this.footing;
@@ -331,7 +334,7 @@ script Diver {
         let across = relative - up * lift;
         let walked = across + (wanted - across) * take;
         lift -= this.gravity * dt;
-        if grounded && Input.Keyboard.just_pressed("Space") {
+        if grounded && (Input.Keyboard.just_pressed("Space") || Controls.up_pressed) {
             lift = this.jump_speed;
         }
         Physics3d.set_velocity(this.entity, this.frame_velocity + walked + up * lift);
@@ -340,7 +343,8 @@ script Diver {
     // F at a ship's seat sits at its controls; F again stands up.
     fn seat(dt: number) {
         let chair = World.find("Seat");
-        if chair == null || !Input.Keyboard.just_pressed("F") {
+        let asked = Input.Keyboard.just_pressed("F") || Controls.grab_pressed || Controls.use_pressed;
+        if chair == null || !asked {
             return;
         }
         if this.seated {
@@ -412,7 +416,7 @@ script Diver {
     }
 
     fn wants_hold() -> bool {
-        return Input.Keyboard.is_down("F") || Pointer.is_down("Right");
+        return Input.Keyboard.is_down("F") || Pointer.is_down("Right") || Controls.grab;
     }
 
     // The closest handhold a hand can reach, other than the one just pushed off.
@@ -438,7 +442,8 @@ script Diver {
     }
 
     fn holding(reached: Entity?) {
-        let push = Input.Keyboard.just_pressed("Space") || Pointer.just_pressed("Left") && Pointer.locked;
+        let push = Input.Keyboard.just_pressed("Space") || Controls.up_pressed
+            || Pointer.just_pressed("Left") && Pointer.locked;
         if push {
             this.left_behind = this.hold;
             this.hold = null;
@@ -466,11 +471,12 @@ script Diver {
         let forward = this.eye.transform.forward;
         let right = this.eye.transform.right;
         let up = this.eye.transform.up;
-        push = push + forward * Input.Keyboard.axis("S", "W");
-        push = push + right * Input.Keyboard.axis("A", "D");
-        push = push + up * Input.Keyboard.axis("C", "Space");
+        push = push + forward * (Input.Keyboard.axis("S", "W") + Controls.move_y);
+        push = push + right * (Input.Keyboard.axis("A", "D") + Controls.move_x);
+        push = push + up * (Input.Keyboard.axis("C", "Space") + rise());
+        let braking = Input.Keyboard.is_down("X") || Controls.brake;
         var velocity = Physics3d.velocity(this.entity);
-        if Input.Keyboard.is_down("X") && velocity.length > 0.01 {
+        if braking && velocity.length > 0.01 {
             push = push - velocity.normalized;
         }
         if push.length < 0.001 {
@@ -485,7 +491,7 @@ script Diver {
         }
         let change = push.normalized * this.thrust * dt;
         // A brake never overshoots into thrusting the other way.
-        if Input.Keyboard.is_down("X") && change.length > velocity.length && push.length < 1.01 {
+        if braking && change.length > velocity.length && push.length < 1.01 {
             velocity = Vec3(0.0, 0.0, 0.0);
         } else {
             velocity = velocity + change;
@@ -496,6 +502,14 @@ script Diver {
             this.warned_low = true;
             print("Drift: propellant low");
         }
+    }
+
+    // The touch buttons for up and down, as one axis the way C and Space are.
+    fn rise() -> number {
+        var amount = 0.0;
+        if Controls.up { amount += 1.0; }
+        if Controls.down { amount -= 1.0; }
+        return amount;
     }
 
     fn hud(reached: Entity?) {

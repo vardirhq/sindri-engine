@@ -263,47 +263,57 @@ fn settings_go_back_to_the_pause_screen_they_were_opened_from() {
 
 #[test]
 fn the_touch_stick_and_jump_work_together() {
-    let mut run = Run::open().expect("the first level opens");
-    step(&mut run, 90);
-    run.set_board("touch", 1.0);
-    step(&mut run, 2);
+    // Either thumb can go down first: the jump thumb is the button's and the
+    // steering thumb the stick's, and the controls are there before any touch.
+    for jump_first in [false, true] {
+        let mut run = Run::open().expect("the first level opens");
+        step(&mut run, 90);
 
-    let hero = find(&run, "hero").expect("the hero");
-    let start = run.position(hero);
-    let stick = find(&run, "touch-stick-ring").expect("the left virtual stick");
-    let [stick_x, stick_y] = run
-        .on_screen(stick)
-        .expect("the stick is drawn in touch mode");
-    let jump = find(&run, "touch-jump").expect("the right jump button");
-    let [jump_x, jump_y] = run.on_screen(jump).expect("jump is drawn in touch mode");
+        let hero = find(&run, "hero").expect("the hero");
+        let start = run.position(hero);
+        let stick = find(&run, "touch-stick-ring").expect("the left virtual stick");
+        let [stick_x, stick_y] = run.on_screen(stick).expect("the stick is always drawn");
+        let jump = find(&run, "touch-jump").expect("the right jump button");
+        let [jump_x, jump_y] = run.on_screen(jump).expect("jump is always drawn");
 
-    // The first finger owns the virtual stick; the second holds jump without
-    // taking steering away from it.
-    run.input.apply(InputEvent::TouchStarted {
-        id: 1,
-        x: stick_x,
-        y: stick_y,
-    });
-    step(&mut run, 1);
-    run.input.apply(InputEvent::TouchMoved {
-        id: 1,
-        x: stick_x + 240.0,
-        y: stick_y,
-    });
-    run.input.apply(InputEvent::TouchStarted {
-        id: 2,
-        x: jump_x,
-        y: jump_y,
-    });
-    step(&mut run, 30);
+        let (steer, thumb) = if jump_first { (2, 1) } else { (1, 2) };
+        let press_jump = |run: &mut Run| {
+            run.input.apply(InputEvent::TouchStarted {
+                id: thumb,
+                x: jump_x,
+                y: jump_y,
+            });
+        };
+        if jump_first {
+            press_jump(&mut run);
+            step(&mut run, 1);
+        }
+        run.input.apply(InputEvent::TouchStarted {
+            id: steer,
+            x: stick_x,
+            y: stick_y,
+        });
+        step(&mut run, 1);
+        run.input.apply(InputEvent::TouchMoved {
+            id: steer,
+            x: stick_x + 240.0,
+            y: stick_y,
+        });
+        if !jump_first {
+            press_jump(&mut run);
+        }
+        step(&mut run, 30);
 
-    let end = run.position(hero);
-    assert!(
-        end[0] > start[0] + 1.0,
-        "the left thumb moved Wick while the other thumb held jump: {start:?} to {end:?}"
-    );
-    assert!(
-        end[1] > start[1] + 1.0,
-        "the right thumb made Wick jump while steering: {start:?} to {end:?}"
-    );
+        let end = run.position(hero);
+        assert!(
+            end[0] > start[0] + 1.0,
+            "the left thumb moved Wick while the other thumb held jump \
+             (jump first: {jump_first}): {start:?} to {end:?}"
+        );
+        assert!(
+            end[1] > start[1] + 1.0,
+            "the right thumb made Wick jump while steering \
+             (jump first: {jump_first}): {start:?} to {end:?}"
+        );
+    }
 }

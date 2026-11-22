@@ -12,13 +12,25 @@ use crate::surface::{
 
 impl WorldHost<'_> {
     pub(super) fn stick_value(&self, value: StickValue) -> Value {
-        let stick = self.context.input.stick();
+        // The screen's stick where there is a screen, so a thumb on a button
+        // is not also steering.
+        let stick = self
+            .screen_ui
+            .map_or_else(|| self.context.input.stick(), sindri_scene::ScreenUi::stick);
         let pushed = stick.value();
         match value {
             StickValue::X => Value::Number(f64::from(pushed[0])),
             StickValue::Y => Value::Number(f64::from(pushed[1])),
             StickValue::Held => Value::Bool(stick.is_engaged()),
             StickValue::Direction => Value::Vec2([f64::from(pushed[0]), f64::from(pushed[1])]),
+            StickValue::Anchor => {
+                let presses = self.context.input.presses();
+                let [x, y] = self
+                    .screen_ui
+                    .and_then(|screen| screen.stick_anchor(presses))
+                    .unwrap_or([0.0, 0.0]);
+                Value::Vec2([f64::from(x), f64::from(y)])
+            }
             StickValue::AnchorX => Value::Number(f64::from(
                 stick
                     .anchor(self.context.input.presses())

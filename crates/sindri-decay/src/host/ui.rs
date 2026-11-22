@@ -52,7 +52,7 @@ impl WorldHost<'_> {
         ) {
             return self.caret_call(call, path, entity);
         }
-        if matches!(call, UiCall::Position | UiCall::Size) {
+        if matches!(call, UiCall::Position | UiCall::Size | UiCall::Drag) {
             return self.layout_read(call, path, entity);
         }
         match call {
@@ -124,7 +124,8 @@ impl WorldHost<'_> {
             | UiCall::SelectionStart
             | UiCall::SelectionEnd
             | UiCall::Position
-            | UiCall::Size => {
+            | UiCall::Size
+            | UiCall::Drag => {
                 unreachable!("handled as a query")
             }
         }
@@ -162,6 +163,16 @@ impl WorldHost<'_> {
         path: &Path,
         entity: EntityId,
     ) -> Result<Value, RuntimeError> {
+        if call == UiCall::Drag {
+            let screen = self.screen_ui.ok_or_else(|| {
+                RuntimeError::Host(format!(
+                    "{}: this host is not laying out any screen UI",
+                    path.dotted()
+                ))
+            })?;
+            let [x, y] = screen.drag(entity);
+            return Ok(Value::Vec2([f64::from(x), f64::from(y)]));
+        }
         let rect = self
             .screen_ui
             .and_then(|screen| screen.rect(entity))

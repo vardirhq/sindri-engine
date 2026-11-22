@@ -1,42 +1,28 @@
-// The left thumb steers with Sindri's virtual stick; a second finger can
-// hold the jump button on the right at the same time.
+// The on-screen controls, always shown: a stick ring on the left and the jump
+// button on the right. The left thumb steers from wherever it lands on the
+// left half, and the ring follows it there; any thumb can hold jump.
 const KNOB_TRAVEL: number = 0.11;
+// Where the ring rests while no thumb is on it.
+const REST_X: number = -0.75;
+const REST_Y: number = -0.64;
 
 script TouchControls {
     var ring: Entity = null;
     var knob: Entity = null;
-    var drawing: bool = false;
-    var checked: bool = false;
-    var anchor: Vec2 = Vec2(-0.75, -0.64);
 
     fn start() {
         this.ring = World.find("touch-stick-ring");
         this.knob = World.find("touch-stick-knob");
-        World.set_active(this.ring, false);
-        World.set_active(this.knob, false);
     }
 
     fn update(dt: number) {
-        if Game.touch && Stick.held && !this.checked {
-            this.checked = true;
-            // Stick anchors are physical pixels. Pointer.overlay is the same
-            // press in screen units, which also places the artwork correctly.
-            this.drawing = Pointer.overlay_x < 0.0;
-            if this.drawing { this.anchor = Pointer.overlay; }
+        var at: Vec2 = Vec2(REST_X, REST_Y);
+        var push: Vec2 = Vec2(0.0, 0.0);
+        if Stick.held && Stick.anchor.x < 0.0 {
+            at = Stick.anchor;
+            push = Vec2(Stick.x, -Stick.y) * KNOB_TRAVEL;
         }
-        if !Stick.held {
-            this.checked = false;
-            this.drawing = false;
-        }
-        World.set_active(this.ring, Game.touch);
-        World.set_active(this.knob, Game.touch);
-        if Game.touch {
-            var at: Vec2 = this.anchor;
-            if !this.drawing { at = Vec2(-0.75, -0.64); }
-            this.ring.transform.position = Vec3(at.x, at.y, 0.0);
-            var push: Vec2 = Vec2(0.0, 0.0);
-            if this.drawing { push = Vec2(Stick.x, -Stick.y) * KNOB_TRAVEL; }
-            this.knob.transform.position = Vec3(at.x + push.x, at.y + push.y, 0.0);
-        }
+        this.ring.transform.position = Vec3(at.x, at.y, 0.0);
+        this.knob.transform.position = Vec3(at.x + push.x, at.y + push.y, 0.0);
     }
 }

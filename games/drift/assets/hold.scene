@@ -20453,7 +20453,7 @@
       "name": "hud-propellant",
       "transform_3d": {
         "position": [
-          -1.25,
+          -0.8,
           -0.88,
           0
         ],
@@ -20492,7 +20492,7 @@
       "name": "hud-velocity",
       "transform_3d": {
         "position": [
-          1.25,
+          0.8,
           -0.88,
           0
         ],
@@ -20648,7 +20648,7 @@
       "name": "hud-oxygen",
       "transform_3d": {
         "position": [
-          -1.25,
+          -0.8,
           -0.68,
           0
         ],
@@ -20687,7 +20687,7 @@
       "name": "hud-power",
       "transform_3d": {
         "position": [
-          -1.25,
+          -0.8,
           -0.78,
           0
         ],
@@ -20765,7 +20765,7 @@
       "name": "hud-airlock",
       "transform_3d": {
         "position": [
-          1.25,
+          0.8,
           -0.78,
           0
         ],
@@ -20804,7 +20804,7 @@
       "name": "hud-salvage",
       "transform_3d": {
         "position": [
-          1.25,
+          0.8,
           -0.68,
           0
         ],
@@ -20835,6 +20835,923 @@
           "layer": 200,
           "text": "",
           "letter_spacing": 0.004
+        }
+      }
+    },
+    {
+      "id": "touch-look",
+      "name": "touch-look",
+      "transform_3d": {
+        "position": [
+          1.0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          2.0,
+          2.0,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.button": {
+          "label": "",
+          "autofocus": false,
+          "disabled": false
+        }
+      }
+    },
+    {
+      "id": "touch-stick-ring",
+      "name": "touch-stick-ring",
+      "transform_3d": {
+        "position": [
+          -1.4,
+          -0.4,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.55,
+          0.55,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.shape": {
+          "kind": "ellipse",
+          "fill": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke": [
+            0.75,
+            0.85,
+            1.0,
+            0.35
+          ],
+          "stroke_width": 0.03,
+          "anchor": "center",
+          "layer": 150
+        }
+      }
+    },
+    {
+      "id": "touch-stick-knob",
+      "name": "touch-stick-knob",
+      "transform_3d": {
+        "position": [
+          -1.4,
+          -0.4,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.2,
+          0.2,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.shape": {
+          "kind": "ellipse",
+          "fill": [
+            0.75,
+            0.85,
+            1.0,
+            0.4
+          ],
+          "anchor": "center",
+          "layer": 151
+        }
+      }
+    },
+    {
+      "id": "touch-up",
+      "name": "touch-up",
+      "transform_3d": {
+        "position": [
+          -0.22,
+          0.22,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.3,
+          0.3,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.06,
+            0.09,
+            0.12,
+            0.55
+          ],
+          "stroke": [
+            0.75,
+            0.85,
+            1.0,
+            0.35
+          ],
+          "stroke_width": 0.02,
+          "anchor": "bottom_right",
+          "layer": 150
+        },
+        "sindri.ui.button": {
+          "label": "UP",
+          "autofocus": false,
+          "disabled": false
+        }
+      }
+    },
+    {
+      "id": "touch-up-label",
+      "name": "touch-up-label",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.text": {
+          "anchor": "center",
+          "color": [
+            0.85,
+            0.92,
+            1.0,
+            0.9
+          ],
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.042,
+          "line_height": 0.05,
+          "layer": 152,
+          "text": "UP",
+          "letter_spacing": 0.004
+        }
+      },
+      "parent": "touch-up"
+    },
+    {
+      "id": "touch-down",
+      "name": "touch-down",
+      "transform_3d": {
+        "position": [
+          -0.58,
+          0.22,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.3,
+          0.3,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.06,
+            0.09,
+            0.12,
+            0.55
+          ],
+          "stroke": [
+            0.75,
+            0.85,
+            1.0,
+            0.35
+          ],
+          "stroke_width": 0.02,
+          "anchor": "bottom_right",
+          "layer": 150
+        },
+        "sindri.ui.button": {
+          "label": "DOWN",
+          "autofocus": false,
+          "disabled": false
+        }
+      }
+    },
+    {
+      "id": "touch-down-label",
+      "name": "touch-down-label",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.text": {
+          "anchor": "center",
+          "color": [
+            0.85,
+            0.92,
+            1.0,
+            0.9
+          ],
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.042,
+          "line_height": 0.05,
+          "layer": 152,
+          "text": "DOWN",
+          "letter_spacing": 0.004
+        }
+      },
+      "parent": "touch-down"
+    },
+    {
+      "id": "touch-grab",
+      "name": "touch-grab",
+      "transform_3d": {
+        "position": [
+          -0.22,
+          0.58,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.3,
+          0.3,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.06,
+            0.09,
+            0.12,
+            0.55
+          ],
+          "stroke": [
+            0.75,
+            0.85,
+            1.0,
+            0.35
+          ],
+          "stroke_width": 0.02,
+          "anchor": "bottom_right",
+          "layer": 150
+        },
+        "sindri.ui.button": {
+          "label": "GRAB",
+          "autofocus": false,
+          "disabled": false
+        }
+      }
+    },
+    {
+      "id": "touch-grab-label",
+      "name": "touch-grab-label",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.text": {
+          "anchor": "center",
+          "color": [
+            0.85,
+            0.92,
+            1.0,
+            0.9
+          ],
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.042,
+          "line_height": 0.05,
+          "layer": 152,
+          "text": "GRAB",
+          "letter_spacing": 0.004
+        }
+      },
+      "parent": "touch-grab"
+    },
+    {
+      "id": "touch-brake",
+      "name": "touch-brake",
+      "transform_3d": {
+        "position": [
+          -0.58,
+          0.58,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.3,
+          0.3,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.06,
+            0.09,
+            0.12,
+            0.55
+          ],
+          "stroke": [
+            0.75,
+            0.85,
+            1.0,
+            0.35
+          ],
+          "stroke_width": 0.02,
+          "anchor": "bottom_right",
+          "layer": 150
+        },
+        "sindri.ui.button": {
+          "label": "BRAKE",
+          "autofocus": false,
+          "disabled": false
+        }
+      }
+    },
+    {
+      "id": "touch-brake-label",
+      "name": "touch-brake-label",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.text": {
+          "anchor": "center",
+          "color": [
+            0.85,
+            0.92,
+            1.0,
+            0.9
+          ],
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.042,
+          "line_height": 0.05,
+          "layer": 152,
+          "text": "BRAKE",
+          "letter_spacing": 0.004
+        }
+      },
+      "parent": "touch-brake"
+    },
+    {
+      "id": "touch-use",
+      "name": "touch-use",
+      "transform_3d": {
+        "position": [
+          -0.22,
+          0.94,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.3,
+          0.3,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.06,
+            0.09,
+            0.12,
+            0.55
+          ],
+          "stroke": [
+            0.75,
+            0.85,
+            1.0,
+            0.35
+          ],
+          "stroke_width": 0.02,
+          "anchor": "bottom_right",
+          "layer": 150
+        },
+        "sindri.ui.button": {
+          "label": "USE",
+          "autofocus": false,
+          "disabled": false
+        }
+      }
+    },
+    {
+      "id": "touch-use-label",
+      "name": "touch-use-label",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.text": {
+          "anchor": "center",
+          "color": [
+            0.85,
+            0.92,
+            1.0,
+            0.9
+          ],
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.042,
+          "line_height": 0.05,
+          "layer": 152,
+          "text": "USE",
+          "letter_spacing": 0.004
+        }
+      },
+      "parent": "touch-use"
+    },
+    {
+      "id": "touch-reel",
+      "name": "touch-reel",
+      "transform_3d": {
+        "position": [
+          -0.58,
+          0.94,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.3,
+          0.3,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.06,
+            0.09,
+            0.12,
+            0.55
+          ],
+          "stroke": [
+            0.75,
+            0.85,
+            1.0,
+            0.35
+          ],
+          "stroke_width": 0.02,
+          "anchor": "bottom_right",
+          "layer": 150
+        },
+        "sindri.ui.button": {
+          "label": "REEL",
+          "autofocus": false,
+          "disabled": false
+        }
+      }
+    },
+    {
+      "id": "touch-reel-label",
+      "name": "touch-reel-label",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.text": {
+          "anchor": "center",
+          "color": [
+            0.85,
+            0.92,
+            1.0,
+            0.9
+          ],
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.042,
+          "line_height": 0.05,
+          "layer": 152,
+          "text": "REEL",
+          "letter_spacing": 0.004
+        }
+      },
+      "parent": "touch-reel"
+    },
+    {
+      "id": "touch-roll-left",
+      "name": "touch-roll-left",
+      "transform_3d": {
+        "position": [
+          0.22,
+          -0.22,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.3,
+          0.3,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.06,
+            0.09,
+            0.12,
+            0.55
+          ],
+          "stroke": [
+            0.75,
+            0.85,
+            1.0,
+            0.35
+          ],
+          "stroke_width": 0.02,
+          "anchor": "top_left",
+          "layer": 150
+        },
+        "sindri.ui.button": {
+          "label": "ROLL <",
+          "autofocus": false,
+          "disabled": false
+        }
+      }
+    },
+    {
+      "id": "touch-roll-left-label",
+      "name": "touch-roll-left-label",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.text": {
+          "anchor": "center",
+          "color": [
+            0.85,
+            0.92,
+            1.0,
+            0.9
+          ],
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.042,
+          "line_height": 0.05,
+          "layer": 152,
+          "text": "ROLL <",
+          "letter_spacing": 0.004
+        }
+      },
+      "parent": "touch-roll-left"
+    },
+    {
+      "id": "touch-roll-right",
+      "name": "touch-roll-right",
+      "transform_3d": {
+        "position": [
+          0.58,
+          -0.22,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.3,
+          0.3,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.06,
+            0.09,
+            0.12,
+            0.55
+          ],
+          "stroke": [
+            0.75,
+            0.85,
+            1.0,
+            0.35
+          ],
+          "stroke_width": 0.02,
+          "anchor": "top_left",
+          "layer": 150
+        },
+        "sindri.ui.button": {
+          "label": "ROLL >",
+          "autofocus": false,
+          "disabled": false
+        }
+      }
+    },
+    {
+      "id": "touch-roll-right-label",
+      "name": "touch-roll-right-label",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.text": {
+          "anchor": "center",
+          "color": [
+            0.85,
+            0.92,
+            1.0,
+            0.9
+          ],
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.042,
+          "line_height": 0.05,
+          "layer": 152,
+          "text": "ROLL >",
+          "letter_spacing": 0.004
+        }
+      },
+      "parent": "touch-roll-right"
+    },
+    {
+      "id": "touch-clip",
+      "name": "touch-clip",
+      "transform_3d": {
+        "position": [
+          0.94,
+          -0.22,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.3,
+          0.3,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.06,
+            0.09,
+            0.12,
+            0.55
+          ],
+          "stroke": [
+            0.75,
+            0.85,
+            1.0,
+            0.35
+          ],
+          "stroke_width": 0.02,
+          "anchor": "top_left",
+          "layer": 150
+        },
+        "sindri.ui.button": {
+          "label": "CLIP",
+          "autofocus": false,
+          "disabled": false
+        }
+      }
+    },
+    {
+      "id": "touch-clip-label",
+      "name": "touch-clip-label",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.text": {
+          "anchor": "center",
+          "color": [
+            0.85,
+            0.92,
+            1.0,
+            0.9
+          ],
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.042,
+          "line_height": 0.05,
+          "layer": 152,
+          "text": "CLIP",
+          "letter_spacing": 0.004
+        }
+      },
+      "parent": "touch-clip"
+    },
+    {
+      "id": "touch-controls",
+      "name": "touch-controls",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.script": {
+          "source": "scripts/touch.decay",
+          "script": "TouchControls"
         }
       }
     }
