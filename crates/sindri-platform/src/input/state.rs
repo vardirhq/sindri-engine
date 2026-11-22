@@ -437,6 +437,15 @@ impl InputState {
         self.touches.len()
     }
 
+    /// Whether a finger is on the screen or touched it this frame.
+    ///
+    /// What decides that a "click" was a finger: a tap is down and up inside
+    /// one frame often enough that the fingers down now are not the answer.
+    #[must_use]
+    pub fn touching(&self) -> bool {
+        !self.touches.is_empty() || !self.touches_began.is_empty() || !self.touches_ended.is_empty()
+    }
+
     /// Where the `index`-th finger is, ordered by the id its host gave it.
     ///
     /// Stable from frame to frame while a finger stays down, which is what a
