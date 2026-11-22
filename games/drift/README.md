@@ -51,10 +51,12 @@ hold at the handhold on the forward bulkhead.
 | U | Unclip from the tether; near its loose end, clip back on |
 | G | Take the salvage in reach |
 
-On a phone held sideways the controls are on screen: the left thumb steers
-with the stick, the right thumb drags anywhere on the right half to look, and
-the buttons are UP, DOWN, GRAB, BRAKE, USE (airlock panel, salvage, seat),
-REEL, ROLL and CLIP. Any finger presses a button while another steers.
+On a phone held sideways the controls are on screen: a move stick on the left,
+a view stick on the right, roll buttons, and ACTION, JUMP and CROUCH. ACTION is
+whatever you aim at: tap it at the airlock panel, by salvage or at the seat,
+and hold it to hold on to a handhold. JUMP is up in space and CROUCH down.
+Any finger presses a button while another steers. The tether's reel, clip and
+the brake are keys only for now (R, U, X).
 
 Stage 2, **the tether**: a 10 m line of physics links from the aft handhold
 to the diver. It goes taut at its length and holds them there, catches on the

@@ -526,12 +526,12 @@ script Diver {
         Ui.set_number(World.find("hud-velocity"), round(speed * 10.0) / 10.0);
         let prompt = World.find("hud-prompt");
         if at_panel() {
-            Ui.set_text(prompt, "E  cycle airlock");
+            Ui.set_text(prompt, "E / ACTION  cycle airlock");
         } else if this.hold != null {
-            Ui.set_text(prompt, "SPACE  push off");
+            Ui.set_text(prompt, "SPACE / JUMP  push off");
         } else {
             if reached != null {
-                Ui.set_text(prompt, "F  hold on");
+                Ui.set_text(prompt, "F / hold ACTION  hold on");
             } else {
                 Ui.set_text(prompt, "");
             }

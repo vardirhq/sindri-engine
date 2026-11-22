@@ -1,20 +1,18 @@
 //! Playing on a phone held sideways: the left thumb on the stick, the right
-//! thumb on the look pad and the buttons, and no keys at all.
+//! thumb on the view stick and the buttons. The tether's clip is a key.
 
 use drift::Run;
+use sindri_platform::Key;
 
 /// The controls, as `art/touch.py` names them.
 const CONTROLS: &[&str] = &[
     "touch-stick-ring",
+    "touch-look-ring",
     "touch-up",
     "touch-down",
-    "touch-grab",
-    "touch-brake",
-    "touch-use",
-    "touch-reel",
+    "touch-action",
     "touch-roll-left",
     "touch-roll-right",
-    "touch-clip",
 ];
 
 const WIDTH: f32 = 1280.0;
@@ -64,7 +62,8 @@ fn thumbs_alone_unclip_push_off_fly_and_look() {
     game.wait(0.5);
     assert!(game.has_said("Drift: holding on"), "{:?}", game.said);
 
-    tap(&mut game, "touch-clip");
+    game.tap(Key::U);
+    game.step();
     assert!(game.has_said("Drift: unclipped"), "{:?}", game.said);
     tap(&mut game, "touch-up");
     assert!(game.has_said("Drift: pushed off"), "{:?}", game.said);
@@ -107,7 +106,7 @@ fn thumbs_alone_unclip_push_off_fly_and_look() {
 fn the_up_thumb_down_first_does_not_take_the_stick() {
     let mut game = Run::open_in_hold().expect("DRIFT opens");
     game.wait(0.5);
-    tap(&mut game, "touch-clip");
+    game.tap(Key::U);
     tap(&mut game, "touch-up");
     assert!(game.has_said("Drift: pushed off"), "{:?}", game.said);
     game.wait(0.2);
@@ -135,14 +134,49 @@ fn the_up_thumb_down_first_does_not_take_the_stick() {
 fn holding_grab_catches_a_handhold() {
     let mut game = Run::open_in_hold().expect("DRIFT opens");
     game.wait(0.5);
-    tap(&mut game, "touch-clip");
+    game.tap(Key::U);
     tap(&mut game, "touch-up");
     assert!(game.has_said("Drift: pushed off"), "{:?}", game.said);
-    let grab = game.on_screen("touch-grab");
+    let grab = game.on_screen("touch-action");
     game.touch(1, grab);
     assert!(
         game.until("Drift: caught the far handhold", 8.0),
         "{:?}",
         game.said
     );
+}
+
+#[test]
+fn thumbs_alone_walk_out_through_the_airlock() {
+    let mut game = Run::open().expect("DRIFT opens");
+    game.wait(1.0);
+    assert!(
+        game.has_said("Drift: awake in the cabin"),
+        "{:?}",
+        game.said
+    );
+    // The stick forward walks into the chamber, as W does.
+    let ring = game.on_screen("touch-stick-ring");
+    game.touch(1, ring);
+    game.step();
+    game.slide(1, [ring[0], ring[1] - 200.0]);
+    game.wait(2.6);
+    game.lift(1);
+    game.wait(0.8);
+    tap(&mut game, "touch-action");
+    assert!(
+        game.has_said("Drift: airlock cycling out"),
+        "{:?}",
+        game.said
+    );
+    assert!(
+        game.until("Drift: outer door open", 12.0),
+        "{:?}",
+        game.said
+    );
+    // And on out into the hold, weightless.
+    game.touch(1, ring);
+    game.step();
+    game.slide(1, [ring[0], ring[1] - 200.0]);
+    assert!(game.until("Drift: weightless", 6.0), "{:?}", game.said);
 }
