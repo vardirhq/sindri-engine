@@ -1,29 +1,24 @@
 #!/usr/bin/env python3
 """DRIFT's on-screen controls, for a phone held sideways. `hold.py` adds them.
 
-Always shown. The left thumb steers with the engine's stick from wherever it
-lands on the left half; the right half is a look pad, an invisible button a
-thumb drags across; and buttons on both edges stand in for the keys that are
-held or tapped. `scripts/touch.decay` reads them into the `Controls` state.
+Always shown: a move stick on the left half, a view stick on the right half
+(an invisible pad whose drag `Ui.drag` reads), roll buttons, and Action (the
+context key), Jump (up in space) and Crouch (down in space). `scripts/touch.decay` reads them into the `Controls` state.
 """
 
 # What each button does, where it sits from its corner, and its words.
 BUTTONS = [
-    # The right thumb's cluster, in from the bottom right corner.
-    ("up", "bottom_right", (-0.22, 0.22), "UP"),
-    ("down", "bottom_right", (-0.58, 0.22), "DOWN"),
-    ("grab", "bottom_right", (-0.22, 0.58), "GRAB"),
-    ("brake", "bottom_right", (-0.58, 0.58), "BRAKE"),
-    ("use", "bottom_right", (-0.22, 0.94), "USE"),
-    ("reel", "bottom_right", (-0.58, 0.94), "REEL"),
-    # Rarer things, along the top left, out of the steering thumb's way.
-    ("roll-left", "top_left", (0.22, -0.22), "ROLL <"),
-    ("roll-right", "top_left", (0.58, -0.22), "ROLL >"),
-    ("clip", "top_left", (0.94, -0.22), "CLIP"),
+    # The right thumb's cluster, in from the bottom right corner, round.
+    ("action", "bottom_right", (-0.24, 0.62), "ACTION", 0.34),
+    ("up", "bottom_right", (-0.24, 0.24), "JUMP", 0.3),
+    ("down", "bottom_right", (-0.62, 0.2), "CROUCH", 0.26),
+    # Roll, along the top left, out of the steering thumb's way.
+    ("roll-left", "top_left", (0.22, -0.22), "<", 0.26),
+    ("roll-right", "top_left", (0.54, -0.22), ">", 0.26),
 ]
 
 SIZE = 0.3
-FILL = [0.06, 0.09, 0.12, 0.55]
+FILL = [0.08, 0.12, 0.16, 0.42]
 RING = [0.75, 0.85, 1.0, 0.35]
 FONT = "fonts/ChakraPetch-Regular.ttf"
 
@@ -48,7 +43,7 @@ def _label(parent, words):
     return _ui(f"{parent}-label", (0, 0), (1, 1), parent=parent, **{
         "sindri.ui.text": {
             "anchor": "center", "color": [0.85, 0.92, 1.0, 0.9], "font": FONT,
-            "font_size": 0.042, "line_height": 0.05, "layer": 152, "text": words,
+            "font_size": 0.048, "line_height": 0.058, "layer": 152, "text": words,
             "letter_spacing": 0.004,
         },
     })
@@ -69,11 +64,19 @@ def controls():
             "sindri.ui.shape": {"kind": "ellipse", "fill": [0.75, 0.85, 1.0, 0.4],
                                 "anchor": "center", "layer": 151},
         }),
+        _ui("touch-look-ring", (1.4, -0.4), (0.55, 0.55), **{
+            "sindri.ui.shape": {"kind": "ellipse", "fill": [0, 0, 0, 0], "stroke": RING,
+                                "stroke_width": 0.03, "anchor": "center", "layer": 150},
+        }),
+        _ui("touch-look-knob", (1.4, -0.4), (0.2, 0.2), **{
+            "sindri.ui.shape": {"kind": "ellipse", "fill": [0.75, 0.85, 1.0, 0.4],
+                                "anchor": "center", "layer": 151},
+        }),
     ]
-    for name, anchor, position, words in BUTTONS:
+    for name, anchor, position, words, size in BUTTONS:
         id_ = f"touch-{name}"
-        entities.append(_ui(id_, position, (SIZE, SIZE), **{
-            "sindri.ui.shape": {"kind": "rect", "fill": FILL, "stroke": RING,
+        entities.append(_ui(id_, position, (size, size), **{
+            "sindri.ui.shape": {"kind": "ellipse", "fill": FILL, "stroke": RING,
                                 "stroke_width": 0.02, "anchor": anchor, "layer": 150},
             "sindri.ui.button": {"label": words, "autofocus": False, "disabled": False},
         }))

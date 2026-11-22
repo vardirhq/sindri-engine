@@ -210,14 +210,13 @@ tread deck, vented bulkhead, frame, hazard, light panel); ships are written by
 ## Playing on a phone
 
 DRIFT plays on a phone held sideways, with its controls always on screen
-(`art/touch.py`, `scripts/touch.decay`). The left thumb steers with the
-engine's stick from wherever it lands on the left half; the right half is a
-look pad, an invisible element whose finger `Ui.drag` reads; and buttons stand
-in for the keys: up, down, grab, brake, use (the airlock panel, salvage and the
-seat), reel, both rolls and clip. The touch script reads them into a `Controls`
-state that each script merges with its keys, so a key and a button are the
-same request. Every finger presses what it lands on, whichever went down first,
-and a thumb on a button is never the stick's (`tests/touch.rs`).
+(`art/touch.py`, `scripts/touch.decay`): a move stick on the left half, a view
+stick on the right half (a pad whose thumb `Ui.drag` reads, turning at a rate
+by how far it is pulled), roll buttons, and Action, Jump and Crouch. Action is
+context: tapped it works the airlock panel, takes salvage or sits; held, it
+holds on. Jump is up in space, Crouch down. The touch script reads them into a
+`Controls` state each script merges with its keys. Reel, clip and brake are
+keys only for now (`tests/touch.rs`).
 
 ## Stages
 

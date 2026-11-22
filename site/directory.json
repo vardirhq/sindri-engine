@@ -366,40 +366,32 @@
         "A tether of jointed links that catches on things",
         "Ships built of voxel blocks that fly as one body",
         "Walking inside a moving, turning ship",
-        "Twin-thumb phone controls with a look pad"
+        "Twin-stick phone controls with a context action"
       ],
       "controls": [
         [
-          "Mouse · drag the right half",
+          "Mouse · right stick",
           "Look (click to capture the cursor)"
         ],
         [
-          "WASD · left thumb",
+          "WASD · left stick",
           "Thrust or walk"
         ],
         [
-          "Space / C · UP / DOWN",
+          "Space / C · JUMP / CROUCH",
           "Up and down, push off, jump"
         ],
         [
-          "F / right mouse · GRAB",
-          "Hold on to a handhold"
+          "E / G / F · ACTION",
+          "Airlock, salvage, seat; hold to hold on"
         ],
         [
-          "X · BRAKE",
-          "Brake"
-        ],
-        [
-          "E / G · USE",
-          "Airlock panel, salvage, pilot's seat"
-        ],
-        [
-          "R · REEL  ·  U · CLIP",
-          "Reel the tether in · clip on or off"
-        ],
-        [
-          "Q / E · ROLL",
+          "Q / E · < >",
           "Roll"
+        ],
+        [
+          "X · R · U",
+          "Brake · reel the tether · clip on or off"
         ]
       ],
       "note": "Early in development. Best held sideways on a phone."
