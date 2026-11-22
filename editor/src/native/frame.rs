@@ -106,10 +106,15 @@ impl EditorApp {
         self.refresh_styles();
         self.refresh_textures();
         let state = self.render_state.clone();
+        let tile_sets = self.textures.tile_sets().generation();
         let arrived = self
             .textures
             .poll(&state.device, &state.queue, &mut self.renderers.text);
         self.record_texture_notes(arrived);
+        if self.textures.tile_sets().generation() != tile_sets {
+            let notes = self.textures.request(&self.world, &mut self.renderers.text);
+            self.record_texture_notes(notes);
+        }
         let arrived = self.textures.poll_play_models(
             &mut [&mut self.scene, &mut self.game_scene],
             self.session.as_mut(),

@@ -294,7 +294,8 @@ Two consequences worth knowing:
 An entity can reference a self-contained GLB with
 `"sindri.model": { "asset": "models/crawler.glb", "layer": 0 }`. The asset ID is
 relative to the project's asset root; models remain separate files. Export finds
-references in scenes and prefabs automatically, validates and preserves their
-bytes, and records manifest kind `model`. Native project capture and the exported
+references in scenes, prefabs, and referenced voxel block sets automatically.
+It validates and preserves their bytes and records manifest kind `model`.
+See [modeled blocks](voxel-terrain.md#modeled-blocks) for block-set authoring. Native project capture and the exported
 WebGPU host load these references through the normal asset pipeline. See
 [imported models](imported-models.md) for supported features and diagnostics.

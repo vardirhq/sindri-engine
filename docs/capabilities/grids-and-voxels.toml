@@ -168,6 +168,18 @@ only their own inner faces.
 """
 
 [[capability]]
+id = "modeled-voxel-blocks"
+group = "Voxel world"
+title = "Modeled voxel blocks"
+summary = "A block set can reference an opaque unit-cell GLB for the 3D blocks view. DRIFT's shuttle uses recessed vent models next to ordinary hull cells."
+status = { engine = "partial", editor = "partial", decay = "n/a", proof = "partial" }
+parity = "Modeled voxel blocks"
+tests = ["crates/sindri-scene/tests/extraction/voxel_models.rs", "crates/sindri-export/tests/exports_a_project.rs", "games/drift/tests/culling.rs"]
+proof = ["games/drift"]
+docs = ["docs/voxel-terrain.md", "docs/drift-plan.md"]
+limits = ["Full-cell collision, with face sprites for other views. The Android editor does not yet bind GLBs.", "Desktop block-set authoring requires editing the model reference in the asset file.", "Per-cell rotation, connected variants, and transparent models are open."]
+
+[[capability]]
 id = "voxel-mesh-cache"
 group = "Voxel world"
 title = "Persistent voxel compiled/GPU mesh cache"

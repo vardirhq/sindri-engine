@@ -6,6 +6,8 @@ mod pipeline;
 mod tests;
 mod validate;
 
+use std::sync::Arc;
+
 use glam::Mat4;
 use thiserror::Error;
 
@@ -93,6 +95,7 @@ pub struct ModelData {
 #[derive(Debug)]
 pub struct RenderModel {
     data: ModelData,
+    image_owner: Option<Arc<Self>>,
     instances: Vec<ModelNodeInstance>,
     /// Model-space box around every drawn vertex, in each node's placement.
     bounds: Option<(glam::Vec3, glam::Vec3)>,
@@ -108,14 +111,40 @@ pub struct ModelNodeInstance {
 
 impl RenderModel {
     pub fn new(data: ModelData) -> Result<Self, ModelRenderError> {
-        validate::data(&data)?;
+        Self::build(data, None)
+    }
+
+    /// Builds new geometry that uses the original model's images and samplers.
+    /// Surface texture indices address the source's images.
+    pub fn with_shared_images(
+        data: ModelData,
+        source: &Arc<Self>,
+    ) -> Result<Self, ModelRenderError> {
+        if !data.images.is_empty() {
+            return Err(ModelRenderError::InvalidData(
+                "a shared-image model cannot supply its own images".into(),
+            ));
+        }
+        Self::build(data, Some(Arc::clone(Self::image_owner(source))))
+    }
+
+    fn build(data: ModelData, image_owner: Option<Arc<Self>>) -> Result<Self, ModelRenderError> {
+        let image_count = image_owner
+            .as_ref()
+            .map_or(data.images.len(), |source| source.data.images.len());
+        validate::data(&data, image_count)?;
         let instances = validate::hierarchy(&data)?;
         let bounds = model_bounds(&data, &instances);
         Ok(Self {
             data,
+            image_owner,
             instances,
             bounds,
         })
+    }
+
+    fn image_owner(model: &Arc<Self>) -> &Arc<Self> {
+        model.image_owner.as_ref().unwrap_or(model)
     }
 
     /// The model-space box around everything the model draws, each mesh

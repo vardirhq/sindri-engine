@@ -39,6 +39,7 @@ pub(crate) struct ModelRenderer {
     occluded: wgpu::RenderPipeline,
     layout: wgpu::BindGroupLayout,
     cache: HashMap<usize, CachedModel>,
+    image_cache: HashMap<usize, Weak<ModelTextures>>,
     slots: Vec<Slot>,
     next: usize,
     stats: ModelCacheStats,
@@ -49,6 +50,13 @@ pub(crate) struct ModelRenderer {
 struct CachedModel {
     owner: Weak<RenderModel>,
     meshes: Vec<Vec<Geometry>>,
+    images: Arc<ModelTextures>,
+}
+
+#[derive(Debug)]
+struct ModelTextures {
+    // Keep the pointer used as the cache key alive for these GPU images.
+    _owner: Weak<RenderModel>,
     textures: Vec<Texture2D>,
     samplers: Vec<wgpu::Sampler>,
 }
@@ -99,6 +107,7 @@ impl ModelRenderer {
             occluded,
             layout,
             cache: HashMap::new(),
+            image_cache: HashMap::new(),
             slots: Vec::new(),
             next: 0,
             stats: ModelCacheStats::default(),
@@ -115,6 +124,7 @@ impl ModelRenderer {
     pub(crate) fn begin_submission(&mut self) {
         self.next = 0;
         self.cache.retain(|_, entry| entry.owner.strong_count() > 0);
+        self.image_cache.retain(|_, gpu| gpu.strong_count() > 0);
         for slot in &mut self.slots {
             if slot
                 .binding
@@ -144,7 +154,22 @@ impl ModelRenderer {
     ) -> Result<usize, ModelRenderError> {
         let key = Arc::as_ptr(asset) as usize;
         if let std::collections::hash_map::Entry::Vacant(entry) = self.cache.entry(key) {
-            entry.insert(upload(device, queue, asset)?);
+            let meshes = upload_geometry(device, asset)?;
+            let owner = RenderModel::image_owner(asset);
+            let image_key = Arc::as_ptr(owner) as usize;
+            let images =
+                if let Some(images) = self.image_cache.get(&image_key).and_then(Weak::upgrade) {
+                    images
+                } else {
+                    let images = Arc::new(upload_images(device, queue, owner)?);
+                    self.image_cache.insert(image_key, Arc::downgrade(&images));
+                    images
+                };
+            entry.insert(CachedModel {
+                owner: Arc::downgrade(asset),
+                meshes,
+                images,
+            });
             self.stats.uploads += 1;
             self.stats.resident_models = self.cache.len();
         }
@@ -184,7 +209,7 @@ impl ModelRenderer {
                 let surface = primitive
                     .material
                     .map_or(&fallback, |i| &asset.data().surfaces[i]);
-                let texture = surface.texture.unwrap_or(cached.textures.len() - 1);
+                let texture = surface.texture.unwrap_or(cached.images.textures.len() - 1);
                 if self.next == self.slots.len() {
                     self.slots.push(Slot {
                         uniform: device.create_buffer(&wgpu::BufferDescriptor {
@@ -214,8 +239,8 @@ impl ModelRenderer {
                             device,
                             &self.layout,
                             &slot.uniform,
-                            &cached.textures[texture],
-                            &cached.samplers[texture],
+                            &cached.images.textures[texture],
+                            &cached.images.samplers[texture],
                             draw.shadow_map,
                         ),
                     ));
@@ -357,11 +382,10 @@ fn bind(
     })
 }
 
-fn upload(
+fn upload_geometry(
     device: &wgpu::Device,
-    queue: &wgpu::Queue,
-    asset: &Arc<RenderModel>,
-) -> Result<CachedModel, ModelRenderError> {
+    asset: &RenderModel,
+) -> Result<Vec<Vec<Geometry>>, ModelRenderError> {
     let limit = device.limits();
     let mut meshes = Vec::new();
     for mesh in &asset.data().meshes {
@@ -403,6 +427,15 @@ fn upload(
         }
         meshes.push(primitives);
     }
+    Ok(meshes)
+}
+
+fn upload_images(
+    device: &wgpu::Device,
+    queue: &wgpu::Queue,
+    asset: &Arc<RenderModel>,
+) -> Result<ModelTextures, ModelRenderError> {
+    let limit = device.limits();
     let mut textures = Vec::new();
     let mut samplers = Vec::new();
     for image in &asset.data().images {
@@ -436,9 +469,8 @@ fn upload(
             .map_err(|error| ModelRenderError::InvalidData(error.to_string()))?,
     );
     samplers.push(device.create_sampler(&wgpu::SamplerDescriptor::default()));
-    Ok(CachedModel {
-        owner: Arc::downgrade(asset),
-        meshes,
+    Ok(ModelTextures {
+        _owner: Arc::downgrade(asset),
         textures,
         samplers,
     })

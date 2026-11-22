@@ -40,6 +40,7 @@ mod voxel_ground;
 mod voxel_map;
 mod voxel_map_edges;
 mod voxel_map_water;
+mod voxel_models;
 mod voxel_source;
 mod voxel_world;
 mod world_meanings;
@@ -145,6 +146,8 @@ pub enum SceneExtractError {
     Material(#[from] crate::RenderMaterialError),
     #[error("model asset '{0}' is not loaded and bound")]
     MissingModel(sindri_core::AssetId),
+    #[error("voxel model {0} needs opaque geometry within the unit cell")]
+    InvalidVoxelModel(sindri_core::AssetId),
     #[error(transparent)]
     Mesh(#[from] sindri_render::MeshGeometryError),
     #[error(transparent)]

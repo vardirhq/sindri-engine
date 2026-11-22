@@ -18,6 +18,7 @@ Each entry links its tests and the projects that exercise it. Surface marks matc
 | [Engine-owned voxel coordinates and 16³ sections](#voxel-storage) | 🟡 | 🟡 | 🟡 | 🟡 |
 | [Bounded voxel residency](#voxel-residency) | 🟡 | 🟡 | ❌ | 🟡 |
 | [Neighbour-aware block meshing](#voxel-meshing) | 🟡 | 🟡 | ❌ | 🟡 |
+| [Modeled voxel blocks](#modeled-voxel-blocks) | 🟡 | 🟡 | — | 🟡 |
 | [Persistent voxel compiled/GPU mesh cache](#voxel-mesh-cache) | 🟡 | 🟡 | ❌ | 🟡 |
 | [Voxel collision](#voxel-collision) | ✅ | ✅ | ✅ | 🟡 |
 | [Voxel ground for gameplay](#voxel-gameplay-ground) | ✅ | — | ✅ | ✅ |
@@ -207,6 +208,26 @@ blocks that do not hide their neighbours are cut out, and `liquid` ones hide
 only their own inner faces.
 
 </details>
+
+<a id="modeled-voxel-blocks"></a>
+
+### Modeled voxel blocks
+
+A block set can reference an opaque unit-cell GLB for the 3D blocks view. DRIFT's shuttle uses recessed vent models next to ordinary hull cells.
+
+Engine 🟡 · Editor 🟡 · Decay — · Proof 🟡 — parity row *Modeled voxel blocks*
+
+**Tested by:** [`crates/sindri-scene/tests/extraction/voxel_models.rs`](../../crates/sindri-scene/tests/extraction/voxel_models.rs), [`crates/sindri-export/tests/exports_a_project.rs`](../../crates/sindri-export/tests/exports_a_project.rs), [`games/drift/tests/culling.rs`](../../games/drift/tests/culling.rs)
+
+**Exercised in:** [`games/drift`](../../games/drift)
+
+**See:** [`docs/voxel-terrain.md`](../../docs/voxel-terrain.md), [`docs/drift-plan.md`](../../docs/drift-plan.md)
+
+**Limits:**
+
+- Full-cell collision, with face sprites for other views. The Android editor does not yet bind GLBs.
+- Desktop block-set authoring requires editing the model reference in the asset file.
+- Per-cell rotation, connected variants, and transparent models are open.
 
 <a id="voxel-mesh-cache"></a>
 

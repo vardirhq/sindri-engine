@@ -134,6 +134,11 @@ impl VoxelMaterial {
 /// renderer's responsibility.
 pub trait VoxelMaterialSource {
     fn material(&self, voxel: VoxelId) -> VoxelMaterial;
+
+    /// Whether the caller supplies the rendered geometry for this voxel.
+    fn uses_custom_geometry(&self, _voxel: VoxelId) -> bool {
+        false
+    }
 }
 
 /// Baseline mapping used when a game has not supplied material policy.

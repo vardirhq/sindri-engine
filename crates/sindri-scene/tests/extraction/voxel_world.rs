@@ -112,7 +112,7 @@ fn settled_voxel_world_reuses_its_compiled_section() {
     );
 }
 
-fn uploads(frame: &sindri_render::PreparedFrame) -> usize {
+pub(super) fn uploads(frame: &sindri_render::PreparedFrame) -> usize {
     frame
         .passes()
         .iter()
@@ -175,7 +175,7 @@ fn a_texture_the_world_draws_with_rebuilds_it() {
     );
 }
 
-fn edited(world: &mut sindri_core::World, edits: serde_json::Value) {
+pub(super) fn edited(world: &mut sindri_core::World, edits: serde_json::Value) {
     let terrain = world
         .entities()
         .find(|(_, data)| data.components.contains_key("sindri.voxel_world"))

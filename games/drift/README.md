@@ -76,7 +76,7 @@ cargo run -p sindri-player -- games/drift
 ## How it is made
 
 There is no game code in Rust. The wreckage's models are made by
-`art/wreck.py` with the repository's GLB writer. The scene is written by `art/hold.py`, which
+`art/wreck.py` with the repository's GLB writer. `art/blocks.py` builds the block set and its recessed vent GLB. The scene is written by `art/hold.py`, which
 also draws the textures; re-running it changes nothing. The diver is
 `assets/scripts/diver.decay`, the airlock `assets/scripts/airlock.decay`
 (sharing `Ship` in `assets/scripts/ship.decay`), the tether `assets/scripts/tether.decay`

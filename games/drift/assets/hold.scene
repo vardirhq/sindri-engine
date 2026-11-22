@@ -14326,7 +14326,7 @@
                 5,
                 0
               ],
-              "block": "hull"
+              "block": "vent"
             },
             {
               "at": [
@@ -14334,7 +14334,7 @@
                 5,
                 9
               ],
-              "block": "hull"
+              "block": "vent"
             },
             {
               "at": [
@@ -14582,7 +14582,7 @@
                 5,
                 0
               ],
-              "block": "frame"
+              "block": "vent"
             },
             {
               "at": [
@@ -14590,7 +14590,7 @@
                 5,
                 9
               ],
-              "block": "frame"
+              "block": "vent"
             },
             {
               "at": [
@@ -14838,7 +14838,7 @@
                 5,
                 0
               ],
-              "block": "hull"
+              "block": "vent"
             },
             {
               "at": [
@@ -14846,7 +14846,7 @@
                 5,
                 9
               ],
-              "block": "hull"
+              "block": "vent"
             },
             {
               "at": [

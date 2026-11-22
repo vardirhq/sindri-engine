@@ -43,10 +43,10 @@ correct it or delete it.
 | [Physics](capabilities/physics.md) | 37 | 8 | 0 |
 | [Effects, saves and randomness](capabilities/runtime.md) | 4 | 1 | 0 |
 | [Screen UI and Weave](capabilities/ui.md) | 7 | 1 | 0 |
-| [Grids and voxels](capabilities/grids-and-voxels.md) | 10 | 3 | 0 |
+| [Grids and voxels](capabilities/grids-and-voxels.md) | 11 | 3 | 0 |
 | [Hosts and rendering](capabilities/rendering.md) | 39 | 3 | 0 |
 | [Assets](capabilities/assets.md) | 5 | 0 | 0 |
 | [The editor](capabilities/editor.md) | 39 | 6 | 1 |
 | [Decay](capabilities/decay.md) | 24 | 8 | 0 |
 | [Games, labs and tooling](capabilities/projects.md) | 9 | 0 | 0 |
-| **All** | **190** | **33** | **1** |
+| **All** | **191** | **33** | **1** |

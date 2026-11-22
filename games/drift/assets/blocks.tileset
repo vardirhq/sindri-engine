@@ -225,6 +225,39 @@
         }
       },
       "glow": 1.0
+    },
+    "vent": {
+      "faces": {
+        "top": {
+          "sprite": "textures/blocks/bulkhead.png",
+          "size": [
+            1.0,
+            1.0
+          ]
+        },
+        "bottom": {
+          "sprite": "textures/blocks/bulkhead.png",
+          "size": [
+            1.0,
+            1.0
+          ]
+        },
+        "south": {
+          "sprite": "textures/blocks/bulkhead.png",
+          "size": [
+            1.0,
+            1.0
+          ]
+        },
+        "east": {
+          "sprite": "textures/blocks/bulkhead.png",
+          "size": [
+            1.0,
+            1.0
+          ]
+        }
+      },
+      "model": "models/vent-block.glb"
     }
   }
 }

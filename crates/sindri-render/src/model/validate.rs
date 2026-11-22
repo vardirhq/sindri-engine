@@ -27,7 +27,7 @@ pub(super) fn drawable(matrix: Mat4) -> Result<bool, ModelRenderError> {
     Ok(matrix.determinant().abs() >= 1e-12)
 }
 
-pub(super) fn data(data: &ModelData) -> Result<(), ModelRenderError> {
+pub(super) fn data(data: &ModelData, image_count: usize) -> Result<(), ModelRenderError> {
     for mesh in &data.meshes {
         for primitive in mesh {
             if primitive.vertices.is_empty()
@@ -66,7 +66,7 @@ pub(super) fn data(data: &ModelData) -> Result<(), ModelRenderError> {
         }
     }
     for surface in &data.surfaces {
-        if surface.texture.is_some_and(|i| i >= data.images.len())
+        if surface.texture.is_some_and(|i| i >= image_count)
             || !surface
                 .base_color
                 .into_iter()

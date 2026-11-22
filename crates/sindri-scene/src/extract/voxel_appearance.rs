@@ -6,7 +6,7 @@
 //! resolved again whenever a texture it names arrives, and its looks are asked
 //! about every frame.
 
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 
 use sindri_core::{SpriteRef, TileDefinition, TileFace, TileSetDocument};
 use sindri_render::MeshSurface;
@@ -17,6 +17,7 @@ use sindri_voxel::{
 use crate::{TextureBindings, VoxelMaterialDocument, VoxelTexture, VoxelTextureSource};
 
 use super::SceneExtractError;
+use super::voxel_models::VoxelModels;
 use super::voxel_source::Palette;
 
 /// What each stored voxel ID looks like.
@@ -349,10 +350,11 @@ fn frame_offsets(
 #[derive(Clone, Debug, Default, PartialEq)]
 pub(super) struct BlockMaterials {
     by_voxel: BTreeMap<u16, VoxelMaterial>,
+    modeled: BTreeSet<u16>,
 }
 
 impl BlockMaterials {
-    pub(super) fn of(appearance: &Appearance) -> Self {
+    pub(super) fn of(appearance: &Appearance, models: &VoxelModels) -> Self {
         let Appearance::Blocks(blocks) = appearance else {
             return Self::default();
         };
@@ -360,7 +362,12 @@ impl BlockMaterials {
             .iter()
             .map(|(voxel, _, block)| {
                 let liquid = block.tags.iter().any(|tag| tag == "liquid");
-                let material = if block.occludes {
+                let material = if models.contains(*voxel) {
+                    VoxelMaterial::new(
+                        sindri_voxel::RenderClass::Opaque,
+                        sindri_voxel::FaceOcclusion::None,
+                    )
+                } else if block.occludes {
                     VoxelMaterial::opaque()
                 } else if liquid {
                     VoxelMaterial::new(
@@ -379,11 +386,20 @@ impl BlockMaterials {
                 )
             })
             .collect();
-        Self { by_voxel }
+        let modeled = blocks
+            .iter()
+            .filter(|(voxel, _, _)| models.contains(*voxel))
+            .map(|(voxel, _, _)| *voxel)
+            .collect();
+        Self { by_voxel, modeled }
     }
 }
 
 impl VoxelMaterialSource for BlockMaterials {
+    fn uses_custom_geometry(&self, voxel: VoxelId) -> bool {
+        self.modeled.contains(&voxel.value())
+    }
+
     fn material(&self, voxel: VoxelId) -> VoxelMaterial {
         self.by_voxel
             .get(&voxel.value())
