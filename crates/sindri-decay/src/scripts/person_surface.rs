@@ -181,7 +181,7 @@ pub(super) fn add_pointer_surface(environment: &mut Environment) {
             *name,
             match value {
                 StickValue::Held => Type::Bool,
-                StickValue::Direction => Type::Vec2,
+                StickValue::Direction | StickValue::Anchor => Type::Vec2,
                 _ => Type::Number,
             },
         );

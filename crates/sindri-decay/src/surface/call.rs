@@ -267,6 +267,9 @@ pub(crate) enum UiCall {
     /// script needs to fit something in the world to a gap in the UI.
     Position,
     Size,
+    /// How far the press that landed on this element moved this step, in
+    /// overlay units: what a touch pad reads.
+    Drag,
     Changed,
     Submitted,
     Focused,
@@ -326,6 +329,7 @@ pub(crate) const UI_CALLS: &[(&str, UiCall)] = &[
     ("is_hovered", UiCall::Hovered),
     ("position", UiCall::Position),
     ("size", UiCall::Size),
+    ("drag", UiCall::Drag),
     ("is_pressed", UiCall::Pressed),
     ("is_held", UiCall::Held),
 ];

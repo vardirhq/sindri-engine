@@ -297,13 +297,17 @@ pub(super) const TYPES: &[TypeEntry] = &[
     },
     TypeEntry {
         name: "Stick",
-        text: "A virtual joystick for touch screens: wherever a thumb lands becomes the centre, and dragging from there steers.",
+        text: "A virtual joystick for touch screens: wherever a thumb lands becomes the centre, and dragging from there steers. A thumb that lands on an on-screen button presses the button instead, so the stick waits for one that lands off them.",
         members: &[
             value(
                 "anchor_x",
                 "Where the thumb first landed, sideways. Use it to draw the joystick.",
             ),
             value("anchor_y", "Where the thumb first landed, up or down."),
+            value(
+                "anchor",
+                "Where the thumb first landed, as a Vec2 in overlay units like `Ui.position`: 0 is the middle, one unit is half the screen's height, up positive. The one to draw the joystick's ring at, and to ask which side of the screen it is on.",
+            ),
             value(
                 "direction",
                 "Which way and how far the joystick is pushed, as a direction up to 1 long.",

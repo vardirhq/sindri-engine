@@ -56,7 +56,7 @@ script Tether {
         let joints = World.with_tag("tether-joint");
         let strands = World.with_tag("tether-strand");
         let points = line_points();
-        if Input.Keyboard.just_pressed("U") {
+        if Input.Keyboard.just_pressed("U") || Controls.clip_pressed {
             toggle_clip(joints, points);
         }
         reel(dt, joints);
@@ -164,7 +164,7 @@ script Tether {
     }
 
     fn reel(dt: number, joints: List<Entity>) {
-        let wanted = Input.Keyboard.is_down("R") && this.clipped;
+        let wanted = (Input.Keyboard.is_down("R") || Controls.reel) && this.clipped;
         var next = this.length;
         if wanted {
             next = max(this.shortest, this.out - this.reel_speed * dt);

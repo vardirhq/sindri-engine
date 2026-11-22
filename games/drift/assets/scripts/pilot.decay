@@ -44,11 +44,14 @@ script Pilot {
         let ship_y = (this.ship.transform.to_world(Vec3(0.0, 1.0, 0.0)) - origin).normalized;
         let ship_z = (this.ship.transform.to_world(Vec3(0.0, 0.0, 1.0)) - origin).normalized;
         // Its nose is -X and its right, facing that way, is -Z.
-        var wanted = ship_x * -Input.Keyboard.axis("S", "W")
-            + ship_z * -Input.Keyboard.axis("A", "D")
-            + ship_y * Input.Keyboard.axis("C", "Space");
+        var rise = Input.Keyboard.axis("C", "Space");
+        if Controls.up { rise += 1.0; }
+        if Controls.down { rise -= 1.0; }
+        var wanted = ship_x * -(Input.Keyboard.axis("S", "W") + Controls.move_y)
+            + ship_z * -(Input.Keyboard.axis("A", "D") + Controls.move_x)
+            + ship_y * rise;
         let drift = Physics3d.velocity(this.ship);
-        if Input.Keyboard.is_down("X") && drift.length > 0.05 {
+        if (Input.Keyboard.is_down("X") || Controls.brake) && drift.length > 0.05 {
             wanted = drift * -1.0;
         }
         flames(thrusters, wanted);
@@ -64,8 +67,8 @@ script Pilot {
         }
         // The gyroscope: roll about the nose's axis, yaw about the ship's up,
         // pitch about its right; everything else it damps away.
-        let delta = Pointer.delta;
-        let roll = Input.Keyboard.axis("Q", "E");
+        let delta = Pointer.delta + Vec2(Controls.look_x, Controls.look_y);
+        let roll = Input.Keyboard.axis("Q", "E") + Controls.roll;
         let yaw = clamp(-delta.x / this.mouse_full, -1.0, 1.0);
         let pitch = clamp(-delta.y / this.mouse_full, -1.0, 1.0);
         let asked = (ship_x * -roll + ship_y * yaw + ship_z * -pitch) * this.turn_rate;

@@ -301,7 +301,7 @@ pub(super) fn add_ui_surface(environment: &mut Environment) {
                     | UiCall::SelectionStart
                     | UiCall::SelectionEnd => Type::Number,
                     UiCall::InputText => Type::String,
-                    UiCall::Position | UiCall::Size => Type::Vec2,
+                    UiCall::Position | UiCall::Size | UiCall::Drag => Type::Vec2,
                     UiCall::Hovered
                     | UiCall::Pressed
                     | UiCall::Held

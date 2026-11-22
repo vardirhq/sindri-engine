@@ -54,7 +54,7 @@ Names in scope without qualification. Decay has no imports, so each of these is 
 - `Save`: `Save` — Saving progress between play sessions: numbers, text and true/false values stored under names, such as a best score.
 - `Scene`: `Scene` — Scenes are a game's separate places or screens, such as a menu, a level or a shop. This asks which one is playing and moves to another.
 - `Sequence`: `Sequence` — Playing an object's sequences: choreography set up for it in the scene's Timeline, such as a title sliding in or a door opening, with named cues along the way.
-- `Stick`: `Stick` — A virtual joystick for touch screens: wherever a thumb lands becomes the centre, and dragging from there steers.
+- `Stick`: `Stick` — A virtual joystick for touch screens: wherever a thumb lands becomes the centre, and dragging from there steers. A thumb that lands on an on-screen button presses the button instead, so the stick waits for one that lands off them.
 - `TAU`: `number` — The number τ (6.28318…), which is 2π: one full turn when measuring angles in radians.
 - `Time`: `Time` — Time in the game. A game runs as a series of frames, many times a second.
 - `Touch`: `Touch` — Every finger on a touch screen, numbered from 0, for games that need more than one finger.
@@ -715,8 +715,9 @@ A 2D image drawn in the game world, and how it is colored.
 
 ### `Stick`
 
-A virtual joystick for touch screens: wherever a thumb lands becomes the centre, and dragging from there steers.
+A virtual joystick for touch screens: wherever a thumb lands becomes the centre, and dragging from there steers. A thumb that lands on an on-screen button presses the button instead, so the stick waits for one that lands off them.
 
+- `anchor`: `Vec2` — Where the thumb first landed, as a Vec2 in overlay units like `Ui.position`: 0 is the middle, one unit is half the screen's height, up positive. The one to draw the joystick's ring at, and to ask which side of the screen it is on.
 - `anchor_x`: `number` — Where the thumb first landed, sideways. Use it to draw the joystick.
 - `anchor_y`: `number` — Where the thumb first landed, up or down.
 - `direction`: `Vec2` — Which way and how far the joystick is pushed, as a direction up to 1 long.
@@ -797,10 +798,11 @@ The interface drawn over the game: changing text and bars, and checking buttons 
 
 - `caret(input: Entity)` → `number` — Where a text field's caret is, in characters.
 - `changed(element: Entity)` → `bool` — Whether user interaction changed a widget this step.
+- `drag(element: Entity)` → `Vec2` — How far the finger that landed on an element moved this frame, as a Vec2 in overlay units, even once it slides off: a look pad is an element a thumb drags across. Zero when nothing is on it.
 - `input_text(input: Entity)` → `String` — The committed text in a single-line input.
 - `is_checked(toggle: Entity)` → `bool` — Whether a toggle is checked.
 - `is_focused(element: Entity)` → `bool` — Whether this element has keyboard focus.
-- `is_held(button: Entity)` → `bool` — Whether a button is being held down right now.
+- `is_held(button: Entity)` → `bool` — Whether a button is being held down right now, by any finger: a thumb on a button counts while another thumb steers.
 - `is_hovered(button: Entity)` → `bool` — Whether the mouse or finger is over a button.
 - `is_open(dropdown: Entity)` → `bool` — Whether a dropdown's list is open.
 - `is_pressed(button: Entity)` → `bool` — Whether a button was clicked this frame: pressed and let go while on it.

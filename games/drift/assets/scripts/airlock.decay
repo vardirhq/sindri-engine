@@ -36,7 +36,7 @@ script Airlock {
     }
 
     fn update(dt: number) {
-        if Input.Keyboard.just_pressed("E") && at_panel() {
+        if (Input.Keyboard.just_pressed("E") || Controls.use_pressed) && at_panel() {
             request();
         }
         let door_step = dt / this.door_time;

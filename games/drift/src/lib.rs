@@ -162,4 +162,40 @@ impl Run {
             .expect("the entity has a transform")
             .position
     }
+
+    /// Where an on-screen control was drawn at the last step, in pixels from
+    /// the top left: where a finger presses it.
+    ///
+    /// # Panics
+    /// If there is no such control on screen.
+    #[must_use]
+    pub fn on_screen(&self, id: &str) -> [f32; 2] {
+        let entity = self.run.entity(id).expect("the control exists");
+        self.run
+            .on_screen(entity)
+            .expect("the control is on screen")
+    }
+
+    /// Puts finger `finger` down at `at`, in pixels from the top left.
+    pub fn touch(&mut self, finger: u64, at: [f32; 2]) {
+        self.run.input.apply(InputEvent::TouchStarted {
+            id: finger,
+            x: at[0],
+            y: at[1],
+        });
+    }
+
+    /// Moves a finger that is down.
+    pub fn slide(&mut self, finger: u64, to: [f32; 2]) {
+        self.run.input.apply(InputEvent::TouchMoved {
+            id: finger,
+            x: to[0],
+            y: to[1],
+        });
+    }
+
+    /// Lifts a finger.
+    pub fn lift(&mut self, finger: u64) {
+        self.run.input.apply(InputEvent::TouchEnded { id: finger });
+    }
 }

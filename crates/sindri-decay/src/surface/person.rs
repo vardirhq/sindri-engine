@@ -210,6 +210,8 @@ pub(crate) enum StickValue {
     AnchorX,
     AnchorY,
     Direction,
+    /// Where the thumb landed, in overlay units.
+    Anchor,
 }
 pub(crate) const STICK_VALUES: &[(&str, StickValue)] = &[
     ("x", StickValue::X),
@@ -218,6 +220,7 @@ pub(crate) const STICK_VALUES: &[(&str, StickValue)] = &[
     ("anchor_x", StickValue::AnchorX),
     ("anchor_y", StickValue::AnchorY),
     ("direction", StickValue::Direction),
+    ("anchor", StickValue::Anchor),
 ];
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
