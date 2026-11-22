@@ -139,7 +139,7 @@ impl ModelRenderer {
                 let surface = primitive
                     .material
                     .map_or(&fallback, |i| &asset.data().surfaces[i]);
-                let texture = surface.texture.unwrap_or(cached.textures.len() - 1);
+                let texture = surface.texture.unwrap_or(cached.images.textures.len() - 1);
                 // Reserve independent shadow slots: queue writes occur before
                 // submission, so color writes must never overwrite these.
                 let next = self.shadow.reserve(device);
@@ -216,11 +216,13 @@ fn binding(
             },
             wgpu::BindGroupEntry {
                 binding: 1,
-                resource: wgpu::BindingResource::TextureView(cached.textures[texture].view()),
+                resource: wgpu::BindingResource::TextureView(
+                    cached.images.textures[texture].view(),
+                ),
             },
             wgpu::BindGroupEntry {
                 binding: 2,
-                resource: wgpu::BindingResource::Sampler(&cached.samplers[texture]),
+                resource: wgpu::BindingResource::Sampler(&cached.images.samplers[texture]),
             },
         ],
     })

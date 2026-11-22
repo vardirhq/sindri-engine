@@ -10,7 +10,7 @@ use std::collections::BTreeSet;
 
 use sindri_assets::AssetLoadOutcome;
 use sindri_core::{AssetId, World};
-use sindri_scene::{SceneExtractor, referenced_models};
+use sindri_scene::{SceneExtractor, referenced_models, referenced_tile_sets, tile_set_models};
 
 use super::{SceneTextures, TextureNote};
 
@@ -24,6 +24,14 @@ impl SceneTextures {
         let mut notes = Vec::new();
         let mut references = referenced_models(world);
         references.extend(referenced_models(&self.prefab_world));
+        references.extend(
+            referenced_tile_sets(world)
+                .into_iter()
+                .chain(referenced_tile_sets(&self.prefab_world))
+                .filter_map(|id| self.tile_set_bindings.get(&id))
+                .flat_map(tile_set_models)
+                .map(ToString::to_string),
+        );
         let mut wanted: BTreeSet<AssetId> = references
             .iter()
             .filter_map(|reference| AssetId::new(reference.clone()).ok())

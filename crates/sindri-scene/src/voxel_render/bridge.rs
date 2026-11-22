@@ -234,7 +234,7 @@ impl VoxelRenderBridge {
     }
 }
 
-fn section_model(section: SectionCoord) -> Mat4 {
+pub(crate) fn section_model(section: SectionCoord) -> Mat4 {
     let min = section.min_voxel();
     #[allow(clippy::cast_precision_loss)]
     Mat4::from_translation(Vec3::new(min.x as f32, min.y as f32, min.z as f32))

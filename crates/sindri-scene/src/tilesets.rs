@@ -33,6 +33,14 @@ pub fn tile_set_textures(tile_set: &TileSetDocument) -> BTreeSet<String> {
         .collect()
 }
 
+/// GLB references used by the 3D voxel blocks view.
+pub fn tile_set_models(tile_set: &TileSetDocument) -> impl Iterator<Item = &AssetId> {
+    tile_set
+        .tiles
+        .values()
+        .filter_map(|tile| tile.model.as_ref())
+}
+
 /// Sheet IDs and the textures they slice for every named baked face.
 pub fn tile_set_sheets(tile_set: &TileSetDocument) -> BTreeMap<AssetId, String> {
     tile_set

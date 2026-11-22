@@ -2,11 +2,11 @@
 
 use std::cell::{RefCell, RefMut};
 use std::collections::{BTreeMap, BTreeSet};
-use std::fmt;
+use std::{fmt, sync::Arc};
 
 use sindri_core::{EntityId, SceneComponent, World};
 use sindri_render::{
-    ExtractedFrame, FrameCamera, FrameCommand, FramePass, RenderLayer, RenderStage,
+    ExtractedFrame, FrameCamera, FrameCommand, FramePass, RenderLayer, RenderModel, RenderStage,
 };
 use sindri_voxel::{
     MeshingProfile, ResidencyConfig, SECTION_EDGE, SectionCoord, SectionMeshKey, VoxelCoord,
@@ -24,6 +24,7 @@ use super::voxel_appearance::{
     Appearance, BlockMaterials, Resolved, block_palette, resolve_appearance,
 };
 use super::voxel_ground::{VoxelGround, voxel_space};
+use super::voxel_models::VoxelModels;
 use super::voxel_source::{Palette, SceneTerrain, terrain_source};
 use super::{SceneExtractError, SceneExtractor, transform_matrix};
 
@@ -50,6 +51,8 @@ struct ResidentVoxelWorld {
     materials: BlockMaterials,
     world: VoxelWorld<SceneTerrain>,
     render: VoxelRenderBridge,
+    models: VoxelModels,
+    section_models: BTreeMap<SectionCoord, Vec<Arc<RenderModel>>>,
     resident: BTreeSet<SectionCoord>,
     /// The component's edits as last applied, and the revision they were
     /// read at. Asked again only when the entity changes.
@@ -84,7 +87,7 @@ impl fmt::Debug for VoxelWorldCache {
 }
 
 impl ResidentVoxelWorld {
-    fn new(definition: VoxelWorldDefinition, resolved: Resolved) -> Self {
+    fn new(definition: VoxelWorldDefinition, resolved: Resolved, models: VoxelModels) -> Self {
         let horizontal =
             i32::try_from(definition.render_radius).expect("validated voxel radius fits in i32");
         let vertical =
@@ -94,10 +97,12 @@ impl ResidentVoxelWorld {
                 definition.source.clone(),
                 ResidencyConfig::new(horizontal, vertical, 0, 0),
             ),
-            materials: BlockMaterials::of(&definition.appearance),
+            materials: BlockMaterials::of(&definition.appearance, &models),
             definition,
             resolved,
             render: VoxelRenderBridge::default(),
+            models,
+            section_models: BTreeMap::new(),
             resident: BTreeSet::new(),
             edits: BTreeMap::new(),
             edits_revision: None,
@@ -133,6 +138,7 @@ impl ResidentVoxelWorld {
         for section in &delta.left {
             self.resident.remove(section);
             self.render.remove_section(*section);
+            self.section_models.remove(section);
         }
         self.resident.extend(delta.entered.iter().copied());
 
@@ -144,7 +150,14 @@ impl ResidentVoxelWorld {
                     job.key.section,
                 );
                 let compiled = compile_block_mesh(&mesh, resolved)?;
-                self.render.finish(job, compiled)?;
+                let models = self.models.compile(&mesh.custom_cells)?;
+                if self.render.finish(job, compiled)? {
+                    if models.is_empty() {
+                        self.section_models.remove(&job.key.section);
+                    } else {
+                        self.section_models.insert(job.key.section, models);
+                    }
+                }
             }
         }
 
@@ -160,6 +173,13 @@ impl ResidentVoxelWorld {
                     self.render
                         .draw_commands(key, &|look| resolved.surface(look, seconds)),
                 );
+                if let Some(models) = self.section_models.get(section) {
+                    let model = crate::voxel_render::section_model(*section);
+                    commands.extend(models.iter().map(|asset| FrameCommand::Model {
+                        model,
+                        asset: Arc::clone(asset),
+                    }));
+                }
             }
         }
         Ok(commands)
@@ -268,19 +288,26 @@ impl SceneExtractor {
         let refused = match definition(component, tile_sets).and_then(|definition| {
             let resolved = resolve_appearance(&definition.appearance, textures)?
                 .with_seed(component.variant_seed);
-            Ok((definition, resolved))
+            let (models, diagnostic) =
+                VoxelModels::resolve(&definition.appearance, &self.models, self.tolerant())?;
+            Ok((definition, resolved, models, diagnostic))
         }) {
-            Ok((definition, resolved)) => {
+            Ok((definition, resolved, models, diagnostic)) => {
                 let fresh = runtimes.get(&entity).is_some_and(|runtime| {
-                    runtime.definition == definition && runtime.resolved == resolved
+                    runtime.definition == definition
+                        && runtime.resolved == resolved
+                        && runtime.models == models
                 });
                 if !fresh {
                     if let Some(mut previous) = runtimes.remove(&entity) {
                         push_commands(previous.release_all(), component.layer, camera, frame, None);
                     }
-                    runtimes.insert(entity, ResidentVoxelWorld::new(definition, resolved));
+                    runtimes.insert(
+                        entity,
+                        ResidentVoxelWorld::new(definition, resolved, models),
+                    );
                 }
-                None
+                diagnostic
             }
             Err(error) if self.tolerant() && runtimes.contains_key(&entity) => Some(error),
             Err(error) => return Err(error),
@@ -309,7 +336,9 @@ impl SceneExtractor {
         }
         let mut commands = runtime.commands(focus, camera.view_projection * root, seconds)?;
         for command in &mut commands {
-            if let FrameCommand::CachedTexturedMesh { model, .. } = command {
+            if let FrameCommand::CachedTexturedMesh { model, .. }
+            | FrameCommand::Model { model, .. } = command
+            {
                 *model = root * *model;
             }
         }

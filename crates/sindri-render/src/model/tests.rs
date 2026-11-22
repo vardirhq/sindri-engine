@@ -100,7 +100,19 @@ fn resource_rejects_bad_indices_materials_and_images() {
         mag_filter: wgpu::FilterMode::Linear,
         min_filter: wgpu::FilterMode::Linear,
     });
-    assert!(RenderModel::new(data).is_err());
+    assert!(RenderModel::new(data.clone()).is_err());
+    data.images[0].rgba.push(255);
+    let source = std::sync::Arc::new(RenderModel::new(data.clone()).unwrap());
+    data.images.clear();
+    assert!(RenderModel::new(data.clone()).is_err());
+    let batch =
+        std::sync::Arc::new(RenderModel::with_shared_images(data.clone(), &source).unwrap());
+    assert!(std::sync::Arc::ptr_eq(
+        RenderModel::image_owner(&batch),
+        &source
+    ));
+    data.surfaces[0].texture = Some(1);
+    assert!(RenderModel::with_shared_images(data, &batch).is_err());
 }
 
 #[test]

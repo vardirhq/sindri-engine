@@ -253,6 +253,8 @@ pub struct BlockMesh {
     pub opaque: BlockMeshPart,
     pub cutout: BlockMeshPart,
     pub transparent: BlockMeshPart,
+    /// Cells whose section-local geometry is supplied by the caller.
+    pub custom_cells: Vec<([u8; 3], VoxelId)>,
 }
 
 impl BlockMesh {
@@ -310,6 +312,7 @@ pub fn mesh_block_section_with_materials(
         opaque: BlockMeshPart::default(),
         cutout: BlockMeshPart::default(),
         transparent: BlockMeshPart::default(),
+        custom_cells: Vec::new(),
     };
     for y in 0..SECTION_EDGE {
         for z in 0..SECTION_EDGE {
@@ -319,12 +322,16 @@ pub fn mesh_block_section_with_materials(
                 if voxel_id.is_air() {
                     continue;
                 }
-                let material = materials.material(voxel_id);
                 let local = [
                     u8::try_from(x).expect("section x fits in u8"),
                     u8::try_from(y).expect("section y fits in u8"),
                     u8::try_from(z).expect("section z fits in u8"),
                 ];
+                if materials.uses_custom_geometry(voxel_id) {
+                    mesh.custom_cells.push((local, voxel_id));
+                    continue;
+                }
+                let material = materials.material(voxel_id);
                 let above = source.voxel(VoxelCoord::new(voxel.x, voxel.y + 1, voxel.z));
                 let placed = Placed {
                     voxel: voxel_id,

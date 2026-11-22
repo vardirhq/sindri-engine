@@ -262,6 +262,27 @@ An invalid value is reported against the field, for example
 ``voxel generator `biomes.2.trees` must be from 0 to 1``, and the editor keeps
 drawing the last valid world meanwhile.
 
+### Modeled blocks
+
+A tile's optional `"model": "models/vent-block.glb"` replaces its face
+geometry in the 3D voxel blocks view. Coordinates are in cell units with
+the lower corner at `[0, 0, 0]` and the upper corner at `[1, 1, 1]`.
+The transformed GLB geometry must be nonempty and fit within those bounds.
+Use a static, opaque GLB with embedded images. Face sprites remain required
+for map and tile views, and the block must have full-cell bounds. Collision
+continues to use that cell and respects `collides`.
+
+The exporter follows models referenced by the block set, and the desktop
+editor requests them when the set loads. Missing or invalid models produce
+asset diagnostics. Tolerant hosts draw the face-textured box until the model
+is available. The Android editor does not yet bind models. Each resident
+section combines repeated uses of a GLB into indexed batches by material.
+Batches share the source GLB's images and GPU textures. Model geometry follows the
+world owner's transform and uses the section's residency and culling.
+Modeled blocks draw all their geometry and leave their neighbors' faces
+visible, including across section boundaries. DRIFT's shuttle exercises
+this with recessed vents that are generated alongside its block set.
+
 ## Not yet
 
 Water is drawn opaque: a liquid hides only its own inner faces, but light does

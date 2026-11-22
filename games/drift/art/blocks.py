@@ -13,9 +13,13 @@ Every texture is drawn from fixed seeds, so re-running this changes nothing.
 import json
 import math
 import random
+import sys
 from pathlib import Path
 
 from PIL import Image, ImageChops, ImageDraw, ImageFilter
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "tools"))
+from glb import Material, Mesh  # noqa: E402
 
 ASSETS = Path(__file__).resolve().parent.parent / "assets"
 TEXTURES = ASSETS / "textures" / "blocks"
@@ -192,9 +196,40 @@ BLOCKS = {
 GLOWING = {"light"}
 
 
+def vent_model():
+    """A double-sided louvered insert, with a recessed core and a thick rim."""
+    mesh = Mesh()
+    materials = {
+        "rim": Material("#6d797a", roughness=0.54, metallic=0.48),
+        "recess": Material("#222b30", roughness=0.83, metallic=0.3),
+        "louver": Material("#515c60", roughness=0.58, metallic=0.55),
+        "fastener": Material("#ad9b72", roughness=0.42, metallic=0.65),
+    }
+    for y in (0.075, 0.925):
+        mesh.box("rim", (0.5, y, 0.5), (1, 0.15, 1), bevel=0.045)
+    for x in (0.075, 0.925):
+        mesh.box("rim", (x, 0.5, 0.5), (0.15, 0.7, 1), bevel=0.045)
+    mesh.box("recess", (0.5, 0.5, 0.5), (0.8, 0.8, 0.44))
+    for z, angle in ((0.17, 20), (0.83, -20)):
+        for y in (0.24, 0.37, 0.50, 0.63, 0.76):
+            mesh.box("louver", (0.5, y, z), (0.66, 0.07, 0.13),
+                     rotation=(angle, 0, 0), bevel=0.012)
+    for z in (0.055, 0.945):
+        for x in (0.12, 0.88):
+            for y in (0.085, 0.915):
+                mesh.cylinder("fastener", (x, y, z), 0.028, 0.025,
+                              segments=6, rotation=(90, 0, 0))
+    models = ASSETS / "models"
+    models.mkdir(parents=True, exist_ok=True)
+    mesh.write(models / "vent-block.glb", materials, name="vent-block")
+
+
 def tile(name):
-    face = {"sprite": f"textures/blocks/{name}.png", "size": [1.0, 1.0]}
+    texture = "bulkhead" if name == "vent" else name
+    face = {"sprite": f"textures/blocks/{texture}.png", "size": [1.0, 1.0]}
     out = {"faces": {"top": face, "bottom": face, "south": face, "east": face}}
+    if name == "vent":
+        out["model"] = "models/vent-block.glb"
     if name in GLOWING:
         out["glow"] = 1.0
     return out
@@ -204,7 +239,8 @@ def main():
     TEXTURES.mkdir(parents=True, exist_ok=True)
     for name, draw in BLOCKS.items():
         draw().save(TEXTURES / f"{name}.png", optimize=True)
-    tileset = {"format_version": 1, "tiles": {name: tile(name) for name in BLOCKS}}
+    vent_model()
+    tileset = {"format_version": 1, "tiles": {name: tile(name) for name in (*BLOCKS, "vent")}}
     (ASSETS / "blocks.tileset").write_text(json.dumps(tileset, indent=2) + "\n")
 
 

@@ -348,6 +348,9 @@ impl ProjectExport {
                 .map_err(|error| ExportError::unreadable(&resolve(project, &id), &error))?;
             let tile_set = sindri_core::TileSetDocument::from_json(&text)
                 .map_err(|error| ExportError::Project(format!("{id}: {error}")))?;
+            for model in sindri_scene::tile_set_models(&tile_set) {
+                wanted.insert(model.to_string(), AssetKind::Model);
+            }
             for texture in sindri_scene::tile_set_textures(&tile_set) {
                 wanted.insert(texture, AssetKind::Texture);
             }

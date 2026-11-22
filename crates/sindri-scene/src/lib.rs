@@ -187,7 +187,9 @@ pub use voxel_render::{
     VoxelRenderStats, VoxelTexture, VoxelTextureSource, compile_block_mesh,
 };
 
-pub use tilesets::{TileSetBindings, referenced_tile_sets, tile_set_sheets, tile_set_textures};
+pub use tilesets::{
+    TileSetBindings, referenced_tile_sets, tile_set_models, tile_set_sheets, tile_set_textures,
+};
 
 pub use render_material::{
     RenderMaterialError, RenderMaterialSources, ResolvedRenderMaterial,

@@ -102,6 +102,9 @@ impl SceneTextures {
                         ))),
                         Err(error) => notes.push(TextureNote::Failed(error.to_string())),
                     }
+                    if let Some(watch) = &mut self.watch {
+                        watch.watch(&id);
+                    }
                     ready.push(tile_set);
                 }
                 AssetLoadOutcome::Failed(error) => notes.push(TextureNote::Failed(format!(

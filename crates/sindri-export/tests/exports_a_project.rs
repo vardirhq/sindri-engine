@@ -171,3 +171,15 @@ fn the_page_carries_the_base_path_it_was_given() {
     let page = std::fs::read_to_string(scratch.0.join("index.html")).expect("a page");
     assert!(page.contains(r#"<base href="/sindri-engine/">"#), "{page}");
 }
+
+#[test]
+fn drift_exports_the_vent_model_referenced_only_by_its_block_set() {
+    let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../games/drift");
+    let export = ProjectExport::gather(&root).expect("DRIFT gathers");
+    assert!(
+        export
+            .assets
+            .iter()
+            .any(|asset| { asset.id == "models/vent-block.glb" && asset.kind == AssetKind::Model })
+    );
+}
