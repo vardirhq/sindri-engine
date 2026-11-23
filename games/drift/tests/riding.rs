@@ -123,7 +123,6 @@ fn eye_stays_above_the_diver_in_a_rolling_ship() {
 }
 
 #[test]
-#[ignore = "the moving-frame attachment is not implemented yet"]
 fn diver_remains_on_the_deck_when_ship_rolls() {
     let mut game = aboard_a_flying_shuttle();
     let shuttle = game.run.entity("shuttle").expect("the shuttle");
@@ -147,5 +146,181 @@ fn diver_remains_on_the_deck_when_ship_rolls() {
     assert!(
         (now.x - start.x).abs() < 0.5 && (now.z - start.z).abs() < 0.5,
         "diver stays in place: {start:?} -> {now:?}"
+    );
+}
+
+#[test]
+fn diver_stays_on_deck_through_a_long_roll() {
+    let mut game = aboard_a_flying_shuttle();
+    let shuttle = game.run.entity("shuttle").expect("the shuttle");
+    let body = game
+        .run
+        .world
+        .get_mut(shuttle)
+        .unwrap()
+        .components
+        .get_mut("sindri.physics3d.rigid_body")
+        .unwrap();
+    body["angular_velocity"] = json!([0.65, 0.0, 0.0]);
+    game.wait(0.2);
+    let start = in_shuttle(&game, game.position("diver"));
+    let mut turn = 0.0;
+    let mut last =
+        Quat::from_array(game.run.world.world_transform(shuttle).unwrap().rotation).normalize();
+    for _ in 0..600 {
+        game.step();
+        let next =
+            Quat::from_array(game.run.world.world_transform(shuttle).unwrap().rotation).normalize();
+        turn += 2.0 * last.dot(next).abs().clamp(0.0, 1.0).acos();
+        last = next;
+    }
+    assert!(turn > 5.5, "the ship makes almost a full turn: {turn}");
+    let now = in_shuttle(&game, game.position("diver"));
+    assert!(
+        (now - start).length() < 0.5,
+        "diver remains aboard: {start:?} -> {now:?}"
+    );
+}
+
+#[test]
+fn diver_stays_on_deck_through_a_long_pitch() {
+    let mut game = aboard_a_flying_shuttle();
+    let shuttle = game.run.entity("shuttle").expect("the shuttle");
+    let body = game
+        .run
+        .world
+        .get_mut(shuttle)
+        .unwrap()
+        .components
+        .get_mut("sindri.physics3d.rigid_body")
+        .unwrap();
+    body["angular_velocity"] = json!([0.0, 0.0, 0.65]);
+    game.wait(0.2);
+    let start = in_shuttle(&game, game.position("diver"));
+    game.wait(3.0);
+    let now = in_shuttle(&game, game.position("diver"));
+    assert!(
+        (now - start).length() < 0.5,
+        "diver remains aboard: {start:?} -> {now:?}"
+    );
+}
+
+#[test]
+fn leaving_a_turning_ship_keeps_world_velocity() {
+    let mut game = aboard_a_flying_shuttle();
+    game.wait(0.5);
+    let diver = game.run.entity("diver").expect("the diver");
+    let shuttle = game.run.entity("shuttle").expect("the shuttle");
+    let transform = game
+        .run
+        .world
+        .world_transform(shuttle)
+        .expect("ship transform");
+    let rotation = Quat::from_array(transform.rotation).normalize();
+    let edge = Vec3::from_array(transform.position)
+        + rotation * (Vec3::new(22.0, 2.6, 5.0) * Vec3::from_array(transform.scale));
+    game.place("diver", edge.to_array());
+    game.wait(0.2);
+    game.press(Key::W);
+    let mut previous = Vec3::ZERO;
+    let mut exited = false;
+    for _ in 0..180 {
+        previous = Vec3::from_array(
+            game.run
+                .session
+                .physics3d()
+                .world()
+                .linear_velocity(diver)
+                .unwrap(),
+        );
+        game.step();
+        if game.has_said("Drift: weightless") {
+            exited = true;
+            break;
+        }
+    }
+    assert!(exited, "the diver left the ship: {:?}", game.said);
+    let after = Vec3::from_array(
+        game.run
+            .session
+            .physics3d()
+            .world()
+            .linear_velocity(diver)
+            .unwrap(),
+    );
+    assert!(
+        after.distance(previous) < 0.5,
+        "velocity on exit: {previous:?} -> {after:?}"
+    );
+}
+
+#[test]
+fn walking_and_jumping_aboard_a_rolling_ship() {
+    let mut game = aboard_a_flying_shuttle();
+    let shuttle = game.run.entity("shuttle").expect("the shuttle");
+    let body = game
+        .run
+        .world
+        .get_mut(shuttle)
+        .unwrap()
+        .components
+        .get_mut("sindri.physics3d.rigid_body")
+        .unwrap();
+    body["angular_velocity"] = json!([0.4, 0.0, 0.0]);
+    game.wait(0.5);
+    let start = in_shuttle(&game, game.position("diver"));
+    game.press(Key::W);
+    game.wait(0.8);
+    game.release(Key::W);
+    game.wait(0.3);
+    let walked = in_shuttle(&game, game.position("diver"));
+    assert!(
+        (walked - start).length() > 2.0,
+        "walked: {start:?} -> {walked:?}"
+    );
+    assert!(
+        (walked.y - start.y).abs() < 0.3,
+        "still standing: {start:?} -> {walked:?}"
+    );
+    game.tap(Key::Space);
+    game.wait(0.2);
+    let jumped = in_shuttle(&game, game.position("diver"));
+    assert!(
+        jumped.y > walked.y + 0.3,
+        "jump rises from deck: {walked:?} -> {jumped:?}"
+    );
+}
+
+#[test]
+fn wall_stops_diver_aboard_a_rolling_ship() {
+    let mut game = aboard_a_flying_shuttle();
+    let shuttle = game.run.entity("shuttle").expect("the shuttle");
+    let body = game
+        .run
+        .world
+        .get_mut(shuttle)
+        .unwrap()
+        .components
+        .get_mut("sindri.physics3d.rigid_body")
+        .unwrap();
+    body["angular_velocity"] = json!([0.3, 0.0, 0.0]);
+    game.wait(0.5);
+    let start = in_shuttle(&game, game.position("diver"));
+    game.press(Key::D);
+    game.wait(3.0);
+    game.release(Key::D);
+    game.wait(0.2);
+    let now = in_shuttle(&game, game.position("diver"));
+    assert!(
+        (now.z - start.z).abs() > 1.0,
+        "diver walked toward the wall: {start:?} -> {now:?}"
+    );
+    assert!(
+        now.z > 1.3 && now.z < 8.7,
+        "diver remains inside walls: {now:?}"
+    );
+    assert!(
+        now.y > 2.0 && now.y < 4.0,
+        "diver remains near deck: {now:?}"
     );
 }
