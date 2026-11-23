@@ -2,6 +2,8 @@
 
 # Changelog
 
+- DRIFT keeps the camera above the diver relative to a tilted ship while aboard; full body attachment is still under development.
+
 - Voxel block sets can use opaque static GLBs with section-local material batching. DRIFT’s shuttle uses recessed vent blocks alongside its face-textured hull.
 
 - `Physics3d.apply_impulse_at(entity, impulse, point)`: an impulse through a world-space point, which turns a 3D body as well as pushing it when the point is off its centre of mass. `project-capture`'s `place:` step takes an optional third coordinate, for 3D scenes.

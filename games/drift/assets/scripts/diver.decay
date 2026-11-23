@@ -98,6 +98,7 @@ script Diver {
 
     var propellant: number = 100.0;
     var eye: Entity = null;
+    var eye_height: number = 0.0;
     var hold: Entity = null;
     // The handhold last pushed off from: not caught again until out of reach.
     var left_behind: Entity = null;
@@ -127,6 +128,7 @@ script Diver {
 
     fn start() {
         this.eye = World.find("Eye");
+        this.eye_height = this.eye.transform.position.y;
         // Where the diver wakes after a blackout: by the bunk, whatever the start.
         this.spawn = World.find("Spawn").transform.world_position;
         place();
@@ -151,6 +153,9 @@ script Diver {
         let was_hull = this.hull;
         place();
         carried(dt, was_hull);
+        // The body stays world-upright, so place its eye along the hull's
+        // up axis while aboard. Outside, hull_turn() is the identity.
+        this.eye.transform.position = qrot(hull_turn(), Vec3(0.0, this.eye_height, 0.0));
         if this.aboard && !was_aboard {
             upright_from_view();
             this.hold = null;

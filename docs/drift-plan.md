@@ -263,7 +263,10 @@ Engine work, each step general, in order:
 2. **Voxel bodies.** *Done.* `sindri.physics3d.voxel_body`: a built world's
    blocks merged into exact boxes as one rigid body, rebuilt on edits with its
    motion kept (`docs/physics.md`).
-3. **Riding a moving ship.** *Started.* Decay's `transform.to_local` and
+3. **Riding a moving ship.** *Started.* The camera offset follows hull up
+   while aboard, but the rotation-locked capsule is not attached to the hull
+   and can slide on a rolling deck. Full moving-frame attachment and exit
+   momentum remain open. Decay's `transform.to_local` and
    `to_world` measure points in an entity's own space. Every region the diver
    can be aboard is a hull (`scripts/hull.decay`): an entity tagged `hull`
    with an interior box in its own space and whether it has gravity and air.
