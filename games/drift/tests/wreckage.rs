@@ -12,10 +12,7 @@ fn refuge_and_cargo_section_are_separated_by_open_space() {
     let game = Run::open().expect("DRIFT opens");
     let door = game.position("outer-door");
     let hold = game.position("start-hold");
-    assert!(
-        hold[0] - door[0] > 4.0,
-        "the refuge is apart from the hold"
-    );
+    assert!(hold[0] - door[0] > 4.0, "the refuge is apart from the hold");
     for index in 0..3 {
         let cable = game
             .run
