@@ -9,4 +9,6 @@ state Ship {
     var pressurized: bool = true;
     // Whether the diver is at the shuttle's controls.
     var piloting: bool = false;
+    // The cabin recycler can refill the suit's oxygen once repaired.
+    var recycler_repaired: bool = false;
 }
