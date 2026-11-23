@@ -44,6 +44,12 @@ not a claim that the new opening already exists.
 - **Opening and connection:** establish the compartment as a separate refuge,
   place a navigable ruined structure and visible connecting cables, and verify
   the route with collision, lighting, native/browser captures and a playtest.
+  *Started:* the old cargo section now floats five meters from the refuge's
+  airlock, with visible service cables crossing the gap. An open, broken
+  block-built frame extends the wreckage field. The cables are visual only;
+  the existing tether is anchored in the cargo section, not the refuge. The
+  route, lighting, performance and first-person readability still need a
+  graphical playtest, and the separate shuttle remains a prototype.
 - **Useful salvage:** choose and communicate a specific part and repair; test
   pickup, carrying, installation, feedback, and repeated interaction. Until
   then the existing canister counter has no crafting use.
