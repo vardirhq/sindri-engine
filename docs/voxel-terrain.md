@@ -277,7 +277,8 @@ editor requests them when the set loads. Missing or invalid models produce
 asset diagnostics. Tolerant hosts draw the face-textured box until the model
 is available. The Android editor does not yet bind models. Each resident
 section combines repeated uses of a GLB into indexed batches by material.
-Batches share the source GLB's images and GPU textures. Model geometry follows the
+Batches share the source GLB's images and GPU textures, including normal and
+packed roughness/metalness maps. Model geometry follows the
 world owner's transform and uses the section's residency and culling.
 Modeled blocks draw all their geometry and leave their neighbors' faces
 visible, including across section boundaries. DRIFT's shuttle exercises

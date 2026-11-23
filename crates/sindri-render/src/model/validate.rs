@@ -66,7 +66,15 @@ pub(super) fn data(data: &ModelData, image_count: usize) -> Result<(), ModelRend
         }
     }
     for surface in &data.surfaces {
-        if surface.texture.is_some_and(|i| i >= image_count)
+        if [
+            surface.texture,
+            surface.normal_texture,
+            surface.metallic_roughness_texture,
+        ]
+        .into_iter()
+        .flatten()
+        .any(|i| i >= image_count)
+            || !surface.normal_scale.is_finite()
             || !surface
                 .base_color
                 .into_iter()

@@ -2,6 +2,10 @@
 
 # Changelog
 
+- Imported GLB models support embedded normal and packed roughness/metalness maps. All eight DRIFT shuttle blocks use them for painted, brushed, ceramic and emissive finishes.
+
+- DRIFT’s shuttle uses modeled geometry for all eight voxel block types, with recessed hull panels, raised deck treads, amber hazard bands and warm cabin lighting.
+
 - DRIFT aligns the diver capsule with a ship's deck and corrects idle footing during ship rotation; moving-frame attachment still needs visual playtesting.
 
 - DRIFT keeps the camera above the diver relative to a tilted ship while aboard; full body attachment is still under development.

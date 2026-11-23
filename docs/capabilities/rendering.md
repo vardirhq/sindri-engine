@@ -995,9 +995,9 @@ Self-contained binary GLB decodes to reusable geometry, hierarchy, materials and
 
 Engine 🟡 · Editor ❌ · Decay ❌ · Proof ✅ — parity row *glTF / model import*
 
-**Tested by:** [`game/tests/the_game_holds_together.rs`](../../game/tests/the_game_holds_together.rs), [`crates/sindri-assets/src/decode/model/tests.rs`](../../crates/sindri-assets/src/decode/model/tests.rs), [`crates/sindri-render/src/model/tests.rs`](../../crates/sindri-render/src/model/tests.rs), [`crates/sindri-gpu/tests/imported_models.rs`](../../crates/sindri-gpu/tests/imported_models.rs), [`crates/sindri-scene/tests/extraction/models.rs`](../../crates/sindri-scene/tests/extraction/models.rs), [`crates/sindri-export/tests/imported_models.rs`](../../crates/sindri-export/tests/imported_models.rs), [`crates/sindri/tests/imported_model.rs`](../../crates/sindri/tests/imported_model.rs)
+**Tested by:** [`game/tests/the_game_holds_together.rs`](../../game/tests/the_game_holds_together.rs), [`crates/sindri-assets/src/decode/model/tests.rs`](../../crates/sindri-assets/src/decode/model/tests.rs), [`crates/sindri-render/src/model/tests.rs`](../../crates/sindri-render/src/model/tests.rs), [`crates/sindri-gpu/tests/imported_models.rs`](../../crates/sindri-gpu/tests/imported_models.rs), [`crates/sindri-gpu/tests/imported_models/maps.rs`](../../crates/sindri-gpu/tests/imported_models/maps.rs), [`games/drift/tests/culling.rs`](../../games/drift/tests/culling.rs), [`crates/sindri-scene/tests/extraction/models.rs`](../../crates/sindri-scene/tests/extraction/models.rs), [`crates/sindri-export/tests/imported_models.rs`](../../crates/sindri-export/tests/imported_models.rs), [`crates/sindri/tests/imported_model.rs`](../../crates/sindri/tests/imported_model.rs)
 
-**Exercised in:** [`game`](../../game), [`examples/model-collision`](../../examples/model-collision)
+**Exercised in:** [`game`](../../game), [`examples/model-collision`](../../examples/model-collision), [`games/drift`](../../games/drift)
 
 **See:** [`docs/imported-models.md`](../../docs/imported-models.md)
 
@@ -1010,14 +1010,17 @@ Engine 🟡 · Editor ❌ · Decay ❌ · Proof ✅ — parity row *glTF / model
 <summary>Evidence</summary>
 
 `ModelAssetDecoder` parses self-contained binary GLB into reusable CPU geometry,
-node local matrices/children, materials and embedded base-color textures. The
-tiny deterministic fixture exercises both index widths, multiple primitives,
+node local matrices/children, materials and embedded base-color, normal and
+metallic/roughness textures. The tiny deterministic fixture exercises both
+index widths, multiple primitives,
 mesh reuse, non-indexed triangles and malformed/unsupported diagnostics.
 `AssetLoader` reuse is covered. A separate renderer resource and GPU path retain
 normal/UV geometry, hierarchy, textures and materials, composing node and entity
 matrices with inverse-transpose normals. GPU readback coverage checks colors,
-depth and upload reuse; renderer resource tests check malformed data. Scene
-`ModelComponent` references validate asset paths and extract shared resources
+depth and upload reuse. Readback also checks UV-aligned normal maps and linear
+roughness/metalness sampling against equivalent numeric factors. Renderer
+resource tests check malformed data. Scene `ModelComponent` references validate
+asset paths and extract shared resources
 with entity world transforms. Disabled models are discovered without drawing;
 missing bindings name the asset. The public facade converts decoded models
 without cross-coupling foundational crates. The editor catalogue assigns the
@@ -1039,6 +1042,7 @@ selection and save/reopen; the imported wall blocks keyboard movement and the
 walker renders on the goal pad.
 Causeway draws every island, figure and building as a generated GLB with
 emissive materials, lit by the sun and point lights.
+DRIFT exercises mapped materials through all eight shuttle block GLBs.
 See [imported models](../imported-models.md).
 
 </details>

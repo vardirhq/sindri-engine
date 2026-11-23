@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Builds DRIFT's block set: `assets/blocks.tileset` and its textures.
+"""Builds DRIFT's voxel block set, models, and face textures.
 
 Ships in DRIFT are built of half-metre blocks (a built `sindri.voxel_world`
 scaled by 0.5). These are their materials, drawn to read as engineered metal
@@ -8,8 +8,10 @@ edges, tread plate for decks, interior bulkhead panels with vents, dark
 structural frame, hazard striping and a glowing light panel. Each face is a
 128-pixel texture for half a metre, about four pixels a centimetre.
 
-Every texture is drawn from fixed seeds, so re-running this changes nothing.
+Models provide the geometry in 3D. The face textures support map views and
+loading previews. Fixed seeds keep the generated art reproducible.
 """
+import io
 import json
 import math
 import random
@@ -20,6 +22,7 @@ from PIL import Image, ImageChops, ImageDraw, ImageFilter
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "tools"))
 from glb import Material, Mesh  # noqa: E402
+from block_models import texture_slots, write_models  # noqa: E402
 
 ASSETS = Path(__file__).resolve().parent.parent / "assets"
 TEXTURES = ASSETS / "textures" / "blocks"
@@ -196,7 +199,7 @@ BLOCKS = {
 GLOWING = {"light"}
 
 
-def vent_model():
+def vent_model(maps):
     """A double-sided louvered insert, with a recessed core and a thick rim."""
     mesh = Mesh()
     materials = {
@@ -221,15 +224,17 @@ def vent_model():
                               segments=6, rotation=(90, 0, 0))
     models = ASSETS / "models"
     models.mkdir(parents=True, exist_ok=True)
-    mesh.write(models / "vent-block.glb", materials, name="vent-block")
+    textures = texture_slots(maps, {
+        "rim": "primer", "recess": "primer", "louver": "brushed", "fastener": "brushed",
+    })
+    mesh.write(models / "vent-block.glb", materials, name="vent-block", textures=textures)
 
 
 def tile(name):
     texture = "bulkhead" if name == "vent" else name
     face = {"sprite": f"textures/blocks/{texture}.png", "size": [1.0, 1.0]}
     out = {"faces": {"top": face, "bottom": face, "south": face, "east": face}}
-    if name == "vent":
-        out["model"] = "models/vent-block.glb"
+    out["model"] = f"models/{name}-block.glb"
     if name in GLOWING:
         out["glow"] = 1.0
     return out
@@ -239,7 +244,77 @@ def main():
     TEXTURES.mkdir(parents=True, exist_ok=True)
     for name, draw in BLOCKS.items():
         draw().save(TEXTURES / f"{name}.png", optimize=True)
-    vent_model()
+    write_block_assets()
+
+
+def png_bytes(image):
+    blob = io.BytesIO()
+    image.save(blob, format="PNG", optimize=True)
+    return blob.getvalue()
+
+
+def enamel_wear():
+    """Quiet paint variation, scuffed metal grains and darkened seams."""
+    coat = fractal(177, ((32, 0.62), (12, 0.26), (3, 0.12)))
+    coat = coat.point(lambda value: 222 + value // 9)
+    shading = edge_mask(16).point(lambda value: value // 16)
+    coat = ImageChops.subtract(coat, shading)
+    draw = ImageDraw.Draw(coat)
+    rng = random.Random(98)
+    for _ in range(27):
+        x, y = rng.randrange(SIZE), rng.randrange(SIZE)
+        draw.line((x, y, x + rng.randint(2, 8), y - 1), fill=rng.randint(211, 246))
+    return coat.convert("RGB")
+
+
+def surface_maps():
+    """Five finishes with tangent-space normals and glTF packed surface data."""
+    result = {}
+    # Height amplitude controls the strength of the microrelief. The packed
+    # green channel modulates roughness and blue modulates metalness.
+    for finish, seed, strength, low, span, metal in (
+        ("enamel", 34, 0.0065, 176, 77, 255),
+        ("brushed", 35, 0.009, 139, 114, 255),
+        ("primer", 36, 0.004, 191, 61, 238),
+        ("ceramic", 37, 0.003, 192, 60, 255),
+        ("lens", 38, 0.0018, 204, 50, 255),
+    ):
+        grain = fractal(seed, ((16, 0.45), (5, 0.40), (2, 0.15)))
+        wear = noise(seed + 200, 28)
+        if finish in ("enamel", "brushed"):
+            draw = ImageDraw.Draw(grain)
+            rng = random.Random(seed)
+            for _ in range(56 if finish == "brushed" else 24):
+                x, y = rng.randrange(SIZE), rng.randrange(SIZE)
+                draw.line((x, y, x + rng.randint(2, 14), y), fill=rng.randint(70, 115))
+        height = grain.load()
+        variation = wear.load()
+        normals, packed = [], []
+        for y in range(SIZE):
+            for x in range(SIZE):
+                # Nearest neighbors wrap with the sampler at the UV seam.
+                du = (height[(x + 1) % SIZE, y] - height[(x - 1) % SIZE, y]) * strength
+                dv = (height[x, (y + 1) % SIZE] - height[x, (y - 1) % SIZE]) * strength
+                length = math.hypot(du, dv, 1)
+                normals.append(tuple(round(127.5 * (1 + n / length)) for n in (-du, -dv, 1)))
+                roughness = low + span * variation[x, y] // 255
+                packed.append((255, roughness, metal))
+        normal = Image.new("RGB", (SIZE, SIZE))
+        normal.putdata(normals)
+        material = Image.new("RGB", (SIZE, SIZE))
+        material.putdata(packed)
+        result[finish] = {
+            "normalTexture": png_bytes(normal),
+            "metallicRoughnessTexture": png_bytes(material),
+        }
+    result["enamel"]["baseColorTexture"] = png_bytes(enamel_wear())
+    return result
+
+
+def write_block_assets():
+    maps = surface_maps()
+    write_models(ASSETS / "models", maps)
+    vent_model(maps)
     tileset = {"format_version": 1, "tiles": {name: tile(name) for name in (*BLOCKS, "vent")}}
     (ASSETS / "blocks.tileset").write_text(json.dumps(tileset, indent=2) + "\n")
 

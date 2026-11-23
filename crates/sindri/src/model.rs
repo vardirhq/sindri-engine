@@ -66,6 +66,9 @@ pub fn prepare(asset: ModelAsset) -> Result<PreparedModel, ModelRenderError> {
         .map(|material| ModelSurface {
             base_color: material.base_color,
             texture: material.base_color_texture,
+            normal_texture: material.normal_texture,
+            normal_scale: material.normal_scale,
+            metallic_roughness_texture: material.metallic_roughness_texture,
             metallic: material.metallic,
             roughness: material.roughness,
             emissive: material.emissive,

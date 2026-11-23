@@ -51,6 +51,10 @@ def shuttle():
     for y in range(1, 5):
         for z in range(3, width - 3):
             blocks.pop((length - 1, y, z), None)
+    # Flush service panels sit below the registration stripe by the cockpit.
+    for z in (0, width - 1):
+        for x in (5, 6, 7):
+            put(x, 2, z, "bulkhead")
     # Adjacent ventilation inserts straddle the x=16 section boundary.
     for z in (0, width - 1):
         for x in (15, 16, 17):

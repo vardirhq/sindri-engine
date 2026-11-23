@@ -203,3 +203,25 @@ fn emissive_factors_are_preserved_and_invalid_values_rejected() {
     assert_eq!(error.kind(), AssetLoadErrorKind::UnsupportedFormat);
     assert!(error.message().contains("emissive"));
 }
+
+#[test]
+fn retains_mapped_surface_inputs_and_requires_uv0() {
+    let model = ModelAssetDecoder
+        .decode(bytes(modified(|json| {
+            json["materials"][1]["normalTexture"] = serde_json::json!({"index": 0, "scale": 0.75});
+            json["materials"][1]["pbrMetallicRoughness"]["metallicRoughnessTexture"] =
+                serde_json::json!({"index": 0});
+        })))
+        .unwrap();
+    let material = &model.materials[1];
+    assert_eq!(material.normal_texture, Some(0));
+    assert!((material.normal_scale - 0.75).abs() < f32::EPSILON);
+    assert_eq!(material.metallic_roughness_texture, Some(0));
+
+    let error = ModelAssetDecoder
+        .decode(bytes(modified(|json| {
+            json["materials"][1]["normalTexture"] = serde_json::json!({"index": 0, "texCoord": 1});
+        })))
+        .unwrap_err();
+    assert!(error.message().contains("TEXCOORD_0"));
+}

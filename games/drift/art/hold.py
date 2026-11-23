@@ -413,6 +413,13 @@ def wreckage():
                                          min_z=1.0, max_z=9.0, air=False),
         },
     ))
+    for index, x in enumerate((2.5, 6.5, 10.5, 14.5, 18.5)):
+        out.append(entity(
+            f"shuttle-fittings-light-{index}", "Shuttle work light",
+            parent="shuttle", position=(x, 6.72, 5.0),
+            **{"sindri.light": {"kind": "point", "color": [1.0, 0.79, 0.53],
+                               "intensity": 2.1, "range": 3.8}},
+        ))
     out += shuttle_parts()
     out.append(entity("salvage", "Salvage", **{
         "sindri.script": {"source": "scripts/salvage.decay", "script": "Salvage"}}))
