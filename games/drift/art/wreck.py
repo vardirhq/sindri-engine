@@ -35,6 +35,7 @@ MATERIALS = {
     "indicator": Material("#0a2a14", emissive="#2bff7a", strength=1.0),
     "star": Material("#000000", emissive="#dfe8ff", strength=1.0),
     "star-warm": Material("#000000", emissive="#ffd9a8", strength=1.0),
+    "local-star": Material("#000000", emissive="#fff1da", strength=4.0),
 }
 
 # The derelict: an octagonal hull module along X, torn open at its far end.
@@ -125,6 +126,13 @@ def canister():
 STAR_DISTANCE = 150.0
 
 
+def local_star():
+    """A visible emissive source for the scene's directional starlight."""
+    mesh = Mesh()
+    mesh.sphere("local-star", (0, 0, 0), 1.5, rings=12, segments=24)
+    mesh.write(MODELS / "local-star.glb", MATERIALS, name="local-star")
+
+
 def stars():
     """Points of light on a far sphere: one model, so the whole sky is one draw."""
     mesh = Mesh()
@@ -149,6 +157,7 @@ def main():
     girder()
     canister()
     stars()
+    local_star()
 
 
 if __name__ == "__main__":

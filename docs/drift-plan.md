@@ -183,6 +183,15 @@ work lamps and the suit's helmet light as spot lights, emissive panels and
 status lights inside. Bloom and exposure carry the glare of the star; fog is
 used inside smoke-filled or depressurized spaces, not in vacuum.
 
+The opening now has a visible emissive star aligned with the directional
+starlight and a low ambient fill to keep unlit silhouettes from disappearing
+completely. The cabin, airlock and helmet retain their local lights. This is an
+initial lighting pass: local point and spot lights do not yet cast shadows or
+respect occluders, so a lamp can illuminate through walls. The apparent star
+is a scene object at a fixed distance, not an astronomical sky; its visual
+alignment and visibility, dark routes and cabin readability still need an
+in-game capture and playtest.
+
 Models are made in Blender and exported as GLB, with AI-assisted modelling
 where it helps; following Causeway's lead, generation scripts and sources live
 in tree (`games/drift/art/`) so assets are reproducible. Asset complexity is set
