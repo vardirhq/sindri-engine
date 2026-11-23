@@ -32,13 +32,26 @@ script Salvage {
             this.carried = 0.0;
             print("Drift: stowed salvage");
         }
+        let recycler = World.find("Recycler");
+        let by_recycler = recycler.transform.world_position.distance(eye) <= 2.0;
+        if by_recycler && Ship.pressurized && !Ship.recycler_repaired
+            && this.stowed > 0.0 && (Input.Keyboard.just_pressed("E") || Controls.use_pressed) {
+            this.stowed -= 1.0;
+            Ship.recycler_repaired = true;
+            print("Drift: recycler repaired");
+        }
         let label = World.find("hud-salvage");
         if this.carried > 0.0 {
-            Ui.set_text(label, "CARRYING " + round(this.carried));
+            Ui.set_text(label, "SALVAGE SECURED - RETURN TO CABIN");
+        } else if Ship.recycler_repaired {
+            Ui.set_text(label, "RECYCLER ONLINE");
         } else if this.stowed > 0.0 {
-            Ui.set_text(label, "STOWED " + round(this.stowed) + " / " + round(this.total));
+            Ui.set_text(label, "PART STOWED - REPAIR RECYCLER");
         } else {
-            Ui.set_text(label, "");
+            Ui.set_text(label, "RECYCLER OFFLINE - FIND SALVAGE");
+        }
+        if by_recycler && Ship.pressurized && !Ship.recycler_repaired && this.stowed > 0.0 {
+            Ui.set_text(World.find("hud-prompt"), "E / ACTION  repair recycler");
         }
         if near.len > 0 {
             Ui.set_text(World.find("hud-prompt"), "G  take salvage");

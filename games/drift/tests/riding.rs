@@ -324,3 +324,63 @@ fn wall_stops_diver_aboard_a_rolling_ship() {
         "diver remains near deck: {now:?}"
     );
 }
+
+#[test]
+fn standing_under_ship_gravity_does_not_accelerate_the_ship() {
+    let mut game = aboard_a_flying_shuttle();
+    let shuttle = game.run.entity("shuttle").expect("the shuttle");
+    let body = game
+        .run
+        .world
+        .get_mut(shuttle)
+        .unwrap()
+        .components
+        .get_mut("sindri.physics3d.rigid_body")
+        .unwrap();
+    body["linear_velocity"] = json!([0.0, 0.0, 0.0]);
+    body["angular_velocity"] = json!([0.0, 0.0, 0.0]);
+    game.wait(1.0);
+    let before = Vec3::from_array(
+        game.run
+            .session
+            .physics3d()
+            .world()
+            .linear_velocity(shuttle)
+            .unwrap(),
+    );
+    game.wait(5.0);
+    let after = Vec3::from_array(
+        game.run
+            .session
+            .physics3d()
+            .world()
+            .linear_velocity(shuttle)
+            .unwrap(),
+    );
+    assert!(
+        (after - before).length() < 0.01,
+        "idle passenger accelerated ship: {before:?} -> {after:?}"
+    );
+}
+
+#[test]
+fn passenger_settles_onto_the_deck_from_just_above_it() {
+    let mut game = Run::open_at([19.0, -0.65, -14.5]).expect("DRIFT opens");
+    let shuttle = game.run.entity("shuttle").expect("the shuttle");
+    let body = game
+        .run
+        .world
+        .get_mut(shuttle)
+        .unwrap()
+        .components
+        .get_mut("sindri.physics3d.rigid_body")
+        .unwrap();
+    body["linear_velocity"] = json!([0.0, 0.0, 0.0]);
+    body["angular_velocity"] = json!([0.0, 0.0, 0.0]);
+    game.wait(2.0);
+    let position = in_shuttle(&game, game.position("diver"));
+    assert!(
+        position.y < 2.64,
+        "passenger floats above the deck: {position:?}"
+    );
+}

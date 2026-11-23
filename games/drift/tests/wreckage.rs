@@ -84,3 +84,25 @@ fn the_derelict_is_solid() {
         "the hull stops the diver short of its middle: {stopped:?} wreck at {wreck:?}"
     );
 }
+
+#[test]
+fn salvaged_part_repairs_the_recycler_after_returning_to_cabin() {
+    let mut game = Run::open().expect("DRIFT opens");
+    game.wait(0.2);
+    let recycler = game.position("recycler");
+    let beside = [recycler[0] + 1.3, -1.68, recycler[2] - 0.4];
+    game.place("diver", beside);
+    game.wait(0.2);
+    game.tap(Key::E);
+    assert!(!game.has_said("Drift: recycler repaired"), "no part yet");
+
+    let canister = game.position("salvage-0");
+    game.place("diver", [canister[0] - 1.0, canister[1] - EYE, canister[2]]);
+    game.wait(0.2);
+    game.tap(Key::G);
+    assert!(game.has_said("Drift: took salvage"), "{:?}", game.said);
+    game.place("diver", beside);
+    assert!(game.until("Drift: stowed salvage", 1.0), "{:?}", game.said);
+    game.tap(Key::E);
+    assert!(game.has_said("Drift: recycler repaired"), "{:?}", game.said);
+}

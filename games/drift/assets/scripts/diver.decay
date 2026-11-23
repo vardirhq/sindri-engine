@@ -367,7 +367,18 @@ script Diver {
         var lift = relative.dot(up);
         let across = relative - up * lift;
         let walked = across + (wanted - across) * take;
-        lift -= this.gravity * dt;
+        // The longer ground probe also helps walking near an edge. Only stop
+        // gravity when the capsule is actually touching the deck, otherwise
+        // a falling diver can hover above it.
+        var touching = false;
+        if ground != null {
+            touching = ground.distance <= 0.81;
+        }
+        if touching {
+            lift = max(0.0, lift);
+        } else {
+            lift -= this.gravity * dt;
+        }
         if grounded && (Input.Keyboard.just_pressed("Space") || Controls.up_pressed) {
             lift = this.jump_speed;
         }
@@ -415,7 +426,9 @@ script Diver {
     // The suit: air and power run down in vacuum and fill up in the ship's air.
     fn suit(dt: number) {
         if Ship.pressurized {
-            this.oxygen = min(100.0, this.oxygen + this.refill_rate * dt);
+            if Ship.recycler_repaired {
+                this.oxygen = min(100.0, this.oxygen + this.refill_rate * dt);
+            }
             this.power = min(100.0, this.power + this.refill_rate * dt);
             this.propellant = min(100.0, this.propellant + this.refill_rate * dt);
             this.warned_air = false;
