@@ -17,7 +17,7 @@ pub fn project() -> PathBuf {
 
 /// Where `open_in_hold` puts the diver: eye level with the aft handhold.
 /// `art/hold.py` names the same place `HOLD_START`.
-pub const HOLD_START: [f32; 3] = [-6.3, -0.6, 0.0];
+pub const HOLD_START: [f32; 3] = [-1.3, -0.6, 0.0];
 
 /// How many fixed steps make up about `seconds` of game time.
 fn steps(seconds: f32) -> u32 {

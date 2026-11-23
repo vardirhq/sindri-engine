@@ -7,6 +7,32 @@ use sindri_platform::Key;
 
 const EYE: f32 = 0.6;
 
+#[test]
+fn refuge_and_cargo_section_are_separated_by_open_space() {
+    let game = Run::open().expect("DRIFT opens");
+    let door = game.position("outer-door");
+    let hold = game.position("start-hold");
+    assert!(
+        hold[0] - door[0] > 4.0,
+        "the refuge is apart from the hold"
+    );
+    for index in 0..3 {
+        let cable = game
+            .run
+            .entity(&format!("ruin-cable-{index}"))
+            .expect("a cable crosses the gap");
+        let components = &game.run.world.get(cable).unwrap().components;
+        assert!(
+            !components.contains_key("sindri.physics3d.collider"),
+            "cables do not block the route"
+        );
+    }
+    let frame = game.run.entity("ruin-frame").expect("the broken frame");
+    let components = &game.run.world.get(frame).unwrap().components;
+    assert!(components.contains_key("sindri.voxel_world"));
+    assert!(components.contains_key("sindri.physics3d.voxel_body"));
+}
+
 fn dist(a: [f32; 3], b: [f32; 3]) -> f32 {
     (0..3).map(|i| (a[i] - b[i]).powi(2)).sum::<f32>().sqrt()
 }

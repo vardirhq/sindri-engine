@@ -33,6 +33,8 @@ LENGTH = 14.0
 HEIGHT = 5.0
 WIDTH = 5.0
 WALL = 0.4
+# Open space between the refuge's airlock and the damaged cargo section.
+HOLD_OFFSET = 5.0
 
 SOLID = {"memberships": 1, "filter": 4294967295}
 DIVER = {"memberships": 2, "filter": 4294967295}
@@ -354,10 +356,41 @@ def convex(asset, restitution=0.2):
             "layers": SOLID, "sensor": False}
 
 
+def ruined_frame():
+    """A broken open-sided extension, built from the same half-metre blocks."""
+    blocks = {}
+    for x in range(36):
+        # Interrupted deck and long rails make the scale legible from afar.
+        if x not in range(13, 19):
+            for z in range(8):
+                blocks[(x, 0, z)] = "deck"
+        for z in (0, 7):
+            blocks[(x, 1, z)] = "frame"
+        # Ribs stop at different heights where the structure has broken apart.
+        if x in (0, 6, 12, 21, 27, 33):
+            height = 8 if x in (0, 6, 27) else 5
+            for y in range(2, height):
+                for z in (0, 7):
+                    blocks[(x, y, z)] = "frame"
+            if height == 8:
+                for z in range(1, 7):
+                    blocks[(x, 7, z)] = "frame"
+    edits = [{"at": [x, y, z], "block": block}
+             for (x, y, z), block in sorted(blocks.items())]
+    return entity(
+        "ruin-frame", "Broken structural frame", position=(14.0, -4.0, 7.0),
+        scale=(0.5, 0.5, 0.5), **{
+            "sindri.voxel_world": {"generator": {"kind": "built"}, "blocks": "blocks.tileset",
+                                   "edits": edits, "focus": [0, 0, 0],
+                                   "render_radius": 2, "vertical_radius": 1, "layer": 0},
+            "sindri.physics3d.voxel_body": {"friction": 0.6, "restitution": 0.1, "layers": SOLID},
+        })
+
+
 def wreckage():
     """Outside the hatch: the derelict, a field of debris, salvage, the stars."""
     rng = random.Random(23)
-    out = [model("stars", "stars", (0, 0, 0))]
+    out = [model("stars", "stars", (0, 0, 0)), ruined_frame()]
     out.append(model("wreck", "wreck", WRECK_AT, quat((0, 1, 0), WRECK_YAW), **{
         "sindri.physics3d.model_collider": {"asset": "models/wreck.glb", "friction": 0.6, "restitution": 0.1,
                                             "layers": SOLID, "sensor": False},
@@ -546,6 +579,9 @@ def ship():
     out += slab("chamber-overhead", (cx0, cy1, cz0 - w), (cx1, cy1 + w, cz1 + w))
     out += slab("chamber-port", (cx0, cy0, cz0 - w), (cx1, cy1, cz0))
     out += slab("chamber-starboard", (cx0, cy0, cz1), (cx1, cy1, cz1 + w))
+    # The outer bulkhead belongs to the refuge, even after the hold breaks off.
+    out += wall_with_door("outer-bulkhead", (cx1, cy0 - w, cz0 - w),
+                          (cx1 + w, cy1 + w, cz1 + w))
     (kx0, ky0, kz0), (kx1, ky1, kz1) = CABIN
     # The inner bulkhead between cabin and chamber, with the inner door through it.
     out += wall_with_door("inner-bulkhead", (kx1, ky0 - w, kz0 - w), (cx0, ky1 + w, kz1 + w))
@@ -650,7 +686,22 @@ def scene():
         entities.append(lamp(f"lamp-{i}", (x, half_h - 0.05, 0), (1.0, 0.86, 0.66), 1.4, 7.0))
     entities.append(lamp("emergency", (half_l - 0.05, 1.8, 0), (1.0, 0.12, 0.08), 1.6, 6.0))
     entities[-1]["transform_3d"]["scale"] = [0.08, 0.3, 0.5]
+    # The old cargo hold is a separate, unpressurized piece of the ruin. Its
+    # walls and fittings move together, leaving open space beyond the airlock.
+    for part in entities[3:]:
+        if "transform_3d" in part:
+            part["transform_3d"]["position"][0] += HOLD_OFFSET
     entities += ship()
+    # Severed services are visual landmarks across the gap, not a solid bridge.
+    # Keep the middle of the airlock approach clear for a drifting diver.
+    for index, (y, z) in enumerate(((1.8, -1.9), (2.0, -1.6), (-1.9, -2.0))):
+        entities.append(entity(
+            f"ruin-cable-{index}", "Severed service cable",
+            position=(-4.9, y, z), scale=(5.0, 0.12, 0.12),
+            **{"sindri.mesh": {"primitive": "cube", "texture": "textures/line.png"},
+               "sindri.material": {"base_color": [0.25, 0.21, 0.17, 1.0],
+                                   "metallic": 0.35, "roughness": 0.8, "override_factors": True}},
+        ))
     entities += wreckage()
     # The diver: a dynamic upright capsule that physics never turns, with the
     # eye under it carrying the camera and the helmet lamp. Turning is the
@@ -677,10 +728,10 @@ def scene():
                             "inner_angle": 0.25, "outer_angle": 0.5}},
     )
     entities += [diver, eye, helmet]
-    entities += tether((-half_l + 0.12, 0, 0), (-half_l + 0.7, 0, 0))
+    entities += tether((-half_l + 0.12 + HOLD_OFFSET, 0, 0), (-half_l + 0.7 + HOLD_OFFSET, 0, 0))
     # A stanchion part way down the hold, for the tether to catch on.
     entities.append(entity(
-        "stanchion", "Stanchion", position=(-2.5, 0, 1.1), scale=(0.35, HEIGHT, 0.35),
+        "stanchion", "Stanchion", position=(-2.5 + HOLD_OFFSET, 0, 1.1), scale=(0.35, HEIGHT, 0.35),
         **{
             "sindri.mesh": {"primitive": "cube", "texture": "textures/grip.png"},
             "sindri.material": {"base_color": [0.55, 0.55, 0.55, 1], "metallic": 0.4, "roughness": 0.6, "override_factors": True},
