@@ -1,3 +1,4 @@
+mod images;
 mod shadow;
 pub(crate) use shadow::ModelShadowDraw;
 
@@ -7,6 +8,7 @@ use std::{
 };
 
 use glam::{Mat4, Vec3};
+use images::{ModelTexture, ModelTextures};
 use wgpu::util::DeviceExt;
 
 use super::{
@@ -14,8 +16,7 @@ use super::{
     validate,
 };
 use crate::{
-    FogSettings, FrameCamera, FrameTarget, ShadowSettings, Texture2D, WorldLighting,
-    shadow::ShadowMap,
+    FogSettings, FrameCamera, FrameTarget, ShadowSettings, WorldLighting, shadow::ShadowMap,
 };
 
 #[derive(Clone, Copy)]
@@ -39,7 +40,7 @@ pub(crate) struct ModelRenderer {
     occluded: wgpu::RenderPipeline,
     layout: wgpu::BindGroupLayout,
     cache: HashMap<usize, CachedModel>,
-    image_cache: HashMap<usize, Weak<ModelTextures>>,
+    image_cache: HashMap<usize, Arc<ModelTextures>>,
     slots: Vec<Slot>,
     next: usize,
     stats: ModelCacheStats,
@@ -54,14 +55,6 @@ struct CachedModel {
 }
 
 #[derive(Debug)]
-struct ModelTextures {
-    // Keep the pointer used as the cache key alive for these GPU images.
-    _owner: Weak<RenderModel>,
-    textures: Vec<Texture2D>,
-    samplers: Vec<wgpu::Sampler>,
-}
-
-#[derive(Debug)]
 struct Geometry {
     vertex: wgpu::Buffer,
     index: wgpu::Buffer,
@@ -72,7 +65,7 @@ struct Geometry {
 #[derive(Debug)]
 struct Slot {
     uniform: wgpu::Buffer,
-    binding: Option<((usize, usize), wgpu::BindGroup)>,
+    binding: Option<((usize, [usize; 3]), wgpu::BindGroup)>,
 }
 
 #[derive(Clone, Copy, bytemuck::Pod, bytemuck::Zeroable)]
@@ -124,7 +117,7 @@ impl ModelRenderer {
     pub(crate) fn begin_submission(&mut self) {
         self.next = 0;
         self.cache.retain(|_, entry| entry.owner.strong_count() > 0);
-        self.image_cache.retain(|_, gpu| gpu.strong_count() > 0);
+        self.image_cache.retain(|_, images| images.source_is_live());
         for slot in &mut self.slots {
             if slot
                 .binding
@@ -157,14 +150,13 @@ impl ModelRenderer {
             let meshes = upload_geometry(device, asset)?;
             let owner = RenderModel::image_owner(asset);
             let image_key = Arc::as_ptr(owner) as usize;
-            let images =
-                if let Some(images) = self.image_cache.get(&image_key).and_then(Weak::upgrade) {
-                    images
-                } else {
-                    let images = Arc::new(upload_images(device, queue, owner)?);
-                    self.image_cache.insert(image_key, Arc::downgrade(&images));
-                    images
-                };
+            let images = if let Some(images) = self.image_cache.get(&image_key) {
+                Arc::clone(images)
+            } else {
+                let images = Arc::new(ModelTextures::upload(device, queue, owner)?);
+                self.image_cache.insert(image_key, Arc::clone(&images));
+                images
+            };
             entry.insert(CachedModel {
                 owner: Arc::downgrade(asset),
                 meshes,
@@ -209,7 +201,7 @@ impl ModelRenderer {
                 let surface = primitive
                     .material
                     .map_or(&fallback, |i| &asset.data().surfaces[i]);
-                let texture = surface.texture.unwrap_or(cached.images.textures.len() - 1);
+                let textures = cached.images.indices(surface);
                 if self.next == self.slots.len() {
                     self.slots.push(Slot {
                         uniform: device.create_buffer(&wgpu::BufferDescriptor {
@@ -231,16 +223,15 @@ impl ModelRenderer {
                 if slot
                     .binding
                     .as_ref()
-                    .is_none_or(|(id, _)| *id != (key, texture))
+                    .is_none_or(|(id, _)| *id != (key, textures))
                 {
                     slot.binding = Some((
-                        (key, texture),
+                        (key, textures),
                         bind(
                             device,
                             &self.layout,
                             &slot.uniform,
-                            &cached.images.textures[texture],
-                            &cached.images.samplers[texture],
+                            textures.map(|i| &cached.images.images[i]),
                             draw.shadow_map,
                         ),
                     ));
@@ -322,8 +313,8 @@ fn uniform(draw: &ModelDraw<'_>, world: Mat4, surface: &ModelSurface) -> Uniform
         shadow: [
             draw.shadows.bias,
             f32::from(draw.shadows.enabled && lighting.directional_intensity > 0.0),
-            0.0,
-            0.0,
+            surface.normal_texture.map_or(0.0, |_| surface.normal_scale),
+            f32::from(surface.metallic_roughness_texture.is_some()),
         ],
         fog_color: [
             draw.fog.color[0],
@@ -350,8 +341,7 @@ fn bind(
     device: &wgpu::Device,
     layout: &wgpu::BindGroupLayout,
     uniform: &wgpu::Buffer,
-    texture: &Texture2D,
-    sampler: &wgpu::Sampler,
+    [color, normal, metallic_roughness]: [&ModelTexture; 3],
     shadow_map: &ShadowMap,
 ) -> wgpu::BindGroup {
     device.create_bind_group(&wgpu::BindGroupDescriptor {
@@ -364,11 +354,11 @@ fn bind(
             },
             wgpu::BindGroupEntry {
                 binding: 1,
-                resource: wgpu::BindingResource::TextureView(texture.view()),
+                resource: wgpu::BindingResource::TextureView(&color.color),
             },
             wgpu::BindGroupEntry {
                 binding: 2,
-                resource: wgpu::BindingResource::Sampler(sampler),
+                resource: wgpu::BindingResource::Sampler(&color.sampler),
             },
             wgpu::BindGroupEntry {
                 binding: 3,
@@ -377,6 +367,22 @@ fn bind(
             wgpu::BindGroupEntry {
                 binding: 4,
                 resource: wgpu::BindingResource::Sampler(shadow_map.sampler()),
+            },
+            wgpu::BindGroupEntry {
+                binding: 5,
+                resource: wgpu::BindingResource::TextureView(&normal.linear),
+            },
+            wgpu::BindGroupEntry {
+                binding: 6,
+                resource: wgpu::BindingResource::Sampler(&normal.sampler),
+            },
+            wgpu::BindGroupEntry {
+                binding: 7,
+                resource: wgpu::BindingResource::TextureView(&metallic_roughness.linear),
+            },
+            wgpu::BindGroupEntry {
+                binding: 8,
+                resource: wgpu::BindingResource::Sampler(&metallic_roughness.sampler),
             },
         ],
     })
@@ -428,50 +434,4 @@ fn upload_geometry(
         meshes.push(primitives);
     }
     Ok(meshes)
-}
-
-fn upload_images(
-    device: &wgpu::Device,
-    queue: &wgpu::Queue,
-    asset: &Arc<RenderModel>,
-) -> Result<ModelTextures, ModelRenderError> {
-    let limit = device.limits();
-    let mut textures = Vec::new();
-    let mut samplers = Vec::new();
-    for image in &asset.data().images {
-        if image.width > limit.max_texture_dimension_2d
-            || image.height > limit.max_texture_dimension_2d
-        {
-            return Err(ModelRenderError::DeviceLimit("texture dimensions".into()));
-        }
-        textures.push(
-            Texture2D::from_rgba8(
-                device,
-                queue,
-                "Imported base color",
-                image.width,
-                image.height,
-                &image.rgba,
-            )
-            .map_err(|error| ModelRenderError::InvalidData(error.to_string()))?,
-        );
-        samplers.push(device.create_sampler(&wgpu::SamplerDescriptor {
-            label: Some("Imported sampler"),
-            address_mode_u: image.wrap_s,
-            address_mode_v: image.wrap_t,
-            mag_filter: image.mag_filter,
-            min_filter: image.min_filter,
-            ..Default::default()
-        }));
-    }
-    textures.push(
-        Texture2D::from_rgba8(device, queue, "Imported white", 1, 1, &[255; 4])
-            .map_err(|error| ModelRenderError::InvalidData(error.to_string()))?,
-    );
-    samplers.push(device.create_sampler(&wgpu::SamplerDescriptor::default()));
-    Ok(ModelTextures {
-        _owner: Arc::downgrade(asset),
-        textures,
-        samplers,
-    })
 }

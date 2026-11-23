@@ -47,6 +47,9 @@ pub struct ModelHierarchyNode {
 pub struct ModelSurface {
     pub base_color: [f32; 4],
     pub texture: Option<usize>,
+    pub normal_texture: Option<usize>,
+    pub normal_scale: f32,
+    pub metallic_roughness_texture: Option<usize>,
     pub metallic: f32,
     pub roughness: f32,
     /// Linear RGB self-emission; finite, nonnegative HDR values are allowed.
@@ -60,6 +63,9 @@ impl Default for ModelSurface {
         Self {
             base_color: [1.0; 4],
             texture: None,
+            normal_texture: None,
+            normal_scale: 1.0,
+            metallic_roughness_texture: None,
             metallic: 1.0,
             roughness: 1.0,
             emissive: [0.0; 3],
@@ -73,7 +79,7 @@ impl Default for ModelSurface {
 pub struct ModelImage {
     pub width: u32,
     pub height: u32,
-    /// sRGB RGBA bytes; glTF UVs are sampled without a vertical flip.
+    /// RGBA bytes. Color views decode sRGB, and surface data views read linear.
     pub rgba: Vec<u8>,
     pub wrap_s: wgpu::AddressMode,
     pub wrap_t: wgpu::AddressMode,

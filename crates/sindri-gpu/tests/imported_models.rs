@@ -4,6 +4,8 @@
 mod casting;
 #[path = "imported_models/effects.rs"]
 mod effects;
+#[path = "imported_models/maps.rs"]
+mod maps;
 #[path = "imported_models/occlusion.rs"]
 mod occlusion;
 #[path = "imported_models/sidedness.rs"]

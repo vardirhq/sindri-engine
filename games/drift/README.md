@@ -76,21 +76,26 @@ cargo run -p sindri-player -- games/drift
 ## How it is made
 
 There is no game code in Rust. The wreckage's models are made by
-`art/wreck.py` with the repository's GLB writer. `art/blocks.py` builds the block set and its recessed vent GLB. The scene is written by `art/hold.py`, which
-also draws the textures; re-running it changes nothing. The diver is
+`art/wreck.py` with the repository's GLB writer. `art/blocks.py` builds
+the shuttle's block set, with modeled hull plates, deck treads, service
+panels, ribs, hazard bands, lights, and vents. Their glTF normal and packed
+roughness/metalness maps give the finishes different responses to light.
+`art/hold.py` writes the scene and its other textures. The diver is
 `assets/scripts/diver.decay`, the airlock `assets/scripts/airlock.decay`
 (sharing `Ship` in `assets/scripts/ship.decay`), the tether `assets/scripts/tether.decay`
 on the engine's 3D distance joints. `src/lib.rs` is a test harness that plays the
 project the way every host does.
 
 ```sh
+python3 games/drift/art/blocks.py
 python3 games/drift/art/hold.py
 cargo run --quiet --package decay-lsp -- --check games/drift/assets/scripts/diver.decay
 cargo test -p drift
 ```
 
 `tests/wreckage.rs` takes salvage and stows it, knocks debris away and flies
-into the derelict; `tests/culling.rs` measures what a frame draws.
+into the derelict. `tests/culling.rs` measures culled draws and checks the
+modeled shuttle's material draw and triangle budgets.
 `tests/airlock.rs` walks out through the airlock and back, checks a cycle
 waits for each door and the pressure, and runs out of air outside.
 `tests/tether.rs` is stopped by the line, reeled home, caught on the

@@ -26,9 +26,9 @@ indices. Non-indexed triangles acquire sequential 32-bit indices. Missing
 normals are generated from triangle geometry; missing UVs are zero only when
 the primitive does not need a texture. Base-color factors are linear RGBA.
 Materials retain metallic/roughness factors, linear RGB emission, double-sidedness
-and alpha cutoff.
-Embedded PNG/JPEG base-color images use the existing texture decoder; sampler
-wrap and filter enums are retained for GPU upload.
+and alpha cutoff. Embedded PNG/JPEG albedo, normal and packed metallic/roughness
+images use the existing texture decoder. All three slots use `TEXCOORD_0`
+and retain their sampler wrap and filter settings.
 
 ## CPU collision preparation
 
@@ -106,6 +106,14 @@ widths are used directly by the GPU. Drawing composes entity and hierarchy
 matrices, transforms normals by inverse transpose, writes/tests depth, and
 handles mirrored instances and double-sided materials. Embedded base-color
 textures are sampled as sRGB, factors are linear, and alpha masks discard.
+Normal and metallic/roughness maps read linear texels from the same uploaded
+image through a separate view. Roughness is the green channel and metalness
+is the blue channel, each multiplied by its material factor. A normal map uses
+RGB tangent-space normals and applies the glTF `scale` to its X and Y components.
+The renderer derives the tangent frame from world-space position and UV0.
+Mirrored UVs preserve the orientation of both axes, and collapsed UVs fall
+back to the imported vertex normal. This works for section-batched voxel
+geometry, which shares the source GLB's images.
 Ambient plus the existing directional world light uses metallic/roughness
 factors in a direct GGX lighting approximation. Environment-map lighting,
 texture mipmaps remain deferred. Models now cast into and receive the
@@ -149,8 +157,8 @@ picker described below.
 
 Only triangle primitives and one embedded binary buffer are supported. External
 buffer/image URIs, sparse accessors, nontriangle geometry, blending, skinning,
-morph targets, additional vertex attributes and non-base-color textures fail
-with an asset-aware `AssetDecodeError`. Required extensions fail explicitly.
+morph targets, authored tangent attributes, occlusion textures and emissive
+textures fail with an asset-aware `AssetDecodeError`. Required extensions fail explicitly.
 Optional extensions, animations and cameras produce retained warnings and do
 not drive Sindri lighting, motion or cameras. Hosts must report these warnings.
 
@@ -387,7 +395,9 @@ filtering/cascades and shipped-host authored fog delivery remain open.
 A model owner may carry `sindri.material`. Shared numeric factors replace its
 primitive base-color/metallic/roughness factors and add emission through the same
 GGX shader as opt-in world meshes; original embedded textures, masks and sidedness
-remain owned by each primitive. Alpha overrides affect color and shadow masks.
+remain owned by each primitive. Normal maps still perturb the normal, and
+packed textures multiply the current roughness and metalness factors. Alpha
+overrides affect color and shadow masks.
 Removing the component restores imported factors, without geometry uploads.
 This is an entity-wide override, not node/primitive inspection or a shared
 material asset. Core GLB emissive factors are retained and rendered; emissive

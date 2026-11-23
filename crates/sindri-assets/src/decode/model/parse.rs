@@ -170,23 +170,42 @@ fn material(
         ));
     }
     let pbr = material.pbr_metallic_roughness();
-    if pbr.base_color_texture().is_some_and(|t| t.tex_coord() != 0) {
-        return Err(unsupported(bytes, "base-color textures require TEXCOORD_0"));
-    }
-    if material.normal_texture().is_some()
-        || material.occlusion_texture().is_some()
-        || material.emissive_texture().is_some()
-        || pbr.metallic_roughness_texture().is_some()
+    let base_color = pbr.base_color_texture();
+    let normal = material.normal_texture();
+    let metallic_roughness = pbr.metallic_roughness_texture();
+    if [
+        base_color.as_ref().map(gltf::texture::Info::tex_coord),
+        normal
+            .as_ref()
+            .map(gltf::material::NormalTexture::tex_coord),
+        metallic_roughness
+            .as_ref()
+            .map(gltf::texture::Info::tex_coord),
+    ]
+    .into_iter()
+    .flatten()
+    .any(|coord| coord != 0)
     {
         return Err(unsupported(
             bytes,
-            "normal, occlusion, emissive and metallic/roughness textures are not supported",
+            "model material textures require TEXCOORD_0",
+        ));
+    }
+    if material.occlusion_texture().is_some() || material.emissive_texture().is_some() {
+        return Err(unsupported(
+            bytes,
+            "occlusion and emissive textures are not supported",
         ));
     }
     let value = ModelMaterial {
         name: material.name().map(str::to_owned),
         base_color: pbr.base_color_factor(),
-        base_color_texture: pbr.base_color_texture().map(|t| t.texture().index()),
+        base_color_texture: base_color.map(|t| t.texture().index()),
+        normal_texture: normal.as_ref().map(|t| t.texture().index()),
+        normal_scale: normal
+            .as_ref()
+            .map_or(1.0, gltf::material::NormalTexture::scale),
+        metallic_roughness_texture: metallic_roughness.map(|t| t.texture().index()),
         metallic: pbr.metallic_factor(),
         roughness: pbr.roughness_factor(),
         emissive: material.emissive_factor(),
@@ -194,12 +213,13 @@ fn material(
         alpha_cutoff: (material.alpha_mode() == AlphaMode::Mask)
             .then(|| material.alpha_cutoff().unwrap_or(0.5)),
     };
-    if !value
-        .base_color
-        .iter()
-        .chain([&value.metallic, &value.roughness])
-        .chain(&value.emissive)
-        .all(|v| v.is_finite() && (0.0..=1.0).contains(v))
+    if !value.normal_scale.is_finite()
+        || !value
+            .base_color
+            .iter()
+            .chain([&value.metallic, &value.roughness])
+            .chain(&value.emissive)
+            .all(|v| v.is_finite() && (0.0..=1.0).contains(v))
     {
         return Err(invalid(
             bytes,

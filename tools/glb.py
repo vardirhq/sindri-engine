@@ -179,10 +179,15 @@ class Mesh:
 
     # --- Writing --------------------------------------------------------------
 
-    def write(self, path, materials, name="model"):
-        """Writes a GLB of this mesh; `materials` maps a name to a Material."""
+    def write(self, path, materials, name="model", *, textures=None):
+        """Write a GLB with optional material names mapped to PNG slots and UV projections.
+
+        Each material entry holds a dict of glTF texture slots to PNG bytes, and
+        a function mapping a position and normal to UV0.
+        """
         binary = bytearray()
         accessors, views, primitives, gltf_materials = [], [], [], []
+        images = {}
         names = [m for m in self.groups if self.groups[m][2]]
         for index, material_name in enumerate(names):
             positions, normals, indices = self.groups[material_name]
@@ -213,6 +218,29 @@ class Mesh:
                     accessor["max"] = [max(p[i] for p in data) for i in range(3)]
                 accessors.append(accessor)
                 attributes[attribute] = len(accessors) - 1
+            if textures and material_name in textures:
+                slots, project_uv = textures[material_name]
+                offset = len(binary)
+                for position, normal in zip(positions, normals):
+                    binary += struct.pack("<2f", *project_uv(position, normal))
+                views.append({"buffer": 0, "byteOffset": offset,
+                              "byteLength": len(binary) - offset, "target": 34962})
+                attributes["TEXCOORD_0"] = len(accessors)
+                accessors.append({"bufferView": len(views) - 1, "componentType": 5126,
+                                  "count": len(positions), "type": "VEC2"})
+
+                for slot, png in slots.items():
+                    if png not in images:
+                        offset = len(binary)
+                        binary += png
+                        views.append({"buffer": 0, "byteOffset": offset, "byteLength": len(png)})
+                        while len(binary) % 4:
+                            binary += b"\0"
+                        images[png] = (len(images), len(views) - 1)
+                    target = gltf_materials[-1]
+                    if slot in ("baseColorTexture", "metallicRoughnessTexture"):
+                        target = target["pbrMetallicRoughness"]
+                    target[slot] = {"index": images[png][0]}
             offset = len(binary)
             for value in indices:
                 binary += struct.pack("<I", value)
@@ -232,6 +260,10 @@ class Mesh:
             "bufferViews": views,
             "buffers": [{"byteLength": len(binary)}],
         }
+        if images:
+            document["images"] = [{"bufferView": view, "mimeType": "image/png"}
+                                  for _, view in images.values()]
+            document["textures"] = [{"source": i} for i in range(len(images))]
         if any("extensions" in m for m in gltf_materials):
             document["extensionsUsed"] = ["KHR_materials_emissive_strength"]
         text = json.dumps(document, separators=(",", ":")).encode()

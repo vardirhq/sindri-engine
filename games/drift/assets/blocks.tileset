@@ -31,7 +31,8 @@
             1.0
           ]
         }
-      }
+      },
+      "model": "models/hull-block.glb"
     },
     "hull-stripe": {
       "faces": {
@@ -63,7 +64,8 @@
             1.0
           ]
         }
-      }
+      },
+      "model": "models/hull-stripe-block.glb"
     },
     "deck": {
       "faces": {
@@ -95,7 +97,8 @@
             1.0
           ]
         }
-      }
+      },
+      "model": "models/deck-block.glb"
     },
     "bulkhead": {
       "faces": {
@@ -127,7 +130,8 @@
             1.0
           ]
         }
-      }
+      },
+      "model": "models/bulkhead-block.glb"
     },
     "frame": {
       "faces": {
@@ -159,7 +163,8 @@
             1.0
           ]
         }
-      }
+      },
+      "model": "models/frame-block.glb"
     },
     "hazard": {
       "faces": {
@@ -191,7 +196,8 @@
             1.0
           ]
         }
-      }
+      },
+      "model": "models/hazard-block.glb"
     },
     "light": {
       "faces": {
@@ -224,6 +230,7 @@
           ]
         }
       },
+      "model": "models/light-block.glb",
       "glow": 1.0
     },
     "vent": {

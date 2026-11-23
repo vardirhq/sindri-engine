@@ -69,6 +69,9 @@ pub struct ModelMaterial {
     /// Linear RGBA, as specified by glTF (not sRGB bytes).
     pub base_color: [f32; 4],
     pub base_color_texture: Option<usize>,
+    pub normal_texture: Option<usize>,
+    pub normal_scale: f32,
+    pub metallic_roughness_texture: Option<usize>,
     pub metallic: f32,
     pub roughness: f32,
     /// Linear RGB self-emission, independent of world lighting.
@@ -83,6 +86,9 @@ impl Default for ModelMaterial {
             name: None,
             base_color: [1.0; 4],
             base_color_texture: None,
+            normal_texture: None,
+            normal_scale: 1.0,
+            metallic_roughness_texture: None,
             metallic: 1.0,
             roughness: 1.0,
             emissive: [0.0; 3],

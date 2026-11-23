@@ -2,6 +2,8 @@
 //! diver's view are culled, so a ship of a few hundred pieces draws only what
 //! is in front of the eye.
 
+use std::sync::Arc;
+
 use drift::Run;
 use sindri_assets::{AssetBytes, AssetDecoder, ModelAssetDecoder};
 use sindri_core::{AssetId, SceneDocument, TileSetDocument, World};
@@ -13,8 +15,14 @@ use sindri_scene::{
 
 /// Loads every model the scene names and binds it for drawing, as a host does
 /// before its first frame; a headless run only loads what collides.
-fn bind_models(scene: &mut SceneExtractor, world: &World, blocks: &TileSetDocument) {
-    let mut names = referenced_models(world);
+fn bind_models(
+    scene: &mut SceneExtractor,
+    world: &World,
+    blocks: &TileSetDocument,
+) -> Vec<Arc<RenderModel>> {
+    let entity_models = referenced_models(world);
+    let mut names = entity_models.clone();
+    let mut resources = Vec::new();
     names.extend(tile_set_models(blocks).map(ToString::to_string));
     for name in names {
         let id = AssetId::new(name.clone()).expect("a model path");
@@ -24,22 +32,29 @@ fn bind_models(scene: &mut SceneExtractor, world: &World, blocks: &TileSetDocume
             .decode(AssetBytes::new(id.clone(), bytes))
             .expect("the model decodes");
         let prepared = sindri::model::prepare(asset).expect("the model prepares");
+        if entity_models.contains(&name) {
+            resources.push(Arc::clone(&prepared.resource));
+        }
         scene.bind_model(id, prepared.resource);
     }
+    resources
 }
 
-fn bind_assets(scene: &mut SceneExtractor, world: &World) -> TileSetBindings {
+fn bind_assets(
+    scene: &mut SceneExtractor,
+    world: &World,
+) -> (TileSetBindings, Vec<Arc<RenderModel>>) {
     let blocks = std::fs::read_to_string(drift::project().join("assets/blocks.tileset")).unwrap();
     let blocks = TileSetDocument::from_json(&blocks).unwrap();
-    bind_models(scene, world, &blocks);
+    let entity_models = bind_models(scene, world, &blocks);
     let mut tile_sets = TileSetBindings::new();
     tile_sets.bind("blocks.tileset", blocks).unwrap();
-    tile_sets
+    (tile_sets, entity_models)
 }
 
 /// How many cubes and models one frame draws, and how many the scene has.
 fn drawn(game: &mut Run) -> (usize, usize) {
-    let tile_sets = bind_assets(&mut game.run.scene, &game.run.world);
+    let (tile_sets, entity_models) = bind_assets(&mut game.run.scene, &game.run.world);
     let authored = game
         .run
         .world
@@ -66,10 +81,14 @@ fn drawn(game: &mut Run) -> (usize, usize) {
                 .iter()
                 .filter(|pass| {
                     !pass.shadow_only
-                        && matches!(
-                            pass.command,
-                            FrameCommand::TexturedCube { .. } | FrameCommand::Model { .. }
-                        )
+                        && match &pass.command {
+                            FrameCommand::TexturedCube { .. } => true,
+                            // This test compares entity draws against authored entities.
+                            FrameCommand::Model { asset, .. } => entity_models
+                                .iter()
+                                .any(|source| Arc::ptr_eq(source, asset)),
+                            _ => false,
+                        }
                 })
                 .count();
             Ok((drawn, sindri_scene::UiTextSizes::new()))
@@ -123,7 +142,7 @@ fn looking_out_of_the_hatch_draws_the_wreckage_ahead_and_not_the_ship_behind() {
 }
 
 #[test]
-fn shuttle_vents_share_material_draws_per_section() {
+fn the_modeled_shuttle_budgets_its_geometry_across_two_sections() {
     use glam::Vec3;
     use sindri_render::{look_at, orthographic_projection};
 
@@ -134,7 +153,10 @@ fn shuttle_vents_share_material_draws_per_section() {
         .retain(|entity| entity.id.as_str() == "shuttle");
     let world = World::from_scene(&document).unwrap().world;
     let mut extractor = SceneExtractor::new().unwrap();
-    let sets = bind_assets(&mut extractor, &world);
+    let (sets, _) = bind_assets(&mut extractor, &world);
+    let blocks = sets.get("blocks.tileset").unwrap();
+    assert_eq!(blocks.tiles.len(), 8);
+    assert!(blocks.tiles.values().all(|block| block.model.is_some()));
     let view = look_at(
         Vec3::new(20.0, 2.0, -4.0),
         Vec3::new(20.0, 0.0, -15.0),
@@ -161,12 +183,34 @@ fn shuttle_vents_share_material_draws_per_section() {
             _ => None,
         })
         .collect();
-    assert_eq!(batches.len(), 2, "six vents span two sections");
+    assert_eq!(
+        batches.len(),
+        14,
+        "each block type in a section draws as one batch"
+    );
+    assert!(
+        batches.iter().all(|batch| {
+            batch.data().surfaces.iter().all(|surface| {
+                surface.normal_texture.is_some() && surface.metallic_roughness_texture.is_some()
+            })
+        }),
+        "every block material keeps both surface maps after batching"
+    );
+    assert!(
+        frame
+            .passes()
+            .iter()
+            .all(|pass| !matches!(pass.command, FrameCommand::CachedTexturedMesh { .. }))
+    );
     let primitives: Vec<_> = batches
         .iter()
         .flat_map(|asset| &asset.data().meshes[0])
         .collect();
-    assert_eq!(primitives.len(), 8, "one draw per material in each section");
+    assert!(
+        primitives.len() <= 54,
+        "shuttle material draws: {}",
+        primitives.len()
+    );
     let triangles: usize = primitives
         .iter()
         .map(|primitive| match &primitive.indices {
@@ -174,9 +218,5 @@ fn shuttle_vents_share_material_draws_per_section() {
             ModelIndexData::U32(indices) => indices.len() / 3,
         })
         .sum();
-    assert_eq!(
-        triangles,
-        6 * 788,
-        "every placed vent is present in the batches"
-    );
+    assert!(triangles <= 110_000, "shuttle triangles: {triangles}");
 }

@@ -70,12 +70,7 @@ pub(super) fn primitive(
                 "primitive has an unreadable TEXCOORD_0 accessor",
             ));
         }
-        None if primitive
-            .material()
-            .pbr_metallic_roughness()
-            .base_color_texture()
-            .is_some() =>
-        {
+        None if requires_uvs(&primitive.material()) => {
             return Err(invalid(
                 bytes,
                 "textured primitive has no TEXCOORD_0 accessor",
@@ -106,6 +101,13 @@ pub(super) fn primitive(
         ));
     }
     Ok(value)
+}
+
+fn requires_uvs(material: &gltf::Material<'_>) -> bool {
+    let pbr = material.pbr_metallic_roughness();
+    pbr.base_color_texture().is_some()
+        || pbr.metallic_roughness_texture().is_some()
+        || material.normal_texture().is_some()
 }
 
 fn generated_normals(positions: &[[f32; 3]], indices: &[u32]) -> Vec<[f32; 3]> {
