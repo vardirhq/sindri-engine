@@ -1,10 +1,9 @@
 // The diver: walking aboard the ship, floating outside it.
 //
-// The diver's body is an upright capsule that physics moves but never turns.
-// Which way they face is the Eye's (the camera under the body), kept as a
-// quaternion. Inside the ship's hull its gravity holds: the diver walks, and
-// the view rights itself and keeps the deck below. Outside there is no up: the
-// view turns about its own axes, so looking past straight up never flips it,
+// The diver's capsule is rotation-locked against physics impulses. Aboard, its
+// pose follows the hull's up axis and the eye turns relative to the capsule.
+// Gravity pulls toward the deck and the view rights itself. Outside there is
+// no up: the view turns about its own axes, so looking past straight up never flips it,
 // and the diver moves by thrusters, handholds and momentum. The same body does
 // both, so stepping through the outer door is the whole change.
 //
@@ -87,6 +86,8 @@ script Diver {
     // Aboard: walking speed in m/s, how fast feet take it up, jump speed, gravity.
     @export let walk_speed: number = 2.6;
     @export let footing: number = 12.0;
+    // Faster correction keeps a moving deck under the diver's feet.
+    @export let moving_footing: number = 60.0;
     @export let jump_speed: number = 3.2;
     @export let gravity: number = 9.81;
     // Suit oxygen and power use in vacuum, and refill aboard, in % per second.
@@ -123,6 +124,8 @@ script Diver {
     var frame_velocity: Vec3 = Vec3(0.0, 0.0, 0.0);
     // Whether `held_local` and `held_world` were taken last step.
     var held: bool = false;
+    var moored: bool = false;
+    var mooring: Vec3 = Vec3(0.0, 0.0, 0.0);
     // Seated at a ship's controls: the keys fly the ship, not the diver.
     var seated: bool = false;
 
@@ -153,9 +156,13 @@ script Diver {
         let was_hull = this.hull;
         place();
         carried(dt, was_hull);
-        // The body stays world-upright, so place its eye along the hull's
-        // up axis while aboard. Outside, hull_turn() is the identity.
-        this.eye.transform.position = qrot(hull_turn(), Vec3(0.0, this.eye_height, 0.0));
+        // Align the capsule with the deck while preserving the camera's
+        // world orientation as the body changes its frame.
+        let view = qmul(this.transform.rotation, this.eye.transform.rotation);
+        let body_turn = hull_turn();
+        this.transform.rotation = body_turn;
+        this.eye.transform.position = Vec3(0.0, this.eye_height, 0.0);
+        this.eye.transform.rotation = qmul(qinv(body_turn), view);
         if this.aboard && !was_aboard {
             upright_from_view();
             this.hold = null;
@@ -178,6 +185,7 @@ script Diver {
         let reached = nearest_hold();
         seat(dt);
         if this.seated {
+            this.moored = false;
             sit();
         } else if this.aboard {
             look_upright(dt);
@@ -262,6 +270,7 @@ script Diver {
     fn carried(dt: number, was_hull: Entity?) {
         let at = this.transform.world_position;
         if this.hull == null || dt <= 0.0 {
+            this.moored = false;
             this.frame_velocity = Vec3(0.0, 0.0, 0.0);
             this.held = false;
             return;
@@ -270,6 +279,7 @@ script Diver {
             let moved = this.hull.transform.to_world(this.held_local) - this.held_world;
             this.frame_velocity = moved / dt;
         } else {
+            this.moored = false;
             this.frame_velocity = Vec3(0.0, 0.0, 0.0);
         }
         this.held_local = this.hull.transform.to_local(at);
@@ -306,7 +316,7 @@ script Diver {
         this.yaw -= delta.x * this.look_speed;
         this.pitch = clamp(this.pitch - delta.y * this.look_speed, -1.45, 1.45);
         let local = qmul(qturn(0.0, 1.0, 0.0, this.yaw), qturn(1.0, 0.0, 0.0, this.pitch));
-        let upright = qmul(hull_turn(), local);
+        let upright = local;
         let settle = 1.0 - exp(-10.0 * dt);
         this.eye.transform.rotation = qblend(this.eye.transform.rotation, upright, settle);
     }
@@ -327,9 +337,28 @@ script Diver {
             wanted = wanted.normalized;
         }
         wanted = wanted * this.walk_speed;
+        // With no walking input, keep the feet at their last spot in the hull.
+        // This is a bounded velocity correction, so physics still resolves walls;
+        // moving, jumping, leaving the hull or losing support releases the spot.
+        if grounded && wanted.length < 0.01 && !Input.Keyboard.is_down("Space") && !Controls.up {
+            if !this.moored {
+                this.mooring = this.hull.transform.to_local(this.transform.world_position);
+                this.moored = true;
+            }
+            let offset = this.hull.transform.to_world(this.mooring) - this.transform.world_position;
+            wanted = (offset - up * offset.dot(up)) * 6.0;
+            if wanted.length > this.walk_speed {
+                wanted = wanted.normalized * this.walk_speed;
+            }
+        } else {
+            this.moored = false;
+        }
         var grip = 1.5;
         if grounded {
             grip = this.footing;
+            if this.frame_velocity.length > 0.01 {
+                grip = this.moving_footing;
+            }
         }
         let take = min(1.0, grip * dt);
         // Everything is worked out relative to the hull, then the hull's own
@@ -380,7 +409,7 @@ script Diver {
         this.yaw = 1.5707963;
         this.pitch = -0.1;
         let local = qmul(qturn(0.0, 1.0, 0.0, this.yaw), qturn(1.0, 0.0, 0.0, this.pitch));
-        this.eye.transform.rotation = qmul(hull_turn(), local);
+        this.eye.transform.rotation = local;
     }
 
     // The suit: air and power run down in vacuum and fill up in the ship's air.

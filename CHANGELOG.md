@@ -2,6 +2,8 @@
 
 # Changelog
 
+- DRIFT aligns the diver capsule with a ship's deck and corrects idle footing during ship rotation; moving-frame attachment still needs visual playtesting.
+
 - DRIFT keeps the camera above the diver relative to a tilted ship while aboard; full body attachment is still under development.
 
 - Voxel block sets can use opaque static GLBs with section-local material batching. DRIFT’s shuttle uses recessed vent blocks alongside its face-textured hull.

@@ -169,3 +169,41 @@ fn standing_up_in_flight_keeps_the_ships_speed() {
         "standing up, the pilot is still carried: {walking} vs {ship}"
     );
 }
+
+#[test]
+fn seated_pilot_remains_above_the_seat_during_a_roll() {
+    let mut game = seated(&[]);
+    game.press(Key::E);
+    game.wait(2.0);
+    game.release(Key::E);
+    let seat = game.run.entity("shuttle-seat").expect("seat");
+    let transform = game
+        .run
+        .world
+        .world_transform(seat)
+        .expect("seat transform");
+    let up = Quat::from_array(transform.rotation).normalize() * Vec3::Y;
+    let offset = Vec3::from_array(game.position("diver")) - Vec3::from_array(transform.position);
+    assert!(
+        (offset.dot(up) - 0.75).abs() < 0.1,
+        "pilot above seat: {offset:?}, up {up:?}"
+    );
+    assert!(
+        (offset - up * offset.dot(up)).length() < 0.1,
+        "pilot aligned with seat: {offset:?}"
+    );
+}
+
+#[test]
+fn standing_up_does_not_pull_the_pilot_back_to_where_they_sat_down() {
+    let mut game = seated(&[]);
+    game.wait(0.5);
+    game.tap(Key::F);
+    let at_seat = Vec3::from_array(game.position("diver"));
+    game.wait(1.0);
+    let after = Vec3::from_array(game.position("diver"));
+    assert!(
+        after.distance(at_seat) < 0.3,
+        "standing moved away from seat: {at_seat:?} -> {after:?}"
+    );
+}

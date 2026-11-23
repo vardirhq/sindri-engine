@@ -263,18 +263,16 @@ Engine work, each step general, in order:
 2. **Voxel bodies.** *Done.* `sindri.physics3d.voxel_body`: a built world's
    blocks merged into exact boxes as one rigid body, rebuilt on edits with its
    motion kept (`docs/physics.md`).
-3. **Riding a moving ship.** *Started.* The camera offset follows hull up
-   while aboard, but the rotation-locked capsule is not attached to the hull
-   and can slide on a rolling deck. Full moving-frame attachment and exit
-   momentum remain open. Decay's `transform.to_local` and
-   `to_world` measure points in an entity's own space. Every region the diver
-   can be aboard is a hull (`scripts/hull.decay`): an entity tagged `hull`
-   with an interior box in its own space and whether it has gravity and air.
-   The *Tern*'s cabin and chamber are hulls fixed in the world; the shuttle is
-   a hull that flies. Aboard one, the diver falls towards its own floor, walks
-   relative to it and keeps the view upright to it, carried by how far the spot
-   they stood on moved since the last step, so a turning ship's spin carries
-   them with no need to know its centre of mass (`tests/riding.rs`).
+3. **Riding a moving ship.** *Started.* A hull is a tagged entity whose own
+   coordinates define its interior and gravity. The diver's capsule aligns
+   to the hull and uses a bounded, collision-resolved velocity correction to
+   hold its local deck position when grounded and idle. Moving or jumping
+   releases that anchor; exiting keeps the body's world velocity. Tests cover
+   a full roll, pitch, walking, jumping, wall collision, and exit velocity.
+   This is a gameplay-level correction, not a general moving reference-frame
+   constraint; visual playtesting, moving ship interactions, and collision
+   behavior under stronger acceleration still need review.
+
 4. **Flying it.** *Started.* Sindri's 3D physics gains `apply_impulse_at`,
    an impulse through a point. The shuttle's functional parts are models on its
    grid (`art/parts.py`): twelve thrusters (mains, retros and pairs on its
