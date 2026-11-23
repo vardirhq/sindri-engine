@@ -33,6 +33,8 @@ LENGTH = 14.0
 HEIGHT = 5.0
 WIDTH = 5.0
 WALL = 0.4
+STAR_ROTATION = (-0.25, 0.35, 0.0, 0.9)
+STAR_DISTANCE = 150.0
 # Open space between the refuge's airlock and the damaged cargo section.
 HOLD_OFFSET = 5.0
 
@@ -351,6 +353,14 @@ def quat(axis, degrees):
     return (x, y, z, math.cos(half))
 
 
+def star_position():
+    """Place the visible star opposite the directional light's -Z ray."""
+    length = math.sqrt(sum(value * value for value in STAR_ROTATION))
+    x, y, z, w = (value / length for value in STAR_ROTATION)
+    return tuple(STAR_DISTANCE * value for value in (
+        2 * (x * z + w * y), 2 * (y * z - w * x), 1 - 2 * (x * x + y * y)))
+
+
 def convex(asset, restitution=0.2):
     return {"asset": f"models/{asset}.glb", "friction": 0.5, "restitution": restitution,
             "layers": SOLID, "sensor": False}
@@ -390,7 +400,8 @@ def ruined_frame():
 def wreckage():
     """Outside the hatch: the derelict, a field of debris, salvage, the stars."""
     rng = random.Random(23)
-    out = [model("stars", "stars", (0, 0, 0)), ruined_frame()]
+    out = [model("stars", "stars", (0, 0, 0)),
+           model("local-star", "local-star", star_position()), ruined_frame()]
     out.append(model("wreck", "wreck", WRECK_AT, quat((0, 1, 0), WRECK_YAW), **{
         "sindri.physics3d.model_collider": {"asset": "models/wreck.glb", "friction": 0.6, "restitution": 0.1,
                                             "layers": SOLID, "sensor": False},
@@ -640,12 +651,13 @@ def scene():
         entity("environment", "Environment", **{"sindri.environment": {
             "background": [0.004, 0.005, 0.009, 1.0],
             "ambient_color": [0.55, 0.65, 0.85],
-            "ambient_intensity": 0.18,
+            # A small fill preserves silhouettes without washing out shadows.
+            "ambient_intensity": 0.035,
             "bloom": {"enabled": True, "intensity": 0.6, "knee": 0.2, "passes": 4, "threshold": 0.8},
             # A near star: hard light and hard shadow, the way sunlight is in vacuum.
             "shadows": {"enabled": True, "map_size": 2048, "distance": 40.0, "bias": 0.002},
         }}),
-        entity("sun", "Starlight", rotation=(-0.25, 0.35, 0.0, 0.9),
+        entity("sun", "Starlight", rotation=STAR_ROTATION,
                **{"sindri.light": {"kind": "directional", "color": [1.0, 0.96, 0.9], "intensity": 1.3}}),
     ]
     # The hold's six walls.

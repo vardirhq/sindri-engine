@@ -69,7 +69,7 @@
             0.65,
             0.85
           ],
-          "ambient_intensity": 0.18,
+          "ambient_intensity": 0.035,
           "bloom": {
             "enabled": true,
             "intensity": 0.6,
@@ -9105,6 +9105,33 @@
       "components": {
         "sindri.model": {
           "asset": "models/stars.glb"
+        }
+      }
+    },
+    {
+      "id": "local-star",
+      "name": "local-star",
+      "transform_3d": {
+        "position": [
+          94.9749,
+          67.8392,
+          94.2211
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.model": {
+          "asset": "models/local-star.glb"
         }
       }
     },
