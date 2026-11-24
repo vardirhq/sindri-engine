@@ -92,11 +92,21 @@ pub(super) enum Culled {
 pub(super) struct Culling {
     camera: Mat4,
     shadow: Option<Mat4>,
+    local_shadow: Option<Mat4>,
 }
 
 impl Culling {
     pub(super) const fn new(camera: Mat4, shadow: Option<Mat4>) -> Self {
-        Self { camera, shadow }
+        Self {
+            camera,
+            shadow,
+            local_shadow: None,
+        }
+    }
+
+    pub(super) fn with_local_shadow(mut self, shadow: Option<Mat4>) -> Self {
+        self.local_shadow = shadow;
+        self
     }
 
     /// What becomes of a box `min`..`max` in an object's own space, placed by
@@ -112,6 +122,9 @@ impl Culling {
         } else if self
             .shadow
             .is_some_and(|shadow| aabb_in_view(low, high, shadow))
+            || self
+                .local_shadow
+                .is_some_and(|shadow| aabb_in_view(low, high, shadow))
         {
             Culled::ShadowOnly
         } else {
@@ -140,6 +153,20 @@ fn world_box(model: Mat4, min: Vec3, max: Vec3) -> Option<(Vec3, Vec3)> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn keeps_offscreen_spotlight_casters() {
+        let camera = Mat4::from_translation(Vec3::new(10.0, 0.0, 0.0));
+        let culling = Culling::new(camera, None).with_local_shadow(Some(Mat4::IDENTITY));
+        assert_eq!(
+            culling.decide(
+                Mat4::IDENTITY,
+                Vec3::new(-0.2, -0.2, 0.2),
+                Vec3::new(0.2, 0.2, 0.8)
+            ),
+            Culled::ShadowOnly
+        );
+    }
 
     #[test]
     fn rejects_only_boxes_wholly_beyond_one_clip_plane() {

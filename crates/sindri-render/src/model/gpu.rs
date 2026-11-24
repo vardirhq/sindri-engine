@@ -25,6 +25,7 @@ pub(crate) struct ModelDraw<'a> {
     pub camera: FrameCamera,
     pub lighting: WorldLighting,
     pub shadow_map: &'a ShadowMap,
+    pub local_shadow_map: &'a ShadowMap,
     pub light_view_projection: Mat4,
     pub shadows: ShadowSettings,
     pub fog: FogSettings,
@@ -87,6 +88,8 @@ struct Uniform {
     emissive: [f32; 4],
     local_lights: [crate::lighting::LocalLightUniform; crate::MAX_LOCAL_LIGHTS],
     occluded_color: [f32; 4],
+    local_shadow_projection: [[f32; 4]; 4],
+    local_shadow: [f32; 4],
 }
 
 impl ModelRenderer {
@@ -233,6 +236,7 @@ impl ModelRenderer {
                             &slot.uniform,
                             textures.map(|i| &cached.images.images[i]),
                             draw.shadow_map,
+                            draw.local_shadow_map,
                         ),
                     ));
                 }
@@ -288,7 +292,23 @@ fn uniform(draw: &ModelDraw<'_>, world: Mat4, surface: &ModelSurface) -> Uniform
     let ambient = Vec3::from_array(lighting.ambient_color) * lighting.ambient_intensity;
     let light = Vec3::from_array(lighting.directional_color) * lighting.directional_intensity;
     let direction = -Vec3::from_array(lighting.directional_direction);
+    let local = draw
+        .shadows
+        .enabled
+        .then(|| crate::shadow::spotlight_view_projection(lighting))
+        .flatten();
     Uniform {
+        local_shadow_projection: local
+            .map_or(Mat4::IDENTITY, |(_, matrix)| matrix)
+            .to_cols_array_2d(),
+        local_shadow: [
+            local.map_or(-1.0, |(index, _)| {
+                u8::try_from(index).map_or(-1.0, f32::from)
+            }),
+            0.002,
+            0.0,
+            0.0,
+        ],
         local_lights: lighting.local_uniforms(),
         occluded_color: draw.occluded_color.unwrap_or([0.0; 4]),
         view_projection: draw.camera.view_projection.to_cols_array_2d(),
@@ -343,6 +363,7 @@ fn bind(
     uniform: &wgpu::Buffer,
     [color, normal, metallic_roughness]: [&ModelTexture; 3],
     shadow_map: &ShadowMap,
+    local_shadow_map: &ShadowMap,
 ) -> wgpu::BindGroup {
     device.create_bind_group(&wgpu::BindGroupDescriptor {
         label: Some("Imported model draw"),
@@ -383,6 +404,10 @@ fn bind(
             wgpu::BindGroupEntry {
                 binding: 8,
                 resource: wgpu::BindingResource::Sampler(&metallic_roughness.sampler),
+            },
+            wgpu::BindGroupEntry {
+                binding: 9,
+                resource: wgpu::BindingResource::TextureView(local_shadow_map.view()),
             },
         ],
     })

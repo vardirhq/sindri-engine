@@ -8855,7 +8855,7 @@
             0.8,
             0.6
           ],
-          "intensity": 1.2,
+          "intensity": 2.5,
           "range": 5.0
         }
       }
@@ -8907,7 +8907,7 @@
             0.8,
             0.6
           ],
-          "intensity": 1.2,
+          "intensity": 2.5,
           "range": 5.0
         }
       }
@@ -8959,7 +8959,7 @@
             1.0,
             0.45
           ],
-          "intensity": 1.2,
+          "intensity": 2.5,
           "range": 3.5
         }
       }
@@ -21559,7 +21559,7 @@
             0.95,
             1.0
           ],
-          "intensity": 1.6,
+          "intensity": 2.5,
           "range": 14.0,
           "inner_angle": 0.25,
           "outer_angle": 0.5

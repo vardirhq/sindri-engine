@@ -2,6 +2,8 @@
 
 # Changelog
 
+- The first selected spotlight can cast shadows when world shadows are enabled; DRIFT uses this for the helmet lamp. Point lights and additional spotlights are not shadowed yet.
+
 - Imported GLB models support embedded normal and packed roughness/metalness maps. All eight DRIFT shuttle blocks use them for painted, brushed, ceramic and emissive finishes.
 
 - DRIFT’s shuttle uses modeled geometry for all eight voxel block types, with recessed hull panels, raised deck treads, amber hazard bands and warm cabin lighting.

@@ -13,7 +13,8 @@ fn safe_normalize(v: vec3<f32>) -> vec3<f32> {
 // zero at range. Local lights are independent of the directional shadow map.
 fn local_lighting(lights: array<LocalLight, 8>, base: vec3<f32>, normal: vec3<f32>,
                   position: vec3<f32>, view: vec3<f32>, metallic: f32,
-                  roughness: f32, standard: bool) -> vec3<f32> {
+                  roughness: f32, standard: bool, local_projection: mat4x4<f32>,
+                  local_shadow: vec4<f32>) -> vec3<f32> {
     var color = vec3<f32>(0.0);
     for (var i = 0u; i < 8u; i += 1u) {
         let light = lights[i];
@@ -29,7 +30,16 @@ fn local_lighting(lights: array<LocalLight, 8>, base: vec3<f32>, normal: vec3<f3
                 cone = smoothstep(light.direction_outer.w, light.inner_spot.x,
                     dot(light.direction_outer.xyz, -direction));
             }
-            let radiance = light.color_intensity.rgb * light.color_intensity.w
+            var visibility = 1.0;
+            if i32(local_shadow.x) == i32(i) {
+                let clip = local_projection * vec4<f32>(position, 1.0);
+                let ndc = clip.xyz / clip.w;
+                let uv = vec2<f32>(ndc.x * 0.5 + 0.5, 0.5 - ndc.y * 0.5);
+                if clip.w > 0.0 && all(uv >= vec2<f32>(0.0)) && all(uv <= vec2<f32>(1.0)) && ndc.z >= 0.0 && ndc.z <= 1.0 {
+                    visibility = textureSampleCompareLevel(local_shadow_map, shadow_sampler, uv, ndc.z - local_shadow.y);
+                }
+            }
+            let radiance = light.color_intensity.rgb * light.color_intensity.w * visibility
                 * cone * window * window / max(distance_squared, 1.0);
             if standard {
                 color += standard_lighting(base, normal, direction, view, metallic,

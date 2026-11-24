@@ -64,7 +64,11 @@ impl TexturedCubeRenderer {
         super::shadow_pass::encode_shadow_mesh(
             queue,
             encoder,
-            self.shadow_map.view(),
+            if self.local_shadow_pass {
+                self.local_shadow_map.view()
+            } else {
+                self.shadow_map.view()
+            },
             self.shadow_view_projection * model,
             &self.batches[slot].shadow_uniform,
             &self.batches[slot].shadow_bind_group,

@@ -216,7 +216,7 @@ fn encode_directional_shadows(
     textures: &TextureRegistry,
     passes: &[FramePass],
 ) -> Result<(), FrameEncodeError> {
-    if !cube.shadows_enabled() {
+    if !cube.shadows_enabled() && !cube.local_shadow_enabled() {
         return Ok(());
     }
     let Some(camera) = passes
@@ -227,57 +227,72 @@ fn encode_directional_shadows(
         return Ok(());
     };
     cube.begin_submission();
-    cube.begin_shadow_pass(encoder, camera);
-    for pass in passes
-        .iter()
-        .filter(|pass| matches!(pass.stage, RenderStage::Opaque3d | RenderStage::Visible3d))
-    {
-        cube.set_material(pass.material)?;
-        cube.set_sidedness(pass.sidedness);
-        match &pass.command {
-            FrameCommand::Model { model, asset } => {
-                cube.encode_shadow_model(device, queue, encoder, asset, *model)?;
+    for local in [false, true] {
+        if local {
+            if !cube.local_shadow_enabled() {
+                continue;
             }
-            FrameCommand::TexturedCube { model, .. } => {
-                cube.encode_shadow_cube(device, queue, encoder, *model);
+            cube.begin_local_shadow_pass(encoder);
+        } else {
+            if !cube.shadows_enabled() {
+                continue;
             }
-            FrameCommand::RetainedTexturedMesh {
-                model, geometry, ..
-            } => {
-                cube.encode_shadow_retained_mesh(device, queue, encoder, *model, geometry);
+            cube.begin_shadow_pass(encoder, camera);
+        }
+        for pass in passes
+            .iter()
+            .filter(|pass| matches!(pass.stage, RenderStage::Opaque3d | RenderStage::Visible3d))
+        {
+            cube.set_material(pass.material)?;
+            cube.set_sidedness(pass.sidedness);
+            match &pass.command {
+                FrameCommand::Model { model, asset } => {
+                    cube.encode_shadow_model(device, queue, encoder, asset, *model)?;
+                }
+                FrameCommand::TexturedCube { model, .. } => {
+                    cube.encode_shadow_cube(device, queue, encoder, *model);
+                }
+                FrameCommand::RetainedTexturedMesh {
+                    model, geometry, ..
+                } => {
+                    cube.encode_shadow_retained_mesh(device, queue, encoder, *model, geometry);
+                }
+                FrameCommand::TexturedMesh {
+                    model,
+                    vertices,
+                    indices,
+                    ..
+                } => {
+                    cube.encode_shadow_mesh(device, queue, encoder, *model, vertices, indices);
+                }
+                FrameCommand::CachedTexturedMesh {
+                    model,
+                    texture,
+                    cache,
+                    revision,
+                    replacement,
+                    surface,
+                } => cube.encode_shadow_cached_mesh(
+                    DrawContext {
+                        device,
+                        queue,
+                        textures,
+                        texture: *texture,
+                    },
+                    encoder,
+                    *model,
+                    CachedMeshRequest {
+                        id: *cache,
+                        revision: *revision,
+                        replacement: replacement.as_ref(),
+                        surface: *surface,
+                    },
+                ),
+                _ => {}
             }
-            FrameCommand::TexturedMesh {
-                model,
-                vertices,
-                indices,
-                ..
-            } => {
-                cube.encode_shadow_mesh(device, queue, encoder, *model, vertices, indices);
-            }
-            FrameCommand::CachedTexturedMesh {
-                model,
-                texture,
-                cache,
-                revision,
-                replacement,
-                surface,
-            } => cube.encode_shadow_cached_mesh(
-                DrawContext {
-                    device,
-                    queue,
-                    textures,
-                    texture: *texture,
-                },
-                encoder,
-                *model,
-                CachedMeshRequest {
-                    id: *cache,
-                    revision: *revision,
-                    replacement: replacement.as_ref(),
-                    surface: *surface,
-                },
-            ),
-            _ => {}
+        }
+        if local {
+            cube.finish_local_shadow_pass(camera);
         }
     }
     Ok(())

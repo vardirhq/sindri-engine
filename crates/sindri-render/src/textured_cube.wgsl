@@ -15,6 +15,8 @@ struct Uniforms {
     material: vec4<f32>,
     emissive: vec4<f32>,
     local_lights: array<LocalLight, 8>,
+    local_shadow_projection: mat4x4<f32>,
+    local_shadow: vec4<f32>,
 }
 
 @group(0) @binding(0)
@@ -102,7 +104,8 @@ fn fs_main(input: VertexOutput, @builtin(front_facing) front: bool) -> @location
     }
     lit += local_lighting(uniforms.local_lights, sampled.rgb, normal, input.world_position,
         safe_normalize(uniforms.camera_position.xyz - input.world_position),
-        uniforms.material.x, uniforms.material.y, uniforms.material.z > 0.5) * contact_visibility;
+        uniforms.material.x, uniforms.material.y, uniforms.material.z > 0.5,
+        uniforms.local_shadow_projection, uniforms.local_shadow) * contact_visibility;
     return vec4<f32>(atmosphere(lit, input.world_position, uniforms.camera_position,
         uniforms.fog_color, uniforms.fog_params), sampled.a);
 }

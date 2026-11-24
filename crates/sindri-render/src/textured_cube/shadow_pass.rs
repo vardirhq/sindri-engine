@@ -9,6 +9,7 @@ impl TexturedCubeRenderer {
         encoder: &mut wgpu::CommandEncoder,
         camera_view_projection: Mat4,
     ) {
+        self.local_shadow_pass = false;
         self.shadow_view_projection =
             light_view_projection(camera_view_projection, &self.lighting, self.shadow_settings);
         self.draw_stats.render_passes += 1;
@@ -16,7 +17,11 @@ impl TexturedCubeRenderer {
             label: Some("Sindri directional shadow clear"),
             color_attachments: &[],
             depth_stencil_attachment: Some(wgpu::RenderPassDepthStencilAttachment {
-                view: self.shadow_map.view(),
+                view: if self.local_shadow_pass {
+                    self.local_shadow_map.view()
+                } else {
+                    self.shadow_map.view()
+                },
                 depth_ops: Some(wgpu::Operations {
                     load: wgpu::LoadOp::Clear(1.0),
                     store: wgpu::StoreOp::Store,
@@ -27,6 +32,35 @@ impl TexturedCubeRenderer {
             occlusion_query_set: None,
             multiview_mask: None,
         });
+    }
+
+    pub(crate) fn begin_local_shadow_pass(&mut self, encoder: &mut wgpu::CommandEncoder) {
+        self.local_shadow_pass = true;
+        self.draw_stats.render_passes += 1;
+        self.shadow_view_projection = crate::shadow::spotlight_view_projection(&self.lighting)
+            .expect("selected spotlight")
+            .1;
+        let _pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
+            label: Some("Sindri spotlight shadow clear"),
+            color_attachments: &[],
+            depth_stencil_attachment: Some(wgpu::RenderPassDepthStencilAttachment {
+                view: self.local_shadow_map.view(),
+                depth_ops: Some(wgpu::Operations {
+                    load: wgpu::LoadOp::Clear(1.0),
+                    store: wgpu::StoreOp::Store,
+                }),
+                stencil_ops: None,
+            }),
+            timestamp_writes: None,
+            occlusion_query_set: None,
+            multiview_mask: None,
+        });
+    }
+
+    pub(crate) fn finish_local_shadow_pass(&mut self, camera: Mat4) {
+        self.local_shadow_pass = false;
+        self.shadow_view_projection =
+            light_view_projection(camera, &self.lighting, self.shadow_settings);
     }
 
     pub(crate) fn encode_shadow_cube(
@@ -40,7 +74,11 @@ impl TexturedCubeRenderer {
         encode_shadow_mesh(
             queue,
             encoder,
-            self.shadow_map.view(),
+            if self.local_shadow_pass {
+                self.local_shadow_map.view()
+            } else {
+                self.shadow_map.view()
+            },
             self.shadow_view_projection * model,
             &self.batches[slot].shadow_uniform,
             &self.batches[slot].shadow_bind_group,
@@ -68,7 +106,11 @@ impl TexturedCubeRenderer {
         encode_shadow_mesh(
             queue,
             encoder,
-            self.shadow_map.view(),
+            if self.local_shadow_pass {
+                self.local_shadow_map.view()
+            } else {
+                self.shadow_map.view()
+            },
             self.shadow_view_projection * model,
             &self.batches[slot].shadow_uniform,
             &self.batches[slot].shadow_bind_group,
@@ -97,7 +139,11 @@ impl TexturedCubeRenderer {
         encode_shadow_mesh(
             context.queue,
             encoder,
-            self.shadow_map.view(),
+            if self.local_shadow_pass {
+                self.local_shadow_map.view()
+            } else {
+                self.shadow_map.view()
+            },
             self.shadow_view_projection * model,
             &self.batches[slot].shadow_uniform,
             &self.batches[slot].shadow_bind_group,

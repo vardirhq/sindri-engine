@@ -91,3 +91,69 @@ fn cones_aim_feather_and_update_every_geometry_without_uploads() {
     assert_eq!(scene.cube.model_cache_stats().uploads, 1);
     assert_eq!(scene.cube.cached_mesh_stats().buffer_uploads, 2);
 }
+
+#[test]
+fn offscreen_blocker_casts_spotlight_shadow_on_mesh_and_model() {
+    let gpu = match pollster::block_on(GpuContext::request(
+        &wgpu::Instance::default(),
+        None,
+        &GpuRequestOptions::default(),
+    )) {
+        Ok(gpu) => gpu,
+        Err(error) => {
+            assert!(
+                std::env::var_os("SINDRI_REQUIRE_GPU").is_none(),
+                "required GPU unavailable: {error}"
+            );
+            return;
+        }
+    };
+    let mut scene = Scene::new(&gpu, [0.0; 3]);
+    scene.cube.set_shadows(
+        &gpu.device,
+        sindri_render::ShadowSettings {
+            enabled: true,
+            ..Default::default()
+        },
+    );
+    let light = lighting([-0.6, 0.0, -1.75], 0.35);
+    for kind in 0..4 {
+        let unblocked = scene.draw(&gpu, kind, None, &light);
+        let passes = scene.frames[kind].passes();
+        let texture = match &passes[0].command {
+            FrameCommand::TexturedCube { texture, .. }
+            | FrameCommand::TexturedMesh { texture, .. }
+            | FrameCommand::RetainedTexturedMesh { texture, .. }
+            | FrameCommand::CachedTexturedMesh { texture, .. } => *texture,
+            _ => unreachable!(),
+        };
+        let mut frame =
+            ExtractedFrame::new(scene.frames[kind].viewport(), scene.frames[kind].clear());
+        for pass in passes.iter().cloned() {
+            frame.push(pass);
+        }
+        let mut blocker = FramePass::new(
+            RenderStage::Opaque3d,
+            RenderLayer::WORLD,
+            passes[0].camera,
+            FrameCommand::TexturedCube {
+                model: Mat4::from_scale_rotation_translation(
+                    Vec3::splat(0.3),
+                    glam::Quat::IDENTITY,
+                    Vec3::new(-0.3, 0.0, 1.1),
+                ),
+                texture,
+            },
+        );
+        blocker.shadow_only = true;
+        frame.push(blocker);
+        scene.frames[kind] = frame.prepare().unwrap();
+        let shadowed = scene.draw(&gpu, kind, None, &light);
+        assert!(
+            pixel(&shadowed, 32)[2] + 5 < pixel(&unblocked, 32)[2],
+            "blocker should darken receiver: {:?} vs {:?}",
+            pixel(&shadowed, 32),
+            pixel(&unblocked, 32)
+        );
+    }
+}

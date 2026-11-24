@@ -630,9 +630,9 @@ def ship():
     out[-2]["name"] = "ChamberZone"
     # Light: warm in the cabin; the chamber's lamp shows its pressure.
     out += [
-        lamp("cabin-lamp-0", (kx0 + 1.5, ky1 - 0.05, (kz0 + kz1) / 2), (1.0, 0.8, 0.6), 1.2, 5.0),
-        lamp("cabin-lamp-1", (kx1 - 1.5, ky1 - 0.05, (kz0 + kz1) / 2), (1.0, 0.8, 0.6), 1.2, 5.0),
-        lamp("airlock-lamp", ((cx0 + cx1) / 2, cy1 - 0.05, (cz0 + cz1) / 2), (0.3, 1.0, 0.45), 1.2, 3.5),
+        lamp("cabin-lamp-0", (kx0 + 1.5, ky1 - 0.05, (kz0 + kz1) / 2), (1.0, 0.8, 0.6), 2.5, 5.0),
+        lamp("cabin-lamp-1", (kx1 - 1.5, ky1 - 0.05, (kz0 + kz1) / 2), (1.0, 0.8, 0.6), 2.5, 5.0),
+        lamp("airlock-lamp", ((cx0 + cx1) / 2, cy1 - 0.05, (cz0 + cz1) / 2), (0.3, 1.0, 0.45), 2.5, 3.5),
     ]
     out[-1]["name"] = "AirlockLamp"
     return out
@@ -736,7 +736,7 @@ def scene():
     )
     helmet = entity(
         "helmet-lamp", "HelmetLamp", parent="eye", position=(0.15, 0.1, 0),
-        **{"sindri.light": {"kind": "spot", "color": [0.9, 0.95, 1.0], "intensity": 1.6, "range": 14.0,
+        **{"sindri.light": {"kind": "spot", "color": [0.9, 0.95, 1.0], "intensity": 2.5, "range": 14.0,
                             "inner_angle": 0.25, "outer_angle": 0.5}},
     )
     entities += [diver, eye, helmet]

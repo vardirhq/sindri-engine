@@ -134,6 +134,13 @@ impl SceneExtractor {
         let shadow = settings.shadows.enabled.then(|| {
             sindri_render::light_view_projection(camera, &settings.lighting, settings.shadows)
         });
-        Some(super::frustum::Culling::new(camera, shadow))
+        let local = settings
+            .shadows
+            .enabled
+            .then(|| {
+                sindri_render::spotlight_view_projection(&settings.lighting).map(|(_, view)| view)
+            })
+            .flatten();
+        Some(super::frustum::Culling::new(camera, shadow).with_local_shadow(local))
     }
 }
