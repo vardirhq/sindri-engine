@@ -2,6 +2,7 @@
 // so both paths sample the same directional map and atmosphere contract.
 @group(0) @binding(3) var shadow_map: texture_depth_2d;
 @group(0) @binding(4) var shadow_sampler: sampler_comparison;
+@group(0) @binding(9) var local_shadow_map: texture_depth_2d;
 
 fn directional_visibility(world_position: vec3<f32>, light_view_projection: mat4x4<f32>,
                           shadow: vec4<f32>, diffuse: f32) -> f32 {

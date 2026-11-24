@@ -8,7 +8,7 @@ pub(super) fn layout(device: &wgpu::Device) -> wgpu::BindGroupLayout {
     })
 }
 
-pub(super) fn layout_entries() -> [wgpu::BindGroupLayoutEntry; 9] {
+pub(super) fn layout_entries() -> [wgpu::BindGroupLayoutEntry; 10] {
     [
         wgpu::BindGroupLayoutEntry {
             binding: 0,
@@ -42,6 +42,16 @@ pub(super) fn layout_entries() -> [wgpu::BindGroupLayoutEntry; 9] {
         sampler(6),
         texture(7),
         sampler(8),
+        wgpu::BindGroupLayoutEntry {
+            binding: 9,
+            visibility: wgpu::ShaderStages::FRAGMENT,
+            ty: wgpu::BindingType::Texture {
+                sample_type: wgpu::TextureSampleType::Depth,
+                view_dimension: wgpu::TextureViewDimension::D2,
+                multisampled: false,
+            },
+            count: None,
+        },
     ]
 }
 

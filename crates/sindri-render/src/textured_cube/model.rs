@@ -30,7 +30,11 @@ impl TexturedCubeRenderer {
             crate::model::ModelShadowDraw {
                 world,
                 projection: self.shadow_view_projection,
-                target: self.shadow_map.view(),
+                target: if self.local_shadow_pass {
+                    self.local_shadow_map.view()
+                } else {
+                    self.shadow_map.view()
+                },
                 material: self.material,
                 sidedness: self.sidedness,
             },
@@ -78,6 +82,7 @@ impl TexturedCubeRenderer {
                 camera: matrices.1,
                 lighting: self.lighting,
                 shadow_map: &self.shadow_map,
+                local_shadow_map: &self.local_shadow_map,
                 light_view_projection: self.shadow_view_projection,
                 shadows: self.shadow_settings,
                 fog: self.fog,

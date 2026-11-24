@@ -1233,9 +1233,9 @@ Strongest-eight active points/spots, world-unit range/falloff, feathered half-an
 
 Engine 🟡 · Editor 🟡 · Decay 🟡 · Proof 🟡 — parity row *3D point and spot lights*
 
-**Tested by:** [`crates/sindri-gpu/tests/standard_materials/points.rs`](../../crates/sindri-gpu/tests/standard_materials/points.rs), [`crates/sindri-gpu/tests/standard_materials/spots.rs`](../../crates/sindri-gpu/tests/standard_materials/spots.rs)
+**Tested by:** [`crates/sindri-gpu/tests/standard_materials/points.rs`](../../crates/sindri-gpu/tests/standard_materials/points.rs), [`crates/sindri-gpu/tests/standard_materials/spots.rs`](../../crates/sindri-gpu/tests/standard_materials/spots.rs), [`games/drift/tests/lighting.rs`](../../games/drift/tests/lighting.rs)
 
-**Exercised in:** [`examples/lighting3d`](../../examples/lighting3d)
+**Exercised in:** [`examples/lighting3d`](../../examples/lighting3d), [`games/drift`](../../games/drift)
 
 **See:** [`docs/3d-lights.md`](../../docs/3d-lights.md)
 
@@ -1248,25 +1248,22 @@ through shared Lambert/GGX point lighting. Positions follow composed live
 transforms and inactive ancestors suppress the light. Editor creation uses one
 checked transaction and selected world-range circles; studio lighting omits
 authored points. Native/browser feature controls and GPU/scene regressions are
-described in [the 3D light contract](../3d-lights.md). This is Explorer feature
-proof, with no in-tree game adoption yet; local shadows are absent.
+described in [the 3D light contract](../3d-lights.md). DRIFT uses these lights; point-light shadows are absent.
 Typed runtime light properties are described below. Points now share the
 spotlight records
 described below. The fixed uniform cost is 512 additional
 bytes per color draw; shared buffers and spatial light assignment remain open.
 
-Explorer's planned lighting track now has unshadowed spotlights as feature proof;
-no in-tree game uses them yet. `sindri.light.kind = "spot"` uses composed world
+Explorer has spotlights as feature proof; DRIFT uses a helmet spotlight. `sindri.light.kind = "spot"` uses composed world
 position/forward with validated inner/outer half-angles in radians. Points and
 spots share eight strongest-intensity slots, range falloff and Lambert/GGX
 shading across world/voxel meshes and imported models. Cone strength feathers
-with smoothstep between angle cosines. Color uniforms are now 880/944 bytes for
+with smoothstep between angle cosines. Color uniforms are now 960/1024 bytes for
 textured/model draws (eight 64-byte light records, plus the model silhouette
-color); shadow uniforms, passes, writes
-and persistent geometry uploads are unchanged. The editor creates down-facing
+color); a shadowed spotlight adds a depth pass and shadow draws while sharing persistent geometry. The editor creates down-facing
 spots in one undo step and paints clipped selected inner/outer range cones.
 Native/browser aimed/away controls and Scene/GPU/guide regressions provide
-feature evidence. Local shadows and Explorer adoption remain open; runtime light
+feature evidence. One selected spotlight casts shadows when world shadows are enabled; points and other spots remain unshadowed. Explorer adoption remains open; runtime light
 controls and mounted-light feature evidence are described below and in `3d-lights.md`.
 
 </details>

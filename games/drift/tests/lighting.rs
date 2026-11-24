@@ -15,3 +15,17 @@ fn visible_star_matches_starlight_direction() {
     let components = &game.run.world.get(visual).unwrap().components;
     assert!(!components.contains_key("sindri.physics3d.collider"));
 }
+
+#[test]
+fn helmet_lamp_is_in_the_selected_lights() {
+    let mut game = Run::open().expect("DRIFT opens");
+    game.wait(0.1);
+    let lighting = game.run.scene.lighting(&game.run.world).expect("lighting");
+    let helmet = Vec3::from_array(game.position("helmet-lamp"));
+    assert!(
+        lighting.local_lights.iter().flatten().any(|light| {
+            light.spot.is_some() && Vec3::from_array(light.point.position).distance(helmet) < 0.01
+        }),
+        "the helmet spotlight must reach the renderer"
+    );
+}

@@ -1,7 +1,6 @@
 # 3D point and spot lights
 
-This is feature proof for Explorer's planned lighting track. No in-tree game
-uses 3D local lights yet. GLB light import and local-light shadows remain open; 2D lights have their own independent contract.
+This is feature proof for Explorer's planned lighting track. DRIFT uses the helmet spotlight. GLB light import and point-light shadows remain open; 2D lights have their own independent contract.
 
 `sindri.light.kind` accepts `directional` (the default), `point` or `spot`.
 Existing scenes keep their directional light. `enabled` defaults to true and
@@ -41,17 +40,21 @@ between the two boundaries it fades with smoothstep in cosine space; outside it
 contributes zero. The same eight slots select points and spots together, without
 an extra pass. Raw invalid renderer inputs pack as disabled lights.
 
-Local light is independent of directional-shadow visibility. Points and spots do
-not cast shadows or respect occluders; that limitation is visible around walls.
+When authored world shadows are enabled, the first selected valid spotlight has a
+separate 1024×1024 shadow map. Its projection follows the composed light transform;
+off-screen casters are retained for its frustum. Other local lights, including
+all point lights, remain unshadowed and may illuminate through walls. One
+spotlight shadow map is supported per frame; an atlas and point-light shadows
+are future work.
 Emission still lights only its own material. World-mesh AO applies to point
 shading as it does to sun shading; imported geometry still has no authored
 mesh-AO channel.
 
 Each color draw carries eight 64-byte records, including empty slots. Textured
-color uniforms are 880 bytes and model color uniforms 944 bytes (including the optional silhouette color); pass/write
-counts, shadow uniforms and retained geometry do not change. Batching, shared
+color uniforms are 960 bytes and model color uniforms 1024 bytes (including the optional silhouette color); shadow uniforms and retained geometry are shared. An active shadowed spotlight
+adds a depth pass and shadow draws. Batching, shared
 light buffers and whole-frame performance targets remain open. The fixed 3D
-workload now uploads 293,744/271,280 uniform bytes with shadows on/off,
+workload now uploads 317,824/295,360 uniform bytes with shadows on/off,
 retaining 602/301 draws and 603/301 passes.
 
 The editor offers Create Point Light and Create Spot Light, with one checked

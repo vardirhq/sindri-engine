@@ -4,6 +4,40 @@ use glam::{Mat4, Vec3, Vec4};
 
 use crate::WorldLighting;
 
+/// The first valid active spotlight and its perspective shadow projection.
+/// Local shadowing is limited to one light until the renderer has an atlas.
+#[must_use]
+pub fn spotlight_view_projection(lighting: &WorldLighting) -> Option<(usize, Mat4)> {
+    lighting
+        .local_lights
+        .iter()
+        .enumerate()
+        .find_map(|(index, light)| {
+            let light = (*light)?.validate().ok()?;
+            let cone = light.spot?;
+            if light.point.intensity <= 0.0 {
+                return None;
+            }
+            let eye = Vec3::from_array(light.point.position);
+            let direction = Vec3::from_array(cone.direction).normalize();
+            let up = if direction.dot(Vec3::Y).abs() > 0.98 {
+                Vec3::Z
+            } else {
+                Vec3::Y
+            };
+            let near = (light.point.range * 0.001).min(0.1);
+            if near <= 0.0 || near >= light.point.range {
+                return None;
+            }
+            let fov = (cone.outer_angle * 2.0).min(std::f32::consts::PI - 0.001);
+            let view = glam::camera::rh::view::look_at_mat4(eye, eye + direction, up);
+            let projection =
+                glam::camera::rh::proj::directx::perspective(fov, 1.0, near, light.point.range);
+            let matrix = projection * view;
+            matrix.is_finite().then_some((index, matrix))
+        })
+}
+
 const MIN_MAP_SIZE: u32 = 256;
 const MAX_MAP_SIZE: u32 = 2048;
 
@@ -208,4 +242,35 @@ pub(crate) fn create_shadow_pipeline(
         })
     });
     (bind_group_layout, pipeline)
+}
+
+#[cfg(test)]
+mod local_tests {
+    use super::*;
+    use crate::{LocalLight, PointLight, SpotCone};
+
+    #[test]
+    fn spotlight_projection_follows_its_position_and_direction() {
+        let mut lighting = WorldLighting::default();
+        lighting.local_lights[2] = Some(LocalLight {
+            point: PointLight {
+                position: [2.0, 1.0, 3.0],
+                color: [1.0; 3],
+                intensity: 1.0,
+                range: 10.0,
+            },
+            spot: Some(SpotCone {
+                direction: [0.0, 0.0, -1.0],
+                inner_angle: 0.2,
+                outer_angle: 0.5,
+            }),
+        });
+        let (index, matrix) = spotlight_view_projection(&lighting).unwrap();
+        assert_eq!(index, 2);
+        let target = matrix * Vec4::new(2.0, 1.0, 1.0, 1.0);
+        assert!(target.x.abs() < 1e-5 && target.y.abs() < 1e-5);
+        assert!(target.z > 0.0 && target.z < target.w);
+        let behind = matrix * Vec4::new(2.0, 1.0, 4.0, 1.0);
+        assert!(behind.w < 0.0);
+    }
 }

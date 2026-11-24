@@ -186,8 +186,9 @@ used inside smoke-filled or depressurized spaces, not in vacuum.
 The opening now has a visible emissive star aligned with the directional
 starlight and a low ambient fill to keep unlit silhouettes from disappearing
 completely. The cabin, airlock and helmet retain their local lights. This is an
-initial lighting pass: local point and spot lights do not yet cast shadows or
-respect occluders, so a lamp can illuminate through walls. The apparent star
+initial lighting pass: one selected spotlight can cast shadows, including the helmet lamp. Point
+lights and additional spotlights remain unshadowed and can illuminate through
+walls. The apparent star
 is a scene object at a fixed distance, not an astronomical sky; its visual
 alignment and visibility, dark routes and cabin readability still need an
 in-game capture and playtest.

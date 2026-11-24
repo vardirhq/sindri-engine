@@ -46,6 +46,8 @@ pub struct TexturedCubeRenderer {
     lighting: WorldLighting,
     shadow_settings: ShadowSettings,
     shadow_map: ShadowMap,
+    local_shadow_map: ShadowMap,
+    local_shadow_pass: bool,
     shadow_bind_group_layout: wgpu::BindGroupLayout,
     shadow_pipeline: [wgpu::RenderPipeline; 4],
     shadow_view_projection: Mat4,
@@ -103,6 +105,8 @@ impl TexturedCubeRenderer {
             lighting: WorldLighting::default(),
             shadow_settings: ShadowSettings::default(),
             shadow_map,
+            local_shadow_map: ShadowMap::new(device, ShadowSettings::default().map_size),
+            local_shadow_pass: false,
             shadow_bind_group_layout,
             shadow_pipeline,
             shadow_view_projection: Mat4::IDENTITY,
@@ -153,6 +157,11 @@ impl TexturedCubeRenderer {
 
     pub fn set_camera_position(&mut self, position: Vec3) {
         self.camera_position = position;
+    }
+
+    pub(crate) fn local_shadow_enabled(&self) -> bool {
+        self.shadow_settings.enabled
+            && crate::shadow::spotlight_view_projection(&self.lighting).is_some()
     }
 
     pub(crate) const fn shadows_enabled(&self) -> bool {
@@ -250,6 +259,10 @@ impl TexturedCubeRenderer {
                 wgpu::BindGroupEntry {
                     binding: 4,
                     resource: wgpu::BindingResource::Sampler(self.shadow_map.sampler()),
+                },
+                wgpu::BindGroupEntry {
+                    binding: 9,
+                    resource: wgpu::BindingResource::TextureView(self.local_shadow_map.view()),
                 },
             ],
         });

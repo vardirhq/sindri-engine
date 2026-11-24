@@ -21,6 +21,8 @@ pub(super) struct CubeUniform {
     pub material: [f32; 4],
     pub emissive: [f32; 4],
     pub local_lights: [crate::lighting::LocalLightUniform; crate::MAX_LOCAL_LIGHTS],
+    pub local_shadow_projection: [[f32; 4]; 4],
+    pub local_shadow: [f32; 4],
 }
 
 #[allow(clippy::too_many_arguments, clippy::too_many_lines)]
@@ -38,7 +40,22 @@ pub(super) fn cube_uniform(
 ) -> CubeUniform {
     let enabled = material.is_some();
     let material = material.unwrap_or_default();
+    let local = shadows
+        .enabled
+        .then(|| crate::shadow::spotlight_view_projection(lighting))
+        .flatten();
     CubeUniform {
+        local_shadow_projection: local
+            .map_or(Mat4::IDENTITY, |(_, matrix)| matrix)
+            .to_cols_array_2d(),
+        local_shadow: [
+            local.map_or(-1.0, |(index, _)| {
+                u8::try_from(index).map_or(-1.0, f32::from)
+            }),
+            0.002,
+            0.0,
+            0.0,
+        ],
         local_lights: lighting.local_uniforms(),
         model_view_projection: model_view_projection.to_cols_array_2d(),
         model: model.to_cols_array_2d(),

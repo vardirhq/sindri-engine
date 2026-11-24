@@ -18,6 +18,8 @@ struct Uniforms {
     emissive: vec4<f32>,
     local_lights: array<LocalLight, 8>,
     occluded_color: vec4<f32>,
+    local_shadow_projection: mat4x4<f32>,
+    local_shadow: vec4<f32>,
 }
 @group(0) @binding(0) var<uniform> u: Uniforms;
 @group(0) @binding(1) var color_texture: texture_2d<f32>;
@@ -85,7 +87,8 @@ fn mapped_normal(v: Vertex, n: vec3<f32>) -> vec3<f32> {
     let shadow_visibility = directional_visibility(v.position, u.light_view_projection, u.shadow, nl);
     let color = standard_lighting(base.rgb, n, l, view, metallic, roughness,
         u.ambient.rgb, u.light.rgb * shadow_visibility) + u.emissive.rgb
-        + local_lighting(u.local_lights, base.rgb, n, v.position, view, metallic, roughness, true);
+        + local_lighting(u.local_lights, base.rgb, n, v.position, view, metallic, roughness, true,
+            u.local_shadow_projection, u.local_shadow);
     return vec4(atmosphere(color, v.position, u.eye, u.fog_color, u.fog_params), 1.0);
 }
 
