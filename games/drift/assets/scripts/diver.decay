@@ -106,6 +106,8 @@ script Diver {
     @export let panel_reach: number = 1.6;
 
     var propellant: number = 100.0;
+    // When the wrist display next refreshes.
+    var wrist_tick = Timer(0.0);
     var eye: Entity = null;
     var eye_height: number = 0.0;
     var hold: Entity = null;
@@ -638,6 +640,12 @@ script Diver {
     // The wrist display: air, suit power, the pack and speed, read on the
     // diver's own forearm rather than in a corner of the screen.
     fn wrist() {
+        // A few times a second, as a real readout refreshes: rewritten every
+        // frame, its digits shimmer.
+        if !this.wrist_tick.done {
+            return;
+        }
+        this.wrist_tick = Timer(0.25);
         var pack = "NO PACK";
         if Ship.thrusters {
             pack = "PACK " + round(this.propellant).fixed(0) + "%";
@@ -646,7 +654,7 @@ script Diver {
         if this.oxygen < 25.0 {
             air = air + "  LOW";
         }
-        let speed = Physics3d.velocity(this.entity).length;
+        let speed = round(Physics3d.velocity(this.entity).length * 2.0) / 2.0;
         Ui.set_text(World.find("wrist-readout"), air + "\nSUIT " + round(this.power).fixed(0)
             + "%\n" + pack + "\n" + speed.fixed(1) + " M/S");
     }

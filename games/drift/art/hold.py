@@ -784,11 +784,14 @@ def scene():
     entities.append(model("forearm", "forearm", (-0.26, -0.3, -0.5), parent="eye",
                           rotation=quat((1.0, -0.35, 0.0), 38)))
     entities[-1]["transform_3d"]["scale"] = [0.7, 0.7, 0.7]
+    # The readout lies on the wrist screen's face: a child of the forearm, laid
+    # flat on the screen (its words' up along the arm, towards the glove).
     entities.append(entity(
-        "wrist-readout", "wrist-readout", parent="eye", position=(-0.245, -0.255, -0.44),
+        "wrist-readout", "wrist-readout", parent="forearm", position=(0.0, 0.093, 0.02),
+        rotation=quat((1.0, 0.0, 0.0), -90),
         **{"sindri.text": {"text": "", "anchor": "center", "color": [0.55, 1.0, 0.85, 1.0],
-                           "font": "fonts/ChakraPetch-Regular.ttf", "font_size": 0.016,
-                           "line_height": 0.019, "layer": 30, "follow_rotation": True}},
+                           "font": "fonts/ChakraPetch-Regular.ttf", "font_size": 0.012,
+                           "line_height": 0.0175, "layer": 30, "follow_rotation": True}},
     ))
     # What ACTION will use: brackets around it, placed by the diver script.
     # Out of sight until there is something to aim at.
