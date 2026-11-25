@@ -8618,6 +8618,45 @@
       }
     },
     {
+      "id": "airlock-display",
+      "name": "airlock-display",
+      "transform_3d": {
+        "position": [
+          -8.5,
+          -0.55,
+          2.34
+        ],
+        "rotation": [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.text": {
+          "text": "",
+          "anchor": "center",
+          "color": [
+            0.55,
+            1.0,
+            0.7,
+            1.0
+          ],
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.07,
+          "line_height": 0.085,
+          "layer": 30,
+          "follow_rotation": true
+        }
+      }
+    },
+    {
       "id": "cabin-panel",
       "name": "cabin-panel",
       "transform_3d": {
@@ -21987,6 +22026,257 @@
       "parent": "eye"
     },
     {
+      "id": "diver-body",
+      "name": "DiverBody",
+      "transform_3d": {
+        "position": [
+          0,
+          0.5,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.model": {
+          "asset": "models/body.glb"
+        }
+      },
+      "parent": "diver"
+    },
+    {
+      "id": "forearm",
+      "name": "forearm",
+      "transform_3d": {
+        "position": [
+          -0.26,
+          -0.3,
+          -0.5
+        ],
+        "rotation": [
+          0.30729,
+          -0.107552,
+          0.0,
+          0.945519
+        ],
+        "scale": [
+          0.7,
+          0.7,
+          0.7
+        ]
+      },
+      "components": {
+        "sindri.model": {
+          "asset": "models/forearm.glb"
+        }
+      },
+      "parent": "eye"
+    },
+    {
+      "id": "wrist-readout",
+      "name": "wrist-readout",
+      "transform_3d": {
+        "position": [
+          -0.245,
+          -0.255,
+          -0.44
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.text": {
+          "text": "",
+          "anchor": "center",
+          "color": [
+            0.55,
+            1.0,
+            0.85,
+            1.0
+          ],
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.016,
+          "line_height": 0.019,
+          "layer": 30,
+          "follow_rotation": true
+        }
+      },
+      "parent": "eye"
+    },
+    {
+      "id": "aim-marker",
+      "name": "aim-marker",
+      "transform_3d": {
+        "position": [
+          0,
+          -1000,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.model": {
+          "asset": "models/marker.glb"
+        }
+      }
+    },
+    {
+      "id": "oxygen-0",
+      "name": "oxygen-0",
+      "transform_3d": {
+        "position": [
+          -4.4,
+          -0.45,
+          1.25
+        ],
+        "rotation": [
+          0.185595,
+          0.0,
+          0.111357,
+          0.976296
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.model": {
+          "asset": "models/oxygen-canister.glb"
+        },
+        "sindri.tags": {
+          "tags": [
+            "oxygen"
+          ]
+        }
+      }
+    },
+    {
+      "id": "oxygen-1",
+      "name": "oxygen-1",
+      "transform_3d": {
+        "position": [
+          1.0,
+          -0.3,
+          0.8
+        ],
+        "rotation": [
+          0.460731,
+          0.0,
+          0.276438,
+          0.843391
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.model": {
+          "asset": "models/oxygen-canister.glb"
+        },
+        "sindri.tags": {
+          "tags": [
+            "oxygen"
+          ]
+        }
+      }
+    },
+    {
+      "id": "oxygen-2",
+      "name": "oxygen-2",
+      "transform_3d": {
+        "position": [
+          7.5,
+          1.2,
+          -1.2
+        ],
+        "rotation": [
+          0.680295,
+          0.0,
+          0.408177,
+          0.608761
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.model": {
+          "asset": "models/oxygen-canister.glb"
+        },
+        "sindri.tags": {
+          "tags": [
+            "oxygen"
+          ]
+        }
+      }
+    },
+    {
+      "id": "oxygen-3",
+      "name": "oxygen-3",
+      "transform_3d": {
+        "position": [
+          15.0,
+          0.4,
+          1.6
+        ],
+        "rotation": [
+          0.817806,
+          0.0,
+          0.490683,
+          0.300706
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.model": {
+          "asset": "models/oxygen-canister.glb"
+        },
+        "sindri.tags": {
+          "tags": [
+            "oxygen"
+          ]
+        }
+      }
+    },
+    {
       "id": "tether",
       "name": "Tether",
       "transform_3d": {
@@ -24544,94 +24834,16 @@
         "sindri.ui.text": {
           "anchor": "center",
           "color": [
-            0.85,
-            0.92,
+            0.95,
+            0.98,
             1.0,
-            0.6
+            0.9
           ],
           "font": "fonts/ChakraPetch-Regular.ttf",
-          "font_size": 0.05,
-          "line_height": 0.06,
+          "font_size": 0.06,
+          "line_height": 0.072,
           "layer": 200,
           "text": "+",
-          "letter_spacing": 0.004
-        }
-      }
-    },
-    {
-      "id": "hud-propellant",
-      "name": "hud-propellant",
-      "transform_3d": {
-        "position": [
-          -0.8,
-          -0.88,
-          0
-        ],
-        "rotation": [
-          0,
-          0,
-          0,
-          1
-        ],
-        "scale": [
-          1,
-          1,
-          1
-        ]
-      },
-      "components": {
-        "sindri.ui.text": {
-          "anchor": "center",
-          "color": [
-            0.85,
-            0.92,
-            1.0,
-            1.0
-          ],
-          "font": "fonts/ChakraPetch-Regular.ttf",
-          "font_size": 0.04,
-          "line_height": 0.048,
-          "layer": 200,
-          "text": "PROPELLANT {}%",
-          "letter_spacing": 0.004
-        }
-      }
-    },
-    {
-      "id": "hud-velocity",
-      "name": "hud-velocity",
-      "transform_3d": {
-        "position": [
-          0.8,
-          -0.88,
-          0
-        ],
-        "rotation": [
-          0,
-          0,
-          0,
-          1
-        ],
-        "scale": [
-          1,
-          1,
-          1
-        ]
-      },
-      "components": {
-        "sindri.ui.text": {
-          "anchor": "center",
-          "color": [
-            0.85,
-            0.92,
-            1.0,
-            1.0
-          ],
-          "font": "fonts/ChakraPetch-Regular.ttf",
-          "font_size": 0.04,
-          "line_height": 0.048,
-          "layer": 200,
-          "text": "{} M/S",
           "letter_spacing": 0.004
         }
       }
@@ -24754,84 +24966,6 @@
       }
     },
     {
-      "id": "hud-oxygen",
-      "name": "hud-oxygen",
-      "transform_3d": {
-        "position": [
-          -0.8,
-          -0.68,
-          0
-        ],
-        "rotation": [
-          0,
-          0,
-          0,
-          1
-        ],
-        "scale": [
-          1,
-          1,
-          1
-        ]
-      },
-      "components": {
-        "sindri.ui.text": {
-          "anchor": "center",
-          "color": [
-            0.85,
-            0.92,
-            1.0,
-            1.0
-          ],
-          "font": "fonts/ChakraPetch-Regular.ttf",
-          "font_size": 0.04,
-          "line_height": 0.048,
-          "layer": 200,
-          "text": "O2 {}%",
-          "letter_spacing": 0.004
-        }
-      }
-    },
-    {
-      "id": "hud-power",
-      "name": "hud-power",
-      "transform_3d": {
-        "position": [
-          -0.8,
-          -0.78,
-          0
-        ],
-        "rotation": [
-          0,
-          0,
-          0,
-          1
-        ],
-        "scale": [
-          1,
-          1,
-          1
-        ]
-      },
-      "components": {
-        "sindri.ui.text": {
-          "anchor": "center",
-          "color": [
-            0.85,
-            0.92,
-            1.0,
-            1.0
-          ],
-          "font": "fonts/ChakraPetch-Regular.ttf",
-          "font_size": 0.04,
-          "line_height": 0.048,
-          "layer": 200,
-          "text": "SUIT {}%",
-          "letter_spacing": 0.004
-        }
-      }
-    },
-    {
       "id": "hud-alert",
       "name": "hud-alert",
       "transform_3d": {
@@ -24903,45 +25037,6 @@
           "font": "fonts/ChakraPetch-Regular.ttf",
           "font_size": 0.05,
           "line_height": 0.06,
-          "layer": 200,
-          "text": "",
-          "letter_spacing": 0.004
-        }
-      }
-    },
-    {
-      "id": "hud-airlock",
-      "name": "hud-airlock",
-      "transform_3d": {
-        "position": [
-          0.8,
-          -0.78,
-          0
-        ],
-        "rotation": [
-          0,
-          0,
-          0,
-          1
-        ],
-        "scale": [
-          1,
-          1,
-          1
-        ]
-      },
-      "components": {
-        "sindri.ui.text": {
-          "anchor": "center",
-          "color": [
-            0.6,
-            1.0,
-            0.7,
-            1.0
-          ],
-          "font": "fonts/ChakraPetch-Regular.ttf",
-          "font_size": 0.035,
-          "line_height": 0.042,
           "layer": 200,
           "text": "",
           "letter_spacing": 0.004

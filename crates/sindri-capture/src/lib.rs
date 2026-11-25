@@ -161,6 +161,51 @@ impl ProjectPlayer {
         Ok(())
     }
 
+    /// `look:<dx>,<dy>`: the mouse moved by so many pixels with the pointer
+    /// captured, the only way a capture can turn a view its own script keeps
+    /// turning back.
+    fn look(&mut self, rest: &str) -> Result<(), Box<dyn Error>> {
+        let (x, y) = rest.split_once(',').ok_or("look:<dx>,<dy>")?;
+        self.input.apply(InputEvent::PointerLockChanged(true));
+        self.input.apply(InputEvent::PointerMotion {
+            x: x.parse()?,
+            y: y.parse()?,
+        });
+        self.step()
+    }
+
+    /// `turn:<entity>=<yaw>,<pitch>[,<roll>]`: an entity turned to face a way,
+    /// in degrees, yaw about Y, then pitch about X, then roll about Z.
+    fn turn(&mut self, rest: &str) -> Result<(), Box<dyn Error>> {
+        let usage = "turn:<entity>=<yaw>,<pitch>[,<roll>]";
+        let (name, angles) = rest.split_once('=').ok_or(usage)?;
+        let parts: Vec<f32> = angles
+            .split(',')
+            .map(str::parse)
+            .collect::<Result<_, _>>()?;
+        let [yaw, pitch, more @ ..] = parts.as_slice() else {
+            return Err(usage.into());
+        };
+        let roll = more.first().copied().unwrap_or(0.0);
+        let entity = self
+            .world
+            .entity_for_source_id(&SceneEntityId::new(name)?)
+            .ok_or_else(|| format!("no entity {name}"))?;
+        let place = self
+            .world
+            .get_mut(entity)
+            .and_then(|data| data.transform_3d.as_mut())
+            .ok_or_else(|| format!("{name} has no place"))?;
+        place.rotation = glam::Quat::from_euler(
+            glam::EulerRot::YXZ,
+            yaw.to_radians(),
+            pitch.to_radians(),
+            roll.to_radians(),
+        )
+        .to_array();
+        self.step()
+    }
+
     fn point_at(&mut self, name: &str) -> Result<(), Box<dyn Error>> {
         let [x, y] = pixel_of(&self.session, &self.world, name, self.size)
             .ok_or_else(|| format!("{name} is not laid out on screen"))?;
@@ -247,6 +292,11 @@ impl ProjectPlayer {
                 self.put(name, [*x, *y], rest.first().copied())?;
                 self.step()?;
             }
+            // The mouse moved with the pointer captured, as a first-person
+            // game reads a look.
+            "look" => self.look(rest)?,
+            // An entity turned to face a way, in degrees.
+            "turn" => self.turn(rest)?,
             // An entity put just in front of the first thing of a name that
             // has been made: a hamlet's lamp, say, once the scatter grew it.
             "near" => {

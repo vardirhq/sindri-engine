@@ -340,9 +340,9 @@ def wall_with_opening(id_, lo, hi, y_range, z_range):
     return pieces
 
 
-def model(id_, asset, position, rotation=(0, 0, 0, 1), **components):
+def model(id_, asset, position, rotation=(0, 0, 0, 1), parent=None, **components):
     """An imported model, by its path under `assets/`."""
-    return entity(id_, position=position, rotation=rotation,
+    return entity(id_, position=position, rotation=rotation, parent=parent,
                   **{"sindri.model": {"asset": f"models/{asset}.glb"}}, **components)
 
 
@@ -618,6 +618,13 @@ def ship():
         entity("airlock", "Airlock", **{
             "sindri.script": {"source": "scripts/airlock.decay", "script": "Airlock"}}),
         panel("airlock-panel", ((cx0 + cx1) / 2, -1.1, cz1 - 0.05)),
+        # The chamber's own display, above its panel: pressure, the doors and
+        # what the airlock is doing, read on the wall rather than the screen.
+        entity("airlock-display", "airlock-display", position=((cx0 + cx1) / 2, -0.55, cz1 - 0.06),
+               rotation=quat((0.0, 1.0, 0.0), 180),
+               **{"sindri.text": {"text": "", "anchor": "center", "color": [0.55, 1.0, 0.7, 1.0],
+                                  "font": "fonts/ChakraPetch-Regular.ttf", "font_size": 0.07,
+                                  "line_height": 0.085, "layer": 30, "follow_rotation": True}}),
         panel("cabin-panel", (kx1 - 0.05, -1.1, DOOR_Z[1] + 0.3)),
         panel("hold-panel", (cx1 + w + 0.05, -1.1, DOOR_Z[0] - 0.3)),
         zone("cabin-zone", CABIN),
@@ -766,6 +773,33 @@ def scene():
                             "inner_angle": 0.25, "outer_angle": 0.5}},
     )
     entities += [diver, eye, helmet]
+    # The diver's own left forearm, held up in view, and the wrist display on it:
+    # air, suit power and the thruster pack read where a diver would read them.
+    # Low in the corner of the view, the screen tipped up towards the eye; the
+    # readout floats just in front of the screen so the screen never hides it.
+    # The rest of the diver's body hangs from the neck, posed by the diver
+    # script: upright with the heading aboard, following the view in free fall.
+    entities.append(model("diver-body", "body", (0, EYE_HEIGHT - 0.1, 0), parent="diver"))
+    entities[-1]["name"] = "DiverBody"
+    entities.append(model("forearm", "forearm", (-0.26, -0.3, -0.5), parent="eye",
+                          rotation=quat((1.0, -0.35, 0.0), 38)))
+    entities[-1]["transform_3d"]["scale"] = [0.7, 0.7, 0.7]
+    entities.append(entity(
+        "wrist-readout", "wrist-readout", parent="eye", position=(-0.245, -0.255, -0.44),
+        **{"sindri.text": {"text": "", "anchor": "center", "color": [0.55, 1.0, 0.85, 1.0],
+                           "font": "fonts/ChakraPetch-Regular.ttf", "font_size": 0.016,
+                           "line_height": 0.019, "layer": 30, "follow_rotation": True}},
+    ))
+    # What ACTION will use: brackets around it, placed by the diver script.
+    # Out of sight until there is something to aim at.
+    entities.append(model("aim-marker", "marker", (0, -1000, 0)))
+    # Spare oxygen, floating where a diver short of air can reach it: beside the
+    # guide cable, inside the ruin, and out by the wreck.
+    for index, at in enumerate(((-4.4, -0.45, 1.25), (1.0, -0.3, 0.8), (7.5, 1.2, -1.2),
+                                (15.0, 0.4, 1.6))):
+        entities.append(model(f"oxygen-{index}", "oxygen-canister", at,
+                              rotation=quat((1.0, 0.0, 0.6), 25 + index * 40),
+                              **{"sindri.tags": {"tags": ["oxygen"]}}))
     entities += tether((-half_l + 0.12 + HOLD_OFFSET, 0, 0), (-half_l + 0.7 + HOLD_OFFSET, 0, 0))
     # A stanchion part way down the hold, for the tether to catch on.
     entities.append(entity(
@@ -778,17 +812,12 @@ def scene():
     ))
     # The HUD: a reticle, the propellant gauge and a prompt for what can be grabbed.
     entities += [
-        text("hud-reticle", (0, 0, 0), "+", 0.05, (0.85, 0.92, 1.0, 0.6)),
-        text("hud-propellant", (-0.8, -0.88, 0), "PROPELLANT {}%", 0.04),
-        text("hud-velocity", (0.8, -0.88, 0), "{} M/S", 0.04),
+        text("hud-reticle", (0, 0, 0), "+", 0.06, (0.95, 0.98, 1.0, 0.9)),
         text("hud-prompt", (0, -0.2, 0), "", 0.035, (1.0, 0.85, 0.3, 1.0)),
         text("hud-tether", (0, -0.88, 0), "TETHER {} / {} M", 0.04),
         text("hud-tether-state", (0, -0.78, 0), "", 0.035, (1.0, 0.55, 0.25, 1.0)),
-        text("hud-oxygen", (-0.8, -0.68, 0), "O2 {}%", 0.04),
-        text("hud-power", (-0.8, -0.78, 0), "SUIT {}%", 0.04),
         text("hud-alert", (0, 0.3, 0), "", 0.05, (1.0, 0.3, 0.2, 1.0)),
         text("hud-breach", (0, 0.82, 0), "", 0.05, (1.0, 0.2, 0.12, 1.0)),
-        text("hud-airlock", (0.8, -0.78, 0), "", 0.035, (0.6, 1.0, 0.7, 1.0)),
         text("hud-salvage", (0.8, -0.68, 0), "", 0.04, (1.0, 0.75, 0.4, 1.0)),
     ]
     entities += touch.controls()

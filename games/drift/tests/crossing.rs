@@ -97,3 +97,24 @@ fn the_alarm_beacons_flash() {
     }
     assert!(seen[0] && seen[1], "the beacon went both on and off");
 }
+
+#[test]
+fn the_marker_shows_a_spare_canister_and_action_takes_it() {
+    // Floating beside the canister along the guide cable.
+    let mut game = Run::open_at([-4.4, -1.0, 1.0]).expect("DRIFT opens");
+    game.wait(0.3);
+    let canister = game.position("oxygen-0");
+    let marker = game.position("aim-marker");
+    let apart = (0..3)
+        .map(|i| (marker[i] - canister[i]).powi(2))
+        .sum::<f32>()
+        .sqrt();
+    assert!(
+        apart < 0.01,
+        "the brackets are on the canister: {marker:?} {canister:?}"
+    );
+    game.tap(Key::F);
+    game.step();
+    assert!(game.has_said("Drift: took spare oxygen"), "{:?}", game.said);
+    assert!(!game.exists("oxygen-0"), "the canister is used up");
+}

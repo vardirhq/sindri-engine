@@ -82,6 +82,8 @@ script Diver {
     // much of the oxygen it costs.
     @export let vent_push: number = 1.2;
     @export let vent_cost: number = 8.0;
+    // How much a spare oxygen canister gives back.
+    @export let canister_air: number = 40.0;
     // How far a hand reaches from the eye, in metres.
     @export let reach: number = 1.1;
     // Radians of turn per unit of pointer movement, and per second of roll.
@@ -209,6 +211,7 @@ script Diver {
             }
         }
         suit(dt);
+        take_oxygen();
         if this.left_behind != null && this.left_behind != reached {
             let away = this.left_behind.transform.world_position - this.eye.transform.world_position;
             if away.length > this.reach * 1.5 {
@@ -221,6 +224,24 @@ script Diver {
             }
         }
         hud(reached);
+        pose_body(dt);
+    }
+
+    // The body below the eye. Aboard it stands upright on the deck, turned to
+    // the heading, so looking down shows the chest, legs and boots. In free
+    // fall it follows the view, a moment behind, as a body swings round after
+    // the head.
+    fn pose_body(dt: number) {
+        let body = World.find("DiverBody");
+        var turn = this.eye.transform.rotation;
+        if this.aboard || this.seated {
+            turn = qmul(hull_turn(), qturn(0.0, 1.0, 0.0, this.yaw));
+        }
+        let follow = 1.0 - exp(-4.0 * dt);
+        let posed = qblend(body.transform.rotation, turn, follow);
+        body.transform.rotation = posed;
+        // Hung from the neck, a little behind the eye.
+        body.transform.position = Vec3(0.0, 0.6, 0.0) + qrot(posed, Vec3(0.0, -0.28, 0.22));
     }
 
     fn look(dt: number) {
@@ -614,24 +635,79 @@ script Diver {
         return amount;
     }
 
-    fn hud(reached: Entity?) {
-        let tank = World.find("hud-propellant");
+    // The wrist display: air, suit power, the pack and speed, read on the
+    // diver's own forearm rather than in a corner of the screen.
+    fn wrist() {
+        var pack = "NO PACK";
         if Ship.thrusters {
-            Ui.set_text(tank, "PROPELLANT {}%");
-            Ui.set_number(tank, round(this.propellant));
-        } else {
-            Ui.set_text(tank, "NO THRUSTER PACK");
+            pack = "PACK " + round(this.propellant).fixed(0) + "%";
         }
-        Ui.set_number(World.find("hud-oxygen"), round(this.oxygen));
-        Ui.set_number(World.find("hud-power"), round(this.power));
+        var air = "O2   " + round(this.oxygen).fixed(0) + "%";
+        if this.oxygen < 25.0 {
+            air = air + "  LOW";
+        }
+        let speed = Physics3d.velocity(this.entity).length;
+        Ui.set_text(World.find("wrist-readout"), air + "\nSUIT " + round(this.power).fixed(0)
+            + "%\n" + pack + "\n" + speed.fixed(1) + " M/S");
+    }
+
+    // What ACTION will use, in order: the airlock panel, spare oxygen, the
+    // handhold or cable in reach. Brackets pulse around it in the world.
+    fn aim(reached: Entity?) {
+        let marker = World.find("aim-marker");
+        let eye = this.eye.transform.world_position;
+        var target = Vec3(0.0, -1000.0, 0.0);
+        var shown = false;
+        let panels = World.within_radius("airlock-panel", eye, this.panel_reach);
+        let spares = World.within_radius("oxygen", eye, this.reach);
+        if panels.len > 0 {
+            target = panels[0].transform.world_position;
+            shown = true;
+        } else if spares.len > 0 {
+            target = spares[0].transform.world_position;
+            shown = true;
+        } else if reached != null && this.hold == null {
+            target = reached.transform.world_position;
+            if World.has_tag(reached, "cable") {
+                target = cable_point(reached, eye);
+            }
+            shown = true;
+        }
+        marker.transform.position = target;
+        marker.transform.rotation = this.eye.transform.rotation;
+        // A model cannot be scaled to nothing, so one not in use is parked
+        // far out of sight instead.
+        var size = 1.0;
+        if shown {
+            size = 1.0 + 0.12 * sin(Time.elapsed * 6.0);
+        }
+        marker.transform.scale = Vec3(size, size, size);
+    }
+
+    // Spare oxygen: ACTION or F beside a canister empties it into the suit.
+    fn take_oxygen() {
+        let asked = Input.Keyboard.just_pressed("F") || Controls.use_pressed;
+        if !asked {
+            return;
+        }
+        let spares = World.within_radius("oxygen", this.eye.transform.world_position, this.reach);
+        if spares.len > 0 {
+            World.despawn(spares[0]);
+            this.oxygen = min(100.0, this.oxygen + this.canister_air);
+            this.warned_air = this.oxygen < 25.0;
+            print("Drift: took spare oxygen");
+        }
+    }
+
+    fn hud(reached: Entity?) {
+        wrist();
+        aim(reached);
         let alert = World.find("hud-alert");
         if this.oxygen < 25.0 {
             Ui.set_text(alert, "OXYGEN LOW");
         } else {
             Ui.set_text(alert, "");
         }
-        let speed = Physics3d.velocity(this.entity).length;
-        Ui.set_number(World.find("hud-velocity"), round(speed * 10.0) / 10.0);
         let prompt = World.find("hud-prompt");
         if at_panel() {
             Ui.set_text(prompt, "E / ACTION  cycle airlock");

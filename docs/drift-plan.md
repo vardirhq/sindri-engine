@@ -60,6 +60,18 @@ not a claim that the new opening already exists.
   (`scripts/alarm.decay`). Tests that prove thrusting start with a pack
   (`tests/crossing.rs`). Still to come: where the pack is found, and the
   tether anchored at the refuge.
+- **Immersion over UI:** *Started.* The diver has a body (`body.glb`): suit,
+  chest plate, life-support pack, legs and the right arm, hung from the neck.
+  Aboard it stands upright with the heading, so looking down shows it; in free
+  fall it follows the view a moment behind. The diver's left forearm is in view, and
+  its wrist display shows air, suit power, the pack and speed, replacing the
+  HUD's corner readouts. The airlock chamber has a wall display with its
+  pressure, both doors and its state. Glowing brackets mark whatever ACTION
+  will use: the airlock panel, a spare oxygen canister, or the handhold or
+  cable in reach. Spare oxygen canisters float along the way to the ruin
+  (beside the cable, inside the ruin, out by the wreck); ACTION or F beside one
+  refills the suit by 40%. Still on screen: the breach warning, the prompt
+  under the crosshair, and the tether and salvage lines.
 - **Useful salvage:** choose and communicate a specific part and repair; test
   pickup, carrying, installation, feedback, and repeated interaction. Until
   then the existing canister counter has no crafting use.
