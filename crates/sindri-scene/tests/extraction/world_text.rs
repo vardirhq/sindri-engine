@@ -111,3 +111,42 @@ fn world_text_turns_with_its_entity_only_when_asked() {
         "{turns:?}"
     );
 }
+
+/// Seen through a perspective camera, a label stands at its entity's full
+/// position in the world, depth and all, facing the camera unless it follows
+/// its entity's turn: a readout on a wrist, a display on a wall.
+#[test]
+fn world_text_stands_in_3d_under_a_perspective_camera() {
+    let camera = r#"{ "id": "eye", "transform_3d": { "position": [0, 0, 0] },
+        "components": { "sindri.camera": {
+          "projection": "perspective", "vertical_fov_degrees": 60.0, "near": 0.05, "far": 100.0 } } }"#;
+    let label = r#", { "id": "label", "transform_3d": { "position": [0.5, 0.2, -4.0] },
+        "components": { "sindri.text": { "text": "O2 87%", "font": "fonts/a.ttf", "font_size": 0.1 } } }"#;
+    let world = world_from(&crate::support::document(&format!("{camera}{label}")));
+    let frame = SceneExtractor::new()
+        .unwrap()
+        .extract(
+            &world,
+            VIEWPORT,
+            CameraView::default(),
+            &TextureBindings::new(),
+        )
+        .expect("the scene extracts");
+    let pass = frame
+        .passes()
+        .iter()
+        .find(|pass| matches!(pass.command, FrameCommand::Text { .. }))
+        .expect("the label draws");
+    // The label's own origin, through its pass's camera, lands where the
+    // entity does through the world camera: depth is kept, not flattened.
+    let drawn = pass.camera.view_projection * glam::Vec4::new(0.0, 0.0, 0.0, 1.0);
+    let ndc = drawn.truncate() / drawn.w;
+    assert!(
+        drawn.w > 3.9 && drawn.w < 4.1,
+        "four units in front of the camera: {drawn}"
+    );
+    assert!(
+        ndc.x > 0.0 && ndc.y > 0.0,
+        "up and to the right of the middle: {ndc}"
+    );
+}

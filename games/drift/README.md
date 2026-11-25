@@ -110,3 +110,7 @@ You start with no thruster pack. Out of the airlock, grab the yellow guide
 cable beside the door (F, or hold ACTION) and pull yourself along it into the
 ruin (W, or the stick). Lost in the open, Space or JUMP vents suit air for a
 small push, at a cost in oxygen.
+
+Air, suit power and speed are read on your wrist, and the airlock's pressure on
+its chamber wall. Brackets mark what ACTION will use. Venting air to push costs
+oxygen, so spare oxygen canisters float along the way: take one with ACTION or F.

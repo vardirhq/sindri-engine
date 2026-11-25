@@ -109,9 +109,19 @@ script Airlock {
             words = "";
         }
         this.lamp.light.color = colour;
-        if words != "" {
-            words = words + "  " + round(p * 100.0) + "%";
+        // The wall display: what a diver standing in the chamber reads.
+        var state = "CYCLING";
+        if this.phase == "in" {
+            state = "PRESSURIZED";
+        } else if this.phase == "out" {
+            state = "OPEN TO VACUUM";
         }
-        Ui.set_text(World.find("hud-airlock"), words);
+        var inner = "SEALED";
+        if this.inner_open > 0.0 { inner = "OPEN"; }
+        var outer = "SEALED";
+        if this.outer_open > 0.0 { outer = "OPEN"; }
+        Ui.set_text(World.find("airlock-display"), "AIRLOCK  " + state
+            + "\nPRESSURE " + (p * 101.3).fixed(1) + " KPA"
+            + "\nINNER " + inner + "   OUTER " + outer);
     }
 }

@@ -32,6 +32,14 @@ number or a name plate wants. On, the words turn with the entity's world
 rotation about their anchor point, shadow and outline with them, for words
 painted on a crate or a sign hung at an angle.
 
+Through a perspective camera, a label stands at its entity's full position in
+the world, depth included, and faces the camera, so a wall display or a reading
+on a diver's wrist is where it should be in a 3D scene. With `follow_rotation`
+it turns with its entity instead, lying in the entity's own XY plane: a sign
+fixed to a wall. It is drawn over the 3D scene as a 2D label is drawn over its
+sprites, so a wall does not hide it; keep 3D labels where they are meant to be
+seen. Through an orthographic camera, labels behave as above.
+
 ```json
 "sindri.text": {
   "text": "{.0}",
