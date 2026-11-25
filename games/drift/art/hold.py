@@ -730,11 +730,11 @@ def scene():
     ))
     # Alarm beacons: red lights flashing through the refuge and the ruin, so the
     # opening reads as a disaster that only just happened (`scripts/alarm.decay`).
-    # Dimmer than the helmet lamp: the renderer keeps the brightest eight local
-    # lights, and the helmet must always be one of them.
-    for index, at in enumerate(((-13.0, 0.0, 0.7), (-8.5, -0.2, 1.5),
-                                (0.5, 2.35, -2.3), (8.0, 2.35, 2.3))):
-        beacon = lamp(f"alarm-{index}", at, (1.0, 0.08, 0.04), 2.0, 7.0)
+    # The renderer keeps the eight lights that light the camera's position
+    # most, so the helmet lamp stays lit however many alarms flash elsewhere.
+    for index, at in enumerate(((-13.0, 0.0, 0.7), (-8.5, -0.2, 1.5), (-7.25, 0.3, 2.7),
+                                (0.5, 2.35, -2.3), (6.5, 2.35, 2.3), (11.0, 2.35, -2.3))):
+        beacon = lamp(f"alarm-{index}", at, (1.0, 0.08, 0.04), 3.0, 7.0)
         beacon["transform_3d"]["scale"] = [0.18, 0.12, 0.18]
         beacon["components"]["sindri.tags"] = {"tags": ["alarm"]}
         entities.append(beacon)

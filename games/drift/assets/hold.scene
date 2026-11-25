@@ -9177,7 +9177,7 @@
             0.08,
             0.04
           ],
-          "intensity": 2.0,
+          "intensity": 3.0,
           "range": 7.0
         },
         "sindri.tags": {
@@ -9234,7 +9234,7 @@
             0.08,
             0.04
           ],
-          "intensity": 2.0,
+          "intensity": 3.0,
           "range": 7.0
         },
         "sindri.tags": {
@@ -9247,6 +9247,63 @@
     {
       "id": "alarm-2",
       "name": "alarm-2",
+      "transform_3d": {
+        "position": [
+          -7.25,
+          0.3,
+          2.7
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.18,
+          0.12,
+          0.18
+        ]
+      },
+      "components": {
+        "sindri.mesh": {
+          "primitive": "cube",
+          "texture": "textures/panel.png"
+        },
+        "sindri.material": {
+          "base_color": [
+            0.2,
+            0.2,
+            0.2,
+            1
+          ],
+          "emissive": [
+            2.0,
+            0.16,
+            0.08
+          ],
+          "override_factors": true
+        },
+        "sindri.light": {
+          "kind": "point",
+          "color": [
+            1.0,
+            0.08,
+            0.04
+          ],
+          "intensity": 3.0,
+          "range": 7.0
+        },
+        "sindri.tags": {
+          "tags": [
+            "alarm"
+          ]
+        }
+      }
+    },
+    {
+      "id": "alarm-3",
+      "name": "alarm-3",
       "transform_3d": {
         "position": [
           0.5,
@@ -9291,7 +9348,7 @@
             0.08,
             0.04
           ],
-          "intensity": 2.0,
+          "intensity": 3.0,
           "range": 7.0
         },
         "sindri.tags": {
@@ -9302,11 +9359,11 @@
       }
     },
     {
-      "id": "alarm-3",
-      "name": "alarm-3",
+      "id": "alarm-4",
+      "name": "alarm-4",
       "transform_3d": {
         "position": [
-          8.0,
+          6.5,
           2.35,
           2.3
         ],
@@ -9348,7 +9405,64 @@
             0.08,
             0.04
           ],
-          "intensity": 2.0,
+          "intensity": 3.0,
+          "range": 7.0
+        },
+        "sindri.tags": {
+          "tags": [
+            "alarm"
+          ]
+        }
+      }
+    },
+    {
+      "id": "alarm-5",
+      "name": "alarm-5",
+      "transform_3d": {
+        "position": [
+          11.0,
+          2.35,
+          -2.3
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.18,
+          0.12,
+          0.18
+        ]
+      },
+      "components": {
+        "sindri.mesh": {
+          "primitive": "cube",
+          "texture": "textures/panel.png"
+        },
+        "sindri.material": {
+          "base_color": [
+            0.2,
+            0.2,
+            0.2,
+            1
+          ],
+          "emissive": [
+            2.0,
+            0.16,
+            0.08
+          ],
+          "override_factors": true
+        },
+        "sindri.light": {
+          "kind": "point",
+          "color": [
+            1.0,
+            0.08,
+            0.04
+          ],
+          "intensity": 3.0,
           "range": 7.0
         },
         "sindri.tags": {

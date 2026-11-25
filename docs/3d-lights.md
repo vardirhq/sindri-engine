@@ -16,10 +16,12 @@ frame. Moving, turning or scaling a parent moves its light; a point's rotation
 has no effect, while a spot shines along the composed forward axis (`-Z`). Range
 and cone angles ignore entity scale. An inactive entity or ancestor removes its
 contribution. Disabled and zero-intensity local lights consume no slot. Scene extraction
-validates all lights, then selects the eight strongest active local-light
-intensities; stable world iteration breaks ties. Selection is shared by every
-geometry kind, independent of camera and distance. There is no spatial light
-assignment yet.
+validates all lights, then selects the eight that light the world camera's
+position most: each light's intensity scaled by `1 / (1 + (distance / range)²)`
+from the camera, so a dim lamp at the player outranks brighter lights across the
+level. A world with no camera ranks by intensity alone; stable world iteration
+breaks ties. Selection is shared by every geometry kind. There is no per-object
+light assignment yet: a frame still carries eight lights in all.
 
 The renderer accepts eight optional `LocalLight` values on
 `WorldLighting.local_lights`. `validate` returns a typed field error; invalid
@@ -71,7 +73,7 @@ geometry. Scene studio lighting replaces sun, points and spots; Game and
 authored Scene lighting use the extracted set.
 
 Scene tests cover composed moving/turning/scaled parents, disable/re-enable,
-strongest-eight selection and invalid overflow lights in strict/tolerant modes.
+camera-weighted eight-light selection and invalid overflow lights in strict/tolerant modes.
 GPU controls compare standard point shading across primitive, inline/cached and
 imported geometry, legacy diffuse, range, zero intensity, facing, invalid input,
 multiple lights, consecutive changes and retained cache uploads. Native/browser

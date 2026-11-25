@@ -158,3 +158,30 @@ fn spots_follow_composed_parent_rotation_and_share_point_capacity() {
     );
     assert_eq!(tolerant.problems().len(), 1);
 }
+
+/// With more lights than the renderer takes, the ones lighting where the
+/// camera is win over brighter ones far away: a player's own lamp is never
+/// pushed out by alarms across the level.
+#[test]
+fn the_lights_near_the_camera_win_the_cap_over_brighter_distant_ones() {
+    let camera = r#"{"id":"eye","transform_3d":{"position":[0,0,0]},"components":{"sindri.camera":{"projection":"perspective","vertical_fov_degrees":70,"near":0.1,"far":100}}}"#;
+    let near = r#"{"id":"near","transform_3d":{"position":[0,0,-0.2]},"components":{"sindri.light":{"kind":"point","intensity":1,"range":6}}}"#;
+    let far = (0..8)
+        .map(|i| {
+            format!(
+                r#"{{"id":"far-{i}","transform_3d":{{"position":[{x},0,-40]}},"components":{{"sindri.light":{{"kind":"point","intensity":5,"range":6}}}}}}"#,
+                x = i * 3
+            )
+        })
+        .collect::<Vec<_>>()
+        .join(",");
+    let world = world_from(&document(&format!("{camera},{near},{far}")));
+    let lighting = SceneExtractor::new().unwrap().lighting(&world).unwrap();
+    let kept: Vec<_> = lighting.local_lights.iter().flatten().collect();
+    assert_eq!(kept.len(), 8);
+    assert!(
+        kept.iter()
+            .any(|light| (light.point.intensity - 1.0).abs() < 1.0e-6),
+        "the dim light at the camera is kept"
+    );
+}
