@@ -10,6 +10,7 @@ repository.workspace = true
 publish = false
 
 [dependencies]
+glam.workspace = true
 log.workspace = true
 png = "0.18"
 sindri = { path = "../sindri" }

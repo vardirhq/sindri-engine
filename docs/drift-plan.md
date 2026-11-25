@@ -60,7 +60,10 @@ not a claim that the new opening already exists.
   (`scripts/alarm.decay`). Tests that prove thrusting start with a pack
   (`tests/crossing.rs`). Still to come: where the pack is found, and the
   tether anchored at the refuge.
-- **Immersion over UI:** *Started.* The diver's left forearm is in view, and
+- **Immersion over UI:** *Started.* The diver has a body (`body.glb`): suit,
+  chest plate, life-support pack, legs and the right arm, hung from the neck.
+  Aboard it stands upright with the heading, so looking down shows it; in free
+  fall it follows the view a moment behind. The diver's left forearm is in view, and
   its wrist display shows air, suit power, the pack and speed, replacing the
   HUD's corner readouts. The airlock chamber has a wall display with its
   pressure, both doors and its state. Glowing brackets mark whatever ACTION

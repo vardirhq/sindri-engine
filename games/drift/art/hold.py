@@ -777,6 +777,10 @@ def scene():
     # air, suit power and the thruster pack read where a diver would read them.
     # Low in the corner of the view, the screen tipped up towards the eye; the
     # readout floats just in front of the screen so the screen never hides it.
+    # The rest of the diver's body hangs from the neck, posed by the diver
+    # script: upright with the heading aboard, following the view in free fall.
+    entities.append(model("diver-body", "body", (0, EYE_HEIGHT - 0.1, 0), parent="diver"))
+    entities[-1]["name"] = "DiverBody"
     entities.append(model("forearm", "forearm", (-0.26, -0.3, -0.5), parent="eye",
                           rotation=quat((1.0, -0.35, 0.0), 38)))
     entities[-1]["transform_3d"]["scale"] = [0.7, 0.7, 0.7]

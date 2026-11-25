@@ -224,6 +224,24 @@ script Diver {
             }
         }
         hud(reached);
+        pose_body(dt);
+    }
+
+    // The body below the eye. Aboard it stands upright on the deck, turned to
+    // the heading, so looking down shows the chest, legs and boots. In free
+    // fall it follows the view, a moment behind, as a body swings round after
+    // the head.
+    fn pose_body(dt: number) {
+        let body = World.find("DiverBody");
+        var turn = this.eye.transform.rotation;
+        if this.aboard || this.seated {
+            turn = qmul(hull_turn(), qturn(0.0, 1.0, 0.0, this.yaw));
+        }
+        let follow = 1.0 - exp(-4.0 * dt);
+        let posed = qblend(body.transform.rotation, turn, follow);
+        body.transform.rotation = posed;
+        // Hung from the neck, a little behind the eye.
+        body.transform.position = Vec3(0.0, 0.6, 0.0) + qrot(posed, Vec3(0.0, -0.28, 0.22));
     }
 
     fn look(dt: number) {

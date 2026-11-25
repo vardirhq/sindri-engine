@@ -22026,6 +22026,34 @@
       "parent": "eye"
     },
     {
+      "id": "diver-body",
+      "name": "DiverBody",
+      "transform_3d": {
+        "position": [
+          0,
+          0.5,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.model": {
+          "asset": "models/body.glb"
+        }
+      },
+      "parent": "diver"
+    },
+    {
       "id": "forearm",
       "name": "forearm",
       "transform_3d": {
