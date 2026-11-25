@@ -35,10 +35,15 @@ pub(crate) struct FrameBudget {
 }
 
 impl FrameBudget {
-    /// Lowers the lighting of `scene` the frame the device is judged unable to keep up.
+    /// Lowers the lighting and graphics quality of `scene` the frame the device is judged unable to keep up.
     pub(crate) fn keep_up(&mut self, scene: &mut SceneExtractor, delta: Duration, counts: bool) {
         if self.observe(delta, counts) {
             scene.set_lighting_quality(LightingQuality::Reduced);
+            // And draw less far, once: a device that was struggling would only
+            // struggle again after stepping back up.
+            if let Some(lower) = scene.graphics_quality().lower() {
+                scene.set_graphics_quality(lower);
+            }
         }
     }
 
@@ -128,5 +133,19 @@ mod tests {
     fn a_paused_game_says_nothing_of_the_device() {
         let mut budget = FrameBudget::default();
         assert!((0..2000).all(|_| !budget.observe(Duration::from_millis(100), false)));
+    }
+
+    #[test]
+    fn a_device_that_cannot_keep_up_draws_less_far_once() {
+        let mut budget = FrameBudget::default();
+        let mut scene = SceneExtractor::new().expect("the engine's components register");
+        for _ in 0..400 {
+            budget.keep_up(&mut scene, Duration::from_millis(60), true);
+        }
+        assert_eq!(
+            scene.graphics_quality(),
+            sindri_scene::GraphicsQuality::Medium
+        );
+        assert_eq!(scene.lighting_quality(), LightingQuality::Reduced);
     }
 }

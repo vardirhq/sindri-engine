@@ -45,6 +45,21 @@ pub(super) fn add_viewport_surface(environment: &mut Environment) {
     }
     environment.add_type(VIEWPORT, viewport);
     environment.add_value(VIEWPORT, Type::Named(VIEWPORT.to_owned()));
+
+    let graphics = HostType::new()
+        .with_value("quality", Type::String)
+        .with_function(
+            "set_quality",
+            FunctionType {
+                params: vec![Type::String],
+                return_type: Type::Unit,
+            },
+        );
+    environment.add_type(crate::surface::GRAPHICS, graphics);
+    environment.add_value(
+        crate::surface::GRAPHICS,
+        Type::Named(crate::surface::GRAPHICS.to_owned()),
+    );
 }
 
 pub(super) fn add_aim_surface(environment: &mut Environment) {

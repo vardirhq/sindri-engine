@@ -37,6 +37,9 @@ pub(crate) const POINTER: &str = "Pointer";
 /// Facts about the screen a game is being drawn into.
 pub(crate) const VIEWPORT: &str = "Viewport";
 
+/// How richly the game is drawn: the graphics quality a settings menu offers.
+pub(crate) const GRAPHICS: &str = "Graphics";
+
 /// Which block the person is pointing at, and where a block clicked there goes.
 ///
 /// Its own namespace rather than more of `Pointer` for the reason `Stick` is:

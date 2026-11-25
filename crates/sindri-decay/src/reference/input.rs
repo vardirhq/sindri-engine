@@ -443,6 +443,21 @@ pub(super) const TYPES: &[TypeEntry] = &[
         )],
     },
     TypeEntry {
+        name: "Graphics",
+        text: "How richly the game is drawn: how far cameras see and how far and sharp shadows are. A settings menu offers it.",
+        members: &[
+            value(
+                "quality",
+                "The level the game is drawn at: \"low\", \"medium\", \"high\" (as the scene was made) or \"ultra\".",
+            ),
+            call(
+                "set_quality",
+                &["level"],
+                "Asks for a level by name, as a settings menu does. It takes effect from the next frame: Low draws half as far, Ultra half as far again with sharper shadows.",
+            ),
+        ],
+    },
+    TypeEntry {
         name: "Time",
         text: "Time in the game. A game runs as a series of frames, many times a second.",
         members: &[

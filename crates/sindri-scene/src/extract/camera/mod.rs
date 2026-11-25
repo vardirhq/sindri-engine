@@ -315,7 +315,12 @@ impl SceneExtractor {
         world: &World,
         aspect: f32,
     ) -> Result<ResolvedCameras, SceneExtractError> {
-        authored_cameras(world, self.components(), aspect)
+        authored_cameras(
+            world,
+            self.components(),
+            aspect,
+            self.graphics_quality().view_distance(),
+        )
     }
 }
 
@@ -331,7 +336,7 @@ pub fn world_camera_of(
     components: &ComponentSchemaRegistry,
     aspect: f32,
 ) -> Result<Option<ViewCamera>, SceneExtractError> {
-    Ok(authored_cameras(world, components, aspect)?
+    Ok(authored_cameras(world, components, aspect, 1.0)?
         .world
         .map(|camera| ViewCamera {
             view: camera.view,
@@ -340,10 +345,13 @@ pub fn world_camera_of(
         }))
 }
 
+/// `view_distance` scales a perspective camera's far plane: the graphics
+/// quality's reach. An orthographic camera frames a fixed box and keeps it.
 fn authored_cameras(
     world: &World,
     components: &ComponentSchemaRegistry,
     aspect: f32,
+    view_distance: f32,
 ) -> Result<ResolvedCameras, SceneExtractError> {
     {
         let mut resolved = resolved_screen_overlay(aspect);
@@ -366,6 +374,7 @@ fn authored_cameras(
                     far,
                 } => {
                     let vertical_fov_radians = vertical_fov_degrees.to_radians();
+                    let far = (far * view_distance).max(near * 2.0);
                     ResolvedCamera {
                         view,
                         view_projection: perspective_projection(

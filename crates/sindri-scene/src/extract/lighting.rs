@@ -137,9 +137,11 @@ impl SceneExtractor {
         let environment = self.environment(world)?;
         Ok(sindri_render::WorldSettings {
             lighting,
-            shadows: environment
-                .map(EnvironmentComponent::shadow_settings)
-                .unwrap_or_default(),
+            shadows: self.scaled_shadows(
+                environment
+                    .map(EnvironmentComponent::shadow_settings)
+                    .unwrap_or_default(),
+            ),
             fog: environment
                 .map(EnvironmentComponent::fog_settings)
                 .unwrap_or_default(),

@@ -81,6 +81,9 @@ impl WorldHost<'_> {
                 named(SEQUENCE_CALLS, name).map(|call| self.sequence_call(call, path, args))
             }
             TOUCH => named(TOUCH_CALLS, name).map(|call| self.touch_call(call, path, args)),
+            crate::surface::GRAPHICS if name == "set_quality" => {
+                Some(self.set_graphics_quality(path, args))
+            }
             POINTER => {
                 named(POINTER_QUERIES, name).map(|query| self.pointer_query(query, path, args))
             }
@@ -127,6 +130,28 @@ impl WorldHost<'_> {
     }
 
     /// Whether the pointer is doing something with this button.
+    /// `Graphics.set_quality("low")`: asks the host for a graphics quality,
+    /// which it applies after the step and then reports through
+    /// `Graphics.quality`.
+    fn set_graphics_quality(&mut self, path: &Path, args: &[Value]) -> Result<Value, RuntimeError> {
+        let level = match args {
+            [Value::String(name)] => sindri_scene::GraphicsQuality::named(name),
+            _ => None,
+        };
+        let Some(level) = level else {
+            return Err(RuntimeError::Host(format!(
+                "{} takes \"low\", \"medium\", \"high\" or \"ultra\"",
+                path.dotted()
+            )));
+        };
+        #[allow(clippy::cast_precision_loss)]
+        self.blackboard.set(
+            sindri_scene::QUALITY_REQUEST_BOARD,
+            (level.index() + 1) as f64,
+        );
+        Ok(Value::Unit)
+    }
+
     fn pointer_query(
         &mut self,
         query: PointerQuery,

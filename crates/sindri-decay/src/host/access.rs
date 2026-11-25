@@ -353,6 +353,16 @@ impl WorldHost<'_> {
         {
             return Some(self.aim_value(*value));
         }
+        if *namespace == crate::surface::GRAPHICS && *name == "quality" {
+            // The host publishes the level it draws at; High until it has.
+            #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
+            let index = self.blackboard.get(sindri_scene::QUALITY_BOARD, 2.0) as usize;
+            let level = sindri_scene::GraphicsQuality::ALL
+                .get(index)
+                .copied()
+                .unwrap_or_default();
+            return Some(Value::String(level.name().into()));
+        }
         if *namespace == VIEWPORT
             && let Some((_, value)) = VIEWPORT_VALUES.iter().find(|(known, _)| known == name)
         {

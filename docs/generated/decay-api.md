@@ -42,6 +42,7 @@ Names in scope without qualification. Decay has no imports, so each of these is 
 - `Game`: `Game` — Numbers stored under names that every script can read and write, such as a score. Declaring them with `state` is safer, because a misspelt name then becomes an error.
 - `Gamepad`: `Gamepad` — Game controllers. Each player gets a number from 1 to 8 when they press a button on their controller; 0 means any controller.
 - `Gesture`: `Gesture` — What the player did with the mouse or a finger: a tap, a hold, a drag or a pinch. Works the same for both.
+- `Graphics`: `Graphics` — How richly the game is drawn: how far cameras see and how far and sharp shadows are. A settings menu offers it.
 - `Grid`: `Grid` — Grids of tiles, flat or stacked in layers like building blocks: what each cell holds, where objects stand on them, and paths across them.
 - `Input`: `Input` — Every way the player reaches the game, in one place. Start with `Input.Action`, which works the same whatever the player holds; `Input.Pointer`, `Input.Stick` and `Input.Gesture` for mouse and touch; `Input.Keyboard`, `Input.Touch` and `Input.Gamepad` for one device read directly. The calls directly on `Input` are the keyboard, kept for older scripts: prefer `Input.Keyboard`.
 - `Lighting`: `Lighting` — Asks the scene's 2D lighting about places in the world. Requires a scene whose environment has 2D lighting on, and fails otherwise. Every light and occluder in the world counts, wherever the camera is. A point is lit by a light when no occluder edge crosses the line between it and the light's centre, so a soft penumbra is a hard edge here, and a light that does not cast shadows shines through occluders.
@@ -334,6 +335,13 @@ What the player did with the mouse or a finger: a tap, a hold, a drag or a pinch
 - `tap_x`: `number` — Where the tap was, sideways.
 - `tap_y`: `number` — Where the tap was, up or down.
 - `tapped`: `bool` — Whether the player tapped (a quick press without moving) this frame. Check this before reading `tap_x` and `tap_y`.
+
+### `Graphics`
+
+How richly the game is drawn: how far cameras see and how far and sharp shadows are. A settings menu offers it.
+
+- `quality`: `String` — The level the game is drawn at: "low", "medium", "high" (as the scene was made) or "ultra".
+- `set_quality(level: String)` → `unit` — Asks for a level by name, as a settings menu does. It takes effect from the next frame: Low draws half as far, Ultra half as far again with sharper shadows.
 
 ### `Grid`
 
