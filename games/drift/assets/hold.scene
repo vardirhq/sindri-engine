@@ -9082,6 +9082,311 @@
       }
     },
     {
+      "id": "guide-cable",
+      "name": "Guide cable",
+      "transform_3d": {
+        "position": [
+          -4.35,
+          -0.8,
+          0.78
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          5.9,
+          0.07,
+          0.07
+        ]
+      },
+      "components": {
+        "sindri.mesh": {
+          "primitive": "cube",
+          "texture": "textures/line.png"
+        },
+        "sindri.material": {
+          "base_color": [
+            0.9,
+            0.7,
+            0.2,
+            1.0
+          ],
+          "emissive": [
+            0.12,
+            0.08,
+            0.0
+          ],
+          "metallic": 0.3,
+          "roughness": 0.6,
+          "override_factors": true
+        },
+        "sindri.tags": {
+          "tags": [
+            "cable"
+          ]
+        }
+      }
+    },
+    {
+      "id": "alarm-0",
+      "name": "alarm-0",
+      "transform_3d": {
+        "position": [
+          -13.0,
+          0.0,
+          0.7
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.18,
+          0.12,
+          0.18
+        ]
+      },
+      "components": {
+        "sindri.mesh": {
+          "primitive": "cube",
+          "texture": "textures/panel.png"
+        },
+        "sindri.material": {
+          "base_color": [
+            0.2,
+            0.2,
+            0.2,
+            1
+          ],
+          "emissive": [
+            2.0,
+            0.16,
+            0.08
+          ],
+          "override_factors": true
+        },
+        "sindri.light": {
+          "kind": "point",
+          "color": [
+            1.0,
+            0.08,
+            0.04
+          ],
+          "intensity": 2.0,
+          "range": 7.0
+        },
+        "sindri.tags": {
+          "tags": [
+            "alarm"
+          ]
+        }
+      }
+    },
+    {
+      "id": "alarm-1",
+      "name": "alarm-1",
+      "transform_3d": {
+        "position": [
+          -8.5,
+          -0.2,
+          1.5
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.18,
+          0.12,
+          0.18
+        ]
+      },
+      "components": {
+        "sindri.mesh": {
+          "primitive": "cube",
+          "texture": "textures/panel.png"
+        },
+        "sindri.material": {
+          "base_color": [
+            0.2,
+            0.2,
+            0.2,
+            1
+          ],
+          "emissive": [
+            2.0,
+            0.16,
+            0.08
+          ],
+          "override_factors": true
+        },
+        "sindri.light": {
+          "kind": "point",
+          "color": [
+            1.0,
+            0.08,
+            0.04
+          ],
+          "intensity": 2.0,
+          "range": 7.0
+        },
+        "sindri.tags": {
+          "tags": [
+            "alarm"
+          ]
+        }
+      }
+    },
+    {
+      "id": "alarm-2",
+      "name": "alarm-2",
+      "transform_3d": {
+        "position": [
+          0.5,
+          2.35,
+          -2.3
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.18,
+          0.12,
+          0.18
+        ]
+      },
+      "components": {
+        "sindri.mesh": {
+          "primitive": "cube",
+          "texture": "textures/panel.png"
+        },
+        "sindri.material": {
+          "base_color": [
+            0.2,
+            0.2,
+            0.2,
+            1
+          ],
+          "emissive": [
+            2.0,
+            0.16,
+            0.08
+          ],
+          "override_factors": true
+        },
+        "sindri.light": {
+          "kind": "point",
+          "color": [
+            1.0,
+            0.08,
+            0.04
+          ],
+          "intensity": 2.0,
+          "range": 7.0
+        },
+        "sindri.tags": {
+          "tags": [
+            "alarm"
+          ]
+        }
+      }
+    },
+    {
+      "id": "alarm-3",
+      "name": "alarm-3",
+      "transform_3d": {
+        "position": [
+          8.0,
+          2.35,
+          2.3
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.18,
+          0.12,
+          0.18
+        ]
+      },
+      "components": {
+        "sindri.mesh": {
+          "primitive": "cube",
+          "texture": "textures/panel.png"
+        },
+        "sindri.material": {
+          "base_color": [
+            0.2,
+            0.2,
+            0.2,
+            1
+          ],
+          "emissive": [
+            2.0,
+            0.16,
+            0.08
+          ],
+          "override_factors": true
+        },
+        "sindri.light": {
+          "kind": "point",
+          "color": [
+            1.0,
+            0.08,
+            0.04
+          ],
+          "intensity": 2.0,
+          "range": 7.0
+        },
+        "sindri.tags": {
+          "tags": [
+            "alarm"
+          ]
+        }
+      }
+    },
+    {
+      "id": "alarms",
+      "name": "Alarms",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.script": {
+          "source": "scripts/alarm.decay",
+          "script": "Alarms"
+        }
+      }
+    },
+    {
       "id": "stars",
       "name": "stars",
       "transform_3d": {
@@ -24440,6 +24745,45 @@
             1.0,
             0.3,
             0.2,
+            1.0
+          ],
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.05,
+          "line_height": 0.06,
+          "layer": 200,
+          "text": "",
+          "letter_spacing": 0.004
+        }
+      }
+    },
+    {
+      "id": "hud-breach",
+      "name": "hud-breach",
+      "transform_3d": {
+        "position": [
+          0,
+          0.82,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.text": {
+          "anchor": "center",
+          "color": [
+            1.0,
+            0.2,
+            0.12,
             1.0
           ],
           "font": "fonts/ChakraPetch-Regular.ttf",

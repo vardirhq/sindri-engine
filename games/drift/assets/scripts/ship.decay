@@ -11,4 +11,7 @@ state Ship {
     var piloting: bool = false;
     // The cabin recycler can refill the suit's oxygen once repaired.
     var recycler_repaired: bool = false;
+    // Whether the suit has a thruster pack. It starts without one: the way
+    // across to the ruin is the guide cable, hand over hand.
+    var thrusters: bool = false;
 }

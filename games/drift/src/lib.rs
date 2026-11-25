@@ -63,14 +63,18 @@ impl Run {
     }
 
     /// Opens the project with the diver's body starting at `at`, before
-    /// anything has run: free, holding nothing and clipped to nothing unless
-    /// that is where the aft handhold and the tether's loose end are.
+    /// anything has run, wearing a thruster pack: free, holding nothing and
+    /// clipped to nothing unless that is where the aft handhold and the
+    /// tether's loose end are.
     ///
     /// # Errors
     /// As [`Run::open`].
     pub fn open_at(at: [f32; 3]) -> Result<Self, String> {
         let mut game = Self::open()?;
         game.place("diver", at);
+        // The floating, tether and flying tests prove what a thruster pack
+        // does, so they start with one; a real start has none.
+        game.run.set_board("Ship.thrusters", 1.0);
         Ok(game)
     }
 

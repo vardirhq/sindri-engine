@@ -50,6 +50,16 @@ not a claim that the new opening already exists.
   the existing tether is anchored in the cargo section, not the refuge. The
   route, lighting, performance and first-person readability still need a
   graphical playtest, and the separate shuttle remains a prototype.
+- **The crossing:** *Started.* The suit starts with no thruster pack
+  (`Ship.thrusters`); the way across is a guide cable strung from the refuge's
+  outer door frame into the ruin's doorway. Hold it (F / held ACTION) and pull
+  hand over hand along it (W / stick) the way the view faces; letting go keeps
+  the speed. Free-floating with no pack, Space / JUMP vents suit air for a
+  small push, paid in oxygen. Red alarm beacons flash through the refuge and
+  the ruin and the HUD flashes a breach warning for the first half minute
+  (`scripts/alarm.decay`). Tests that prove thrusting start with a pack
+  (`tests/crossing.rs`). Still to come: where the pack is found, and the
+  tether anchored at the refuge.
 - **Useful salvage:** choose and communicate a specific part and repair; test
   pickup, carrying, installation, feedback, and repeated interaction. Until
   then the existing canister counter has no crafting use.

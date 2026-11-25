@@ -1,0 +1,31 @@
+// The alarms: every beacon tagged `alarm` flashes, and the HUD warns of the
+// breach for the first half minute, so waking reads as a disaster that only
+// just happened rather than a quiet ship.
+
+// One flash: on for half of it.
+const FLASH: number = 0.8;
+// How long the breach warning flashes after waking, in seconds.
+const WARNING: number = 30.0;
+
+script Alarms {
+    var phase: number = 0.0;
+    var elapsed: number = 0.0;
+
+    fn update(dt: number) {
+        this.phase += dt;
+        if this.phase >= FLASH {
+            this.phase -= FLASH;
+        }
+        this.elapsed += dt;
+        let on = this.phase < FLASH * 0.5;
+        for beacon in World.with_tag("alarm") {
+            beacon.light.enabled = on;
+        }
+        let warning = World.find("hud-breach");
+        if on && this.elapsed < WARNING {
+            Ui.set_text(warning, "!  HULL BREACH  -  SECTION LOST  !");
+        } else {
+            Ui.set_text(warning, "");
+        }
+    }
+}
