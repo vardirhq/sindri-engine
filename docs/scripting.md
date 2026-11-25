@@ -2209,8 +2209,9 @@ their maps are half, the same or twice the authored resolution. Whatever lies
 beyond the camera's reach is neither drawn nor culled in.
 `Graphics.set_quality("low")` asks for a level, as a settings menu does; the
 host applies it after the step, so `quality` reads the new level from the next
-frame. Any other name is an error. The browser player also lowers the level
-one step by itself, once, when a device cannot keep up; scripts see that too.
+frame. Any other name is an error. The engine never changes it by itself: a
+draw distance that shrank mid-play would be a visible pop, so the level is the
+game's and the player's choice.
 A game that wants the choice remembered keeps it with `Save` and sets it again
 on start.
 
