@@ -20,6 +20,7 @@ class ScopeTests(unittest.TestCase):
             ('games/orbital-baked/assets/main.scene', 'orbital-baked', 'orbital-baked'),
             ('games/scorchball/assets/main.scene', 'scorchball', 'scorchball'),
             ('games/weave-poc/assets/main.scene', 'weave-poc', 'weave-poc'),
+            ('games/drift/assets/hold.scene', 'drift', 'drift'),
         ]:
             with self.subTest(game=game):
                 self.assertEqual(classify([path, 'CHANGELOG.md']), (game, package))
