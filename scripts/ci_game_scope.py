@@ -14,6 +14,7 @@ GAMES = {
     'orbital-baked': ('games/orbital-baked/', 'orbital-baked'),
     'scorchball': ('games/scorchball/', 'scorchball'),
     'weave-poc': ('games/weave-poc/', 'weave-poc'),
+    'drift': ('games/drift/', 'drift'),
 }
 CAUSEWAY_TOOLS = {'tools/causeway_art.py', 'tools/level.py', 'tools/check_causeway_art.py'}
 
