@@ -343,6 +343,7 @@ impl DesktopApp for Player {
         engine.advance(delta)?;
         let counts = !self.paused_for_page && self.page_visible;
         self.budget.keep_up(&mut self.scene, delta, counts);
+        engine.game_mut().sync_graphics_quality(&mut self.scene);
         if !self.paused_for_page {
             self.seconds += delta.as_secs_f32();
         }

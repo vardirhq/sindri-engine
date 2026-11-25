@@ -67,6 +67,13 @@
       "type": "Gesture"
     },
     {
+      "description": "How richly the game is drawn: how far cameras see and how far and sharp shadows are. A settings menu offers it.",
+      "kind": "value",
+      "name": "Graphics",
+      "read_only": false,
+      "type": "Graphics"
+    },
+    {
       "description": "Grids of tiles, flat or stacked in layers like building blocks: what each cell holds, where objects stand on them, and paths across them.",
       "kind": "value",
       "name": "Grid",
@@ -1846,6 +1853,31 @@
         }
       ],
       "name": "Gesture"
+    },
+    {
+      "description": "How richly the game is drawn: how far cameras see and how far and sharp shadows are. A settings menu offers it.",
+      "members": [
+        {
+          "description": "The level the game is drawn at: \"low\", \"medium\", \"high\" (as the scene was made) or \"ultra\".",
+          "kind": "value",
+          "name": "quality",
+          "read_only": false,
+          "type": "String"
+        },
+        {
+          "description": "Asks for a level by name, as a settings menu does. It takes effect from the next frame: Low draws half as far, Ultra half as far again with sharper shadows.",
+          "kind": "function",
+          "name": "set_quality",
+          "parameter_names": [
+            "level"
+          ],
+          "parameters": [
+            "String"
+          ],
+          "returns": "unit"
+        }
+      ],
+      "name": "Graphics"
     },
     {
       "description": "Grids of tiles, flat or stacked in layers like building blocks: what each cell holds, where objects stand on them, and paths across them.",

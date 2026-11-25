@@ -22,6 +22,7 @@ mod animation;
 mod audio;
 mod cameras;
 mod game;
+mod graphics;
 mod input;
 /// Where a session's save is kept, and when it is written out.
 mod origin;

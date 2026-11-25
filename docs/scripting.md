@@ -2198,6 +2198,25 @@ host guessing which camera controls gameplay.
 
 | Path | Type |
 | --- | --- |
+| `Graphics.quality` | `String` |
+| `Graphics.set_quality(level)` | nothing |
+
+`Graphics.quality` is how richly the game is drawn: `"low"`, `"medium"`,
+`"high"` or `"ultra"`. `High` draws a scene as authored. The level scales what
+the scene authored rather than replacing it: a perspective camera draws to its
+far plane times 0.5, 0.75, 1 or 1.5, shadows reach that much further too, and
+their maps are half, the same or twice the authored resolution. Whatever lies
+beyond the camera's reach is neither drawn nor culled in.
+`Graphics.set_quality("low")` asks for a level, as a settings menu does; the
+host applies it after the step, so `quality` reads the new level from the next
+frame. Any other name is an error. The engine never changes it by itself: a
+draw distance that shrank mid-play would be a visible pop, so the level is the
+game's and the player's choice.
+A game that wants the choice remembered keeps it with `Save` and sets it again
+on start.
+
+| Path | Type |
+| --- | --- |
 | `Camera.pan_x` | `number` |
 | `Camera.pan_y` | `number` |
 | `Camera.pan_z` | `number` |

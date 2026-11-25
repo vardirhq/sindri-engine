@@ -13,6 +13,8 @@ fn said_after(game: &Run, from: usize, line: &str) -> bool {
 #[test]
 fn the_diver_walks_out_through_the_airlock_and_back_in() {
     let mut game = Run::open().expect("DRIFT opens");
+    // Back in is flown, so this diver wears a thruster pack.
+    game.run.set_board("Ship.thrusters", 1.0);
     game.wait(1.0);
     assert!(
         game.has_said("Drift: awake in the cabin"),

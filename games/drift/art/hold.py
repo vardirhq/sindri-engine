@@ -714,6 +714,32 @@ def scene():
                "sindri.material": {"base_color": [0.25, 0.21, 0.17, 1.0],
                                    "metallic": 0.35, "roughness": 0.8, "override_factors": True}},
         ))
+    # The guide line: a service cable still strung from the refuge's outer door
+    # frame into the ruin's, at hand height beside the doorway. With no
+    # thruster pack, it is the way across: hold it and pull hand over hand.
+    # Not solid, so a diver drifting through the doorway is not stopped by it.
+    door_z = DOOR_Z[0] - 0.12
+    start, end = CHAMBER[1][0] + 0.1, -7.0 + HOLD_OFFSET + 0.6
+    entities.append(entity(
+        "guide-cable", "Guide cable", position=((start + end) / 2, DOOR_TOP - 0.3, door_z),
+        scale=(end - start, 0.07, 0.07),
+        **{"sindri.mesh": {"primitive": "cube", "texture": "textures/line.png"},
+           "sindri.material": {"base_color": [0.9, 0.7, 0.2, 1.0], "emissive": [0.12, 0.08, 0.0],
+                               "metallic": 0.3, "roughness": 0.6, "override_factors": True},
+           "sindri.tags": {"tags": ["cable"]}},
+    ))
+    # Alarm beacons: red lights flashing through the refuge and the ruin, so the
+    # opening reads as a disaster that only just happened (`scripts/alarm.decay`).
+    # The renderer keeps the eight lights that light the camera's position
+    # most, so the helmet lamp stays lit however many alarms flash elsewhere.
+    for index, at in enumerate(((-13.0, 0.0, 0.7), (-8.5, -0.2, 1.5), (-7.25, 0.3, 2.7),
+                                (0.5, 2.35, -2.3), (6.5, 2.35, 2.3), (11.0, 2.35, -2.3))):
+        beacon = lamp(f"alarm-{index}", at, (1.0, 0.08, 0.04), 3.0, 7.0)
+        beacon["transform_3d"]["scale"] = [0.18, 0.12, 0.18]
+        beacon["components"]["sindri.tags"] = {"tags": ["alarm"]}
+        entities.append(beacon)
+    entities.append(entity("alarms", "Alarms",
+                           **{"sindri.script": {"source": "scripts/alarm.decay", "script": "Alarms"}}))
     entities += wreckage()
     # The diver: a dynamic upright capsule that physics never turns, with the
     # eye under it carrying the camera and the helmet lamp. Turning is the
@@ -761,6 +787,7 @@ def scene():
         text("hud-oxygen", (-0.8, -0.68, 0), "O2 {}%", 0.04),
         text("hud-power", (-0.8, -0.78, 0), "SUIT {}%", 0.04),
         text("hud-alert", (0, 0.3, 0), "", 0.05, (1.0, 0.3, 0.2, 1.0)),
+        text("hud-breach", (0, 0.82, 0), "", 0.05, (1.0, 0.2, 0.12, 1.0)),
         text("hud-airlock", (0.8, -0.78, 0), "", 0.035, (0.6, 1.0, 0.7, 1.0)),
         text("hud-salvage", (0.8, -0.68, 0), "", 0.04, (1.0, 0.75, 0.4, 1.0)),
     ]

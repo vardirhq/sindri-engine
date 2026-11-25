@@ -30,6 +30,8 @@ pub(crate) use tile_volume::face_is_occluded;
 mod lighting;
 pub(crate) mod lighting_2d;
 pub use lighting_2d::LightingQuality;
+mod quality;
+pub use quality::{GraphicsQuality, QUALITY_BOARD, QUALITY_REQUEST_BOARD};
 mod shadow_cache;
 mod shadows_2d;
 mod tilemap;
@@ -128,6 +130,8 @@ pub struct SceneExtractor {
     last_environment: RefCell<Option<(EntityId, crate::EnvironmentComponent)>>,
     /// How much a frame's 2D lighting costs: see [`LightingQuality`].
     lighting_quality: LightingQuality,
+    /// How far frames draw and how detailed their shadows: see `quality.rs`.
+    graphics_quality: GraphicsQuality,
     /// 2D shadow maps kept while their light and its occluders stand still.
     shadow_maps: RefCell<shadow_cache::ShadowMapCache>,
 }
@@ -258,6 +262,7 @@ impl SceneExtractor {
             problems: RefCell::default(),
             last_environment: RefCell::default(),
             lighting_quality: LightingQuality::Full,
+            graphics_quality: GraphicsQuality::High,
         })
     }
 

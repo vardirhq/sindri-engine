@@ -328,6 +328,7 @@ impl ProjectRun {
                 delta,
             )
             .map_err(|error| error.to_string())?;
+        self.session.sync_graphics_quality(&mut self.scene);
         self.input.begin_frame(Duration::from_secs_f32(delta));
         self.present()?;
         Ok(report)

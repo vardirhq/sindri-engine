@@ -9,7 +9,7 @@ use sindri_render::{
     FrameCommand, ModelData, ModelGeometry, ModelHierarchyNode, ModelIndexData, ModelVertex,
     RenderModel,
 };
-use sindri_scene::{CameraView, SceneExtractor, TextureBindings};
+use sindri_scene::{CameraView, GraphicsQuality, SceneExtractor, TextureBindings};
 
 use crate::support::{VIEWPORT, document, world_from};
 
@@ -153,4 +153,39 @@ fn a_model_is_culled_by_where_its_geometry_is_not_where_its_origin_is() {
         })
         .collect();
     assert_eq!(drawn, vec![-11.0]);
+}
+
+/// The graphics quality scales how far a camera draws: a cube 70 units out,
+/// inside the authored 100, is gone at Low (50) and there at High; one at 130
+/// appears only at Ultra (150).
+#[test]
+fn graphics_quality_scales_how_far_the_camera_draws() {
+    let world = world_from(&document(&format!(
+        "{CAMERA}{}{}",
+        cube("mid", [0.0, 0.0, -70.0]),
+        cube("far", [0.0, 0.0, -130.0])
+    )));
+    let drawn = |quality| {
+        let mut extractor = SceneExtractor::new().unwrap();
+        extractor.set_graphics_quality(quality);
+        extractor
+            .extract(
+                &world,
+                VIEWPORT,
+                CameraView::default(),
+                &TextureBindings::new(),
+            )
+            .unwrap()
+            .passes()
+            .iter()
+            .filter(|pass| matches!(pass.command, FrameCommand::TexturedCube { .. }))
+            .count()
+    };
+    assert_eq!(
+        drawn(GraphicsQuality::Low),
+        0,
+        "nothing past half the authored distance"
+    );
+    assert_eq!(drawn(GraphicsQuality::High), 1, "the authored distance");
+    assert_eq!(drawn(GraphicsQuality::Ultra), 2, "half as far again");
 }

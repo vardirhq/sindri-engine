@@ -105,3 +105,8 @@ stop and that the brake takes it out again. The editor's
 `play_matches_the_build` test plays it the same in the editor as in a build.
 
 Chakra Petch is under the SIL Open Font License (`assets/fonts/Fonts-OFL.txt`).
+
+You start with no thruster pack. Out of the airlock, grab the yellow guide
+cable beside the door (F, or hold ACTION) and pull yourself along it into the
+ruin (W, or the stick). Lost in the open, Space or JUMP vents suit air for a
+small push, at a cost in oxygen.

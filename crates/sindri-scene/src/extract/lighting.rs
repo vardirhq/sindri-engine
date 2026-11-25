@@ -21,8 +21,14 @@ impl SceneExtractor {
         Ok(lighting)
     }
 
-    /// The strongest active local lights, with stable world iteration breaking
-    /// intensity ties. Validate every light before applying the renderer cap.
+    /// The local lights that matter most where the camera is, with stable world
+    /// iteration breaking ties. Validate every light before applying the
+    /// renderer cap.
+    ///
+    /// Ranked by how strongly each would light the camera's position, not by
+    /// raw intensity: with more lights than the renderer takes, a bright
+    /// alarm across the level must not push out the lamp on the player's
+    /// helmet. A world with no camera ranks by intensity alone.
     fn apply_lights(
         &self,
         world: &World,
@@ -64,7 +70,21 @@ impl SceneExtractor {
                 Err(error) => return Err(error.into()),
             }
         }
-        points.sort_by(|a, b| b.point.intensity.total_cmp(&a.point.intensity));
+        let viewer = self
+            .world_camera(world, crate::CameraView::default())
+            .ok()
+            .flatten()
+            .map(|camera| camera.view.inverse().transform_point3(glam::Vec3::ZERO));
+        let reach = |light: &LocalLight| match viewer {
+            Some(eye) => {
+                let distance = eye.distance(glam::Vec3::from_array(light.point.position));
+                let scaled = distance / light.point.range.max(f32::EPSILON);
+                light.point.intensity / (1.0 + scaled * scaled)
+            }
+            None => light.point.intensity,
+        };
+        // Stable, so equal reach keeps the world's order.
+        points.sort_by(|a, b| reach(b).total_cmp(&reach(a)));
         points.truncate(sindri_render::MAX_LOCAL_LIGHTS);
         for (slot, point) in lighting.local_lights.iter_mut().zip(points) {
             *slot = Some(point);
@@ -117,9 +137,11 @@ impl SceneExtractor {
         let environment = self.environment(world)?;
         Ok(sindri_render::WorldSettings {
             lighting,
-            shadows: environment
-                .map(EnvironmentComponent::shadow_settings)
-                .unwrap_or_default(),
+            shadows: self.scaled_shadows(
+                environment
+                    .map(EnvironmentComponent::shadow_settings)
+                    .unwrap_or_default(),
+            ),
             fog: environment
                 .map(EnvironmentComponent::fog_settings)
                 .unwrap_or_default(),

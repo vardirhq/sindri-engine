@@ -76,6 +76,12 @@ script Diver {
     @export let thrust: number = 2.2;
     // How fast a push off a handhold sends the diver, in m/s.
     @export let push_speed: number = 3.2;
+    // How fast a hand-over-hand pull moves the diver along a cable, in m/s.
+    @export let climb_speed: number = 1.6;
+    // With no thruster pack: how hard venting suit air pushes, in m/s, and how
+    // much of the oxygen it costs.
+    @export let vent_push: number = 1.2;
+    @export let vent_cost: number = 8.0;
     // How far a hand reaches from the eye, in metres.
     @export let reach: number = 1.1;
     // Radians of turn per unit of pointer movement, and per second of roll.
@@ -193,7 +199,7 @@ script Diver {
         } else {
             look(dt);
             if this.hold != null {
-                holding(reached);
+                holding(dt);
             } else {
                 if wants_hold() && reached != null {
                     grab(reached);
@@ -474,21 +480,55 @@ script Diver {
                 return candidate;
             }
         }
+        // A cable is held anywhere along it, so it is measured to its line.
+        for cable in World.with_tag("cable") {
+            if cable != this.left_behind && cable_point(cable, from).distance(from) <= this.reach {
+                return cable;
+            }
+        }
         return null;
+    }
+
+    // The point on a cable nearest `at`: cables run along their own X.
+    fn cable_point(cable: Entity, at: Vec3) -> Vec3 {
+        let centre = cable.transform.world_position;
+        let axis = cable.transform.right;
+        let half = cable.transform.scale.x * 0.5;
+        let along = clamp((at - centre).dot(axis), -half, half);
+        return centre + axis * along;
+    }
+
+    // Hand over hand: forward on the stick or W moves the hand along the cable
+    // the way the view faces, as far as its ends. Letting go keeps the speed.
+    fn climb(dt: number) {
+        let cable = this.hold;
+        let axis = cable.transform.right;
+        var way = Input.Keyboard.axis("S", "W") + Controls.move_y;
+        if this.eye.transform.forward.dot(axis) < 0.0 {
+            way = -way;
+        }
+        let centre = cable.transform.world_position;
+        let half = cable.transform.scale.x * 0.5;
+        let from = this.anchor - centre;
+        let side = from - axis * from.dot(axis);
+        let along = clamp(from.dot(axis) + way * this.climb_speed * dt, -half, half);
+        this.anchor = centre + axis * along + side;
     }
 
     fn grab(handhold: Entity) {
         this.hold = handhold;
         this.anchor = this.transform.world_position;
         Physics3d.set_velocity(this.entity, Vec3(0.0, 0.0, 0.0));
-        if handhold == World.find("FarHold") {
+        if World.has_tag(handhold, "cable") {
+            print("Drift: holding the cable");
+        } else if handhold == World.find("FarHold") {
             print("Drift: caught the far handhold");
         } else {
             print("Drift: holding on");
         }
     }
 
-    fn holding(reached: Entity?) {
+    fn holding(dt: number) {
         let push = Input.Keyboard.just_pressed("Space") || Controls.up_pressed
             || Pointer.just_pressed("Left") && Pointer.locked;
         if push {
@@ -503,6 +543,9 @@ script Diver {
             print("Drift: let go");
             return;
         }
+        if World.has_tag(this.hold, "cable") {
+            climb(dt);
+        }
         // The arm takes up the slack: drawn back to where the hand closed.
         let pull = (this.anchor - this.transform.world_position) * 6.0;
         Physics3d.set_velocity(this.entity, pull);
@@ -514,6 +557,18 @@ script Diver {
     }
 
     fn fly(dt: number) {
+        // No thruster pack: the one way to move is to vent suit air, a small
+        // push the way the view faces, paid for in oxygen.
+        if !Ship.thrusters {
+            let vent = Input.Keyboard.just_pressed("Space") || Controls.up_pressed;
+            if vent && this.oxygen > this.vent_cost * 2.0 {
+                let velocity = Physics3d.velocity(this.entity);
+                Physics3d.set_velocity(this.entity, velocity + this.eye.transform.forward * this.vent_push);
+                this.oxygen -= this.vent_cost;
+                print("Drift: vented air");
+            }
+            return;
+        }
         var push = Vec3(0.0, 0.0, 0.0);
         let forward = this.eye.transform.forward;
         let right = this.eye.transform.right;
@@ -560,7 +615,13 @@ script Diver {
     }
 
     fn hud(reached: Entity?) {
-        Ui.set_number(World.find("hud-propellant"), round(this.propellant));
+        let tank = World.find("hud-propellant");
+        if Ship.thrusters {
+            Ui.set_text(tank, "PROPELLANT {}%");
+            Ui.set_number(tank, round(this.propellant));
+        } else {
+            Ui.set_text(tank, "NO THRUSTER PACK");
+        }
         Ui.set_number(World.find("hud-oxygen"), round(this.oxygen));
         Ui.set_number(World.find("hud-power"), round(this.power));
         let alert = World.find("hud-alert");
@@ -574,14 +635,18 @@ script Diver {
         let prompt = World.find("hud-prompt");
         if at_panel() {
             Ui.set_text(prompt, "E / ACTION  cycle airlock");
+        } else if this.hold != null && World.has_tag(this.hold, "cable") {
+            Ui.set_text(prompt, "W / STICK  pull along   SPACE / JUMP  push off");
         } else if this.hold != null {
             Ui.set_text(prompt, "SPACE / JUMP  push off");
+        } else if reached != null && World.has_tag(reached, "cable") {
+            Ui.set_text(prompt, "F / hold ACTION  grab the cable");
+        } else if reached != null {
+            Ui.set_text(prompt, "F / hold ACTION  hold on");
+        } else if !Ship.thrusters && !this.aboard {
+            Ui.set_text(prompt, "SPACE / JUMP  vent air to push");
         } else {
-            if reached != null {
-                Ui.set_text(prompt, "F / hold ACTION  hold on");
-            } else {
-                Ui.set_text(prompt, "");
-            }
+            Ui.set_text(prompt, "");
         }
     }
 }
