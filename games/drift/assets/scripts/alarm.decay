@@ -4,8 +4,8 @@
 
 // One flash: on for half of it.
 const FLASH: number = 0.8;
-// How long the breach warning flashes after waking, in seconds.
-const WARNING: number = 30.0;
+// How long the breach warning shows after waking, in seconds.
+const WARNING: number = 8.0;
 
 script Alarms {
     var phase: number = 0.0;
@@ -22,7 +22,9 @@ script Alarms {
             beacon.light.enabled = on;
         }
         let warning = World.find("hud-breach");
-        if on && this.elapsed < WARNING {
+        // Steady, not flashing: the beacons do the flashing, and words that
+        // blink are hard to read.
+        if this.elapsed < WARNING {
             Ui.set_text(warning, "!  HULL BREACH  -  SECTION LOST  !");
         } else {
             Ui.set_text(warning, "");
