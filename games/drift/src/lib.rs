@@ -146,11 +146,13 @@ impl Run {
         self.run.input.apply(InputEvent::KeyReleased(key));
     }
 
-    /// Taps a key: down for one step, then up.
+    /// Taps a key: down for one step, then up, and a step for what acts on
+    /// the letting go (a push-off is coiled while held and made on release).
     pub fn tap(&mut self, key: Key) {
         self.press(key);
         self.step();
         self.release(key);
+        self.step();
     }
 
     /// Where a scene entity is in the world, by its id.

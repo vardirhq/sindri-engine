@@ -114,3 +114,8 @@ small push, at a cost in oxygen.
 Air, suit power and speed are read on your wrist, and the airlock's pressure on
 its chamber wall. Brackets mark what ACTION will use. Venting air to push costs
 oxygen, so spare oxygen canisters float along the way: take one with ACTION or F.
+
+With no thrusters, scramble: hold any wall or hull with F or ACTION and crawl
+along it with the stick or WASD; hold JUMP while holding on to coil a harder
+push-off; take loose cargo in hand and throw it with JUMP to drift the other
+way.

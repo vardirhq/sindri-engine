@@ -65,6 +65,12 @@ These are defects or sources of actively misleading tooling.
   - [x] Add a test that fails when parser keywords and tooling keywords drift:
         every listed keyword must be rejected as a local's name, and the
         server's keyword completions must equal the parser's table.
+- [ ] Make `decay-lsp --check` agree with the runtime compiler on null
+      narrowing. Found in DRIFT: `if hit == null || hit.entity == x { return; }`
+      on a `RayHit3d?` passed preflight with no diagnostic, then failed to
+      compile at load ("this is `RayHit3d?`, which may be `null`"). One of the
+      two is wrong about narrowing through `||`; whichever it is, both must
+      give the same answer, with a test that runs one snippet through both.
 - [ ] Bring the VS Code TextMate grammar up to the current Decay language.
   - [x] Highlight `for` and `in`.
   - [x] Audit every implemented keyword, literal, declaration, primitive type,
