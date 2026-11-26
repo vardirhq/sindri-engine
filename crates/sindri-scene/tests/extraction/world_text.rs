@@ -38,7 +38,7 @@ fn world_text_is_placed_at_its_entity_over_its_layer() {
     assert!(text > sprite, "the number is over the enemy");
     let pass = &passes[text];
     assert_eq!(pass.stage, RenderStage::Transparent2d);
-    let FrameCommand::Text { instances } = &pass.command else {
+    let FrameCommand::Text { instances, .. } = &pass.command else {
         unreachable!()
     };
     let [x, y] = instances[0].position();
@@ -92,7 +92,7 @@ fn world_text_turns_with_its_entity_only_when_asked() {
         .passes()
         .iter()
         .filter_map(|pass| match &pass.command {
-            FrameCommand::Text { instances } => Some(instances),
+            FrameCommand::Text { instances, .. } => Some(instances),
             _ => None,
         })
         .flatten()
@@ -148,5 +148,48 @@ fn world_text_stands_in_3d_under_a_perspective_camera() {
     assert!(
         ndc.x > 0.0 && ndc.y > 0.0,
         "up and to the right of the middle: {ndc}"
+    );
+}
+
+/// A label standing in a 3D world is hidden by nearer walls, and one behind the
+/// camera is not drawn at all: neither may show on the far side of a wall.
+#[test]
+fn world_text_in_3d_is_hidden_by_walls_and_dropped_behind_the_camera() {
+    let camera = r#"{ "id": "eye", "transform_3d": { "position": [0, 0, 0] },
+        "components": { "sindri.camera": {
+          "projection": "perspective", "vertical_fov_degrees": 60.0, "near": 0.05, "far": 100.0 } } }"#;
+    let ahead = r#", { "id": "ahead", "transform_3d": { "position": [0, 0, -4.0] },
+        "components": { "sindri.text": { "text": "AHEAD", "font": "fonts/a.ttf", "font_size": 0.1 } } }"#;
+    let behind = r#", { "id": "behind", "transform_3d": { "position": [0, 0, 4.0] },
+        "components": { "sindri.text": { "text": "BEHIND", "font": "fonts/a.ttf", "font_size": 0.1 } } }"#;
+    let world = world_from(&crate::support::document(&format!(
+        "{camera}{ahead}{behind}"
+    )));
+    let frame = SceneExtractor::new()
+        .unwrap()
+        .extract(
+            &world,
+            VIEWPORT,
+            CameraView::default(),
+            &TextureBindings::new(),
+        )
+        .expect("the scene extracts");
+    let labels: Vec<_> = frame
+        .passes()
+        .iter()
+        .filter_map(|pass| match &pass.command {
+            FrameCommand::Text { depth, instances } => Some((*depth, instances.len())),
+            _ => None,
+        })
+        .collect();
+    assert_eq!(
+        labels.len(),
+        1,
+        "only the label in front is drawn: {labels:?}"
+    );
+    assert_eq!(
+        labels[0].0,
+        sindri_render::SpriteDepth::Test,
+        "and walls hide it"
     );
 }

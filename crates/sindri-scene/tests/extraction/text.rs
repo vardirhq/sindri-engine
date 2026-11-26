@@ -28,7 +28,7 @@ fn text_is_sized_as_a_share_of_the_viewport_without_a_camera() {
     assert_eq!(frame.passes().len(), 1);
     assert_eq!(frame.passes()[0].stage, RenderStage::Overlay);
     assert_eq!(frame.passes()[0].layer.0, 101);
-    let FrameCommand::Text { instances } = &frame.passes()[0].command else {
+    let FrameCommand::Text { instances, .. } = &frame.passes()[0].command else {
         panic!("expected a text pass");
     };
     assert_eq!(instances.len(), 1);

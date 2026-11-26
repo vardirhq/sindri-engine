@@ -49,7 +49,10 @@ struct Batch {
 }
 
 pub struct GlyphRenderer {
+    /// Text drawn over everything, as a HUD's is.
     pipeline: wgpu::RenderPipeline,
+    /// Text hidden by nearer geometry, as words standing in a 3D world are.
+    occluded: wgpu::RenderPipeline,
     bind_group_layout: wgpu::BindGroupLayout,
     mesh: MeshBuffers,
     batches: Vec<Batch>,
@@ -79,47 +82,52 @@ impl GlyphRenderer {
             bind_group_layouts: &[Some(&bind_group_layout)],
             immediate_size: 0,
         });
-        let pipeline = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
-            label: Some("Sindri glyph pipeline"),
-            layout: Some(&layout),
-            vertex: wgpu::VertexState {
-                module: &shader,
-                entry_point: Some("vs_main"),
-                buffers: &[
-                    Some(TexturedVertex::layout()),
-                    Some(GlyphInstance::layout()),
-                ],
-                compilation_options: wgpu::PipelineCompilationOptions::default(),
-            },
-            fragment: Some(wgpu::FragmentState {
-                module: &shader,
-                entry_point: Some("fs_main"),
-                compilation_options: wgpu::PipelineCompilationOptions::default(),
-                targets: &[Some(wgpu::ColorTargetState {
-                    format: target_format,
-                    blend: Some(SpriteBlendMode::Alpha.blend_state()),
-                    write_mask: wgpu::ColorWrites::ALL,
-                })],
-            }),
-            primitive: wgpu::PrimitiveState::default(),
-            // Text reads the depth buffer and never writes it, which is what
-            // every other transparent thing here does and for the same reason:
-            // blending is order dependent, and a depth write would make the
-            // result depend on draw order twice.
-            depth_stencil: Some(wgpu::DepthStencilState {
-                format: DepthTarget::FORMAT,
-                depth_write_enabled: Some(false),
-                depth_compare: Some(wgpu::CompareFunction::Always),
-                stencil: wgpu::StencilState::default(),
-                bias: wgpu::DepthBiasState::default(),
-            }),
-            multisample: wgpu::MultisampleState::default(),
-            multiview_mask: None,
-            cache: None,
-        });
+        let make = |compare: wgpu::CompareFunction| {
+            device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
+                label: Some("Sindri glyph pipeline"),
+                layout: Some(&layout),
+                vertex: wgpu::VertexState {
+                    module: &shader,
+                    entry_point: Some("vs_main"),
+                    buffers: &[
+                        Some(TexturedVertex::layout()),
+                        Some(GlyphInstance::layout()),
+                    ],
+                    compilation_options: wgpu::PipelineCompilationOptions::default(),
+                },
+                fragment: Some(wgpu::FragmentState {
+                    module: &shader,
+                    entry_point: Some("fs_main"),
+                    compilation_options: wgpu::PipelineCompilationOptions::default(),
+                    targets: &[Some(wgpu::ColorTargetState {
+                        format: target_format,
+                        blend: Some(SpriteBlendMode::Alpha.blend_state()),
+                        write_mask: wgpu::ColorWrites::ALL,
+                    })],
+                }),
+                primitive: wgpu::PrimitiveState::default(),
+                // Text reads the depth buffer and never writes it, which is what
+                // every other transparent thing here does and for the same reason:
+                // blending is order dependent, and a depth write would make the
+                // result depend on draw order twice.
+                depth_stencil: Some(wgpu::DepthStencilState {
+                    format: DepthTarget::FORMAT,
+                    depth_write_enabled: Some(false),
+                    depth_compare: Some(compare),
+                    stencil: wgpu::StencilState::default(),
+                    bias: wgpu::DepthBiasState::default(),
+                }),
+                multisample: wgpu::MultisampleState::default(),
+                multiview_mask: None,
+                cache: None,
+            })
+        };
+        let pipeline = make(wgpu::CompareFunction::Always);
+        let occluded = make(crate::SpriteDepth::Test.compare());
 
         Self {
             pipeline,
+            occluded,
             bind_group_layout,
             mesh: MeshBuffers::new(device, "Sindri glyph quad", &VERTICES, &INDICES),
             batches: Vec::new(),
@@ -152,6 +160,7 @@ impl GlyphRenderer {
         atlas: &Texture2D,
         build: u64,
         view_projection: Mat4,
+        depth: crate::SpriteDepth,
         instances: &[GlyphInstance],
     ) -> Result<(), GlyphDrawError> {
         let instance_count =
@@ -197,7 +206,11 @@ impl GlyphRenderer {
         if let Some([x, y, w, h]) = self.clip {
             pass.set_scissor_rect(x, y, w, h);
         }
-        pass.set_pipeline(&self.pipeline);
+        pass.set_pipeline(if depth == crate::SpriteDepth::Ignore {
+            &self.pipeline
+        } else {
+            &self.occluded
+        });
         pass.set_bind_group(
             0,
             &batch
