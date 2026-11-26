@@ -457,7 +457,7 @@ fn encode_passes<'p>(
             // the size it is drawn, an outline, a softened shadow — and because
             // the atlas they sample is filled while the frame is being built,
             // so it cannot have been in the registry beforehand.
-            FrameCommand::Text { instances } => {
+            FrameCommand::Text { depth, instances } => {
                 if let Some(quads) = text_renderer.quads(device, queue, instances)? {
                     glyph_renderer.draw(
                         device,
@@ -468,6 +468,7 @@ fn encode_passes<'p>(
                         quads.atlas,
                         quads.generation,
                         pass.camera.view_projection,
+                        *depth,
                         &quads.instances,
                     )?;
                 }

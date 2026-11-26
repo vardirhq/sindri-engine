@@ -86,7 +86,10 @@ impl SceneExtractor {
                         view_projection: overlay.view_projection,
                         position: glam::Vec3::ZERO,
                     },
-                    FrameCommand::Text { instances },
+                    FrameCommand::Text {
+                        depth: sindri_render::SpriteDepth::Ignore,
+                        instances,
+                    },
                 )
                 .with_clip(clip),
             );

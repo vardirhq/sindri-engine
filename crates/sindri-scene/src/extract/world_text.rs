@@ -18,6 +18,10 @@ use super::camera::ResolvedCameras;
 use super::shape::world_model_matrix;
 use super::{SceneExtractError, SceneExtractor};
 
+/// How far in front of the camera a 3D label must stand to be drawn, in world
+/// units: nearer than this its glyphs would cross the eye.
+const NEAREST_LABEL: f32 = 0.02;
+
 impl SceneExtractor {
     pub(super) fn push_world_text(
         &self,
@@ -69,7 +73,10 @@ impl SceneExtractor {
                     view_projection: camera.view_projection,
                     position: glam::Vec3::ZERO,
                 },
-                FrameCommand::Text { instances },
+                FrameCommand::Text {
+                    depth: sindri_render::SpriteDepth::Ignore,
+                    instances,
+                },
             ));
         }
         Ok(())
@@ -78,7 +85,7 @@ impl SceneExtractor {
     /// World text seen through a perspective camera: each label at its
     /// entity's full position in the world, facing the camera, or turned with
     /// its entity when it asks to follow its rotation. Drawn over the 3D scene,
-    /// as 2D labels are drawn over their sprites: a wall does not hide it.
+    /// and hidden, as anything in the world is, by walls nearer the camera.
     fn push_world_text_3d(
         world: &World,
         texts: Vec<(sindri_core::EntityId, TextComponent)>,
@@ -93,6 +100,14 @@ impl SceneExtractor {
             }
             let model = world_model_matrix(world, entity);
             let (_, turn, position) = model.to_scale_rotation_translation();
+            // Behind the camera, a label is not drawn. Its quads are not
+            // clipped at the near plane, so one behind the eye would land
+            // mirrored on the far side of the view: a wall's display seen on
+            // the opposite wall the moment the diver walks past it.
+            let ahead = view_projection * position.extend(1.0);
+            if ahead.w <= NEAREST_LABEL {
+                continue;
+            }
             let turn = if text.follow_rotation { turn } else { facing };
             let placed = glam::Mat4::from_rotation_translation(turn.normalize(), position);
             frame.push(FramePass::new(
@@ -102,7 +117,11 @@ impl SceneExtractor {
                     view_projection: view_projection * placed,
                     position: glam::Vec3::ZERO,
                 },
+                // Hidden by nearer walls, as anything standing in the world is:
+                // drawn over everything, a display on one side of a wall would
+                // show through it on the other.
                 FrameCommand::Text {
+                    depth: sindri_render::SpriteDepth::Test,
                     instances: vec![text.instance([0.0, 0.0])?],
                 },
             ));

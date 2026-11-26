@@ -74,6 +74,7 @@ impl Batches {
                     atlas,
                     1,
                     Mat4::IDENTITY,
+                    sindri_render::SpriteDepth::Ignore,
                     if empty { &[] } else { &glyphs },
                 )
                 .unwrap();

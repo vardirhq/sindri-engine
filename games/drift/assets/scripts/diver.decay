@@ -78,6 +78,13 @@ script Diver {
     @export let push_speed: number = 3.2;
     // How fast a hand-over-hand pull moves the diver along a cable, in m/s.
     @export let climb_speed: number = 1.6;
+    // A full coil (held this long) pushes off this many times harder.
+    @export let coil_time: number = 1.0;
+    @export let coil_boost: number = 1.0;
+    // How hard a thrown thing leaves the hand, and how much of that comes back
+    // on the diver: a light canister pushes back less than a heavy crate.
+    @export let throw_speed: number = 6.0;
+    @export let throw_recoil: number = 0.45;
     // With no thruster pack: how hard venting suit air pushes, in m/s, and how
     // much of the oxygen it costs.
     @export let vent_push: number = 1.2;
@@ -113,6 +120,18 @@ script Diver {
     var hold: Entity = null;
     // The handhold last pushed off from: not caught again until out of reach.
     var left_behind: Entity = null;
+    // Holding a bare surface (a wall, the hull, the ruin) rather than a handhold
+    // or a cable, and which way that surface faces.
+    var on_surface: bool = false;
+    var surface_normal: Vec3 = Vec3(0.0, 1.0, 0.0);
+    // How long a push-off has been coiled for, while JUMP is held.
+    var coil: number = 0.0;
+    var coiling: bool = false;
+    // A loose thing in hand, to be thrown: and the throw's push back.
+    var in_hand: Entity = null;
+    // A moment after pushing off, so the hand does not close on the wall it
+    // just left.
+    var regrab = Timer(0.0);
     // Where the diver's body hangs while holding on.
     var anchor: Vec3 = Vec3(0.0, 0.0, 0.0);
     var warned_low: bool = false;
@@ -205,8 +224,13 @@ script Diver {
             if this.hold != null {
                 holding(dt);
             } else {
+                carry(dt);
                 if wants_hold() && reached != null {
                     grab(reached);
+                } else if wants_hold() && this.regrab.done && grab_surface() {
+                    // Holding the surface in front of the hand.
+                } else if this.in_hand != null && jump_pressed() {
+                    throw_carried();
                 } else {
                     fly(dt);
                 }
@@ -539,6 +563,7 @@ script Diver {
     }
 
     fn grab(handhold: Entity) {
+        this.on_surface = false;
         this.hold = handhold;
         this.anchor = this.transform.world_position;
         Physics3d.set_velocity(this.entity, Vec3(0.0, 0.0, 0.0));
@@ -552,12 +577,23 @@ script Diver {
     }
 
     fn holding(dt: number) {
-        let push = Input.Keyboard.just_pressed("Space") || Controls.up_pressed
-            || Pointer.just_pressed("Left") && Pointer.locked;
-        if push {
+        // Coil while JUMP is held, push off when it is let go: a tap is a
+        // nudge, a long hold a hard shove.
+        if jump_held() {
+            this.coiling = true;
+            this.coil = min(this.coil_time, this.coil + dt);
+        } else if this.coiling {
+            let strength = 1.0 + this.coil_boost * this.coil / this.coil_time;
+            this.coiling = false;
+            this.coil = 0.0;
             this.left_behind = this.hold;
             this.hold = null;
-            Physics3d.set_velocity(this.entity, this.eye.transform.forward * this.push_speed);
+            this.on_surface = false;
+            this.regrab = Timer(0.4);
+            Physics3d.set_velocity(this.entity, this.eye.transform.forward * this.push_speed * strength);
+            if strength > 1.5 {
+                print("Drift: pushed off hard");
+            }
             print("Drift: pushed off");
             return;
         }
@@ -568,10 +604,101 @@ script Diver {
         }
         if World.has_tag(this.hold, "cable") {
             climb(dt);
+        } else if this.on_surface {
+            crawl(dt);
         }
         // The arm takes up the slack: drawn back to where the hand closed.
         let pull = (this.anchor - this.transform.world_position) * 6.0;
         Physics3d.set_velocity(this.entity, pull);
+    }
+
+    // JUMP, held or just pressed, from the keyboard, the screen or the mouse.
+    fn jump_held() -> bool {
+        return Input.Keyboard.is_down("Space") || Controls.up
+            || Pointer.is_down("Left") && Pointer.locked;
+    }
+
+    fn jump_pressed() -> bool {
+        return Input.Keyboard.just_pressed("Space") || Controls.up_pressed
+            || Pointer.just_pressed("Left") && Pointer.locked;
+    }
+
+    // With nothing made to be held in reach, a hand can still close on bare
+    // surface: a wall, the hull, the edge of the ruin, whatever is in front
+    // of it.
+    fn grab_surface() -> bool {
+        let eye = this.eye.transform.world_position;
+        let hit = Physics3d.raycast(eye, this.eye.transform.forward, this.reach, 1, false, this.entity);
+        if hit == null {
+            return false;
+        }
+        if hit.entity == this.in_hand {
+            return false;
+        }
+        this.hold = hit.entity;
+        this.on_surface = true;
+        this.surface_normal = hit.normal;
+        this.anchor = this.transform.world_position;
+        Physics3d.set_velocity(this.entity, Vec3(0.0, 0.0, 0.0));
+        print("Drift: holding the surface");
+        return true;
+    }
+
+    // Hand over hand across a surface: the stick moves along it, never into or
+    // off it. At an edge, where no surface is under the next hand, the diver
+    // stops rather than letting go.
+    fn crawl(dt: number) {
+        let forward = Input.Keyboard.axis("S", "W") + Controls.move_y;
+        let sideways = Input.Keyboard.axis("A", "D") + Controls.move_x;
+        var way = this.eye.transform.forward * forward + this.eye.transform.right * sideways;
+        way = way - this.surface_normal * way.dot(this.surface_normal);
+        if way.length < 0.001 {
+            return;
+        }
+        let next = this.anchor + way.normalized * (this.climb_speed * dt);
+        let reach_from = next + (this.eye.transform.world_position - this.transform.world_position);
+        let under = Physics3d.raycast(reach_from, this.surface_normal * -1.0, this.reach + 0.4, 1, false, this.entity);
+        if under == null {
+            return;
+        }
+        this.anchor = next;
+        this.surface_normal = under.normal;
+    }
+
+    // A loose thing in reach, taken in hand with F or ACTION: something to
+    // throw when there is nothing else to push against.
+    fn carry(dt: number) {
+        if this.in_hand == null {
+            let asked = Input.Keyboard.just_pressed("F") || Controls.use_pressed;
+            if !asked {
+                return;
+            }
+            let near = World.within_radius("cargo", this.eye.transform.world_position, this.reach);
+            if near.len > 0 {
+                this.in_hand = near[0];
+                print("Drift: took hold of cargo");
+            }
+            return;
+        }
+        if !World.exists(this.in_hand) {
+            this.in_hand = null;
+            return;
+        }
+        // Held out in front, drawn after the hand.
+        let hand = this.eye.transform.world_position + this.eye.transform.forward * 0.7
+            - this.eye.transform.up * 0.25;
+        let along = Physics3d.velocity(this.entity);
+        Physics3d.set_velocity(this.in_hand, along + (hand - this.in_hand.transform.world_position) * 10.0);
+    }
+
+    // Thrown the way the view faces; the diver drifts the other way.
+    fn throw_carried() {
+        let forward = this.eye.transform.forward;
+        let mine = Physics3d.velocity(this.entity);
+        Physics3d.set_velocity(this.in_hand, mine + forward * this.throw_speed);
+        Physics3d.set_velocity(this.entity, mine - forward * (this.throw_speed * this.throw_recoil));
+        this.in_hand = null;
+        print("Drift: threw cargo");
     }
 
     // At the start the diver is already holding on without a key held.
@@ -668,6 +795,7 @@ script Diver {
         var shown = false;
         let panels = World.within_radius("airlock-panel", eye, this.panel_reach);
         let spares = World.within_radius("oxygen", eye, this.reach);
+        let loose = World.within_radius("cargo", eye, this.reach);
         if panels.len > 0 {
             target = panels[0].transform.world_position;
             shown = true;
@@ -679,6 +807,9 @@ script Diver {
             if World.has_tag(reached, "cable") {
                 target = cable_point(reached, eye);
             }
+            shown = true;
+        } else if loose.len > 0 && this.in_hand == null && this.hold == null {
+            target = loose[0].transform.world_position;
             shown = true;
         }
         marker.transform.position = target;
@@ -720,9 +851,13 @@ script Diver {
         if at_panel() {
             Ui.set_text(prompt, "E / ACTION  cycle airlock");
         } else if this.hold != null && World.has_tag(this.hold, "cable") {
-            Ui.set_text(prompt, "W / STICK  pull along   SPACE / JUMP  push off");
+            Ui.set_text(prompt, "W / STICK  pull along   hold JUMP, let go  push off");
+        } else if this.hold != null && this.on_surface {
+            Ui.set_text(prompt, "W A S D / STICK  crawl   hold JUMP, let go  push off");
         } else if this.hold != null {
-            Ui.set_text(prompt, "SPACE / JUMP  push off");
+            Ui.set_text(prompt, "hold SPACE / JUMP, let go  push off");
+        } else if this.in_hand != null {
+            Ui.set_text(prompt, "SPACE / JUMP  throw it, drift the other way");
         } else if reached != null && World.has_tag(reached, "cable") {
             Ui.set_text(prompt, "F / hold ACTION  grab the cable");
         } else if reached != null {

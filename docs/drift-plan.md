@@ -60,6 +60,15 @@ not a claim that the new opening already exists.
   (`scripts/alarm.decay`). Tests that prove thrusting start with a pack
   (`tests/crossing.rs`). Still to come: where the pack is found, and the
   tether anchored at the refuge.
+- **Scrambling without thrusters:** *Started.* With no pack, the diver gets
+  about by what is to hand. Any bare surface in reach (a wall, the hull, the
+  ruin) can be held with F or ACTION and crawled along with the stick or
+  WASD, never into or off it, stopping at an edge rather than letting go.
+  JUMP held while holding on coils a push-off, up to twice as hard after a
+  second, made on release. Loose cargo can be taken in hand and thrown with
+  JUMP, drifting the diver the other way (`tests/scramble.rs`). Still to
+  come: kicking off a thrown thing's recoil mid-air, swinging on the tether,
+  and grabbing moving wreckage.
 - **Immersion over UI:** *Started.* The diver has a body (`body.glb`): suit,
   chest plate, life-support pack, legs and the right arm, hung from the neck.
   Aboard it stands upright with the heading, so looking down shows it; in free

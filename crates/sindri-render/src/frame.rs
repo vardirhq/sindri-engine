@@ -136,6 +136,9 @@ pub enum FrameCommand {
     },
     /// Strings sharing one render stage and layer, shaped in one glyph pass.
     Text {
+        /// Over everything (`Ignore`), as a HUD's words are, or hidden by
+        /// nearer geometry (`Test`), as words standing in a 3D world are.
+        depth: crate::SpriteDepth,
         instances: Vec<TextInstance>,
     },
     /// Shapes sharing one blend mode, evaluated in one pass.

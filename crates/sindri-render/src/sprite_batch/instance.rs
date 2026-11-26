@@ -36,7 +36,7 @@ pub enum SpriteDepth {
 }
 
 impl SpriteDepth {
-    pub(super) const fn compare(self) -> wgpu::CompareFunction {
+    pub(crate) const fn compare(self) -> wgpu::CompareFunction {
         match self {
             Self::Ignore => wgpu::CompareFunction::Always,
             Self::Test | Self::Write => wgpu::CompareFunction::Less,

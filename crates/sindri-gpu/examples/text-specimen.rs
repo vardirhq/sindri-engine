@@ -143,6 +143,7 @@ async fn run(path: &Path) -> Result<(), Box<dyn Error>> {
             ),
         },
         FrameCommand::Text {
+            depth: sindri_render::SpriteDepth::Ignore,
             instances: specimen()?,
         },
     ));
